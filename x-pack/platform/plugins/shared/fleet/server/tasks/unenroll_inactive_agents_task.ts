@@ -22,10 +22,11 @@ import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
 import { AGENTS_PREFIX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
+import { AGENT_ACTIONS_INDEX } from '../../common/constants';
 import { getAgentsByKuery } from '../services/agents';
 import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 import { agentPolicyService, appContextService, auditLoggingService } from '../services';
-import type { AgentPolicy } from '../types';
+import type { AgentPolicy, FleetServerAgentAction } from '../types';
 
 export const TYPE = 'fleet:unenroll-inactive-agents-task';
 export const VERSION = '1.0.3';
@@ -35,6 +36,8 @@ const DEFAULT_INTERVAL = '10m';
 const TIMEOUT = '1m';
 const UNENROLLMENT_BATCHSIZE = 1000;
 const POLICIES_BATCHSIZE = 500;
+export const UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS = 60 * 60 * 1000; // 1 hour
+export const SCHEDULED_UNENROLL_ACTION_ID_PREFIX = 'ScheduledUnenrollInactiveAgents-';
 
 interface UnenrollInactiveAgentsTaskConfig {
   taskInterval?: string;
@@ -129,15 +132,49 @@ export class UnenrollInactiveAgentsTask {
     this.logger.debug(`[UnenrollInactiveAgentsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
-  public async unenrollInactiveAgents(
+  // Returns a Set of agent IDs that already have an open scheduled UNENROLL action
+  // (start_time in the future, created by this task) to avoid re-scheduling them.
+  private async getAlreadyScheduledAgentIds(
+    esClient: ElasticsearchClient,
+    candidateAgentIds: string[]
+  ): Promise<Set<string>> {
+    if (candidateAgentIds.length === 0) return new Set();
+
+    const now = new Date().toISOString();
+    const res = await esClient.search<FleetServerAgentAction>({
+      index: AGENT_ACTIONS_INDEX,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [
+            { term: { type: 'UNENROLL' } },
+            { range: { start_time: { gt: now } } },
+            { terms: { agents: candidateAgentIds } },
+          ],
+        },
+      },
+      _source: ['agents'],
+      size: this.unenrollBatchSize,
+    });
+
+    const scheduledIds = new Set<string>();
+    for (const hit of res.hits.hits) {
+      for (const agentId of hit._source?.agents ?? []) {
+        scheduledIds.add(agentId);
+      }
+    }
+    return scheduledIds;
+  }
+
+  // Phase A: schedule unenrollments for eligible inactive agents.
+  // Creates UNENROLL actions with a future start_time but does not revoke API keys.
+  public async scheduleUnenrollments(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract
   ) {
     this.logger.debug(
       `[UnenrollInactiveAgentsTask] Fetching agent policies with unenroll_timeout > 0`
     );
-    // find all agent policies that are not managed and having unenroll_timeout > 0
-    // limit the search to POLICIES_BATCHSIZE at a time and loop until there are no agent policies left
     const policiesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed: false AND ${AGENT_POLICY_SAVED_OBJECT_TYPE}.unenroll_timeout > 0`;
     let agentCounter = 0;
 
@@ -155,9 +192,6 @@ export class UnenrollInactiveAgentsTask {
         return;
       }
 
-      // find inactive agents enrolled on above policies
-      // check that the time since last checkin was longer than unenroll_timeout
-      // limit batch size to UNENROLLMENT_BATCHSIZE to avoid scale issues
       const res = await getAgentsByKuery(esClient, soClient, {
         kuery: this.getAgentsQuery(agentPolicyPageResults),
         showInactive: true,
@@ -166,28 +200,134 @@ export class UnenrollInactiveAgentsTask {
       });
       if (!res.agents.length) {
         this.logger.debug(
-          '[UnenrollInactiveAgentsTask] No inactive agents to unenroll in agent policy batch'
+          '[UnenrollInactiveAgentsTask] No inactive agents to schedule for unenrollment in agent policy batch'
         );
         continue;
       }
-      agentCounter += res.agents.length;
+
+      // Exclude agents that are already waiting for a scheduled unenrollment
+      const candidateIds = res.agents.map((a) => a.id);
+      const alreadyScheduled = await this.getAlreadyScheduledAgentIds(esClient, candidateIds);
+      const agentsToSchedule = res.agents.filter((a) => !alreadyScheduled.has(a.id));
+
+      if (!agentsToSchedule.length) {
+        this.logger.debug(
+          '[UnenrollInactiveAgentsTask] All candidate agents already have a scheduled unenrollment'
+        );
+        continue;
+      }
+
+      agentCounter += agentsToSchedule.length;
       if (agentCounter > this.unenrollBatchSize) {
-        this.endRun('Reached the maximum amount of agents to unenroll, exiting.');
+        this.endRun('Reached the maximum amount of agents to schedule, exiting.');
         return;
       }
+
+      const startTime = new Date(
+        Date.now() + UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS
+      ).toISOString();
+      const actionId = `${SCHEDULED_UNENROLL_ACTION_ID_PREFIX}${uuidv4()}`;
+
+      const scheduledBatch = await unenrollBatch(soClient, esClient, agentsToSchedule, {
+        force: true,
+        actionId,
+        startTime,
+      });
+
+      auditLoggingService.writeCustomAuditLog({
+        message: `Scheduled unenrollment of ${agentsToSchedule.length} inactive agents due to unenroll_timeout option set on agent policy. Fleet action [id=${scheduledBatch.actionId}] scheduled for ${startTime}`,
+      });
       this.logger.debug(
-        `[UnenrollInactiveAgentsTask] Found ${res.agents.length} inactive agents to unenroll. Attempting unenrollment`
+        `[UnenrollInactiveAgentsTask] Scheduled unenrollment of ${agentsToSchedule.length} inactive agents with actionId: ${scheduledBatch.actionId} for ${startTime}`
       );
-      const unenrolledBatch = await unenrollBatch(soClient, esClient, res.agents, {
+    }
+  }
+
+  // Phase B: execute due scheduled unenrollments that have not been cancelled.
+  public async executeDueUnenrollments(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract
+  ) {
+    const now = new Date().toISOString();
+
+    // Find UNENROLL actions created by this task whose start_time has passed
+    const actionsRes = await esClient.search<FleetServerAgentAction>({
+      index: AGENT_ACTIONS_INDEX,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [
+            { term: { type: 'UNENROLL' } },
+            { range: { start_time: { lte: now } } },
+            { prefix: { action_id: SCHEDULED_UNENROLL_ACTION_ID_PREFIX } },
+          ],
+        },
+      },
+      size: this.unenrollBatchSize,
+    });
+
+    if (!actionsRes.hits.hits.length) {
+      this.logger.debug('[UnenrollInactiveAgentsTask] No due scheduled unenrollments to execute');
+      return;
+    }
+
+    // Find action IDs that have been cancelled by fetching all CANCEL actions
+    // and matching in memory — avoids relying on dynamic field mapping for data.target_id.
+    const cancelRes = await esClient.search<FleetServerAgentAction>({
+      index: AGENT_ACTIONS_INDEX,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [{ term: { type: 'CANCEL' } }],
+        },
+      },
+      _source: ['data.target_id'],
+      size: this.unenrollBatchSize,
+    });
+
+    const cancelledActionIds = new Set(
+      cancelRes.hits.hits.map((h) => (h._source as any)?.data?.target_id).filter(Boolean)
+    );
+
+    for (const hit of actionsRes.hits.hits) {
+      const action = hit._source;
+      if (!action?.action_id || !action.agents?.length) continue;
+      if (cancelledActionIds.has(action.action_id)) {
+        this.logger.debug(
+          `[UnenrollInactiveAgentsTask] Skipping cancelled action ${action.action_id}`
+        );
+        continue;
+      }
+
+      // Fetch the current agent docs to re-validate they are still inactive
+      const agentsRes = await getAgentsByKuery(esClient, soClient, {
+        kuery: `${AGENTS_PREFIX}.agent.id:(${action.agents.join(
+          ' OR '
+        )}) and ${AGENTS_PREFIX}.status: inactive`,
+        showInactive: true,
+        page: 1,
+        perPage: action.agents.length,
+      });
+
+      if (!agentsRes.agents.length) {
+        this.logger.debug(
+          `[UnenrollInactiveAgentsTask] No longer-inactive agents for action ${action.action_id}, skipping`
+        );
+        continue;
+      }
+
+      await unenrollBatch(soClient, esClient, agentsRes.agents, {
         revoke: true,
         force: true,
-        actionId: `UnenrollInactiveAgentsTask-${uuidv4()}`,
+        actionId: action.action_id,
+        skipActionCreation: true,
       });
+
       auditLoggingService.writeCustomAuditLog({
-        message: `Recurrent unenrollment of ${agentCounter} inactive agents due to unenroll_timeout option set on agent policy. Fleet action [id=${unenrolledBatch.actionId}]`,
+        message: `Executed scheduled unenrollment of ${agentsRes.agents.length} inactive agents. Fleet action [id=${action.action_id}]`,
       });
       this.logger.debug(
-        `[UnenrollInactiveAgentsTask] Executed unenrollment of ${agentCounter} inactive agents with actionId: ${unenrolledBatch.actionId}`
+        `[UnenrollInactiveAgentsTask] Executed scheduled unenrollment for action ${action.action_id} on ${agentsRes.agents.length} agents`
       );
     }
   }
@@ -212,7 +352,8 @@ export class UnenrollInactiveAgentsTask {
     const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     try {
-      await this.unenrollInactiveAgents(esClient, soClient);
+      await this.scheduleUnenrollments(esClient, soClient);
+      await this.executeDueUnenrollments(esClient, soClient);
 
       this.endRun('success');
     } catch (err) {

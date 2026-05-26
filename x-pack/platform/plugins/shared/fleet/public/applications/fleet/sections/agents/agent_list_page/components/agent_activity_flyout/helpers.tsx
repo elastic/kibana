@@ -79,6 +79,8 @@ const actionNames: {
   ACTION: { inProgressText: 'Actioning', completedText: 'actioned', cancelledText: 'action' },
 };
 
+export const SCHEDULED_INACTIVE_UNENROLL_PREFIX = 'ScheduledUnenrollInactiveAgents-';
+
 export const getAction = (type?: string, actionId?: string) => {
   // handling a special case of force unenrollment coming from an automatic task
   // we know what kind of action is from the actionId prefix

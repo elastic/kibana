@@ -24,7 +24,13 @@ import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 
 import type { AgentPolicy } from '../types';
 
-import { UnenrollInactiveAgentsTask, TYPE, VERSION } from './unenroll_inactive_agents_task';
+import {
+  UnenrollInactiveAgentsTask,
+  TYPE,
+  VERSION,
+  UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS,
+  SCHEDULED_UNENROLL_ACTION_ID_PREFIX,
+} from './unenroll_inactive_agents_task';
 
 jest.mock('../services');
 jest.mock('../services/agents');
@@ -142,14 +148,162 @@ describe('UnenrollInactiveAgentsTask', () => {
       jest.clearAllMocks();
     });
 
-    it('Should unenroll eligible agents', async () => {
-      mockedUnenrollBatch.mockResolvedValueOnce({ actionId: 'actionid-01' });
+    it('Should schedule eligible agents with a future start_time', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2025-06-01T00:00:00.000Z'));
+      mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
+      // esClient.search returns empty (no already-scheduled actions)
+      mockContract.elasticsearch.client.asInternalUser.search.mockResolvedValue({
+        hits: { hits: [] },
+      } as any);
       await runTask();
+      const expectedStartTime = new Date(
+        Date.now() + UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS
+      ).toISOString();
       expect(mockedUnenrollBatch).toHaveBeenCalledWith(undefined, expect.anything(), agents, {
         force: true,
-        revoke: true,
-        actionId: expect.stringContaining('UnenrollInactiveAgentsTask-'),
+        startTime: expectedStartTime,
+        actionId: expect.stringContaining(SCHEDULED_UNENROLL_ACTION_ID_PREFIX),
       });
+      jest.useRealTimers();
+    });
+
+    it('Should skip agents that are already scheduled for unenrollment', async () => {
+      mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
+      // esClient.search returns agent-1 as already scheduled
+      mockContract.elasticsearch.client.asInternalUser.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [{ _source: { agents: ['agent-1'] } }],
+          },
+        } as any)
+        // second call for executeDueUnenrollments — no due actions
+        .mockResolvedValue({ hits: { hits: [] } } as any);
+
+      await runTask();
+      // Only agents NOT already scheduled should be passed
+      expect(mockedUnenrollBatch).toHaveBeenCalledWith(
+        undefined,
+        expect.anything(),
+        agents.filter((a) => a.id !== 'agent-1'),
+        expect.objectContaining({ startTime: expect.any(String) })
+      );
+    });
+
+    it('Should execute due scheduled actions that have no CANCEL', async () => {
+      const now = new Date('2025-06-01T02:00:00.000Z');
+      jest.useFakeTimers().setSystemTime(now);
+      mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
+
+      mockContract.elasticsearch.client.asInternalUser.search
+        // scheduleUnenrollments: getAlreadyScheduledAgentIds (no candidates)
+        .mockResolvedValueOnce({ hits: { hits: [] } } as any)
+        // executeDueUnenrollments: find due UNENROLL actions
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  action_id: `${SCHEDULED_UNENROLL_ACTION_ID_PREFIX}abc`,
+                  agents: ['agent-1', 'agent-2'],
+                  start_time: new Date('2025-06-01T01:00:00.000Z').toISOString(),
+                  type: 'UNENROLL',
+                },
+              },
+            ],
+          },
+        } as any)
+        // executeDueUnenrollments: fetch all CANCEL actions (none)
+        .mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+      // getAgentsByKuery for re-validation returns the agents still inactive
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ agents } as any);
+
+      await runTask();
+      expect(mockedUnenrollBatch).toHaveBeenCalledWith(
+        undefined,
+        expect.anything(),
+        agents,
+        expect.objectContaining({
+          revoke: true,
+          force: true,
+          actionId: `${SCHEDULED_UNENROLL_ACTION_ID_PREFIX}abc`,
+          skipActionCreation: true,
+        })
+      );
+      jest.useRealTimers();
+    });
+
+    it('Should NOT execute due action if a CANCEL exists', async () => {
+      const now = new Date('2025-06-01T02:00:00.000Z');
+      jest.useFakeTimers().setSystemTime(now);
+      mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
+
+      mockContract.elasticsearch.client.asInternalUser.search
+        .mockResolvedValueOnce({ hits: { hits: [] } } as any) // scheduleUnenrollments
+        // executeDueUnenrollments: find due UNENROLL action
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  action_id: `${SCHEDULED_UNENROLL_ACTION_ID_PREFIX}abc`,
+                  agents: ['agent-1'],
+                  start_time: new Date('2025-06-01T01:00:00.000Z').toISOString(),
+                  type: 'UNENROLL',
+                },
+              },
+            ],
+          },
+        } as any)
+        // executeDueUnenrollments: fetch all CANCEL actions — returns one matching the due action
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  data: { target_id: `${SCHEDULED_UNENROLL_ACTION_ID_PREFIX}abc` },
+                },
+              },
+            ],
+          },
+        } as any);
+
+      await runTask();
+      expect(mockedUnenrollBatch).not.toHaveBeenCalled();
+      jest.useRealTimers();
+    });
+
+    it('Should skip due action if agent is no longer inactive', async () => {
+      const now = new Date('2025-06-01T02:00:00.000Z');
+      jest.useFakeTimers().setSystemTime(now);
+      mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
+
+      mockContract.elasticsearch.client.asInternalUser.search
+        .mockResolvedValueOnce({ hits: { hits: [] } } as any) // scheduleUnenrollments
+        // executeDueUnenrollments: find due UNENROLL action
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  action_id: `${SCHEDULED_UNENROLL_ACTION_ID_PREFIX}abc`,
+                  agents: ['agent-1'],
+                  start_time: new Date('2025-06-01T01:00:00.000Z').toISOString(),
+                  type: 'UNENROLL',
+                },
+              },
+            ],
+          },
+        } as any)
+        // executeDueUnenrollments: fetch all CANCEL actions (none)
+        .mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+      // agent is no longer inactive (getAgentsByKuery returns empty)
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ agents: [] } as any);
+
+      await runTask();
+      expect(mockedUnenrollBatch).not.toHaveBeenCalled();
+      jest.useRealTimers();
     });
 
     it('Should not run if task is outdated', async () => {

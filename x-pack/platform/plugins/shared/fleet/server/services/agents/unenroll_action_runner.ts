@@ -64,6 +64,8 @@ export async function unenrollBatch(
     actionId?: string;
     total?: number;
     spaceId?: string;
+    startTime?: string;
+    skipActionCreation?: boolean;
   }
 ): Promise<{ actionId: string }> {
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
@@ -86,6 +88,34 @@ export async function unenrollBatch(
       }, []);
 
   const now = new Date().toISOString();
+  const actionId = options.actionId ?? uuidv4();
+  const total = options.total ?? givenAgents.length;
+  const agentIds = agentsToUpdate.map((agent) => agent.id);
+  const spaceId = options.spaceId;
+  const namespaces = spaceId ? [spaceId] : [];
+
+  // Scheduled unenrollment: create the action with a future start_time but do not
+  // mutate agent state or invalidate API keys yet — the execute phase does that.
+  if (options.startTime) {
+    await createAgentAction(esClient, soClient, {
+      id: actionId,
+      agents: agentIds,
+      created_at: now,
+      start_time: options.startTime,
+      type: 'UNENROLL',
+      total,
+      namespaces,
+    });
+
+    await createErrorActionResults(
+      esClient,
+      actionId,
+      outgoingErrors,
+      'cannot unenroll from a hosted policy or already unenrolled'
+    );
+
+    return { actionId };
+  }
 
   // Update the necessary agents
   const updateData = options.revoke
@@ -98,19 +128,13 @@ export async function unenrollBatch(
     outgoingErrors
   );
 
-  const actionId = options.actionId ?? uuidv4();
-  const total = options.total ?? givenAgents.length;
-
-  const agentIds = agentsToUpdate.map((agent) => agent.id);
-
-  const spaceId = options.spaceId;
-  const namespaces = spaceId ? [spaceId] : [];
-
   if (options.revoke) {
     // Get all API keys that need to be invalidated
     await invalidateAPIKeysForAgents(agentsToUpdate);
 
-    await updateActionsForForceUnenroll(esClient, soClient, agentIds, actionId, total);
+    if (!options.skipActionCreation) {
+      await updateActionsForForceUnenroll(esClient, soClient, agentIds, actionId, total);
+    }
   } else {
     // Create unenroll action for each agent
     await createAgentAction(esClient, soClient, {
