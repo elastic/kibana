@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { ConversationPrompt } from './conversation_prompt';
@@ -14,26 +14,8 @@ import { useKibana } from '../../hooks/use_kibana';
 
 jest.mock('../../hooks/use_kibana');
 
-jest.mock('@kbn/agent-builder-plugin/public', () => {
-  const { forwardRef } = require('react');
-  return {
-    ConversationInputShell: forwardRef(
-      ({ children }: { children: React.ReactNode }, ref: React.Ref<HTMLDivElement>) => (
-        <div ref={ref}>{children}</div>
-      )
-    ),
-  };
-});
-
+const mockNavigateToApp = jest.fn();
 const mockUseKibana = useKibana as jest.Mock;
-
-const MockEmbeddableConversation = ({ onClose }: { onClose: () => void }) => (
-  <div data-test-subj="embeddableConversation">
-    <button data-test-subj="embeddableConversationClose" onClick={onClose}>
-      Close
-    </button>
-  </div>
-);
 
 const renderComponent = () =>
   render(
@@ -46,51 +28,64 @@ const renderComponent = () =>
 
 describe('ConversationPrompt', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    mockNavigateToApp.mockClear();
     mockUseKibana.mockReturnValue({
-      services: { agentBuilder: { EmbeddableConversation: MockEmbeddableConversation } },
+      services: { application: { navigateToApp: mockNavigateToApp } },
     });
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
+  it('renders the textarea and send button', () => {
+    renderComponent();
+    expect(screen.getByTestId('searchGettingStartedChatPromptInput')).toBeInTheDocument();
+    expect(screen.getByTestId('searchGettingStartedChatPromptSend')).toBeInTheDocument();
   });
 
-  it('does not show the overlay on initial mount', () => {
+  it('send button is disabled when the input is empty', () => {
     renderComponent();
-
-    expect(
-      screen.queryByTestId('searchGettingStartedChatNewConversationOverlay')
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('searchGettingStartedChatPromptSend')).toBeDisabled();
   });
 
-  it('shows the overlay and mounts EmbeddableConversation when the prompt is activated', () => {
+  it('send button is enabled after typing a message', () => {
     renderComponent();
+    fireEvent.change(screen.getByTestId('searchGettingStartedChatPromptInput'), {
+      target: { value: 'Hello' },
+    });
+    expect(screen.getByTestId('searchGettingStartedChatPromptSend')).not.toBeDisabled();
+  });
 
+  it('navigates to agent builder with the message when send is clicked', () => {
+    renderComponent();
+    fireEvent.change(screen.getByTestId('searchGettingStartedChatPromptInput'), {
+      target: { value: 'Help me get started' },
+    });
     fireEvent.click(screen.getByTestId('searchGettingStartedChatPromptSend'));
-
-    expect(
-      screen.getByTestId('searchGettingStartedChatNewConversationOverlay')
-    ).toBeInTheDocument();
-    expect(screen.getByTestId('embeddableConversation')).toBeInTheDocument();
+    expect(mockNavigateToApp).toHaveBeenCalledWith(
+      'agent_builder',
+      expect.objectContaining({
+        state: expect.objectContaining({ initialMessage: 'Help me get started' }),
+      })
+    );
   });
 
-  it('hides the overlay after EmbeddableConversation calls onClose', () => {
+  it('navigates to agent builder when Enter is pressed', () => {
     renderComponent();
+    const input = screen.getByTestId('searchGettingStartedChatPromptInput');
+    fireEvent.change(input, { target: { value: 'Hello' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(mockNavigateToApp).toHaveBeenCalled();
+  });
 
-    // Open and advance to the Open phase so collapseConversation's guard passes
-    fireEvent.click(screen.getByTestId('searchGettingStartedChatPromptSend'));
-    act(() => {
-      jest.runAllTimers();
-    });
+  it('does not navigate when Shift+Enter is pressed', () => {
+    renderComponent();
+    const input = screen.getByTestId('searchGettingStartedChatPromptInput');
+    fireEvent.change(input, { target: { value: 'Hello' } });
+    fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
+    expect(mockNavigateToApp).not.toHaveBeenCalled();
+  });
 
-    fireEvent.click(screen.getByTestId('embeddableConversationClose'));
-    act(() => {
-      jest.runAllTimers();
-    });
-
-    expect(
-      screen.queryByTestId('searchGettingStartedChatNewConversationOverlay')
-    ).not.toBeInTheDocument();
+  it('does not navigate when the message is blank', () => {
+    renderComponent();
+    fireEvent.keyDown(screen.getByTestId('searchGettingStartedChatPromptInput'), { key: 'Enter' });
+    expect(mockNavigateToApp).not.toHaveBeenCalled();
   });
 });

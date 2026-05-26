@@ -5,127 +5,81 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useState } from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiButtonIcon, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { ConversationInputShell } from '@kbn/agent-builder-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 
 import {
-  CONVERSATION_ANIMATION_MS,
-  ConversationOverlayBaseStyles,
-  ConversationOverlayOpeningStyle,
-  ConversationOverlayOpenStyle,
-  ConversationStyle,
   NewConversationTextArea,
   NewConversationSendButton,
   NewConversationContainer,
 } from './styles';
 
-enum ConversationPhase {
-  Closed = 'closed',
-  Opening = 'opening',
-  Open = 'open',
-  Closing = 'closing',
-}
-
 export const ConversationPrompt = () => {
   const {
-    services: { agentBuilder },
+    services: { application },
   } = useKibana();
-  const promptLauncherRef = useRef<HTMLDivElement>(null);
-  const [launcherRect, setLauncherRect] = useState<DOMRect | null>(null);
-  const [chatPhase, setChatPhase] = useState<ConversationPhase>(ConversationPhase.Closed);
-  const expandConversation = useCallback(() => {
-    if (chatPhase !== ConversationPhase.Closed) return;
-    if (promptLauncherRef.current) {
-      setLauncherRect(promptLauncherRef.current.getBoundingClientRect());
-    }
-    setChatPhase(ConversationPhase.Opening);
-    // Two rAF calls: the first lets the browser paint the Opening state (small rect),
-    // and the second triggers the transition to Open so CSS animates between them.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => setChatPhase(ConversationPhase.Open));
+  const [initialMessage, setInitialMessage] = useState<string>('');
+  const openConversation = useCallback(() => {
+    if (initialMessage.trim().length === 0) return;
+    application.navigateToApp(AGENT_BUILDER_APP_ID, {
+      path: `/agents/${agentBuilderDefaultAgentId}/conversations/new`,
+      state: {
+        initialMessage,
+        entryPointSource: 'search_getting_started',
+      },
     });
-  }, [chatPhase]);
-  const collapseConversation = useCallback(() => {
-    if (chatPhase !== ConversationPhase.Open) return;
-    if (promptLauncherRef.current) {
-      setLauncherRect(promptLauncherRef.current.getBoundingClientRect());
-    }
-    setChatPhase(ConversationPhase.Closing);
-    setTimeout(() => {
-      setChatPhase(ConversationPhase.Closed);
-      setLauncherRect(null);
-    }, CONVERSATION_ANIMATION_MS);
-  }, [chatPhase]);
-
-  const isOverlayVisible = chatPhase !== ConversationPhase.Closed;
-  const isConversationOverlayOpen = chatPhase === ConversationPhase.Open;
-  // agentBuilder === undefined handled by useGettingStartChatEnabled
-  const { EmbeddableConversation } = agentBuilder!;
+  }, [application, initialMessage]);
+  const onInputKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (event.key === keys.ENTER && !event.shiftKey) {
+        event.preventDefault();
+        openConversation();
+      }
+    },
+    [openConversation]
+  );
 
   return (
-    <>
-      <div css={NewConversationContainer}>
-        <ConversationInputShell ref={promptLauncherRef} css={NewConversationTextArea}>
-          <textarea
-            data-test-subj="searchGettingStartedChatPromptInput"
-            placeholder={i18n.translate(
-              'xpack.search.gettingStarted.chat.conversationPrompt.placeholder',
-              { defaultMessage: 'How can I help you get started today?' }
-            )}
-            aria-hidden
-            readOnly
-            rows={3}
-            onFocus={expandConversation}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              expandConversation();
-            }}
+    <div css={NewConversationContainer}>
+      <ConversationInputShell>
+        <textarea
+          css={NewConversationTextArea}
+          name="searchGettingStartedChatPromptInput"
+          data-test-subj="searchGettingStartedChatPromptInput"
+          placeholder={i18n.translate(
+            'xpack.search.gettingStarted.chat.conversationPrompt.placeholder',
+            { defaultMessage: 'How can I help you get started today?' }
+          )}
+          aria-label={i18n.translate(
+            'xpack.search.gettingStarted.chat.conversationPrompt.input.aria',
+            {
+              defaultMessage: 'Ask the AI assistant a question to get started',
+            }
+          )}
+          rows={3}
+          value={initialMessage}
+          onChange={(e) => setInitialMessage(e.currentTarget.value)}
+          onKeyDown={onInputKeyDown}
+        />
+        <div css={NewConversationSendButton}>
+          <EuiButtonIcon
+            iconType="kqlFunction"
+            display="fill"
+            size="m"
+            disabled={initialMessage.trim().length === 0}
+            onClick={openConversation}
+            aria-label={i18n.translate('xpack.search.gettingStarted.chat.conversationPrompt.send', {
+              defaultMessage: 'Open the AI assistant chat',
+            })}
+            data-test-subj="searchGettingStartedChatPromptSend"
           />
-          <div css={NewConversationSendButton}>
-            <EuiToolTip
-              content={i18n.translate('xpack.search.gettingStarted.chat.conversationPrompt.send', {
-                defaultMessage: 'Open the AI agent chat',
-              })}
-            >
-              <EuiButtonIcon
-                iconType="kqlFunction"
-                display="fill"
-                size="m"
-                onClick={expandConversation}
-                aria-label={i18n.translate(
-                  'xpack.search.gettingStarted.chat.conversationPrompt.send',
-                  {
-                    defaultMessage: 'Open the AI agent chat',
-                  }
-                )}
-                data-test-subj="searchGettingStartedChatPromptSend"
-              />
-            </EuiToolTip>
-          </div>
-        </ConversationInputShell>
-      </div>
-      {isOverlayVisible ? (
-        <div
-          css={[
-            ConversationOverlayBaseStyles,
-            !isConversationOverlayOpen && launcherRect
-              ? ConversationOverlayOpeningStyle(launcherRect)
-              : ConversationOverlayOpenStyle,
-          ]}
-          data-test-subj="searchGettingStartedChatNewConversationOverlay"
-        >
-          <div css={ConversationStyle(isConversationOverlayOpen)}>
-            <EmbeddableConversation
-              sessionTag="search-getting-started"
-              onClose={collapseConversation}
-              ariaLabelledBy="search-getting-started-embeddable-conversation"
-            />
-          </div>
         </div>
-      ) : null}
-    </>
+      </ConversationInputShell>
+    </div>
   );
 };
