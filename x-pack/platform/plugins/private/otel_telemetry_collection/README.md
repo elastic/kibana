@@ -12,8 +12,7 @@ The OTel Telemetry Collection plugin is owned by the Observability BI team and p
 1. **Per-service metadata collection** — Runs scheduled tasks to gather OTel
    resource attributes per service+environment pair
 2. **Per-signal events** — Sends one EBT event per signal type (traces, metrics, logs)
-3. **Dynamic configuration** — Query parameters, batching thresholds, and task
-   interval are configurable via CDN
+3. **Dynamic configuration** — Query parameters and batching thresholds are configurable via CDN
 
 ## Features
 
