@@ -14,6 +14,7 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiRadioGroup,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiCheckboxGroupOption, EuiRadioGroupOption } from '@elastic/eui';
 import type { WeekdayStr } from '@kbn/rrule';
@@ -42,17 +43,32 @@ export interface FrequencySelectorProps {
   disabled?: boolean;
   /** Validation flag — surfaces the "select at least one day" error in Custom. */
   weekdaysError?: boolean;
+  /**
+   * Optional override for the auto-generated id prefix. In product code an
+   * instance-scoped prefix from {@link useGeneratedHtmlId} is used so two
+   * ScheduleSection instances on the same page (pack form + open query
+   * flyout) don't share radio/checkbox ids — a duplicate id makes
+   * `<label htmlFor>` activate the first matching control in the document,
+   * leaking clicks across forms. Tests pin distinct prefixes to mirror that.
+   */
+  idPrefix?: string;
 }
 
-const FREQUENCY_ID_PREFIX = 'osquery-frequency-selector-option';
-
 // Daily + Custom (weekly) only for the initial release. Re-enable the other
-// frequencies by adding the corresponding entries to FREQUENCY_OPTIONS, the
-// matching FrequencyMode tokens in `./types`, and the dead JSX branches /
-// handlers / imports below.
-const FREQUENCY_OPTIONS: Array<EuiRadioGroupOption & { mode: FrequencyMode }> = [
-  { id: `${FREQUENCY_ID_PREFIX}-daily`, label: FREQUENCY_DAILY, mode: 'daily' },
-  { id: `${FREQUENCY_ID_PREFIX}-custom`, label: FREQUENCY_CUSTOM, mode: 'custom' },
+// frequencies by adding the corresponding entries here, the matching
+// FrequencyMode tokens in `./types`, and the dead JSX branches / handlers /
+// imports below. Option ids are instance-scoped (see `useGeneratedHtmlId`
+// inside the component) so multiple ScheduleSection instances on the same
+// page do not share radio ids — a duplicate id makes `<label htmlFor>`
+// activate the wrong radio.
+interface FrequencyOptionTemplate {
+  suffix: string;
+  label: string;
+  mode: FrequencyMode;
+}
+const FREQUENCY_OPTION_TEMPLATES: FrequencyOptionTemplate[] = [
+  { suffix: 'daily', label: FREQUENCY_DAILY, mode: 'daily' },
+  { suffix: 'custom', label: FREQUENCY_CUSTOM, mode: 'custom' },
 ];
 
 // MONTH_OPTIONS — unused until monthly/yearly are re-enabled.
@@ -81,13 +97,7 @@ const WEEKDAY_LABEL: Record<WeekdayStr, string> = {
 };
 
 const isFrequencyMode = (value: string): value is FrequencyMode =>
-  FREQUENCY_OPTIONS.some((opt) => opt.mode === value);
-
-const optionIdForMode = (mode: FrequencyMode): string =>
-  FREQUENCY_OPTIONS.find((opt) => opt.mode === mode)?.id ?? FREQUENCY_OPTIONS[0].id;
-
-const modeForOptionId = (id: string): FrequencyMode | undefined =>
-  FREQUENCY_OPTIONS.find((opt) => opt.id === id)?.mode;
+  FREQUENCY_OPTION_TEMPLATES.some((opt) => opt.mode === value);
 
 const clampInt = (value: number, min: number, max: number, fallback: number): number => {
   if (!Number.isFinite(value) || !Number.isInteger(value)) return fallback;
@@ -102,7 +112,38 @@ export const FrequencySelector = ({
   onChange,
   disabled,
   weekdaysError,
+  idPrefix,
 }: FrequencySelectorProps) => {
+  // Instance-scoped prefix so multiple ScheduleSection instances on the same
+  // page (pack form + open query flyout) don't share radio/checkbox ids — a
+  // shared `id` lets `<label htmlFor>` activate the first matching radio in
+  // the document, which leaks clicks across forms.
+  const generatedIdPrefix = useGeneratedHtmlId({ prefix: 'osquery-frequency-selector' });
+  const basePrefix = idPrefix ?? generatedIdPrefix;
+  const frequencyIdPrefix = `${basePrefix}-option`;
+  const weekdayIdPrefix = `${basePrefix}-weekday`;
+
+  const frequencyOptions = useMemo<Array<EuiRadioGroupOption & { mode: FrequencyMode }>>(
+    () =>
+      FREQUENCY_OPTION_TEMPLATES.map(({ suffix, label, mode }) => ({
+        id: `${frequencyIdPrefix}-${suffix}`,
+        label,
+        mode,
+      })),
+    [frequencyIdPrefix]
+  );
+
+  const optionIdForMode = useCallback(
+    (mode: FrequencyMode): string =>
+      frequencyOptions.find((opt) => opt.mode === mode)?.id ?? frequencyOptions[0].id,
+    [frequencyOptions]
+  );
+
+  const modeForOptionId = useCallback(
+    (id: string): FrequencyMode | undefined => frequencyOptions.find((opt) => opt.id === id)?.mode,
+    [frequencyOptions]
+  );
+
   const handleFrequencyChange = useCallback(
     (optionId: string) => {
       const next = modeForOptionId(optionId);
@@ -117,7 +158,7 @@ export const FrequencySelector = ({
         _unknown: undefined,
       });
     },
-    [onChange, value]
+    [modeForOptionId, onChange, value]
   );
 
   const handleIntervalChange = useCallback(
@@ -129,9 +170,23 @@ export const FrequencySelector = ({
     [onChange, value]
   );
 
+  const tokenForWeekdayId = useCallback(
+    (id: string): WeekdayStr | undefined => {
+      const suffix = id.startsWith(`${weekdayIdPrefix}-`)
+        ? id.slice(weekdayIdPrefix.length + 1)
+        : id;
+
+      return (WEEKDAY_TOKENS as readonly string[]).includes(suffix)
+        ? (suffix as WeekdayStr)
+        : undefined;
+    },
+    [weekdayIdPrefix]
+  );
+
   const handleWeekdayToggle = useCallback(
     (id: string) => {
-      const token = id as WeekdayStr;
+      const token = tokenForWeekdayId(id);
+      if (!token) return;
       const selected = new Set(value.byweekday);
       if (selected.has(token)) {
         selected.delete(token);
@@ -142,7 +197,7 @@ export const FrequencySelector = ({
       const ordered = WEEKDAY_TOKENS.filter((day) => selected.has(day));
       onChange({ ...value, byweekday: ordered });
     },
-    [onChange, value]
+    [onChange, tokenForWeekdayId, value]
   );
 
   // Monthly/yearly handlers — unused until those modes are re-enabled.
@@ -167,21 +222,21 @@ export const FrequencySelector = ({
   const weekdayOptions = useMemo<EuiCheckboxGroupOption[]>(
     () =>
       WEEKDAY_TOKENS.map((token) => ({
-        id: token,
+        id: `${weekdayIdPrefix}-${token}`,
         label: WEEKDAY_LABEL[token],
         disabled,
       })),
-    [disabled]
+    [disabled, weekdayIdPrefix]
   );
 
   const weekdayIdToSelectedMap = useMemo<Record<string, boolean>>(() => {
     const map: Record<string, boolean> = {};
     for (const token of WEEKDAY_TOKENS) {
-      map[token] = value.byweekday.includes(token);
+      map[`${weekdayIdPrefix}-${token}`] = value.byweekday.includes(token);
     }
 
     return map;
-  }, [value.byweekday]);
+  }, [value.byweekday, weekdayIdPrefix]);
 
   const everyUnitLabel: string | null = (() => {
     switch (value.frequency) {
@@ -203,7 +258,7 @@ export const FrequencySelector = ({
         <EuiFormRow label={FREQUENCY_LABEL} fullWidth>
           <EuiRadioGroup
             css={HORIZONTAL_GROUP_CSS}
-            options={FREQUENCY_OPTIONS.map(({ id, label, mode }) => ({
+            options={frequencyOptions.map(({ id, label, mode }) => ({
               id,
               label,
               disabled: disabled || mode === undefined,

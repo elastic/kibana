@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import moment from 'moment';
 import { EuiDatePicker, EuiFormRow } from '@elastic/eui';
 import { ToggleableRow } from './toggleable_row';
@@ -22,6 +22,12 @@ export interface StopAfterFieldProps {
   startDate: Date;
   onChange: (next: { enabled: boolean; date: Date }) => void;
   disabled?: boolean;
+  /**
+   * When true, surface validation errors regardless of touched state. The
+   * parent form flips this on submit so the error becomes visible even if the
+   * user never blurred the field.
+   */
+  showErrors?: boolean;
 }
 
 export const StopAfterField = ({
@@ -30,7 +36,23 @@ export const StopAfterField = ({
   startDate,
   onChange,
   disabled,
+  showErrors = false,
 }: StopAfterFieldProps) => {
+  // Defer error display until the field has been interacted with — otherwise
+  // the user sees the before-start error the instant the toggle flips on,
+  // before they've had a chance to pick a date.
+  const [touched, setTouched] = useState(false);
+  const previousEnabled = useRef(enabled);
+  useEffect(() => {
+    // Reset touched state when the user toggles the field off; turning it back
+    // on should feel like a fresh start.
+    if (previousEnabled.current && !enabled) {
+      setTouched(false);
+    }
+
+    previousEnabled.current = enabled;
+  }, [enabled]);
+
   const handleToggle = useCallback(
     (next: boolean) => {
       onChange({ enabled: next, date: value });
@@ -41,14 +63,20 @@ export const StopAfterField = ({
   const handleDateChange = useCallback(
     (next: moment.Moment | null) => {
       if (!next) return;
+      setTouched(true);
       onChange({ enabled, date: next.toDate() });
     },
     [enabled, onChange]
   );
 
+  const handleBlur = useCallback(() => {
+    setTouched(true);
+  }, []);
+
   const selectedMoment = useMemo(() => moment(value), [value]);
   const minMoment = useMemo(() => moment(startDate), [startDate]);
   const isBeforeStart = enabled && value.getTime() <= startDate.getTime();
+  const showError = isBeforeStart && (touched || showErrors);
 
   return (
     <ToggleableRow
@@ -60,8 +88,8 @@ export const StopAfterField = ({
       dataTestSubj="osquery-schedule-stop-after-toggle"
     >
       <EuiFormRow
-        isInvalid={isBeforeStart}
-        error={isBeforeStart ? STOP_AFTER_BEFORE_START_ERROR : undefined}
+        isInvalid={showError}
+        error={showError ? STOP_AFTER_BEFORE_START_ERROR : undefined}
         fullWidth
       >
         <EuiDatePicker
@@ -69,6 +97,7 @@ export const StopAfterField = ({
           aria-label={STOP_AFTER_DATE_LABEL}
           selected={selectedMoment}
           onChange={handleDateChange}
+          onBlur={handleBlur}
           showTimeSelect
           minDate={minMoment}
           disabled={disabled}

@@ -275,13 +275,18 @@ export const deserializeSchedule = (
       recurrence = createDefaultRecurrence();
     }
 
+    // When the saved object has no end_date, seed the toggle-off placeholder
+    // with `startDate + 1d` so flipping "Stop after" on lands in a valid
+    // state (UNTIL must be strictly after DTSTART for the rule to ever fire).
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
     return {
       scheduleType: 'rrule',
       interval: DEFAULT_INTERVAL_SECONDS,
       startDate,
       stopAfter: {
         enabled: endDate !== undefined,
-        date: endDate ?? startDate,
+        date: endDate ?? new Date(startDate.getTime() + ONE_DAY_MS),
       },
       recurrence,
       splay: deserializeSplay(input.rrule_schedule.splay),

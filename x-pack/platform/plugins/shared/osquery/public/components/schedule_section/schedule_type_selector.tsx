@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadio } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiRadio,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { noop } from 'lodash';
 import styled from '@emotion/styled';
 import type { ScheduleType } from '../../../common/schedule';
@@ -19,13 +26,25 @@ import {
   SCHEDULE_TYPE_RECURRENCE_LABEL,
 } from './translations';
 
-const StyledEuiCard = styled(EuiCard)`
+const StyledEuiCard = styled(EuiCard, {
+  shouldForwardProp: (prop) => prop !== 'isInteractive',
+})<{ isInteractive?: boolean }>`
   padding: 16px 92px 16px 16px !important;
   border: ${({ theme, selectable }) => {
     if (selectable?.isSelected) {
       return `${theme.euiTheme.border.width.thin} solid ${theme.euiTheme.colors.success}`;
     }
   }};
+
+  ${({ isInteractive }) =>
+    isInteractive === false
+      ? `
+        cursor: not-allowed;
+        & * {
+          pointer-events: none;
+        }
+      `
+      : ''}
 
   .euiTitle {
     font-size: 1rem;
@@ -56,6 +75,15 @@ export interface ScheduleTypeSelectorProps {
    */
   lockedScheduleType?: ScheduleType;
   disabled?: boolean;
+  /**
+   * Optional override for the generated id prefix. Tests pin this to keep
+   * radio ids stable across renders. In product code an auto-generated
+   * instance-scoped prefix is used (see {@link useGeneratedHtmlId}) so two
+   * ScheduleSection instances on the same page (pack form + open query
+   * flyout) don't share radio ids — a duplicate id makes `<label htmlFor>`
+   * activate the first matching radio in the document, leaking clicks
+   * across forms.
+   */
   idPrefix?: string;
 }
 
@@ -64,35 +92,39 @@ export const ScheduleTypeSelector = ({
   onChange,
   lockedScheduleType,
   disabled,
-  idPrefix = 'osquery-schedule-type',
+  idPrefix: idPrefixProp,
 }: ScheduleTypeSelectorProps) => {
+  const generatedIdPrefix = useGeneratedHtmlId({ prefix: 'osquery-schedule-type' });
+  const idPrefix = idPrefixProp ?? generatedIdPrefix;
   const isLocked = lockedScheduleType !== undefined;
   const effectiveValue = isLocked ? lockedScheduleType : value;
 
+  const isInteractive = !isLocked && !disabled;
+
   const handleSelect = useCallback(
     (next: ScheduleType) => {
-      if (isLocked || disabled || next === value) return;
+      if (!isInteractive || next === value) return;
       onChange(next);
     },
-    [disabled, isLocked, onChange, value]
+    [isInteractive, onChange, value]
   );
 
   const intervalSelectable = useMemo(
     () => ({
-      onClick: () => handleSelect('interval'),
+      onClick: isInteractive ? () => handleSelect('interval') : noop,
       isSelected: effectiveValue === 'interval',
-      isDisabled: disabled || isLocked,
+      isDisabled: !isInteractive,
     }),
-    [disabled, effectiveValue, handleSelect, isLocked]
+    [effectiveValue, handleSelect, isInteractive]
   );
 
   const recurrenceSelectable = useMemo(
     () => ({
-      onClick: () => handleSelect('rrule'),
+      onClick: isInteractive ? () => handleSelect('rrule') : noop,
       isSelected: effectiveValue === 'rrule',
-      isDisabled: disabled || isLocked,
+      isDisabled: !isInteractive,
     }),
-    [disabled, effectiveValue, handleSelect, isLocked]
+    [effectiveValue, handleSelect, isInteractive]
   );
 
   return (
@@ -104,6 +136,7 @@ export const ScheduleTypeSelector = ({
       <EuiFlexGroup gutterSize="m" data-test-subj="osquery-schedule-type-selector">
         <EuiFlexItem>
           <StyledEuiCard
+            isInteractive={isInteractive}
             layout="horizontal"
             title={
               <EuiRadio
@@ -125,6 +158,7 @@ export const ScheduleTypeSelector = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <StyledEuiCard
+            isInteractive={isInteractive}
             layout="horizontal"
             title={
               <EuiRadio

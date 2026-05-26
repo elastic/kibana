@@ -130,6 +130,8 @@ export const createDefaultSplay = (): SplayFormStateUI => ({
   unit: 'seconds',
 });
 
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
 export const createDefaultScheduleFormData = (
   scheduleType: ScheduleType = 'interval'
 ): ScheduleFormData => {
@@ -141,7 +143,10 @@ export const createDefaultScheduleFormData = (
     startDate: now,
     stopAfter: {
       enabled: false,
-      date: now,
+      // Default UNTIL is strictly after DTSTART so the field is valid as soon
+      // as the user toggles it on. RRULE requires UNTIL > DTSTART or it never
+      // fires.
+      date: new Date(now.getTime() + ONE_DAY_MS),
     },
     recurrence: createDefaultRecurrence(),
     splay: createDefaultSplay(),

@@ -38,6 +38,11 @@ export interface ScheduleSectionProps {
    * narrower label when embedded inside an override toggle.
    */
   title?: string | null;
+  /**
+   * Force validation errors to surface on touched-deferred fields (currently
+   * the end-date field). Parent forms flip this on submit attempt.
+   */
+  showErrors?: boolean;
 }
 
 const weekdaysAreValid = (data: ScheduleFormData): boolean => {
@@ -53,6 +58,7 @@ export const ScheduleSection = ({
   lockedScheduleType,
   disabled,
   title = SCHEDULE_SECTION_TITLE,
+  showErrors,
 }: ScheduleSectionProps) => {
   const handleTypeChange = useCallback(
     (scheduleType: ScheduleType) => {
@@ -169,6 +175,7 @@ export const ScheduleSection = ({
               startDate={value.startDate}
               onChange={handleStopAfterChange}
               disabled={disabled}
+              showErrors={showErrors}
             />
 
             <SplayTimeField

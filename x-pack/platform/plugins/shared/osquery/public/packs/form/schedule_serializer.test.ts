@@ -177,6 +177,40 @@ describe('schedule_serializer', () => {
       expect(result.recurrence.frequency).toBe('daily');
     });
 
+    it('seeds stopAfter.date to startDate + 1 day when end_date is missing', () => {
+      // When a saved pack has no UNTIL bound, the toggle-off placeholder for
+      // the end-date picker must already be > startDate so flipping the
+      // toggle on lands in a valid state.
+      const startDateIso = '2024-03-15T09:00:00.000Z';
+      const result = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=DAILY',
+          start_date: startDateIso,
+        },
+      });
+
+      expect(result.stopAfter.enabled).toBe(false);
+      const expected = new Date(new Date(startDateIso).getTime() + 24 * 60 * 60 * 1000);
+      expect(result.stopAfter.date.toISOString()).toBe(expected.toISOString());
+    });
+
+    it('preserves end_date verbatim when present on the saved object', () => {
+      const startDateIso = '2024-03-15T09:00:00.000Z';
+      const endDateIso = '2024-04-01T09:00:00.000Z';
+      const result = deserializeSchedule({
+        schedule_type: 'rrule',
+        rrule_schedule: {
+          rrule: 'FREQ=DAILY',
+          start_date: startDateIso,
+          end_date: endDateIso,
+        },
+      });
+
+      expect(result.stopAfter.enabled).toBe(true);
+      expect(result.stopAfter.date.toISOString()).toBe(endDateIso);
+    });
+
     // Round-trip check ────────────────────────────────────────────────────────
     it('should round-trip interval mode: serialize → deserialize', () => {
       const original = makeIntervalFormData(1800);

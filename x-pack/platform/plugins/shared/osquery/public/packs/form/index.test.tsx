@@ -221,8 +221,10 @@ describe('PackForm', () => {
 
       expect(section).toBeInTheDocument();
       // The radio group exposes both options; the recurrence one is selected.
+      // The id prefix is now auto-generated per instance via useGeneratedHtmlId
+      // (see schedule_type_selector.tsx), so match on the `-rrule` suffix.
       const recurrenceRadio = typeSelector.querySelector(
-        'input[id$="osquery-schedule-type-rrule"]'
+        'input[id$="-rrule"]'
       ) as HTMLInputElement | null;
       expect(recurrenceRadio).not.toBeNull();
       expect(recurrenceRadio?.checked).toBe(true);
