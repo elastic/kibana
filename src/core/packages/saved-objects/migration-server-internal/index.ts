@@ -30,7 +30,6 @@ export {
   updateMappings,
   updateAliases,
   transformDocs,
-  removeWriteBlock,
   readWithPit,
   refreshIndex,
   pickupUpdatedMappings,

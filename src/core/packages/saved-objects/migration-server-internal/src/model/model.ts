@@ -297,7 +297,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       case MigrationType.Compatible:
         return {
           ...stateP,
-          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+          controlState: 'COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION',
         };
       case MigrationType.Incompatible:
         return {
@@ -330,6 +330,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'FATAL',
           reason: 'Incompatible mappings change on already migrated Kibana instance.',
         };
+    }
+  } else if (stateP.controlState === 'COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+      };
+    } else {
+      const left = res.left;
+      if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
+        const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else {
+        throwBadResponse(stateP, left);
+      }
     }
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -552,6 +568,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // and can proceed to the next step
         return {
           ...stateP,
+          logs,
           pitId: res.right.pitId,
           controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
         };

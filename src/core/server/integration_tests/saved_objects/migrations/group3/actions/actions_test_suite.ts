@@ -33,7 +33,6 @@ import {
   updateAndPickupMappings,
   type UpdateAndPickupMappingsResponse,
   updateMappings,
-  removeWriteBlock,
   transformDocs,
   waitForIndexStatus,
   fetchIndices,
@@ -313,49 +312,6 @@ export const runActionTestSuite = ({
       const task = checkClusterRoutingAllocationEnabled(client);
       const result = await task();
       expect(Either.isRight(result)).toBe(true);
-    });
-  });
-
-  describe('removeWriteBlock', () => {
-    beforeAll(async () => {
-      await createIndex({
-        client,
-        indexName: 'existing_index_without_write_block_2',
-        mappings: { properties: {} },
-        esCapabilities,
-      })();
-      await createIndex({
-        client,
-        indexName: 'existing_index_with_write_block_2',
-        mappings: { properties: {} },
-        esCapabilities,
-      })();
-      await client.indices.addBlock({ index: 'existing_index_with_write_block_2', block: 'write' });
-    });
-    it('resolves right if successful when an index already has a write block', async () => {
-      expect.assertions(1);
-      const task = removeWriteBlock({ client, index: 'existing_index_with_write_block_2' });
-      await expect(task()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Right",
-            "right": "remove_write_block_succeeded",
-          }
-      `);
-    });
-    it('resolves right if successful when an index does not have a write block', async () => {
-      expect.assertions(1);
-      const task = removeWriteBlock({ client, index: 'existing_index_without_write_block_2' });
-      await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": "remove_write_block_succeeded",
-        }
-      `);
-    });
-    it('rejects if there is a non-retryable error', async () => {
-      expect.assertions(1);
-      const task = removeWriteBlock({ client, index: 'no_such_index' });
-      await expect(task()).rejects.toThrow('index_not_found_exception');
     });
   });
 

@@ -252,6 +252,10 @@ export interface UpdateSourceMappingsPropertiesState extends SourceExistsState {
   readonly controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES';
 }
 
+export interface CompatibleUpdateCheckClusterRoutingAllocationState extends SourceExistsState {
+  readonly controlState: 'COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION';
+}
+
 export interface CreateIndexCheckClusterRoutingAllocationState extends PostInitState {
   readonly controlState: 'CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION';
   readonly sourceIndex: Option.None;
@@ -381,6 +385,7 @@ export type State = Readonly<
   | CheckVersionIndexReadyActions
   | CleanupUnknownAndExcluded
   | CleanupUnknownAndExcludedWaitForTaskState
+  | CompatibleUpdateCheckClusterRoutingAllocationState
   | CreateIndexCheckClusterRoutingAllocationState
   | CreateNewTargetState
   | DoneState

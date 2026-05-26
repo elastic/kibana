@@ -37,6 +37,7 @@ import type {
   WaitForYellowSourceState,
   PostInitState,
   CreateIndexCheckClusterRoutingAllocationState,
+  CompatibleUpdateCheckClusterRoutingAllocationState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
@@ -436,7 +437,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(2000);
         });
 
-        test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a legacy index (>= 6.0.0 < 6.5)', () => {
+        test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when a concrete index exists without a version alias', () => {
           const res: ResponseType<'INIT'> = Either.right({
             '.kibana': {
               aliases: {},
@@ -659,7 +660,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(0);
         });
 
-        test('INIT -> CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION when the index does not exist and the migrator is NOT involved in a relocation', () => {
+        test('INIT -> CREATE_INDEX_CHECK_CLUSTER_ROUTING_ALLOCATION when no saved object indices exist', () => {
           const res: ResponseType<'INIT'> = Either.right({});
           const newState = model(initState, res);
 
@@ -803,7 +804,7 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(2000);
       });
 
-      test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a legacy index (>= 6.0.0 < 6.5)', () => {
+      test('WAIT_FOR_MIGRATION_COMPLETION -> WAIT_FOR_MIGRATION_COMPLETION when the source index has no current alias', () => {
         const res: ResponseType<'WAIT_FOR_MIGRATION_COMPLETION'> = Either.right({
           '.kibana': {
             aliases: {},
@@ -914,7 +915,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(0);
         });
 
-        describe('if the migrator is NOT involved in a relocation', () => {
+        describe('when the source index is ready', () => {
           test('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
             const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
             const newState = model(waitForYellowSourceState, res);
@@ -958,12 +959,14 @@ describe('migrations v2 model', () => {
       };
 
       describe('if action succeeds', () => {
-        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED if mappings changes are compatible and index is not migrated yet', () => {
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION if mappings changes are compatible and index is not migrated yet', () => {
           const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.right(
             'update_mappings_succeeded'
           );
           const newState = model(updateSourceMappingsPropertiesState, res);
-          expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED');
+          expect(newState.controlState).toEqual(
+            'COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION'
+          );
         });
 
         test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if mappings changes are compatible and index is already migrated', () => {
@@ -1018,6 +1021,41 @@ describe('migrations v2 model', () => {
             `"Incompatible mappings change on already migrated Kibana instance."`
           );
         });
+      });
+    });
+
+    describe('COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION', () => {
+      const compatibleUpdateCheckClusterRoutingAllocationState: CompatibleUpdateCheckClusterRoutingAllocationState =
+        {
+          ...postInitState,
+          controlState: 'COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION',
+          sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+          sourceIndexMappings: Option.some(
+            baseState.targetIndexMappings
+          ) as Option.Some<IndexMapping>,
+        };
+
+      test('COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION -> COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION when cluster allocation is not compatible', () => {
+        const res: ResponseType<'COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION'> = Either.left(
+          {
+            type: 'incompatible_cluster_routing_allocation',
+          }
+        );
+        const newState = model(compatibleUpdateCheckClusterRoutingAllocationState, res);
+
+        expect(newState.controlState).toBe('COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+
+      test('COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION -> CLEANUP_UNKNOWN_AND_EXCLUDED when cluster allocation is compatible', () => {
+        const res: ResponseType<'COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION'> =
+          Either.right({});
+        const newState = model(compatibleUpdateCheckClusterRoutingAllocationState, res);
+
+        expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED');
+        expect(newState.retryCount).toEqual(0);
+        expect(newState.retryDelay).toEqual(0);
       });
     });
 
@@ -1180,7 +1218,7 @@ describe('migrations v2 model', () => {
       });
     });
 
-    describe('PREPARE_COMPATIBLE_MIGRATIONS', () => {
+    describe('PREPARE_COMPATIBLE_MIGRATION', () => {
       const someAliasAction: AliasAction = { add: { index: '.kibana', alias: '.kibana_8.7.0' } };
       const state: PrepareCompatibleMigration = {
         ...postInitState,
@@ -1190,7 +1228,7 @@ describe('migrations v2 model', () => {
         preTransformDocsActions: [someAliasAction],
       };
 
-      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_SOURCE if action succeeds  and we must refresh the index', () => {
+      it('PREPARE_COMPATIBLE_MIGRATION -> REFRESH_SOURCE if action succeeds and we must refresh the index', () => {
         const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
           'update_aliases_succeeded'
         );
@@ -1202,7 +1240,7 @@ describe('migrations v2 model', () => {
         expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
 
-      it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeds', () => {
+      it('PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeds', () => {
         const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
           'update_aliases_succeeded'
         );
@@ -1211,7 +1249,7 @@ describe('migrations v2 model', () => {
         expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
 
-      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_SOURCE if action fails because the alias is not found', () => {
+      it('PREPARE_COMPATIBLE_MIGRATION -> REFRESH_SOURCE if action fails because the alias is not found', () => {
         const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
           type: 'alias_not_found_exception',
         });
@@ -1224,7 +1262,7 @@ describe('migrations v2 model', () => {
         expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
 
-      it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action fails because the alias is not found', () => {
+      it('PREPARE_COMPATIBLE_MIGRATION -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action fails because the alias is not found', () => {
         const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
           type: 'alias_not_found_exception',
         });
@@ -1492,8 +1530,8 @@ describe('migrations v2 model', () => {
         targetIndex: '.kibana_7.11.0_001',
       };
 
-      describe('reindex migration', () => {
-        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if origin mappings did not exist', () => {
+      describe('when index mappings are incomplete', () => {
+        it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if index mappings are incomplete', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
             type: 'index_mappings_incomplete' as const,
           });

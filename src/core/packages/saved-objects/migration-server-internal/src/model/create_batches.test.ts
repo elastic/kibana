@@ -19,66 +19,64 @@ describe('createBatches', () => {
 
   const DOCUMENT_SIZE_BYTES = 77; // 76 + \n
 
-  describe('when maxBatchSizeBytes is provided', () => {
-    it('returns right one batch if all documents fit in maxBatchSizeBytes', () => {
-      const documents = [
-        { _id: '', _source: { type: 'dashboard', title: 'my saved object title ¹' } },
-        { _id: '', _source: { type: 'dashboard', title: 'my saved object title ²' } },
-        { _id: '', _source: { type: 'dashboard', title: 'my saved object title ®' } },
-      ];
+  it('returns right one batch if all documents fit in maxBatchSizeBytes', () => {
+    const documents = [
+      { _id: '', _source: { type: 'dashboard', title: 'my saved object title ¹' } },
+      { _id: '', _source: { type: 'dashboard', title: 'my saved object title ²' } },
+      { _id: '', _source: { type: 'dashboard', title: 'my saved object title ®' } },
+    ];
 
-      expect(
-        createBatches({
-          documents,
-          maxBatchSizeBytes: DOCUMENT_SIZE_BYTES * 3,
-        })
-      ).toEqual(Either.right([documents.map(documentToOperation)]));
-    });
-    it('creates multiple batches with each batch limited to maxBatchSizeBytes', () => {
-      const documents = [
-        { _id: '', _source: { type: 'dashboard', title: 'my saved object title ¹' } },
-        { _id: '', _source: { type: 'dashboard', title: 'my saved object title ²' } },
-        { _id: '', _source: { type: 'dashboard', title: 'my saved object title ®' } },
-        { _id: '', _source: { type: 'dashboard', title: 'my saved object title 44' } },
-        { _id: '', _source: { type: 'dashboard', title: 'my saved object title 55' } },
-      ];
-      expect(
-        createBatches({
-          documents,
-          maxBatchSizeBytes: DOCUMENT_SIZE_BYTES * 2,
-        })
-      ).toEqual(
-        Either.right([
-          documents.slice(0, 2).map(documentToOperation),
-          documents.slice(2, 4).map(documentToOperation),
-          documents.slice(4).map(documentToOperation),
-        ])
-      );
-    });
-    it('creates a single empty batch if there are no documents', () => {
-      const documents = [] as SavedObjectsRawDoc[];
-      expect(createBatches({ documents, maxBatchSizeBytes: 100 })).toEqual(Either.right([[]]));
-    });
-    it('throws if any one document exceeds the maxBatchSizeBytes', () => {
-      const documents = [
-        { _id: 'foo', _source: { type: 'dashboard', title: 'my saved object title ¹' } },
-        {
-          _id: 'bar',
-          _source: {
-            type: 'dashboard',
-            title: 'my saved object title ² with a very long title that exceeds max size bytes',
-          },
+    expect(
+      createBatches({
+        documents,
+        maxBatchSizeBytes: DOCUMENT_SIZE_BYTES * 3,
+      })
+    ).toEqual(Either.right([documents.map(documentToOperation)]));
+  });
+  it('creates multiple batches with each batch limited to maxBatchSizeBytes', () => {
+    const documents = [
+      { _id: '', _source: { type: 'dashboard', title: 'my saved object title ¹' } },
+      { _id: '', _source: { type: 'dashboard', title: 'my saved object title ²' } },
+      { _id: '', _source: { type: 'dashboard', title: 'my saved object title ®' } },
+      { _id: '', _source: { type: 'dashboard', title: 'my saved object title 44' } },
+      { _id: '', _source: { type: 'dashboard', title: 'my saved object title 55' } },
+    ];
+    expect(
+      createBatches({
+        documents,
+        maxBatchSizeBytes: DOCUMENT_SIZE_BYTES * 2,
+      })
+    ).toEqual(
+      Either.right([
+        documents.slice(0, 2).map(documentToOperation),
+        documents.slice(2, 4).map(documentToOperation),
+        documents.slice(4).map(documentToOperation),
+      ])
+    );
+  });
+  it('creates a single empty batch if there are no documents', () => {
+    const documents = [] as SavedObjectsRawDoc[];
+    expect(createBatches({ documents, maxBatchSizeBytes: 100 })).toEqual(Either.right([[]]));
+  });
+  it('throws if any one document exceeds the maxBatchSizeBytes', () => {
+    const documents = [
+      { _id: 'foo', _source: { type: 'dashboard', title: 'my saved object title ¹' } },
+      {
+        _id: 'bar',
+        _source: {
+          type: 'dashboard',
+          title: 'my saved object title ² with a very long title that exceeds max size bytes',
         },
-        { _id: 'baz', _source: { type: 'dashboard', title: 'my saved object title ®' } },
-      ];
-      expect(createBatches({ documents, maxBatchSizeBytes: 120 })).toEqual(
-        Either.left({
-          maxBatchSizeBytes: 120,
-          docSizeBytes: 130,
-          type: 'document_exceeds_batch_size_bytes',
-          documentId: documents[1]._id,
-        })
-      );
-    });
+      },
+      { _id: 'baz', _source: { type: 'dashboard', title: 'my saved object title ®' } },
+    ];
+    expect(createBatches({ documents, maxBatchSizeBytes: 120 })).toEqual(
+      Either.left({
+        maxBatchSizeBytes: 120,
+        docSizeBytes: 130,
+        type: 'document_exceeds_batch_size_bytes',
+        documentId: documents[1]._id,
+      })
+    );
   });
 });

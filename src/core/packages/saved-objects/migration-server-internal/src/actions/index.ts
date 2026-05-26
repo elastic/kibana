@@ -28,9 +28,6 @@ export { checkClusterRoutingAllocationEnabled } from './check_cluster_routing_al
 export type { FetchIndexResponse, FetchIndicesParams } from './fetch_indices';
 export { fetchIndices } from './fetch_indices';
 
-export type { RemoveWriteBlockParams } from './remove_write_block';
-export { removeWriteBlock } from './remove_write_block';
-
 export type {
   WaitForIndexStatusParams,
   IndexNotYellowTimeout,

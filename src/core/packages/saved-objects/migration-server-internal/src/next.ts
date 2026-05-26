@@ -73,6 +73,8 @@ export const nextActionMap = (
         latestMappingsVersions: state.latestMappingsVersions,
         hashToVersionMap: state.hashToVersionMap,
       }),
+    COMPATIBLE_UPDATE_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
+      Actions.checkClusterRoutingAllocationEnabled(client),
     CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
       Actions.cleanupUnknownAndExcluded({
         client,

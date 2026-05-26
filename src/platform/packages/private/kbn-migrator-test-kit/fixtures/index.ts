@@ -320,6 +320,7 @@ export const getCompatibleMigratorTestKit = async ({
   removedTypes = REMOVED_TYPES,
   types = getCompatibleBaselineTypes(removedTypes),
   kibanaVersion = nextMinor,
+  clientWrapperFactory,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
@@ -327,6 +328,7 @@ export const getCompatibleMigratorTestKit = async ({
     types,
     removedTypes,
     kibanaVersion,
+    clientWrapperFactory,
     settings,
   });
 };

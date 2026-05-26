@@ -156,7 +156,7 @@ describe('Elasticsearch Errors', () => {
       // @ts-expect-error @elastic/elasticsearch doesn't declare error on response
       expect(isClusterShardLimitExceeded(res.error)).toEqual(true);
     });
-    it('correctly identify errors from clone index operation', async () => {
+    it('correctly identifies cluster_shard_limit_exceeded from indices.clone', async () => {
       const res = await client.indices.clone(
         {
           index: 'existing_index_with_write_block',
