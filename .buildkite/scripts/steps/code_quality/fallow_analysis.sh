@@ -22,6 +22,17 @@ DEAD_CODE_EXIT=$?
 set -e
 echo "Exit code: $DEAD_CODE_EXIT"
 
+echo "--- Run fallow duplication analysis (grouped by CODEOWNERS owner)"
+set +e
+DUPES_OUTPUT=$(npx "fallow@${FALLOW_VERSION}" dupes \
+  --group-by owner \
+  --format markdown \
+  --quiet \
+  2>&1)
+DUPES_EXIT=$?
+set -e
+echo "Exit code: $DUPES_EXIT"
+
 echo "--- Extract results for our teams"
 
 extract_owner_section() {
@@ -35,9 +46,12 @@ extract_owner_section() {
 REPORT=""
 for owner in "${FALLOW_OWNERS[@]}"; do
   dead_section=$(extract_owner_section "$DEAD_CODE_OUTPUT" "$owner")
+  dupes_section=$(extract_owner_section "$DUPES_OUTPUT" "$owner")
 
-  if [ -n "$dead_section" ]; then
-    REPORT+="### ${owner}\n\n${dead_section}\n\n"
+  if [ -n "$dead_section" ] || [ -n "$dupes_section" ]; then
+    REPORT+="### ${owner}\n\n"
+    [ -n "$dead_section" ] && REPORT+="**Dead code:**\n${dead_section}\n\n"
+    [ -n "$dupes_section" ] && REPORT+="**Duplication:**\n${dupes_section}\n\n"
   fi
 done
 
