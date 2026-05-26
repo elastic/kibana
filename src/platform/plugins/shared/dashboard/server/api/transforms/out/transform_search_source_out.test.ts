@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformSearchSourceOut } from './transform_search_source_out';
 
 jest.mock('../../../kibana_services', () => ({
@@ -34,7 +35,7 @@ describe('transformSearchSourceOut', () => {
         query: { query: 'test', language: 'kuery' },
       }),
     };
-    const result = transformSearchSourceOut(meta, references);
+    const result = transformSearchSourceOut(meta, references, getDashboardStateSchema(false));
     expect(result).toEqual({
       filters: [{ data_view_id: 'fizzle-1234', type: 'dsl', dsl: { query: { foo: 'bar' } } }],
       query: { expression: 'test', language: 'kql' },
@@ -42,12 +43,12 @@ describe('transformSearchSourceOut', () => {
   });
 
   it('returns empty object if searchSourceJSON is missing', () => {
-    expect(transformSearchSourceOut({}, [])).toEqual({});
+    expect(transformSearchSourceOut({}, [], getDashboardStateSchema(false))).toEqual({});
   });
 
   it('returns empty object if parseSearchSourceJSON throws', () => {
     const meta = { searchSourceJSON: 'not json' };
-    expect(transformSearchSourceOut(meta, [])).toEqual({});
+    expect(transformSearchSourceOut(meta, [], getDashboardStateSchema(false))).toEqual({});
   });
 
   it('falls back to no data_view_id injectReferences throws', () => {
@@ -57,7 +58,7 @@ describe('transformSearchSourceOut', () => {
         query: { query: 'test', language: 'kuery' },
       }),
     };
-    const result = transformSearchSourceOut(meta, []);
+    const result = transformSearchSourceOut(meta, [], getDashboardStateSchema(false));
     expect(result).toEqual({
       filters: [{ type: 'dsl', dsl: { query: { foo: 'bar' } } }],
       query: { expression: 'test', language: 'kql' },

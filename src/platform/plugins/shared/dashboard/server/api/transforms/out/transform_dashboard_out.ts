@@ -21,7 +21,7 @@ import { transformSearchSourceOut } from './transform_search_source_out';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
-  references: SavedObjectReference[] | undefined,
+  references: SavedObjectReference[] | undefined = undefined,
   isDashboardAppRequest: boolean = false,
   strictValidationSchema?: ReturnType<typeof getDashboardStateSchema>
 ): {

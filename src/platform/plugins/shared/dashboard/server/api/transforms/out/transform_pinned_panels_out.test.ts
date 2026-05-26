@@ -14,12 +14,13 @@ import {
   RANGE_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
+import { getDashboardStateSchema } from '../../dashboard_state_schemas';
+import type { DashboardState } from '../../types';
 import {
   transformPinnedPanelProperties,
   transformPinnedPanelsObjectToArray,
   transformPinnedPanelsOut,
 } from './transform_pinned_panels_out';
-import type { DashboardState } from '../../types';
 
 jest.mock('../../../kibana_services', () => ({
   ...jest.requireActual('../../../kibana_services'),
@@ -82,7 +83,12 @@ describe('pinned panels', () => {
   ] as unknown as DashboardState['pinned_panels'];
 
   it('should transform pinned panels object to array with all transformations applied', () => {
-    const result = transformPinnedPanelsOut(undefined, { panels: mockPinnedPanels }, []);
+    const result = transformPinnedPanelsOut(
+      undefined,
+      { panels: mockPinnedPanels },
+      [],
+      getDashboardStateSchema(false)
+    );
     expect(result.panels).toEqual(transformedPinnedPanels);
   });
 
@@ -113,7 +119,12 @@ describe('pinned panels', () => {
 
     it('should transform serialized control state to array with all transformations applied', () => {
       const serializedControlState = { panelsJSON: JSON.stringify(mockPinnedPanels) };
-      const result = transformPinnedPanelsOut(serializedControlState, undefined, []);
+      const result = transformPinnedPanelsOut(
+        serializedControlState,
+        undefined,
+        [],
+        getDashboardStateSchema(false)
+      );
       expect(result.panels).toEqual(transformedPinnedPanels);
     });
   });

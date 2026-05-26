@@ -25,7 +25,7 @@ export function transformPanelsOut(
   sections: SavedDashboardSection[] = [],
   containerReferences: SavedObjectReference[] = [],
   isDashboardAppRequest: boolean = false,
-  dashboardSchema: ReturnType<typeof getDashboardStateSchema>
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
 ): { panels: DashboardState['panels']; warnings: Warnings } {
   const topLevelPanels: DashboardPanel[] = [];
   const warnings: Warnings = [];
@@ -84,7 +84,7 @@ export function transformPanelsOut(
   // Validate against the array to ensure the number of elements is valid
   const panels = [...topLevelPanels, ...Object.values(sectionsMap)];
   try {
-    const result = dashboardSchema
+    const result = strictValidationSchema
       .getSchema()
       .extract('panels')
       .options({ stripUnknown: { arrays: true } }) // allows all panel types through, since they have been validated above

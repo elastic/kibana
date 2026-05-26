@@ -25,7 +25,7 @@ type ParsedSavedObjectOptions = { [key in keyof typeof savedObjectToAPIOptionsKe
 
 export function transformOptionsOut(
   optionsJSON: string,
-  controlGroupShowApplyButtonSetting: boolean | undefined
+  controlGroupShowApplyButtonSetting?: boolean
 ): DashboardState['options'] {
   const options = JSON.parse(optionsJSON) as ParsedSavedObjectOptions;
   const apiOptions: Writable<Partial<DashboardState['options']>> = {};
