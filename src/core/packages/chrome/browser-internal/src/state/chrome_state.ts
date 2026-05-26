@@ -66,6 +66,7 @@ export interface ChromeState {
   globalSearch: State<GlobalSearchConfig | undefined>;
   customNavLink: State<ChromeNavLink | undefined>;
   appMenu: State<AppMenuConfig | undefined>;
+  contextSwitcher: State<ReactNode>;
 
   /** Help system */
   help: {
@@ -111,6 +112,7 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const globalFooter = createState<ReactNode>(null);
   const globalSearch = createState<GlobalSearchConfig | undefined>(undefined);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
+  const contextSwitcher = createState<ReactNode>(null);
 
   // Help System
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
@@ -141,5 +143,6 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
       supportUrl: helpSupportUrl,
       globalMenuLinks: globalHelpMenuLinks,
     },
+    contextSwitcher,
   };
 }

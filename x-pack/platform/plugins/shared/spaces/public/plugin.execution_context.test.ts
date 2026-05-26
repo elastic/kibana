@@ -7,7 +7,9 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 
 import { SpacesPlugin } from './plugin';
 import { spacesManagerMock } from './spaces_manager/mocks';
@@ -34,7 +36,10 @@ describe('Spaces plugin - execution context synchronization', () => {
   );
 
   plugin.setup(coreSetup, {});
-  plugin.start(coreStart);
+  plugin.start(coreStart, {
+    features: featuresPluginMock.createStart(),
+    cloud: cloudMock.createStart(),
+  });
 
   beforeEach(() => {
     // Reset observable values
