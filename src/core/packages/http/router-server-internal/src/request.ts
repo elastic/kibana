@@ -466,6 +466,32 @@ function routeHasUnparsedPayload(req: Request): boolean {
   return parse === false || parse === 'gunzip';
 }
 
+/**
+ * Hapi parsed `application/json` bodies that were already JSON strings (e.g. security
+ * analytics posts `localStorage.getItem(...)`). Fastify's JSON parser can leave those as
+ * strings, which then fail config-schema validation with indexed property errors.
+ */
+function tryParseJsonStringBody(body: unknown): unknown {
+  if (typeof body !== 'string') {
+    return body;
+  }
+  const text = body.trim();
+  if (text === '') {
+    return undefined;
+  }
+  if (text === 'null') {
+    return null;
+  }
+  if (text.startsWith('{') || text.startsWith('[')) {
+    try {
+      return JSON.parse(text);
+    } catch {
+      return body;
+    }
+  }
+  return body;
+}
+
 function sanitizeRequest(req: Request): { query: unknown; params: unknown; body: unknown } {
   const { [ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM]: __, ...query } = req.query ?? {};
 
@@ -476,7 +502,7 @@ function sanitizeRequest(req: Request): { query: unknown; params: unknown; body:
   // payload from the Fastify adapter). Explicit JSON `null` and `schema.nullable(...)` still
   // receive `null`.
   const method = String(req.method ?? 'get').toLowerCase();
-  let body: unknown = req.payload;
+  let body: unknown = tryParseJsonStringBody(req.payload);
   if (body === undefined) {
     if (routeHasUnparsedPayload(req)) {
       body = null;

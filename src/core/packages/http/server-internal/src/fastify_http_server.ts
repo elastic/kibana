@@ -91,6 +91,11 @@ import {
   isLifecycleShortCircuited,
 } from './fastify/fastify_lifecycle';
 import { getEcsResponseLog } from './logging';
+import {
+  getFindMyWayLookupPath,
+  redirectLocationWithoutTrailingSlash,
+  routeMatchHasEmptyNamedPathParam,
+} from './fastify/find_my_way_lookup_path';
 import { extractHapiWildcardName, translateHapiPathToFastify } from './fastify/translate_path';
 import { HapiCompatServer } from './fastify/hapi_compat_server';
 import { createFastifyCookieSessionStorageFactory } from './fastify/fastify_cookie_session_storage';
@@ -141,24 +146,6 @@ type FmwHandler = (
 ) => unknown | Promise<unknown>;
 
 const ALL_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'] as const;
-
-/**
- * Path passed to find-my-way `find()`. Must be identical in {@link installFastifyDispatcher}
- * and {@link installRouteLookupHook}: if the hook misses a match, `matchedKibanaRouteOptions`
- * is unset and post-auth treats the route as `access: internal` → 400 from
- * `restrictInternalApis` even when the dispatcher matches and serves the asset.
- */
-function getFindMyWayLookupPath(req: FastifyRequest): string {
-  const raw = req.raw.url ?? req.url;
-  if (typeof raw !== 'string' || raw === '') {
-    return '/';
-  }
-  const pathOnly = raw.split(/[?#]/, 1)[0];
-  if (pathOnly === '') {
-    return '/';
-  }
-  return pathOnly.startsWith('/') ? pathOnly : `/${pathOnly}`;
-}
 
 function pathnameMatchesFastifyWildcardPattern(pathname: string, pattern: string): boolean {
   if (!pattern.endsWith('*')) {
@@ -1039,6 +1026,11 @@ export class FastifyHttpServer {
         return;
       }
       const lookupPath = getFindMyWayLookupPath(req);
+      const redirectLocation = redirectLocationWithoutTrailingSlash(req, lookupPath);
+      if (redirectLocation) {
+        void reply.redirect(redirectLocation);
+        return;
+      }
       const match = fmw.find(req.method as any, lookupPath);
       if (!match) {
         if (this.fallbackHandler) {
@@ -1066,10 +1058,7 @@ export class FastifyHttpServer {
         }
       }
       const plainParams = toPlainRouteParams(params);
-      const hasEmptyNamedParam = Object.entries(plainParams).some(
-        ([name, value]) =>
-          value === '' && name !== wildcardName && name !== '*' && !name.endsWith('*')
-      );
+      const hasEmptyNamedParam = routeMatchHasEmptyNamedPathParam(plainParams, wildcardName);
       if (hasEmptyNamedParam) {
         if (this.fallbackHandler) {
           (req as { params: unknown }).params = {};

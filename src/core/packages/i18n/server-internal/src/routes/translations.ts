@@ -11,6 +11,7 @@ import { readFile } from 'fs/promises';
 import { i18n, i18nLoader } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;
@@ -104,7 +105,11 @@ export const registerTranslationsRoute = ({
           }
 
           let headers: Record<string, string>;
-          if (isDist) {
+          const requestInternalOrigin = req.headers?.[X_ELASTIC_INTERNAL_ORIGIN_REQUEST];
+          const shouldServeImmutable =
+            isDist ||
+            (typeof requestInternalOrigin === 'string' && requestInternalOrigin === 'kibana');
+          if (shouldServeImmutable) {
             headers = {
               'content-type': 'application/json',
               'cache-control': `public, max-age=${365 * DAY}, immutable`,

@@ -19,6 +19,7 @@ import type {
   RouterRoute,
 } from '@kbn/core-http-server';
 import { routeHasUnparsedPayload, routeWantsStreamPayload } from './fastify_route_body_options';
+import { getRequestAcceptEncoding } from './install_fastify_compression';
 
 /**
  * {@link CoreKibanaRequest} param validation (config-schema ObjectType) requires a
@@ -203,10 +204,16 @@ export function buildHapiCompatRequestFromFastify(
   // Note: we rely on `request.raw.req`/`request.raw.res` being a real Node IncomingMessage
   // and ServerResponse so `CoreKibanaRequest` recognizes the request as a "real" request
   // and resolves request.events from the underlying socket.
+  const preservedAcceptEncoding = getRequestAcceptEncoding(fastifyReq);
+  const headers = { ...(fastifyReq.headers as Record<string, unknown>) };
+  if (typeof preservedAcceptEncoding === 'string') {
+    headers['accept-encoding'] = preservedAcceptEncoding;
+  }
+
   const compat: any = {
     app,
     url,
-    headers: fastifyReq.headers,
+    headers,
     method: String(fastifyReq.method ?? '').toLowerCase(),
     params: toPlainRouteParams(fastifyReq.params),
     query: toPlainQuery((fastifyReq as { query?: Record<string, unknown> }).query),

@@ -10,19 +10,8 @@
 import FindMyWay from 'find-my-way';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { KibanaRouteOptions, RouterRoute } from '@kbn/core-http-server';
+import { getFindMyWayLookupPath } from './find_my_way_lookup_path';
 import { populateMatchedRouteFromFindMyWay } from './fastify_route_lookup';
-
-function lookupPath(req: FastifyRequest): string {
-  const raw = req.raw.url ?? req.url;
-  if (typeof raw !== 'string' || raw === '') {
-    return '/';
-  }
-  const pathOnly = raw.split(/[?#]/, 1)[0];
-  if (pathOnly === '') {
-    return '/';
-  }
-  return pathOnly.startsWith('/') ? pathOnly : `/${pathOnly}`;
-}
 
 describe('populateMatchedRouteFromFindMyWay', () => {
   const kibanaRouteOptions: KibanaRouteOptions = {
@@ -45,7 +34,7 @@ describe('populateMatchedRouteFromFindMyWay', () => {
 
   const lookupOptions = {
     fmw,
-    getLookupPath: lookupPath,
+    getLookupPath: getFindMyWayLookupPath,
     staticDirectoryRouteInfo: new Map<string, string>(),
     staticDirectoryRouteOptions: kibanaRouteOptions,
     pathnameMatchesWildcardPattern: () => false,
@@ -115,6 +104,29 @@ describe('populateMatchedRouteFromFindMyWay', () => {
 
     expect((req as any).app?.matchedRoute).toBe(appRoute);
     expect((req as any).app?.matchedKibanaRouteOptions?.security).toEqual(appRoute.security);
+  });
+
+  it('does not stash a matched route for a trailing-slash path (lookup is normalized)', () => {
+    const alertsFmw = FindMyWay({ caseSensitive: true, ignoreTrailingSlash: false });
+    const alertsRoute = {
+      method: 'get',
+      path: '/api/cases/alerts/{alert_id}',
+      options: { tags: [] },
+      security: kibanaRouteOptions.security,
+    } as unknown as RouterRoute;
+    alertsFmw.on('GET', '/api/cases/alerts/:alert_id', () => undefined, {
+      kibanaRoute: alertsRoute,
+      kibanaRouteOptions,
+    });
+
+    const req = makeReq('/api/cases/alerts/');
+    populateMatchedRouteFromFindMyWay(req, makeReply(), {
+      ...lookupOptions,
+      fmw: alertsFmw,
+    });
+
+    expect((req as any).app?.matchedRoute).toBeUndefined();
+    expect((req as any).app?.matchedKibanaRouteOptions).toBeUndefined();
   });
 
   it('matches after rewrite and exposes security on KibanaRequest', () => {

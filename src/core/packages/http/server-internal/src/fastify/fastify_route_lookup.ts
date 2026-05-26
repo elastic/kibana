@@ -13,6 +13,7 @@ import type { KibanaRouteOptions, RouterRoute } from '@kbn/core-http-server';
 import { omitBy, isNil } from 'lodash';
 
 import { applyHapiCompatRequestTimeouts } from './apply_hapi_compat_request_timeouts';
+import { routeMatchHasEmptyNamedPathParam } from './find_my_way_lookup_path';
 import { toPlainRouteParams } from './fastify_to_hapi_request';
 import { attachFastifyPayloadReceiveTimeout } from './register_fastify_payload_timeout_pre_parsing';
 
@@ -124,13 +125,9 @@ export function populateMatchedRouteFromFindMyWay(
       }
     }
     const plainParams = toPlainRouteParams(params);
-    // Hapi does not treat a trailing slash as an empty `{param}` capture (e.g. `/alerts/` does
-    // not satisfy `/alerts/{alert_id}`). find-my-way matches with `alert_id: ''`, which changes
-    // status codes (400 vs 302/404) for consumers that rely on the missing-param behavior.
-    const hasEmptyNamedParam = Object.entries(plainParams).some(
-      ([name, value]) =>
-        value === '' && name !== wildcardName && name !== '*' && !name.endsWith('*')
-    );
+    // Unusual paths (e.g. double slashes) can still yield empty named captures; trailing slashes
+    // are stripped in {@link getFindMyWayLookupPath} before lookup.
+    const hasEmptyNamedParam = routeMatchHasEmptyNamedPathParam(plainParams, wildcardName);
     if (hasEmptyNamedParam) {
       delete app.matchedRoute;
       delete app.matchedKibanaRouteOptions;
