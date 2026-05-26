@@ -1187,7 +1187,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       await supertestWithoutAuth
         .delete(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${warmupRuleId}`)
         .set('kbn-xsrf', 'foo')
-        .expect(200);
+        .expect(204);
     }
   }
 }
