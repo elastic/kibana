@@ -20,6 +20,8 @@ import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import { resolveConnectorForSignificantEventsDiscovery } from '../../../routes/utils/resolve_connector_for_feature';
 import { triggerMemorySynthesisWorkflow } from '../../memory/trigger_memory_synthesis_workflow';
+import { createMcpDiscoveryTools } from '../mcp_discovery_tools';
+import { createSlackDiscoveryTools } from '../slack_discovery_tools';
 
 export interface InsightsDiscoveryTaskResult {
   insights: Insight[];
@@ -80,6 +82,43 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 OBSERVABILITY_STREAMS_ENABLE_MEMORY
               );
 
+              const agentBuilderTools = await taskContext.getAgentBuilderTools(fakeRequest);
+              const mcpTools = agentBuilderTools
+                ? await createMcpDiscoveryTools({
+                    toolsStart: agentBuilderTools,
+                    request: fakeRequest,
+                    logger: taskLogger.get('mcp'),
+                  })
+                : undefined;
+
+              const slackTools = await createSlackDiscoveryTools({
+                actions: taskContext.server.actions,
+                request: fakeRequest,
+                logger: taskLogger.get('slack'),
+              });
+
+              const additionalTools = {
+                ...(mcpTools?.tools ?? {}),
+                ...(slackTools?.tools ?? {}),
+              };
+              const additionalCallbacks = {
+                ...(mcpTools?.callbacks ?? {}),
+                ...(slackTools?.callbacks ?? {}),
+              };
+              const systemPromptSnippets = [
+                mcpTools?.promptSnippet,
+                slackTools?.systemPromptSnippet,
+              ].filter(Boolean);
+
+              const discoveryTools =
+                Object.keys(additionalTools).length > 0
+                  ? {
+                      tools: additionalTools,
+                      callbacks: additionalCallbacks,
+                      systemPromptSnippet: systemPromptSnippets.join('\n\n'),
+                    }
+                  : undefined;
+
               try {
                 const result = await generateInsights({
                   streamsClient,
@@ -89,6 +128,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   signal: runContext.abortController.signal,
                   logger: taskLogger,
                   streamNames,
+                  memoryTools: discoveryTools,
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({

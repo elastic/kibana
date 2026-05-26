@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
+import type {
+  BoundInferenceClient,
+  ChatCompletionTokenCount,
+  ToolCallback,
+  ToolDefinition,
+} from '@kbn/inference-common';
 import { EMPTY_TOKENS, sumTokens } from '@kbn/streams-ai';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Streams } from '@kbn/streams-schema';
@@ -20,6 +25,12 @@ import { createSummarizeStreamsPrompt } from './prompts/summarize_streams/prompt
 import { SUBMIT_INSIGHTS_TOOL_NAME } from './client/insight_tool';
 import { extractInsightsFromResponse, collectQueryData, type QueryData } from './utils';
 
+export interface InsightsMemoryTools {
+  tools: Record<string, ToolDefinition>;
+  callbacks: Record<string, ToolCallback>;
+  systemPromptSnippet: string;
+}
+
 export async function generateInsights({
   streamsClient,
   queryClient,
@@ -28,6 +39,7 @@ export async function generateInsights({
   signal,
   logger,
   streamNames,
+  memoryTools,
 }: {
   streamsClient: StreamsClient;
   queryClient: QueryClient;
@@ -37,6 +49,7 @@ export async function generateInsights({
   logger: Logger;
   /** When provided, only generate insights for these streams. Otherwise all streams are used. */
   streamNames?: string[];
+  memoryTools?: InsightsMemoryTools;
 }): Promise<GenerateInsightsResult> {
   const allStreams = await streamsClient.listStreams();
   let streams = allStreams;
@@ -53,6 +66,7 @@ export async function generateInsights({
         inferenceClient,
         signal,
         logger,
+        memoryTools,
       });
       return {
         streamName: stream.name,
@@ -61,6 +75,7 @@ export async function generateInsights({
     })
   );
 
+  // Filter out streams with no insights
   const streamInsightsWithData = streamInsightsResults.filter(
     (result) => result.insights.length > 0
   );
@@ -70,6 +85,7 @@ export async function generateInsights({
     EMPTY_TOKENS
   );
 
+  // If no stream insights, return empty
   if (streamInsightsWithData.length === 0) {
     return {
       insights: [],
@@ -78,7 +94,10 @@ export async function generateInsights({
   }
 
   try {
-    const prompt = createSummarizeStreamsPrompt({});
+    const prompt = createSummarizeStreamsPrompt({
+      additionalTools: memoryTools?.tools,
+      systemPromptSuffix: memoryTools?.systemPromptSnippet,
+    });
 
     const response = await executeAsReasoningAgent({
       prompt,
@@ -86,9 +105,10 @@ export async function generateInsights({
         streamInsights: JSON.stringify(streamInsightsWithData),
       },
       inferenceClient,
-      maxSteps: 2,
+      maxSteps: memoryTools ? 4 : 2,
       finalToolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
       toolCallbacks: {
+        ...(memoryTools?.callbacks ?? {}),
         [SUBMIT_INSIGHTS_TOOL_NAME]: async (toolCall) => ({
           response: {
             status: 'submitted',
@@ -130,6 +150,7 @@ async function generateStreamInsights({
   inferenceClient,
   signal,
   logger,
+  memoryTools,
 }: {
   stream: Streams.all.Definition;
   queryClient: QueryClient;
@@ -137,6 +158,7 @@ async function generateStreamInsights({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
+  memoryTools?: InsightsMemoryTools;
 }): Promise<GenerateInsightsResult> {
   const queries = await queryClient.getAssets(stream.name);
 
@@ -149,6 +171,7 @@ async function generateStreamInsights({
     )
   );
 
+  // Filter out queries with no events
   const queryDataList = queryDataResults.filter((data): data is QueryData => data !== undefined);
 
   if (queryDataList.length === 0) {
@@ -159,7 +182,10 @@ async function generateStreamInsights({
   }
 
   try {
-    const prompt = createSummarizeQueriesPrompt({});
+    const prompt = createSummarizeQueriesPrompt({
+      additionalTools: memoryTools?.tools,
+      systemPromptSuffix: memoryTools?.systemPromptSnippet,
+    });
 
     const response = await executeAsReasoningAgent({
       prompt,
@@ -168,9 +194,10 @@ async function generateStreamInsights({
         queries: JSON.stringify(queryDataList),
       },
       inferenceClient,
-      maxSteps: 2,
+      maxSteps: memoryTools ? 4 : 2,
       finalToolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
       toolCallbacks: {
+        ...(memoryTools?.callbacks ?? {}),
         [SUBMIT_INSIGHTS_TOOL_NAME]: async (toolCall) => ({
           response: {
             status: 'submitted',

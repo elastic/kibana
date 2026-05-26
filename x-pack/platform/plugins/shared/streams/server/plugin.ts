@@ -362,6 +362,10 @@ export class StreamsPlugin
         }
         return startPlugins.agentBuilder.conversations.getScopedClient({ request });
       },
+      getAgentBuilderTools: async () => {
+        const [, startPlugins] = await core.getStartServices();
+        return startPlugins.agentBuilder?.tools;
+      },
       server: this.server,
     });
 
