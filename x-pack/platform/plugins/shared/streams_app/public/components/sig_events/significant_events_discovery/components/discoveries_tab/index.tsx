@@ -15,15 +15,13 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Discovery } from '@kbn/streams-schema';
 import {
   useFetchDiscoveriesEntities,
   useFetchDiscoveryHistory,
 } from '../../../../../hooks/sig_events/use_fetch_discoveries_entities';
-import { useTimefilter } from '../../../../../hooks/use_timefilter';
-import { useTimeRange } from '../../../../../hooks/use_time_range';
-import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
 import { DiscoveryFlyout } from '../discovery_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 
@@ -110,14 +108,22 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
   },
 ];
 
+const DEFAULT_DISCOVERIES_RANGE = { from: 'now-7d', to: 'now' };
+
 export const DiscoveriesTab = () => {
-  const { timeState } = useTimefilter();
-  const { rangeFrom, rangeTo } = useTimeRange();
-  const { updateTimeRange } = useTimeRangeUpdate();
+  const [pickerRange, setPickerRange] = useState(DEFAULT_DISCOVERIES_RANGE);
+  const [absoluteRange, setAbsoluteRange] = useState(() =>
+    getAbsoluteTimeRange(DEFAULT_DISCOVERIES_RANGE, { forceNow: new Date() })
+  );
+
+  const handleTimeChange = ({ start: s, end: e }: { start: string; end: string }) => {
+    setPickerRange({ from: s, to: e });
+    setAbsoluteRange(getAbsoluteTimeRange({ from: s, to: e }, { forceNow: new Date() }));
+  };
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchDiscoveriesEntities({
-    from: timeState.start,
-    to: timeState.end,
+    from: absoluteRange.from,
+    to: absoluteRange.to,
   });
   const [selectedDiscovery, setSelectedDiscovery] = useState<Discovery | undefined>();
 
@@ -144,9 +150,9 @@ export const DiscoveriesTab = () => {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker
-              start={rangeFrom}
-              end={rangeTo}
-              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
+              start={pickerRange.from}
+              end={pickerRange.to}
+              onTimeChange={handleTimeChange}
               onRefresh={() => refetch()}
               compressed
               showUpdateButton="iconOnly"

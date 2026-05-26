@@ -15,15 +15,13 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Verdict } from '@kbn/streams-schema';
 import {
   useFetchVerdicts,
   useFetchVerdictHistory,
 } from '../../../../../hooks/sig_events/use_fetch_verdicts';
-import { useTimefilter } from '../../../../../hooks/use_timefilter';
-import { useTimeRange } from '../../../../../hooks/use_time_range';
-import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
 import { SigEventsFlyout } from '../sig_events_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 
@@ -106,19 +104,26 @@ const columns: Array<EuiBasicTableColumn<Verdict>> = [
     name: i18n.translate('xpack.streams.verdictsTab.timestampColumn', {
       defaultMessage: 'Last verdict',
     }),
-    sortable: true,
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
 ];
 
+const DEFAULT_SIG_EVENTS_RANGE = { from: 'now-7d', to: 'now' };
+
 export const SigEventsTab = () => {
-  const { timeState } = useTimefilter();
-  const { rangeFrom, rangeTo } = useTimeRange();
-  const { updateTimeRange } = useTimeRangeUpdate();
+  const [pickerRange, setPickerRange] = useState(DEFAULT_SIG_EVENTS_RANGE);
+  const [absoluteRange, setAbsoluteRange] = useState(() =>
+    getAbsoluteTimeRange(DEFAULT_SIG_EVENTS_RANGE, { forceNow: new Date() })
+  );
+
+  const handleTimeChange = ({ start: s, end: e }: { start: string; end: string }) => {
+    setPickerRange({ from: s, to: e });
+    setAbsoluteRange(getAbsoluteTimeRange({ from: s, to: e }, { forceNow: new Date() }));
+  };
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchVerdicts({
-    from: timeState.start,
-    to: timeState.end,
+    from: absoluteRange.from,
+    to: absoluteRange.to,
   });
   const [selectedVerdict, setSelectedVerdict] = useState<Verdict | undefined>();
 
@@ -145,9 +150,9 @@ export const SigEventsTab = () => {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker
-              start={rangeFrom}
-              end={rangeTo}
-              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
+              start={pickerRange.from}
+              end={pickerRange.to}
+              onTimeChange={handleTimeChange}
               onRefresh={() => refetch()}
               compressed
               showUpdateButton="iconOnly"
