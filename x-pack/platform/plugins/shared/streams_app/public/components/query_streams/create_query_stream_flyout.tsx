@@ -41,7 +41,7 @@ export function CreateQueryStreamFlyout({ onQueryStreamCreated }: CreateQueryStr
   );
 }
 
-const CreateQueryStreamFlyoutContent = ({
+export const CreateQueryStreamFlyoutContent = ({
   onClose,
   onQueryStreamCreated,
 }: {

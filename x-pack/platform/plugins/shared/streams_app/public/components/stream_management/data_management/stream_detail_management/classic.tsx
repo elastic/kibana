@@ -106,11 +106,15 @@ export function ClassicStreamDetailManagement({
     }),
   };
 
+  const lifecycleTabLabel = i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+    defaultMessage: 'Data lifecycle',
+  });
   tabs.lifecycle = {
     content: (
       <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
     ),
-    label: (
+    label: lifecycleTabLabel,
+    fallbackLabel: (
       <EuiToolTip
         content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
           defaultMessage:
@@ -118,9 +122,7 @@ export function ClassicStreamDetailManagement({
         })}
       >
         <span data-test-subj="retentionTab" tabIndex={0}>
-          {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-            defaultMessage: 'Data lifecycle',
-          })}
+          {lifecycleTabLabel}
         </span>
       </EuiToolTip>
     ),
@@ -150,20 +152,22 @@ export function ClassicStreamDetailManagement({
     }),
   };
 
+  const dataQualityTabLabel = i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+    defaultMessage: 'Data quality',
+  });
   tabs.dataQuality = {
     content: (
       <StreamDetailDataQuality definition={definition} refreshDefinition={refreshDefinition} />
     ),
-    label: (
+    label: dataQualityTabLabel,
+    fallbackLabel: (
       <EuiToolTip
         content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
           defaultMessage: 'View details about this classic stream’s data quality',
         })}
       >
         <span data-test-subj="dataQualityTab" tabIndex={0}>
-          {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
-            defaultMessage: 'Data quality',
-          })}
+          {dataQualityTabLabel}
         </span>
       </EuiToolTip>
     ),
@@ -181,22 +185,22 @@ export function ClassicStreamDetailManagement({
   }
 
   if (definition.privileges.manage || definition.replicated) {
+    const advancedTabLabel = i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+      defaultMessage: 'Advanced',
+    });
     tabs.advanced = {
       content: (
         <ClassicAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
       ),
-      label: (
+      label: advancedTabLabel,
+      fallbackLabel: (
         <EuiToolTip
           content={i18n.translate('xpack.streams.managementTab.advanced.tooltip', {
             defaultMessage:
               'View technical details about this classic stream’s underlying index setup',
           })}
         >
-          <span tabIndex={0}>
-            {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
-              defaultMessage: 'Advanced',
-            })}
-          </span>
+          <span tabIndex={0}>{advancedTabLabel}</span>
         </EuiToolTip>
       ),
     };

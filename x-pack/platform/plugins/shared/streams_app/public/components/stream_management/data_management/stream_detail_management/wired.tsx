@@ -157,6 +157,13 @@ export function WiredStreamDetailManagement({
     );
   }
 
+  const lifecycleTabLabel = i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+    defaultMessage: 'Data lifecycle',
+  });
+  const dataQualityTabLabel = i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+    defaultMessage: 'Data quality',
+  });
+
   const tabs = {
     overview: {
       content: <StreamOverview />,
@@ -173,7 +180,8 @@ export function WiredStreamDetailManagement({
                 refreshDefinition={refreshDefinition}
               />
             ),
-            label: (
+            label: lifecycleTabLabel,
+            fallbackLabel: (
               <EuiToolTip
                 position="top"
                 content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
@@ -182,9 +190,7 @@ export function WiredStreamDetailManagement({
                 })}
               >
                 <span data-test-subj="retentionTab" tabIndex={0}>
-                  {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-                    defaultMessage: 'Data lifecycle',
-                  })}
+                  {lifecycleTabLabel}
                 </span>
               </EuiToolTip>
             ),
@@ -217,16 +223,15 @@ export function WiredStreamDetailManagement({
                 refreshDefinition={refreshDefinition}
               />
             ),
-            label: (
+            label: dataQualityTabLabel,
+            fallbackLabel: (
               <EuiToolTip
                 content={i18n.translate('xpack.streams.managementTab.dataQuality.wired.tooltip', {
                   defaultMessage: "View details about this stream's data quality",
                 })}
               >
                 <span data-test-subj="dataQualityTab" tabIndex={0}>
-                  {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
-                    defaultMessage: 'Data quality',
-                  })}
+                  {dataQualityTabLabel}
                 </span>
               </EuiToolTip>
             ),

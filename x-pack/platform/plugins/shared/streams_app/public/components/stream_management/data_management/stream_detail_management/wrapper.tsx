@@ -10,12 +10,10 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageHeader,
   EuiSpacer,
   EuiTourStep,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import {
@@ -43,15 +41,17 @@ import {
   LifecycleBadge,
   TimeSeriesBadge,
   WiredStreamBadge,
+  useDiscoverLink,
 } from '../../../stream_badges';
-import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
+import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { TAB_TO_TOUR_STEP_ID, useStreamsTour } from '../../../streams_tour';
 
 export type ManagementTabs = Record<
   string,
   {
     content: JSX.Element;
-    label: ReactNode;
+    label: string;
+    fallbackLabel?: ReactNode;
   }
 >;
 
@@ -108,6 +108,7 @@ export function Wrapper({
             query: { rangeFrom, rangeTo },
           }),
           label: currentTab.label,
+          fallbackLabel: currentTab.fallbackLabel,
           content: currentTab.content,
         },
       ];
@@ -155,25 +156,47 @@ export function Wrapper({
   const isQualityLoading =
     countResult?.loading || failedDocsResult?.loading || degradedDocsResult.loading;
 
-  const { euiTheme } = useEuiTheme();
+  const discoverLink = useDiscoverLink(
+    Streams.ingest.all.GetResponse.is(definition)
+      ? {
+          stream: definition.stream,
+          hasDataStream: definition.data_stream_exists || isDraft,
+          indexMode: definition.index_mode ?? 'standard',
+        }
+      : undefined
+  );
+  const viewInDiscoverLabel = i18n.translate(
+    'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
+    {
+      defaultMessage: 'Open in Discover',
+    }
+  );
 
-  const streamBadges: Array<{ key: string; node: ReactNode }> = [];
+  const streamBadges: Array<{ key: string; label: string; node: ReactNode }> = [];
   if (Streams.ClassicStream.GetResponse.is(definition)) {
-    streamBadges.push({ key: 'classic', node: <ClassicStreamBadge /> });
+    streamBadges.push({
+      key: 'classic',
+      label: i18n.translate('xpack.streams.streamDetailHeader.classicBadgeLabel', {
+        defaultMessage: 'Classic',
+      }),
+      node: <ClassicStreamBadge />,
+    });
   }
 
   if (Streams.WiredStream.GetResponse.is(definition)) {
     if (ROOT_STREAM_NAMES.includes(definition.stream.name as RootStreamName)) {
+      const technicalPreviewLabel = i18n.translate('xpack.streams.technicalPreviewLabel', {
+        defaultMessage: 'Technical preview',
+      });
       streamBadges.push({
         key: 'technicalPreview',
+        label: technicalPreviewLabel,
         node: (
           <EuiBetaBadge
             tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
               defaultMessage: 'This feature is in technical preview. We are working on it...',
             })}
-            label={i18n.translate('xpack.streams.technicalPreviewLabel', {
-              defaultMessage: 'Technical preview',
-            })}
+            label={technicalPreviewLabel}
             iconType="flask"
             size="s"
             css={{ display: 'block' }}
@@ -181,17 +204,38 @@ export function Wrapper({
         ),
       });
     }
-    streamBadges.push({ key: 'wired', node: <WiredStreamBadge /> });
+    streamBadges.push({
+      key: 'wired',
+      label: i18n.translate('xpack.streams.streamDetailHeader.wiredBadgeLabel', {
+        defaultMessage: 'Wired',
+      }),
+      node: <WiredStreamBadge />,
+    });
     if (isDraft) {
-      streamBadges.push({ key: 'draft', node: <DraftStreamBadge /> });
+      streamBadges.push({
+        key: 'draft',
+        label: i18n.translate('xpack.streams.streamDetailHeader.draftBadgeLabel', {
+          defaultMessage: 'Draft',
+        }),
+        node: <DraftStreamBadge />,
+      });
     }
   }
   if (Streams.ingest.all.GetResponse.is(definition) && !isDraft) {
     if (definition.index_mode === 'time_series') {
-      streamBadges.push({ key: 'timeSeries', node: <TimeSeriesBadge /> });
+      streamBadges.push({
+        key: 'timeSeries',
+        label: i18n.translate('xpack.streams.streamDetailHeader.timeSeriesBadgeLabel', {
+          defaultMessage: 'Time series',
+        }),
+        node: <TimeSeriesBadge />,
+      });
     }
     streamBadges.push({
       key: 'lifecycle',
+      label: i18n.translate('xpack.streams.streamDetailHeader.lifecycleBadgeLabel', {
+        defaultMessage: 'Lifecycle',
+      }),
       node: (
         <LifecycleBadge
           lifecycle={definition.effective_lifecycle}
@@ -203,6 +247,9 @@ export function Wrapper({
   if (!isDraft) {
     streamBadges.push({
       key: 'quality',
+      label: i18n.translate('xpack.streams.streamDetailHeader.qualityBadgeLabel', {
+        defaultMessage: 'Quality',
+      }),
       node: (
         <DatasetQualityIndicator
           quality={quality}
@@ -214,22 +261,83 @@ export function Wrapper({
     });
   }
 
+  const appHeaderBadges: AppHeaderBadge[] = streamBadges.map(({ label, node }) => ({
+    label,
+    renderCustomBadge: () => <>{node}</>,
+  }));
+  const appHeaderTabs: AppHeaderTab[] = Object.entries(tabMap).map(([tabKey, { label, href }]) => ({
+    id: tabKey,
+    label,
+    href,
+    isSelected: tab === tabKey,
+  }));
+  const appHeaderMenu: AppHeaderMenu | undefined = discoverLink
+    ? {
+        primaryActionItem: {
+          id: 'viewInDiscover',
+          label: viewInDiscoverLabel,
+          iconType: 'discoverApp',
+          href: discoverLink,
+          testId: `streamsDiscoverActionButton-${definition.stream.name}`,
+        },
+      }
+    : undefined;
+  const fallbackRightSideItems =
+    discoverLink && Streams.ingest.all.GetResponse.is(definition)
+      ? [
+          <DiscoverBadgeButton
+            key="viewInDiscover"
+            stream={definition.stream}
+            hasDataStream={definition.data_stream_exists || isDraft}
+            indexMode={definition.index_mode ?? 'standard'}
+            spellOut
+          />,
+        ]
+      : undefined;
+  const fallbackTabs = Object.entries(tabMap).map(([tabKey, { label, fallbackLabel, href }]) => {
+    const tourStepId = TAB_TO_TOUR_STEP_ID[tabKey];
+    const stepProps = tourStepId ? getStepPropsByStepId(tourStepId) : undefined;
+
+    const wrappedLabel = stepProps ? (
+      <EuiTourStep
+        step={stepProps.step}
+        stepsTotal={stepProps.stepsTotal}
+        title={stepProps.title}
+        subtitle={stepProps.subtitle}
+        content={stepProps.content}
+        anchorPosition={stepProps.anchorPosition}
+        offset={stepProps.offset}
+        maxWidth={stepProps.maxWidth}
+        isStepOpen={stepProps.isStepOpen}
+        footerAction={stepProps.footerAction}
+        onFinish={stepProps.onFinish}
+      >
+        <span>{fallbackLabel ?? label}</span>
+      </EuiTourStep>
+    ) : (
+      fallbackLabel ?? label
+    );
+
+    return {
+      label: wrappedLabel,
+      href,
+      isSelected: tab === tabKey,
+    };
+  });
+  const streamsBackLabel = i18n.translate('xpack.streams.streamDetailHeader.backToStreamsLabel', {
+    defaultMessage: 'Streams',
+  });
+
   return (
     <>
-      <EuiPageHeader
-        paddingSize="l"
-        bottomBorder="extended"
-        css={css`
-          background: ${euiTheme.colors.backgroundBasePlain};
-        `}
-        pageTitle={
-          <EuiFlexGroup
-            direction="row"
-            gutterSize="s"
-            alignItems="center"
-            justifyContent="spaceBetween"
-            wrap
-          >
+      <StreamsAppHeader
+        title={streamId}
+        back={{ href: router.link('/'), label: streamsBackLabel }}
+        badges={appHeaderBadges}
+        tabs={appHeaderTabs}
+        menu={appHeaderMenu}
+        fallback={{
+          pageTitle: (
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" wrap>
               <EuiFlexItem grow={false}>{streamId}</EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
@@ -240,46 +348,10 @@ export function Wrapper({
                 ))}
               </EuiFlexGroup>
             </EuiFlexGroup>
-            {Streams.ingest.all.GetResponse.is(definition) && (
-              <DiscoverBadgeButton
-                stream={definition.stream}
-                hasDataStream={definition.data_stream_exists || isDraft}
-                indexMode={definition.index_mode ?? 'standard'}
-                spellOut
-              />
-            )}
-          </EuiFlexGroup>
-        }
-        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
-          const tourStepId = TAB_TO_TOUR_STEP_ID[tabKey];
-          const stepProps = tourStepId ? getStepPropsByStepId(tourStepId) : undefined;
-
-          const wrappedLabel = stepProps ? (
-            <EuiTourStep
-              step={stepProps.step}
-              stepsTotal={stepProps.stepsTotal}
-              title={stepProps.title}
-              subtitle={stepProps.subtitle}
-              content={stepProps.content}
-              anchorPosition={stepProps.anchorPosition}
-              offset={stepProps.offset}
-              maxWidth={stepProps.maxWidth}
-              isStepOpen={stepProps.isStepOpen}
-              footerAction={stepProps.footerAction}
-              onFinish={stepProps.onFinish}
-            >
-              <span>{label}</span>
-            </EuiTourStep>
-          ) : (
-            label
-          );
-
-          return {
-            label: wrappedLabel,
-            href,
-            isSelected: tab === tabKey,
-          };
-        })}
+          ),
+          rightSideItems: fallbackRightSideItems,
+          tabs: fallbackTabs,
+        }}
       />
       <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
         {topContent}
