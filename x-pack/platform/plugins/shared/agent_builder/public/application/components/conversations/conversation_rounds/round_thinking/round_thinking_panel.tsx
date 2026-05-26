@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
+import { useTraceExists } from '../../../../hooks/use_trace_exists';
 import { RoundFlyout } from './round_flyout';
 import { TraceFlyout } from './trace_flyout';
 import { RoundSteps } from './steps/round_steps';
@@ -71,6 +72,12 @@ export const RoundThinkingPanel = ({
     return Array.isArray(id) ? id[0] : id;
   }, [rawRound.trace_id]);
 
+  const isExperimentalEnabled = useExperimentalFeatures();
+
+  const { exists: traceExists } = useTraceExists(traceId ?? null, {
+    enabled: isExperimentalEnabled,
+  });
+
   const addToDatasetAction = services.plugins.evals?.getAddToDatasetAction
     ? services.plugins.evals.getAddToDatasetAction({
         initialExample: {
@@ -87,9 +94,8 @@ export const RoundThinkingPanel = ({
         },
       })
     : null;
-  const isExperimentalEnabled = useExperimentalFeatures();
 
-  const showTraceButton = isExperimentalEnabled && !!traceId;
+  const showTraceButton = traceExists;
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction != null;
 
   const shadowStyles = useEuiShadow('l');

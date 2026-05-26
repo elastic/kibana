@@ -26,7 +26,6 @@ import {
   createComment,
   removeServerGeneratedPropertiesFromSavedObject,
   getSOFromKibanaIndex,
-  getReferenceFromEsResponse,
   bulkCreateAttachments,
   updateComment,
   findCaseUserActions,
@@ -96,17 +95,11 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
-        const ref = getReferenceFromEsResponse(esResponse, 'testRef');
 
         const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-        const commentWithoutInjectedId = omit(
-          'persistableStateAttachmentState.injectedId',
-          persistableStateAttachment
-        );
 
-        expect(ref).to.eql({ id: 'testRef', name: 'myTestReference', type: 'test-so' });
         expect(comment).to.eql({
-          ...commentWithoutInjectedId,
+          ...persistableStateAttachment,
           created_by: defaultUser,
           pushed_at: null,
           pushed_by: null,
@@ -114,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should create references and attributes correctly on user actions', async () => {
+      it('should create attributes correctly on user actions', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         await createComment({
           supertest,
@@ -133,18 +126,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const commentOnES =
           esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
-        const ref = getReferenceFromEsResponse(esResponse, 'testRef');
 
-        const commentWithoutInjectedId = omit(
-          'persistableStateAttachmentState.injectedId',
-          persistableStateAttachment
-        );
-
-        expect(ref).to.eql({ id: 'testRef', name: 'myTestReference', type: 'test-so' });
-        expect(commentOnES).to.eql(commentWithoutInjectedId);
+        expect(commentOnES).to.eql(persistableStateAttachment);
       });
 
-      it('should create references and attributes correctly when bulk create', async () => {
+      it('should create attributes correctly when bulk create', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCase = await bulkCreateAttachments({
           supertest,
@@ -163,17 +149,11 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
-        const ref = getReferenceFromEsResponse(esResponse, 'testRef');
 
         const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-        const commentWithoutInjectedId = omit(
-          'persistableStateAttachmentState.injectedId',
-          persistableStateAttachment
-        );
 
-        expect(ref).to.eql({ id: 'testRef', name: 'myTestReference', type: 'test-so' });
         expect(comment).to.eql({
-          ...commentWithoutInjectedId,
+          ...persistableStateAttachment,
           created_by: defaultUser,
           pushed_at: null,
           pushed_by: null,
@@ -181,7 +161,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should put the new externalReferenceId to the SO references when updating the attachment', async () => {
+      it('should persist the updated state correctly when updating the attachment', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const patchedCase = await createComment({
           supertest,
@@ -208,15 +188,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const commentOnES = esResponse.body._source?.[CASE_COMMENT_SAVED_OBJECT];
         const comment = removeServerGeneratedPropertiesFromSavedObject(commentOnES);
-        const ref = getReferenceFromEsResponse(esResponse, 'testRef');
-        const commentWithoutInjectedId = omit(
-          'persistableStateAttachmentState.injectedId',
-          persistableStateAttachment
-        );
 
-        expect(ref).to.eql({ id: 'testRef', name: 'myTestReference', type: 'test-so' });
         expect(comment).to.eql({
-          ...commentWithoutInjectedId,
+          ...persistableStateAttachment,
+          persistableStateAttachmentState: { foo: 'bar' },
           created_by: defaultUser,
           pushed_at: null,
           pushed_by: null,
