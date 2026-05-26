@@ -353,19 +353,6 @@ export interface ChromeStart {
   getFeedbackHandler$(): Observable<(() => void) | undefined>;
 
   /**
-   * Register a handler that navigates to the integrations browse page.
-   * Called by the fleet plugin during `start`.
-   *
-   * @returns A function to unregister the handler.
-   */
-  registerIntegrationsHandler(handler: () => void): () => void;
-
-  /**
-   * Get an observable of the currently registered integrations handler, or `undefined` if none.
-   */
-  getIntegrationsHandler$(): Observable<(() => void) | undefined>;
-
-  /**
    * Register a handler that opens the newsfeed UI.
    * Called by the newsfeed plugin during `start`.
    *

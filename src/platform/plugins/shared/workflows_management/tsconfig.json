@@ -103,7 +103,7 @@
     "@kbn/inbox-plugin",
     "@kbn/app-header",
     "@kbn/core-chrome-app-menu-components",
-    "@kbn/core-chrome-browser-context",
+    "@kbn/core-chrome-browser-hooks",
     "@kbn/ui-chrome-layout",
   ],
   "exclude": ["target/**/*"]

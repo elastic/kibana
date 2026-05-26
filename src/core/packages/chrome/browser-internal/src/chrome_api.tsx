@@ -240,14 +240,6 @@ export function createChromeApi({
     },
     getFeedbackHandler$: () => state.feedbackHandler.$,
 
-    registerIntegrationsHandler: (handler: () => void) => {
-      state.integrationsHandler.set(handler);
-      return () => {
-        state.integrationsHandler.update((current) => (current === handler ? undefined : current));
-      };
-    },
-    getIntegrationsHandler$: () => state.integrationsHandler.$,
-
     registerNewsfeedHandler: (handler: { open: () => void; hasNew$: Observable<boolean> }) => {
       state.newsfeedHandler.set(handler);
       return () => {

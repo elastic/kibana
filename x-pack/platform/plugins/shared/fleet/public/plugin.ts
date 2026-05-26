@@ -325,11 +325,6 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   public start(core: CoreStart, deps: FleetStartDeps): FleetStart {
     ExperimentalFeaturesService.init(this.experimentalFeatures);
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
-
-    core.chrome.registerIntegrationsHandler(() => {
-      core.application.navigateToApp('integrations', { path: '/browse' });
-    });
-
     const getPermissions = once(() =>
       core.http.fetch<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath(), {
         headers: {
