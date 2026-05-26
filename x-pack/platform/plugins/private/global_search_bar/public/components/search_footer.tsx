@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isMac } from '@kbn/shared-ux-utility';
 
-export const PopoverFooter: FC = () => {
+export const SearchFooter = () => {
   return (
     <EuiFlexGroup
       alignItems="center"
