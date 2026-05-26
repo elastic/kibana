@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import {
   asCodeMetaSchema,
   asCodePaginationParamsSchema,
@@ -14,91 +13,73 @@ import {
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
 
-export const tagsSearchRequestQuerySchema = schema.object({
-  query: schema.maybe(
-    schema.string({
-      meta: {
-        description:
-          'Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
-      },
-    })
-  ),
-  ...asCodePaginationParamsSchema.getPropSchemas(),
-});
+export const tagsSearchRequestQuerySchema = z
+  .object({
+    query: z.string().optional().meta({
+      description:
+        'Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
+    }),
+    ...asCodePaginationParamsSchema.shape,
+  })
+  .strict();
 
-export const tagIdParamSchema = schema.object({
-  id: schema.string({
-    meta: {
+export const tagIdParamSchema = z
+  .object({
+    id: z.string().meta({
       description: 'The tag ID, as returned by the create or search endpoints.',
-    },
-  }),
-});
-
-export const tagAttributesSchema = schema.object(
-  {
-    name: schema.string({
-      meta: {
-        description: 'The display name of the tag.',
-      },
     }),
-    description: schema.maybe(
-      schema.string({
-        meta: {
-          description: 'Optional description of the tag.',
-        },
-      })
-    ),
-    color: schema.string({
-      meta: {
-        description:
-          'The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.',
-      },
+  })
+  .strict();
+
+export const tagAttributesSchema = z
+  .object({
+    name: z.string().meta({
+      description: 'The display name of the tag.',
     }),
-  },
-  {
-    unknowns: 'forbid',
-    meta: {
-      id: 'kbn-tags-attributes',
-    },
-  }
-);
+    description: z.string().optional().meta({
+      description: 'Optional description of the tag.',
+    }),
+    color: z.string().meta({
+      description:
+        'The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'kbn-tags-attributes',
+  });
 
-const tagAttributesProps = tagAttributesSchema.getPropSchemas();
+export const tagRequestAttributesSchema = tagAttributesSchema
+  .extend({
+    color: z.string().optional().meta({
+      description:
+        'The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'kbn-tags-request-attributes',
+  });
 
-export const tagRequestAttributesSchema = schema.object(
-  {
-    ...tagAttributesProps,
-    color: schema.maybe(tagAttributesProps.color),
-  },
-  {
-    unknowns: 'forbid',
-    meta: {
-      id: 'kbn-tags-request-attributes',
-    },
-  }
-);
-
-export const tagResponseItemSchema = schema.object(
-  {
-    id: schema.string({ meta: { description: 'The tag ID.' } }),
+export const tagResponseItemSchema = z
+  .object({
+    id: z.string().meta({ description: 'The tag ID.' }),
     data: tagAttributesSchema,
     meta: asCodeMetaSchema,
-  },
-  { unknowns: 'forbid' }
-);
+  })
+  .strict();
 
-export const tagsSearchResponseBodySchema = schema.object(
-  {
-    data: schema.arrayOf(tagResponseItemSchema, {
-      minSize: 0,
-      maxSize: PAGINATION_MAX_SIZE,
-      meta: { description: 'List of tags matching the query.' },
-    }),
+export const tagsSearchResponseBodySchema = z
+  .object({
+    data: z
+      .array(tagResponseItemSchema)
+      .min(0)
+      .max(PAGINATION_MAX_SIZE)
+      .meta({ description: 'List of tags matching the query.' }),
     meta: asCodePaginationResponseMetaSchema,
-  },
-  { unknowns: 'forbid' }
-);
+  })
+  .strict();
 
-export type TagResponseItem = TypeOf<typeof tagResponseItemSchema>;
-export type TagsSearchResponseBody = TypeOf<typeof tagsSearchResponseBodySchema>;
-export type TagsSearchRequestQuery = TypeOf<typeof tagsSearchRequestQuerySchema>;
+export type TagResponseItem = z.output<typeof tagResponseItemSchema>;
+export type TagsSearchResponseBody = z.output<typeof tagsSearchResponseBodySchema>;
+export type TagsSearchRequestQuery = z.output<typeof tagsSearchRequestQuerySchema>;
