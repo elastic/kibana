@@ -206,10 +206,15 @@ gh issue list --repo elastic/kibana --state closed \
 
 Create `.exploratory-session/` if it doesn't exist.
 
+Capture the session start time now (used in `config.json` and the final report):
+```bash
+date -u +"%Y-%m-%dT%H:%M:%SZ"
+```
+
 If `.exploratory-session/config.json` already exists — ask the user: **"An existing session config was found. Reuse it (r) or start fresh (f)?"** Wait for their answer.
 
-- **Reuse (r):** Trust `config.json` as-is. Skip Phase 0 remaining steps and all of Phase 1. Jump directly to Phase 2. Existing `findings-flow-<N>.md` files are kept and will be included in Phase 3's merge.
-- **Start fresh (f):** Delete all `.exploratory-session/findings-flow-*.md` files. Overwrite `config.json` with the newly parsed input and continue.
+- **Reuse (r):** Trust `config.json` as-is, including its existing `session_started_at`. Skip Phase 0 remaining steps and all of Phase 1. Jump directly to Phase 2. Existing `findings-flow-<N>.md` files are kept and will be included in Phase 3's merge.
+- **Start fresh (f):** Delete all `.exploratory-session/findings-flow-*.md` files. Overwrite `config.json` with the newly parsed input and continue. Set `session_started_at` to the current UTC time: `date -u +"%Y-%m-%dT%H:%M:%SZ"`.
 
 Write `.exploratory-session/config.json`:
 ```json
@@ -243,7 +248,8 @@ Write `.exploratory-session/config.json`:
   },
   "skipped_setup": [],
   "known_open_bugs": [{ "number": 0, "title": "" }],
-  "recently_closed_bugs": [{ "number": 0, "title": "", "closedAt": "" }]
+  "recently_closed_bugs": [{ "number": 0, "title": "", "closedAt": "" }],
+  "session_started_at": "<ISO timestamp — set once when starting fresh, preserved on reuse>"
 }
 ```
 
@@ -470,6 +476,12 @@ Sub-agent did not complete. No findings collected for this flow.
 
 Default timebox: `timeout_minutes` from the flow in `config.json` (default 4 minutes). Track elapsed time from the first checklist step.
 
+Record the flow start time before the first checklist step:
+```bash
+date -u +"%Y-%m-%dT%H:%M:%SZ"
+```
+Record the flow end time when the checklist completes or the timebox fires. Both timestamps are written into the findings file header (see Finding Format).
+
 **Mandatory checklist — attempt in this order:**
 
 | Step | What to attempt |
@@ -518,6 +530,12 @@ skipped: time budget exhausted (N minutes elapsed)
 ---
 
 ## Finding Format
+
+At the top of each `.exploratory-session/findings-flow-<N>.md` file, write a flow header once (before the first finding):
+
+```markdown
+<!-- flow: <flow name> | started: <ISO> | ended: <ISO> | duration: <Xm Ys> -->
+```
 
 Each entry appended to `.exploratory-session/findings-flow-<N>.md`:
 
@@ -588,6 +606,8 @@ Read all `.exploratory-session/findings-flow-<N>.md` files. Write `.exploratory-
 **Date:** <today's date>
 **Mode:** <single | parallel>
 **Flows explored:** <N>
+**Session started:** <session_started_at from config.json>
+**Session duration:** <total elapsed from session_started_at to now>
 
 ## Summary
 - Level 1 (confirmed bugs): N
@@ -595,6 +615,12 @@ Read all `.exploratory-session/findings-flow-<N>.md` files. Write `.exploratory-
 - Level 3 (observations): N
 - Skipped (time budget / session lost): N
 - Known / suppressed: N
+
+## Timing
+| Flow | Started | Duration |
+|---|---|---|
+| <flow name> | <ISO start> | <Xm Ys> |
+| **Total session** | <session_started_at> | **<Xh Ym>** |
 
 ## Level 1 — Confirmed Bugs
 <all Level 1 findings in full finding format>
