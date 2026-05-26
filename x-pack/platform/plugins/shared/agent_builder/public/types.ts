@@ -32,6 +32,7 @@ import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
+  CaseAiWorkspaceProps,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
   PublicEmbeddableConversationProps,

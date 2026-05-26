@@ -55,6 +55,10 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   browserApiTools?: BrowserApiToolMetadata[];
   /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
   action?: ConversationAction;
+  /** Cases case ID to persist on conversation create. */
+  caseId?: string;
+  /** Project ID to persist on conversation create. */
+  projectId?: string;
 }
 
 /**

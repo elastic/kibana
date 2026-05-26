@@ -120,6 +120,8 @@ const handleConversationExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
+    caseId,
+    projectId,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
@@ -184,6 +186,8 @@ const handleConversationExecution = async ({
         title$,
         agentEvents$,
         action,
+        caseId,
+        projectId,
       })
     : EMPTY;
 
@@ -376,6 +380,8 @@ const buildPersistenceEvents = ({
   title$,
   agentEvents$,
   action,
+  caseId,
+  projectId,
 }: {
   agentId: string;
   conversation: ConversationWithOperation;
@@ -384,6 +390,8 @@ const buildPersistenceEvents = ({
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
   action?: ConversationAction;
+  caseId?: string;
+  projectId?: string;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -394,6 +402,8 @@ const buildPersistenceEvents = ({
       conversationId: conversationId || conversation.id,
       title$,
       roundCompletedEvents$,
+      caseId,
+      projectId,
     });
   }
 

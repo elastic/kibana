@@ -24,6 +24,10 @@ export interface ChatRequestBodyPayload {
   connector_id?: string | null;
   inference_id?: string | null;
   conversation_id?: string;
+  /** Cases case ID to associate with a new or updated conversation. */
+  case_id?: string;
+  /** Agent Builder project ID to associate with the conversation. */
+  project_id?: string;
   capabilities?: AgentCapabilities;
   attachments?: AttachmentInput[];
   input?: string;

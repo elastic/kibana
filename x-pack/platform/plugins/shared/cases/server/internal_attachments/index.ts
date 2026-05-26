@@ -12,10 +12,12 @@ import {
   stackAlertAttachmentType,
   fileAttachmentType,
 } from '../attachment_framework/attachments';
+import { aiResponseAttachmentType } from '../attachment_framework/attachments/ai_response';
 
 export const registerInternalAttachments = (unifiedRegistry: UnifiedAttachmentTypeRegistry) => {
   unifiedRegistry.register(fileAttachmentType);
   unifiedRegistry.register(lensAttachmentType);
   unifiedRegistry.register(commentAttachmentType);
+  unifiedRegistry.register(aiResponseAttachmentType);
   unifiedRegistry.register(stackAlertAttachmentType);
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, FC } from 'react';
 import type { AttachmentInput, UpdateOriginResponse } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolDefinition } from './tools/browser_api_tool';
 import type {
@@ -75,6 +75,26 @@ export interface EmbeddableConversationProps {
   attachments?: AttachmentInput[];
 
   /**
+   * Cases case ID when opening chat from a case (persisted on new conversations).
+   */
+  caseId?: string;
+
+  /**
+   * Cases owner for `caseId` (e.g. `securitySolution`). Used to get-or-create a case-typed project.
+   */
+  caseOwner?: string;
+
+  /**
+   * Optional case title when auto-creating a case-typed project for `caseId` + `caseOwner`.
+   */
+  caseTitle?: string;
+
+  /**
+   * Agent Builder project ID when chat belongs to a project workspace.
+   */
+  projectId?: string;
+
+  /**
    * Browser API tools that the agent can use to interact with the page.
    * Tools are executed browser-side when the LLM requests them.
    *
@@ -93,6 +113,19 @@ export interface EmbeddableConversationProps {
    * ```
    */
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+}
+
+/**
+ * Props for the case detail "AI Workspace" tab (Option B: case is the entry point).
+ */
+export interface CaseAiWorkspaceProps {
+  caseId: string;
+  caseTitle: string;
+  caseOwner: string;
+  caseDescription?: string;
+  totalAlerts?: number;
+  totalComments?: number;
+  fileCount?: number;
 }
 
 /**
@@ -214,4 +247,8 @@ export interface AgentBuilderPluginStart {
    * functional agent_builder chat without the sidebar chrome.
    */
   EmbeddableConversation: ComponentType<PublicEmbeddableConversationProps>;
+  /**
+   * Inline AI Workspace for a case detail tab. Undefined when Agent Builder is unavailable.
+   */
+  CaseAiWorkspace?: FC<CaseAiWorkspaceProps>;
 }

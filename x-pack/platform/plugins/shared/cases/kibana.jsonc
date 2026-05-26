@@ -30,6 +30,7 @@
       "workflowsExtensions"
     ],
     "optionalPlugins": ["cloud", "home", "taskManager", "usageCollection", "spaces", "serverless"],
+    "runtimePluginDependencies": ["agentBuilder"],
     "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils", "savedObjectsFinder"],
     "extraPublicDirs": ["common"]
   }

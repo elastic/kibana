@@ -42,6 +42,7 @@ import {
   SmlService,
   OAuthClientsService,
   PluginsService,
+  ProjectsService,
   EventsService,
   type AgentBuilderInternalService,
 } from './services';
@@ -60,6 +61,7 @@ import type {
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type { PublicEmbeddableConversationProps } from './types';
+import { createCaseAiWorkspace } from './case_ai_workspace/create_case_ai_workspace';
 import type { OpenConversationSidebarOptions, OpenSidebarInternalOptions } from './sidebar/types';
 import {
   setSidebarServices,
@@ -161,6 +163,7 @@ export class AgentBuilderPlugin
     const skillsService = new SkillsService({ http });
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
+    const projectsService = new ProjectsService({ http });
     const oauthClientsService = new OAuthClientsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
@@ -228,6 +231,7 @@ export class AgentBuilderPlugin
       skillsService,
       smlService,
       pluginsService,
+      projectsService,
       oauthClientsService,
       startDependencies,
       usageCollection,
@@ -269,6 +273,11 @@ export class AgentBuilderPlugin
         />
       </React.Suspense>
     );
+
+    const CaseAiWorkspace = createCaseAiWorkspace({
+      services: internalServices,
+      coreStart: core,
+    });
 
     this.experimentalDeepLinksSubscription = core.uiSettings
       .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
@@ -325,6 +334,7 @@ export class AgentBuilderPlugin
         return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
       },
       EmbeddableConversation: PublicEmbeddableConversation,
+      CaseAiWorkspace,
     };
 
     if (hasAgentBuilder) {

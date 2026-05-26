@@ -18,6 +18,7 @@ import { ToolsService } from './tools';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
 import { ConversationServiceImpl } from './conversation';
+import { ProjectServiceImpl } from './project';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
@@ -103,6 +104,7 @@ export class ServiceManager {
     trackingService,
     analyticsService,
     searchInferenceEndpoints,
+    getCasesClientWithRequest,
   }: ServicesStartDeps): InternalStartServices {
     if (!this.services) {
       throw new Error('#startServices called before #setupServices');
@@ -199,6 +201,14 @@ export class ServiceManager {
       spaces,
     });
 
+    const projects = new ProjectServiceImpl({
+      logger: logger.get('projects'),
+      security,
+      elasticsearch,
+      spaces,
+      getCasesClientWithRequest,
+    });
+
     const auditLogService = new AuditLogService({
       security,
       logger: logger.get('audit'),
@@ -246,6 +256,7 @@ export class ServiceManager {
       attachments,
       skills: skillsServiceStart,
       conversations,
+      projects,
       runnerFactory,
       auditLogService,
       execution: executionService,

@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { createRuleAttachmentType } from './rule';
 import { createAlertAttachmentType } from './alert';
+import { createCaseAttachmentType } from './case';
 import { createEntityAttachmentType } from './entity';
 import { createEntityAnalyticsDashboardAttachmentType } from './entity_analytics_dashboard';
 import { createSiemReadinessAttachmentType } from './siem_readiness';
@@ -17,6 +18,7 @@ import { createSiemReadinessAttachmentType } from './siem_readiness';
  */
 export const registerAttachments = async (agentBuilder: AgentBuilderPluginSetup) => {
   agentBuilder.attachments.registerType(createAlertAttachmentType());
+  agentBuilder.attachments.registerType(createCaseAttachmentType());
   agentBuilder.attachments.registerType(createEntityAttachmentType());
   agentBuilder.attachments.registerType(createEntityAnalyticsDashboardAttachmentType());
   agentBuilder.attachments.registerType(createRuleAttachmentType());

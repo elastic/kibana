@@ -17,6 +17,7 @@ import { registerInternalInferenceEndpointsRoute } from './internal/inference_en
 import { registerAgentRoutes } from './agents';
 import { registerChatRoutes } from './chat';
 import { registerConversationRoutes } from './conversations';
+import { registerProjectRoutes } from './projects';
 import { registerAttachmentRoutes } from './attachments';
 import { registerMCPRoutes } from './mcp';
 import { registerA2ARoutes } from './a2a';
@@ -36,6 +37,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerAgentRoutes(dependencies);
   registerChatRoutes(dependencies);
   registerConversationRoutes(dependencies);
+  registerProjectRoutes(dependencies);
   registerAttachmentRoutes(dependencies);
   registerMCPRoutes(dependencies);
   registerA2ARoutes(dependencies);

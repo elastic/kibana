@@ -16,6 +16,7 @@ import type {
 } from '../../../common/types/domain';
 import type { CaseUI, CaseUser } from '../../containers/types';
 import { AttachmentActionType } from '../../../common/utils/attachment_actions';
+import { defineAttachment as defineAttachmentRuntime } from '../../../common/attachment_framework/define_attachment';
 
 export { AttachmentActionType };
 
@@ -171,4 +172,4 @@ type UnifiedAttachmentTypeForRegistry<S extends z.ZodType> = IsReferenceSchema<S
 export const defineAttachment = <S extends z.ZodType>(
   attachmentType: UnifiedAttachmentTypeFromSchema<S> & { schema: S }
 ): UnifiedAttachmentTypeForRegistry<S> =>
-  attachmentType as unknown as UnifiedAttachmentTypeForRegistry<S>;
+  defineAttachmentRuntime(attachmentType) as unknown as UnifiedAttachmentTypeForRegistry<S>;

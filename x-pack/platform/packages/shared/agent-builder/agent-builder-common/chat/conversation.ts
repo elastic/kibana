@@ -345,6 +345,14 @@ export interface Conversation {
    * Keeps track of which prompts have been answered and the response.
    */
   state?: ConversationInternalState;
+  /**
+   * Optional link to a Cases case when the conversation was opened from case context.
+   */
+  case_id?: string;
+  /**
+   * Optional link to an Agent Builder project workspace.
+   */
+  project_id?: string;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createBrowserHistory } from 'history';
@@ -61,6 +62,7 @@ export class CasesUiPlugin
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
+  private agentBuilderPromise?: Promise<AgentBuilderPluginStart | undefined>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
@@ -69,12 +71,18 @@ export class CasesUiPlugin
     this.unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
   }
 
-  public setup(core: CoreSetup, plugins: CasesPublicSetupDependencies): CasesPublicSetup {
+  public setup(
+    core: CoreSetup<CasesPublicStartDependencies, CasesPublicStart>,
+    plugins: CasesPublicSetupDependencies
+  ): CasesPublicSetup {
+    this.setupAgentBuilderStart(core);
+
     const kibanaVersion = this.kibanaVersion;
     const storage = this.storage;
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
     const unifiedAttachmentTypeRegistry = this.unifiedAttachmentTypeRegistry;
+    const agentBuilderPromise = this.agentBuilderPromise;
 
     registerInternalAttachments(unifiedAttachmentTypeRegistry);
 
@@ -103,13 +111,18 @@ export class CasesUiPlugin
             CasesPublicStartDependencies,
             unknown
           ];
+          const agentBuilder = await agentBuilderPromise;
+          const pluginsStartWithAgentBuilder: CasesPublicStartDependencies = {
+            ...pluginsStart,
+            agentBuilder: pluginsStart.agentBuilder ?? agentBuilder,
+          };
 
           const { renderApp } = await import('./application');
 
           return renderApp({
             mountParams: params,
             coreStart,
-            pluginsStart,
+            pluginsStart: pluginsStartWithAgentBuilder,
             storage,
             kibanaVersion,
             externalReferenceAttachmentTypeRegistry,
@@ -232,4 +245,21 @@ export class CasesUiPlugin
   }
 
   public stop() {}
+
+  /**
+   * Resolves Agent Builder at runtime without an optional plugin dependency, which would
+   * create a circular dependency with agentBuilder's optional cases dependency.
+   */
+  private setupAgentBuilderStart(
+    core: CoreSetup<CasesPublicStartDependencies, CasesPublicStart>
+  ): void {
+    try {
+      this.agentBuilderPromise = core.plugins
+        .onStart<{ agentBuilder: AgentBuilderPluginStart }>('agentBuilder')
+        .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined))
+        .catch(() => undefined);
+    } catch {
+      this.agentBuilderPromise = Promise.resolve(undefined);
+    }
+  }
 }
