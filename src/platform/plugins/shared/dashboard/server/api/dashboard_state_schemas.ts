@@ -230,16 +230,19 @@ export const accessControlSchema = schema.maybe(
   )
 );
 
-export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
+export function getDashboardStateSchema(
+  isDashboardAppRequest: boolean,
+  isReadRequest: boolean = false
+) {
   return schema.object(
     {
-      pinned_panels: getPinnedPanelsSchema(),
+      pinned_panels: getPinnedPanelsSchema(isDashboardAppRequest && isReadRequest),
       description: schema.maybe(
         schema.string({ meta: { description: 'A short description of the dashboard.' } })
       ),
       filters: schema.maybe(
         schema.arrayOf(asCodeFilterSchema, {
-          maxSize: 500,
+          maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : 500,
           meta: {
             description: 'Filters applied across all panels, including pinned panels.',
           },
@@ -253,7 +256,7 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
         ]),
         {
           defaultValue: [],
-          maxSize: MAX_PANELS,
+          maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : MAX_PANELS,
           meta: {
             description:
               'Panels and sections in the dashboard. Each entry is either a panel (with a `type` and `config`) or a collapsible section (with a `title`, `collapsed` state, and nested `panels`).',
@@ -272,7 +275,7 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
       refresh_interval: schema.maybe(refreshIntervalSchema),
       tags: schema.maybe(
         schema.arrayOf(schema.string(), {
-          maxSize: 100,
+          maxSize: isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : 100,
           meta: { description: 'Tag IDs to associate with this dashboard.' },
         })
       ),
