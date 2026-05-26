@@ -88,8 +88,7 @@ export async function getEsqlQuerySuggestions(
     return null;
   }
 
-  const maskedRanges: ReadonlyArray<LiquidMaskedRange> =
-    liquid.kind === 'all-maskable' ? liquid.maskedRanges : [];
+  const maskedRanges = liquid.maskedRanges;
 
   const containingRange = findRangeContaining(padded.offset, maskedRanges);
   if (containingRange !== null) {

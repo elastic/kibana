@@ -199,6 +199,10 @@ const mockCompletionProvider = {
   provideCompletionItems: jest.fn(),
 };
 
+jest.mock('../lib/esql_validation/use_workflow_esql_callbacks', () => ({
+  useWorkflowEsqlCallbacks: () => ({}),
+}));
+
 jest.mock('../lib/autocomplete/get_completion_item_provider', () => ({
   getCompletionItemProvider: jest.fn(() => mockCompletionProvider),
 }));
