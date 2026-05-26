@@ -9,7 +9,6 @@ import type { EvaluationDataset, EvalsExecutorClient, Example, ExperimentTask } 
 import { createEsqlEquivalenceEvaluator } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { platformCoreTools } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import type { AgentBuilderEvaluationChatClient } from '../../src/chat_client';
 import { evaluate as base } from '../../src/evaluate';
@@ -54,20 +53,23 @@ function createEvaluateEsqlDataset({
   return async function evaluateDataset({ dataset: { name, description, examples } }) {
     const dataset = { name, description, examples } satisfies EvaluationDataset;
 
-    const executeToolTask: ExperimentTask<DatasetExample, ToolTaskOutput> = async ({ input }) => {
-      const response = await chatClient.executeTool({
-        toolId: platformCoreTools.generateEsql,
-        toolParams: { query: input!.question },
+    const converseTask: ExperimentTask<DatasetExample, ToolTaskOutput> = async ({ input }) => {
+      const response = await chatClient.converse({
+        messages: [{ message: input!.question }],
       });
 
-      const esql = (response.results as ToolResult[])
+      const toolResults = (response.steps ?? [])
+        .filter((step) => (step as { type?: string }).type === 'tool_call')
+        .flatMap((step) => ((step as { results?: unknown[] }).results ?? []));
+
+      const esql = (toolResults as ToolResult[])
         .filter((r) => r.type === 'query')
         .map((r) => r.data?.esql)
         .filter(Boolean)
         .join('\n');
 
       return {
-        results: response.results,
+        results: toolResults,
         errors: response.errors,
         esql,
       };
@@ -83,7 +85,7 @@ function createEvaluateEsqlDataset({
     await executorClient.runExperiment(
       {
         dataset,
-        task: executeToolTask,
+        task: converseTask,
       },
       [esqlEquivalenceEvaluator]
     );
