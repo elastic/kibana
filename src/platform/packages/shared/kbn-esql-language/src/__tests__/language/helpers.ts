@@ -51,7 +51,6 @@ export const indexes = [
   '.secret_index',
   'my-index',
   'unsupported_index',
-  'hidden_stream',
 ];
 
 export const policies = [
@@ -185,7 +184,7 @@ export function getCallbackMocks(): ESQLCallbacks {
     getSources: jest.fn(async () =>
       indexes.map((name) => ({
         name,
-        hidden: name.startsWith('.') || name === 'hidden_stream',
+        hidden: name.startsWith('.'),
         type: 'Index',
       }))
     ),

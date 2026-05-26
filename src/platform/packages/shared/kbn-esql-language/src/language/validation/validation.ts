@@ -74,7 +74,7 @@ async function validateAst(
     await Promise.all([
       shouldValidateCallback(callbacks, 'getSources')
         ? retrieveSources(rootCommands, callbacks)
-        : new Map<string, boolean>(),
+        : new Set<string>(),
       shouldValidateCallback(callbacks, 'getPolicies')
         ? retrievePolicies(rootCommands, callbacks)
         : new Map(),
@@ -244,7 +244,7 @@ function validateCommand(
   const context = {
     columns: references.columns,
     policies: references.policies,
-    sources: Array.from(references.sources, ([name, hidden]) => ({ name, hidden })),
+    sources: Array.from(references.sources, (name) => ({ name, hidden: false })),
     joinSources: references.joinIndices,
     timeSeriesSources: references.timeSeriesSources,
     views: references.views,

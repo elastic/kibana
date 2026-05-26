@@ -87,9 +87,8 @@ describe('TS Validation', () => {
         tsExpectErrors('TS *missingIndex, missing*Index2', []);
       });
 
-      test('no errors on hidden or backing index', () => {
+      test('no errors on dot-prefixed backing index', () => {
         tsExpectErrors('TS .ds-metrics-x-default-000001', []);
-        tsExpectErrors('TS hidden_stream', []);
       });
     });
 

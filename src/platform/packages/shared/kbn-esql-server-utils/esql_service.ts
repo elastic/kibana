@@ -146,7 +146,7 @@ export class EsqlService {
         return {
           name: index.name,
           type: this.getIndexSourceType(index.mode),
-          hidden: index.attributes?.includes('hidden') ?? false,
+          hidden: index.name.startsWith('.'),
         };
       }) ?? []
     );
@@ -158,7 +158,7 @@ export class EsqlService {
         return {
           name: alias.name,
           type: SOURCES_TYPES.ALIAS,
-          hidden: alias.attributes?.includes('hidden') ?? false,
+          hidden: alias.name.startsWith('.'),
         };
       }) ?? []
     );
@@ -180,7 +180,7 @@ export class EsqlService {
         return {
           name: dataStream.name,
           type: isTimeSeries ? SOURCES_TYPES.TIMESERIES : SOURCES_TYPES.DATA_STREAM,
-          hidden: dataStream.attributes?.includes('hidden') ?? false,
+          hidden: dataStream.name.startsWith('.'),
         };
       }) ?? []
     );
