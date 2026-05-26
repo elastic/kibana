@@ -39,7 +39,7 @@ export class DeleteActionPolicyRoute extends BaseAlertingRoute {
     },
     response: {
       204: {
-        description: 'Indicates a successful call.',
+        description: 'The action policy was deleted successfully.',
       },
       404: {
         body: () => errorResponseSchema,

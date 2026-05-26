@@ -31,7 +31,7 @@ export class GetRuleTagsRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => ruleTagsResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the requested rule tags.',
       },
       400: {
         body: () => errorResponseSchema,

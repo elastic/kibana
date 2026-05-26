@@ -84,7 +84,7 @@ export class ListActionPoliciesRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => findActionPoliciesResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns a paginated list of action policies.',
       },
       400: {
         body: () => errorResponseSchema,

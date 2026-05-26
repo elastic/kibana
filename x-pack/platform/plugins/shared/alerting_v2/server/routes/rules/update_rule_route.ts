@@ -39,7 +39,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => ruleResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the updated rule.',
       },
       400: {
         body: () => errorResponseSchema,

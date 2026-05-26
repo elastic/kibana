@@ -47,7 +47,7 @@ export class SnoozeActionPolicyRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => actionPolicyResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the snoozed action policy.',
       },
       400: {
         body: () => errorResponseSchema,
