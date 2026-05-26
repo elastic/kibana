@@ -8,11 +8,20 @@
  */
 
 import { apm } from '@elastic/apm-rum';
-import { EsqlResponseError } from './esql_response_error';
+import type { Logger } from '@kbn/logging';
+import { loggerMock } from '@kbn/logging-mocks';
+import { renderHook } from '@testing-library/react';
+import React from 'react';
 import {
-  CHART_SECTION_ERROR_TYPE_LABEL,
-  reportChartSectionError,
-} from './report_chart_section_error';
+  ExternalServicesProvider,
+  type ExternalServices,
+} from '../../../context/external_services';
+import { ERROR_TYPE } from '../../../utils/error_labels';
+import { EsqlResponseError } from '../utils/esql_response_error';
+import {
+  type ReportChartSectionErrorArgs,
+  useReportChartSectionError,
+} from './use_report_chart_section_error';
 
 jest.mock('@elastic/apm-rum', () => ({
   apm: {
@@ -45,7 +54,17 @@ const createMockTransaction = (span: MockSpan | undefined): MockTransaction => (
   startSpan: jest.fn().mockReturnValue(span),
 });
 
-describe('reportChartSectionError', () => {
+const renderReporter = (externalServices?: ExternalServices) => {
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <ExternalServicesProvider externalServices={externalServices}>
+      {children}
+    </ExternalServicesProvider>
+  );
+  const { result } = renderHook(() => useReportChartSectionError(), { wrapper });
+  return (args: ReportChartSectionErrorArgs) => result.current(args);
+};
+
+describe('useReportChartSectionError', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getCurrentTransactionMock.mockReturnValue(undefined);
@@ -54,7 +73,8 @@ describe('reportChartSectionError', () => {
   const PROFILE_ID = 'metrics-experience';
 
   it('is a no-op when error is undefined', () => {
-    reportChartSectionError({
+    const reportError = renderReporter();
+    reportError({
       error: undefined,
       source: 'useFetchMetricsData',
       labels: { profile_id: PROFILE_ID },
@@ -64,7 +84,8 @@ describe('reportChartSectionError', () => {
   });
 
   it('is a no-op when error is a non-Error value', () => {
-    reportChartSectionError({
+    const reportError = renderReporter();
+    reportError({
       error: 'plain string',
       source: 'useFetchMetricsData',
       labels: { profile_id: PROFILE_ID },
@@ -74,10 +95,11 @@ describe('reportChartSectionError', () => {
   });
 
   it('is a no-op for AbortError (preserves isSuppressedFetchError semantics)', () => {
+    const reportError = renderReporter();
     const abortError = new Error('aborted');
     abortError.name = 'AbortError';
 
-    reportChartSectionError({
+    reportError({
       error: abortError,
       source: 'useFetchMetricsData',
       labels: { profile_id: PROFILE_ID },
@@ -87,9 +109,10 @@ describe('reportChartSectionError', () => {
   });
 
   it('reports a plain Error to APM', () => {
+    const reportError = renderReporter();
     const plainError = new Error('network blew up');
 
-    reportChartSectionError({
+    reportError({
       error: plainError,
       source: 'useFetchMetricsData',
       labels: { profile_id: PROFILE_ID },
@@ -98,7 +121,7 @@ describe('reportChartSectionError', () => {
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
     expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
       labels: {
-        error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+        error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
         chart_section_source: 'useFetchMetricsData',
         profile_id: PROFILE_ID,
       },
@@ -106,6 +129,7 @@ describe('reportChartSectionError', () => {
   });
 
   it('includes EsqlResponseError metadata in APM labels', () => {
+    const reportError = renderReporter();
     const esqlError = new EsqlResponseError(
       {
         type: 'verification_exception',
@@ -115,7 +139,7 @@ describe('reportChartSectionError', () => {
       { status: 400 }
     );
 
-    reportChartSectionError({
+    reportError({
       error: esqlError,
       source: 'useLensProps',
       labels: { profile_id: PROFILE_ID },
@@ -124,7 +148,7 @@ describe('reportChartSectionError', () => {
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
     expect(captureErrorMock).toHaveBeenCalledWith(esqlError, {
       labels: {
-        error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+        error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
         chart_section_source: 'useLensProps',
         esql_error_type: 'verification_exception',
         esql_status: '400',
@@ -134,9 +158,10 @@ describe('reportChartSectionError', () => {
   });
 
   it('omits esql labels when EsqlResponseError fields are absent', () => {
+    const reportError = renderReporter();
     const esqlError = new EsqlResponseError({ reason: 'no type, no status' });
 
-    reportChartSectionError({
+    reportError({
       error: esqlError,
       source: 'useLensProps',
       labels: { profile_id: PROFILE_ID },
@@ -144,7 +169,7 @@ describe('reportChartSectionError', () => {
 
     expect(captureErrorMock).toHaveBeenCalledWith(esqlError, {
       labels: {
-        error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+        error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
         chart_section_source: 'useLensProps',
         profile_id: PROFILE_ID,
       },
@@ -158,9 +183,10 @@ describe('reportChartSectionError', () => {
       transaction as unknown as ReturnType<typeof apm.getCurrentTransaction>
     );
 
+    const reportError = renderReporter();
     const plainError = new Error('build failed');
 
-    reportChartSectionError({
+    reportError({
       error: plainError,
       source: 'useLensProps',
       labels: { profile_id: PROFILE_ID },
@@ -172,13 +198,13 @@ describe('reportChartSectionError', () => {
       'chart-section'
     );
     expect(span.addLabels).toHaveBeenCalledWith({
-      error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+      error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
       chart_section_source: 'useLensProps',
       profile_id: PROFILE_ID,
     });
     expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
       labels: {
-        error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+        error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
         chart_section_source: 'useLensProps',
         profile_id: PROFILE_ID,
       },
@@ -193,9 +219,10 @@ describe('reportChartSectionError', () => {
       transaction as unknown as ReturnType<typeof apm.getCurrentTransaction>
     );
 
+    const reportError = renderReporter();
     const plainError = new Error('build failed');
 
-    reportChartSectionError({
+    reportError({
       error: plainError,
       source: 'useLensProps',
       labels: { profile_id: PROFILE_ID },
@@ -205,42 +232,62 @@ describe('reportChartSectionError', () => {
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
     expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
       labels: {
-        error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+        error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
         chart_section_source: 'useLensProps',
         profile_id: PROFILE_ID,
       },
     });
   });
 
-  it('swallows reporting failures and logs them via console.error', () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  it('swallows reporting failures and routes them through the package logger', () => {
+    const logger: Logger = loggerMock.create();
     const reportingFailure = new Error('apm transport down');
     captureErrorMock.mockImplementationOnce(() => {
       throw reportingFailure;
     });
 
+    const reportError = renderReporter({ logger });
+
     expect(() =>
-      reportChartSectionError({
+      reportError({
         error: new Error('boom'),
         source: 'useFetchMetricsData',
         labels: { profile_id: PROFILE_ID },
       })
     ).not.toThrow();
 
-    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Error reporting chart section error to APM:',
-      reportingFailure
-    );
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledWith(reportingFailure, {
+      labels: {
+        error_type: ERROR_TYPE.APM_REPORTING_FAILURE,
+        chart_section_source: 'useFetchMetricsData',
+      },
+    });
+  });
 
-    consoleErrorSpy.mockRestore();
+  it('swallows reporting failures silently when no logger is wired into context', () => {
+    const reportingFailure = new Error('apm transport down');
+    captureErrorMock.mockImplementationOnce(() => {
+      throw reportingFailure;
+    });
+
+    const reportError = renderReporter();
+
+    expect(() =>
+      reportError({
+        error: new Error('boom'),
+        source: 'useFetchMetricsData',
+        labels: { profile_id: PROFILE_ID },
+      })
+    ).not.toThrow();
   });
 
   describe('caller-supplied labels', () => {
     it('merges caller labels into the APM payload', () => {
+      const reportError = renderReporter();
       const plainError = new Error('boom');
 
-      reportChartSectionError({
+      reportError({
         error: plainError,
         source: 'useLensProps',
         labels: {
@@ -251,7 +298,7 @@ describe('reportChartSectionError', () => {
 
       expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
         labels: {
-          error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+          error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
           chart_section_source: 'useLensProps',
           profile_id: 'metrics-experience',
           chart_id: 'system.cpu.total.norm.pct',
@@ -266,7 +313,9 @@ describe('reportChartSectionError', () => {
         transaction as unknown as ReturnType<typeof apm.getCurrentTransaction>
       );
 
-      reportChartSectionError({
+      const reportError = renderReporter();
+
+      reportError({
         error: new Error('boom'),
         source: 'useFetchMetricsData',
         labels: {
@@ -275,20 +324,21 @@ describe('reportChartSectionError', () => {
       });
 
       expect(span.addLabels).toHaveBeenCalledWith({
-        error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+        error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
         chart_section_source: 'useFetchMetricsData',
         profile_id: 'metrics-experience',
       });
     });
 
     it('drops undefined and empty-string label values so APM is not polluted', () => {
+      const reportError = renderReporter();
       const plainError = new Error('boom');
 
       // `profile_id` is typed as a required string and `chart_id` as optional,
       // but the type system can't catch every runtime case (e.g. an upstream
       // ref hasn't been hydrated yet). The merge loop is the defense-in-depth
       // guard that keeps placeholder values out of APM.
-      reportChartSectionError({
+      reportError({
         error: plainError,
         source: 'useFetchMetricsData',
         labels: {
@@ -299,7 +349,7 @@ describe('reportChartSectionError', () => {
 
       expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
         labels: {
-          error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+          error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
           chart_section_source: 'useFetchMetricsData',
         },
       });
@@ -326,9 +376,11 @@ describe('reportChartSectionError', () => {
         chart_section_source: 'spoofed-source',
         esql_error_type: 'spoofed-esql-type',
         esql_status: 'spoofed-esql-status',
-      } as unknown as Parameters<typeof reportChartSectionError>[0]['labels'];
+      } as unknown as ReportChartSectionErrorArgs['labels'];
 
-      reportChartSectionError({
+      const reportError = renderReporter();
+
+      reportError({
         error: esqlError,
         source: 'useLensProps',
         labels: hostileLabels,
@@ -336,7 +388,7 @@ describe('reportChartSectionError', () => {
 
       expect(captureErrorMock).toHaveBeenCalledWith(esqlError, {
         labels: {
-          error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+          error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
           chart_section_source: 'useLensProps',
           esql_error_type: 'verification_exception',
           esql_status: '400',
@@ -346,6 +398,7 @@ describe('reportChartSectionError', () => {
     });
 
     it('preserves EsqlResponseError fields alongside caller labels', () => {
+      const reportError = renderReporter();
       const esqlError = new EsqlResponseError(
         {
           type: 'verification_exception',
@@ -355,7 +408,7 @@ describe('reportChartSectionError', () => {
         { status: 400 }
       );
 
-      reportChartSectionError({
+      reportError({
         error: esqlError,
         source: 'useLensProps',
         labels: { profile_id: 'metrics-experience' },
@@ -363,7 +416,7 @@ describe('reportChartSectionError', () => {
 
       expect(captureErrorMock).toHaveBeenCalledWith(esqlError, {
         labels: {
-          error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+          error_type: ERROR_TYPE.CHART_SECTION_NON_RENDER_ERROR,
           chart_section_source: 'useLensProps',
           esql_error_type: 'verification_exception',
           esql_status: '400',
