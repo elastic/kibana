@@ -30,6 +30,7 @@ import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 
+import { addNightshiftAttachment } from './nightshift_attachments';
 import { ShellSpinner } from './shell_spinner';
 import { useStartNightshiftConversation } from './use_start_nightshift_conversation';
 
@@ -391,9 +392,22 @@ const SignificantEventRow: React.FC<{ event: SignificantEvent; isLast: boolean }
                 size="xs"
                 aria-label={i18n.translate(
                   'xpack.observability.nightshift.critical.attachAriaLabel',
-                  { defaultMessage: 'Attach to event' }
+                  {
+                    defaultMessage: 'Attach "{title}" to the input',
+                    values: { title: event.title },
+                  }
                 )}
-                onClick={() => {}}
+                data-test-subj={`nightshiftCriticalEvent-${event.id}-attach`}
+                onClick={() =>
+                  addNightshiftAttachment({
+                    // Prefix the event id so attachments coming from
+                    // different sources never collide (e.g. event ids
+                    // are short slugs like "password-reset").
+                    id: `significantEvent:${event.id}`,
+                    label: event.title,
+                    iconType: 'alert',
+                  })
+                }
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

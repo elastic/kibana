@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,6 +36,46 @@ const EXPLAIN_PROMPT = i18n.translate('xpack.observability.nightshift.loading.ex
     'I will monitor how your current workflows are doing, and provide reasoning and a summary.',
 });
 
+/* ----------------------------------------------------------------------- *
+ * Follow-up plan panel — mocks the workflow steps Nightshift runs while
+ * it analyses the data. Matches Figma node 887:74247.
+ *
+ * Each step is either `done` (green check, completed timestamp) or
+ * `running` (shell spinner, started timestamp). Real wiring will come
+ * once Nightshift workflows are real — for now this is a static mock
+ * that mirrors the design.
+ * ----------------------------------------------------------------------- */
+
+type WorkflowStepStatus = 'done' | 'running';
+
+interface WorkflowStep {
+  id: string;
+  label: string;
+  status: WorkflowStepStatus;
+  timestamp: string;
+}
+
+const WORKFLOW_STEPS: WorkflowStep[] = [
+  {
+    id: 'verdict',
+    label: 'Significant event Verdict',
+    status: 'done',
+    timestamp: '2 minutes ago',
+  },
+  {
+    id: 'discovery',
+    label: 'Significant event Discovery',
+    status: 'done',
+    timestamp: '2 minutes ago',
+  },
+  {
+    id: 'detection',
+    label: 'Significant event Detection',
+    status: 'running',
+    timestamp: '2 minutes ago',
+  },
+];
+
 interface OverviewStat {
   id: string;
   label: string;
@@ -49,7 +90,7 @@ const OVERVIEW_STATS: OverviewStat[] = [
   { id: 'entities', label: 'Entities', iconType: 'layers', value: '24' },
   { id: 'service', label: 'Service', iconType: 'node', value: '4' },
   { id: 'technologies', label: 'Technologies', iconType: 'package', value: '8' },
-  { id: 'workflowsRunning', label: 'Workflows running', isLoading: true, value: '6' },
+  { id: 'workflowsRunning', label: 'Workflows running', isLoading: true, value: '3' },
 ];
 
 const STAT_GLYPH_BG_SIZE = 24;
@@ -156,7 +197,6 @@ export const NightshiftLoading: React.FC = () => {
             css={css`
               background: ${euiTheme.colors.backgroundBaseSubdued};
               padding: ${euiTheme.size.l};
-              border-bottom: ${euiTheme.border.thin};
             `}
           >
             <EuiFlexGroup
@@ -220,9 +260,196 @@ export const NightshiftLoading: React.FC = () => {
               ))}
             </EuiFlexGrid>
           </div>
+        </EuiPanel>
+      </EuiFlexItem>
+
+      {/* ----------------------------------------------------------------- *
+       * Follow-up plan panel — workflow summary + "Explain this" / "Go
+       * to Workflows" actions.
+       *
+       * Matches Figma node 887:74247. Visually distinct panel that sits
+       * below the Overview: header row with workflow icon + title +
+       * "Open details" action → list of three workflow steps (Verdict /
+       * Discovery / Detection) → footer with summary copy and the two
+       * action buttons (formerly attached to the Overview footer).
+       * ----------------------------------------------------------------- */}
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          width: 100%;
+        `}
+        data-test-subj="nightshiftLoadingFollowUpPlan"
+      >
+        <EuiPanel
+          paddingSize="none"
+          hasShadow={false}
+          hasBorder
+          color="plain"
+          css={css`
+            overflow: hidden;
+            border-radius: 12px;
+            border-color: ${euiTheme.colors.borderBaseSubdued};
+          `}
+        >
+          {/* Panel header — workflow icon + title + Open details action */}
           <div
             css={css`
-              padding: ${euiTheme.size.base} ${euiTheme.size.l};
+              padding: ${euiTheme.size.base};
+              background: ${euiTheme.colors.backgroundBasePlain};
+              border-bottom: ${euiTheme.border.thin};
+            `}
+          >
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              responsive={false}
+              gutterSize="s"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    {/*
+                     * Mimics an `EuiAvatar size="s"` (24px round) but
+                     * renders the shell-style braille loader instead of
+                     * a static icon — signals "workflow is currently
+                     * executing" inline with the panel title.
+                     */}
+                    <div
+                      aria-hidden
+                      css={css`
+                        width: 24px;
+                        height: 24px;
+                        border-radius: 12px;
+                        background: ${euiTheme.colors.backgroundBaseSubdued};
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                      `}
+                    >
+                      <ShellSpinner size={14} aria-label="Workflow running" />
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <strong>
+                        {i18n.translate(
+                          'xpack.observability.nightshift.loading.workflowSummary.title',
+                          { defaultMessage: 'Workflow execution summary' }
+                        )}
+                      </strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      color="text"
+                      data-test-subj="nightshiftWorkflowOpenDetails"
+                      onClick={() => {}}
+                    >
+                      {i18n.translate(
+                        'xpack.observability.nightshift.loading.workflowSummary.openDetails',
+                        { defaultMessage: 'Close details' }
+                      )}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType="boxesHorizontal"
+                      color="text"
+                      size="s"
+                      aria-label={i18n.translate(
+                        'xpack.observability.nightshift.loading.workflowSummary.moreAriaLabel',
+                        { defaultMessage: 'More actions for the workflow summary' }
+                      )}
+                      onClick={() => {}}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+
+          {/* Workflow step rows */}
+          {WORKFLOW_STEPS.map((step, idx) => {
+            const isLast = idx === WORKFLOW_STEPS.length - 1;
+            return (
+              <div
+                key={step.id}
+                css={css`
+                  padding: ${euiTheme.size.s} ${euiTheme.size.base};
+                  background: ${euiTheme.colors.backgroundBaseSubdued};
+                  border-bottom: ${isLast ? 'none' : euiTheme.border.thin};
+                `}
+                data-test-subj={`nightshiftWorkflowStep-${step.id}`}
+              >
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                  responsive={false}
+                  gutterSize="s"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="chevronSingleRight" size="s" color="subdued" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <strong>{step.label}</strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        {step.status === 'done' ? (
+                          <EuiIcon
+                            type="checkInCircleFilled"
+                            color={euiTheme.colors.textSuccess}
+                            size="s"
+                          />
+                        ) : (
+                          <ShellSpinner size={14} aria-label={`${step.label} running`} />
+                        )}
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          {step.timestamp}
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="boxesHorizontal"
+                          color="text"
+                          size="xs"
+                          aria-label={i18n.translate(
+                            'xpack.observability.nightshift.loading.workflowSummary.stepMoreAriaLabel',
+                            {
+                              defaultMessage: 'More actions for {step}',
+                              values: { step: step.label },
+                            }
+                          )}
+                          onClick={() => {}}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            );
+          })}
+
+          {/* Footer summary + actions (moved here from the Overview panel) */}
+          <div
+            css={css`
+              padding: ${euiTheme.size.base};
+              background: ${euiTheme.colors.backgroundBasePlain};
+              border-top: ${euiTheme.border.thin};
             `}
           >
             <EuiText size="s">
@@ -236,29 +463,31 @@ export const NightshiftLoading: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  color="primary"
-                  data-test-subj="nightshiftGoToWorkflows"
-                  // Placeholder — wire to the Workflows app deeplink when
-                  // the workflows experience is finalised.
-                  onClick={() => {}}
-                >
-                  {i18n.translate('xpack.observability.nightshift.loading.goToWorkflows', {
-                    defaultMessage: 'Go to Workflows',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
                 <AiButton
                   variant="base"
                   size="s"
+                  iconType="productAgent"
                   data-test-subj="nightshiftExplainThis"
                   isDisabled={isExiting}
                   onClick={() => start({ initialMessage: EXPLAIN_PROMPT })}
                 >
                   {i18n.translate('xpack.observability.nightshift.loading.explainThis', {
                     defaultMessage: 'Explain this',
+                  })}
+                </AiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AiButton
+                  variant="empty"
+                  size="s"
+                  data-test-subj="nightshiftGoToWorkflows"
+                  isDisabled={isExiting}
+                  // Placeholder — wire to the Workflows app deeplink when
+                  // the workflows experience is finalised.
+                  onClick={() => {}}
+                >
+                  {i18n.translate('xpack.observability.nightshift.loading.goToWorkflows', {
+                    defaultMessage: 'Go to Workflows',
                   })}
                 </AiButton>
               </EuiFlexItem>

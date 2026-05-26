@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, type PropsWithChildren } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  type PropsWithChildren,
+} from 'react';
 import { css } from '@emotion/react';
 
 import {
@@ -18,6 +23,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { NightshiftAttachmentPill } from './nightshift_attachment_pill';
+import {
+  clearNightshiftAttachments,
+  nightshiftAttachments$,
+  removeNightshiftAttachment,
+  type NightshiftAttachment,
+} from './nightshift_attachments';
 
 /**
  * Inline SVG mimicking Anthropic's brand mark — a six-pointed orange
@@ -206,10 +219,28 @@ export const NightshiftInput: React.FC<NightshiftInputProps> = ({ onSubmit, isDi
   const [value, setValue] = useState('');
   const isSubmitEmpty = !value.trim();
 
+  /*
+   * Subscribe to the module-singleton attachment stream populated by the
+   * Critical page's per-row paperclip button. The pills render above the
+   * editor, mirroring Agent Builder's `AttachmentPillsRow` placement.
+   */
+  const [attachments, setAttachments] = useState<NightshiftAttachment[]>(() =>
+    nightshiftAttachments$.getValue()
+  );
+  useEffect(() => {
+    const subscription = nightshiftAttachments$.subscribe(setAttachments);
+    return () => subscription.unsubscribe();
+  }, []);
+
   const submit = useCallback(() => {
     const trimmed = value.trim();
     if (!trimmed || isInputDisabled) return;
     onSubmit(trimmed);
+    // Clear staged attachments on a successful submit — they are
+    // "consumed" by the request, matching Agent Builder's flow where
+    // the AttachmentInputs are passed into the new round and the input
+    // resets to a clean state for the next message.
+    clearNightshiftAttachments();
   }, [value, isInputDisabled, onSubmit]);
 
   const onKeyDown = useCallback(
@@ -266,6 +297,30 @@ export const NightshiftInput: React.FC<NightshiftInputProps> = ({ onSubmit, isDi
    */
   return (
     <InputContainer isDisabled={isInputDisabled} isCollapsed={shouldCollapseInput}>
+      {attachments.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            gutterSize="s"
+            wrap
+            responsive={false}
+            role="list"
+            aria-label={i18n.translate(
+              'xpack.observability.nightshift.input.attachmentsAriaLabel',
+              { defaultMessage: 'Staged attachments' }
+            )}
+            data-test-subj="nightshiftAttachmentPillsRow"
+          >
+            {attachments.map((attachment) => (
+              <EuiFlexItem key={attachment.id} grow={false}>
+                <NightshiftAttachmentPill
+                  attachment={attachment}
+                  onRemove={() => removeNightshiftAttachment(attachment.id)}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem css={editorContainerStyles}>
         <textarea
           value={value}
