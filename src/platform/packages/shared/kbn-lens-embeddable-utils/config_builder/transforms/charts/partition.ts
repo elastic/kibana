@@ -278,11 +278,15 @@ function convertAPIStaticColorToLensState(config: PartitionConfig) {
   if (isAPIMosaicChartLayer(config)) {
     return undefined;
   }
+
+  // Key colorsByDimension by the metric's position in `config.metrics`
   const colorsByDimension = Object.fromEntries(
-    config.metrics
-      .filter(hasStaticColorAssignment)
-      // @ts-expect-error StaticColorType is ensured by the filter above
-      .map((metric, index) => [getAccessorName('metric', index), metric.color.color])
+    config.metrics.flatMap((metric, index) => {
+      if (!hasStaticColorAssignment(metric)) {
+        return [];
+      }
+      return [[getAccessorName('metric', index), metric.color.color]];
+    })
   );
   return Object.keys(colorsByDimension).length > 0 ? { colorsByDimension } : {};
 }
@@ -351,7 +355,7 @@ type PartitionMetricItem =
 
 function hasStaticColorAssignment<T extends PartitionMetricItem>(
   metric: T
-): metric is Extract<T, { color: StaticColorType }> {
+): metric is T & { color: StaticColorType } {
   return 'color' in metric && metric.color != null && metric.color.type === 'static';
 }
 

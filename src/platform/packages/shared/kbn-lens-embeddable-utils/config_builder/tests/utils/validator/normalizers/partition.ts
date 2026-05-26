@@ -50,6 +50,18 @@ function remapAccessors(ids: string[], idMap: Map<string, string>): string[] {
   return ids.map((id) => idMap.get(id) ?? id);
 }
 
+// Remap the keys of a record to the new accessor ids
+function remapRecordKeys<T>(
+  record: Record<string, T>,
+  idMap: Map<string, string>
+): Record<string, T> | undefined {
+  const result: Record<string, T> = {};
+  for (const [key, value] of Object.entries(record)) {
+    result[idMap.get(key) ?? key] = value;
+  }
+  return result;
+}
+
 const alignId: NormalizerConfig<PartitionAttributes> = {
   original: (attributes) => {
     const viz = attributes.state.visualization;
@@ -73,6 +85,14 @@ const alignId: NormalizerConfig<PartitionAttributes> = {
     layer.primaryGroups = remapAccessors(layer.primaryGroups, idMap);
     if (layer.secondaryGroups) {
       layer.secondaryGroups = remapAccessors(layer.secondaryGroups, idMap);
+    }
+
+    if (layer.collapseFns) {
+      layer.collapseFns = remapRecordKeys(layer.collapseFns, idMap);
+    }
+
+    if (layer.colorsByDimension) {
+      layer.colorsByDimension = remapRecordKeys(layer.colorsByDimension, idMap);
     }
 
     return attributes;

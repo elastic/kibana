@@ -204,6 +204,51 @@ describe('Partition', () => {
     });
   });
 
+  describe('API to state colorsByDimension index preservation', () => {
+    const baseDataSource = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test-index',
+      time_field: '@timestamp',
+    } as const;
+
+    const RED = '#ff0000';
+    const BLUE = '#0000ff';
+
+    it('should preserve sparse static colors across metric positions', () => {
+      // Four metrics, with static colors on positions 1, 3 and 4 only.
+      const config = {
+        type: 'pie',
+        title: 'colorsByDimension sparse test',
+        data_source: baseDataSource,
+        metrics: [
+          { operation: 'count', empty_as_null: false },
+          { operation: 'count', empty_as_null: false, color: { type: 'static', color: RED } },
+          { operation: 'count', empty_as_null: false },
+          { operation: 'count', empty_as_null: false, color: { type: 'static', color: BLUE } },
+          { operation: 'count', empty_as_null: false, color: { type: 'static', color: BLUE } },
+        ],
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies PieConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const vizState = lensState.state.visualization as LensPartitionVisualizationState;
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(vizState.layers[0].colorsByDimension).toEqual({
+        partition_value_accessor_metric_1: RED,
+        partition_value_accessor_metric_3: BLUE,
+        partition_value_accessor_metric_4: BLUE,
+      });
+      expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
+      expect(apiOutput.metrics[1].color).toEqual({ type: 'static', color: RED });
+      expect(apiOutput.metrics[2].color).toEqual(AUTO_COLOR);
+      expect(apiOutput.metrics[3].color).toEqual({ type: 'static', color: BLUE });
+      expect(apiOutput.metrics[4].color).toEqual({ type: 'static', color: BLUE });
+    });
+  });
+
   describe('waffle legend values', () => {
     const baseDataSource = {
       type: AS_CODE_DATA_VIEW_SPEC_TYPE,
