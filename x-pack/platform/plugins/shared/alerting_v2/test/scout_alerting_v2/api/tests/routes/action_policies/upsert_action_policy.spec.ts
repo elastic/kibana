@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
-  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
@@ -25,7 +25,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     writerCredentials = await requestAuth.getApiKeyForCustomRole(
-      ALERTING_V2_ACTION_POLICIES_ALL_ROLE
+      ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE
     );
     writerHeaders = { ...writerCredentials.apiKeyHeader };
   });
