@@ -222,6 +222,18 @@ describe('query invalidation', () => {
     mockInvalidateQueries.mockRestore();
   });
 
+  it('invalidates episodesKpis when the refresh button is clicked', async () => {
+    renderPage();
+
+    await waitFor(() => {
+      expect(capturedFilterBarOnRefresh).toBeDefined();
+    });
+
+    act(() => capturedFilterBarOnRefresh!());
+
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['episodesKpis'] });
+  });
+
   it('invalidates episodesKpis when an episode action succeeds', async () => {
     let capturedOnSuccess: (() => void) | undefined;
     const mockAction = {
