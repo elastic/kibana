@@ -15,6 +15,7 @@ import type {
 } from '../saved_objects';
 
 export const WINDOW_CAP_GRACE_PERIOD_MS = 30_000;
+const MAX_LAG_LOOKBACK_FACTOR = 1.5;
 
 /** `now - delay`. Upper bound of all data eligible to be processed in this cycle. */
 export const computeEffectiveWindowEnd = (delay: string): string =>
@@ -128,6 +129,51 @@ export const resolveCcsExtractionWindow = ({
     recoveryId: undefined,
     isWindowOverride: false,
   };
+};
+
+/**
+ * Skip-ahead circuit breaker for stalled extractions.
+ *
+ * When the gap between `fromDateISO` and `effectiveWindowEnd` exceeds MAX_LAG_LOOKBACK_FACTOR × `lookbackPeriod`,
+ * continuing to chip away at the backlog won't let the engine catch up. Reset the window start
+ * to `effectiveWindowEnd - frequency` so this cycle still processes a real, frequency-sized
+ * slice of recent data, re-anchoring the persisted checkpoint near real-time. The skipped range
+ * is intentionally dropped.
+ */
+export const applyMaxLagCutoff = ({
+  fromDateISO,
+  effectiveWindowEnd,
+  lookbackPeriod,
+  frequency,
+  logger,
+}: {
+  fromDateISO: string;
+  effectiveWindowEnd: string;
+  lookbackPeriod: string;
+  frequency: string;
+  logger: Logger;
+}): string => {
+  const fromMs = moment(fromDateISO).valueOf();
+  const effectiveEndMs = moment(effectiveWindowEnd).valueOf();
+  const lagMs = effectiveEndMs - fromMs;
+  const lookbackMs = parseDurationToMs(lookbackPeriod);
+  const thresholdMs = MAX_LAG_LOOKBACK_FACTOR * lookbackMs;
+
+  if (lagMs <= thresholdMs) {
+    return fromDateISO;
+  }
+
+  const frequencyMs = parseDurationToMs(frequency);
+  const newFromDateISO = moment(effectiveEndMs - frequencyMs)
+    .utc()
+    .toISOString();
+
+  const droppedMs = lagMs - frequencyMs;
+  logger.warn(
+    `Extraction lag exceeded ${thresholdMs} — skipping backlog: from=${fromDateISO}, newFrom=${newFromDateISO}, effectiveEnd=${effectiveWindowEnd}, lagMs=${lagMs}, droppedMs=${droppedMs}`
+  );
+
+  return newFromDateISO;
 };
 
 export interface CappedExtractionWindow {

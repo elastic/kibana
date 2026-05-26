@@ -33,6 +33,7 @@ import {
   HASHED_ID_FIELD,
 } from './logs_extraction_query_builder';
 import {
+  applyMaxLagCutoff,
   capExtractionWindowEnd,
   resolveMainExtractionWindow,
   validateExtractionWindow,
@@ -295,6 +296,7 @@ export class LogsExtractionClient {
         maxLogsPerPage: config.maxLogsPerPage,
         lookbackPeriod: config.lookbackPeriod,
         delay: config.delay,
+        frequency: config.frequency,
         entityDefinition,
         abortController: opts?.abortController,
         windowOverride: opts?.specificWindow,
@@ -385,12 +387,20 @@ export class LogsExtractionClient {
       };
     }
 
-    const { fromDateISO: initialFromDateISO, effectiveWindowEnd } = resolveMainExtractionWindow({
+    const { fromDateISO: resolvedFromDateISO, effectiveWindowEnd } = resolveMainExtractionWindow({
       config,
       engineState,
     });
     // Surface clock skew / corrupted state loudly if the persisted resume point is in the future.
-    validateExtractionWindow(initialFromDateISO, effectiveWindowEnd);
+    validateExtractionWindow(resolvedFromDateISO, effectiveWindowEnd);
+
+    const initialFromDateISO = applyMaxLagCutoff({
+      fromDateISO: resolvedFromDateISO,
+      effectiveWindowEnd,
+      lookbackPeriod: config.lookbackPeriod,
+      frequency: config.frequency,
+      logger: this.logger,
+    });
 
     let currentFromDateISO = initialFromDateISO;
     // Recovery cursors on the engine state apply only to the first sub-window of this run; once
