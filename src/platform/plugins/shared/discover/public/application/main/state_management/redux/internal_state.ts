@@ -429,6 +429,11 @@ export const internalStateSlice = createSlice({
         };
       }),
 
+    setProfileState: (state, action: TabAction<{ key: string; profileState: object }>) =>
+      withTab(state, { tabId: state.tabs.unsafeCurrentId }, (tab) => {
+        tab.profileState[action.payload.key] = action.payload.profileState;
+      }),
+
     resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action.payload, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
@@ -758,6 +763,7 @@ export const createInternalStateStore = (
     getContextAwarenessToolkit: (tabId: string) => {
       return createContextAwarenessToolkit({
         internalState,
+        stateRegistry: options.services.profileStateRegistry,
         tabId,
       });
     },

@@ -7,17 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { distinctUntilChanged, from, map } from 'rxjs';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
 import type { InternalStateStore } from './internal_state';
 import { internalStateActions } from '.';
+import { selectTab } from './selectors';
+import type {
+  ProfileStateAdapter,
+  ProfileStateKey,
+  ProfileStateRegistry,
+} from '../../../../context_awareness';
 
 export const createContextAwarenessToolkit = ({
   internalState,
+  stateRegistry,
   tabId,
 }: {
   internalState: InternalStateStore;
+  stateRegistry: ProfileStateRegistry;
   tabId: string;
 }): ContextAwarenessToolkit => {
+  const stateAdapters = new Map<string, ProfileStateAdapter<object>>();
+
   return {
     actions: {
       openInNewTab: async (params) => {
@@ -44,6 +55,43 @@ export const createContextAwarenessToolkit = ({
           })
         );
       },
+    },
+    getStateAdapter: <TState extends object>(key: ProfileStateKey<TState>) => {
+      if (stateAdapters.has(key.rawKey)) {
+        return stateAdapters.get(key.rawKey) as unknown as ProfileStateAdapter<TState>;
+      }
+
+      stateRegistry.getDefinition(key);
+
+      const getState = () => {
+        const tabState = selectTab(internalState.getState(), tabId);
+        return (tabState?.profileState[key.rawKey] ?? {}) as TState;
+      };
+
+      const state$ = from(internalState).pipe(map(getState), distinctUntilChanged());
+
+      const adapter: ProfileStateAdapter<TState> = {
+        getState,
+        getState$: () => state$,
+        setState: (profileState, _options) => {
+          internalState.dispatch(
+            internalStateActions.setProfileState({ tabId, key: key.rawKey, profileState })
+          );
+        },
+        updateState: (stateUpdate, _options) => {
+          internalState.dispatch(
+            internalStateActions.setProfileState({
+              tabId,
+              key: key.rawKey,
+              profileState: { ...getState(), ...stateUpdate },
+            })
+          );
+        },
+      };
+
+      stateAdapters.set(key.rawKey, adapter as unknown as ProfileStateAdapter<object>);
+
+      return adapter;
     },
   };
 };

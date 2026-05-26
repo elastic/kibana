@@ -7,18 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlyout } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { AppMenuActionId, getFieldValue } from '@kbn/discover-utils';
 import { capitalize } from 'lodash';
 import React from 'react';
+import { useObservable } from '@kbn/use-observable';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { ChartWithCustomButtons, CustomDocViewerFooter, CustomDocViewerHeader } from './components';
 import { CustomDocView } from './components/custom_doc_view';
 import { RestorableStateDocView } from './components/restorable_state_doc_view';
+import { COLOR_STATE_KEY } from '../../../profile_state';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -61,9 +72,11 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         );
       },
     }),
-    getDocViewer:
-      (prev, { context, toolkit }) =>
-      (params) => {
+    getDocViewer: (prev, { context, toolkit }) => {
+      const stateAdapter = toolkit.getStateAdapter(COLOR_STATE_KEY);
+      const colorState$ = stateAdapter.getState$();
+
+      return (params) => {
         const { openInNewTab, updateESQLQuery } = toolkit.actions;
         const recordId = params.record.id;
         const prevValue = prev(params);
@@ -91,12 +104,51 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               render: (props) => <RestorableStateDocView {...props} />,
             });
 
+            registry.add({
+              id: 'doc_view_extensible_state_example',
+              title: 'Extensible State Example',
+              order: 2,
+              render: function Render() {
+                const colorState = useObservable(colorState$, stateAdapter.getState());
+                const options = [
+                  { value: 'default', text: 'None' },
+                  { value: 'blue', text: 'Blue' },
+                  { value: 'pink', text: 'Pink' },
+                  { value: 'green', text: 'Green' },
+                ];
+
+                return (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+                      <EuiTitle size="xs">
+                        <h3>Extensible State Example</h3>
+                      </EuiTitle>
+                      <EuiFlexItem grow={false}>
+                        <EuiFormRow label="Favourite color">
+                          <EuiSelect
+                            options={options}
+                            value={colorState.favouriteColor}
+                            onChange={(e) => {
+                              stateAdapter.updateState({ favouriteColor: e.target.value });
+                            }}
+                            aria-label="Select favourite color"
+                          />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
+                );
+              },
+            });
+
             return prevValue.docViewsRegistry(registry);
           },
           renderHeader: (props) => <CustomDocViewerHeader {...props} />,
           renderFooter: (props) => <CustomDocViewerFooter {...props} />,
         };
-      },
+      };
+    },
     /**
      * The `getAppMenu` extension point gives access to AppMenuRegistry with methods `registerCustomItem` and
      * `registerCustomPopoverItem`.

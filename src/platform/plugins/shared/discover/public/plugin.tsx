@@ -353,10 +353,14 @@ export class DiscoverPlugin
   }) {
     const [
       { rootProfileService, dataSourceProfileService, documentProfileService, profilesManager },
-      { createProfileProviderSharedServices, registerProfileProviders },
+      {
+        createProfileProviderSharedServices,
+        registerProfileProviders,
+        registerProfileStateDefinitions,
+      },
     ] = await Promise.all([
       this.createProfileServices(),
-      import('./context_awareness/profile_providers'),
+      import('./plugin_imports/context_awareness'),
     ]);
 
     const [sharedServices, services] = await Promise.all([
@@ -379,6 +383,8 @@ export class DiscoverPlugin
       sharedServices,
       services,
     });
+
+    registerProfileStateDefinitions(services.profileStateRegistry);
 
     return services;
   }

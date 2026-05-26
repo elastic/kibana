@@ -20,6 +20,14 @@ export {
 } from './profiles_manager';
 export { type ProfileProviderSharedServices } from './profile_providers';
 export {
+  type ProfileStateAdapter,
+  type ProfileStateDefinition,
+  type ProfileStateDescriptor,
+  ProfileStateKey,
+  ProfileStateType,
+  ProfileStateRegistry,
+} from './profile_state';
+export {
   useProfileAccessor,
   useRootProfile,
   useAdditionalCellActions,

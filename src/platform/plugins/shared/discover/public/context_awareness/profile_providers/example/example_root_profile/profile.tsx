@@ -10,8 +10,10 @@
 import { EuiBadge, EuiFlyout } from '@elastic/eui';
 import { getFieldValue } from '@kbn/discover-utils';
 import React from 'react';
+import { useObservable } from '@kbn/use-observable';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
+import { COLOR_STATE_KEY } from '../../../profile_state';
 
 export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-root-profile',
@@ -19,18 +21,28 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profile: {
     getDefaultAdHocDataViews,
     getDefaultEsqlQuery,
-    getCellRenderers: (prev) => (params) => ({
-      ...prev(params),
-      '@timestamp': (props) => {
-        const timestamp = getFieldValue(props.row, '@timestamp') as string;
+    getCellRenderers: (prev, { toolkit }) => {
+      const stateAdapter = toolkit.getStateAdapter(COLOR_STATE_KEY);
+      const colorState$ = stateAdapter.getState$();
 
-        return (
-          <EuiBadge color="hollow" title={timestamp} data-test-subj="exampleRootProfileTimestamp">
-            {timestamp}
-          </EuiBadge>
-        );
-      },
-    }),
+      return (params) => ({
+        ...prev(params),
+        '@timestamp': function Timestamp(props) {
+          const timestamp = getFieldValue(props.row, '@timestamp') as string;
+          const colorState = useObservable(colorState$, stateAdapter.getState());
+
+          return (
+            <EuiBadge
+              color={colorState.favouriteColor}
+              title={timestamp}
+              data-test-subj="exampleRootProfileTimestamp"
+            >
+              {timestamp}
+            </EuiBadge>
+          );
+        },
+      });
+    },
     /**
      * The `getAppMenu` extension point gives access to AppMenuRegistry with methods `registerCustomItem` and
      * `registerCustomPopoverItem`.
