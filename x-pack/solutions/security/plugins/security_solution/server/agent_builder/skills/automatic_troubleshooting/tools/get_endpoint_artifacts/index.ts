@@ -92,7 +92,11 @@ export const classifyArtifactError = (error: unknown): ArtifactErrorType => {
     const statusCode =
       'statusCode' in error
         ? (error as { statusCode: number }).statusCode
-        : 'body' in error && (error as { body?: { statusCode?: number } }).body?.statusCode;
+        : 'body' in error
+        ? (error as { body?: { statusCode?: number } }).body?.statusCode
+        : 'output' in error
+        ? (error as { output?: { statusCode?: number } }).output?.statusCode
+        : undefined;
 
     if (statusCode === 403) {
       return 'not_authorized';
@@ -233,29 +237,27 @@ const fetchSummary = async (
   search: string | undefined,
   logger: Logger
 ): Promise<Record<string, { total: number } | { error: ArtifactErrorType }>> => {
-  const summary: Record<string, { total: number } | { error: ArtifactErrorType }> = {};
+  const entries = await Promise.all(
+    ARTIFACT_TYPE_KEYS.map(async (artifactType) => {
+      const listId = ARTIFACT_TYPE_TO_LIST_ID[artifactType];
+      try {
+        const result = await client.findEndpointArtifactListItems({
+          listId,
+          namespaceType: 'agnostic',
+          filter,
+          search,
+          perPage: 1,
+          page: 1,
+        });
+        return [artifactType, { total: result?.total ?? 0 }] as const;
+      } catch (error) {
+        const errorType = logAndClassifyError(error, logger, `Summary query for ${artifactType}`);
+        return [artifactType, { error: errorType }] as const;
+      }
+    })
+  );
 
-  for (const artifactType of ARTIFACT_TYPE_KEYS) {
-    const listId = ARTIFACT_TYPE_TO_LIST_ID[artifactType];
-    try {
-      const result = await client.findEndpointArtifactListItems({
-        listId,
-        namespaceType: 'agnostic',
-        filter,
-        search,
-        perPage: 1,
-        page: 1,
-        sortField: undefined,
-        sortOrder: undefined,
-      });
-      summary[artifactType] = { total: result?.total ?? 0 };
-    } catch (error) {
-      const errorType = logAndClassifyError(error, logger, `Summary query for ${artifactType}`);
-      summary[artifactType] = { error: errorType };
-    }
-  }
-
-  return summary;
+  return Object.fromEntries(entries);
 };
 
 const fetchDetail = async (
@@ -274,8 +276,8 @@ const fetchDetail = async (
     search,
     perPage,
     page,
-    sortField: undefined,
-    sortOrder: undefined,
+    sortField: 'tie_breaker_id',
+    sortOrder: 'asc',
   });
 
   const data = result?.data ?? [];

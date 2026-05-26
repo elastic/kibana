@@ -108,7 +108,7 @@ Reference './available_indices' for the list of indices available for troublesho
     name: NAME,
     basePath: BASE_PATH,
     description:
-      'Troubleshoot Elastic Defend endpoint configuration issues -- policies, endpoint exceptions, trusted apps, blocklists, etc.',
+      'Troubleshoot Elastic Defend endpoint configuration issues — policies, endpoint exceptions, trusted apps, blocklists, etc.',
     content: systemInstructions,
     referencedContent: [
       {

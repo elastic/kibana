@@ -392,7 +392,7 @@ export class EndpointAppContextService {
     username: string
   ): ScopedEndpointArtifactListClient {
     if (!this.startDependencies?.getExceptionListClient) {
-      throw new EndpointAppContentServicesNotStartedError();
+      throw new EndpointError('Endpoint artifact client unavailable: lists plugin is not enabled');
     }
 
     const client = this.startDependencies.getExceptionListClient(

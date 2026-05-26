@@ -12,6 +12,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 import { GET_ENDPOINT_ARTIFACTS_TOOL_ID } from '../..';
+import { fromKueryExpression } from '@kbn/es-query';
 import { getEndpointArtifactsTool, classifyArtifactError, buildArtifactFilter } from '.';
 
 const mockLogger = {
@@ -483,6 +484,12 @@ describe('classifyArtifactError', () => {
     expect(classifyArtifactError(new Error('something broke'))).toBe('unknown_error');
   });
 
+  it('classifies Boom errors with output.statusCode 403 as not_authorized', () => {
+    const error = new Error('Forbidden');
+    (error as Error & { output: { statusCode: number } }).output = { statusCode: 403 };
+    expect(classifyArtifactError(error)).toBe('not_authorized');
+  });
+
   it('classifies non-Error objects as unknown_error', () => {
     expect(classifyArtifactError('string error')).toBe('unknown_error');
   });
@@ -496,12 +503,14 @@ describe('buildArtifactFilter', () => {
   it('builds osType filter with escapeKuery', () => {
     const filter = buildArtifactFilter({ osType: 'windows' });
     expect(filter).toContain('exception-list-agnostic.attributes.os_types:"windows"');
+    expect(() => fromKueryExpression(filter!)).not.toThrow();
   });
 
   it('builds policyId filter with global and per-policy tags', () => {
     const filter = buildArtifactFilter({ policyId: 'policy-123' });
     expect(filter).toContain('policy:all');
     expect(filter).toContain('policy:policy-123');
+    expect(() => fromKueryExpression(filter!)).not.toThrow();
   });
 
   it('combines osType and policyId filters with AND', () => {
@@ -509,5 +518,6 @@ describe('buildArtifactFilter', () => {
     expect(filter).toContain(' AND ');
     expect(filter).toContain('os_types:"linux"');
     expect(filter).toContain('policy:p1');
+    expect(() => fromKueryExpression(filter!)).not.toThrow();
   });
 });
