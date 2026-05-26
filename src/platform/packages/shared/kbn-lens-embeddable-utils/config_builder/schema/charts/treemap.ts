@@ -19,6 +19,7 @@ import {
   layerSettingsSchema,
   sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
+  legendPositionSchema,
 } from '../shared';
 import type { PartitionMetric } from './partition_shared';
 import {
@@ -43,6 +44,7 @@ const treemapSharedConfigSchema = {
         truncate_after_lines: legendTruncateAfterLinesSchema,
         visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
+        position: legendPositionSchema,
       },
       {
         meta: {

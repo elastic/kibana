@@ -132,11 +132,6 @@ const alignLegacyTypes: NormalizerConfig<PartitionAttributes> = {
       delete layer.legendStats;
     }
 
-    // default legend position is right -> delete it
-    if (layer.legendPosition === 'right') {
-      delete layer.legendPosition;
-    }
-
     // legendMaxLines is ignored at runtime when truncateLegend is false or undefined -> delete it
     if (!layer.truncateLegend) {
       delete layer.legendMaxLines;
