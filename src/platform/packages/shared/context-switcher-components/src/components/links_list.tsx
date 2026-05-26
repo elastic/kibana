@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { LinksListItem } from './types';
 
 export interface LinksListProps {
@@ -21,19 +20,10 @@ export interface LinksListProps {
  */
 
 export const LinksList = ({ items }: LinksListProps) => {
-  const itemCss = css`
-    /* no underline */
-    && .euiListGroupItem__button:hover,
-    && .euiListGroupItem__button:focus {
-      text-decoration: none;
-    }
-  `;
-
   return (
     <EuiListGroup>
       {items.map((item) => (
         <EuiListGroupItem
-          css={itemCss}
           key={item.id}
           label={item.label}
           href={item.href}

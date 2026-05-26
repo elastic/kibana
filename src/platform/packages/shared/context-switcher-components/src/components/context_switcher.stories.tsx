@@ -139,7 +139,7 @@ const CloudScenario = ({ searchThreshold }: { searchThreshold: number }) => {
           submenuItems: [
             {
               id: 'manage-discovery-insights',
-              label: 'Manage Discovery Insights',
+              label: 'Manage this deployment',
               iconType: 'gear',
               onClick: () => action('manage-discovery-insights')(),
             },
@@ -175,7 +175,7 @@ const ServerlessScenario = ({ searchThreshold }: { searchThreshold: number }) =>
           submenuItems: [
             {
               id: 'manage-insightful-analytics',
-              label: 'Manage Insightful Analytics',
+              label: 'Manage this project',
               iconType: 'gear',
               onClick: () => action('manage-insightful-analytics')(),
             },

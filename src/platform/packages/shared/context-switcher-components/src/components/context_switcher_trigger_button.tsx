@@ -12,14 +12,7 @@ import type { ReactElement } from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiButtonEmpty, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-
-const CONTEXT_SWITCHER_BUTTON_ARIA_LABEL = i18n.translate(
-  'contextSwitcherComponents.triggerButton.ariaLabel',
-  {
-    defaultMessage: 'Open context switcher',
-  }
-);
+import { POPOVER_WIDTH_PX } from './types';
 
 interface ContextSwitcherTriggerButtonProps {
   readonly solutionIcon: IconType;
@@ -48,10 +41,10 @@ export const ContextSwitcherTriggerButton = ({
       iconType="arrowDown"
       iconSide="right"
       isSelected={isSelected}
-      aria-label={CONTEXT_SWITCHER_BUTTON_ARIA_LABEL}
       data-test-subj="contextSwitcherTriggerButton"
       css={css`
         color: ${euiTheme.colors.textSubdued};
+        max-inline-size: ${POPOVER_WIDTH_PX}px;
       `}
     >
       <EuiIcon type={solutionIcon} size="m" aria-hidden={true} />

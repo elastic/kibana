@@ -49,6 +49,7 @@ export const ContextSubmenuView = ({
   return (
     <>
       <EuiPopoverTitle
+        // Remove separator between title and list
         css={css`
           border-bottom: 0;
           padding-bottom: 0;

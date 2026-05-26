@@ -10,9 +10,8 @@
 import type { ReactElement, ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
 
-export const POPOVER_WIDTH = 360;
-export const SELECTABLE_ROW_HEIGHT = 40;
-export const CONTEXT_ROW_HEIGHT = 48;
+export const POPOVER_WIDTH_PX = 360;
+export const SELECTABLE_ROW_HEIGHT_PX = 40;
 
 export interface SpaceItem {
   id: string;

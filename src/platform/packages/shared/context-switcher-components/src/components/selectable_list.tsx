@@ -14,7 +14,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
-import { SELECTABLE_ROW_HEIGHT } from './types';
+import { SELECTABLE_ROW_HEIGHT_PX } from './types';
 
 const SELECTABLE_LIST_CHECKED_ITEM_CLASS = 'kbnContextSwitcherSelectableListItem--checked';
 
@@ -118,36 +118,11 @@ export const SelectableList = ({
   );
 
   const selectableStyles = css`
-    /* no underline */
-    && .euiSelectableListItem:hover:not([aria-disabled='true']) .euiSelectableListItem__text,
-    &&
-      .euiSelectableListItem.euiSelectableListItem-isFocused:not([aria-disabled='true'])
-      .euiSelectableListItem__text {
-      text-decoration: none;
-    }
-    /* blue background color and rounded corners */
-    .euiSelectableListItem {
-      &:hover:not([aria-disabled='true']),
-      &.euiSelectableListItem-isFocused:not([aria-disabled='true']),
-      &.${SELECTABLE_LIST_CHECKED_ITEM_CLASS} {
-        background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};
-        border-radius: ${euiTheme.border.radius.small};
-      }
-    }
-    /* blue icon color */
-    .euiSelectableListItem__icon {
-      color: ${euiTheme.colors.textPrimary};
-    }
     /* badges: no background + no border */
     .euiSelectableListItem__append .euiBadge:not(.euiSelectableListItem__onFocusBadge) {
       --euiBadgeTextColor: ${euiTheme.colors.textSubdued};
       background-color: transparent;
       border: 0;
-      box-shadow: none;
-    }
-    /* no bottom border between items */
-    .euiSelectableListItem:not(:last-of-type) {
-      border-bottom: 0;
     }
   `;
 
@@ -166,9 +141,8 @@ export const SelectableList = ({
       noMatchesMessage={noMatchesMessage ?? defaultNoMatchesMessage}
       css={selectableStyles}
       listProps={{
-        rowHeight: SELECTABLE_ROW_HEIGHT,
+        rowHeight: SELECTABLE_ROW_HEIGHT_PX,
         showIcons: true,
-        onFocusBadge: false,
       }}
       {...searchableProps}
     >

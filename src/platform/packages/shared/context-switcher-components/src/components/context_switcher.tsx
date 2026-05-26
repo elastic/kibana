@@ -26,7 +26,7 @@ import { ContextSubmenuView } from './views/context_submenu';
 import type { ContextSubmenuViewProps } from './views/context_submenu';
 import { ContextSwitcherTriggerButton } from './context_switcher_trigger_button';
 import type { ActionConfig, LinksListItem } from './types';
-import { POPOVER_WIDTH, type ContextSwitcherProps, type SpaceItem } from './types';
+import { POPOVER_WIDTH_PX, type ContextSwitcherProps, type SpaceItem } from './types';
 import type { SelectableListItem } from './selectable_list';
 
 const SEARCH_THRESHOLD = 15;
@@ -179,7 +179,6 @@ export const ContextSwitcher = ({
               i18n.translate('contextSwitcherComponents.searchPlaceholder', {
                 defaultMessage: 'Find a space',
               }),
-            compressed: true,
             isClearable: true,
           },
         }
@@ -252,7 +251,7 @@ export const ContextSwitcher = ({
       isOpen={isOpen}
       closePopover={closePopover}
       anchorPosition="downLeft"
-      panelStyle={{ width: POPOVER_WIDTH }}
+      panelStyle={{ width: POPOVER_WIDTH_PX }}
       panelPaddingSize="s"
       ownFocus
       repositionOnScroll
@@ -268,6 +267,7 @@ export const ContextSwitcher = ({
               label: environmentContext.name,
               value: environmentDescription,
               prepend: environmentIcon,
+              'data-test-subj': 'contextSwitcherEnvironmentRow',
             },
             spacesRow: {
               id: 'spaces',
@@ -276,6 +276,7 @@ export const ContextSwitcher = ({
                 <EuiAvatar type="space" name={spaces.active.name} size="l" />
               ),
               value: spacesDescription,
+              'data-test-subj': 'contextSwitcherSpacesRow',
             },
             footerLinks: footerLinksWithClose,
           }}

@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiListGroupItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CONTEXT_ROW_HEIGHT, type ContextRowModel } from './types';
+import type { ContextRowModel } from './types';
 
 export interface ContextRowProps {
   readonly row: ContextRowModel;
@@ -22,36 +22,24 @@ export interface ContextRowProps {
  */
 
 export const ContextRow = ({ row, onClick }: ContextRowProps) => {
-  const rowStyles = css`
-    && .euiListGroupItem__label {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-    && .euiListGroupItem__button {
-      min-height: ${CONTEXT_ROW_HEIGHT}px;
-    }
-    /* no underline */
-    && .euiListGroupItem__button:hover,
-    && .euiListGroupItem__button:focus {
-      text-decoration: none;
-    }
-  `;
-
-  const truncateCss = css`
-    min-width: 0;
+  const truncateStyles = css`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   `;
-
   const rowLabel = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow>
-        <EuiText size="s" css={truncateCss}>
+      <EuiFlexItem
+        grow
+        css={css`
+          min-width: 0;
+        `}
+      >
+        <EuiText size="s" css={truncateStyles}>
           {row.label}
         </EuiText>
         {row.value != null && (
-          <EuiText size="xs" color="subdued" css={truncateCss}>
+          <EuiText size="xs" color="subdued">
             {row.value}
           </EuiText>
         )}
@@ -64,7 +52,6 @@ export const ContextRow = ({ row, onClick }: ContextRowProps) => {
 
   return (
     <EuiListGroupItem
-      css={rowStyles}
       label={rowLabel}
       icon={row.prepend}
       onClick={onClick}

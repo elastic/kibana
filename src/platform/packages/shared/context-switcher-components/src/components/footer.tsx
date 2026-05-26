@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { ActionConfig } from './types';
 
 export interface FooterProps {
@@ -22,15 +21,8 @@ export interface FooterProps {
 export const Footer = ({ action }: FooterProps) => {
   if (!action) return null;
 
-  const footerStyles = css`
-    && .euiListGroupItem__button:hover,
-    && .euiListGroupItem__button:focus {
-      text-decoration: none;
-    }
-  `;
-
   return (
-    <EuiListGroup css={footerStyles}>
+    <EuiListGroup>
       <EuiListGroupItem
         label={action.label}
         iconType={'plus'}
