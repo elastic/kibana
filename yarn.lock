@@ -6911,6 +6911,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-lead-generation@link:x-pack/solutions/security/packages/kbn-evals-suite-lead-generation":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-llm-tasks@link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks":
   version "0.0.0"
   uid ""

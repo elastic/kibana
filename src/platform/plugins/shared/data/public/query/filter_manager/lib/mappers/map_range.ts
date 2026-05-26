@@ -16,7 +16,7 @@ export function getRangeDisplayValue(
   { meta: { params } }: RangeFilter | ScriptedRangeFilter,
   formatter?: FieldFormat
 ) {
-  const convert = formatter ? formatter.getConverterFor('text') : identity;
+  const convert = formatter ? (v: unknown) => formatter.convertToText(v) : identity;
   const { gte, gt, lte, lt } = params || {};
 
   const left = gte ?? gt;
