@@ -259,7 +259,7 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
       description: description ?? current.description,
       content: nextContent,
       tool_ids: toolIds ?? current.tool_ids,
-      ...(nextReferenced.length > 0 ? { referenced_content: nextReferenced } : {}),
+      referenced_content: nextReferenced.length > 0 ? nextReferenced : undefined,
     };
 
     const validated = skillCreateRequestSchema.safeParse(merged);
