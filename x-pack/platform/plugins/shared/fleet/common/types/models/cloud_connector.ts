@@ -27,6 +27,12 @@ export interface CloudConnectorSecretReference {
   id: string;
 }
 
+export function isCloudConnectorSecretReference(
+  value: string | CloudConnectorSecretReference | undefined
+): value is CloudConnectorSecretReference {
+  return typeof value === 'object' && value !== null && 'isSecretRef' in value;
+}
+
 export interface CloudConnectorVar {
   type?: 'text';
   value: string;

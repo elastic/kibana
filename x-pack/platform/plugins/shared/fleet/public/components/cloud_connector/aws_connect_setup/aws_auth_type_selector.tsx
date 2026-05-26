@@ -35,13 +35,13 @@ const OPTIONS = [
   {
     value: 'static_keys' as AwsAuthType,
     text: i18n.translate('xpack.fleet.awsConnectSetup.authType.staticKeysLabel', {
-      defaultMessage: 'Static Keys',
+      defaultMessage: 'Static keys',
     }),
   },
   {
     value: 'temporary_keys' as AwsAuthType,
     text: i18n.translate('xpack.fleet.awsConnectSetup.authType.temporaryKeysLabel', {
-      defaultMessage: 'Temporary Keys',
+      defaultMessage: 'Temporary keys',
     }),
   },
 ];
@@ -60,6 +60,9 @@ export const AwsAuthTypeSelector: React.FC<AwsAuthTypeSelectorProps> = ({
       options={OPTIONS}
       value={selectedAuthType}
       onChange={(e) => onChange(e.target.value as AwsAuthType)}
+      aria-label={i18n.translate('xpack.fleet.awsConnectSetup.authType.selectorAriaLabel', {
+        defaultMessage: 'Authentication method',
+      })}
       data-test-subj={AWS_AUTH_TYPE_SELECTOR_TEST_SUBJ}
     />
   );
