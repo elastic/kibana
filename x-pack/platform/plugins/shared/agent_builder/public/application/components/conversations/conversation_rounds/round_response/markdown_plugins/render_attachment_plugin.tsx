@@ -124,8 +124,6 @@ export const createRenderAttachmentRenderer = ({
     }
 
     if (isStreaming) {
-      // See `isStreaming` doc on `RenderAttachmentRendererProps`: the cache can be stale
-      // mid-stream, so we gate the chip behind a skeleton until the round completes.
       return <AttachmentLoadingSkeleton />;
     }
 
