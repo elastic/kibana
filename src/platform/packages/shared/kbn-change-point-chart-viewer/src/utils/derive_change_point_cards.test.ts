@@ -155,8 +155,20 @@ describe('derive_change_point_cards', () => {
           { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
         ],
         rows: [
-          { host: 'a', bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: null, pvalue: null },
-          { host: 'b', bucket: '2023-11-16T00:00:00.000Z', avg_bytes: 20, type: null, pvalue: null },
+          {
+            host: 'a',
+            bucket: '2023-11-15T00:00:00.000Z',
+            avg_bytes: 14,
+            type: null,
+            pvalue: null,
+          },
+          {
+            host: 'b',
+            bucket: '2023-11-16T00:00:00.000Z',
+            avg_bytes: 20,
+            type: null,
+            pvalue: null,
+          },
         ],
       };
       expect(buildChangePointCards({ table, esql: esqlWithHost })).toBeUndefined();
@@ -171,7 +183,9 @@ describe('derive_change_point_cards', () => {
           { id: 'type', name: 'type', meta: { type: 'string' as const } },
           { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
         ],
-        rows: [{ bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: 'mean_shift', pvalue: null }],
+        rows: [
+          { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: 'mean_shift', pvalue: null },
+        ],
       };
       expect(buildChangePointCards({ table, esql })).toBeUndefined();
     });
@@ -187,9 +201,7 @@ describe('derive_change_point_cards', () => {
           { id: 'type', name: 'type', meta: { type: 'string' as const } },
           { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
         ],
-        rows: [
-          { bucket: null, avg_bytes: 14, type: 'mean_shift', pvalue: 0.001 },
-        ],
+        rows: [{ bucket: null, avg_bytes: 14, type: 'mean_shift', pvalue: 0.001 }],
       };
 
       const cards = buildChangePointCards({ table, esql });
