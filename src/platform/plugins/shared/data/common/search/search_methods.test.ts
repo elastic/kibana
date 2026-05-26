@@ -210,6 +210,17 @@ describe('SearchMethodsService', () => {
         sort: [{ timestamp: 'desc' }],
       });
 
+      expect(mockSearch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            body: expect.objectContaining({
+              track_total_hits: true,
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+
       expect(result.pagination).toBeDefined();
       expect(result.pagination.hasNextPage).toBeDefined();
       expect(result.pagination.nextPage).toBeDefined();

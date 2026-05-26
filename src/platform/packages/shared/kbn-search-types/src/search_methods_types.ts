@@ -379,7 +379,7 @@ export interface ISearchMethods {
    */
   dslPaginated: (
     params: IDSLSearchParams,
-    options?: IDSLSearchOptions
+    options?: Omit<IDSLSearchOptions, 'trackTotalHits'>
   ) => Promise<IDSLPaginatedSearchResult>;
 
   /**

@@ -79,8 +79,13 @@ export class SearchMethodsService implements ISearchMethods {
    */
   async dslPaginated(
     params: IDSLSearchParams,
-    options?: IDSLSearchOptions
+    _options?: Omit<IDSLSearchOptions, 'trackTotalHits'>
   ): Promise<IDSLPaginatedSearchResult> {
+    const options = {
+      ..._options,
+      // trackTotalHits is required for pagination to determine if there are more pages
+      trackTotalHits: true,
+    };
     const request = this.buildDSLRequest(params, options);
     const response = await this.executeSearch(request, this.mapDSLOptions(options, params));
 
