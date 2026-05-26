@@ -44,8 +44,9 @@ export const FieldTitleExperimentalBadge = <T extends SettingType>({
   }
 
   const isBooleanExperimental = typeof experimental === 'boolean';
-  const tooltipContent =
-    isBooleanExperimental ? defaultTooltip : experimental.message || defaultTooltip;
+  const tooltipContent = isBooleanExperimental
+    ? defaultTooltip
+    : experimental.message || defaultTooltip;
 
   if (!isBooleanExperimental && experimental.docLinksKey) {
     return (
