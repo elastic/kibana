@@ -8,10 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import type {
-  AnomalySwimLaneEmbeddableState,
-  AnomalySwimlaneEmbeddableUserInput,
-} from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import type { MlDependencies } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
@@ -27,7 +24,7 @@ export function AnomalySwimlaneUserInput({
 }: {
   coreStart: CoreStart;
   pluginStart: MlDependencies | MlStartDependencies;
-  onConfirm: (state: AnomalySwimlaneEmbeddableUserInput) => void;
+  onConfirm: (state: AnomalySwimLaneEmbeddableState) => void;
   onCancel: () => void;
   input?: Partial<AnomalySwimLaneEmbeddableState>;
 }) {

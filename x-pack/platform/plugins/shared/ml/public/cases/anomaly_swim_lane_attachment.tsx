@@ -11,25 +11,26 @@ import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
+import { transformOut } from '../../common/embeddables/anomaly_swimlane/transform_out';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables/constants';
 
 export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
   return React.memo(
     (props: UnifiedValueAttachmentViewProps) => {
       const { caseData } = props;
       const attachmentState = props.data.state as Record<string, unknown>;
+      const attachmentId = typeof attachmentState.id === 'string' ? attachmentState.id : undefined;
 
       const dataFormatter = fieldFormats.deserialize({
         id: FIELD_FORMAT_IDS.DATE,
       });
 
-      const inputProps = transformTimeRangeOut(
+      const embeddableState = transformOut(
         attachmentState as unknown as AnomalySwimLaneEmbeddableState
       );
 
@@ -41,9 +42,9 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
               defaultMessage="Job IDs"
             />
           ),
-          description: inputProps.jobIds.join(', '),
+          description: embeddableState.job_ids.join(', '),
         },
-        ...(inputProps.swimlaneType === 'viewBy' && inputProps.viewBy
+        ...(embeddableState.swimlane_type === 'viewBy'
           ? [
               {
                 title: (
@@ -52,43 +53,35 @@ export const initComponent = memoize((fieldFormats: FieldFormatsStart) => {
                     defaultMessage="View by"
                   />
                 ),
-                description: inputProps.viewBy,
+                description: embeddableState.view_by,
               },
             ]
           : []),
-        {
-          title: (
-            <FormattedMessage
-              id="xpack.ml.cases.anomalySwimLane.description.timeRangeLabel"
-              defaultMessage="Time range"
-            />
-          ),
-          description: `${dataFormatter.convert(
-            inputProps.time_range!.from
-          )} - ${dataFormatter.convert(inputProps.time_range!.to)}`,
-        },
+        ...(embeddableState.time_range
+          ? [
+              {
+                title: (
+                  <FormattedMessage
+                    id="xpack.ml.cases.anomalySwimLane.description.timeRangeLabel"
+                    defaultMessage="Time range"
+                  />
+                ),
+                description: `${dataFormatter.convert(
+                  embeddableState.time_range.from
+                )} - ${dataFormatter.convert(embeddableState.time_range.to)}`,
+              },
+            ]
+          : []),
       ];
-
-      if (typeof inputProps.query?.query === 'string' && inputProps.query?.query !== '') {
-        listItems.push({
-          title: (
-            <FormattedMessage
-              id="xpack.ml.cases.anomalySwimLane.description.queryLabel"
-              defaultMessage="Query"
-            />
-          ),
-          description: inputProps.query?.query,
-        });
-      }
 
       return (
         <>
           <EuiDescriptionList compressed type={'inline'} listItems={listItems} />
           <EmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
-            maybeId={inputProps.id}
+            maybeId={attachmentId}
             type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
             getParentApi={() => ({
-              getSerializedStateForChild: () => inputProps,
+              getSerializedStateForChild: () => embeddableState,
               executionContext: {
                 type: 'cases',
                 description: caseData.title,
