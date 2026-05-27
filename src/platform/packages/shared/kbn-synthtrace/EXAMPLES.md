@@ -581,19 +581,19 @@ Generates infrastructure host metrics along with APM host data.
 node scripts/synthtrace infra_hosts_with_apm_hosts --live
 ```
 
-#### `test_host_hosts_page`
+#### `infra_hosts_minimal_host`
 
 Generates a single ECS infrastructure host row without numeric system metric fields. Useful for verifying Hosts page `N/A` behavior when a host exists but utilization/throughput values are unavailable.
 
 **Options:**
 
-- `hostName` (string, default: `test-host`): Host name to generate.
+- `hostName` (string, default: `minimal-host`): Host name to generate.
 
 **Usage:**
 
 ```sh
-node scripts/synthtrace test_host_hosts_page --from=now-15m --to=now --clean
-node scripts/synthtrace test_host_hosts_page --scenarioOpts.hostName=my-host --from=now-15m --to=now --clean
+node scripts/synthtrace infra_hosts_minimal_host --from=now-15m --to=now --clean
+node scripts/synthtrace infra_hosts_minimal_host --scenarioOpts.hostName=my-host --from=now-15m --to=now --clean
 ```
 
 #### `infra_docker_containers`

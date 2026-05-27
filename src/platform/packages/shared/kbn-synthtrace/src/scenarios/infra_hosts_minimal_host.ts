@@ -8,11 +8,11 @@
  */
 
 /**
- * Generates a single ECS infrastructure host named "test-host" for the Hosts page.
+ * Generates a single minimal ECS infrastructure host named "minimal-host" for the Hosts page.
  *
  * Goal:
  * - Reproduce a minimal Hosts page state with one visible host row, similar to a
- *   screenshot showing a single `test-host` in the host table.
+ *   screenshot showing a single `minimal-host` in the host table.
  *
  * Data shape:
  * - ECS infrastructure identity/routing docs only
@@ -22,13 +22,13 @@
  *   docs can be isolated in Elasticsearch queries.
  *
  * Scenario options:
- * - hostName (string, default: "test-host"): host.name / host.hostname
+ * - hostName (string, default: "minimal-host"): host.name / host.hostname
  *
  * Run:
- *   node scripts/synthtrace test_host_hosts_page --from now-15m --to now
+ *   node scripts/synthtrace infra_hosts_minimal_host --from now-15m --to now
  *
  * Manual live run (optional):
- *   node scripts/synthtrace test_host_hosts_page --live --from now-15m --to now
+ *   node scripts/synthtrace infra_hosts_minimal_host --live --from now-15m --to now
  *
  * Validation:
  *   Search the `metrics-system-*` index pattern with:
@@ -36,8 +36,8 @@
  *     "query": {
  *       "bool": {
  *         "filter": [
- *           { "term": { "host.name": "test-host" } },
- *           { "term": { "labels.synthtrace_environment": "test_host_hosts_page" } }
+ *           { "term": { "host.name": "minimal-host" } },
+ *           { "term": { "labels.synthtrace_environment": "infra_hosts_minimal_host" } }
  *         ]
  *       }
  *     }
@@ -54,7 +54,7 @@ import { getStringOpt } from './helpers/scenario_opts_helpers';
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<InfraDocument> = async (runOptions: RunOptions) => {
-  const hostName = getStringOpt(runOptions.scenarioOpts, 'hostName') ?? 'test-host';
+  const hostName = getStringOpt(runOptions.scenarioOpts, 'hostName') ?? 'minimal-host';
   const hostDocument = {
     'agent.id': 'synthtrace',
     'event.dataset': 'system.cpu',
