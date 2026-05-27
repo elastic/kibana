@@ -1856,21 +1856,21 @@ export default function ({ getService }: FtrProviderContext) {
           const state = JSON.parse(docs[0]._source.state) as {
             resolvedFromTaskRequest: {
               profileUid?: string;
-              usernameAccessThrew: boolean;
+              usernameWasUndefined: boolean;
             } | null;
             resolvedFromChildRequest: {
               profileUid?: string;
-              usernameAccessThrew: boolean;
+              usernameWasUndefined: boolean;
             } | null;
           };
 
           expect(state.resolvedFromTaskRequest).to.be.an('object');
           expect(state.resolvedFromTaskRequest?.profileUid).to.eql(testProfileUid);
-          expect(state.resolvedFromTaskRequest?.usernameAccessThrew).to.be(true);
+          expect(state.resolvedFromTaskRequest?.usernameWasUndefined).to.be(true);
 
           expect(state.resolvedFromChildRequest).to.be.an('object');
           expect(state.resolvedFromChildRequest?.profileUid).to.eql(testProfileUid);
-          expect(state.resolvedFromChildRequest?.usernameAccessThrew).to.be(true);
+          expect(state.resolvedFromChildRequest?.usernameWasUndefined).to.be(true);
         });
       });
     });

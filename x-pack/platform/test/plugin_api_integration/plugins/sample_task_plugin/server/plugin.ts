@@ -135,7 +135,7 @@ export class SampleTaskManagerFixturePlugin
                 schema.nullable(
                   schema.object({
                     profileUid: schema.maybe(schema.string()),
-                    usernameAccessThrew: schema.boolean(),
+                    usernameWasUndefined: schema.boolean(),
                   })
                 )
               ),
@@ -143,7 +143,7 @@ export class SampleTaskManagerFixturePlugin
                 schema.nullable(
                   schema.object({
                     profileUid: schema.maybe(schema.string()),
-                    usernameAccessThrew: schema.boolean(),
+                    usernameWasUndefined: schema.boolean(),
                   })
                 )
               ),
@@ -165,14 +165,9 @@ export class SampleTaskManagerFixturePlugin
               if (!user) {
                 return null;
               }
-              // Capture that non-profile_uid fields throw on the enriched user.
-              let usernameAccessThrew = false;
-              try {
-                void user.username;
-              } catch {
-                usernameAccessThrew = true;
-              }
-              return { profileUid: user.profile_uid, usernameAccessThrew };
+              // Verify identity fields are suppressed (read returns undefined).
+              const usernameWasUndefined = user.username === undefined;
+              return { profileUid: user.profile_uid, usernameWasUndefined };
             };
 
             const resolvedFromTaskRequest = resolveUser(fakeRequest);
