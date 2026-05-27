@@ -18,14 +18,14 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 const KI_EXTRACTION_RECOMMENDED_MODELS = [
   defaultInferenceEndpoints.OPENAI_GPT_5_4,
-  defaultInferenceEndpoints.OPENAI_GPT_5_2,
+  defaultInferenceEndpoints.OPENAI_GPT_OSS_120B,
   defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
 ];
 
 const KI_QUERY_GENERATION_RECOMMENDED_MODELS = [
-  defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS,
   defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
-  defaultInferenceEndpoints.OPENAI_GPT_5_2,
+  defaultInferenceEndpoints.OPENAI_GPT_5_4,
+  defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS,
 ];
 
 const DISCOVERY_RECOMMENDED_MODELS = [
