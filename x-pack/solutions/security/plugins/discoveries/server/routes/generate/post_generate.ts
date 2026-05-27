@@ -151,7 +151,6 @@ export const registerGenerateRoute = (
                       logger: checkLogger,
                       spaceId,
                       workflowsExtensions: pluginsStart.workflowsExtensions,
-                      workflowsManagementApi,
                     });
                   }
                 : undefined,
