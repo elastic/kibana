@@ -39,7 +39,8 @@ export const CloudConnectorSchemaV4 = CloudConnectorSchemaV3.extends({
 });
 
 export const PermissionResultSchema = schema.object({
-  action: schema.string(),
+  // Permission identifiers: AWS ARNs cap ~200 chars; service:Action style ~50.
+  action: schema.string({ maxLength: 256 }),
   status: schema.oneOf([
     schema.literal('verified'),
     schema.literal('required'),
@@ -48,8 +49,10 @@ export const PermissionResultSchema = schema.object({
     schema.literal('skipped'),
   ]),
   required: schema.boolean(),
-  error_code: schema.maybe(schema.string()),
-  message: schema.maybe(schema.string()),
+  // Cloud-provider error codes follow naming conventions: AccessDenied, Throttling, etc.
+  error_code: schema.maybe(schema.string({ maxLength: 100 })),
+  // Human-readable provider messages (e.g. STS errors include assumed-role principal).
+  message: schema.maybe(schema.string({ maxLength: 2000 })),
 });
 
 // Mirrors `PackagePolicyPermissionSummary` in common/types/models/cloud_connector.ts.
@@ -57,14 +60,24 @@ export const PermissionResultSchema = schema.object({
 // name, package title, version) is resolved live from the package policy SO at
 // render time.
 export const PackagePolicyPermissionSummarySchema = schema.object({
-  package_policy_id: schema.string(),
-  policy_id: schema.string(),
-  policy_template: schema.string(),
-  package_name: schema.string(),
-  last_verified_at: schema.string(),
-  permissions: schema.arrayOf(PermissionResultSchema),
+  // SO IDs (UUIDs are 36 chars; 64 leaves headroom for any prefix scheme).
+  package_policy_id: schema.string({ maxLength: 64 }),
+  policy_id: schema.string({ maxLength: 64 }),
+  // Slugs: 'cspm', 'asset_inventory'; package names: 'cloud_security_posture'.
+  policy_template: schema.string({ maxLength: 100 }),
+  package_name: schema.string({ maxLength: 100 }),
+  // ISO-8601 timestamp: '2026-05-27T10:16:00.123Z' = ~25 chars.
+  last_verified_at: schema.string({ maxLength: 40 }),
+  // Each policy template probes a small fixed set (cloudtrail ~5, asset_inventory ~10).
+  // 1000 is ~100× the realistic ceiling while still bounding worst-case validation cost.
+  permissions: schema.arrayOf(PermissionResultSchema, { maxSize: 1000 }),
 });
 
 export const CloudConnectorSchemaV5 = CloudConnectorSchemaV4.extends({
-  verification_permissions: schema.maybe(schema.arrayOf(PackagePolicyPermissionSummarySchema)),
+  // Aligns with MAX_PACKAGE_POLICY_BUCKETS_PER_CONNECTOR (25) × 40 headroom factor;
+  // bounds the array at the schema layer so abusive payloads are rejected before
+  // any aggregator processing.
+  verification_permissions: schema.maybe(
+    schema.arrayOf(PackagePolicyPermissionSummarySchema, { maxSize: 1000 })
+  ),
 });

@@ -63,10 +63,15 @@ const CloudConnectorResponseVarsSchema = schema.recordOf(schema.string(), schema
 // here caused drift in the past — single source of truth is enforced via the shared import.
 
 const VerificationFieldsSchema = {
-  verification_status: schema.maybe(schema.string()),
-  verification_started_at: schema.maybe(schema.string()),
-  verification_failed_at: schema.maybe(schema.string()),
-  verification_permissions: schema.maybe(schema.arrayOf(PackagePolicyPermissionSummarySchema)),
+  // 'pending' | 'success' | 'failed' — narrow string but bounded for CodeQL.
+  verification_status: schema.maybe(schema.string({ maxLength: 32 })),
+  // ISO-8601 timestamps: ~25 chars.
+  verification_started_at: schema.maybe(schema.string({ maxLength: 40 })),
+  verification_failed_at: schema.maybe(schema.string({ maxLength: 40 })),
+  // Aligns with MAX_PACKAGE_POLICY_BUCKETS_PER_CONNECTOR (25) with 40× headroom.
+  verification_permissions: schema.maybe(
+    schema.arrayOf(PackagePolicyPermissionSummarySchema, { maxSize: 1000 })
+  ),
 };
 
 export const CreateCloudConnectorResponseSchema = schema.object({
