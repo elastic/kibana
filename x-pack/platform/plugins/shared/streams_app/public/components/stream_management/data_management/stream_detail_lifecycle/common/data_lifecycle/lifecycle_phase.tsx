@@ -8,10 +8,13 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiBadge,
+  EuiButton,
   EuiButtonIcon,
+  EuiCallOut,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -19,6 +22,7 @@ import {
   EuiText,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { usePhaseColors } from '@kbn/data-lifecycle-phases';
@@ -31,6 +35,8 @@ interface BaseLifecyclePhaseProps {
   description?: string;
   docsCount?: number;
   isReadOnly?: boolean;
+  showEnterpriseCallout?: boolean;
+  onUpgradeEnterprise?: () => void;
   label: string;
   minAge?: string;
   onClick?: () => void;
@@ -63,12 +69,17 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
   const { euiTheme } = useEuiTheme();
   const phaseColors = usePhaseColors();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId({
+    prefix: `streamsLifecyclePhasePopoverTitle-${props.label}`,
+  });
 
   const {
     color,
     description,
     docsCount,
     isReadOnly = false,
+    showEnterpriseCallout = false,
+    onUpgradeEnterprise,
     label,
     minAge,
     onClick,
@@ -105,9 +116,17 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
   };
   const showStoredSize = !isDelete && sizeInBytes !== undefined;
   const showDocumentCount = !isDelete && docsCount !== undefined;
-  const showRetentionPeriod = label !== 'hot' && minAge !== undefined && !isZeroAge(minAge);
+  const showAgeBadge = minAge !== undefined && !isZeroAge(minAge);
   const showSearchableSnapshot =
     !isDelete && (label === 'cold' || label === 'frozen') && searchableSnapshot !== undefined;
+  const canShowReadOnlyRow = !isDelete && (label === 'hot' || label === 'warm' || label === 'cold');
+  const readOnlyValue = isReadOnly
+    ? i18n.translate('xpack.streams.streamDetailLifecycle.readOnlyEnabled', {
+        defaultMessage: 'Enabled',
+      })
+    : i18n.translate('xpack.streams.streamDetailLifecycle.readOnlyDisabled', {
+        defaultMessage: 'Disabled',
+      });
 
   return (
     <EuiPopover
@@ -128,36 +147,28 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
       isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen}
       closePopover={closePopover}
       anchorPosition="upCenter"
+      aria-labelledby={popoverTitleId}
+      panelPaddingSize="none"
     >
-      <EuiPopoverTitle data-test-subj={`${prefix}lifecyclePhase-${label}-popoverTitle`}>
+      <EuiPopoverTitle
+        id={popoverTitleId}
+        data-test-subj={`${prefix}lifecyclePhase-${label}-popoverTitle`}
+        paddingSize="m"
+      >
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 {i18n.translate('xpack.streams.streamDetailLifecycle.phasePopoverTitleLabel', {
                   defaultMessage: '{phase} phase',
                   values: { phase: capitalize(label) },
                 })}
               </EuiFlexItem>
-              {isReadOnly && (
-                <EuiFlexItem
-                  grow={false}
-                  data-test-subj={`${prefix}lifecyclePhase-${label}-readOnly`}
-                  style={{ position: 'relative', top: -1 }}
-                >
-                  <EuiIconTip
-                    type="readOnly"
-                    size="m"
-                    content={i18n.translate('xpack.streams.streamDetailLifecycle.readOnlyTooltip', {
-                      defaultMessage: 'Read only',
-                    })}
-                    aria-label={i18n.translate(
-                      'xpack.streams.streamDetailLifecycle.readOnlyAriaLabel',
-                      {
-                        defaultMessage: 'Read only',
-                      }
-                    )}
-                  />
+              {showAgeBadge && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge data-test-subj={`${prefix}lifecyclePhase-${label}-ageBadge`}>
+                    {minAge}
+                  </EuiBadge>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
@@ -167,10 +178,9 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
               <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
                 {onEditPhase && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="pencil"
+                    <EuiButton
                       size="s"
-                      display="base"
+                      minWidth={false}
                       aria-label={i18n.translate(
                         'xpack.streams.streamDetailLifecycle.editPhaseButton.ariaLabel',
                         {
@@ -183,7 +193,11 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                         closePopover();
                         onEditPhase(label ?? '');
                       }}
-                    />
+                    >
+                      {i18n.translate('xpack.streams.streamDetailLifecycle.editPhaseButtonLabel', {
+                        defaultMessage: 'Edit',
+                      })}
+                    </EuiButton>
                   </EuiFlexItem>
                 )}
 
@@ -238,141 +252,160 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
         style={{ width: '300px' }}
         data-test-subj={`${prefix}lifecyclePhase-${label}-popoverContent`}
       >
-        <EuiText size="s" data-test-subj={`${prefix}lifecyclePhase-${label}-description`}>
-          <p>{description}</p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        {(showStoredSize || showDocumentCount || showRetentionPeriod || showSearchableSnapshot) && (
-          <>
-            <EuiFlexGroup direction="column" gutterSize="none">
-              {showRetentionPeriod && (
-                <>
-                  <EuiFlexItem data-test-subj={`${prefix}lifecyclePhase-${label}-minAge`}>
-                    <EuiFlexGroup
-                      justifyContent="spaceBetween"
-                      gutterSize="none"
-                      responsive={false}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">
-                          <strong>
-                            {i18n.translate('xpack.streams.streamDetailLifecycle.afterDataStored', {
-                              defaultMessage: 'After data stored',
-                            })}
-                          </strong>
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText
-                          size="s"
-                          textAlign="right"
-                          data-test-subj={`${prefix}lifecyclePhase-${label}-minAgeValue`}
-                        >
-                          {minAge}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiSpacer size="s" />
-                </>
+        {!isDelete && label === 'frozen' && showEnterpriseCallout && onUpgradeEnterprise && (
+          <EuiCallOut
+            size="s"
+            color="warning"
+            announceOnMount={false}
+            title={i18n.translate(
+              'xpack.streams.streamDetailLifecycle.frozen.enterpriseRequiredCallout.title',
+              {
+                defaultMessage: 'Enterprise license required for frozen phase',
+              }
+            )}
+            data-test-subj={`${prefix}lifecyclePhase-${label}-enterpriseRequiredCallout`}
+          >
+            <EuiText size="s" color="subdued">
+              {i18n.translate(
+                'xpack.streams.streamDetailLifecycle.frozen.enterpriseRequiredCallout.body',
+                {
+                  defaultMessage:
+                    'Your current subscription tier does not support the frozen phase. This phase will be ignored until you remove it or upgrade your license.',
+                }
               )}
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiButton
+              size="s"
+              fill
+              color="warning"
+              onClick={onUpgradeEnterprise}
+              data-test-subj={`${prefix}lifecyclePhase-${label}-upgradeEnterpriseButton`}
+            >
+              {i18n.translate(
+                'xpack.streams.streamDetailLifecycle.frozen.enterpriseRequiredCallout.upgradeButton',
+                {
+                  defaultMessage: 'Upgrade to enterprise',
+                }
+              )}
+            </EuiButton>
+          </EuiCallOut>
+        )}
+        <div css={{ padding: euiTheme.size.m }}>
+          <EuiText size="s" data-test-subj={`${prefix}lifecyclePhase-${label}-description`}>
+            <p>{description}</p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          {(showStoredSize || showDocumentCount || canShowReadOnlyRow) && (
+            <EuiFlexGrid columns={2} gutterSize="s">
               {showStoredSize && sizeInBytes !== undefined && (
                 <>
                   <EuiFlexItem data-test-subj={`${prefix}lifecyclePhase-${label}-storedSize`}>
-                    <EuiFlexGroup
-                      justifyContent="spaceBetween"
-                      gutterSize="none"
-                      responsive={false}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">
-                          <strong>
-                            {i18n.translate('xpack.streams.streamDetailLifecycle.storedSize', {
-                              defaultMessage: 'Stored size',
-                            })}
-                          </strong>
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText
-                          size="s"
-                          textAlign="right"
-                          data-test-subj={`${prefix}lifecyclePhase-${label}-storedSizeValue`}
-                        >
-                          {formatBytes(sizeInBytes)}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <EuiText size="s">
+                      <strong>
+                        {i18n.translate('xpack.streams.streamDetailLifecycle.storedSize', {
+                          defaultMessage: 'Storage size',
+                        })}
+                      </strong>
+                    </EuiText>
                   </EuiFlexItem>
-                  <EuiSpacer size="s" />
+                  <EuiFlexItem>
+                    <EuiText
+                      size="s"
+                      data-test-subj={`${prefix}lifecyclePhase-${label}-storedSizeValue`}
+                    >
+                      {formatBytes(sizeInBytes)}
+                    </EuiText>
+                  </EuiFlexItem>
                 </>
               )}
+
               {showDocumentCount && docsCount !== undefined && (
-                <EuiFlexItem data-test-subj={`${prefix}lifecyclePhase-${label}-docsCount`}>
-                  <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        <strong>
-                          {i18n.translate('xpack.streams.streamDetailLifecycle.documentCount', {
-                            defaultMessage: 'Document count',
-                          })}
-                        </strong>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText
-                        size="s"
-                        textAlign="right"
-                        data-test-subj={`${prefix}lifecyclePhase-${label}-docsCountValue`}
-                      >
-                        {docsCount.toLocaleString()}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
+                <>
+                  <EuiFlexItem data-test-subj={`${prefix}lifecyclePhase-${label}-docsCount`}>
+                    <EuiText size="s">
+                      <strong>
+                        {i18n.translate('xpack.streams.streamDetailLifecycle.documentCount', {
+                          defaultMessage: 'Document count',
+                        })}
+                      </strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText
+                      size="s"
+                      data-test-subj={`${prefix}lifecyclePhase-${label}-docsCountValue`}
+                    >
+                      {docsCount.toLocaleString()}
+                    </EuiText>
+                  </EuiFlexItem>
+                </>
               )}
-              {showSearchableSnapshot && (
-                <EuiPopoverFooter
-                  data-test-subj={`${prefix}lifecyclePhase-${label}-searchableSnapshot`}
+
+              {canShowReadOnlyRow && (
+                <>
+                  <EuiFlexItem data-test-subj={`${prefix}lifecyclePhase-${label}-readOnly`}>
+                    <EuiText size="s">
+                      <strong>
+                        {i18n.translate('xpack.streams.streamDetailLifecycle.readOnlyLabel', {
+                          defaultMessage: 'Read-only',
+                        })}
+                      </strong>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText
+                      size="s"
+                      data-test-subj={`${prefix}lifecyclePhase-${label}-readOnlyValue`}
+                    >
+                      {readOnlyValue}
+                    </EuiText>
+                  </EuiFlexItem>
+                </>
+              )}
+            </EuiFlexGrid>
+          )}
+        </div>
+
+        {showSearchableSnapshot && (
+          <EuiPopoverFooter
+            data-test-subj={`${prefix}lifecyclePhase-${label}-searchableSnapshot`}
+            paddingSize="m"
+          >
+            <EuiText size="xs" color="subdued">
+              <strong>
+                {i18n.translate(
+                  'xpack.streams.streamDetailLifecycle.searchableSnapshot.description',
+                  {
+                    defaultMessage: 'Searchable snapshot',
+                  }
+                )}
+              </strong>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiFlexGrid columns={2} gutterSize="s">
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate(
+                      'xpack.streams.streamDetailLifecycle.searchableSnapshot.snapshotRepository',
+                      {
+                        defaultMessage: 'Repository',
+                      }
+                    )}
+                  </strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText
+                  size="s"
+                  data-test-subj={`${prefix}lifecyclePhase-${label}-snapshotRepository`}
                 >
-                  <EuiText size="xs" color="subdued">
-                    <strong>
-                      {i18n.translate(
-                        'xpack.streams.streamDetailLifecycle.searchableSnapshot.description',
-                        {
-                          defaultMessage: 'Searchable snapshot',
-                        }
-                      )}
-                    </strong>
-                  </EuiText>
-                  <EuiSpacer size="s" />
-                  <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        <strong>
-                          {i18n.translate(
-                            'xpack.streams.streamDetailLifecycle.searchableSnapshot.snapshotRepository',
-                            {
-                              defaultMessage: 'Snapshot repository',
-                            }
-                          )}
-                        </strong>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText
-                        size="s"
-                        textAlign="right"
-                        data-test-subj={`${prefix}lifecyclePhase-${label}-snapshotRepository`}
-                      >
-                        {searchableSnapshot}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPopoverFooter>
-              )}
-            </EuiFlexGroup>
-          </>
+                  {searchableSnapshot}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGrid>
+          </EuiPopoverFooter>
         )}
       </div>
     </EuiPopover>

@@ -221,9 +221,16 @@ export const performRuleUpgradeHandler = async (
           }))
         );
       } else {
+        const changeTracking = {
+          metadata: {
+            bulkCount: modifiedPrebuiltRuleAssets.length,
+          },
+        };
+
         const { results: upgradeResults, errors: installationErrors } = await upgradePrebuiltRules(
           detectionRulesClient,
           modifiedPrebuiltRuleAssets,
+          changeTracking,
           logger
         );
         ruleErrors.push(...installationErrors);

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { AgentBuilderMcpClients } from '../components/mcp_clients/mcp_clients';
+import { McpClientsProvider } from '../context/mcp_clients_provider';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
@@ -22,5 +23,9 @@ export const AgentBuilderMcpClientsPage = () => {
       path: appPaths.manage.mcpClients,
     },
   ]);
-  return <AgentBuilderMcpClients />;
+  return (
+    <McpClientsProvider>
+      <AgentBuilderMcpClients />
+    </McpClientsProvider>
+  );
 };

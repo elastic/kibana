@@ -8,27 +8,19 @@
  */
 
 import type { ReactNode } from 'react';
-import type {
-  ContentEditorCustomValidators,
-  OpenContentEditorParams,
-} from '@kbn/content-management-content-editor';
+import type { ContentEditorCustomValidators } from '@kbn/content-management-content-editor';
 import type { ContentListItem } from '@kbn/content-list-provider';
 
 /**
  * Content editor configuration for `ContentListClientProvider`.
  *
  * This is the Kibana-specific content editor integration. The base
- * `ContentListProvider` only knows about an `actions.inspect.onItemAction`
- * callback; this config produces that callback by wiring it to the
- * Kibana content editor flyout.
+ * `ContentListProvider` exposes a list-level `features.contentEditor.open`
+ * callback; this config produces that callback by wiring it to the Kibana
+ * content editor flyout, which the provider opens internally via
+ * `useOpenContentEditor` from `@kbn/content-management-content-editor`.
  */
 export interface ContentEditorConfig {
-  /**
-   * Callback to open the content editor flyout.
-   * Obtained from `useOpenContentEditor()` in `@kbn/content-management-content-editor`.
-   */
-  openContentEditor: (params: OpenContentEditorParams) => () => void;
-
   /** Whether the content editor is readonly. Defaults to `false`. */
   isReadonly?: boolean;
 

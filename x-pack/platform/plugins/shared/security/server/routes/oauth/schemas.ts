@@ -5,31 +5,25 @@
  * 2.0.
  */
 
+import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-// Max base64-encoded logo data length (256KB), consistent with the UIAM API.
-const CLIENT_LOGO_MAX_DATA_LENGTH = 262144;
-
-// Upper bound on registered redirect URIs per OAuth client. UIAM does not enforce
-// a server-side cap, so this guards Kibana against unbounded-array DoS inputs.
-// 32 leaves ample headroom versus realistic client usage (localhost + a handful
-// of environment-specific callbacks).
-const REDIRECT_URIS_MAX_SIZE = 32;
-
-// Generic cap for short, identifier/name-like string fields (client IDs, names,
-// metadata keys/values, revocation reasons).
-export const OAUTH_MAX_STRING_FIELD_LENGTH = 1024;
-
-// Cap for URI-like string fields (client `resource`, redirect URIs).
-export const OAUTH_MAX_URI_LENGTH = 2048;
+import type { OAuthClientLogoMediaType } from '../../../common/oauth/constants';
+import {
+  OAUTH_CLIENT_LOGO_MAX_DATA_LENGTH,
+  OAUTH_CLIENT_LOGO_MEDIA_TYPES,
+  OAUTH_MAX_STRING_FIELD_LENGTH,
+  OAUTH_MAX_URI_LENGTH,
+  OAUTH_REDIRECT_URIS_MAX_SIZE,
+} from '../../../common/oauth/constants';
 
 export const clientLogoSchema = schema.object({
-  media_type: schema.oneOf([
-    schema.literal('image/png'),
-    schema.literal('image/jpeg'),
-    schema.literal('image/gif'),
-  ]),
-  data: schema.string({ minLength: 1, maxLength: CLIENT_LOGO_MAX_DATA_LENGTH }),
+  media_type: schema.oneOf(
+    OAUTH_CLIENT_LOGO_MEDIA_TYPES.map((type) => schema.literal(type)) as [
+      Type<OAuthClientLogoMediaType>
+    ]
+  ),
+  data: schema.string({ minLength: 1, maxLength: OAUTH_CLIENT_LOGO_MAX_DATA_LENGTH }),
 });
 
 export const clientTypeSchema = schema.oneOf([
@@ -40,7 +34,7 @@ export const clientTypeSchema = schema.oneOf([
 export const redirectUrisSchema = schema.arrayOf(
   schema.string({ minLength: 1, maxLength: OAUTH_MAX_URI_LENGTH }),
   {
-    maxSize: REDIRECT_URIS_MAX_SIZE,
+    maxSize: OAUTH_REDIRECT_URIS_MAX_SIZE,
   }
 );
 
@@ -55,7 +49,6 @@ export const nullableClientMetadataSchema = schema.recordOf(
 );
 
 export const createClientBodySchema = schema.object({
-  resource: schema.string({ minLength: 1, maxLength: OAUTH_MAX_URI_LENGTH }),
   client_name: schema.string({ minLength: 1, maxLength: OAUTH_MAX_STRING_FIELD_LENGTH }),
   client_type: schema.maybe(clientTypeSchema),
   client_metadata: schema.maybe(clientMetadataSchema),
