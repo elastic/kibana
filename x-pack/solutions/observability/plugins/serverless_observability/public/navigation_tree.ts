@@ -22,12 +22,14 @@ export function filterForFeatureAvailability(
 export const createNavigationTree = ({
   streamsAvailable,
   overviewAvailable = true,
+  genAiSettingsAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
   showAlertingV2 = false,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
+  genAiSettingsAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
   showAlertingV2?: boolean;
@@ -514,6 +516,7 @@ export const createNavigationTree = ({
                 { link: 'management:rules', breadcrumbStatus: 'hidden' },
                 { link: 'management:episodes', breadcrumbStatus: 'hidden' },
                 { link: 'management:action_policies', breadcrumbStatus: 'hidden' },
+                { link: 'management:execution_history', breadcrumbStatus: 'hidden' },
               ],
             },
             showAlertingV2

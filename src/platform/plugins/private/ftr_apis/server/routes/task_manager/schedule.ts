@@ -17,7 +17,7 @@ import type {
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import type { InstanceTaskCost, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-const taskSchema = schema.object({
+const scheduleBodySchema = schema.object({
   task: schema.object({
     taskType: schema.string({ minLength: 1, maxLength: 200 }),
     id: schema.maybe(schema.string({ maxLength: 200 })),
@@ -59,6 +59,16 @@ const taskSchema = schema.object({
       schema.oneOf([schema.literal('tiny'), schema.literal('normal'), schema.literal('extralarge')])
     ),
   }),
+  /**
+   * When true, Task Manager schedules without the HTTP request, so no API keys are granted from the caller.
+   * Intended for FTR/Scout only (this route is behind `ftrApis`). Omitted or false preserves existing callers' body shape.
+   */
+  skipRequestForScheduling: schema.maybe(schema.boolean()),
+  /**
+   * When true with a normal schedule (request present), grant only the Elasticsearch API key (no UIAM).
+   * FTR/Scout only (`ftrApis`).
+   */
+  onEsKey: schema.maybe(schema.boolean()),
 });
 
 export const registerTaskManagerScheduleRoute = (
@@ -74,7 +84,7 @@ export const registerTaskManagerScheduleRoute = (
         },
       },
       validate: {
-        body: taskSchema,
+        body: scheduleBodySchema,
       },
     },
     async (_context: RequestHandlerContext, req: KibanaRequest, res: KibanaResponseFactory) => {
@@ -86,7 +96,7 @@ export const registerTaskManagerScheduleRoute = (
         });
       }
 
-      const { task } = req.body as {
+      const { task, skipRequestForScheduling, onEsKey } = req.body as {
         task: {
           taskType: string;
           id?: string;
@@ -98,9 +108,17 @@ export const registerTaskManagerScheduleRoute = (
           timeoutOverride?: string;
           cost?: InstanceTaskCost;
         };
+        skipRequestForScheduling?: boolean;
+        onEsKey?: boolean;
       };
 
-      const taskResult = await startContract.schedule(task, { request: req });
+      const taskResult =
+        skipRequestForScheduling === true
+          ? await startContract.schedule(task)
+          : await startContract.schedule(task, {
+              request: req,
+              ...(onEsKey === true ? { onEsKey: true } : {}),
+            });
 
       return res.ok({ body: taskResult });
     }

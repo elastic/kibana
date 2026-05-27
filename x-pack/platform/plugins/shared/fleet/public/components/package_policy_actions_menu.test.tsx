@@ -12,7 +12,7 @@ import { waitFor } from '@testing-library/react';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
-import { useMultipleAgentPolicies, useLink } from '../hooks';
+import { useMultipleAgentPolicies, useLink, useGetOneAgentPolicy } from '../hooks';
 
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
@@ -20,12 +20,18 @@ jest.mock('../hooks', () => {
   return {
     ...jest.requireActual('../hooks'),
     useMultipleAgentPolicies: jest.fn(),
+    useGetOneAgentPolicy: jest.fn().mockReturnValue({ data: undefined, isLoading: false }),
     useStartServices: jest.fn().mockReturnValue({
       application: {
         navigateToApp: jest.fn(),
       },
       notifications: {
         toasts: { addSuccess: jest.fn() },
+      },
+      cloud: {
+        isCloudEnabled: true,
+        isServerlessEnabled: false,
+        deploymentId: 'abc123def456',
       },
     }),
     useLink: jest.fn().mockReturnValue({
@@ -49,8 +55,30 @@ jest.mock(
   })
 );
 
+// Capture the textToCopy prop passed to EuiCopy so tests can assert the bundle text
+let capturedCopyText: string | undefined;
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiCopy: ({
+      textToCopy,
+      children,
+    }: {
+      textToCopy: string;
+      children: (fn: () => void) => React.ReactNode;
+    }) => {
+      capturedCopyText = textToCopy;
+      return <>{children(() => {})}</>;
+    },
+  };
+});
+
 const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
   typeof useMultipleAgentPolicies
+>;
+const useGetOneAgentPolicyMock = useGetOneAgentPolicy as jest.MockedFunction<
+  typeof useGetOneAgentPolicy
 >;
 
 function renderMenu({
@@ -350,6 +378,132 @@ describe('PackagePolicyActionsMenu', () => {
     await waitFor(() => {
       expect(utils.getByTestId('PackagePolicyActionsUpgradeItem')).not.toBeNull();
       expect(utils.queryByTestId('PackagePolicyActionsDeclinedUpgradeItem')).toBeNull();
+    });
+  });
+
+  describe('"Copy support info" button', () => {
+    beforeEach(() => {
+      capturedCopyText = undefined;
+      useGetOneAgentPolicyMock.mockReturnValue({ data: undefined, isLoading: false } as any);
+    });
+
+    it('should not render for non-agentless policies', async () => {
+      const agentPolicies = createMockAgentPolicies();
+      const packagePolicy = createMockPackagePolicy({ supports_agentless: false });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(utils.queryByTestId('PackagePolicyActionsCopySupportInfoItem')).toBeNull();
+      });
+    });
+
+    it('should render for agentless policies', async () => {
+      const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+      const packagePolicy = createMockPackagePolicy({ supports_agentless: true });
+      const { utils } = renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(utils.getByTestId('PackagePolicyActionsCopySupportInfoItem')).not.toBeNull();
+      });
+    });
+
+    it('should include deployment_id and policy_id from agentPolicy on ECH', async () => {
+      const agentPolicies = createMockAgentPolicies({
+        id: 'policy-uuid',
+        supports_agentless: true,
+        agentless: {},
+      } as any);
+      const packagePolicy = createMockPackagePolicy({
+        supports_agentless: true,
+        policy_ids: ['policy-uuid'],
+        package: { name: 'cloud_security_posture', version: '1.0.0', title: 'CSPM' },
+      });
+      renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(capturedCopyText).toEqual(
+          'elastic-support-bundle\ndeployment_id=abc123def456\npolicy_id=policy-uuid\nintegration=cloud_security_posture'
+        );
+      });
+    });
+
+    it('should include cluster_id when present on agentPolicy', async () => {
+      const agentPolicies = createMockAgentPolicies({
+        id: 'policy-uuid',
+        supports_agentless: true,
+        agentless: { cluster_id: 'my-cluster' },
+      } as any);
+      const packagePolicy = createMockPackagePolicy({
+        supports_agentless: true,
+        policy_ids: ['policy-uuid'],
+        package: { name: 'cloud_security_posture', version: '1.0.0', title: 'CSPM' },
+      });
+      renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(capturedCopyText).toEqual(
+          'elastic-support-bundle\ndeployment_id=abc123def456\ncluster_id=my-cluster\npolicy_id=policy-uuid\nintegration=cloud_security_posture'
+        );
+      });
+    });
+
+    it('should fall back to useGetOneAgentPolicy for cluster_id when agentPolicies is empty', async () => {
+      useGetOneAgentPolicyMock.mockReturnValue({
+        data: {
+          item: {
+            id: 'policy-uuid',
+            agentless: { cluster_id: 'fetched-cluster' },
+          },
+        },
+        isLoading: false,
+      } as any);
+      const packagePolicy = createMockPackagePolicy({
+        supports_agentless: true,
+        policy_ids: ['policy-uuid'],
+        package: { name: 'cloud_security_posture', version: '1.0.0', title: 'CSPM' },
+      });
+      renderMenu({ agentPolicies: [], packagePolicy });
+      await waitFor(() => {
+        expect(capturedCopyText).toEqual(
+          'elastic-support-bundle\ndeployment_id=abc123def456\ncluster_id=fetched-cluster\npolicy_id=policy-uuid\nintegration=cloud_security_posture'
+        );
+      });
+    });
+
+    it('should use project_id instead of deployment_id on serverless', async () => {
+      const { useStartServices } = jest.requireMock('../hooks');
+      const serverlessReturnValue = {
+        application: { navigateToApp: jest.fn() },
+        notifications: { toasts: { addSuccess: jest.fn() } },
+        cloud: {
+          isCloudEnabled: true,
+          isServerlessEnabled: true,
+          serverless: { projectId: 'my-project-id' },
+        },
+      };
+      useStartServices.mockReturnValue(serverlessReturnValue);
+      const agentPolicies = createMockAgentPolicies({
+        id: 'policy-uuid',
+        supports_agentless: true,
+        agentless: {},
+      } as any);
+      const packagePolicy = createMockPackagePolicy({
+        supports_agentless: true,
+        policy_ids: ['policy-uuid'],
+        package: { name: 'cloud_security_posture', version: '1.0.0', title: 'CSPM' },
+      });
+      renderMenu({ agentPolicies, packagePolicy });
+      await waitFor(() => {
+        expect(capturedCopyText).toEqual(
+          'elastic-support-bundle\nproject_id=my-project-id\npolicy_id=policy-uuid\nintegration=cloud_security_posture'
+        );
+      });
+      // Restore default mock for subsequent tests
+      useStartServices.mockReturnValue({
+        application: { navigateToApp: jest.fn() },
+        notifications: { toasts: { addSuccess: jest.fn() } },
+        cloud: {
+          isCloudEnabled: true,
+          isServerlessEnabled: false,
+          deploymentId: 'abc123def456',
+        },
+      });
     });
   });
 });

@@ -130,6 +130,35 @@ describe('applyConfigOverrides', () => {
     });
   });
 
+  it('alters config to enable SAML Mock IdP in stateful dev mode', () => {
+    expect(applyConfigOverrides({}, { dev: true }, {}, {})).toEqual({
+      elasticsearch: {
+        username: 'kibana_system',
+        password: 'changeme',
+      },
+      plugins: { paths: [] },
+      xpack: {
+        security: {
+          authc: {
+            providers: {
+              basic: { basic: { order: Number.MAX_SAFE_INTEGER } },
+              saml: {
+                'cloud-saml-kibana': {
+                  description: 'Continue as Test User',
+                  hint: 'Allows testing stateful user roles',
+                  icon: 'user',
+                  order: 0,
+                  realm: 'cloud-saml-kibana',
+                },
+              },
+            },
+            selector: { enabled: false },
+          },
+        },
+      },
+    });
+  });
+
   it('omits UIAM config if `--no-uiam` flag is passed in serverless dev mode', () => {
     expect(applyConfigOverrides({}, { dev: true, serverless: true, uiam: false }, {}, {})).toEqual({
       elasticsearch: {

@@ -13,6 +13,7 @@ export type {
   ChromeBadge,
   ChromeBreadcrumbsBadge,
   ChromeBreadcrumb,
+  ChromeNext,
   ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,
   ChromeDocTitle,
@@ -54,4 +55,5 @@ export type {
   SidebarAppDefinition,
   SidebarSetup,
   SidebarStart,
+  GlobalSearchConfig,
 } from './src';

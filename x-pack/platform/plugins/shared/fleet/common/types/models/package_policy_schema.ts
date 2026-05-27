@@ -89,6 +89,14 @@ const PackagePolicyStreamsSchema = {
   var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   compiled_stream: schema.maybe(schema.any()),
+  condition: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          '**Experimental.** Agent condition expression to evaluate whether to apply this stream.',
+      },
+    })
+  ),
   deprecated: schema.maybe(DeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
 };
@@ -104,6 +112,14 @@ export const PackagePolicyInputsSchema = {
   var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 }),
+  condition: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          '**Experimental.** Agent condition expression to evaluate whether to apply this input.',
+      },
+    })
+  ),
   deprecated: schema.maybe(DeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
 };
@@ -265,6 +281,14 @@ export const PackagePolicyBaseSchema = {
     ])
   ),
   package_agent_version_condition: schema.maybe(schema.string()),
+  condition: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.',
+      },
+    })
+  ),
   // Only available for agentless integration policies.
   // On standard package policies this field is rejected by server-side validation.
   global_data_tags: schema.maybe(
@@ -303,6 +327,7 @@ export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
     inputs: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
     package: schema.maybe(schema.any()),
     global_data_tags: undefined,
+    condition: undefined,
   },
   { unknowns: 'ignore' }
 );
@@ -316,6 +341,18 @@ export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
 export const PackagePolicySchemaV23 = PackagePolicySchemaV22.extends(
   {
     global_data_tags: NewPackagePolicySchema.getPropSchemas().global_data_tags,
+  },
+  { unknowns: 'ignore' }
+);
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.24.0.
+ * Re-introduces the `condition` field at the integration level — V22/V23 excluded it
+ * to preserve their hashes when `condition` was added to PackagePolicyBaseSchema.
+ */
+export const PackagePolicySchemaV24 = PackagePolicySchemaV23.extends(
+  {
+    condition: NewPackagePolicySchema.getPropSchemas().condition,
   },
   { unknowns: 'ignore' }
 );
@@ -405,6 +442,14 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
       ),
       deprecated: schema.maybe(DeprecationInfoSchema),
       vars: schema.maybe(SimplifiedVarsSchema),
+      condition: schema.maybe(
+        schema.string({
+          meta: {
+            description:
+              '**Experimental.** Agent condition expression to evaluate whether to apply this input.',
+          },
+        })
+      ),
       streams: schema.maybe(
         schema.recordOf(
           schema.string(),
@@ -419,6 +464,14 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
             vars: schema.maybe(SimplifiedVarsSchema),
             var_group_selections: VarGroupSelectionsSchema,
             deprecated: schema.maybe(DeprecationInfoSchema),
+            condition: schema.maybe(
+              schema.string({
+                meta: {
+                  description:
+                    '**Experimental.** Agent condition expression to evaluate whether to apply this stream.',
+                },
+              })
+            ),
           }),
           {
             meta: {
@@ -502,6 +555,14 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
         maxSize: 100,
       }),
     ])
+  ),
+  condition: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.',
+      },
+    })
   ),
 });
 

@@ -11,7 +11,6 @@ import { EuiFlexItem } from '@elastic/eui';
 
 import { WithMissingPrivileges } from '.';
 import { TestProviders } from '../../../../../common/mock';
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
 
@@ -106,7 +105,6 @@ describe('WithMissingPrivileges', () => {
 
       const chileComponent = screen.getByTestId('testChild1');
       fireEvent.mouseOver(chileComponent.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');

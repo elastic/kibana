@@ -11,8 +11,8 @@ import type { LoopBreakNode, WorkflowGraph } from '@kbn/workflows/graph';
 import { isLoopEnterScope } from './is_loop_enter_scope';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../workflow_context_manager/step_execution_runtime_factory';
+import type { StepIoService } from '../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { WorkflowExecutionState } from '../../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 
@@ -23,7 +23,7 @@ export class LoopBreakNodeImpl implements NodeImplementation {
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
-    private workflowExecutionState: WorkflowExecutionState,
+    private stepIoService: StepIoService,
     private workflowGraph: WorkflowGraph
   ) {}
 
@@ -43,7 +43,7 @@ export class LoopBreakNodeImpl implements NodeImplementation {
       { inclusive: true }
     );
     const innerStepIds = this.workflowGraph.getInnerStepIds(this.node.loopStepId);
-    this.workflowExecutionState.evictStaleLoopOutputs(innerStepIds);
+    this.stepIoService.evictStaleLoopOutputs(innerStepIds);
     this.workflowLogger.logDebug(
       `Evicted stale in-memory outputs for ${innerStepIds.size} inner step(s) of loop "${this.node.loopStepId}" after break`,
       { workflow: { step_id: this.node.stepId } }

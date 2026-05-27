@@ -80,6 +80,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -90,6 +95,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -100,6 +110,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/403_response"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/error_403_response"
+                  }
                 }
               }
             }
@@ -110,6 +125,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/500_response"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/error_500_response"
+                  }
                 }
               }
             }
@@ -177,6 +197,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/annotation_search_response"
+                },
+                "examples": {
+                  "getAnnotationResponse1": {
+                    "$ref": "#/components/examples/annotation_search_get_200_response1"
+                  }
                 }
               }
             }
@@ -187,6 +212,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -197,6 +227,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -207,6 +242,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/500_response"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/error_500_response"
+                  }
                 }
               }
             }
@@ -276,6 +316,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -286,6 +331,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -296,6 +346,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/403_response"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/error_403_response"
+                  }
                 }
               }
             }
@@ -306,6 +361,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -354,6 +414,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -364,6 +429,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -374,6 +444,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -432,6 +507,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -442,6 +522,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -452,6 +537,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/403_response"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/error_403_response"
+                  }
                 }
               }
             }
@@ -462,6 +552,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -530,6 +625,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -540,6 +640,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -550,6 +655,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/403_response"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/error_403_response"
+                  }
                 }
               }
             }
@@ -560,6 +670,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -620,6 +735,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -630,6 +750,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -640,6 +765,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -701,6 +831,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -711,6 +846,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -721,6 +861,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -772,6 +917,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -782,6 +932,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -792,6 +947,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -829,6 +989,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/service_agent_name_response"
+                },
+                "examples": {
+                  "getAgentNameForServiceResponse1": {
+                    "$ref": "#/components/examples/service_agent_name_get_200_response1"
+                  }
                 }
               }
             }
@@ -839,6 +1004,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -849,6 +1019,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -859,6 +1034,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -917,6 +1097,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -927,6 +1112,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -937,6 +1127,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/500_response"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/error_500_response"
+                  }
                 }
               }
             }
@@ -947,6 +1142,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/501_response"
+                },
+                "examples": {
+                  "notImplementedResponse": {
+                    "$ref": "#/components/examples/error_501_response"
+                  }
                 }
               }
             }
@@ -980,6 +1180,11 @@
             "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/upload_source_map_object"
+              },
+              "examples": {
+                "uploadSourceMapRequest": {
+                  "$ref": "#/components/examples/source_maps_upload_request1"
+                }
               }
             }
           }
@@ -1006,6 +1211,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -1016,6 +1226,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -1026,6 +1241,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/403_response"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/error_403_response"
+                  }
                 }
               }
             }
@@ -1036,6 +1256,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/500_response"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/error_500_response"
+                  }
                 }
               }
             }
@@ -1046,6 +1271,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/501_response"
+                },
+                "examples": {
+                  "notImplementedResponse": {
+                    "$ref": "#/components/examples/error_501_response"
+                  }
                 }
               }
             }
@@ -1108,6 +1338,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -1118,6 +1353,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -1128,6 +1368,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/403_response"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/error_403_response"
+                  }
                 }
               }
             }
@@ -1138,6 +1383,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/500_response"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/error_500_response"
+                  }
                 }
               }
             }
@@ -1148,6 +1398,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/501_response"
+                },
+                "examples": {
+                  "notImplementedResponse": {
+                    "$ref": "#/components/examples/error_501_response"
+                  }
                 }
               }
             }
@@ -1194,6 +1449,16 @@
                     }
                   }
                 }
+              },
+              "examples": {
+                "saveApmServerSchemaRequest": {
+                  "description": "An example request payload for `POST /api/apm/fleet/apm_server_schema`.",
+                  "value": {
+                    "schema": {
+                      "foo": "bar"
+                    }
+                  }
+                }
               }
             }
           }
@@ -1222,6 +1487,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/400_response"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/error_400_response"
+                  }
                 }
               }
             }
@@ -1232,6 +1502,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/401_response"
+                },
+                "examples": {
+                  "unauthorizedResponse": {
+                    "$ref": "#/components/examples/error_401_response"
+                  }
                 }
               }
             }
@@ -1242,6 +1517,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/403_response"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/error_403_response"
+                  }
                 }
               }
             }
@@ -1252,6 +1532,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/404_response"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/error_404_response"
+                  }
                 }
               }
             }
@@ -1988,6 +2273,57 @@
           }
         }
       },
+      "error_400_response": {
+        "description": "An example of a 400 Bad Request response, returned when the request payload or query parameters fail validation.",
+        "value": {
+          "statusCode": 400,
+          "error": "Bad Request",
+          "message": "[request body]: expected value of type [string] but got [undefined]"
+        }
+      },
+      "error_401_response": {
+        "description": "An example of a 401 Unauthorized response, returned when the request is missing valid authentication credentials.",
+        "value": {
+          "statusCode": 401,
+          "error": "Unauthorized",
+          "message": "[security_exception]: missing authentication credentials for REST request"
+        }
+      },
+      "error_403_response": {
+        "description": "An example of a 403 Forbidden response, returned when the authenticated user lacks the required APM and User Experience privileges.",
+        "value": {
+          "statusCode": 403,
+          "error": "Forbidden",
+          "message": "Insufficient privileges to perform this action. The APM and User Experience feature requires `all` privileges."
+        }
+      },
+      "error_500_response": {
+        "description": "An example of a 500 Internal Server Error response, returned when an unexpected error occurs while processing the request.",
+        "value": {
+          "statusCode": 500,
+          "error": "Internal Server Error",
+          "message": "An internal server error occurred. Check the Kibana server logs for details."
+        }
+      },
+      "annotation_search_get_200_response1": {
+        "description": "An example of a successful response from `GET /api/apm/services/{serviceName}/annotation/search`, which returns the annotations associated with a service over the given time range.",
+        "value": {
+          "annotations": [
+            {
+              "type": "version",
+              "id": "opbeans-node@2.0.0",
+              "@timestamp": 1735689600000,
+              "text": "opbeans-node@2.0.0"
+            },
+            {
+              "type": "version",
+              "id": "opbeans-node@2.1.0",
+              "@timestamp": 1736294400000,
+              "text": "opbeans-node@2.1.0"
+            }
+          ]
+        }
+      },
       "annotation_object_post_request1": {
         "description": "Run `POST /api/apm/services/{serviceName}/annotation` to create a deployment annotation for a service.",
         "value": {
@@ -2031,6 +2367,14 @@
               "created": "2020-05-09T02:34:43.937Z"
             }
           }
+        }
+      },
+      "error_404_response": {
+        "description": "An example of a 404 Not Found response, returned when the requested resource does not exist or the feature is not available on the current deployment.",
+        "value": {
+          "statusCode": 404,
+          "error": "Not Found",
+          "message": "Not Found"
         }
       },
       "agent_configuration_intake_object_get_200_response1": {
@@ -2181,6 +2525,12 @@
           ]
         }
       },
+      "service_agent_name_get_200_response1": {
+        "description": "An example of a successful response from `GET /api/apm/settings/agent-configuration/agent_name`, which returns the detected APM agent name for a service.",
+        "value": {
+          "agentName": "nodejs"
+        }
+      },
       "source_maps_get_200_response1": {
         "description": "A successful response from `GET /api/apm/sourcemaps`.",
         "value": {
@@ -2221,6 +2571,23 @@
               "packageName": "apm"
             }
           ]
+        }
+      },
+      "error_501_response": {
+        "description": "An example of a 501 Not Implemented response, returned when the source map feature is not available on the current deployment.",
+        "value": {
+          "statusCode": 501,
+          "error": "Not Implemented",
+          "message": "Not Implemented"
+        }
+      },
+      "source_maps_upload_request1": {
+        "description": "An example of a multipart/form-data request body for `POST /api/apm/sourcemaps`.\nEach field is a separate form part; `sourcemap` is the source map file content (typically uploaded as a file).\n",
+        "value": {
+          "service_name": "opbeans-node",
+          "service_version": "1.0.0",
+          "bundle_filepath": "/test/e2e/general-usecase/bundle.js.map",
+          "sourcemap": "{\"version\":3,\"sources\":[\"bundle.js\"],\"names\":[],\"mappings\":\"AAAA\",\"file\":\"bundle.js\",\"sourcesContent\":[\"console.log('hello');\"]}"
         }
       },
       "source_maps_upload_200_response1": {

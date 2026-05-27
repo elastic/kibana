@@ -42,6 +42,207 @@ const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
 const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
 
 describe('resumeWorkflow', () => {
+  describe('terminal state and resume gating', () => {
+    const workflowRunId = 'run-1';
+    const spaceId = 'default';
+    const logger = loggingSystemMock.create().get();
+    const fakeRequest = { headers: {} } as KibanaRequest;
+    let dependencies: ReturnType<typeof mockContextDependencies>;
+    let mockGetWorkflowExecutionById: jest.Mock;
+    let mockGetLastFailedStepContext: jest.Mock;
+    let mockGetWorkflowExecutionStatus: jest.Mock;
+    let mockGetWorkflowExecution: jest.Mock;
+    let mockStateGetWorkflowExecution: jest.Mock;
+
+    /** After a successful loop, `emitWorkflowExecutionFailedEventIfFailed` still runs in `finally`. */
+    const nonFailedRuntimeMethods = () => ({
+      getWorkflowExecutionStatus: jest.fn().mockReturnValue(ExecutionStatus.COMPLETED),
+      getWorkflowExecution: jest.fn().mockReturnValue({
+        isTestRun: false,
+        status: ExecutionStatus.COMPLETED,
+      }),
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      dependencies = mockContextDependencies();
+      mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
+      mockGetLastFailedStepContext = jest.fn().mockReturnValue(undefined);
+      mockGetWorkflowExecutionStatus = jest.fn();
+      mockGetWorkflowExecution = jest.fn();
+      mockStateGetWorkflowExecution = jest
+        .fn()
+        .mockReturnValue({ status: ExecutionStatus.WAITING });
+
+      mockSetupDependencies.mockResolvedValue({
+        workflowRuntime: {
+          resume: jest.fn().mockResolvedValue(undefined),
+          getWorkflowExecutionStatus: mockGetWorkflowExecutionStatus,
+          getWorkflowExecution: mockGetWorkflowExecution,
+        },
+        stepExecutionRuntimeFactory: {},
+        workflowExecutionState: {
+          getLastFailedStepContext: mockGetLastFailedStepContext,
+          getWorkflowExecution: mockStateGetWorkflowExecution,
+        },
+        workflowLogger: {},
+        nodesFactory: {},
+        workflowExecutionGraph: {},
+        workflowTaskManager: {},
+        workflowExecutionRepository: {
+          getWorkflowExecutionById: mockGetWorkflowExecutionById,
+        },
+        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      } as never);
+    });
+
+    it('does not resume or run loop when execution is already terminal', async () => {
+      const resume = jest.fn().mockResolvedValue(undefined);
+      mockSetupDependencies.mockResolvedValue({
+        workflowRuntime: { resume, ...nonFailedRuntimeMethods() },
+        stepExecutionRuntimeFactory: {},
+        workflowExecutionState: {
+          getWorkflowExecution: () => ({
+            status: ExecutionStatus.COMPLETED,
+          }),
+        },
+        workflowLogger: {},
+        nodesFactory: {},
+        workflowExecutionGraph: {},
+        esClient: {},
+        workflowTaskManager: {},
+        workflowExecutionRepository: {},
+      } as never);
+
+      await resumeWorkflow({
+        workflowRunId,
+        spaceId,
+        taskAbortController: new AbortController(),
+        dependencies,
+        logger: logger as Logger,
+        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        fakeRequest,
+        workflowsExecutionEngine: mockWorkflowExecutionEngine,
+      });
+
+      expect(resume).not.toHaveBeenCalled();
+      expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+    });
+
+    it('runs resume and loop when execution is not terminal', async () => {
+      const resume = jest.fn().mockResolvedValue(undefined);
+      mockSetupDependencies.mockResolvedValue({
+        workflowRuntime: {
+          resume,
+          ...nonFailedRuntimeMethods(),
+        },
+        stepExecutionRuntimeFactory: {},
+        workflowExecutionState: {
+          getWorkflowExecution: () => ({
+            status: ExecutionStatus.WAITING,
+          }),
+        },
+        workflowLogger: {},
+        nodesFactory: {},
+        workflowExecutionGraph: {},
+        esClient: {},
+        workflowTaskManager: {},
+        workflowExecutionRepository: {
+          getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+        },
+      } as never);
+
+      await resumeWorkflow({
+        workflowRunId,
+        spaceId,
+        taskAbortController: new AbortController(),
+        dependencies,
+        logger: logger as Logger,
+        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        fakeRequest,
+        workflowsExecutionEngine: mockWorkflowExecutionEngine,
+      });
+
+      expect(resume).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowExecutionLoop).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      ['FAILED', ExecutionStatus.FAILED],
+      ['CANCELLED', ExecutionStatus.CANCELLED],
+      ['SKIPPED', ExecutionStatus.SKIPPED],
+      ['COMPLETED', ExecutionStatus.COMPLETED],
+      ['TIMED_OUT', ExecutionStatus.TIMED_OUT],
+    ] as const)('skips resume when already %s (stale TM / duplicate resume)', async (_, status) => {
+      const resume = jest.fn().mockResolvedValue(undefined);
+      mockSetupDependencies.mockResolvedValue({
+        workflowRuntime: { resume, ...nonFailedRuntimeMethods() },
+        stepExecutionRuntimeFactory: {},
+        workflowExecutionState: {
+          getWorkflowExecution: () => ({ status }),
+        },
+        workflowLogger: {},
+        nodesFactory: {},
+        workflowExecutionGraph: {},
+        esClient: {},
+        workflowTaskManager: {},
+        workflowExecutionRepository: {},
+      } as never);
+
+      await resumeWorkflow({
+        workflowRunId,
+        spaceId,
+        taskAbortController: new AbortController(),
+        dependencies,
+        logger: logger as Logger,
+        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        fakeRequest,
+        workflowsExecutionEngine: mockWorkflowExecutionEngine,
+      });
+
+      expect(resume).not.toHaveBeenCalled();
+      expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+    });
+
+    it('runs resume when status is RUNNING (e.g. mid-loop)', async () => {
+      const resume = jest.fn().mockResolvedValue(undefined);
+      mockSetupDependencies.mockResolvedValue({
+        workflowRuntime: {
+          resume,
+          ...nonFailedRuntimeMethods(),
+        },
+        stepExecutionRuntimeFactory: {},
+        workflowExecutionState: {
+          getWorkflowExecution: () => ({
+            status: ExecutionStatus.RUNNING,
+          }),
+        },
+        workflowLogger: {},
+        nodesFactory: {},
+        workflowExecutionGraph: {},
+        esClient: {},
+        workflowTaskManager: {},
+        workflowExecutionRepository: {
+          getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+        },
+      } as never);
+
+      await resumeWorkflow({
+        workflowRunId,
+        spaceId,
+        taskAbortController: new AbortController(),
+        dependencies,
+        logger: logger as Logger,
+        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as never,
+        fakeRequest,
+        workflowsExecutionEngine: mockWorkflowExecutionEngine,
+      });
+
+      expect(resume).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowExecutionLoop).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('wiring / metering', () => {
     const workflowRunId = 'test-workflow-run-id';
     const spaceId = 'default';
@@ -177,10 +378,13 @@ describe('resumeWorkflow', () => {
         status: ExecutionStatus.COMPLETED,
       };
 
-      it('does not call getWorkflowExecutionById for metering when meteringService is omitted', async () => {
+      it('does not report metering when meteringService is omitted but still loads execution after loop', async () => {
         await resumeWorkflowWithDefaults();
 
-        expect(workflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+        expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+          workflowRunId,
+          spaceId
+        );
       });
 
       it('calls reportWorkflowExecution when final execution exists', async () => {
@@ -221,7 +425,7 @@ describe('resumeWorkflow', () => {
 
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringContaining(
-            `Failed to fetch execution for metering (execution=${workflowRunId}): fetch failed`
+            `Failed to fetch execution after loop (execution=${workflowRunId}): fetch failed`
           )
         );
         expect(reportWorkflowExecution).not.toHaveBeenCalled();
@@ -239,16 +443,20 @@ describe('resumeWorkflow', () => {
     let mockGetLastFailedStepContext: jest.Mock;
     let mockGetWorkflowExecutionStatus: jest.Mock;
     let mockGetWorkflowExecution: jest.Mock;
+    let mockGetWorkflowExecutionFromState: jest.Mock;
 
     const mockWorkflowExecutionEngineEmit = workflowsExecutionEngineMock.createStart();
 
     beforeEach(() => {
       jest.clearAllMocks();
       dependencies = mockContextDependencies();
-      mockGetWorkflowExecutionById = jest.fn();
+      mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
       mockGetLastFailedStepContext = jest.fn().mockReturnValue(undefined);
       mockGetWorkflowExecutionStatus = jest.fn();
       mockGetWorkflowExecution = jest.fn();
+      mockGetWorkflowExecutionFromState = jest.fn().mockReturnValue({
+        status: ExecutionStatus.WAITING,
+      });
 
       mockWorkflowExecutionEngineEmit.triggerEvents.emitEvent.mockClear();
       mockWorkflowExecutionEngineEmit.triggerEvents.emitEvent.mockResolvedValue(undefined);
@@ -260,7 +468,10 @@ describe('resumeWorkflow', () => {
           getWorkflowExecution: mockGetWorkflowExecution,
         },
         stepExecutionRuntimeFactory: {},
-        workflowExecutionState: { getLastFailedStepContext: mockGetLastFailedStepContext },
+        workflowExecutionState: {
+          getLastFailedStepContext: mockGetLastFailedStepContext,
+          getWorkflowExecution: mockGetWorkflowExecutionFromState,
+        },
         workflowLogger: {},
         nodesFactory: {},
         workflowExecutionGraph: {},

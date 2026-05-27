@@ -61,6 +61,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     tools: createToolStartMock(),
     events: {
       chat$: EMPTY,
+      getChatEvents$: jest.fn().mockReturnValue(EMPTY),
       ui: {
         activeConversation$: new BehaviorSubject(null),
       },
@@ -78,6 +79,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     }),
     addAttachment: jest.fn(),
     updateAttachmentOrigin: jest.fn(),
+    EmbeddableConversation: () => null,
   };
 };
 

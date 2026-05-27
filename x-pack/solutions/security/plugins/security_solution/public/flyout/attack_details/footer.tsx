@@ -89,7 +89,6 @@ export const PanelFooter = () => {
                 attack={attack}
                 onActionSuccess={onActionSuccess}
                 closePopover={closePopover}
-                size="s"
                 telemetrySource="attacks_page_flyout_take_action"
                 showAiAssistantAction={false}
                 isRemoteDocument={isRemoteDocument}

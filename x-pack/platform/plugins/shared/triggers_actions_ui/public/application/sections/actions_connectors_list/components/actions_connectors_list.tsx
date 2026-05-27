@@ -247,6 +247,7 @@ const ActionsConnectorsList = ({
       ),
       sortable: false,
       truncateText: true,
+      width: '25%',
       render: (value: string, item: ActionConnectorTableItem) => {
         const checkEnabledResult = checkActionTypeEnabled(
           actionTypesIndex && actionTypesIndex[item.actionTypeId],
@@ -330,7 +331,7 @@ const ActionsConnectorsList = ({
                     'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.earsDisabledDescription',
                     {
                       defaultMessage:
-                        'EARS authentication is disabled. Enable it via xpack.actions.ears.enabled in kibana.yml.',
+                        'EARS authentication is disabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.',
                     }
                   )}
                   position="right"
@@ -465,6 +466,7 @@ const ActionsConnectorsList = ({
     },
     {
       name: '',
+      width: '300px',
       render: (item: ActionConnectorTableItem) => {
         if (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]) {
           return null;
@@ -475,7 +477,7 @@ const ActionsConnectorsList = ({
         const isStackConnector = actionType.source === ACTION_TYPE_SOURCES.stack;
 
         return (
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false}>
             {usesOAuthAuthorizationCode(item) && !isDisabledEarsConnector(item) && (
               <>
                 {connectorAuthStatusError ? (
@@ -545,6 +547,7 @@ const ActionsConnectorsList = ({
       loading={isLoadingActions || isLoadingActionTypes}
       items={actionConnectorTableItems}
       sorting={true}
+      tableLayout="fixed"
       itemId={(item: ActionConnectorTableItem) =>
         item.isPreconfigured ? `preconfigured_${item.id}` : item.id
       }

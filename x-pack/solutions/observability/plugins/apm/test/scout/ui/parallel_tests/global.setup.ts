@@ -17,14 +17,11 @@ import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span
 import { otelSendotlp } from '../fixtures/synthtrace/otel_sendotlp';
 import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
 import { mobileServices } from '../fixtures/synthtrace/mobile_services';
-import { awsLambda } from '../fixtures/synthtrace/aws_lambda';
 import { azureFunctions } from '../fixtures/synthtrace/azure_functions';
-import {
-  metricsServices,
-  setupOtelNativeJavaMetrics,
-} from '../fixtures/synthtrace/metrics_services';
+import { ingestApmMetricsFixtures } from '../../shared';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
+import { distributedTrace } from '../fixtures/synthtrace/distributed_trace';
 import { serviceMapMultiEnv } from '../fixtures/synthtrace/service_map_multi_env';
 
 globalSetupHook(
@@ -67,6 +64,11 @@ globalSetupHook(
 
     await apmSynthtraceEsClient.index(serviceDataWithRecentErrors());
 
+    // Generate distributed trace data for trace waterfall flyout tests
+    const distributedTraceData = distributedTrace();
+    await apmSynthtraceEsClient.index(distributedTraceData);
+    log.info('Distributed trace waterfall data indexed');
+
     // Generate OTEL service data for OTEL service overview tests
     const otelData = otelSendotlp({
       from: new Date(testData.START_DATE).getTime(),
@@ -91,14 +93,6 @@ globalSetupHook(
     await apmSynthtraceEsClient.index(mobileData);
     log.info('Mobile services data indexed');
 
-    // Generate AWS Lambda service data for cold start chart tests
-    const awsLambdaData = awsLambda({
-      from: new Date(testData.START_DATE).getTime(),
-      to: new Date(testData.END_DATE).getTime(),
-    });
-    await apmSynthtraceEsClient.index(awsLambdaData);
-    log.info('AWS Lambda service data indexed');
-
     // Generate Azure Functions service data for cold start chart tests
     const azureFunctionsData = azureFunctions({
       from: new Date(testData.START_DATE).getTime(),
@@ -107,19 +101,10 @@ globalSetupHook(
     await apmSynthtraceEsClient.index(azureFunctionsData);
     log.info('Azure Functions service data indexed');
 
-    const metricsData = metricsServices({
-      from: new Date(testData.START_DATE).getTime(),
-      to: new Date(testData.END_DATE).getTime(),
-    });
-    await apmSynthtraceEsClient.index(metricsData);
-    log.info('Metrics services data indexed');
-
-    await setupOtelNativeJavaMetrics(
-      esClient,
-      new Date(testData.START_DATE).getTime(),
-      new Date(testData.END_DATE).getTime()
-    );
-    log.info('OTel-native Java metrics bulk-indexed into .otel-* indices');
+    // Shared APM metrics dataset (classic + OTel synth metrics, AWS Lambda
+    // transactions fixture, OTel-native Java bulk-indexed metrics). Single
+    // source of truth for both UI and API Scout suites.
+    await ingestApmMetricsFixtures({ apmSynthtraceEsClient, esClient, log });
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();

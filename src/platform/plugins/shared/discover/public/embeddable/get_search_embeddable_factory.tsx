@@ -8,11 +8,11 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { BehaviorSubject, firstValueFrom, merge, skip, map } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, map, merge, skip } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -20,10 +20,10 @@ import type { FetchContext } from '@kbn/presentation-publishing';
 import {
   initializeTimeRangeManager,
   initializeTitleManager,
+  initializeStateApi,
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
-  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
@@ -60,9 +60,9 @@ export const getSearchEmbeddableFactory = ({
   };
   discoverServices: DiscoverServices;
 }) => {
-  const { save, checkForDuplicateTitle } = discoverServices.savedSearch;
+  const { save, hasLibraryItemWithTitle } = discoverServices.savedSearch;
 
-  const savedSearchEmbeddableFactory: EmbeddableFactory<
+  const savedSearchEmbeddableFactory: EmbeddablePublicDefinition<
     SearchEmbeddablePanelApiState,
     SearchEmbeddableApi
   > = {
@@ -118,6 +118,7 @@ export const getSearchEmbeddableFactory = ({
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const fetchContext$ = new BehaviorSubject<FetchContext | undefined>(undefined);
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
+      const refreshTrigger$ = new BehaviorSubject<void>(undefined);
 
       /** Build API */
       const titleManager = initializeTitleManager(runtimeState);
@@ -154,7 +155,7 @@ export const getSearchEmbeddableFactory = ({
         dataLoading$,
       });
 
-      const unsavedChangesApi = initializeUnsavedChanges<SearchEmbeddablePanelApiState>({
+      const stateApi = initializeStateApi<SearchEmbeddablePanelApiState>({
         uuid,
         parentApi,
         defaultState,
@@ -185,19 +186,18 @@ export const getSearchEmbeddableFactory = ({
             nonPersistedDisplayOptions: 'skip',
           };
         },
-        onReset: async (lastSaved) => {
-          drilldownsManager.reinitializeState(lastSaved ?? {});
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) {
-            const lastSavedRuntimeState = await deserializeState({
-              serializedState: lastSaved,
-              discoverServices,
-            });
+        applySerializedState: async (nextState) => {
+          drilldownsManager.reinitializeState(nextState);
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
 
-            selectedTabId$.next(lastSavedRuntimeState.selectedTabId);
-            await searchEmbeddable.reinitializeState(lastSavedRuntimeState);
-          }
+          const nextRuntimeState = await deserializeState({
+            serializedState: nextState,
+            discoverServices,
+          });
+
+          selectedTabId$.next(nextRuntimeState.selectedTabId);
+          await searchEmbeddable.reinitializeState(nextRuntimeState);
           inlineEditingApi.stopInlineEditing();
         },
       });
@@ -215,7 +215,7 @@ export const getSearchEmbeddableFactory = ({
       });
 
       const api: SearchEmbeddableApi = finalizeApi({
-        ...unsavedChangesApi,
+        ...stateApi,
         ...titleManager.api,
         ...searchEmbeddable.api,
         ...timeRangeManager.api,
@@ -266,15 +266,9 @@ export const getSearchEmbeddableFactory = ({
           defaultDescription$.next(description);
           return savedObjectId!;
         },
-        checkForDuplicateTitle: (newTitle, isTitleDuplicateConfirmed, onTitleDuplicate) =>
-          checkForDuplicateTitle({
-            newTitle,
-            isTitleDuplicateConfirmed,
-            onTitleDuplicate,
-          }),
+        hasLibraryItemWithTitle,
         getSerializedStateByValue: () => serialize(undefined),
         getSerializedStateByReference: (newId: string) => serialize(newId),
-        serializeState: () => serialize(savedObjectId$.getValue()),
         getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
         supportedTriggers: () => {
           return [ON_OPEN_PANEL_MENU];
@@ -299,6 +293,7 @@ export const getSearchEmbeddableFactory = ({
         discoverServices,
         stateManager: searchEmbeddable.stateManager,
         scopedProfilesManager,
+        refreshTrigger$,
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
@@ -361,6 +356,10 @@ export const getSearchEmbeddableFactory = ({
             },
             [dataView]
           );
+
+          const onRefreshData = useCallback(() => {
+            refreshTrigger$.next(undefined);
+          }, []);
 
           const renderAsFieldStatsTable = useMemo(
             () => isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings),
@@ -429,6 +428,7 @@ export const getSearchEmbeddableFactory = ({
                       <SearchEmbeddableGridComponent
                         api={{ ...api, fetchWarnings$, fetchContext$ }}
                         dataView={dataView!}
+                        onRefreshData={onRefreshData}
                         onAddFilter={
                           runtimeState.nonPersistedDisplayOptions?.enableFilters === false
                             ? undefined

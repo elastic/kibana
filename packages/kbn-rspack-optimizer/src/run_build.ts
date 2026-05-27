@@ -18,6 +18,18 @@ import { HmrServer } from './hmr/hmr_server';
 import type { ThemeTag } from './types';
 import { BUNDLES_SUBDIR } from './paths';
 
+export const IGNORED_WATCH_PATTERNS: RegExp[] = [
+  /[\\/]node_modules[\\/]/,
+  /[\\/]target[\\/]/,
+  /\.tsbuildinfo$/,
+  /\.test\.[jt]sx?$/,
+  /\.spec\.[jt]sx?$/,
+  /\.stories\.[jt]sx?$/,
+  /\.mock\.[jt]sx?$/,
+  /[\\/]__(?:mocks|snapshots|fixtures|jest)__[\\/]/,
+  /[\\/]jest(?:\.integration)?\.config\.[jt]s$/,
+];
+
 export interface BuildOptions {
   repoRoot: string;
   outputRoot?: string;
@@ -243,7 +255,7 @@ async function runWatchBuild(
     };
 
     log?.info('Setting up RSPack watcher...');
-    log?.debug('Watcher will ignore: /node_modules/');
+    log?.debug(`Watcher will ignore: ${IGNORED_WATCH_PATTERNS.map((re) => re.source).join(', ')}`);
     log?.debug('Aggregate timeout: 50ms');
 
     if (hmrServer) {
@@ -257,7 +269,9 @@ async function runWatchBuild(
     const watching = compiler.watch(
       {
         aggregateTimeout: 50,
-        ignored: /node_modules/,
+        // rspack's WatchOptions.ignored only types as string[] | string | RegExp
+        // | (path) => boolean (not RegExp[]), so use the predicate form.
+        ignored: (filePath: string) => IGNORED_WATCH_PATTERNS.some((re) => re.test(filePath)),
       },
       (err, stats) => {
         if (isShuttingDown) {

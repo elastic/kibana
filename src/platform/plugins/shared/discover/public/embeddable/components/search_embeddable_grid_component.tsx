@@ -11,11 +11,7 @@ import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-  getSortArray,
-} from '@kbn/discover-utils';
+import { SORT_DEFAULT_ORDER_SETTING, getSortArray } from '@kbn/discover-utils';
 import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -36,6 +32,7 @@ import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types
 import { DiscoverGridEmbeddable, type InlineEditing } from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
+import { showTimeFieldColumn } from '../../utils/show_time_field_column';
 import { useAdditionalCellActions } from '../../context_awareness';
 import { getTimeRangeFromFetchContext } from '../utils/update_search_source';
 import { createDataSource } from '../../../common/data_sources';
@@ -48,6 +45,7 @@ interface SavedSearchEmbeddableComponentProps {
   };
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
+  onRefreshData?: () => void;
   enableDocumentViewer: boolean;
   inlineEditing: InlineEditing;
   stateManager: SearchEmbeddableStateManager;
@@ -59,6 +57,7 @@ export function SearchEmbeddableGridComponent({
   api,
   dataView,
   onAddFilter,
+  onRefreshData,
   enableDocumentViewer,
   inlineEditing,
   stateManager,
@@ -226,6 +225,12 @@ export function SearchEmbeddableGridComponent({
 
   const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
 
+  // should be aligned with discover documents `showTimeCol` prop
+  const showTimeCol = useMemo(
+    () => showTimeFieldColumn({ uiSettings: discoverServices.uiSettings, query: savedSearchQuery }),
+    [discoverServices.uiSettings, savedSearchQuery]
+  );
+
   return (
     <DiscoverGridEmbeddableMemoized
       {...onStateEditedProps}
@@ -234,6 +239,7 @@ export function SearchEmbeddableGridComponent({
       dataView={dataView}
       interceptedWarnings={interceptedWarnings}
       onFilter={onAddFilter}
+      onRefreshData={onRefreshData}
       rows={rows}
       rowsPerPageState={savedSearch.rowsPerPage ?? defaults.rowsPerPage}
       sampleSizeState={fetchedSampleSize}
@@ -262,7 +268,7 @@ export function SearchEmbeddableGridComponent({
       savedSearchId={savedSearchId}
       searchTitle={panelTitle || savedSearchTitle}
       services={discoverServices}
-      showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
+      showTimeCol={showTimeCol}
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
       inlineEditing={inlineEditing}

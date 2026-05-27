@@ -32,7 +32,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -115,6 +115,7 @@ spaceTest.describe(
 
       await spaceTest.step('open context menu in fullscreen', async () => {
         await metricsExperience.clearSearch();
+        await expect(metricsExperience.pagination.container).toBeVisible();
         await metricsExperience.openCardContextMenu(0);
         await expect(metricsExperience.chartActions.viewDetails).toBeVisible();
       });

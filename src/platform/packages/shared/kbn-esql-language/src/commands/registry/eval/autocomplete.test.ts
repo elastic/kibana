@@ -171,6 +171,11 @@ describe('EVAL Autocomplete', () => {
     ]);
   });
 
+  test('does not suggest subqueries after IN', async () => {
+    await evalExpectSuggestions('from a | eval col = doubleField in ', ['($0)']);
+    await evalExpectSuggestions('from a | eval col = doubleField not in ', ['($0)']);
+  });
+
   test('after column after assignment', async () => {
     await evalExpectSuggestions('from a | eval col = doubleField ', [
       ', ',

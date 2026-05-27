@@ -11,8 +11,11 @@ import type {
   UnifiedAttachmentPayload,
   AttachmentAttributesV2,
 } from '../../../common/types/domain/attachment/v2';
-import type { ExternalReferenceNoSOAttachmentPayload } from '../../../common/types/domain';
-import { AttachmentType } from '../../../common/types/domain';
+import type {
+  ExternalReferenceAttachmentPayload,
+  ExternalReferenceNoSOAttachmentPayload,
+} from '../../../common/types/domain';
+import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
 import type {
   AttachmentPersistedAttributes,
   UnifiedAttachmentAttributes,
@@ -24,6 +27,45 @@ import {
   UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP,
 } from '../../../common/constants/attachments';
 import { getExternalReferenceStorage } from './storage_type';
+
+type ExternalReferenceStorage = ExternalReferenceAttachmentPayload['externalReferenceStorage'];
+
+/** Lifts `externalReferenceStorage.soType` into `metadata.soType` (savedObject storage only). */
+function liftLegacySoTypeIntoMetadata(
+  externalReferenceStorage: ExternalReferenceStorage | undefined,
+  metadata: Record<string, unknown> | null | undefined
+): Record<string, unknown> | null | undefined {
+  if (externalReferenceStorage?.type !== ExternalReferenceStorageType.savedObject) {
+    return metadata;
+  }
+  return {
+    ...(metadata ?? {}),
+    soType: externalReferenceStorage.soType,
+  };
+}
+
+/** Inverse of {@link liftLegacySoTypeIntoMetadata}. */
+function lowerSoTypeIntoLegacyStorage(
+  metadata: Record<string, unknown> | null | undefined,
+  legacyTypeId: string
+): {
+  externalReferenceStorage: ExternalReferenceStorage;
+  metadata: Record<string, unknown> | null | undefined;
+} {
+  const soType = metadata && typeof metadata.soType === 'string' ? metadata.soType : undefined;
+  if (soType != null) {
+    const { soType: _stripped, ...rest } = metadata as Record<string, unknown>;
+    const cleanedMetadata = Object.keys(rest).length > 0 ? rest : null;
+    return {
+      externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType },
+      metadata: cleanedMetadata,
+    };
+  }
+  return {
+    externalReferenceStorage: getExternalReferenceStorage(legacyTypeId),
+    metadata: metadata ?? null,
+  };
+}
 
 /**
  * Resolves a legacy externalReferenceAttachmentTypeId to its unified type name.
@@ -51,11 +93,8 @@ function isLegacyExternalReferenceAttachment(attributes: unknown): boolean {
 function isUnifiedExternalReferenceAttachment(attributes: unknown): boolean {
   if (typeof attributes !== 'object' || attributes === null) return false;
   const attrs = attributes as Record<string, unknown>;
-  // External-reference unified attachments expect `attachmentId` to be a single
-  // saved-object id string. The shared `AttachmentAttributesV2` union allows
-  // `attachmentId` to be `string | string[]` to accommodate alert/event types,
-  // so we explicitly narrow here to reject API payloads that pass an array
-  // (e.g. `{ type: 'security.endpoint', attachmentId: ['a','b'] }`).
+  // Reject array `attachmentId` (allowed by the shared v2 union for alert/event
+  // types but invalid for external-reference subtypes).
   return (
     typeof attrs.type === 'string' &&
     resolveLegacyTypeId(attrs.type) != null &&
@@ -85,14 +124,20 @@ export const externalReferenceAttachmentTransformer: AttachmentTypeTransformer<
 
     if (isLegacyExternalReferenceAttachment(attributes)) {
       const legacyAttrs = attributes as AttachmentPersistedAttributes &
-        ExternalReferenceNoSOAttachmentPayload;
+        ExternalReferenceNoSOAttachmentPayload & {
+          externalReferenceStorage?: ExternalReferenceStorage;
+        };
       const unifiedType =
         resolveUnifiedType(legacyAttrs.externalReferenceAttachmentTypeId) ??
         legacyAttrs.externalReferenceAttachmentTypeId;
+      const liftedMetadata = liftLegacySoTypeIntoMetadata(
+        legacyAttrs.externalReferenceStorage,
+        legacyAttrs.externalReferenceMetadata as Record<string, unknown> | null | undefined
+      );
       return {
         type: unifiedType,
         attachmentId: legacyAttrs.externalReferenceId,
-        metadata: legacyAttrs.externalReferenceMetadata as Record<string, unknown> | undefined,
+        metadata: liftedMetadata,
         owner: legacyAttrs.owner,
         ...extractCommonAttributes(legacyAttrs as AttachmentAttributesV2),
       } as UnifiedAttachmentAttributes;
@@ -110,12 +155,16 @@ export const externalReferenceAttachmentTransformer: AttachmentTypeTransformer<
       const unifiedAttrs = attributes as UnifiedAttachmentAttributes &
         UnifiedReferenceAttachmentPayload;
       const legacyTypeId = resolveLegacyTypeId(unifiedAttrs.type) ?? unifiedAttrs.type;
+      const { externalReferenceStorage, metadata } = lowerSoTypeIntoLegacyStorage(
+        unifiedAttrs.metadata as Record<string, unknown> | null | undefined,
+        legacyTypeId
+      );
       return {
         type: AttachmentType.externalReference,
         externalReferenceId: unifiedAttrs.attachmentId,
-        externalReferenceStorage: getExternalReferenceStorage(legacyTypeId),
+        externalReferenceStorage,
         externalReferenceAttachmentTypeId: legacyTypeId,
-        externalReferenceMetadata: unifiedAttrs.metadata ?? null,
+        externalReferenceMetadata: metadata,
         owner: unifiedAttrs.owner,
         ...extractCommonAttributes(unifiedAttrs as AttachmentAttributesV2),
       } as AttachmentPersistedAttributes;
@@ -151,14 +200,20 @@ export const externalReferenceAttachmentTransformer: AttachmentTypeTransformer<
     if (!isLegacyExternalReferenceAttachment(attachment)) {
       throw new Error('Expected legacy external reference attachment payload');
     }
-    const legacyAttachment = attachment as ExternalReferenceNoSOAttachmentPayload;
+    const legacyAttachment = attachment as ExternalReferenceNoSOAttachmentPayload & {
+      externalReferenceStorage?: ExternalReferenceStorage;
+    };
     const unifiedType =
       resolveUnifiedType(legacyAttachment.externalReferenceAttachmentTypeId) ??
       legacyAttachment.externalReferenceAttachmentTypeId;
+    const liftedMetadata = liftLegacySoTypeIntoMetadata(
+      legacyAttachment.externalReferenceStorage,
+      legacyAttachment.externalReferenceMetadata as Record<string, unknown> | null | undefined
+    );
     return {
       type: unifiedType,
       attachmentId: legacyAttachment.externalReferenceId,
-      metadata: legacyAttachment.externalReferenceMetadata,
+      metadata: liftedMetadata as UnifiedReferenceAttachmentPayload['metadata'],
       owner: legacyAttachment.owner,
     };
   },
@@ -169,12 +224,16 @@ export const externalReferenceAttachmentTransformer: AttachmentTypeTransformer<
     }
     const unifiedAttachment = attachment as UnifiedReferenceAttachmentPayload;
     const legacyTypeId = resolveLegacyTypeId(unifiedAttachment.type) ?? unifiedAttachment.type;
+    const { externalReferenceStorage, metadata } = lowerSoTypeIntoLegacyStorage(
+      unifiedAttachment.metadata as Record<string, unknown> | null | undefined,
+      legacyTypeId
+    );
     return {
       type: AttachmentType.externalReference,
       externalReferenceId: unifiedAttachment.attachmentId,
-      externalReferenceStorage: getExternalReferenceStorage(legacyTypeId),
+      externalReferenceStorage,
       externalReferenceAttachmentTypeId: legacyTypeId,
-      externalReferenceMetadata: unifiedAttachment.metadata ?? null,
+      externalReferenceMetadata: metadata,
       owner: unifiedAttachment.owner,
     } as ExternalReferenceNoSOAttachmentPayload;
   },

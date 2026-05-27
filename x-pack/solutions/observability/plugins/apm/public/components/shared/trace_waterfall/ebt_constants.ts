@@ -5,5 +5,20 @@
  * 2.0.
  */
 
-export const EBT_SCROLL_TO_ORIGIN_ACTION = 'scrollToOrigin';
-export const EBT_FLYOUT_WATERFALL_SCROLL_TO_ORIGIN_BUTTON = 'flyoutWaterfallScrollToOriginButton';
+export const TRACE_WATERFALL_EBT_CLICK_ACTIONS = {
+  VIEW_FULL_TRACE: 'viewFullTrace',
+  SCROLL_TO_ORIGIN: 'scrollToOrigin',
+} as const;
+
+export const TRACE_WATERFALL_EBT_ELEMENTS = {
+  WATERFALL_ROW: 'waterfallRow',
+  WATERFALL_ERROR_BADGE: 'waterfallErrorBadge',
+  WATERFALL_SERVICE_BADGE: 'waterfallServiceBadge',
+  WATERFALL_HEADER: 'waterfallHeader',
+  WATERFALL_VIEW_FULL_TRACE: 'waterfallViewFullTrace',
+  FLYOUT_WATERFALL_ROW: 'flyoutWaterfallRow',
+  FLYOUT_WATERFALL_ERROR_BADGE: 'flyoutWaterfallErrorBadge',
+  FLYOUT_WATERFALL_SERVICE_BADGE: 'flyoutWaterfallServiceBadge',
+  FLYOUT_WATERFALL_FOOTER: 'flyoutWaterfallFooter',
+  FLYOUT_WATERFALL_SCROLL_TO_ORIGIN: 'flyoutWaterfallScrollToOrigin',
+} as const;

@@ -29,8 +29,9 @@
       "management",
       "kibanaUtils",
       "share",
-      "eventLog",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
+      "maintenanceWindows",
+      "eventLog"
     ],
     "optionalPlugins": ["usageCollection", "agentBuilder", "agentContextLayer"],
     "requiredBundles": ["alerting", "kibanaReact"],

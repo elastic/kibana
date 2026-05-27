@@ -2,7 +2,7 @@
 
 > **Prerequisite:** Read the [server-level README](../../README.md) first for the plugin-wide architecture and terminology.
 
-The dispatcher is the notification pipeline for alerting v2. It reads alert episodes from `.rule-events`, reads user/system action history from `.alert-actions`, decides what should notify now, dispatches eligible groups, and records the outcome back into `.alert-actions`.
+The dispatcher is the action dispatch pipeline for alerting v2. It reads alert episodes from `.rule-events`, reads user/system action history from `.alert-actions`, decides what should dispatch now, dispatches eligible groups, and records the outcome back into `.alert-actions`.
 
 It runs on its own Task Manager schedule, separate from per-rule execution.
 
@@ -10,7 +10,7 @@ It runs on its own Task Manager schedule, separate from per-rule execution.
 
 - Loading candidate alert episodes for the current execution window
 - Applying suppression semantics from alert actions
-- Matching episodes to notification policies
+- Matching episodes to action policies
 - Grouping matched episodes
 - Throttling repeated delivery
 - Dispatching to destinations
@@ -55,9 +55,9 @@ The pipeline then moves through these phases:
 2. Fetch suppression facts
 3. Split into dispatchable vs suppressed episodes
 4. Load rule metadata for dispatchable episodes
-5. Load enabled notification policies
+5. Load enabled action policies
 6. Evaluate policy matchers
-7. Build notification groups
+7. Build action groups
 8. Apply throttling
 9. Dispatch eligible groups
 10. Store final actions and reasons
@@ -68,10 +68,10 @@ By the end of a dispatcher run, every episode that reached the later pipeline st
 
 | Outcome | What happened | Action documents written |
 | --- | --- | --- |
-| `dispatch` | The episode matched a policy, survived suppression and throttling, and was selected for delivery. | `fire` per episode, plus `notified` per notification group |
-| `throttled` | The episode matched a policy, but the notification group was held back by throttling. | `suppress` with a throttle-related reason |
+| `dispatch` | The episode matched a policy, survived suppression and throttling, and was selected for delivery. | `fire` per episode, plus `notified` per action group |
+| `throttled` | The episode matched a policy, but the action group was held back by throttling. | `suppress` with a throttle-related reason |
 | `suppressed` | The episode was explicitly filtered out by suppression logic such as ack, snooze, or deactivate semantics. | `suppress` with the suppression reason |
-| `unmatched` | The episode remained dispatchable but matched no enabled notification policy. | `unmatched` |
+| `unmatched` | The episode remained dispatchable but matched no enabled action policy. | `unmatched` |
 
 The full action taxonomy, including user-written actions such as `ack` and `snooze`, is documented in [`../../resources/README.md`](../../resources/README.md).
 
@@ -113,15 +113,15 @@ Unlike the rule executor, the dispatcher is not streaming. Each step receives on
 - `continue` with a partial state merge, or
 - `halt` with a `DispatcherHaltReason`
 
-## Notification policy model
+## Action policy model
 
-A notification policy is a saved object scoped to a Kibana space. Policies are not embedded into the rule. Instead, the dispatcher loads enabled policies for the space and evaluates each policy against the candidate episodes.
+An action policy is a saved object scoped to a Kibana space. Policies are not embedded into the rule. Instead, the dispatcher loads enabled policies for the space and evaluates each policy against the candidate episodes.
 
 Each policy defines:
 
 - `matcher`: optional KQL filter evaluated against the episode context and `data.*`
 - `groupBy` and `groupingMode`: how matched episodes are batched
-- `throttle`: when repeated notifications are allowed
+- `throttle`: when repeated actions are allowed
 - `destinations`: where matching groups should go
 - `snoozedUntil`: optional time-based suppression
 - `apiKey`: optional credential used to dispatch
@@ -148,9 +148,9 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 | `suppressions` | `FetchSuppressionsStep` | Suppression facts from `.alert-actions`. |
 | `dispatchable` / `suppressed` | `ApplySuppressionStep` | Split of episodes that may continue vs those that must not notify. |
 | `rules` | `FetchRulesStep` | Rule metadata keyed by rule id. |
-| `policies` | `FetchPoliciesStep` | Enabled notification policies keyed by id. |
+| `policies` | `FetchPoliciesStep` | Enabled action policies keyed by id. |
 | `matched` | `EvaluateMatchersStep` | Concrete `(episode, policy)` matches. |
-| `groups` | `BuildGroupsStep` | Notification groups to consider for delivery. |
+| `groups` | `BuildGroupsStep` | Action groups to consider for delivery. |
 | `dispatch` / `throttled` | `ApplyThrottlingStep` | Groups that may send now vs groups held back. |
 
 ## Execution steps
@@ -163,10 +163,10 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | 2 | `FetchSuppressionsStep` | Load alert-action facts needed for suppression decisions. |
 | 3 | `ApplySuppressionStep` | Mark each episode as dispatchable or suppressed, preserving reasons. |
 | 4 | `FetchRulesStep` | Load rule metadata for the remaining dispatchable set. |
-| 5 | `FetchPoliciesStep` | Load enabled notification policies for the space. |
+| 5 | `FetchPoliciesStep` | Load enabled action policies for the space. |
 | 6 | `EvaluateMatchersStep` | Evaluate each policy matcher against each episode context. |
-| 7 | `BuildGroupsStep` | Build `NotificationGroup` objects based on policy grouping settings. |
-| 8 | `ApplyThrottlingStep` | Compare candidate groups with notification history and split them into dispatch vs throttled. |
+| 7 | `BuildGroupsStep` | Build `ActionGroup` objects based on policy grouping settings. |
+| 8 | `ApplyThrottlingStep` | Compare candidate groups with action history and split them into dispatch vs throttled. |
 | 9 | `DispatchStep` | Perform delivery side effects for eligible groups. |
 | 10 | `StoreActionsStep` | Persist the execution outcome to `.alert-actions`. |
 
@@ -185,7 +185,7 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 
 ## When to add a new dispatcher step
 
-Add a step when you need a new distinct phase in the notification decision pipeline, especially when that phase:
+Add a step when you need a new distinct phase in the action dispatch pipeline, especially when that phase:
 
 - introduces new pipeline state
 - must run in a specific order relative to suppression, grouping, or dispatch
@@ -256,11 +256,11 @@ export interface DispatcherPipelineState {
   readonly dispatchable?: AlertEpisode[];
   readonly suppressed?: Array<AlertEpisode & { reason: string }>;
   readonly rules?: Map<RuleId, Rule>;
-  readonly policies?: Map<NotificationPolicyId, NotificationPolicy>;
+  readonly policies?: Map<ActionPolicyId, ActionPolicy>;
   readonly matched?: MatchedPair[];
-  readonly groups?: NotificationGroup[];
-  readonly dispatch?: NotificationGroup[];
-  readonly throttled?: NotificationGroup[];
+  readonly groups?: ActionGroup[];
+  readonly dispatch?: ActionGroup[];
+  readonly throttled?: ActionGroup[];
   readonly myNewMetadata?: string;
 }
 ```
@@ -311,7 +311,7 @@ describe('MyNewStep', () => {
 
 If you are not adding a new pipeline phase, but instead want to support a new delivery target, start with:
 
-- `types.ts` to extend `NotificationPolicyDestination`
+- `types.ts` to extend `ActionPolicyDestination`
 - `steps/dispatch_step.ts` to add the new dispatch branch
 - any saved object / route validation that defines allowed destinations
 

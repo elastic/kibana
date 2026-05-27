@@ -180,7 +180,9 @@ export function ImportContentPackFlyout({
             <ContentPackObjectsList
               objects={contentPackObjects}
               onSelectionChange={setIncludedObjects}
-              significantEventsAvailable={significantEvents?.enabled ?? false}
+              significantEventsAvailable={
+                (!!significantEvents?.enabled && !!significantEvents?.available) ?? false
+              }
             />
           </>
         ) : null}

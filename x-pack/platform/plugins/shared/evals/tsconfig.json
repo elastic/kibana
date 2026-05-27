@@ -24,6 +24,7 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-router-server-mocks",
     "@kbn/code-editor",
+    "@kbn/llm-trace-waterfall",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
     "@kbn/core-saved-objects-api-server-mocks",

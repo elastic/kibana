@@ -12,11 +12,19 @@ import type { TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch'
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
-import type { BaseSearchRuntimeMappings, IDataStreamClient, DataStreamDefinition } from './types';
+import type {
+  AnyDataStreamDefinition,
+  BaseSearchRuntimeMappings,
+  IDataStreamClient,
+  DataStreamDefinition,
+} from './types';
 import type { ClientHelpers } from './types/client';
 import type { ClientSearchRequest, ClientCreateRequest } from './types/es_api';
 
 import { initialize } from './initialize';
+import { initializeIndexTemplate } from './initialize/index_template';
+import { initializeDataStream } from './initialize/data_stream';
+import { getExistingDataStream, getExistingIndexTemplate } from './initialize/exists_checks';
 import { validateClientArgs } from './validate_client_args';
 import {
   generateSpacePrefixedId,
@@ -68,6 +76,83 @@ export class DataStreamClient<
       return;
     }
 
+    return new DataStreamClient(args.elasticsearchClient, args.dataStream);
+  }
+
+  /**
+   * Install or update the index template for a data stream without creating the data stream.
+   *
+   * Use this at plugin setup time (e.g. with the internal/system user) to ensure the template
+   * is in place before the first write happens. The data stream itself will be auto-created by
+   * Elasticsearch on the first write.
+   *
+   * If a data stream already exists when this is called (e.g. on a deploy that bumps `version`),
+   * mapping changes are applied to the current write index — same contract as
+   * {@link DataStreamClient.initialize}, minus the data stream creation step.
+   *
+   * Use {@link DataStreamClient.fromDefinition} to obtain a client at runtime.
+   *
+   * @remark Idempotent: subsequent calls with the same definition are no-ops; calls with a higher
+   *         `version` will update the template and migrate mappings on the existing write index.
+   */
+  public static async initializeTemplate(args: {
+    dataStream: AnyDataStreamDefinition;
+    elasticsearchClient: ElasticsearchClient;
+    logger: Logger;
+  }): Promise<void> {
+    validateClientArgs(args);
+    const { dataStream, elasticsearchClient } = args;
+    const logger = args.logger.get('data-streams-setup');
+
+    if (!dataStream.name) {
+      throw new Error('Data stream name is required');
+    }
+
+    const [existingDataStream, existingIndexTemplate] = await Promise.all([
+      getExistingDataStream(elasticsearchClient, dataStream.name, logger),
+      getExistingIndexTemplate(elasticsearchClient, dataStream.name, logger),
+    ]);
+
+    await initializeIndexTemplate({
+      logger,
+      dataStream,
+      elasticsearchClient,
+      existingIndexTemplate,
+      skipCreation: false,
+    });
+
+    // Apply mapping migrations to the existing write index when present. The pre-update
+    // `existingIndexTemplate` reference is intentional: it lets `initializeDataStream` detect
+    // a version bump and run `simulateIndexTemplate` + `putMapping` against the write index.
+    // When no data stream exists yet, this is a no-op thanks to the `skipCreation` guard.
+    await initializeDataStream({
+      logger,
+      dataStream,
+      elasticsearchClient,
+      existingDataStream,
+      existingIndexTemplate,
+      skipCreation: true,
+    });
+  }
+
+  /**
+   * Build a client for an already-initialized data stream.
+   *
+   * Use this in request-scoped code paths to avoid re-running setup on every call. The
+   * data stream's index template should already have been installed at startup via
+   * {@link DataStreamClient.initializeTemplate} (or {@link DataStreamClient.initialize}).
+   *
+   * If the data stream does not exist yet, Elasticsearch will auto-create it on the first
+   * write through this client, provided a matching index template is in place.
+   */
+  public static fromDefinition<
+    MappingsInDefinition extends MappingsDefinition,
+    FullDocumentType extends GetFieldsOf<MappingsInDefinition> = GetFieldsOf<MappingsInDefinition>,
+    SRM extends BaseSearchRuntimeMappings = never
+  >(args: {
+    dataStream: DataStreamDefinition<MappingsInDefinition, FullDocumentType, SRM>;
+    elasticsearchClient: ElasticsearchClient;
+  }): DataStreamClient<MappingsInDefinition, FullDocumentType, SRM> {
     return new DataStreamClient(args.elasticsearchClient, args.dataStream);
   }
 

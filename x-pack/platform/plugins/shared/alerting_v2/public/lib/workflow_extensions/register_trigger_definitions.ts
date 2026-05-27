@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import type { WorkflowExtensionsPublicServiceContract } from '../../services/workflow_extensions_service';
+import type {
+  PublicTriggerDefinition,
+  WorkflowsExtensionsPublicPluginSetup,
+} from '@kbn/workflows-extensions/public';
 
 /**
  * Registers all alerting-v2 public workflow trigger definitions (UI metadata).
- * Call once during plugin setup with the resolved {@link WorkflowExtensionsService}.
+ * Call once during plugin setup with the `workflowsExtensions` setup contract.
  */
 export function registerTriggerDefinitions(
-  workflowExtensionsService: WorkflowExtensionsPublicServiceContract
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
 ): void {
-  workflowExtensionsService.registerPublicTriggerDefinitions([
+  const triggerDefinitions: PublicTriggerDefinition[] = [
     // Add PublicTriggerDefinition entries here (spread common id + eventSchema + title, icon, docs).
-  ]);
+  ];
+
+  for (const definition of triggerDefinitions) {
+    workflowsExtensions.registerTriggerDefinition(definition);
+  }
 }

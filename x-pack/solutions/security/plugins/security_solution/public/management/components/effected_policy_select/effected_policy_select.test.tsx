@@ -232,13 +232,10 @@ describe('when using EffectedPolicySelect component', () => {
 
       expect(getByTestId('test-unaccessibleGroupLabel')).toBeTruthy();
       expect(getByTestId(`test-unAccessiblePolicy-${unAccessiblePolicyId}`)).toBeTruthy();
-      expect(
-        (
-          getByTestId(
-            `${policySelectorTestUtils.testIds.root}-test-unAccessiblePolicy-${unAccessiblePolicyId}-checkbox`
-          ) as HTMLInputElement
-        ).disabled
-      ).toBe(true);
+      expect(getByTestId(`test-unAccessiblePolicy-${unAccessiblePolicyId}`)).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
     });
 
     it('should display count of policies assigned to artifact that are not accessible in active space', async () => {

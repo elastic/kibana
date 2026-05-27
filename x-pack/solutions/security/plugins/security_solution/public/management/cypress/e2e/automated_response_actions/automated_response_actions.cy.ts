@@ -19,8 +19,7 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-// Failing: See https://github.com/elastic/kibana/issues/207773
-describe.skip(
+describe(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
@@ -82,7 +81,6 @@ describe.skip(
 
       visitRuleAlerts(ruleName);
       closeAllToasts();
-      waitForAlertsToPopulate(1, 2000, 120000);
       changeAlertsFilter(
         `agent.id: "${createdHost.agentId}" and process.name: "sshd" and kibana.alert.rule.uuid: "${ruleId}"`
       );

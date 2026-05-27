@@ -12,16 +12,23 @@ import {
   EuiButtonGroup,
   EuiButtonIcon,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ReactNode } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash/fp';
+import {
+  EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
+} from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { CriticalityLevel } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import { getWatchlistName } from '../../../../../../common/entity_analytics/watchlists/constants';
 import { ALERT_PREVIEW_BANNER } from '../../../../../flyout/document_details/preview/constants';
@@ -37,6 +44,7 @@ import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributi
 import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 
 import { useRiskScore } from '../../../../api/hooks/use_risk_score';
+import type { RiskScoreState } from '../../../../api/hooks/use_risk_score';
 import { useGetWatchlists } from '../../../../api/hooks/use_get_watchlists';
 import type { EntityRiskScore, EntityType } from '../../../../../../common/search_strategy';
 import type { ESQuery } from '../../../../../../common/typed_json';
@@ -44,9 +52,12 @@ import { buildEntityNameFilter } from '../../../../../../common/search_strategy'
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
-import { AskAiAssistant } from './ask_ai_assistant';
+import { AiAssistantButton } from '../../../ai_assistant_button/ai_assistant_button';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
 import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
+import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -63,33 +74,47 @@ const FIRST_RECORD_PAGINATION = {
 export const EXPAND_ALERT_TEST_ID = 'risk-input-alert-preview-button';
 export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
 
+interface RiskScorePanelProps extends FlyoutPanelProps {
+  params: {
+    path: {
+      tab: EntityDetailsLeftPanelTab.RISK_INPUTS;
+      subTab?: RiskScoreLeftPanelSubTab;
+    };
+  };
+}
+
+function isRiskScoreFlyoutPanelProps(
+  panelLeft: FlyoutPanelProps | undefined
+): panelLeft is RiskScorePanelProps {
+  const params = panelLeft?.params;
+  if (!params || typeof params !== 'object' || !('path' in params)) {
+    return false;
+  }
+
+  const path = params.path as { tab?: unknown; subTab?: unknown };
+  if (path?.tab !== EntityDetailsLeftPanelTab.RISK_INPUTS) {
+    return false;
+  }
+
+  return (
+    path.subTab === undefined ||
+    (typeof path.subTab === 'string' &&
+      Object.values(RiskScoreLeftPanelSubTab).includes(path.subTab as RiskScoreLeftPanelSubTab))
+  );
+}
+
 export const RiskInputsTab = <T extends EntityType>({
   entityType,
   entityName,
   scopeId,
   entityId,
 }: RiskInputsTabProps<T>) => {
-  const { setQuery, deleteQuery } = useGlobalTime();
-  const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
-  const [selectedView, setSelectedView] = useState<'entity' | 'resolution'>('entity');
-  const euidApi = useEntityStoreEuidApi();
-  const { openPreviewPanel } = useExpandableFlyoutApi();
-  const { data: watchlists } = useGetWatchlists();
+  const panels = useStableExpandableFlyoutState();
+  const subTab = isRiskScoreFlyoutPanelProps(panels.left)
+    ? panels.left.params.path.subTab
+    : undefined;
 
-  const openAlertPreview = useCallback(
-    (id: string, indexName: string) =>
-      openPreviewPanel({
-        id: DocumentDetailsPreviewPanelKey,
-        params: {
-          id,
-          indexName,
-          scopeId,
-          isPreviewMode: true,
-          banner: ALERT_PREVIEW_BANNER,
-        },
-      }),
-    [openPreviewPanel, scopeId]
-  );
+  const { data: watchlists } = useGetWatchlists();
 
   const entityFilterQuery = useMemo(
     () =>
@@ -162,17 +187,6 @@ export const RiskInputsTab = <T extends EntityType>({
       : undefined;
   const hasResolutionScore = hasRealResolutionGroup && Boolean(resolutionRiskScore);
 
-  useEffect(() => {
-    if (!loadingRiskScore && !entityRiskScore && hasResolutionScore) {
-      setSelectedView('resolution');
-    }
-  }, [loadingRiskScore, entityRiskScore, hasResolutionScore]);
-
-  const isResolutionView = selectedView === 'resolution' && hasResolutionScore;
-  const activeRiskScore = isResolutionView ? resolutionRiskScore : entityRiskScore;
-  const activeInspectRiskScore = isResolutionView ? inspectResolutionRiskScore : inspectRiskScore;
-  const activeRiskScoreLoading = isResolutionView ? loadingResolutionRiskScore : loadingRiskScore;
-  const activeRiskScoreRefetch = isResolutionView ? refetchResolutionRiskScore : refetch;
   const watchlistNamesById = useMemo(() => {
     const map = new Map<string, string>();
     (watchlists ?? []).forEach((watchlist) => {
@@ -182,6 +196,126 @@ export const RiskInputsTab = <T extends EntityType>({
     });
     return map;
   }, [watchlists]);
+
+  if (riskScoreError) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.errorTitle"
+            defaultMessage="Something went wrong"
+          />
+        }
+        color="danger"
+        iconType="error"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.errorBody"
+            defaultMessage="Error while fetching risk inputs. Please try again later."
+          />
+        </p>
+      </EuiCallOut>
+    );
+  }
+
+  return (
+    <RiskInputsTabContent
+      // using subTab as key to force re-render the tab content when the subTab changes
+      key={subTab}
+      subTab={subTab}
+      entityType={entityType}
+      entityName={entityName}
+      scopeId={scopeId}
+      entityRiskScore={entityRiskScore}
+      resolutionRiskScore={resolutionRiskScore}
+      hasResolutionScore={hasResolutionScore}
+      loadingRiskScore={loadingRiskScore}
+      loadingResolutionRiskScore={loadingResolutionRiskScore}
+      inspectRiskScore={inspectRiskScore}
+      inspectResolutionRiskScore={inspectResolutionRiskScore}
+      refetch={refetch}
+      refetchResolutionRiskScore={refetchResolutionRiskScore}
+      resolutionGroup={resolutionGroup}
+      watchlistNamesById={watchlistNamesById}
+    />
+  );
+};
+
+RiskInputsTab.displayName = 'RiskInputsTab';
+
+interface RiskInputsTabContentProps<T extends EntityType> {
+  subTab?: RiskScoreLeftPanelSubTab;
+  entityType: T;
+  entityName: string;
+  scopeId: string;
+  entityRiskScore: EntityRiskScore<T> | undefined;
+  resolutionRiskScore: EntityRiskScore<T> | undefined;
+  hasResolutionScore: boolean;
+  loadingRiskScore: boolean;
+  loadingResolutionRiskScore: boolean;
+  inspectRiskScore: RiskScoreState<EntityType>['inspect'];
+  inspectResolutionRiskScore: RiskScoreState<EntityType>['inspect'];
+  refetch: RiskScoreState<EntityType>['refetch'];
+  refetchResolutionRiskScore: RiskScoreState<EntityType>['refetch'];
+  resolutionGroup: ReturnType<typeof useResolutionGroup>['data'];
+  watchlistNamesById: Map<string, string>;
+}
+
+const RiskInputsTabContent = <T extends EntityType>({
+  subTab,
+  entityType,
+  entityName,
+  scopeId,
+  entityRiskScore,
+  resolutionRiskScore,
+  hasResolutionScore,
+  loadingRiskScore,
+  loadingResolutionRiskScore,
+  inspectRiskScore,
+  inspectResolutionRiskScore,
+  refetch,
+  refetchResolutionRiskScore,
+  resolutionGroup,
+  watchlistNamesById,
+}: RiskInputsTabContentProps<T>) => {
+  const { setQuery, deleteQuery } = useGlobalTime();
+  const euidApi = useEntityStoreEuidApi();
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
+  const [userSelectedView, setUserSelectedView] = useState(subTab);
+  const isAssistantToolDisabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolDisabled');
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const showAiAssistantButton = !isAssistantToolDisabled || isAgentBuilderEnabled;
+
+  const defaultView =
+    !loadingRiskScore && !entityRiskScore && hasResolutionScore
+      ? RiskScoreLeftPanelSubTab.RESOLUTION
+      : RiskScoreLeftPanelSubTab.ENTITY;
+  const selectedView = userSelectedView ?? defaultView;
+
+  const openAlertPreview = useCallback(
+    (id: string, indexName: string) =>
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id,
+          indexName,
+          scopeId,
+          isPreviewMode: true,
+          banner: ALERT_PREVIEW_BANNER,
+        },
+      }),
+    [openPreviewPanel, scopeId]
+  );
+
+  const isResolutionView =
+    selectedView === RiskScoreLeftPanelSubTab.RESOLUTION && hasResolutionScore;
+  const activeRiskScore = isResolutionView ? resolutionRiskScore : entityRiskScore;
+  const activeInspectRiskScore = isResolutionView ? inspectResolutionRiskScore : inspectRiskScore;
+  const activeRiskScoreLoading = isResolutionView ? loadingResolutionRiskScore : loadingRiskScore;
+  const activeRiskScoreRefetch = isResolutionView ? refetchResolutionRiskScore : refetch;
 
   useQueryInspector({
     deleteQuery,
@@ -193,38 +327,29 @@ export const RiskInputsTab = <T extends EntityType>({
   });
 
   const alerts = useRiskContributingAlerts<T>({ riskScore: activeRiskScore, entityType });
+
   const entityNameByEuid = useMemo(() => {
     const map = new Map<string, string>();
-
-    if (!resolutionGroup) {
-      return map;
-    }
-
+    if (!resolutionGroup) return map;
     [resolutionGroup.target, ...resolutionGroup.aliases].forEach((entity) => {
       const entityIdValue = getEntityId(entity);
       if (entityIdValue) {
         map.set(entityIdValue, getEntityName(entity) || entityIdValue);
       }
     });
-
     return map;
   }, [resolutionGroup]);
+
   const alertEntityById = useMemo(() => {
     const map = new Map<string, string>();
-
-    if (!isResolutionView || !euidApi || !alerts.data) {
-      return map;
-    }
-
+    if (!isResolutionView || !euidApi || !alerts.data) return map;
     alerts.data.forEach((alert) => {
       const sourceEntityId =
         alert.input.entity_id ?? euidApi.euid.getEuidFromObject(entityType, alert.rawSource);
-
       if (sourceEntityId) {
         map.set(alert._id, entityNameByEuid.get(sourceEntityId) ?? sourceEntityId);
       }
     });
-
     return map;
   }, [alerts.data, entityNameByEuid, entityType, euidApi, isResolutionView]);
 
@@ -327,29 +452,6 @@ export const RiskInputsTab = <T extends EntityType>({
     return columns;
   }, [alertEntityById, isResolutionView, openAlertPreview]);
 
-  if (riskScoreError) {
-    return (
-      <EuiCallOut
-        announceOnMount
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.riskInputs.errorTitle"
-            defaultMessage="Something went wrong"
-          />
-        }
-        color="danger"
-        iconType="error"
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.riskInputs.errorBody"
-            defaultMessage="Error while fetching risk inputs. Please try again later."
-          />
-        </p>
-      </EuiCallOut>
-    );
-  }
-
   const riskInputsAlertSection = (
     <>
       <EuiTitle size="xs" data-test-subj="risk-input-alert-title">
@@ -387,6 +489,8 @@ export const RiskInputsTab = <T extends EntityType>({
       {hasResolutionScore && (
         <>
           <EuiButtonGroup
+            color="primary"
+            isFullWidth
             legend={i18n.translate(
               'xpack.securitySolution.flyout.entityDetails.riskInputs.scoreViewLegend',
               { defaultMessage: 'Risk score view' }
@@ -394,14 +498,14 @@ export const RiskInputsTab = <T extends EntityType>({
             buttonSize="compressed"
             options={[
               {
-                id: 'entity',
+                id: RiskScoreLeftPanelSubTab.ENTITY,
                 label: i18n.translate(
                   'xpack.securitySolution.flyout.entityDetails.riskInputs.entityScoreViewLabel',
                   { defaultMessage: 'Entity risk score' }
                 ),
               },
               {
-                id: 'resolution',
+                id: RiskScoreLeftPanelSubTab.RESOLUTION,
                 label: i18n.translate(
                   'xpack.securitySolution.flyout.entityDetails.riskInputs.resolutionScoreViewLabel',
                   { defaultMessage: 'Resolution group risk score' }
@@ -409,7 +513,7 @@ export const RiskInputsTab = <T extends EntityType>({
               },
             ]}
             idSelected={selectedView}
-            onChange={(id) => setSelectedView(id as 'entity' | 'resolution')}
+            onChange={(id) => setUserSelectedView(id as RiskScoreLeftPanelSubTab)}
             data-test-subj="risk-input-score-view-toggle"
           />
           <EuiSpacer size="m" />
@@ -425,12 +529,23 @@ export const RiskInputsTab = <T extends EntityType>({
       />
       <EuiSpacer size="m" />
       {riskInputsAlertSection}
-      <AskAiAssistant entityType={entityType} entityName={entityName} />
+      {showAiAssistantButton && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <AiAssistantButton
+                entityType={entityType}
+                entityName={entityName}
+                telemetryPathway="entity_risk_contribution"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 };
-
-RiskInputsTab.displayName = 'RiskInputsTab';
 
 interface ContextsSectionProps<T extends EntityType> {
   riskScore?: EntityRiskScore<T>;
@@ -555,6 +670,7 @@ const ContextsSection = <T extends EntityType>({
         <AssetCriticalityBadge
           criticalityLevel={criticality.level}
           dataTestSubj="risk-inputs-asset-criticality-badge"
+          textSize="xs"
         />
       ),
       contribution: formatContribution(criticality.contribution),

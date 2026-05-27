@@ -377,6 +377,7 @@ export const AgentResponseSchema = schema.object({
   capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   health: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   effective_config: schema.maybe(schema.any()),
+  signals: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({
@@ -505,6 +506,35 @@ export const PostBulkAgentUnenrollRequestSchema = {
       schema.boolean({
         meta: {
           description: 'When passing agents by KQL query, unenrolls inactive agents too',
+        },
+      })
+    ),
+  }),
+};
+
+export const PostRemoveCollectorRequestSchema = {
+  params: schema.object({
+    agentId: schema.string({ meta: { description: 'The collector agent ID' } }),
+  }),
+};
+
+export const PostBulkRemoveCollectorsRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([
+      schema.arrayOf(
+        schema.string({
+          meta: { description: 'List of collector agent IDs' },
+        }),
+        { maxSize: 10000 }
+      ),
+      schema.string({
+        meta: { description: 'KQL query string. Leave empty to target all collectors' },
+      }),
+    ]),
+    includeInactive: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'When passing collectors by KQL query, also removes inactive collectors',
         },
       })
     ),

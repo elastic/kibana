@@ -8,10 +8,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
-import { i18n as i18nFn } from '@kbn/i18n';
+
 import {
   EuiEmptyPrompt,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -20,38 +20,35 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiPanel,
+  EuiSkeletonText,
   EuiTab,
   EuiTabs,
-  EuiTitle,
-  EuiFieldSearch,
-  EuiSkeletonText,
   EuiText,
+  EuiTitle,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n as i18nFn } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useAsync from 'react-use/lib/useAsync';
+
 import type { DashboardApi } from '../../../../dashboard_api/types';
-import type { MenuItem, MenuItemGroup } from '../types';
-import { getMenuItemGroups } from '../get_menu_item_groups';
-import { Groups } from './groups';
-import { FeaturedItems } from './featured_menu_items';
 import { embeddableService } from '../../../../services/kibana_services';
+import { useMenuItemGroups } from '../use_menu_item_groups';
+import type { MenuItem, MenuItemGroup } from '../types';
+import { FeaturedItems } from './featured_menu_items';
+import { Groups } from './groups';
 
 const TAB_NEW_ID = 'new' as const;
 const TAB_LIBRARY_ID = 'library' as const;
 type FlyoutTab = typeof TAB_NEW_ID | typeof TAB_LIBRARY_ID;
 
 function NewPanelContent({ dashboardApi }: { dashboardApi: DashboardApi }) {
-  const {
-    value: groups,
-    loading,
-    error,
-  } = useAsync(async () => {
-    return await getMenuItemGroups(dashboardApi);
-  }, [dashboardApi]);
+  const { groups, loading, error } = useMenuItemGroups({ dashboardApi });
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filteredGroups, setFilteredGroups] = useState<MenuItemGroup[]>([]);
+
   useEffect(() => {
     if (!searchTerm) {
       return setFilteredGroups(groups ?? []);
