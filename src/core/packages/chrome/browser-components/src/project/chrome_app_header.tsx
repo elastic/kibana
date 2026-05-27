@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState, useLayoutEffect } from 'react';
-import type { ChromeBreadcrumb, AppHeaderConfig } from '@kbn/core-chrome-browser';
+import React, { Suspense, useMemo, useState, useLayoutEffect } from 'react';
+import type { ChromeBreadcrumb, AppHeaderBack, AppHeaderConfig } from '@kbn/core-chrome-browser';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
-import type { AppHeaderBack } from '@kbn/app-header';
 
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { AppHeaderView } from '@kbn/app-header';
 import { useLayoutUpdate } from '@kbn/ui-chrome-layout';
 import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
+
+const AppHeaderViewLazy = React.lazy(async () => {
+  const { AppHeaderView } = await import('@kbn/app-header');
+  return { default: AppHeaderView };
+});
 
 function getBreadcrumbText(crumb: ChromeBreadcrumb): string | undefined {
   if (typeof crumb.text === 'string') return crumb.text;
@@ -127,16 +130,18 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
 
   return (
     <div ref={measureRef}>
-      <AppHeaderView
-        title={config?.title}
-        back={config?.back ?? fallback.back}
-        tabs={config?.tabs}
-        badges={config?.badges}
-        menu={config?.menu ?? fallback.menu}
-        favorite={config?.favorite}
-        sticky={false}
-        padding="m"
-      />
+      <Suspense fallback={null}>
+        <AppHeaderViewLazy
+          title={config?.title}
+          back={config?.back ?? fallback.back}
+          tabs={config?.tabs}
+          badges={config?.badges}
+          menu={config?.menu ?? fallback.menu}
+          favorite={config?.favorite}
+          sticky={false}
+          padding="m"
+        />
+      </Suspense>
     </div>
   );
 });
