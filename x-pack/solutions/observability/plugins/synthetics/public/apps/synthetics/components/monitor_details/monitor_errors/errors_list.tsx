@@ -18,6 +18,7 @@ import {
   EuiButtonIcon,
   useIsWithinMinBreakpoint,
   EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';

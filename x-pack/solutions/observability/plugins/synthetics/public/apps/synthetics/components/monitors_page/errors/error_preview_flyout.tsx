@@ -24,6 +24,7 @@ import {
   EuiPanel,
   EuiCopy,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDateFormat } from '../../../../../hooks/use_date_format';

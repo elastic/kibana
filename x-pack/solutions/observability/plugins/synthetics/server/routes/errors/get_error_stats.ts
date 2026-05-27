@@ -11,19 +11,21 @@ import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getErrorStats } from '../../queries/get_error_stats';
 import { safeJsonParse } from './safe_json_parse';
 
+const MAX_QUERY_PARAM_LENGTH = 4096;
+
 export const getErrorStatsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.ERROR_STATS,
   validate: {
     query: schema.object({
-      from: schema.string(),
-      to: schema.string(),
-      monitorTypes: schema.maybe(schema.string()),
-      locations: schema.maybe(schema.string()),
-      tags: schema.maybe(schema.string()),
-      projects: schema.maybe(schema.string()),
-      statusCodes: schema.maybe(schema.string()),
-      query: schema.maybe(schema.string()),
+      from: schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH }),
+      to: schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH }),
+      monitorTypes: schema.maybe(schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH })),
+      locations: schema.maybe(schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH })),
+      tags: schema.maybe(schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH })),
+      projects: schema.maybe(schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH })),
+      statusCodes: schema.maybe(schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH })),
+      query: schema.maybe(schema.string({ maxLength: MAX_QUERY_PARAM_LENGTH })),
     }),
   },
   handler: async ({ syntheticsEsClient, request, spaceId }) => {
