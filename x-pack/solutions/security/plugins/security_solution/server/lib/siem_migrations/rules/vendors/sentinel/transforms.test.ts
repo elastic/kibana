@@ -82,7 +82,7 @@ describe('transformSentinelRuleToOriginalRule', () => {
       annotations: {
         from: 'now-360s',
         to: 'now',
-        interval: '5m',
+        interval: '1m',
       },
     });
   });
@@ -164,7 +164,7 @@ describe('transformSentinelRuleToOriginalRule', () => {
     expect(result.annotations).toEqual({
       from: 'now-360s',
       to: 'now',
-      interval: '5m',
+      interval: '1m',
     });
   });
 
@@ -192,7 +192,7 @@ describe('transformSentinelRuleToOriginalRule', () => {
     expect(result.annotations).toEqual({
       from: 'now-1m',
       to: 'now',
-      interval: '5m',
+      interval: '1m',
     });
   });
 });

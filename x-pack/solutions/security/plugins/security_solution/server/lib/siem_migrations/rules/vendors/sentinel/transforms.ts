@@ -68,6 +68,8 @@ export function transformSentinelMitreMapping(
 const ISO_8601_DURATION_PATTERN =
   /^P(?=\d|T\d)(?:(?<years>\d+)Y)?(?:(?<months>\d+)M)?(?:(?<days>\d+)D)?(?:T(?=\d)(?:(?<hours>\d+)H)?(?:(?<minutes>\d+)M)?(?:(?<seconds>\d+)S)?)?$/;
 
+const SENTINEL_DEFAULT_QUERY_FREQUENCY = '1m';
+
 function convertIsoDurationToDateMath(isoString: string): string | undefined {
   const match = ISO_8601_DURATION_PATTERN.exec(isoString);
   if (!match?.groups) {
@@ -162,8 +164,8 @@ export function transformSentinelRuleToOriginalRule(rule: SentinelRule): Origina
             to: DEFAULT_TRANSLATION_FIELDS.to,
           }),
       interval: isNonEmptyString(rule.queryFrequency)
-        ? convertIsoDurationToDateMath(rule.queryFrequency) ?? DEFAULT_TRANSLATION_FIELDS.interval
-        : DEFAULT_TRANSLATION_FIELDS.interval,
+        ? convertIsoDurationToDateMath(rule.queryFrequency) ?? SENTINEL_DEFAULT_QUERY_FREQUENCY
+        : SENTINEL_DEFAULT_QUERY_FREQUENCY,
     },
   };
 
