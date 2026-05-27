@@ -180,4 +180,19 @@ describe('<TakeAction />', () => {
       expect.anything()
     );
   });
+
+  it('should forward dataFormattedForFieldBrowser as detailsData to TakeActionButton', () => {
+    render(
+      <TakeAction
+        hit={createMockHit()}
+        onAlertUpdated={mockOnAlertUpdated}
+        onShowNotes={mockOnShowNotes}
+      />
+    );
+
+    expect(mockTakeActionButton).toHaveBeenCalledWith(
+      expect.objectContaining({ detailsData: mockDataFormattedForFieldBrowser }),
+      expect.anything()
+    );
+  });
 });

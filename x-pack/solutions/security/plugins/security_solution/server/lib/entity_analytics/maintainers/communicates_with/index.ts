@@ -7,8 +7,8 @@
 
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 
-import { runGenericMaintainer } from '../engine/run_relationship_maintainer';
-import { COMMUNICATES_WITH_ENGINE_CONFIGS } from './configs';
+import { runRelationshipMaintainer } from '../engine/run_relationship_maintainer';
+import { COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS } from './configs';
 
 export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
   id: 'communicates_with',
@@ -18,12 +18,12 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
   run: async ({ esClient, logger, status, crudClient, abortController }) => {
     const namespace = status.metadata.namespace;
     logger.info('Starting communicates_with maintainer run');
-    const result = await runGenericMaintainer({
+    const result = await runRelationshipMaintainer({
       esClient,
       logger,
       namespace,
       crudClient,
-      integrations: COMMUNICATES_WITH_ENGINE_CONFIGS,
+      integrations: COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS,
       abortController,
     });
     logger.info(

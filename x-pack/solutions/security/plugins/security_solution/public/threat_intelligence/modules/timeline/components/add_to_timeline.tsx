@@ -208,7 +208,6 @@ export const AddToTimelineContextMenu: FC<AddToTimelineProps> = ({
       <EuiContextMenuItem
         key="addToTimeline"
         icon={ICON_TYPE}
-        size="s"
         onClick={() => {
           contextMenuRef.current?.click();
           if (onAnnounce) {

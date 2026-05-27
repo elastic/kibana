@@ -86,6 +86,9 @@ Follow existing patterns in the target area first; below are common defaults.
 - Guidelines are found in src/platform/packages/shared/kbn-i18n/GUIDELINE.md
 - Run `node scripts/i18n_check --fix` to check for and fix errors.
 
+## CI
+- Use the `bk` CLI when interacting with Buildkite.
+
 ## Contribution Hygiene
 - Unsure: read more code; if still stuck, ask w/ short options. Never guess.
 - Fix root cause (not band-aid).

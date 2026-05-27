@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from './hooks';
@@ -23,6 +24,11 @@ import type {
 } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { EsqlResponseError } from '../../../common/errors/esql_response_error';
+import {
+  ExternalServicesProvider,
+  type ExternalServices,
+} from '../../../context/external_services';
 import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
@@ -83,6 +89,22 @@ const useDiscoverFieldForBreakdownMock = hooks.useDiscoverFieldForBreakdown as j
   typeof hooks.useDiscoverFieldForBreakdown
 >;
 
+const TestWrapper = ({
+  children,
+  externalServices,
+}: {
+  children: React.ReactNode;
+  externalServices?: ExternalServices;
+}) => (
+  <EuiProvider highContrastMode={false}>
+    <IntlProvider locale="en">
+      <ExternalServicesProvider externalServices={externalServices}>
+        {children}
+      </ExternalServicesProvider>
+    </IntlProvider>
+  </EuiProvider>
+);
+
 const dimensions: Dimension[] = [{ name: 'foo' }, { name: 'qux' }];
 const metricItems: ParsedMetricItem[] = [
   {
@@ -142,6 +164,7 @@ describe('MetricsExperienceGrid', () => {
       } as unknown as UnifiedHistogramServices,
       fetch$,
       isComponentVisible: true,
+      isTabSelected: true,
       profileId: 'test-profile-id',
     };
 
@@ -154,6 +177,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 
@@ -193,7 +219,55 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
   });
 
-  it('renders only the METRICS_INFO error state when fetch fails', () => {
+  it('renders Discover ErrorCallout when METRICS_INFO fetch fails with a network error', () => {
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems: [],
+      allDimensions: [],
+      activeDimensions: [],
+      loading: false,
+      error: new Error('Network error'),
+    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+    const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: TestWrapper,
+    });
+
+    expect(getByTestId('discoverErrorCalloutTitle')).toHaveTextContent(
+      'Unable to retrieve search results'
+    );
+    expect(getByTestId('discoverErrorCalloutMessage')).toHaveTextContent('Network error');
+    expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
+  });
+
+  it('renders Discover ErrorCallout with embedded ES|QL error message (HTTP 200 + error body)', () => {
+    const embeddedError = new EsqlResponseError(
+      {
+        type: 'illegal_argument_exception',
+        reason: 'Unknown column [bad.field]',
+      },
+      { status: 400 }
+    );
+
+    useFetchMetricsDataMock.mockReturnValue({
+      metricItems: [],
+      allDimensions: [],
+      activeDimensions: [],
+      loading: false,
+      error: embeddedError,
+    });
+    useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
+
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: TestWrapper,
+    });
+
+    expect(getByTestId('discoverErrorCalloutMessage')).toHaveTextContent(
+      'illegal_argument_exception: Unknown column [bad.field]'
+    );
+  });
+
+  it('renders ES|QL reference link when externalServices provides docLinks', () => {
     useFetchMetricsDataMock.mockReturnValue({
       metricItems: [],
       allDimensions: [],
@@ -203,16 +277,26 @@ describe('MetricsExperienceGrid', () => {
     });
     useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
 
-    const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: ({ children }) => (
+        <TestWrapper
+          externalServices={
+            {
+              docLinks: {
+                links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } },
+              },
+            } as ExternalServices
+          }
+        >
+          {children}
+        </TestWrapper>
+      ),
     });
 
-    expect(getByTestId('metricsInfoError')).toBeInTheDocument();
-    expect(getByTestId('metricsInfoErrorTitle')).toHaveTextContent('Unable to load visualization');
-    expect(getByTestId('metricsInfoErrorDescription')).toHaveTextContent(
-      'trouble retrieving the information needed for this visualization'
+    expect(getByTestId('discoverErrorCalloutESQLReferenceButton')).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/docs/reference/esql'
     );
-    expect(queryByTestId('toggleActions')).not.toBeInTheDocument();
   });
 
   it('does not render the METRICS_INFO error state for AbortError (shows chart grid instead)', () => {
@@ -232,7 +316,7 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    expect(queryByTestId('metricsInfoError')).not.toBeInTheDocument();
+    expect(queryByTestId('discoverErrorCalloutTitle')).not.toBeInTheDocument();
     expect(getByTestId('toggleActions')).toBeInTheDocument();
   });
 
@@ -250,7 +334,7 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    expect(queryByTestId('metricsInfoError')).not.toBeInTheDocument();
+    expect(queryByTestId('discoverErrorCalloutTitle')).not.toBeInTheDocument();
     expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
   });
 
@@ -268,6 +352,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange,
       onToggleFullscreen: jest.fn(),
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 
@@ -311,6 +398,9 @@ describe('MetricsExperienceGrid', () => {
       searchTerm: '',
       onSearchTermChange: jest.fn(),
       onToggleFullscreen,
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
       profileId: 'test-profile-id',
     });
 
@@ -349,6 +439,9 @@ describe('MetricsExperienceGrid', () => {
         searchTerm: '',
         onSearchTermChange: jest.fn(),
         onToggleFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
       });
 
@@ -386,6 +479,9 @@ describe('MetricsExperienceGrid', () => {
         searchTerm: '',
         onSearchTermChange: jest.fn(),
         onToggleFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutSelectedTabChange: jest.fn(),
         profileId: 'test-profile-id',
       });
 

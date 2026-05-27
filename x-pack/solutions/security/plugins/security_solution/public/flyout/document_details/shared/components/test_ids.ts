@@ -7,11 +7,4 @@
 
 import { PREFIX } from '../../../shared/test_ids';
 
-const INSIGHTS_TEST_ID = `${PREFIX}Insights` as const;
-export const INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID = `${INSIGHTS_TEST_ID}AlertsCount` as const;
-export const INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID =
-  `${INSIGHTS_TEST_ID}AlertsCountInvestigateInTimelineButton` as const;
-export const INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID =
-  `${INSIGHTS_TEST_ID}AlertsCountNavigationButton` as const;
-
 export const FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID = `${PREFIX}FooterDropdownButton` as const;

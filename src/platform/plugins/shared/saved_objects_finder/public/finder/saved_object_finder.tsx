@@ -38,6 +38,7 @@ import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist/src';
+import type { SearchQuery } from '@kbn/content-management-plugin/common';
 
 import type { FinderAttributes, SavedObjectCommon } from '../../common';
 import { LISTING_LIMIT_SETTING } from '../../common';
@@ -87,10 +88,7 @@ interface BaseSavedObjectFinder {
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   extraItems?: {
     metaData: Array<SavedObjectMetaData<FinderAttributes>>;
-    get: (search: {
-      query?: string;
-      perPage?: number;
-    }) => Promise<SavedObjectCommon<FinderAttributes>[]>;
+    get: (search: SearchQuery) => Promise<SavedObjectCommon<FinderAttributes>[]>;
   };
   showFilter?: boolean;
   leftChildren?: ReactElement | ReactElement[];
@@ -146,21 +144,19 @@ class SavedObjectFinderUiClass extends React.Component<
         contentTypeId: type,
       }));
     const fetchLimit = uiSettings.get(LISTING_LIMIT_SETTING); // TODO: support pagination,
+    const searchQuery = {
+      text: queryText ? `${queryText}*` : undefined,
+      ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
+      limit: fetchLimit,
+    };
     const response = await Promise.all([
       contentTypes.length
         ? contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
             contentTypes,
-            query: {
-              text: queryText ? `${queryText}*` : undefined,
-              ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
-              limit: fetchLimit,
-            },
+            query: searchQuery,
           })
         : Promise.resolve<{ hits: never[] }>({ hits: [] }),
-      this.props.extraItems?.get({
-        query: queryText,
-        perPage: fetchLimit,
-      }) ?? Promise.resolve<never[]>([]),
+      this.props.extraItems?.get(searchQuery) ?? Promise.resolve<never[]>([]),
     ]);
 
     const savedObjects = [

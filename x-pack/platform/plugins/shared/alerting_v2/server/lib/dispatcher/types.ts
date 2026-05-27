@@ -78,7 +78,7 @@ interface BaseActionPolicy {
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';
-    interval?: string; // e.g. '1h', '30m', '5m'
+    interval?: string | null; // e.g. '1h', '30m', '5m'; null for intervalless strategies
   };
   snoozedUntil?: string | null;
   /** Target destinations to dispatch matched episodes to */

@@ -12,6 +12,7 @@ import type {
   PackageInfo,
   InputsOverride,
   RegistryVarsEntry,
+  RegistryVarsMigrateFrom,
   RegistryStreamWithDataStream,
 } from '../../common/types';
 import type { NewPackagePolicy } from '../types';
@@ -104,15 +105,29 @@ export function applyInputLevelMigration(
 }
 
 /**
+ * Normalizes the var-level `migrate_from` field to the object form. Accepts either the current
+ * object shape (`{ name?, scope?, stream? }`) or the legacy string shorthand that named only the
+ * previous variable. Returns undefined when the field is absent.
+ */
+function normalizeVarMigrateFrom(
+  migrateFrom: RegistryVarsEntry['migrate_from']
+): RegistryVarsMigrateFrom | undefined {
+  if (!migrateFrom) return undefined;
+  if (typeof migrateFrom === 'string') return { name: migrateFrom };
+  return migrateFrom;
+}
+
+/**
  * Builds a rename map `{ newVarName: oldVarName }` from `RegistryVarsEntry` definitions that
- * declare `migrate_from`. Used by `migrateStreamVars` to alias old var values under new names
- * before the name-based `deepMergeVars` lookup runs.
+ * declare `migrate_from.name` (or the legacy string shorthand). Used by `migrateStreamVars` to
+ * alias old var values under new names before the name-based `deepMergeVars` lookup runs.
  */
 export function buildVarRenameMap(varDefs: RegistryVarsEntry[]): Record<string, string> {
   const map: Record<string, string> = {};
   for (const varDef of varDefs) {
-    if (varDef.migrate_from) {
-      map[varDef.name] = varDef.migrate_from;
+    const oldName = normalizeVarMigrateFrom(varDef.migrate_from)?.name;
+    if (oldName) {
+      map[varDef.name] = oldName;
     }
   }
   return map;
@@ -266,6 +281,84 @@ export function applyStreamLevelMigration(
         true
       ) as InputsOverride;
       update.vars = sanitizeMigratedVars(removeStaleVars(mergedInput, update)).vars;
+    }
+  }
+}
+
+/**
+ * Carries var values across scopes (input ↔ stream) for same-input-type upgrades when the new
+ * schema declares `migrate_from.scope`. Seeds the value into `originalInput` in place so the
+ * subsequent `deepMergeVars` + `removeStaleVars` cycle propagates and cleans up automatically.
+ *
+ * Cross-input-type migrations are handled by `applyInputLevelMigration` / `applyStreamLevelMigration`.
+ *
+ * - `scope: 'stream'` on an input var: pulls from the matching old stream. `migrate_from.stream`
+ *   picks the dataset (bare name or fully-qualified); omit only when the input has exactly one stream.
+ * - `scope: 'input'` on a stream var: pulls from old input-level vars.
+ * - `migrate_from.name`: look up the old value under that key instead of the var's current name.
+ * - No-ops when the destination already has a value, or the source var/stream is missing.
+ */
+export function applyVarScopeMigration(
+  originalInput: NewPackagePolicyInput,
+  registryInputVarDefs: RegistryVarsEntry[] | undefined,
+  registryStreams: RegistryStreamWithDataStream[] | undefined
+): void {
+  // Stream → input: an input-level var in the new schema was previously at stream scope.
+  if (registryInputVarDefs && originalInput.streams.length > 0) {
+    for (const varDef of registryInputVarDefs) {
+      const mf = normalizeVarMigrateFrom(varDef.migrate_from);
+      if (mf?.scope !== 'stream') continue;
+
+      let sourceStream: NewPackagePolicyInputStream | undefined;
+      if (mf.stream) {
+        // Accept either the fully-qualified dataset (`<package>.<folder>`) or the bare folder
+        // name as written in the data_stream directory. Authors naturally reach for the bare
+        // name, and silently skipping when they pick the "wrong" form is a footgun.
+        sourceStream = originalInput.streams.find((s) => {
+          const dataset = s.data_stream?.dataset;
+          if (!dataset) return false;
+          return dataset === mf.stream || dataset.endsWith(`.${mf.stream}`);
+        });
+      } else if (originalInput.streams.length === 1) {
+        sourceStream = originalInput.streams[0];
+      }
+      if (!sourceStream?.vars) continue;
+
+      const sourceKey = mf.name ?? varDef.name;
+      const oldEntry = sourceStream.vars[sourceKey];
+      if (oldEntry?.value == null) continue;
+
+      if (!originalInput.vars) originalInput.vars = {};
+      const existing = originalInput.vars[varDef.name];
+      if (existing?.value != null) continue;
+
+      originalInput.vars[varDef.name] = { ...oldEntry };
+    }
+  }
+
+  // Input → stream: a stream-level var in the new schema was previously at input scope.
+  if (registryStreams && originalInput.vars) {
+    for (const registryStream of registryStreams) {
+      const dataset = registryStream.data_stream?.dataset;
+      if (!dataset || !registryStream.vars) continue;
+
+      const originalStream = originalInput.streams.find((s) => s.data_stream?.dataset === dataset);
+      if (!originalStream) continue;
+
+      for (const varDef of registryStream.vars) {
+        const mf = normalizeVarMigrateFrom(varDef.migrate_from);
+        if (mf?.scope !== 'input') continue;
+
+        const sourceKey = mf.name ?? varDef.name;
+        const oldEntry = originalInput.vars[sourceKey];
+        if (oldEntry?.value == null) continue;
+
+        if (!originalStream.vars) originalStream.vars = {};
+        const existing = originalStream.vars[varDef.name];
+        if (existing?.value != null) continue;
+
+        originalStream.vars[varDef.name] = { ...oldEntry };
+      }
     }
   }
 }

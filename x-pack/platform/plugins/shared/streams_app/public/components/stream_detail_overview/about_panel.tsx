@@ -220,7 +220,7 @@ export function AboutPanel() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                   e.preventDefault();
-                  saveDescription(descriptionValue.trim());
+                  void saveDescription(descriptionValue.trim());
                 }
               }}
               onChange={(e) => setDescriptionValue(e.target.value)}
@@ -253,11 +253,21 @@ export function AboutPanel() {
                       iconType="sparkles"
                       isDisabled={!isAIAvailable || !hasConnector || isGenerating}
                       isLoading={isGenerating}
-                      onClick={async () => {
-                        const generated = await generateDescription();
-                        if (generated) {
-                          setDescriptionValue(generated);
-                        }
+                      onClick={() => {
+                        void generateDescription()
+                          .then((generated) => {
+                            if (generated) {
+                              setDescriptionValue(generated);
+                            }
+                          })
+                          .catch((error) => {
+                            notifications.toasts.addError(getFormattedError(error), {
+                              title: i18n.translate(
+                                'xpack.streams.streamOverview.aboutPanel.generateDescriptionError',
+                                { defaultMessage: 'Failed to generate description' }
+                              ),
+                            });
+                          });
                       }}
                     >
                       {i18n.translate('xpack.streams.aboutPanel.p.helpMeGenerateALabel', {
@@ -279,7 +289,7 @@ export function AboutPanel() {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     size="xs"
-                    onClick={() => saveDescription(descriptionValue.trim())}
+                    onClick={() => void saveDescription(descriptionValue.trim())}
                   >
                     {i18n.translate('xpack.streams.aboutPanel.saveButtonLabel', {
                       defaultMessage: 'Save',

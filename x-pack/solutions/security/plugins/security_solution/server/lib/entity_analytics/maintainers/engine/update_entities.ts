@@ -9,19 +9,19 @@ import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient, BulkObject } from '@kbn/entity-store/server';
 import type { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
 
-import type { ProcessedEngineRecord } from './types';
+import type { EntityRelationshipRecord } from './types';
 
-type ValidRecord = ProcessedEngineRecord & { entityId: string };
+type ValidRecord = EntityRelationshipRecord & { entityId: string };
 
 interface MergedRelationships {
   [relType: string]: Set<string>;
 }
 
-function hasAnyTargets(record: ProcessedEngineRecord): boolean {
+function hasAnyTargets(record: EntityRelationshipRecord): boolean {
   return Object.values(record.relationships).some((rel) => rel.length > 0);
 }
 
-function filterValid(records: ProcessedEngineRecord[]): ValidRecord[] {
+function filterValid(records: EntityRelationshipRecord[]): ValidRecord[] {
   return records.filter((r): r is ValidRecord => r.entityId !== null && hasAnyTargets(r));
 }
 
@@ -67,7 +67,7 @@ export interface WriteEntityIdsResult {
 export const writeEntityIds = async (
   crudClient: EntityUpdateClient,
   logger: Logger,
-  records: ProcessedEngineRecord[]
+  records: EntityRelationshipRecord[]
 ): Promise<WriteEntityIdsResult> => {
   if (records.length === 0) return { updated: 0, notFound: 0, errors: 0 };
 
@@ -85,7 +85,7 @@ export const writeEntityIds = async (
       }
     }
     if (Object.keys(relationships).length > 0) {
-      // TODO(follow-up): entity type hardcoded to 'user' — use actorEntityType from config.
+      // TODO(#266748): entity type hardcoded to 'user' — use actorEntityType from config.
       objects.push({
         type: 'user',
         doc: {

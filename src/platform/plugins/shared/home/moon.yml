@@ -17,6 +17,7 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/plugins/shared/home
 dependsOn:
+  - '@kbn/scout'
   - '@kbn/core'
   - '@kbn/data-views-plugin'
   - '@kbn/custom-integrations-plugin'
@@ -56,6 +57,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - .storybook/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

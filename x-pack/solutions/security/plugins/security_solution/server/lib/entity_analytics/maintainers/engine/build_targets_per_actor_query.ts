@@ -16,17 +16,38 @@ import type {
 import { COMPOSITE_PAGE_SIZE, ESQL_ENGINE_PREAMBLE } from './constants';
 import { ENGINE_COLUMNS } from './columns';
 
+/**
+ * "At least one of these fields exists and is non-empty" ES|QL fragment.
+ *
+ * Used as the actor-presence gate (the `AND (...)` clause appended after
+ * `esqlWhereClause`) when the config supplies its own `customActor.fields`.
+ * The default path (no `customActor`) keeps using
+ * `euid.esql.getEuidDocumentsContainsIdFilter('user')` — same rationale as
+ * the parallel helper in `build_actor_discovery_query.ts`. Today no shipped
+ * `kind: 'standard' | 'bucketed'` config combines `customActor` with the
+ * default builder, but Step 1 and Step 2 must agree about the actor-presence
+ * gate so the inconsistency cannot reappear silently in a future config.
+ *
+ * Identifiers are backtick-wrapped so dotted-numeric segments (rare for
+ * actor fields today, but cheap insurance) round-trip safely.
+ */
+function buildAnyActorFieldNonEmptyEsql(fields: string[]): string {
+  return fields.map((field) => `(\`${field}\` IS NOT NULL AND \`${field}\` != "")`).join(' OR ');
+}
+
 function buildRelationshipEsql(
   config: StandardRelationshipIntegrationConfig | BucketedRelationshipIntegrationConfig,
   namespace: string
 ): string {
   const indexPattern = config.indexPattern(namespace);
-  // TODO(follow-up): 'user' hardcoded for actor — thread actorEntityType through config.
+  // TODO(#266748): 'user' hardcoded for actor — thread actorEntityType through config.
   const userFieldEvals = !config.customActor?.evalOverride
     ? getFieldEvaluationsEsql('user')
     : undefined;
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
-  const userIdFilter = euid.esql.getEuidDocumentsContainsIdFilter('user');
+  const userIdFilter = config.customActor
+    ? buildAnyActorFieldNonEmptyEsql(config.customActor.fields)
+    : euid.esql.getEuidDocumentsContainsIdFilter('user');
   const actorEval =
     config.customActor?.evalOverride ?? euid.esql.getEuidEvaluation('user', { withTypeId: true });
   const targetEval =

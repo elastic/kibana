@@ -24,7 +24,8 @@ export interface WaitForEnabledStateParams {
 }
 
 export interface RulesApiService {
-  create: (data: CreateRuleData, options?: { id?: string }) => Promise<RuleResponse>;
+  create: (data: CreateRuleData) => Promise<RuleResponse>;
+  upsert: (id: string, data: CreateRuleData) => Promise<RuleResponse>;
   get: (id: string) => Promise<RuleResponse>;
   find: (query?: FindRulesParams) => Promise<FindRulesResponse>;
   delete: (id: string) => Promise<void>;
@@ -68,14 +69,22 @@ export const getRulesApiService = ({
     });
 
   return {
-    create: (data, options) =>
+    create: (data) =>
       measurePerformanceAsync(log, 'rules.create', async () => {
-        const path = options?.id
-          ? `${RULE_API_PATH}/${encodeURIComponent(options.id)}`
-          : RULE_API_PATH;
         const response = await kbnClient.request<RuleResponse>({
           method: 'POST',
-          path,
+          path: RULE_API_PATH,
+          headers: COMMON_HEADERS,
+          body: data,
+        });
+        return response.data;
+      }),
+
+    upsert: (id, data) =>
+      measurePerformanceAsync(log, 'rules.upsert', async () => {
+        const response = await kbnClient.request<RuleResponse>({
+          method: 'PUT',
+          path: `${RULE_API_PATH}/${encodeURIComponent(id)}`,
           headers: COMMON_HEADERS,
           body: data,
         });

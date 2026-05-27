@@ -240,6 +240,32 @@ function renderTestCases(
       expect(uiSettings.globalClient.getUserProvided).not.toHaveBeenCalled();
     });
 
+    it('does not resolve async default `getValue` for anonymous pages', async () => {
+      const getValue = jest.fn().mockResolvedValue('async-default');
+      uiSettings.client.getRegistered.mockReturnValue({
+        registered: { name: 'title', getValue },
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: true,
+      });
+
+      expect(getValue).not.toHaveBeenCalled();
+    });
+
+    it('resolves async default `getValue` for non-anonymous pages', async () => {
+      const getValue = jest.fn().mockResolvedValue('async-default');
+      uiSettings.client.getRegistered.mockReturnValue({
+        registered: { name: 'title', getValue },
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings);
+
+      expect(getValue).toHaveBeenCalledTimes(1);
+    });
+
     it('calls `getCommonStylesheetPaths` with the correct parameters', async () => {
       getSettingValueMock.mockImplementation((settingName: string) => {
         if (settingName === 'theme:darkMode') {
@@ -732,6 +758,73 @@ describe('RenderingService', () => {
 
       const renderResult = await render(createKibanaRequest(), uiSettings);
       expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
+    });
+  });
+
+  describe('userStorage injection', () => {
+    const renderAndReadUserStorage = async (content: string) => {
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      return data.userStorage;
+    };
+
+    const buildUiSettings = () => ({
+      client: uiSettingsServiceMock.createClient(),
+      globalClient: uiSettingsServiceMock.createClient(),
+    });
+
+    it('injects values returned by userStorage.asScoped().getForInjection()', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const getForInjection = jest
+        .fn()
+        .mockResolvedValue({ 'navigation:layout': { hidden: ['discover'] } });
+      const asScoped = jest.fn().mockReturnValue({ getForInjection });
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const content = await render(createKibanaRequest(), buildUiSettings());
+
+      expect(asScoped).toHaveBeenCalledTimes(1);
+      expect(getForInjection).toHaveBeenCalledTimes(1);
+      expect(await renderAndReadUserStorage(content)).toEqual({
+        values: { 'navigation:layout': { hidden: ['discover'] } },
+      });
+    });
+
+    it('injects empty values when asScoped() returns null (no profile_uid)', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const asScoped = jest.fn().mockReturnValue(null);
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const content = await render(createKibanaRequest(), buildUiSettings());
+
+      expect(asScoped).toHaveBeenCalledTimes(1);
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+    });
+
+    it('injects empty values for anonymous pages without consulting userStorage', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const asScoped = jest.fn();
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const content = await render(createKibanaRequest(), buildUiSettings(), {
+        isAnonymousPage: true,
+      });
+
+      expect(asScoped).not.toHaveBeenCalled();
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+    });
+
+    it('rejects when getForInjection() rejects', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const getForInjection = jest.fn().mockRejectedValue(new Error('ES exploded'));
+      const asScoped = jest.fn().mockReturnValue({ getForInjection });
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      await expect(render(createKibanaRequest(), buildUiSettings())).rejects.toThrow('ES exploded');
     });
   });
 

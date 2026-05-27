@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, useRef } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { CasePostRequest, ObservablePost } from '../../../common/types/api';
@@ -35,6 +35,7 @@ import { getInitialCaseValue } from '../../../common/utils/get_initial_case_valu
 import { getOwnerDefaultValue } from './utils';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useSubmitCase } from './use_submit_case';
+import { TemplateFieldsValidationContext } from './template_fields_validation_context';
 
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
@@ -175,53 +176,57 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
       afterCaseCreated,
     });
 
+    const templateFieldsTriggerRef = useRef<(() => Promise<boolean>) | null>(null);
+
     return (
       <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
-        <FormContext
-          initialValue={initialValue}
-          currentConfiguration={currentConfiguration}
-          selectedOwner={selectedOwner}
-          onSubmitCase={submitCase}
-        >
-          <FormFieldsWithFormContext
-            withSteps={withSteps}
-            draftStorageKey={draftStorageKey}
-            selectedOwner={selectedOwner}
-            onSelectedOwner={onSelectedOwner}
-            isLoadingCaseConfiguration={isLoadingCaseConfiguration}
+        <TemplateFieldsValidationContext.Provider value={templateFieldsTriggerRef}>
+          <FormContext
+            initialValue={initialValue}
             currentConfiguration={currentConfiguration}
-          />
-          <EuiFormRow fullWidth>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="l"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="create-case-cancel"
-                  iconType="cross"
-                  onClick={onOpenModal}
-                  size="s"
-                >
-                  {i18n.CANCEL}
-                </EuiButtonEmpty>
-                {showConfirmationModal && (
-                  <CancelCreationConfirmationModal
-                    title={i18n.MODAL_TITLE}
-                    onConfirm={onConfirmModal}
-                    onCancel={onCancelModal}
-                  />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SubmitCaseButton isSubmitting={isSubmitting} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-          <InsertTimeline fieldName={descriptionFieldName} />
-        </FormContext>
+            selectedOwner={selectedOwner}
+            onSubmitCase={submitCase}
+          >
+            <FormFieldsWithFormContext
+              withSteps={withSteps}
+              draftStorageKey={draftStorageKey}
+              selectedOwner={selectedOwner}
+              onSelectedOwner={onSelectedOwner}
+              isLoadingCaseConfiguration={isLoadingCaseConfiguration}
+              currentConfiguration={currentConfiguration}
+            />
+            <EuiFormRow fullWidth>
+              <EuiFlexGroup
+                alignItems="center"
+                justifyContent="flexEnd"
+                gutterSize="l"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="create-case-cancel"
+                    iconType="cross"
+                    onClick={onOpenModal}
+                    size="s"
+                  >
+                    {i18n.CANCEL}
+                  </EuiButtonEmpty>
+                  {showConfirmationModal && (
+                    <CancelCreationConfirmationModal
+                      title={i18n.MODAL_TITLE}
+                      onConfirm={onConfirmModal}
+                      onCancel={onCancelModal}
+                    />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <SubmitCaseButton isSubmitting={isSubmitting} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+            <InsertTimeline fieldName={descriptionFieldName} />
+          </FormContext>
+        </TemplateFieldsValidationContext.Provider>
       </CasesTimelineIntegrationProvider>
     );
   }

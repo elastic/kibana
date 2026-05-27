@@ -481,7 +481,7 @@ describe('Route privilege/ES-operation consistency', () => {
       workflowExecutionId: 'test-exec-id',
     });
     mockExecutionEngine.cancelWorkflowExecution.mockResolvedValue(undefined);
-    mockExecutionEngine.resumeWorkflowExecution.mockResolvedValue(undefined);
+    mockExecutionEngine.resumeWorkflowExecution.mockResolvedValue({ resumedBy: 'user' });
     mockExecutionEngine.scheduleWorkflow.mockResolvedValue({
       workflowExecutionId: 'test-exec-id',
     });

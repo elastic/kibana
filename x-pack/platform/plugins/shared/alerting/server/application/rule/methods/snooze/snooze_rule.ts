@@ -27,7 +27,7 @@ import { updateRuleSo } from '../../../../data/rule';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
 import type { RuleParams } from '../../types';
 import { transformRuleDomainToRule, transformRuleAttributesToRuleDomain } from '../../transforms';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 import { snoozeRuleParamsSchema } from './schemas';
 import type { SnoozeRuleOptions } from './types';
 
@@ -120,7 +120,7 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
     }),
   });
 
-  await logBulkRuleChanges({
+  await logRuleChanges({
     ruleSOs: [updatedRuleRaw] as Array<SavedObject<RawRule>>,
     rulesClientContext: context,
     changesContext: {

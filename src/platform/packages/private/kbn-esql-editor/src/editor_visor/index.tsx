@@ -29,6 +29,8 @@ import { NLInput } from './nl_input';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
+import { reportEsqlError } from '../report_error';
+import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
 export { VisorMode } from './mode_selector';
 
@@ -43,6 +45,7 @@ export interface QuickSearchVisorProps {
   onUpdateAndSubmitQuery: (query: string) => void;
   // Callback to toggle the visor visibility
   onToggleVisor: () => void;
+  telemetryService?: ESQLEditorTelemetryService;
 }
 
 export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
@@ -67,6 +70,7 @@ export function QuickSearchVisor({
   isVisible,
   onUpdateAndSubmitQuery,
   onToggleVisor,
+  telemetryService,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, core, data } = kibana.services;
@@ -108,11 +112,32 @@ export function QuickSearchVisor({
     [selectedSources, query, onUpdateAndSubmitQuery]
   );
 
+  const trackNlResult = useCallback(
+    (
+      nlLength: number,
+      contextQueryLength: number,
+      startTime: number,
+      success: boolean,
+      errorCode?: string,
+      generatedQueryLength?: number
+    ) =>
+      telemetryService?.trackVisorNlSubmitted({
+        nlLength,
+        contextQueryLength,
+        success,
+        durationMs: Date.now() - startTime,
+        ...(errorCode ? { errorCode } : {}),
+        ...(generatedQueryLength !== undefined ? { generatedQueryLength } : {}),
+      }),
+    [telemetryService]
+  );
+
   const onNlSubmit = useCallback(async () => {
     const trimmed = nlValue.trim();
     if (!trimmed || isNlLoading) return;
 
     setIsNlLoading(true);
+    const startTime = Date.now();
     try {
       const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
         body: JSON.stringify({
@@ -121,10 +146,23 @@ export function QuickSearchVisor({
         }),
       });
       if (result.content) {
+        trackNlResult(
+          trimmed.length,
+          query.length,
+          startTime,
+          true,
+          undefined,
+          result.content.length
+        );
         onUpdateAndSubmitQuery(result.content);
         setNlValue('');
       }
     } catch (error) {
+      reportEsqlError(error, { errorType: 'NlToEsql' });
+      const errorCode = String(
+        (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
+      );
+      trackNlResult(trimmed.length, query.length, startTime, false, errorCode || undefined);
       const message =
         (error as { body?: { message?: string } })?.body?.message ??
         i18n.translate('esqlEditor.visor.nlError', {
@@ -134,7 +172,15 @@ export function QuickSearchVisor({
     } finally {
       setIsNlLoading(false);
     }
-  }, [nlValue, isNlLoading, core.http, core.notifications.toasts, onUpdateAndSubmitQuery, query]);
+  }, [
+    nlValue,
+    isNlLoading,
+    core.http,
+    core.notifications.toasts,
+    onUpdateAndSubmitQuery,
+    query,
+    trackNlResult,
+  ]);
 
   const checkConnectorAvailability = useCallback(async () => {
     if (connectorCheckRef.current) return;

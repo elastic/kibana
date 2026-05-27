@@ -289,7 +289,6 @@ export const HeaderHelpMenu = () => {
     >
       <EuiContextMenu
         initialPanelId="helpMenu"
-        size="s"
         panels={[
           {
             id: 'helpMenu',
