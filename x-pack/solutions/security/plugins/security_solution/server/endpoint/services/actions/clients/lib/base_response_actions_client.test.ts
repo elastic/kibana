@@ -35,6 +35,7 @@ import {
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
 import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
+import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
 import { set } from '@kbn/safer-lodash-set';
 import { responseActionsClientMock } from '../mocks';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -295,8 +296,10 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should pass ccsEnabled=true when the feature flag is enabled and remote clusters are connected', async () => {
-      constructorOptions.endpointService.experimentalFeatures.defendRemoteOutputCcs = true;
-      constructorOptions.esClient.cluster.remoteInfo.mockResolvedValue({
+      (
+        constructorOptions.endpointService.experimentalFeatures as DeepMutable<ExperimentalFeatures>
+      ).defendRemoteOutputCcs = true;
+      (constructorOptions.esClient.cluster.remoteInfo as unknown as jest.Mock).mockResolvedValue({
         cluster_a: { connected: true },
       });
 

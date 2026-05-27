@@ -14,6 +14,8 @@ import { createMockEndpointAppContextService } from '../../../../mocks';
 import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
 import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
 import { resetCcsCache } from '../../../../utils/ccs_utils';
+import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
+import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
 
 jest.mock('../../../actions/pending_actions_summary', () => {
   const realModule = jest.requireActual('../../../actions/pending_actions_summary');
@@ -94,7 +96,9 @@ describe('EndpointAgentStatusClient', () => {
 
   it('should pass ccsEnabled=true to metadata service when remote clusters are connected', async () => {
     const metadataClient = constructorOptions.endpointService.getEndpointMetadataService();
-    constructorOptions.endpointService.experimentalFeatures.defendRemoteOutputCcs = true;
+    (
+      constructorOptions.endpointService.experimentalFeatures as DeepMutable<ExperimentalFeatures>
+    ).defendRemoteOutputCcs = true;
     (constructorOptions.esClient.cluster.remoteInfo as jest.Mock).mockResolvedValue({
       cluster_a: { connected: true },
     });
