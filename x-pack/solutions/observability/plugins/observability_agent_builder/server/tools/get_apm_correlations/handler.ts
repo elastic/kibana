@@ -29,6 +29,11 @@ import {
   TRANSACTION_DURATION,
   USER_AGENT_NAME,
 } from '@kbn/apm-types';
+import {
+  THROUGHPUT_BUCKET_COUNT,
+  THROUGHPUT_CORRELATION_THRESHOLD,
+  THROUGHPUT_TOP_VALUES_PER_FIELD,
+} from '@kbn/apm-plugin/common/correlations/constants';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
@@ -36,6 +41,7 @@ import type {
 import { getObservabilityDataSources } from '../../utils/get_observability_data_sources';
 import { kqlFilter, timeRangeFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
+
 type CorrelationsMetric = 'latency' | 'failure_rate' | 'throughput' | 'infra_metrics';
 
 const DEFAULT_FIELD_CANDIDATES = [
@@ -63,11 +69,7 @@ const INFRA_DEFAULT_FIELD_CANDIDATES = [
   CLOUD_ACCOUNT_ID,
 ] as const;
 
-// Mirror values from apm/common/correlations/constants.ts — cannot import directly because
-// observability_agent_builder does not depend on the APM plugin. Keep in sync manually.
-const THROUGHPUT_BUCKET_COUNT = 20; // sync: THROUGHPUT_BUCKET_COUNT
-const THROUGHPUT_CORRELATION_THRESHOLD = 0.3; // sync: THROUGHPUT_CORRELATION_THRESHOLD
-const THROUGHPUT_TOP_VALUES_PER_FIELD = 10; // sync: THROUGHPUT_TOP_VALUES_PER_FIELD
+// Matches CHUNK_SIZE in apm/server/routes/correlations/queries/fetch_throughput_correlations.ts
 const THROUGHPUT_CHUNK_SIZE = 10;
 
 function computeIntervalMs(start: number, end: number): number {
