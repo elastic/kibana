@@ -118,7 +118,7 @@ export class StreamsApp {
   }
 
   async gotoDataRetentionTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'retention');
+    await this.gotoStreamManagementTab(streamName, 'lifecycle');
   }
 
   async gotoDataQualityTab(streamName: string) {
@@ -173,6 +173,7 @@ export class StreamsApp {
       .locator('a[data-test-subj^="breadcrumb"]')
       .filter({ hasText: /^Streams$/ })
       .click();
+    await this.expectStreamsTableVisible();
   }
 
   // Streams table utility methods
@@ -362,7 +363,7 @@ export class StreamsApp {
 
   async switchToColumnsView() {
     // Draft streams fetch samples via ES|QL from the parent, which can be slow
-    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 30_000 });
+    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 60_000 });
   }
 
   async saveRoutingRule() {

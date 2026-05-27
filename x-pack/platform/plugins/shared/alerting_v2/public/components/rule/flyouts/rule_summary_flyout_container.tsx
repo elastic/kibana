@@ -70,12 +70,15 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }:
           ruleName={ruleToDelete.metadata.name}
           onCancel={() => setRuleToDelete(null)}
           onConfirm={() => {
-            deleteRule(ruleToDelete.id, {
-              onSuccess: () => {
-                setRuleToDelete(null);
-                onClose();
-              },
-            });
+            deleteRule(
+              { id: ruleToDelete.id, name: ruleToDelete.metadata.name },
+              {
+                onSuccess: () => {
+                  setRuleToDelete(null);
+                  onClose();
+                },
+              }
+            );
           }}
           isLoading={isDeleting}
         />

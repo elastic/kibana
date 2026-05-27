@@ -14,6 +14,7 @@ import {
   buildFieldEvaluations,
   buildSetFieldsByCondition,
   type PaginationParams,
+  type LogSlicePaginationParams,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   MAIN_ENTITY_ID_FIELD,
   TIMESTAMP_FIELD,
@@ -44,8 +45,8 @@ export interface CcsLogsExtractionQueryParams {
   docsLimit: number;
   recoveryId?: string;
   pagination?: PaginationParams;
-  logsPageCursorStart?: PaginationParams;
-  logsPageCursorEnd?: PaginationParams;
+  logsPageCursorStart?: LogSlicePaginationParams;
+  logsPageCursorEnd?: LogSlicePaginationParams;
 }
 
 /**

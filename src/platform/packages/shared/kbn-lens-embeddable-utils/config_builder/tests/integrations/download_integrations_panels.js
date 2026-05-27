@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// bypasses linking full package to @kbn/lens-plugin, only needed for script
+// uncomment these lines when running locally
+// require('@kbn/babel-register').install();
+// const { migrateAttributes } = require('@kbn/lens-plugin/common/transforms/transform_out');
+
 const fs = require('fs').promises;
 const path = require('path');
 const zlib = require('zlib');
@@ -86,10 +91,12 @@ async function processDashboardFile(filePath, packageName) {
     for (const [index, panel] of panels.entries()) {
       // Check if embeddableConfig.attributes exists and matches criteria
       if (panel.embeddableConfig?.attributes) {
-        const attrs = panel.embeddableConfig.attributes;
+        const originalAttrs = panel.embeddableConfig.attributes;
 
         // Check if type is "lens"
-        if (attrs.type === 'lens') {
+        if (originalAttrs.type === 'lens') {
+          // eslint-disable-next-line no-undef
+          const attrs = migrateAttributes(originalAttrs);
           results.push({
             package_name: packageName,
             dashboard_file: path.basename(filePath),

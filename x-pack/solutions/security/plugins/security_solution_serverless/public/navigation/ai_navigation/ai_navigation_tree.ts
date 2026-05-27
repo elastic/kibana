@@ -105,6 +105,10 @@ export const createAiNavigationTree = (
         },
       ],
     },
+    {
+      link: 'onboarding' as AppDeepLinkId,
+      sideNavStatus: 'hidden',
+    },
   ],
   footer: [
     {

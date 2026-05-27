@@ -65,7 +65,9 @@ const createMockServices = ({
   };
 };
 
-const createAttachment = (overrides: Partial<{ workflowId?: string; name?: string }> = {}) => ({
+const createAttachment = (
+  overrides: Partial<{ workflowId?: string; name?: string; origin?: string }> = {}
+) => ({
   id: 'att-1',
   type: WORKFLOW_YAML_ATTACHMENT_TYPE,
   versions: [],
@@ -75,6 +77,7 @@ const createAttachment = (overrides: Partial<{ workflowId?: string; name?: strin
     workflowId: overrides.workflowId,
     name: overrides.name,
   },
+  ...(overrides.origin ? { origin: overrides.origin } : {}),
 });
 
 describe('createWorkflowYamlAttachmentUiDefinition', () => {
@@ -137,7 +140,38 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       expect(previewButton).toBeDefined();
     });
 
-    it('includes Open in editor button when workflowId is present', () => {
+    it('includes Open in editor button when workflowId is present and persisted', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
+
+      const buttons = definition.getActionButtons!({
+        attachment,
+        isSidebar: false,
+        isCanvas: false,
+        updateOrigin: jest.fn(),
+      });
+
+      const openInEditorButton = buttons.find((b) => b.label === 'Open in editor');
+      expect(openInEditorButton).toBeDefined();
+    });
+
+    it('returns no inline buttons when isCanvas is true (canvas registers its own)', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
+
+      const buttons = definition.getActionButtons!({
+        attachment,
+        isSidebar: false,
+        isCanvas: true,
+        updateOrigin: jest.fn(),
+      });
+
+      expect(buttons).toHaveLength(0);
+    });
+
+    it('does NOT include Open in editor button when workflowId is present but not persisted', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
       const attachment = createAttachment({ workflowId: 'wf-123' });
@@ -150,7 +184,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       });
 
       const openInEditorButton = buttons.find((b) => b.label === 'Open in editor');
-      expect(openInEditorButton).toBeDefined();
+      expect(openInEditorButton).toBeUndefined();
     });
 
     it('does NOT include Open in editor button when workflowId is absent', () => {
@@ -175,7 +209,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         currentLocation: '/wf-123',
       });
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
-      const attachment = createAttachment({ workflowId: 'wf-123' });
+      const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
 
       const buttons = definition.getActionButtons!({
         attachment,
@@ -192,7 +226,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       it('calls application.navigateToApp with the workflow ID', () => {
         const services = createMockServices();
         const definition = createWorkflowYamlAttachmentUiDefinition(services);
-        const attachment = createAttachment({ workflowId: 'wf-123' });
+        const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
 
         const buttons = definition.getActionButtons!({
           attachment,
@@ -249,10 +283,31 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       expect(buttons.find((b: { label: string }) => b.label === 'Override')).toBeUndefined();
     });
 
+    it('registers Save button when workflowId is pre-assigned but not yet persisted', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = createAttachment({ workflowId: 'wf-pre-assigned' });
+      const registerActionButtons = jest.fn();
+
+      render(
+        <>
+          {definition.renderCanvasContent!(
+            { attachment, isSidebar: false },
+            { registerActionButtons, updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+          )}
+        </>
+      );
+
+      const buttons = registerActionButtons.mock.calls[0][0];
+      expect(buttons.find((b: { label: string }) => b.label === 'Save')).toBeDefined();
+      expect(buttons.find((b: { label: string }) => b.label === 'Override')).toBeUndefined();
+      expect(buttons.find((b: { label: string }) => b.label === 'Save as new')).toBeUndefined();
+    });
+
     it('registers Override and Save as new buttons for existing workflow', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
-      const attachment = createAttachment({ workflowId: 'wf-123' });
+      const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
       const registerActionButtons = jest.fn();
 
       render(
@@ -272,7 +327,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
     it('registers Open in editor button for existing workflow', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
-      const attachment = createAttachment({ workflowId: 'wf-123' });
+      const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
       const registerActionButtons = jest.fn();
 
       render(
@@ -319,7 +374,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         });
         const services = createMockServices();
         const definition = createWorkflowYamlAttachmentUiDefinition(services);
-        const attachment = createAttachment({ workflowId: 'wf-123' });
+        const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
         const registerActionButtons = jest.fn();
 
         render(
@@ -343,7 +398,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         });
         const services = createMockServices();
         const definition = createWorkflowYamlAttachmentUiDefinition(services);
-        const attachment = createAttachment({ workflowId: 'wf-123' });
+        const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
         const registerActionButtons = jest.fn();
 
         render(
@@ -367,7 +422,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         });
         const services = createMockServices();
         const definition = createWorkflowYamlAttachmentUiDefinition(services);
-        const attachment = createAttachment({ workflowId: 'wf-123' });
+        const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
         const registerActionButtons = jest.fn();
 
         render(

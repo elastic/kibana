@@ -16,7 +16,7 @@ import {
   shortenDottedString,
 } from '../utils';
 import { FieldFormat } from '../field_format';
-import type { ReactContextTypeSingleConvert, TextContextTypeConvert } from '../types';
+import type { ReactConvertFunction, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 
 const TRANSFORM_OPTIONS = [
@@ -135,7 +135,7 @@ export class StringFormat extends FieldFormat {
     }
   };
 
-  reactConvertSingle: ReactContextTypeSingleConvert = (val, options = {}) => {
+  reactConvert: ReactConvertFunction = (val, { hit, field } = {}) => {
     const missing = this.checkForMissingValueReact(val);
     if (missing) return missing;
 
