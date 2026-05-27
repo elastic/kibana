@@ -117,16 +117,9 @@ export const revertPrebuiltRuleHandler = async (
       });
     });
 
-    const changeTracking = {
-      metadata: {
-        bulkCount: revertableRules.length,
-      },
-    };
-
     const { results: revertResults, errors: revertErrors } = await revertPrebuiltRules(
       detectionRulesClient,
-      revertableRules,
-      changeTracking
+      revertableRules
     );
 
     const formattedUpdateErrors = revertErrors.map(({ error, item }) => {

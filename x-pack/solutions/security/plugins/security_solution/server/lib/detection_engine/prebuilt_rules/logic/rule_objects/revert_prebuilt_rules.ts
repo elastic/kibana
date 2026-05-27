@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
 import { initPromisePool } from '../../../../../utils/promise_pool';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
@@ -21,10 +20,15 @@ import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
  */
 export const revertPrebuiltRules = async (
   detectionRulesClient: IDetectionRulesClient,
-  ruleVersions: RuleTriad[],
-  changeTracking?: SecurityRuleChangeTracking<never>
+  ruleVersions: RuleTriad[]
 ) =>
   withSecuritySpan('revertPrebuiltRule', async () => {
+    const changeTracking = {
+      metadata: {
+        bulkCount: ruleVersions.length,
+      },
+    };
+
     const result = await initPromisePool({
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: ruleVersions,
