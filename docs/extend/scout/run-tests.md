@@ -31,7 +31,7 @@ node scripts/scout.js start-server \
 And then run tests how often you'd like against the same test servers:
 
 ```bash
-npx playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts \
+node scripts/playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts \
   --project local \
   --grep @<location>-<arch>-<domain>
 ```

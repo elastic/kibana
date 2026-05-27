@@ -52,7 +52,11 @@ const AllFieldDefinitionsLazy: FC<AllFieldDefinitionsPageProps> = lazy(
   () => import('../field_library/pages/all_field_definitions_page')
 );
 
-const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timelineIntegration }) => {
+const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
+  actionsNavigation,
+  refreshRef,
+  timelineIntegration,
+}) => {
   const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
   const { navigateToCaseView } = useCaseViewNavigation();
@@ -65,13 +69,24 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
   );
   const config = KibanaServices.getConfig();
   const isTemplatesEnabled = config?.templates?.enabled ?? false;
+  const casesRedesign = {
+    list: config?.casesRedesign?.list ?? false,
+    details: config?.casesRedesign?.details ?? false,
+    settings: config?.casesRedesign?.settings ?? false,
+  };
 
   return (
     <>
       <ReactQueryDevtools initialIsOpen={false} />
       <Routes>
         <Route strict exact path={basePath}>
-          <AllCases />
+          {casesRedesign.list ? (
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <AllCasesRedesignLazy />
+            </Suspense>
+          ) : (
+            <AllCases />
+          )}
         </Route>
 
         <Route path={getCreateCasePath(basePath)}>
@@ -124,7 +139,13 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
 
         <Route path={getCasesConfigurePath(basePath)}>
           {permissions.settings ? (
-            <ConfigureCases />
+            casesRedesign.settings ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <ConfigureCasesRedesignLazy />
+              </Suspense>
+            ) : (
+              <ConfigureCases />
+            )
           ) : (
             <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
           )}
@@ -133,7 +154,14 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
         {/* NOTE: current case view implementation retains some local state between renders, eg. when going from one case directly to another one. as a short term fix, we are forcing the component remount. */}
         <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
           <Suspense fallback={<EuiLoadingSpinner />}>
-            <CaseViewLazy refreshRef={refreshRef} timelineIntegration={timelineIntegration} />
+            {casesRedesign.details ? (
+              <CaseViewRedesignLazy />
+            ) : (
+              <CaseViewLazy
+                refreshRef={refreshRef}
+                timelineIntegration={timelineIntegration}
+              />
+            )}
           </Suspense>
         </Route>
 
