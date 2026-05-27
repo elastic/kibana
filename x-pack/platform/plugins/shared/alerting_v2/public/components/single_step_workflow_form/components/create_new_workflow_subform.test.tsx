@@ -7,18 +7,38 @@
 
 import '@testing-library/jest-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { CreateWorkflowFormValue } from '../types';
 import { CreateNewWorkflowSubform } from './create_new_workflow_subform';
 
+jest.mock('@kbn/react-query', () => ({
+  ...jest.requireActual('@kbn/react-query'),
+  useQueryClient: () => ({ invalidateQueries: jest.fn(), setQueryData: jest.fn() }),
+}));
+
+let capturedFlyoutProps: Record<string, unknown> = {};
+const mockGetAddConnectorFlyout = jest.fn().mockImplementation((props: Record<string, unknown>) => {
+  capturedFlyoutProps = props;
+  return null;
+});
+
 jest.mock('@kbn/core-di-browser', () => ({
-  useService: () => ({
-    get: jest.fn().mockResolvedValue([]),
-    toasts: { addError: jest.fn() },
-  }),
+  useService: (token: unknown) => {
+    if (token === 'plugin.start.triggersActionsUi') {
+      return { getAddConnectorFlyout: mockGetAddConnectorFlyout };
+    }
+    return {
+      get: jest.fn().mockResolvedValue([]),
+      toasts: { addError: jest.fn() },
+    };
+  },
   CoreStart: (key: string) => key,
+}));
+
+jest.mock('@kbn/core-di', () => ({
+  PluginStart: (key: string) => `plugin.start.${key}`,
 }));
 
 jest.mock('@kbn/code-editor', () => ({
@@ -43,6 +63,7 @@ jest.mock('@kbn/code-editor', () => ({
 }));
 
 jest.mock('../hooks/use_fetch_connectors_by_type', () => ({
+  ALL_CONNECTORS_KEY: ['alertingV2', 'singleStepWorkflow', 'connectors'],
   useFetchConnectorsByType: ({ connectorTypeId }: { connectorTypeId: string | null }) => ({
     data:
       connectorTypeId === '.email'
@@ -111,5 +132,62 @@ describe('CreateNewWorkflowSubform', () => {
     fireEvent.change(editor, { target: { value: 'message: "hi"' } });
 
     expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ params: 'message: "hi"' }));
+  });
+
+  describe('Create new connector', () => {
+    beforeEach(() => {
+      mockGetAddConnectorFlyout.mockClear();
+      capturedFlyoutProps = {};
+    });
+
+    it('renders the "+ Create new connector" link', () => {
+      renderSubform({ typeId: 'email' });
+      expect(screen.getByTestId('singleStepWorkflowCreateConnectorLink')).toBeInTheDocument();
+    });
+
+    it('opens the create connector flyout pre-seeded with the matching action type', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      renderSubform({ typeId: 'email' });
+
+      await user.click(screen.getByTestId('singleStepWorkflowCreateConnectorLink'));
+
+      expect(mockGetAddConnectorFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({ initialConnector: { actionTypeId: '.email' } })
+      );
+    });
+
+    it('selects the new connector and closes the flyout after creation', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      const { onChange } = renderSubform({ typeId: 'email' });
+
+      await user.click(screen.getByTestId('singleStepWorkflowCreateConnectorLink'));
+
+      const { onConnectorCreated } = capturedFlyoutProps as {
+        onConnectorCreated: (connector: { id: string }) => void;
+      };
+      act(() => {
+        onConnectorCreated({ id: 'new-connector-id' });
+      });
+
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'new-connector-id' })
+      );
+    });
+
+    it('closes the flyout without selecting a connector when onClose is called', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
+      renderSubform({ typeId: 'email' });
+
+      await user.click(screen.getByTestId('singleStepWorkflowCreateConnectorLink'));
+      expect(mockGetAddConnectorFlyout).toHaveBeenCalledTimes(1);
+
+      const { onClose } = capturedFlyoutProps as { onClose: () => void };
+      act(() => {
+        onClose();
+      });
+
+      // flyout is no longer rendered after close
+      expect(mockGetAddConnectorFlyout).toHaveBeenCalledTimes(1);
+    });
   });
 });
