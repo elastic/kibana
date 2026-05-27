@@ -13,6 +13,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { useSpaceId } from './use_space_id';
+import { queryKeys } from '../query_keys';
 import { buildEpisodesHistogramQuery, type EpisodesFilterState } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import {
@@ -57,8 +58,8 @@ export const useEpisodesHistogramQuery = ({
     error,
     refetch,
   } = useQuery<HistogramEpisodeRow[], Error>({
-    // bucketInterval is used for client-side bucketing only — omitting from queryKey is intentional
-    queryKey: ['episodesHistogram', spaceId, filterState, timeRange, breakdownField],
+    // bucketInterval is used for client-side bucketing only — omitted from queryKey intentionally
+    queryKey: queryKeys.histogram(spaceId, filterState, timeRange, breakdownField),
     queryFn: async ({ signal }) => {
       const query = buildEpisodesHistogramQuery(spaceId, filterState, breakdownField);
       return executeEsqlQuery<HistogramEpisodeRow>({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TimeRange } from '@kbn/es-query';
 import type { EpisodesFilterState, EpisodesSortState } from './queries/episodes_query';
 
 export const queryKeys = {
@@ -67,4 +68,11 @@ export const queryKeys = {
   assigneeSuggestions: (searchTerm: string) =>
     [...queryKeys.all, 'assignee-suggestions', searchTerm] as const,
   bulkGetProfiles: (uids: string[]) => [...queryKeys.all, 'bulk-get-profiles', ...uids] as const,
+  histogramAll: () => [...queryKeys.all, 'histogram'] as const,
+  histogram: (
+    spaceId: string | undefined,
+    filterState: EpisodesFilterState,
+    timeRange: TimeRange | undefined,
+    breakdownField: string | undefined
+  ) => [...queryKeys.histogramAll(), spaceId, filterState, timeRange, breakdownField] as const,
 };
