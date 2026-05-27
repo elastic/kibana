@@ -150,6 +150,7 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             data-test-subj="bulkCloseRuntimeFieldWarning"
             size="s"
             color="warning"
