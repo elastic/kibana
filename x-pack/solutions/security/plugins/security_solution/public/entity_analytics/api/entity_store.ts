@@ -30,8 +30,8 @@ const WATCHLIST_TOAST_LIFETIME_MS = 8000;
 export const useEntityStoreRoutes = () => {
   const { http, uiSettings, notifications } = useKibana().services;
   const isV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2);
-  const uiSettingstimeZone: string = uiSettings.get('dateFormat:tz');
-  const timeZone = moment.tz.zone(uiSettingstimeZone)?.name ?? moment.tz.guess(true);
+  const uiSettingsTimeZone: string = uiSettings.get('dateFormat:tz');
+  const timeZone = moment.tz.zone(uiSettingsTimeZone)?.name ?? moment.tz.guess(true);
 
   return useMemo(() => {
     const installPrebuiltWatchlists = async () =>

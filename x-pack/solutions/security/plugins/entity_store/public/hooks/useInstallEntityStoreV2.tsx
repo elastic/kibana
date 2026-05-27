@@ -10,7 +10,6 @@ import type { Logger } from '@kbn/logging';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpFetchOptionsWithPath, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { useEffect } from 'react';
-import type { HistorySnapshotState } from '../../server/domain/saved_objects';
 import { EntityStoreStatus } from '../../common';
 import { API_VERSIONS, ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
 import type { StatusRequestQuery } from '../../server/routes/apis/status';
@@ -60,7 +59,7 @@ const initEntityMaintainersRequest: HttpFetchOptionsWithPath = {
 const buildUpdateHistorySnapshotCadenceRequest = (
   uiSettings: IUiSettingsClient
 ): HttpFetchOptionsWithPath => ({
-  path: ENTITY_STORE_ROUTES.internal.UPDATE_SNAPHOT_TASK,
+  path: ENTITY_STORE_ROUTES.internal.UPDATE_SNAPSHOT_TASK,
   body: JSON.stringify({
     timezone: resolveTimezone(uiSettings),
   }),
@@ -81,7 +80,7 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         const space = await services.spaces.getActiveSpace();
         const statusResponse = await services.http.get<{
           status: EntityStoreStatus;
-          historySnapshot: HistorySnapshotState;
+          historySnapshot?: { timezone?: string };
         }>(getStatusRequest);
 
         const isEntityStoreV2Installed = isEntityStoreInstalled(statusResponse.status);

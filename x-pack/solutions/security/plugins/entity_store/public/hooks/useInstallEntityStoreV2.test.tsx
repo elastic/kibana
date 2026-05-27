@@ -205,7 +205,7 @@ describe('useInstallEntityStoreV2', () => {
     });
 
     expect(mockServices.http.put).toHaveBeenCalledWith({
-      path: ENTITY_STORE_ROUTES.internal.UPDATE_SNAPHOT_TASK,
+      path: ENTITY_STORE_ROUTES.internal.UPDATE_SNAPSHOT_TASK,
       body: JSON.stringify({ timezone: 'America/New_York' }),
       query: { apiVersion: '2' },
     });

@@ -16,12 +16,10 @@ import { wrapMiddlewares } from '../middleware';
 export function registerUpdateHistorySnapshotCadence(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: ENTITY_STORE_ROUTES.internal.UPDATE_SNAPHOT_TASK,
+      path: ENTITY_STORE_ROUTES.internal.UPDATE_SNAPSHOT_TASK,
       access: 'internal',
       summary: 'Update history snapshot task cadence',
-      description:
-        'Update the history snapshot schedule. Provide a timezone to switch to a midnight rrule schedule; ' +
-        'provide only a frequency to switch to a fixed interval.',
+      description: 'Update the history snapshot schedule to midnight in the provided.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

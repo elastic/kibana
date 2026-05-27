@@ -20,7 +20,7 @@ import { clearEntityStoreIndices } from '../fixtures/helpers';
 // task:entity_store:v2:history_snapshot_task:<namespace>
 const HISTORY_SNAPSHOT_TASK_DOC_ID = 'task:entity_store:v2:history_snapshot_task:default';
 
-export const getHistorySnapshotTaskRunAt = async (esClient: EsClient): Promise<Date> => {
+const getHistorySnapshotTaskRunAt = async (esClient: EsClient): Promise<Date> => {
   try {
     const doc = await esClient.get({
       index: '.kibana_task_manager',
@@ -90,11 +90,14 @@ apiTest.describe('Entity Store History Snapshot Task Cadence', { tag: ENTITY_STO
   apiTest(
     'after update with timezone: task runAt is scheduled at midnight UTC (00:00:00)',
     async ({ apiClient, esClient }) => {
-      const updateResponse = await apiClient.put(ENTITY_STORE_ROUTES.internal.UPDATE_SNAPHOT_TASK, {
-        headers: internalHeaders,
-        responseType: 'json',
-        body: { timezone: 'UTC' },
-      });
+      const updateResponse = await apiClient.put(
+        ENTITY_STORE_ROUTES.internal.UPDATE_SNAPSHOT_TASK,
+        {
+          headers: internalHeaders,
+          responseType: 'json',
+          body: { timezone: 'UTC' },
+        }
+      );
       expect(updateResponse.statusCode).toBe(200);
 
       let runAt = new Date(0);

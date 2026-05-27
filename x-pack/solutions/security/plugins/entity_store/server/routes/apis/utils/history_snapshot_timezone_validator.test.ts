@@ -36,6 +36,15 @@ describe('validateHistorySnapshotTimezone', () => {
         expect(issue?.message).toMatch(/valid timezone/);
       }
     });
+
+    it.each(['', '   '])('rejects empty/whitespace timezone %j', (timezone) => {
+      const result = schema.safeParse({ timezone });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const issue = result.error.issues.find((i) => i.path.includes('timezone'));
+        expect(issue?.message).toMatch(/valid timezone/);
+      }
+    });
   });
 
   describe('when isOptional: false', () => {
@@ -59,6 +68,15 @@ describe('validateHistorySnapshotTimezone', () => {
 
     it('rejects invalid timezone', () => {
       const result = schema.safeParse({ timezone: 'Not/ATimezone' });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const issue = result.error.issues.find((i) => i.path.includes('timezone'));
+        expect(issue?.message).toMatch(/valid timezone/);
+      }
+    });
+
+    it.each(['', '   '])('rejects empty/whitespace timezone %j', (timezone) => {
+      const result = schema.safeParse({ timezone });
       expect(result.success).toBe(false);
       if (!result.success) {
         const issue = result.error.issues.find((i) => i.path.includes('timezone'));

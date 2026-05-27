@@ -36,15 +36,13 @@ describe('BodySchema historySnapshot', () => {
     expect(BodySchema.safeParse({ logExtraction: { lookbackPeriod: '12h' } }).success).toBe(true);
   });
 
-  it('accepts valid historySnapshot timezone', () => {
+  it('accepts valid top-level timezone', () => {
     expect(BodySchema.safeParse({ timezone: 'America/New_York' }).success).toBe(true);
-    expect(BodySchema.safeParse({ historySnapshot: { timezone: 'UTC' } }).success).toBe(true);
-    expect(BodySchema.safeParse({ historySnapshot: { timezone: 'Europe/London' } }).success).toBe(
-      true
-    );
+    expect(BodySchema.safeParse({ timezone: 'UTC' }).success).toBe(true);
+    expect(BodySchema.safeParse({ timezone: 'Europe/London' }).success).toBe(true);
   });
 
-  it('rejects invalid historySnapshot timezone', () => {
+  it('rejects invalid top-level timezone', () => {
     const result = BodySchema.safeParse({ timezone: 'Mars/Olympus_Mons' });
     expect(result.success).toBe(false);
     if (!result.success) {

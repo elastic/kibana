@@ -13,7 +13,9 @@ const isValidTimezone = (timezone: string): boolean => moment.tz.zone(timezone) 
 export const validateHistorySnapshotTimezone =
   ({ isOptional }: { isOptional: boolean }) =>
   (data: { timezone?: string } | undefined, ctx: z.RefinementCtx): void => {
-    if (!data?.timezone) {
+    const { timezone } = data ?? {};
+
+    if (timezone === undefined) {
       if (!isOptional) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -23,7 +25,8 @@ export const validateHistorySnapshotTimezone =
       }
       return;
     }
-    if (!isValidTimezone(data.timezone)) {
+
+    if (timezone.trim() === '' || !isValidTimezone(timezone)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['timezone'],
