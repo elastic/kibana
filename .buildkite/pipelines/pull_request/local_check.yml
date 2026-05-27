@@ -9,6 +9,8 @@ steps:
       diskSizeGb: 105
     key: check
     timeout_in_minutes: 35
+    env:
+      CHECK_GATE: 'true'
     retry:
       automatic:
         - exit_status: '-1'

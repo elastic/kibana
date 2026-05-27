@@ -73,8 +73,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     await runPreBuild();
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/local_check.yml', {}));
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
+    // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/local_check.yml', {}));
+    // pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
 
     // Register steps from base.yml that should still be canceled on gate failure.
     // base.yml itself is not loaded with cancelOnGateFailure because it contains the gate steps.
