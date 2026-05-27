@@ -2533,6 +2533,10 @@ x-pack/platform/plugins/shared/actions/server/lib/ears @elastic/workchat-eng
 x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.ts @elastic/workchat-eng @elastic/response-ops
 x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.test.ts @elastic/workchat-eng @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs/src/auth_types/ears.ts @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/lib/ears_experimental_utils.ts @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/lib/ears_experimental_utils.test.ts @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema_from_spec.ts @elastic/workchat-eng @elastic/response-ops
+src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema_from_spec.test.ts @elastic/workchat-eng @elastic/response-ops
 
 
 # Connector Specs
