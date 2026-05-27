@@ -163,13 +163,16 @@ export const CollectorsStatusBar: React.FC<CollectorsStatusBarProps> = ({
               isOpen={isGroupByOpen}
               closePopover={() => setIsGroupByOpen(false)}
               panelPaddingSize="none"
-              anchorPosition="downRight"
+              anchorPosition="downCenter"
             >
               <EuiSelectable
                 singleSelection
                 options={selectableOptions}
                 onChange={handleGroupByChange}
                 listProps={{ bordered: false }}
+                css={`
+                  min-width: 200px;
+                `}
               >
                 {(list) => list}
               </EuiSelectable>

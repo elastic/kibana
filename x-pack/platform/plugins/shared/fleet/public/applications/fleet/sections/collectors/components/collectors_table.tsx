@@ -22,6 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
+import { pipelineConfigLabel } from '../../../../../../common/services/pipeline_config_label';
+
 import type { Agent } from '../../../../../../common/types';
 import {
   getOtelCollectorDisplayName,
@@ -91,7 +93,16 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
           defaultMessage: 'Version',
         }),
         // TODO not implemented yet, waiting for backend to populate the field
-        render: (_: unknown, collector: Agent) => <EuiBadge>TODO</EuiBadge>,
+        render: (_: unknown, collector: Agent) => {
+          if (!collector.pipeline_config) return '-';
+          return (
+            <EuiToolTip content={collector.pipeline_config}>
+              <EuiBadge tabIndex={0} color="hollow">
+                {pipelineConfigLabel(collector.pipeline_config)}
+              </EuiBadge>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'signals',
