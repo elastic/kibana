@@ -2248,7 +2248,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('enrichment', () => {
+    describe('@skipInServerlessMKI enrichment', () => {
       const config = getService('config');
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);
