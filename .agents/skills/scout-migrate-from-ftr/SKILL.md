@@ -64,7 +64,7 @@ Once execution is complete, run the new Scout tests and fix failures until they 
 For faster feedback during the loop, start the test servers once and reuse them across iterations:
 
 1. Start servers (one-time): `node scripts/scout.js start-server --stateful --serverConfigSet <configSet>` (or `--serverless <project>`).
-2. Run the specs per iteration: `npx playwright test --config <playwright.config.ts> <test-file>`.
+2. Run the specs per iteration: `node scripts/playwright test --config <playwright.config.ts> <test-file>`.
 
 Falling back to `node scripts/scout.js run-tests` works but restarts the servers each time, which is much slower for iterative debugging.
 

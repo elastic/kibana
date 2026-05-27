@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 
 export const NoFailureStorePanel = ({
@@ -36,11 +36,10 @@ export const NoFailureStorePanel = ({
               })}
             </b>
           </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText>
+          <EuiText color="subdued">
             {i18n.translate('xpack.streams.streamDetailView.failureStoreDisabled.description', {
               defaultMessage:
-                'Enable the failure store to have this stream’s failed documents automatically placed',
+                "Enable the failure store to collect this stream's failed documents for later review.",
             })}
           </EuiText>
         </EuiFlexItem>

@@ -7,8 +7,16 @@
 
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type CommonSearchOptions } from '../query_utils';
-import { runLatestSourceEsqlQuery } from '../latest_source_query';
+import {
+  type CommonSearchOptions,
+  type PaginatedSearchOptions,
+  type PaginatedResponse,
+} from '../query_utils';
+import {
+  runLatestSourceEsqlQuery,
+  runPaginatedLatestSourceEsqlQuery,
+  runFindByIdEsqlQuery,
+} from '../latest_source_query';
 import {
   EVENTS_DATA_STREAM,
   type SigEvent,
@@ -17,6 +25,8 @@ import {
 } from './data_stream';
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
+
+const GROUP_BY_FIELD = 'event_id';
 
 export class EventClient {
   constructor(
@@ -40,7 +50,29 @@ export class EventClient {
       space: this.clients.space,
       options,
       index: EVENTS_DATA_STREAM,
-      groupBy: 'event_id',
+      groupBy: GROUP_BY_FIELD,
+    });
+  }
+
+  async findLatestPaginated(
+    options: PaginatedSearchOptions = {}
+  ): Promise<PaginatedResponse<SigEvent>> {
+    return runPaginatedLatestSourceEsqlQuery<SigEvent>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      options,
+      index: EVENTS_DATA_STREAM,
+      groupBy: GROUP_BY_FIELD,
+    });
+  }
+
+  async findById(eventId: string): Promise<{ hits: SigEvent[] }> {
+    return runFindByIdEsqlQuery<SigEvent>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: EVENTS_DATA_STREAM,
+      idField: GROUP_BY_FIELD,
+      idValue: eventId,
     });
   }
 }

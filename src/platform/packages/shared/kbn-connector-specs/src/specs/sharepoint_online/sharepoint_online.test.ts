@@ -156,12 +156,39 @@ describe('SharepointOnline', () => {
         },
       });
     });
+
+    it('supports oauth_client_credentials_private_key_jwt with Microsoft defaults', () => {
+      const certType = (
+        SharepointOnline.auth?.types as Array<
+          | string
+          | {
+              type: string;
+              defaults?: Record<string, unknown>;
+              overrides?: { meta?: Record<string, Record<string, unknown>> };
+            }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_client_credentials_private_key_jwt');
+      expect(certType).toBeDefined();
+      expect(certType).toMatchObject({
+        type: 'oauth_client_credentials_private_key_jwt',
+        defaults: {
+          scope: 'https://graph.microsoft.com/.default',
+        },
+        overrides: {
+          meta: {
+            tokenUrl: {
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+            },
+          },
+        },
+      });
+    });
   });
 
   describe('getAllSites action', () => {
     const appOnlyContext = {
       ...mockContext,
-      secrets: { authType: 'oauth_client_credentials' },
+      secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
     } as unknown as ActionContext;
 
     const delegatedContext = {
@@ -206,6 +233,30 @@ describe('SharepointOnline', () => {
       );
       expect(result).toEqual(mockResponse.data);
       expect(result.value).toHaveLength(2);
+    });
+
+    it('should treat oauth_client_credentials as app-only (uses /sites/getAllSites)', async () => {
+      const certContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials' },
+      } as unknown as ActionContext;
+
+      const mockResponse = { data: { value: [] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await SharepointOnline.actions.getAllSites.handler(certContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/sites/getAllSites/',
+        {
+          params: {
+            $select: 'id,displayName,webUrl,siteCollection',
+          },
+        }
+      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith(
+        'SharePoint listing all sites (app-only auth)'
+      );
     });
 
     it('should fall back to /sites?search= with delegated auth', async () => {
@@ -1035,7 +1086,7 @@ describe('SharepointOnline', () => {
   describe('search action', () => {
     const appOnlySearchContext = {
       ...mockContext,
-      secrets: { authType: 'oauth_client_credentials' },
+      secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
     } as unknown as ActionContext;
 
     it('should search with default entity types using app-only auth (includes region)', async () => {
@@ -1083,6 +1134,37 @@ describe('SharepointOnline', () => {
       );
       expect(result).toEqual(mockResponse.data);
       expect(result.value[0].hitsContainers[0].hits).toHaveLength(1);
+    });
+
+    it('should search with oauth_client_credentials treating it as app-only (includes region)', async () => {
+      const certSearchContext = {
+        ...mockContext,
+        secrets: { authType: 'oauth_client_credentials' },
+      } as unknown as ActionContext;
+
+      const mockResponse = {
+        data: { value: [{ hitsContainers: [{ hits: [], total: 0 }] }] },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      await SharepointOnline.actions.search.handler(certSearchContext, {
+        query: 'test document',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://graph.microsoft.com/v1.0/search/query',
+        {
+          requests: [
+            {
+              entityTypes: ['site'],
+              query: {
+                queryString: 'test document',
+              },
+              region: 'NAM',
+            },
+          ],
+        }
+      );
     });
 
     it('should search with delegated auth (omits region)', async () => {
