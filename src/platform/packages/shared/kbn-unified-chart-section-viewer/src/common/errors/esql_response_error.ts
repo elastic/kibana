@@ -7,24 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO https://github.com/elastic/kibana/issues/260667
 import type { estypes } from '@elastic/elasticsearch';
 
 export type EsqlResponseErrorCause = Partial<estypes.ErrorCause>;
 
-export const formatErrorCause = (errorCause: EsqlResponseErrorCause): string => {
-  const head = [errorCause.type, errorCause.reason]
+const formatSingleCause = (cause: EsqlResponseErrorCause): string | undefined => {
+  const formatted = [cause.type, cause.reason]
     .filter((value): value is string => Boolean(value?.trim()))
     .join(': ');
+  return formatted || undefined;
+};
+
+const formatRootCauses = (rootCauses: EsqlResponseErrorCause[] | undefined): string | undefined => {
+  if (!rootCauses?.length) {
+    return undefined;
+  }
+
+  const formatted = rootCauses
+    .map((cause) => formatSingleCause(cause))
+    .filter((value): value is string => Boolean(value));
+
+  return formatted.length > 0 ? formatted.join('\n') : undefined;
+};
+
+/**
+ * Builds a human-readable message from an Elasticsearch error cause, including
+ * all `root_cause` entries (e.g. CCS / multi-cluster failures).
+ */
+export const formatErrorCause = (errorCause: EsqlResponseErrorCause): string => {
+  const head = formatSingleCause(errorCause);
   if (head) {
     return head;
   }
 
-  const rootCause = errorCause.root_cause?.[0];
-  const fromRootCause = [rootCause?.type, rootCause?.reason]
-    .filter((value): value is string => Boolean(value?.trim()))
-    .join(': ');
-  return fromRootCause || 'Elasticsearch returned an error';
+  const fromRootCauses = formatRootCauses(errorCause.root_cause);
+  if (fromRootCauses) {
+    return fromRootCauses;
+  }
+
+  const fromCausedBy = errorCause.caused_by ? formatSingleCause(errorCause.caused_by) : undefined;
+  return fromCausedBy || 'Elasticsearch returned an error';
 };
 
 export interface EsqlEmbeddedError {
@@ -61,5 +83,12 @@ export class EsqlResponseError extends Error {
     this.reason = errorCause.reason ?? undefined;
     this.rootCause = errorCause.root_cause;
     this.status = options?.status;
+
+    // Set the prototype explicitly, see:
+    // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+    Object.setPrototypeOf(this, EsqlResponseError.prototype);
   }
 }
+
+export const isEsqlResponseError = (error: unknown): error is EsqlResponseError =>
+  error instanceof EsqlResponseError;
