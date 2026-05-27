@@ -69,7 +69,7 @@ test.describe('Stack Monitoring feature controls', { tag: tags.stateful.classic 
 
     expect(response?.status()).toBe(404);
     const bodyText = await page.evaluate(() => document.body.innerText);
-    expect(JSON.parse(bodyText)).toEqual({
+    expect(JSON.parse(bodyText)).toStrictEqual({
       statusCode: 404,
       error: 'Not Found',
       message: 'Not Found',
