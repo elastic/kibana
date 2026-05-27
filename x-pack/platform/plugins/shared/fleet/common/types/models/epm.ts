@@ -889,6 +889,7 @@ export interface EsAssetReference {
   id: string;
   type: ElasticsearchAssetType;
   deferred?: boolean;
+  customDataStreamOriginPath?: string;
 }
 
 export interface PackageAssetReference {

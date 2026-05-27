@@ -22,6 +22,7 @@ export const EpmPackagesSchemaV6 = schema.object({
         type: schema.string(),
         version: schema.maybe(schema.string()),
         deferred: schema.maybe(schema.boolean()),
+        customDataStreamOriginPath: schema.maybe(schema.string()),
       }),
       { maxSize: 10000 }
     )

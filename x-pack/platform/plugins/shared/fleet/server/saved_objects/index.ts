@@ -1390,6 +1390,7 @@ export const getSavedObjectTypes = (
           verification_status: { type: 'keyword' },
           verification_key_id: { type: 'keyword' },
           installed_es: {
+            dynamic: false,
             type: 'nested',
             properties: {
               id: { type: 'keyword' },

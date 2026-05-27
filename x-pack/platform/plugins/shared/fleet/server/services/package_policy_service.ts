@@ -89,6 +89,7 @@ export interface PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
+      createDatasetTemplates?: boolean;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest

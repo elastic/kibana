@@ -46,12 +46,6 @@ export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
     if (!packageInfo || packageInfo.version !== pkgVersion) {
       throw new FleetNotFoundError('Version is not installed');
     }
-    if (packageInfo?.type !== 'input') {
-      throw new PackagePolicyRequestError(
-        `Requested package ${pkgName}-${pkgVersion} is not an input package`
-      );
-    }
-
     const allSpacesSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
     const { items: allPackagePolicies } = await packagePolicyService.list(allSpacesSoClient, {
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,

@@ -788,7 +788,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       installed_kibana: attributes.installed_kibana,
       installed_kibana_space_id: attributes.installed_kibana_space_id,
       additional_spaces_installed_kibana: attributes.additional_spaces_installed_kibana,
-      installed_es: attributes.installed_es,
+      installed_es: attributes.installed_es ?? [],
       install_status: attributes.install_status,
       install_source: attributes.install_source,
       name: attributes.name,

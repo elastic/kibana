@@ -102,6 +102,7 @@ export const EsAssetReferenceSchema = schema.object({
   ]),
   deferred: schema.maybe(schema.boolean()),
   version: schema.maybe(schema.string()),
+  customDataStreamOriginPath: schema.maybe(schema.string()),
 });
 
 export const InstallationInfoSchema = schema.object({

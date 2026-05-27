@@ -198,7 +198,10 @@ import type {
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
 } from './package_policy_service';
-import { installAssetsForInputPackagePolicy } from './epm/packages/input_type_packages';
+import {
+  installAssetsForInputPackagePolicy,
+  installAssetsForCustomDatasetPolicy,
+} from './epm/packages/input_type_packages';
 import { auditLoggingService } from './audit_logging';
 import {
   extractAndUpdateSecrets,
@@ -516,6 +519,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
+      createDatasetTemplates?: boolean;
     } = {},
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -721,8 +725,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
-    if (pkgInfo.type === 'input') {
-      await installAssetsForInputPackagePolicy({
+    const shouldCreateDatasetTemplates =
+      options?.createDatasetTemplates ?? pkgInfo.type === 'input';
+
+    if (shouldCreateDatasetTemplates) {
+      await installAssetsForCustomDatasetPolicy({
         soClient,
         esClient,
         pkgInfo,
@@ -3557,6 +3564,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
+      createDatasetTemplates?: boolean;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
