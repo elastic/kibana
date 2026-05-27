@@ -28,10 +28,14 @@ export const useSetupRuleNotifications = () => {
 
   return useMutation({
     mutationFn: async ({ rule, workflow }: SetupRuleNotificationsParams) => {
+      if (workflow.kind === 'unselected') {
+        return;
+      }
+
       let createdWorkflowId: string | null = null;
 
       let workflowId: string;
-      if (workflow.mode === 'create') {
+      if (workflow.kind === 'slack' || workflow.kind === 'email') {
         const created = await workflowApi.createWorkflow({
           yaml: buildSingleStepWorkflowYaml(workflow),
         });
@@ -65,7 +69,8 @@ export const useSetupRuleNotifications = () => {
         throw err;
       }
     },
-    onSuccess: () => {
+    onSuccess: (_, { workflow }) => {
+      if (workflow.kind === 'unselected') return;
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.useSetupRuleNotifications.successMessage', {
           defaultMessage: 'Notifications configured successfully',

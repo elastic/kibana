@@ -32,45 +32,58 @@ export default meta;
 
 type Story = StoryObj<typeof SingleStepWorkflowFormStory>;
 
-export const Empty: Story = {
+export const Unselected: Story = {
   args: {
-    initialValue: { mode: 'existing', workflowId: null },
+    initialValue: { kind: 'unselected' },
   },
 };
 
-export const ExistingWorkflowSelected: Story = {
+export const WorkflowSelected: Story = {
   args: {
-    initialValue: { mode: 'existing', workflowId: 'singlestep-1' },
+    initialValue: { kind: 'workflow', workflowId: null },
   },
 };
 
-export const CreateNewEmail: Story = {
+export const WorkflowSelectedWithValue: Story = {
+  args: {
+    initialValue: { kind: 'workflow', workflowId: 'singlestep-1' },
+  },
+};
+
+export const SlackEmpty: Story = {
   args: {
     initialValue: {
-      mode: 'create',
-      typeId: 'email',
-      connectorId: null,
-      params: 'to: ""\nsubject: ""\nmessage: ""\n',
-    },
-  },
-};
-
-export const CreateNewSlack: Story = {
-  args: {
-    initialValue: {
-      mode: 'create',
-      typeId: 'slack',
+      kind: 'slack',
       connectorId: null,
       params: 'message: ""\n',
     },
   },
 };
 
-export const CreateNewFilled: Story = {
+export const SlackFilled: Story = {
   args: {
     initialValue: {
-      mode: 'create',
-      typeId: 'email',
+      kind: 'slack',
+      connectorId: 'slack-ops',
+      params: 'message: "Alert for {{ inputs.policyId }}"\n',
+    },
+  },
+};
+
+export const EmailEmpty: Story = {
+  args: {
+    initialValue: {
+      kind: 'email',
+      connectorId: null,
+      params: 'to: ""\nsubject: ""\nmessage: ""\n',
+    },
+  },
+};
+
+export const EmailFilled: Story = {
+  args: {
+    initialValue: {
+      kind: 'email',
       connectorId: 'email-ops',
       params:
         'to: "{{ inputs.policyId }}@example.com"\nsubject: "Alert for {{ inputs.id }}"\nmessage: "{{ inputs.episodes }} episodes"\n',

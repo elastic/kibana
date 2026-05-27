@@ -17,6 +17,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   SingleStepWorkflowForm,
+  createInitialValue,
   type SingleStepWorkflowFormValue,
 } from '../components/single_step_workflow_form';
 import type { RuleApiResponse } from '../services/rules_api';
@@ -66,10 +67,11 @@ export const useComposeDiscoverFlyout = ({
       lens,
       workflowForm: {
         Component: SingleStepWorkflowForm,
-        defaultValue: () => ({ mode: 'existing', workflowId: null }),
+        defaultValue: createInitialValue,
         isValid: (value: SingleStepWorkflowFormValue) => {
-          if (value.mode === 'existing') return Boolean(value.workflowId);
-          return Boolean(value.typeId) && value.connectorId !== null && value.params.trim() !== '';
+          if (value.kind === 'unselected') return true;
+          if (value.kind === 'workflow') return Boolean(value.workflowId);
+          return value.connectorId !== null && value.params.trim() !== '';
         },
       },
       uiActions,

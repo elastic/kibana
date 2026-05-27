@@ -9,7 +9,7 @@ import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import { parse } from 'yaml';
 import { SINGLE_STEP_WORKFLOW_TAG } from '../constants';
 import { getSingleStepWorkflowType } from '../registry';
-import type { CreateWorkflowFormValue } from '../types';
+import type { ConnectorBackedFormValue } from '../types';
 
 export class InvalidSingleStepWorkflowError extends Error {
   constructor(message: string) {
@@ -44,17 +44,17 @@ const parseParams = (params: string): Record<string, unknown> => {
   return parsed as Record<string, unknown>;
 };
 
-export const buildSingleStepWorkflowYaml = (value: CreateWorkflowFormValue): string => {
-  const type = getSingleStepWorkflowType(value.typeId);
+export const buildSingleStepWorkflowYaml = (value: ConnectorBackedFormValue): string => {
+  const type = getSingleStepWorkflowType(value.kind);
   if (!type) {
-    throw new InvalidSingleStepWorkflowError(`Unknown single-step workflow type: ${value.typeId}`);
+    throw new InvalidSingleStepWorkflowError(`Unknown single-step workflow type: ${value.kind}`);
   }
   if (!value.connectorId) {
     throw new InvalidSingleStepWorkflowError('A connector must be selected.');
   }
 
   const workflow = {
-    name: value.name?.trim() || `${type.label} notification`,
+    name: `${type.label} notification`,
     enabled: true,
     tags: [SINGLE_STEP_WORKFLOW_TAG],
     triggers: [{ type: 'manual' }],

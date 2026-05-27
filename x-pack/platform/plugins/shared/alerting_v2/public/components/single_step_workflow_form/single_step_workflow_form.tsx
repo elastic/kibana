@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { CreateNewWorkflowSubform } from './components/create_new_workflow_subform';
-import { ExistingWorkflowSelector } from './components/existing_workflow_selector';
-import { getDefaultSingleStepWorkflowType } from './registry';
-import type { SingleStepWorkflowFormValue } from './types';
+import { ConnectorSelector } from './components/connector_selector';
+import { ParamsEditor } from './components/params_editor';
+import { WORKFLOW_FORM_CARDS, WorkflowCards } from './components/workflow_cards';
+import { WorkflowPanelHeader } from './components/workflow_panel_header';
+import { WorkflowReferenceSelector } from './components/workflow_reference_selector';
+import { getSingleStepWorkflowType } from './registry';
+import type { SingleStepWorkflowFormValue, SingleStepWorkflowKind } from './types';
 
 interface SingleStepWorkflowFormProps {
   value: SingleStepWorkflowFormValue;
@@ -20,15 +22,7 @@ interface SingleStepWorkflowFormProps {
   errorMessage?: string;
 }
 
-export const createInitialCreateValue = (): SingleStepWorkflowFormValue => {
-  const defaultType = getDefaultSingleStepWorkflowType();
-  return {
-    mode: 'create',
-    typeId: defaultType.id,
-    connectorId: null,
-    params: defaultType.paramsTemplate,
-  };
-};
+export const createInitialValue = (): SingleStepWorkflowFormValue => ({ kind: 'unselected' });
 
 export const SingleStepWorkflowForm = ({
   value,
@@ -36,58 +30,58 @@ export const SingleStepWorkflowForm = ({
   isInvalid,
   errorMessage,
 }: SingleStepWorkflowFormProps) => {
-  const handleSelectExisting = (workflowId: string | null) => {
-    if (value.mode === 'existing' && value.workflowId === workflowId) return;
-    onChange({ mode: 'existing', workflowId });
+  const handlePick = (kind: Exclude<SingleStepWorkflowKind, 'unselected'>) => {
+    if (kind === 'workflow') {
+      onChange({ kind: 'workflow', workflowId: null });
+      return;
+    }
+    const type = getSingleStepWorkflowType(kind);
+    if (!type) return;
+    onChange({ kind, connectorId: null, params: type.paramsTemplate });
   };
 
-  const handleCreateNew = () => {
-    if (value.mode === 'create') return;
-    onChange(createInitialCreateValue());
-  };
+  const handleBack = () => onChange({ kind: 'unselected' });
 
-  const handleBackToExisting = () => {
-    if (value.mode === 'existing' && value.workflowId === null) return;
-    onChange({ mode: 'existing', workflowId: null });
-  };
-
-  if (value.mode === 'existing') {
-    return (
-      <ExistingWorkflowSelector
-        value={value.workflowId}
-        onSelect={handleSelectExisting}
-        onCreateNew={handleCreateNew}
-        isInvalid={isInvalid}
-        errorMessage={errorMessage}
-      />
-    );
+  if (value.kind === 'unselected') {
+    return <WorkflowCards onPick={handlePick} />;
   }
+
+  const card = WORKFLOW_FORM_CARDS.find((c) => c.kind === value.kind)!;
 
   return (
     <div data-test-subj="singleStepWorkflowForm">
-      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('xpack.alertingV2.singleStepWorkflow.creatingNew.title', {
-                defaultMessage: 'New single-step workflow',
-              })}
-            </strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            onClick={handleBackToExisting}
-            data-test-subj="singleStepWorkflowBackToExistingLink"
-          >
-            {i18n.translate('xpack.alertingV2.singleStepWorkflow.creatingNew.backLink', {
-              defaultMessage: 'Pick an existing workflow instead',
-            })}
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <CreateNewWorkflowSubform value={value} onChange={onChange} />
+      <WorkflowPanelHeader iconType={card.iconType} title={card.label} onBack={handleBack} />
+      <EuiSpacer size="m" />
+      {value.kind === 'workflow' && (
+        <WorkflowReferenceSelector
+          value={value.workflowId}
+          onSelect={(workflowId) => onChange({ kind: 'workflow', workflowId })}
+          isInvalid={isInvalid}
+          errorMessage={errorMessage}
+        />
+      )}
+      {(value.kind === 'slack' || value.kind === 'email') && (
+        <EuiPanel
+          hasShadow={false}
+          hasBorder
+          paddingSize="m"
+          data-test-subj="singleStepWorkflowSubform"
+        >
+          <ConnectorSelector
+            connectorTypeId={getSingleStepWorkflowType(value.kind)!.connectorTypeId}
+            value={value.connectorId}
+            onChange={(connectorId) => {
+              if (connectorId === value.connectorId) return;
+              onChange({ ...value, connectorId });
+            }}
+          />
+          <EuiSpacer size="m" />
+          <ParamsEditor
+            value={value.params}
+            onChange={(params) => onChange({ ...value, params })}
+          />
+        </EuiPanel>
+      )}
     </div>
   );
 };

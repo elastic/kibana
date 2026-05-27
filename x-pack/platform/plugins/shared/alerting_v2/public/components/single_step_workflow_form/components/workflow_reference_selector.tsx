@@ -14,25 +14,20 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import React, { useState } from 'react';
 import { useFetchWorkflows } from '../../../hooks/use_fetch_workflows';
-import { SINGLE_STEP_WORKFLOW_TAG } from '../constants';
 
-const CREATE_NEW_OPTION_VALUE = '__create_new_workflow__';
-
-interface ExistingWorkflowSelectorProps {
+interface WorkflowReferenceSelectorProps {
   value: string | null;
   onSelect: (workflowId: string | null) => void;
-  onCreateNew: () => void;
   isInvalid?: boolean;
   errorMessage?: string;
 }
 
-export const ExistingWorkflowSelector = ({
+export const WorkflowReferenceSelector = ({
   value,
   onSelect,
-  onCreateNew,
   isInvalid,
   errorMessage,
-}: ExistingWorkflowSelectorProps) => {
+}: WorkflowReferenceSelectorProps) => {
   const application = useService(CoreStart('application'));
   const uiSettings = useService(CoreStart('uiSettings'));
   const isWorkflowsEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID);
@@ -45,21 +40,14 @@ export const ExistingWorkflowSelector = ({
 
   const { data: workflowsData, isLoading } = useFetchWorkflows({
     query: debouncedQuery,
-    tags: [SINGLE_STEP_WORKFLOW_TAG],
     isEnabled: isWorkflowsEnabled,
   });
 
   const results = workflowsData?.results ?? [];
-  const workflowOptions: Array<EuiComboBoxOptionOption<string>> = [
-    ...results.map((w) => ({ label: w.name, value: w.id })),
-    {
-      label: i18n.translate(
-        'xpack.alertingV2.singleStepWorkflow.existing.createNewWorkflowOption',
-        { defaultMessage: '+ Create new workflow' }
-      ),
-      value: CREATE_NEW_OPTION_VALUE,
-    },
-  ];
+  const workflowOptions: Array<EuiComboBoxOptionOption<string>> = results.map((w) => ({
+    label: w.name,
+    value: w.id,
+  }));
 
   const selectedOptions: Array<EuiComboBoxOptionOption<string>> = value
     ? [
@@ -104,7 +92,7 @@ export const ExistingWorkflowSelector = ({
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.alertingV2.singleStepWorkflow.existing.label', {
+      label={i18n.translate('xpack.alertingV2.singleStepWorkflow.workflowReference.label', {
         defaultMessage: 'Workflow',
       })}
       fullWidth
@@ -117,10 +105,13 @@ export const ExistingWorkflowSelector = ({
         singleSelection={{ asPlainText: true }}
         isLoading={isLoading}
         isInvalid={!!isInvalid}
-        data-test-subj="singleStepWorkflowSelector"
-        placeholder={i18n.translate('xpack.alertingV2.singleStepWorkflow.existing.placeholder', {
-          defaultMessage: 'Search or create a workflow',
-        })}
+        data-test-subj="workflowReferenceSelector"
+        placeholder={i18n.translate(
+          'xpack.alertingV2.singleStepWorkflow.workflowReference.placeholder',
+          {
+            defaultMessage: 'Search for a workflow',
+          }
+        )}
         selectedOptions={selectedOptions}
         onSearchChange={setSearchQuery}
         onChange={(options) => {
@@ -130,10 +121,6 @@ export const ExistingWorkflowSelector = ({
             return;
           }
           const next = options[0];
-          if (next.value === CREATE_NEW_OPTION_VALUE) {
-            onCreateNew();
-            return;
-          }
           if (next.value) {
             const workflow = results.find((w) => w.id === next.value);
             if (workflow) setSelectedWorkflow({ id: workflow.id, name: workflow.name });

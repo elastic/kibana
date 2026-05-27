@@ -17,10 +17,10 @@ export {
   getSingleStepWorkflowType,
 } from './registry';
 export type { PayloadVariable, SingleStepWorkflowType } from './registry';
-export { SingleStepWorkflowForm } from './single_step_workflow_form';
+export { SingleStepWorkflowForm, createInitialValue } from './single_step_workflow_form';
 export type {
-  CreateWorkflowFormValue,
-  ExistingWorkflowFormValue,
+  ConnectorBackedFormValue,
   SingleStepWorkflowFormValue,
+  SingleStepWorkflowKind,
   SingleStepWorkflowTypeId,
 } from './types';

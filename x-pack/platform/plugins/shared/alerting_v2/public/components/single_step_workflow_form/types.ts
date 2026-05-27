@@ -6,18 +6,32 @@
  */
 
 export type SingleStepWorkflowTypeId = 'email' | 'slack';
+export type SingleStepWorkflowKind = 'unselected' | 'workflow' | 'slack' | 'email';
 
-export interface ExistingWorkflowFormValue {
-  mode: 'existing';
+export interface UnselectedWorkflowFormValue {
+  kind: 'unselected';
+}
+
+export interface WorkflowReferenceFormValue {
+  kind: 'workflow';
   workflowId: string | null;
 }
 
-export interface CreateWorkflowFormValue {
-  mode: 'create';
-  typeId: SingleStepWorkflowTypeId;
+export interface SlackWorkflowFormValue {
+  kind: 'slack';
   connectorId: string | null;
   params: string;
-  name?: string;
 }
 
-export type SingleStepWorkflowFormValue = ExistingWorkflowFormValue | CreateWorkflowFormValue;
+export interface EmailWorkflowFormValue {
+  kind: 'email';
+  connectorId: string | null;
+  params: string;
+}
+
+export type ConnectorBackedFormValue = SlackWorkflowFormValue | EmailWorkflowFormValue;
+
+export type SingleStepWorkflowFormValue =
+  | UnselectedWorkflowFormValue
+  | WorkflowReferenceFormValue
+  | ConnectorBackedFormValue;

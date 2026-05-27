@@ -29,16 +29,20 @@ const mockRule = {
   metadata: { name: 'My Test Rule', description: '', tags: [] },
 } as unknown as RuleApiResponse;
 
-const mockCreateWorkflow = {
-  mode: 'create' as const,
-  typeId: 'email' as const,
+const mockEmailWorkflow = {
+  kind: 'email' as const,
   connectorId: 'connector-1',
   params: '{}',
-  name: 'My Workflow',
+};
+
+const mockSlackWorkflow = {
+  kind: 'slack' as const,
+  connectorId: 'connector-2',
+  params: 'message: ""',
 };
 
 const mockExistingWorkflow = {
-  mode: 'existing' as const,
+  kind: 'workflow' as const,
   workflowId: 'workflow-existing-1',
 };
 
@@ -82,7 +86,26 @@ describe('useSetupRuleNotifications', () => {
     });
   });
 
-  describe('create mode', () => {
+  describe('unselected mode', () => {
+    it('does nothing and shows no toast when workflow is unselected', async () => {
+      const { result } = renderHook(() => useSetupRuleNotifications(), {
+        wrapper: createWrapper(),
+      });
+
+      result.current.mutate({ rule: mockRule, workflow: { kind: 'unselected' } });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      expect(mockCreateWorkflowFn).not.toHaveBeenCalled();
+      expect(mockCreateActionPolicy).not.toHaveBeenCalled();
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+      expect(mockAddError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('email / slack (create) mode', () => {
     it('creates workflow and action policy, then shows success toast', async () => {
       mockCreateWorkflowFn.mockResolvedValue({ id: 'workflow-new-1' });
       mockCreateActionPolicy.mockResolvedValue({});
@@ -91,7 +114,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflow: mockCreateWorkflow });
+      result.current.mutate({ rule: mockRule, workflow: mockEmailWorkflow });
 
       await waitFor(() => {
         expect(mockCreateWorkflowFn).toHaveBeenCalledWith({ yaml: expect.any(String) });
@@ -108,6 +131,24 @@ describe('useSetupRuleNotifications', () => {
       });
     });
 
+    it('also works for the slack kind', async () => {
+      mockCreateWorkflowFn.mockResolvedValue({ id: 'workflow-new-2' });
+      mockCreateActionPolicy.mockResolvedValue({});
+
+      const { result } = renderHook(() => useSetupRuleNotifications(), {
+        wrapper: createWrapper(),
+      });
+
+      result.current.mutate({ rule: mockRule, workflow: mockSlackWorkflow });
+
+      await waitFor(() => {
+        expect(mockCreateWorkflowFn).toHaveBeenCalledTimes(1);
+        expect(mockCreateActionPolicy).toHaveBeenCalledWith(
+          expect.objectContaining({ destinations: [{ type: 'workflow', id: 'workflow-new-2' }] })
+        );
+      });
+    });
+
     it('rolls back by deleting the workflow when action policy creation fails', async () => {
       mockCreateWorkflowFn.mockResolvedValue({ id: 'workflow-new-1' });
       mockCreateActionPolicy.mockRejectedValue(new Error('action policy failed'));
@@ -117,7 +158,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflow: mockCreateWorkflow });
+      result.current.mutate({ rule: mockRule, workflow: mockEmailWorkflow });
 
       await waitFor(() => {
         expect(mockDeleteWorkflowFn).toHaveBeenCalledWith('workflow-new-1');
@@ -135,7 +176,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflow: mockCreateWorkflow });
+      result.current.mutate({ rule: mockRule, workflow: mockEmailWorkflow });
 
       await waitFor(() => {
         expect(mockDeleteWorkflowFn).toHaveBeenCalledWith('workflow-new-1');
@@ -145,7 +186,7 @@ describe('useSetupRuleNotifications', () => {
     });
   });
 
-  describe('existing mode', () => {
+  describe('workflow reference mode', () => {
     it('uses the existing workflow id and creates action policy, shows success toast', async () => {
       mockCreateActionPolicy.mockResolvedValue({});
 
@@ -173,7 +214,7 @@ describe('useSetupRuleNotifications', () => {
 
       result.current.mutate({
         rule: mockRule,
-        workflow: { mode: 'existing', workflowId: null },
+        workflow: { kind: 'workflow', workflowId: null },
       });
 
       await waitFor(() => {
@@ -195,7 +236,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflow: mockCreateWorkflow });
+      result.current.mutate({ rule: mockRule, workflow: mockEmailWorkflow });
 
       await waitFor(() => {
         expect(mockAddError).toHaveBeenCalledWith(

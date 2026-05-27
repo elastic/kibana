@@ -130,60 +130,61 @@ export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
         </EuiCallOut>
       )}
 
-      {!isLoading && !error && items.length === 0 && (
-        <EuiText size="s" color="subdued" data-test-subj="linkedActionPoliciesEmpty">
-          <p>{emptyStateLabel}</p>
-        </EuiText>
-      )}
+      {!isLoading && !error && (
+        <>
+          {items.length === 0 && (
+            <EuiText size="s" color="subdued" data-test-subj="linkedActionPoliciesEmpty">
+              <p>{emptyStateLabel}</p>
+            </EuiText>
+          )}
+          {SECTION_CONFIG.map(({ category, title, description }) => {
+            const sectionItems = itemsByCategory[category] ?? [];
+            if (sectionItems.length === 0) return null;
 
-      {!isLoading &&
-        !error &&
-        SECTION_CONFIG.map(({ category, title, description }) => {
-          const sectionItems = itemsByCategory[category] ?? [];
-          if (sectionItems.length === 0) return null;
+            const options: EuiSelectableOption[] = [
+              {
+                key: `${category}-header`,
+                label: title,
+                isGroupLabel: true,
+                append: (
+                  <EuiText size="xs" color="subdued">
+                    {description}
+                  </EuiText>
+                ),
+              },
+              ...sectionItems.map(({ actionPolicy }) => ({
+                key: actionPolicy.id,
+                label: actionPolicy.name,
+                append: (
+                  <a
+                    href={http.basePath.prepend(
+                      `${ACTION_POLICY_EDIT_BASE}/${encodeURIComponent(actionPolicy.id)}`
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <EuiIcon type="popout" size="s" aria-hidden={true} />
+                  </a>
+                ),
+              })),
+            ];
 
-          const options: EuiSelectableOption[] = [
-            {
-              key: `${category}-header`,
-              label: title,
-              isGroupLabel: true,
-              append: (
-                <EuiText size="xs" color="subdued">
-                  {description}
-                </EuiText>
-              ),
-            },
-            ...sectionItems.map(({ actionPolicy }) => ({
-              key: actionPolicy.id,
-              label: actionPolicy.name,
-              append: (
-                <a
-                  href={http.basePath.prepend(
-                    `${ACTION_POLICY_EDIT_BASE}/${encodeURIComponent(actionPolicy.id)}`
-                  )}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
+            return (
+              <React.Fragment key={category}>
+                <EuiSelectable
+                  options={options}
+                  onChange={() => {}}
+                  listProps={{ showIcons: false, bordered: true, isVirtualized: false }}
                 >
-                  <EuiIcon type="popout" size="s" aria-hidden={true} />
-                </a>
-              ),
-            })),
-          ];
-
-          return (
-            <React.Fragment key={category}>
-              <EuiSelectable
-                options={options as EuiSelectableOption[]}
-                onChange={() => {}}
-                listProps={{ showIcons: false, bordered: true, isVirtualized: false }}
-              >
-                {(list) => list}
-              </EuiSelectable>
-              <EuiSpacer size="s" />
-            </React.Fragment>
-          );
-        })}
+                  {(list) => list}
+                </EuiSelectable>
+                <EuiSpacer size="s" />
+              </React.Fragment>
+            );
+          })}
+        </>
+      )}
     </>
   );
 };
