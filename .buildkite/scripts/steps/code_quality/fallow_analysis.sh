@@ -20,69 +20,55 @@ extract_owner_section() {
      found { print }'
 }
 
-# Extract the parenthesised summary for an owner, e.g. "(98 issues: 26 files ...)"
-# grep returns exit 1 when no match — || true prevents set -e from killing the script.
-extract_count() {
-  local summary="$1"
+# Extract count summary from the section header line,
+# e.g. "## @elastic/search-kibana (18 issues: 5 exports · 13 types)" → "(18 issues: 5 exports · 13 types)"
+extract_owner_count() {
+  local output="$1"
   local owner="$2"
   local escaped="${owner//\//\\/}"
-  printf '%s\n' "$summary" | grep -oE "${escaped} \([^)]+\)" | sed "s|${escaped} ||" || true
+  printf '%s\n' "$output" | grep -oE "^## ${escaped} \([^)]+\)" | grep -oE '\([^)]+\)' || true
 }
 
 echo "--- Install fallow v${FALLOW_VERSION}"
 npx --yes "fallow@${FALLOW_VERSION}" --version
 
-echo "--- Run fallow dead-code analysis"
+echo "--- Run fallow analysis"
+echo "Run locally: npx fallow@${FALLOW_VERSION} --group-by owner --production"
 set +e
-DEAD_CODE_OUTPUT=$(npx "fallow@${FALLOW_VERSION}" dead-code \
+FALLOW_OUTPUT=$(npx "fallow@${FALLOW_VERSION}" \
   --group-by owner \
   --production \
   --format markdown \
   --quiet \
   2>&1)
-DEAD_CODE_EXIT=$?
+FALLOW_EXIT=$?
 set -e
-for owner in "${FALLOW_OWNERS[@]}"; do
-  section=$(extract_owner_section "$DEAD_CODE_OUTPUT" "$owner")
-  echo "=== ${owner} ==="
-  if [ -n "$section" ]; then
-    echo "$section"
-  else
-    echo "no issues"
-  fi
-  echo ""
-done
 
-echo "--- Run fallow duplication analysis"
-set +e
-DUPES_OUTPUT=$(npx "fallow@${FALLOW_VERSION}" dupes \
-  --group-by owner \
-  --format markdown \
-  --quiet \
-  2>&1)
-DUPES_EXIT=$?
-set -e
 for owner in "${FALLOW_OWNERS[@]}"; do
-  section=$(extract_owner_section "$DUPES_OUTPUT" "$owner")
-  echo "=== ${owner} ==="
+  echo "+++ ${owner}"
+  section=$(extract_owner_section "$FALLOW_OUTPUT" "$owner")
   if [ -n "$section" ]; then
     echo "$section"
   else
-    echo "no issues"
+    echo "No issues found"
   fi
-  echo ""
 done
 
 echo "--- Post Buildkite annotation"
 
-ANNOTATION="**Code Quality** (see job log for details)\n\n"
+ANNOTATION="**Code Quality**\n\n"
+HAS_ISSUES=0
 for owner in "${FALLOW_OWNERS[@]}"; do
-  dead_section=$(extract_owner_section "$DEAD_CODE_OUTPUT" "$owner")
-  dupes_section=$(extract_owner_section "$DUPES_OUTPUT" "$owner")
-  team_short="${owner#@elastic/}"
-  dead_label=$([ -n "$dead_section" ] && echo "has issues" || echo "clean")
-  dupes_label=$([ -n "$dupes_section" ] && echo "has duplication" || echo "clean")
-  ANNOTATION+="${team_short}: dead-code ${dead_label} · duplication ${dupes_label}\n"
+  count=$(extract_owner_count "$FALLOW_OUTPUT" "$owner")
+  if [ -n "$count" ]; then
+    team_short="${owner#@elastic/}"
+    ANNOTATION+="- **${team_short}** ${count}\n"
+    HAS_ISSUES=1
+  fi
 done
+
+if [ "$HAS_ISSUES" -eq 0 ]; then
+  ANNOTATION+="All teams clean\n"
+fi
 
 buildkite-agent annotate --style info --context fallow-report "$(printf "%b" "$ANNOTATION")"
