@@ -203,20 +203,21 @@ const getChangePointCardsBuildContext = (params: {
   const { valueColumn, timeColumn } = series;
   const columnIds = table.columns.map((c) => c.id);
 
+  // The Lens mini-chart uses a dateHistogram xAxis keyed on timeColumn. If the column is present
+  // in the result table but is not a date type (e.g. a keyword used as the ON column), the chart
+  // cannot render and change-point annotations have no meaningful x position.
+  // Return undefined early so the grid shows the "No change point series" empty state instead of
+  // a broken chart.
+  const timeColumnMeta = table.columns.find((c) => c.id === timeColumn);
+  if (timeColumnMeta && timeColumnMeta.meta?.type !== 'date') return undefined;
+
   const byColumns = getChangePointByColumns(esql);
 
-  // When BY is explicit, use those columns (filtered to ones present in the current table, since
-  // the table may lag a query change). When there is no BY clause, fall back to heuristic: any
-  // result column that is not a reserved change-point column is treated as an entity dimension.
-  const reservedColumnIds = new Set<string>([
-    typeColumnId,
-    pvalueColumnId,
-    valueColumn,
-    timeColumn,
-  ]);
+  // Entity columns come exclusively from the explicit CHANGE_POINT ... BY clause. Without a BY,
+  // all rows belong to a single series and the line query needs no WHERE filter.
   const entityColumnIds: string[] = byColumns
     ? byColumns.filter((id: string) => columnIds.includes(id))
-    : columnIds.filter((id: string) => !reservedColumnIds.has(id));
+    : [];
 
   // BY mode: the new `CHANGE_POINT ... BY` syntax omits type/pvalue from the result schema when
   // combined with `WHERE type IS NOT NULL` — every returned row is a change point event.
@@ -276,28 +277,6 @@ export const buildChangePointCards = (params: {
     isByMode,
     groups,
   } = ctx;
-
-  // No-split with no table rows: produce one card with an empty annotations list so the source
-  // data line is always visible even when no change points were detected.
-  if (entityColumnIds.length === 0 && groups.size === 0) {
-    const lineEsql = buildChangePointLineDataQuery(esql);
-    if (lineEsql) {
-      return [
-        {
-          id: 'cp-card-all',
-          title: i18n.translate('changePointChartViewer.card.defaultTitle', {
-            defaultMessage: 'Change point series 1',
-          }),
-          lineEsql,
-          annotationEvents: [],
-          changePointTypes: [],
-          entityValues: {},
-          entityDescription: undefined,
-        },
-      ];
-    }
-    return undefined;
-  }
 
   const cards: ChangePointCardModel[] = [];
 
