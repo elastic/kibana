@@ -10,7 +10,6 @@
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
-  DEFAULT_POLL_CEILINGS,
   isPollOnlyStepDefinition,
   isStartPlusPollStepDefinition,
 } from '@kbn/workflows-extensions/server';
@@ -178,20 +177,13 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
     }
 
     const data = this.enforceCeilings({
-      ceilings: this.stepDefinition.ceilings,
       attempt,
       nextPollAt,
     });
 
     if (data.outcome === 'maxAttemptReached') {
-      const maxAttempts =
-        this.stepDefinition.ceilings?.maxAttempts ?? DEFAULT_POLL_CEILINGS.maxAttempts;
-      this.workflowLogger.logWarn('Poll step attempt ceiling exceeded', {
-        stepType: this.node.stepType,
-        stepId: this.node.stepId,
-        attempt,
-        maxAttempts,
-      });
+      const maxAttempts = this.stepDefinition.ceilings?.maxAttempts;
+      this.workflowLogger.logWarn(`Poll step attempt ceiling exceeded ${maxAttempts}`);
       throw new ExecutionError({
         type: 'StepFailed',
         message: 'The step did not complete within the allowed time.',
@@ -286,13 +278,13 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
   }
 
   private enforceCeilings(params: {
-    ceilings?: PollCeilings;
     attempt: number;
     nextPollAt: string;
   }): PolicyCalculationResult {
-    const { ceilings, attempt, nextPollAt: currentNextPollAtString } = params;
-    const maxWaitMs = ceilings?.maxWaitMs ?? DEFAULT_POLL_CEILINGS.maxWaitMs;
-    const maxAttempts = ceilings?.maxAttempts ?? DEFAULT_POLL_CEILINGS.maxAttempts;
+    const { attempt, nextPollAt: currentNextPollAtString } = params;
+    const ceilings = this.getCeilings();
+    const maxWaitMs = ceilings?.maxWaitMs;
+    const maxAttempts = ceilings?.maxAttempts;
 
     if (attempt >= maxAttempts) {
       return { outcome: 'maxAttemptReached' };
@@ -320,5 +312,13 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
       outcome: 'success',
       nextPollAt: scheduledNextPollAt.toISOString(),
     };
+  }
+
+  private getCeilings(): PollCeilings {
+    if (!this.stepDefinition.ceilings) {
+      throw new Error('Poll step ceilings are not configured');
+    }
+
+    return this.stepDefinition.ceilings;
   }
 }

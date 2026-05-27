@@ -18,15 +18,30 @@ import type { CommonStepDefinition } from '../../common';
 // -----------------------------------------------------------------------------
 
 /**
- * Default ceilings applied when a poll-based step omits {@link PollCeilings}.
- * Conservative values that prevent runaway polling but are loose enough for
- * most real-world async jobs (background ML tasks, Osquery actions, etc.).
- *
- * `maxWaitMs` caps each inter-poll sleep (from policy or `nextPollDelayMs`), not total step duration.
+ * @deprecated Use {@link PollStepDefaults} instead. Retained for backward-compatible imports only.
  */
 export const DEFAULT_POLL_CEILINGS: Required<PollCeilings> = {
   maxAttempts: 120,
   maxWaitMs: 60 * 60_000,
+};
+
+/**
+ * Applied by {@link createPollServerStepDefinition} when `policy` or `ceilings` fields are omitted
+ * (or when individual ceiling properties are missing). Override in your step definition for
+ * production integrations.
+ */
+const PollStepDefaults: {
+  ceilings: PollCeilings;
+  policy: PollPolicy;
+} = {
+  ceilings: {
+    maxAttempts: 60,
+    maxWaitMs: 60 * 1_000, // 1 minute
+  },
+  policy: {
+    strategy: 'fixed',
+    intervalMs: 1000,
+  },
 };
 
 // -----------------------------------------------------------------------------
@@ -158,8 +173,8 @@ export type PollPolicy =
     };
 
 /**
- * Engine-enforced ceilings for a poll-based step. Both default to
- * {@link DEFAULT_POLL_CEILINGS} when omitted.
+ * Engine-enforced ceilings for a poll-based step. At registration,
+ * {@link createPollServerStepDefinition} fills missing values from {@link PollStepDefaults}.
  */
 export interface PollCeilings {
   /**
@@ -167,13 +182,13 @@ export interface PollCeilings {
    * generic execution error. Prefer returning `{ error }` from `poll` for
    * integration-specific failure messages when the upstream job fails or times out.
    */
-  maxAttempts?: number;
+  maxAttempts: number;
   /**
    * Maximum delay (ms) until the next poll wake-up (from **now**). When policy or
    * `nextPollDelayMs` would schedule a longer sleep, the engine caps it to this value.
    * Does not fail the step.
    */
-  maxWaitMs?: number;
+  maxWaitMs: number;
 }
 
 export interface CommonServerStepDefinition<
@@ -330,6 +345,9 @@ export const isOneShotStepDefinition = (
 /**
  * Like {@link createServerStepDefinition} but only for definitions that include **`poll`**
  * (`start` + `poll` or **`poll` only**). Narrows inference so single-`handler` steps are excluded.
+ *
+ * Merges {@link PollStepDefaults} when `policy` is omitted or `ceilings` / individual ceiling
+ * properties are missing (`maxAttempts` **60**, `maxWaitMs` **60_000** ms, fixed **1_000** ms poll interval).
  */
 export function createPollServerStepDefinition<
   Input extends z.ZodType = z.ZodType,
@@ -341,6 +359,14 @@ export function createPollServerStepDefinition<
     | PollOnlyStepDefinition<Input, Output, Config, State>
     | StartPlusPollStepDefinition<Input, Output, Config, State>
 ): PollStepDefinition<Input, Output, Config, State> {
+  if (!definition.ceilings) {
+    definition.ceilings = PollStepDefaults.ceilings;
+  }
+
+  if (!definition.policy) {
+    definition.policy = PollStepDefaults.policy;
+  }
+
   return definition;
 }
 
