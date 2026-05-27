@@ -15,12 +15,25 @@ responses:
                     - 'logs'
                     - 'metrics'
                   isUngrouped: false
+                  firstSeen: '2026-05-20T08:00:00.000Z'
+                  lastSeen: '2026-05-27T09:30:00.000Z'
+                  pipelineConfigs:
+                    top:
+                      - 'pipe:logs/access[otlp||elasticsearch];receivers:otlp;exporters:elasticsearch'
+                      - 'pipe:logs/error[otlp||elasticsearch];receivers:otlp;exporters:elasticsearch'
+                    total: 2
                 - group: 'database-servers'
                   groupDisplayName: 'database-servers'
                   docCount: 3
                   signals:
                     - 'metrics'
                     - 'traces'
+                  firstSeen: '2026-05-22T12:00:00.000Z'
+                  lastSeen: '2026-05-27T09:25:00.000Z'
+                  pipelineConfigs:
+                    top:
+                      - 'pipe:metrics/db[otlp||elasticsearch];receivers:otlp;exporters:elasticsearch'
+                    total: 1
               afterKey: '{"collector.group":"database-servers"}'
   400:
     description: 'Bad Request'

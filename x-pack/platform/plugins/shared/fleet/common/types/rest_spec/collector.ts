@@ -9,10 +9,17 @@ import { type TypeOf, schema } from '@kbn/config-schema';
 
 export const GetCollectorGroupsRequestSchema = {
   query: schema.object({
-    groupBy: schema.oneOf([schema.literal('collector.group'), schema.literal('config.name')], {
-      defaultValue: 'collector.group' as const,
-      meta: { description: 'Field to group collectors by' },
-    }),
+    groupBy: schema.oneOf(
+      [
+        schema.literal('collector.group'),
+        schema.literal('config.name'),
+        schema.literal('pipeline_config'),
+      ],
+      {
+        defaultValue: 'collector.group' as const,
+        meta: { description: 'Field to group collectors by' },
+      }
+    ),
     kuery: schema.maybe(
       schema.string({
         maxLength: 4096,
@@ -65,6 +72,37 @@ export const CollectorGroupSchema = schema.object({
         description: 'True when the collectors in this bucket have no value for the group-by field',
       },
     })
+  ),
+  firstSeen: schema.maybe(
+    schema.string({
+      meta: { description: 'Earliest enrolled_at timestamp in this group (ISO date)' },
+    })
+  ),
+  lastSeen: schema.maybe(
+    schema.string({
+      meta: { description: 'Latest last_checkin timestamp in this group (ISO date)' },
+    })
+  ),
+  pipelineConfigs: schema.maybe(
+    schema.object(
+      {
+        top: schema.arrayOf(schema.string({ maxLength: 4096 }), {
+          maxSize: 3,
+          meta: {
+            description: 'Top pipeline configuration fingerprints by frequency',
+          },
+        }),
+        total: schema.number({
+          meta: { description: 'Total number of distinct pipeline configurations in this group' },
+        }),
+      },
+      {
+        meta: {
+          description:
+            'Distinct pipeline configuration fingerprints and their count within the group',
+        },
+      }
+    )
   ),
 });
 

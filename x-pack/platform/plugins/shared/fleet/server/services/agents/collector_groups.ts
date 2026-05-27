@@ -11,6 +11,7 @@ import { toElasticsearchQuery } from '@kbn/es-query';
 import { AGENTS_INDEX, AGENT_TYPE_OPAMP } from '../../../common/constants';
 import type { CollectorGroup } from '../../../common/types';
 
+import { PIPELINE_CONFIG_RUNTIME_FIELD } from './build_pipeline_config_runtime_field';
 import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
 import {
   ACTIVE_AGENT_CONDITION,
@@ -29,6 +30,10 @@ const GROUP_BY_FIELDS: Record<string, { valueField: string; nameField: string }>
   'config.name': {
     valueField: 'non_identifying_attributes.config.name',
     nameField: 'non_identifying_attributes.config.description',
+  },
+  pipeline_config: {
+    valueField: 'pipeline_config',
+    nameField: 'pipeline_config',
   },
 };
 
@@ -69,6 +74,7 @@ export async function getCollectorGroups(
   const runtimeFields = {
     ...(await buildAgentStatusRuntimeField(soClient)),
     ...SIGNALS_RUNTIME_FIELD,
+    ...PIPELINE_CONFIG_RUNTIME_FIELD,
   };
 
   const res = await esClient.search<
@@ -80,6 +86,10 @@ export async function getCollectorGroups(
           doc_count: number;
           group_name: { buckets: Array<{ key: string }> };
           signals: { buckets: Array<{ key: string }> };
+          pipeline_configs: { buckets: Array<{ key: string }> };
+          pipeline_configs_count: { value: number };
+          first_seen: { value: number | null; value_as_string?: string };
+          last_seen: { value: number | null; value_as_string?: string };
         }>;
         after_key?: { group: string | null };
       };
@@ -109,6 +119,18 @@ export async function getCollectorGroups(
           signals: {
             terms: { field: 'signals', size: 10 },
           },
+          pipeline_configs: {
+            terms: { field: 'pipeline_config', size: 3 },
+          },
+          pipeline_configs_count: {
+            cardinality: { field: 'pipeline_config' },
+          },
+          first_seen: {
+            min: { field: 'enrolled_at' },
+          },
+          last_seen: {
+            max: { field: 'last_checkin' },
+          },
         },
       },
     },
@@ -125,12 +147,21 @@ export async function getCollectorGroups(
 
   const items: CollectorGroup[] = buckets.map((bucket) => {
     const isUngrouped = bucket.key.group == null;
+    const topPipelineConfigs = bucket.pipeline_configs.buckets.map((b) => b.key);
+    const pipelineConfigsTotal = bucket.pipeline_configs_count.value;
     return {
       group: bucket.key.group ?? 'others',
       groupDisplayName: bucket.group_name.buckets[0]?.key ?? bucket.key.group ?? 'Others',
       docCount: bucket.doc_count,
       signals: bucket.signals.buckets.map((b) => b.key),
       ...(isUngrouped ? { isUngrouped: true } : {}),
+      ...(topPipelineConfigs.length > 0
+        ? { pipelineConfigs: { top: topPipelineConfigs, total: pipelineConfigsTotal } }
+        : {}),
+      ...(bucket.first_seen.value_as_string
+        ? { firstSeen: bucket.first_seen.value_as_string }
+        : {}),
+      ...(bucket.last_seen.value_as_string ? { lastSeen: bucket.last_seen.value_as_string } : {}),
     };
   });
 

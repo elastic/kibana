@@ -251,6 +251,44 @@ export default function (providerContext: FtrProviderContext) {
         expect(configGroup).to.be.ok();
         expect(configGroup.groupDisplayName).to.eql('Webserver access and error logs');
         expect(configGroup.docCount).to.eql(2);
+        expect(configGroup.pipelineConfigs).to.be.ok();
+        expect(configGroup.pipelineConfigs.top).to.be.an('array');
+        expect(configGroup.pipelineConfigs.top.length).to.be.greaterThan(0);
+        expect(configGroup.pipelineConfigs.total).to.be.a('number');
+        expect(configGroup.pipelineConfigs.total).to.be.greaterThan(0);
+      });
+
+      it('returns pipeline config fingerprints capped at 3', async () => {
+        await createOpampCollector(esClient, 'opamp-pc-1', {
+          configName: 'multi-pipeline',
+          configDescription: 'Multi pipeline test',
+          pipelines: { 'logs/a': {} },
+        });
+        await createOpampCollector(esClient, 'opamp-pc-2', {
+          configName: 'multi-pipeline',
+          configDescription: 'Multi pipeline test',
+          pipelines: { 'logs/b': {} },
+        });
+        await createOpampCollector(esClient, 'opamp-pc-3', {
+          configName: 'multi-pipeline',
+          configDescription: 'Multi pipeline test',
+          pipelines: { 'metrics/c': {} },
+        });
+        await createOpampCollector(esClient, 'opamp-pc-4', {
+          configName: 'multi-pipeline',
+          configDescription: 'Multi pipeline test',
+          pipelines: { 'traces/d': {} },
+        });
+
+        const { body } = await supertest
+          .get('/api/fleet/agents/collector_groups?groupBy=config.name&perPage=100')
+          .expect(200);
+
+        const group = body.items.find((item: any) => item.group === 'multi-pipeline');
+        expect(group).to.be.ok();
+        expect(group.pipelineConfigs.top).to.be.an('array');
+        expect(group.pipelineConfigs.top.length).to.be.lessThan(4);
+        expect(group.pipelineConfigs.total).to.eql(4);
       });
 
       it('filters by kuery', async () => {

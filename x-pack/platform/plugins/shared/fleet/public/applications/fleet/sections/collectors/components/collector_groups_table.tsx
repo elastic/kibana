@@ -25,10 +25,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AGENT_TYPE_OPAMP } from '../../../../../../common/constants';
+import { pipelineConfigLabel } from '../../../../../../common/services/pipeline_config_label';
 import type { Agent, CollectorGroup } from '../../../../../../common/types';
 import { useGetAgentsQuery } from '../../../../../hooks/use_request/agents';
 
 import { CollectorsTable } from './collectors_table';
+import { ExpandedConfigGroup } from './expanded_config_group';
 
 import { getSignalBadgeColor } from './signal_colors';
 
@@ -123,9 +125,41 @@ const CollectorGroupRow: React.FC<{
               <EuiFlexItem grow>
                 <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <strong>{displayName}</strong>
-                    </EuiText>
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          <strong>{displayName}</strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      {groupBy === 'config.name' && group.pipelineConfigs != null && (
+                        <>
+                          {group.pipelineConfigs.top.map((fingerprint) => (
+                            <EuiFlexItem grow={false} key={fingerprint}>
+                              <EuiToolTip content={fingerprint}>
+                                <EuiBadge color="hollow">
+                                  {pipelineConfigLabel(fingerprint)}
+                                </EuiBadge>
+                              </EuiToolTip>
+                            </EuiFlexItem>
+                          ))}
+                          {group.pipelineConfigs.total > group.pipelineConfigs.top.length && (
+                            <EuiFlexItem grow={false}>
+                              <EuiBadge color="hollow">
+                                <FormattedMessage
+                                  id="xpack.fleet.collectorGroups.morePipelineConfigs"
+                                  defaultMessage="+{count} more"
+                                  values={{
+                                    count:
+                                      group.pipelineConfigs.total -
+                                      group.pipelineConfigs.top.length,
+                                  }}
+                                />
+                              </EuiBadge>
+                            </EuiFlexItem>
+                          )}
+                        </>
+                      )}
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                   {group.signals.length > 0 && (
                     <EuiFlexItem grow={false}>
@@ -232,7 +266,7 @@ const CollectorGroupRow: React.FC<{
           {groupBy === 'collector.group' ? (
             <ExpandedGroupCollectors group={group} />
           ) : (
-            'TODO: implement expanded content for config.name grouping'
+            <ExpandedConfigGroup group={group} />
           )}
         </EuiPanel>
       )}
