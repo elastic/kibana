@@ -16,6 +16,7 @@ import {
   createMemorySynthesisSkill,
   createMemoryConsolidationSkill,
   createConversationScraperSkill,
+  createGapDetectionSkill,
 } from './memory';
 
 export const registerAgentBuilderSkills = ({
@@ -40,6 +41,7 @@ export const registerAgentBuilderSkills = ({
     createMemorySynthesisSkill(memoryToolsOptions),
     createMemoryConsolidationSkill(memoryToolsOptions),
     createConversationScraperSkill(memoryToolsOptions),
+    createGapDetectionSkill(memoryToolsOptions),
   ];
 
   for (const skill of streamsSkills) {

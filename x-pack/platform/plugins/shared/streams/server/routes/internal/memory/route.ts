@@ -14,7 +14,10 @@ import {
   STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import {
+  STREAMS_API_PRIVILEGES,
+  GAP_DETECTION_WORKFLOW_NAME,
+} from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type {
   MemoryEntry,
@@ -505,6 +508,12 @@ const synthesizeMemoryRoute = createServerRoute({
   },
 });
 
+const detectGapsRoute = createWorkflowTriggerRoute(
+  'POST /internal/streams/memory/_detect_gaps',
+  GAP_DETECTION_WORKFLOW_NAME,
+  'Trigger gap detection for memory'
+);
+
 export const internalMemoryRoutes = {
   ...createEntryRoute,
   ...getEntryRoute,
@@ -520,4 +529,5 @@ export const internalMemoryRoutes = {
   ...scrapeConversationsRoute,
   ...consolidateMemoryRoute,
   ...synthesizeMemoryRoute,
+  ...detectGapsRoute,
 };

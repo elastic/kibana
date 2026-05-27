@@ -93,6 +93,7 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
   'sigevents.memory.system-onboarding',
+  'sigevents.memory.gap-detector',
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -133,6 +134,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-memory-consolidation',
   'streams-conversation-scraper',
   'significant-events-onboarding',
+  'streams-gap-detection',
 
   // Platform – Workflows
   'workflow-authoring',
