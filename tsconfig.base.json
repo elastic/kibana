@@ -2842,8 +2842,6 @@
     "forceConsistentCasingInFileNames": false,
     // Forbid unused local variables as the rule was deprecated by ts-lint
     "noUnusedLocals": true,
-    // Provide full support for iterables in for..of, spread and destructuring when targeting ES5 or ES3.
-    "downlevelIteration": true,
     // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
     "importHelpers": true,
     // Allow usage of experimental decorators
