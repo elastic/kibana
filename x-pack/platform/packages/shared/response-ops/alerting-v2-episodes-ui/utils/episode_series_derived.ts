@@ -48,16 +48,19 @@ export const getGroupHashFromEpisodeRows = (rows: EpisodeEventRow[]): string | u
   return undefined;
 };
 
-export const getEpisodeDurationMs = (rows: EpisodeEventRow[]): number | undefined => {
-  if (rows.length < 2) {
-    return undefined;
-  }
-  const first = rows[0]['@timestamp'];
-  const last = rows[rows.length - 1]['@timestamp'];
-  const a = Date.parse(first);
-  const b = Date.parse(last);
-  if (Number.isNaN(a) || Number.isNaN(b)) {
-    return undefined;
-  }
+export const getEpisodeDurationMs = (
+  rows: EpisodeEventRow[],
+  now = Date.now()
+): number | undefined => {
+  if (!rows.length) return undefined;
+
+  const a = Date.parse(rows[0]['@timestamp']);
+  if (Number.isNaN(a)) return undefined;
+
+  const lastStatus = rows[rows.length - 1]['episode.status'];
+  const isOngoing = lastStatus === 'active' || lastStatus === 'pending';
+  const b = isOngoing ? now : Date.parse(rows[rows.length - 1]['@timestamp']);
+  if (Number.isNaN(b)) return undefined;
+
   return Math.max(0, b - a);
 };
