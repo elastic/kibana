@@ -101,7 +101,7 @@ export class DiscoveryClient {
       query = query.where`${esql.col('kind')} == ${esql.str('finding')}`;
       query = query.pipe`STATS discovered_at = MIN(@timestamp) BY ${esql.col('discovery_slug')}`;
 
-      const response = await queryEsql({ esClient: this.clients.esClient, query: query.print() });
+      const response = await queryEsql({ esClient: this.clients.esClient, query });
       const rows = esqlToObjects<{ discovery_slug: string; discovered_at: string }>(response);
       return new Map(rows.map((r) => [r.discovery_slug, r.discovered_at]));
     } catch (error) {
