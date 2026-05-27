@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument } from 'yaml';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { monaco } from '@kbn/monaco';
 import { getEsqlQuerySuggestions } from './get_esql_query_suggestions';
-import { findEsqlStepRegions } from '../../../esql_validation/extract_esql_region';
+import { findEsqlStepRegionsFromText } from '../../../esql_validation/extract_esql_region';
 import type { ExtendedAutocompleteContext } from '../../context/autocomplete.types';
 
 const mockSuggest = jest.fn();
@@ -54,7 +53,8 @@ function buildEsqlStep(query: string): string {
     .map((line) => `        ${line}`)
     .join('\n');
   return `steps:
-  - type: elasticsearch.esql.query
+  - name: esql_step
+    type: elasticsearch.esql.query
     with:
       query: |
 ${body}
@@ -66,8 +66,8 @@ function buildContextAtMatch(
   match: string,
   matchOffsetWithin: number = match.length
 ): { ctx: ExtendedAutocompleteContext; regionEsql: string } {
-  const yamlDocument = parseDocument(text);
-  const regions = findEsqlStepRegions(yamlDocument, text);
+  // Region extraction uses buildWorkflowLookup, which only indexes steps with a `name`.
+  const regions = findEsqlStepRegionsFromText(text);
   const region = regions[0] ?? null;
   const model = createTextModel(text);
   if (!region) {
@@ -121,7 +121,7 @@ describe('getEsqlQuerySuggestions', () => {
   });
 
   it('passes the (indent-preserved) query and offset to suggest() and maps results into Monaco items', async () => {
-    // findEsqlStepRegions trims trailing whitespace, so the trailing space after `|` is gone.
+    // Region extraction trims trailing whitespace, so the trailing space after `|` is gone.
     const text = buildEsqlStep('FROM logs-* |');
     const { ctx, regionEsql } = buildContextAtMatch(text, 'FROM logs-* |');
     mockSuggest.mockResolvedValue([
