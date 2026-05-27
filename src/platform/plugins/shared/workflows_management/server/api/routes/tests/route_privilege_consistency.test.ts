@@ -88,7 +88,7 @@ const PRIVILEGE_SCOPE: Record<string, PrivilegeScope> = {
     writes: [WORKFLOWS_INDEX],
     delegates: [],
   },
-  [WorkflowsManagementApiActions.updateManagedWorkflows]: {
+  [WorkflowsManagementApiActions.updateManaged]: {
     reads: [],
     writes: [WORKFLOWS_INDEX],
     delegates: [],

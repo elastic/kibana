@@ -978,7 +978,7 @@ steps:
         createWorkflowDto({ id: 'system-workflow', managed: true }),
       ]);
       (mockRequest as any).authzResult = {
-        [WorkflowsManagementApiActions.updateManagedWorkflows]: true,
+        [WorkflowsManagementApiActions.updateManaged]: true,
       };
 
       await expect(
