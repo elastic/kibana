@@ -17,6 +17,7 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
@@ -283,11 +284,13 @@ const UnavailableMlJobLink: React.FC<UnavailableMlJobLinkProps> = ({ jobId }) =>
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
   const button = (
-    <EuiButtonIcon
-      iconType="question"
-      onClick={togglePopover}
-      aria-label={i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}
-    />
+    <EuiToolTip content={i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="question"
+        onClick={togglePopover}
+        aria-label={i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}
+      />
+    </EuiToolTip>
   );
 
   return (

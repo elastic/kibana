@@ -7,7 +7,7 @@
 
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
-import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import type { VersionsPickerOptionEnum } from './versions_picker/versions_picker';
@@ -32,11 +32,13 @@ export function ComparisonSideHelpInfo({ options }: ComparisonSideHelpInfoProps)
   const optionsWithDescriptions = options.map((option) => getOptionDetails(option));
 
   const button = (
-    <EuiButtonIcon
-      iconType="question"
-      onClick={togglePopover}
-      aria-label={i18n.VERSION_COMPARISON_HELP_ARIA_LABEL}
-    />
+    <EuiToolTip content={i18n.VERSION_COMPARISON_HELP_ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="question"
+        onClick={togglePopover}
+        aria-label={i18n.VERSION_COMPARISON_HELP_ARIA_LABEL}
+      />
+    </EuiToolTip>
   );
 
   return (
