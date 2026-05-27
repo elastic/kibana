@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 
 import type { EsLegacyConfigService, SpecDefinitionsService } from '../services';
 import type { ESConfigForProxy } from '../types';
@@ -26,6 +26,7 @@ export interface ProxyDependencies {
 export interface RouteDependencies {
   router: IRouter;
   log: Logger;
+  getStartServices: CoreSetup['getStartServices'];
   proxy: ProxyDependencies;
   services: {
     esLegacyConfigService: EsLegacyConfigService;
