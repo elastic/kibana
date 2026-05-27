@@ -13,3 +13,4 @@ export {
   type GraphEdge,
   type GraphAttachmentData,
 } from './graph';
+export { SKILL_ATTACHMENT_TYPE, type SkillAttachment, type SkillAttachmentData } from './skill';
