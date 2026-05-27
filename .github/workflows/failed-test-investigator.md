@@ -143,10 +143,13 @@ Post exactly one comment. Keep the visible portion very short and easy to read:
 
 1. **One-line bold headline** stating the result kind and one identifying detail.
 2. **One short paragraph (2–3 sentences max)**: what broke and where, the most likely root cause.
-3. **Findings bullets** — exactly these four, in this order. Downstream tooling parses them; preserve keys, casing, and `` - `key`: value `` shape:
-   - `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
-   - `confidence`: `high` | `medium` | `low`
-   - `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
-   - `test.file`: repo-relative path, or `unknown`
+3. **Next steps** (5–6 sentences max): the recommended path forward — code fix area, owners to escalate to, skip/delete recommendation, or what evidence would change the conclusion.
 
-Put the full investigation and the `flaky-test-investigator` skill full output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion of the comment). This should include a root cause walkthrough, details of a suggested patch (if available), and open questions (as well as the full skill's output). Blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
+Put the full `flaky-test-investigator` skill output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion). It must also include the findings bullets below in this exact order — downstream tooling parses them, so preserve keys, casing, and `` - `key`: value `` shape:
+
+- `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
+- `confidence`: `high` | `medium` | `low`
+- `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
+- `test.file`: repo-relative path, or `unknown`
+
+Blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
