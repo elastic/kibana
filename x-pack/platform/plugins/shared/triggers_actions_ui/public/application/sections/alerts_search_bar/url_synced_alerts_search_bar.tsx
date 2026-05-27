@@ -88,7 +88,7 @@ export interface UrlSyncedAlertsSearchBarProps
   /**
    * Setter for the filter controls output filters.
    */
-  onFilterControlsChange: (filterControls: Filter[]) => void;
+  onFilterControlsChange?: (filterControls: Filter[]) => void;
   /**
    * Fires with the control group handle once the controls have initialized.
    */
@@ -107,7 +107,7 @@ export const UrlSyncedAlertsSearchBar = ({
   urlStorageKey = ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY,
   filterControlsStorageKey: filterControlsStorageKeyProp = 'alertsSearchBar',
   filterControls,
-  onFilterControlsChange,
+  onFilterControlsChange = () => {},
   onControlApiAvailable,
   onEsQueryChange,
   onFilterSelected,
