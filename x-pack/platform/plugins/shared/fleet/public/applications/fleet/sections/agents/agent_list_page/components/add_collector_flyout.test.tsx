@@ -318,9 +318,9 @@ describe('AddCollectorFlyout', () => {
 
     it('includes insecure_skip_verify when not on cloud', async () => {
       mockedUseStartServices.mockReturnValue({
-      cloud: { isCloudEnabled: false },
-      docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
-    } as any);
+        cloud: { isCloudEnabled: false },
+        docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+      } as any);
 
       const component = renderFlyout();
 
