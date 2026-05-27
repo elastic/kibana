@@ -62,16 +62,22 @@ export const renderSecondaryMenuSection = ({
       return null;
     }
 
+    const content = renderExtensionPoint(section.extensionPointId, {
+      extensionPointId: section.extensionPointId,
+      solutionId,
+      primaryItemId: primaryItem.id,
+      sectionId: section.id,
+      surface,
+      activeItemId,
+    });
+
+    if (!content) {
+      return null;
+    }
+
     return (
       <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
-        {renderExtensionPoint(section.extensionPointId, {
-          extensionPointId: section.extensionPointId,
-          solutionId,
-          primaryItemId: primaryItem.id,
-          sectionId: section.id,
-          surface,
-          activeItemId,
-        })}
+        {content}
       </SideNav.SecondaryMenu.Section>
     );
   }
@@ -142,16 +148,22 @@ export const renderNestedSecondaryMenuSection = ({
       return null;
     }
 
+    const content = renderExtensionPoint(section.extensionPointId, {
+      extensionPointId: section.extensionPointId,
+      solutionId,
+      primaryItemId: primaryItem.id,
+      sectionId: section.id,
+      surface: 'overflow',
+      activeItemId,
+    });
+
+    if (!content) {
+      return null;
+    }
+
     return (
       <SideNav.NestedSecondaryMenu.Section key={section.id} label={section.label}>
-        {renderExtensionPoint(section.extensionPointId, {
-          extensionPointId: section.extensionPointId,
-          solutionId,
-          primaryItemId: primaryItem.id,
-          sectionId: section.id,
-          surface: 'overflow',
-          activeItemId,
-        })}
+        {content}
       </SideNav.NestedSecondaryMenu.Section>
     );
   }

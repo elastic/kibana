@@ -25,6 +25,7 @@
     "@kbn/navigation-plugin",
     "@kbn/management-plugin",
     "@kbn/core-chrome-browser",
+    "@kbn/use-observable",
     "@kbn/cloud-plugin",
     "@kbn/licensing-types",
     "@kbn/deeplinks-management",
