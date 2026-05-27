@@ -206,8 +206,6 @@ export type ArrayQueries = z.infer<typeof ArrayQueries>;
 osqueryd interval scheduling (seconds). `rrule` uses osquerybeat's
 RRULE-based recurrence scheduling. Per-query overrides MUST use the
 same mode as the pack — cross-mode overrides are rejected with 400.
-Gated by the `rruleScheduling` feature flag; values other than
-`interval` are only accepted when the flag is on.
 
   */
 export const ScheduleType = lazySchema(() => z.enum(['interval', 'rrule']));
@@ -219,45 +217,41 @@ export const ScheduleTypeOrUndefined = lazySchema(() => ScheduleType.nullable())
 export type ScheduleTypeOrUndefined = z.infer<typeof ScheduleTypeOrUndefined>;
 
 /**
-  * RRULE schedule configuration consumed by osquerybeat. `rrule` is a
-fully serialized RFC 5545 string (e.g. `"FREQ=WEEKLY;BYDAY=MO,WE,FR"`).
-The Kibana UI writes only a subset of RFC 5545 parts — `FREQ`,
-`INTERVAL`, `BYDAY`, `BYMONTHDAY`, `BYMONTH` — but the server
-accepts and round-trips any well-formed parts (other recognized parts
-like `BYHOUR`, `BYMINUTE`, `BYSETPOS`, `WKST`, `COUNT`, `UNTIL` are
-preserved verbatim). DTSTART is NOT embedded in `rrule`; the
-separate `start_date` field is the schedule anchor.
-
-`start_date` and `end_date` SHALL be RFC 3339 datetime strings (e.g.
-`"2024-01-01T00:00:00Z"`). Loose date forms like `"2024-01-01"` are
-rejected with 400.
-
-`splay` is a Go duration string (e.g. `"30s"`, `"5m"`, `"1h"`). The
-Kibana form writes single-unit values only; compound durations
-(`"1h30m"`) are tolerated on read for round-trip safety with
-osquerybeat's writer. Maximum 12 hours (43200 seconds).
-
-`timeout` is the per-execution timeout for RRULE queries, in
-seconds. When unset osquerybeat defaults to 60 seconds.
+  * RRULE schedule configuration consumed by osquerybeat. Loose date
+forms like `"2024-01-01"` are rejected with 400. DTSTART is NOT
+embedded in `rrule`; the separate `start_date` field is the
+schedule anchor.
 
   */
 export const RRuleScheduleConfig = lazySchema(() =>
   z.object({
     /**
-     * RFC 5545 RRULE string (e.g. "FREQ=DAILY", "FREQ=WEEKLY;BYDAY=MO,WE,FR").
-     */
+      * Fully serialized RFC 5545 RRULE string (e.g.
+`"FREQ=WEEKLY;BYDAY=MO,WE,FR"`). The Kibana UI writes only a
+subset of parts — `FREQ`, `INTERVAL`, `BYDAY`, `BYMONTHDAY`,
+`BYMONTH` — but the server accepts and round-trips any
+well-formed parts (other recognized parts like `BYHOUR`,
+`BYMINUTE`, `BYSETPOS`, `WKST`, `COUNT`, `UNTIL` are preserved
+verbatim).
+
+      */
     rrule: z.string().max(2048),
     /**
-     * RFC 3339 datetime string for the schedule's start. Required.
+     * RFC 3339 datetime string for the schedule's start.
      */
-    start_date: z.string().datetime(),
+    start_date: z.string().max(64).datetime(),
     /**
      * Optional RFC 3339 datetime string for the schedule's end. MUST be after `start_date`.
      */
-    end_date: z.string().datetime().optional(),
+    end_date: z.string().max(64).datetime().optional(),
     /**
-     * Optional Go duration string for splay (random execution delay). Max 12 hours.
-     */
+      * Optional Go duration string for splay (random execution delay),
+e.g. `"30s"`, `"5m"`, `"1h"`. The Kibana form writes single-unit
+values only; compound durations (`"1h30m"`) are tolerated on
+read for round-trip safety with osquerybeat's writer. Maximum
+12 hours (43200 seconds).
+
+      */
     splay: z.string().max(64).optional(),
     /**
      * Optional query execution timeout, in seconds. Defaults to 60 in osquerybeat when unset.
