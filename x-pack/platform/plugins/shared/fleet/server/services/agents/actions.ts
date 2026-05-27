@@ -26,6 +26,7 @@ import {
   AGENT_ACTIONS_INDEX,
   AGENT_ACTIONS_RESULTS_INDEX,
   SO_SEARCH_LIMIT,
+  SCHEDULED_UNENROLL_ACTION_ID_PREFIX,
 } from '../../../common/constants';
 import { AgentActionNotFoundError } from '../../errors';
 
@@ -43,8 +44,6 @@ import {
   isActionSecretStorageEnabled,
   toCompiledSecretRef,
 } from '../secrets';
-
-import { SCHEDULED_UNENROLL_ACTION_ID_PREFIX } from '../../tasks/unenroll_inactive_agents_task';
 
 import { bulkUpdateAgents } from './crud';
 
@@ -535,14 +534,16 @@ export async function cancelAgentAction(
   if (actionId.startsWith(SCHEDULED_UNENROLL_ACTION_ID_PREFIX)) {
     // Cancel any other pending scheduled batches for the same policies so the entire
     // policy's scheduled unenrollment is cancelled, not just the one batch the user selected.
-    const cancelledUnenrollPolicyIds = uniq(
-      cancelledActions.filter((a) => a.type === 'UNENROLL').flatMap((a) => a.policyIds)
+    // Use the agent IDs already in memory (from the cancelled batches) to scope the search
+    // without an extra round-trip through .fleet-agents.
+    const cancelledUnenrollAgentIds = new Set(
+      cancelledActions.filter((a) => a.type === 'UNENROLL').flatMap((a) => a.agents)
     );
-    if (cancelledUnenrollPolicyIds.length > 0) {
+    if (cancelledUnenrollAgentIds.size > 0) {
       await cancelPendingBatches(
         esClient,
         soClient,
-        cancelledUnenrollPolicyIds,
+        cancelledUnenrollAgentIds,
         actionId,
         currentSpaceId
       );
@@ -642,25 +643,15 @@ async function getAgentActionsByIds(
 async function cancelPendingBatches(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  policyIds: string[],
+  cancelledAgentIds: Set<string>,
   alreadyCancelledActionId: string,
   currentSpaceId: string
 ) {
   const currentTime = new Date().toISOString();
 
-  const policyAgentsRes = await esClient.search<{ policy_id?: string }>({
-    index: '.fleet-agents',
-    ignore_unavailable: true,
-    query: { terms: { policy_id: policyIds } },
-    _source: ['policy_id'],
-    size: SO_SEARCH_LIMIT,
-  });
-  const allPolicyAgentIds = policyAgentsRes.hits.hits
-    .map((h) => h._id)
-    .filter((id): id is string => !!id);
-
-  if (allPolicyAgentIds.length === 0) return;
-
+  // Query all pending scheduled batches by prefix + future start_time, excluding the
+  // action already cancelled. No round-trip through .fleet-agents is needed: we intersect
+  // in-memory against the agent IDs collected from the batches we just cancelled.
   const pendingRes = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
@@ -670,7 +661,6 @@ async function cancelPendingBatches(
           { term: { type: 'UNENROLL' } },
           { range: { start_time: { gt: currentTime } } },
           { prefix: { action_id: SCHEDULED_UNENROLL_ACTION_ID_PREFIX } },
-          { terms: { agents: allPolicyAgentIds } },
         ],
         must_not: [{ term: { action_id: alreadyCancelledActionId } }],
       },
@@ -682,6 +672,9 @@ async function cancelPendingBatches(
   for (const hit of pendingRes.hits.hits) {
     const pendingAction = hit._source;
     if (!pendingAction?.action_id || seen.has(pendingAction.action_id)) continue;
+    // Only cancel batches that share at least one agent with the already-cancelled batches,
+    // which scopes this to the same policy without a round-trip through .fleet-agents.
+    if (!pendingAction.agents?.some((id) => cancelledAgentIds.has(id))) continue;
     seen.add(pendingAction.action_id);
     await createAgentAction(esClient, soClient, {
       id: uuidv4(),

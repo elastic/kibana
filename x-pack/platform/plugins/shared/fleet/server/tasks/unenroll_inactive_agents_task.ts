@@ -22,7 +22,11 @@ import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
 import { AGENTS_PREFIX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
-import { AGENT_ACTIONS_INDEX, SO_SEARCH_LIMIT } from '../../common/constants';
+import {
+  AGENT_ACTIONS_INDEX,
+  SO_SEARCH_LIMIT,
+  SCHEDULED_UNENROLL_ACTION_ID_PREFIX,
+} from '../../common/constants';
 import { getAgentsByKuery } from '../services/agents';
 import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 import { agentPolicyService, appContextService, auditLoggingService } from '../services';
@@ -37,7 +41,6 @@ const TIMEOUT = '1m';
 const UNENROLLMENT_BATCHSIZE = 1000;
 const POLICIES_BATCHSIZE = 500;
 export const UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS = 60 * 60 * 1000; // 1 hour
-export const SCHEDULED_UNENROLL_ACTION_ID_PREFIX = 'ScheduledUnenrollInactiveAgents-';
 
 interface UnenrollInactiveAgentsTaskConfig {
   taskInterval?: string;
@@ -271,14 +274,24 @@ export class UnenrollInactiveAgentsTask {
       return;
     }
 
-    // Find action IDs that have been cancelled by fetching all CANCEL actions
-    // and matching in memory — avoids relying on dynamic field mapping for data.target_id.
+    // Find action IDs that have been cancelled. We match in memory rather than
+    // querying on data.target_id because that field is dynamically mapped as `text`
+    // and prefix/term queries on it are unreliable at runtime.
+    // A date range on `created_at` bounds the fetch: CANCEL actions relevant to
+    // scheduled unenrollments must have been created within the grace period window,
+    // so anything older than grace_period + one task interval cannot match a due action.
+    const cancelWindowStart = new Date(
+      Date.now() - UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS - 10 * 60 * 1000
+    ).toISOString();
     const cancelRes = await esClient.search<FleetServerAgentAction>({
       index: AGENT_ACTIONS_INDEX,
       ignore_unavailable: true,
       query: {
         bool: {
-          filter: [{ term: { type: 'CANCEL' } }],
+          filter: [
+            { term: { type: 'CANCEL' } },
+            { range: { created_at: { gte: cancelWindowStart } } },
+          ],
         },
       },
       _source: ['data.target_id'],

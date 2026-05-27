@@ -15,7 +15,7 @@ import { auditLoggingService } from '../audit_logging';
 
 import { agentPolicyService } from '../agent_policy';
 
-import { SCHEDULED_UNENROLL_ACTION_ID_PREFIX } from '../../tasks/unenroll_inactive_agents_task';
+import { SCHEDULED_UNENROLL_ACTION_ID_PREFIX } from '../../../common/constants';
 
 import {
   bulkCreateAgentActionResults,
@@ -423,8 +423,7 @@ describe('Agent actions', () => {
       // 1: find UNENROLL action
       // 2: look up agent policy_ids from .fleet-agents
       // 3: concurrent-batch re-query
-      // 4: look up all agents for the policy (cancel-other-batches step)
-      // 5: look up other pending scheduled UNENROLL batches for same policy
+      // 4: look up other pending scheduled UNENROLL batches (cancelPendingBatches)
       esClient.search
         .mockResolvedValueOnce({
           hits: {
@@ -461,7 +460,6 @@ describe('Agent actions', () => {
             ],
           },
         } as any)
-        .mockResolvedValueOnce({ hits: { hits: [{ _id: 'agent1' }, { _id: 'agent2' }] } } as any)
         .mockResolvedValueOnce({ hits: { hits: [] } } as any); // no other pending batches
 
       mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
@@ -559,7 +557,6 @@ describe('Agent actions', () => {
             ],
           },
         } as any)
-        .mockResolvedValueOnce({ hits: { hits: [{ _id: 'agent1' }] } } as any) // policy agents
         .mockResolvedValueOnce({ hits: { hits: [] } } as any); // no other pending batches
 
       mockedAgentPolicyService.update = jest.fn().mockResolvedValue({});
@@ -612,16 +609,14 @@ describe('Agent actions', () => {
           },
         } as any)
         .mockResolvedValueOnce({
-          hits: { hits: [{ _id: 'agent1' }, { _id: 'agent2' }] },
-        } as any) // policy agents
-        .mockResolvedValueOnce({
           hits: {
             hits: [
               {
                 _source: {
                   type: 'UNENROLL',
+                  // batch-2 shares agent1 with batch-1, so the in-memory intersection matches
                   action_id: 'ScheduledUnenrollInactiveAgents-batch-2',
-                  agents: ['agent2'],
+                  agents: ['agent1', 'agent2'],
                   expiration: '2099-05-12T18:16:18.019Z',
                   start_time: '2099-05-12T18:00:00.000Z',
                 },

@@ -25,12 +25,13 @@ import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 
 import type { AgentPolicy } from '../types';
 
+import { SCHEDULED_UNENROLL_ACTION_ID_PREFIX } from '../../common/constants';
+
 import {
   UnenrollInactiveAgentsTask,
   TYPE,
   VERSION,
   UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS,
-  SCHEDULED_UNENROLL_ACTION_ID_PREFIX,
 } from './unenroll_inactive_agents_task';
 
 jest.mock('../services');

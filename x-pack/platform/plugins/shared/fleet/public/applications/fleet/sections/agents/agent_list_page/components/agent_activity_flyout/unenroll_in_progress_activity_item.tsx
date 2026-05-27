@@ -113,7 +113,7 @@ export const UnenrollInProgressActivityItem: React.FunctionComponent<{
             >
               <FormattedMessage
                 id="xpack.fleet.agentActivityFlyout.unenrollGracePeriodWarningBody"
-                defaultMessage="After this point, some agents may already be unenrolled. Cancelling will also reset the automatic unenrollment timeout to 0 on the agent policy."
+                defaultMessage="After this point, some agents may already be unenrolled."
               />
             </EuiCallOut>
           </EuiFlexItem>
