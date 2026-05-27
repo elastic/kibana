@@ -24,6 +24,57 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
+## 9.4.2 [kibana-9.4.2-release-notes]
+
+### Features and enhancements [kibana-9.4.2-features-enhancements]
+
+**Search**:
+* Improves the **Add inference endpoint** and **Edit inference endpoint** flyouts with clearer titles, a footer **Save** button, task type descriptions in the selector, always-visible endpoint ID and API reference fields, and inline validation for required fields [#262143]({{kib-pull}}262143).
+
+### Fixes [kibana-9.4.2-fixes]
+
+**Alerting and cases**:
+* Fixes an issue that caused rules with large action parameter payloads to fail when saving or executing [#269467]({{kib-pull}}269467).
+* Fixes case workflow templates resolving from the wrong owner [#268719]({{kib-pull}}268719).
+* Fixes phrase search in the **All Cases** view [#266827]({{kib-pull}}266827).
+
+**Connectivity**:
+* Fixes the email connector to reject malformed email addresses (for example, local parts or domain labels with leading or trailing hyphens) that mail servers would reject, preventing unnecessary SMTP connection attempts [#268496]({{kib-pull}}268496).
+* Fixes HTTP connector TLS options when connecting through proxies [#269898]({{kib-pull}}269898).
+* Fixes client-side navigation in the content connectors UI to honor `server.basePath` and space URL prefixes, preventing 404s on connector detail tabs and after creation [#269571]({{kib-pull}}269571).
+
+**Dashboards and Visualizations**:
+* Fixes the links panel transform to remove an unsupported `enhancements` property [#270230]({{kib-pull}}270230).
+* Fixes the Lens API so XY charts with legends at the top or bottom return the correct configuration [#268729]({{kib-pull}}268729).
+* Fixes the Lens Visualization API rejecting `rank_by` with `operation: "count"` on terms buckets when no `field` is specified, so **Count** can rank by all documents without a field [#268620]({{kib-pull}}268620).
+* Fixes the Visualization API to correctly show default datatable colored badges [#268425]({{kib-pull}}268425).
+* Fixes gauge chart `min`, `max`, and `goal` configuration to reject unsupported reference-based metric operations (`moving_average`, `differences`, `cumulative_sum`, `counter_rate`) that require a date histogram [#268168]({{kib-pull}}268168).
+
+**Data ingestion and Fleet**:
+* Parses top-level `elasticsearch` fields in integration packages on upgrade or reinstall [#269080]({{kib-pull}}269080).
+* Fixes the agent enrollment **Confirm incoming data** step timing out for integrations that ingest backdated data by checking `event.ingested` instead of `@timestamp` [#268224]({{kib-pull}}268224).
+
+**Discover**:
+* Preserves the expanded document selection after refresh when comparing documents in Discover [#268328]({{kib-pull}}268328).
+
+**{{esql}} editor**:
+* Allows `null` in `CASE()` expressions combined with other types [#269051]({{kib-pull}}269051).
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.4.2 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.4.2 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Management**:
+* Fixes missing modal and popover labels for screen readers across Stack Management UIs [#269652]({{kib-pull}}269652).
+
+**Machine Learning**:
+* Fixes File upload not disabling data view creation when the user lacks data view creation capabilities [#268167]({{kib-pull}}268167).
+
+**Workflows**:
+* Makes the `with` block optional in workflow YAML for connector steps that have no required parameters [#269047]({{kib-pull}}269047).
+
 ## 9.4.1 [kibana-9.4.1-release-notes]
 
 ### Fixes [kibana-9.4.1-fixes]
