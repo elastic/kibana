@@ -8,27 +8,6 @@
  */
 
 import { setup } from './helpers';
+import { runValidationCommandsLicenseSuite } from './validation_commands_license_suite';
 
-describe('Command license validation', () => {
-  it('Should allows licensed commands when user has required license', async () => {
-    const { expectErrors, callbacks } = await setup();
-
-    callbacks.getLicense = jest.fn(async () => ({
-      hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
-    }));
-
-    await expectErrors('FROM a_index | CHANGE_POINT doubleField', []);
-  });
-
-  it('should blocks licensed commands when user lacks required license', async () => {
-    const { expectErrors, callbacks } = await setup();
-
-    callbacks.getLicense = jest.fn(async () => ({
-      hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
-    }));
-
-    await expectErrors('FROM a_index | CHANGE_POINT doubleField', [
-      'CHANGE_POINT requires a PLATINUM license.',
-    ]);
-  });
-});
+runValidationCommandsLicenseSuite(setup);

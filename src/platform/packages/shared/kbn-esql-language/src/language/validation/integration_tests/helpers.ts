@@ -18,22 +18,12 @@ import { ESQL_NAMED_PARAMS_TYPE } from '../../../commands/definitions/types';
 import {
   enrichFields as enrichFieldsHelper,
   fields as fieldsHelper,
-  getCallbackMocks,
   indexes,
   policies,
   unsupported_field,
 } from '../../../__tests__/language/helpers';
-import { validateQuery } from '../validation';
 
 export type EsqlEnv = Awaited<ReturnType<typeof setupEsqlEnv>>;
-
-export interface EsqlValidationTestCase {
-  query: string;
-}
-
-export interface EsqlValidationFixtures {
-  testCases: EsqlValidationTestCase[];
-}
 
 interface EsqlErrorResponse {
   meta?: {
@@ -91,6 +81,8 @@ const createIndexRequest = (index: string, fieldList: Array<{ name: string; type
       properties: fieldList.reduce((memo: Record<string, MappingProperty>, { name, type }) => {
         let esType = type;
 
+        // Unit-test fields are reused as ES mappings; these ES|QL names are
+        // not valid mapping types, so translate them before index creation.
         if (type === 'cartesian_point') {
           esType = 'point';
         }
@@ -110,8 +102,6 @@ const createIndexRequest = (index: string, fieldList: Array<{ name: string; type
     },
   };
 };
-
-export const runClientValidation = (query: string) => validateQuery(query, getCallbackMocks());
 
 const setupIntegrationEnv = async () => {
   // ES-only: we spin up a local ES test cluster without Kibana.
@@ -145,7 +135,6 @@ const setupIntegrationEnv = async () => {
 export const setupEsqlEnv = async () => {
   const integrationEnv = await setupIntegrationEnv();
   const es = integrationEnv.esClient;
-
   const uniqueSourceIndices = Array.from(
     new Set(policies.flatMap((policy) => policy.sourceIndices))
   );
