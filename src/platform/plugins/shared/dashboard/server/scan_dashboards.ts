@@ -57,9 +57,9 @@ export async function scanDashboards(
       return {
         id: so.id,
         references: so.references,
-        description,
+        ...(description?.length && { description }),
         panels: panels ?? [],
-        tags,
+        ...(tags?.length && { tags }),
         title: title ?? '',
       };
     }),
