@@ -34,6 +34,7 @@ import {
   ensureSAMLRoleMapping,
   createMockIdpMetadata,
   MOCK_IDP_UIAM_SERVICE_INTERNAL_URL,
+  MOCK_IDP_SP_BASE_URL,
 } from '@kbn/mock-idp-utils';
 
 import { initializeUiamContainers, runUiamContainer, getUiamContainers } from './docker_uiam';
@@ -120,15 +121,13 @@ export const esProjectTypeFromKbn = new Map<string, string>([
   ['oblt', 'observability'],
   ['security', 'security'],
   ['workplaceai', 'workplaceai'],
-  // replace with 'vectordb' once stateless ES supports it
-  ['vectordb', 'elasticsearch_vector'],
+  ['vectordb', 'vectordb'],
 ]);
 
 // ES operator/settings.json expects 'elasticsearch' for all `elasticsearch_*` project types.
 export const esSettingsProjectTypeFromKbn = new Map<string, string>([
   ...esProjectTypeFromKbn.entries(),
   ['es', 'elasticsearch'],
-  ['vectordb', 'elasticsearch'],
 ]);
 
 export const kbnProjectTypeFromEs = new Map<string, string>([
@@ -138,6 +137,7 @@ export const kbnProjectTypeFromEs = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['workplaceai', 'workplaceai'],
+  ['vectordb', 'vectordb'],
 ]);
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
@@ -175,8 +175,6 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
   waitForReady?: boolean;
-  /** Fully qualified URL where Kibana is hosted (including base path) */
-  kibanaUrl?: string;
   /**
    * Resource file(s) to overwrite
    * (see list of files that can be overwritten under `src/platform/packages/shared/kbn-es/src/serverless_resources/users`)
@@ -659,14 +657,7 @@ export function resolveEsArgs(
   }
 
   // Configure mock identify provider (ES only supports SAML when running in SSL mode)
-  if (
-    ssl &&
-    'kibanaUrl' in options &&
-    options.kibanaUrl &&
-    esArgs.get('xpack.security.enabled') !== 'false'
-  ) {
-    const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
-
+  if (ssl && esArgs.get('xpack.security.enabled') !== 'false') {
     // The mock IDP setup requires a custom role mapping, but since native role mappings are disabled by default in
     // Serverless, we have to re-enable them explicitly here.
     esArgs.set('xpack.security.authc.native_role_mappings.enabled', 'true');
@@ -682,15 +673,15 @@ export function resolveEsArgs(
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id`,
-      trimTrailingSlash(options.kibanaUrl)
+      MOCK_IDP_SP_BASE_URL
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs`,
-      `${trimTrailingSlash(options.kibanaUrl)}/api/security/saml/callback`
+      `${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout`,
-      `${trimTrailingSlash(options.kibanaUrl)}/logout`
+      `${MOCK_IDP_SP_BASE_URL}/logout`
     );
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal`,
@@ -709,12 +700,12 @@ export function resolveEsArgs(
       MOCK_IDP_ATTRIBUTE_EMAIL
     );
 
-    if (options.uiam) {
+    if ('uiam' in options && options.uiam) {
       // HACK: A workaround for the Serverless ES metering service, which is enabled automatically after we set
       // `serverless.project_id`, and, if not configured _explicitly_ with an HTTP URL, expects CA certs in a
-      // fixed location (`http-certs/ca.crt`) that we cannot override. So we just point it to Kibana as if it
-      // were a metering service and use the longest possible interval to reduce noise.
-      esArgs.set('metering.url', options.kibanaUrl);
+      // fixed location (`http-certs/ca.crt`) that we cannot override. Any HTTP URL works — we reuse the SP base
+      // URL just to avoid introducing another constant — and use the longest possible interval to reduce noise.
+      esArgs.set('metering.url', MOCK_IDP_SP_BASE_URL);
       esArgs.set('metering.report_period', '60m');
 
       esArgs.set(
@@ -800,7 +791,6 @@ export async function setupServerlessVolumes(
     basePath,
     clean,
     ssl,
-    kibanaUrl,
     files,
     resources,
     projectType,
@@ -912,9 +902,9 @@ export async function setupServerlessVolumes(
     );
   }
 
-  // Create and add meta data for mock identity provider
-  if (ssl && kibanaUrl) {
-    const metadata = await createMockIdpMetadata(kibanaUrl);
+  // Create and add metadata for mock identity provider
+  if (ssl) {
+    const metadata = await createMockIdpMetadata();
     await Fsp.writeFile(SERVERLESS_IDP_METADATA_PATH, metadata);
     volumeCmds.push(
       '--volume',
@@ -1094,7 +1084,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
 
   const readyPromise = waitUntilClusterReady({ client, expectedStatus: 'green', log }).then(
     async () => {
-      if (!options.ssl || !options.kibanaUrl) {
+      if (!options.ssl) {
         return;
       }
 
@@ -1230,7 +1220,7 @@ export async function runLinkedServerlessCluster(log: ToolingLog, options: Serve
 
   await waitUntilClusterReady({ client, expectedStatus: 'green', log });
 
-  if (options.ssl && options.kibanaUrl) {
+  if (options.ssl) {
     await ensureSAMLRoleMapping(client);
   }
 

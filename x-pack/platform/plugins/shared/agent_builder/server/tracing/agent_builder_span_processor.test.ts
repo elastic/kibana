@@ -12,6 +12,11 @@ import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing as elasticTracing } from '@elastic/opentelemetry-node/sdk';
 import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from '@kbn/inference-tracing';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
+import {
+  AGENT_BUILDER_OWNER_BAGGAGE_KEY,
+  AGENT_BUILDER_OWNER_BAGGAGE_VALUE,
+  DATA_STREAM_NAMESPACE_ATTR,
+} from './agent_builder_context';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 
@@ -48,7 +53,15 @@ describe('AgentBuilderSpanProcessor', () => {
     contextManager.disable();
   });
 
-  function inferenceParentContext(): ReturnType<typeof context.active> {
+  function agentBuilderParentContext(): ReturnType<typeof context.active> {
+    const baggage = propagation.createBaggage({
+      [BAGGAGE_TRACKING_BEACON_KEY]: { value: BAGGAGE_TRACKING_BEACON_VALUE },
+      [AGENT_BUILDER_OWNER_BAGGAGE_KEY]: { value: AGENT_BUILDER_OWNER_BAGGAGE_VALUE },
+    });
+    return propagation.setBaggage(context.active(), baggage);
+  }
+
+  function inferenceOnlyParentContext(): ReturnType<typeof context.active> {
     const baggage = propagation.createBaggage({
       [BAGGAGE_TRACKING_BEACON_KEY]: { value: BAGGAGE_TRACKING_BEACON_VALUE },
     });
@@ -128,7 +141,7 @@ describe('AgentBuilderSpanProcessor', () => {
     };
   }
 
-  it('onStart marks inference spans with attribute when enabled', async () => {
+  it('onStart marks agent builder inference spans with attribute when enabled', async () => {
     const processor = new AgentBuilderSpanProcessor({
       exporter: createExporter(),
       scheduledDelayMillis: 1,
@@ -136,11 +149,26 @@ describe('AgentBuilderSpanProcessor', () => {
     });
 
     const span = createMockSpan('inference');
-    const parentContext = inferenceParentContext();
+    const parentContext = agentBuilderParentContext();
     await processor.onStart(span, parentContext);
 
     expect(span.setAttribute).toHaveBeenCalledWith(SHOULD_TRACK_ATTR, true);
     expect(mockBatch.onStart).toHaveBeenCalledWith(span, parentContext);
+  });
+
+  it('onStart skips inference spans without agent builder baggage', async () => {
+    const processor = new AgentBuilderSpanProcessor({
+      exporter: createExporter(),
+      scheduledDelayMillis: 1,
+      isEnabled: () => true,
+    });
+
+    const span = createMockSpan('inference');
+    const parentContext = inferenceOnlyParentContext();
+    await processor.onStart(span, parentContext);
+
+    expect(span.setAttribute).not.toHaveBeenCalled();
+    expect(mockBatch.onStart).not.toHaveBeenCalled();
   });
 
   it('onStart skips non-inference spans', async () => {
@@ -164,7 +192,7 @@ describe('AgentBuilderSpanProcessor', () => {
     });
 
     const span = createMockSpan('inference');
-    await processor.onStart(span, inferenceParentContext());
+    await processor.onStart(span, agentBuilderParentContext());
 
     expect(span.setAttribute).not.toHaveBeenCalled();
     expect(mockBatch.onStart).not.toHaveBeenCalled();
@@ -182,7 +210,7 @@ describe('AgentBuilderSpanProcessor', () => {
     expect(mockBatch.onEnd).not.toHaveBeenCalled();
   });
 
-  it('onEnd creates a copy with SAMPLED flag and data_stream.dataset on resource', () => {
+  it('onEnd creates a copy with data_stream.dataset and strips tracking attribute', () => {
     const processor = new AgentBuilderSpanProcessor({
       exporter: createExporter(),
       scheduledDelayMillis: 1,
@@ -197,10 +225,43 @@ describe('AgentBuilderSpanProcessor', () => {
 
     expect(mockBatch.onEnd).toHaveBeenCalledTimes(1);
     const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
-    expect(exported.attributes).toEqual({ existing: 'keep-me' });
-    expect(exported.resource.attributes['data_stream.dataset']).toBe('agent_builder');
-    expect(exported.spanContext().traceFlags).toBe(TraceFlags.SAMPLED);
+    expect(exported.attributes).toEqual({
+      existing: 'keep-me',
+    });
+    expect(exported.resource.attributes).toEqual(
+      expect.objectContaining({ 'data_stream.dataset': 'agent_builder' })
+    );
+    expect(exported.resource.attributes).not.toHaveProperty(DATA_STREAM_NAMESPACE_ATTR);
+    expect(exported.spanContext().traceFlags).toBe(TraceFlags.NONE);
     expect(SHOULD_TRACK_ATTR in exported.attributes).toBe(false);
+  });
+
+  it(`onEnd includes ${DATA_STREAM_NAMESPACE_ATTR} in resource when span has the attribute`, () => {
+    const processor = new AgentBuilderSpanProcessor({
+      exporter: createExporter(),
+      scheduledDelayMillis: 1,
+    });
+
+    const readable = createMockReadableSpan({
+      [SHOULD_TRACK_ATTR]: true,
+      [DATA_STREAM_NAMESPACE_ATTR]: 'pablo',
+      existing: 'keep-me',
+    });
+
+    processor.onEnd(readable);
+
+    expect(mockBatch.onEnd).toHaveBeenCalledTimes(1);
+    const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+    expect(exported.attributes).toEqual({
+      existing: 'keep-me',
+    });
+    expect(exported.resource.attributes).toEqual(
+      expect.objectContaining({
+        'data_stream.dataset': 'agent_builder',
+        [DATA_STREAM_NAMESPACE_ATTR]: 'pablo',
+      })
+    );
+    expect(DATA_STREAM_NAMESPACE_ATTR in exported.attributes).toBe(false);
   });
 
   it('onEnd preserves span events without modifying their attributes', () => {

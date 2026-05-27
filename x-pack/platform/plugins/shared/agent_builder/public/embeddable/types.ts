@@ -18,7 +18,7 @@ export interface EmbeddableConversationDependencies {
 }
 
 export interface EmbeddableConversationSidebarProps {
-  onClose: () => void;
+  onClose?: () => void;
   ariaLabelledBy: string;
   /**
    * Callback to register sidebar control methods.

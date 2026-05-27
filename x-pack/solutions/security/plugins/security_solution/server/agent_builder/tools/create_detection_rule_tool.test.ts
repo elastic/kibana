@@ -17,6 +17,7 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../__mocks__/test_helpers';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import {
   createDetectionRuleTool,
   SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
@@ -55,9 +56,18 @@ describe('createDetectionRuleTool', () => {
     mockExperimentalFeatures
   ) as BuiltinToolDefinition<z.ZodObject<{ user_query: z.ZodString }>>;
 
+  let mockCoreStart: ReturnType<typeof setupMockCoreStartServices>;
+  let mockUiSettingsClient: ReturnType<
+    ReturnType<typeof setupMockCoreStartServices>['uiSettings']['asScopedToClient']
+  >;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    setupMockCoreStartServices(mockCore, mockEsClient);
+    mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
+    mockUiSettingsClient = mockCoreStart.uiSettings.asScopedToClient(
+      mockCoreStart.savedObjects.getScopedClient(mockRequest)
+    );
+    jest.mocked(mockUiSettingsClient.get).mockResolvedValue(true);
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
@@ -120,11 +130,37 @@ describe('createDetectionRuleTool', () => {
       });
     });
 
-    it('returns available status when experimental feature is enabled', async () => {
+    it('returns unavailable when space availability check fails', async () => {
       mockGetAgentBuilderResourceAvailability.mockResolvedValue({
-        status: 'available',
+        status: 'unavailable',
+        reason: 'Space is not available',
       });
 
+      const availability = await tool.availability?.handler(
+        createToolAvailabilityContext(mockRequest, 'default')
+      );
+
+      expect(availability).toEqual({
+        status: 'unavailable',
+        reason: 'Space is not available',
+      });
+    });
+
+    it('returns unavailable when ES|QL is disabled', async () => {
+      jest.mocked(mockUiSettingsClient.get).mockResolvedValue(false);
+
+      const availability = await tool.availability?.handler(
+        createToolAvailabilityContext(mockRequest, 'default')
+      );
+
+      expect(availability).toEqual({
+        status: 'unavailable',
+        reason: 'ES|QL is disabled in this space via the enableESQL advanced setting.',
+      });
+      expect(mockUiSettingsClient.get).toHaveBeenCalledWith(ENABLE_ESQL);
+    });
+
+    it('returns available when all checks pass', async () => {
       const availability = await tool.availability?.handler(
         createToolAvailabilityContext(mockRequest, 'default')
       );

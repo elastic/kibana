@@ -8,9 +8,9 @@
  */
 
 export const WORKFLOWS_AI_PARENT_FEATURE_ID = 'workflows_ai';
-export const AI_PROMPT_FEATURE_ID = 'ai.prompt';
-export const AI_SUMMARIZE_FEATURE_ID = 'ai.summarize';
-export const AI_CLASSIFY_FEATURE_ID = 'ai.classify';
+export const AI_PROMPT_FEATURE_ID = 'ai_prompt';
+export const AI_SUMMARIZE_FEATURE_ID = 'ai_summarize';
+export const AI_CLASSIFY_FEATURE_ID = 'ai_classify';
 
 /**
  * Recommended inference endpoints for Workflows AI steps.

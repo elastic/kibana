@@ -986,7 +986,7 @@ node scripts/scout.js run-tests --arch stateful --domain classic --config src/pl
 
 # Or start servers separately, then run tests
 node scripts/scout.js start-server --arch stateful --domain classic
-npx playwright test --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts --project local
+node scripts/playwright test --config src/platform/plugins/shared/workflows_extensions/test/scout/api/playwright.config.ts --project local
 ```
 
 The test will fail with a clear error message indicating which steps need to be added or updated in the approved list.

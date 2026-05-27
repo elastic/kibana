@@ -41,8 +41,9 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
   });
 
-  apiTest.afterAll(async ({ profilingHelper }) => {
+  apiTest.afterAll(async ({ profilingHelper, profilingSetup }) => {
     await profilingHelper.cleanupPolicies();
+    await profilingSetup.cleanup();
   });
 
   // Fleet package_policies.delete is eventually consistent — a subsequent /api/profiling/setup/es_resources call may still see the policy as installed for a brief window. Polling until `has_setup` reflects the deletion (cloud: false; self-managed: unchanged true) keeps the test deterministic.
