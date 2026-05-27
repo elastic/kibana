@@ -15,8 +15,7 @@ import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 const HUGE_FIELDS_ARCHIVE_PATH = 'src/platform/test/functional/fixtures/es_archiver/huge_fields';
-const HUGE_FIELDS_INDEX = 'testhuge';
-const HUGE_FIELDS_DATA_VIEW = `${HUGE_FIELDS_INDEX}*`;
+const HUGE_FIELDS_DATA_VIEW = 'testhuge*';
 const HUGE_FIELDS_TIME_DEFAULTS = '{ "from": "2016-10-05T00:00:00", "to": "2016-10-06T00:00:00"}';
 
 spaceTest.describe('Discover huge field list virtualization', { tag: tags.stateful.all }, () => {
@@ -60,7 +59,7 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
   });
 
   spaceTest(
-    'test_huge data should have expected number of fields',
+    'renders offscreen sidebar fields after scroll in huge data view',
     async ({ page, pageObjects }) => {
       await expect(pageObjects.discover.getSelectedDataView()).toContainText(HUGE_FIELDS_DATA_VIEW);
 
