@@ -83,7 +83,7 @@ const markdownUpdateDescription =
 const markdownDeleteDescription = 'Permanently deletes a markdown library item by ID.';
 
 // ---------------------------------------------------------------------------
-// Typed example bodies — checked against the schema-derived request types
+// Typed example bodies, checked against the schema-derived request types
 // ---------------------------------------------------------------------------
 
 const markdownCreateBody: MarkdownCreateRequestBody = {
@@ -226,7 +226,7 @@ const markdownUpdateRequestExamples = {
 };
 
 // ---------------------------------------------------------------------------
-// Response examples — typed against the schema-derived response types
+// Response examples, typed against the schema-derived response types
 // ---------------------------------------------------------------------------
 
 const markdownCreateResponseExamples = {
@@ -251,7 +251,7 @@ const markdownSearchResponseExamples = {
   searchMarkdownsResponse: {
     summary: 'Search markdown library items response',
     description:
-      'Paginated list of markdown library item summaries. Each item includes the ID, a subset of state fields (`title` and `description`), and metadata. The full `content` is not included — use `GET /api/markdowns/{id}` to retrieve a specific item.',
+      'Paginated list of markdown library item summaries. Each item includes the ID, a subset of state fields (`title` and `description`), and metadata. The full `content` is not included; use `GET /api/markdowns/{id}` to retrieve a specific item.',
     value: {
       data: [
         {
@@ -299,7 +299,7 @@ const markdownUpdateResponseExamples = {
   updatedMarkdownResponse: {
     summary: 'Update markdown library item response',
     description:
-      'The complete updated markdown library item state after a full replacement. PUT replaces the entire item — fields omitted from the request are reset to their defaults.',
+      'The complete updated markdown library item state after a full replacement. PUT replaces the entire item, so any fields omitted from the request are reset to their defaults.',
     value: {
       id: '5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e',
       data: markdownUpdateBody,
@@ -332,7 +332,7 @@ const markdownUpdateCreatedResponseExamples = {
 };
 
 // ---------------------------------------------------------------------------
-// Exported OAS operation objects — consumed by the routes via
+// Exported OAS operation objects, consumed by the routes via
 // `options.oasOperationObject` and deep-merged into the generated spec.
 // ---------------------------------------------------------------------------
 

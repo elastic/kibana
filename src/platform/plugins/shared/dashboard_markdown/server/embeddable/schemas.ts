@@ -16,7 +16,7 @@ export const markdownByValueStateSchema = schema.object({
   content: schema.string({
     meta: {
       description:
-        'The Markdown text rendered by the panel. Supports GitHub-flavored Markdown — including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\\n` for line breaks within JSON strings.',
+        'The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\\n` for line breaks within JSON strings.',
     },
   }),
   settings: schema.object(
