@@ -192,6 +192,8 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     const conditionFieldAllowed =
       !isAgentless && packagePolicyInput.type !== OTEL_COLLECTOR_INPUT_TYPE;
 
+    const showConditionField = packagePolicyInput.enabled && conditionFieldAllowed;
+
     const inputVarGroups = packageInput.var_groups?.length ? packageInput.var_groups : undefined;
 
     const {
@@ -340,15 +342,10 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       inputValidationResults,
     ]);
 
-    // Show the input-level panel when:
-    // - multi-stream/input: condition field scopes across streams so always expose it
-    // - single-stream with input vars: preserve original access to those vars
-    // - single-stream consolidation: stream's advanced vars are hoisted here and stream panel
-    //   is hidden, so this is the only place to reach those vars and the condition field
-    const showInputLevelPanel =
-      !isSingleInputAndStreams ||
-      Boolean(packageInput.vars?.length) ||
-      shouldConsolidateAdvancedSections;
+    // Render the input config section only when there is actual content to show:
+    // input-level vars, the condition field, or consolidated stream advanced vars.
+    const showInputConfig =
+      Boolean(packageInput.vars?.length) || showConditionField || shouldConsolidateAdvancedSections;
 
     const topLevelDescription = showTopLevelDescription && (
       <EuiText size="s" color="subdued">
@@ -546,10 +543,10 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         </EuiFlexGroup>
 
         {/* Spacing if we are showing rest of content */}
-        {isShowingStreams && hasInputStreams && showInputLevelPanel ? <EuiSpacer size="m" /> : null}
+        {isShowingStreams && hasInputStreams && showInputConfig ? <EuiSpacer size="m" /> : null}
 
         {/* Input level policy */}
-        {isShowingStreams && showInputLevelPanel ? (
+        {isShowingStreams && showInputConfig ? (
           <>
             <PackagePolicyInputConfig
               data-test-subj="PackagePolicy.InputConfig"
@@ -560,7 +557,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               inputValidationResults={inputValidationResults}
               forceShowErrors={forceShowErrors}
               isEditPage={isEditPage}
-              showConditionField={packagePolicyInput.enabled && conditionFieldAllowed}
+              showConditionField={showConditionField}
               varGroups={inputVarGroups}
               varGroupSelections={inputVarGroupSelections}
               onVarGroupSelectionChange={handleInputVarGroupSelectionChange}

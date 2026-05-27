@@ -1155,50 +1155,6 @@ describe('PackagePolicyInputPanel', () => {
       });
     });
 
-    it('should hide input config panel when single-stream with no input vars and non-advanced stream vars', async () => {
-      const streamWithRequiredVar: RegistryStreamWithDataStream[] = [
-        {
-          input: 'logfile',
-          title: 'Stream 1',
-          template_path: 'stream.yml.hbs',
-          vars: [
-            {
-              name: 'required_var',
-              type: 'text',
-              title: 'Required Var',
-              required: true,
-              show_user: true,
-            },
-          ],
-          description: 'Test stream',
-          data_stream: { ...mockPackageInputStreams[0].data_stream },
-        },
-      ];
-
-      renderResult = testRenderer.render(
-        <PackagePolicyInputPanel
-          packageInfo={mockPackageInfo}
-          packageInput={mockPackageInput}
-          packageInputStreams={streamWithRequiredVar}
-          packagePolicyInput={singleStreamPolicyInput}
-          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
-          inputValidationResults={inputValidationResults}
-          isSingleInputAndStreams={true}
-        />
-      );
-
-      await waitFor(() => {
-        expect(renderResult.getByText('Required Var')).toBeInTheDocument();
-      });
-      fireEvent.click(renderResult.getByText('Advanced options'));
-      await waitFor(() => {
-        expect(renderResult.getByTestId('packagePolicyStreamConditionInput')).toBeInTheDocument();
-      });
-      expect(
-        renderResult.queryByTestId('packagePolicyInputConditionInput')
-      ).not.toBeInTheDocument();
-    });
-
     it('should show input config panel when single-stream but input has vars', async () => {
       const inputWithVars: RegistryInput = {
         ...mockPackageInput,
