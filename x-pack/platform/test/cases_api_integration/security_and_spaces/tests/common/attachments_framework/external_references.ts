@@ -497,21 +497,8 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should check changes on all registered external reference attachment types', async () => {
         const types = await getRegisteredTypes();
 
-        // `endpoint` was migrated from the externalReference registry to the unified
-        // registry as `security.endpoint`. The legacy id is intentionally kept
-        // registered for back-compat so existing API clients that still POST
-        // `{ type: 'externalReference', externalReferenceAttachmentTypeId: 'endpoint', ... }`
-        // are not rejected with `400 "Attachment type endpoint is not registered."`.
-        // The cases server transparently converts these legacy-shape SOs to the
-        // unified `security.endpoint` shape on read.
-        // `indicator` was migrated to the unified registry; the legacy
-        // external-reference registration was dropped because legacy-shape
-        // POSTs are routed through `EXTERNAL_REFERENCE_TYPE_MAP` and validated
-        // against the unified zod schema.
         expect(types).to.eql({
           '.test': 'ab2204830c67f5cf992c9aa2f7e3ead752cc60a1',
-          endpoint: 'e13fe41b5c330dd923da91992ed0cedb7e30960f',
-          osquery: '99bee68fce8ee84e81d67c536e063d3e1a2cee96',
         });
       });
     });

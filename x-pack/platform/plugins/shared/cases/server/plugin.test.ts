@@ -40,6 +40,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
       resetPageDelayMs: 0,
     },
     templates: { enabled: true },
+    casesRedesign: { list: false, details: false, settings: false },
     attachments: { enabled: true },
     ...overrides,
   };
@@ -195,6 +196,11 @@ describe('Cases Plugin', () => {
             },
             "attachments": Object {
               "enabled": true,
+            },
+            "casesRedesign": Object {
+              "details": false,
+              "list": false,
+              "settings": false,
             },
             "enabled": true,
             "files": Object {

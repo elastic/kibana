@@ -241,7 +241,6 @@ export class CasesClientFactory {
 
     const attachmentService = new AttachmentService({
       log: this.logger,
-      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
       config: this.options.config,
     });
@@ -308,7 +307,6 @@ export class CasesClientFactory {
       connectorMappingsService: new ConnectorMappingsService(this.logger),
       userActionService: new CaseUserActionService({
         log: this.logger,
-        persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         savedObjectsSerializer,
         auditLogger,

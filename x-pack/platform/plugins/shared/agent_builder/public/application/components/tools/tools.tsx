@@ -7,7 +7,8 @@
 
 import { EuiButton, EuiText, EuiLink, useEuiTheme, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ToolType } from '@kbn/agent-builder-common';
+import { ToolType, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -52,6 +53,11 @@ export const AgentBuilderTools = () => {
                       defaultMessage: 'Learn more about tools in the documentation',
                     }
                   )}
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                    action: AGENT_BUILDER_UI_EBT.action.globalManagement.LEARN_MORE_DOCS,
+                    detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+                  })}
                 >
                   {i18n.translate('xpack.agentBuilder.tools.toolsDocumentation', {
                     defaultMessage: 'Learn more',
@@ -72,6 +78,11 @@ export const AgentBuilderTools = () => {
               fill
               iconType="plus"
               onClick={() => createTool(ToolType.esql)}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.NEW_TOOL,
+                detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+              })}
             >
               <EuiText size="s">{labels.tools.newToolButton}</EuiText>
             </EuiButton>
@@ -80,6 +91,11 @@ export const AgentBuilderTools = () => {
             key="agents-button"
             href={createAgentBuilderUrl(appPaths.agents.list)}
             aria-label={manageAgentsLabel}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_AGENTS_LINK,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+            })}
           >
             <EuiText size="s">{manageAgentsLabel}</EuiText>
           </EuiButtonEmpty>,

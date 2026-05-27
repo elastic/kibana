@@ -806,6 +806,11 @@ export const mockCasesContract = (): CasesServerStart => ({
     templates: {
       enabled: true,
     },
+    casesRedesign: {
+      list: false,
+      details: false,
+      settings: false,
+    },
     attachments: {
       enabled: true,
     },

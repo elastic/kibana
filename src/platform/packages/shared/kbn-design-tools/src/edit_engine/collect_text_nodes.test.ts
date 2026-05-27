@@ -84,6 +84,22 @@ describe('collectAllTextNodes', () => {
     expect(nodes[0].textContent).toBe('Visible');
   });
 
+  it('should skip Emotion-prefixed euiScreenReaderOnly elements', () => {
+    const el = document.createElement('div');
+    const sr = document.createElement('span');
+    sr.classList.add('css-gb1zbv-euiScreenReaderOnly');
+    sr.textContent = 'ScreenReaderOnly';
+    const visible = document.createElement('span');
+    visible.textContent = 'Visible';
+    el.appendChild(sr);
+    el.appendChild(visible);
+
+    const nodes = collectAllTextNodes(el);
+
+    expect(nodes).toHaveLength(1);
+    expect(nodes[0].textContent).toBe('Visible');
+  });
+
   it('should recursively collect from nested elements', () => {
     const el = document.createElement('div');
     el.innerHTML = '<div><div><span>Deep</span></div></div>';
