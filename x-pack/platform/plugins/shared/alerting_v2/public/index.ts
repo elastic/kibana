@@ -18,7 +18,6 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { NOOP_WORKFLOW_FORM } from '@kbn/alerting-v2-rule-form';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
@@ -67,7 +66,7 @@ export const module = new ContainerModule(({ bind }) => {
         lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
         expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
-        workflowForm: NOOP_WORKFLOW_FORM,
+        workflowForm: { Component: () => null, defaultValue: () => ({}), supported: false },
       });
 
       const experimentalEnabled = coreStart.settings.globalClient.get<boolean>(
