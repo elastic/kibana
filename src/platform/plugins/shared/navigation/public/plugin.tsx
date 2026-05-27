@@ -20,8 +20,8 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { getNavigationNodeIcon } from '@kbn/core-chrome-browser';
 import { type SolutionId, type NavigationCustomization } from '@kbn/core-chrome-browser';
+import { getNavigationNodeIcon } from '@kbn/core-chrome-browser-navigation-utils';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
@@ -278,6 +278,8 @@ export class NavigationPublicPlugin
 
   private openCustomizeNavigationModal(core: CoreStart, chrome: InternalChromeStart) {
     const openModal = async () => {
+      // Lazy-load the modal package — it pulls in heavy dnd + EUI dependencies that
+      // shouldn't be in the page-load bundle.
       const { CustomizeNavigationModal } = await import('@kbn/navigation-customization-components');
 
       const { items, defaultItemIds } = this.getNavigationItems(chrome);

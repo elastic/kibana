@@ -33,7 +33,8 @@
     "@kbn/scout",
     "@kbn/security-plugin",
     "@kbn/navigation-customization-components",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/core-chrome-browser-navigation-utils"
   ],
   "exclude": [
     "target/**/*",

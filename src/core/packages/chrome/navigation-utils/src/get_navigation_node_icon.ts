@@ -7,9 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChromeProjectNavigationNode } from '../project_navigation';
-
 import { AppDeepLinkIdToIcon } from './known_icons_mappings';
+
+/**
+ * Minimal structural subset of ChromeProjectNavigationNode.
+ * Using a local interface instead of importing from @kbn/core-chrome-browser
+ * keeps this package dependency-free, preventing a kbn_references cycle.
+ */
+interface NavigationNode {
+  id: string;
+  icon?: unknown;
+  deepLink?: {
+    euiIconType?: string;
+    icon?: string;
+  };
+}
 
 const SKIP_WARNINGS = process.env.NODE_ENV === 'production';
 
@@ -43,11 +55,11 @@ const warnOnce = (message: string) => {
  * Resolves the EUI icon type for a project navigation node using the same
  * fallback chain as the side navigation renderer.
  *
- * Shared by `@kbn/core-chrome-browser-components` and the navigation customization modal.
- * Lives in `@kbn/core-chrome-browser` (not browser-internal) because components cannot
- * depend on internal without a circular dependency with `@kbn/core-chrome-browser-internal`.
+ * Shared by `@kbn/core-chrome-browser-components` (via re-export from
+ * `@kbn/core-chrome-browser`) and the navigation customization modal
+ * (via dynamic import).
  */
-export const getNavigationNodeIcon = (node: ChromeProjectNavigationNode | null): string => {
+export const getNavigationNodeIcon = (node: NavigationNode | null): string => {
   if (node?.icon) {
     return node.icon as string;
   }

@@ -11,7 +11,10 @@ import type {
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
-import { getNavigationNodeIcon, NAVIGATION_NODE_ICON_FALLBACK } from '@kbn/core-chrome-browser';
+import {
+  getNavigationNodeIcon,
+  NAVIGATION_NODE_ICON_FALLBACK,
+} from '@kbn/core-chrome-browser-navigation-utils';
 import classnames from 'classnames';
 import type {
   MenuItem,
@@ -127,8 +130,7 @@ export const toNavigationItems = (
 
   // TODO: The visibility checks below (sideNavStatus === 'hidden', empty panel-opener pruning,
   // section-header flattening) duplicate logic already handled by `getRenderableNodes` in
-  // `@kbn/core-chrome-browser-internal`. Icon resolution uses the shared `getNavigationNodeIcon`
-  // from `@kbn/core-chrome-browser`. Once `getNavigation$()` passes a pre-pruned tree, this
+  // `@kbn/core-chrome-browser-internal`. Once `getNavigation$()` passes a pre-pruned tree, this
   // function can be simplified to a pure shape-transformer with no visibility decisions.
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
     if (!navNode) return null;

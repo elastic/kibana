@@ -54,12 +54,6 @@ export type {
   RenderAs,
 } from './project_navigation';
 
-export {
-  getNavigationNodeIcon,
-  NAVIGATION_NODE_ICON_FALLBACK,
-} from './navigation/get_navigation_node_icon';
-export { AppDeepLinkIdToIcon } from './navigation/known_icons_mappings';
-
 export type {
   SidebarApp,
   SidebarAppConfig,

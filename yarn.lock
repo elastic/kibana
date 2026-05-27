@@ -5375,6 +5375,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-browser-navigation-utils@link:src/core/packages/chrome/navigation-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-browser@link:src/core/packages/chrome/browser":
   version "0.0.0"
   uid ""
