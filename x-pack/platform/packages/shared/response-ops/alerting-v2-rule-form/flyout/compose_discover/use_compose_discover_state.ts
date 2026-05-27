@@ -17,26 +17,29 @@ import type {
 } from './types';
 
 export const getStepIds = (isAlert: boolean): StepId[] =>
-  isAlert
-    ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
-    : ['alertCondition', 'details', 'notifications'];
+  isAlert ? ['alertCondition', 'recoveryCondition', 'details'] : ['alertCondition', 'details'];
+
+export const getBuilderStepIds = (isAlert: boolean): StepId[] =>
+  isAlert ? ['builderCondition', 'recoveryCondition', 'details'] : ['builderCondition', 'details'];
 
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
   initialKind?: RuleKind;
   initialRecoveryType?: RecoveryType;
+  isBuilderMode?: boolean;
 }
 
 export const createInitialState = ({
   mode,
   initialKind = 'signal',
   initialRecoveryType = 'default',
+  isBuilderMode = false,
 }: InitialStateConfig): ComposeDiscoverState => ({
   mode,
   step: 0,
   recoveryType: initialKind === 'alert' ? initialRecoveryType : 'default',
   activeTab: 'alert',
-  childOpen: mode === 'create',
+  childOpen: mode === 'create' && !isBuilderMode,
   queryCommitted: mode === 'edit',
   yamlMode: false,
 });
@@ -116,9 +119,10 @@ export function reducer(
     case 'COMMIT_QUERY':
       return {
         ...state,
-        childOpen: state.yamlMode ? state.childOpen : false,
         queryCommitted: true,
       };
+    case 'INVALIDATE_QUERY':
+      return { ...state, queryCommitted: false };
     case 'SET_YAML_MODE':
       return {
         ...state,
