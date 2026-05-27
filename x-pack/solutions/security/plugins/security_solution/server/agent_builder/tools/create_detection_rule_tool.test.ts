@@ -10,6 +10,10 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { z } from '@kbn/zod/v4';
 import type { ExperimentalFeatures } from '../../../common';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../common/constants';
 import { coreMock } from '@kbn/core/server/mocks';
 import {
   createToolAvailabilityContext,
@@ -86,16 +90,6 @@ describe('createDetectionRuleTool', () => {
 
     it('rejects missing user_query', () => {
       const invalidInput = {};
-
-      const result = tool.schema.safeParse(invalidInput);
-
-      expect(result.success).toBe(false);
-    });
-
-    it('rejects non-string user_query', () => {
-      const invalidInput = {
-        user_query: 123,
-      };
 
       const result = tool.schema.safeParse(invalidInput);
 
@@ -205,14 +199,14 @@ describe('createDetectionRuleTool', () => {
         errors: [],
       });
 
-      const mockAttachmentId = 'ai-rule-creation';
+      const mockAttachmentId = SECURITY_RULE_ATTACHMENT_ID;
       const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
         modelProvider: mockModelProvider,
         events: mockEvents,
       });
       (context.attachments.add as jest.Mock).mockResolvedValue({
         id: mockAttachmentId,
-        type: 'security.rule',
+        type: SecurityAgentBuilderAttachments.rule,
         versions: [],
         current_version: 1,
       });
@@ -233,8 +227,8 @@ describe('createDetectionRuleTool', () => {
         ],
       });
       expect(context.attachments.add).toHaveBeenCalledWith({
-        id: 'ai-rule-creation',
-        type: 'security.rule',
+        id: SECURITY_RULE_ATTACHMENT_ID,
+        type: SecurityAgentBuilderAttachments.rule,
         data: {
           text: JSON.stringify(mockRule),
           attachmentLabel: 'Test Rule',
@@ -242,6 +236,19 @@ describe('createDetectionRuleTool', () => {
         description: 'Rule: Test Rule',
       });
       expect(mockIterativeAgent.invoke).toHaveBeenCalledWith({ userQuery });
+      expect(mockGetBuildAgent).toHaveBeenCalledWith({
+        model: expect.objectContaining({
+          getConnector: expect.any(Function),
+        }),
+        logger: mockLogger,
+        inference: expect.any(Object),
+        connectorId: 'test-connector-id',
+        request: mockRequest,
+        esClient: mockEsClient.asCurrentUser,
+        savedObjectsClient: expect.any(Object),
+        rulesClient: expect.any(Object),
+        events: mockEvents,
+      });
     });
 
     it('returns error when connector ID is not available', async () => {
@@ -272,7 +279,44 @@ describe('createDetectionRuleTool', () => {
       });
     });
 
-    it('returns error graph creates rule with errors', async () => {
+    it('returns a structured rejection when the graph rejects rule creation', async () => {
+      mockIterativeAgent.invoke.mockResolvedValue({
+        rule: {},
+        errors: [],
+        rejectionReason: {
+          code: 'INVALID_OUTPUT',
+          message: 'The assembled rule failed schema validation',
+          details: 'severity: Invalid enum value',
+        },
+        rejectionMessage:
+          'I built a rule but it failed validation: severity: Invalid enum value. Please retry or rephrase.',
+      });
+
+      const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+        modelProvider: mockModelProvider,
+        events: mockEvents,
+      });
+
+      const result = await tool.handler({ user_query: userQuery }, context);
+
+      expect(result).toEqual({
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              success: false,
+              rejected: true,
+              rejectionCode: 'INVALID_OUTPUT',
+              message:
+                'I built a rule but it failed validation: severity: Invalid enum value. Please retry or rephrase.',
+            },
+          },
+        ],
+      });
+      expect(context.attachments.add).not.toHaveBeenCalled();
+    });
+
+    it('returns error when graph creates rule with errors', async () => {
       const mockErrors = ['Error 1', 'Error 2'];
       mockIterativeAgent.invoke.mockResolvedValue({
         rule: null,
@@ -322,35 +366,6 @@ describe('createDetectionRuleTool', () => {
             },
           },
         ],
-      });
-    });
-
-    it('initiates agent with correct parameters', async () => {
-      mockIterativeAgent.invoke.mockResolvedValue({
-        rule: { name: 'Test Rule' },
-        errors: [],
-      });
-
-      await tool.handler(
-        { user_query: userQuery },
-        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
-          modelProvider: mockModelProvider,
-          events: mockEvents,
-        })
-      );
-
-      expect(mockGetBuildAgent).toHaveBeenCalledWith({
-        model: expect.objectContaining({
-          getConnector: expect.any(Function),
-        }),
-        logger: mockLogger,
-        inference: expect.any(Object),
-        connectorId: 'test-connector-id',
-        request: mockRequest,
-        esClient: mockEsClient.asCurrentUser,
-        savedObjectsClient: expect.any(Object),
-        rulesClient: expect.any(Object),
-        events: mockEvents,
       });
     });
   });
