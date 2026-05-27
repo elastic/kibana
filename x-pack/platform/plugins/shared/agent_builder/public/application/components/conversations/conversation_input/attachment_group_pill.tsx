@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
 import type { AttachmentGroup } from '@kbn/agent-builder-common/attachments';
 
 const removeAriaLabel = i18n.translate('xpack.agentBuilder.attachmentGroupPill.removeAriaLabel', {
@@ -33,7 +33,11 @@ export interface AttachmentGroupPillProps {
 
 export const AttachmentGroupPill: React.FC<AttachmentGroupPillProps> = ({ group, onRemove }) => {
   const { euiTheme } = useEuiTheme();
-  const [isHovered, setIsHovered] = useState(false);
+
+  const removeButtonClass = css`
+    opacity: 0;
+    transition: opacity ${euiTheme.animation.fast};
+  `;
 
   const iconContainerStyles = css`
     display: flex;
@@ -54,18 +58,21 @@ export const AttachmentGroupPill: React.FC<AttachmentGroupPillProps> = ({ group,
     word-break: break-word;
   `;
 
+  const panelStyles = css`
+    max-width: 200px;
+    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
+    &:hover .${removeButtonClass}, &:focus-within .${removeButtonClass} {
+      opacity: 1;
+    }
+  `;
+
   return (
     <EuiPanel
       hasShadow={false}
       hasBorder
       color="subdued"
       paddingSize="s"
-      css={css`
-        max-width: 200px;
-        border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.darkShade};
-      `}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      css={panelStyles}
       data-test-subj={`agentBuilderAttachmentGroupPill-${group.id}`}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -79,10 +86,11 @@ export const AttachmentGroupPill: React.FC<AttachmentGroupPillProps> = ({ group,
             <strong>{group.label}</strong>
           </EuiText>
         </EuiFlexItem>
-        {onRemove && isHovered && (
+        {onRemove && (
           <EuiFlexItem grow={false}>
             <EuiToolTip content={removeAriaLabel} disableScreenReaderOutput>
               <EuiButtonIcon
+                className={removeButtonClass}
                 iconType="cross"
                 size="xs"
                 color="text"

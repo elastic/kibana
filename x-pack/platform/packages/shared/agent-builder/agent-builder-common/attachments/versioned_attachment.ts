@@ -50,12 +50,7 @@ export interface VersionedAttachment<
   readonly?: boolean;
   /** The client-provided ID if this attachment was created with one (e.g., via flyout configuration) */
   client_id?: string;
-  /**
-   * Stable identifier for the logical group this attachment belongs to.
-   * Attachments sharing the same group_id were submitted together as a single
-   * logical entity (e.g. multiple alert batches from one bulk-add action).
-   * Undefined for standalone attachments.
-   */
+  /** Stable group identifier; shared by attachments submitted together as one logical entity. */
   group_id?: string;
   /**
    * Origin/reference info for attachments created from external sources.
@@ -160,15 +155,7 @@ export interface AttachmentInput<
   hidden?: boolean;
   /** Whether the attachment should be read-only */
   readonly?: boolean;
-  /**
-   * Stable identifier for the logical group this attachment belongs to.
-   * Attachments sharing the same group_id were submitted together as a single
-   * logical entity (e.g. multiple alert batches from one bulk-add action).
-   * Undefined for standalone attachments.
-   *
-   * When this input is part of an AttachmentGroup, flattenAttachments always
-   * stamps this field with the group's id, overriding any value set here.
-   */
+  /** Stable group identifier; set automatically by flattenAttachments when part of an AttachmentGroup. */
   group_id?: string;
 }
 
@@ -254,11 +241,6 @@ export const attachmentGroupSchema = z.object({
 export const isAttachmentGroup = (a: ConversationAttachment): a is AttachmentGroup =>
   a.type === 'group';
 
-/**
- * Union of a single attachment or a group of attachments.
- * This is the type used in client-side conversation state.
- * Groups are flattened to AttachmentInput[] before being sent to the server.
- */
 export type ConversationAttachment = AttachmentInput | AttachmentGroup;
 
 export const attachmentDiffSchema = z.object({

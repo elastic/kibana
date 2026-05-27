@@ -66,7 +66,6 @@ export interface ReportOptOutParams {
 export interface ReportAddToChatClickedParams {
   pathway: string;
   attachments?: string[];
-  /** Number of items added when using bulk add-to-chat. Absent for single-item pathways. */
   item_count?: number;
 }
 
