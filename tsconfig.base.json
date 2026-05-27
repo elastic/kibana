@@ -2836,6 +2836,10 @@
     // Resolve modules in the same way as Node.js. Aka make `require` works the
     // same in TypeScript as it does in Node.js.
     "moduleResolution": "node",
+    // Silence the TS 6.0 soft-deprecation diagnostics for options we still
+    // need (baseUrl, moduleResolution: node). These are removed in TS 7.0;
+    // we will land their replacements before bumping to 7.0 and drop this.
+    "ignoreDeprecations": "6.0",
     // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
     "resolveJsonModule": true,
     // Disallow inconsistently-cased references to the same file.
