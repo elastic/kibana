@@ -2260,12 +2260,12 @@ export default ({ getService }: FtrProviderContext) => {
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);
       const path = dataPathBuilder.getPath('auditbeat/hosts');
-      before(async () => {
+      before(async function () {
         await esArchiver.load(path);
         // Two entities are needed:
         //   1. Id-based EUID for auditbeat docs (risk test, host.id present in alert).
         //   2. Name-based EUID for dynamic ecs_compliant docs (criticality test, no host.id).
-        await entityStoreV2.setup({
+        const available = await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
@@ -2284,11 +2284,15 @@ export default ({ getService }: FtrProviderContext) => {
           users: [
             {
               user: { name: 'root' },
-              entity: { id: 'user:root', type: 'user' },
+              entity: { type: 'user' },
               asset: { criticality: 'extreme_impact' },
             },
           ],
         });
+        if (!available) {
+          await esArchiver.unload(path);
+          this.skip();
+        }
       });
 
       after(async () => {

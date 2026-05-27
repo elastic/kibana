@@ -36,6 +36,10 @@ export interface EnrichmentSetupConfig {
 /**
  * Installs Entity Store V2 engines and seeds entities for alert enrichment tests.
  *
+ * Returns `true` if setup succeeded (V2 enrichment is active), or `false` if Entity Store V2
+ * enrichment is disabled in the current environment. When `false` is returned, callers should
+ * skip their test suite via `this.skip()`.
+ *
  * Inspired by the approach started in https://github.com/elastic/kibana/pull/270939
  * by @denar50.
  */
@@ -43,17 +47,47 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
   const supertest = getService('supertest');
   const retry = getService('retry');
   const log = getService('log');
+  const ftrConfig = getService('config');
 
-  const setup = async (config: EnrichmentSetupConfig): Promise<void> => {
+  /**
+   * Returns false when the `entityAnalyticsEntityStoreV2` experimental feature flag is
+   * explicitly disabled in the current Kibana test server configuration. This can happen in test
+   * suites that still rely on legacy (V1) enrichment so they can keep using archiver-seeded data.
+   */
+  const isV2EnrichmentEnabled = (): boolean => {
+    try {
+      const serverArgs = ftrConfig.get('kbnTestServer.serverArgs') as string[] | undefined;
+      if (!Array.isArray(serverArgs)) return true;
+      return !serverArgs.some((arg) => arg.includes('disable:entityAnalyticsEntityStoreV2'));
+    } catch {
+      return true;
+    }
+  };
+
+  const setup = async (enrichmentConfig: EnrichmentSetupConfig): Promise<boolean> => {
+    if (!isV2EnrichmentEnabled()) {
+      log.info(
+        'Entity Store V2 enrichment is disabled in this environment (disable:entityAnalyticsEntityStoreV2 flag set). Skipping V2 setup.'
+      );
+      return false;
+    }
+
     const entityTypes: string[] = [];
-    if (config.hosts?.length) entityTypes.push('host');
-    if (config.users?.length) entityTypes.push('user');
+    if (enrichmentConfig.hosts?.length) entityTypes.push('host');
+    if (enrichmentConfig.users?.length) entityTypes.push('user');
 
-    if (entityTypes.length === 0) return;
+    if (entityTypes.length === 0) return true;
 
     const installRes = await withHeaders(supertest.post('/api/security/entity_store/install')).send(
       { entityTypes }
     );
+
+    if (installRes.status === 403) {
+      log.info(
+        'Entity Store V2 is not available in this environment (feature flag or UI setting disabled). Skipping V2 setup.'
+      );
+      return false;
+    }
 
     if (installRes.status !== 200 && installRes.status !== 201) {
       throw new Error(
@@ -71,7 +105,7 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
       return res.body.status === 'running' || res.body.status === 'stopped';
     });
 
-    for (const hostConfig of config.hosts ?? []) {
+    for (const hostConfig of enrichmentConfig.hosts ?? []) {
       const createRes = await withHeaders(
         supertest.post('/api/security/entity_store/entities/host')
       ).send(hostConfig);
@@ -84,7 +118,7 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
       }
     }
 
-    for (const userConfig of config.users ?? []) {
+    for (const userConfig of enrichmentConfig.users ?? []) {
       const createRes = await withHeaders(
         supertest.post('/api/security/entity_store/entities/user')
       ).send(userConfig);
@@ -96,6 +130,8 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
         );
       }
     }
+
+    return true;
   };
 
   const teardown = async (): Promise<void> => {

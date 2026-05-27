@@ -64,7 +64,6 @@ const ENRICHMENT_HOST_ID = '2ce8b1e7d69e4a1d9c6bcddc473da9d9';
 const ENRICHMENT_HOST_NAME = 'zeek-sensor-amsterdam';
 const ENRICHMENT_HOST_EUID = `host:${ENRICHMENT_HOST_ID}`;
 const ENRICHMENT_USER_NAME = 'root';
-const ENRICHMENT_USER_EUID = `user:${ENRICHMENT_USER_NAME}`;
 
 const createThreatMatchRule = ({
   name = 'Query with a rule id',
@@ -2468,8 +2467,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('alerts should be enriched', () => {
-      before(async () => {
-        await entityStoreV2.setup({
+      before(async function () {
+        const available = await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
@@ -2481,6 +2480,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
+        if (!available) this.skip();
       });
 
       after(async () => {
@@ -2523,8 +2523,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with asset criticality', () => {
-      before(async () => {
-        await entityStoreV2.setup({
+      before(async function () {
+        const available = await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
@@ -2535,11 +2535,12 @@ export default ({ getService }: FtrProviderContext) => {
           users: [
             {
               user: { name: ENRICHMENT_USER_NAME },
-              entity: { id: ENRICHMENT_USER_EUID, type: 'user' },
+              entity: { type: 'user' },
               asset: { criticality: 'extreme_impact' },
             },
           ],
         });
+        if (!available) this.skip();
       });
 
       after(async () => {

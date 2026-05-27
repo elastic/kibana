@@ -89,7 +89,6 @@ const ENRICHMENT_HOST_ID = '8cc95778cce5407c809480e8e32ad76b';
 const ENRICHMENT_HOST_NAME = 'suricata-zeek-sensor-toronto';
 const ENRICHMENT_HOST_EUID = `host:${ENRICHMENT_HOST_ID}`;
 const ENRICHMENT_USER_NAME = 'root';
-const ENRICHMENT_USER_EUID = `user:${ENRICHMENT_USER_NAME}`;
 
 /**
  * Test coverage:
@@ -285,8 +284,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with host and user risk indices', () => {
-      before(async () => {
-        await entityStoreV2.setup({
+      before(async function () {
+        const available = await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
@@ -301,13 +300,13 @@ export default ({ getService }: FtrProviderContext) => {
             {
               user: { name: ENRICHMENT_USER_NAME },
               entity: {
-                id: ENRICHMENT_USER_EUID,
                 type: 'user',
                 risk: { calculated_level: 'Low', calculated_score_norm: 11 },
               },
             },
           ],
         });
+        if (!available) this.skip();
       });
 
       after(async () => {
@@ -368,8 +367,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with asset criticality', () => {
-      before(async () => {
-        await entityStoreV2.setup({
+      before(async function () {
+        const available = await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
@@ -380,11 +379,12 @@ export default ({ getService }: FtrProviderContext) => {
           users: [
             {
               user: { name: ENRICHMENT_USER_NAME },
-              entity: { id: ENRICHMENT_USER_EUID, type: 'user' },
+              entity: { type: 'user' },
               asset: { criticality: 'extreme_impact' },
             },
           ],
         });
+        if (!available) this.skip();
       });
 
       after(async () => {

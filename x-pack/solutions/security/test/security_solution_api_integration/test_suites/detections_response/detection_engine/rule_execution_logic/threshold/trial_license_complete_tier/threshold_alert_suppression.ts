@@ -970,8 +970,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with host risk index', () => {
-      before(async () => {
-        await entityStoreV2.setup({
+      before(async function () {
+        const available = await entityStoreV2.setup({
           hosts: [
             {
               host: { name: LONDON_HOST_NAME, id: [LONDON_HOST_ID] },
@@ -991,6 +991,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
+        if (!available) this.skip();
       });
 
       after(async () => {
@@ -1022,8 +1023,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with asset criticality', () => {
-      before(async () => {
-        await entityStoreV2.setup({
+      before(async function () {
+        const available = await entityStoreV2.setup({
           hosts: [
             {
               host: { name: LONDON_HOST_NAME, id: [LONDON_HOST_ID] },
@@ -1032,6 +1033,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
+        if (!available) this.skip();
       });
 
       after(async () => {
