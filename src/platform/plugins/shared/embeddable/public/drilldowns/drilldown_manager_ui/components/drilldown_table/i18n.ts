@@ -41,7 +41,7 @@ export const txtDeleteDrilldowns = (count: number) =>
 export const txtTableCaption = i18n.translate(
   'embeddableApi.components.DrilldownTable.tableCaption',
   {
-    defaultMessage: 'Drilldowns attached to this panel',
+    defaultMessage: 'Drilldowns',
   }
 );
 
