@@ -31,6 +31,7 @@ import type { RuleFormServices } from '../../../form/contexts/rule_form_context'
 import { useDataFields } from '../../../form/hooks/use_data_fields';
 import { ScheduleField } from '../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../form/fields/lookback_window_field';
+import { AlertDelayField } from '../../../form/fields/alert_delay_field';
 
 interface AlertConditionStepProps {
   state: ComposeDiscoverState;
@@ -306,6 +307,13 @@ export function AlertConditionStep({
         disabled={!state.queryCommitted}
         data-test-subj="composeDiscoverTrackingToggle"
       />
+
+      {isAlert && (
+        <>
+          <EuiSpacer size="m" />
+          <AlertDelayField />
+        </>
+      )}
 
       {/* Schedule and lookback -- connected to RHF via useFormContext() internally */}
       <EuiSpacer size="m" />
