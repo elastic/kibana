@@ -65,6 +65,7 @@
     "@kbn/cps-utils",
     "@kbn/tour-queue",
     "@kbn/context-switcher-components",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }
