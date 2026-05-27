@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
-export const useStyles = () => {
+export const useDataPhasesFlyoutStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
@@ -31,6 +31,12 @@ export const useStyles = () => {
       }
     `;
 
+    const tabsWarningSelectedUnderlineStyles = css`
+      .streamsIlmPhasesTab--hasWarnings.euiTab-isSelected::after {
+        border-color: ${euiTheme.colors.warning};
+      }
+    `;
+
     const phaseDescriptionStyles = css`
       padding: ${euiTheme.size.m} ${euiTheme.size.l};
     `;
@@ -44,8 +50,9 @@ export const useStyles = () => {
       headerStyles,
       footerStyles,
       tabsErrorSelectedUnderlineStyles,
+      tabsWarningSelectedUnderlineStyles,
       phaseDescriptionStyles,
       phaseDescriptionNoBottomPaddingStyles,
     };
-  }, [euiTheme.colors.danger, euiTheme.size.l, euiTheme.size.m]);
+  }, [euiTheme.colors.danger, euiTheme.colors.warning, euiTheme.size.l, euiTheme.size.m]);
 };
