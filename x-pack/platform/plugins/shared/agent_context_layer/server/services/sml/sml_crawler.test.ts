@@ -663,9 +663,7 @@ describe('SmlCrawlerImpl', () => {
 
       expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(1);
       expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('mapping update failed')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('mapping update failed'));
       const createOp = mockStateClient.bulk.mock.calls
         .flatMap((c: unknown[]) => (c[0] as { operations?: unknown[] }).operations ?? [])
         .find(
