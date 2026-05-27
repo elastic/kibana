@@ -144,7 +144,7 @@ export function SignificantEventsDiscoveryPage() {
       },
       {
         id: 'significant_events',
-        label: i18n.translate('xpack.streams.significantEventsDiscovery.sigEventsTab', {
+        label: i18n.translate('xpack.streams.significantEventsDiscovery.significantEventsTab', {
           defaultMessage: 'Significant Events',
         }),
         href: router.link('/_discovery/{tab}', { path: { tab: 'significant_events' } }),
