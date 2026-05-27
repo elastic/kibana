@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { ExecuteRuleQueryStep } from './execute_rule_query_step';
 import {
   collectStreamResults,
@@ -12,6 +16,7 @@ import {
   createRuleExecutionInput,
   createRuleResponse,
   createRulePipelineState,
+  getStepError,
   mockHelpersEsqlArrowBatches,
   mockHelpersEsqlToArrowReader,
 } from '../test_utils';
@@ -89,6 +94,34 @@ describe('ExecuteRuleQueryStep', () => {
     await expect(
       collectStreamResults(step.executeStream(createPipelineStream([state])))
     ).rejects.toThrow('Query execution failed');
+  });
+
+  it('marks ResponseError(400) ES|QL errors as TaskErrorSource.USER', async () => {
+    mockHelpersEsqlToArrowReader(
+      mockEsClient,
+      jest.fn().mockRejectedValue(new errors.ResponseError({ statusCode: 400 } as DiagnosticResult))
+    );
+
+    const state = createRulePipelineState({ rule: createRuleResponse() });
+
+    const error = await getStepError(step, state);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
+  });
+
+  it('does not mark plain ES|QL errors as TaskErrorSource.USER', async () => {
+    mockHelpersEsqlToArrowReader(
+      mockEsClient,
+      jest.fn().mockRejectedValue(new Error('ES query failed'))
+    );
+
+    const state = createRulePipelineState({ rule: createRuleResponse() });
+
+    const error = await getStepError(step, state);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(getErrorSource(error!)).toBeUndefined();
   });
 
   it('yields rows from query results', async () => {

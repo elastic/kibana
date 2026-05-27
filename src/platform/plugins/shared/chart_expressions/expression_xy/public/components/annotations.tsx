@@ -66,7 +66,7 @@ const TooltipAnnotationDetails = ({
         <EuiFlexGroup gutterSize="s" key={`${field.key}-${field.name}`}>
           <EuiFlexItem css={styles.tooltipExtraFieldsKey}>{field.name}:</EuiFlexItem>
           <EuiFlexItem css={styles.tooltipExtraFieldsValue}>
-            {field.formatter ? field.formatter.convert(row[field.key]) : row[field.key]}
+            {field.formatter ? field.formatter.convertToText(row[field.key]) : row[field.key]}
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
@@ -248,7 +248,7 @@ export const getAnnotationsGroupedByInterval = (
     const formatter = columnFormatter && formatFactory(columnFormatter);
     const label =
       textField && formatter && `field:${textField}` in firstRow
-        ? formatter.convert(firstRow[`field:${textField}`])
+        ? formatter.convertToText(firstRow[`field:${textField}`])
         : firstRow.label;
     const mergedAnnotation: MergedAnnotation = {
       ...firstRow,

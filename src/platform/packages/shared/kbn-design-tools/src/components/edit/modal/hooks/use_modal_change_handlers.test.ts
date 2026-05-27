@@ -13,6 +13,12 @@ import { useDraftHistory } from './use_draft_history';
 import type { TextNodeEntry } from '../text_node_editor';
 import type { MediaEditorEntry } from '../media_editor';
 import type { DraftHistoryResult } from './use_draft_history';
+import {
+  collectStyleReflowDimensions,
+  collectTextReflowDimensions,
+  reflowAfterStyleChange,
+  reflowAfterTextChange,
+} from '../../../../edit_engine/clone_element';
 
 jest.mock('../../../../edit_engine/clone_element', () => ({
   reflowAfterStyleChange: jest.fn(),
@@ -171,7 +177,7 @@ describe('useModalChangeHandlers', () => {
       expect(draftResult.current.state.canUndo).toBe(false);
     });
 
-    it('should compensate width and height when padding changes on border-box element', () => {
+    it('should not synthesize width and height edits when padding changes on border-box element', () => {
       const { result: draftResult } = renderHook(() => useDraftHistory());
       const args = createArgs();
       const cloneEl = args.elementMapRef.current.get(args.selectedElement!)! as HTMLElement;
@@ -185,15 +191,13 @@ describe('useModalChangeHandlers', () => {
 
       const allEdits = Array.from(draftResult.current.edits.values()).flat();
       const styleEdits = allEdits.filter((e) => e.type === 'style');
+      const paddingEdit = styleEdits.find((e) => e.property === 'padding');
       const widthEdit = styleEdits.find((e) => e.property === 'width');
       const heightEdit = styleEdits.find((e) => e.property === 'height');
 
-      expect(widthEdit).toBeDefined();
-      expect(heightEdit).toBeDefined();
-      // padding 10→20 = delta 10*2 = 20; width 100+20 = 120
-      expect(widthEdit!.after).toBe('120px');
-      // height 50+20 = 70
-      expect(heightEdit!.after).toBe('70px');
+      expect(paddingEdit).toBeDefined();
+      expect(widthEdit).toBeUndefined();
+      expect(heightEdit).toBeUndefined();
     });
 
     it('should not compensate width/height when padding changes on content-box element', () => {
@@ -215,6 +219,26 @@ describe('useModalChangeHandlers', () => {
 
       expect(widthEdit).toBeUndefined();
       expect(heightEdit).toBeUndefined();
+    });
+
+    it('should use preview wrapper as style reflow root boundary', () => {
+      jest.clearAllMocks();
+      const { result: draftResult } = renderHook(() => useDraftHistory());
+      const args = createArgs();
+      const selected = args.selectedElement as HTMLElement;
+      const cloneEl = args.elementMapRef.current.get(selected) as HTMLElement;
+      const wrapper = document.createElement('div');
+      wrapper.appendChild(cloneEl);
+      args.cloneRef.current = wrapper;
+
+      const { result } = renderHook(() =>
+        useModalChangeHandlers({ ...args, draft: draftResult.current })
+      );
+
+      act(() => result.current.handleDimensionChange('padding', '20px'));
+
+      expect(collectStyleReflowDimensions).toHaveBeenCalledWith(cloneEl, 'padding', wrapper);
+      expect(reflowAfterStyleChange).toHaveBeenCalledWith(cloneEl, 'padding', wrapper);
     });
   });
 
@@ -286,6 +310,29 @@ describe('useModalChangeHandlers', () => {
       act(() => result.current.handleTextNodeChange(99, { text: 'world' }));
 
       expect(draftResult.current.state.canUndo).toBe(false);
+    });
+
+    it('should use inner clone root as text reflow root boundary', () => {
+      jest.clearAllMocks();
+      const { result: draftResult } = renderHook(() => useDraftHistory());
+      const args = createArgs();
+      const wrapper = document.createElement('div');
+      const selected = args.selectedElement as HTMLElement;
+      const cloneEl = args.elementMapRef.current.get(selected) as HTMLElement;
+      wrapper.appendChild(cloneEl);
+      args.cloneRef.current = wrapper;
+
+      const cloneTextNode = args.textNodeMap.current[0].clone;
+      const textParent = cloneTextNode.parentElement as HTMLElement;
+
+      const { result } = renderHook(() =>
+        useModalChangeHandlers({ ...args, draft: draftResult.current })
+      );
+
+      act(() => result.current.handleTextNodeChange(0, { text: 'world' }));
+
+      expect(collectTextReflowDimensions).toHaveBeenCalledWith(textParent, cloneEl);
+      expect(reflowAfterTextChange).toHaveBeenCalledWith(textParent, cloneEl);
     });
   });
 
