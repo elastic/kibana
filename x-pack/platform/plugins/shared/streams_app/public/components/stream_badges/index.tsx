@@ -297,7 +297,7 @@ export function DiscoverBadgeButton({ spellOut = false, ...linkProps }: Discover
 
   const ariaLabel = i18n.translate(
     'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
-    { defaultMessage: 'Open in Discover' }
+    { defaultMessage: 'View in Discover' }
   );
 
   return spellOut ? (

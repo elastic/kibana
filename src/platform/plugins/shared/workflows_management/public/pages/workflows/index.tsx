@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { AppHeader as PageHeader } from '@kbn/app-header';
+import { AppHeaderWithFallback as PageHeader } from '@kbn/app-header';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

@@ -10,8 +10,8 @@ import type { EuiPageSectionProps } from '@elastic/eui';
 import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { css as emotionCss } from '@emotion/react';
-import type { AppHeaderProps } from '@kbn/app-header';
-import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderWithFallbackProps } from '@kbn/app-header';
+import { AppHeaderWithFallback } from '@kbn/app-header';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
   return (
@@ -28,11 +28,11 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
   );
 }
 
-export const StreamsAppHeader = ({ fallback, ...props }: AppHeaderProps) => {
+export const StreamsAppHeader = ({ fallback, ...props }: AppHeaderWithFallbackProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <AppHeader
+    <AppHeaderWithFallback
       fallback={
         fallback === null
           ? null

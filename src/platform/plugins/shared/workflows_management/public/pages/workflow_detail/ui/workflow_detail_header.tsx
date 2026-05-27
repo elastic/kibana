@@ -37,7 +37,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import type { AppHeaderBadge } from '@kbn/app-header';
-import { AppHeader as PageHeader } from '@kbn/app-header';
+import { AppHeaderWithFallback as PageHeader } from '@kbn/app-header';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
