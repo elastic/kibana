@@ -234,7 +234,7 @@ export const buildEpisodesKpisQuery = (
     .pipe(`EVAL _assigned_to_me = CASE(last_assignee_uid == ${escapeStringValue(currentUserUid)}, 1, 0)`)
     .pipe`EVAL _is_unassigned  = CASE(last_assignee_uid IS NULL, 1, 0)`
     .pipe`EVAL _is_acked       = CASE(last_ack_action == "ack", 1, 0)`
-    .pipe`EVAL _is_snoozed     = CASE(last_snooze_action == "snooze" AND snooze_expiry IS NOT NULL, 1, 0)`
+    .pipe`EVAL _is_snoozed     = CASE(last_snooze_action == "snooze" AND (snooze_expiry IS NULL OR TO_DATETIME(snooze_expiry) > NOW()), 1, 0)`
     .pipe`STATS
       alerts_count   = COUNT(*),
       firing_rules   = COUNT_DISTINCT(_active_rule_id),

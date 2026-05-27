@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiCallOut, EuiTitle } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
@@ -18,6 +18,7 @@ import {
   EPISODES_KPIS_ALERTS_PANEL_TITLE,
   EPISODES_KPIS_ASSIGNED_TO_ME,
   EPISODES_KPIS_ERROR,
+  EPISODES_KPIS_ERROR_TITLE,
   EPISODES_KPIS_FIRING_RULES,
   EPISODES_KPIS_SNOOZED,
   EPISODES_KPIS_UNASSIGNED_ALERTS,
@@ -34,9 +35,16 @@ export const EpisodesKpis = ({ services, filterState, timeRange }: EpisodesKpisP
 
   if (isError) {
     return (
-      <EuiText color="danger" size="s">
-        <p>{EPISODES_KPIS_ERROR}</p>
-      </EuiText>
+      <EuiPanel hasBorder>
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          title={EPISODES_KPIS_ERROR_TITLE}
+          iconType="error"
+        >
+          {EPISODES_KPIS_ERROR}
+        </EuiCallOut>
+      </EuiPanel>
     );
   }
 

@@ -173,6 +173,13 @@ export const EPISODES_KPIS_SNOOZED = i18n.translate('xpack.alertingV2.episodes.k
   defaultMessage: 'Snoozed',
 });
 
+export const EPISODES_KPIS_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.kpis.errorTitle',
+  {
+    defaultMessage: 'Unable to load alert statistics',
+  }
+);
+
 export const EPISODES_KPIS_ERROR = i18n.translate('xpack.alertingV2.episodes.kpis.error', {
-  defaultMessage: 'Failed to load stats.',
+  defaultMessage: 'An error occurred while fetching the alert statistics. Try refreshing the page.',
 });

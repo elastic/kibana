@@ -33,6 +33,7 @@ import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
 import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import { queryKeys } from '@kbn/alerting-v2-episodes-ui/query_keys';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
@@ -181,7 +182,7 @@ export const AlertEpisodesListPage = () => {
   // Refresh the list and the KPIs (used for both the Refresh button and action callbacks).
   const onRefresh = useCallback(() => {
     refetch();
-    queryClient.invalidateQueries({ queryKey: ['episodesKpis'] });
+    queryClient.invalidateQueries({ queryKey: queryKeys.kpisAll() });
   }, [refetch, queryClient]);
 
   // Refresh the list and the KPIs after any action that mutates episode state.

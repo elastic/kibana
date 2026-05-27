@@ -13,6 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { useSpaceId } from './use_space_id';
 import { buildEpisodesKpisQuery, type EpisodesFilterState } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { queryKeys } from '../query_keys';
 
 export interface EpisodesKpisData {
   alertsCount: number;
@@ -56,7 +57,7 @@ export const useEpisodesKpisQuery = ({
   const spaceId = useSpaceId(services.spaces);
 
   const { data: currentUser, isLoading: isCurrentUserLoading } = useQuery({
-    queryKey: ['episodesKpisCurrentUser'],
+    queryKey: queryKeys.kpisCurrentUser(),
     queryFn: () => services.userProfile.getCurrent(),
     staleTime: Infinity,
   });
@@ -68,7 +69,7 @@ export const useEpisodesKpisQuery = ({
     isLoading: isKpisLoading,
     error,
   } = useQuery<EpisodesKpisData | undefined, Error>({
-    queryKey: ['episodesKpis', spaceId, filterState, timeRange, currentUserUid],
+    queryKey: queryKeys.kpis(spaceId, filterState, timeRange, currentUserUid),
     queryFn: async ({ signal }) => {
       if (!currentUserUid) return undefined; // enabled: !!currentUserUid guards this
       const query = buildEpisodesKpisQuery(spaceId, currentUserUid, filterState);

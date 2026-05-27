@@ -346,10 +346,15 @@ describe('buildEpisodesKpisQuery', () => {
     expect(output).toContain('last_ack_action == "ack"');
   });
 
-  it('checks last_snooze_action and snooze_expiry for snoozed', () => {
+  it('counts indefinitely snoozed episodes (snooze_expiry IS NULL) as snoozed', () => {
     const output = buildEpisodesKpisQuery(SPACE, UID);
     expect(output).toContain('last_snooze_action == "snooze"');
-    expect(output).toContain('snooze_expiry IS NOT NULL');
+    expect(output).toContain('snooze_expiry IS NULL');
+  });
+
+  it('excludes expired snoozes (snooze_expiry in the past) from the snoozed count', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('TO_DATETIME(snooze_expiry) > NOW()');
   });
 
   it('applies queryString filter when provided', () => {
