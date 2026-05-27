@@ -30,6 +30,15 @@ import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { useFeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/use_featured_items';
 
+const customTitles: Record<string, string> = {
+  addLensPanelAction: i18n.translate('dashboard.emptyScreen.createVisualizationTitle', {
+    defaultMessage: 'Create visualization',
+  }),
+  ACTION_CREATE_ESQL_CHART: i18n.translate('dashboard.emptyScreen.createEsqlVisualizationTitle', {
+    defaultMessage: 'Create visualization (query)',
+  })
+}
+
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
     return getDashboardCapabilities();
@@ -106,7 +115,7 @@ export function DashboardEmptyScreen() {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="s">
-                      <strong>{item.name}</strong>
+                      <strong>{customTitles[item.id] ?? item.name}</strong>
                     </EuiText>
                     <EuiText size="xs" color="subdued">
                       {item.description}
