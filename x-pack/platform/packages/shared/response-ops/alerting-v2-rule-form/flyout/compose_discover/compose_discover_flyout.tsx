@@ -535,12 +535,14 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
               responsive={false}
               style={{ marginTop: 8 }}
             >
-              <EuiFlexItem grow>
-                {uiState.yamlMode ? (
+              {uiState.yamlMode ? (
+                <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
                     {YAML_MODE_BADGE_LABEL}
                   </EuiBadge>
-                ) : (
+                </EuiFlexItem>
+              ) : (
+                <EuiFlexItem grow>
                   <HorizontalMinimalStepper
                     steps={steps.map(
                       (s, i): MinimalStep => ({
@@ -549,8 +551,8 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                       })
                     )}
                   />
-                )}
-              </EuiFlexItem>
+                </EuiFlexItem>
+              )}
               {!isBuilderMode && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonGroup
