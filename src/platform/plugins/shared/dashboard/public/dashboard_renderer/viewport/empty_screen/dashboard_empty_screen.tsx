@@ -36,8 +36,8 @@ const customTitles: Record<string, string> = {
   }),
   ACTION_CREATE_ESQL_CHART: i18n.translate('dashboard.emptyScreen.createEsqlVisualizationTitle', {
     defaultMessage: 'Create visualization (query)',
-  })
-}
+  }),
+};
 
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
