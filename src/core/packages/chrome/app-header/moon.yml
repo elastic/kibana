@@ -24,15 +24,20 @@ dependsOn:
   - '@kbn/core-mount-utils-browser'
   - '@kbn/i18n'
   - '@kbn/use-observable'
+  - '@kbn/core-chrome-browser-internal-types'
+  - '@kbn/core-chrome-browser-mocks'
 tags:
   - shared-browser
   - package
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

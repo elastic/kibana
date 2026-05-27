@@ -20,35 +20,27 @@ const AppMenuComponent = lazy(async () => {
 
 export interface AppMenuProps {
   menu?: AppMenuConfig;
-  hasExplicitShare?: boolean;
   docLink?: string;
   showAddIntegrations?: boolean;
 }
 
-export const AppMenu = React.memo<AppMenuProps>(
-  ({ menu, hasExplicitShare, docLink, showAddIntegrations }) => {
-    const { config, staticItems } = useAppHeaderMenu(
-      menu,
-      !!hasExplicitShare,
-      docLink,
-      showAddIntegrations
+export const AppMenu = React.memo<AppMenuProps>(({ menu, docLink, showAddIntegrations }) => {
+  const { config, staticItems } = useAppHeaderMenu(menu, docLink, showAddIntegrations);
+  const hasLegacyActionMenu = useHasLegacyActionMenu();
+
+  if (config || staticItems?.length) {
+    return (
+      <Suspense>
+        <AppMenuComponent config={config} staticItems={staticItems} />
+      </Suspense>
     );
-    const hasLegacyActionMenu = useHasLegacyActionMenu();
-
-    if (config || staticItems?.length) {
-      return (
-        <Suspense>
-          <AppMenuComponent config={config} staticItems={staticItems} />
-        </Suspense>
-      );
-    }
-
-    if (hasLegacyActionMenu) {
-      return <LegacyHeaderActionMenu />;
-    }
-
-    return null;
   }
-);
+
+  if (hasLegacyActionMenu) {
+    return <LegacyHeaderActionMenu />;
+  }
+
+  return null;
+});
 
 AppMenu.displayName = 'AppMenu';

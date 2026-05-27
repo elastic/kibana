@@ -1019,6 +1019,7 @@ x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana @elastic
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-ai-tools-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
+x-pack/platform/packages/shared/kbn-apm-common @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-change-history @elastic/security-detection-rule-management
 x-pack/platform/packages/shared/kbn-classic-stream-flyout @elastic/kibana-management
@@ -1037,6 +1038,7 @@ x-pack/platform/packages/shared/kbn-evals-common @elastic/obs-ai-team @elastic/s
 x-pack/platform/packages/shared/kbn-evals-extensions @elastic/obs-ai-team @elastic/security-genai-research-and-development
 x-pack/platform/packages/shared/kbn-evals-phoenix-executor @elastic/obs-ai-team
 x-pack/platform/packages/shared/kbn-evals-suite-significant-events @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests @elastic/obs-ai-team
 x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
@@ -1134,6 +1136,7 @@ x-pack/platform/plugins/private/logstash @elastic/logstash
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
 x-pack/platform/plugins/private/observability_ai_assistant_management @elastic/obs-ai-team
+x-pack/platform/plugins/private/otel_telemetry_collection @elastic/observability-bi
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
 x-pack/platform/plugins/private/product_intercept @elastic/appex-sharedux
 x-pack/platform/plugins/private/reindex_service @elastic/kibana-management
@@ -1468,7 +1471,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-data-discovery
 /x-pack/platform/test/api_integration/apis/search @elastic/kibana-data-discovery
 /x-pack/platform/test/examples/search_examples @elastic/kibana-data-discovery
-/x-pack/platform/test/functional/apps/data_views @elastic/kibana-data-discovery
 /x-pack/platform/test/functional/apps/discover @elastic/kibana-data-discovery
 /x-pack/platform/test/functional/apps/saved_query_management @elastic/kibana-data-discovery
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/discover @elastic/kibana-data-discovery
@@ -2862,6 +2864,9 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-reproduce @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
@@ -3237,16 +3242,23 @@ x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics @elastic/contextual-security-apps @elastic/security-entity-analytics
 
 ## Security Solution sub teams - Entity Resolution (contextual-security-apps co-ownership)
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_resolution @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_resolution_file_uploader @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_resolution @elastic/contextual-security-apps @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/common/entity_analytics/entity_store/resolution_csv_upload.ts @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_resolution @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_resolution @elastic/contextual-security-apps
+
+## Security Solution sub teams - entity_analytics test tree per-feature overrides
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store @elastic/core-analysis
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_flyout.cy.ts @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_flyout @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_analytics_home/entity_analytics_home_page.cy.ts @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_analytics_home/entities_table.cy.ts @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_analytics_home/entities_table_grouping.cy.ts @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_analytics/entity_analytics_home.ts @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_analytics/entity_flyout_resolution.ts @elastic/contextual-security-apps
 
 ## Security Solution sub teams - GenAI
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai @elastic/security-threat-hunting
@@ -3453,6 +3465,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.agents/skills/scout-create-scaffold/** @elastic/appex-qa
 /.agents/skills/scout-migrate-from-ftr/** @elastic/appex-qa
 /.agents/skills/scout-ui-testing/** @elastic/appex-qa
+/.agents/skills/flaky-test-investigator/** @elastic/appex-qa
 /.agents/skills/enzyme-to-rtl/** @elastic/appex-qa
 /.agents/skills/evals-create-suite/** @elastic/obs-ai-team @elastic/security-genai-research-and-development
 /.agents/skills/evals-write-spec/** @elastic/obs-ai-team @elastic/security-genai-research-and-development
@@ -3494,6 +3507,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/scripts/steps/checks/capture_oas_snapshot.sh @elastic/kibana-core
 /.buildkite/scripts/steps/checks/notify_api_contract_owners.ts @elastic/kibana-core
 /.buildkite/scripts/steps/checks/notify_api_contract_owners.test.ts @elastic/kibana-core
+/.buildkite/scripts/steps/checks/unused_deps.sh @elastic/kibana-security
 /.buildkite/pipelines/performance/streams_weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-otel-semconv-sync.yml @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-streams-performance-weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team
@@ -3523,6 +3537,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 
 /.mise.toml @elastic/kibana-operations
+
+/knip.jsonc @elastic/kibana-security
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

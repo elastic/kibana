@@ -29,6 +29,8 @@ const legacyBadgeToHeaderBadge = (badge: ChromeBadge): AppHeaderBadge => ({
 export function useResolvedBadges(
   propBadges: AppHeaderBadge[] | undefined
 ): AppHeaderBadge[] | undefined {
+  // Explicit app-header badges win. When they are not provided, Chrome Next
+  // falls back to legacy badge streams so unmigrated routes keep their badges.
   const chrome = useChromeService();
   const breadcrumbsBadges$ = useMemo(() => chrome.getBreadcrumbsBadges$(), [chrome]);
   const breadcrumbsBadges = useObservable(breadcrumbsBadges$, []);

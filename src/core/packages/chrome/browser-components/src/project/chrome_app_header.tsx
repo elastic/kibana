@@ -7,16 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState, useLayoutEffect } from 'react';
-import type { ChromeBreadcrumb, AppHeaderConfig } from '@kbn/core-chrome-browser';
+import React, { Suspense, useMemo, useState, useLayoutEffect } from 'react';
+import type { ChromeBreadcrumb, AppHeaderBack, AppHeaderConfig } from '@kbn/core-chrome-browser';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
-import type { AppHeaderBack } from '@kbn/app-header';
 
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { AppHeaderView } from '@kbn/app-header';
 import { useLayoutUpdate } from '@kbn/ui-chrome-layout';
 import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
+
+const AppHeaderViewLazy = React.lazy(async () => {
+  const { AppHeaderView } = await import('@kbn/app-header');
+  return { default: AppHeaderView };
+});
 
 function getBreadcrumbText(crumb: ChromeBreadcrumb): string | undefined {
   if (typeof crumb.text === 'string') return crumb.text;
@@ -40,6 +43,10 @@ function useFallbackProps(): FallbackProps {
   const appMenu = useObservable(appMenu$, undefined);
 
   const hasLegacyActionMenu = useHasLegacyActionMenu();
+  const legacyBadge$ = useMemo(() => chrome.getBadge$(), [chrome]);
+  const legacyBadge = useObservable(legacyBadge$, undefined);
+  const breadcrumbsBadges$ = useMemo(() => chrome.getBreadcrumbsBadges$(), [chrome]);
+  const breadcrumbsBadges = useObservable(breadcrumbsBadges$, []);
 
   return useMemo(() => {
     const backTargets: AppHeaderBack[] = [];
@@ -56,14 +63,15 @@ function useFallbackProps(): FallbackProps {
 
     const hasBack = backTargets.length > 0;
     const hasMenu = !!appMenu?.items?.length;
-    const hasContent = hasBack || hasMenu || hasLegacyActionMenu;
+    const hasBadges = !!legacyBadge || breadcrumbsBadges.length > 0;
+    const hasContent = hasBack || hasMenu || hasBadges || hasLegacyActionMenu;
 
     return {
       hasContent,
       back: hasBack ? backTargets : undefined,
       menu: hasMenu ? appMenu : undefined,
     };
-  }, [breadcrumbs, appMenu, hasLegacyActionMenu]);
+  }, [breadcrumbs, appMenu, legacyBadge, breadcrumbsBadges, hasLegacyActionMenu]);
 }
 
 function useAppHeaderConfig(): AppHeaderConfig | undefined {
@@ -72,21 +80,15 @@ function useAppHeaderConfig(): AppHeaderConfig | undefined {
   return useObservable(config$, undefined);
 }
 
-function normalizeAppHeaderBack(
-  back: string | AppHeaderBack | undefined
-): AppHeaderBack | undefined {
-  if (typeof back === 'string') return { href: back };
-  return back;
-}
-
 function hasExplicitAppHeaderContent(config: AppHeaderConfig | undefined): boolean {
   if (!config) return false;
   return (
     config.title !== undefined ||
-    normalizeAppHeaderBack(config.back) !== undefined ||
+    config.back !== undefined ||
     !!config.tabs?.length ||
     !!config.badges?.length ||
-    !!config.menu?.items?.length
+    !!config.menu?.items?.length ||
+    !!config.favorite
   );
 }
 
@@ -121,7 +123,6 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
   const config = useAppHeaderConfig();
   const fallback = useFallbackProps();
 
-  const back = normalizeAppHeaderBack(config?.back);
   const hasContent = hasExplicitAppHeaderContent(config) || fallback.hasContent;
   const measureRef = useMeasuredAppHeaderHeight();
 
@@ -129,17 +130,18 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
 
   return (
     <div ref={measureRef}>
-      <AppHeaderView
-        title={config?.title}
-        back={back ?? fallback.back}
-        tabs={config?.tabs}
-        badges={config?.badges}
-        menu={config?.menu ?? fallback.menu}
-        onShare={config?.onShare}
-        favorite={config?.favorite}
-        sticky={false}
-        padding="m"
-      />
+      <Suspense fallback={null}>
+        <AppHeaderViewLazy
+          title={config?.title}
+          back={config?.back ?? fallback.back}
+          tabs={config?.tabs}
+          badges={config?.badges}
+          menu={config?.menu ?? fallback.menu}
+          favorite={config?.favorite}
+          sticky={false}
+          padding="m"
+        />
+      </Suspense>
     </div>
   );
 });

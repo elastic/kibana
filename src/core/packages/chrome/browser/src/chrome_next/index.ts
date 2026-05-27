@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ChromeNextAiButton } from './ai_button';
 export type {
-  ChromeNext,
-  AppHeaderConfig,
   AppHeaderBack,
   AppHeaderBadge,
   AppHeaderBadgeItem,
+  AppHeaderConfig,
   AppHeaderTab,
+  ChromeNext,
 } from './chrome_next';
+export type { ChromeNextAiButton } from './ai_button';
 export type { GlobalSearchConfig } from './global_search';

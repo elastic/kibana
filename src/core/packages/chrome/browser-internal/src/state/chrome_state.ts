@@ -19,8 +19,8 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   GlobalSearchConfig,
-  ChromeNavLink,
   ChromeNextAiButton,
+  ChromeNavLink,
   ChromeUserBanner,
   AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
@@ -65,12 +65,14 @@ export interface ChromeState {
   /** UI elements */
   headerBanner: State<ChromeUserBanner | undefined>;
   globalFooter: State<ReactNode>;
-  globalSearch: State<GlobalSearchConfig | undefined>;
-  customNavLink: State<ChromeNavLink | undefined>;
-  appMenu: State<AppMenuConfig | undefined>;
   aiButton: State<ReadonlySet<ChromeNextAiButton>>;
+  globalSearch: State<GlobalSearchConfig | undefined>;
   userMenu: State<ReactNode>;
   contextSwitcher: State<ReactNode>;
+  customNavLink: State<ChromeNavLink | undefined>;
+  appMenu: State<AppMenuConfig | undefined>;
+  inlineAppHeader: State<boolean>;
+  appHeader: State<AppHeaderConfig | undefined>;
 
   /** Help system */
   help: {
@@ -87,10 +89,6 @@ export interface ChromeState {
 
   /** Newsfeed handler registered by the newsfeed plugin */
   newsfeedHandler: State<{ open: () => void; hasNew$: Observable<boolean> } | undefined>;
-
-  /** Whether an inline AppHeader is currently mounted by the active app */
-  inlineAppHeader: State<boolean>;
-  appHeader: State<AppHeaderConfig | undefined>;
 }
 
 export interface ChromeStateDeps {
@@ -132,6 +130,8 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const userMenu = createState<ReactNode>(null);
   const contextSwitcher = createState<ReactNode>(null);
   const customNavLink = createState<ChromeNavLink | undefined>(undefined);
+  const inlineAppHeader = createState<boolean>(false);
+  const appHeader = createState<AppHeaderConfig | undefined>(undefined);
 
   // Help System
   const helpExtension = createState<ChromeHelpExtension | undefined>(undefined);
@@ -148,12 +148,6 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
   const newsfeedHandler = createState<
     { open: () => void; hasNew$: Observable<boolean> } | undefined
   >(undefined);
-
-  // Inline AppHeader presence (managed by @kbn/app-header)
-  const inlineAppHeader = createState<boolean>(false);
-
-  // App header config (managed by chrome.next.appHeader.set)
-  const appHeader = createState<AppHeaderConfig | undefined>(undefined);
 
   return {
     visibility,
@@ -177,6 +171,8 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     contextSwitcher,
     customNavLink,
     appMenu,
+    inlineAppHeader,
+    appHeader,
     help: {
       extension: helpExtension,
       supportUrl: helpSupportUrl,
@@ -185,7 +181,5 @@ export function createChromeState({ application, docLinks }: ChromeStateDeps): C
     appDocumentationLink,
     feedbackHandler,
     newsfeedHandler,
-    inlineAppHeader,
-    appHeader,
   };
 }

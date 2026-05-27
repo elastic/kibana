@@ -20,6 +20,10 @@ export interface BackNavigation {
 
 const EMPTY: BackNavigation[] = [];
 
+const hasBasePathPrefix = (href: string, basePath: string): boolean => {
+  return href === basePath || href.startsWith(`${basePath}/`);
+};
+
 export function useBackNavTargets(
   back: AppHeaderBack | AppHeaderBack[] | undefined
 ): BackNavigation[] {
@@ -32,11 +36,24 @@ export function useBackNavTargets(
     const backItems = Array.isArray(back) ? back : [back];
     const base = basePath.get();
     const explicit: BackNavigation[] = [];
+    const seenHrefs = new Set<string>();
     for (const b of backItems) {
-      if (b.href?.trim()) {
-        const href = base && b.href.startsWith(base) ? b.href : basePath.prepend(b.href);
-        explicit.push({ backHref: href, backOnClick: b.onClick, backDestinationLabel: b.label });
+      const target = typeof b === 'string' ? { href: b } : b;
+      const targetHref = target.href?.trim();
+      if (!targetHref) {
+        continue;
       }
+      const href =
+        base && hasBasePathPrefix(targetHref, base) ? targetHref : basePath.prepend(targetHref);
+      if (seenHrefs.has(href)) {
+        continue;
+      }
+      seenHrefs.add(href);
+      explicit.push({
+        backHref: href,
+        backOnClick: target.onClick,
+        backDestinationLabel: target.label,
+      });
     }
     return explicit.length > 0 ? explicit : EMPTY;
   }, [back, basePath]);

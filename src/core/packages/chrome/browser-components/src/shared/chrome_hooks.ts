@@ -9,10 +9,13 @@
 
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
+import { combineLatest, debounceTime, map } from 'rxjs';
 import type { Observable } from 'rxjs';
-import { debounceTime, map } from 'rxjs';
 import type {
   ChromeBreadcrumb,
+  ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpExtension,
+  ChromeHelpMenuLink,
   ChromeNavControl,
   ChromeNavLink,
   GlobalSearchConfig,
@@ -153,6 +156,46 @@ export function useNavControls(position: NavControlPosition): ChromeNavControl[]
   return useObservable(controls$, []);
 }
 
+interface HelpMenuState {
+  menuLinks: ChromeHelpMenuLink[];
+  extension: ChromeHelpExtension | undefined;
+  supportUrl: string;
+  globalExtensionMenuLinks: ChromeGlobalHelpExtensionMenuLink[];
+}
+
+const INITIAL_HELP_MENU: HelpMenuState = {
+  menuLinks: [],
+  extension: undefined,
+  supportUrl: '',
+  globalExtensionMenuLinks: [],
+};
+
+/**
+ * Returns all help menu state as a single object (single subscription).
+ * Used by `HeaderHelpMenu` (instantiated from both classic and project headers).
+ */
+export function useHelpMenu(): HelpMenuState {
+  const chrome = useChromeService();
+  const helpMenu$ = useMemo(
+    () =>
+      combineLatest([
+        chrome.getHelpMenuLinks$(),
+        chrome.getHelpExtension$(),
+        chrome.getHelpSupportUrl$(),
+        chrome.getGlobalHelpExtensionMenuLinks$(),
+      ]).pipe(
+        map(([menuLinks, extension, supportUrl, globalExtensionMenuLinks]) => ({
+          menuLinks,
+          extension,
+          supportUrl,
+          globalExtensionMenuLinks,
+        }))
+      ),
+    [chrome]
+  );
+  return useObservable(helpMenu$, INITIAL_HELP_MENU);
+}
+
 /**
  * Returns the current side nav collapsed state and a toggle callback.
  * Used by `GridLayoutProjectSideNav`.
@@ -279,12 +322,6 @@ export function useHasInlineAppHeader(): boolean {
   const inlineAppHeader$ = useMemo(() => chrome.next.inlineAppHeader.get$(), [chrome]);
   return useObservable(inlineAppHeader$, false);
 }
-
-// ---------------------------------------------------------------------------
-// Internal hooks: read from useChromeService().componentDeps instead of
-// useChromeComponentsDeps(). These work in any React tree that has
-// ChromeServiceProvider (including management section apps).
-// ---------------------------------------------------------------------------
 
 export function useInternalBasePath(): IBasePath {
   return useChromeService().componentDeps.basePath;

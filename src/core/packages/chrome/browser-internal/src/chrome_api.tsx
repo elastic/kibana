@@ -8,13 +8,14 @@
  */
 
 import React, { type ReactNode } from 'react';
-import { type Observable, distinctUntilChanged, map, shareReplay } from 'rxjs';
-import type { ChromeNextAiButton, AppHeaderConfig } from '@kbn/core-chrome-browser';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import { distinctUntilChanged, map, shareReplay } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { RecentlyAccessedService } from '@kbn/recently-accessed';
+import type { AppHeaderConfig, ChromeNextAiButton } from '@kbn/core-chrome-browser';
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import type { InternalChromeStart } from './types';
 import type { ChromeState } from './state/chrome_state';
@@ -61,8 +62,6 @@ export function createChromeApi({
     }
   };
 
-  let appHeaderRegistrationId = 0;
-
   const hasHeaderBanner$ = state.headerBanner.$.pipe(
     map((banner) => Boolean(banner)),
     distinctUntilChanged(),
@@ -82,6 +81,8 @@ export function createChromeApi({
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
     getProjectHome$: () => projectNavigation.getProjectHome$(),
   };
+
+  let appHeaderRegistrationId = 0;
 
   const chromeStart: InternalChromeStart = {
     componentDeps,
@@ -149,8 +150,6 @@ export function createChromeApi({
     registerGlobalHelpExtensionMenuLink: (link) => state.help.globalMenuLinks.add(link),
     getHelpMenuLinks$: () => services.navControls.getHelpMenuLinks$(),
     setHelpMenuLinks: services.navControls.setHelpMenuLinks,
-    registerAppDocumentationLink: state.appDocumentationLink.set,
-    getAppDocumentationLink$: () => state.appDocumentationLink.$,
 
     // Custom Nav Link
     getCustomNavLink$: () => state.customNavLink.$,
@@ -230,8 +229,8 @@ export function createChromeApi({
         },
       },
     },
-    sidebar,
-
+    registerAppDocumentationLink: state.appDocumentationLink.set,
+    getAppDocumentationLink$: () => state.appDocumentationLink.$,
     registerFeedbackHandler: (handler: () => void) => {
       state.feedbackHandler.set(handler);
       return () => {
@@ -239,7 +238,6 @@ export function createChromeApi({
       };
     },
     getFeedbackHandler$: () => state.feedbackHandler.$,
-
     registerNewsfeedHandler: (handler: { open: () => void; hasNew$: Observable<boolean> }) => {
       state.newsfeedHandler.set(handler);
       return () => {
@@ -247,6 +245,7 @@ export function createChromeApi({
       };
     },
     getNewsfeedHandler$: () => state.newsfeedHandler.$,
+    sidebar,
   };
 
   return chromeStart;

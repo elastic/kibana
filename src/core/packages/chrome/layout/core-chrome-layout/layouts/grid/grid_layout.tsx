@@ -9,22 +9,22 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import type { ChromeLayoutConfig, ChromeStyle } from '@kbn/ui-chrome-layout';
+import type { ChromeLayoutConfig } from '@kbn/ui-chrome-layout';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/ui-chrome-layout';
 import {
   ChromeComponentsProvider,
   ClassicHeader,
   ChromeNextGlobalHeader,
+  ChromeAppHeaderRenderer,
   ProjectHeader,
   GridLayoutProjectSideNav,
   HeaderTopBanner,
   ChromelessHeader,
   AppMenuBar,
-  ChromeAppHeaderRenderer,
   Sidebar,
   useHasAppMenu,
-  useHasInlineAppHeader,
   useHasChromeAppHeaderContent,
+  useHasInlineAppHeader,
 } from '@kbn/core-chrome-browser-components';
 import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import {
@@ -80,68 +80,6 @@ const layoutConfigs: {
   },
 };
 
-interface ChromeSlots {
-  chromeVisible: boolean;
-  chromeStyle: ChromeStyle;
-  layoutConfig: ChromeLayoutConfig;
-  footer: ReactNode;
-  header?: ReactNode;
-  navigation?: ReactNode;
-  banner?: ReactNode;
-  applicationTopBar?: ReactNode;
-}
-
-const useChromeSlots = (nextChrome: boolean): ChromeSlots => {
-  const chromeVisible = useIsChromeVisible();
-  const chromeStyle = useChromeStyle();
-  const hasAppMenu = useHasAppMenu();
-  const hasInlineAppHeader = useHasInlineAppHeader();
-  const hasHeaderBanner = useHasHeaderBanner();
-  const footer = useGlobalFooter();
-  const sidebarWidth = useSidebarWidth();
-  const navigationWidth = useSideNavWidth();
-
-  const layoutConfigKey =
-    chromeStyle === 'classic' ? 'classic' : nextChrome ? 'projectNext' : 'project';
-
-  const hasChromeAppHeaderContent = useHasChromeAppHeaderContent();
-  const needsChromeAppHeader = nextChrome && !hasInlineAppHeader && hasChromeAppHeaderContent;
-
-  const layoutConfig: ChromeLayoutConfig = {
-    ...layoutConfigs[layoutConfigKey],
-    sidebarWidth,
-    navigationWidth,
-  };
-
-  const banner = hasHeaderBanner ? <HeaderTopBanner position="static" /> : undefined;
-
-  const base = { chromeVisible, chromeStyle, layoutConfig, footer, banner };
-
-  if (!chromeVisible) {
-    return base;
-  }
-
-  if (chromeStyle === 'classic') {
-    return { ...base, header: <ClassicHeader /> };
-  }
-
-  if (nextChrome) {
-    return {
-      ...base,
-      header: <ChromeNextGlobalHeader />,
-      navigation: <GridLayoutProjectSideNav />,
-      applicationTopBar: needsChromeAppHeader ? <ChromeAppHeaderRenderer /> : undefined,
-    };
-  }
-
-  return {
-    ...base,
-    header: <ProjectHeader />,
-    navigation: <GridLayoutProjectSideNav />,
-    applicationTopBar: hasAppMenu ? <AppMenuBar /> : undefined,
-  };
-};
-
 /**
  * Service for providing layout component wired to other core services.
  */
@@ -163,20 +101,54 @@ export class GridLayout implements LayoutService {
       http,
       docLinks,
       customBranding,
-      featureFlags,
     };
 
     const GridLayoutContent = React.memo(() => {
-      const {
-        chromeVisible,
-        chromeStyle,
-        layoutConfig,
-        footer,
-        header,
-        navigation,
-        banner,
-        applicationTopBar,
-      } = useChromeSlots(nextChrome);
+      const chromeVisible = useIsChromeVisible();
+      const hasHeaderBanner = useHasHeaderBanner();
+      const chromeStyle = useChromeStyle();
+      const hasAppMenu = useHasAppMenu();
+      const hasInlineAppHeader = useHasInlineAppHeader();
+      const hasChromeAppHeaderContent = useHasChromeAppHeaderContent();
+      const footer = useGlobalFooter();
+      const sidebarWidth = useSidebarWidth();
+      const navigationWidth = useSideNavWidth();
+
+      const layoutConfigKey =
+        chromeStyle === 'classic' ? 'classic' : nextChrome ? 'projectNext' : 'project';
+
+      const layoutConfig = {
+        ...layoutConfigs[layoutConfigKey],
+        sidebarWidth,
+        navigationWidth,
+      };
+
+      // Assign main layout parts first
+      let header: ReactNode;
+      let navigation: ReactNode;
+      let banner: ReactNode;
+      let applicationTopBar: ReactNode;
+
+      if (chromeVisible) {
+        if (chromeStyle === 'classic') {
+          header = <ClassicHeader />;
+        } else {
+          header = nextChrome ? <ChromeNextGlobalHeader /> : <ProjectHeader />;
+          if (nextChrome) {
+            if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
+              applicationTopBar = <ChromeAppHeaderRenderer />;
+            }
+          } else if (hasAppMenu) {
+            applicationTopBar = <AppMenuBar />;
+          }
+
+          navigation = <GridLayoutProjectSideNav />;
+        }
+      }
+
+      if (hasHeaderBanner) {
+        banner = <HeaderTopBanner position="static" />;
+      }
 
       return (
         <>

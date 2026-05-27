@@ -19,7 +19,7 @@ import { AppTabs } from './app_tabs';
 import { TitleArea } from './title_area';
 import { TitleActions } from './title_actions';
 import { AppMenu } from './app_menu';
-import { useShareAction } from './hooks';
+import { useResolvedBadges, useShareAction } from './hooks';
 
 export interface AppHeaderViewProps {
   title?: string;
@@ -27,7 +27,6 @@ export interface AppHeaderViewProps {
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
-  onShare?: () => void;
   favorite?: ReactNode;
   sticky?: boolean;
   padding?: AppHeaderPadding;
@@ -42,7 +41,6 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     tabs,
     badges,
     menu,
-    onShare,
     favorite,
     sticky,
     padding,
@@ -50,13 +48,18 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     showAddIntegrations,
   }) => {
     const hasLegacyActionMenu = useHasLegacyActionMenu();
-    const shareAction = useShareAction(menu, onShare);
+    const shareAction = useShareAction(menu);
+    const resolvedBadges = useResolvedBadges(badges);
     const show =
       title !== undefined ||
       back !== undefined ||
       !!tabs?.length ||
-      !!badges?.length ||
+      !!resolvedBadges?.length ||
       !!menu?.items?.length ||
+      !!shareAction ||
+      !!favorite ||
+      !!docLink ||
+      !!showAddIntegrations ||
       hasLegacyActionMenu;
 
     if (!show) {
@@ -66,15 +69,10 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     return (
       <AppHeaderShell
         title={<TitleArea title={title} back={back} />}
-        badges={<AppBadges badges={badges} />}
+        badges={<AppBadges badges={resolvedBadges} />}
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
         trailing={
-          <AppMenu
-            menu={menu}
-            hasExplicitShare={!!onShare}
-            docLink={docLink}
-            showAddIntegrations={showAddIntegrations}
-          />
+          <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
         }
         tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
         sticky={sticky}
@@ -86,21 +84,18 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
 
 AppHeaderView.displayName = 'AppHeaderView';
 
-export interface AppHeaderProps extends Omit<AppHeaderViewProps, 'back'> {
+export interface AppHeaderProps extends AppHeaderViewProps {
   title: string;
-  back?: string | AppHeaderBack;
 }
 
-export const AppHeader = React.memo<AppHeaderProps>(({ back, ...rest }) => {
+export const AppHeader = React.memo<AppHeaderProps>((props) => {
   const chrome = useChromeService();
   useLayoutEffect(() => {
     chrome.next.inlineAppHeader.set(true);
     return () => chrome.next.inlineAppHeader.set(false);
   }, [chrome]);
 
-  const resolvedBack = typeof back === 'string' ? { href: back } : back;
-
-  return <AppHeaderView {...rest} back={resolvedBack} />;
+  return <AppHeaderView {...props} />;
 });
 
 AppHeader.displayName = 'AppHeader';

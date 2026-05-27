@@ -14,22 +14,22 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
+  AppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumbsBadge,
   ChromeNext,
   ChromeNextAiButton,
-  GlobalSearchConfig,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
+  GlobalSearchConfig,
   AppDeepLinkId,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionId,
-  AppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -37,6 +37,10 @@ export type InternalChromeSetup = ChromeSetup;
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
+  /**
+   * Dependencies used by Chrome-owned React components that live outside
+   * `browser-internal`, but still render under `ChromeServiceProvider`.
+   */
   componentDeps: {
     readonly basePath: IBasePath;
     readonly legacyActionMenu$: Observable<MountPoint | undefined>;

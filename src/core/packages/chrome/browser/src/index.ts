@@ -12,6 +12,15 @@ export type {
   ChromeBreadcrumb,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
+export type {
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderBadgeItem,
+  AppHeaderConfig,
+  AppHeaderTab,
+  ChromeNext,
+  ChromeNextAiButton,
+} from './chrome_next';
 export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
@@ -29,15 +38,6 @@ export type {
   ChromeRecentlyAccessedHistoryItem,
 } from './recently_accessed';
 export type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeUserBanner, ChromeStyle } from './types';
-export type {
-  AppHeaderBack,
-  AppHeaderBadge,
-  AppHeaderBadgeItem,
-  AppHeaderConfig,
-  AppHeaderTab,
-  ChromeNext,
-  ChromeNextAiButton,
-} from './chrome_next';
 
 export type {
   ChromeProjectNavigationNode,

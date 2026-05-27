@@ -37,7 +37,6 @@ export const AppHeaderWithFallback: FC<AppHeaderWithFallbackProps> = ({
   tabs,
   badges,
   menu,
-  onShare,
   favorite,
   fallback,
   sticky,
@@ -78,7 +77,6 @@ export const AppHeaderWithFallback: FC<AppHeaderWithFallbackProps> = ({
       tabs={tabs}
       badges={badges}
       menu={menu}
-      onShare={onShare}
       favorite={favorite}
       sticky={sticky}
       padding={padding}

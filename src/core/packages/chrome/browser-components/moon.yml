@@ -50,8 +50,8 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/use-observable'
   - '@kbn/shared-ux-utility'
-  - '@kbn/app-header'
   - '@kbn/ui-chrome-layout'
+  - '@kbn/app-header'
 tags:
   - shared-browser
   - package

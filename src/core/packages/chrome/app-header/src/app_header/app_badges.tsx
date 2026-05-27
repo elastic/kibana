@@ -13,7 +13,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderBadge } from '../types';
 import { AppBadge } from './app_badge';
-import { useResolvedBadges } from './hooks';
 
 const MAX_VISIBLE_BADGES = 2;
 const OVERFLOW_THRESHOLD = 3;
@@ -38,8 +37,7 @@ export interface AppBadgesProps {
   badges?: AppHeaderBadge[];
 }
 
-export const AppBadges = memo<AppBadgesProps>(({ badges: propBadges }) => {
-  const badges = useResolvedBadges(propBadges);
+export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
   const { badgesContainer } = useBadgesStyle();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 

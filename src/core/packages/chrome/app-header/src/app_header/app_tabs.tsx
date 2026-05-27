@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiNotificationBadge, EuiTab, EuiTabs } from '@elastic/eui';
 import type { AppHeaderTab } from '../types';
 
 export interface AppTabsProps {
@@ -21,7 +21,20 @@ export const AppTabs = React.memo<AppTabsProps>(({ tabs }) => {
   return (
     <EuiTabs size="m" bottomBorder={false}>
       {tabs.map((tab) => (
-        <EuiTab key={tab.id} isSelected={tab.isSelected} onClick={tab.onClick} href={tab.href}>
+        <EuiTab
+          key={tab.id}
+          isSelected={tab.isSelected}
+          onClick={tab.onClick}
+          href={tab.href}
+          data-test-subj={tab['data-test-subj']}
+          append={
+            tab.badge !== undefined ? (
+              <EuiNotificationBadge color="subdued" size="m">
+                {tab.badge}
+              </EuiNotificationBadge>
+            ) : undefined
+          }
+        >
           {tab.label}
         </EuiTab>
       ))}

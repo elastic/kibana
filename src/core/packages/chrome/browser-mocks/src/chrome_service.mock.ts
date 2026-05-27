@@ -13,9 +13,9 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ReactNode } from 'react';
 import type {
+  AppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
-  AppHeaderConfig,
   GlobalSearchConfig,
 } from '@kbn/core-chrome-browser';
 import type {
@@ -36,7 +36,9 @@ const createStartContractMock = () => {
   const nextUserMenuState$ = new BehaviorSubject<ReactNode>(null);
   const nextContextSwitcherState$ = new BehaviorSubject<ReactNode>(null);
   const nextAppHeaderState$ = new BehaviorSubject<AppHeaderConfig | undefined>(undefined);
+  const inlineAppHeaderState$ = new BehaviorSubject(false);
   const appDocumentationLinkState$ = new BehaviorSubject<string | undefined>(undefined);
+  let appHeaderRegistrationId = 0;
 
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
     withProvider: jest.fn((children) => children),
@@ -80,7 +82,7 @@ const createStartContractMock = () => {
     }),
     setIsVisible: jest.fn(),
     getIsVisible$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
-    getBadge$: jest.fn().mockReturnValue(new BehaviorSubject({} as ChromeBadge)),
+    getBadge$: jest.fn().mockReturnValue(new BehaviorSubject<ChromeBadge | undefined>(undefined)),
     setBadge: jest.fn(),
     getBreadcrumbs$: jest.fn().mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb])),
     getBreadcrumbs: jest.fn().mockReturnValue([]),
@@ -95,6 +97,7 @@ const createStartContractMock = () => {
     }),
     getBreadcrumbsAppendExtensions$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     getBreadcrumbsAppendExtensionsWithBadges$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+    getBreadcrumbsBadges$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     setBreadcrumbsAppendExtension: jest.fn(),
     getGlobalHelpExtensionMenuLinks$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     registerGlobalHelpExtensionMenuLink: jest.fn(),
@@ -131,7 +134,9 @@ const createStartContractMock = () => {
         register: jest.fn().mockReturnValue(() => {}),
       }),
       globalSearch: lazyObject({
-        set: jest.fn(),
+        set: jest.fn((config?: GlobalSearchConfig) => {
+          nextGlobalSearchState$.next(config);
+        }),
         get$: jest.fn().mockReturnValue(nextGlobalSearchState$),
       }),
       userMenu: lazyObject({
@@ -147,15 +152,18 @@ const createStartContractMock = () => {
         }),
       }),
       inlineAppHeader: lazyObject({
-        get$: jest.fn().mockReturnValue(new BehaviorSubject(false)),
-        set: jest.fn(),
+        get$: jest.fn().mockReturnValue(inlineAppHeaderState$),
+        set: jest.fn((value: boolean) => inlineAppHeaderState$.next(value)),
       }),
       appHeader: lazyObject({
         get$: jest.fn().mockReturnValue(nextAppHeaderState$),
         set: jest.fn((config: AppHeaderConfig) => {
+          const registrationId = ++appHeaderRegistrationId;
           nextAppHeaderState$.next(config);
           return () => {
-            nextAppHeaderState$.next(undefined);
+            if (registrationId === appHeaderRegistrationId) {
+              nextAppHeaderState$.next(undefined);
+            }
           };
         }),
       }),
@@ -165,7 +173,6 @@ const createStartContractMock = () => {
     getAppMenu$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
     setAppMenu: jest.fn(),
     setBreadcrumbsBadges: jest.fn(),
-    getBreadcrumbsBadges$: jest.fn().mockReturnValue(new BehaviorSubject([])),
     getFeedbackHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
     registerFeedbackHandler: jest.fn().mockReturnValue(() => {}),
     getNewsfeedHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),

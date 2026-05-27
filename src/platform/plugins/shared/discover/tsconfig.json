@@ -79,7 +79,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/shared-ux-markdown",
     "@kbn/data-view-utils",
-    "@kbn/app-header",
     "@kbn/presentation-publishing",
     "@kbn/aiops-log-pattern-analysis",
     "@kbn/elastic-agent-utils",
@@ -144,6 +143,9 @@
     "@kbn/core-http-server-mocks",
     "@kbn/reporting-public",
     "@kbn/core-chrome-feature-flags",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/app-header",
   ],
   "exclude": ["target/**/*"]
 }

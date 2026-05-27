@@ -55,9 +55,19 @@ export interface ResolutionGroup {
   group_size: number;
 }
 
-/** Options forwarded to the underlying bulk write. */
+/** Options controlling how the underlying bulk write behaves. */
 export interface ResolutionWriteOptions {
-  refresh?: RefreshOption;
+  /**
+   * When true, the bulk write blocks until the next index refresh fires
+   * (typically <1s) so a subsequent read of the affected docs is guaranteed
+   * to see the write. Default: false (fire-and-forget; reads may be stale
+   * for ~1s).
+   *
+   * Set to true from interactive request handlers (UI routes) where the
+   * caller will immediately refetch. Leave false for background tasks and
+   * bulk imports.
+   */
+  awaitVisibility?: boolean;
 }
 
 interface FetchedEntities {
@@ -86,7 +96,8 @@ export class ResolutionClient {
     rawEntityIds: string[],
     options: ResolutionWriteOptions = {}
   ): Promise<LinkResult> {
-    const { refresh = 'wait_for' } = options;
+    const { awaitVisibility = false } = options;
+    const refresh: RefreshOption = awaitVisibility ? 'wait_for' : false;
     const index = getLatestEntitiesIndexName(this.namespace);
 
     // 1. Deduplicate entity_ids
@@ -159,7 +170,8 @@ export class ResolutionClient {
     rawEntityIds: string[],
     options: ResolutionWriteOptions = {}
   ): Promise<UnlinkResult> {
-    const { refresh = 'wait_for' } = options;
+    const { awaitVisibility = false } = options;
+    const refresh: RefreshOption = awaitVisibility ? 'wait_for' : false;
     const index = getLatestEntitiesIndexName(this.namespace);
 
     // 1. Deduplicate and fetch all entities

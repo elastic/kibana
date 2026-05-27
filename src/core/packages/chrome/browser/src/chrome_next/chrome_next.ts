@@ -9,12 +9,14 @@
 
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { Observable } from 'rxjs';
 import type { ChromeNextAiButton } from './ai_button';
 import type { GlobalSearchConfig } from './global_search';
 
 /** @public */
-export interface AppHeaderBack {
+export type AppHeaderBack = string | AppHeaderBackTarget;
+
+/** @public */
+export interface AppHeaderBackTarget {
   href: string;
   /** Click handler, called alongside href navigation when provided. */
   onClick?: MouseEventHandler;
@@ -65,11 +67,10 @@ export interface AppHeaderTab {
 /** @public */
 export interface AppHeaderConfig {
   title?: string;
-  back?: string | AppHeaderBack;
+  back?: AppHeaderBack;
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
-  onShare?: () => void;
   favorite?: ReactNode;
 }
 
@@ -77,8 +78,8 @@ export interface AppHeaderConfig {
  * Chrome Next rollout APIs.
  *
  * @remarks
- * This namespace starts with the rollout state and hosts Chrome Next APIs as feature slices land
- * behind the same flag.
+ * This namespace starts with the rollout state and will host additional Chrome Next APIs as
+ * follow-up feature slices land behind the same flag.
  *
  * @public
  */
@@ -103,8 +104,6 @@ export interface ChromeNext {
      * Pass `undefined` to remove. Global — persists across app changes.
      */
     set(config?: GlobalSearchConfig): void;
-    /** Observable of the current global search config. */
-    get$(): Observable<GlobalSearchConfig | undefined>;
   };
   userMenu: {
     /**
@@ -126,11 +125,11 @@ export interface ChromeNext {
   };
   appHeader: {
     /**
-     * Set the app header configuration for the Chrome-Next project header.
+     * Set the app header configuration for the Chrome Next project header.
      * Chrome renders an application top bar with back navigation, title, tabs,
      * badges, menu, share action, and favorite action based on this config.
      * Pass the config to show; the returned callback removes it.
-     * Per-app — cleared on app change.
+     * Per-app, cleared on app change.
      */
     set(config: AppHeaderConfig): () => void;
   };
