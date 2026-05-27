@@ -11,6 +11,7 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import {
   AutoDetectPage,
   KubernetesPage,
@@ -48,6 +49,7 @@ export function ObservabilityOnboardingFlow() {
   useFlowBreadcrumb(null);
 
   useEffect(() => {
+    document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID)?.scrollTo(0, 0);
     window.scrollTo(0, 0);
   }, [pathname]);
 
