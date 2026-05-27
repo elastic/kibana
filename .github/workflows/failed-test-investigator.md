@@ -142,14 +142,18 @@ No other side-effects beyond posting the comment and updating the label.
 Post exactly one comment. Keep the visible portion very short and easy to read:
 
 1. **One-line bold headline** stating the result kind and one identifying detail.
-2. **One short paragraph (2–3 sentences max)**: what broke and where, the most likely root cause.
-3. **Next steps** (5–6 sentences max): the recommended path forward — code fix area, owners to escalate to, skip/delete recommendation, or what evidence would change the conclusion.
+2. **Diagnosis** (≤5 concise bullet points): what broke and where, the most likely root cause.
+3. **Next steps** (≤5 concise bullet points).
 
-Put the full `flaky-test-investigator` skill output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion). It must also include the findings bullets below in this exact order — downstream tooling parses them, so preserve keys, casing, and `` - `key`: value `` shape:
+Put the full `flaky-test-investigator` skill output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion). Use the skill's "Reporting" subsections:
 
-- `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
-- `confidence`: `high` | `medium` | `low`
-- `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
-- `test.file`: repo-relative path, or `unknown`
+- What the test does
+- What failed and when
+- Where it ran
+- Root cause hypothesis
+- Evidence
+- Failure screenshot
+- Recommended next step
+- Open questions
 
 Blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
