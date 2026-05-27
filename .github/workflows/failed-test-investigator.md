@@ -164,3 +164,7 @@ The skill's "Reporting" subsections should also be inside the collapsible sectio
 - Open questions
 
 Blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
+
+End the comment with this footer line (verbatim, on its own line after the `</details>` block):
+
+`<sup>AI-generated, share feedback in [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3)</sup>`
