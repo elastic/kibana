@@ -17,7 +17,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from 'fs';
-import { dump, load } from 'js-yaml';
+import { parse, stringify } from 'yaml';
 import { OpenAPIV3 } from 'openapi-types';
 import { bundle, BundlerConfig } from '../../src/openapi_bundler';
 
@@ -59,7 +59,7 @@ function dumpSpecs(folderPath: string, oasSpecs: Record<string, OpenAPIV3.Docume
   for (const [fileName, oasSpec] of Object.entries(oasSpecs)) {
     writeFileSync(
       join(folderPath, `${fileName}.schema.yaml`),
-      dump(oasSpec, { skipInvalid: true }) // Skip invalid types like `undefined`
+      stringify(oasSpec, { strict: false }) // Skip invalid types like `undefined`
     );
   }
 }
@@ -70,7 +70,7 @@ export function readBundledSpecs(folderPath: string): Record<string, OpenAPIV3.D
   for (const fileName of readdirSync(folderPath)) {
     const yaml = readFileSync(join(folderPath, fileName), { encoding: 'utf8' });
 
-    bundledSpecs[fileName] = load(yaml) as OpenAPIV3.Document;
+    bundledSpecs[fileName] = parse(yaml) as OpenAPIV3.Document;
   }
 
   return bundledSpecs;
