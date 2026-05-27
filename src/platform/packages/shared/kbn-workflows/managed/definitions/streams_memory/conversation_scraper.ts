@@ -15,7 +15,7 @@ export const STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID =
 export const STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW = {
   id: STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 2,
+  version: 3,
   yaml: `version: "1"
 
 name: Conversation Scraper
@@ -68,12 +68,6 @@ steps:
               - range:
                   updated_at:
                     gte: '{{ consts.CONVERSATIONS_LOOKBACK }}'
-            must_not:
-              - terms:
-                  agent_id:
-                    - sigevents.memory.conversation-scraper
-                    - sigevents.memory.synthesizer
-                    - sigevents.memory.consolidator
     on-failure:
       continue: true
 
@@ -89,13 +83,16 @@ steps:
     steps:
       - name: extract_knowledge
         type: ai.agent
-        agent-id: sigevents.memory.conversation-scraper
         connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
         create-conversation: true
         with:
           timeout: 1800s
           message: |
+            First, call the load_skill tool with skill path skills/platform/streams/streams-conversation-scraper.
+            Wait for the skill to load before calling any other tools.
+
             Review the following {{ steps.check_has_conversations.output.conversation_count }} recent conversations and extract any durable knowledge into wiki pages.
+            Skip conversations that look like automated memory workflow runs (for example, messages that only load streams-memory-* skills).
 
             {{ steps.get_recent_conversations.output.hits.hits | json }}
           schema:

@@ -15,41 +15,6 @@ import { registerAgentBuilderTools } from './tools/register_tools';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
 
-type AgentDefinition = Parameters<AgentBuilderPluginSetup['agents']['register']>[0];
-
-const memorySynthesizerAgent: AgentDefinition = {
-  id: 'sigevents.memory.synthesizer',
-  name: 'Memory Synthesizer',
-  description:
-    'Synthesizes significant events knowledge indicators into memory wiki pages using ES|QL read tools and the write_memory_page workflow.',
-  configuration: {
-    skill_ids: ['streams-memory-synthesis'],
-    tools: [],
-  },
-};
-
-const memoryConsolidatorAgent: AgentDefinition = {
-  id: 'sigevents.memory.consolidator',
-  name: 'Memory Consolidator',
-  description:
-    'Curates the memory knowledge base by merging duplicates, removing stale entries, and improving categorization.',
-  configuration: {
-    skill_ids: ['streams-memory-consolidation'],
-    tools: [],
-  },
-};
-
-const conversationScraperAgent: AgentDefinition = {
-  id: 'sigevents.memory.conversation-scraper',
-  name: 'Conversation Scraper',
-  description:
-    'Extracts durable knowledge from AI chat conversations and persists it as memory wiki pages.',
-  configuration: {
-    skill_ids: ['streams-conversation-scraper'],
-    tools: [],
-  },
-};
-
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
   getScopedClients,
@@ -89,11 +54,6 @@ export const registerStreamsAgentBuilder = async ({
     telemetry,
   });
   registerAgentBuilderSkills({ agentBuilder, getScopedClients, telemetry, memoryToolsOptions });
-
-  agentBuilder.agents.register(memorySynthesizerAgent);
-  agentBuilder.agents.register(memoryConsolidatorAgent);
-  agentBuilder.agents.register(conversationScraperAgent);
-  logger.info('sigevents memory agents registered');
 
   let memorySkillRegistered = false;
 

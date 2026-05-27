@@ -14,13 +14,14 @@ export const STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID = 'system-streams-memory-c
 export const STREAMS_MEMORY_CONSOLIDATION_WORKFLOW = {
   id: STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 1,
+  version: 2,
   yaml: `version: "1"
 
 name: Memory Consolidation
 description: >
   Curates the memory wiki by merging duplicates, removing stale entries,
-  improving categorization, and adding cross-references. Runs on a 24h schedule.
+  improving categorization, and adding cross-references via the streams-memory-consolidation
+  skill. Runs on a 24h schedule.
 enabled: true
 settings:
   timeout: "30m"
@@ -43,13 +44,15 @@ triggers:
 steps:
   - name: consolidate_memory
     type: ai.agent
-    agent-id: sigevents.memory.consolidator
     connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
     create-conversation: true
     with:
       timeout: 1800s
       message: |
-        Review the current state of the memory wiki. Start by listing all pages, then work through them methodically. Not every page needs changes — focus on the highest-impact improvements.
+        First, call the load_skill tool with skill path skills/platform/streams/streams-memory-consolidation.
+        Wait for the skill to load before calling any other tools.
+
+        Then review the current state of the memory wiki. Start by listing all pages, then work through them methodically. Not every page needs changes — focus on the highest-impact improvements.
       schema:
         type: object
         properties:

@@ -14,14 +14,14 @@ export const STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID = 'system-streams-memory-synth
 export const STREAMS_MEMORY_SYNTHESIS_WORKFLOW = {
   id: STREAMS_MEMORY_SYNTHESIS_WORKFLOW_ID,
   pluginId: 'streams',
-  version: 1,
+  version: 2,
   yaml: `version: "1"
 
 name: Memory Synthesis
 description: >
   Synthesizes significant events knowledge indicators into wiki pages using the
-  sigevents.memory.synthesizer agent. The agent reads existing pages and insights
-  via ES|QL tools and writes updates via the memory_write tool.
+  streams-memory-synthesis skill. The default Agent Builder agent loads the skill,
+  reads existing pages and insights via skill tools, and writes updates via memory_write.
 enabled: true
 settings:
   timeout: "30m"
@@ -41,13 +41,15 @@ triggers:
 steps:
   - name: synthesize_memory
     type: ai.agent
-    agent-id: sigevents.memory.synthesizer
     connector-id: ".anthropic-claude-4.6-sonnet-chat_completion"
     create-conversation: true
     with:
       timeout: 1800s
       message: |
-        Review the current state of the memory wiki and the latest significant events insights, then synthesize new or updated wiki pages.
+        First, call the load_skill tool with skill path skills/platform/streams/streams-memory-synthesis.
+        Wait for the skill to load before calling any other tools.
+
+        Then review the current state of the memory wiki and the latest significant events insights, and synthesize new or updated wiki pages.
       schema:
         type: object
         properties:
