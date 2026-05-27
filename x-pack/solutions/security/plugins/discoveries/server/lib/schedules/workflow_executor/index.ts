@@ -143,17 +143,19 @@ export const workflowExecutor = async ({
       alertsIndexPattern,
       analytics: deps.analytics,
       apiConfig,
-      checkIntegrity:
-        deps.workflowsManagementApi != null
-          ? ({ logger: checkLogger, spaceId: checkSpaceId }) =>
-              checkManagedWorkflowIntegrity({
-                analytics: deps.analytics,
-                logger: checkLogger,
-                spaceId: checkSpaceId,
-                workflowsExtensions: deps.workflowsExtensions,
-                workflowsManagementApi: deps.workflowsManagementApi!,
-              })
-          : undefined,
+      checkIntegrity: (() => {
+        const { workflowsExtensions, workflowsManagementApi } = deps;
+        if (workflowsManagementApi == null || workflowsExtensions == null) {
+          return undefined;
+        }
+        return ({ logger: checkLogger, spaceId: checkSpaceId }) =>
+          checkManagedWorkflowIntegrity({
+            analytics: deps.analytics,
+            logger: checkLogger,
+            spaceId: checkSpaceId,
+            workflowsExtensions,
+          });
+      })(),
       end,
       esClient: scopedClusterClient.asCurrentUser,
       executionUuid,

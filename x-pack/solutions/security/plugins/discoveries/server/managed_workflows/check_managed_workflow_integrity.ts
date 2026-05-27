@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
-
 import * as yaml from 'js-yaml';
 
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
@@ -24,15 +22,14 @@ import {
   ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
   getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 export interface CheckManagedWorkflowIntegrityParams {
   analytics?: AnalyticsServiceSetup;
   logger: Logger;
   spaceId: string;
-  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
-  workflowsManagementApi: WorkflowsServerPluginSetup['management'];
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
 }
 
 const BUILT_IN_STEP_PREFIXES = ['data.', 'elasticsearch.', 'kibana.', 'workflow.'] as const;
@@ -74,151 +71,175 @@ const getUnregisteredStepType = (
   return null;
 };
 
-const REQUIRED_ENTRIES: ReadonlyArray<{ id: string; key: RequiredDefaultWorkflowKey }> = [
-  { id: ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID, key: 'default_alert_retrieval' },
-  { id: ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID, key: 'generation' },
-  { id: ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID, key: 'validate' },
-];
+const REQUIRED_ENTRIES: ReadonlyArray<{ id: ManagedWorkflowId; key: RequiredDefaultWorkflowKey }> =
+  [
+    { id: ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID, key: 'default_alert_retrieval' },
+    { id: ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID, key: 'generation' },
+    { id: ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID, key: 'validate' },
+  ];
 
-const OPTIONAL_ENTRIES: ReadonlyArray<{ id: string; key: OptionalDefaultWorkflowKey }> = [
-  { id: ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID, key: 'run_example' },
-  { id: ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID, key: 'custom_validation_example' },
-];
-
-const computeRegistryHash = (workflowId: string): string | null => {
-  const definition = getManagedWorkflowDefinition(workflowId);
-  if (!definition?.yaml) return null;
-  return createHash('sha256').update(definition.yaml.trim()).digest('hex');
-};
+const OPTIONAL_ENTRIES: ReadonlyArray<{ id: ManagedWorkflowId; key: OptionalDefaultWorkflowKey }> =
+  [
+    { id: ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID, key: 'run_example' },
+    {
+      id: ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
+      key: 'custom_validation_example',
+    },
+  ];
 
 export const checkManagedWorkflowIntegrity = async ({
   analytics,
   logger,
   spaceId,
   workflowsExtensions,
-  workflowsManagementApi,
 }: CheckManagedWorkflowIntegrityParams): Promise<WorkflowIntegrityResult> => {
+  const managed = await workflowsExtensions.initManagedWorkflowsClient('discoveries');
+
   const requiredOutcomes = await Promise.all(
     REQUIRED_ENTRIES.map(async ({ id, key }) => {
-      const workflow = await workflowsManagementApi.getWorkflow(id, spaceId);
+      const report = await managed.getWorkflowStatus(id, { spaceId });
 
-      if (workflow === null) {
-        logger.error(`Required AD workflow '${id}' (${key}) not found in space '${spaceId}'`);
-        return {
-          key,
-          unrepairableError: {
-            error: `Workflow '${id}' not found`,
-            key,
-            workflowId: id,
-          },
-        };
-      }
-
-      if (!workflow.managed) {
-        logger.error(`Required AD workflow '${id}' (${key}) is not managed in space '${spaceId}'`);
-        return {
-          key,
-          unrepairableError: {
-            error: `Workflow '${id}' is not managed`,
-            key,
-            workflowId: id,
-          },
-        };
-      }
-
-      if (!workflow.enabled) {
-        logger.error(`Required AD workflow '${id}' (${key}) is disabled in space '${spaceId}'`);
-        return {
-          key,
-          unrepairableError: {
-            error: `Workflow '${id}' is disabled`,
-            key,
-            workflowId: id,
-          },
-        };
-      }
-
-      const registryHash = computeRegistryHash(id);
-      if (registryHash !== null && workflow.definitionHash !== registryHash) {
-        logger.debug(
-          () =>
-            `AD workflow '${id}' (${key}) has an outdated definition in space '${spaceId}'; platform will reconcile on next restart`
-        );
-        return {
-          key,
-          repaired: { key, workflowId: id },
-        };
-      }
-
-      if (workflowsExtensions != null) {
-        const unregisteredType = getUnregisteredStepType(id, workflowsExtensions);
-        if (unregisteredType != null) {
-          const error = `Workflow '${id}' references unregistered step type '${unregisteredType}'; ensure the discoveries plugin is enabled in this Kibana instance`;
-          logger.error(error);
+      switch (report.status) {
+        case 'missing':
+          logger.error(`Required AD workflow '${id}' (${key}) not found in space '${spaceId}'`);
           return {
             key,
-            unrepairableError: { error, key, workflowId: id },
+            unrepairableError: {
+              error: `Workflow '${id}' not found`,
+              key,
+              workflowId: id,
+            },
           };
+
+        case 'not_managed':
+          logger.error(
+            `Required AD workflow '${id}' (${key}) is not managed in space '${spaceId}'`
+          );
+          return {
+            key,
+            unrepairableError: {
+              error: `Workflow '${id}' is not managed`,
+              key,
+              workflowId: id,
+            },
+          };
+
+        case 'invalid':
+          logger.error(
+            `Required AD workflow '${id}' (${key}) has an invalid definition in space '${spaceId}'`
+          );
+          return {
+            key,
+            unrepairableError: {
+              error: `Workflow '${id}' has an invalid definition`,
+              key,
+              workflowId: id,
+            },
+          };
+
+        case 'disabled':
+          logger.error(`Required AD workflow '${id}' (${key}) is disabled in space '${spaceId}'`);
+          return {
+            key,
+            unrepairableError: {
+              error: `Workflow '${id}' is disabled`,
+              key,
+              workflowId: id,
+            },
+          };
+
+        case 'drifted':
+          logger.debug(
+            () =>
+              `AD workflow '${id}' (${key}) has an outdated definition in space '${spaceId}'; platform will reconcile on next restart`
+          );
+          return {
+            key,
+            repaired: { key, workflowId: id },
+          };
+
+        case 'intact':
+        default: {
+          const unregisteredType = getUnregisteredStepType(id, workflowsExtensions);
+          if (unregisteredType != null) {
+            const error = `Workflow '${id}' references unregistered step type '${unregisteredType}'; ensure the discoveries plugin is enabled in this Kibana instance`;
+            logger.error(error);
+            return {
+              key,
+              unrepairableError: { error, key, workflowId: id },
+            };
+          }
+          return { key };
         }
       }
-
-      return { key };
     })
   );
 
   const optionalOutcomes = await Promise.all(
     OPTIONAL_ENTRIES.map(async ({ id, key }) => {
-      const workflow = await workflowsManagementApi.getWorkflow(id, spaceId);
+      const report = await managed.getWorkflowStatus(id, { spaceId });
 
-      if (workflow === null) {
-        logger.warn(`Optional AD workflow '${id}' (${key}) not found in space '${spaceId}'`);
-        return {
-          key,
-          optionalWarning: {
-            error: `Workflow '${id}' not found`,
+      switch (report.status) {
+        case 'missing':
+          logger.warn(`Optional AD workflow '${id}' (${key}) not found in space '${spaceId}'`);
+          return {
             key,
-            workflowId: id,
-          },
-        };
-      }
+            optionalWarning: {
+              error: `Workflow '${id}' not found`,
+              key,
+              workflowId: id,
+            },
+          };
 
-      if (!workflow.managed) {
-        logger.warn(`Optional AD workflow '${id}' (${key}) is not managed in space '${spaceId}'`);
-        return {
-          key,
-          optionalWarning: {
-            error: `Workflow '${id}' is not managed`,
+        case 'not_managed':
+          logger.warn(`Optional AD workflow '${id}' (${key}) is not managed in space '${spaceId}'`);
+          return {
             key,
-            workflowId: id,
-          },
-        };
-      }
+            optionalWarning: {
+              error: `Workflow '${id}' is not managed`,
+              key,
+              workflowId: id,
+            },
+          };
 
-      if (!workflow.enabled) {
-        logger.warn(`Optional AD workflow '${id}' (${key}) is disabled in space '${spaceId}'`);
-        return {
-          key,
-          optionalWarning: {
-            error: `Workflow '${id}' is disabled`,
+        case 'invalid':
+          logger.warn(
+            `Optional AD workflow '${id}' (${key}) has an invalid definition in space '${spaceId}'`
+          );
+          return {
             key,
-            workflowId: id,
-          },
-        };
-      }
+            optionalWarning: {
+              error: `Workflow '${id}' has an invalid definition`,
+              key,
+              workflowId: id,
+            },
+          };
 
-      const registryHash = computeRegistryHash(id);
-      if (registryHash !== null && workflow.definitionHash !== registryHash) {
-        logger.debug(
-          () =>
-            `Optional AD workflow '${id}' (${key}) has an outdated definition in space '${spaceId}'`
-        );
-        return {
-          key,
-          optionalRepaired: { key, workflowId: id },
-        };
-      }
+        case 'disabled':
+          logger.warn(`Optional AD workflow '${id}' (${key}) is disabled in space '${spaceId}'`);
+          return {
+            key,
+            optionalWarning: {
+              error: `Workflow '${id}' is disabled`,
+              key,
+              workflowId: id,
+            },
+          };
 
-      return { key };
+        case 'drifted':
+          logger.debug(
+            () =>
+              `Optional AD workflow '${id}' (${key}) has an outdated definition in space '${spaceId}'`
+          );
+          return {
+            key,
+            optionalRepaired: { key, workflowId: id },
+          };
+
+        case 'intact':
+        default:
+          return { key };
+      }
     })
   );
 

@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { createHash } from 'crypto';
-
 import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
-import type { WorkflowDetailDto } from '@kbn/workflows';
+import type { ManagedWorkflowStatus, ManagedWorkflowStatusReport } from '@kbn/workflows/server';
 import {
   ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
   ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
   ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
   ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
   ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
-  getManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import { checkManagedWorkflowIntegrity } from './check_managed_workflow_integrity';
@@ -27,46 +23,65 @@ const createMockAnalytics = (): jest.Mocked<AnalyticsServiceSetup> =>
     reportEvent: jest.fn(),
   } as unknown as jest.Mocked<AnalyticsServiceSetup>);
 
-const computeExpectedHash = (workflowId: string): string => {
-  const definition = getManagedWorkflowDefinition(workflowId);
-  const yaml = definition?.yaml ?? '';
-  return createHash('sha256').update(yaml.trim()).digest('hex');
-};
-
-const createIntactWorkflowDto = (id: string): WorkflowDetailDto => ({
-  id,
-  name: `Test workflow ${id}`,
+const createIntactReport = (id: string): ManagedWorkflowStatusReport => ({
+  definitionId: id as ManagedWorkflowStatusReport['definitionId'],
   enabled: true,
-  managed: true,
-  definitionHash: computeExpectedHash(id),
-  yaml: '',
+  installed: true,
+  managedBy: 'discoveries',
+  registryHash: 'registry-hash',
+  registryVersion: 1,
+  spaceId: 'default',
+  status: 'intact',
+  storedHash: 'registry-hash',
+  storedVersion: 1,
   valid: true,
-  definition: null,
-  createdAt: '2024-01-01T00:00:00.000Z',
-  createdBy: 'kibana',
-  lastUpdatedAt: '2024-01-01T00:00:00.000Z',
-  lastUpdatedBy: 'kibana',
+  workflowId: id,
 });
 
-const createMockWorkflowsExtensions = (
-  registeredStepTypes: string[] = []
-): jest.Mocked<WorkflowsExtensionsServerPluginStart> =>
-  ({
-    hasStepDefinition: jest.fn((stepTypeId: string) => registeredStepTypes.includes(stepTypeId)),
-  } as unknown as jest.Mocked<WorkflowsExtensionsServerPluginStart>);
+const createReport = (
+  id: string,
+  status: ManagedWorkflowStatus,
+  overrides: Partial<ManagedWorkflowStatusReport> = {}
+): ManagedWorkflowStatusReport => ({
+  ...createIntactReport(id),
+  status,
+  ...overrides,
+});
 
-const createMockManagementApi = (
-  overrides: Partial<Record<string, WorkflowDetailDto | null>> = {}
-): WorkflowsServerPluginSetup['management'] => {
-  const getWorkflow = jest.fn().mockImplementation((id: string) => {
+interface MockManagedClient {
+  getWorkflowStatus: jest.Mock;
+}
+
+const createMockManagedClient = (
+  overrides: Partial<Record<string, ManagedWorkflowStatusReport>> = {}
+): MockManagedClient => ({
+  getWorkflowStatus: jest.fn().mockImplementation((id: string) => {
     if (id in overrides) {
       return Promise.resolve(overrides[id]);
     }
-    return Promise.resolve(createIntactWorkflowDto(id));
-  });
+    return Promise.resolve(createIntactReport(id));
+  }),
+});
 
-  return { getWorkflow } as unknown as WorkflowsServerPluginSetup['management'];
-};
+const createMockWorkflowsExtensions = ({
+  managedClient,
+  registeredStepTypes = [],
+}: {
+  managedClient: MockManagedClient;
+  registeredStepTypes?: string[];
+}): jest.Mocked<WorkflowsExtensionsServerPluginStart> =>
+  ({
+    hasStepDefinition: jest.fn((stepTypeId: string) => registeredStepTypes.includes(stepTypeId)),
+    initManagedWorkflowsClient: jest.fn().mockResolvedValue(managedClient),
+  } as unknown as jest.Mocked<WorkflowsExtensionsServerPluginStart>);
+
+const AD_STEP_TYPES = [
+  'security.attack-discovery.defaultAlertRetrieval',
+  'security.attack-discovery.generate',
+  'security.attack-discovery.defaultValidation',
+  'security.attack-discovery.persistDiscoveries',
+  'security.attack-discovery.run',
+];
 
 const createMockLogger = (): Logger =>
   ({
@@ -78,13 +93,17 @@ const createMockLogger = (): Logger =>
 
 describe('checkManagedWorkflowIntegrity', () => {
   describe('all_intact', () => {
-    it('returns all_intact when all required workflows exist, are managed, enabled, and have current definitionHash', async () => {
-      const workflowsManagementApi = createMockManagementApi();
+    it('returns all_intact when all required workflows report intact', async () => {
+      const managedClient = createMockManagedClient();
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
+      });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(result.status).toBe('all_intact');
@@ -94,51 +113,76 @@ describe('checkManagedWorkflowIntegrity', () => {
       expect(result.optionalWarnings).toEqual([]);
     });
 
-    it('queries all 5 AD workflow IDs', async () => {
-      const workflowsManagementApi = createMockManagementApi();
+    it('initializes the managed workflows client with the discoveries plugin id', async () => {
+      const managedClient = createMockManagedClient();
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
+      });
 
       await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
-      expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
+      expect(workflowsExtensions.initManagedWorkflowsClient).toHaveBeenCalledWith('discoveries');
+    });
+
+    it('queries all 5 AD workflow IDs via getWorkflowStatus', async () => {
+      const managedClient = createMockManagedClient();
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
+      });
+
+      await checkManagedWorkflowIntegrity({
+        logger: createMockLogger(),
+        spaceId: 'default',
+        workflowsExtensions,
+      });
+
+      expect(managedClient.getWorkflowStatus).toHaveBeenCalledWith(
         ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
-        'default'
+        { spaceId: 'default' }
       );
-      expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
+      expect(managedClient.getWorkflowStatus).toHaveBeenCalledWith(
         ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
-        'default'
+        { spaceId: 'default' }
       );
-      expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
+      expect(managedClient.getWorkflowStatus).toHaveBeenCalledWith(
         ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
-        'default'
+        { spaceId: 'default' }
       );
-      expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
+      expect(managedClient.getWorkflowStatus).toHaveBeenCalledWith(
         ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
-        'default'
+        { spaceId: 'default' }
       );
-      expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith(
+      expect(managedClient.getWorkflowStatus).toHaveBeenCalledWith(
         ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
-        'default'
+        { spaceId: 'default' }
       );
     });
   });
 
   describe('repaired', () => {
-    it('returns repaired when a required workflow has an outdated definitionHash', async () => {
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: {
-          ...createIntactWorkflowDto(ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID),
-          definitionHash: 'outdated-hash-from-previous-version',
-        },
+    it('returns repaired when a required workflow reports drifted', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+          'drifted',
+          { storedHash: 'outdated-hash-from-previous-version' }
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(result.status).toBe('repaired');
@@ -148,22 +192,26 @@ describe('checkManagedWorkflowIntegrity', () => {
       expect(result.unrepairableErrors).toEqual([]);
     });
 
-    it('returns repaired with all affected keys when multiple required workflows have outdated hashes', async () => {
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: {
-          ...createIntactWorkflowDto(ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID),
-          definitionHash: 'old-hash-a',
-        },
-        [ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID]: {
-          ...createIntactWorkflowDto(ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID),
-          definitionHash: 'old-hash-b',
-        },
+    it('returns repaired with all affected keys when multiple required workflows report drifted', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+          'drifted'
+        ),
+        [ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+          'drifted'
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(result.status).toBe('repaired');
@@ -177,85 +225,149 @@ describe('checkManagedWorkflowIntegrity', () => {
   });
 
   describe('repair_failed', () => {
-    it('returns repair_failed when a required workflow is missing (null)', async () => {
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: null,
+    it('returns repair_failed when a required workflow reports missing', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+          'missing',
+          {
+            installed: false,
+            enabled: null,
+            valid: null,
+            managedBy: null,
+            storedHash: null,
+            storedVersion: null,
+          }
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(result.status).toBe('repair_failed');
       expect(result.unrepairableErrors).toEqual([
         expect.objectContaining({
+          error: expect.stringContaining('not found'),
           key: 'generation',
           workflowId: ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
         }),
       ]);
     });
 
-    it('returns repair_failed when a required workflow is disabled', async () => {
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID]: {
-          ...createIntactWorkflowDto(ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID),
-          enabled: false,
-        },
+    it('returns repair_failed when a required workflow reports disabled', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
+          'disabled',
+          { enabled: false }
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(result.status).toBe('repair_failed');
       expect(result.unrepairableErrors).toEqual([
         expect.objectContaining({
+          error: expect.stringContaining('disabled'),
           key: 'default_alert_retrieval',
           workflowId: ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
         }),
       ]);
     });
 
-    it('returns repair_failed when a required workflow has managed: false', async () => {
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID]: {
-          ...createIntactWorkflowDto(ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID),
-          managed: false,
-        },
+    it('returns repair_failed when a required workflow reports not_managed', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+          'not_managed',
+          { managedBy: null }
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(result.status).toBe('repair_failed');
       expect(result.unrepairableErrors).toEqual([
         expect.objectContaining({
+          error: expect.stringContaining('not managed'),
           key: 'validate',
           workflowId: ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
         }),
       ]);
     });
 
-    it('takes precedence over repaired when unrepairableErrors exist', async () => {
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: null,
-        [ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID]: {
-          ...createIntactWorkflowDto(ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID),
-          definitionHash: 'old-hash',
-        },
+    it('returns repair_failed when a required workflow reports invalid', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+          'invalid',
+          { valid: false }
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
+      });
+
+      expect(result.status).toBe('repair_failed');
+      expect(result.unrepairableErrors).toEqual([
+        expect.objectContaining({
+          error: expect.stringContaining('invalid definition'),
+          key: 'generation',
+          workflowId: ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+        }),
+      ]);
+    });
+
+    it('takes precedence over repaired when unrepairableErrors exist', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+          'missing'
+        ),
+        [ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+          'drifted'
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
+      });
+
+      const result = await checkManagedWorkflowIntegrity({
+        logger: createMockLogger(),
+        spaceId: 'default',
+        workflowsExtensions,
       });
 
       expect(result.status).toBe('repair_failed');
@@ -263,18 +375,22 @@ describe('checkManagedWorkflowIntegrity', () => {
   });
 
   describe('optional workflows', () => {
-    it('does not affect status when an optional workflow has an outdated definitionHash', async () => {
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID]: {
-          ...createIntactWorkflowDto(ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID),
-          definitionHash: 'old-optional-hash',
-        },
+    it('does not affect status when an optional workflow reports drifted, adds to optionalRepaired', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
+          'drifted'
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(result.status).toBe('all_intact');
@@ -283,43 +399,86 @@ describe('checkManagedWorkflowIntegrity', () => {
       ]);
     });
 
-    it('does not affect status when an optional workflow is missing, adds to optionalWarnings', async () => {
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID]: null,
+    it('does not affect status when an optional workflow reports missing, adds to optionalWarnings', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
+          'missing'
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(result.status).toBe('all_intact');
       expect(result.optionalWarnings).toEqual([
         expect.objectContaining({
+          error: expect.stringContaining('not found'),
           key: 'custom_validation_example',
           workflowId: ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW_ID,
         }),
       ]);
     });
 
-    it('does not affect status when an optional workflow is disabled, adds to optionalWarnings', async () => {
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID]: {
-          ...createIntactWorkflowDto(ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID),
-          enabled: false,
-        },
+    it('does not affect status when an optional workflow reports disabled, adds to optionalWarnings', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
+          'disabled',
+          { enabled: false }
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(result.status).toBe('all_intact');
       expect(result.optionalWarnings).toEqual([
         expect.objectContaining({
+          error: expect.stringContaining('disabled'),
+          key: 'run_example',
+          workflowId: ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
+        }),
+      ]);
+    });
+
+    it('does not affect status when an optional workflow reports invalid, adds to optionalWarnings', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
+          'invalid',
+          { valid: false }
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
+      });
+
+      const result = await checkManagedWorkflowIntegrity({
+        logger: createMockLogger(),
+        spaceId: 'default',
+        workflowsExtensions,
+      });
+
+      expect(result.status).toBe('all_intact');
+      expect(result.optionalWarnings).toEqual([
+        expect.objectContaining({
+          error: expect.stringContaining('invalid definition'),
           key: 'run_example',
           workflowId: ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
         }),
@@ -328,24 +487,28 @@ describe('checkManagedWorkflowIntegrity', () => {
   });
 
   describe('telemetry (workflow_modified)', () => {
-    it('emits workflow_modified for each required workflow with an outdated definitionHash', async () => {
+    it('emits workflow_modified for each required workflow reporting drifted', async () => {
       const analytics = createMockAnalytics();
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: {
-          ...createIntactWorkflowDto(ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID),
-          definitionHash: 'outdated-hash',
-        },
-        [ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID]: {
-          ...createIntactWorkflowDto(ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID),
-          definitionHash: 'another-outdated-hash',
-        },
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+          'drifted'
+        ),
+        [ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
+          'drifted'
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       await checkManagedWorkflowIntegrity({
         analytics,
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledTimes(2);
@@ -371,20 +534,24 @@ describe('checkManagedWorkflowIntegrity', () => {
       );
     });
 
-    it('emits workflow_modified for an optional workflow with an outdated definitionHash', async () => {
+    it('emits workflow_modified for an optional workflow reporting drifted', async () => {
       const analytics = createMockAnalytics();
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID]: {
-          ...createIntactWorkflowDto(ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID),
-          definitionHash: 'outdated-optional-hash',
-        },
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_RUN_EXAMPLE_WORKFLOW_ID,
+          'drifted'
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       await checkManagedWorkflowIntegrity({
         analytics,
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -401,13 +568,17 @@ describe('checkManagedWorkflowIntegrity', () => {
 
     it('does not emit telemetry when all workflows are intact', async () => {
       const analytics = createMockAnalytics();
-      const workflowsManagementApi = createMockManagementApi();
+      const managedClient = createMockManagedClient();
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
+      });
 
       await checkManagedWorkflowIntegrity({
         analytics,
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(analytics.reportEvent).not.toHaveBeenCalled();
@@ -415,58 +586,63 @@ describe('checkManagedWorkflowIntegrity', () => {
 
     it('does not emit telemetry when required workflows are missing (unrepairableError)', async () => {
       const analytics = createMockAnalytics();
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: null,
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+          'missing'
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       await checkManagedWorkflowIntegrity({
         analytics,
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
       expect(analytics.reportEvent).not.toHaveBeenCalled();
     });
 
-    it('does not emit telemetry when analytics is not provided', async () => {
-      const workflowsManagementApi = createMockManagementApi({
-        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: {
-          ...createIntactWorkflowDto(ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID),
-          definitionHash: 'outdated-hash',
-        },
+    it('does not throw when analytics is not provided and a required workflow has drifted', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_GENERATION_WORKFLOW_ID,
+          'drifted'
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
       });
 
       await expect(
         checkManagedWorkflowIntegrity({
           logger: createMockLogger(),
           spaceId: 'default',
-          workflowsManagementApi,
+          workflowsExtensions,
         })
       ).resolves.toBeDefined();
     });
   });
 
   describe('step type registration', () => {
-    const AD_STEP_TYPES = [
-      'security.attack-discovery.defaultAlertRetrieval',
-      'security.attack-discovery.generate',
-      'security.attack-discovery.defaultValidation',
-      'security.attack-discovery.persistDiscoveries',
-      'security.attack-discovery.run',
-    ];
-
     it('returns repair_failed when a required workflow references an unregistered step type', async () => {
-      const workflowsManagementApi = createMockManagementApi();
-      const workflowsExtensions = createMockWorkflowsExtensions(
-        AD_STEP_TYPES.filter((t) => t !== 'security.attack-discovery.defaultAlertRetrieval')
-      );
+      const managedClient = createMockManagedClient();
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES.filter(
+          (t) => t !== 'security.attack-discovery.defaultAlertRetrieval'
+        ),
+      });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
         workflowsExtensions,
-        workflowsManagementApi,
       });
 
       expect(result.status).toBe('repair_failed');
@@ -480,14 +656,16 @@ describe('checkManagedWorkflowIntegrity', () => {
     });
 
     it('returns all_intact when all step types referenced by required workflows are registered', async () => {
-      const workflowsManagementApi = createMockManagementApi();
-      const workflowsExtensions = createMockWorkflowsExtensions(AD_STEP_TYPES);
+      const managedClient = createMockManagedClient();
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
+      });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
         workflowsExtensions,
-        workflowsManagementApi,
       });
 
       expect(result.status).toBe('all_intact');
@@ -495,14 +673,16 @@ describe('checkManagedWorkflowIntegrity', () => {
     });
 
     it('does not call hasStepDefinition for built-in data.* step types', async () => {
-      const workflowsManagementApi = createMockManagementApi();
-      const workflowsExtensions = createMockWorkflowsExtensions(AD_STEP_TYPES);
+      const managedClient = createMockManagedClient();
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES,
+      });
 
       await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
         workflowsExtensions,
-        workflowsManagementApi,
       });
 
       expect(workflowsExtensions.hasStepDefinition).not.toHaveBeenCalledWith(
@@ -510,16 +690,33 @@ describe('checkManagedWorkflowIntegrity', () => {
       );
     });
 
-    it('skips step type checks when workflowsExtensions is not provided', async () => {
-      const workflowsManagementApi = createMockManagementApi();
+    it('does not perform the step-type check when a required workflow is already drifted', async () => {
+      const managedClient = createMockManagedClient({
+        [ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID]: createReport(
+          ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
+          'drifted'
+        ),
+      });
+      const workflowsExtensions = createMockWorkflowsExtensions({
+        managedClient,
+        registeredStepTypes: AD_STEP_TYPES.filter(
+          (t) => t !== 'security.attack-discovery.defaultAlertRetrieval'
+        ),
+      });
 
       const result = await checkManagedWorkflowIntegrity({
         logger: createMockLogger(),
         spaceId: 'default',
-        workflowsManagementApi,
+        workflowsExtensions,
       });
 
-      expect(result.status).toBe('all_intact');
+      expect(result.status).toBe('repaired');
+      expect(result.repaired).toEqual([
+        {
+          key: 'default_alert_retrieval',
+          workflowId: ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
+        },
+      ]);
     });
   });
 });
