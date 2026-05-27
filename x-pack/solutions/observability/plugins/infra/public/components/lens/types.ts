@@ -32,6 +32,7 @@ export type BaseChartProps = Pick<
   | 'hidePanelTitles'
   | 'lastReloadRequestTime'
   | 'loading'
+  | 'onLoad'
   | 'overrides'
   | 'onBrushEnd'
   | 'onFilter'

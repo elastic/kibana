@@ -13,15 +13,6 @@
 // REMOVE BEFORE PRODUCTION: these switches expose data-fetching code paths
 // that we don't want users discovering as a real configuration knob. They
 // exist to make perf comparisons reproducible during the Tier 3 PoC review.
-//
-// Why per-proposal toggles? The original implementation bundled the
-// proposals into four group switches (KPI, Table, Metrics tab, Universal
-// fixes). When the user spotted that flipping the "Universal" group
-// dramatically improved KPI latency but slightly hurt table latency, it
-// became impossible to tell *which* of P1 / P2 / P5 / P5.5 was the lever.
-// Splitting every proposal into its own switch lets a reviewer measure each
-// one's actual contribution to the page-load wall time, instead of treating
-// the bundles as opaque.
 
 import createContainer from 'constate';
 import { useCallback, useEffect, useMemo } from 'react';
@@ -31,55 +22,49 @@ const LOCAL_STORAGE_KEY = 'kibana.observability.hosts.poc_settings';
 
 // Each flag corresponds to exactly one proposal in
 // `/tmp/hosts-perf/PROPOSALS.md`. The keys are deliberately tied to the
-// proposal IDs (P10, P11, …) rather than a behavioural name so the link
-// stays obvious as the proposals evolve.
-//
-// Some flags are dependency-bound:
-//   - `dropKpiTrendline` (P15a) only changes behaviour when
-//     `useKpiEndpoint` (P15b) is OFF — when the new endpoint is on, the
-//     trendline doesn't exist to begin with.
-//   - `useServerSideSort`, `useScopedAlerts`, `useEsqlPhaseB` only change
-//     behaviour when `useTwoPhaseFetch` (P10) is ON — the legacy path
-//     doesn't route through any of them.
-// The popover surfaces these dependencies inline so reviewers don't waste
-// runs flipping a no-op switch.
+// proposal IDs (P15a, P15c, P16-A, …) rather than a behavioural name so
+// the link stays obvious as the proposals evolve.
 interface PocSettings {
-  // KPI tiles section
-  // P15b. ON → `<HostKpiTiles>` driven by the single ES|QL endpoint. OFF →
-  // the four legacy Lens `metric` charts.
-  useKpiEndpoint: boolean;
-  // P15a. ON → drop `trendLine: true` from the four legacy KPI Lens charts
-  // (saves their second per-tile `date_histogram` aggregation). OFF →
-  // restore the pre-P15 chart configs verbatim. Only effective when
-  // `useKpiEndpoint=false`.
-  dropKpiTrendline: boolean;
-
-  // Hosts table section
-  // P10. ON → two-phase fetch (Phase A `/host/list` cheap names + Phase B
-  // `/host/metrics` per-page metrics). OFF → legacy single
-  // `/api/metrics/infra/host` call with the full result returned.
-  useTwoPhaseFetch: boolean;
-  // P11. ON → server-side sort & pagination (Phase A sorts the entire fleet
-  // by the chosen metric). OFF → server returns the fleet in default order
-  // and the client sorts the visible page only — same shape as today's
-  // unsupported-field fallback (alerts/title). Only effective with
-  // `useTwoPhaseFetch=true`.
-  useServerSideSort: boolean;
-  // P5.6. ON → the alerts API is scoped to the visible page's host names
-  // only (≤ 20). OFF → fetch alerts for every host in the Phase A result
-  // (up to `limit`, e.g. 500). Only effective with `useTwoPhaseFetch=true`.
-  useScopedAlerts: boolean;
-  // P12. ON → Phase B uses a single ES|QL query when the schema is semconv
-  // (`fetchSemconvHostsMetrics`). OFF → force the DSL fallback path even
-  // for semconv. Only effective with `useTwoPhaseFetch=true` and the
-  // semconv schema.
-  useEsqlPhaseB: boolean;
-
   // Metrics tab section
-  // P16. ON → eleven `@elastic/charts` line charts off a single ES|QL
-  // `/host/metrics_timeseries` round-trip. OFF → eleven Lens xy embeddables,
-  // each firing its own DSL aggregation.
-  useMetricsTimeseriesEndpoint: boolean;
+  // P16-A. ON → render every Metrics-tab tile through a Lens xy embeddable
+  // backed by an ES|QL `STATS … BY host.name, BUCKET(...)` query. OFF →
+  // fall back to the inventory-model-driven Lens DSL charts (the
+  // pre-PoC main behaviour). Each ES|QL chart fires its own request when
+  // Lens's IntersectionObserver-driven embeddable wakes up, so the
+  // `perfTracker` records one sample per chart under
+  // `PERF_KEYS.lensEsqlChart`.
+  useLensEsqlMetricsCharts: boolean;
+
+  // KPI tiles section
+  // P15c. ON → render every KPI tile through a Lens `chartType: 'metric'`
+  // embeddable backed by an ES|QL `STATS` query for the headline value
+  // (trendline disabled — see `esql_kpi_chart.ts`). OFF → fall back to
+  // the inventory-model formula configs which go through Lens's DSL
+  // formula path. That's the pre-PoC main behaviour and the baseline for
+  // the A/B comparison.
+  useLensEsqlKpiCharts: boolean;
+  // P15b. ON → bypass Lens entirely for the KPI strip and read four
+  // scalar values from a dedicated server endpoint
+  // (`POST /api/metrics/infra/host/kpis`) that runs *one* ES|QL `STATS`
+  // (semconv) or *one* DSL `_search` with four sibling aggregations
+  // (ECS). Tiles render through the pre-Lens `<MetricChartWrapper>`
+  // (Elastic Charts `Metric`). Visual contract — header / value /
+  // subtitle / tooltip — matches the other two paths so the toggle only
+  // changes how the data is fetched. OFF → fall through to the
+  // `useLensEsqlKpiCharts` / DSL Lens paths above.
+  //
+  // Strictly higher-precedence than `useLensEsqlKpiCharts` and
+  // `kpiTrendline`: when this flag is on the entire Lens render path is
+  // skipped (there's no Lens embeddable to feed a trendline into).
+  useEsqlEndpointKpi: boolean;
+  // P15a. ON → render the small sparkline behind each KPI headline number
+  // (the inventory-model + main behaviour). OFF → drop the trendline so
+  // the tile only renders the scalar headline.
+  //
+  // Independent of `useLensEsqlKpiCharts` for the DSL Lens path; the
+  // ES|QL Lens path is hardcoded to no trendline, and the server-endpoint
+  // path renders without a trendline by construction.
+  kpiTrendline: boolean;
 
   // Cross-cutting plumbing section
   // P1. ON → flat `terms({ field: 'host.name', values: [...] })` for
@@ -92,25 +77,26 @@ interface PocSettings {
   // `InfraMetricsClient.search` when no excluded tier filter applies.
   // OFF → keep the wrap (sent server-side via `x-poc-legacy-bool-wrap`).
   useStrippedBoolWrap: boolean;
-  // P5.5. ON → `isReady` gate suppresses the first-paint double-fetch on
-  // the Hosts endpoints (waits for `metricsView?.dataViewReference` +
-  // settled schema). OFF → fetches fire immediately on mount, before the
-  // schema resolution lands, leading to the original double-fire pattern.
-  useReadyGate: boolean;
 }
 
 const DEFAULT_SETTINGS: PocSettings = {
-  useKpiEndpoint: true,
-  dropKpiTrendline: true,
-  useTwoPhaseFetch: true,
-  useServerSideSort: true,
-  useScopedAlerts: true,
-  useEsqlPhaseB: true,
-  useMetricsTimeseriesEndpoint: true,
+  // Default OFF — the spike is opt-in for reviewers; turning it on by
+  // default would replace the legacy inventory-model Lens charts with 11
+  // ES|QL Lens embeddables on every page load and skew `perfTracker`
+  // baselines.
+  useLensEsqlMetricsCharts: false,
+  // Default OFF — same rationale as `useLensEsqlMetricsCharts`. Flipping
+  // this on swaps the 4 KPI tiles from the legacy formula path to one
+  // ES|QL query per tile (4 in total). Reviewers turn it on to measure
+  // the difference against the baseline.
+  useLensEsqlKpiCharts: false,
+  // Default OFF — opt-in third KPI render path for the A/B/C benchmark
+  // matrix. Server endpoint + plain `<MetricChartWrapper>` indicator.
+  useEsqlEndpointKpi: false,
+  kpiTrendline: true,
   useTermsFilter: true,
   useConsolidatedKql: true,
   useStrippedBoolWrap: true,
-  useReadyGate: true,
 };
 
 // Side-channel mirror so non-React surfaces (the server-bound request
@@ -121,50 +107,22 @@ const DEFAULT_SETTINGS: PocSettings = {
 // for a PoC, not authorisation gates.
 export const pocFlags = { ...DEFAULT_SETTINGS };
 
-// Migration shim — older localStorage payloads have the four-bundle shape
-// (`useNewKpis` / `useNewTable` / `useNewMetricsTab` / `useUniversalFixes`).
-// Translate them into the per-proposal shape on load so a reviewer who
-// already has a localStorage entry from earlier in the PoC doesn't reset to
-// all-defaults the moment we ship the split. New keys win when both are
-// present.
-type LegacyPocSettings = Partial<{
-  useNewKpis: boolean;
-  useNewTable: boolean;
-  useNewMetricsTab: boolean;
-  useUniversalFixes: boolean;
-}>;
-
-const hydrate = (stored: (Partial<PocSettings> & LegacyPocSettings) | undefined): PocSettings => {
+const hydrate = (stored: Partial<PocSettings> | undefined): PocSettings => {
   if (!stored) return DEFAULT_SETTINGS;
   return {
-    useKpiEndpoint: stored.useKpiEndpoint ?? stored.useNewKpis ?? DEFAULT_SETTINGS.useKpiEndpoint,
-    dropKpiTrendline:
-      stored.dropKpiTrendline ?? stored.useNewKpis ?? DEFAULT_SETTINGS.dropKpiTrendline,
-    useTwoPhaseFetch:
-      stored.useTwoPhaseFetch ?? stored.useNewTable ?? DEFAULT_SETTINGS.useTwoPhaseFetch,
-    useServerSideSort:
-      stored.useServerSideSort ?? stored.useNewTable ?? DEFAULT_SETTINGS.useServerSideSort,
-    useScopedAlerts:
-      stored.useScopedAlerts ?? stored.useNewTable ?? DEFAULT_SETTINGS.useScopedAlerts,
-    useEsqlPhaseB: stored.useEsqlPhaseB ?? stored.useNewTable ?? DEFAULT_SETTINGS.useEsqlPhaseB,
-    useMetricsTimeseriesEndpoint:
-      stored.useMetricsTimeseriesEndpoint ??
-      stored.useNewMetricsTab ??
-      DEFAULT_SETTINGS.useMetricsTimeseriesEndpoint,
-    useTermsFilter:
-      stored.useTermsFilter ?? stored.useUniversalFixes ?? DEFAULT_SETTINGS.useTermsFilter,
-    useConsolidatedKql:
-      stored.useConsolidatedKql ?? stored.useUniversalFixes ?? DEFAULT_SETTINGS.useConsolidatedKql,
-    useStrippedBoolWrap:
-      stored.useStrippedBoolWrap ??
-      stored.useUniversalFixes ??
-      DEFAULT_SETTINGS.useStrippedBoolWrap,
-    useReadyGate: stored.useReadyGate ?? stored.useUniversalFixes ?? DEFAULT_SETTINGS.useReadyGate,
+    useLensEsqlMetricsCharts:
+      stored.useLensEsqlMetricsCharts ?? DEFAULT_SETTINGS.useLensEsqlMetricsCharts,
+    useLensEsqlKpiCharts: stored.useLensEsqlKpiCharts ?? DEFAULT_SETTINGS.useLensEsqlKpiCharts,
+    useEsqlEndpointKpi: stored.useEsqlEndpointKpi ?? DEFAULT_SETTINGS.useEsqlEndpointKpi,
+    kpiTrendline: stored.kpiTrendline ?? DEFAULT_SETTINGS.kpiTrendline,
+    useTermsFilter: stored.useTermsFilter ?? DEFAULT_SETTINGS.useTermsFilter,
+    useConsolidatedKql: stored.useConsolidatedKql ?? DEFAULT_SETTINGS.useConsolidatedKql,
+    useStrippedBoolWrap: stored.useStrippedBoolWrap ?? DEFAULT_SETTINGS.useStrippedBoolWrap,
   };
 };
 
 const usePocSettings = () => {
-  const [stored, setStored] = useLocalStorage<Partial<PocSettings> & LegacyPocSettings>(
+  const [stored, setStored] = useLocalStorage<Partial<PocSettings>>(
     LOCAL_STORAGE_KEY,
     DEFAULT_SETTINGS
   );
@@ -175,8 +133,7 @@ const usePocSettings = () => {
   const settings: PocSettings = useMemo(() => hydrate(stored), [stored]);
 
   // Single setter factory — every per-flag setter is "merge this key into
-  // the persisted blob". Eleven near-identical closures collapses into one
-  // returned helper that consumers wrap in a per-flag `useCallback`.
+  // the persisted blob".
   const setSetting = useCallback(
     <K extends keyof PocSettings>(key: K, value: PocSettings[K]) => {
       setStored({ ...settings, [key]: value });
@@ -184,32 +141,20 @@ const usePocSettings = () => {
     [setStored, settings]
   );
 
-  const setUseKpiEndpoint = useCallback(
-    (value: boolean) => setSetting('useKpiEndpoint', value),
+  const setUseLensEsqlMetricsCharts = useCallback(
+    (value: boolean) => setSetting('useLensEsqlMetricsCharts', value),
     [setSetting]
   );
-  const setDropKpiTrendline = useCallback(
-    (value: boolean) => setSetting('dropKpiTrendline', value),
+  const setUseLensEsqlKpiCharts = useCallback(
+    (value: boolean) => setSetting('useLensEsqlKpiCharts', value),
     [setSetting]
   );
-  const setUseTwoPhaseFetch = useCallback(
-    (value: boolean) => setSetting('useTwoPhaseFetch', value),
+  const setUseEsqlEndpointKpi = useCallback(
+    (value: boolean) => setSetting('useEsqlEndpointKpi', value),
     [setSetting]
   );
-  const setUseServerSideSort = useCallback(
-    (value: boolean) => setSetting('useServerSideSort', value),
-    [setSetting]
-  );
-  const setUseScopedAlerts = useCallback(
-    (value: boolean) => setSetting('useScopedAlerts', value),
-    [setSetting]
-  );
-  const setUseEsqlPhaseB = useCallback(
-    (value: boolean) => setSetting('useEsqlPhaseB', value),
-    [setSetting]
-  );
-  const setUseMetricsTimeseriesEndpoint = useCallback(
-    (value: boolean) => setSetting('useMetricsTimeseriesEndpoint', value),
+  const setKpiTrendline = useCallback(
+    (value: boolean) => setSetting('kpiTrendline', value),
     [setSetting]
   );
   const setUseTermsFilter = useCallback(
@@ -224,11 +169,6 @@ const usePocSettings = () => {
     (value: boolean) => setSetting('useStrippedBoolWrap', value),
     [setSetting]
   );
-  const setUseReadyGate = useCallback(
-    (value: boolean) => setSetting('useReadyGate', value),
-    [setSetting]
-  );
-
   // Keep the module-level mirror in sync with the React state.
   useEffect(() => {
     Object.assign(pocFlags, settings);
@@ -236,17 +176,13 @@ const usePocSettings = () => {
 
   return {
     ...settings,
-    setUseKpiEndpoint,
-    setDropKpiTrendline,
-    setUseTwoPhaseFetch,
-    setUseServerSideSort,
-    setUseScopedAlerts,
-    setUseEsqlPhaseB,
-    setUseMetricsTimeseriesEndpoint,
+    setUseLensEsqlMetricsCharts,
+    setUseLensEsqlKpiCharts,
+    setUseEsqlEndpointKpi,
+    setKpiTrendline,
     setUseTermsFilter,
     setUseConsolidatedKql,
     setUseStrippedBoolWrap,
-    setUseReadyGate,
   };
 };
 

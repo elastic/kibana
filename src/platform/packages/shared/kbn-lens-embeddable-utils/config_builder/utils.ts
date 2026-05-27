@@ -58,24 +58,60 @@ export const getDefaultReferences = (
   ];
 };
 
+// Canonical Lens suffix for each `TimeScaleUnit`. Mirrors the formula
+// path's `unitSuffixes` map in
+// `x-pack/platform/plugins/shared/lens/common/suffix_formatter/index.ts`
+// — copied (not imported) because the shared embeddable-utils library
+// can't depend on the Lens plugin. Kept as plain ASCII so the strings
+// match the formula path's defaults verbatim; the Lens plugin runs them
+// through i18n but the rendered output is identical for the default
+// locale, which is what `kbn-lens-embeddable-utils` consumers rely on.
+const TIME_SCALE_SUFFIX: Record<'s' | 'm' | 'h' | 'd', string> = {
+  s: '/s',
+  m: '/m',
+  h: '/h',
+  d: '/d',
+};
+
+// Build the `ValueFormatConfig` block (id + decimals + optional compact +
+// optional suffix) from a `LensBaseLayer`'s top-level format hints. Lives
+// next to `mapToFormula` because both consume the same `format` /
+// `decimals` / `compactValues` / `suffix` / `normalizeByUnit` set —
+// `mapToFormula` for the DSL/formula path, `mapToValueFormat` for the
+// ES|QL text-based path where we stamp the format directly onto a
+// `TextBasedLayerColumn['params']`.
+//
+// `suffix` precedence: an explicit `layer.suffix` always wins; otherwise
+// `normalizeByUnit` is translated into a `/s` / `/m` / `/h` / `/d` suffix
+// so ES|QL columns reading a counter rate or per-second metric render
+// with the unit annotation the formula path would have produced via
+// `timeScale`. (The text-based datasource doesn't honour `timeScale` —
+// `TextBasedLayerColumn` has no equivalent field — so the suffix is the
+// only place to surface the unit on this path.)
+export function mapToValueFormat(
+  layer: LensBaseLayer
+): NonNullable<FormulaValueConfig['format']> | undefined {
+  const { decimals, format, compactValues: compact, suffix, normalizeByUnit } = layer;
+  if (!format) return undefined;
+  const derivedSuffix =
+    suffix ?? (normalizeByUnit ? TIME_SCALE_SUFFIX[normalizeByUnit] : undefined);
+  return {
+    id: format,
+    params: {
+      decimals: decimals ?? 2,
+      ...(!!compact ? { compact } : undefined),
+      ...(derivedSuffix ? { suffix: derivedSuffix } : undefined),
+    },
+  };
+}
+
 export function mapToFormula(layer: LensBaseLayer): FormulaValueConfig {
-  const { label, decimals, format, compactValues: compact, normalizeByUnit, value } = layer;
-
-  const formulaFormat: FormulaValueConfig['format'] | undefined = format
-    ? {
-        id: format,
-        params: {
-          decimals: decimals ?? 2,
-          ...(!!compact ? { compact } : undefined),
-        },
-      }
-    : undefined;
-
+  const { label, normalizeByUnit, value } = layer;
   return {
     formula: value,
     label,
     timeScale: normalizeByUnit,
-    format: formulaFormat,
+    format: mapToValueFormat(layer),
   };
 }
 

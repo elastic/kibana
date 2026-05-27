@@ -16,12 +16,12 @@
 //
 // Scope semantics:
 // - We pass `names: string[]` from `useHostsViewContext()` so the KPIs are
-//   averaged over the same hosts the table renders (Lens did this implicitly
-//   via `buildCombinedAssetFilter`). Empty name list → KPIs are scoped by
-//   the unified-search KQL alone.
-// - `isReady` gating matches Phase A / count: returns `undefined` while the
-//   unified search isn't ready so `useFetcher` skips the initial double-fire
-//   (P5.5).
+//   averaged over the same hosts the table renders (Lens did this
+//   implicitly via `buildCombinedAssetFilter`). Empty name list → KPIs are
+//   scoped by the unified-search KQL alone.
+// - `isReady` gating matches the host count hook: `useFetcher` skips the
+//   request until the unified search has resolved so we don't double-fire
+//   on first paint.
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useMemo } from 'react';
@@ -33,10 +33,10 @@ import type {
 } from '../../../../../common/http_api';
 import { GetHostsKpisResponsePayloadRT } from '../../../../../common/http_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { PERF_KEYS, perfTracker } from '../utils/perf_tracker';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsViewContext } from './use_hosts_view';
 import { useHostsPageReady } from './use_hosts_page_ready';
-import { PERF_KEYS, perfTracker } from '../utils/perf_tracker';
 
 const KPIS_PATH = '/api/metrics/infra/host/kpis';
 
@@ -56,14 +56,14 @@ export interface UseHostsKpisResult {
 
 export const useHostsKpis = (): UseHostsKpisResult => {
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const { hostNodes } = useHostsViewContext();
   const isReady = useHostsPageReady();
-  // Scope to the *full* ranked top-N list Phase A computed — same set the
-  // table is paginating across, not just the visible 20-row page.
-  // Reading `hostNodes` here instead used to scope KPIs to the visible
-  // page (a) producing the wrong "average across 20 hosts" semantic and
-  // (b) firing the request twice — once with no `names` (fleet-wide,
-  // pre-Phase-A) and once with the 20 visible names (post-Phase-B).
-  const { allHostNames } = useHostsViewContext();
+
+  // Match the table's host set exactly. Lens did this implicitly with
+  // `buildCombinedAssetFilter`; here the contract is explicit (the names
+  // travel in the request body) which also makes the KPI 1:1 reproducible
+  // for a given host-list response.
+  const names = useMemo(() => hostNodes.map((node) => node.name), [hostNodes]);
 
   const payload = useMemo<string>(() => {
     const body: GetHostsKpisRequestBodyPayloadClient = {
@@ -72,7 +72,7 @@ export const useHostsKpis = (): UseHostsKpisResult => {
       query: buildQuery() as GetHostsKpisRequestBodyPayloadClient['query'],
       schema: searchCriteria?.preferredSchema || DEFAULT_SCHEMA,
       limit: searchCriteria.limit,
-      ...(allHostNames.length > 0 ? { names: allHostNames } : {}),
+      ...(names.length > 0 ? { names } : {}),
     };
     return JSON.stringify(body);
   }, [
@@ -81,40 +81,38 @@ export const useHostsKpis = (): UseHostsKpisResult => {
     parsedDateRange.to,
     searchCriteria?.preferredSchema,
     searchCriteria.limit,
-    allHostNames,
+    names,
   ]);
 
   const { data, status, error } = useFetcher(
     (callApi) => {
-      // Wait for Phase A's ranked name list before firing. Phase A is
-      // cheap; the cost of sequencing here is well under the cost of
-      // the wasted first call we used to make. Skipping when the list
-      // is empty also collapses the request count to exactly one per
-      // query change.
-      if (!isReady || allHostNames.length === 0) return;
+      if (!isReady) return;
       return (async () => {
-        const start = performance.now();
+        // PoC instrumentation — wall time around the `_query`-equivalent
+        // network round trip. `perfTracker` keeps the last
+        // `MAX_ENTRIES_PER_KEY` samples per key, so the gear-popover
+        // overlay shows the rolling distribution for benchmark A/B/C
+        // comparison against the Lens DSL and Lens ES|QL paths.
+        const startedAt = performance.now();
         const response = await callApi(KPIS_PATH, {
           method: 'POST',
           body: payload,
         });
-        const duration = performance.now() - start;
-        perfTracker.record(PERF_KEYS.kpis, duration, {
-          hosts: allHostNames.length,
-          limit: searchCriteria.limit,
+        perfTracker.record(PERF_KEYS.esqlEndpointKpi, performance.now() - startedAt, {
+          schema: searchCriteria?.preferredSchema ?? DEFAULT_SCHEMA,
+          hosts: names.length,
         });
         return decodeOrThrow(GetHostsKpisResponsePayloadRT)(
           response as GetHostsKpisResponsePayload
         );
       })();
     },
-    // `allHostNames.length` and `searchCriteria.limit` are already captured
-    // transitively via `payload` (the request body is stringified from them),
-    // but they're also read directly inside the callback to label the
-    // `perfTracker` sample. Listing them explicitly keeps
-    // `react-hooks/exhaustive-deps` happy without changing the refetch cadence
-    // — when either value changes, `payload` changes in the same render.
-    [isReady, payload, allHostNames.length, searchCriteria.limit]
+    // `searchCriteria.preferredSchema` and `names.length` are read by
+    // `perfTracker.record` only; the request itself is keyed off `payload`,
+    // which already encodes them. Intentionally omitted from deps so the
+    // hook doesn't refire when only a logging tag changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isReady, payload]
   );
 
   return {

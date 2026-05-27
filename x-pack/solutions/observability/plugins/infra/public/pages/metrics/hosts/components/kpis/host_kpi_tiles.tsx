@@ -6,10 +6,12 @@
  */
 
 // P15b — renders the four headline KPI tiles (CPU Usage, Normalized Load,
-// Memory Usage, Disk Usage) from a single ES|QL `STATS` request instead of
-// four separate Lens charts. Previously these were `<Kpi>` components
-// wrapping `<LensChart>`; the visual contract (header / value / subtitle /
-// tooltip) is preserved, only the data path changes.
+// Memory Usage, Disk Usage) from a single server-side ES|QL `STATS` request
+// instead of four parallel Lens charts. On main these are `<Kpi>`
+// components wrapping `<LensChart>`; this path swaps them for the
+// pre-Lens `<MetricChartWrapper>` (a plain Elastic Charts `Metric`) driven
+// by the `useHostsKpis` hook. The visual contract (header / value /
+// subtitle / tooltip) is preserved — only the data path changes.
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -53,7 +55,7 @@ const TILE_DEFS: ReadonlyArray<{
     id: 'hostsViewKPI-normalizedLoad1m',
     title: NORMALIZED_LOAD_LABEL,
     tooltipKey: 'normalizedLoad1m',
-    format: 'percent',
+    format: 'ratio',
   },
   {
     key: 'memoryUsage',
@@ -89,8 +91,8 @@ export const HostKpiTiles = () => {
 
   // "Average (of {limit} hosts)" when the user-selected `limit` is below the
   // total matching host count; otherwise the plain "Average" subtitle.
-  // Matches the wording the legacy `getSubtitle` used so the tile copy
-  // doesn't shift under users.
+  // Matches the wording the Lens-path `getSubtitle` uses so the tile copy
+  // doesn't shift under users when they flip the toggle.
   const subtitle = useMemo(() => {
     const { limit } = searchCriteria;
     return limit < hostCount

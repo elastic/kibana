@@ -199,6 +199,38 @@ test('generates xy chart config with legend stats', async () => {
   });
 });
 
+test('applies ES|QL yAxis format even when decimals is 0', async () => {
+  // Regression: the previous `hasFormatParams` guard required at least
+  // one of `decimals`/`suffix`/`compact`/`fromUnit`/`toUnit` to be
+  // truthy, which dropped the formatter for the inventory model's
+  // whole-number metrics (CPU %, disk space, IOPS — all `decimals: 0`).
+  const result = await buildXY(
+    {
+      chartType: 'xy',
+      title: 'cpu',
+      dataset: { esql: 'from test | stats cpu = avg(price) by bucket = bucket(@timestamp, 1m)' },
+      layers: [
+        {
+          type: 'series',
+          seriesType: 'line',
+          xAxis: 'bucket',
+          yAxis: [{ value: 'cpu', label: 'CPU Usage', format: 'percent', decimals: 0 }],
+        },
+      ],
+    },
+    { dataViewsAPI: mockDataViewsService() as any }
+  );
+
+  const textBased = (result.state.datasourceStates as any).textBased;
+  const yColumn = textBased.layers.layer_0.columns.find(
+    (c: { columnId: string }) => c.columnId === 'metric_formula_accessor0_0'
+  );
+  expect(yColumn?.params?.format).toEqual({
+    id: 'percent',
+    params: { decimals: 0 },
+  });
+});
+
 test('it generates xy chart with multiple reference lines', async () => {
   const result = await buildXY(
     {

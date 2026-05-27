@@ -54,6 +54,7 @@ export const LensChart = React.memo(
     query,
     onBrushEnd,
     onFilter,
+    onLoad,
     overrides,
     toolTip,
     lastReloadRequestTime,
@@ -145,6 +146,7 @@ export const LensChart = React.memo(
         onBrushEnd={onBrushEnd}
         lastReloadRequestTime={lastReloadRequestTime}
         onFilter={onFilter}
+        onLoad={onLoad}
         onBeforeBadgesRender={handleBeforeBadgesRender}
       />
     );

@@ -203,3 +203,32 @@ test('generates metric chart config with trendline', async () => {
     }
   `);
 });
+
+test('propagates label and format to ES|QL value columns', async () => {
+  const result = await buildMetric(
+    {
+      chartType: 'metric',
+      title: 'CPU Usage',
+      label: 'CPU Usage',
+      dataset: {
+        esql: 'from test | stats value = avg(cpu)',
+      },
+      value: 'value',
+      format: 'percent',
+      decimals: 0,
+    },
+    {
+      dataViewsAPI: mockDataViewsService() as any,
+    }
+  );
+
+  const textBased = (result.state.datasourceStates as any).textBased;
+  expect(textBased.layers.layer_0.columns[0]).toEqual({
+    columnId: 'metric_formula_accessor',
+    fieldName: 'value',
+    meta: { type: 'number' },
+    params: { format: { id: 'percent', params: { decimals: 0 } } },
+    label: 'CPU Usage',
+    customLabel: true,
+  });
+});

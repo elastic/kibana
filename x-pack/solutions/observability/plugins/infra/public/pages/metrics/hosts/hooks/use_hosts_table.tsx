@@ -43,22 +43,7 @@ import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 import { AddDataTroubleshootingPopover } from '../components/table/add_data_troubleshooting_popover';
 import { useUnifiedSearchContext } from './use_unified_search';
-import { usePocSettingsContext } from './use_poc_settings';
 import { DEFAULT_PAGE_SIZE } from '../constants';
-
-// P10 — server-side sort fields. Anything in this set is already ranked by
-// Phase A and the table renders `items` as-is; anything outside falls back
-// to the legacy client-side sort on the visible page.
-const SERVER_SIDE_SORT_FIELDS = new Set<string>([
-  'host.name',
-  'cpuV2',
-  'normalizedLoad1m',
-  'memory',
-  'memoryFree',
-  'diskSpaceUsage',
-  'rxV2',
-  'txV2',
-]);
 
 /**
  * Columns and items types
@@ -182,13 +167,6 @@ export const useHostsTable = () => {
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
   const { searchCriteria } = useUnifiedSearchContext();
-  // P10 + P11. `useTwoPhaseFetch` decides between the two-phase and legacy
-  // paths; `useServerSideSort` decides, within the two-phase path, whether
-  // sort + pagination happen server-side (Phase A drives them) or client-
-  // side over the visible page. When the latter is OFF, the new path
-  // behaves like the legacy unsupported-sort fallback (sort the page only).
-  const { useTwoPhaseFetch, useServerSideSort } = usePocSettingsContext();
-  const useNewTable = useTwoPhaseFetch && useServerSideSort;
 
   const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
   const showApmHostTroubleshooting = hostNodes.some((item) => !item.hasSystemMetrics);
@@ -266,28 +244,12 @@ export const useHostsTable = () => {
     [detailsItemId, items]
   );
 
-  // P10 — server-side sort + pagination when the new table flow is on.
-  // Phase A already returns the page slice in the right order, so
-  // `currentPage` is just `items` for any sort field the server understands.
-  // For client-only sort fields (`alertsCount`, `title`) we apply the same
-  // in-place sort the table used to do — bounded to ≤ 20 rows so it's free.
-  //
-  // When the PoC "Use new Hosts table" toggle is off, the legacy fetcher
-  // returns the full fleet and we replicate the pre-Tier-3 behaviour:
-  // client-side sort over the whole set and slice down to the visible page.
   const currentPage = useMemo(() => {
-    if (useNewTable) {
-      if (!sorting.field || SERVER_SIDE_SORT_FIELDS.has(sorting.field)) {
-        return items;
-      }
-      return [...items].sort(sortTableData(sorting));
-    }
-
     const sorted = sorting.field ? [...items].sort(sortTableData(sorting)) : items;
     const pageIndex = pagination.pageIndex ?? 0;
     const pageSize = pagination.pageSize ?? DEFAULT_PAGE_SIZE;
     return sorted.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
-  }, [useNewTable, items, sorting, pagination.pageIndex, pagination.pageSize]);
+  }, [items, sorting, pagination.pageIndex, pagination.pageSize]);
 
   const showNetworkColumns = searchCriteria.preferredSchema !== 'semconv';
   // EUI deprecated `%` / `vw` / `cqw` / `cqi` units for table column widths

@@ -117,6 +117,22 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
   );
 
   const getFormula = () => {
+    // ES|QL-backed chart configs may stash the original inventory-model
+    // formula expression on a `displayFormula` passthrough — Lens itself
+    // ignores the field, but the "Formula Calculation:" tooltip rendered
+    // by `TooltipContent` reads whatever `getFormula()` returns. The
+    // helper exists because on the ES|QL path the chart's `value` (or
+    // `yAxis[0].value` for XY) carries the result-set column name, not a
+    // human-readable formula, so without this short-circuit the popover
+    // would render the bare column name (e.g. the literal string
+    // `'value'` for KPI tiles or `'cpuUsage'` for Metrics-tab tiles).
+    // Prefer the explicit override so the ES|QL path matches the DSL
+    // path's tooltip output verbatim.
+    const displayFormula = (params as { displayFormula?: unknown }).displayFormula;
+    if (typeof displayFormula === 'string') {
+      return displayFormula;
+    }
+
     if (params.chartType === 'xy') {
       return params.layers[0].yAxis[0].value;
     }

@@ -91,11 +91,25 @@ export const perfTracker = new PerfTracker();
 // double as the labels rendered in the gear-popover overlay; keep them
 // short and reviewer-readable.
 export const PERF_KEYS = {
-  phaseA: 'Phase A — /host/list',
-  phaseB: 'Phase B — /host/metrics',
-  legacy: 'Legacy — /host (single)',
-  kpis: 'KPIs — /host/kpis',
-  metricsTimeseries: 'Metrics tab — /host/metrics_timeseries',
+  // P16-A — each Lens ES|QL chart records one sample on `onLoad(false)`.
+  // We keep all eleven under a single key (the `meta.metric` tag identifies
+  // which tile produced the sample) so the overlay shows the rolling
+  // distribution rather than one row per chart. `MAX_ENTRIES_PER_KEY=10`
+  // means the most recent ~one render cycle survives, which is what
+  // reviewers want to see when comparing against the legacy Lens DSL path.
+  lensEsqlChart: 'Metrics tab — Lens ES|QL (per chart)',
+  // P15c — KPI tiles. One sample per render cycle per tile (Lens fires
+  // `onLoad(false)` once the single text-based layer finishes). The
+  // trendline isn't supported on the ES|QL path (see
+  // `esql_kpi_chart.ts`), so there's no second layer to disambiguate.
+  // Same `MAX_ENTRIES_PER_KEY=10` ceiling as `lensEsqlChart`.
+  lensEsqlKpi: 'KPI tiles — Lens ES|QL (per tile)',
+  // P15b — KPI strip rendered through the server endpoint
+  // (`POST /api/metrics/infra/host/kpis`) instead of any Lens embeddable.
+  // One sample per fetch (the four tiles share the same request), so the
+  // overlay shows a single wall-time per KPI cycle to A/B against the
+  // four per-tile samples from the Lens DSL / Lens ES|QL paths.
+  esqlEndpointKpi: 'KPI strip — server endpoint (ES|QL, per fetch)',
 } as const;
 
 export type PerfKey = (typeof PERF_KEYS)[keyof typeof PERF_KEYS];

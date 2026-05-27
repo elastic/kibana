@@ -21,6 +21,7 @@ import {
   buildDatasourceStates,
   extractReferences,
   mapToFormula,
+  mapToValueFormat,
 } from '../utils';
 import {
   getBreakdownColumn,
@@ -179,11 +180,22 @@ function getValueColumns(layer: LensMetricConfig) {
   if (layer.breakdown && typeof layer.breakdown !== 'string') {
     throw new Error('breakdown must be a field name when not using index source');
   }
+  // For the ES|QL/text-based path, format hints (`percent`, `bytes`, …)
+  // and the human-readable label only land in the rendered tile when
+  // they're stamped onto the `TextBasedLayerColumn` itself — the
+  // top-level `LensMetricConfig.format` / `LensMetricConfig.label`
+  // fields are wired through `mapToFormula` for the DSL path, but the
+  // value-column path used by ES|QL had no equivalent until now. Push
+  // them onto the headline column so an ES|QL KPI renders with the
+  // same chrome (e.g. "CPU Usage" / `43%`) as the DSL/formula variant
+  // instead of the bare ES|QL column name (`value`) and an unformatted
+  // float (`0.433`).
+  const headlineFormat = mapToValueFormat(layer);
   return [
     ...(layer.breakdown
       ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown as string)]
       : []),
-    getValueColumn(ACCESSOR, layer.value, 'number'),
+    getValueColumn(ACCESSOR, layer.value, 'number', headlineFormat, layer.label),
     ...(layer.queryMaxValue
       ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue, 'number')]
       : []),

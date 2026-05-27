@@ -44,17 +44,10 @@ export const PocSettingsPopover = () => {
   // default (ON) position, so a reviewer's eye is drawn to the gear icon
   // when the page is in a non-default configuration.
   const allDefault =
-    settings.useKpiEndpoint &&
-    settings.dropKpiTrendline &&
-    settings.useTwoPhaseFetch &&
-    settings.useServerSideSort &&
-    settings.useScopedAlerts &&
-    settings.useEsqlPhaseB &&
-    settings.useMetricsTimeseriesEndpoint &&
+    settings.kpiTrendline &&
     settings.useTermsFilter &&
     settings.useConsolidatedKql &&
-    settings.useStrippedBoolWrap &&
-    settings.useReadyGate;
+    settings.useStrippedBoolWrap;
 
   return (
     <EuiPopover
@@ -78,102 +71,70 @@ export const PocSettingsPopover = () => {
       <div style={{ width: 380, maxHeight: 560, overflowY: 'auto' }}>
         <EuiText size="xs" color="subdued">
           One switch per proposal, grouped by the area of the Hosts page they touch. Flip individual
-          flags to isolate the cost of a single change (e.g. measure P15a in isolation, or compare
-          P11 vs no-server-sort). Persisted in localStorage; resets to all-ON on a fresh browser.
+          flags to isolate the cost of a single change (e.g. compare P11 vs no-server-sort, or
+          measure P16-A against the inventory-model DSL charts). Persisted in localStorage; resets
+          to all-ON on a fresh browser.
         </EuiText>
         <EuiSpacer size="m" />
 
         <Section title="KPI tiles" defaultOpen>
           <Toggle
-            proposal="P15b"
-            label="Use ES|QL KPI endpoint"
-            checked={settings.useKpiEndpoint}
-            onChange={settings.setUseKpiEndpoint}
-            dataTestSubj="hostsViewPocSettingsKpiEndpointSwitch"
-            description={
-              <>
-                ON — one <EuiCode language="esql">STATS</EuiCode> request returns the four headline
-                scalars. OFF — four parallel Lens <EuiCode>chartType: &apos;metric&apos;</EuiCode>{' '}
-                charts (the legacy strip).
-              </>
-            }
-          />
-          <Toggle
             proposal="P15a"
-            label="Drop KPI trendline"
-            checked={settings.dropKpiTrendline}
-            onChange={settings.setDropKpiTrendline}
+            label="Trendline behind KPI headline"
+            checked={settings.kpiTrendline}
+            onChange={settings.setKpiTrendline}
             dataTestSubj="hostsViewPocSettingsKpiTrendlineSwitch"
-            dependsOn="Only effective when 'Use ES|QL KPI endpoint' is OFF"
             description={
               <>
-                ON — Lens KPI charts render without their per-tile <EuiCode>date_histogram</EuiCode>{' '}
-                sparkline (current inventory-model default). OFF — restore{' '}
-                <EuiCode>trendLine: true</EuiCode> so each tile fires a second aggregation (pre-P15a
-                cost).
-              </>
-            }
-          />
-        </Section>
-
-        <Section title="Hosts table">
-          <Toggle
-            proposal="P10"
-            label="Use two-phase fetch (Phase A + Phase B)"
-            checked={settings.useTwoPhaseFetch}
-            onChange={settings.setUseTwoPhaseFetch}
-            dataTestSubj="hostsViewPocSettingsTwoPhaseFetchSwitch"
-            description={
-              <>
-                ON — cheap Phase A names + per-page Phase B metrics + alerts. OFF — legacy single{' '}
-                <EuiCode>POST /api/metrics/infra/host</EuiCode> with the full result returned (the
-                pre-PoC shape).
+                ON — render the small sparkline behind each KPI headline number (the inventory-
+                model + main behaviour). OFF — drop the trendline so the tile only renders the
+                scalar headline. Independent of the ES|QL toggle below: with ES|QL ON, dropping the
+                trendline skips the second bucketed{' '}
+                <EuiCode language="esql">STATS … BY BUCKET(...)</EuiCode> query per tile; with ES|QL
+                OFF, it suppresses the DSL <EuiCode>date_histogram</EuiCode> sub-aggregation Lens
+                adds for the formula trendline path.
               </>
             }
           />
           <Toggle
-            proposal="P11"
-            label="Server-side sort &amp; pagination"
-            checked={settings.useServerSideSort}
-            onChange={settings.setUseServerSideSort}
-            dataTestSubj="hostsViewPocSettingsServerSortSwitch"
-            dependsOn="Only effective when 'Use two-phase fetch' is ON"
+            proposal="P15c"
+            label="Render KPIs via Lens ES|QL viz"
+            checked={settings.useLensEsqlKpiCharts}
+            onChange={settings.setUseLensEsqlKpiCharts}
+            dataTestSubj="hostsViewPocSettingsLensEsqlKpisSwitch"
             description={
               <>
-                ON — Phase A ranks the whole fleet by the chosen metric, server returns the page.
-                OFF — server returns hosts in default order, client sorts the visible page only
-                (same shape as today&apos;s unsupported-field fallback).
+                ON — each KPI tile fires a scalar ES|QL <EuiCode>STATS</EuiCode> for the headline
+                number. The trendline (sparkline) is intentionally disabled on this path —{' '}
+                <EuiCode>kbn-lens-embeddable-utils</EuiCode> only knows how to bucketize a
+                DSL/formula value for the metric viz&apos;s second layer, and the ES|QL equivalent
+                didn&apos;t render cleanly during the spike. The trendline toggle above only applies
+                when this toggle is OFF. OFF — fall back to the inventory-model formula configs
+                which rely on Lens&apos;s DSL formula path (the pre-PoC main behaviour). Per-tile
+                wall times are logged to the overlay below as{' '}
+                <EuiCode>KPI tiles — Lens ES|QL (per tile)</EuiCode>. Overridden by the server-
+                endpoint toggle below.
               </>
             }
           />
           <Toggle
-            proposal="P5.6"
-            label="Scoped alerts (visible page only)"
-            checked={settings.useScopedAlerts}
-            onChange={settings.setUseScopedAlerts}
-            dataTestSubj="hostsViewPocSettingsScopedAlertsSwitch"
-            dependsOn="Only effective when 'Use two-phase fetch' is ON"
+            proposal="P15b"
+            label="Render KPIs via server endpoint (plain indicator)"
+            checked={settings.useEsqlEndpointKpi}
+            onChange={settings.setUseEsqlEndpointKpi}
+            dataTestSubj="hostsViewPocSettingsEsqlEndpointKpiSwitch"
             description={
               <>
-                ON — alerts API aggregates over the ≤ 20 hosts on screen. OFF — aggregates over the
-                full Phase A result (up to <EuiCode>limit</EuiCode>) and the table picks the
-                relevant counts out by name (replicates pre-P5.6 cost).
-              </>
-            }
-          />
-          <Toggle
-            proposal="P12"
-            label="ES|QL Phase B (semconv)"
-            checked={settings.useEsqlPhaseB}
-            onChange={settings.setUseEsqlPhaseB}
-            dataTestSubj="hostsViewPocSettingsEsqlPhaseBSwitch"
-            dependsOn="Only effective when 'Use two-phase fetch' is ON and schema is semconv"
-            description={
-              <>
-                ON — Phase B builds one ES|QL{' '}
-                <EuiCode language="esql">FROM … STATS … BY host.name</EuiCode> query (single
-                round-trip, filter-in-agg). OFF — force the DSL fallback path even on semconv to
-                measure ES|QL&apos;s contribution to Phase B latency.
+                ON — bypass Lens for the KPI strip. The page fires{' '}
+                <EuiCode>POST /api/metrics/infra/host/kpis</EuiCode> once per render cycle; the
+                server runs a single ES|QL <EuiCode>STATS</EuiCode> (semconv) or one DSL search with
+                four sibling aggregations (ECS), and returns four scalar values. The tiles render
+                through the pre-Lens <EuiCode>MetricChartWrapper</EuiCode> (an Elastic Charts{' '}
+                <EuiCode>Metric</EuiCode>) so the per-tile rendering cost reduces to a plain React
+                update with no Lens wiring. OFF — fall through to the two Lens toggles above (DSL or
+                ES|QL embeddable). Higher precedence than P15c and P15a — flipping this on disables
+                both. The single per-fetch wall time is logged to the overlay below as{' '}
+                <EuiCode>KPI strip — server endpoint (ES|QL, per fetch)</EuiCode>.
               </>
             }
           />
@@ -181,18 +142,23 @@ export const PocSettingsPopover = () => {
 
         <Section title="Metrics tab">
           <Toggle
-            proposal="P16"
-            label="Use timeseries endpoint"
-            checked={settings.useMetricsTimeseriesEndpoint}
-            onChange={settings.setUseMetricsTimeseriesEndpoint}
-            dataTestSubj="hostsViewPocSettingsMetricsTimeseriesSwitch"
+            proposal="P16-A"
+            label="Render Metrics tab via Lens ES|QL viz"
+            checked={settings.useLensEsqlMetricsCharts}
+            onChange={settings.setUseLensEsqlMetricsCharts}
+            dataTestSubj="hostsViewPocSettingsLensEsqlChartsSwitch"
             description={
               <>
-                ON — one <EuiCode>POST /host/metrics_timeseries</EuiCode> request returns all 11
-                metric series for the visible page (single ES|QL query, counter rates derived
-                server-side via bucket diffs). Eleven <EuiCode>@elastic/charts</EuiCode> line charts
-                render the result. OFF — eleven Lens xy embeddables, each firing its own DSL{' '}
-                <EuiCode>terms + date_histogram</EuiCode> per metric (pre-P16 shape).
+                ON — all eleven Metrics-tab tiles render through Lens xy embeddables backed by ES|QL{' '}
+                <EuiCode>STATS … BY host.name, BUCKET(...)</EuiCode> queries (one per chart, fired
+                by Lens&apos;s own IntersectionObserver). OFF — fall back to the legacy
+                inventory-model Lens DSL charts. The chart chrome and per-series legend table (Avg /
+                Min / Max / Last non-null) are identical between the two paths; only the data source
+                changes. Counter metrics (rx/tx, disk I/O, throughput) display the raw{' '}
+                <EuiCode>MAX(field)</EuiCode> because ES|QL <EuiCode>RATE()</EuiCode> requires a{' '}
+                <EuiCode>TS</EuiCode> pipeline that doesn&apos;t accept the per-direction filter we
+                need. Per-chart wall times are logged to the overlay below as{' '}
+                <EuiCode>Metrics tab — Lens ES|QL (per chart)</EuiCode>.
               </>
             }
           />
@@ -238,20 +204,6 @@ export const PocSettingsPopover = () => {
                 <EuiCode>InfraMetricsClient.search</EuiCode> when no excluded-tier filter applies.
                 OFF — keep the wrap (sent server-side via <EuiCode>x-poc-legacy-bool-wrap</EuiCode>
                 ).
-              </>
-            }
-          />
-          <Toggle
-            proposal="P5.5"
-            label="Ready gate (suppress double-fetch)"
-            checked={settings.useReadyGate}
-            onChange={settings.setUseReadyGate}
-            dataTestSubj="hostsViewPocSettingsReadyGateSwitch"
-            description={
-              <>
-                ON — fetches wait for <EuiCode>metricsView</EuiCode> + schema to settle so they fire
-                once. OFF — fetches fire immediately on mount and re-fire when the gate resolves
-                (original pre-P5.5 double-fire pattern).
               </>
             }
           />

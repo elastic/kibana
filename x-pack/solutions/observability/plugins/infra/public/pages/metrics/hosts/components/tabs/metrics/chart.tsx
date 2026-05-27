@@ -24,9 +24,13 @@ import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 export type ChartProps = LensConfig & {
   id: string;
   dataView: DataView | undefined;
+  // Optional load-cycle listener. P16-A uses it to push per-chart wall
+  // times into `perfTracker`; the legacy DSL path doesn't pass anything
+  // and the prop falls through to `LensChart` unchanged.
+  onLoad?: (isLoading: boolean) => void;
 };
 
-export const Chart = ({ id, dataView, ...chartProps }: ChartProps) => {
+export const Chart = ({ id, dataView, onLoad, ...chartProps }: ChartProps) => {
   const { searchCriteria, parsedDateRange } = useUnifiedSearchContext();
   const { loading, error, hostNodes } = useHostsViewContext();
   const { reloadRequestTime } = useReloadRequestTimeContext();
@@ -100,6 +104,7 @@ export const Chart = ({ id, dataView, ...chartProps }: ChartProps) => {
       filters={filters}
       query={afterLoadedState.query}
       lastReloadRequestTime={afterLoadedState.reloadRequestTime}
+      onLoad={onLoad}
     />
   );
 };

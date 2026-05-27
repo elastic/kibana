@@ -101,23 +101,15 @@ function createInfraApiClient(
   return ((path: string, options: HttpFetchOptions) => {
     const shouldInspect = inspectEnabled && isInspectableRoute(path);
 
-    // PoC gear toggles: when their respective switch is OFF, send a header
-    // that tells the server to restore the pre-PoC behaviour. Hosts-page-
-    // only — `pocFlags` is a module-level mirror updated by
-    // `<PocSettingsProvider>`, which is mounted exclusively on the Hosts
-    // page. Building the header dict lazily so a fully-default page sends
-    // no PoC headers at all.
+    // PoC gear toggle (P5 only — the host-endpoint toggles for P10 / P11 /
+    // P12 / P5.6 were reverted): when "Use stripped bool wrap" is OFF, send
+    // the legacy-shape header so the metrics client re-wraps every search
+    // in the redundant outer `bool` filter. Hosts-page-only — `pocFlags`
+    // is a module-level mirror updated by `<PocSettingsProvider>`, which
+    // is mounted exclusively on the Hosts page.
     const pocHeaders = isInspectableRoute(path)
       ? {
-          // P5 — restore the redundant outer `bool` wrap in the metrics
-          // client's `search()` calls.
           ...(pocFlags.useStrippedBoolWrap === false ? { 'x-poc-legacy-bool-wrap': 'true' } : {}),
-          // P5.6 — widen the alerts API scope from the visible page to the
-          // full Phase A result. Read by the `/host/list` route.
-          ...(pocFlags.useScopedAlerts === false ? { 'x-poc-skip-alert-scoping': 'true' } : {}),
-          // P12 — force Phase B onto the DSL fallback even when the schema
-          // is semconv. Read by the `/host/metrics` route.
-          ...(pocFlags.useEsqlPhaseB === false ? { 'x-poc-force-dsl-phase-b': 'true' } : {}),
         }
       : undefined;
 
@@ -142,7 +134,7 @@ function createInfraApiClient(
   }) as ApiCallClient;
 }
 
-// P5.5 — the callback may synchronously return `undefined` to signal "do not
+// The callback may synchronously return `undefined` to signal "do not
 // fetch yet". The runtime already guards on this below (line ~159); the type
 // widening here makes the contract explicit so consumers can gate the request
 // on async-resolved prerequisites without firing a wasted dispatch. See the

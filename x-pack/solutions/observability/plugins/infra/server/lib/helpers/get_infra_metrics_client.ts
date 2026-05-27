@@ -125,13 +125,14 @@ export async function getInfraMetricsClient({
         }
       );
     },
-    // P10 — ES|QL execution path for the two-phase host endpoints. Bypasses
-    // `framework.callWithRequest` (which only types `search` / `msearch`) and
-    // calls `asCurrentUser.esql.query` directly so we can pass the official
+    // P15b — ES|QL execution path. Bypasses `framework.callWithRequest`
+    // (which only types `search` / `msearch`) and calls
+    // `asCurrentUser.esql.query` directly so we can pass the official
     // `EsqlQueryRequest` shape end-to-end. Excluded-tier filtering composes
-    // via the request's `filter` field; the caller may pass an extra `filter`
-    // (typically the unified-search KQL converted via `buildEsQuery`) and the
-    // two are merged with a top-level `bool { filter: [...] }`.
+    // via the request's `filter` field; the caller may pass an extra
+    // `filter` (typically the unified-search KQL converted via
+    // `buildEsQuery`) and the two are merged with a top-level
+    // `bool { filter: [...] }`.
     async esql<TRow extends Record<string, unknown> = Record<string, unknown>>(
       params: {
         query: string;

@@ -17,6 +17,7 @@ export const Kpi = ({
   filters,
   lastReloadRequestTime,
   loading,
+  onLoad,
   ...chartProps
 }: LensConfig & {
   id: string;
@@ -26,6 +27,11 @@ export const Kpi = ({
   searchSessionId?: string;
   loading?: boolean;
   lastReloadRequestTime?: number;
+  // PoC perf-tracking hook so KPI tile rendered through `LensChart` can
+  // report each layer's wall-time to the Hosts UI `perfTracker`. Optional
+  // because non-PoC surfaces (asset detail flyout, etc.) don't measure
+  // per-tile timings.
+  onLoad?: (isLoading: boolean) => void;
 }) => {
   const tooltipContent = useMemo(
     () =>
@@ -46,6 +52,7 @@ export const Kpi = ({
       loading={loading}
       toolTip={tooltipContent}
       lastReloadRequestTime={lastReloadRequestTime}
+      onLoad={onLoad}
       disableTriggers
       hidePanelTitles
     />

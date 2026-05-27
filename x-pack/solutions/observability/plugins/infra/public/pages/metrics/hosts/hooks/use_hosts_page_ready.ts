@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-// P5.5 — first-paint double-fire gate for the Hosts page data fetchers
-// (`useHostsView`, `useHostsKpis`, `useHostsMetricsTimeseries`,
-// `useHostCount`). Returns `true` when all upstream prerequisites have
-// settled so the downstream `useFetcher` callsites can fire once instead
-// of twice.
+// First-paint double-fire gate for the Hosts page data fetchers
+// (`useHostsView`, `useHostCount`). Returns `true` when all
+// upstream prerequisites have settled so the downstream `useFetcher`
+// callsites can fire once instead of twice.
 //
 // Two upstream resolutions settle asynchronously on first load. Each one
 // would otherwise change the `useFetcher` payload identity and force the
@@ -49,7 +48,6 @@
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
-import { usePocSettingsContext } from './use_poc_settings';
 import { useUnifiedSearchContext } from './use_unified_search';
 
 export const useHostsPageReady = (): boolean => {
@@ -57,14 +55,6 @@ export const useHostsPageReady = (): boolean => {
   const { metricsView } = useMetricsDataViewContext();
   const { data: timeRangeMetadata, status: timeRangeMetadataStatus } =
     useTimeRangeMetadataContext();
-  // PoC gear toggle: when "Use ready gate" is OFF, return `true` from the
-  // first render. Downstream `useFetcher` callsites that gate on this will
-  // fire immediately and re-fire when the metrics view / preferred schema
-  // resolve, restoring the pre-P5.5 first-paint double-fetch for
-  // comparison runs.
-  const { useReadyGate } = usePocSettingsContext();
-
-  if (!useReadyGate) return true;
 
   const schemaSettled =
     searchCriteria.preferredSchema != null ||

@@ -9,27 +9,26 @@
 //
 // Replaces four parallel Lens-driven DSL queries (one per KPI tile) with one
 // server-side request that returns the four headline scalars in one round
-// trip. Builds on P15a's removal of `trendLine: true`: with no
-// `date_histogram` to bucket against, the engine-side cost collapses from
+// trip. The Hosts page's KPI strip has no trendline (P15a), so with no
+// `date_histogram` to bucket against the engine-side cost collapses from
 // `O(hosts × buckets × per-state slices)` to `O(hosts × per-state slices)`,
-// well below Nhat's 1 GB Serverless circuit-breaker threshold for any
-// realistic fleet size up to MAX_HOST_COUNT_LIMIT (10 000).
+// well below the 1 GB Serverless circuit-breaker for any realistic fleet
+// size up to `MAX_HOST_COUNT_LIMIT` (10 000).
 //
 // Schema split:
 // - semconv → ES|QL `FROM … | STATS … | EVAL`. Filter-in-aggregation per
 //   per-state slice (`AVG(...) WHERE state == "idle"`). The `*_OVER_TIME`
 //   family isn't used here — these are page-wide aggregates, not time
 //   series. `FROM` (not `TS`) because we need filter-in-aggregation, which
-//   the engine currently rejects inside `TS` pipelines (same constraint
-//   that drives the Phase B query shape).
+//   the engine currently rejects inside `TS` pipelines.
 // - ecs → DSL search with four sibling aggregations + a `bucket_script` for
 //   the normalised-load ratio. One round trip, no Lens / formula compiler.
 //
 // Scope match with the table:
-// - The caller passes `names: string[]` (Phase A's result, capped at
-//   MAX_HOST_COUNT_LIMIT). The KPI tiles' "Average (of N hosts)" subtitle
-//   means exactly the N hosts the table is rendering. We don't re-run the
-//   ranking; the client owns the contract.
+// - The caller passes `names: string[]` (the legacy host endpoint's
+//   result, capped at `MAX_HOST_COUNT_LIMIT`). The KPI tiles' "Average
+//   (of N hosts)" subtitle means exactly the N hosts the table is
+//   rendering. We don't re-run the ranking; the client owns the contract.
 // - The same KQL `query` is applied so any "exclude cloud.provider=aws"
 //   filter the user typed is honoured.
 
@@ -110,7 +109,7 @@ async function fetchSemconvKpis({
   // Pre-aggregation `WHERE` is inlined into the ES|QL query (the engine
   // applies it on the raw stream before the `STATS` boundary). Post-`STATS`
   // filtering uses the wrapping request `filter` instead — same pattern
-  // Phase B uses.
+  // every other ES|QL helper in the plugin uses.
   const nameList = names ? names.map((n) => JSON.stringify(n)).join(', ') : null;
 
   const esqlQuery = `FROM metrics-hostmetricsreceiver.otel-*${
@@ -128,7 +127,7 @@ async function fetchSemconvKpis({
     cpuUsage = 1 - cpu_idle,
     normalizedLoad1m = CASE(cores > 0, load1m / cores, NULL),
     memoryUsage = mem_used,
-    diskUsage = CASE(disk_total > 0, 1 - disk_free / disk_total, NULL)
+    diskUsage = CASE(disk_total > 0, 1 - TO_DOUBLE(disk_free) / TO_DOUBLE(disk_total), NULL)
 | KEEP cpuUsage, normalizedLoad1m, memoryUsage, diskUsage, host_count`;
 
   const filterClauses: estypes.QueryDslQueryContainer[] = [
@@ -228,12 +227,6 @@ async function fetchKpisDsl({
   const load1mField = isSemconv ? 'metrics.system.cpu.load_average.1m' : 'system.load.1';
   const coresField = isSemconv ? 'metrics.system.cpu.logical.count' : 'system.load.cores';
 
-  // We *cannot* use `bucket_script` to derive `diskUsage` and
-  // `normalizedLoad1m` here: pipeline aggs require a multi-bucket parent,
-  // but at the root of this request all siblings are metric aggs. Returning
-  // the raw numerator/denominator and dividing in `extract*` below is one
-  // extra division per request — cheaper than wrapping everything in a
-  // dummy `filters` bucket just to satisfy the parser.
   const diskAggs: Record<string, estypes.AggregationsAggregationContainer> = isSemconv
     ? {
         disk_free: {
@@ -241,6 +234,13 @@ async function fetchKpisDsl({
           aggs: { value: { sum: { field: 'metrics.system.filesystem.usage' } } },
         },
         disk_total: { sum: { field: 'metrics.system.filesystem.usage' } },
+        diskUsage: {
+          bucket_script: {
+            buckets_path: { free: 'disk_free>value', total: 'disk_total' },
+            // Guard against `total=0` so we don't return `Infinity`.
+            script: 'params.total > 0 ? 1 - params.free / params.total : null',
+          },
+        },
       }
     : {
         diskUsage: { max: { field: 'system.filesystem.used.pct' } },
@@ -265,6 +265,12 @@ async function fetchKpisDsl({
         mem: memAgg,
         load1m: { avg: { field: load1mField } },
         cores: { max: { field: coresField } },
+        normalizedLoad1m: {
+          bucket_script: {
+            buckets_path: { load: 'load1m', cores: 'cores' },
+            script: 'params.cores > 0 ? params.load / params.cores : null',
+          },
+        },
         ...diskAggs,
         host_count: { cardinality: { field: HOST_NAME_FIELD } },
       },
@@ -276,7 +282,7 @@ async function fetchKpisDsl({
 
   const kpis: HostsKpis = {
     cpuUsage: extractCpuUsage(aggs, isSemconv),
-    normalizedLoad1m: extractNormalizedLoad(aggs),
+    normalizedLoad1m: numberOrNull(aggs?.normalizedLoad1m?.value),
     memoryUsage: extractMemoryUsage(aggs, isSemconv),
     diskUsage: extractDiskUsage(aggs, isSemconv),
   };
@@ -324,28 +330,9 @@ function extractDiskUsage(
 ): number | null {
   if (!aggs) return null;
   if (isSemconv) {
-    // Semconv: `system.filesystem.usage` reports bytes per `state`. Total
-    // capacity == sum across all states; `1 - free/total` is the canonical
-    // used-ratio formula used everywhere else in the inventory model.
-    const free = numberOrNull(
-      (aggs.disk_free as { value?: { value?: number | null } } | undefined)?.value?.value
-    );
-    const total = numberOrNull((aggs.disk_total as { value?: number | null } | undefined)?.value);
-    if (free === null || total === null || total <= 0) return null;
-    return 1 - free / total;
+    return numberOrNull((aggs.diskUsage as { value?: number | null } | undefined)?.value);
   }
   return numberOrNull((aggs.diskUsage as { value?: number | null } | undefined)?.value);
-}
-
-function extractNormalizedLoad(aggs: Record<string, unknown> | undefined): number | null {
-  if (!aggs) return null;
-  // load1m and cores have identical shape on both ECS and semconv branches
-  // (plain metric aggs); the field names differ but the response shape
-  // doesn't, so this branch-free.
-  const load = numberOrNull((aggs.load1m as { value?: number | null } | undefined)?.value);
-  const cores = numberOrNull((aggs.cores as { value?: number | null } | undefined)?.value);
-  if (load === null || cores === null || cores <= 0) return null;
-  return load / cores;
 }
 
 function numberOrNull(value: unknown): number | null {

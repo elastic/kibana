@@ -4,125 +4,88 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, EuiFlexItem, EuiText, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { HostMetricsExplanationContent } from '../../../../../../components/lens';
 import { Chart } from './chart';
-import { HostMetricsChart } from './host_metrics_chart';
 import { Popover } from '../../../../../../components/popover';
 import { useMetricsDataViewContext } from '../../../../../../containers/metrics_source';
 import { useMetricsCharts } from '../../../hooks/use_metrics_charts';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { useHostsMetricsTimeseries } from '../../../hooks/use_hosts_metrics_timeseries';
+import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { usePocSettingsContext } from '../../../hooks/use_poc_settings';
-import type { HostsTimeseriesMetric } from '../../../../../../../common/http_api';
-
-// P16 — order matches the legacy `useMetricsCharts()` array so the two-column
-// grid renders the same chart in the same slot regardless of which path is
-// active. Titles are sourced from i18n directly here (small enough catalogue
-// that wiring back through `findInventoryModel('host').metrics.getCharts({})`
-// is not worth the round-trip on every render).
-const POC_METRICS: ReadonlyArray<{ metric: HostsTimeseriesMetric; title: string }> = [
-  {
-    metric: 'cpuUsage',
-    title: i18n.translate('xpack.infra.hostsView.metricsTab.cpuUsage', {
-      defaultMessage: 'CPU Usage',
-    }),
-  },
-  {
-    metric: 'normalizedLoad1m',
-    title: i18n.translate('xpack.infra.hostsView.metricsTab.normalizedLoad1m', {
-      defaultMessage: 'Normalized Load',
-    }),
-  },
-  {
-    metric: 'memoryUsage',
-    title: i18n.translate('xpack.infra.hostsView.metricsTab.memoryUsage', {
-      defaultMessage: 'Memory Usage',
-    }),
-  },
-  {
-    metric: 'memoryFree',
-    title: i18n.translate('xpack.infra.hostsView.metricsTab.memoryFree', {
-      defaultMessage: 'Memory Free',
-    }),
-  },
-  {
-    metric: 'diskSpaceAvailable',
-    title: i18n.translate('xpack.infra.hostsView.metricsTab.diskSpaceAvailable', {
-      defaultMessage: 'Disk Space Available',
-    }),
-  },
-  {
-    metric: 'diskIORead',
-    title: i18n.translate('xpack.infra.hostsView.metricsTab.diskIORead', {
-      defaultMessage: 'Disk Read IOPS',
-    }),
-  },
-  {
-    metric: 'diskIOWrite',
-    title: i18n.translate('xpack.infra.hostsView.metricsTab.diskIOWrite', {
-      defaultMessage: 'Disk Write IOPS',
-    }),
-  },
-  {
-    metric: 'diskReadThroughput',
-    title: i18n.translate('xpack.infra.hostsView.metricsTab.diskReadThroughput', {
-      defaultMessage: 'Disk Read Throughput',
-    }),
-  },
-  {
-    metric: 'diskWriteThroughput',
-    title: i18n.translate('xpack.infra.hostsView.metricsTab.diskWriteThroughput', {
-      defaultMessage: 'Disk Write Throughput',
-    }),
-  },
-  {
-    metric: 'rx',
-    title: i18n.translate('xpack.infra.hostsView.metricsTab.rx', {
-      defaultMessage: 'Network Inbound (RX)',
-    }),
-  },
-  {
-    metric: 'tx',
-    title: i18n.translate('xpack.infra.hostsView.metricsTab.tx', {
-      defaultMessage: 'Network Outbound (TX)',
-    }),
-  },
-];
+import { PERF_KEYS, perfTracker } from '../../../utils/perf_tracker';
+import { autoBucketSpan, bucketSpanSeconds } from '../../../utils/bucket_span';
+import { isSupportedEsqlMetric, toEsqlMetricsChartConfig } from './esql_metrics_chart';
 
 export const MetricsGrid = () => {
-  const { useMetricsTimeseriesEndpoint } = usePocSettingsContext();
+  const { metricsView } = useMetricsDataViewContext();
+  const { searchCriteria, parsedDateRange } = useUnifiedSearchContext();
+  const { currentPage } = useHostsTableContext();
+  const { useLensEsqlMetricsCharts } = usePocSettingsContext();
 
-  // P16 — the new path uses the visible table page (`currentPage`) as its
-  // host scope. Both the legacy and the new table expose a `currentPage`, so
-  // we don't need to gate the new charts on `useTwoPhaseFetch` — flipping
-  // the metrics-tab toggle alone is enough to switch which endpoint backs
-  // the eleven charts.
-  if (useMetricsTimeseriesEndpoint) {
-    return <PocMetricsGrid />;
-  }
+  const baseCharts = useMetricsCharts({
+    indexPattern: metricsView?.dataViewReference.getIndexPattern(),
+    schema: searchCriteria.preferredSchema,
+  });
 
-  return <LegacyMetricsGrid />;
-};
+  // Resolved absolute ISO strings (from the unified-search context) →
+  // numeric ms pair. Date.parse keeps the input narrow.
+  const fromMs = useMemo(() => Date.parse(parsedDateRange.from), [parsedDateRange.from]);
+  const toMs = useMemo(() => Date.parse(parsedDateRange.to), [parsedDateRange.to]);
+  const span = useMemo(() => autoBucketSpan(fromMs, toMs), [fromMs, toMs]);
+  const spanSeconds = useMemo(() => bucketSpanSeconds(span), [span]);
 
-const PocMetricsGrid = () => {
-  const { seriesByMetric, loading, bucketSpan } = useHostsMetricsTimeseries();
+  const names = useMemo(() => currentPage.map((row) => row.name), [currentPage]);
+
+  // When P16-A is on, rewrite each inventory chart config so its dataset
+  // is an ES|QL query bounded to the current page's hosts. The chart's
+  // chrome (title, legend, ybounds, fittingFunction, reference layers)
+  // is preserved, so the only visual difference between the two paths is
+  // the data behind the line.
+  //
+  // We skip the rewrite while `names` is empty — the legacy `<Chart>`
+  // already shows a loading placeholder during Phase A and avoids
+  // running Lens with an empty filter. Re-running through `useMemo` is
+  // cheap (11 small JSON rebuilds) so a stale ES|QL string never reaches
+  // Lens.
+  const charts = useMemo(() => {
+    if (!useLensEsqlMetricsCharts || names.length === 0) {
+      return baseCharts;
+    }
+    return baseCharts.map((chart) => {
+      const id = (chart as { id?: string }).id;
+      if (!id || !isSupportedEsqlMetric(id)) {
+        return chart;
+      }
+      return {
+        ...toEsqlMetricsChartConfig({
+          baseChart: chart,
+          metric: id,
+          names,
+          span,
+          spanSeconds,
+        }),
+        id,
+      };
+    });
+  }, [useLensEsqlMetricsCharts, baseCharts, names, span, spanSeconds]);
 
   return (
     <>
       <MetricsGridHeader />
       <EuiSpacer size="s" />
       <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
-        {POC_METRICS.map(({ metric, title }) => (
-          <EuiFlexItem key={metric} grow={false}>
-            <HostMetricsChart
-              metric={metric}
-              title={title}
-              series={seriesByMetric.get(metric) ?? []}
-              loading={loading}
-              bucketSpan={bucketSpan}
+        {charts.map((chart, index) => (
+          <EuiFlexItem key={(chart as { id?: string }).id ?? index} grow={false}>
+            <MetricsGridItem
+              chart={chart}
+              dataView={metricsView?.dataViewReference}
+              perfEnabled={useLensEsqlMetricsCharts}
+              span={span}
+              hostsInScope={names.length}
             />
           </EuiFlexItem>
         ))}
@@ -131,27 +94,53 @@ const PocMetricsGrid = () => {
   );
 };
 
-const LegacyMetricsGrid = () => {
-  const { metricsView } = useMetricsDataViewContext();
-  const { searchCriteria } = useUnifiedSearchContext();
-  const charts = useMetricsCharts({
-    indexPattern: metricsView?.dataViewReference.getIndexPattern(),
-    schema: searchCriteria.preferredSchema,
-  });
+interface MetricsGridItemProps {
+  chart: ReturnType<typeof useMetricsCharts>[number];
+  dataView: DataView | undefined;
+  perfEnabled: boolean;
+  span: string;
+  hostsInScope: number;
+}
 
-  return (
-    <>
-      <MetricsGridHeader />
-      <EuiSpacer size="s" />
-      <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
-        {charts.map((chartProp, index) => (
-          <EuiFlexItem key={index} grow={false}>
-            <Chart {...chartProp} dataView={metricsView?.dataViewReference} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
-    </>
+// One Lens chart with optional per-load perf tracking. The `onLoad` cycle
+// brackets a single fetch + render: Lens fires `(true)` when it kicks
+// off, then `(false)` when the result lands (or fails). We record the
+// duration only when ES|QL is enabled so the legacy DSL path's wall
+// times don't pollute the ES|QL distribution.
+const MetricsGridItem = ({
+  chart,
+  dataView,
+  perfEnabled,
+  span,
+  hostsInScope,
+}: MetricsGridItemProps) => {
+  const loadStartRef = useRef<number | null>(null);
+  const id = (chart as { id?: string }).id ?? 'unknown';
+
+  const handleOnLoad = useCallback(
+    (isLoading: boolean) => {
+      if (!perfEnabled) {
+        loadStartRef.current = null;
+        return;
+      }
+      if (isLoading) {
+        loadStartRef.current = performance.now();
+        return;
+      }
+      if (loadStartRef.current !== null) {
+        const duration = performance.now() - loadStartRef.current;
+        loadStartRef.current = null;
+        perfTracker.record(PERF_KEYS.lensEsqlChart, duration, {
+          metric: id,
+          hosts: hostsInScope,
+          span,
+        });
+      }
+    },
+    [perfEnabled, id, hostsInScope, span]
   );
+
+  return <Chart {...chart} dataView={dataView} onLoad={handleOnLoad} />;
 };
 
 const MetricsGridHeader = () => (

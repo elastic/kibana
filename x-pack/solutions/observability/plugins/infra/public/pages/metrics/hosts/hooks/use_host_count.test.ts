@@ -212,11 +212,11 @@ describe('useHostCount', () => {
     });
   });
 
-  // P5.5 — guards against a regression where /api/infra/host/count fires
-  // twice on initial load: once before the data view / preferred schema
-  // resolve and again once they do. `useFetcher` treats a synchronously-
-  // returned `undefined` as "do not initiate", so the hook's fetcher
-  // callback must short-circuit while `isReady` is false.
+  // Guards against a regression where /api/infra/host/count fires twice
+  // on initial load: once before the data view / preferred schema resolve
+  // and again once they do. `useFetcher` treats a synchronously-returned
+  // `undefined` as "do not initiate", so the hook's fetcher callback must
+  // short-circuit while `isReady` is false.
   describe('initial-load gate', () => {
     const captureFetcherCallback = () => {
       const captured: { callback?: (callApi: jest.Mock) => unknown } = {};

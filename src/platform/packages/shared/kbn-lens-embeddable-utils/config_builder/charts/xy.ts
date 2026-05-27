@@ -19,7 +19,13 @@ import type {
   XYVisualizationState,
 } from '@kbn/lens-common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
-import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
+import {
+  addLayerColumn,
+  buildDatasourceStates,
+  extractReferences,
+  mapToFormula,
+  mapToValueFormat,
+} from '../utils';
 import type {
   BuildDependencies,
   LensAnnotationLayer,
@@ -154,11 +160,25 @@ function buildVisualizationState(config: LensXYConfig): XYVisualizationState {
   };
 }
 
-function hasFormatParams(yAxis: LensSeriesLayer['yAxis'][number]) {
-  return (
-    yAxis.format &&
-    (yAxis.suffix || yAxis.compactValues || yAxis.decimals || yAxis.fromUnit || yAxis.toUnit)
-  );
+// `decimals: 0` is the inventory model's default for whole-number metrics
+// (CPU %, disk space, IOPS). The previous `format && (suffix ||
+// compactValues || decimals || …)` guard treated a falsy `decimals` (i.e.
+// 0) as "no format params at all" and dropped the formatter entirely —
+// the chart fell back to raw numbers. `mapToValueFormat` (shared with
+// the metric/formula path) keeps the formatter as long as `format` is
+// set, regardless of whether `decimals` happens to be 0.
+//
+// `mapToValueFormat` also forwards `suffix` and translates
+// `normalizeByUnit` into a `/s` / `/m` / `/h` / `/d` suffix on the format
+// params (the only `ValueFormatConfig` knob the text-based datasource
+// respects for time-scale annotations — `TextBasedLayerColumn` has no
+// `timeScale` field of its own, unlike the formula path). That keeps
+// counter-rate metrics (IOPS, throughput, network bits/s) rendering
+// with their unit suffix when read through ES|QL.
+function getYAxisFormat(
+  yAxis: LensSeriesLayer['yAxis'][number]
+): NonNullable<TextBasedLayerColumn['params']>['format'] | undefined {
+  return yAxis.format ? mapToValueFormat(yAxis) : undefined;
 }
 
 function getValueColumns(layer: LensSeriesLayer, i: number) {
@@ -174,22 +194,9 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
       getValueColumn(`${ACCESSOR}${i}_breakdown_${breakdownIndex}`, bd as string)
     ),
     ...getXValueColumn(layer.xAxis, i),
-    ...layer.yAxis.map((yAxis, index) => {
-      const params = hasFormatParams(yAxis)
-        ? {
-            id: yAxis.format as string,
-            params: {
-              compact: yAxis.compactValues,
-              decimals: yAxis.decimals ?? 0,
-              suffix: yAxis.suffix,
-              fromUnit: yAxis.fromUnit,
-              toUnit: yAxis.toUnit,
-            },
-          }
-        : undefined;
-
-      return getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number', params);
-    }),
+    ...layer.yAxis.map((yAxis, index) =>
+      getValueColumn(`${ACCESSOR}${i}_${index}`, yAxis.value, 'number', getYAxisFormat(yAxis))
+    ),
   ];
 }
 
