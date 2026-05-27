@@ -87,51 +87,33 @@ export const findRelatedAlerts = async (
     destIps: providedDestIps,
   } = params;
 
-  const hasProvidedEntities =
-    (Array.isArray(providedHostNames) && providedHostNames.length > 0) ||
-    (Array.isArray(providedUserNames) && providedUserNames.length > 0) ||
-    (Array.isArray(providedSourceIps) && providedSourceIps.length > 0) ||
-    (Array.isArray(providedDestIps) && providedDestIps.length > 0);
+  const providedEntities: SourceEntities = {
+    hostNames: trimEntityValues(providedHostNames),
+    userNames: trimEntityValues(providedUserNames),
+    sourceIps: trimEntityValues(providedSourceIps),
+    destIps: trimEntityValues(providedDestIps),
+  };
 
-  let sourceEntities: SourceEntities;
+  const hasProvidedEntities = hasAnyEntityValues(providedEntities);
 
   try {
-    if (hasProvidedEntities) {
-      sourceEntities = {
-        hostNames: trimEntityValues(providedHostNames),
-        userNames: trimEntityValues(providedUserNames),
-        sourceIps: trimEntityValues(providedSourceIps),
-        destIps: trimEntityValues(providedDestIps),
-      };
-    } else {
-      const alertResult = await esClient.get({
-        index: alertsIndex,
-        id: alertId,
-      });
+    let sourceEntities: SourceEntities;
 
-      const alertSource = alertResult._source as Record<string, unknown> | undefined;
-      if (!alertSource) {
+    if (hasProvidedEntities) {
+      const alertEntities = await getAlertSourceEntities(esClient, alertsIndex, alertId);
+      sourceEntities = mergeSourceEntities(alertEntities, providedEntities);
+    } else {
+      const alertEntities = await getAlertSourceEntities(esClient, alertsIndex, alertId);
+      if (!alertEntities) {
         return {
           ok: false,
           message: `Alert ${alertId} not found or has no source data.`,
         };
       }
-
-      sourceEntities = {
-        hostNames: trimEntityValues(getNestedValues(alertSource, 'host.name')),
-        userNames: trimEntityValues(getNestedValues(alertSource, 'user.name')),
-        sourceIps: trimEntityValues(getNestedValues(alertSource, 'source.ip')),
-        destIps: trimEntityValues(getNestedValues(alertSource, 'destination.ip')),
-      };
+      sourceEntities = alertEntities;
     }
 
-    const hasEntities =
-      sourceEntities.hostNames.length > 0 ||
-      sourceEntities.userNames.length > 0 ||
-      sourceEntities.sourceIps.length > 0 ||
-      sourceEntities.destIps.length > 0;
-
-    if (!hasEntities) {
+    if (!hasAnyEntityValues(sourceEntities)) {
       return {
         ok: true,
         message: 'No entity values found on the source alert to correlate.',
@@ -203,7 +185,7 @@ export const findRelatedAlerts = async (
 
     return {
       ok: true,
-      message: `Found ${returnedCount} related alerts sharing entities with alert ${alertId}.`,
+      message: buildSuccessMessage({ alertId, returnedCount, totalMatched, isTruncated }),
       sourceEntities,
       relatedAlerts,
       totalMatched,
@@ -232,13 +214,81 @@ const getTotalMatched = (
   return 0;
 };
 
+const buildSuccessMessage = ({
+  alertId,
+  returnedCount,
+  totalMatched,
+  isTruncated,
+}: {
+  alertId: string;
+  returnedCount: number;
+  totalMatched: number;
+  isTruncated: boolean;
+}): string => {
+  if (isTruncated) {
+    return `Found ${returnedCount} of ${totalMatched} related alerts sharing entities with alert ${alertId}.`;
+  }
+  return `Found ${returnedCount} related alerts sharing entities with alert ${alertId}.`;
+};
+
+const hasAnyEntityValues = (entities: SourceEntities): boolean =>
+  entities.hostNames.length > 0 ||
+  entities.userNames.length > 0 ||
+  entities.sourceIps.length > 0 ||
+  entities.destIps.length > 0;
+
+const mergeSourceEntities = (
+  alertEntities: SourceEntities | null,
+  providedEntities: SourceEntities
+): SourceEntities => ({
+  hostNames: unionEntityValues(alertEntities?.hostNames, providedEntities.hostNames),
+  userNames: unionEntityValues(alertEntities?.userNames, providedEntities.userNames),
+  sourceIps: unionEntityValues(alertEntities?.sourceIps, providedEntities.sourceIps),
+  destIps: unionEntityValues(alertEntities?.destIps, providedEntities.destIps),
+});
+
+const unionEntityValues = (...valueLists: Array<string[] | undefined>): string[] =>
+  trimEntityValues(valueLists.flatMap((values) => values ?? []));
+
+const getAlertSourceEntities = async (
+  esClient: ElasticsearchClient,
+  alertsIndex: string,
+  alertId: string
+): Promise<SourceEntities | null> => {
+  try {
+    const alertResult = await esClient.get({
+      index: alertsIndex,
+      id: alertId,
+    });
+
+    const alertSource = alertResult._source as Record<string, unknown> | undefined;
+    if (!alertSource) {
+      return null;
+    }
+
+    return extractSourceEntitiesFromAlert(alertSource);
+  } catch {
+    return null;
+  }
+};
+
+const extractSourceEntitiesFromAlert = (alertSource: Record<string, unknown>): SourceEntities => ({
+  hostNames: trimEntityValues(getNestedValues(alertSource, 'host.name')),
+  userNames: trimEntityValues(getNestedValues(alertSource, 'user.name')),
+  sourceIps: trimEntityValues(getNestedValues(alertSource, 'source.ip')),
+  destIps: trimEntityValues(getNestedValues(alertSource, 'destination.ip')),
+});
+
 function trimEntityValues(values: string[] | undefined): string[] {
   if (!Array.isArray(values)) {
     return [];
   }
-  return values
-    .filter((value): value is string => typeof value === 'string' && value.length > 0)
-    .slice(0, MAX_ENTITY_VALUES_PER_FIELD);
+  const uniqueValues = [
+    ...new Set(
+      values.filter((value): value is string => typeof value === 'string' && value.length > 0)
+    ),
+  ];
+  return uniqueValues.slice(0, MAX_ENTITY_VALUES_PER_FIELD);
 }
 
 function getNestedValues(obj: Record<string, unknown>, path: string): string[] {
@@ -246,15 +296,30 @@ function getNestedValues(obj: Record<string, unknown>, path: string): string[] {
   let current: unknown = obj;
   for (const part of parts) {
     if (current == null || typeof current !== 'object') {
-      return [];
+      current = undefined;
+      break;
     }
     current = (current as Record<string, unknown>)[part];
   }
-  if (typeof current === 'string') {
-    return [current];
+
+  if (current !== undefined) {
+    return normalizeToStringArray(current);
   }
-  if (Array.isArray(current)) {
-    return current.filter((value): value is string => typeof value === 'string');
+
+  const flatValue = obj[path];
+  if (flatValue !== undefined) {
+    return normalizeToStringArray(flatValue);
+  }
+
+  return [];
+}
+
+function normalizeToStringArray(value: unknown): string[] {
+  if (typeof value === 'string') {
+    return [value];
+  }
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string');
   }
   return [];
 }

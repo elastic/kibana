@@ -8,51 +8,17 @@
 import { ToolType } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { z } from '@kbn/zod/v4';
 import {
   SECURITY_ALERTS_TOOL_ID,
   SECURITY_ENTITY_RISK_SCORE_TOOL_ID,
   SECURITY_LABS_SEARCH_TOOL_ID,
 } from '../../tools';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import { relatedAlertsInlineToolSchema } from '../../../../common/api/alert_analysis/related_alerts';
 import {
   findRelatedAlerts,
   RELATED_ALERTS_INLINE_MAX_RESULTS,
 } from '../../../lib/alert_analysis/services/find_related_alerts';
-
-const getRelatedAlertsSchema = z.object({
-  alertId: z.string().describe('The _id of the alert to find related alerts for'),
-  timeWindowHours: z
-    .number()
-    .min(1)
-    .max(168)
-    .default(24)
-    .describe('Time window in hours to search for related alerts (1-168, default 24)'),
-  hostNames: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Optional: host.name values from the alert. If provided along with other entity fields, skips refetching the alert.'
-    ),
-  userNames: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Optional: user.name values from the alert. If provided along with other entity fields, skips refetching the alert.'
-    ),
-  sourceIps: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Optional: source.ip values from the alert. If provided along with other entity fields, skips refetching the alert.'
-    ),
-  destIps: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Optional: destination.ip values from the alert. If provided along with other entity fields, skips refetching the alert.'
-    ),
-});
 
 export const alertAnalysisSkill = defineSkillType({
   id: 'alert-analysis',
@@ -83,7 +49,7 @@ Use this skill when:
 ### 2. Find Related Alerts
 - Use 'security.alert-analysis.get-related-alerts' to find alerts sharing entities with the investigated alert
 - Specify the alert ID and an appropriate time window (default 24h, extend to 168h for slow attacks)
-- If you already have entity values (host.name, user.name, source.ip, destination.ip) from a previous tool call, pass them as optional parameters to skip refetching the alert
+- If you already have entity values (host.name, user.name, source.ip, destination.ip) from a previous tool call, pass them as optional parameters; any missing values are merged from the alert document
 - Review the related alerts for patterns: same rule triggering, escalating severity, or multi-stage attack chains
 
 ### 3. Search Security Labs
@@ -134,11 +100,11 @@ Use this skill when:
       id: 'security.alert-analysis.get-related-alerts',
       type: ToolType.builtin,
       description:
-        'Find alerts that share entities (host.name, user.name, source.ip, destination.ip) with a given alert. Returns related alerts within the specified time window. Pass entity values directly if already available to skip refetching the alert.',
-      schema: getRelatedAlertsSchema,
+        'Find alerts that share entities (host.name, user.name, source.ip, destination.ip) with a given alert. Returns related alerts within the specified time window. Pass entity values directly when already available; missing values are merged from the alert.',
+      schema: relatedAlertsInlineToolSchema,
       handler: async (args, context) => {
         const { alertId, timeWindowHours, hostNames, userNames, sourceIps, destIps } =
-          getRelatedAlertsSchema.parse(args);
+          relatedAlertsInlineToolSchema.parse(args);
 
         const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
 

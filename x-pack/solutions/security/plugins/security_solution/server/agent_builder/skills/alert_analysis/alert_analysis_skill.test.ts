@@ -139,6 +139,24 @@ describe('alertAnalysisSkill', () => {
         );
       });
 
+      it('returns message with truncation hint when findRelatedAlerts result is truncated', async () => {
+        findRelatedAlerts.mockResolvedValueOnce(
+          makeSuccess({
+            message: 'Found 1 of 99 related alerts sharing entities with alert alert-123.',
+            relatedAlerts: [{ _id: 'r1', _index: 'idx' }],
+            totalMatched: 99,
+            returnedCount: 1,
+            isTruncated: true,
+          })
+        );
+
+        const result = await callHandler({ alertId: 'alert-123' });
+
+        expect(getData(result).message).toBe(
+          'Found 1 of 99 related alerts sharing entities with alert alert-123.'
+        );
+      });
+
       it('returns message, sourceEntities, and relatedAlerts only — no surplus metadata', async () => {
         findRelatedAlerts.mockResolvedValueOnce(
           makeSuccess({

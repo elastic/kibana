@@ -20,4 +20,9 @@ export const relatedAlertsRequestSchema = z.object({
   destIps: z.array(z.string()).optional(),
 });
 
+/** Inline tool omits maxResults; the handler applies RELATED_ALERTS_INLINE_MAX_RESULTS. */
+export const relatedAlertsInlineToolSchema = relatedAlertsRequestSchema.omit({
+  maxResults: true,
+});
+
 export type RelatedAlertsRequest = z.infer<typeof relatedAlertsRequestSchema>;

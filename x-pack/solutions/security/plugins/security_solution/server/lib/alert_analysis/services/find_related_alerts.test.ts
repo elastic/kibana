@@ -37,17 +37,33 @@ describe('findRelatedAlerts', () => {
     }
   });
 
-  it('skips alert GET when entity shortcut params are provided', async () => {
+  it('returns error when alert is missing and no entity shortcuts are provided', async () => {
+    (esClient.get as jest.Mock).mockRejectedValue(new Error('document missing'));
+
+    const result = await findRelatedAlerts(esClient, {
+      alertId: 'missing-alert',
+      alertsIndex: '.alerts-security.alerts-default',
+      timeWindowHours: 24,
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.message).toContain('missing-alert');
+    }
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it('merges partial entity shortcut params with alert source entities', async () => {
+    (esClient.get as jest.Mock).mockResolvedValue({
+      _source: {
+        'host.name': 'host-from-alert',
+        'user.name': 'user-from-alert',
+      },
+    });
     (esClient.search as jest.Mock).mockResolvedValue({
       hits: {
-        total: { value: 1, relation: 'eq' },
-        hits: [
-          {
-            _id: 'related-1',
-            _index: '.alerts-security.alerts-default',
-            _source: { message: 'related' },
-          },
-        ],
+        total: { value: 0, relation: 'eq' },
+        hits: [],
       },
     });
 
@@ -55,15 +71,62 @@ describe('findRelatedAlerts', () => {
       alertId: 'alert-1',
       alertsIndex: '.alerts-security.alerts-default',
       timeWindowHours: 24,
-      hostNames: ['host-a'],
-      userNames: ['user-a'],
+      hostNames: ['host-from-model'],
     });
 
-    expect(esClient.get).not.toHaveBeenCalled();
+    expect(esClient.get).toHaveBeenCalledWith({
+      index: '.alerts-security.alerts-default',
+      id: 'alert-1',
+    });
     expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.sourceEntities.hostNames).toEqual(['host-from-alert', 'host-from-model']);
+      expect(result.sourceEntities.userNames).toEqual(['user-from-alert']);
+    }
   });
 
-  it('uses token-budgeted defaults and emits truncation metadata', async () => {
+  it('builds a bool query that excludes the source alert and matches entity terms', async () => {
+    (esClient.get as jest.Mock).mockResolvedValue({
+      _source: {
+        'host.name': 'host-a',
+        'source.ip': '10.0.0.1',
+      },
+    });
+    (esClient.search as jest.Mock).mockResolvedValue({
+      hits: {
+        total: { value: 0, relation: 'eq' },
+        hits: [],
+      },
+    });
+
+    await findRelatedAlerts(esClient, {
+      alertId: 'alert-1',
+      alertsIndex: '.alerts-security.alerts-default',
+      timeWindowHours: 48,
+    });
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: '.alerts-security.alerts-default',
+        query: {
+          bool: {
+            must: [{ range: { '@timestamp': { gte: 'now-48h' } } }],
+            should: [
+              { terms: { 'host.name': ['host-a'] } },
+              { terms: { 'source.ip': ['10.0.0.1'] } },
+            ],
+            minimum_should_match: 1,
+            must_not: [{ ids: { values: ['alert-1'] } }],
+          },
+        },
+      })
+    );
+  });
+
+  it('uses token-budgeted defaults, emits truncation metadata, and includes a truncation hint in the message', async () => {
+    (esClient.get as jest.Mock).mockResolvedValue({
+      _source: { 'host.name': 'host-a' },
+    });
     (esClient.search as jest.Mock).mockResolvedValue({
       hits: {
         total: { value: 99, relation: 'eq' },
@@ -96,6 +159,9 @@ describe('findRelatedAlerts', () => {
       expect(result.totalMatched).toBe(99);
       expect(result.returnedCount).toBe(1);
       expect(result.isTruncated).toBe(true);
+      expect(result.message).toBe(
+        'Found 1 of 99 related alerts sharing entities with alert alert-1.'
+      );
     }
   });
 });
