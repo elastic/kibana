@@ -34,7 +34,7 @@ import {
   checkAllowlist,
   acquireRateLimit,
   checkAuth,
-} from './gate_checks';
+} from '../../../lib/detection_emulation/execution/gate_checks';
 import { runStep } from '../../../lib/detection_emulation/execution/pipeline_step_error';
 
 /**
@@ -273,7 +273,7 @@ export const withCommandGates = async (
     const authResult = await runStep('auth_check', 5, () =>
       checkAuth(resolveCurrentUsername, {
         request,
-        security: coreStart.security as any,
+        security: coreStart.security,
         esClient: esClient.asCurrentUser,
       })
     );

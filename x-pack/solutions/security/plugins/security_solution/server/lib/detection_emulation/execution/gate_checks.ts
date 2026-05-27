@@ -13,22 +13,22 @@ import {
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { ConfigType } from '../../../config';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import type { EmulationAllowlist } from '../../../lib/detection_emulation/execution/allowlist';
-import type { EmulationRateLimiter } from '../../../lib/detection_emulation/execution/rate_limiter';
+import type { EmulationAllowlist } from './allowlist';
+import type { EmulationRateLimiter } from './rate_limiter';
 import {
   getDetectionEmulationFeatureFlags,
   getRealExecutionDisableReason,
   isRealExecutionEnabled,
   REAL_EXECUTION_DISABLE_REASON_TEXT,
-} from '../../../lib/detection_emulation/feature_flag';
+} from '../feature_flag';
 import {
   resolveAllowlistConfig,
   resolveRateLimiterConfig,
-} from '../../../lib/detection_emulation/runtime_config_resolver';
+} from '../runtime_config_resolver';
 import {
   checkValidationGates,
   resolveValidationGateConfig,
-} from '../../../lib/detection_emulation/execution/validation_gate';
+} from './validation_gate';
 import type { RunEmulationCommandInput } from '../../../../common/detection_emulation/schemas';
 
 // ─── Result types ──────────────────────────────────────────────────────────────

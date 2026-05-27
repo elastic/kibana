@@ -43,7 +43,7 @@ import {
   checkAllowlist,
   acquireRateLimit,
   resolveEffectiveConfig,
-} from './gate_checks';
+} from '../../../lib/detection_emulation/execution/gate_checks';
 import { resolveCurrentUsername } from '../../../lib/detection_emulation/resolve_current_user';
 import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
@@ -70,18 +70,7 @@ const computeScenarioFingerprint = (
 
 // ─── Tool ─────────────────────────────────────────────────────────────────────
 
-/**
- * Narrow dependency interface for the validateRule tool factory.
- *
- * Extends the shared `ToolFactoryDeps` pattern (inspired by
- * andrew-goldstein's `WorkflowFetcher` DI in PR #260811) so unit tests
- * can inject stubs for exactly the surface they need.
- */
-export interface ValidateRuleToolDeps extends ToolFactoryDeps {
-  // ToolFactoryDeps provides: core, endpointService, config, logger, guardrails.
-  // No additional deps needed — the interface extension is the declaration
-  // that validateRule consumes exactly the shared shape.
-}
+
 
 /**
  * Creates the validateRule tool for the detection emulation Agent Builder skill.
@@ -97,7 +86,7 @@ export interface ValidateRuleToolDeps extends ToolFactoryDeps {
  *   8. History write + result
  */
 export const createValidateRuleTool = (
-  deps: ValidateRuleToolDeps
+  deps: ToolFactoryDeps
 ): BuiltinSkillBoundedTool<typeof validateRuleSchema> => {
   const { core, endpointService, config, logger, guardrails } = deps;
   const { allowlist, rateLimiter, concurrencyGate } = guardrails;
@@ -154,7 +143,7 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
         // Step 2: Authenticated caller required (uses shared gate_checks)
         const authResult = await checkAuth(resolveCurrentUsername, {
           request,
-          security: coreStart.security as any,
+          security: coreStart.security,
           esClient: esClient.asCurrentUser,
         });
         if (!authResult.ok) {
@@ -331,7 +320,8 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
                 scenarioId: scenarioResult.scenarioId,
                 docs,
                 spaceId,
-                logInjectionEnabled: featureFlags.logInjection,
+                // Step 1 already verified logInjection is enabled via checkModeFeatureFlags.
+                logInjectionEnabled: true,
               },
               { esClient: esClient.asCurrentUser, logger }
             );

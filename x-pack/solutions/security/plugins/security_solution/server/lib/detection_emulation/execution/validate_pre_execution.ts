@@ -19,8 +19,8 @@ import {
   checkAuth,
   acquireRateLimit,
   resolveEffectiveConfig,
-} from '../../../agent_builder/skills/detection_emulation/gate_checks';
-import type { GateFail } from '../../../agent_builder/skills/detection_emulation/gate_checks';
+} from './gate_checks';
+import type { GateFail } from './gate_checks';
 import type { TracedLogger } from './traced_logger';
 import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,

@@ -38,3 +38,15 @@ export type {
   ScenarioGeneratorDeps,
   DispatchDeps,
 } from './tool_factory_deps';
+
+export {
+  checkRealExecutionFeatureFlags,
+  checkModeFeatureFlags,
+  checkAuth,
+  checkRbac,
+  checkValidation,
+  checkAllowlist,
+  acquireRateLimit,
+  resolveEffectiveConfig,
+} from './gate_checks';
+export type { GateResult, GateOk, GateFail } from './gate_checks';
