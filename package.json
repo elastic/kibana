@@ -78,7 +78,6 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
-    "**/@ai-sdk/provider-utils": "3.0.25",
     "**/@babel/parser": "7.24.7",
     "**/@emotion/sheet": "npm:@elastic/emotion-sheet@1.4.1",
     "**/@hapi/mimos/mime-db": "1.53.0",
