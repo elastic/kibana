@@ -10,21 +10,29 @@ import { z } from '@kbn/zod/v4';
 export const ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH =
   '/internal/security_solution/alert_analysis/related_alerts';
 
-// codeql[js/kibana/unbounded-string-in-schema] alert _id validated by findRelatedAlerts; internal authz-protected route
-const relatedAlertIdSchema = z.string();
-// codeql[js/kibana/unbounded-string-in-schema] ECS entity values; findRelatedAlerts trims and caps list length
-const relatedAlertEntityNameSchema = z.string();
-// codeql[js/kibana/unbounded-string-in-schema] ECS IP values; findRelatedAlerts trims and caps list length
-const relatedAlertIpSchema = z.string();
+export const RELATED_ALERT_ID_MAX_LENGTH = 512;
+export const RELATED_ALERT_ENTITY_VALUE_MAX_LENGTH = 256;
+export const RELATED_ALERT_IP_MAX_LENGTH = 45;
+export const RELATED_ALERT_ENTITY_LIST_MAX_LENGTH = 100;
+
+export const relatedAlertIdSchema = z.string().max(RELATED_ALERT_ID_MAX_LENGTH);
+export const relatedAlertEntityNameSchema = z.string().max(RELATED_ALERT_ENTITY_VALUE_MAX_LENGTH);
+export const relatedAlertIpSchema = z.string().max(RELATED_ALERT_IP_MAX_LENGTH);
 
 export const relatedAlertsRequestSchema = z.object({
   alertId: relatedAlertIdSchema.describe('The _id of the alert to correlate'),
   timeWindowHours: z.number().min(1).max(168).default(24),
   maxResults: z.number().min(1).max(100).default(25),
-  hostNames: z.array(relatedAlertEntityNameSchema).optional(),
-  userNames: z.array(relatedAlertEntityNameSchema).optional(),
-  sourceIps: z.array(relatedAlertIpSchema).optional(),
-  destIps: z.array(relatedAlertIpSchema).optional(),
+  hostNames: z
+    .array(relatedAlertEntityNameSchema)
+    .max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH)
+    .optional(),
+  userNames: z
+    .array(relatedAlertEntityNameSchema)
+    .max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH)
+    .optional(),
+  sourceIps: z.array(relatedAlertIpSchema).max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH).optional(),
+  destIps: z.array(relatedAlertIpSchema).max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH).optional(),
 });
 
 /** Inline tool omits maxResults; the handler applies RELATED_ALERTS_INLINE_MAX_RESULTS. */
