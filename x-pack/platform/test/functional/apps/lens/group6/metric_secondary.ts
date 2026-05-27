@@ -9,33 +9,32 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
+  const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
+  const lensApi = getService('lens');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
 
   describe('lens metric secondary', () => {
+    const BASE_METRIC_ID = 'metric-secondary-base';
+    const BASE_METRIC_TITLE = 'Metric secondary base';
+
+    before(async () => {
+      await lensApi.createMetricChart({ id: BASE_METRIC_ID, title: BASE_METRIC_TITLE });
+    });
+
+    const openBaseMetric = async () => {
+      await common.navigateToApp('lens', { hash: `#/edit/${BASE_METRIC_ID}` });
+      await lens.waitForVisualization('mtrVis');
+    };
+
     it('should show a badge for the secondary metric', async () => {
       const CUSTOM_STATIC_COLOR_HEX = '#EE72A6';
 
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisType('lens');
-      await lens.switchToVisualization('lnsMetric', 'Metric');
-
-      // start with a numeric primary metric
-      await lens.configureDimension({
-        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
-        operation: 'average',
-        field: 'bytes',
-      });
-
-      // now add a secondary metric
-      await lens.configureDimension({
-        dimension: 'lnsMetric_secondaryMetricDimensionPanel > lns-empty-dimension',
-        operation: 'average',
-        field: 'bytes',
-        keepOpen: true,
-      });
+      await openBaseMetric();
+      await lens.openDimensionEditor(
+        'lnsMetric_secondaryMetricDimensionPanel > lns-dimensionTrigger'
+      );
 
       log.info('Checking badge in various configurations');
 
@@ -96,17 +95,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should disable collapse by when the primary metric is not numeric', async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisType('lens');
+      await openBaseMetric();
 
       const N_TILES = 39;
-
-      await lens.switchToVisualization('lnsMetric', 'Metric');
-      await lens.configureDimension({
-        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
-        operation: 'average',
-        field: 'bytes',
-      });
 
       await lens.configureDimension({
         dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
@@ -139,26 +130,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should replace secondary metric label and badge when changing primary metric type to non-numeric', async () => {
-      // Create new metric lens vis
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisType('lens');
-      await lens.switchToVisualization('lnsMetric', 'Metric');
+      await openBaseMetric();
 
       // Set primary metric: count of records
       await lens.configureDimension({
-        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
+        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger',
         operation: 'count',
-      });
-
-      // Set secondary metric: avg of bytes
-      await lens.configureDimension({
-        dimension: 'lnsMetric_secondaryMetricDimensionPanel > lns-empty-dimension',
-        operation: 'average',
-        field: 'bytes',
-        keepOpen: true,
+        field: 'records',
       });
 
       // Set Dynamic color trend with compare to Primary metric
+      await lens.openDimensionEditor(
+        'lnsMetric_secondaryMetricDimensionPanel > lns-dimensionTrigger'
+      );
       await testSubjects.click('lnsMetric_color_mode_dynamic');
       await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
       // Check the label and the badge text
@@ -166,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await lens.getSecondaryMetricBadgeText()).to.be('+8,277.678\n↑');
 
       // Save the visualization
-      await lens.save('Metric label badge test', false, true);
+      await lens.save('Metric label badge test', true, true);
 
       // Open in edit mode and change primary metric to last value of ip
       await visualize.gotoVisualizationLandingPage();
