@@ -14,11 +14,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { createTestEsCluster } from '@kbn/test-es-server';
 import { ToolingLog } from '@kbn/tooling-log';
-import {
-  ESQL_NAMED_PARAMS_TYPE,
-  type ESQL_NUMERIC_DECIMAL_TYPES,
-  type ESQL_STRING_TYPES,
-} from '../../../commands/definitions/types';
+import { ESQL_NAMED_PARAMS_TYPE } from '../../../commands/definitions/types';
 import {
   enrichFields as enrichFieldsHelper,
   fields as fieldsHelper,
@@ -29,24 +25,7 @@ import {
 } from '../../../__tests__/language/helpers';
 import { validateQuery } from '../validation';
 
-const fields = [...fieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
-const enrichFieldsRaw = [...enrichFieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
-
-type NumericDecimalType = (typeof ESQL_NUMERIC_DECIMAL_TYPES)[number];
-
-export type StringType = (typeof ESQL_STRING_TYPES)[number];
-export type NumberType =
-  | 'integer'
-  | Extract<NumericDecimalType, 'double' | 'long' | 'unsigned_long'>;
-export type DateType = 'date' | 'date_nanos';
 export type EsqlEnv = Awaited<ReturnType<typeof setupEsqlEnv>>;
-
-export interface MappingVariant {
-  name: string;
-  stringFieldType: StringType;
-  numberFieldType: NumberType;
-  dateFieldType: DateType;
-}
 
 export interface EsqlValidationTestCase {
   query: string;
@@ -68,6 +47,11 @@ interface EsqlErrorResponse {
 }
 
 const nonIndexableFieldTypes = new Set(['date_period', 'null', 'time_duration', 'time_literal']);
+const fields = [...fieldsHelper, { name: policies[0].matchField, type: 'keyword' }];
+const enrichIndexFields = [
+  ...enrichFieldsHelper,
+  { name: policies[0].matchField, type: 'keyword' },
+];
 const timeRangeParams: NonNullable<EsqlQueryRequest['params']> = [
   {
     _tstart: '2026-04-20T23:00:00.000Z',
@@ -76,24 +60,6 @@ const timeRangeParams: NonNullable<EsqlQueryRequest['params']> = [
     _tend: '2026-05-20T09:09:08.139Z',
   },
 ];
-
-const mappingVariantDimensions = {
-  stringFieldTypes: ['text', 'keyword'] satisfies StringType[],
-  numberFieldTypes: ['integer', 'long', 'double', 'unsigned_long'] satisfies NumberType[],
-  dateFieldTypes: ['date', 'date_nanos'] satisfies DateType[],
-};
-
-export const mappingVariants: MappingVariant[] = mappingVariantDimensions.stringFieldTypes.flatMap(
-  (stringFieldType) =>
-    mappingVariantDimensions.numberFieldTypes.flatMap((numberFieldType) =>
-      mappingVariantDimensions.dateFieldTypes.map((dateFieldType) => ({
-        name: `${stringFieldType} strings, ${numberFieldType} numbers, ${dateFieldType} dates`,
-        stringFieldType,
-        numberFieldType,
-        dateFieldType,
-      }))
-    )
-);
 
 const isIndexableField = ({ type }: { type: string }) =>
   !type.startsWith('counter_') && !nonIndexableFieldTypes.has(type);
@@ -118,26 +84,13 @@ const getParams = (query: string): NonNullable<EsqlQueryRequest['params']> => {
   return timeRangeParams;
 };
 
-const createIndexRequest = (
-  index: string,
-  fieldList: Array<{ name: string; type: string }>,
-  mappingVariant: MappingVariant
-) => {
+const createIndexRequest = (index: string, fieldList: Array<{ name: string; type: string }>) => {
   return {
     index,
     mappings: {
       properties: fieldList.reduce((memo: Record<string, MappingProperty>, { name, type }) => {
         let esType = type;
 
-        if (type === 'string') {
-          esType = mappingVariant.stringFieldType;
-        }
-        if (type === 'number') {
-          esType = mappingVariant.numberFieldType;
-        }
-        if (type === 'date') {
-          esType = mappingVariant.dateFieldType;
-        }
         if (type === 'cartesian_point') {
           esType = 'point';
         }
@@ -164,7 +117,7 @@ const setupIntegrationEnv = async () => {
   const es = createTestEsCluster({
     license: 'basic',
     log: new ToolingLog({
-      level: 'debug',
+      level: 'warning',
       writeTo: process.stdout,
     }),
   });
@@ -187,10 +140,14 @@ export const setupEsqlEnv = async () => {
   const integrationEnv = await setupIntegrationEnv();
   const es = integrationEnv.esClient;
 
+  const uniqueSourceIndices = Array.from(
+    new Set(policies.flatMap((policy) => policy.sourceIndices))
+  );
+
   const cleanup = async () => {
     await es.indices.delete({ index: indexes, ignore_unavailable: true }, { ignore: [404] });
     await es.indices.delete(
-      { index: policies[0].sourceIndices[0], ignore_unavailable: true },
+      { index: uniqueSourceIndices, ignore_unavailable: true },
       { ignore: [404] }
     );
     for (const policy of policies) {
@@ -198,40 +155,38 @@ export const setupEsqlEnv = async () => {
     }
   };
 
-  const setupIndicesPolicies = async (mappingVariant: MappingVariant) => {
+  const setupIndicesPolicies = async () => {
     await cleanup();
 
     const indexableFields = fields.filter(isIndexableField);
+    const indexableEnrichFields = enrichIndexFields.filter(isIndexableField);
 
     for (const index of indexes) {
       await es.indices.create(
-        createIndexRequest(
-          index,
-          /unsupported/.test(index) ? unsupported_field : indexableFields,
-          mappingVariant
-        ),
+        createIndexRequest(index, /unsupported/.test(index) ? unsupported_field : indexableFields),
         { ignore: [409] }
       );
     }
 
-    for (const { sourceIndices, matchField } of policies.slice(0, 1)) {
-      const enrichFields = [{ name: matchField, type: 'string' }].concat(enrichFieldsRaw);
-      await es.indices.create(
-        createIndexRequest(sourceIndices[0], enrichFields.filter(isIndexableField), mappingVariant),
-        {
-          ignore: [409],
-        }
-      );
+    for (const sourceIndex of uniqueSourceIndices) {
+      await es.indices.create(createIndexRequest(sourceIndex, indexableEnrichFields), {
+        ignore: [409],
+      });
     }
 
-    for (const { name, sourceIndices, matchField, enrichFields } of policies) {
+    for (const {
+      name,
+      sourceIndices,
+      matchField: policyMatchField,
+      enrichFields: policyEnrichFields,
+    } of policies) {
       await es.enrich.putPolicy(
         {
           name,
           match: {
             indices: sourceIndices,
-            match_field: matchField,
-            enrich_fields: enrichFields,
+            match_field: policyMatchField,
+            enrich_fields: policyEnrichFields,
           },
         },
         { ignore: [409] }

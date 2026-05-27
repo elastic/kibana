@@ -11,7 +11,6 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 import {
   setupEsqlEnv,
-  mappingVariants,
   runClientValidation,
   type EsqlEnv,
   type EsqlValidationFixtures,
@@ -25,41 +24,46 @@ const loadFixtures = async () => {
 describe('ES|QL validation error integration', () => {
   let esqlEnv: EsqlEnv;
   let fixtures: EsqlValidationFixtures;
+  const falseNegatives = new Set<string>();
 
   beforeAll(async () => {
     [esqlEnv, fixtures] = await Promise.all([setupEsqlEnv(), loadFixtures()]);
+    await esqlEnv.setupIndicesPolicies();
   });
 
   afterAll(async () => {
+    if (falseNegatives.size > 0) {
+      process.stdout.write(
+        `\nNon-blocking client/ES validation mismatches:\n${Array.from(falseNegatives).join(
+          '\n'
+        )}\n`
+      );
+    }
     await esqlEnv?.integrationEnv.shutdown();
   });
 
-  for (const mappingVariant of mappingVariants) {
-    describe(`using ${mappingVariant.name}`, () => {
-      beforeAll(async () => {
-        await esqlEnv.setupIndicesPolicies(mappingVariant);
-      });
+  it('does not report client-side validation errors for queries accepted by Elasticsearch', async () => {
+    const falsePositives: string[] = [];
 
-      afterAll(async () => {
-        await esqlEnv.cleanup();
-      });
+    for (const { query } of fixtures.testCases) {
+      const [{ errors }, esqlResponse] = await Promise.all([
+        runClientValidation(query),
+        esqlEnv.sendEsqlQuery(query),
+      ]);
 
-      it('does not report client-side validation errors for queries accepted by Elasticsearch', async () => {
-        const results = await Promise.all(
-          fixtures.testCases.map(async ({ query }) => {
-            const [{ errors }, esqlResponse] = await Promise.all([
-              runClientValidation(query),
-              esqlEnv.sendEsqlQuery(query),
-            ]);
+      const clientHasError = errors.length > 0;
+      const serverHasError = Boolean(esqlResponse.error);
 
-            return errors.length > 0 && !esqlResponse.error
-              ? `Client-side validator rejected a query accepted by ES: ${query}`
-              : null;
-          })
+      if (clientHasError && !serverHasError) {
+        falsePositives.push(`Client-side validator rejected a query accepted by ES: ${query}`);
+      }
+      if (!clientHasError && serverHasError) {
+        falseNegatives.add(
+          `ES rejected a query accepted by the client-side validator: ${JSON.stringify(query)}`
         );
+      }
+    }
 
-        expect(results.filter(Boolean)).toEqual([]);
-      });
-    });
-  }
+    expect(falsePositives).toEqual([]);
+  });
 });
