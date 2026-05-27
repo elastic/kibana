@@ -22,6 +22,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { ProcRunner } from '@kbn/dev-proc-runner';
 import {
   readValidationRunFlags,
+  resolveValidationAffectedProjects,
   resolveValidationBaseContext,
   type ValidationBaseContext,
   VALIDATION_RUN_HELP,
@@ -166,6 +167,26 @@ const findJestUnitConfig = (filePath: string): string | undefined => {
 
 const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
 
+const runLintTsProjects = async (
+  affectedSourceRoots: string[],
+  fix: boolean
+): Promise<{ passed: boolean; output: string }> => {
+  const execa = (await import('execa')).default;
+  const args = ['scripts/lint_ts_projects', '--no-refs-check'];
+  if (fix) args.push('--fix');
+  args.push(...affectedSourceRoots);
+
+  const result = await execa(process.execPath, args, {
+    cwd: REPO_ROOT,
+    reject: false,
+  });
+
+  return {
+    passed: result.exitCode === 0,
+    output: [result.stdout, result.stderr].filter(Boolean).join('\n'),
+  };
+};
+
 const runJestTestsDirectly = async (
   testFiles: string[]
 ): Promise<{ testCount: number; passed: boolean; output: string }> => {
@@ -283,6 +304,68 @@ run(
       } catch (error) {
         progress.writeResult(line('lint', '✗', 'failed', progress.elapsed()));
         errors.push(error instanceof Error ? error : new Error(String(error)));
+      }
+    }
+
+    // ── ts projects ────────────────────────────────────────────────────
+
+    {
+      const tsProjectsProgress = startProgress('tsproj');
+
+      if (isSkipOrFull) {
+        tsProjectsProgress.writeResult(
+          line('tsproj', '—', 'skipped', tsProjectsProgress.elapsed())
+        );
+      } else if (changedFiles.length === 0) {
+        tsProjectsProgress.writeResult(
+          line('tsproj', '—', 'no changed files', tsProjectsProgress.elapsed())
+        );
+      } else {
+        try {
+          const affected = await resolveValidationAffectedProjects({
+            changedFilesJson: JSON.stringify({ files: changedFiles }),
+            downstream: baseContext.mode === 'contract' ? baseContext.contract.downstream : 'none',
+          });
+
+          if (affected.isRootProjectAffected || affected.affectedSourceRoots.length === 0) {
+            // Root-level inputs touched (or nothing to scope to) — skip the scoped run; the
+            // repo-wide lint_ts_projects check still runs in its own dedicated CI step.
+            tsProjectsProgress.writeResult(
+              line('tsproj', '—', 'no scoped projects', tsProjectsProgress.elapsed())
+            );
+          } else {
+            const result = await runLintTsProjects(affected.affectedSourceRoots, fix);
+            if (result.passed) {
+              tsProjectsProgress.writeResult(
+                line(
+                  'tsproj',
+                  '✓',
+                  pluralize(affected.affectedSourceRoots.length, 'project'),
+                  tsProjectsProgress.elapsed()
+                )
+              );
+            } else {
+              tsProjectsProgress.writeResult(
+                line('tsproj', '✗', 'failed', tsProjectsProgress.elapsed())
+              );
+              writeln('');
+              const excerpt = result.output.split('\n').slice(-20);
+              for (const l of excerpt) writeln(`    ${l}`);
+              writeln(
+                `    $ node scripts/lint_ts_projects${
+                  fix ? ' --fix' : ''
+                } ${affected.affectedSourceRoots.join(' ')}`
+              );
+              writeln('');
+              errors.push(new Error('lint_ts_projects failed'));
+            }
+          }
+        } catch (error) {
+          tsProjectsProgress.writeResult(
+            line('tsproj', '✗', 'failed', tsProjectsProgress.elapsed())
+          );
+          errors.push(error instanceof Error ? error : new Error(String(error)));
+        }
       }
     }
 
