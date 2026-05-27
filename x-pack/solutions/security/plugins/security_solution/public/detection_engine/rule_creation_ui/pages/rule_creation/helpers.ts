@@ -654,9 +654,7 @@ export const filterOutEmptyRelatedIntegrations = (relatedIntegrations: RelatedIn
 export const isRuleAction = (
   action: AlertingRuleAction | AlertingRuleSystemAction,
   actionTypeRegistry: ActionTypeRegistryContract
-): action is AlertingRuleAction =>
-  !actionTypeRegistry.has(action.actionTypeId) ||
-  !actionTypeRegistry.get(action.actionTypeId).isSystemActionType;
+): action is AlertingRuleAction => !actionTypeRegistry.get(action.actionTypeId).isSystemActionType;
 
 export const formatActionsStepData = (
   actionsStepData: ActionsStepRule,

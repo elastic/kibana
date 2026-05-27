@@ -35,12 +35,9 @@ export const useAlertingDefaults = () => {
       'data-test-subj': connectorAction.name,
       prepend: (
         <EuiIcon
-          type={
-            actionTypeRegistry.has(connectorAction.actionTypeId as string)
-              ? actionTypeRegistry.get(connectorAction.actionTypeId as string).iconClass
-              : 'plugs'
-          }
+          type={actionTypeRegistry.get(connectorAction.actionTypeId as string).iconClass}
           size="s"
+          aria-hidden={true}
         />
       ),
     }));

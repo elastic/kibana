@@ -127,9 +127,7 @@ export function RuleActions({
                       {String(
                         getNotifyText(
                           action,
-                          actionTypeRegistry.has(actionTypeId)
-                            ? actionTypeRegistry.get(actionTypeId).isSystemActionType
-                            : false
+                          actionTypeRegistry.get(actionTypeId).isSystemActionType
                         )
                       )}
                     </EuiText>
