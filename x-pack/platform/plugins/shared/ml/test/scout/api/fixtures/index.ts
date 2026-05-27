@@ -6,7 +6,12 @@
  */
 
 import { apiTest } from '@kbn/scout';
-import type { RoleApiCredentials, RoleSessionCredentials, RequestAuthFixture, SamlAuth } from '@kbn/scout';
+import type {
+  RoleApiCredentials,
+  RoleSessionCredentials,
+  RequestAuthFixture,
+  SamlAuth,
+} from '@kbn/scout';
 import { ML_USERS } from './constants';
 import { CUSTOM_ROLES } from './custom_roles';
 
