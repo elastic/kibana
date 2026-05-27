@@ -32,8 +32,7 @@ export function useManagedOtlp(): UseManagedOtlpResult {
   const isServerless = Boolean(cloud?.isServerlessEnabled);
   const managedOtlpUrl = cloud?.managedOtlp?.url;
   const isFeatureEnabled =
-    isServerless ||
-    featureFlags?.getBooleanValue?.(IS_MANAGED_OTLP_SERVICE_ENABLED, false) === true;
+    isServerless || featureFlags.getBooleanValue(IS_MANAGED_OTLP_SERVICE_ENABLED, false);
   const available = isFeatureEnabled && Boolean(managedOtlpUrl);
   const endpoint = available && managedOtlpUrl ? `${managedOtlpUrl}:443` : undefined;
 
@@ -41,6 +40,7 @@ export function useManagedOtlp(): UseManagedOtlpResult {
   const [isCreatingApiKey, setIsCreatingApiKey] = useState(false);
 
   const onCreateApiKey = useCallback(async () => {
+    if (isCreatingApiKey || apiKeyEncoded) return;
     try {
       setIsCreatingApiKey(true);
       const res = await sendCreateManagedOtlpApiKey({
@@ -55,7 +55,7 @@ export function useManagedOtlp(): UseManagedOtlpResult {
       });
     }
     setIsCreatingApiKey(false);
-  }, [notifications.toasts]);
+  }, [isCreatingApiKey, apiKeyEncoded, notifications.toasts]);
 
   return {
     available,

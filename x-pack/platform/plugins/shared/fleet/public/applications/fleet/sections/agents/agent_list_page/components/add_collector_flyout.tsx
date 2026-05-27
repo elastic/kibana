@@ -146,23 +146,21 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   const instanceUid = useRef(uuidv4());
   const { cloud } = useStartServices();
 
-  const {
-    apiKeyEncoded: esApiKeyEncoded,
-    isLoading: isCreatingEsApiKey,
-    onCreateApiKey: onCreateEsApiKey,
-  } = useGetCreateApiKey();
+  const esApiKey = useGetCreateApiKey();
+  const motlp = useManagedOtlp();
+  const { available: motlpAvailable, endpoint: motlpEndpoint } = motlp;
 
-  const {
-    available: motlpAvailable,
-    endpoint: motlpEndpoint,
-    apiKeyEncoded: motlpApiKeyEncoded,
-    isCreatingApiKey: isCreatingMotlpApiKey,
-    onCreateApiKey: onCreateMotlpApiKey,
-  } = useManagedOtlp();
-
-  const apiKeyEncoded = motlpAvailable ? motlpApiKeyEncoded : esApiKeyEncoded;
-  const isCreatingApiKey = motlpAvailable ? isCreatingMotlpApiKey : isCreatingEsApiKey;
-  const onCreateApiKey = motlpAvailable ? onCreateMotlpApiKey : onCreateEsApiKey;
+  const { apiKeyEncoded, isCreatingApiKey, onCreateApiKey } = motlpAvailable
+    ? {
+        apiKeyEncoded: motlp.apiKeyEncoded,
+        isCreatingApiKey: motlp.isCreatingApiKey,
+        onCreateApiKey: motlp.onCreateApiKey,
+      }
+    : {
+        apiKeyEncoded: esApiKey.apiKeyEncoded,
+        isCreatingApiKey: esApiKey.isLoading,
+        onCreateApiKey: esApiKey.onCreateApiKey,
+      };
 
   const fleetServerHosts = useGetFleetServerHosts();
   const defaultFleetServerHost =
@@ -255,6 +253,8 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
       },
     };
 
+    const primaryExporter = motlpAvailable ? 'otlp/managed' : 'elasticsearch/otel';
+
     const config = {
       extensions: {
         opamp: {
@@ -280,43 +280,35 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
           },
         },
       },
-      exporters: motlpAvailable
-        ? {
-            'otlp/managed': {
-              endpoint: motlpEndpoint,
-              headers: {
-                Authorization: `ApiKey ${motlpApiKeyEncoded || '${API_KEY}'}`,
-              },
-            },
-            otlp: {
-              endpoint: 'http://localhost:4317',
-              tls: { insecure: true },
-            },
-          }
-        : {
-            'elasticsearch/otel': {
-              endpoints: [defaultEsHost],
-              api_key: esApiKeyEncoded ? esApiKeyEncoded : '${API_KEY}',
-              mapping: { mode: 'otel' },
-            },
-            otlp: {
-              endpoint: 'http://localhost:4317',
-              tls: { insecure: true },
-            },
-          },
-      service: {
-        extensions: ['opamp'],
-        pipelines: motlpAvailable
+      exporters: {
+        ...(motlpAvailable
           ? {
-              logs: { receivers: ['otlp'], exporters: ['otlp/managed'] },
-              metrics: { receivers: ['otlp'], exporters: ['otlp/managed'] },
-              traces: { receivers: ['otlp'], exporters: ['otlp/managed'] },
+              'otlp/managed': {
+                endpoint: motlpEndpoint,
+                headers: {
+                  Authorization: `ApiKey ${apiKeyEncoded || '${API_KEY}'}`,
+                },
+              },
             }
           : {
-              logs: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
-              metrics: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
-              traces: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
-            },
+              'elasticsearch/otel': {
+                endpoints: [defaultEsHost],
+                api_key: apiKeyEncoded || '${API_KEY}',
+                mapping: { mode: 'otel' },
+              },
+            }),
+        otlp: {
+          endpoint: 'http://localhost:4317',
+          tls: { insecure: true },
+        },
+      },
+      service: {
+        extensions: ['opamp'],
+        pipelines: {
+          logs: { receivers: ['otlp'], exporters: [primaryExporter] },
+          metrics: { receivers: ['otlp'], exporters: [primaryExporter] },
+          traces: { receivers: ['otlp'], exporters: [primaryExporter] },
+        },
         telemetry: {
           resource: telemetryResource,
           metrics: {
@@ -344,10 +336,9 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
     defaultFleetServerHost,
     defaultEsHost,
     token,
-    esApiKeyEncoded,
+    apiKeyEncoded,
     motlpAvailable,
     motlpEndpoint,
-    motlpApiKeyEncoded,
     cloud?.isCloudEnabled,
   ]);
 
