@@ -109,7 +109,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       accountType,
       vars: {
         role_arn: { value: roleArn, type: 'text' },
-        external_id: { value: externalId, type: 'text' },
+        external_id: { value: externalId, type: 'password' },
       },
     });
   }, [createConnector, connectorName, accountType, roleArn, externalId]);

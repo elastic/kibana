@@ -33,7 +33,7 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
         id="xpack.fleet.cloudConnector.aws.guide.steps.accessKeyCredentials"
         defaultMessage="Copy {accessKeyId} and {secretAccessKey} then paste the credentials below"
         values={{
-          accessKeyId: <strong>{'Access Key Id'}</strong>,
+          accessKeyId: <strong>{'Access Key ID'}</strong>,
           secretAccessKey: <strong>{'Secret Access Key'}</strong>,
         }}
       />

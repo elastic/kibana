@@ -13,7 +13,7 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': 'true',
+        'ingestHub.onboardingEnabled': true,
       },
     });
   });
@@ -120,7 +120,7 @@ test.describe('Onboarding connect step', { tag: tags.stateful.classic }, () => {
           accountType: 'single-account',
           vars: {
             role_arn: { type: 'text', value: 'arn:aws:iam::123456789012:role/ScoutTest' },
-            external_id: { type: 'text', value: 'scout-ext-id' },
+            external_id: { type: 'password', value: 'scout-ext-id' },
           },
         },
       })) as any;

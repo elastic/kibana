@@ -32,7 +32,7 @@ export interface AwsStaticKeysFormProps {
   initialValues?: Partial<AwsStaticKeyCredentials>;
   iacTemplateUrl?: string;
   onReadyChange?: (isReady: boolean) => void;
-  onFieldsChange?: (fields: AwsStaticKeyCredentials) => void;
+  onFieldsChange?: (fields: AwsStaticKeyCredentials | undefined) => void;
 }
 
 export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
@@ -54,7 +54,7 @@ export const AwsStaticKeysForm: React.FC<AwsStaticKeysFormProps> = ({
   const handleChange = (key: keyof AwsStaticKeyCredentials, value: string) => {
     const next = { ...fields, [key]: value };
     setFields(next);
-    onFieldsChange?.(next);
+    onFieldsChange?.(next.access_key_id ? next : undefined);
   };
 
   const accessKeyIdInvalid = hasInvalidRequiredVars && !fields.access_key_id;

@@ -21,7 +21,7 @@ export interface AwsTemporaryKeysFormProps {
   hasInvalidRequiredVars?: boolean;
   initialValues?: Partial<AwsTemporaryKeyCredentials>;
   onReadyChange?: (isReady: boolean) => void;
-  onFieldsChange?: (fields: AwsTemporaryKeyCredentials) => void;
+  onFieldsChange?: (fields: AwsTemporaryKeyCredentials | undefined) => void;
 }
 
 export const AwsTemporaryKeysForm: React.FC<AwsTemporaryKeysFormProps> = ({
@@ -43,7 +43,7 @@ export const AwsTemporaryKeysForm: React.FC<AwsTemporaryKeysFormProps> = ({
   const handleChange = (key: keyof AwsTemporaryKeyCredentials, value: string) => {
     const next = { ...fields, [key]: value };
     setFields(next);
-    onFieldsChange?.(next);
+    onFieldsChange?.(next.access_key_id ? next : undefined);
   };
 
   const accessKeyIdInvalid = hasInvalidRequiredVars && !fields.access_key_id;

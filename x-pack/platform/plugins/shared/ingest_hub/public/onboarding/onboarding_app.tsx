@@ -30,13 +30,12 @@ function RootRedirect() {
   return null;
 }
 
-const queryClient = new QueryClient();
-
 export function renderOnboardingApp(
   coreStart: CoreStart,
   params: AppMountParameters,
   deps: IngestHubStartDependencies = {}
 ) {
+  const queryClient = new QueryClient();
   const root = createRoot(params.element);
   root.render(
     coreStart.rendering.addContext(

@@ -12,7 +12,7 @@
     "configPath": ["xpack", "ingestHub"],
     "requiredPlugins": ["fleet"],
     "optionalPlugins": ["spaces", "cloud"],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": ["kibanaReact", "fleet"],
     "extraPublicDirs": ["common"]
   }
 }

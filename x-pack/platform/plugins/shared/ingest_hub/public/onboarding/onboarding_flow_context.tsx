@@ -18,7 +18,7 @@ export interface ConnectStepState {
 // Only non-sensitive fields are persisted — password values are never written to session storage
 interface PersistedConnectStep {
   connectorId?: string;
-  authType?: 'static_keys' | 'temporary_keys';
+  authType?: 'identity_federation' | 'static_keys' | 'temporary_keys';
   accessKeyId?: string;
 }
 
@@ -53,7 +53,15 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   );
 
   const setConnectorId = useCallback(
-    (id: string | undefined) => setPersisted({ connectorId: id }),
+    (id: string | undefined) => {
+      setStaticKeysState(undefined);
+      setTemporaryKeysState(undefined);
+      setPersisted({
+        connectorId: id,
+        authType: id ? 'identity_federation' : undefined,
+        accessKeyId: undefined,
+      });
+    },
     [setPersisted]
   );
 
@@ -62,6 +70,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       setStaticKeysState(keys);
       setTemporaryKeysState(undefined);
       setPersisted({
+        connectorId: undefined,
         authType: keys ? 'static_keys' : undefined,
         accessKeyId: keys?.access_key_id,
       });
@@ -74,6 +83,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
       setTemporaryKeysState(keys);
       setStaticKeysState(undefined);
       setPersisted({
+        connectorId: undefined,
         authType: keys ? 'temporary_keys' : undefined,
         accessKeyId: keys?.access_key_id,
       });
