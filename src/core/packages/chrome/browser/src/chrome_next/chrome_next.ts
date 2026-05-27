@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
 import type { ReactNode } from 'react';
 import type { GlobalSearchConfig } from './global_search';
 
@@ -31,8 +30,6 @@ export interface ChromeNext {
      * Pass `undefined` to remove. Global — persists across app changes.
      */
     set(config?: GlobalSearchConfig): void;
-    /** Observable of the current global search config. */
-    get$(): Observable<GlobalSearchConfig | undefined>;
   };
   /** Context switcher content. */
   contextSwitcher: {
@@ -41,7 +38,5 @@ export interface ChromeNext {
      * Pass `undefined` to remove. Global — persists across app changes.
      */
     set(content?: ReactNode): void;
-    /** Observable of the current context switcher content. */
-    get$(): Observable<ReactNode | null>;
   };
 }

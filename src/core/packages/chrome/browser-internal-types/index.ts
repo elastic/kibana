@@ -23,6 +23,8 @@ import type {
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionId,
+  GlobalSearchConfig,
+  ChromeNext,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -103,5 +105,18 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
+  };
+
+  /** @internal Extends public `next` with `get$` for Chrome layout components. */
+  next: InternalChromeNext;
+}
+
+/** @internal */
+export interface InternalChromeNext extends ChromeNext {
+  contextSwitcher: ChromeNext['contextSwitcher'] & {
+    get$(): Observable<ReactNode>;
+  };
+  globalSearch: ChromeNext['globalSearch'] & {
+    get$(): Observable<GlobalSearchConfig | undefined>;
   };
 }
