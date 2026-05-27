@@ -47,25 +47,25 @@ exports[`DateRangePicker renders 1`] = `
               >
                 <span>
                   <span
-                    class="eui-textTruncate css-1xiu28x-root"
+                    class="eui-textTruncate css-rbdo33-root"
                     data-test-subj="dateRangePickerValueDisplay"
                   >
                     <span
-                      class="css-1g8ilf8-part"
+                      class="css-1i6t4lm-part"
                       data-test-subj="dateRangePickerDisplayPart"
                     >
                       Last
                     </span>
                      
                     <span
-                      class="css-1g8ilf8-part"
+                      class="css-1i6t4lm-part"
                       data-test-subj="dateRangePickerDisplayPart"
                     >
                       20
                     </span>
                      
                     <span
-                      class="css-1g8ilf8-part"
+                      class="css-1i6t4lm-part"
                       data-test-subj="dateRangePickerDisplayPart"
                     >
                       minutes
