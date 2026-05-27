@@ -9,6 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
+import type { LinksState } from '../../../server';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import type { LinksByValueState, LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
 import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
@@ -18,7 +19,7 @@ import { injectReferences } from './references';
 export function transformOut(
   storedState: LinksEmbeddableState | StoredLinksEmbeddableState | StoredLinksByValueState910,
   references?: Reference[]
-) {
+): LinksEmbeddableState {
   const latestState = isLegacyState(storedState)
     ? transformLegacyState(storedState)
     : (storedState as StoredLinksEmbeddableState);
@@ -54,6 +55,6 @@ export function transformOut(
     links: injectReferences(updatedLinks, references).map((link) => ({
       ...link,
       ...(link.options && { options: getOptions(link.type, link.options) }),
-    })),
+    })) as LinksState['links'],
   };
 }
