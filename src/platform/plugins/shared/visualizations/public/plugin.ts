@@ -500,10 +500,8 @@ export class VisualizationsPlugin
       savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
         defaultMessage: 'Visualization',
       }),
-      getIconForSavedObject: (savedObject) => {
-        // const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
-        // return getTypes().get(visState.type)?.icon ?? '';
-        return '';
+      getIconForSavedObject: () => {
+        return 'visualizeApp';
       },
     });
     embeddable.registerLegacyURLTransform(
