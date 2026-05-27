@@ -18,6 +18,7 @@ import {
   createAlertEvent,
   createRuleResponse,
   createEsqlResponse,
+  getStepError,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createQueryService } from '../../services/query_service/query_service.mock';
@@ -355,15 +356,10 @@ describe('CreateRecoveryEventsStep', () => {
         alertEventsBatch: [],
       });
 
-      let caughtError: unknown;
-      try {
-        await collectStreamResults(step.executeStream(createPipelineStream([state])));
-      } catch (error) {
-        caughtError = error;
-      }
+      const error = await getStepError(step, state);
 
-      expect(caughtError).toBeInstanceOf(Error);
-      expect(getErrorSource(caughtError as Error)).toBe(TaskErrorSource.USER);
+      expect(error).toBeInstanceOf(Error);
+      expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
     });
 
     it('does not mark ResponseError(503) recovery query errors as TaskErrorSource.USER', async () => {
@@ -385,15 +381,10 @@ describe('CreateRecoveryEventsStep', () => {
         alertEventsBatch: [],
       });
 
-      let caughtError: unknown;
-      try {
-        await collectStreamResults(step.executeStream(createPipelineStream([state])));
-      } catch (error) {
-        caughtError = error;
-      }
+      const error = await getStepError(step, state);
 
-      expect(caughtError).toBeInstanceOf(Error);
-      expect(getErrorSource(caughtError as Error)).toBeUndefined();
+      expect(error).toBeInstanceOf(Error);
+      expect(getErrorSource(error!)).toBeUndefined();
     });
 
     it('does not mark plain recovery query errors as TaskErrorSource.USER', async () => {
@@ -413,15 +404,10 @@ describe('CreateRecoveryEventsStep', () => {
         alertEventsBatch: [],
       });
 
-      let caughtError: unknown;
-      try {
-        await collectStreamResults(step.executeStream(createPipelineStream([state])));
-      } catch (error) {
-        caughtError = error;
-      }
+      const error = await getStepError(step, state);
 
-      expect(caughtError).toBeInstanceOf(Error);
-      expect(getErrorSource(caughtError as Error)).toBeUndefined();
+      expect(error).toBeInstanceOf(Error);
+      expect(getErrorSource(error!)).toBeUndefined();
     });
   });
 

@@ -16,6 +16,7 @@ import {
   createRuleExecutionInput,
   createRuleResponse,
   createRulePipelineState,
+  getStepError,
   mockHelpersEsqlArrowBatches,
   mockHelpersEsqlToArrowReader,
 } from '../test_utils';
@@ -103,15 +104,10 @@ describe('ExecuteRuleQueryStep', () => {
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
 
-    let caughtError: unknown;
-    try {
-      await collectStreamResults(step.executeStream(createPipelineStream([state])));
-    } catch (error) {
-      caughtError = error;
-    }
+    const error = await getStepError(step, state);
 
-    expect(caughtError).toBeInstanceOf(Error);
-    expect(getErrorSource(caughtError as Error)).toBe(TaskErrorSource.USER);
+    expect(error).toBeInstanceOf(Error);
+    expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
   });
 
   it('does not mark plain ES|QL errors as TaskErrorSource.USER', async () => {
@@ -122,15 +118,10 @@ describe('ExecuteRuleQueryStep', () => {
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
 
-    let caughtError: unknown;
-    try {
-      await collectStreamResults(step.executeStream(createPipelineStream([state])));
-    } catch (error) {
-      caughtError = error;
-    }
+    const error = await getStepError(step, state);
 
-    expect(caughtError).toBeInstanceOf(Error);
-    expect(getErrorSource(caughtError as Error)).toBeUndefined();
+    expect(error).toBeInstanceOf(Error);
+    expect(getErrorSource(error!)).toBeUndefined();
   });
 
   it('yields rows from query results', async () => {
