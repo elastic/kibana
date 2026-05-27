@@ -38,6 +38,13 @@ export const txtDeleteDrilldowns = (count: number) =>
     },
   });
 
+export const txtTableCaption = i18n.translate(
+  'embeddableApi.components.DrilldownTable.tableCaption',
+  {
+    defaultMessage: 'Drilldowns attached to this panel',
+  }
+);
+
 export const txtSelectDrilldown = i18n.translate(
   'embeddableApi.components.DrilldownTable.selectThisDrilldownCheckboxLabel',
   {
