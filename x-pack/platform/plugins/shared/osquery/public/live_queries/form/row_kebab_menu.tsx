@@ -45,9 +45,12 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
       exportFilters?.kuery ||
       (exportFilters?.activeFilters && exportFilters.activeFilters.length > 0)
     );
-    // Strict `=== 0` so unknown counts (initial load, error response, or a
+    // Strict `=== 0` so unknown counts (initial fetch, error response, or a
     // collapsed pack row that cleared its store entry) leave the action
     // enabled. Only a successfully-fetched zero-row result disables it.
+    // EuiContextMenuItem has no `isLoading` equivalent, so the action stays
+    // clickable during a brief initial load — the lesser evil compared to
+    // flashing a disabled state.
     const isEmpty = exportFilters?.total === 0;
 
     const esFilters = useMemo(

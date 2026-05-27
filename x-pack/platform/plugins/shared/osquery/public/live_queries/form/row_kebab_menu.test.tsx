@@ -258,8 +258,8 @@ describe('RowKebabMenu — export branch', () => {
       expect(item).not.toBeDisabled();
     });
 
-    it('leaves the menu item enabled when total is greater than zero', () => {
-      useExportFiltersMock.mockReturnValue({ total: 10 });
+    it('leaves the menu item enabled when total is greater than zero (boundary: 1)', () => {
+      useExportFiltersMock.mockReturnValue({ total: 1 });
       renderKebab();
 
       fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));

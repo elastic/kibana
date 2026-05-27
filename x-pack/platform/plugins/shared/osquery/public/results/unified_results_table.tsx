@@ -101,7 +101,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [euiTheme.size.m, euiTheme.colors.body]
   );
 
-  const { data: actionResultsData } = useActionResults({
+  const { data: actionResultsData, isFetched: actionResultsFetched } = useActionResults({
     actionId,
     startDate,
     activePage: 0,
@@ -242,7 +242,13 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   // button and row kebab menu can read them. The store does not re-render this
   // tree on writes; only subscribers of this `actionId` re-render.
   const exportFiltersStore = useExportFiltersContext();
-  const unfilteredTotal = actionResultsData?.aggregations?.totalRowCount;
+  // Keep `total` undefined until the first real fetch completes, so the
+  // export controls can distinguish "still loading" from "loaded, zero rows".
+  // `useActionResults` ships with `initialData.aggregations.totalRowCount = 0`,
+  // so reading the value unconditionally would conflate the two states.
+  const unfilteredTotal = actionResultsFetched
+    ? actionResultsData?.aggregations?.totalRowCount
+    : undefined;
   useEffect(() => {
     exportFiltersStore?.setFilters(actionId, {
       kuery: userKuery,

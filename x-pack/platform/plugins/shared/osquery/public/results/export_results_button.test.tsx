@@ -26,10 +26,14 @@ const defaultExportMock = {
   isExporting: false,
 };
 
+// Default total to a non-undefined number so tests that don't exercise the
+// "initial loading" branch (where total === undefined) get the button rendered
+// in its normal, clickable state. Tests covering loading/empty pass total
+// explicitly.
 const renderButton = (props: Partial<React.ComponentProps<typeof ExportResultsButton>> = {}) =>
   render(
     <I18nProvider>
-      <ExportResultsButton actionId="action-abc" {...props} />
+      <ExportResultsButton actionId="action-abc" total={100} {...props} />
     </I18nProvider>
   );
 
@@ -151,18 +155,30 @@ describe('ExportResultsButton', () => {
       expect(screen.queryByTestId('osqueryExportResultsModal')).not.toBeInTheDocument();
     });
 
-    it('leaves the button enabled when total is undefined (loading or error)', () => {
+    it('shows a loading state when total is undefined (initial fetch)', () => {
       renderButton({ total: undefined });
 
       const button = screen.getByTestId('osqueryExportResultsButton');
-      expect(button).not.toBeDisabled();
+      // EuiButtonEmpty disables the underlying button when `isLoading`; the
+      // spinner is rendered as a child element.
+      expect(button).toBeDisabled();
+      expect(button.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
     });
 
-    it('leaves the button enabled when total is greater than zero', () => {
-      renderButton({ total: 10 });
+    it('does not open the modal when the button is clicked with total=undefined', () => {
+      renderButton({ total: undefined });
+
+      fireEvent.click(screen.getByTestId('osqueryExportResultsButton'));
+
+      expect(screen.queryByTestId('osqueryExportResultsModal')).not.toBeInTheDocument();
+    });
+
+    it('leaves the button enabled when total is greater than zero (boundary: 1)', () => {
+      renderButton({ total: 1 });
 
       const button = screen.getByTestId('osqueryExportResultsButton');
       expect(button).not.toBeDisabled();
+      expect(button.querySelector('.euiLoadingSpinner')).not.toBeInTheDocument();
     });
   });
 
