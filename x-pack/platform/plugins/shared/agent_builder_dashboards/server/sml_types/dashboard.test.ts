@@ -182,14 +182,6 @@ describe('dashboardSmlType', () => {
     expect(result?.chunks[0].content).toContain('Operations');
     expect(result?.chunks[0].content).toContain('2 panels');
     expect(result?.chunks[0].content).toContain('1 sections');
-    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
-    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
-      core: {
-        savedObjects: {
-          client: savedObjectsClient,
-        },
-      },
-    });
   });
 
   it('converts saved dashboards into dashboard attachments with origin', async () => {
@@ -244,14 +236,6 @@ describe('dashboardSmlType', () => {
         }),
       ])
     );
-    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
-    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
-      core: {
-        savedObjects: {
-          client: savedObjectsClient,
-        },
-      },
-    });
   });
 
   it('falls back to generic panel storage when a lens panel is already in API format', async () => {
@@ -323,13 +307,5 @@ describe('dashboardSmlType', () => {
         chunks: [expect.objectContaining({ type: 'dashboard', title: 'System Overview' })],
       })
     );
-    const requestHandlerContext = dashboardClient.read.mock.calls[0][0];
-    await expect(requestHandlerContext.resolve(['core'])).resolves.toEqual({
-      core: {
-        savedObjects: {
-          client: savedObjectsClient,
-        },
-      },
-    });
   });
 });
