@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -49,15 +50,22 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
 
   const menuButton = useMemo(() => {
     return (
-      <EuiButtonIcon
-        onClick={togglePopover}
-        data-test-subj="toggleConsoleMenu"
-        aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+      <EuiToolTip
+        content={i18n.translate('console.requestOptionsButtonAriaLabel', {
           defaultMessage: 'Request options',
         })}
-        iconType="boxesVertical"
-        iconSize="s"
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          onClick={togglePopover}
+          data-test-subj="toggleConsoleMenu"
+          aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+            defaultMessage: 'Request options',
+          })}
+          iconType="boxesVertical"
+          iconSize="s"
+        />
+      </EuiToolTip>
     );
   }, [togglePopover]);
 
