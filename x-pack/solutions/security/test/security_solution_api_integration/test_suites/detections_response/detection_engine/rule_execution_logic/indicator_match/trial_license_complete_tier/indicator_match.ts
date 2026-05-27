@@ -2468,10 +2468,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('alerts should be enriched', () => {
-      let entityStoreV2Installed = false;
-
       before(async () => {
-        entityStoreV2Installed = await entityStoreV2.setup({
+        await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
@@ -2483,19 +2481,10 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
-        if (!entityStoreV2Installed) {
-          await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
-        }
       });
 
       after(async () => {
-        if (entityStoreV2Installed) {
-          await entityStoreV2.teardown();
-        } else {
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
-          );
-        }
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched with host risk score', async () => {
@@ -2534,10 +2523,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with asset criticality', () => {
-      let entityStoreV2Installed = false;
-
       before(async () => {
-        entityStoreV2Installed = await entityStoreV2.setup({
+        await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
@@ -2553,21 +2540,10 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
-        if (!entityStoreV2Installed) {
-          await esArchiver.load(
-            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-          );
-        }
       });
 
       after(async () => {
-        if (entityStoreV2Installed) {
-          await entityStoreV2.teardown();
-        } else {
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-          );
-        }
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched alert with criticality_level', async () => {
