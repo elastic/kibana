@@ -45,7 +45,7 @@ export const searchResponseBodySchema = schema.object({
       minSize: 0,
       maxSize: PAGINATION_MAX_SIZE,
       meta: {
-        description: 'List of markdown library items matching the query',
+        description: 'List of markdown library items matching the query.',
       },
     }
   ),
