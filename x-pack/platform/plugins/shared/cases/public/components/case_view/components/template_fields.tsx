@@ -24,8 +24,7 @@ import {
   getFieldSnakeKey,
   parseFieldDefinitionsToInlineFields,
 } from '../../../../common/utils';
-import { isRefField } from '../../../../common/types/domain/template/fields';
-import * as libI18n from '../../field_library/translations';
+import { isInlineField, isRefField } from '../../../../common/types/domain/template/fields';
 import * as i18n from '../translations';
 import type { OnUpdateFields } from '../types';
 
@@ -134,8 +133,31 @@ TemplateFieldsForm.displayName = 'TemplateFieldsForm';
 export const TemplateFields = React.memo<TemplateFieldsProps>(({ caseData, onUpdateField }) => {
   const { data: templateData } = useGetTemplate(caseData.template?.id, caseData.template?.version);
 
+  const { data: globalFieldDefsData } = useGetFieldDefinitions({
+    owner: caseData.owner,
+    applyToAllCases: true,
+  });
+
+  const globalFieldNames = useMemo<ReadonlySet<string>>(
+    () =>
+      new Set(
+        parseFieldDefinitionsToInlineFields(globalFieldDefsData?.fieldDefinitions ?? []).map(
+          (f) => f.name
+        )
+      ),
+    [globalFieldDefsData]
+  );
+
   const parsedTemplate = templateData?.definition;
-  if (!templateData || !parsedTemplate || parsedTemplate.fields.length === 0) return null;
+
+  const filteredTemplateFields = useMemo(
+    () =>
+      parsedTemplate?.fields.filter((f) => !isInlineField(f) || !globalFieldNames.has(f.name)) ??
+      [],
+    [parsedTemplate, globalFieldNames]
+  );
+
+  if (!templateData || !parsedTemplate || filteredTemplateFields.length === 0) return null;
 
   return (
     <div>
@@ -144,7 +166,7 @@ export const TemplateFields = React.memo<TemplateFieldsProps>(({ caseData, onUpd
       </EuiTitle>
       <EuiSpacer size="s" />
       <TemplateFieldsForm
-        parsedTemplate={parsedTemplate}
+        parsedTemplate={{ ...parsedTemplate, fields: filteredTemplateFields }}
         owner={templateData.owner}
         extendedFields={caseData.extendedFields ?? EMPTY_EXTENDED_FIELDS}
         onUpdateField={onUpdateField}
@@ -208,17 +230,11 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
     return null;
 
   return (
-    <div>
-      <EuiTitle size="xs">
-        <h3>{libI18n.GLOBAL_FIELDS_TITLE}</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <TemplateFieldsFormReady
-        resolvedFields={visibleGlobalFields}
-        extendedFields={caseData.extendedFields ?? EMPTY_EXTENDED_FIELDS}
-        onUpdateField={onUpdateField}
-      />
-    </div>
+    <TemplateFieldsFormReady
+      resolvedFields={visibleGlobalFields}
+      extendedFields={caseData.extendedFields ?? EMPTY_EXTENDED_FIELDS}
+      onUpdateField={onUpdateField}
+    />
   );
 });
 

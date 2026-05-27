@@ -224,7 +224,9 @@ export const validateExtendedFieldsInRequest = async ({
   const templateOnlyFields = Object.fromEntries(
     Object.entries(updateReq.extended_fields).filter(([k]) => !globalKeys.has(k))
   );
-  const errors = validateExtendedFields(templateOnlyFields, parsedTemplate.definition.fields);
+  const errors = validateExtendedFields(templateOnlyFields, parsedTemplate.definition.fields, {
+    partial: true,
+  });
   if (errors.length) {
     throw Boom.badRequest(`Invalid extended_fields: ${errors.join('; ')}`);
   }
