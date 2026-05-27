@@ -1,0 +1,13 @@
+export declare const ruleDetailsRoute: "/rule/:ruleId";
+export declare const createRuleRoute: "/create/:ruleTypeId";
+export declare const createRuleFromTemplateRoute: "/create/template/:templateId";
+export declare const editRuleRoute: "/edit/:id";
+export declare const rulesAppDetailsRoute: "/rule/:ruleId";
+export declare const ruleLogsRoute: "/logs";
+export declare const triggersActionsRoute: "/app/management/insightsAndAlerting/triggersActions";
+export declare const rulesAppRoute: "/app/rules";
+export declare const getRuleDetailsRoute: (ruleId: string) => string;
+export declare const getRulesAppDetailsRoute: (ruleId: string) => string;
+export declare const getCreateRuleRoute: (ruleTypeId: string) => string;
+export declare const getCreateRuleFromTemplateRoute: (templateId: string) => string;
+export declare const getEditRuleRoute: (ruleId: string) => string;
