@@ -26,6 +26,8 @@ import {
   DeleteCloudOnboardingDeploymentResponseSchema,
   PrepareCloudOnboardingDeploymentRequestSchema,
   PrepareCloudOnboardingDeploymentResponseSchema,
+  CompleteCloudOnboardingDeploymentRequestSchema,
+  CompleteCloudOnboardingDeploymentResponseSchema,
 } from '../../types/rest_spec/cloud_onboarding_deployment';
 
 import {
@@ -35,6 +37,7 @@ import {
   updateCloudOnboardingDeploymentHandler,
   deleteCloudOnboardingDeploymentHandler,
   prepareCloudOnboardingDeploymentHandler,
+  completeCloudOnboardingDeploymentHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -295,6 +298,57 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       prepareCloudOnboardingDeploymentHandler
+    );
+
+  // POST /api/fleet/cloud_onboarding_deployments/{id}/complete
+  router.versioned
+    .post({
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.COMPLETE_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+              ],
+            },
+          ],
+        },
+      },
+      summary: 'Complete cloud onboarding deployment',
+      description:
+        'Mark a deployment as succeeded after the user confirms the CloudFormation stack was created.',
+      options: {
+        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        availability: {
+          since: '9.5.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: CompleteCloudOnboardingDeploymentRequestSchema,
+          response: {
+            200: {
+              body: () => CompleteCloudOnboardingDeploymentResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+            404: {
+              body: notFoundResponse,
+              description: 'Not found.',
+            },
+          },
+        },
+      },
+      completeCloudOnboardingDeploymentHandler
     );
 
   // DELETE /api/fleet/cloud_onboarding_deployments/{id}

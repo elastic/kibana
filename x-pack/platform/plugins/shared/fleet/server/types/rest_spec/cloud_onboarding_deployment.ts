@@ -236,3 +236,11 @@ export const PrepareCloudOnboardingDeploymentResponseSchema = schema.object({
     })
   ),
 });
+
+// --- Complete endpoint ---
+
+export const CompleteCloudOnboardingDeploymentRequestSchema = {
+  params: OnboardingDeploymentIdParamSchema,
+};
+
+export const CompleteCloudOnboardingDeploymentResponseSchema = SingleItemResponseSchema;

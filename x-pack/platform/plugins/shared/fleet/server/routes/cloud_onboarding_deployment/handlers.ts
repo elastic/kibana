@@ -19,6 +19,7 @@ import type {
   UpdateCloudOnboardingDeploymentRequestSchema,
   DeleteCloudOnboardingDeploymentRequestSchema,
   PrepareCloudOnboardingDeploymentRequestSchema,
+  CompleteCloudOnboardingDeploymentRequestSchema,
 } from '../../types/rest_spec/cloud_onboarding_deployment';
 
 function toResponseItem(deployment: CloudOnboardingDeployment) {
@@ -93,12 +94,14 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
   try {
     const deployment = await cloudOnboardingDeploymentService.update(
       internalSoClient,
       request.params.id,
-      request.body
+      request.body,
+      esClient
     );
     return response.ok({ body: { item: toResponseItem(deployment) } });
   } catch (error) {
@@ -151,6 +154,31 @@ export const prepareCloudOnboardingDeploymentHandler: FleetRequestHandler<
       });
     }
     if (error instanceof Error && error.message.includes('not in pending status')) {
+      return response.badRequest({ body: { message: error.message } });
+    }
+    throw error;
+  }
+};
+
+export const completeCloudOnboardingDeploymentHandler: FleetRequestHandler<
+  TypeOf<typeof CompleteCloudOnboardingDeploymentRequestSchema.params>
+> = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const { internalSoClient } = fleetContext;
+
+  try {
+    const deployment = await cloudOnboardingDeploymentService.complete(
+      internalSoClient,
+      request.params.id
+    );
+    return response.ok({ body: { item: toResponseItem(deployment) } });
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return response.notFound({
+        body: { message: `Cloud onboarding deployment ${request.params.id} not found` },
+      });
+    }
+    if (error instanceof Error && error.message.includes('not in deploying status')) {
       return response.badRequest({ body: { message: error.message } });
     }
     throw error;

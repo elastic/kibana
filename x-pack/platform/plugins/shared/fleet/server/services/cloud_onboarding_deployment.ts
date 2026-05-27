@@ -105,12 +105,46 @@ class CloudOnboardingDeploymentService {
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    update: UpdateCloudOnboardingDeploymentInput
+    update: UpdateCloudOnboardingDeploymentInput,
+    esClient?: ElasticsearchClient
   ): Promise<CloudOnboardingDeployment> {
+    if (update.status === 'pending' && update.attemptCount) {
+      const current = await this.getById(soClient, id);
+      if (current.apiKeyId && esClient) {
+        await esClient.security.invalidateApiKey({ ids: [current.apiKeyId] }).catch(() => {});
+      }
+      await soClient.update<CloudOnboardingDeploymentSOAttributes>(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        id,
+        { ...update, apiKeyId: undefined }
+      );
+    } else {
+      await soClient.update<CloudOnboardingDeploymentSOAttributes>(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        id,
+        { ...update }
+      );
+    }
+
+    return this.getById(soClient, id);
+  }
+
+  public async complete(
+    soClient: SavedObjectsClientContract,
+    id: string
+  ): Promise<CloudOnboardingDeployment> {
+    const deployment = await this.getById(soClient, id);
+
+    if (deployment.status !== 'deploying') {
+      throw new Error(
+        `Deployment ${id} is not in deploying status (current: ${deployment.status})`
+      );
+    }
+
     await soClient.update<CloudOnboardingDeploymentSOAttributes>(
       CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
       id,
-      { ...update }
+      { status: 'succeeded' }
     );
 
     return this.getById(soClient, id);
