@@ -22,7 +22,7 @@ export const EmbeddableWelcomeMessage = () => {
   } = useKibana();
   const { euiTheme } = useEuiTheme();
   const { docLinksService } = useAgentBuilderServices();
-  const hasAccessToGenAiSettings = useHasConnectorsAllPrivileges();
+  const { hasAllPrivileges: hasAccessToGenAiSettings } = useHasConnectorsAllPrivileges();
 
   const [showCallOut, setShowCallOut] = useState(
     !localStorage.getItem(storageKeys.welcomeMessageDismissed)
