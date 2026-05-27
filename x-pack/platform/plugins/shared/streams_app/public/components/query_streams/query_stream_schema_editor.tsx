@@ -516,15 +516,23 @@ const QueryStreamFieldActionsCell = ({
     <EuiPopover
       id={contextMenuPopoverId}
       button={
-        <EuiButtonIcon
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.streams.queryStreamSchemaEditor.openActionsMenuAriaLabel',
             { defaultMessage: 'Open actions menu' }
           )}
-          data-test-subj="streamsAppQueryStreamFieldActionsButton"
-          iconType="boxesVertical"
-          onClick={toggle}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            aria-label={i18n.translate(
+              'xpack.streams.queryStreamSchemaEditor.openActionsMenuAriaLabel',
+              { defaultMessage: 'Open actions menu' }
+            )}
+            data-test-subj="streamsAppQueryStreamFieldActionsButton"
+            iconType="boxesVertical"
+            onClick={toggle}
+          />
+        </EuiToolTip>
       }
       isOpen={popoverIsOpen}
       closePopover={closePopover}

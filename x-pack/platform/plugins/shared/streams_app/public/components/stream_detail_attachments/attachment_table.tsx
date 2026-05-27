@@ -5,7 +5,14 @@
  * 2.0.
  */
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiButtonIcon, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
@@ -88,14 +95,21 @@ export function AttachmentsTable({
       name: '',
       width: '40px',
       render: (_, attachment) => (
-        <EuiButtonIcon
-          data-test-subj="streamsAppAttachmentDetailsButton"
-          iconType="maximize"
-          aria-label={i18n.translate('xpack.streams.attachmentTable.detailsButtonAriaLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.attachmentTable.detailsButtonAriaLabel', {
             defaultMessage: 'View details',
           })}
-          onClick={() => onViewDetails?.(attachment)}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="streamsAppAttachmentDetailsButton"
+            iconType="maximize"
+            aria-label={i18n.translate('xpack.streams.attachmentTable.detailsButtonAriaLabel', {
+              defaultMessage: 'View details',
+            })}
+            onClick={() => onViewDetails?.(attachment)}
+          />
+        </EuiToolTip>
       ),
     };
 
