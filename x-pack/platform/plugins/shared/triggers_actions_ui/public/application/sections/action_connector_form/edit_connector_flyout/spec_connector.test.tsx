@@ -84,7 +84,6 @@ describe('spec connector with API fetch', () => {
 
   const specActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
     id: 'spec-connector-test',
-    source: 'spec',
     actionConnectorFields: lazy(() => import('../connector_mock')),
   });
 
