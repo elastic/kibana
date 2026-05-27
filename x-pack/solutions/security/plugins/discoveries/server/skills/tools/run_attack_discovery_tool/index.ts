@@ -204,7 +204,6 @@ export const getRunAttackDiscoveryTool = ({
                   logger: checkLogger,
                   spaceId,
                   workflowsExtensions: startDeps.workflowsExtensions,
-                  workflowsManagementApi,
                 });
               }
             : undefined,
