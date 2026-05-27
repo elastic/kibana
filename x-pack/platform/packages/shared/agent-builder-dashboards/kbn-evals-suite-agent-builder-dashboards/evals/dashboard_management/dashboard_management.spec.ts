@@ -25,14 +25,12 @@ import {
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
-    ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
+    ({ chatClient, evaluators, executorClient }, use) => {
       use(
         createEvaluateDataset({
           chatClient,
           evaluators,
           executorClient,
-          traceEsClient,
-          log,
         })
       );
     },
