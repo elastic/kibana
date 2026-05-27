@@ -17,7 +17,12 @@ export type RecoveryType = 'default' | 'custom';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
-export type StepId = 'alertCondition' | 'builderCondition' | 'recoveryCondition' | 'details';
+export type StepId =
+  | 'alertCondition'
+  | 'builderCondition'
+  | 'recoveryCondition'
+  | 'details'
+  | 'notifications';
 
 export interface StepRenderProps {
   state: ComposeDiscoverState;
@@ -25,6 +30,7 @@ export interface StepRenderProps {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  ruleId?: string;
   builderState?: unknown;
   onBuilderStateChange?: (state: unknown) => void;
   renderBuilderRecovery?: (props: RuleBuilderRecoveryProps) => React.ReactNode;
@@ -37,6 +43,7 @@ export interface StepDefinition {
   validate?: (
     methods: UseFormReturn<ComposeFormValues>,
     state: ComposeDiscoverState,
+    services?: RuleFormServices,
     builderState?: unknown
   ) => Promise<boolean> | boolean;
 }
