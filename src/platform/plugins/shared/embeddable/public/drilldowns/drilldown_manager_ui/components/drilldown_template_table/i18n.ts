@@ -57,7 +57,7 @@ export const txtSingleItemCopyActionLabel = i18n.translate(
 export const txtTableCaption = i18n.translate(
   'embeddableApi.components.DrilldownTemplateTable.tableCaption',
   {
-    defaultMessage: 'Drilldown templates available to copy',
+    defaultMessage: 'Drilldown templates',
   }
 );
 
