@@ -85,13 +85,14 @@ class DashboardUserActivitySession {
     if (type === 'refresh') {
       const state = this.api.getSerializedState();
       const refreshInterval = dataService.query.timefilter.timefilter.getRefreshInterval();
+
       meta = {
         time_range: state.attributes.time_range,
         ...(refreshInterval &&
           !refreshInterval.pause && { refresh_interval: refreshInterval.value }),
         query: state.attributes.query,
         filters: state.attributes.filters,
-        panel_count: state.attributes.panels.length,
+        panel_count: this.api.getPanelCount(),
         errors: Object.entries(this.api.children$.getValue()).reduce(
           (prev: Array<{ panel_id: string; error: string }>, [id, child]) => {
             if (apiPublishesBlockingError(child)) {

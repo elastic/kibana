@@ -53,12 +53,28 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
       },
       security: {
         authz: {
-          requiredPrivileges: ['read'],
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
         },
       },
     },
     async (ctx, req, res) => {
-      const user = (await ctx.core).security.authc.getCurrentUser();
+      const core = await ctx.core;
+      const esClient = core.elasticsearch.client.asCurrentUser;
+      const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
+        application: [
+          {
+            application: `kibana-.kibana`,
+            resources: ['*'],
+            privileges: [`feature_dashboard_v2.read`],
+          },
+        ],
+      });
+      if (!hasAllPrivileges) {
+        res.forbidden();
+      }
+
+      const user = core.security.authc.getCurrentUser();
       const hasPanelErrors = (req.body.meta?.errors ?? []).length;
       coreServices.userActivity.trackUserAction({
         message: `User ${user ? `"${user.username}"` : ''} ${
