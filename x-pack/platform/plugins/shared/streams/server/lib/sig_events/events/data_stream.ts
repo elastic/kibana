@@ -19,11 +19,27 @@ export const eventsMappings = {
     event_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
-    evidences: mappings.object({
-      properties: {
-        rule_name: { type: 'keyword' as const },
-      },
-    }),
+    previous_event_id: mappings.keyword(),
+    stream_names: mappings.keyword(),
+    rule_names: mappings.keyword(),
+    verdict: mappings.keyword(),
+    verdict_summary: mappings.text(),
+    assessment_note: mappings.text(),
+    verdict_source: mappings.keyword(),
+    original_verdict: mappings.keyword(),
+    conversation_id: mappings.keyword(),
+    grouped_discovery_ids: mappings.keyword(),
+    impact: mappings.keyword(),
+    criticality: mappings.integer(),
+    confidence: mappings.integer(),
+    title: mappings.text(),
+    summary: mappings.text(),
+    root_cause: mappings.text(),
+    recommended_action: mappings.text(),
+    recommendations: mappings.text(),
+    workflow_execution_id: mappings.keyword(),
+    created_at: mappings.date({ format: 'strict_date_optional_time' }),
+    grouped_into: mappings.keyword(),
   },
 } satisfies MappingsDefinition;
 
@@ -32,7 +48,7 @@ export type { SigEvent };
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  version: 2,
+  version: 4,
   hidden: true,
   template: {
     priority: 500,
