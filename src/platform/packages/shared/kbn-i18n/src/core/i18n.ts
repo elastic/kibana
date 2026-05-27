@@ -185,6 +185,83 @@ export function formatList(type: 'conjunction' | 'disjunction' | 'unit', value: 
 }
 
 /**
+ * A per-locale translator instance that does not share state with the singleton.
+ * Created via {@link createScopedTranslator} for request-scoped server-side translation.
+ */
+export interface ScopedTranslator {
+  /** Returns the locale this translator was built for. */
+  getLocale(): string;
+  /** Translates the message with the given id using this instance's locale. */
+  translate(id: string, args: TranslateArguments): string;
+  /** Formats a list using this instance's locale. */
+  formatList(type: 'conjunction' | 'disjunction' | 'unit', values: string[]): string;
+}
+
+/**
+ * Creates an isolated translator for the locale specified in `translationInput`.
+ * Unlike the singleton {@link translate}, instances produced here share no state
+ * with each other or with the module-level `intl` variable.
+ */
+export function createScopedTranslator(translationInput: {
+  locale: string;
+  messages?: Record<string, string>;
+  formats?: unknown;
+}): ScopedTranslator {
+  if (!translationInput.locale || typeof translationInput.locale !== 'string') {
+    throw new Error('[I18n] A `locale` must be a non-empty string to create a scoped translator.');
+  }
+
+  const config: IntlConfig<string> = {
+    locale: normalizeLocale(translationInput.locale),
+    messages: translationInput.messages ?? {},
+    defaultFormats: defaultEnFormats,
+    defaultLocale,
+    onError: handleIntlError,
+  };
+
+  if (translationInput.formats) {
+    config.formats = translationInput.formats as IntlConfig<string>['formats'];
+  }
+
+  const cache = createIntlCache();
+  const scopedIntl = createIntl(config, cache);
+
+  return {
+    getLocale: () => scopedIntl.locale,
+
+    translate(
+      id,
+      { values = {}, description, defaultMessage, ignoreTag, formatters }: TranslateArguments
+    ) {
+      if (!id || typeof id !== 'string') {
+        throw new Error('[I18n] An `id` must be a non-empty string to translate a message.');
+      }
+      try {
+        if (!defaultMessage) {
+          throw new Error('Missing `defaultMessage`.');
+        }
+        return scopedIntl.formatMessage(
+          { id, defaultMessage, description },
+          values,
+          // @ts-expect-error - There's a small mismatch between @formatjs type and Intl API that only applies to the date function, we're ignoring that
+          { ignoreTag, shouldParseSkeletons: true, formatters }
+        );
+      } catch (e) {
+        throw new Error(`[I18n] Error formatting the default message for: "${id}".\n${e}`);
+      }
+    },
+
+    formatList(type, value) {
+      try {
+        return scopedIntl.formatList(value, { type });
+      } catch (e) {
+        throw new Error(`[I18n] Error formatting list ${JSON.stringify(value)}: ${e}`);
+      }
+    },
+  };
+}
+
+/**
  * Initializes the engine
  * @param newTranslation
  */

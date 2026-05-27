@@ -65,6 +65,49 @@ user profiles; however, anonymous pages and pages visited after signing out
 will always fall back to `i18n.defaultLocale` (or `Accept-Language` on
 serverless deployments) rather than remembering the previously resolved locale.
 
+## Server-side translation
+
+In addition to rendering the browser UI in the user's locale, Kibana exposes a request-scoped translator to route handlers so that HTTP response strings — validation errors, structured messages, and similar — can also be returned in the user's language.
+
+### Using `context.core.i18n` in a route handler
+
+Inside an HTTP route handler, the per-request client is accessible via `(await context.core).i18n`:
+
+```typescript
+router.post({ path: '/api/my-plugin/action', ... }, async (context, request, response) => {
+  const { i18n } = await context.core;
+
+  if (!isValid) {
+    return response.badRequest({
+      body: await i18n.translate('myPlugin.actionFailed', {
+        defaultMessage: 'Action "{name}" failed',
+        values: { name: actionName },
+      }),
+    });
+  }
+  // ...
+});
+```
+
+The locale is resolved from the same priority chain as rendering (user profile → `KBN_LOCALE` cookie → `Accept-Language` on serverless → `i18n.defaultLocale`) on the first `translate()` call and memoised for the lifetime of the request.
+
+### What can be translated with `context.core.i18n`?
+
+Only **strings returned from route handler bodies** should use `context.core.i18n`. The following are **out of scope** and must continue using the singleton `i18n.translate(...)`:
+
+- Module-load-time strings: OpenAPI route `summary`/`description`, feature registrations, UI-settings definitions, constants.
+- Background task strings: Task Manager executors, alerting rule executors, scheduled jobs. There is no request context in these code paths.
+
+The singleton `i18n.translate(...)` is still available and works as before, but it will always resolve to the server default locale (`i18n.defaultLocale` in `kibana.yml`) since it has no request context and doesn't know the user or their preferences.
+
+### Identifying migration candidates
+
+To list route files that call `i18n.translate` (handler-body calls are a subset of this list — OAS metadata calls are excluded by inspecting context):
+
+```bash
+rg -l 'i18n\.translate\(' --glob '**/server/**/routes/**/*.ts' src/ x-pack/
+```
+
 ## Example configurations
 
 ```yaml

@@ -27,6 +27,7 @@ import type { PricingServiceStart } from '@kbn/core-pricing-server';
 import type { InternalCoreDiServiceStart } from '@kbn/core-di-internal';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
+import type { InternalI18nServiceStart } from '@kbn/core-i18n-server-internal';
 
 /**
  * @internal
@@ -52,4 +53,5 @@ export interface InternalCoreStart {
   injection: InternalCoreDiServiceStart;
   dataStreams: DataStreamsStart;
   userStorage: UserStorageServiceStart;
+  i18n: InternalI18nServiceStart;
 }

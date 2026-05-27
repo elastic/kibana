@@ -15,6 +15,7 @@ import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-serv
 import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 import type { UserProfileRequestHandlerContext } from '@kbn/core-user-profile-server';
 import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-server';
+import type { I18nRequestHandlerContext } from '@kbn/core-i18n-server';
 
 /**
  * The `core` context provided to route handler.
@@ -59,6 +60,16 @@ export interface CoreRequestHandlerContext {
    * {@link UserProfileRequestHandlerContext}
    */
   userProfile: UserProfileRequestHandlerContext;
+  /**
+   * {@link I18nRequestHandlerContext}
+   *
+   * Per-request i18n client that translates strings in the locale resolved for
+   * the current user (profile setting → KBN_LOCALE cookie → Accept-Language →
+   * `i18n.defaultLocale`). Only strings returned from route handler bodies
+   * should be translated here; module-load-time strings (OAS summaries, feature
+   * registrations, etc.) remain on the singleton and are unaffected.
+   */
+  i18n: I18nRequestHandlerContext;
 }
 
 /**

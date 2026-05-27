@@ -27,6 +27,7 @@ import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 import { userStorageServiceMock } from '@kbn/core-user-storage-server-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 import { lazyObject } from '@kbn/lazy-object';
 
 export function createInternalCoreStartMock() {
@@ -51,6 +52,7 @@ export function createInternalCoreStartMock() {
     injection: injectionServiceMock.createInternalStartContract(),
     dataStreams: dataStreamServiceMock.createStartContract(),
     userStorage: userStorageServiceMock.createStartContract(),
+    i18n: i18nServiceMock.createStartContract(),
   });
   return startDeps;
 }

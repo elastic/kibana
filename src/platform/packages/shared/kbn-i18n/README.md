@@ -347,6 +347,33 @@ export const MyComponent = injectI18n(
 );
 ```
 
+## Server-side route handler translation
+
+The singleton `i18n.translate(...)` always uses `i18n.defaultLocale`. For HTTP **route handler bodies** that should reflect the requesting user's locale, use the request-scoped client available via `(await context.core).i18n`:
+
+```typescript
+router.post({ path: '/api/my-plugin/action', ... }, async (context, request, response) => {
+  const { i18n } = await context.core;
+
+  return response.badRequest({
+    body: await i18n.translate('myPlugin.invalid', {
+      defaultMessage: 'Invalid value "{value}"',
+      values: { value: postedValue },
+    }),
+  });
+});
+```
+
+The locale is resolved once per request (user profile → cookie → Accept-Language → defaultLocale) and memoised; subsequent translate calls within the same handler are cheap in-memory lookups.
+
+**Limitations:**
+- Module-load-time strings (OAS summaries, feature registrations, etc.) cannot use the request-scoped API. Keep using `i18n.translate(...)` there.
+- Background tasks (Task Manager, alerting) have no request context and are not supported.
+
+### `createScopedTranslator` (advanced)
+
+This package also exports `createScopedTranslator(translationInput)` which creates an isolated, non-singleton `ScopedTranslator` instance. It is intended for the core i18n service implementation and for unit tests that need to validate locale-specific message rendering without affecting the global singleton. Plugin authors should use `context.core.i18n` instead.
+
 ## I18n tools
 
 In order to simplify localization process, some additional tools were implemented:

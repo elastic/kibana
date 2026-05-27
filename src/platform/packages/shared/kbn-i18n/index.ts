@@ -48,7 +48,8 @@ const i18nLoader = {
 };
 
 export type { Translation, TranslationInput } from './src/translation';
-export type { Formats, TranslateArguments } from './src/core';
+export type { Formats, TranslateArguments, ScopedTranslator } from './src/core';
+export { createScopedTranslator } from './src/core';
 export {
   SUPPORTED_LOCALE_IDS,
   getLocaleLabel,

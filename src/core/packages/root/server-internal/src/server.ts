@@ -38,7 +38,10 @@ import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService } from '@kbn/core-status-server-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
-import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
+import {
+  UserSettingsService,
+  type InternalUserSettingsServiceSetup,
+} from '@kbn/core-user-settings-server-internal';
 import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
 import {
   CoreRouteHandlerContext,
@@ -121,6 +124,7 @@ export class Server {
   private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
   private nodeRoles?: NodeRoles;
+  private userSettingsServiceSetup?: InternalUserSettingsServiceSetup;
 
   private readonly uptimePerStep: Partial<UptimeSteps> = {};
 
@@ -430,6 +434,7 @@ export class Server {
 
     const customBrandingSetup = this.customBranding.setup();
     const userSettingsServiceSetup = this.userSettingsService.setup();
+    this.userSettingsServiceSetup = userSettingsServiceSetup;
     const featureFlagsSetup = this.featureFlags.setup();
 
     const renderingSetup = await this.rendering.setup({
@@ -614,6 +619,10 @@ export class Server {
 
     const pricingStart = this.pricing.start();
 
+    const i18nStart = this.i18n.start({
+      getUserSettingLocale: this.userSettingsServiceSetup!.getUserSettingLocale,
+    });
+
     this.httpRateLimiter.start();
     this.status.start();
 
@@ -643,6 +652,7 @@ export class Server {
       injection: injectionStart,
       dataStreams: dataStreamsStart,
       userStorage: userStorageStart,
+      i18n: i18nStart,
     };
 
     this.coreApp.start(this.coreStart);
