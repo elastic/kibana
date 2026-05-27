@@ -85,7 +85,6 @@ const overallSwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneOverall';
 const viewBySwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneViewBy';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
@@ -94,7 +93,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('anomaly explorer', function () {
     this.tags(['ml']);
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
