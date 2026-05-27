@@ -8,8 +8,20 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/server-route-repository-utils",
-    "@kbn/core-http-browser",
     "@kbn/apm-common",
-    "@kbn/io-ts-utils"
+    "@kbn/io-ts-utils",
+    "@kbn/core",
+    "@kbn/server-route-repository",
+    "@kbn/cps-utils",
+    "@kbn/es-query",
+    "@kbn/apm-types",
+    "@kbn/es-types",
+    "@kbn/security-plugin-types-common",
+    "@kbn/data-views-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/profiling-utils",
+    "@kbn/slo-schema",
+    "@kbn/elastic-agent-utils",
+    "@kbn/apm-types-shared"
   ]
 }
