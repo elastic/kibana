@@ -6,6 +6,7 @@
  */
 import { useTimeZone } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import type { Ping, PingState } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
@@ -16,6 +17,7 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 
 function buildTermsFilter(field: string, values?: string | string[]) {
   if (!values || (Array.isArray(values) && values.length === 0)) return [];
@@ -35,6 +37,7 @@ function buildStatusCodesFilter(values?: string | string[]) {
 
 export function useAllMonitorErrors() {
   const { lastRefresh } = useSyntheticsRefreshContext();
+  const { space } = useKibanaSpace();
 
   const {
     dateRangeStart,
@@ -61,6 +64,7 @@ export function useAllMonitorErrors() {
         },
       },
     },
+    ...buildTermsFilter('meta.space_id', space?.id ? [space.id, ALL_SPACES_ID] : undefined),
     ...buildTermsFilter('monitor.type', monitorTypes),
     ...buildTermsFilter('observer.geo.name', locations),
     ...buildTermsFilter('tags', tags),
@@ -80,6 +84,7 @@ export function useAllMonitorErrors() {
     tags,
     projects,
     statusCodes,
+    spaceId: space?.id,
   });
 
   const { data, loading, error } = useReduxEsSearch(
@@ -136,10 +141,11 @@ export function useAllMonitorErrors() {
       tags,
       projects,
       statusCodes,
+      space?.id,
     ],
     {
       name: `getAllMonitorErrors/${dateRangeStart}/${dateRangeEnd}/${filterKey}`,
-      isRequestReady: true,
+      isRequestReady: Boolean(space?.id),
     }
   );
 

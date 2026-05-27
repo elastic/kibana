@@ -26,7 +26,7 @@ export const getErrorStatsRoute: SyntheticsRestApiRouteFactory = () => ({
       query: schema.maybe(schema.string()),
     }),
   },
-  handler: async ({ syntheticsEsClient, request }) => {
+  handler: async ({ syntheticsEsClient, request, spaceId }) => {
     const { from, to, monitorTypes, locations, tags, projects, statusCodes, query } = request.query;
 
     return await getErrorStats({
@@ -39,6 +39,7 @@ export const getErrorStatsRoute: SyntheticsRestApiRouteFactory = () => ({
       projects: safeJsonParse(projects),
       statusCodes: safeJsonParse(statusCodes),
       query: query || undefined,
+      spaceId,
     });
   },
 });

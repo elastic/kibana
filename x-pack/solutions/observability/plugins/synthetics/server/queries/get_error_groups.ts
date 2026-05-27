@@ -6,6 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
@@ -53,6 +54,7 @@ interface GetErrorGroupsParams {
   projects?: string[];
   statusCodes?: string[];
   query?: string;
+  spaceId: string;
 }
 
 export async function getErrorGroups({
@@ -65,12 +67,14 @@ export async function getErrorGroups({
   projects,
   statusCodes,
   query,
+  spaceId,
 }: GetErrorGroupsParams): Promise<ErrorGroupsResponse> {
   const filters: QueryDslQueryContainer[] = [
     SUMMARY_FILTER as QueryDslQueryContainer,
     EXCLUDE_RUN_ONCE_FILTER as QueryDslQueryContainer,
     { range: { '@timestamp': { gte: from, lte: to } } },
     { term: { 'monitor.status': 'down' } },
+    { terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } },
   ];
 
   if (monitorTypes?.length) {

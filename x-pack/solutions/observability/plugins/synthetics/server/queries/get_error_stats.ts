@@ -7,6 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import DateMath from '@kbn/datemath';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
@@ -35,6 +36,7 @@ interface GetErrorStatsParams {
   projects?: string[];
   statusCodes?: string[];
   query?: string;
+  spaceId: string;
 }
 
 /**
@@ -65,6 +67,7 @@ export async function getErrorStats({
   projects,
   statusCodes,
   query,
+  spaceId,
 }: GetErrorStatsParams): Promise<ErrorStats> {
   const { prevFrom, prevTo } = getPreviousPeriod(from, to);
 
@@ -104,6 +107,7 @@ export async function getErrorStats({
   const topLevelFilter: QueryDslQueryContainer[] = [
     ...baseFilters,
     { range: { '@timestamp': { gte: prevFrom, lte: to } } },
+    { terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } },
   ];
 
   // Helper: build a bool.must list combining a date-range filter with an
