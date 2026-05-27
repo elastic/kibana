@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SnapshotCheckResult } from './resolve_snapshot_sha';
 import { resolveSnapshotSha } from './resolve_snapshot_sha';
 
 describe('resolveSnapshotSha', () => {
   const requestedSha = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
   const parentSha = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
 
+  const snapshotResultForSha =
+    (sha: string) =>
+    async (requested: string): Promise<SnapshotCheckResult> =>
+      requested === sha ? { outcome: 'exists' } : { outcome: 'not_found' };
+
   it('returns the requested SHA when its snapshot exists on the first attempt', async () => {
     const snapshotExistsFn = jest
-      .fn<Promise<boolean>, [string]>()
-      .mockImplementation(async (sha) => sha === requestedSha);
+      .fn<Promise<SnapshotCheckResult>, [string]>()
+      .mockImplementation(snapshotResultForSha(requestedSha));
 
     await expect(
       resolveSnapshotSha(requestedSha, {
@@ -34,8 +40,8 @@ describe('resolveSnapshotSha', () => {
 
   it('retries the same SHA before walking to a parent commit', async () => {
     const snapshotExistsFn = jest
-      .fn<Promise<boolean>, [string]>()
-      .mockImplementation(async (sha) => sha === parentSha);
+      .fn<Promise<SnapshotCheckResult>, [string]>()
+      .mockImplementation(snapshotResultForSha(parentSha));
 
     const getParentCommitShaFn = jest.fn((sha: string) => {
       if (sha === requestedSha) {
@@ -62,8 +68,82 @@ describe('resolveSnapshotSha', () => {
     expect(getParentCommitShaFn).toHaveBeenCalledTimes(1);
   });
 
+  it('retries network errors indefinitely without walking to a parent commit', async () => {
+    let callCount = 0;
+    const snapshotExistsFn = jest.fn(async (): Promise<SnapshotCheckResult> => {
+      callCount++;
+      if (callCount < 4) {
+        return { outcome: 'network_error' };
+      }
+      return { outcome: 'exists' };
+    });
+    const getParentCommitShaFn = jest.fn(() => parentSha);
+
+    await expect(
+      resolveSnapshotSha(requestedSha, {
+        attemptsPerSha: 3,
+        maxAncestorDepth: 3,
+        retryDelayMs: 0,
+        snapshotExistsFn,
+        getParentCommitShaFn,
+      })
+    ).resolves.toEqual({
+      requestedSha,
+      resolvedSha: requestedSha,
+      usedAncestorSnapshot: false,
+    });
+
+    expect(snapshotExistsFn).toHaveBeenCalledTimes(4);
+    expect(getParentCommitShaFn).not.toHaveBeenCalled();
+  });
+
+  it('does not count network errors toward the not-found retry limit', async () => {
+    const resultsByCall: SnapshotCheckResult[] = [
+      { outcome: 'network_error' },
+      { outcome: 'not_found' },
+      { outcome: 'network_error' },
+      { outcome: 'not_found' },
+      { outcome: 'network_error' },
+      { outcome: 'not_found' },
+      { outcome: 'exists' },
+    ];
+    let callCount = 0;
+    const snapshotExistsFn = jest.fn(async (sha: string): Promise<SnapshotCheckResult> => {
+      if (sha === parentSha) {
+        return { outcome: 'exists' };
+      }
+      return resultsByCall[callCount++];
+    });
+
+    const getParentCommitShaFn = jest.fn((sha: string) => {
+      if (sha === requestedSha) {
+        return parentSha;
+      }
+      throw new Error(`unexpected sha ${sha}`);
+    });
+
+    await expect(
+      resolveSnapshotSha(requestedSha, {
+        attemptsPerSha: 3,
+        maxAncestorDepth: 3,
+        retryDelayMs: 0,
+        snapshotExistsFn,
+        getParentCommitShaFn,
+      })
+    ).resolves.toEqual({
+      requestedSha,
+      resolvedSha: parentSha,
+      usedAncestorSnapshot: true,
+    });
+
+    expect(snapshotExistsFn).toHaveBeenCalledTimes(7);
+    expect(getParentCommitShaFn).toHaveBeenCalledTimes(1);
+  });
+
   it('attempts up to 4 SHAs with 3 tries each before failing', async () => {
-    const snapshotExistsFn = jest.fn(async () => false);
+    const snapshotExistsFn = jest.fn(async (): Promise<SnapshotCheckResult> => ({
+      outcome: 'not_found',
+    }));
     const getParentCommitShaFn = jest
       .fn<string, [string]>()
       .mockImplementationOnce(() => 'cccccccccccccccccccccccccccccccccccccccc')

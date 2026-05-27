@@ -22,25 +22,41 @@ export interface ResolvedSnapshotSha {
   usedAncestorSnapshot: boolean;
 }
 
+export type SnapshotCheckResult =
+  | { outcome: 'exists' }
+  | { outcome: 'not_found' }
+  | { outcome: 'network_error' };
+
 const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 
-export const snapshotExists = (sha: string): Promise<boolean> => {
+export const snapshotExists = (sha: string): Promise<SnapshotCheckResult> => {
   const url = gcsSnapshotUrl(sha);
   if (!url) {
-    return Promise.resolve(false);
+    return Promise.resolve({ outcome: 'not_found' });
   }
 
   return new Promise((resolve) => {
     const request = https.request(url, { method: 'HEAD' }, (response) => {
       response.resume();
       const statusCode = response.statusCode ?? 0;
-      resolve(statusCode >= 200 && statusCode < 400);
+
+      if (statusCode >= 200 && statusCode < 400) {
+        resolve({ outcome: 'exists' });
+        return;
+      }
+
+      if (statusCode === 404) {
+        resolve({ outcome: 'not_found' });
+        return;
+      }
+
+      resolve({ outcome: 'network_error' });
     });
 
-    request.on('error', () => resolve(false));
+    request.on('error', () => resolve({ outcome: 'network_error' }));
     request.end();
   });
 };
@@ -84,7 +100,7 @@ export interface ResolveSnapshotShaOptions {
   attemptsPerSha?: number;
   maxAncestorDepth?: number;
   retryDelayMs?: number;
-  snapshotExistsFn?: (sha: string) => Promise<boolean>;
+  snapshotExistsFn?: (sha: string) => Promise<SnapshotCheckResult>;
   getParentCommitShaFn?: (sha: string) => string;
 }
 
@@ -92,6 +108,8 @@ export interface ResolveSnapshotShaOptions {
  * Resolves a commit SHA to the nearest available GCS snapshot SHA.
  * Retries fetching the requested SHA before walking up to {@link MAX_ANCESTOR_DEPTH}
  * parent commits, giving recently uploaded snapshots time to appear in GCS.
+ * 404 responses are retried up to {@link ATTEMPTS_PER_SHA} times per SHA; network
+ * errors are retried indefinitely on the same SHA.
  */
 export const resolveSnapshotSha = async (
   requestedSha: string,
@@ -107,8 +125,12 @@ export const resolveSnapshotSha = async (
   let currentSha = expandedRequestedSha;
 
   for (let ancestorDepth = 0; ancestorDepth <= maxAncestorDepth; ancestorDepth++) {
-    for (let attempt = 1; attempt <= attemptsPerSha; attempt++) {
-      if (await snapshotExistsFn(currentSha)) {
+    let notFoundAttempts = 0;
+
+    while (notFoundAttempts < attemptsPerSha) {
+      const result = await snapshotExistsFn(currentSha);
+
+      if (result.outcome === 'exists') {
         return {
           requestedSha: expandedRequestedSha,
           resolvedSha: currentSha,
@@ -116,7 +138,13 @@ export const resolveSnapshotSha = async (
         };
       }
 
-      if (attempt < attemptsPerSha) {
+      if (result.outcome === 'network_error') {
+        await sleep(retryDelayMs);
+        continue;
+      }
+
+      notFoundAttempts++;
+      if (notFoundAttempts < attemptsPerSha) {
         await sleep(retryDelayMs);
       }
     }
