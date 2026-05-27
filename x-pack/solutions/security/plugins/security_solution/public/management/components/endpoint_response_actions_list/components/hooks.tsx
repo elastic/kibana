@@ -295,18 +295,7 @@ export const useActionsLogFilter = ({
       : isStatusesFilter
       ? RESPONSE_ACTION_STATUS.map((statusName) => ({
           key: statusName,
-          label: (
-            <ResponseActionStatusBadge
-              color={
-                statusName === 'successful'
-                  ? 'success'
-                  : statusName === 'failed'
-                  ? 'danger'
-                  : 'warning'
-              }
-              status={getActionStatus(statusName)}
-            />
-          ) as unknown as string,
+          label: (<ResponseActionStatusBadge status={statusName} />) as unknown as string,
           searchableLabel: statusName,
           checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
           'data-test-subj': `${filterName}-filter-option`,
