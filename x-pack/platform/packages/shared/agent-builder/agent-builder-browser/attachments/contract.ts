@@ -33,10 +33,6 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   screenContext?: ScreenContextAttachmentData;
   /** Callback to open the agent builder sidebar with the current conversation loaded. Undefined when already in the sidebar. */
   openSidebarConversation?: () => void;
-  /** The version number being rendered. Undefined when version metadata is unavailable. */
-  version?: number;
-  /** Total number of versions for this attachment in the conversation. Undefined when version metadata is unavailable. */
-  versionCount?: number;
 }
 
 /**
@@ -112,11 +108,10 @@ export interface ActionButton {
    */
   href?: string;
   /**
-   * Optional anchor target. Use `'_blank'` to open in a new tab. Only applies
-   * when `href` is set; `rel="noopener noreferrer"` is added automatically for
-   * `_blank` targets.
+   * When true, the link opens in a new browser tab. Only applies when `href`
+   * is set; `rel="noopener noreferrer"` is added automatically.
    */
-  target?: '_self' | '_blank' | '_parent' | '_top';
+  openInNewTab?: boolean;
   /**
    * Handler function called when the button is clicked.
    */
@@ -136,15 +131,23 @@ export interface AttachmentLifecycleParams<
 }
 
 /**
- * Parameters passed to header-level resolvers (`getHeaderIcon`, `getHeaderBadges`).
+ * Parameters passed to the `getHeader` resolver.
  */
 export interface GetHeaderParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
   /** The attachment being rendered in the header. */
   attachment: TAttachment;
-  /** The version number being rendered. Undefined when version metadata is unavailable. */
-  version?: number;
-  /** Total number of versions for this attachment in the conversation. */
-  versionCount?: number;
+}
+
+/**
+ * Return value of the `getHeader` resolver.
+ */
+export interface HeaderData {
+  /** Optional icon to display in the attachment header next to the title. */
+  icon?: IconType;
+  /** Optional secondary line rendered under the attachment title. */
+  subtitle?: string;
+  /** Optional badges rendered in the attachment header next to the title. */
+  badges?: HeaderBadge[];
 }
 
 /**
@@ -173,20 +176,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getIcon?: () => IconType;
   /**
-   * Returns the icon to render in the attachment header (inline / canvas), next
-   * to the title. Falls back to no icon when not provided.
+   * Returns header metadata (icon, subtitle, badges) for the attachment header
+   * (inline / canvas). Omitted fields fall back to their defaults (no icon, no
+   * subtitle, no badges).
    */
-  getHeaderIcon?: (params: GetHeaderParams<TAttachment>) => IconType | undefined;
-  /**
-   * Returns a secondary line to render under the attachment title in the
-   * header. Falls back to no subtitle when not provided.
-   */
-  getHeaderSubtitle?: (params: GetHeaderParams<TAttachment>) => string | undefined;
-  /**
-   * Returns badges to render in the attachment header (inline / canvas), next
-   * to the title. Falls back to no badges when not provided.
-   */
-  getHeaderBadges?: (params: GetHeaderParams<TAttachment>) => HeaderBadge[];
+  getHeader?: (params: GetHeaderParams<TAttachment>) => HeaderData;
   /**
    * Optional custom click handler for attachment pills.
    * When provided, pills will invoke this instead of the default behavior.

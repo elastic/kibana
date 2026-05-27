@@ -88,7 +88,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
   // Clear dynamic buttons when the canvas attachment changes
   useEffect(() => {
     setDynamicButtons([]);
-  }, [canvasState?.attachment.id, canvasState?.version]);
+  }, [canvasState?.attachment.id, canvasState?.attachment.version]);
 
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
     setDynamicButtons(buttons);
@@ -105,8 +105,6 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         updateOrigin,
         openSidebarConversation: canvasState.isSidebar ? undefined : openSidebarConversation,
         isCanvas: true,
-        version: canvasState.version,
-        versionCount: canvasState.versionCount,
       }) ?? [];
     return [...staticButtons, ...dynamicButtons];
   }, [canvasState, uiDefinition, updateOrigin, openSidebarConversation, dynamicButtons]);
@@ -117,21 +115,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
 
   const { attachment, isSidebar } = canvasState;
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
-  const headerIcon = uiDefinition?.getHeaderIcon?.({
-    attachment,
-    version: canvasState.version,
-    versionCount: canvasState.versionCount,
-  });
-  const headerSubtitle = uiDefinition?.getHeaderSubtitle?.({
-    attachment,
-    version: canvasState.version,
-    versionCount: canvasState.versionCount,
-  });
-  const headerBadges = uiDefinition?.getHeaderBadges?.({
-    attachment,
-    version: canvasState.version,
-    versionCount: canvasState.versionCount,
-  });
+  const header = uiDefinition?.getHeader?.({ attachment });
 
   const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
   const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
@@ -164,23 +148,21 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       paddingSize="none"
     >
       <AttachmentHeader
-        icon={headerIcon}
+        icon={header?.icon}
         title={title}
-        subtitle={headerSubtitle}
-        badges={headerBadges}
+        subtitle={header?.subtitle}
+        badges={header?.badges}
         actionButtons={canvasHeaderActionButtons}
         onClose={closeCanvas}
         previewBadgeState="preview_available"
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        <React.Fragment key={`${attachment.id}:${canvasState.version ?? 'latest'}`}>
+        <React.Fragment key={`${attachment.id}:${attachment.version ?? 'latest'}`}>
           {uiDefinition.renderCanvasContent(
             {
               attachment,
               isSidebar,
               openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-              version: canvasState.version,
-              versionCount: canvasState.versionCount,
             },
             {
               registerActionButtons,

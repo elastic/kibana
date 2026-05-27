@@ -280,10 +280,9 @@ export const createSkillAttachmentDefinition = ({
       i18n.translate('xpack.agentBuilderPlatform.attachments.skill.label', {
         defaultMessage: 'Skill draft',
       }),
-    getHeaderIcon: () => 'sparkles',
-    getHeaderSubtitle: ({ attachment }) => attachment.data.id,
-    getHeaderBadges: ({ attachment, version, versionCount }) => {
-      const headerBadges: HeaderBadge[] = [];
+    getHeader: ({ attachment }) => {
+      const { version, versionCount } = attachment;
+      const badges: HeaderBadge[] = [];
       const isCreated = Boolean(attachment.origin);
 
       if (isCreated) {
@@ -294,9 +293,9 @@ export const createSkillAttachmentDefinition = ({
           color: 'success',
           iconType: 'check',
         };
-        headerBadges.push(createdBadge);
+        badges.push(createdBadge);
         // Created attachments only show created badge
-        return headerBadges;
+        return { icon: 'sparkles', subtitle: attachment.data.id, badges };
       }
 
       const draftBadge: HeaderBadge = {
@@ -304,7 +303,7 @@ export const createSkillAttachmentDefinition = ({
           defaultMessage: 'Draft',
         }),
       };
-      headerBadges.push(draftBadge);
+      badges.push(draftBadge);
 
       if (isLatest({ version, versionCount })) {
         const latestBadge: HeaderBadge = {
@@ -313,21 +312,15 @@ export const createSkillAttachmentDefinition = ({
           }),
           color: 'primary',
         };
-        headerBadges.push(latestBadge);
+        badges.push(latestBadge);
       }
 
-      return headerBadges;
+      return { icon: 'sparkles', subtitle: attachment.data.id, badges };
     },
     renderInlineContent: (props) => <SkillInlineContent {...props} />,
     renderCanvasContent: (props) => <SkillCanvasContent {...props} />,
-    getActionButtons: ({
-      attachment,
-      updateOrigin,
-      openCanvas,
-      isCanvas,
-      version,
-      versionCount,
-    }) => {
+    getActionButtons: ({ attachment, updateOrigin, openCanvas, isCanvas }) => {
+      const { version, versionCount } = attachment;
       const isCreated = Boolean(attachment.origin);
 
       const actionButtons: ActionButton[] = [];
@@ -378,7 +371,7 @@ export const createSkillAttachmentDefinition = ({
             href: application.getUrlForApp(AGENTBUILDER_APP_ID, {
               path: `${SKILLS_MANAGE_PATH}/${skillId}`,
             }),
-            target: '_blank',
+            openInNewTab: true,
             handler: () => {
               // Do nothing. navigation handled by href
             },

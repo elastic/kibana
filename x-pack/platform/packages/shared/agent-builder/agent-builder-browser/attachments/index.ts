@@ -13,6 +13,7 @@ export type {
   InlineRenderCallbacks,
   GetActionButtonsParams,
   GetHeaderParams,
+  HeaderData,
   HeaderBadge,
   ActionButton,
   AttachmentPreviewState,

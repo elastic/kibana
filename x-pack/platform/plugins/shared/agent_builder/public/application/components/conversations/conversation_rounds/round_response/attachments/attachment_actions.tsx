@@ -56,12 +56,12 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
 
   // Derive the navigation/click props for an EUI button. When `href` is set we
   // render an anchor (so middle-click / cmd-click / "Open in new tab" all work
-  // natively); `rel="noopener noreferrer"` is added automatically for `_blank`
-  // targets.
+  // natively); `rel="noopener noreferrer"` is added automatically when
+  // `openInNewTab` is true.
   const getNavProps = (button: ActionButton) => ({
     href: button.href,
-    target: button.href ? button.target : undefined,
-    rel: button.href && button.target === '_blank' ? 'noopener noreferrer' : undefined,
+    target: button.href && button.openInNewTab ? '_blank' : undefined,
+    rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
     onClick: button.handler,
   });
 
@@ -162,9 +162,8 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                     disabled: button.disabled,
                     toolTipContent: button.disabled ? button.disabledReason : undefined,
                     href: button.href,
-                    target: button.href ? button.target : undefined,
-                    rel:
-                      button.href && button.target === '_blank' ? 'noopener noreferrer' : undefined,
+                    target: button.href && button.openInNewTab ? '_blank' : undefined,
+                    rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
                     onClick: () => {
                       closePopover();
                       button.handler();

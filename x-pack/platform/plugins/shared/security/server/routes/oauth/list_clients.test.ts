@@ -20,9 +20,13 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('List OAuth Clients route', () => {
   function getMockContext(
-    licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
+    licenseCheckResult: { state: string; message?: string } = { state: 'valid' },
+    { oauthManagementEnabled = true }: { oauthManagementEnabled?: boolean } = {}
   ) {
+    const coreContext = coreMock.createRequestHandlerContext();
+    (coreContext.uiSettings.client.get as jest.Mock).mockResolvedValue(oauthManagementEnabled);
     return coreMock.createCustomRequestHandlerContext({
+      core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
@@ -81,6 +85,17 @@ describe('List OAuth Clients route', () => {
     );
 
     expect(response.status).toBe(404);
+  });
+
+  it('returns 404 when uiamOAuthClientManagement setting is disabled', async () => {
+    const response = await routeHandler(
+      getMockContext({ state: 'valid' }, { oauthManagementEnabled: false }),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(oauthMock.listClients).not.toHaveBeenCalled();
   });
 
   it('returns error from service', async () => {

@@ -25,10 +25,6 @@ interface InlineAttachmentWithActionsProps {
   isSidebar: boolean;
   conversationId: string;
   screenContext?: ScreenContextAttachmentData;
-  /** Version number of the attachment being rendered, used for canvas preview comparison */
-  version?: number;
-  /** Total number of versions for this attachment in the conversation. */
-  versionCount?: number;
   /**
    * Shared preview state for header actions/badges.
    */
@@ -44,8 +40,6 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   isSidebar,
   conversationId,
   screenContext,
-  version,
-  versionCount,
   previewBadgeState,
 }) => {
   const {
@@ -58,8 +52,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
 
   const openCanvas = useCallback(() => {
-    openCanvasContext(attachment, isSidebar, version, versionCount);
-  }, [openCanvasContext, attachment, isSidebar, version, versionCount]);
+    openCanvasContext(attachment, isSidebar);
+  }, [openCanvasContext, attachment, isSidebar]);
 
   const updateOrigin = useCallback(
     async (origin: string) => {
@@ -75,7 +69,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }, [conversationId, openSidebarConversationInternal]);
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
-  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, version);
+  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, attachment.version);
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
@@ -137,9 +131,13 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }
 
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
+<<<<<<< HEAD
   const headerIcon = uiDefinition?.getHeaderIcon?.({ attachment, version, versionCount });
   const headerSubtitle = uiDefinition?.getHeaderSubtitle?.({ attachment, version, versionCount });
   const headerBadges = uiDefinition?.getHeaderBadges?.({ attachment, version, versionCount });
+=======
+  const header = uiDefinition?.getHeader?.({ attachment });
+>>>>>>> main
 
   return (
     <EuiSplitPanel.Outer
@@ -151,10 +149,10 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       `}
     >
       <AttachmentHeader
-        icon={headerIcon}
+        icon={header?.icon}
         title={title}
-        subtitle={headerSubtitle}
-        badges={headerBadges}
+        subtitle={header?.subtitle}
+        badges={header?.badges}
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
         onClosePreview={closeCanvas}
@@ -166,8 +164,6 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
             isSidebar,
             screenContext,
             openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-            version,
-            versionCount,
           },
           {
             registerActionButtons,

@@ -12,9 +12,10 @@ import {
   RELATED_EPISODE_FIELDS,
 } from './related_episodes_query';
 
+const SPACE_ID = 'default';
 describe('buildRelatedBaseQuery', () => {
   it('selects from the alert events stream, filters by rule and excludes an episode', () => {
-    const queryString = buildRelatedBaseQuery('rule-a', 'episode-b').print('basic');
+    const queryString = buildRelatedBaseQuery(SPACE_ID, 'rule-a', 'episode-b').print('basic');
 
     expect(queryString).toContain(ALERT_EVENTS_DATA_STREAM);
     expect(queryString).toContain('METADATA');
@@ -28,7 +29,7 @@ describe('buildRelatedBaseQuery', () => {
   });
 
   it('escapes quotes in ids', () => {
-    const queryString = buildRelatedBaseQuery('a"b', 'c"d').print('basic');
+    const queryString = buildRelatedBaseQuery(SPACE_ID, 'a"b', 'c"d').print('basic');
 
     expect(queryString).toContain('rule.id');
     expect(queryString).toContain('episode.id');
@@ -40,7 +41,7 @@ describe('buildRelatedBaseQuery', () => {
 describe('finishRelatedEpisodesQuery', () => {
   it('adds episode aggregation, sort, fixed limit, and keep columns', () => {
     const queryString = finishRelatedEpisodesQuery(
-      buildRelatedBaseQuery('rule-a', 'episode-b')
+      buildRelatedBaseQuery(SPACE_ID, 'rule-a', 'episode-b')
     ).print('basic');
 
     expect(queryString).toContain('MIN(@timestamp)');
