@@ -52,7 +52,7 @@ You MUST use this skill when the user mentions ANY of these:
 - Endpoint protection not applying or not updating
 - Elastic Defend package configuration questions
 - Endpoint isolation, response action, or policy sync issues
-- Endpoint exceptions, trusted apps, event filters, blocklists, or host isolation exceptions not working as expected
+- Endpoint exceptions, trusted apps, trusted devices, event filters, blocklists, or host isolation exceptions not working as expected
 - Security alerts or events still appearing despite a configured endpoint exception or allowlist
 - Unexpected allow or block behavior on endpoints
 

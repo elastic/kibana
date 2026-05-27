@@ -174,21 +174,21 @@ describe('ScopedEndpointArtifactListClient', () => {
       ).rejects.toThrow('Unknown endpoint artifact list ID: unknown-list-id');
     });
 
-    it('validates access before querying for trusted apps', async () => {
-      await client.findEndpointArtifactListItems(baseOptions);
-
-      expect(TrustedAppValidator).toHaveBeenCalledWith(mockEndpointAppContextService, mockRequest);
-      expect(mockValidatePreSingleListFind).toHaveBeenCalled();
-      expect(mockExceptionListClient.findExceptionListItem).toHaveBeenCalled();
-    });
-
-    it('validates access before querying for blocklists', async () => {
+    it.each([
+      ['trustedApps', TrustedAppValidator],
+      ['trustedDevices', TrustedDeviceValidator],
+      ['hostIsolationExceptions', HostIsolationExceptionsValidator],
+      ['eventFilters', EventFilterValidator],
+      ['blocklists', BlocklistValidator],
+      ['endpointExceptions', EndpointExceptionsValidator],
+    ] as const)('validates access before querying for %s', async (artifactKey, ValidatorMock) => {
       await client.findEndpointArtifactListItems({
         ...baseOptions,
-        listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+        listId: ENDPOINT_ARTIFACT_LISTS[artifactKey].id,
       });
 
-      expect(BlocklistValidator).toHaveBeenCalledWith(mockEndpointAppContextService, mockRequest);
+      expect(ValidatorMock).toHaveBeenCalledWith(mockEndpointAppContextService, mockRequest);
+      expect(mockExceptionListClient.findExceptionListItem).toHaveBeenCalled();
     });
 
     it('applies space filter to queries', async () => {
