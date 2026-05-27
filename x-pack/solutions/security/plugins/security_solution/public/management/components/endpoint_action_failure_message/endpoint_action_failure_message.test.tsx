@@ -60,6 +60,7 @@ describe('EndpointActionFailureMessage', () => {
         'agent-fails-a-lot': {
           isCompleted: true,
           wasSuccessful: false,
+          wasCanceled: false,
           completedAt: new Date().toISOString(),
           errors: undefined,
         },
@@ -94,6 +95,7 @@ describe('EndpointActionFailureMessage', () => {
           'agent-fails-a-lot': {
             isCompleted: true,
             wasSuccessful: false,
+            wasCanceled: false,
             completedAt: new Date().toISOString(),
             errors: ['Error info A', 'Error info B', 'Error info C'],
           },
@@ -134,6 +136,7 @@ describe('EndpointActionFailureMessage', () => {
           'agent-fails-a-lot': {
             isCompleted: true,
             wasSuccessful: false,
+            wasCanceled: false,
             completedAt: new Date().toISOString(),
             errors: ['Error info A', 'Error info B', 'Error info C'],
           },
@@ -174,6 +177,7 @@ describe('EndpointActionFailureMessage', () => {
           'agent-fails-a-lot': {
             isCompleted: true,
             wasSuccessful: false,
+            wasCanceled: false,
             completedAt: new Date().toISOString(),
             errors: ['Error info A'],
           },
@@ -219,12 +223,14 @@ describe('EndpointActionFailureMessage', () => {
           'agent-fails-a-lot': {
             isCompleted: true,
             wasSuccessful: false,
+            wasCanceled: false,
             completedAt: new Date().toISOString(),
             errors: ['Error info A', 'Error info B', 'Error info C'],
           },
           'agent-errs-a-lot': {
             isCompleted: true,
             wasSuccessful: false,
+            wasCanceled: false,
             completedAt: new Date().toISOString(),
             errors: ['Error info P', 'Error info Q', 'Error info R'],
           },
@@ -281,12 +287,14 @@ describe('EndpointActionFailureMessage', () => {
           'agent-fails-a-lot': {
             isCompleted: true,
             wasSuccessful: false,
+            wasCanceled: false,
             completedAt: new Date().toISOString(),
             errors: ['Error info A', 'Error info B', 'Error info C'],
           },
           'agent-errs-a-lot': {
             isCompleted: true,
             wasSuccessful: false,
+            wasCanceled: false,
             completedAt: new Date().toISOString(),
             errors: ['Error info P', 'Error info Q', 'Error info R'],
           },
@@ -336,12 +344,14 @@ describe('EndpointActionFailureMessage', () => {
           'agent-runs-a-lot': {
             isCompleted: true,
             wasSuccessful: true,
+            wasCanceled: false,
             completedAt: new Date().toISOString(),
             errors: undefined,
           },
           'agent-errs-a-lot': {
             isCompleted: true,
             wasSuccessful: false,
+            wasCanceled: false,
             completedAt: new Date().toISOString(),
             errors: ['Error info P', 'Error info Q', 'Error info R'],
           },
@@ -391,12 +401,14 @@ describe('EndpointActionFailureMessage', () => {
           'agent-runs-a-lot': {
             isCompleted: true,
             wasSuccessful: true,
+            wasCanceled: false,
             completedAt: new Date().toISOString(),
             errors: undefined,
           },
           'agent-errs-a-lot': {
             isCompleted: true,
             wasSuccessful: false,
+            wasCanceled: false,
             completedAt: new Date().toISOString(),
             errors: [],
           },
