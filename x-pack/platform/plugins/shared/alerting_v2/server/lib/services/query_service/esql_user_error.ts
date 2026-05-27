@@ -12,4 +12,4 @@ import { isResponseError } from '@kbn/es-errors';
 const USER_ERROR_STATUS_CODES = new Set([400, 401, 403, 404]);
 
 export const isEsqlUserError = (error: unknown): boolean =>
-  isResponseError(error) && USER_ERROR_STATUS_CODES.has(error.statusCode!);
+  isResponseError(error) && USER_ERROR_STATUS_CODES.has(error.statusCode);
