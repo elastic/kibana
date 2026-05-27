@@ -80,7 +80,6 @@ export const Box: ConnectorSpec = {
 
   auth: {
     types: [
-      'bearer',
       {
         type: 'oauth_authorization_code',
         defaults: {
