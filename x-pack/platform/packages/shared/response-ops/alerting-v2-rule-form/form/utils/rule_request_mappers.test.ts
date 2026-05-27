@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 import {
   mapFormValuesToRuleRequest,
@@ -284,12 +285,15 @@ describe('rule_request_mappers', () => {
       expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
     });
 
-    it('replaces existing runbook artifact value while preserving artifact id', () => {
+    it('merges split artifact fields into API request', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        artifacts: [
-          { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'existing-runbook-id', type: 'runbook', value: '  Existing runbook  ' },
+        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        runbookArtifacts: [
+          { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
+        ],
+        dashboardArtifacts: [
+          { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
         ],
       };
 
@@ -297,7 +301,25 @@ describe('rule_request_mappers', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'artifact-1', type: 'host', value: 'host-a' },
-        { id: 'existing-runbook-id', type: 'runbook', value: 'Existing runbook' },
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+      ]);
+    });
+
+    it('replaces existing runbook artifact value while preserving artifact id', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'existing-runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '  Existing runbook  ' },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'existing-runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Existing runbook' },
       ]);
     });
 
@@ -306,7 +328,7 @@ describe('rule_request_mappers', () => {
         ...baseFormValues,
         artifacts: [
           { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'runbook-id', type: 'runbook', value: '   ' },
+          { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' },
         ],
       };
 
@@ -318,7 +340,7 @@ describe('rule_request_mappers', () => {
     it('omits artifacts when only runbook artifact is empty', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        artifacts: [{ id: 'runbook-id', type: 'runbook', value: '   ' }],
+        artifacts: [{ id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' }],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
@@ -348,7 +370,7 @@ describe('rule_request_mappers', () => {
         ...baseFormValues,
         artifacts: [
           { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'runbook-id', type: 'runbook', value: 'Valid runbook' },
+          { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Valid runbook' },
         ],
       };
 
@@ -356,14 +378,14 @@ describe('rule_request_mappers', () => {
 
       expect(result.artifacts).toEqual([
         { id: 'artifact-1', type: 'host', value: 'host-a' },
-        { id: 'runbook-id', type: 'runbook', value: 'Valid runbook' },
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Valid runbook' },
       ]);
     });
 
     it('creates runbook artifact id when runbook artifact id is empty', () => {
       const formValues: FormValues = {
         ...baseFormValues,
-        artifacts: [{ id: '', type: 'runbook', value: 'Runbook with missing id' }],
+        artifacts: [{ id: '', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook with missing id' }],
       };
 
       const result = mapFormValuesToRuleRequest(formValues);
@@ -371,8 +393,55 @@ describe('rule_request_mappers', () => {
       expect(result.artifacts).toHaveLength(1);
       expect(result.artifacts?.[0]).toEqual({
         id: expect.stringMatching(/^runbook-\d+-[a-z0-9]+$/),
-        type: 'runbook',
+        type: RUNBOOK_ARTIFACT_TYPE,
         value: 'Runbook with missing id',
+      });
+    });
+
+    it('trims dashboard artifact value while preserving artifact id', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '  dashboard-123  ' },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([
+        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+      ]);
+    });
+
+    it('removes empty dashboard artifact and keeps other artifacts', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [
+          { id: 'artifact-1', type: 'host', value: 'host-a' },
+          { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '   ' },
+        ],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+    });
+
+    it('creates dashboard artifact id when dashboard artifact id is empty', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        artifacts: [{ id: '', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' }],
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.artifacts).toHaveLength(1);
+      expect(result.artifacts?.[0]).toEqual({
+        id: expect.stringMatching(/^dashboard-\d+-[a-z0-9]+$/),
+        type: DASHBOARD_ARTIFACT_TYPE,
+        value: 'dashboard-123',
       });
     });
   });
@@ -718,20 +787,24 @@ describe('rule_request_mappers', () => {
       expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
     });
 
-    it('maps artifacts when present', () => {
+    it('splits artifacts by field ownership when present', () => {
       const rule = {
         ...baseRuleResponse,
         artifacts: [
           { id: 'artifact-1', type: 'host', value: 'host-a' },
           { id: 'runbook-id', type: 'runbook', value: 'Runbook from API' },
+          { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
         ],
       } as RuleResponse;
 
       const result = mapRuleResponseToFormValues(rule);
 
-      expect(result.artifacts).toEqual([
-        { id: 'artifact-1', type: 'host', value: 'host-a' },
+      expect(result.artifacts).toEqual([{ id: 'artifact-1', type: 'host', value: 'host-a' }]);
+      expect(result.runbookArtifacts).toEqual([
         { id: 'runbook-id', type: 'runbook', value: 'Runbook from API' },
+      ]);
+      expect(result.dashboardArtifacts).toEqual([
+        { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
       ]);
     });
 
@@ -762,6 +835,8 @@ describe('rule_request_mappers', () => {
         stateTransitionAlertDelayMode: formValues.stateTransitionAlertDelayMode!,
         stateTransitionRecoveryDelayMode: formValues.stateTransitionRecoveryDelayMode!,
         artifacts: formValues.artifacts,
+        runbookArtifacts: formValues.runbookArtifacts,
+        dashboardArtifacts: formValues.dashboardArtifacts,
       };
 
       const createPayload = mapFormValuesToCreateRequest(completeFormValues);
