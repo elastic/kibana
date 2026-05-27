@@ -11,7 +11,6 @@ import { MessageRole } from '@kbn/inference-common';
 import type { ChatCompleteOptions } from '@kbn/inference-common';
 import { invokeAroundCompletion } from './invoke_around_completion';
 import { InferenceAnonymizationUnavailableError } from '../anonymization/errors';
-import type { AnonymizationContext } from '../anonymization/context';
 import type { InferenceConfig } from '../config';
 
 const logger = loggingSystemMock.createLogger();
@@ -40,27 +39,20 @@ const makeConfig = (overrides?: Partial<InferenceConfig['anonymization']>): Infe
 const messages: ChatCompleteOptions['messages'] = [{ role: MessageRole.User, content: 'hello' }];
 
 const makeHookInvoker =
-  (
-    result: Pick<HookResult, 'status'> & Partial<HookResult>,
-    simulateAnonymization?: (ctx: AnonymizationContext) => void
-  ) =>
-  async (
-    _triggerId: string,
-    _payload: Record<string, unknown>,
-    capabilities?: Record<string, unknown>
-  ): Promise<HookResult> => {
-    if (simulateAnonymization && capabilities?.anonymizationContext) {
-      simulateAnonymization(capabilities.anonymizationContext as AnonymizationContext);
-    }
+  (result: Pick<HookResult, 'status'> & Partial<HookResult>) => async (): Promise<HookResult> => {
     return { output: {}, error: undefined, ...result } as HookResult;
   };
 
 describe('invokeAroundCompletion', () => {
   describe('happy path', () => {
-    it('returns anonymized inputs written by ai.pii steps via setField', async () => {
-      const hookInvoker = makeHookInvoker({ status: 'completed' }, (ctx) => {
-        ctx.setField('system', 'anon-system');
-        ctx.setField('messages', [{ role: 'user', content: 'anon message' }]);
+    it('returns anonymized system/messages from workflow.output', async () => {
+      const hookInvoker = async (): Promise<HookResult> => ({
+        status: 'completed',
+        output: {
+          system: 'anon-system',
+          messages: [{ role: 'user', content: 'anon message' }],
+          tokenMap: {},
+        },
       });
 
       const result = await invokeAroundCompletion({
@@ -79,7 +71,7 @@ describe('invokeAroundCompletion', () => {
       expect(result.sessionId).toBe('sess-1');
     });
 
-    it('falls back to original system/messages when steps set no fields', async () => {
+    it('falls back to original system/messages when workflow.output has no fields', async () => {
       const hookInvoker = makeHookInvoker({ status: 'completed' });
 
       const result = await invokeAroundCompletion({
@@ -97,10 +89,13 @@ describe('invokeAroundCompletion', () => {
       expect(result.anonymizedMessages).toBe(messages);
     });
 
-    it('populates tokenMap so caller can restore tokens in the streamed response', async () => {
+    it('returns tokenMap from workflow.output for the caller to restore tokens', async () => {
       const token = 'IP_aabbccdd00112233445566778899aabb';
-      const hookInvoker = makeHookInvoker({ status: 'completed' }, (ctx) => {
-        ctx.tokenMap.set(token, { original: '192.168.1.50', entityClass: 'IP' });
+      const hookInvoker = async (): Promise<HookResult> => ({
+        status: 'completed',
+        output: {
+          tokenMap: { [token]: { original: '192.168.1.50', entityClass: 'IP' } },
+        },
       });
 
       const result = await invokeAroundCompletion({
@@ -112,14 +107,17 @@ describe('invokeAroundCompletion', () => {
         messages,
       });
 
-      expect(result.anonymizationContext.tokenMap.get(token)?.original).toBe('192.168.1.50');
+      expect(result.tokenMap[token]?.original).toBe('192.168.1.50');
     });
 
     it('injects anonymization instruction into system when tokens are produced', async () => {
       const token = 'IP_aabbccdd00112233445566778899aabb';
-      const hookInvoker = makeHookInvoker({ status: 'completed' }, (ctx) => {
-        ctx.setField('system', 'anon-system');
-        ctx.tokenMap.set(token, { original: '192.168.1.50', entityClass: 'IP' });
+      const hookInvoker = async (): Promise<HookResult> => ({
+        status: 'completed',
+        output: {
+          system: 'anon-system',
+          tokenMap: { [token]: { original: '192.168.1.50', entityClass: 'IP' } },
+        },
       });
 
       const result = await invokeAroundCompletion({
@@ -169,7 +167,7 @@ describe('invokeAroundCompletion', () => {
       expect(result.sessionId).toBe('explicit-session');
     });
 
-    it('passes sessionId and raw system/messages to the hook payload', async () => {
+    it('passes sessionId, salt, and raw system/messages to the hook payload', async () => {
       const capturedPayload: Record<string, unknown>[] = [];
       const hookInvoker = async (
         _triggerId: string,
@@ -189,9 +187,10 @@ describe('invokeAroundCompletion', () => {
       });
 
       expect(capturedPayload[0]).toMatchObject({ sessionId: 'abc', system: 'sys', messages });
+      expect(typeof capturedPayload[0].salt).toBe('string');
     });
 
-    it('passes anonymizationContext as capability', async () => {
+    it('does not pass anonymizationContext as a capability', async () => {
       const capturedCapabilities: Record<string, unknown>[] = [];
       const hookInvoker = async (
         _triggerId: string,
@@ -211,7 +210,7 @@ describe('invokeAroundCompletion', () => {
         messages,
       });
 
-      expect(capturedCapabilities[0]).toHaveProperty('anonymizationContext');
+      expect(capturedCapabilities[0]).not.toHaveProperty('anonymizationContext');
     });
   });
 
@@ -253,10 +252,13 @@ describe('invokeAroundCompletion', () => {
   });
 
   describe('buffered path (call_site.proceed)', () => {
-    it('returns kind: buffered when the hook result contains a response string', async () => {
+    it('returns kind: buffered when the hook result contains a result string', async () => {
       const hookInvoker = async (): Promise<import('@kbn/workflows/server/types').HookResult> => ({
         status: 'completed',
-        output: { response: 'anonymized LLM response' },
+        output: {
+          result: 'restored LLM response',
+          tokenMap: {},
+        },
       });
 
       const result = await invokeAroundCompletion({
@@ -270,8 +272,31 @@ describe('invokeAroundCompletion', () => {
 
       expect(result.kind).toBe('buffered');
       if (result.kind !== 'buffered') throw new Error('Expected buffered result');
-      expect(result.finalResponse).toBe('anonymized LLM response');
+      expect(result.finalResponse).toBe('restored LLM response');
       expect(result.sessionId).toBe('buf-1');
+    });
+
+    it('exposes tokenMap from the buffered workflow output', async () => {
+      const token = 'IP_aabbccdd00112233445566778899aabb';
+      const hookInvoker = async (): Promise<import('@kbn/workflows/server/types').HookResult> => ({
+        status: 'completed',
+        output: {
+          result: 'response text',
+          tokenMap: { [token]: { original: '10.0.0.1', entityClass: 'IP' } },
+        },
+      });
+
+      const result = await invokeAroundCompletion({
+        anonymizationHookInvoker: hookInvoker,
+        config: makeConfig(),
+        logger,
+        metadata: { anonymization: { sessionId: 'buf-2' } },
+        system: undefined,
+        messages,
+      });
+
+      expect(result.kind).toBe('buffered');
+      expect(result.tokenMap[token]?.original).toBe('10.0.0.1');
     });
 
     it('passes proceedFn as a capability when provided', async () => {

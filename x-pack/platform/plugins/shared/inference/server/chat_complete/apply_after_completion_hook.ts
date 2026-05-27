@@ -15,7 +15,6 @@ import type { Logger } from '@kbn/logging';
 import { EMPTY, from, mergeMap, of } from 'rxjs';
 import type { OperatorFunction } from 'rxjs';
 import { AfterCompletionOutputSchema } from '../anonymization/trigger_schemas';
-import type { AnonymizationContext } from '../anonymization/context';
 import { InferenceAnonymizationUnavailableError } from '../anonymization/errors';
 import type { InvokeHookFn } from '../types';
 import type { InferenceConfig } from '../config';
@@ -84,14 +83,10 @@ const safeStringify = (value: unknown): string => {
  * RxJS operator that progressively restores anonymization tokens in a chat completion
  * stream. Used by the around hook path to restore tokens before the stream reaches
  * applyAfterCompletionHook.
- *
- * This operator accepts the legacy Map-based tokenMap from AnonymizationContext
- * (around-hook path, Commit D will migrate it to the plain-Record form).
  */
 export const restoreTokensOperator = (
-  tokenMap: AnonymizationContext['tokenMap']
+  tokenMap: Record<string, TokenEntry>
 ): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> => {
-  const tokenRecord = Object.fromEntries(tokenMap.entries());
   return (source$) => {
     let holdBuffer = '';
 
@@ -117,7 +112,7 @@ export const restoreTokensOperator = (
 
           const restoredChunk: ChatCompletionChunkEvent = {
             ...event,
-            content: restoreInString(safe, tokenRecord),
+            content: restoreInString(safe, tokenMap),
             tool_calls: [],
           };
           return of(restoredChunk);
@@ -133,14 +128,14 @@ export const restoreTokensOperator = (
               ...tc.function,
               arguments: restoreInValue(
                 tc.function.arguments,
-                tokenRecord
+                tokenMap
               ) as typeof tc.function.arguments,
             },
           }));
 
           const flushChunk: ChatCompletionChunkEvent = {
             type: ChatCompletionEventType.ChatCompletionChunk,
-            content: restoreInString(flushed, tokenRecord),
+            content: restoreInString(flushed, tokenMap),
             tool_calls: (restoredToolCalls ?? []).map((tc, idx) => {
               let args = '';
               try {
@@ -158,7 +153,7 @@ export const restoreTokensOperator = (
 
           const restoredMessage: ChatCompletionMessageEvent = {
             ...event,
-            content: restoreInString(event.content ?? '', tokenRecord),
+            content: restoreInString(event.content ?? '', tokenMap),
             ...(restoredToolCalls !== undefined ? { toolCalls: restoredToolCalls } : {}),
           };
 

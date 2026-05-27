@@ -6,10 +6,8 @@
  */
 
 /**
- * Single source of truth for the built-in regex patterns used by both the
- * programmatic default handler (`default_handlers.ts`) and the YAML-facing
- * `ai.pii` step (`steps/pii/ai_pii/index.ts`). Phase 2 cleanup (RFC line 248)
- * will move this into a shared `@kbn/ai-infra/pii-detection` package.
+ * Single source of truth for the built-in regex patterns used by the YAML-facing
+ * `ai.pii` step (`steps/pii/ai_pii/index.ts`).
  */
 
 export interface RegexRule {

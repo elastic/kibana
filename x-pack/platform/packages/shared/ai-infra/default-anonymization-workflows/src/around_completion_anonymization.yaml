@@ -1,3 +1,16 @@
+# Default workflow: anonymize PII in the prompt before the LLM call, then
+# call the LLM via call_site.proceed, and restore tokens in the response.
+#
+# Trigger:  inference.aroundCompletion
+# Outputs:  { system, messages, result, tokenMap }
+#
+# The ai.pii steps replace PII with deterministic HMAC tokens keyed by salt.
+# call_site.proceed performs the actual LLM call with the anonymized inputs.
+# transform.pii_restore substitutes tokens back to their original values.
+# All data flows by value through step inputs/outputs — no capability side-channel.
+#
+# Usage: import this YAML via the Workflow Management UI → "Import workflow".
+
 version: '1'
 name: Default PII Anonymization (around completion)
 enabled: false
@@ -10,6 +23,7 @@ steps:
     if: 'event.system'
     with:
       input: '{{ event.system }}'
+      salt: '{{ event.salt }}'
       entities:
         - IP
         - EMAIL
@@ -19,7 +33,29 @@ steps:
     type: ai.pii
     with:
       input: '${{ event.messages }}'
+      salt: '{{ event.salt }}'
+      tokenMap: '${{ steps.anonymize_system.output.tokenMap }}'
       entities:
         - IP
         - EMAIL
         - HOST_NAME
+
+  - name: proceed_to_llm
+    type: call_site.proceed
+    with:
+      system: '{{ steps.anonymize_system.output.output }}'
+      messages: '${{ steps.anonymize_messages.output.output }}'
+
+  - name: restore_result
+    type: transform.pii_restore
+    with:
+      input: '{{ steps.proceed_to_llm.output.response }}'
+      tokenMap: '${{ steps.anonymize_messages.output.tokenMap }}'
+
+  - name: emit_output
+    type: workflow.output
+    with:
+      system: '{{ steps.anonymize_system.output.output }}'
+      messages: '${{ steps.anonymize_messages.output.output }}'
+      result: '{{ steps.restore_result.output.output }}'
+      tokenMap: '${{ steps.anonymize_messages.output.tokenMap }}'

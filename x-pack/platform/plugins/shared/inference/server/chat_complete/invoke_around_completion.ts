@@ -8,13 +8,17 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ChatCompleteOptions } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
-import { AnonymizationContext } from '../anonymization/context';
 import { deriveSalt } from '../anonymization/derive_salt';
 import { InferenceAnonymizationUnavailableError } from '../anonymization/errors';
 import { buildAnonymizationInstruction } from './invoke_before_completion';
 import type { InvokeHookFn } from '../types';
 import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
 import type { InferenceConfig } from '../config';
+
+interface TokenEntry {
+  original: string;
+  entityClass: string;
+}
 
 export interface AroundCompletionArgs {
   anonymizationHookInvoker: InvokeHookFn;
@@ -35,7 +39,7 @@ export interface AroundCompletionArgs {
 }
 
 /**
- * Default (streaming) path — workflow used setField to write anonymized inputs.
+ * Streaming path — workflow emitted anonymized system/messages via workflow.output.
  * The caller streams the LLM call directly and uses restoreTokensOperator.
  */
 export interface StreamingAroundCompletionResult {
@@ -43,7 +47,7 @@ export interface StreamingAroundCompletionResult {
   anonymizedSystem: ChatCompleteOptions['system'];
   anonymizedMessages: ChatCompleteOptions['messages'];
   sessionId: string;
-  anonymizationContext: AnonymizationContext;
+  tokenMap: Record<string, TokenEntry>;
 }
 
 /**
@@ -55,7 +59,7 @@ export interface BufferedAroundCompletionResult {
   /** Final response text, already processed by any post-proceed workflow steps. */
   finalResponse: string;
   sessionId: string;
-  anonymizationContext: AnonymizationContext;
+  tokenMap: Record<string, TokenEntry>;
 }
 
 export type AroundCompletionResult =
@@ -65,12 +69,12 @@ export type AroundCompletionResult =
 /**
  * Invokes the `inference.aroundCompletion` hook and returns anonymized inputs.
  *
- * The workflow contains `ai.pii` steps that detect PII and write anonymized
- * system/messages into the `AnonymizationContext` via `setField`. After the hook
- * runs, this function reads those values and returns them to the caller, which
- * streams the LLM call directly and applies token restoration via
- * `restoreTokensOperator` — enabling true streaming rather than buffering the
- * full response.
+ * The workflow contains `ai.pii` steps that detect PII and emit anonymized
+ * system/messages plus tokenMap via `workflow.output`. After the hook runs,
+ * this function reads those values from `result.output` and returns them to
+ * the caller, which either streams the LLM call directly (streaming path) or
+ * uses the pre-assembled response when the workflow contained `call_site.proceed`
+ * (buffered path).
  *
  * Failure behaviour is controlled by `config.anonymization.failureMode`:
  *   - `'block'`: throws `InferenceAnonymizationUnavailableError`
@@ -91,9 +95,8 @@ export const invokeAroundCompletion = async ({
 
   const encryptionKey = await anonymization?.replacements?.encryptionKeyPromise;
   const salt = encryptionKey ? deriveSalt(sessionId, encryptionKey) : sessionId;
-  const anonymizationContext = new AnonymizationContext(salt);
 
-  const capabilities: Record<string, unknown> = { anonymizationContext };
+  const capabilities: Record<string, unknown> = {};
   if (proceedFn) {
     capabilities.proceedFn = proceedFn;
   }
@@ -102,9 +105,11 @@ export const invokeAroundCompletion = async ({
 
   const result = await anonymizationHookInvoker(
     'inference.aroundCompletion',
-    { sessionId, system, messages },
+    { sessionId, salt, system, messages },
     capabilities
   );
+
+  const emptyTokenMap: Record<string, TokenEntry> = {};
 
   if (result.status === 'failed') {
     if (config.anonymization.failureMode === 'block') {
@@ -120,7 +125,7 @@ export const invokeAroundCompletion = async ({
       anonymizedSystem: system,
       anonymizedMessages: messages,
       sessionId,
-      anonymizationContext,
+      tokenMap: emptyTokenMap,
     };
   }
 
@@ -131,28 +136,30 @@ export const invokeAroundCompletion = async ({
       anonymizedSystem: system,
       anonymizedMessages: messages,
       sessionId,
-      anonymizationContext,
+      tokenMap: emptyTokenMap,
     };
   }
 
-  // Detect buffered path: workflow ran call_site.proceed and returned a response string.
-  if (typeof result.output?.response === 'string') {
+  // Buffered path: workflow ran call_site.proceed and returned a result string.
+  if (typeof result.output?.result === 'string') {
+    const tokenMap = (result.output?.tokenMap ?? {}) as Record<string, TokenEntry>;
     logger.debug(
       () =>
         `[hook-anon-debug] aroundCompletion buffered path done sessionId=${sessionId} ` +
-        `tokenMapSize=${anonymizationContext.tokenMap.size}`
+        `tokenMapSize=${Object.keys(tokenMap).length}`
     );
     return {
       kind: 'buffered',
-      finalResponse: result.output.response as string,
+      finalResponse: result.output.result as string,
       sessionId,
-      anonymizationContext,
+      tokenMap,
     };
   }
 
-  // Streaming path: ai.pii steps wrote anonymized values into the context via setField.
-  const rawSystem = anonymizationContext.getField('system');
-  const rawMessages = anonymizationContext.getField('messages');
+  // Streaming path: workflow emitted anonymized system/messages/tokenMap via workflow.output.
+  const rawSystem = result.output?.system;
+  const rawMessages = result.output?.messages;
+  const tokenMap = (result.output?.tokenMap ?? {}) as Record<string, TokenEntry>;
 
   if (rawSystem !== undefined && typeof rawSystem !== 'string') {
     logger.warn(
@@ -169,9 +176,7 @@ export const invokeAroundCompletion = async ({
     messages;
 
   const instruction =
-    anonymizationContext.tokenMap.size > 0
-      ? buildAnonymizationInstruction(Object.fromEntries(anonymizationContext.tokenMap.entries()))
-      : '';
+    Object.keys(tokenMap).length > 0 ? buildAnonymizationInstruction(tokenMap) : '';
 
   const finalSystem = instruction
     ? anonymizedSystem
@@ -182,7 +187,7 @@ export const invokeAroundCompletion = async ({
   logger.debug(
     () =>
       `[hook-anon-debug] aroundCompletion done sessionId=${sessionId} ` +
-      `tokenMapSize=${anonymizationContext.tokenMap.size}`
+      `tokenMapSize=${Object.keys(tokenMap).length}`
   );
 
   return {
@@ -190,6 +195,6 @@ export const invokeAroundCompletion = async ({
     anonymizedSystem: finalSystem,
     anonymizedMessages,
     sessionId,
-    anonymizationContext,
+    tokenMap,
   };
 };

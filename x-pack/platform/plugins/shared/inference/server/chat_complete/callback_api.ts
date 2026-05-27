@@ -309,7 +309,7 @@ function createChatCompletePipeline({
             ).pipe(
               switchMap((aroundResult) => {
                 if (aroundResult.kind === 'buffered') {
-                  const { finalResponse, anonymizationContext: aroundContext } = aroundResult;
+                  const { finalResponse, tokenMap: aroundTokenMap } = aroundResult;
 
                   const syntheticChunk: ChatCompletionEvent = {
                     type: ChatCompletionEventType.ChatCompletionChunk,
@@ -323,7 +323,7 @@ function createChatCompletePipeline({
                   };
 
                   return of(syntheticChunk, syntheticMessage).pipe(
-                    restoreTokensOperator(aroundContext.tokenMap),
+                    restoreTokensOperator(aroundTokenMap),
                     applyAfterCompletionHook({
                       anonymizationHookInvoker: anonymizationHookInvoker!,
                       config: config!,
@@ -338,7 +338,7 @@ function createChatCompletePipeline({
                 const {
                   anonymizedSystem,
                   anonymizedMessages,
-                  anonymizationContext: aroundContext,
+                  tokenMap: aroundTokenMap,
                 } = aroundResult;
 
                 const spanModel = getSpanModel(modelName);
@@ -368,7 +368,7 @@ function createChatCompletePipeline({
                       stream,
                     }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
                 ).pipe(
-                  restoreTokensOperator(aroundContext.tokenMap),
+                  restoreTokensOperator(aroundTokenMap),
                   applyAfterCompletionHook({
                     anonymizationHookInvoker: anonymizationHookInvoker!,
                     config: config!,

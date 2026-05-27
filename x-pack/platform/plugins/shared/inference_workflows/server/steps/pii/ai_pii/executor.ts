@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { TokenEntry } from '../../../anonymization/context_handle';
 import { generateToken } from '../../../anonymization/generate_token';
 import type { RegexRule } from '../../../anonymization/default_rules';
+
+interface TokenEntry {
+  original: string;
+  entityClass: string;
+}
 
 /**
  * Anonymize PII in a text string using regex rules.

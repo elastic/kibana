@@ -37,6 +37,7 @@ export const afterCompletionEventSchema = z
 export const aroundCompletionEventSchema = z
   .object({
     sessionId: z.string().describe('Session/conversation identifier for cross-turn determinism'),
+    salt: z.string().describe('Per-session salt for deterministic token derivation'),
     system: z.string().optional().describe('System prompt, if any'),
     messages: z.array(messageSchema).describe('Chat messages to be sent to the LLM'),
   })
