@@ -45,14 +45,6 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 
 import type { KqlPluginStart } from '@kbn/kql/public';
-import {
-  createRegionMapFn,
-  GEOHASH_GRID,
-  getGeoHashBucketAgg,
-  regionMapRenderer,
-  createTileMapFn,
-  tileMapRenderer,
-} from './legacy_visualizations';
 import { MapsAppLocatorDefinition } from './locators/map_locator/locator_definition';
 import { MapsAppTileMapLocatorDefinition } from './locators/tile_map_locator/locator_definition';
 import { MapsAppRegionMapLocatorDefinition } from './locators/region_map_locator/locator_definition';
@@ -122,6 +114,7 @@ export interface MapsPluginStartDependencies {
   screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
   serverless?: ServerlessPluginStart;
+  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
 }
 
 /**
@@ -225,17 +218,31 @@ export class MapsPlugin
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
 
     // register wrapper around legacy tile_map and region_map visualizations
-    plugins.data.search.aggs.types.registerLegacy(GEOHASH_GRID, getGeoHashBucketAgg);
-    plugins.expressions.registerFunction(createRegionMapFn);
-    plugins.expressions.registerRenderer(regionMapRenderer);
     plugins.visualizations.createBaseVisualizationAsync(REGION_MAP_VIS_TYPE, async () => {
-      const { regionMapVisType } = await import('./legacy_visualizations/vis_types_module');
+      const [[, startPlugins], { regionMapVisType, createRegionMapFn, regionMapRenderer }] =
+        await Promise.all([
+          core.getStartServices(),
+          import('./legacy_visualizations/async_module'),
+        ]);
+      if (!startPlugins.expressions.getFunction('regionmap')) {
+        plugins.expressions.registerFunction(createRegionMapFn);
+        plugins.expressions.registerRenderer(regionMapRenderer);
+      }
       return regionMapVisType;
     });
-    plugins.expressions.registerFunction(createTileMapFn);
-    plugins.expressions.registerRenderer(tileMapRenderer);
     plugins.visualizations.createBaseVisualizationAsync(TILE_MAP_VIS_TYPE, async () => {
-      const { tileMapVisType } = await import('./legacy_visualizations/vis_types_module');
+      const [
+        [, startPlugins],
+        { tileMapVisType, createTileMapFn, tileMapRenderer, GEOHASH_GRID, getGeoHashBucketAgg },
+      ] = await Promise.all([
+        core.getStartServices(),
+        import('./legacy_visualizations/async_module'),
+      ]);
+      if (!startPlugins.expressions.getFunction('tilemap')) {
+        plugins.data.search.aggs.types.registerLegacy(GEOHASH_GRID, getGeoHashBucketAgg);
+        plugins.expressions.registerFunction(createTileMapFn);
+        plugins.expressions.registerRenderer(tileMapRenderer);
+      }
       return tileMapVisType;
     });
 
