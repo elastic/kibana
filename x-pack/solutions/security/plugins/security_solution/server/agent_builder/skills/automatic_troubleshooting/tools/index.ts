@@ -7,3 +7,4 @@
 
 export { getPackageConfigurationsTool } from './get_package_configurations';
 export { generateInsightTool } from './generate_insight';
+export { checkEndpointPackageFreshnessTool } from './check_endpoint_package_freshness';

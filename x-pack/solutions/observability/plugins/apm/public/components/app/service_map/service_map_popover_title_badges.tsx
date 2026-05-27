@@ -11,7 +11,7 @@ import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import type { ServiceNodeData } from '../../../../common/service_map';
 import { SloStatusBadge } from '../../shared/slo_status_badge';
-import { useServiceMapSloFlyout } from './service_map_slo_flyout_context';
+import { useServiceMapSloFlyout } from '../../shared/service_map/service_map_slo_flyout_context';
 import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
 
 interface Props {

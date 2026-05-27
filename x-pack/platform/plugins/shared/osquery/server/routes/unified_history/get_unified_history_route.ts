@@ -14,6 +14,7 @@ import {
   API_VERSIONS,
   ACTIONS_INDEX,
   ACTION_RESPONSES_DATA_STREAM_INDEX,
+  OSQUERY_INTEGRATION_NAME,
 } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -146,6 +147,24 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           // Fetch all packs once — used for both kuery filtering and
           // resolving query names on scheduled rows.
           const packSOs = includeScheduled ? await getPacksForSpace(spaceScopedClient) : [];
+          let integrationNamespaces: string[] | undefined;
+
+          if (includeLive && osqueryContext?.service?.getIntegrationNamespaces) {
+            try {
+              const namespaceMap = await osqueryContext.service.getIntegrationNamespaces(
+                [OSQUERY_INTEGRATION_NAME],
+                spaceScopedClient,
+                logger
+              );
+              const osqueryNamespaces = namespaceMap[OSQUERY_INTEGRATION_NAME];
+              integrationNamespaces =
+                osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+
+              logger.debug(`Retrieved integration namespaces: ${JSON.stringify(namespaceMap)}`);
+            } catch (err) {
+              logger.warn(`Failed to resolve integration namespaces: ${(err as Error).message}`);
+            }
+          }
 
           let packIdsForQuery: string[] | undefined;
           let scheduleIdsForQuery: string[] | undefined;
@@ -230,6 +249,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             liveHits,
             osqueryContext,
             spaceId,
+            integrationNamespaces,
+            ccsEnabled,
             logger,
           });
 

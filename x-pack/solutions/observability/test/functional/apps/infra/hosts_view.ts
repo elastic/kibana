@@ -290,9 +290,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           await waitForPageToLoad();
 
-          await retry.tryForTime(5000, async () => {
-            await testSubjects.exists('hostsViewTableNoData');
-          });
+          await testSubjects.existOrFail('hostsViewTableNoData', { timeout: 5000 });
         });
       });
     });

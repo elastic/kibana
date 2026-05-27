@@ -259,6 +259,7 @@ export const CreateConnector: React.FC = () => {
                               css={css`
                                 margin-right: ${euiTheme.size.m};
                               `}
+                              aria-hidden
                             />
                             {selectedConnector?.name}
                           </>

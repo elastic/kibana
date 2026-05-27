@@ -9,9 +9,11 @@ import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_fram
 import { getCommentAttachmentType } from './comment';
 import { getFileAttachmentType } from './file';
 import { getVisualizationAttachmentType } from './lens';
+import { getStackAlertAttachmentType } from './alert';
 
 export const registerInternalAttachments = (unifiedRegistry: UnifiedAttachmentTypeRegistry) => {
   unifiedRegistry.register(getFileAttachmentType());
   unifiedRegistry.register(getVisualizationAttachmentType());
   unifiedRegistry.register(getCommentAttachmentType());
+  unifiedRegistry.register(getStackAlertAttachmentType());
 };

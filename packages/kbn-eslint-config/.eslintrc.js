@@ -56,6 +56,7 @@ const USES_ELASTIC_APM_AGENT = [
   /plugins[\/\\]apm[\/\\]/,
   /synthetics[\/\\]server[\/\\]/,
   /feature-flags[\/\\]server-internal[\/\\]/,
+  /plugins[\/\\]slo[\/\\]server[\/\\]/,
 ];
 
 module.exports = {

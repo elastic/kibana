@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/es-ui-shared-plugin",
@@ -21,7 +21,8 @@
     "@kbn/code-editor-mock",
     "@kbn/monaco",
     "@kbn/css-utils",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }

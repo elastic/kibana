@@ -16,13 +16,17 @@ import type {
 import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 
 const isoDateTimeString = z.string().datetime();
 
 export function validateDateString(dateString: string): void {
   const result = isoDateTimeString.safeParse(dateString);
   if (!result.success) {
-    throw Boom.badRequest(`Invalid date string - "${dateString}" is not a valid ISO datetime`);
+    throw Boom.badRequest(`Invalid date string - "${dateString}" is not a valid ISO datetime`, {
+      code: ALERTING_V2_ERROR_CODES.INVALID_DATE_STRING,
+      details: { value: dateString },
+    });
   }
 }
 
@@ -69,19 +73,15 @@ export const buildCreateActionPolicyAttributes = ({
   data,
   auth,
   createdBy,
-  createdByUsername,
   createdAt,
   updatedBy,
-  updatedByUsername,
   updatedAt,
 }: {
   data: CreateActionPolicyData;
   auth: ActionPolicySavedObjectAttributes['auth'];
   createdBy: string | null;
-  createdByUsername: string | null;
   createdAt: string;
   updatedBy: string | null;
-  updatedByUsername: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
@@ -99,10 +99,8 @@ export const buildCreateActionPolicyAttributes = ({
     snoozedUntil: null,
     auth,
     createdBy,
-    createdByUsername,
     createdAt,
     updatedBy,
-    updatedByUsername,
     updatedAt,
   };
 };
@@ -112,14 +110,12 @@ export const buildUpdateActionPolicyAttributes = ({
   update,
   auth,
   updatedBy,
-  updatedByUsername,
   updatedAt,
 }: {
   existing: ActionPolicySavedObjectAttributes;
   update: UpdateActionPolicyData;
   auth: ActionPolicySavedObjectAttributes['auth'];
   updatedBy: string | null;
-  updatedByUsername: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
@@ -137,9 +133,7 @@ export const buildUpdateActionPolicyAttributes = ({
     snoozedUntil: normalizeNullableField(existing.snoozedUntil),
     auth,
     createdBy: existing.createdBy,
-    createdByUsername: existing.createdByUsername,
     updatedBy,
-    updatedByUsername,
     createdAt: existing.createdAt,
     updatedAt,
   };
@@ -171,10 +165,8 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     snoozedUntil: normalizeNullableField(attributes.snoozedUntil),
     auth: toAuthResponse(attributes.auth),
     createdBy: attributes.createdBy,
-    createdByUsername: attributes.createdByUsername,
     createdAt: attributes.createdAt,
     updatedBy: attributes.updatedBy,
-    updatedByUsername: attributes.updatedByUsername,
     updatedAt: attributes.updatedAt,
   };
 };

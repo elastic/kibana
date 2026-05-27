@@ -132,7 +132,7 @@ describe('ServiceContents', () => {
       return call?.[1]?.query as Record<string, unknown> | undefined;
     }
 
-    it('keeps the caller-provided kuery on both Service Details and Focus URLs by default', () => {
+    it('keeps the caller-provided kuery on Service Details but clears it on Focus URL by default', () => {
       render(
         <ServiceContents
           {...defaultProps}
@@ -146,12 +146,12 @@ describe('ServiceContents', () => {
         environment: 'production',
       });
       expect(getQueryFor('/services/{serviceName}/service-map')).toMatchObject({
-        kuery: 'service.name:"opbeans-go" and transaction.name:"GET /api/products"',
+        kuery: '',
         environment: 'production',
       });
     });
 
-    it('clears kuery (and keeps environment) on both URLs when clearKueryOnNavigation is true', () => {
+    it('clears kuery on Service Details URL when clearKueryOnNavigation is true (Focus URL always clears kuery)', () => {
       render(
         <ServiceContents
           {...defaultProps}

@@ -11,6 +11,7 @@ import type { IconType } from '@elastic/eui';
 import type { CanAddNewPanel } from '@kbn/presentation-publishing';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
+import type { SearchQuery } from '@kbn/content-management-plugin/common';
 import { useMemo } from 'react';
 
 export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = {
@@ -20,10 +21,7 @@ export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = Finde
   ) => void;
   savedObjectMetaData: SavedObjectMetaData & {
     /* If the saved object is not in content management, provide a getter for it */
-    getSavedObjects?: (search?: {
-      query?: string;
-      per_page?: number;
-    }) => Promise<SavedObjectCommon<FinderAttributes>[]>;
+    getSavedObjects?: (search?: SearchQuery) => Promise<SavedObjectCommon<FinderAttributes>[]>;
   };
 };
 

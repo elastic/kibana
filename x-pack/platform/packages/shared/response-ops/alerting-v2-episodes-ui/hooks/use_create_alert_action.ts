@@ -30,7 +30,10 @@ export const useCreateAlertAction = (http: HttpStart) => {
       Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.actionsAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.groupActionsAll() }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.tagSuggestions() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.tagSuggestionsAll() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.listAll() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.episodeEventsAll() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.episodeEventDataAll() }),
         ...(variables.actionType === ALERT_EPISODE_ACTION_TYPE.TAG
           ? [queryClient.invalidateQueries({ queryKey: queryKeys.tagOptionsAll() })]
           : []),

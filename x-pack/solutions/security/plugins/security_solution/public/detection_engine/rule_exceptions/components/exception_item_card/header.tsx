@@ -71,7 +71,7 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
             closePopover={onClosePopover}
             data-test-subj={`${dataTestSubj}-items`}
           >
-            <EuiContextMenuPanel size="s" items={itemActions} />
+            <EuiContextMenuPanel items={itemActions} />
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>

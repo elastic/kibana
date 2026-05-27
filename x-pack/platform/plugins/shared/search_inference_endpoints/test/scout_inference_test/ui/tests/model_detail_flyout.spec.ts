@@ -120,6 +120,44 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
   });
 
+  test('deprecated model flyout shows the deprecated badge and enables Add endpoint', async ({
+    pageObjects,
+  }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('open flyout for the deprecated model', async () => {
+      await eisModels.modelCard('OpenAI GPT-3.5').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('flyout header shows the deprecated status badge', async () => {
+      await expect(eisModels.modelStatusBadge('openai-gpt-3.5', 'deprecated')).toBeVisible();
+    });
+
+    await test.step('Add endpoint remains enabled for a deprecated (non-EOL) model', async () => {
+      await expect(eisModels.flyoutAddEndpointButton).toBeEnabled();
+    });
+  });
+
+  test('EOL model flyout shows the EOL badge and disables Add endpoint', async ({
+    pageObjects,
+  }) => {
+    const { eisModels } = pageObjects;
+
+    await test.step('open flyout for the EOL model', async () => {
+      await eisModels.modelCard('OpenAI Davinci').click();
+      await expect(eisModels.flyout).toBeVisible();
+    });
+
+    await test.step('flyout header shows the EOL status badge', async () => {
+      await expect(eisModels.modelStatusBadge('openai-davinci', 'eol')).toBeVisible();
+    });
+
+    await test.step('Add endpoint is disabled for an EOL model', async () => {
+      await expect(eisModels.flyoutAddEndpointButton).toBeDisabled();
+    });
+  });
+
   test('opens view endpoint modal from flyout', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 

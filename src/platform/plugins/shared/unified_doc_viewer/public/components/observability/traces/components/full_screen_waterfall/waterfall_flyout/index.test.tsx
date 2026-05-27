@@ -15,6 +15,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { FlyoutContentId } from '../../../common/constants';
 import { setUnifiedDocViewerServices } from '../../../../../../plugin';
 import { mockUnifiedDocViewerServices } from '../../../../../../__mocks__';
+import { OriginDocTypeContext } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
@@ -140,6 +141,27 @@ describe('WaterfallFlyout', () => {
       fireEvent.click(closeButton);
 
       expect(onCloseFlyout).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('originDocType telemetry', () => {
+    it('forwards the parent OriginDocTypeContext value into the unified_doc_viewer_viewed event', () => {
+      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as jest.Mock;
+      reportEvent.mockClear();
+
+      render(
+        <OriginDocTypeContext.Provider value="log">
+          <WaterfallFlyout {...defaultProps} flyoutContentId={FlyoutContentId.SPAN_DETAIL} />
+        </OriginDocTypeContext.Provider>
+      );
+
+      expect(reportEvent).toHaveBeenCalledWith(
+        'unified_doc_viewer_viewed',
+        expect.objectContaining({
+          originDocType: 'log',
+          contentId: FlyoutContentId.SPAN_DETAIL,
+        })
+      );
     });
   });
 });

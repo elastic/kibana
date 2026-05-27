@@ -14,7 +14,7 @@ import * as monitorDetail from '../../../../hooks/use_monitor_detail';
 import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 
 jest.mock('@kbn/observability-shared-plugin/public');
@@ -28,6 +28,18 @@ useFetcherMock.mockReturnValue({
   data: { monitor: { tags: ['tag1', 'tag2'] } },
   status: 200,
   refetch: jest.fn(),
+});
+
+// `jest.mock('@kbn/observability-shared-plugin/public')` auto-mocks every export
+// with `() => undefined`. The flyout renders `MonitorStatusPanel`, which now
+// reaches `useRemoteMonitor` via `useSelectedMonitor`; that hook destructures
+// `useEsSearch(...)`, so the mock must return a non-undefined result.
+const useEsSearchMock = useEsSearch as jest.Mock;
+
+useEsSearchMock.mockReturnValue({
+  data: undefined,
+  loading: false,
+  error: undefined,
 });
 
 describe('Monitor Detail Flyout', () => {
@@ -110,6 +122,57 @@ describe('Monitor Detail Flyout', () => {
       }
     );
     getByText(testErrorText, { exact: false });
+  });
+
+  it('hides the fetch-error callout when overview heartbeat data is available (cross-space)', () => {
+    const testErrorText = 'This is a test error';
+
+    const { queryByText } = render(
+      <MonitorDetailFlyout
+        configId="cross-space-config-id"
+        id="cross-space-id"
+        location="US East"
+        locationId="us-east"
+        onClose={jest.fn()}
+        onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
+      />,
+      {
+        state: {
+          monitorDetails: {
+            syntheticsMonitor: null,
+            syntheticsMonitorLoading: false,
+            syntheticsMonitorError: {
+              body: { statusCode: 404, error: 'Not Found', message: testErrorText },
+            },
+          },
+          overviewStatus: {
+            status: {
+              upConfigs: {
+                'cross-space-config-id-us-east': {
+                  monitorQueryId: 'cross-space-id',
+                  configId: 'cross-space-config-id',
+                  name: 'Cross-space monitor',
+                  type: 'http',
+                  schedule: '1',
+                  tags: [],
+                  isEnabled: true,
+                  isStatusAlertEnabled: false,
+                  overallStatus: 'up',
+                  spaces: ['team-a'],
+                  locations: [{ id: 'us-east', label: 'US East', status: 'up' }],
+                },
+              },
+              downConfigs: {},
+              pendingConfigs: {},
+              disabledConfigs: {},
+            },
+          },
+        },
+      }
+    );
+
+    expect(queryByText(testErrorText, { exact: false })).toBeNull();
   });
 
   it('renders loading state while fetching', () => {

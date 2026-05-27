@@ -6,6 +6,7 @@
  */
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -90,6 +91,7 @@ export interface SLOPublicPluginsStart {
   discoverShared: DiscoverSharedPublicStart;
   embeddable: EmbeddableStart;
   fieldFormats: FieldFormatsStart;
+  inspector: InspectorPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observability: ObservabilityPublicStart;

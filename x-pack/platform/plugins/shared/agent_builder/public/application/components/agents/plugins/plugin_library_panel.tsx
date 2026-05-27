@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { LibraryPanel } from '../common/library_panel';
@@ -69,6 +70,7 @@ export const PluginLibraryPanel: React.FC<PluginLibraryPanelProps> = ({
       getItemName={getPluginName}
       disabledItemIdSet={autoPluginIdSet}
       readOnlyItemIdSet={readOnlyItemIdSet}
+      ebtEntityType={AGENT_BUILDER_UI_EBT.entity.PLUGIN}
     />
   );
 };

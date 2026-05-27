@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlToolsOptions } from './types';
 
 const smlAttachSchema = z.object({
@@ -45,9 +45,7 @@ export const createSmlAttachTool = ({
   availability: {
     cacheMode: 'global',
     handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(
-        AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
-      );
+      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
       return enabled
         ? { status: 'available' }
         : {

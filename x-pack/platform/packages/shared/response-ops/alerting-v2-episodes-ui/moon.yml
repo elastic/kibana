@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/kibana-react-plugin'
   - '@kbn/search-types'
+  - '@kbn/spaces-plugin'
   - '@kbn/user-profile-components'
   - '@kbn/unified-data-table'
 tags:
