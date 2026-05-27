@@ -18,7 +18,7 @@ const MAX_RULE_NAME_LENGTH = 256;
 
 export const verdictSchema = z.object({
   '@timestamp': z.iso.datetime(),
-  verdict: z.string(),
+  verdict: z.enum(['promoted', 'demoted', 'acknowledged']),
   verdict_id: z.string().optional(),
   discovery_id: z.string(),
   discovery_slug: z.string(),

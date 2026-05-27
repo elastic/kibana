@@ -17,9 +17,9 @@ import {
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
+  runFindByIdsEsqlQuery,
   queryEsql,
   esqlToObjects,
-  runFindByIdsEsqlQuery,
 } from '../latest_source_query';
 import {
   DISCOVERIES_DATA_STREAM,
@@ -27,7 +27,11 @@ import {
   type StoredDiscovery,
   type discoveriesMappings,
 } from './data_stream';
-import { FIELD_DISCOVERY_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
+import {
+  FIELD_DISCOVERY_ID,
+  FIELD_DISCOVERY_SLUG,
+  FIELD_CLOSES_DISCOVERY_ID,
+} from '../field_names';
 
 export type DiscoveryDataStreamClient = IDataStreamClient<
   typeof discoveriesMappings,
@@ -69,44 +73,49 @@ export class DiscoveryClient {
       options,
       index: DISCOVERIES_DATA_STREAM,
       groupBy: FIELD_DISCOVERY_ID,
+      where: esql.exp`${esql.col('kind')} == ${esql.str('finding')}`,
     });
 
-    if (result.hits.length === 0) return result;
+    if (!result.hits.length) return result;
 
-    const discoveredAtMap = await this.getDiscoveredAtMap(options);
+    const clearedIds = await this.getClearedIds(
+      result.hits.map((h) => h.discovery_id).filter((id): id is string => Boolean(id))
+    );
+
     return {
       ...result,
       hits: result.hits.map((h) => ({
         ...h,
-        discovered_at: discoveredAtMap.get(h.discovery_slug) ?? h['@timestamp'],
+        kind: clearedIds.has(h.discovery_id ?? '') ? ('clearance' as const) : h.kind,
       })),
     };
   }
 
-  // Returns MIN(@timestamp) of kind:finding documents per discovery_slug for the given time range.
-  // A finding always precedes any clearance for the same slug, so MIN(@timestamp) = first investigation time.
-  private async getDiscoveredAtMap(options: CommonSearchOptions): Promise<Map<string, string>> {
-    try {
-      let query = esql.from([DISCOVERIES_DATA_STREAM]).where`${esql.col('kibana.space_ids')} == ${
-        this.clients.space
-      } OR ${esql.col('kibana.space_ids')} IS NULL`;
+  // Returns the set of finding IDs that have been cleared, querying by closes_discovery_id —
+  // the field the workflow writes on clearance docs, consistent with how verdict checks clearances.
+  private async getClearedIds(findingIds: string[]): Promise<Set<string>> {
+    if (!findingIds.length) return new Set();
+    const idLiterals = findingIds.map((id) => esql.str(id));
+    const query = esql`FROM ${DISCOVERIES_DATA_STREAM}
+      | WHERE ${esql.col('kibana.space_ids')} == ${esql.str(this.clients.space)} OR ${esql.col(
+      'kibana.space_ids'
+    )} IS NULL
+      | WHERE ${esql.col('kind')} == ${esql.str('clearance')}
+      | WHERE ${esql.col('closes_discovery_id')} IN (${idLiterals})
+      | KEEP ${esql.col('closes_discovery_id')}`;
+    const response = await queryEsql({ esClient: this.clients.esClient, query });
+    const rows = esqlToObjects<{ closes_discovery_id: string }>(response);
+    return new Set(rows.map((r) => r.closes_discovery_id));
+  }
 
-      if (options.from !== undefined) {
-        query = query.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
-      }
-      if (options.to !== undefined) {
-        query = query.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
-      }
-
-      query = query.where`${esql.col('kind')} == ${esql.str('finding')}`;
-      query = query.pipe`STATS discovered_at = MIN(@timestamp) BY ${esql.col('discovery_slug')}`;
-
-      const response = await queryEsql({ esClient: this.clients.esClient, query });
-      const rows = esqlToObjects<{ discovery_slug: string; discovered_at: string }>(response);
-      return new Map(rows.map((r) => [r.discovery_slug, r.discovered_at]));
-    } catch (error) {
-      return new Map();
-    }
+  async findById(discoveryId: string): Promise<{ hits: Discovery[] }> {
+    return runFindByIdEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DISCOVERIES_DATA_STREAM,
+      idField: FIELD_DISCOVERY_ID,
+      idValue: discoveryId,
+    });
   }
 
   async findByIds(discoveryIds: string[]): Promise<{ hits: Discovery[] }> {
@@ -116,6 +125,16 @@ export class DiscoveryClient {
       index: DISCOVERIES_DATA_STREAM,
       idField: FIELD_DISCOVERY_ID,
       idValues: discoveryIds,
+    });
+  }
+
+  async findByClosesDiscoveryId(discoveryId: string): Promise<{ hits: Discovery[] }> {
+    return runFindByIdEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DISCOVERIES_DATA_STREAM,
+      idField: FIELD_CLOSES_DISCOVERY_ID,
+      idValue: discoveryId,
     });
   }
 

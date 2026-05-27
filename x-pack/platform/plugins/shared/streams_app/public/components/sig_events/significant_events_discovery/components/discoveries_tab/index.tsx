@@ -24,25 +24,16 @@ import {
 } from '../../../../../hooks/sig_events/use_fetch_discoveries_entities';
 import { DiscoveryFlyout } from './discovery_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
+import { DISCOVERY_KIND_LABELS } from '../shared/translations';
+import { DISCOVERY_KIND_COLORS } from '../shared/constants';
 
 const MAX_VISIBLE_STREAMS = 3;
-
-const KIND_LABELS: Record<string, string> = {
-  finding: i18n.translate('xpack.streams.discoveriesTab.kind.finding', {
-    defaultMessage: 'Finding',
-  }),
-  clearance: i18n.translate('xpack.streams.discoveriesTab.kind.clearance', {
-    defaultMessage: 'Cleared',
-  }),
-};
-
-const KIND_COLORS: Record<string, string> = { finding: 'warning', clearance: 'success' };
 
 const columns: Array<EuiBasicTableColumn<Discovery>> = [
   {
     field: 'discovered_at',
-    name: i18n.translate('xpack.streams.discoveriesTab.foundColumn', {
-      defaultMessage: 'Found',
+    name: i18n.translate('xpack.streams.discoveriesTab.timestampColumn', {
+      defaultMessage: 'Timestamp',
     }),
     width: '200px',
     render: (discoveredAt: string | undefined, discovery: Discovery) =>
@@ -54,8 +45,8 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
       defaultMessage: 'Status',
     }),
     width: '90px',
-    render: (kind: string) => (
-      <EuiBadge color={KIND_COLORS[kind] ?? 'default'}>{KIND_LABELS[kind] ?? kind}</EuiBadge>
+    render: (kind: Discovery['kind']) => (
+      <EuiBadge color={DISCOVERY_KIND_COLORS[kind]}>{DISCOVERY_KIND_LABELS[kind]}</EuiBadge>
     ),
   },
   {

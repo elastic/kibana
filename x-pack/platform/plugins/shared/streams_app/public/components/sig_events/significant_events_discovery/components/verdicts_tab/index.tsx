@@ -24,30 +24,14 @@ import {
 } from '../../../../../hooks/sig_events/use_fetch_verdicts';
 import { VerdictFlyout } from './verdict_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
-
-const VERDICT_LABELS: Record<string, string> = {
-  promoted: i18n.translate('xpack.streams.verdictsTab.verdict.promoted', {
-    defaultMessage: 'Promoted',
-  }),
-  demoted: i18n.translate('xpack.streams.verdictsTab.verdict.demoted', {
-    defaultMessage: 'Demoted',
-  }),
-  acknowledged: i18n.translate('xpack.streams.verdictsTab.verdict.acknowledged', {
-    defaultMessage: 'Acknowledged',
-  }),
-};
-
-const VERDICT_COLORS: Record<string, string> = {
-  promoted: 'warning',
-  demoted: 'success',
-  acknowledged: 'primary',
-};
+import { VERDICT_LABELS } from '../shared/translations';
+import { VERDICT_COLORS } from '../shared/constants';
 
 const columns: Array<EuiBasicTableColumn<Verdict>> = [
   {
     field: '@timestamp',
     name: i18n.translate('xpack.streams.verdictsTab.timestampColumn', {
-      defaultMessage: 'Last verdict',
+      defaultMessage: 'Timestamp',
     }),
     width: '200px',
     render: (timestamp: string) => formatTimestamp(timestamp),
@@ -58,7 +42,7 @@ const columns: Array<EuiBasicTableColumn<Verdict>> = [
       defaultMessage: 'Verdict',
     }),
     width: '110px',
-    render: (v: string) => (
+    render: (v: Verdict['verdict']) => (
       <EuiBadge color={VERDICT_COLORS[v] ?? 'default'}>{VERDICT_LABELS[v] ?? v}</EuiBadge>
     ),
   },

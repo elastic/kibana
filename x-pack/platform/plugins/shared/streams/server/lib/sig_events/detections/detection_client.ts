@@ -152,6 +152,7 @@ export class DetectionClient {
       groupBy: FIELD_DETECTION_ID,
       sort: [['detected_at', 'DESC']],
     });
+
     const processedIds = await this.getProcessedIds(
       result.hits.map((h) => h.detection_id).filter((id): id is string => Boolean(id))
     );
