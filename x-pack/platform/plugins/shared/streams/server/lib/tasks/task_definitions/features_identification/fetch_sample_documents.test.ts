@@ -165,7 +165,7 @@ describe('fetchSampleDocuments', () => {
         start: 100,
         end: 200,
         sampleSize: 4,
-        loadUnmappedFields: true,
+        unmappedFields: 'LOAD',
       })
     );
     expect(BasicPrettyPrinter.print(entityFilteredCall.whereCondition!)).toBe(
@@ -179,6 +179,7 @@ describe('fetchSampleDocuments', () => {
       end: 200,
       size: 6,
       offset: 0,
+      logger,
     });
     expect(getSampleDocumentsEsqlMock.mock.calls[1][0]).toEqual({
       esClient,

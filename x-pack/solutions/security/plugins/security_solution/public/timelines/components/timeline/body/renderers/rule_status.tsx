@@ -10,18 +10,13 @@ import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 
-import styled from 'styled-components';
-import { STATUS_BUTTON_TEST_ID } from '../../../../../flyout_v2/document/components/test_ids';
+import { STATUS_BUTTON_TEST_ID } from '../../../../../flyout_v2/document/main/components/test_ids';
 
 const mapping = {
   open: 'primary',
   acknowledged: 'warning',
   closed: 'default',
 };
-
-const StyledEuiBadge = styled(EuiBadge)`
-  text-transform: capitalize;
-`;
 
 interface BaseProps {
   value: string | number | undefined | null;
@@ -39,16 +34,18 @@ const RuleStatusComponent: React.FC<Props> = ({
 }) => {
   const color = useMemo(() => getOr('default', `${value}`, mapping), [value]);
   const badge = (
-    <StyledEuiBadge
+    // @ts-ignore no iconOnClick needed
+    <EuiBadge
       color={color}
       onClick={onClick}
       onClickAriaLabel={onClickAriaLabel}
       iconType={iconType}
       iconSide={iconSide}
       data-test-subj={STATUS_BUTTON_TEST_ID}
+      css={{ textTransform: 'capitalize' }}
     >
       {value}
-    </StyledEuiBadge>
+    </EuiBadge>
   );
 
   return badge;

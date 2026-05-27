@@ -30,6 +30,10 @@ target
 types.eslint.config.js
 types.eslint.config.cjs
 __tmp__
+.bug-fixer-session/
+.playwright-mcp/
+.exploratory-session/
+config_sets/bug_fixer/
 
 # Ignore example plugin builds
 /examples/*/build
@@ -198,3 +202,6 @@ src/platform/plugins/shared/console/packaging/react/translations
 
 # Local superset worktree configuration
 .superset/
+# Agent skill working output (team-auto-tests-stats markdown only — never commit)
+.cursor/tmp/
+.agents/tmp/

@@ -96,4 +96,20 @@ export class EisModelsPage {
   public deleteEndpointButton(inferenceId: string): Locator {
     return this.page.testSubj.locator(`deleteEndpointButton-${inferenceId}`);
   }
+
+  public modelStatusBadge(id: string, kind: 'preview' | 'deprecated' | 'eol'): Locator {
+    let prefix: string;
+    switch (kind) {
+      case 'preview':
+        prefix = 'modelPreviewBadge';
+        break;
+      case 'deprecated':
+        prefix = 'modelDeprecatedBadge';
+        break;
+      case 'eol':
+        prefix = 'modelEolBadge';
+        break;
+    }
+    return this.page.testSubj.locator(`${prefix}-${id}`);
+  }
 }

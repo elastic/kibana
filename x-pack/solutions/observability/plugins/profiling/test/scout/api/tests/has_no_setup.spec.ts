@@ -18,10 +18,25 @@ apiTest.describe(
     let viewerApiCreditials: RoleApiCredentials;
     let adminApiCreditials: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ profilingHelper, profilingSetup, requestAuth }) => {
-      await profilingHelper.cleanupPolicies();
-      await profilingHelper.installPolicies();
+    apiTest.beforeAll(async ({ profilingSetup, requestAuth }) => {
       await profilingSetup.cleanup();
+
+      // Poll until ES state converges after deleting data streams and indices.
+      await expect
+        .poll(
+          async () => {
+            const status = await profilingSetup.checkStatus();
+            return status.has_setup === false && status.has_data === false;
+          },
+          {
+            timeout: 30_000,
+            intervals: [500, 1000, 2000, 4000],
+            message:
+              'Profiling status did not converge to has_setup: false, has_data: false after cleanup',
+          }
+        )
+        .toBe(true);
+
       viewerApiCreditials = await requestAuth.getApiKey('viewer');
       adminApiCreditials = await requestAuth.getApiKey('admin');
     });

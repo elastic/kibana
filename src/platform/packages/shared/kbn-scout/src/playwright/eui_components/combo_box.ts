@@ -87,7 +87,7 @@ export class EuiComboBoxWrapper {
     await this.typeValueInSearch(value, options);
     // select the option that matches the value
     const trimmedValue = value.trim();
-    await this.page.locator(`.euiFilterSelectItem[title="${trimmedValue}"]`).click();
+    await this.page.locator(`.euiComboBoxOption[title="${trimmedValue}"]`).click();
     // wait for the new badge to be visible
     await this.waitForBadgeToBe(value, 'visible');
     // Verify option was selected
@@ -108,7 +108,7 @@ export class EuiComboBoxWrapper {
     for (const value of values) {
       await this.typeValueInSearch(value, options);
       const trimmedValue = value.trim();
-      await this.page.locator(`.euiFilterSelectItem[title="${trimmedValue}"]`).click();
+      await this.page.locator(`.euiComboBoxOption[title="${trimmedValue}"]`).click();
       await this.waitForBadgeToBe(value, 'visible');
       const updatedOptions = await this.getSelectedMultiOptions();
       expect(updatedOptions).toContain(value);

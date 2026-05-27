@@ -155,7 +155,7 @@ export const TemplatePreviewPanel: React.FC<TemplatePreviewPanelProps> = ({
               <h4>{i18n.COLUMN_FIELDS}</h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <TemplateFieldRenderer parsedTemplate={parsedDefinition} />
+            <TemplateFieldRenderer parsedTemplate={parsedDefinition} owner={template.owner} />
           </>
         )}
       </EuiPanel>

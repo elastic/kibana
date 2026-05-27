@@ -21,7 +21,7 @@ import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { RoundError } from './round_error/round_error';
 import { ConfirmationPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
@@ -91,7 +91,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     retry: retrySendMessage,
     resumeRound,
     isResuming,
-  } = useSendMessage();
+  } = useConversationStream();
   // HITL Approve / Cancel is per-conversation: streamActions are closure-bound to
   // vars.conversationId, so other in-flight conversations cannot corrupt this cache.
   // Use `isStreaming` (not `isResponseLoading`) so the buttons stay disabled during the

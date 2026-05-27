@@ -29,6 +29,7 @@ import type { ConnectorType } from '../application/connector/types';
 import { get } from '../application/connector/methods/get';
 import { getAll, getAllSystemConnectors } from '../application/connector/methods/get_all';
 import { getAuthStatus } from '../application/connector/methods/get_auth_status';
+import { getConnectorSpecAsJsonSchema } from '../application/connector/methods/get_connector_spec';
 import type { GetAuthStatusResult } from '../application/connector/methods/get_auth_status/types';
 import { update } from '../application/connector/methods/update';
 import { listTypes } from '../application/connector/methods/list_types';
@@ -71,10 +72,6 @@ import type {
 } from '../routes/get_oauth_access_token';
 import type { GetOAuthJwtConfig, GetOAuthJwtSecrets } from '../lib/get_oauth_jwt_access_token';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
-import type {
-  GetOAuthClientCredentialsConfig,
-  GetOAuthClientCredentialsSecrets,
-} from '../lib/get_oauth_client_credentials_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
 import {
   getOAuthAuthorizationCodeAccessToken,
@@ -267,6 +264,20 @@ export class ActionsClient {
     return getAuthStatus({ context: this.context });
   }
 
+  public async getConnectorSpec({
+    id,
+    configurationUtilities,
+  }: {
+    id: string;
+    configurationUtilities: ActionsConfigurationUtilities;
+  }) {
+    return getConnectorSpecAsJsonSchema({
+      context: this.context,
+      id,
+      configurationUtilities,
+    });
+  }
+
   /**
    * Get bulk actions with in-memory list
    */
@@ -429,8 +440,9 @@ export class ActionsClient {
           logger: this.context.logger,
           configurationUtilities,
           credentials: {
-            config: tokenOpts.config as GetOAuthClientCredentialsConfig,
-            secrets: tokenOpts.secrets as GetOAuthClientCredentialsSecrets,
+            type: 'client_secret',
+            config: { clientId: tokenOpts.config.clientId },
+            secrets: { clientSecret: tokenOpts.secrets.clientSecret },
           },
           tokenUrl: tokenOpts.tokenUrl,
           oAuthScope: tokenOpts.scope,

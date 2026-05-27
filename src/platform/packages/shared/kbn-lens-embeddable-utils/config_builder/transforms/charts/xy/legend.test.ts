@@ -10,6 +10,7 @@
 import type { XYConfig } from '../../../schema';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import type { XYVisualizationState } from '@kbn/lens-common';
+import { LegendSize } from '@kbn/chart-expressions-common';
 
 describe('XY Legend Transforms', () => {
   type ApiLegend = NonNullable<XYConfig['legend']>;
@@ -140,17 +141,152 @@ describe('XY Legend Transforms', () => {
       },
       forbiddenApiPaths: ['layout.truncate.max_pixels'],
     },
+    {
+      title: 'outside right legend includes size',
+      state: {
+        isVisible: true,
+        position: 'right',
+        legendSize: LegendSize.LARGE,
+        shouldTruncate: true,
+        maxLines: 1,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'right',
+        size: 'l',
+        layout: { type: 'grid', truncate: { max_lines: 1 } },
+      },
+    },
+    {
+      title: 'outside left legend includes size',
+      state: {
+        isVisible: true,
+        position: 'left',
+        legendSize: LegendSize.SMALL,
+        shouldTruncate: false,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'left',
+        size: 's',
+        layout: { type: 'grid', truncate: { max_lines: 1, enabled: false } },
+      },
+    },
+    {
+      title: 'outside top legend omits size',
+      state: {
+        isVisible: true,
+        position: 'top',
+        legendSize: LegendSize.LARGE,
+        shouldTruncate: true,
+        maxLines: 2,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'top',
+        layout: { type: 'grid', truncate: { max_lines: 2 } },
+      },
+      forbiddenApiPaths: ['size'],
+    },
+    {
+      title: 'outside bottom legend omits size',
+      state: {
+        isVisible: true,
+        position: 'bottom',
+        legendSize: LegendSize.EXTRA_LARGE,
+        shouldTruncate: true,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'bottom',
+        layout: { type: 'grid', truncate: { max_lines: 1 } },
+      },
+      forbiddenApiPaths: ['size'],
+    },
+    {
+      title: 'outside right legend with auto size',
+      state: {
+        isVisible: true,
+        position: 'right',
+        legendSize: LegendSize.AUTO,
+        shouldTruncate: true,
+      },
+      api: {
+        visibility: 'visible',
+        placement: 'outside',
+        position: 'right',
+        size: 'auto',
+        layout: { type: 'grid', truncate: { max_lines: 1 } },
+      },
+    },
   ];
 
   it.each(cases)('$title (State -> API -> State)', ({ api, state, forbiddenApiPaths }) => {
     const { stateLegend, apiLegend } = roundTripLegend(state);
 
-    expect(stateLegend).toMatchObject(state);
-
+    if (state.position === 'top' || state.position === 'bottom') {
+      // normalizes legendSize to undefined for horizontal positions
+      expect(stateLegend).toMatchObject({ ...state, legendSize: undefined });
+    } else {
+      expect(stateLegend).toMatchObject(state);
+    }
     // API assertions: verify the persisted shape + explicitly forbid the other truncate key.
     expect(apiLegend).toMatchObject(api);
     forbiddenApiPaths?.forEach((path) => {
       expect(apiLegend).not.toHaveProperty(path);
+    });
+  });
+
+  describe('legend size by position', () => {
+    it('preserves legendSize through round-trip for horizontal positions', () => {
+      const positions = ['left', 'right'] as const;
+      const sizes = [
+        LegendSize.SMALL,
+        LegendSize.MEDIUM,
+        LegendSize.LARGE,
+        LegendSize.EXTRA_LARGE,
+        LegendSize.AUTO,
+      ] as const;
+
+      for (const position of positions) {
+        for (const legendSize of sizes) {
+          const { stateLegend, apiLegend } = roundTripLegend({
+            isVisible: true,
+            position,
+            legendSize,
+            shouldTruncate: true,
+          });
+          expect(apiLegend).toHaveProperty('size');
+          expect(stateLegend.legendSize).toBe(legendSize);
+        }
+      }
+    });
+
+    it('strips legendSize from API for vertical positions', () => {
+      const positions = ['top', 'bottom'] as const;
+
+      for (const position of positions) {
+        const { apiLegend } = roundTripLegend({
+          isVisible: true,
+          position,
+          legendSize: LegendSize.LARGE,
+          shouldTruncate: true,
+        });
+        expect(apiLegend).not.toHaveProperty('size');
+      }
+    });
+
+    it('does not include size in API when legendSize is undefined for horizontal positions', () => {
+      const { apiLegend } = roundTripLegend({
+        isVisible: true,
+        position: 'right',
+        shouldTruncate: true,
+      });
+      expect(apiLegend).not.toHaveProperty('size');
     });
   });
 });

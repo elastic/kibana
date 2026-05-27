@@ -198,6 +198,8 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
             <EuiFlexItem grow={false}>
               <ResumeExecutionButton
                 executionId={executionId}
+                workflowId={stepExecution.workflowId}
+                stepStartedAt={stepExecution.startedAt}
                 resumeMessage={resumeMessage}
                 resumeSchema={resumeSchema}
                 autoOpen={shouldAutoResume}

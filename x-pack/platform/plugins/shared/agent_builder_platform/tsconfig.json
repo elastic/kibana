@@ -21,6 +21,7 @@
     "@kbn/inference-common",
     "@kbn/llm-tasks-plugin",
     "@kbn/i18n",
+    "@kbn/i18n-react",
     "@kbn/agent-builder-browser",
     "@kbn/cases-plugin",
     "@kbn/core-http-server",
@@ -33,6 +34,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/management-settings-ids",
     "@kbn/agent-context-layer-plugin",
-    "@kbn/actions-plugin"
+    "@kbn/actions-plugin",
   ]
 }

@@ -5,7 +5,16 @@
  * 2.0.
  */
 
+export type { PaginatedResponse } from '../../../common/pagination';
+
 export interface CommonSearchOptions {
-  from?: number;
-  to?: number;
+  /** ISO 8601 formatted datetime */
+  from?: string;
+  /** ISO 8601 formatted datetime */
+  to?: string;
+}
+
+export interface PaginatedSearchOptions extends CommonSearchOptions {
+  page?: number;
+  perPage?: number;
 }

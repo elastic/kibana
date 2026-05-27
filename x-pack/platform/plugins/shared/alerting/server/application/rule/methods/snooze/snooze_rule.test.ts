@@ -249,7 +249,6 @@ describe('snoozeRule change tracking', () => {
       {
         action: 'rule_snooze',
         spaceId: 'default',
-        data: { metadata: { bulkCount: 1 } },
       }
     );
   });

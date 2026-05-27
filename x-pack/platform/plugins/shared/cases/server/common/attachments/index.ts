@@ -12,6 +12,7 @@ import {
   EXTERNAL_REFERENCE_TYPE_MAP,
 } from '../../../common/constants/attachments';
 import {
+  isAlertAttachmentType,
   toUnifiedAttachmentType,
   toUnifiedPersistableStateAttachmentType,
 } from '../../../common/utils/attachments';
@@ -25,6 +26,7 @@ import { commentAttachmentTransformer } from './comment';
 import { externalReferenceAttachmentTransformer } from './external_reference';
 import { persistableStateAttachmentTransformer } from './persistable_state';
 import { eventAttachmentTransformer } from './event';
+import { alertAttachmentTransformer } from './alert';
 
 export { getCommentContentFromUnifiedPayload, commentAttachmentTransformer } from './comment';
 export {
@@ -91,6 +93,9 @@ export function getAttachmentTypeTransformers(
   }
   if (normalizedType === SECURITY_EVENT_ATTACHMENT_TYPE) {
     return eventAttachmentTransformer;
+  }
+  if (isAlertAttachmentType(normalizedType)) {
+    return alertAttachmentTransformer;
   }
   if (UNIFIED_EXTERNAL_REFERENCE_TYPES.has(normalizedType)) {
     return externalReferenceAttachmentTransformer;

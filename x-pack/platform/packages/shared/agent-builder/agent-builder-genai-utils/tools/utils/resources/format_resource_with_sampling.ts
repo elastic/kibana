@@ -29,7 +29,7 @@ const SAMPLE_VALUE_TYPES = new Set([
  * suitable for inclusion in a prompt.
  *
  * Each field is rendered as a single line:
- *   path (type) [description][: val1, val2]
+ *   path (type[, ts_dimension][, ts_metric=<metric>]) [description][: val1, val2]
  */
 export const formatResourceWithSampledValues = ({
   resource,
@@ -38,8 +38,9 @@ export const formatResourceWithSampledValues = ({
 }) => {
   const samplingCount = resource.fields.length > 1000 ? 0 : resource.fields.length > 200 ? 1 : 2;
   const lines = resource.fields.map((field) => renderFieldLine(field, samplingCount));
+  const tsdbAttr = resource.isTsdb ? ` is-tsds="true"` : '';
   return [
-    `<target_resource name="${resource.name}" type="${resource.type}">`,
+    `<target_resource name="${resource.name}" type="${resource.type}"${tsdbAttr}>`,
     ...lines,
     `</target_resource>`,
   ].join('\n');
@@ -53,7 +54,18 @@ const renderFieldLine = (field: MappingFieldWithStats, samplingCount: number): s
           .map((v) => truncate(normalizeSpaces(`${v.value}`), 80))
           .join(', ')}...)`
       : '';
-  return `- ${field.path} [${field.type}]${description}${samples}`;
+  return `- ${field.path} [${renderTypeSegment(field)}]${description}${samples}`;
+};
+
+const renderTypeSegment = (field: MappingFieldWithStats): string => {
+  const parts: string[] = [field.type];
+  if (field.tsDimension === true) {
+    parts.push('ts_dimension');
+  }
+  if (typeof field.tsMetric === 'string') {
+    parts.push(`ts_metric=${field.tsMetric}`);
+  }
+  return parts.join(', ');
 };
 
 const truncate = (text: unknown, maxLength: number): string => {

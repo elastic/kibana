@@ -448,7 +448,7 @@ export const SavedQueryManagementList = ({
             isLoading={isInitializing}
             singleSelection="always"
             options={savedQueriesOptions}
-            listProps={{ onFocusBadge: false }}
+            listProps={{ onFocusBadge: false, paddingSize: 's' }}
             isPreFiltered
             searchable
             searchProps={{

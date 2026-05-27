@@ -130,11 +130,7 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel
-            size="s"
-            items={actionsMenuItems}
-            data-test-subj="alertsTableActionsMenu"
-          />
+          <EuiContextMenuPanel items={actionsMenuItems} data-test-subj="alertsTableActionsMenu" />
         </EuiPopover>
       </EuiFlexItem>
     </>

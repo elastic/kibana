@@ -31,3 +31,16 @@ export const toStringOrStringArray = (value: unknown): string | string[] | undef
 
   return values.length === 1 ? values[0] : values;
 };
+
+/**
+ * Returns the first non-empty string from the provided value (string or string[]),
+ * or `null` when the value is nullish or contains only empty strings.
+ */
+export const getNonEmptyField = (field: unknown): string | null => {
+  const normalized = toStringOrStringArray(field);
+  const firstItem = Array.isArray(normalized) ? normalized[0] : normalized;
+  if (firstItem == null || firstItem === '') {
+    return null;
+  }
+  return firstItem;
+};
