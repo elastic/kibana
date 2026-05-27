@@ -266,7 +266,7 @@ describe('runTask', () => {
     expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(6);
     ['abc', 'def', 'xyz', 'rst', 'mno', 'pqr'].forEach((id) => {
       expect(auditService.withoutRequest.log).toHaveBeenCalledWith({
-        message: `System has deleted alert [id=${id}]`,
+        message: `System has deleted alert with instance id "${id}"`,
         event: {
           action: 'alert_delete',
           category: ['database'],
@@ -506,7 +506,7 @@ describe('runTask', () => {
     expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(5);
     ['abc', 'def', 'ghi', 'jkl', 'mno'].forEach((id) => {
       expect(auditService.withoutRequest.log).toHaveBeenCalledWith({
-        message: `System has deleted alert [id=${id}]`,
+        message: `System has deleted alert with instance id "${id}"`,
         event: {
           action: 'alert_delete',
           category: ['database'],
@@ -664,7 +664,7 @@ describe('runTask', () => {
     expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(4);
     ['abc', 'def', 'xyz', 'rst'].forEach((id) => {
       expect(auditService.withoutRequest.log).toHaveBeenCalledWith({
-        message: `System has deleted alert [id=${id}]`,
+        message: `System has deleted alert with instance id "${id}"`,
         event: {
           action: 'alert_delete',
           category: ['database'],
@@ -894,7 +894,7 @@ describe('runTask', () => {
       expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(2);
       ['ghi', 'jkl'].forEach((id) => {
         expect(auditService.withoutRequest.log).toHaveBeenCalledWith({
-          message: `System has deleted alert [id=${id}]`,
+          message: `System has deleted alert with instance id "${id}"`,
           event: {
             action: 'alert_delete',
             category: ['database'],
@@ -1006,7 +1006,7 @@ describe('runTask', () => {
 
       expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(2);
       expect(auditService.withoutRequest.log).toHaveBeenNthCalledWith(1, {
-        message: `System has deleted alert [id=abc]`,
+        message: 'System has deleted alert with instance id "abc"',
         event: {
           action: 'alert_delete',
           category: ['database'],
@@ -1015,7 +1015,7 @@ describe('runTask', () => {
         },
       });
       expect(auditService.withoutRequest.log).toHaveBeenNthCalledWith(2, {
-        message: `Failed attempt to delete alert [id=def]`,
+        message: `Failed attempt to delete alert with instance id \"def\"`,
         event: {
           action: 'alert_delete',
           category: ['database'],

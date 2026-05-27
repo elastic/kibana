@@ -12,7 +12,7 @@ import type { RawRule } from '../../../../saved_objects/schemas/raw_rule';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { updateMeta } from '../../../../rules_client/lib';
-import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
+import { AlertAuditAction, alertAuditEvent } from '../../../../lib/alert_audit_events';
 import { removePerAlertSnoozeEntry } from '../../../../rules_client/common/per_alert_snooze_utils';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { unsnoozeAlertParamsSchema } from './schemas';
@@ -58,9 +58,10 @@ async function unsnoozeInstanceWithOCC(
     }
   } catch (error) {
     context.auditLogger?.log(
-      ruleAuditEvent({
-        action: RuleAuditAction.UNSNOOZE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
+      alertAuditEvent({
+        action: AlertAuditAction.UNSNOOZE,
+        id: alertInstanceId,
+        ruleSavedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
         error,
       })
     );
@@ -68,10 +69,11 @@ async function unsnoozeInstanceWithOCC(
   }
 
   context.auditLogger?.log(
-    ruleAuditEvent({
-      action: RuleAuditAction.UNSNOOZE,
+    alertAuditEvent({
+      action: AlertAuditAction.UNSNOOZE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
+      id: alertInstanceId,
+      ruleSavedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
     })
   );
 
