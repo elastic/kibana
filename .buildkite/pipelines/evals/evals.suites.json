@@ -220,6 +220,7 @@
     {
       "id": "agent-builder-dashboards",
       "name": "Agent Builder Dashboards",
+      "slackChannel": "#agent-builder-alerts",
       "configPath": "x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards/playwright.config.ts",
       "tags": [
         "platform",
