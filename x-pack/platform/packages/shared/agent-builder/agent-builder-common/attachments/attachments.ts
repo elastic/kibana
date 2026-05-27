@@ -28,10 +28,23 @@ export interface Attachment<
    * Undefined for by-value attachments.
    */
   origin?: string;
-  /** The version number of this attachment snapshot. Undefined when version metadata is unavailable. */
-  version?: number;
-  /** Total number of versions for this attachment. Undefined when version metadata is unavailable. */
-  versionCount?: number;
+  /**
+   * Version metadata for this attachment snapshot.
+   * Undefined when version metadata is unavailable.
+   */
+  versionData?: {
+    /** The version number of this snapshot */
+    version: number;
+    /** Total number of versions for this attachment */
+    versionCount: number;
+    /** ISO timestamp of when this version was created */
+    createdAt: string;
+    /**
+     * ISO timestamp of when this attachment's content was last synced with its origin.
+     * Set when `updateOrigin` is called. Undefined when the attachment has never been saved to an origin.
+     */
+    originSyncedAt?: string;
+  };
 }
 
 /**

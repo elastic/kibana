@@ -5,15 +5,24 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { skillCreateRequestObjectSchema } from '@kbn/agent-builder-common/skills/validation';
-import type { z } from '@kbn/zod';
+import { skillCreateRequestSchema } from '@kbn/agent-builder-common';
 
 export const SKILL_ATTACHMENT_TYPE = 'skill' as const;
 
+export const skillAttachmentDataSchema = z.object({
+  mode: z.enum(['create', 'edit']),
+  skill: skillCreateRequestSchema,
+});
+
 /**
  * Data shape stored on a `skill` attachment version.
+ *
+ * - `mode: 'create'` — new skill draft; `skill` matches the POST request body.
+ * - `mode: 'edit'`   — edit draft for an existing skill; `skill.id` is the
+ *   persisted skill's id used as the PUT path parameter.
  */
-export type SkillAttachmentData = z.infer<typeof skillCreateRequestObjectSchema>;
+export type SkillAttachmentData = z.infer<typeof skillAttachmentDataSchema>;
 
 export type SkillAttachment = Attachment<typeof SKILL_ATTACHMENT_TYPE, SkillAttachmentData>;

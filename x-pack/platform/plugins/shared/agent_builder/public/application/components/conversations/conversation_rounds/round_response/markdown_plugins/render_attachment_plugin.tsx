@@ -154,8 +154,12 @@ export const createRenderAttachmentRenderer = ({
           data: versionData.data,
           hidden: attachment.hidden,
           origin: attachment.origin,
-          version: versionToUse,
-          versionCount: attachment.versions.length,
+          versionData: {
+            version: versionToUse,
+            versionCount: attachment.versions.length,
+            createdAt: versionData.created_at,
+            originSyncedAt: attachment.origin_snapshot_at,
+          },
         }}
         conversationId={conversationId}
         attachmentsService={attachmentsService}

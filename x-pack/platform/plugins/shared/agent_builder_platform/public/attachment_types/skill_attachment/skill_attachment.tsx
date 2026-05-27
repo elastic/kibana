@@ -33,11 +33,7 @@ import {
   SKILLS_API_PATH,
   type CreateSkillResponse,
 } from '@kbn/agent-builder-plugin/public';
-import {
-  SKILL_ATTACHMENT_TYPE,
-  type SkillAttachment,
-  type SkillAttachmentData,
-} from '../../../common/attachments';
+import { SKILL_ATTACHMENT_TYPE, type SkillAttachment } from '../../../common/attachments';
 
 const SKILLS_MANAGE_PATH = '/manage/skills';
 
@@ -57,6 +53,12 @@ const createSkillLabel = i18n.translate(
   'xpack.agentBuilderPlatform.attachments.skill.createButtonLabel',
   {
     defaultMessage: 'Create skill',
+  }
+);
+const saveChangesLabel = i18n.translate(
+  'xpack.agentBuilderPlatform.attachments.skill.saveChangesButtonLabel',
+  {
+    defaultMessage: 'Save changes',
   }
 );
 const lackManageSkillsPermissionDescription = i18n.translate(
@@ -195,7 +197,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ attachment, isCanvas }) => {
     description,
     tool_ids: toolIds,
     referenced_content: referencedContent,
-  } = attachment.data;
+  } = attachment.data.skill;
   const showFullContent = isCanvas === true;
 
   return (
@@ -266,36 +268,53 @@ export const createSkillAttachmentDefinition = ({
   application,
 }: CreateSkillDeps): AttachmentUIDefinition<SkillAttachment> => {
   const canCreate = application.capabilities.agentBuilder?.manageSkills === true;
-  const isLatest = ({
-    version,
-    versionCount,
-  }: {
-    version: number | undefined;
-    versionCount: number | undefined;
-  }) => typeof version === 'number' && typeof versionCount === 'number' && version === versionCount;
+  const isLatest = (attachment: SkillAttachment): boolean => {
+    const { version, versionCount } = attachment.versionData ?? {};
+    return (
+      typeof version === 'number' && typeof versionCount === 'number' && version === versionCount
+    );
+  };
+  // An attachment is "committed" when its current version predates the last save.
+  // If the version was created after originSyncedAt, the draft has diverged from
+  // what is persisted at origin and needs to be saved again.
+  const isCommitted = (attachment: SkillAttachment): boolean => {
+    const { versionData } = attachment;
+    if (!attachment.origin || !versionData?.originSyncedAt) {
+      return false;
+    }
+    const hasDraftChanges = versionData.createdAt > versionData.originSyncedAt;
+    return !hasDraftChanges;
+  };
 
   return {
     getLabel: (attachment) =>
-      attachment.data.name ||
+      attachment.data.skill.name ||
       i18n.translate('xpack.agentBuilderPlatform.attachments.skill.label', {
         defaultMessage: 'Skill draft',
       }),
     getHeader: ({ attachment }) => {
-      const { version, versionCount } = attachment;
+      const {
+        data: { mode, skill },
+      } = attachment;
       const badges: HeaderBadge[] = [];
-      const isCreated = Boolean(attachment.origin);
 
-      if (isCreated) {
-        const createdBadge: HeaderBadge = {
-          label: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.createdBadge', {
-            defaultMessage: 'Created',
-          }),
+      if (isCommitted(attachment)) {
+        const isCreating = mode === 'create';
+        const label = isCreating
+          ? i18n.translate('xpack.agentBuilderPlatform.attachments.skill.committedBadge.create', {
+              defaultMessage: 'Created',
+            })
+          : i18n.translate('xpack.agentBuilderPlatform.attachments.skill.committedBadge.edit', {
+              defaultMessage: 'Saved',
+            });
+        const committedBadge: HeaderBadge = {
+          label,
           color: 'success',
           iconType: 'check',
         };
-        badges.push(createdBadge);
+        badges.push(committedBadge);
         // Created attachments only show created badge
-        return { icon: 'sparkles', subtitle: attachment.data.id, badges };
+        return { icon: 'sparkles', subtitle: skill.id, badges };
       }
 
       const draftBadge: HeaderBadge = {
@@ -305,7 +324,7 @@ export const createSkillAttachmentDefinition = ({
       };
       badges.push(draftBadge);
 
-      if (isLatest({ version, versionCount })) {
+      if (isLatest(attachment)) {
         const latestBadge: HeaderBadge = {
           label: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.latestBadge', {
             defaultMessage: 'Latest',
@@ -315,19 +334,19 @@ export const createSkillAttachmentDefinition = ({
         badges.push(latestBadge);
       }
 
-      return { icon: 'sparkles', subtitle: attachment.data.id, badges };
+      return { icon: 'sparkles', subtitle: skill.id, badges };
     },
     renderInlineContent: (props) => <SkillInlineContent {...props} />,
     renderCanvasContent: (props) => <SkillCanvasContent {...props} />,
     getActionButtons: ({ attachment, updateOrigin, openCanvas, isCanvas }) => {
-      const { version, versionCount } = attachment;
-      const isCreated = Boolean(attachment.origin);
+      const { data } = attachment;
+      const { mode, skill } = data;
 
       const actionButtons: ActionButton[] = [];
       const createSkill = async () => {
         try {
           const response = await http.post<CreateSkillResponse>(SKILLS_API_PATH, {
-            body: JSON.stringify(attachment.data satisfies SkillAttachmentData),
+            body: JSON.stringify(skill),
           });
           await updateOrigin(response.id);
           notifications.toasts.addSuccess({
@@ -348,6 +367,29 @@ export const createSkillAttachmentDefinition = ({
         }
       };
 
+      const saveChanges = async () => {
+        const { id: skillId, ...skillContent } = skill;
+        try {
+          const response = await http.fetch<CreateSkillResponse>(
+            `${SKILLS_API_PATH}/${encodeURIComponent(skillId)}`,
+            { method: 'PUT', body: JSON.stringify(skillContent) }
+          );
+          await updateOrigin(response.id);
+          notifications.toasts.addSuccess({
+            title: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.saveSuccessToast', {
+              defaultMessage: 'Skill "{skillId}" updated.',
+              values: { skillId: response.id },
+            }),
+          });
+        } catch (error) {
+          notifications.toasts.addError(error as Error, {
+            title: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.saveErrorToast', {
+              defaultMessage: 'Could not save skill changes',
+            }),
+          });
+        }
+      };
+
       if (!isCanvas && openCanvas) {
         // As long as the canvas for the skill is not currently open, show the button
         const previewButton = {
@@ -359,10 +401,10 @@ export const createSkillAttachmentDefinition = ({
         actionButtons.push(previewButton);
       }
 
-      if (isLatest({ version, versionCount })) {
+      if (isLatest(attachment)) {
         // Once the draft has been persisted, swap the create button for one that
-        // navigates the user to the skill management page for the created skill.
-        if (isCreated && attachment.origin) {
+        // navigates the user to the skill management page for the skill.
+        if (isCommitted(attachment)) {
           const skillId = attachment.origin;
           const editInManagementButton: ActionButton = {
             label: editInManagementLabel,
@@ -377,6 +419,16 @@ export const createSkillAttachmentDefinition = ({
             },
           };
           actionButtons.push(editInManagementButton);
+        } else if (mode === 'edit') {
+          const saveChangesButton: ActionButton = {
+            label: saveChangesLabel,
+            icon: 'save',
+            type: ActionButtonType.PRIMARY,
+            disabled: !canCreate,
+            disabledReason: !canCreate ? lackManageSkillsPermissionDescription : undefined,
+            handler: saveChanges,
+          };
+          actionButtons.push(saveChangesButton);
         } else {
           // Only show create button for the latest draft
           const createButton: ActionButton = {

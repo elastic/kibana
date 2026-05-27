@@ -180,9 +180,10 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
     }
 
     const current = stored.data.data as SkillAttachmentData;
-    let nextContent = current.content;
-    let nextReferenced = current.referenced_content
-      ? current.referenced_content.map((item) => ({ ...item }))
+    const currentSkill = current.skill;
+    let nextContent = currentSkill.content;
+    let nextReferenced = currentSkill.referenced_content
+      ? currentSkill.referenced_content.map((item) => ({ ...item }))
       : [];
     const errors: string[] = [];
 
@@ -253,16 +254,16 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
       };
     }
 
-    const merged: SkillAttachmentData = {
-      id: current.id,
-      name: name ?? current.name,
-      description: description ?? current.description,
+    const nextSkillInput: SkillAttachmentData['skill'] = {
+      id: currentSkill.id,
+      name: name ?? currentSkill.name,
+      description: description ?? currentSkill.description,
       content: nextContent,
-      tool_ids: toolIds ?? current.tool_ids,
+      tool_ids: toolIds ?? currentSkill.tool_ids,
       ...(nextReferenced.length > 0 ? { referenced_content: nextReferenced } : {}),
     };
 
-    const validated = skillCreateRequestSchema.safeParse(merged);
+    const validated = skillCreateRequestSchema.safeParse(nextSkillInput);
     if (!validated.success) {
       return {
         results: [
@@ -275,7 +276,8 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
       };
     }
 
-    const toolValidation = await validateToolIdsAgainstRegistry(context, validated.data.tool_ids);
+    const merged: SkillAttachmentData = { mode: current.mode, skill: validated.data };
+    const toolValidation = await validateToolIdsAgainstRegistry(context, merged.skill.tool_ids);
     if (!toolValidation.ok) {
       return {
         results: [
@@ -298,7 +300,7 @@ export const createPatchSkillTool = (): BuiltinSkillBoundedTool<typeof patchSkil
       const updated = await attachments.update(
         attachmentId,
         {
-          data: validated.data,
+          data: merged,
           description: validated.data.description,
         },
         'agent'

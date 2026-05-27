@@ -69,7 +69,10 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }, [conversationId, openSidebarConversationInternal]);
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
-  const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, attachment.version);
+  const attachmentPreviewKey = getAttachmentPreviewKey(
+    attachment.id,
+    attachment.versionData?.version
+  );
   const [dynamicButtonsState, setDynamicButtonsState] = useState<{
     key: string;
     buttons: ActionButton[];
