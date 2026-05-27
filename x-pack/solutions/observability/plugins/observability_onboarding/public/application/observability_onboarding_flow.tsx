@@ -21,6 +21,8 @@ import {
   FirehosePage,
   OtelApmPage,
   CloudForwarderPage,
+  KubernetesOtelPage,
+  KubernetesElasticAgentPage,
 } from './pages';
 import {
   HostLinuxAutoDetectPage,
@@ -37,7 +39,7 @@ import { useManagedOtlpServiceAvailability } from './shared/use_managed_otlp_ser
 const queryClient = new QueryClient();
 
 export function ObservabilityOnboardingFlow() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const {
     services: {
       featureFlags,
@@ -79,18 +81,34 @@ export function ObservabilityOnboardingFlow() {
         </Route>,
       ];
 
+  const kubernetesRoutes = isAddDataPageV2Enabled
+    ? [
+        <Route key="kubernetes-v2-otel" exact path="/kubernetes">
+          <KubernetesOtelPage />
+        </Route>,
+        <Route key="kubernetes-v2-elastic-agent" exact path="/kubernetes/elastic-agent">
+          <KubernetesElasticAgentPage />
+        </Route>,
+        <Route key="otel-kubernetes-v2-redirect" exact path="/otel-kubernetes">
+          <Redirect to={`/kubernetes${search}`} />
+        </Route>,
+      ]
+    : [
+        <Route key="kubernetes-v1" exact path="/kubernetes">
+          <KubernetesPage />
+        </Route>,
+        <Route key="otel-kubernetes-v1" exact path="/otel-kubernetes">
+          <OtelKubernetesPage />
+        </Route>,
+      ];
+
   return (
     <QueryClientProvider client={queryClient}>
       <Routes>
         <Route path="/auto-detect">
           <AutoDetectPage />
         </Route>
-        <Route path="/kubernetes">
-          <KubernetesPage />
-        </Route>
-        <Route path="/otel-kubernetes">
-          <OtelKubernetesPage />
-        </Route>
+        {kubernetesRoutes}
         <Route path="/otel-logs">
           <OtelLogsPage />
         </Route>

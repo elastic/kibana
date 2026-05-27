@@ -162,10 +162,21 @@ describe('LandingPage host tiles (V2)', () => {
     ['macos', '/host/macos'],
     ['windows', '/host/windows'],
   ] as const)('navigates to %s sub-page when its tile is clicked', async (tileId, expectedPath) => {
+    const user = userEvent.setup();
     const { getByTestId } = renderLandingWithRouter(true);
     const tile = getByTestId(`observabilityOnboardingIntegrationTile-${tileId}`);
-    await userEvent.click(tile);
+    await user.click(tile);
     expect(getByTestId('locationPathname')).toHaveTextContent(expectedPath);
+  });
+});
+
+describe('LandingPage Kubernetes tile (V2)', () => {
+  it('navigates to the Kubernetes V2 page when its tile is clicked', async () => {
+    const user = userEvent.setup();
+    const { getByTestId } = renderLandingWithRouter(true);
+    const tile = getByTestId('observabilityOnboardingIntegrationTile-kubernetes');
+    await user.click(tile);
+    expect(getByTestId('locationPathname')).toHaveTextContent('/kubernetes');
   });
 });
 
