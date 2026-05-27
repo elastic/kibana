@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
+source .buildkite/scripts/steps/test/ftr_job_annotation.sh
 
 BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}
 FTR_CONFIG_GROUP_KEY=${FTR_CONFIG_GROUP_KEY:-}
@@ -20,6 +21,9 @@ FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}"
 
 # a FTR failure will result in the script returning an exit code of 10
 exitCode=0
+annotation_rows=()
+failure_detail_lines=()
+retry_recovered=false
 
 configs="${FTR_CONFIG:-}"
 
@@ -47,6 +51,12 @@ fi
 failedConfigs=""
 results=()
 
+# Capture which configs failed in the previous attempt before the meta-data key is overwritten below.
+prevRunFailedConfigs=""
+if [[ "${BUILDKITE_RETRY_COUNT:-0}" -ge "1" ]]; then
+  prevRunFailedConfigs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '' 2>/dev/null || true)
+fi
+
 while read -r config; do
   if [[ ! "$config" ]]; then
     continue;
@@ -62,6 +72,7 @@ while read -r config; do
 
   if [[ "$IS_CONFIG_EXECUTION" == "true" && "$IS_FLAKY_TEST_RUN" == "false" ]]; then
     echo "--- [ already-tested ] $FULL_COMMAND"
+    annotation_rows+=("| [\`${config}\`](https://github.com/elastic/kibana/blob/${BUILDKITE_COMMIT:-main}/${config}) | — | skipped (already-tested) |")
     continue
   else
     echo "--- $ $FULL_COMMAND"
@@ -86,6 +97,8 @@ while read -r config; do
   Chromedriver version: ${CHROMEDRIVER_VERSION} / $(node node_modules/chromedriver/bin/chromedriver --version)
   """
   fi
+
+  node scripts/ftr_annotation_helper snapshot "target/junit/$JOB" 2>/dev/null || true
 
   # prevent non-zero exit code from breaking the loop
   set +e;
@@ -121,9 +134,15 @@ while read -r config; do
     duration: ${duration}
     result: ${lastCode}")
 
+  config_link="[\`${config}\`](https://github.com/elastic/kibana/blob/${BUILDKITE_COMMIT:-main}/${config})"
   if [ $lastCode -eq 0 ]; then
     # Test was successful, so mark it as executed
     buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
+    if [[ -n "$prevRunFailedConfigs" ]] && grep -qxF "$config" <<< "$prevRunFailedConfigs"; then
+      annotation_rows+=("| ${config_link} | ${duration} | recovered |")
+    else
+      annotation_rows+=("| ${config_link} | ${duration} | passed |")
+    fi
   else
     exitCode=10
     echo "FTR exited with code $lastCode"
@@ -133,6 +152,23 @@ while read -r config; do
       failedConfigs="${failedConfigs}"$'\n'"$config"
     else
       failedConfigs="$config"
+    fi
+
+    if [[ -n "$prevRunFailedConfigs" ]] && grep -qxF "$config" <<< "$prevRunFailedConfigs"; then
+      annotation_rows+=("| ${config_link} | ${duration} | **still failing** |")
+    elif [[ -n "$prevRunFailedConfigs" ]]; then
+      annotation_rows+=("| ${config_link} | ${duration} | **new failure** (was passing) |")
+    else
+      annotation_rows+=("| ${config_link} | ${duration} | **failed** |")
+    fi
+
+    config_failures=$(node scripts/ftr_annotation_helper list-new-failures "target/junit/$JOB" 2>/dev/null || true)
+    if [[ -n "$config_failures" ]]; then
+      failure_detail_lines+=("**Failing tests — \`${config}\`:**" "")
+      while IFS= read -r t; do
+        [[ -n "$t" ]] && failure_detail_lines+=("- ${t}")
+      done <<< "$config_failures"
+      failure_detail_lines+=("")
     fi
   fi
 done <<< "$configs"
@@ -144,5 +180,7 @@ fi
 echo "--- FTR configs complete"
 printf "%s\n" "${results[@]}"
 echo ""
+
+write_job_annotation
 
 exit $exitCode

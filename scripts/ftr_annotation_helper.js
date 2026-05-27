@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './failed_tests_reporter/failed_tests_reporter_cli';
-export { runAnnotationHelperCli } from './failed_tests_reporter/ftr_annotation_helper';
+require('@kbn/setup-node-env');
+require('@kbn/failed-test-reporter-cli').runAnnotationHelperCli();
