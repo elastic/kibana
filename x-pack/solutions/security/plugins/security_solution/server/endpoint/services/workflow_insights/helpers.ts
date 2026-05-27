@@ -140,9 +140,10 @@ export function buildEsQueryParams(searchParams: SearchParams): QueryDslQueryCon
 
 export async function groupEndpointIdsByOS(
   endpointIds: string[],
-  endpointMetadataService: EndpointMetadataService
+  endpointMetadataService: EndpointMetadataService,
+  ccsEnabled: boolean
 ): Promise<Record<SupportedHostOsType, string[]>> {
-  const metadata = await endpointMetadataService.getMetadataForEndpoints(endpointIds);
+  const metadata = await endpointMetadataService.getMetadataForEndpoints(endpointIds, ccsEnabled);
   return metadata.reduce<Record<string, string[]>>((acc, m) => {
     const os = m.host.os.name.toLowerCase() as SupportedHostOsType;
     if (!acc[os]) {

@@ -249,13 +249,25 @@ describe('helpers', () => {
 
       endpointMetadataService.getMetadataForEndpoints.mockResolvedValue(metadata);
 
-      const result = await groupEndpointIdsByOS(endpointIds, endpointMetadataService);
+      const result = await groupEndpointIdsByOS(endpointIds, endpointMetadataService, false);
 
       expect(result).toEqual({
         windows: ['agent1'],
         linux: ['agent2'],
         macos: ['agent3'],
       });
+    });
+
+    it('should pass ccsEnabled to getMetadataForEndpoints', async () => {
+      const endpointIds = ['endpoint1'];
+      endpointMetadataService.getMetadataForEndpoints.mockResolvedValue([]);
+
+      await groupEndpointIdsByOS(endpointIds, endpointMetadataService, true);
+
+      expect(endpointMetadataService.getMetadataForEndpoints).toHaveBeenCalledWith(
+        endpointIds,
+        true
+      );
     });
   });
 
