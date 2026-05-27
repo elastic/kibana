@@ -466,10 +466,7 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).not.toHaveBeenCalled();
 
-        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledTimes(1);
-        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
-          outcome: 'success',
-        });
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).not.toHaveBeenCalled();
       });
     });
 
@@ -609,10 +606,7 @@ describe('UserProfileService', () => {
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).not.toHaveBeenCalled();
 
-        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenCalledTimes(1);
-        expect(securityTelemetry.recordGetCurrentProfileInvocation).toHaveBeenLastCalledWith({
-          outcome: 'success',
-        });
+        expect(securityTelemetry.recordGetCurrentProfileInvocation).not.toHaveBeenCalled();
       });
 
       it('should get user profile and application data scoped to Kibana', async () => {
