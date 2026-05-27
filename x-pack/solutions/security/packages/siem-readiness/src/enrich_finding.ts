@@ -30,9 +30,10 @@ export type Dimension = 'coverage' | 'quality' | 'continuity' | 'retention';
  * - pipelineToIndices: ingest pipeline name → indices using that pipeline
  * - categoryToIndices: SIEM category (e.g. "Cloud") → indices in that category
  * - tacticTotals: tactic ID → total number of rules covering that tactic (for % impact)
+ * - indexToPlatform: data stream name → platform label derived from ECS fields in the data
  *
- * All maps are built once per request by fetchRulesReverseMap and passed into
- * enrichFinding/enrichFindings.
+ * All maps are built once per request by fetchRulesReverseMap / fetchIndexPlatforms and
+ * passed into enrichFinding/enrichFindings.
  */
 export interface EnrichmentContext {
   indexToRules: IndexToRulesMap;
@@ -40,6 +41,8 @@ export interface EnrichmentContext {
   categoryToIndices: CategoryToIndicesMap;
   tacticTotals: TacticTotals;
   dimension: Dimension;
+  /** Data stream name → platform label, derived from actual ECS field values in the index */
+  indexToPlatform: Map<string, string>;
 }
 
 // A rule can appear in multiple indices (e.g. via wildcard patterns), so when
@@ -97,7 +100,7 @@ const getRulesForFinding = (
  * Derives the affected platform from the set of impacted rules using a
  * majority-vote approach:
  * - If one platform accounts for >50% of rules → return it alone (clear owner)
- * - Otherwise → return up to the top 3 platforms joined by comma (mixed finding)
+ * - Otherwise → return all unique platforms joined by comma, sorted by rule count descending
  */
 const derivePlatformFromRules = (rules: RuleIndexEntry[]): string | undefined => {
   const platforms = rules.map((r) => r.platform).filter((p): p is string => p !== undefined);
@@ -115,10 +118,19 @@ const derivePlatformFromRules = (rules: RuleIndexEntry[]): string | undefined =>
     return sorted[0][0];
   }
 
-  return sorted
-    .slice(0, 3)
-    .map(([p]) => p)
-    .join(', ');
+  return sorted.map(([p]) => p).join(', ');
+};
+
+/**
+ * Extracts the parent data stream name from a backing index name.
+ * Backing indices follow the pattern: .ds-{data_stream_name}-YYYY.MM.DD-NNNNNN
+ *
+ * @example
+ * ".ds-logs-aws.cloudtrail-default-2026.01.01-000001" → "logs-aws.cloudtrail-default"
+ */
+const extractDataStreamName = (resource: string): string | undefined => {
+  const match = resource.match(/^\.ds-(.+)-\d{4}\.\d{2}\.\d{2}-\d+$/);
+  return match?.[1];
 };
 
 const createResourceSlug = (resource: string): string => {
@@ -217,8 +229,15 @@ export const enrichFinding = (
     };
   });
 
-  // 4. Derive the dominant platform via majority vote across affected rules
-  const affectedPlatform = derivePlatformFromRules(rules);
+  // 4. Derive platform: data-first (index ECS fields), then rule metadata as fallback.
+  //    Two-step lookup handles both data stream names and backing index names:
+  //      Step 1: direct lookup by finding.resource (data stream name)
+  //      Step 2: parse backing index → data stream name, then look up
+  //      Step 3: fall back to rule metadata / tags via majority vote
+  const affectedPlatform =
+    ctx.indexToPlatform.get(finding.resource) ??
+    ctx.indexToPlatform.get(extractDataStreamName(finding.resource) ?? '') ??
+    derivePlatformFromRules(rules);
 
   // 5. Build dimension-specific recommended actions
   const recommendedActions = buildRecommendedActionsForFinding(finding, ctx.dimension);

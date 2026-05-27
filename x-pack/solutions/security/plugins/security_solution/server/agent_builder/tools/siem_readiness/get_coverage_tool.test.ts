@@ -36,6 +36,7 @@ const mockSharedContext = {
   },
   categoriesResult: { rawCategoriesMap: [], mainCategoriesMap: [] },
   packageToPlatform: new Map(),
+  indexToPlatform: new Map(),
 };
 
 const makePayload = (overrides: Partial<CoveragePayload> = {}): CoveragePayload => ({

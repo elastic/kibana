@@ -13,11 +13,14 @@ import type { CategoriesResponse, ReverseMapResult } from '@kbn/siem-readiness';
 
 import { fetchCategories } from './fetch_categories';
 import { fetchRulesReverseMap, buildPackageToPlatform } from './fetch_rules_reverse_map';
+import { fetchIndexPlatforms } from './fetch_index_platforms';
 
 export interface SiemReadinessSharedContext {
   reverseMapResult: ReverseMapResult;
   categoriesResult: CategoriesResponse;
   packageToPlatform: Map<string, string>;
+  /** Map of data stream name → platform label, derived from ECS fields in the actual data */
+  indexToPlatform: Map<string, string>;
 }
 
 export interface FetchSiemReadinessSharedContextDeps {
@@ -86,9 +89,13 @@ export const fetchSiemReadinessSharedContext = async ({
     logger.warn('Failed to fetch Fleet packages, platform mapping will use tag fallback');
   }
 
-  // Fetch categories first so they can be passed into fetchRulesReverseMap,
-  // avoiding a second fetchCategories call inside that function.
-  const categoriesResult = await fetchCategories({ esClient, logger });
+  // Fetch categories and index platforms in parallel, then pass categories into
+  // fetchRulesReverseMap to avoid a duplicate fetchCategories call inside that function.
+  const [categoriesResult, indexToPlatform] = await Promise.all([
+    fetchCategories({ esClient, logger }),
+    fetchIndexPlatforms({ esClient, logger }),
+  ]);
+
   const reverseMapResult = await fetchRulesReverseMap({
     rulesClient,
     esClient,
@@ -98,5 +105,5 @@ export const fetchSiemReadinessSharedContext = async ({
     categoriesData: categoriesResult,
   });
 
-  return { reverseMapResult, categoriesResult, packageToPlatform };
+  return { reverseMapResult, categoriesResult, packageToPlatform, indexToPlatform };
 };

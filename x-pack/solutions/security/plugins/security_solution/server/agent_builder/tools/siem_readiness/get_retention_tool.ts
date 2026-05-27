@@ -49,9 +49,8 @@ export const getRetentionTool = (
       const [coreStart, startPlugins] = await core.getStartServices();
 
       // Phase 1: shared context (rules reverse map + categories) — lazy per-request
-      const { reverseMapResult, categoriesResult } = await getSiemReadinessSharedContext(
-        request,
-        async () => {
+      const { reverseMapResult, categoriesResult, indexToPlatform } =
+        await getSiemReadinessSharedContext(request, async () => {
           const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
           const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
             coreStart.savedObjects.getScopedClient(request),
@@ -64,8 +63,7 @@ export const getRetentionTool = (
             fleet: startPlugins.fleet,
             logger: handlerLogger,
           });
-        }
-      );
+        });
 
       // Phase 2: dimension-specific data (ILM/DSL retention)
       const payload = await getRetention({
@@ -77,6 +75,7 @@ export const getRetentionTool = (
       // Phase 3: blast radius enrichment
       const allEnrichedFindings = enrichFindings(payload.actionableFindings ?? [], {
         ...reverseMapResult,
+        indexToPlatform,
         dimension: 'retention',
       });
 

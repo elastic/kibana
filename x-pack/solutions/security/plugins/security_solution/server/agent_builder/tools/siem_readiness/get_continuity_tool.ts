@@ -50,7 +50,7 @@ export const getContinuityTool = (
       const [coreStart, startPlugins] = await core.getStartServices();
 
       // Phase 1: shared context (rules reverse map + categories) — lazy per-request
-      const { reverseMapResult, categoriesResult } = await getSiemReadinessSharedContext(
+      const { reverseMapResult, categoriesResult, indexToPlatform } = await getSiemReadinessSharedContext(
         request,
         async () => {
           const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
@@ -78,6 +78,7 @@ export const getContinuityTool = (
       // Phase 3: blast radius enrichment
       const allEnrichedFindings = enrichFindings(payload.actionableFindings ?? [], {
         ...reverseMapResult,
+        indexToPlatform,
         dimension: 'continuity',
       });
 

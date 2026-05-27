@@ -25,6 +25,7 @@ const createMockContext = (overrides: Partial<EnrichmentContext> = {}): Enrichme
   categoryToIndices: new Map(),
   tacticTotals: new Map(),
   dimension: 'quality',
+  indexToPlatform: new Map(),
   ...overrides,
 });
 
@@ -112,7 +113,7 @@ describe('enrichFinding', () => {
       expect(result.severity).toBe('CRITICAL');
     });
 
-    it('should derive platform from rules', () => {
+    it('should derive platform from rules when indexToPlatform has no match', () => {
       const rule1 = createMockRule({ platform: 'AWS' });
       const rule2 = createMockRule({ platform: 'AWS' });
       const rule3 = createMockRule({ platform: 'Azure' });
@@ -128,6 +129,55 @@ describe('enrichFinding', () => {
       const result = enrichFinding(finding, ctx);
 
       expect(result.affectedPlatform).toBe('AWS');
+    });
+
+    it('should use indexToPlatform over rule-derived platform (data-first)', () => {
+      const rule = createMockRule({ platform: 'Azure' });
+      const indexToRules = new Map([['logs-aws.cloudtrail-default', [rule]]]);
+
+      const ctx = createMockContext({
+        indexToRules,
+        indexToPlatform: new Map([['logs-aws.cloudtrail-default', 'AWS account 123456']]),
+        dimension: 'quality',
+      });
+
+      const finding = createMockFinding({ resource: 'logs-aws.cloudtrail-default' });
+      const result = enrichFinding(finding, ctx);
+
+      // indexToPlatform wins over rule-derived platform
+      expect(result.affectedPlatform).toBe('AWS account 123456');
+    });
+
+    it('should resolve backing index name to data stream platform via two-step lookup', () => {
+      const ctx = createMockContext({
+        indexToPlatform: new Map([['logs-aws.cloudtrail-default', 'AWS account 789012']]),
+        dimension: 'quality',
+      });
+
+      // finding.resource is a backing index, not the data stream name
+      const finding = createMockFinding({
+        resource: '.ds-logs-aws.cloudtrail-default-2026.01.01-000001',
+      });
+      const result = enrichFinding(finding, ctx);
+
+      expect(result.affectedPlatform).toBe('AWS account 789012');
+    });
+
+    it('should fall back to rule-derived platform when neither direct nor backing-index lookup matches', () => {
+      const rule = createMockRule({ platform: 'Endpoint Security' });
+      const indexToRules = new Map([['logs-endpoint.events-default', [rule]]]);
+
+      const ctx = createMockContext({
+        indexToRules,
+        indexToPlatform: new Map([['logs-aws.cloudtrail-default', 'AWS account 123456']]),
+        dimension: 'quality',
+      });
+
+      const finding = createMockFinding({ resource: 'logs-endpoint.events-default' });
+      const result = enrichFinding(finding, ctx);
+
+      // No match in indexToPlatform, falls back to rule-derived
+      expect(result.affectedPlatform).toBe('Endpoint Security');
     });
   });
 

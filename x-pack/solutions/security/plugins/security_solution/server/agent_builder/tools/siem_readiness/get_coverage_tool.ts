@@ -43,9 +43,8 @@ export const getCoverageTool = (
       const [coreStart, startPlugins] = await core.getStartServices();
 
       // Phase 1: shared context (rules reverse map + categories) — lazy per-request
-      const { reverseMapResult, categoriesResult } = await getSiemReadinessSharedContext(
-        request,
-        async () => {
+      const { reverseMapResult, categoriesResult, indexToPlatform } =
+        await getSiemReadinessSharedContext(request, async () => {
           const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
           const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
             coreStart.savedObjects.getScopedClient(request),
@@ -58,8 +57,7 @@ export const getCoverageTool = (
             fleet: startPlugins.fleet,
             logger: handlerLogger,
           });
-        }
-      );
+        });
 
       // Derive from the reverse map — avoids a savedObjectsClient query that lacks
       // access to alert objects in the Agent Builder context.
@@ -79,6 +77,7 @@ export const getCoverageTool = (
       // Phase 3: blast radius enrichment
       const enrichedFindings = enrichFindings(payload.actionableFindings ?? [], {
         ...reverseMapResult,
+        indexToPlatform,
         dimension: 'coverage',
       });
 
