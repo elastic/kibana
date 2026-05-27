@@ -17,6 +17,35 @@ export type AuthType = 'identity_federation' | 'api_key';
 
 export type Badge = 'technical_preview' | 'beta';
 
+export type AwsInputType =
+  | 'aws-s3'
+  | 'aws-cloudwatch'
+  | 'aws/metrics'
+  | 'cel'
+  | 'httpjson'
+  | 'awsfargate/metrics';
+
+export type AwsConfigKey =
+  | 'regions'
+  | 'aws_region'
+  | 'region'
+  | 'region_name'
+  | 'bucket_arn'
+  | 'log_group_arn'
+  | 'detector_id'
+  | 'metrics';
+
+export interface AwsServiceVarsSource {
+  regions?: string[];
+  aws_region?: string;
+  region?: string;
+  region_name?: string;
+  bucket_arn?: string;
+  log_group_arn?: string;
+  detector_id?: string;
+  metrics?: string[];
+}
+
 export type ServiceCategory =
   | 'AI / ML'
   | 'Cost & Billing'
@@ -50,9 +79,9 @@ export interface AwsServiceMatrixEntry {
   /** Whether OIDC-based IAM role assumption is supported. Populated once Security team confirms per-service status. */
   identityFederationSupported?: boolean;
   /** Fleet integration input types required by this data stream (e.g. 'aws-s3', 'aws-cloudwatch') */
-  inputs?: string[];
+  inputs?: AwsInputType[];
   /** Manifest var names the user must configure to activate this data stream */
-  requiredConfig?: string[];
+  requiredConfig?: AwsConfigKey[];
   packageName: string;
   /** Whether the data stream is enabled by default when the integration is installed */
   defaultEnabled: boolean;

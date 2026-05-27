@@ -10,6 +10,8 @@ import type {
   DeliveryMethod,
   SignalType,
   ServiceCategory,
+  AwsInputType,
+  AwsConfigKey,
 } from './aws_service_matrix';
 import { AWS_SERVICES_MATRIX } from './aws_service_matrix';
 
@@ -28,6 +30,24 @@ const VALID_CATEGORIES: ServiceCategory[] = [
   'Security / Networking',
   'Serverless & Compute',
   'Storage',
+];
+const VALID_INPUT_TYPES: AwsInputType[] = [
+  'aws-s3',
+  'aws-cloudwatch',
+  'aws/metrics',
+  'cel',
+  'httpjson',
+  'awsfargate/metrics',
+];
+const VALID_CONFIG_KEYS: AwsConfigKey[] = [
+  'regions',
+  'aws_region',
+  'region',
+  'region_name',
+  'bucket_arn',
+  'log_group_arn',
+  'detector_id',
+  'metrics',
 ];
 
 describe('AWS_SERVICES_MATRIX', () => {
@@ -73,6 +93,18 @@ describe('AWS_SERVICES_MATRIX', () => {
     it('has exactly one preferred delivery method', () => {
       const preferred = entry.deliveryMethods.filter((dm) => dm.preferred === true);
       expect(preferred).toHaveLength(1);
+    });
+
+    it('has only valid input type values', () => {
+      (entry.inputs ?? []).forEach((input) => {
+        expect(VALID_INPUT_TYPES).toContain(input);
+      });
+    });
+
+    it('has only valid requiredConfig values', () => {
+      (entry.requiredConfig ?? []).forEach((key) => {
+        expect(VALID_CONFIG_KEYS).toContain(key);
+      });
     });
 
     it('has a non-empty packageName', () => {
