@@ -15,7 +15,7 @@ actions:
     description: Add tag description with getting started content, externalDocs, and displayName
     update:
       description: |
-        A markdown library item is a reusable [markdown panel](https://www.elastic.co/docs/explore-analyze/dashboards) saved to your library. Use this API to create and manage markdown content that can be embedded in multiple dashboards by ID.
+        A markdown library item is a reusable [markdown panel](https://www.elastic.co/docs/explore-analyze/visualize/text-panels) saved to your library. Use this API to create and manage markdown content that can be embedded in multiple dashboards by ID.
 
         ## When to use this API
 
@@ -65,6 +65,6 @@ actions:
 
         See the [Dashboards API](dashboards#tag/Dashboards) for the full panel structure.
       externalDocs:
-        description: Dashboards documentation
-        url: https://www.elastic.co/docs/explore-analyze/dashboards
+        description: Text panels documentation
+        url: https://www.elastic.co/docs/explore-analyze/visualize/text-panels
       x-displayName: Markdowns
