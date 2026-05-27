@@ -48,3 +48,4 @@ export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
     meta: { type: 'string' },
   },
 ];
+export const HISTOGRAM_EPISODE_LIMIT = 10_000;

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import moment from 'moment';
+
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 
 export interface TimeBucket {
@@ -43,24 +45,7 @@ const intervalToMs = (interval: string): number => {
   const match = interval.match(/^(\d*)([smhdwMy])$/);
   if (!match) return 3_600_000; // unknown format: fall back to 1 h
   const n = match[1] ? parseInt(match[1], 10) : 1;
-  switch (match[2]) {
-    case 's':
-      return n * 1_000;
-    case 'm':
-      return n * 60_000;
-    case 'h':
-      return n * 3_600_000;
-    case 'd':
-      return n * 86_400_000;
-    case 'w':
-      return n * 604_800_000;
-    case 'M':
-      return n * 30 * 86_400_000;
-    case 'y':
-      return n * 365 * 86_400_000;
-    default:
-      return 3_600_000; // fallback
-  }
+  return moment.duration(n, match[2] as moment.unitOfTime.DurationConstructor).asMilliseconds();
 };
 
 /** Generates non-overlapping buckets aligned to interval boundaries covering [startMs, endMs]. */
@@ -92,33 +77,30 @@ export const computeOverlapCounts = (
   buckets: TimeBucket[],
   breakdownField?: string
 ): HistogramBucketCount[] => {
-  const result: HistogramBucketCount[] = [];
+  const parsed = episodes.map((ep) => ({
+    ep,
+    firstMs: new Date(ep.first_timestamp).getTime(),
+    lastMs: ep['episode.status'] === 'active' ? Infinity : new Date(ep.last_timestamp).getTime(),
+  }));
 
-  for (const bucket of buckets) {
-    const overlapping = episodes.filter((ep) => {
-      const firstMs = new Date(ep.first_timestamp).getTime();
-      const lastMs =
-        ep['episode.status'] === 'active' ? Infinity : new Date(ep.last_timestamp).getTime();
-      return firstMs < bucket.end && lastMs > bucket.start;
-    });
+  return buckets.flatMap(({ start, end }) => {
+    const overlapping = parsed.filter(({ firstMs, lastMs }) => firstMs < end && lastMs > start);
 
     if (!breakdownField) {
-      result.push({ bucketStart: bucket.start, count: overlapping.length });
-    } else {
-      const byBreakdown = new Map<string, number>();
-      for (const ep of overlapping) {
-        const key = String(ep[breakdownField] ?? 'unknown');
-        byBreakdown.set(key, (byBreakdown.get(key) ?? 0) + 1);
-      }
-      for (const [breakdown, count] of byBreakdown) {
-        result.push({ bucketStart: bucket.start, count, breakdown });
-      }
-      // Empty buckets (byBreakdown.size === 0) are intentionally skipped: emitting a row
-      // with no breakdown value would cause Lens to render a "(null)" category bucket.
+      return [{ bucketStart: start, count: overlapping.length }];
     }
-  }
 
-  return result;
+    const counts = new Map<string, number>();
+    for (const { ep } of overlapping) {
+      const key = String(ep[breakdownField] ?? 'unknown');
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return [...counts.entries()].map(([breakdown, count]) => ({
+      bucketStart: start,
+      count,
+      breakdown,
+    }));
+  });
 };
 
 /** Formats overlap counts as a Lens-compatible Datatable for @kbn/unified-histogram. */

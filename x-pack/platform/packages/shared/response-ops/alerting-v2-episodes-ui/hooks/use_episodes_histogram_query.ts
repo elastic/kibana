@@ -13,11 +13,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { useSpaceId } from './use_space_id';
-import {
-  buildEpisodesHistogramQuery,
-  HISTOGRAM_EPISODE_LIMIT,
-  type EpisodesFilterState,
-} from '../queries/episodes_query';
+import { buildEpisodesHistogramQuery, type EpisodesFilterState } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import {
   generateTimeBuckets,
@@ -25,6 +21,7 @@ import {
   formatHistogramDatatable,
   type HistogramEpisodeRow,
 } from '../utils/histogram_utils';
+import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 
 export interface UseEpisodesHistogramQueryOptions {
   services: {

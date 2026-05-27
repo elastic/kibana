@@ -20,8 +20,7 @@ import dateMath from '@kbn/datemath';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
 import type { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import type { ColorMapping } from '@kbn/coloring';
-import type { XYVisualizationState } from '@kbn/lens-plugin/public';
+import type { UnifiedHistogramFetchParamsExternal } from '@kbn/unified-histogram';
 import {
   useUnifiedHistogram,
   UnifiedHistogramChart,
@@ -35,6 +34,7 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { computeBucketInterval } from '@kbn/alerting-v2-episodes-ui/utils/histogram_utils';
 import { HISTOGRAM_BREAKDOWN_COLUMNS } from '@kbn/alerting-v2-episodes-ui/constants';
+import { buildModifiedVisAttributes } from '@kbn/alerting-v2-episodes-ui/utils/episodes_color_mapping';
 import type { AlertEpisodesKibanaServices } from '../../../../episodes_kibana_services';
 import {
   EPISODES_HISTOGRAM_CAP_WARNING,
@@ -119,10 +119,8 @@ export const EpisodesHistogram = ({
     ]
   );
 
-  const { isInitialized, api, chartProps } = useUnifiedHistogram({
-    services: unifiedHistogramServices,
-    isChartLoading: isDataLoading || !dataView,
-    onBrushEnd: (brushData: BrushTriggerEvent['data']) => {
+  const onBrushEnd = useCallback(
+    (brushData: BrushTriggerEvent['data']) => {
       const { range } = brushData;
       if (Array.isArray(range)) {
         onTimeRangeChange({
@@ -131,10 +129,19 @@ export const EpisodesHistogram = ({
         });
       }
     },
-    onTimeIntervalChange: (interval) => {
-      // 'auto' means "let the chart decide" — skip to keep our computed interval
-      if (interval && interval !== 'auto') setBucketInterval(interval);
-    },
+    [onTimeRangeChange]
+  );
+
+  const onTimeIntervalChange = useCallback((interval?: string) => {
+    // 'auto' means "let the chart decide" — skip to keep our computed interval
+    if (interval && interval !== 'auto') setBucketInterval(interval);
+  }, []);
+
+  const { isInitialized, api, chartProps } = useUnifiedHistogram({
+    services: unifiedHistogramServices,
+    isChartLoading: isDataLoading || !dataView,
+    onBrushEnd,
+    onTimeIntervalChange,
   });
 
   const esqlQuery = useMemo<AggregateQuery>(
@@ -142,124 +149,13 @@ export const EpisodesHistogram = ({
     [spaceId, filterState, breakdownField]
   );
 
-  const statusColorMap: Record<string, string> = useMemo(
-    () => ({
-      active: euiTheme.colors.danger,
-      inactive: euiTheme.colors.success,
-      recovering: euiTheme.colors.primary,
-      pending: euiTheme.colors.warning,
-    }),
-    [
-      euiTheme.colors.danger,
-      euiTheme.colors.success,
-      euiTheme.colors.primary,
-      euiTheme.colors.warning,
-    ]
-  );
-
   const getModifiedVisAttributes = useCallback(
     (
       attributes: Parameters<
-        NonNullable<Parameters<typeof api.fetch>[0]['getModifiedVisAttributes']>
+        NonNullable<UnifiedHistogramFetchParamsExternal['getModifiedVisAttributes']>
       >[0]
-    ) => {
-      const visualization = attributes.state?.visualization as XYVisualizationState | undefined;
-      if (!visualization?.layers) return attributes;
-
-      const baseVisualization: XYVisualizationState = {
-        ...visualization,
-        axisTitlesVisibilitySettings: {
-          yLeft: visualization.axisTitlesVisibilitySettings?.yLeft ?? false,
-          yRight: visualization.axisTitlesVisibilitySettings?.yRight ?? false,
-          x: false,
-        },
-      };
-
-      const applyColorMapping = (colorMapping: ColorMapping.Config) => ({
-        ...attributes,
-        state: {
-          ...attributes.state,
-          visualization: {
-            ...baseVisualization,
-            layers: baseVisualization.layers.map((layer) =>
-              layer.layerType === 'data' ? { ...layer, colorMapping } : layer
-            ),
-          },
-        },
-      });
-
-      if (breakdownField === 'effective_status') {
-        return applyColorMapping({
-          paletteId: 'default',
-          colorMode: { type: 'categorical' },
-          assignments: [
-            {
-              rules: [{ type: 'match', pattern: 'active', matchEntireWord: true }],
-              color: { type: 'colorCode', colorCode: euiTheme.colors.danger },
-              touched: true,
-            },
-            {
-              rules: [{ type: 'match', pattern: 'inactive', matchEntireWord: true }],
-              color: { type: 'colorCode', colorCode: euiTheme.colors.success },
-              touched: true,
-            },
-            {
-              rules: [{ type: 'match', pattern: 'recovering', matchEntireWord: true }],
-              color: { type: 'colorCode', colorCode: euiTheme.colors.primary },
-              touched: true,
-            },
-            {
-              rules: [{ type: 'match', pattern: 'pending', matchEntireWord: true }],
-              color: { type: 'colorCode', colorCode: euiTheme.colors.warning },
-              touched: true,
-            },
-          ],
-          specialAssignments: [
-            { rules: [{ type: 'other' }], color: { type: 'loop' }, touched: false },
-          ],
-        });
-      }
-
-      // When no breakdown is selected but a single status is filtered, colour the whole
-      // series to match the status — so the chart stays visually consistent with the filter.
-      // Fall back to danger (red) when no status filter is active so the no-breakdown,
-      // no-filter state still has a meaningful colour rather than the Lens palette default.
-      const statusColor =
-        (filterState.status ? statusColorMap[filterState.status] : undefined) ??
-        euiTheme.colors.danger;
-      if (!breakdownField) {
-        return {
-          ...attributes,
-          state: {
-            ...attributes.state,
-            visualization: {
-              ...baseVisualization,
-              layers: baseVisualization.layers.map((layer) => {
-                if (layer.layerType !== 'data') return layer;
-                const existingYConfig = layer.yConfig ?? [];
-                const yConfig = (layer.accessors as string[]).map((acc) => {
-                  const existing = existingYConfig.find((yc) => yc.forAccessor === acc);
-                  return { ...existing, forAccessor: acc, color: statusColor };
-                });
-                return { ...layer, yConfig };
-              }),
-            },
-          },
-        };
-      }
-
-      return { ...attributes, state: { ...attributes.state, visualization: baseVisualization } };
-    },
-    [
-      api,
-      breakdownField,
-      filterState.status,
-      statusColorMap,
-      euiTheme.colors.danger,
-      euiTheme.colors.success,
-      euiTheme.colors.primary,
-      euiTheme.colors.warning,
-    ]
+    ) => buildModifiedVisAttributes(attributes, breakdownField, filterState, euiTheme.colors),
+    [breakdownField, filterState, euiTheme.colors]
   );
 
   useEffect(() => {

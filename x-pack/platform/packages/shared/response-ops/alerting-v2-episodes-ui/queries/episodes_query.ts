@@ -13,6 +13,7 @@ import {
   ALERT_EVENTS_DATA_STREAM,
   ALERT_ACTIONS_DATA_STREAM,
   PAGE_SIZE_ESQL_VARIABLE,
+  HISTOGRAM_EPISODE_LIMIT,
 } from '../constants';
 
 export interface AlertEpisode {
@@ -208,8 +209,6 @@ export const buildEpisodesQuery = (
     ...ALERT_EPISODE_FIELDS
   );
 };
-
-export const HISTOGRAM_EPISODE_LIMIT = 10_000;
 
 /**
  * Builds a lightweight ESQL query for histogram data.

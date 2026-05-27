@@ -13,7 +13,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useEpisodesHistogramQuery } from './use_episodes_histogram_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { useSpaceId } from './use_space_id';
-import { HISTOGRAM_EPISODE_LIMIT } from '../queries/episodes_query';
+import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 
 jest.mock('../utils/execute_esql_query');
 jest.mock('./use_space_id');
