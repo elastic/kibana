@@ -127,13 +127,19 @@ while read -r config; do
   lastCode=$?
   set -e;
 
-  # Scout reporter
+  # Scout reporter — run under set+e so a failure here does not abort the config loop
   if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
-    # Upload events after running each config
     echo "Upload Scout reporter events to AppEx QA's team cluster for config $config"
+    set +e
     node scripts/scout upload-events --dontFailOnError
-    echo "Upload successful, removing local events at .scout/reports"
-    rm -rf .scout/reports
+    scout_upload_code=$?
+    set -e
+    if [[ $scout_upload_code -ne 0 ]]; then
+      echo "Scout reporter upload exited $scout_upload_code (continuing)"
+    else
+      echo "Upload successful, removing local events at .scout/reports"
+      rm -rf .scout/reports
+    fi
   else
     echo "SCOUT_REPORTER_ENABLED=$SCOUT_REPORTER_ENABLED, skipping event upload."
   fi
@@ -191,6 +197,13 @@ if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
 
+# smart-retry is only active for attempt 1 (store) and attempt 2 (check).
+# On a manual third-or-later retry it is silently inactive; log that so CI debugging is easier.
+if [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" && \
+      "${BUILDKITE_RETRY_COUNT:-0}" -ge "2" && "$exitCode" != "0" ]]; then
+  echo "--- [smart-retry] inactive on attempt $((${BUILDKITE_RETRY_COUNT:-0} + 1)) — only applies to the first automatic retry"
+fi
+
 # Attempt 1: record the names of failing tests so the retry can evaluate whether they recovered.
 # On the first retry, the step is marked green if every previously-failing test passes — even if
 # a different (previously-passing) test happens to fail on retry.
@@ -246,7 +259,9 @@ write_job_annotation() {
     echo ""
 
     if [[ "$retry_recovered" == "true" ]]; then
-      echo "**Recovered on retry** — all previously-failing tests passed; step marked green."
+      echo "**Recovered on retry** — all originally-failing tests passed; step marked green."
+      echo ""
+      echo "> Configs shown as 'still failing' below introduced *new* failures on retry that were not part of the original failure set and are not counted against recovery."
       echo ""
     fi
 
