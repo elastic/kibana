@@ -219,7 +219,7 @@ export const buildEpisodesHistogramQuery = (
   spaceId: string,
   filterState?: EpisodesFilterState,
   breakdownField?: string
-): string => {
+): ComposerQuery => {
   const query = buildEpisodesBaseQuery(spaceId, filterState?.queryString?.trim());
 
   if (filterState) {
@@ -234,8 +234,5 @@ export const buildEpisodesHistogramQuery = (
   ];
   if (breakdownField) keepFields.push(breakdownField);
 
-  return query
-    .keep(...(keepFields as [string, ...string[]]))
-    .limit(HISTOGRAM_EPISODE_LIMIT)
-    .print('basic');
+  return query.keep(...(keepFields as [string, ...string[]])).limit(HISTOGRAM_EPISODE_LIMIT);
 };

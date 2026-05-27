@@ -145,7 +145,9 @@ export const EpisodesHistogram = ({
   });
 
   const esqlQuery = useMemo<AggregateQuery>(
-    () => ({ esql: buildEpisodesHistogramQuery(spaceId, filterState, breakdownField) }),
+    () => ({
+      esql: buildEpisodesHistogramQuery(spaceId, filterState, breakdownField).print('basic'),
+    }),
     [spaceId, filterState, breakdownField]
   );
 
