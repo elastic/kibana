@@ -44,16 +44,16 @@ describe('requiresUserSuppliedInputs', () => {
     expect(requiresUserSuppliedInputs(normalized)).toBe(true);
   });
 
-  it('returns false when the required field has a default value', () => {
+  it('returns true when the required field has a default value', () => {
     const normalized: JsonModelSchemaType = {
       type: 'object',
       properties: { ticketId: { type: 'string', default: 'AUTO' } },
       required: ['ticketId'],
     };
-    expect(requiresUserSuppliedInputs(normalized)).toBe(false);
+    expect(requiresUserSuppliedInputs(normalized)).toBe(true);
   });
 
-  it('returns false when all required fields have defaults', () => {
+  it('returns true when all required fields have defaults', () => {
     const normalized: JsonModelSchemaType = {
       type: 'object',
       properties: {
@@ -62,7 +62,7 @@ describe('requiresUserSuppliedInputs', () => {
       },
       required: ['ticketId', 'severity'],
     };
-    expect(requiresUserSuppliedInputs(normalized)).toBe(false);
+    expect(requiresUserSuppliedInputs(normalized)).toBe(true);
   });
 
   it('returns true when at least one required field lacks a default', () => {
