@@ -438,9 +438,9 @@ describe('When the edit exception modal is opened', () => {
         );
       });
 
-      it('should have the bulk close checkbox disabled', () => {
+      it('should have the bulk close checkbox enabled (warning shown on check)', () => {
         const checkbox = screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox');
-        expect(checkbox).toBeDisabled();
+        expect(checkbox).not.toBeDisabled();
       });
     });
   });
@@ -659,9 +659,11 @@ describe('When the edit exception modal is opened', () => {
       );
     });
 
-    it('should have the bulk close checkbox disabled', () => {
+    // The non-ECS field check no longer disables bulk close after
+    // elastic/kibana#253666 — the warning callout fills that role.
+    it('should have the bulk close checkbox enabled (warning shown on check)', () => {
       const checkbox = screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox');
-      expect(checkbox).toBeDisabled();
+      expect(checkbox).not.toBeDisabled();
     });
 
     it('should display the eql sequence callout', () => {

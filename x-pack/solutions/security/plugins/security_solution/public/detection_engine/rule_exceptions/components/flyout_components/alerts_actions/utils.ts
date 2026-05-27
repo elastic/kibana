@@ -65,17 +65,21 @@ export const entryHasNonEcsType = (
 
 /**
  * Determines whether the bulk close alerts option should be disabled.
+ *
+ * Disabled only for cases that bulk-close fundamentally can't handle:
+ *   - Value list entries (`is in list` / `is not in list`).
+ *   - All items have no entries (nothing to match).
+ *
+ * Entries referencing fields not present on the alerts index — e.g. runtime
+ * fields defined on a rule's source index — are intentionally NOT a disabling
+ * condition. Bulk-close handles them server-side via runtime-field synthesis,
+ * and `ExceptionItemsFlyoutAlertsActions` surfaces a warning callout to set
+ * user expectations about coverage.
  */
 export const shouldDisableBulkClose = ({
   items,
-  indexPatterns,
 }: {
   items: ExceptionsBuilderReturnExceptionItem[];
-  indexPatterns: DataViewBase;
 }): boolean => {
-  return (
-    entryHasListType(items) ||
-    entryHasNonEcsType(items, indexPatterns) ||
-    items.every((item) => item.entries.length === 0)
-  );
+  return entryHasListType(items) || items.every((item) => item.entries.length === 0);
 };

@@ -163,6 +163,7 @@ export const setSignalsStatusRoute = (
               spaceId,
               esClient,
               user,
+              logger,
               reason,
               runtimeMappings
             );
@@ -182,9 +183,23 @@ export const setSignalsStatusRoute = (
 };
 
 /**
- * Please avoid using `updateSignalsStatusByQuery` when possible, use the common handler with "by IDs" instead.
+ * Please avoid using `updateSignalsStatusByQuery` when possible, use the
+ * common handler with "by IDs" instead.
  *
- * This method calls `updateByQuery` with `refresh: true` which is expensive on serverless.
+ * This method calls `updateByQuery` with `refresh: true` which is expensive on
+ * serverless.
+ *
+ * When `runtimeMappings` are provided (the rule's source indices supplied at
+ * least one runtime field), the function uses a two-step pattern:
+ *   1. `_search` with `runtime_mappings` to collect the matching alert `_id`s.
+ *   2. `_update_by_query` against those `_id`s.
+ *
+ * Note that we can't tell from here whether the exception filter actually
+ * references one of the runtime fields (parsing the DSL would be brittle), so
+ * we take the safe path and pre-resolve to alert `_id`s via `_search` whenever
+ * any runtime mappings are present. If none of the runtime fields are
+ * referenced, the search still returns the correct ID set — we just pay an
+ * extra round-trip.
  */
 const updateSignalsStatusByQuery = async (
   status: SetAlertsStatusRequestBody['status'],
@@ -193,43 +208,102 @@ const updateSignalsStatusByQuery = async (
   spaceId: string,
   esClient: ElasticsearchClient,
   user: AuthenticatedUser | null,
+  logger: Logger,
   reason?: string,
   runtimeMappings?: estypes.MappingRuntimeFields
-) =>
-  esClient.updateByQuery({
-    index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+) => {
+  const index = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+  const hasRuntimeMappings = runtimeMappings != null && Object.keys(runtimeMappings).length > 0;
+
+  const effectiveQuery: estypes.QueryDslQueryContainer = hasRuntimeMappings
+    ? {
+        terms: {
+          _id: await collectMatchingAlertIds(esClient, index, query, runtimeMappings, logger),
+        },
+      }
+    : { bool: { filter: query as estypes.QueryDslQueryContainer | undefined } };
+
+  return esClient.updateByQuery({
+    index,
     conflicts: options.conflicts,
     refresh: true,
     script: getUpdateSignalStatusScript(status, user, reason),
-    query: {
-      bool: {
-        filter: query,
-      },
-    },
-    // `runtime_mappings` is a valid top-level field on the ES updateByQuery
-    // wire protocol but isn't typed in the @elastic/elasticsearch client.
-    // Threading it through `body` keeps the call type-safe; the keys forbidden
-    // there (query/script/conflicts/etc.) are already passed at the top level.
-    body:
-      runtimeMappings && Object.keys(runtimeMappings).length > 0
-        ? { runtime_mappings: runtimeMappings }
-        : undefined,
+    query: effectiveQuery,
     ignore_unavailable: true,
   });
+};
+
+const MAX_ALERTS_TO_CLOSE_PER_REQUEST = 50_000;
 
 /**
- * Read the `runtime` block from each provided index's mapping and merge them
- * into a single `runtime_mappings` object suitable for an ES query body. This
- * is how the bulk-close path supports runtime fields defined directly on ES
- * index mappings (the documented workaround in elastic/security-ml#677): field
- * caps doesn't return the Painless script source, so we have to hit
- * `GET <index>/_mapping` server-side and pull the definitions from there.
+ * Collect alert `_id`s matching the exception filter when runtime mappings
+ * are required to evaluate it.
+ */
+const collectMatchingAlertIds = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  query: object | undefined,
+  runtimeMappings: estypes.MappingRuntimeFields,
+  logger: Logger
+): Promise<string[]> => {
+  const PAGE_SIZE = 10_000;
+  const KEEP_ALIVE = '1m';
+  const pit = await esClient.openPointInTime({ index, keep_alive: KEEP_ALIVE });
+
+  try {
+    const ids: string[] = [];
+    let searchAfter: estypes.SortResults | undefined;
+    let capReached = false;
+
+    while (!capReached) {
+      const remaining = MAX_ALERTS_TO_CLOSE_PER_REQUEST - ids.length;
+      const pageSize = Math.min(PAGE_SIZE, remaining);
+
+      const res = await esClient.search({
+        size: pageSize,
+        _source: false,
+        query: { bool: { filter: query as estypes.QueryDslQueryContainer | undefined } },
+        runtime_mappings: runtimeMappings,
+        sort: [{ _shard_doc: 'asc' }],
+        track_total_hits: false,
+        pit: { id: pit.id, keep_alive: KEEP_ALIVE },
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+      });
+
+      const hits = res.hits.hits;
+      for (const hit of hits) {
+        if (hit._id != null) ids.push(hit._id);
+      }
+      if (hits.length < pageSize) break;
+      searchAfter = hits[hits.length - 1].sort;
+    }
+
+    return ids;
+  } finally {
+    await esClient.closePointInTime({ id: pit.id });
+  }
+};
+
+/**
+ * Build `runtime_mappings` to attach to the alerts-side search when an
+ * exception references a runtime field that lives on the rule's source index
+ * (the documented workaround in elastic/security-ml#677).
  *
- * Conflict handling: if two indices define the same runtime field name with
- * different scripts or types, last-write-wins (deterministic by the order ES
- * returns the indices). A warning is logged so the conflict is visible —
- * realistically rare, since the motivating workaround applies the same script
- * everywhere, but possible with multi-index data views.
+ * Rather than re-execute the user's Painless against alert documents — which
+ * would only work if every field the user's script depends on is also present
+ * on the alert — we synthesize a constant runtime field per name that simply
+ * reads the value out of `_source`. By default the alerting framework's
+ * `missingFields` merge strategy copies runtime field values from the source
+ * doc's `fields` API response into the alert's `_source`, so the value the
+ * rule originally computed is already there.
+ *
+ * Only the `type` is carried over from the source index's mapping; the script
+ * is generated by us and is identical across all runtime fields modulo the
+ * field name they read.
+ *
+ * Conflict handling: if two source indices declare the same runtime field
+ * name with different types, last-write-wins (deterministic by ES's index
+ * ordering) and we log a warning. Realistically rare.
  *
  * Failures are logged and treated as no-op — a missing or unauthorised index
  * shouldn't fail the close, it just means no runtime fields are attached.
@@ -241,51 +315,100 @@ const resolveRuntimeMappingsFromIndices = async (
 ): Promise<estypes.MappingRuntimeFields | undefined> => {
   if (!indices || indices.length === 0) return undefined;
 
+  const mappings = await safelyGetMapping(esClient, indices, logger);
+  if (mappings === null) return undefined;
+
+  const synthesized: estypes.MappingRuntimeFields = {};
+  const sources: Record<string, string> = {};
+  for (const { indexName, name, type } of collectRuntimeFieldEntries(mappings)) {
+    const previousType = synthesized[name]?.type;
+    if (previousType !== undefined && previousType !== type) {
+      logger.warn(
+        `Conflicting runtime field types for "${name}" while building bulk-close runtime_mappings: ` +
+          `[${sources[name]}] declares "${previousType}", [${indexName}] declares "${type}". ` +
+          `Last-write-wins; using "${type}" from [${indexName}].`
+      );
+    }
+    synthesized[name] = synthesizeSourceReadingRuntimeField(name, type);
+    sources[name] = indexName;
+  }
+
+  return Object.keys(synthesized).length > 0 ? synthesized : undefined;
+};
+
+const safelyGetMapping = async (
+  esClient: ElasticsearchClient,
+  indices: string[],
+  logger: Logger
+): Promise<estypes.IndicesGetMappingResponse | null> => {
   try {
-    const mappings = await esClient.indices.getMapping({
+    return await esClient.indices.getMapping({
       index: indices,
       ignore_unavailable: true,
       allow_no_indices: true,
     });
-
-    const merged: estypes.MappingRuntimeFields = {};
-    const sources: Record<string, string> = {};
-
-    for (const [indexName, indexMapping] of Object.entries(mappings)) {
-      const runtime = indexMapping?.mappings?.runtime;
-      if (runtime) {
-        for (const [name, def] of Object.entries(runtime)) {
-          const existing = merged[name];
-          if (existing !== undefined && !areRuntimeFieldsEqual(existing, def)) {
-            logger.warn(
-              `Conflicting runtime field definitions for "${name}" while resolving bulk-close runtime_mappings: ` +
-                `[${sources[name]}] vs [${indexName}]. Last-write-wins; closing alerts using the definition from [${indexName}].`
-            );
-          }
-          merged[name] = def as estypes.MappingRuntimeField;
-          sources[name] = indexName;
-        }
-      }
-    }
-    return Object.keys(merged).length > 0 ? merged : undefined;
   } catch (err) {
     logger.warn(
       `Failed to resolve runtime mappings from indices [${indices.join(', ')}] for bulk close: ${
         err?.message ?? err
       }`
     );
-    return undefined;
+    return null;
   }
 };
 
-// `Script` has several shapes (inline source, stored id, params, etc.) so a
-// structural equality check via JSON serialisation is the pragmatic choice
-// for "are these two definitions the same?" — false negatives are acceptable
-// here because the only effect is logging a warning we'd otherwise miss.
-const areRuntimeFieldsEqual = (
-  a: estypes.MappingRuntimeField,
-  b: estypes.MappingRuntimeField
-): boolean => a.type === b.type && JSON.stringify(a.script) === JSON.stringify(b.script);
+interface RuntimeFieldEntry {
+  indexName: string;
+  name: string;
+  type: estypes.MappingRuntimeFieldType;
+}
+
+const collectRuntimeFieldEntries = (
+  mappings: estypes.IndicesGetMappingResponse
+): RuntimeFieldEntry[] =>
+  Object.entries(mappings).flatMap(([indexName, indexMapping]) => {
+    const runtime = indexMapping?.mappings?.runtime;
+    if (!runtime) return [];
+    return Object.entries(runtime).map(([name, def]) => ({
+      indexName,
+      name,
+      type: (def as estypes.MappingRuntimeField).type,
+    }));
+  });
+
+/**
+ * A constant Painless source that reads the value of `fieldName` from
+ * `_source`. Handles both nested-object storage (`{source: {ip_ecs: ...}}`)
+ * and the flat-dotted-key fallback (`{"source.ip_ecs": ...}`), and emits
+ * each element if the stored value is an array.
+ */
+const synthesizeSourceReadingRuntimeField = (
+  fieldName: string,
+  type: estypes.MappingRuntimeFieldType
+): estypes.MappingRuntimeField => ({
+  type,
+  script: {
+    source: `
+      def v = params._source[params.fieldName];
+      if (v == null) {
+        def cur = params._source;
+        for (def part : params.fieldName.splitOnToken('.')) {
+          if (!(cur instanceof Map)) { cur = null; break; }
+          cur = cur.get(part);
+        }
+        v = cur;
+      }
+      if (v != null) {
+        if (v instanceof List) {
+          for (def item : v) { if (item != null) emit(item); }
+        } else {
+          emit(v);
+        }
+      }
+    `,
+    params: { fieldName },
+  },
+});
 
 /**
  * Resolve the set of source index patterns declared by the given detection

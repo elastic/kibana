@@ -96,12 +96,15 @@ describe('alerts_actions#utils', () => {
               ],
             },
           ],
-          indexPatterns: mockEcsIndexPattern,
         })
       ).toBeTruthy();
     });
 
-    it('returns true if items include non ECS types', () => {
+    // After elastic/kibana#253666 the gate no longer disables for fields that
+    // happen to be missing from the alerts index — bulk-close handles those
+    // server-side via runtime-field synthesis. The component surfaces a
+    // warning callout instead.
+    it('returns false if the only entry references a field not on the alerts index', () => {
       expect(
         shouldDisableBulkClose({
           items: [
@@ -110,9 +113,8 @@ describe('alerts_actions#utils', () => {
               entries: [{ field: 'some.nonEcsField' }] as EntriesArray,
             },
           ],
-          indexPatterns: mockEcsIndexPattern,
         })
-      ).toBeTruthy();
+      ).toBeFalsy();
     });
 
     it('returns true if all items have no entries', () => {
@@ -124,7 +126,6 @@ describe('alerts_actions#utils', () => {
               entries: [] as EntriesArray,
             },
           ],
-          indexPatterns: mockEcsIndexPattern,
         })
       ).toBeTruthy();
     });
@@ -133,41 +134,14 @@ describe('alerts_actions#utils', () => {
       expect(
         shouldDisableBulkClose({
           items: [],
-          indexPatterns: mockEcsIndexPattern,
         })
       ).toBeTruthy();
     });
 
-    it('returns false if no large value list entries exist and all are ECS compliant', () => {
+    it('returns false if no large value list entries exist and there is at least one entry', () => {
       expect(
         shouldDisableBulkClose({
           items: [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
-          indexPatterns: mockEcsIndexPattern,
-        })
-      ).toBeFalsy();
-    });
-
-    // Regression coverage for elastic/kibana#253666: a runtime field defined on
-    // the rule's source indices (e.g. the workaround in elastic/security-ml#677)
-    // is offered in the picker and must therefore be accepted by the gate.
-    it('returns false if the only entry references a runtime field present on the rule indexPatterns', () => {
-      const indexPatternsWithRuntimeField = {
-        title: 'mlAnomalies',
-        fields: [
-          { name: 'partition_field_value' },
-          { name: 'source.ip_ecs', runtimeField: { type: 'ip' } },
-        ],
-      } as DataViewBase;
-
-      expect(
-        shouldDisableBulkClose({
-          items: [
-            {
-              ...getExceptionListItemSchemaMock(),
-              entries: [{ field: 'source.ip_ecs' }] as EntriesArray,
-            },
-          ],
-          indexPatterns: indexPatternsWithRuntimeField,
         })
       ).toBeFalsy();
     });

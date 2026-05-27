@@ -8,14 +8,14 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 
-import { EuiTitle, EuiFormRow, EuiCheckbox, EuiSpacer, EuiText } from '@elastic/eui';
-import type { DataViewBase } from '@kbn/es-query';
+import { EuiCallOut, EuiCheckbox, EuiFormRow, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useFetchIndex } from '../../../../../common/containers/source';
 import type { Status } from '../../../../../../common/api/detection_engine';
-import { shouldDisableBulkClose } from './utils';
+import { entryHasNonEcsType, shouldDisableBulkClose } from './utils';
 import * as i18n from './translations';
 import type { AlertData } from '../../../utils/types';
 
@@ -38,15 +38,6 @@ interface ExceptionsFlyoutAlertsActionsComponentProps {
   exceptionListType: ExceptionListType;
   shouldBulkCloseAlert: boolean;
   disableBulkClose: boolean;
-  /**
-   * Index patterns sourced from the same data view backing the exception
-   * field picker (see `useFetchIndexPatterns`). Driving the bulk-close gate
-   * from this source — instead of an ad-hoc DataView of the alerts wildcard —
-   * means a runtime field offered in the picker (e.g. one defined on the ML
-   * anomaly results index per elastic/security-ml#677) is also recognised here.
-   */
-  indexPatterns: DataViewBase;
-  isIndexPatternLoading: boolean;
   alertData?: AlertData;
   alertStatus?: Status;
   isAlertDataLoading?: boolean;
@@ -68,8 +59,6 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
   disableBulkClose,
   alertData,
   alertStatus,
-  indexPatterns,
-  isIndexPatternLoading,
   onDisableBulkClose,
   onUpdateBulkCloseIndex,
   onBulkCloseCheckboxChange,
@@ -80,6 +69,14 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
     () => (signalIndexName !== null ? [signalIndexName] : []),
     [signalIndexName]
   );
+
+  // The alerts wildcard data view is used purely to detect when the exception
+  // references fields that are not on the alerts index — typically runtime or
+  // non-ECS fields defined on the rule's source indices. When that's the case,
+  // bulk-close still proceeds (server resolves via runtime-field synthesis),
+  // but we surface a warning callout to set expectations about coverage.
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] =
+    useFetchIndex(memoSignalIndexName);
 
   const handleBulkCloseCheckbox = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -110,16 +107,16 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
   }, [disableBulkClose, onBulkCloseCheckboxChange]);
 
   useEffect((): void => {
-    if (isIndexPatternLoading === false && isSignalIndexLoading === false) {
-      onDisableBulkClose(shouldDisableBulkClose({ items: exceptionListItems, indexPatterns }));
-    }
-  }, [
-    onDisableBulkClose,
-    exceptionListItems,
-    isIndexPatternLoading,
-    isSignalIndexLoading,
-    indexPatterns,
-  ]);
+    onDisableBulkClose(shouldDisableBulkClose({ items: exceptionListItems }));
+  }, [onDisableBulkClose, exceptionListItems]);
+
+  const showRuntimeFieldWarning = useMemo(
+    () =>
+      shouldBulkCloseAlert &&
+      isSignalIndexPatternLoading === false &&
+      entryHasNonEcsType(exceptionListItems, signalIndexPatterns),
+    [shouldBulkCloseAlert, isSignalIndexPatternLoading, exceptionListItems, signalIndexPatterns]
+  );
 
   return (
     <FlyoutCheckboxesSection>
@@ -135,7 +132,7 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
             label={i18n.SINGLE_ALERT_CLOSE_LABEL}
             checked={shouldCloseSingleAlert}
             onChange={handleCloseSingleAlertCheckbox}
-            disabled={isSignalIndexLoading || isIndexPatternLoading || isAlertDataLoading}
+            disabled={isSignalIndexLoading || isAlertDataLoading}
           />
         </EuiFormRow>
       )}
@@ -146,11 +143,23 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
           label={disableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL}
           checked={shouldBulkCloseAlert}
           onChange={handleBulkCloseCheckbox}
-          disabled={
-            disableBulkClose || isSignalIndexLoading || isIndexPatternLoading || isAlertDataLoading
-          }
+          disabled={disableBulkClose || isSignalIndexLoading || isAlertDataLoading}
         />
       </EuiFormRow>
+      {showRuntimeFieldWarning && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            data-test-subj="bulkCloseRuntimeFieldWarning"
+            size="s"
+            color="warning"
+            iconType="warning"
+            title={i18n.BULK_CLOSE_RUNTIME_FIELD_WARNING_TITLE}
+          >
+            <p>{i18n.BULK_CLOSE_RUNTIME_FIELD_WARNING_BODY}</p>
+          </EuiCallOut>
+        </>
+      )}
       {exceptionListType === 'endpoint' && (
         <>
           <EuiSpacer size="s" />
