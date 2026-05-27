@@ -400,6 +400,36 @@ function resolveEvaluationConnectorId(options = {}) {
 }
 
 /**
+ * Credentials for direct EIS `/_inference/chat_completion` calls during CI triage.
+ * Prefer KIBANA_EIS_CCM_API_KEY (same as eval runs) over evaluations export keys.
+ *
+ * @returns {{ esUrl: string; apiKey: string }}
+ */
+function resolveEisInferenceCredentials() {
+  const esUrl = process.env.EIS_INFERENCE_ES_URL || process.env.EVALUATIONS_ES_URL || '';
+  const ccmApiKey = process.env.KIBANA_EIS_CCM_API_KEY || '';
+  const evaluationsApiKey = process.env.EVALUATIONS_ES_API_KEY || '';
+
+  if (!esUrl) {
+    throw new Error(
+      'ES URL is required for EIS judge triage (set EIS_INFERENCE_ES_URL or EVALUATIONS_ES_URL)'
+    );
+  }
+
+  if (ccmApiKey) {
+    return { esUrl, apiKey: ccmApiKey };
+  }
+
+  if (evaluationsApiKey) {
+    return { esUrl, apiKey: evaluationsApiKey };
+  }
+
+  throw new Error(
+    'KIBANA_EIS_CCM_API_KEY or EVALUATIONS_ES_API_KEY is required for EIS judge triage summaries'
+  );
+}
+
+/**
  * @param {Record<string, unknown>} connector
  * @param {Array<{ role: string; content: string }>} messages
  * @param {string} esUrl
@@ -508,6 +538,7 @@ module.exports = {
   evaluationConnectorMetadataKey,
   readBuildkiteMetadata,
   resolveEvaluationConnectorId,
+  resolveEisInferenceCredentials,
   buildEisChatRequest,
   parseEisStreamResponse,
   parseLitellmChatContent,

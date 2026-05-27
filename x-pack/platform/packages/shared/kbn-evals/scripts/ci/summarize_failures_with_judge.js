@@ -12,6 +12,7 @@ const {
   buildLitellmChatRequest,
   buildLitellmConnectorFromVault,
   resolveEvaluationConnectorId,
+  resolveEisInferenceCredentials,
   buildEisChatRequest,
   parseEisStreamResponse,
   parseLitellmChatContent,
@@ -128,15 +129,8 @@ async function summarizeFailuresWithJudge(contextPath) {
     const request = buildLitellmChatRequest(connector, messages);
     summary = await postForContent(request.url, request.headers, request.body);
   } else if (evaluationConnectorId.startsWith('eis-')) {
-    const esUrl = process.env.EVALUATIONS_ES_URL || '';
-    const esApiKey = process.env.EVALUATIONS_ES_API_KEY || '';
-    if (!esUrl || !esApiKey) {
-      throw new Error(
-        'EVALUATIONS_ES_URL and EVALUATIONS_ES_API_KEY are required for EIS judge triage summaries'
-      );
-    }
-
-    const request = buildEisChatRequest(connector, messages, esUrl, esApiKey);
+    const { esUrl, apiKey } = resolveEisInferenceCredentials();
+    const request = buildEisChatRequest(connector, messages, esUrl, apiKey);
     summary = await postForContent(request.url, request.headers, request.body, {
       parseStream: true,
     });

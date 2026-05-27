@@ -402,9 +402,9 @@ The CLI uses suite metadata from:
 
 The [weekly LLM evals pipeline](https://buildkite.com/elastic/kibana-evals-weekly-llm-evals) uses **two Slack flows**:
 
-| Flow                | Channel                               | Mechanism                                                                                                               | Content                                                                                                                                        |
-| ------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **A — build-level** | `#kbn-evals-notifications`            | `KIBANA_SLACK_NOTIFICATIONS_ENABLED` + metadata `slack:kbn_evals_weekly_failures:body`                                  | Rollup of per-suite summaries ([`weekly_build_slack_summary.sh`](../../../../../.buildkite/scripts/steps/evals/weekly_build_slack_summary.sh)) |
+| Flow                | Channel                               | Mechanism                                                                                                               | Content                                                                                                                                                             |
+| ------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **A — build-level** | `#kbn-evals-notifications`            | `KIBANA_SLACK_NOTIFICATIONS_ENABLED` + metadata `slack:kbn_evals_weekly_failures:body`                                  | Rollup of per-suite summaries ([`weekly_build_slack_summary.sh`](../../../../../.buildkite/scripts/steps/evals/weekly_build_slack_summary.sh))                      |
 | **B — per-suite**   | `slackChannel` in `evals.suites.json` | Buildkite `notify` after [`suite_owner_notify.sh`](../../../../../.buildkite/scripts/steps/evals/suite_owner_notify.sh) | Suite name, failing models, build link, plus an LLM triage summary from the **same** judge connector used for LLM-as-a-judge evaluators (`EVALUATION_CONNECTOR_ID`) |
 
 **Metadata handoff (B → A):** failing fanout steps write `kbn-evals:suite-failures:{suite}:{project}` and `kbn-evals:suite-failure-log:{suite}:{project}` (log tail). The fanout parent records `kbn-evals:evaluation-connector-id:{suite}` with the effective judge for the build. `suite_owner_notify.sh` calls [`build_suite_owner_slack_message.js`](scripts/ci/build_suite_owner_slack_message.js), which collects failure context ([`collect_failure_context.js`](scripts/ci/collect_failure_context.js): metadata logs + `kibana-evaluations` scores for the Buildkite build), then asks the judge via [`summarize_failures_with_judge.js`](scripts/ci/summarize_failures_with_judge.js) using the same connector resolution as evals (`EVALUATION_CONNECTOR_ID` env → build metadata → vault `evaluationConnectorId`, including PR `models:judge:*` overrides). Stores the combined body in `kbn-evals:triage:{suite}` and posts to the suite channel. Flow A embeds those triage bodies in the weekly rollup.
@@ -433,7 +433,7 @@ The eval pipeline step sets `FTR_EIS_CCM=1` and `EVAL_FANOUT=1`; `KBN_EVALS=1` i
 Example environment variables for Agent Builder + one EIS model:
 
 ```text
-EVAL_SUITE_ID=agent-builder
+EVAL_SUITE_ID=observability-ai
 EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
 EVAL_INCLUDE_EIS_MODELS=1
 ```

@@ -15,7 +15,7 @@ const evalsConfig = createPlaywrightEvalsConfig({
   timeout: 20 * 60_000, // 20 minutes
 });
 
-// TODO: revert before merge — notify testing only; skip all other observability-ai specs
+// TODO: revert before merge — notify testing only (one fail + one pass hook)
 export default defineConfig(evalsConfig, {
-  testMatch: '**/ci_force_fail.spec.ts',
+  testMatch: ['**/ci_force_fail.spec.ts', '**/time_range.spec.ts'],
 });
