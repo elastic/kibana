@@ -63,7 +63,7 @@ const bulkStatusUpdatedSchema = {
     _meta: { description: 'The new status applied to the schedules', optional: false },
   },
   count: {
-    type: 'long',
+    type: 'integer',
     _meta: { description: 'The number of schedules updated', optional: false },
   },
 } as const;
@@ -82,7 +82,7 @@ export const attackDiscoverySchedulesBulkStatusUpdateFailedEvent: AttackDiscover
 
 const bulkDeletedSchema = {
   count: {
-    type: 'long',
+    type: 'integer',
     _meta: { description: 'The number of schedules deleted', optional: false },
   },
 } as const;
