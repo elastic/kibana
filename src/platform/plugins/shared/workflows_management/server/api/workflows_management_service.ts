@@ -26,6 +26,7 @@ import type {
   ValidateWorkflowResponseDto,
   WorkflowAggsDto,
   WorkflowDetailDto,
+  WorkflowExecutionCollapseField,
   WorkflowExecutionDto,
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
@@ -87,6 +88,7 @@ export interface SearchWorkflowExecutionsParams {
   omitStepRuns?: boolean;
   finishedAfter?: string;
   finishedBefore?: string;
+  collapse?: WorkflowExecutionCollapseField;
   sortField?: WorkflowExecutionSortField;
   sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
