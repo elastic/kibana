@@ -7,8 +7,16 @@
 
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type CommonSearchOptions } from '../query_utils';
-import { runLatestSourceEsqlQuery } from '../latest_source_query';
+import {
+  type CommonSearchOptions,
+  type PaginatedSearchOptions,
+  type PaginatedResponse,
+} from '../query_utils';
+import {
+  runLatestSourceEsqlQuery,
+  runPaginatedLatestSourceEsqlQuery,
+  runFindByIdEsqlQuery,
+} from '../latest_source_query';
 import {
   DISCOVERIES_DATA_STREAM,
   type Discovery,
@@ -20,6 +28,8 @@ export type DiscoveryDataStreamClient = IDataStreamClient<
   typeof discoveriesMappings,
   StoredDiscovery
 >;
+
+const GROUP_BY_FIELD = 'discovery_id';
 
 export class DiscoveryClient {
   constructor(
@@ -43,7 +53,29 @@ export class DiscoveryClient {
       space: this.clients.space,
       options,
       index: DISCOVERIES_DATA_STREAM,
-      groupBy: 'discovery_id',
+      groupBy: GROUP_BY_FIELD,
+    });
+  }
+
+  async findLatestPaginated(
+    options: PaginatedSearchOptions = {}
+  ): Promise<PaginatedResponse<Discovery>> {
+    return runPaginatedLatestSourceEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      options,
+      index: DISCOVERIES_DATA_STREAM,
+      groupBy: GROUP_BY_FIELD,
+    });
+  }
+
+  async findById(discoveryId: string): Promise<{ hits: Discovery[] }> {
+    return runFindByIdEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DISCOVERIES_DATA_STREAM,
+      idField: GROUP_BY_FIELD,
+      idValue: discoveryId,
     });
   }
 }
