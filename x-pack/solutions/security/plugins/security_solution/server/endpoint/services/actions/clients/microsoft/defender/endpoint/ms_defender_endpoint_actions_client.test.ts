@@ -1413,7 +1413,7 @@ describe('MS Defender response actions client', () => {
           parameters: { id: 'cancel-action-id' },
         })
       ).rejects.toMatchObject({
-        message: 'Cannot cancel a cancel action.',
+        message: '[cancel] response action cannot be canceled.',
         statusCode: 400,
       });
 

@@ -87,6 +87,9 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
           <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
             <EuiFlexItem grow={false}>
               <EuiPopover
+                aria-label={i18n.translate('xpack.painlessLab.helpPopoverAriaLabel', {
+                  defaultMessage: 'Help menu',
+                })}
                 id="painlessLabHelpContextMenu"
                 button={
                   <EuiButtonEmpty

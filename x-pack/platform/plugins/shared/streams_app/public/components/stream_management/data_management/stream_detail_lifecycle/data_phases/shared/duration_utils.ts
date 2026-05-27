@@ -85,6 +85,39 @@ export const parseInterval = (
   return { value: size, unit: unit as PreservedTimeUnit };
 };
 
+export const parseIntervalWithDefaultUnit = (
+  duration: string | undefined,
+  defaultUnit: PreservedTimeUnit = 'd'
+): { value: string; unit: PreservedTimeUnit } => {
+  const parsed = parseInterval(duration);
+  return {
+    value: parsed?.value ?? '',
+    unit: parsed?.unit ?? defaultUnit,
+  };
+};
+
+export const formatDuration = (
+  value: string | undefined,
+  unit: string | undefined,
+  {
+    integerOnly = false,
+    minInclusive,
+    minExclusive,
+  }: {
+    integerOnly?: boolean;
+    minInclusive?: number;
+    minExclusive?: number;
+  } = {}
+): string | undefined => {
+  if (!value || value.trim() === '') return;
+  if (!unit) return;
+  const num = Number(value);
+  if (integerOnly && !Number.isInteger(num)) return;
+  if (minInclusive !== undefined && (!Number.isFinite(num) || num < minInclusive)) return;
+  if (minExclusive !== undefined && (!Number.isFinite(num) || num <= minExclusive)) return;
+  return `${num}${unit}`;
+};
+
 export const formatMillisecondsInUnit = (
   ms: number,
   unit: PreservedTimeUnit,

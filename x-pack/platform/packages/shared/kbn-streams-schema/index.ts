@@ -87,6 +87,7 @@ export {
   hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
+  stripMetadata,
 } from './src/helpers/esql_helpers';
 
 export * from './src/ingest_pipeline_processors';
@@ -137,6 +138,8 @@ export {
 export {
   type EsqlQuery,
   esqlQuerySchema,
+  type QueryFeature,
+  queryFeatureSchema,
   type StreamQuery,
   type QueryLink,
   type QueryType,
@@ -209,6 +212,8 @@ export type {
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
   SignificantEventsQueriesGenerationTaskResult,
+  LifecycleDetection,
+  EventLifecycleResponse,
 } from './src/api/significant_events';
 export { generatedSignificantEventQuerySchema } from './src/api/significant_events';
 

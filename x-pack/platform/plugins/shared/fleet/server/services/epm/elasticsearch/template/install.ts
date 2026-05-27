@@ -48,7 +48,8 @@ import {
 import { appContextService } from '../../../app_context';
 import type { AssetsMap, PackageInstallContext } from '../../../../../common/types';
 
-import { OTEL_COLLECTOR_INPUT_TYPE, OTEL_TEMPLATE_SUFFIX } from '../../../../../common/constants';
+import { OTEL_TEMPLATE_SUFFIX } from '../../../../../common/constants';
+import { dataStreamUsesOtelInput } from '../../../../../common/services';
 
 import {
   generateMappings,
@@ -643,7 +644,7 @@ export function prepareTemplate({
   const experimentalFeature = appContextService.getExperimentalFeatures();
   const isOtelInputType =
     experimentalFeature.enableOtelIntegrations &&
-    (dataStream?.streams || []).some((stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE);
+    dataStreamUsesOtelInput(packageInstallContext.packageInfo, dataStream);
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     !!experimentalDataStreamFeature?.features.tsdb;
