@@ -22,6 +22,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
