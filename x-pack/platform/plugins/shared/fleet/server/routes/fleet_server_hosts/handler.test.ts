@@ -212,4 +212,48 @@ describe('fleet server hosts handler', () => {
 
     expect(res).toEqual({ body: { item: { id: 'host1' } } });
   });
+
+  it('should call bumpAllAgentPoliciesForFleetServerHosts with isDefault flag on put', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+    jest.spyOn(fleetServerHostService, 'update').mockResolvedValue({
+      id: 'host1',
+      is_default: true,
+    } as any);
+
+    await putFleetServerHostHandlerWithErrorHandler(
+      mockContext,
+      { body: { host_urls: ['http://localhost:8080'] }, params: { itemId: 'host1' } } as any,
+      mockResponse as any
+    );
+
+    expect(agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts).toHaveBeenLastCalledWith(
+      undefined,
+      'host1',
+      { isDefault: true }
+    );
+  });
+
+  it('should call bumpAllAgentPoliciesForFleetServerHosts with isDefault flag on post', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+    jest.spyOn(fleetServerHostService, 'create').mockResolvedValue({
+      id: 'host1',
+      is_default: false,
+    } as any);
+
+    await postFleetServerHostWithErrorHandler(
+      mockContext,
+      { body: { host_urls: ['http://localhost:8080'] } } as any,
+      mockResponse as any
+    );
+
+    expect(agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts).toHaveBeenLastCalledWith(
+      undefined,
+      'host1',
+      { isDefault: false }
+    );
+  });
 });
