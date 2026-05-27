@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiListGroup,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DOCUMENT_TYPE_ALERT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -82,13 +88,15 @@ export const EventActionsButton = ({ item, scopeId }: EventActionsButtonProps) =
   return (
     <EuiPopover
       button={
-        <EuiButtonIcon
-          iconType="boxesHorizontal"
-          aria-label={actionsButtonAriaLabel}
-          color="text"
-          onClick={togglePopover}
-          data-test-subj={GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID}
-        />
+        <EuiToolTip content={actionsButtonAriaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            aria-label={actionsButtonAriaLabel}
+            color="text"
+            onClick={togglePopover}
+            data-test-subj={GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
