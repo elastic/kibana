@@ -6,9 +6,7 @@
  */
 
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ContentFrameworkSection } from '@kbn/unified-doc-viewer-plugin/public';
 import type { StreamsAppLocator } from '../../common/locators';
 import { useResolvedDefinitionName } from './use_resolved_definition_name';
 import { StreamLinkContent } from './stream_link_content';
@@ -20,22 +18,7 @@ export interface DiscoverFlyoutStreamFieldByStreamNameProps {
   renderCpsWarning?: boolean;
 }
 
-export function DiscoverFlyoutStreamFieldByStreamName(
-  props: DiscoverFlyoutStreamFieldByStreamNameProps
-) {
-  return (
-    <ContentFrameworkSection
-      id="discoverFlyoutStreamFieldByStreamName"
-      title={i18n.translate('xpack.streams.discoverFlyoutStreamFieldByStreamName.title', {
-        defaultMessage: 'Stream',
-      })}
-    >
-      <DiscoverFlyoutStreamFieldByStreamNameContent {...props} />
-    </ContentFrameworkSection>
-  );
-}
-
-function DiscoverFlyoutStreamFieldByStreamNameContent({
+export function DiscoverFlyoutStreamFieldByStreamName({
   streamName,
   streamsRepositoryClient,
   locator,

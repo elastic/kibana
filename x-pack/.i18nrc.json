@@ -97,6 +97,7 @@
       "platform/plugins/private/monitoring"
     ],
     "xpack.observability": "solutions/observability/plugins/observability",
+    "xpack.nightshift": "solutions/observability/packages/kbn-nightshift",
     "xpack.observabilityAgentBuilder": "solutions/observability/plugins/observability_agent_builder",
     "xpack.observabilityAiAssistant": [
       "platform/plugins/shared/observability_ai_assistant",
@@ -110,6 +111,7 @@
       "platform/packages/shared/logs-overview/src/components"
     ],
     "xpack.agentBuilder": ["platform/plugins/shared/agent_builder", "platform/packages/shared/agent-builder"],
+    "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",
     "xpack.osquery": [
       "platform/plugins/shared/osquery"
     ],

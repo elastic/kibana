@@ -14,10 +14,17 @@ import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import {
+  normalizeChangePointChartLegacyFields,
+  type RawChangePointChartState,
+} from '../../common/embeddables/change_point_chart/normalize_legacy_state';
 import type {
   ChangePointDetectionProps,
   ChangePointDetectionSharedComponent,
 } from '../shared_components/change_point_detection';
+
+// Pre-9.5 case attachments stored time_range as timeRange.
+type RawAttachmentState = RawChangePointChartState & { timeRange?: TimeRange };
 
 export const initComponent = memoize(
   (
@@ -30,12 +37,18 @@ export const initComponent = memoize(
           id: FIELD_FORMAT_IDS.DATE,
         });
 
-        const rawState = props.data.state as Record<string, unknown>;
-        const timeRange = (rawState.time_range ?? rawState.timeRange) as TimeRange;
+        const rawState = props.data.state as RawAttachmentState;
+        const normalized = normalizeChangePointChartLegacyFields(rawState);
         const inputProps = {
-          ...(rawState as unknown as ChangePointDetectionProps),
-          timeRange,
-        };
+          timeRange: rawState.time_range ?? rawState.timeRange,
+          viewType: normalized.view_type,
+          dataViewId: normalized.data_view_id,
+          fn: normalized.aggregation_function,
+          metricField: normalized.metric_field,
+          splitField: normalized.split_field,
+          partitions: normalized.partitions,
+          maxSeriesToPlot: normalized.max_series_to_plot,
+        } as ChangePointDetectionProps;
 
         const listItems = [
           {
@@ -45,9 +58,9 @@ export const initComponent = memoize(
                 defaultMessage="Time range"
               />
             ),
-            description: `${dataFormatter.convert(
+            description: `${dataFormatter.convertToText(
               inputProps.timeRange.from
-            )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
+            )} - ${dataFormatter.convertToText(inputProps.timeRange.to)}`,
           },
         ];
 

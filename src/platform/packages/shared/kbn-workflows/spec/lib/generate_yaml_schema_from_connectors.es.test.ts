@@ -32,6 +32,34 @@ describe('generateYamlSchemaFromConnectors / elasticsearch connectors', () => {
     expect(() => workflowSchema.parse({ steps: [] })).toThrow();
   });
 
+  it('should accept elasticsearch.search body-style sort objects', () => {
+    const result = workflowSchema.safeParse({
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'search-sorted-docs',
+          type: 'elasticsearch.search',
+          with: {
+            index: 'test-index',
+            query: { match_all: {} },
+            sort: [
+              {
+                '@timestamp': {
+                  order: 'desc',
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(result.error).toBeUndefined();
+    expect(result.success).toBe(true);
+  });
+
   ES_VALID_SAMPLE_STEPS.forEach((step) => {
     it(`${step.type} (${step.name})`, async () => {
       const result = workflowSchema.safeParse({
