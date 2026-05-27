@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import {
   EuiBadge,
   EuiButton,
@@ -23,29 +21,31 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDebounceFn } from '@kbn/react-hooks';
-import type { FormValues } from '../../form/types';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
-import { serializeFormToYaml, parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
+import type { FormValues, RuleNotificationsValue } from '../../form/types';
 import { mergeArtifactsByType, splitArtifactsByType } from '../../form/utils/artifact_mappers';
+import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
+import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import type { ComposeFormValues, RuleQuery } from './compose_form_types';
 import { getBreachQuery } from './compose_form_types';
 import {
-  mapRuleToComposeFormValues,
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
+  mapRuleToComposeFormValues,
   transformQueryIn,
   transformQueryOut,
 } from './compose_mappers';
-import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
-import { useComposeDiscoverState, getSandboxTabs } from './use_compose_discover_state';
-import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
-import { useEsqlAutocomplete } from './use_esql_providers';
-import { useSplitQueryCompletion } from './use_split_query_completion';
-import { splitQuery, guessRecoveryBlock } from './use_heuristic_split';
 import { RULE_BUILDER_REGISTRY } from './rule_builder';
+import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
+import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
+import { useEsqlAutocomplete } from './use_esql_providers';
+import { guessRecoveryBlock, splitQuery } from './use_heuristic_split';
+import { useSplitQueryCompletion } from './use_split_query_completion';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -125,7 +125,7 @@ const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
 // These hooks live in the plugin, not the package — imported via the plugin's hook layer
 // when this flyout is rendered in the rules list page.
 // For now they are passed as props to keep the package boundary clean.
-export interface ComposeDiscoverFlyoutProps {
+export interface ComposeDiscoverFlyoutProps<TWorkflow extends object = object> {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
   /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
@@ -133,9 +133,17 @@ export interface ComposeDiscoverFlyoutProps {
   /** The ID of the rule being edited. Required when mode === 'edit'. */
   ruleId?: string;
   onClose: () => void;
-  services: RuleFormServices;
-  /** Called with the create payload when the user submits in create mode. */
-  onCreateRule: (payload: ReturnType<typeof composeFormToCreateRequest>) => void;
+  services: RuleFormServices<TWorkflow>;
+  /**
+   * Called with the create payload when the user submits in create mode. When the user
+   * enables the notifications step, `notifications` carries the captured workflow value;
+   * otherwise it is `undefined`. The cast to `RuleNotificationsValue<TWorkflow>` is safe
+   * because the workflow value was seeded by `services.workflowForm.defaultValue()`.
+   */
+  onCreateRule: (
+    payload: ReturnType<typeof composeFormToCreateRequest>,
+    notifications?: RuleNotificationsValue<TWorkflow>
+  ) => void;
   /** Called with id + update payload when the user submits in edit mode. */
   onUpdateRule?: (id: string, payload: ReturnType<typeof composeFormToUpdateRequest>) => void;
   /** True while a create/update mutation is in flight. */
@@ -216,7 +224,7 @@ const EMPTY_FORM_VALUES: ComposeFormValues = {
   dashboardArtifacts: [],
 };
 
-export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
+export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   historyKey,
   mode = 'create',
   rule,
@@ -228,7 +236,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   isSaving = false,
   builderType,
   initialBuilderState,
-}) => {
+}: ComposeDiscoverFlyoutProps<TWorkflow>): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
    * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
@@ -237,6 +245,10 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
    * When the persisted rule has a custom recovery query, the initial state
    * infers that tracking was active and reconstructs the split.
    */
+  // Internal alias: typed-down to the base `RuleFormServices` for sub-components that
+  // don't need the concrete `TWorkflow`. The typed boundary lives in `onCreateRule`.
+  const baseServices = services as unknown as RuleFormServices;
+
   const initialMapped =
     (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'signal';
@@ -250,7 +262,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
-  useEsqlAutocomplete(services);
+  useEsqlAutocomplete(baseServices);
 
   const [builderState, setBuilderState] = useState<unknown>(() => {
     if (!builderType) return undefined;
@@ -452,7 +464,10 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       }
     }
     if (isCreate) {
-      onCreateRule(composeFormToCreateRequest(values, builderType));
+      onCreateRule(
+        composeFormToCreateRequest(values, builderType),
+        values.notifications as RuleNotificationsValue<TWorkflow> | undefined
+      );
     } else if (ruleId && onUpdateRule) {
       onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType));
     }
@@ -474,11 +489,19 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   const handleNext = useCallback(async () => {
     if (currentStep?.validate) {
-      const valid = await currentStep.validate(methods, uiState, builderState);
+      const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
       if (!valid) return;
     }
     dispatch({ type: 'GO_NEXT', isAlert });
-  }, [currentStep, methods, uiState, builderState, isAlert, dispatch]);
+  }, [currentStep, methods, uiState, isAlert, dispatch, baseServices, builderState]);
+
+  const handleFinalSubmit = useCallback(async () => {
+    if (currentStep?.validate) {
+      const valid = await currentStep.validate(methods, uiState, baseServices, builderState);
+      if (!valid) return;
+    }
+    handleSubmit();
+  }, [currentStep, methods, uiState, baseServices, builderState, handleSubmit]);
 
   // TODO: recoveryType drives whether the recovery tab appears in YAML mode.
   // Follow schema decisions in #268984 — if recoveryType is superseded by a
@@ -548,7 +571,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             {uiState.yamlMode ? (
               <React.Suspense fallback={null}>
                 <LazyYamlRuleForm
-                  services={services}
+                  services={baseServices}
                   yamlText={yamlText}
                   setYamlText={handleSetYamlText}
                   isSubmitting={isSaving}
@@ -558,9 +581,10 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               <ComposeDiscoverForm
                 state={uiState}
                 dispatch={dispatch}
-                services={services}
+                services={baseServices}
                 onRecoveryTypeChange={handleRecoveryTypeChange}
                 onKindChange={handleKindChange}
+                ruleId={ruleId}
                 builderType={builderType}
                 builderState={builderState}
                 onBuilderStateChange={setBuilderState}
@@ -608,7 +632,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                         <EuiButton
                           fill
                           isLoading={isSaving}
-                          onClick={handleSubmit}
+                          onClick={handleFinalSubmit}
                           data-test-subj="composeDiscoverSubmit"
                         >
                           {isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL}
@@ -671,4 +695,4 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       </FormProvider>
     </RuleFormProvider>
   );
-};
+}
