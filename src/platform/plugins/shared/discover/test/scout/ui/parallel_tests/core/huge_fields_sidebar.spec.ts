@@ -140,14 +140,7 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
       await expect(virtualizedField).toBeHidden();
 
       // Scrolling down should render this field.
-      const availableFieldsGroup = page.testSubj.locator('fieldListGroupedAvailableFields');
-
-      await availableFieldsGroup.hover();
-
-      for (let i = 0; i < 25; i++) {
-        await page.mouse.wheel(0, 1_200);
-      }
-
+      await pageObjects.discover.scrollSidebarAvailableFieldsUntilFieldIsVisible('myvar1050');
       await expect(virtualizedField).toBeVisible();
     }
   );
