@@ -27,21 +27,8 @@ jest.mock('@kbn/unified-histogram', () => ({
   ),
 }));
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query');
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_space_id');
-jest.mock('@kbn/alerting-v2-episodes-ui/queries/episodes_query', () => ({
-  buildEpisodesHistogramQuery: jest.fn(() => 'FROM .alerts-*'),
-  HISTOGRAM_EPISODE_LIMIT: 10_000,
-}));
-jest.mock('@kbn/alerting-v2-episodes-ui/utils/histogram_utils', () => ({
-  computeBucketInterval: jest.fn(() => '1h'),
-}));
-jest.mock('@kbn/datemath', () => ({
-  __esModule: true,
-  default: {
-    parse: jest.fn(() => ({ valueOf: () => Date.now() })),
-  },
-}));
+jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query');
 
 const mockUseUnifiedHistogram = jest.mocked(useUnifiedHistogram);
 const mockUseEpisodesHistogramQuery = jest.mocked(useEpisodesHistogramQuery);
