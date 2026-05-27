@@ -10,6 +10,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -69,6 +70,13 @@ const deleteItemText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.deleteItemButtonText',
   {
     defaultMessage: 'Delete',
+  }
+);
+
+const tooltipContent = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.stepContextMenuButtonAriaLabel',
+  {
+    defaultMessage: 'Step context menu',
   }
 );
 
@@ -255,22 +263,9 @@ export const StepContextMenu: React.FC<StepContextMenuProps> = ({
   ];
 
   const button = (
-    <EuiToolTip
-      content={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.stepContextMenuButtonAriaLabel',
-        {
-          defaultMessage: 'Step context menu',
-        }
-      )}
-      disableScreenReaderOutput
-    >
+    <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
       <EuiButtonIcon
-        aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.stepContextMenuButtonAriaLabel',
-          {
-            defaultMessage: 'Step context menu',
-          }
-        )}
+        aria-label={tooltipContent}
         data-test-subj="streamsAppStreamDetailEnrichmentStepContextMenuButton"
         data-stream-type={streamType}
         disabled={!!stepUnderEdit}
