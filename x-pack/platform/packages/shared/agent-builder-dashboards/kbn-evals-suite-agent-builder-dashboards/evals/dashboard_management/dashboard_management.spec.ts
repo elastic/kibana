@@ -17,7 +17,11 @@ import {
   dashboardPanelCountEvaluator,
   dashboardSectionShapeEvaluator,
 } from '../../src/dashboard_attachment_evaluators';
-import { dashboardSkillActivatedEvaluator } from '../../src/skill_selection_evaluators';
+import {
+  dashboardSkillActivatedEvaluator,
+  dashboardSkillNotActivatedEvaluator,
+  visualizationSkillWithoutDashboardEvaluator,
+} from '../../src/skill_selection_evaluators';
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
@@ -69,6 +73,24 @@ evaluate.describe(
                 },
               },
             },
+          ],
+        },
+        evaluators: [
+          dashboardSkillActivatedEvaluator,
+          dashboardAttachmentExistsEvaluator,
+          dashboardAttachmentTitleEvaluator,
+          dashboardPanelCountEvaluator,
+          dashboardGridBoundsEvaluator,
+        ],
+      });
+    });
+
+    evaluate('dashboard section requests create requested sections', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'agent builder dashboards: dashboard section creation',
+          description: 'Checks that dashboard section requests create the requested sections',
+          examples: [
             {
               input: {
                 question:
