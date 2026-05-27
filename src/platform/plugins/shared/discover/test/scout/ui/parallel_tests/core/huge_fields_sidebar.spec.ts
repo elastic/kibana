@@ -104,24 +104,7 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.discover.setQueryMode('classic');
-
-    let discoverLoaded = false;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        await pageObjects.discover.goto();
-        discoverLoaded = true;
-        break;
-      } catch (error) {
-        if (attempt === 1) {
-          throw error;
-        }
-      }
-    }
-
-    if (!discoverLoaded) {
-      throw new Error('Unable to load Discover page after retrying navigation');
-    }
-
+    await pageObjects.discover.goto();
     await pageObjects.discover.waitUntilSearchingHasFinished();
   });
 
@@ -158,6 +141,7 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
 
       // Scrolling down should render this field.
       const availableFieldsGroup = page.testSubj.locator('fieldListGroupedAvailableFields');
+
       await availableFieldsGroup.hover();
 
       for (let i = 0; i < 25; i++) {
