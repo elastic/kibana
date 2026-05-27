@@ -54,11 +54,7 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({
   if (steps.length === 0) return null;
 
   const stepsVisible = hideMasterToggle || isExpanded;
-  // "Show reasoning" (collapsed) renders above the panel — there's no panel yet
-  // and the toggle is the only thing to click. "Collapse reasoning" (expanded)
-  // renders below the panel so the toggle sits at the boundary between the
-  // steps block and whatever follows, keeping it near the end of what the user
-  // just scrolled through.
+
   const showToggle = !hideMasterToggle;
   const togglePosition: 'above' | 'below' = isExpanded ? 'below' : 'above';
 
@@ -91,8 +87,6 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({
 };
 
 const getStepKey = (step: ConversationRoundStep, index: number): string => {
-  // ToolCallStep and BackgroundAgentCompleteStep have their own ids; reuse
-  // them so React doesn't remount on re-renders. Others fall back to index.
   if ('tool_call_id' in step && step.tool_call_id) return `tool-${step.tool_call_id}`;
   if ('execution_id' in step && step.execution_id) return `bg-${step.execution_id}`;
   return `step-${index}-${step.type}`;

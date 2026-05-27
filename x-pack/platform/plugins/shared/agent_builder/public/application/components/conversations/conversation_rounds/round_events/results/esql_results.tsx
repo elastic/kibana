@@ -10,18 +10,19 @@ import { EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import type { EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
+import type { EsqlResults as EsqlResultsData } from '@kbn/agent-builder-common/tools/tool_result';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 
-interface InlineEsqlResultsProps {
-  result: EsqlResults;
+interface EsqlResultsProps {
+  result: EsqlResultsData;
 }
 
 /**
- * Renders an `esqlResults` ToolResult inline as a "Found N results" link to Discover.
+ * Renders an `esqlResults` ToolResult as a "Found N results" link to Discover
+ * inside the `ToolResponseFlyout`'s body, dispatched by `tool_result.tsx`.
  */
-export const InlineEsqlResults: React.FC<InlineEsqlResultsProps> = ({ result: { data } }) => {
+export const EsqlResults: React.FC<EsqlResultsProps> = ({ result: { data } }) => {
   const {
     startDependencies: { share },
   } = useAgentBuilderServices();

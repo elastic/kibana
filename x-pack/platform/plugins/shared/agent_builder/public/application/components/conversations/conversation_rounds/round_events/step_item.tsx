@@ -22,16 +22,6 @@ interface StepItemProps {
   step: ConversationRoundStep;
 }
 
-/**
- * Dispatches a single `ConversationRoundStep` to the right step component.
- *
- * - Reasoning, compaction: rendered as static rows.
- * - Tool call, background-agent complete: rendered as clickable rows that own
- *   their own expansion state locally.
- * - Transient reasoning steps are filtered out here (they're internal-only).
- * - TodosStep is *not* part of this hierarchy — it has its own dedicated panel
- *   above the response body.
- */
 export const StepItem: React.FC<StepItemProps> = ({ step }) => {
   if (isReasoningStep(step)) {
     if (step.transient) return null;

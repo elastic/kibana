@@ -29,18 +29,6 @@ interface ViewExecutionButtonProps {
 
 /**
  * Button that opens `SubAgentExecutionFlyout` for a sub-agent execution.
- *
- * Used in two places:
- *   1. `tool_call_step.tsx` — when a `ToolCallStep` is a sub-agent invocation
- *      (`tool_id === internalTools.runSubagent`), this replaces the generic
- *      `ViewResponseButton` so the user gets the rich nested-steps + final
- *      response view instead of a JSON dump.
- *   2. `background_agent_step.tsx` — the equivalent affordance on the
- *      completion event.
- *
- * The flyout is a strict superset of what the generic `ViewResponseButton`
- * would have shown: same final response, plus the trace of how the sub-agent
- * got there.
  */
 export const ViewExecutionButton: React.FC<ViewExecutionButtonProps> = ({
   executionId,

@@ -20,6 +20,14 @@ import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 
+const labels = {
+  collapse: i18n.translate('xpack.agentBuilder.roundEvents.masterToggle.collapse', {
+    defaultMessage: 'Collapse reasoning',
+  }),
+  show: i18n.translate('xpack.agentBuilder.roundEvents.masterToggle.show', {
+    defaultMessage: 'Show reasoning',
+  }),
+};
 interface MasterToggleProps {
   expanded: boolean;
   onToggle: () => void;
@@ -31,13 +39,7 @@ interface MasterToggleProps {
 export const MasterToggle: React.FC<MasterToggleProps> = ({ expanded, onToggle }) => {
   const { euiTheme } = useEuiTheme();
 
-  const label = expanded
-    ? i18n.translate('xpack.agentBuilder.roundEvents.masterToggle.collapse', {
-        defaultMessage: 'Collapse reasoning',
-      })
-    : i18n.translate('xpack.agentBuilder.roundEvents.masterToggle.show', {
-        defaultMessage: 'Show reasoning',
-      });
+  const label = expanded ? labels.collapse : labels.show;
 
   const textDisabledStyles = css`
     color: ${euiTheme.colors.textDisabled};

@@ -39,12 +39,6 @@ interface StepLayoutProps {
 
 /**
  * Shared layout for a single step row in the events block.
- *
- * Replaces the old `ThinkingItemLayout` with a smaller surface:
- *  - No icon column (no status icons / loading spinners / checkmarks).
- *  - No `textColor` / `isLoading` props.
- *  - Optional click handler turns the row into an expandable disclosure with
- *    a chevron, indenting the expansion content underneath.
  */
 export const StepLayout: React.FC<StepLayoutProps> = ({
   label,
@@ -57,7 +51,7 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
   const isClickable = !!onClick;
 
   // Base text color for every step row:
-  //   - collapsed / non-clickable → textDisabled
+  //   - collapsed / non-clickable  → textDisabled
   //   - expanded                   → textParagraph (stays "active" while open)
   //   - hover (clickable only)     → textParagraph
   //
@@ -109,8 +103,6 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
             })
           : {})}
       >
-        {/* grow={false} so the chevron sits next to the label (8px gap via gutterSize="s")
-            instead of being pushed to the far right by the label's flex stretch. */}
         <EuiFlexItem grow={false}>{label}</EuiFlexItem>
         {isClickable && (
           <EuiFlexItem grow={false}>

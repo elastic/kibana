@@ -20,9 +20,6 @@ interface CompactionStepProps {
  *
  * - In progress (`token_count_after === 0`): "Compacting context"
  * - Complete: "Context condensed: {before} → {after} tokens, {N} round(s)"
- *
- * All three numbers fit on the headline, so this step has no sub-fields and is
- * not clickable.
  */
 export const CompactionStep: React.FC<CompactionStepProps> = ({ step }) => {
   const isInProgress = step.token_count_after === 0;

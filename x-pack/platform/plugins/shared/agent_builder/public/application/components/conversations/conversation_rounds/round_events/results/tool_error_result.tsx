@@ -9,33 +9,34 @@ import React from 'react';
 import { EuiCodeBlock, EuiSplitPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { QueryResult } from '@kbn/agent-builder-common/tools/tool_result';
+import type { ErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 
 const codeblockStyles = css`
   word-break: break-word;
 `;
 
-const label = i18n.translate('xpack.agentBuilder.roundEvents.results.query.title', {
-  defaultMessage: 'ESQL',
+const label = i18n.translate('xpack.agentBuilder.roundEvents.results.error.title', {
+  defaultMessage: 'Error',
 });
 
-interface InlineQueryProps {
-  result: QueryResult;
+interface ToolErrorResultProps {
+  result: ErrorResult;
 }
 
 /**
- * Renders a `query` ToolResult inline as an ESQL code block.
+ * Renders an `error` ToolResult as a red-bordered error block inside the
+ * `ToolResponseFlyout`'s body, dispatched by `tool_result.tsx`.
  */
-export const InlineQuery: React.FC<InlineQueryProps> = ({ result: { data } }) => (
+export const ToolErrorResult: React.FC<ToolErrorResultProps> = ({ result: { data } }) => (
   <EuiSplitPanel.Outer hasBorder hasShadow={false}>
-    <EuiSplitPanel.Inner color="plain" grow={false} paddingSize="m">
-      <EuiText size="s">
+    <EuiSplitPanel.Inner color="danger" grow={false} paddingSize="m">
+      <EuiText size="s" color="danger">
         <strong>{label}</strong>
       </EuiText>
     </EuiSplitPanel.Inner>
     <EuiSplitPanel.Inner paddingSize="none">
-      <EuiCodeBlock language="esql" isCopyable paddingSize="m" lineNumbers css={codeblockStyles}>
-        {data.esql}
+      <EuiCodeBlock isCopyable paddingSize="m" lineNumbers css={codeblockStyles}>
+        {data.message}
       </EuiCodeBlock>
     </EuiSplitPanel.Inner>
   </EuiSplitPanel.Outer>

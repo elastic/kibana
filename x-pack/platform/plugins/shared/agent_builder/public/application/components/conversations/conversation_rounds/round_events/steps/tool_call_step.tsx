@@ -22,11 +22,14 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { internalTools, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
-import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  isErrorResult,
+  type ToolResult as ToolResultData,
+} from '@kbn/agent-builder-common/tools/tool_result';
 import { getEbtProps } from '@kbn/ebt-click';
 import { StepLayout } from '../step_layout';
 import { JsonCodeBlock } from '../json_code_block';
-import { ToolResult } from '../results/tool_result';
+import { ToolResult, isInlineRenderableResult } from '../results/tool_result';
 import { ToolResponseFlyout } from '../flyouts/tool_response_flyout';
 import { SubAgentExecutionFlyout } from '../flyouts/sub_agent_execution_flyout';
 
@@ -55,9 +58,12 @@ interface ToolCallStepProps {
 /**
  * Renders a `ToolCallStep`. Clickable to expand into:
  *   - A "Parameters sent" accordion (JSON)
- *   - Each progression message as a plain row
- *   - A "Response returned" row with an inline "View JSON" (or
- *     "View execution" for sub-agent calls) link
+ *   - Each progression message as a plain text row
+ *   - A "Response returned" section that renders one of three forms:
+ *      1. Sub-agent call → inline "View execution" link → SubAgentExecutionFlyout
+ *      2. Any inline-renderable results (query / esqlResults / error) →
+ *         accordion with chevron; body shows results rendered inline
+ *      3. Only "other" results → inline "View JSON" link → ToolResponseFlyout
  */
 export const ToolCallStep: React.FC<ToolCallStepProps> = ({ step }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -118,13 +124,17 @@ const ToolCallHeadline: React.FC<{ step: ToolCallStepData; hasResults: boolean }
 const ToolCallExpansion: React.FC<{ step: ToolCallStepData }> = ({ step }) => {
   const { euiTheme } = useEuiTheme();
 
-  // Sub-agent invocations get the rich `SubAgentExecutionFlyout` (nested
-  // steps + final response). The execution_id is available from results once
-  // the sub-agent completes, or from progression metadata while it's still
-  // running — we look in both.
+  // Sub-agent invocations get the rich `SubAgentExecutionFlyout` (nested steps + final response).
   const isSubAgentCall = step.tool_id === internalTools.runSubagent;
   const subAgentExecutionId = isSubAgentCall ? getSubAgentExecutionId(step) : undefined;
-  const showResponseRow = isSubAgentCall ? Boolean(subAgentExecutionId) : step.results.length > 0;
+
+  // Three mutually exclusive forms for the response section:
+  //   1. Sub-agent → inline "View execution" link (rich nested-steps flyout)
+  //   2. Any inline-renderable result → accordion with chevron
+  //   3. Only "other" results → inline "View JSON" link (raw JSON flyout)
+  const showSubAgentLink = isSubAgentCall && Boolean(subAgentExecutionId);
+  const showResponseAccordion = !showSubAgentLink && step.results.some(isInlineRenderableResult);
+  const showJsonLink = !showSubAgentLink && !showResponseAccordion && step.results.length > 0;
 
   const containerStyles = css`
     padding-left: ${euiTheme.size.s};
@@ -143,8 +153,11 @@ const ToolCallExpansion: React.FC<{ step: ToolCallStepData }> = ({ step }) => {
         </EuiText>
       ))}
 
-      {showResponseRow && (
-        <ResponseRow
+      {showResponseAccordion && (
+        <ResponseAccordion stepId={step.tool_call_id} results={step.results} />
+      )}
+      {(showSubAgentLink || showJsonLink) && (
+        <ResponseLink
           step={step}
           isSubAgentCall={isSubAgentCall}
           subAgentExecutionId={subAgentExecutionId}
@@ -198,10 +211,66 @@ const ParametersAccordion: React.FC<{
 };
 
 /**
- * "Response returned • View JSON" (or "• View execution" for sub-agent calls)
- * row. Not an accordion — clicking the link opens a flyout.
+ * Accordion form of "Response returned" — used when the tool call has at
+ * least one inline-renderable result (`query` / `esqlResults` / `error`).
+ * Body renders all results through the `ToolResult` dispatcher; inline-
+ * renderable types use their purpose-built renderers, anything else falls
+ * through to `JsonCodeBlock`.
  */
-const ResponseRow: React.FC<{
+const ResponseAccordion: React.FC<{
+  stepId: string;
+  results: ToolResultData[];
+}> = ({ stepId, results }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <EuiAccordion
+      id={`${stepId}-response`}
+      forceState={isOpen ? 'open' : 'closed'}
+      onToggle={setIsOpen}
+      arrowDisplay="none"
+      buttonContent={
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="s"
+          alignItems="center"
+          responsive={false}
+          css={css`
+            width: fit-content;
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {labels.result}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type={isOpen ? 'arrowUp' : 'arrowDown'}
+              size="s"
+              color="subdued"
+              aria-hidden={true}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      paddingSize="s"
+    >
+      {results.map((result, idx) => (
+        <Fragment key={`response-result-${idx}`}>
+          <ToolResult result={result} />
+          {idx < results.length - 1 && <EuiSpacer size="s" />}
+        </Fragment>
+      ))}
+    </EuiAccordion>
+  );
+};
+
+/**
+ * Inline-link form of "Response returned" — used for sub-agent calls
+ * ("View execution" → `SubAgentExecutionFlyout`) and for tool calls whose
+ * results are all "other" types ("View JSON" → `ToolResponseFlyout`).
+ */
+const ResponseLink: React.FC<{
   step: ToolCallStepData;
   isSubAgentCall: boolean;
   subAgentExecutionId: string | undefined;
@@ -261,7 +330,7 @@ const ResponseRow: React.FC<{
         <ToolResponseFlyout isOpen={isFlyoutOpen} onClose={closeFlyout}>
           {step.results.map((result, idx) => (
             <Fragment key={`flyout-result-${idx}`}>
-              <ToolResult result={result} mode="flyout" />
+              <ToolResult result={result} />
               {idx < step.results.length - 1 && <EuiSpacer size="m" />}
             </Fragment>
           ))}
@@ -271,9 +340,6 @@ const ResponseRow: React.FC<{
   );
 };
 
-/**
- * Shape of `data` on a sub-agent tool result.
- */
 interface SubAgentResultData {
   agent_execution_id?: string;
 }
@@ -281,8 +347,7 @@ interface SubAgentResultData {
 /**
  * Extracts the sub-agent execution id from a tool-call step. Looks in results
  * first (populated after the tool completes), then falls back to progression
- * metadata (set during execution by tool-progress events). Returns undefined
- * if neither carries it yet.
+ * metadata (set during execution by tool-progress events).
  */
 const getSubAgentExecutionId = (step: ToolCallStepData): string | undefined => {
   const fromResults = step.results.find(

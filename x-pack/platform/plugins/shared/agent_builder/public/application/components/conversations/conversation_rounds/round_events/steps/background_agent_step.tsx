@@ -40,8 +40,7 @@ const BackgroundAgentHeadline: React.FC<{ step: BackgroundAgentCompleteStepData 
     step.status === ExecutionStatus.failed || step.status === ExecutionStatus.aborted;
 
   // Synthetic `ToolResult` of type `other` so `ToolResponseFlyout` can render
-  // the completion payload via its existing JSON-dump path. Matches what the
-  // old `round_steps.tsx` did via `openFlyout([{ type: ToolResultType.other, ... }])`.
+  // the completion payload via its existing JSON-dump path.
   const syntheticResult: ToolResultData = useMemo(
     () => ({
       type: ToolResultType.other,
@@ -97,7 +96,7 @@ const BackgroundAgentHeadline: React.FC<{ step: BackgroundAgentCompleteStepData 
         </EuiLink>
       </EuiFlexItem>
       <ToolResponseFlyout isOpen={isFlyoutOpen} onClose={closeFlyout}>
-        <ToolResult result={syntheticResult} mode="flyout" />
+        <ToolResult result={syntheticResult} />
       </ToolResponseFlyout>
     </EuiFlexGroup>
   );

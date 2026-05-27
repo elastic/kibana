@@ -19,14 +19,6 @@ interface ReasoningStepProps {
   step: ReasoningStepData;
 }
 
-/**
- * Renders a `ReasoningStep` as a static row containing the reasoning text in
- * full (no truncation, no expansion). Not clickable — reasoning has no
- * sub-fields.
- *
- * Note: transient reasoning steps are filtered out by `StepItem` before
- * reaching this component.
- */
 export const ReasoningStep: React.FC<ReasoningStepProps> = ({ step }) => (
   <StepLayout
     label={

@@ -26,10 +26,6 @@ import { JsonCodeBlock } from '../json_code_block';
 
 interface SubAgentExecutionFlyoutProps {
   executionId: string;
-  /**
-   * Optional params from the originating tool call. When provided, rendered
-   * as a JSON block at the top of the flyout.
-   */
   params?: Record<string, unknown>;
   onClose: () => void;
 }
@@ -38,9 +34,6 @@ interface SubAgentExecutionFlyoutProps {
  * Flyout showing a sub-agent's full execution — params, error (if any), the
  * sub-agent's own steps (rendered recursively via `RoundEvents`), and the
  * final response message.
- *
- * Opened from `BackgroundAgentStep`'s "View execution" button. Data is
- * subscribed to live via `useFollowExecution`.
  */
 export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = ({
   executionId,
@@ -105,12 +98,6 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
             <EuiSpacer size="m" />
           </>
         )}
-        {/*
-         * Recursive use of `RoundEvents`. Master toggle is suppressed here —
-         * the flyout itself is the collapsible container, and nesting another
-         * "Collapse reasoning / Show reasoning" toggle inside would be
-         * redundant. Steps render fully inline.
-         */}
         <RoundEvents steps={steps} isReloadedRound={false} hideMasterToggle />
         {displayMessage && (
           <>
