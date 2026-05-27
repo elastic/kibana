@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -146,6 +151,7 @@ export function AddToDashboardButton({
   const embeddable = services?.embeddable;
   const filterManager = services?.data?.query?.filterManager;
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleSave: SaveModalDashboardProps['onSave'] = useCallback(
     async ({ dashboardId, newTitle, newDescription }) => {
@@ -211,19 +217,51 @@ export function AddToDashboardButton({
     defaultMessage: 'Service map',
   });
 
+  const menuLabel = i18n.translate('xpack.apm.serviceMap.panelActions.menuLabel', {
+    defaultMessage: 'More actions',
+  });
+
+  const menuItems = useMemo(
+    () => [
+      <EuiContextMenuItem
+        key="copyToDashboard"
+        icon="addToDashboard"
+        onClick={() => {
+          setIsMenuOpen(false);
+          setIsModalOpen(true);
+        }}
+        data-test-subj="apmServiceMapCopyToDashboardMenuItem"
+      >
+        {i18n.translate('xpack.apm.serviceMap.copyToDashboardMenuItem', {
+          defaultMessage: 'Copy to dashboard',
+        })}
+      </EuiContextMenuItem>,
+    ],
+    []
+  );
+
   return (
     <>
-      <EuiButton
-        iconType="dashboardApp"
-        size="s"
-        color="primary"
-        onClick={() => setIsModalOpen(true)}
-        data-test-subj="apmServiceMapAddToDashboardButton"
+      <EuiPopover
+        anchorPosition="downRight"
+        panelPaddingSize="none"
+        isOpen={isMenuOpen}
+        closePopover={() => setIsMenuOpen(false)}
+        button={
+          <EuiButtonIcon
+            iconType="boxesHorizontal"
+            color="text"
+            display="base"
+            size="s"
+            aria-label={menuLabel}
+            title={menuLabel}
+            onClick={() => setIsMenuOpen((open) => !open)}
+            data-test-subj="apmServiceMapPanelActionsButton"
+          />
+        }
       >
-        {i18n.translate('xpack.apm.serviceMap.addToDashboardButton', {
-          defaultMessage: 'Add to dashboard',
-        })}
-      </EuiButton>
+        <EuiContextMenuPanel size="s" items={menuItems} />
+      </EuiPopover>
       {isModalOpen && (
         <SavedObjectSaveModalDashboard
           objectType={objectType}
