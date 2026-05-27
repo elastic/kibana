@@ -128,7 +128,7 @@ export async function createInactivityMonitoringTemplate(
   deps: { logger: Logger; savedObjectsClient: SavedObjectsClientContract },
   params: {
     packageInfo: InstallablePackage;
-    spaceId?: string;
+    spaceId: string;
     installAsAdditionalSpace?: boolean;
   }
 ): Promise<KibanaAssetReference | undefined> {
@@ -163,7 +163,7 @@ export async function createInactivityMonitoringTemplate(
       // scoped or unscoped client causes incorrect namespace resolution for get/create.
       const internalSoClient = appContextService
         .getInternalUserSOClient()
-        .asScopedToNamespace(spaceId ?? DEFAULT_SPACE_ID);
+        .asScopedToNamespace(spaceId);
 
       // Check if the template already exists
       const existing = await internalSoClient
@@ -208,7 +208,8 @@ export async function createInactivityMonitoringTemplate(
           pkgName,
           [templateRef],
           installAsAdditionalSpace,
-          true
+          true,
+          spaceId
         );
         return templateRef;
       }
@@ -255,7 +256,8 @@ export async function createInactivityMonitoringTemplate(
         pkgName,
         [templateRef],
         installAsAdditionalSpace,
-        true
+        true,
+        spaceId
       );
 
       return templateRef;
@@ -323,6 +325,6 @@ export async function stepCreateAlertingAssets(
       { concurrency: MAX_CONCURRENT_RULE_CREATION_OPERATIONS }
     );
 
-    await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, false, true);
+    await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, false, true, spaceId);
   });
 }

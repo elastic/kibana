@@ -1361,7 +1361,8 @@ export const saveKibanaAssetsRefs = async (
   pkgName: string,
   assetRefs: KibanaAssetReference[] | null,
   saveAsAdditionnalSpace = false,
-  append = false
+  append = false,
+  spaceId: string
 ) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
@@ -1369,8 +1370,6 @@ export const saveKibanaAssetsRefs = async (
     name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-
-  const spaceId = savedObjectsClient.getCurrentNamespace() || DEFAULT_SPACE_ID;
 
   // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
   // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe

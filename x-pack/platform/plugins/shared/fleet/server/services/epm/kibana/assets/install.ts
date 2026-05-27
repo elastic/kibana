@@ -339,7 +339,9 @@ export async function installKibanaAssetsAndReferences({
     assets,
     installedPkg && installedPkg.attributes.installed_kibana_space_id === spaceId
       ? false
-      : installAsAdditionalSpace
+      : installAsAdditionalSpace,
+    false,
+    spaceId
   );
 
   await withPackageSpan('Create and assign package tags', () =>
@@ -380,7 +382,7 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
     );
   }
   await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
-  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, true);
+  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, true, false, spaceId);
 }
 
 const kibanaAssetTypes = Object.values(KibanaAssetType);
