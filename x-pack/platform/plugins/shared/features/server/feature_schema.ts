@@ -157,6 +157,7 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
     },
   }),
   name: schema.string(),
+  excludeFromBasePrivileges: schema.maybe(schema.boolean()),
   includeIn: schema.oneOf([schema.literal('all'), schema.literal('read'), schema.literal('none')]),
   minimumLicense: schema.maybe(validSubFeaturePrivilegeLicensesSchema),
   management: schema.maybe(managementSchema),
