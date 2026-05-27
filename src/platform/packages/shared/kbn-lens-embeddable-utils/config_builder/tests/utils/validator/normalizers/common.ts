@@ -468,6 +468,15 @@ export const getCommonNormalizer = <T extends LensAttributes>(
             };
           });
 
+          // Datatable's ESQL output order is driven by `layer.columns` array order
+          // and uses its own canonical (rows → splits → metrics) sort in
+          // the datatable normalizer. For every other chart, alphabetical
+          // canonicalization is fine because column order does not drive
+          // rendering.
+          if (attributes.visualizationType !== 'lnsDatatable') {
+            layer.columns.sort((a, b) => a.columnId.localeCompare(b.columnId));
+          }
+
           if (layer.timeField) {
             layer.timeField = undefined; // not saved in API re-derived at runtime
           }
@@ -562,6 +571,9 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     if (attributes.visualizationType !== 'lnsDatatable') {
       Object.values(attributes.state.datasourceStates.formBased?.layers ?? {}).forEach((layer) => {
         layer.columnOrder.sort();
+      });
+      Object.values(attributes.state.datasourceStates.textBased?.layers ?? {}).forEach((layer) => {
+        layer.columns.sort((a, b) => a.columnId.localeCompare(b.columnId));
       });
     }
 
