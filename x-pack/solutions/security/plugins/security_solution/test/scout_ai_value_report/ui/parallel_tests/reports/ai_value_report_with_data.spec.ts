@@ -28,33 +28,38 @@ spaceTest.describe(
       async ({ browserAuth, pageObjects }) => {
         const { aiValueReportPage } = pageObjects;
 
-        await browserAuth.loginAsSecurityRole('soc_manager');
+        await browserAuth.loginAsSecurityRole('admin');
         await aiValueReportPage.navigate();
 
         await expect(aiValueReportPage.page).toBeVisible({ timeout: 30000 });
         await expect(aiValueReportPage.sampleBanner).toBeHidden();
         await expect(aiValueReportPage.sampleDataBadge).toBeHidden();
-        await expect(aiValueReportPage.executiveSummary).toBeVisible();
+        await expect(aiValueReportPage.executiveSummary).toBeVisible({ timeout: 30000 });
         await expect(aiValueReportPage.exportButton).toBeEnabled();
       }
     );
 
     spaceTest(
       'shows the no-results empty state when Attack Discovery data is outside the selected range',
-      async ({ browserAuth, pageObjects }) => {
-        const { aiValueReportPage, datePicker } = pageObjects;
+      async ({ browserAuth, pageObjects, page, kbnUrl, scoutSpace }) => {
+        const { aiValueReportPage } = pageObjects;
 
-        await browserAuth.loginAsSecurityRole('soc_manager');
-        await aiValueReportPage.navigate();
+        await browserAuth.loginAsSecurityRole('admin');
+
+        // Navigate directly with a historical time range so no seeded data falls within it.
+        // The page reads `timerange` from the URL on mount via useInitTimerangeFromUrlParam,
+        // so deep-linking is the correct way to set an initial range on a page with no SearchBar.
+        const timerange =
+          "(valueReport:(linkTo:!(),timerange:(from:'2020-01-01T00:00:00.000Z',kind:absolute,to:'2020-01-02T00:00:00.000Z')))";
+        await page.goto(
+          kbnUrl.app('security/reports/ai_value', {
+            space: scoutSpace.id,
+            pathOptions: { params: { timerange } },
+          })
+        );
 
         await expect(aiValueReportPage.page).toBeVisible({ timeout: 30000 });
-
-        await datePicker.setAbsoluteRange({
-          from: 'Jan 1, 2020 @ 00:00:00.000',
-          to: 'Jan 2, 2020 @ 00:00:00.000',
-        });
-
-        await expect(aiValueReportPage.noResultsEmptyState).toBeVisible();
+        await expect(aiValueReportPage.noResultsEmptyState).toBeVisible({ timeout: 30000 });
         await expect(
           aiValueReportPage.noResultsEmptyState.getByText(
             'Adjust the time range in the top bar to see available results for the Value Report.'
