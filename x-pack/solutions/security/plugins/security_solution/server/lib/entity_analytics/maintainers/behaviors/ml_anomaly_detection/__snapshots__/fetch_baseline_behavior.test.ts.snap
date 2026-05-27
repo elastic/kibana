@@ -129,7 +129,6 @@ Object {
           "range": Object {
             "@timestamp": Object {
               "gte": "now-90d",
-              "lt": 1778241600000,
             },
           },
         },

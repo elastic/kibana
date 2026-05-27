@@ -26,4 +26,4 @@ See [`css_variables.ts`](./src/css_variables.ts) for complete API documentation 
 
 ## Related
 
-- [`@kbn/core-chrome-layout-components`](../core-chrome-layout-components) - React components using these variables
+- [`@kbn/ui-chrome-layout`](../../../../platform/kbn-ui/chrome-layout) - React components using these variables
