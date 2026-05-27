@@ -215,6 +215,27 @@ describe('useSerialPolling', () => {
     expect(poll).toHaveBeenCalledTimes(2);
   });
 
+  it('does not schedule sleep when immediate is false and shouldStop is already true', async () => {
+    const poll = jest.fn().mockResolvedValue(undefined);
+
+    renderHook(() =>
+      useSerialPolling({
+        poll,
+        intervalMs: 1000,
+        immediate: false,
+        shouldStop: () => true,
+      })
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+      jest.advanceTimersByTime(5000);
+      await Promise.resolve();
+    });
+
+    expect(poll).not.toHaveBeenCalled();
+  });
+
   it('waits one interval before the first poll when immediate is false', async () => {
     const poll = jest.fn().mockResolvedValue(undefined);
 

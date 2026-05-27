@@ -41,6 +41,7 @@ export const useSerialPolling = ({
   const pollRef = useRef(poll);
   const intervalMsRef = useRef(intervalMs);
   const shouldStopRef = useRef(shouldStop);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   pollRef.current = poll;
   intervalMsRef.current = intervalMs;
@@ -71,8 +72,12 @@ export const useSerialPolling = ({
 
         isFirstIteration = false;
 
+        if (cancelled || shouldStopRef.current()) {
+          break;
+        }
+
         await new Promise((resolve) => {
-          setTimeout(resolve, resolveIntervalMs(intervalMsRef.current));
+          timeoutRef.current = setTimeout(resolve, resolveIntervalMs(intervalMsRef.current));
         });
 
         if (cancelled || shouldStopRef.current()) {
@@ -84,6 +89,10 @@ export const useSerialPolling = ({
     void run();
 
     return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       cancelled = true;
     };
   }, [enabled, immediate, pollKey]);
