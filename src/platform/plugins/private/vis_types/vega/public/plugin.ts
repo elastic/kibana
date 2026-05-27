@@ -33,8 +33,6 @@ import {
   setUsageCollectionStart,
 } from './services';
 
-
-
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
 import type { ConfigSchema } from '../server/config';
@@ -97,13 +95,8 @@ export class VegaPlugin implements Plugin<void, void> {
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
     visualizations.createBaseVisualizationAsync('vega', async () => {
-      const [
-        [, startPlugins],
-        { vegaVisType, createVegaFn, getVegaVisRenderer },
-      ] = await Promise.all([
-        core.getStartServices(),
-        import('./async_module'),
-      ]);
+      const [[, startPlugins], { vegaVisType, createVegaFn, getVegaVisRenderer }] =
+        await Promise.all([core.getStartServices(), import('./async_module')]);
       if (!startPlugins.expressions.getFunction('vega')) {
         expressions.registerFunction(() => createVegaFn(visualizationDependencies));
         expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
