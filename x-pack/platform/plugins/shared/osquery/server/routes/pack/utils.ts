@@ -221,6 +221,52 @@ export function stripPerQueryRruleFields<T extends SOPackQuery[] | Record<string
   ) as T;
 }
 
+/**
+ * Drop the per-query override fields that don't match the new pack mode.
+ * Used on a PUT that transitions `schedule_type` (interval ↔ rrule, or clears
+ * the mode) so the SO write and read-API responses don't carry stale
+ * prior-mode overrides. Returns the same query verbatim when the per-query
+ * `schedule_type` already matches `newPackMode`, when the query carries no
+ * mode-specific fields, or when `newPackMode` is undefined (mode cleared —
+ * drop both override flavours).
+ */
+export const stripPriorModePerQueryFields = (
+  query: PackQueryInput,
+  newPackMode: ScheduleType | undefined
+): PackQueryInput => {
+  if (newPackMode === 'rrule') {
+    // Drop legacy interval override; preserve a same-mode rrule override.
+    const { interval: _interval, ...rest } = query;
+    if (rest.schedule_type === 'interval') {
+      const { schedule_type: _scheduleType, ...stripped } = rest;
+
+      return stripped;
+    }
+
+    return rest;
+  }
+
+  if (newPackMode === 'interval') {
+    // Drop rrule override; preserve a same-mode interval override.
+    const { schedule_type: scheduleType, rrule_schedule: _rruleSchedule, ...rest } = query;
+    if (scheduleType === 'rrule') {
+      return rest;
+    }
+
+    return scheduleType === undefined ? rest : { ...rest, schedule_type: scheduleType };
+  }
+
+  // Mode cleared (or undefined). Drop both flavours of override.
+  const {
+    schedule_type: _scheduleType,
+    rrule_schedule: _rruleSchedule,
+    interval: _interval,
+    ...rest
+  } = query;
+
+  return rest;
+};
+
 export interface ConvertSOQueriesToPackConfigOptions {
   spaceId?: string;
   packSchedule?: PackScheduleInput;

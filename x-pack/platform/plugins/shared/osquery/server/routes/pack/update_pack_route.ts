@@ -55,6 +55,7 @@ import {
   resolvePackScheduleForUpdate,
   buildScheduleResponseSlice,
   stripPerQueryRruleFields,
+  stripPriorModePerQueryFields,
 } from './utils';
 
 import { convertShardsToArray } from '../utils';
@@ -180,18 +181,6 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           ),
           'id'
         );
-        const now = moment().toISOString();
-        const queries = gatedQueries
-          ? (mapValues(gatedQueries, (queryData, queryId) => {
-              const existing = existingScheduleIds[queryId];
-
-              return {
-                ...queryData,
-                schedule_id: existing?.schedule_id ?? uuidv4(),
-                start_date: existing?.start_date ?? now,
-              };
-            }) as Record<string, PackQueryInput>)
-          : undefined;
 
         const resolved = resolvePackScheduleForUpdate({
           current: {
@@ -209,6 +198,40 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           },
           isRruleFeatureEnabled,
         });
+
+        const now = moment().toISOString();
+
+        // On a pack-mode transition the request typically doesn't restate
+        // `queries`, but the SO carries per-query fields from the prior mode
+        // (e.g. `fast.interval: 30` from an old interval pack). Without a
+        // rewrite those fields stay on the SO and surface via GET/find,
+        // leaking cross-mode state. Hydrate from the current SO when the
+        // request omits `queries`, then strip prior-mode per-query fields so
+        // the merged set is consistent with the new pack mode before both
+        // validation and SO write.
+        const baseQueries =
+          gatedQueries ??
+          (resolved.transitioned
+            ? (convertSOQueriesToPack(currentPackSO.attributes.queries ?? []) as Record<
+                string,
+                PackQueryInput
+              >)
+            : undefined);
+
+        const queries = baseQueries
+          ? (mapValues(baseQueries, (queryData, queryId) => {
+              const existing = existingScheduleIds[queryId];
+              const carried = resolved.transitioned
+                ? stripPriorModePerQueryFields(queryData, resolved.scheduleType)
+                : queryData;
+
+              return {
+                ...carried,
+                schedule_id: existing?.schedule_id ?? uuidv4(),
+                start_date: existing?.start_date ?? now,
+              };
+            }) as Record<string, PackQueryInput>)
+          : undefined;
 
         const scheduleErr = validatePackScheduleFields({
           packScheduleType: resolved.scheduleType ?? undefined,

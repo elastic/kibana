@@ -14,6 +14,7 @@ import {
   isValidRfc3339,
   resolvePackScheduleForUpdate,
   stripPerQueryRruleFields,
+  stripPriorModePerQueryFields,
 } from './utils';
 
 const getTestQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
@@ -462,6 +463,75 @@ describe('Pack utils', () => {
     test('flag off — empty queries returns empty', () => {
       expect(stripPerQueryRruleFields([], false)).toEqual([]);
       expect(stripPerQueryRruleFields({}, false)).toEqual({});
+    });
+  });
+
+  describe('stripPriorModePerQueryFields', () => {
+    test('new mode rrule — drops interval and stale interval schedule_type', () => {
+      expect(
+        stripPriorModePerQueryFields(
+          { query: 'SELECT 1', interval: 30, schedule_type: 'interval' },
+          'rrule'
+        )
+      ).toEqual({ query: 'SELECT 1' });
+    });
+
+    test('new mode rrule — preserves same-mode rrule override', () => {
+      const rrule = {
+        rrule: 'FREQ=MINUTELY',
+        start_date: '2024-01-01T00:00:00.000Z',
+      };
+      expect(
+        stripPriorModePerQueryFields(
+          { query: 'SELECT 1', schedule_type: 'rrule', rrule_schedule: rrule },
+          'rrule'
+        )
+      ).toEqual({ query: 'SELECT 1', schedule_type: 'rrule', rrule_schedule: rrule });
+    });
+
+    test('new mode interval — drops rrule_schedule and stale rrule schedule_type', () => {
+      expect(
+        stripPriorModePerQueryFields(
+          {
+            query: 'SELECT 1',
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2024-01-01T00:00:00.000Z' },
+          },
+          'interval'
+        )
+      ).toEqual({ query: 'SELECT 1' });
+    });
+
+    test('new mode interval — preserves same-mode interval override', () => {
+      expect(
+        stripPriorModePerQueryFields(
+          { query: 'SELECT 1', interval: 30, schedule_type: 'interval' },
+          'interval'
+        )
+      ).toEqual({ query: 'SELECT 1', interval: 30, schedule_type: 'interval' });
+    });
+
+    test('mode cleared — drops both override flavours and interval', () => {
+      expect(
+        stripPriorModePerQueryFields(
+          {
+            query: 'SELECT 1',
+            interval: 30,
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2024-01-01T00:00:00.000Z' },
+          },
+          undefined
+        )
+      ).toEqual({ query: 'SELECT 1' });
+    });
+
+    test('no overrides — pass-through', () => {
+      expect(stripPriorModePerQueryFields({ query: 'SELECT 1' }, 'rrule')).toEqual({
+        query: 'SELECT 1',
+      });
+      expect(stripPriorModePerQueryFields({ query: 'SELECT 1' }, undefined)).toEqual({
+        query: 'SELECT 1',
+      });
     });
   });
 

@@ -304,6 +304,118 @@ describe('updatePackRoute', () => {
       expect(patchedAttributes).not.toHaveProperty('rrule_schedule');
     });
 
+    it('interval → rrule with queries omitted — strips prior-mode per-query interval from SO write', async () => {
+      // Repro from the review: pack runs interval with per-query `fast.interval: 30`.
+      // PUT flips schedule_type to rrule WITHOUT restating queries. Without the
+      // transition strip, the per-query interval survives on the SO and leaks
+      // via GET/find as cross-mode state.
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          schedule_type: 'interval' as const,
+          interval: 60,
+          rrule_schedule: null,
+          queries: [
+            {
+              id: 'fast',
+              name: 'fast',
+              query: 'SELECT 1',
+              interval: 30,
+              schedule_type: 'interval' as const,
+              schedule_id: 'sched-fast',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+            {
+              id: 'default',
+              name: 'default',
+              query: 'SELECT 2',
+              schedule_id: 'sched-default',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+          ],
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: {
+          schedule_type: 'rrule',
+          rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const updateCall = mockClient.update.mock.calls[0];
+      const patchedAttributes = updateCall[2];
+      // Queries are rewritten on the SO write so cross-mode state doesn't leak.
+      const writtenQueries = patchedAttributes.queries as Array<Record<string, unknown>>;
+      const fast = writtenQueries.find((q) => q.id === 'fast')!;
+      expect(fast).not.toHaveProperty('interval');
+      expect(fast).not.toHaveProperty('schedule_type');
+      // Existing schedule_id is preserved across the rewrite.
+      expect(fast.schedule_id).toBe('sched-fast');
+    });
+
+    it('rrule → interval with queries omitted — strips prior-mode per-query rrule_schedule from SO write', async () => {
+      const rruleValue = {
+        rrule: 'FREQ=MINUTELY;INTERVAL=2',
+        start_date: '2026-01-01T00:00:00Z',
+      };
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          schedule_type: 'rrule' as const,
+          interval: null,
+          rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00Z' },
+          queries: [
+            {
+              id: 'overrides',
+              name: 'overrides',
+              query: 'SELECT 1',
+              schedule_type: 'rrule' as const,
+              rrule_schedule: rruleValue,
+              schedule_id: 'sched-overrides',
+              start_date: '2025-01-01T00:00:00.000Z',
+            },
+          ],
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { schedule_type: 'interval', interval: 60 },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const updateCall = mockClient.update.mock.calls[0];
+      const patchedAttributes = updateCall[2];
+      const writtenQueries = patchedAttributes.queries as Array<Record<string, unknown>>;
+      const overrides = writtenQueries.find((q) => q.id === 'overrides')!;
+      expect(overrides).not.toHaveProperty('rrule_schedule');
+      expect(overrides).not.toHaveProperty('schedule_type');
+      expect(overrides.schedule_id).toBe('sched-overrides');
+    });
+
     it('policy_ids omitted — preserves existing policy attachments (no strip)', async () => {
       // Reproduces the schedule-update bug: when a PUT updates schedule fields
       // without restating `policy_ids`, the pack must remain attached to its
