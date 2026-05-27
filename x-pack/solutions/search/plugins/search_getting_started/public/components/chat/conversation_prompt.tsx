@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, keys } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
@@ -68,9 +68,12 @@ export const ConversationPrompt = () => {
         />
         <div css={NewConversationSendButton}>
           <EuiToolTip
-            content={i18n.translate('xpack.search.gettingStarted.chat.conversationPrompt.send', {
-              defaultMessage: 'Open the AI assistant chat',
-            })}
+            content={i18n.translate(
+              'xpack.search.gettingStarted.chat.conversationPrompt.send.tooltip',
+              {
+                defaultMessage: 'Open the AI assistant chat',
+              }
+            )}
             disableScreenReaderOutput
           >
             <EuiButtonIcon
