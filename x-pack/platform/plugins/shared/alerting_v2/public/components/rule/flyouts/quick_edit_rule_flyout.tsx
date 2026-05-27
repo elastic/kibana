@@ -22,6 +22,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
@@ -157,15 +158,22 @@ export const QuickEditRuleFlyout = ({ rule, onClose }: QuickEditRuleFlyoutProps)
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="cross"
-                    color="text"
-                    onClick={onClose}
-                    aria-label={i18n.translate('xpack.alertingV2.quickEditRuleFlyout.close', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.alertingV2.quickEditRuleFlyout.close', {
                       defaultMessage: 'Close',
                     })}
-                    data-test-subj="quickEditRuleFlyoutCloseButton"
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="cross"
+                      color="text"
+                      onClick={onClose}
+                      aria-label={i18n.translate('xpack.alertingV2.quickEditRuleFlyout.close', {
+                        defaultMessage: 'Close',
+                      })}
+                      data-test-subj="quickEditRuleFlyoutCloseButton"
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>

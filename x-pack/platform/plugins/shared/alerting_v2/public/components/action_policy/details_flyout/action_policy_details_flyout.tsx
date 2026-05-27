@@ -20,6 +20,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   type EuiDescriptionListProps,
 } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
@@ -162,15 +163,25 @@ export const ActionPolicyDetailsFlyout = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              color="text"
-              onClick={onClose}
-              aria-label={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon', {
+            <EuiToolTip
+              content={i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon', {
                 defaultMessage: 'Close',
               })}
-              data-test-subj="detailsFlyoutCloseIcon"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="cross"
+                color="text"
+                onClick={onClose}
+                aria-label={i18n.translate(
+                  'xpack.alertingV2.actionPolicy.detailsFlyout.closeIcon',
+                  {
+                    defaultMessage: 'Close',
+                  }
+                )}
+                data-test-subj="detailsFlyoutCloseIcon"
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
