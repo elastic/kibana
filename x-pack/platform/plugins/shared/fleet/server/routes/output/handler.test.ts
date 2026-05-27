@@ -216,6 +216,56 @@ describe('Outputs handler', () => {
     expect(res).toEqual({ body: { item: { id: 'output1' } } });
   });
 
+  it('should call bumpAllAgentPoliciesForOutput with isDefault flags on put', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+    jest.spyOn(outputService, 'get').mockImplementation((id: string) => {
+      if (id === SERVERLESS_DEFAULT_OUTPUT_ID) {
+        return { hosts: ['http://elasticsearch:9200'] } as any;
+      }
+      return { id: 'output1', is_default: true, is_default_monitoring: false } as any;
+    });
+
+    await putOutputHandlerWithErrorHandler(
+      mockContext,
+      {
+        body: { hosts: ['http://localhost:8080'] },
+        params: { outputId: 'output1' },
+      } as any,
+      mockResponse as any
+    );
+
+    expect(agentPolicyService.bumpAllAgentPoliciesForOutput).toHaveBeenLastCalledWith(
+      undefined,
+      'output1',
+      { isDefault: true, isDefaultMonitoring: false }
+    );
+  });
+
+  it('should call bumpAllAgentPoliciesForOutput with isDefault flags on post', async () => {
+    jest
+      .spyOn(appContextService, 'getCloud')
+      .mockReturnValue({ isServerlessEnabled: false } as any);
+    jest.spyOn(outputService, 'create').mockResolvedValue({
+      id: 'output1',
+      is_default: false,
+      is_default_monitoring: true,
+    } as any);
+
+    await postOutputHandlerWithErrorHandler(
+      mockContext,
+      { body: { type: 'elasticsearch' } } as any,
+      mockResponse as any
+    );
+
+    expect(agentPolicyService.bumpAllAgentPoliciesForOutput).toHaveBeenLastCalledWith(
+      undefined,
+      'output1',
+      { isDefault: false, isDefaultMonitoring: true }
+    );
+  });
+
   it('should return error if both service_token and secrets.service_token is provided for remote_elasticsearch output', async () => {
     jest
       .spyOn(appContextService, 'getCloud')
