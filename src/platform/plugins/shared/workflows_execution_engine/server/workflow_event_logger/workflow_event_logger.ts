@@ -191,6 +191,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
         provider: 'workflow-engine',
       },
       tags: ['workflow'],
+      ...(this.context.mode ? { labels: { mode: this.context.mode } } : {}),
     };
   }
 

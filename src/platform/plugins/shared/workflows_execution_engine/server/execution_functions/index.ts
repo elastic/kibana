@@ -13,3 +13,7 @@ export { resumeWorkflow } from './resume_workflow';
 export { checkAndSkipIfExistingScheduledExecution } from './schedule_workflow';
 export { executeWorkflowSync } from './execute_workflow_sync';
 export type { ExecuteWorkflowSyncInput, ExecuteWorkflowSyncResult } from './execute_workflow_sync';
+export {
+  assertWorkflowLinearForSync,
+  SyncModeNotSupportedError,
+} from './assert_workflow_linear_for_sync';

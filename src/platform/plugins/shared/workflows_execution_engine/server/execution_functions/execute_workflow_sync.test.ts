@@ -18,6 +18,9 @@ const logger = loggingSystemMock.createLogger();
 /** Minimal step definition that echoes its `value` input as `output`. */
 const echoStep: ServerStepDefinition = {
   id: 'test.echo',
+  label: 'test',
+  description: 'test',
+  category: 'test' as never,
   inputSchema: {} as never,
   outputSchema: {} as never,
   handler: async (ctx) => ({ output: { result: (ctx.input as { value: string }).value } }),
@@ -26,6 +29,9 @@ const echoStep: ServerStepDefinition = {
 /** Step that always throws. */
 const failStep: ServerStepDefinition = {
   id: 'test.fail',
+  label: 'test',
+  description: 'test',
+  category: 'test' as never,
   inputSchema: {} as never,
   outputSchema: {} as never,
   handler: async () => {
@@ -145,6 +151,9 @@ describe('executeWorkflowSync', () => {
     it('times out when execution exceeds maxTimeoutMs', async () => {
       const slowStep: ServerStepDefinition = {
         id: 'test.slow',
+        label: 'test',
+        description: 'test',
+        category: 'test' as never,
         inputSchema: {} as never,
         outputSchema: {} as never,
         handler: () => new Promise((resolve) => setTimeout(() => resolve({ output: {} }), 500)),

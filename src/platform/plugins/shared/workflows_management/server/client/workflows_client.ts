@@ -109,6 +109,8 @@ export const createWorkflowsClientProvider = (
             payload: current,
             maxTimeoutMs: timeoutMs,
             capabilities,
+            workflowId: workflow.id,
+            workflowName: workflow.name,
           });
 
           if (firstResult.status === 'failed') {
@@ -158,6 +160,8 @@ export const createWorkflowsClientProvider = (
                 resumeFrom: firstResult.checkpoint,
                 proceedResult,
                 capabilities,
+                workflowId: workflow.id,
+                workflowName: workflow.name,
               });
 
               if (resumeResult.status === 'failed') {

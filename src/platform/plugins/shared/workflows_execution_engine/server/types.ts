@@ -63,7 +63,10 @@ export interface WorkflowsExecutionEnginePluginStart {
   bulkScheduleWorkflow: BulkScheduleWorkflow;
   triggerEvents: TriggerEventsContract;
   executeWorkflowSync: (
-    input: Omit<ExecuteWorkflowSyncInput, 'getStepDefinition' | 'logger'>
+    input: Omit<
+      ExecuteWorkflowSyncInput,
+      'getStepDefinition' | 'logger' | 'workflowEventLoggerService'
+    >
   ) => Promise<ExecuteWorkflowSyncResult>;
 }
 

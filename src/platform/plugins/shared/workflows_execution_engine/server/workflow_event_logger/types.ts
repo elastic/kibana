@@ -79,6 +79,12 @@ export interface WorkflowEventLoggerContext {
   stepName?: string;
   stepType?: string;
   spaceId?: string;
+  /**
+   * Execution mode. 'sync' for synchronous hook-driven runs (in-process,
+   * no Task Manager); 'async' for Task-Manager–driven workflow executions.
+   * Propagated as a label on every log entry produced by this logger.
+   */
+  mode?: 'sync' | 'async';
 }
 
 export interface WorkflowEventLoggerOptions {

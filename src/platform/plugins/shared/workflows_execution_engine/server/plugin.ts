@@ -1300,12 +1300,16 @@ export class WorkflowsExecutionEnginePlugin
       resumeWorkflowExecution,
       triggerEvents,
       executeWorkflowSync: (
-        input: Omit<ExecuteWorkflowSyncInput, 'getStepDefinition' | 'logger'>
+        input: Omit<
+          ExecuteWorkflowSyncInput,
+          'getStepDefinition' | 'logger' | 'workflowEventLoggerService'
+        >
       ) =>
         executeWorkflowSync({
           ...input,
           getStepDefinition: (stepType) => plugins.workflowsExtensions.getStepDefinition(stepType),
           logger: this.logger,
+          workflowEventLoggerService,
         }),
     };
   }
