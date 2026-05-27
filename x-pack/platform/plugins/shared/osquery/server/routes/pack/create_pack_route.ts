@@ -210,7 +210,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             updated_by_profile_uid: profileUid,
             shards: convertShardsToArray(shards),
             // Pack-level schedule fields. Stamped only when the feature flag
-            // is on — the gated `scheduleType` is `undefined` otherwise.
+            // is on — the gated `scheduleType` is `undefined` otherwise. The
+            // mode/value coupling below is already enforced by
+            // `validatePackScheduleFields`; the redundant null/defined checks
+            // are defense in depth so a missed validator branch can never
+            // write a mode-mismatched pair to the SO.
             ...(scheduleType ? { schedule_type: scheduleType } : {}),
             ...(scheduleType === 'interval' && packInterval !== undefined
               ? { interval: packInterval }
