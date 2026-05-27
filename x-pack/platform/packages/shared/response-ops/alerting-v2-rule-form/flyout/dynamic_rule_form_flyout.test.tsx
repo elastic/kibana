@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -15,8 +15,18 @@ import { DynamicRuleFormFlyout } from './dynamic_rule_form_flyout';
 import type { DynamicRuleFormFlyoutProps } from './dynamic_rule_form_flyout';
 
 jest.mock('../form/dynamic_rule_form', () => ({
-  DynamicRuleForm: (props: { query: string }) => (
-    <div data-test-subj="dynamicRuleFormMock" data-query={props.query} />
+  DynamicRuleForm: ({
+    query,
+    onDirtyChange,
+  }: {
+    query: string;
+    onDirtyChange?: (isDirty: boolean) => void;
+  }) => (
+    <div data-test-subj="dynamicRuleFormMock" data-query={query}>
+      <button data-test-subj="mockMakeDirty" onClick={() => onDirtyChange?.(true)} type="button">
+        Make dirty
+      </button>
+    </div>
   ),
 }));
 
@@ -57,6 +67,80 @@ describe('DynamicRuleFormFlyout', () => {
     expect(callout).toHaveTextContent('??field');
 
     expect(screen.getByTestId('ruleV2FlyoutSaveButton')).toBeDisabled();
+  });
+
+  describe('unsaved-changes confirmation', () => {
+    it('closes immediately when the form is pristine and the X button is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('closes immediately when the form is pristine and the Cancel button is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('ruleV2FlyoutCancelButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('shows the confirmation modal instead of closing when the form is dirty and the X button is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+
+    it('shows the confirmation modal instead of closing when the form is dirty and the Cancel button is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('ruleV2FlyoutCancelButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+
+    it('"Continue editing" dismisses the modal and keeps the flyout open', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dynamicRuleFormMock')).toBeInTheDocument();
+    });
+
+    it('"Discard changes" calls onClose and closes the modal', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    // ESC key behaviour: EuiFlyout delegates ESC to its onClose handler
+    // (via EuiWindowEvent). The guard in handleRequestClose is the same
+    // code path already exercised by the X-button and Cancel-button tests
+    // above, so ESC is covered implicitly. Directly simulating EUI's
+    // internal window-level keyboard wiring is not reliable in JSDOM.
   });
 
   describe('esqlVariables integration', () => {

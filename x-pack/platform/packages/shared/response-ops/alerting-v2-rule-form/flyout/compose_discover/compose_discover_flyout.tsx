@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import {
   EuiBadge,
@@ -26,6 +26,7 @@ import { useDebounceFn } from '@kbn/react-hooks';
 import type { FormValues } from '../../form/types';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
+import { ConfirmRuleClose } from '../confirm_rule_close';
 import { serializeFormToYaml, parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
 import type { ComposeFormValues, RuleQuery } from './compose_form_types';
 import { getBreachQuery } from './compose_form_types';
@@ -273,6 +274,28 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   }, [rule, mode]);
 
   const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
+  const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
+  const [flyoutKey, setFlyoutKey] = useState(0);
+  const isDirtyRef = useRef(false);
+  isDirtyRef.current = methods.formState.isDirty;
+
+  const handleRequestClose = useCallback(() => {
+    if (isDirtyRef.current) {
+      setIsConfirmCloseVisible(true);
+    } else {
+      onClose();
+    }
+  }, [onClose]);
+
+  const handleConfirmDiscard = useCallback(() => {
+    setIsConfirmCloseVisible(false);
+    onClose();
+  }, [onClose]);
+
+  const handleCancelDiscard = useCallback(() => {
+    setIsConfirmCloseVisible(false);
+    setFlyoutKey((k) => k + 1);
+  }, []);
 
   const [sandboxQuery, setSandboxQuery] = useState<RuleQuery>(() => methods.getValues('query'));
   const [sandboxTimeField, setSandboxTimeField] = useState<string>(() =>
@@ -309,15 +332,15 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
         const { base, alertBlock } = splitQuery(full);
         const composed: RuleQuery = { format: 'composed', base, blocks: { breach: alertBlock } };
         setSandboxQuery(composed);
-        methods.setValue('query', composed);
+        methods.setValue('query', composed, { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
         const assembled = getBreachQuery(methods.getValues('query'));
         const standalone: RuleQuery = { format: 'standalone', breach: assembled };
         setSandboxQuery(standalone);
-        methods.setValue('query', standalone);
+        methods.setValue('query', standalone, { shouldDirty: true });
       }
-      methods.setValue('kind', kind);
+      methods.setValue('kind', kind, { shouldDirty: true });
       dispatch({ type: 'KIND_CHANGE', kind });
     },
     [methods, dispatch]
@@ -358,9 +381,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
         if (uiState.queryCommitted) {
           const current = methods.getValues('query');
           if (current.format === 'composed' && current.blocks.recover) {
-            methods.setValue('query', { ...current, blocks: { breach: current.blocks.breach } });
+            methods.setValue('query', { ...current, blocks: { breach: current.blocks.breach } }, { shouldDirty: true });
           } else if (current.format === 'standalone' && current.recover) {
-            methods.setValue('query', { format: 'standalone', breach: current.breach });
+            methods.setValue('query', { format: 'standalone', breach: current.breach }, { shouldDirty: true });
           }
         }
         // (b) Close sandbox in non-YAML mode — prevents a pending Apply from
@@ -429,8 +452,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   );
 
   const handleSandboxApply = useCallback(() => {
-    methods.setValue('query', sandboxQuery);
-    methods.setValue('timeField', sandboxTimeField);
+    methods.setValue('query', sandboxQuery, { shouldDirty: true });
+    methods.setValue('timeField', sandboxTimeField, { shouldDirty: true });
     if (uiState.yamlMode) {
       const current = { ...methods.getValues(), query: sandboxQuery, timeField: sandboxTimeField };
       setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(current)));
@@ -491,10 +514,11 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
       <FormProvider {...methods}>
         <EuiFlyout
+          key={flyoutKey}
           type="overlay"
           session="start"
           historyKey={historyKey}
-          onClose={onClose}
+          onClose={handleRequestClose}
           aria-labelledby={FLYOUT_TITLE_ID}
           size={480}
         >
@@ -582,7 +606,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             ) : (
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={onClose} data-test-subj="composeDiscoverCancel">
+                  <EuiButtonEmpty onClick={handleRequestClose} data-test-subj="composeDiscoverCancel">
                     {CANCEL_BUTTON_LABEL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
@@ -665,6 +689,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             />
           )}
         </EuiFlyout>
+        {isConfirmCloseVisible && (
+          <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
+        )}
       </FormProvider>
     </RuleFormProvider>
   );

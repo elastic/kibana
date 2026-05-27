@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { useForm, FormProvider, Controller } from 'react-hook-form';
+import React, { useEffect, useRef } from 'react';
+import { useForm, FormProvider, Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from './types';
@@ -28,6 +28,8 @@ export interface DynamicRuleFormProps {
   /** Callback invoked after a successful internal submission (useCreateRule). */
   onSuccess?: () => void;
   onCancel?: () => void;
+  /** Called whenever the form's dirty state changes, allowing parents outside FormProvider to react. */
+  onDirtyChange?: (isDirty: boolean) => void;
   /** Whether to include YAML editor toggle (default: false) */
   includeYaml?: boolean;
   /** Whether the form is in a loading/disabled state */
@@ -52,6 +54,22 @@ export interface DynamicRuleFormProps {
  * The query is the only externally-driven field; a useEffect syncs it via
  * setValue when the prop changes. All other fields are internally managed.
  */
+const DirtyStateBridge = ({ onDirtyChange }: { onDirtyChange: (isDirty: boolean) => void }) => {
+  const {
+    formState: { isDirty },
+  } = useFormContext<FormValues>();
+  const prevRef = useRef(isDirty);
+
+  useEffect(() => {
+    if (prevRef.current !== isDirty) {
+      prevRef.current = isDirty;
+      onDirtyChange(isDirty);
+    }
+  }, [isDirty, onDirtyChange]);
+
+  return null;
+};
+
 export const DynamicRuleForm = ({
   query,
   services,
@@ -63,6 +81,7 @@ export const DynamicRuleForm = ({
   isSubmitting = false,
   includeSubmission = false,
   onCancel,
+  onDirtyChange,
   submitLabel,
   cancelLabel,
 }: DynamicRuleFormProps) => {
@@ -80,6 +99,7 @@ export const DynamicRuleForm = ({
 
   return (
     <FormProvider {...methods}>
+      {onDirtyChange && <DirtyStateBridge onDirtyChange={onDirtyChange} />}
       {/* Hidden field to validate the ES|QL query */}
       <Controller
         name="evaluation.query.base"

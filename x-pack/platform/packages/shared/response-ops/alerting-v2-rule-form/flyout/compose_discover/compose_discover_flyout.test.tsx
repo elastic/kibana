@@ -27,6 +27,8 @@ jest.mock('@kbn/esql-editor', () => ({
 }));
 
 jest.mock('./compose_discover_form', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { useFormContext } = require('react-hook-form');
   const actual = jest.requireActual('./use_compose_discover_state');
   return {
     getSteps: (isAlert: boolean) =>
@@ -39,7 +41,20 @@ jest.mock('./compose_discover_form', () => {
         };
         return { id, title: titles[id], render: () => <div /> };
       }),
-    ComposeDiscoverForm: () => <div data-test-subj="composeDiscoverFormMock" />,
+    ComposeDiscoverForm: () => {
+      const { setValue } = useFormContext();
+      return (
+        <div data-test-subj="composeDiscoverFormMock">
+          <button
+            data-test-subj="mockMakeDirty"
+            onClick={() => setValue('metadata.name', 'changed', { shouldDirty: true })}
+            type="button"
+          >
+            Make dirty
+          </button>
+        </div>
+      );
+    },
   };
 });
 
@@ -145,6 +160,74 @@ describe('ComposeDiscoverFlyout', () => {
     it('disables Next when query is not committed on alertCondition step', () => {
       renderFlyout();
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
+    });
+  });
+
+  describe('unsaved-changes confirmation', () => {
+    it('closes immediately when the form is pristine and the X button is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('closes immediately when the form is pristine and Cancel is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('composeDiscoverCancel'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+    });
+
+    it('shows the confirmation modal when the form is dirty and the X button is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+
+    it('shows the confirmation modal when the form is dirty and Cancel is clicked', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('composeDiscoverCancel'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.getByTestId('alertingV2ConfirmRuleCloseModal')).toBeInTheDocument();
+    });
+
+    it('"Continue editing" dismisses the modal and keeps the flyout open', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('alertingV2ConfirmRuleCloseModal')).not.toBeInTheDocument();
+      expect(screen.getByTestId('composeDiscoverFormMock')).toBeInTheDocument();
+    });
+
+    it('"Discard changes" calls onClose', () => {
+      const onClose = jest.fn();
+      renderFlyout({ onClose });
+
+      fireEvent.click(screen.getByTestId('mockMakeDirty'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
     });
   });
 });
