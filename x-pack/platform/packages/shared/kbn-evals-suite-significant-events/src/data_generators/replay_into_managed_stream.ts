@@ -400,7 +400,7 @@ export async function replayIntoManagedStream(
   try {
     log.info('Step 1/4: Registering snapshot repository...');
     repository.validate();
-    await repository.register({ esClient, log, repoName: artifacts.repoName });
+    await repository.register({ esClient, log, repoName: artifacts.repoName, verify: false });
 
     log.info('Step 2/4: Restoring logs snapshot indices into temporary indices...');
     const logsIndices = await getLogsIndicesFromSnapshot({

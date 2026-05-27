@@ -79,7 +79,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     repository.validate();
 
     log.info('Step 1/4: Registering snapshot repository...');
-    await repository.register({ esClient, log, repoName });
+    await repository.register({ esClient, log, repoName, verify: false });
 
     log.info('Step 2/4: Retrieving snapshot metadata...');
     const snapshotInfo = await getSnapshotMetadata({
