@@ -12,11 +12,11 @@ import type { ComposeFormValues } from './compose_form_types';
 
 export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
 
-export type RecoveryType = 'default' | 'custom' | 'none';
+export type RecoveryType = 'default' | 'custom';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
-export type StepId = 'alertCondition' | 'recoveryCondition' | 'details' | 'notifications';
+export type StepId = 'alertCondition' | 'builderCondition' | 'recoveryCondition' | 'details';
 
 export interface StepRenderProps {
   state: ComposeDiscoverState;
@@ -24,6 +24,8 @@ export interface StepRenderProps {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  builderState?: unknown;
+  onBuilderStateChange?: (state: unknown) => void;
 }
 
 export interface StepDefinition {
@@ -32,7 +34,8 @@ export interface StepDefinition {
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
     methods: UseFormReturn<ComposeFormValues>,
-    state: ComposeDiscoverState
+    state: ComposeDiscoverState,
+    builderState?: unknown
   ) => Promise<boolean> | boolean;
 }
 
@@ -69,4 +72,5 @@ export type ComposeDiscoverAction =
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number; isAlert: boolean }
   | { type: 'CLOSE_CHILD' }
   | { type: 'COMMIT_QUERY' }
+  | { type: 'INVALIDATE_QUERY' }
   | { type: 'SET_YAML_MODE'; enabled: boolean };
