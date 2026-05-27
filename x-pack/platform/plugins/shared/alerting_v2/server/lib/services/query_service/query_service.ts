@@ -7,14 +7,12 @@
 
 import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { inject, injectable } from 'inversify';
 import type { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import type { ExecutionContext } from '../../execution_context';
 import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
-import { isEsqlUserError } from '../../errors/esql_user_error';
 
 export interface ExecuteQueryParams {
   query: EsqlQueryRequest['query'];
@@ -125,9 +123,6 @@ export class QueryService implements QueryServiceContract {
         });
       }
 
-      if (isEsqlUserError(error)) {
-        throw createTaskRunError(error as Error, TaskErrorSource.USER);
-      }
       throw error;
     } finally {
       await this.closeReader(reader);
