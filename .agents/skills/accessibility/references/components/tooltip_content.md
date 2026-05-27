@@ -2,7 +2,7 @@
 
 **Applies to:** `EuiToolTip`, `EuiIconTip` — the `content` and `title` props
 
-Tooltip `content` and `title` render inside a portal with `role="tooltip"`. The tooltip itself is only shown on hover or focus of the trigger and is **not reachable by keyboard or screen-reader navigation**. Anything focusable placed inside makes that control unreachable for keyboard and assistive-technology users. Use **`EuiPopover`** when the content needs to be interactive.
+Tooltip `content` and `title` render inside a portal with `role="tooltip"`. The overlay only appears while the trigger is hovered or focused and is dismissed on blur, so any focusable element placed inside it is unreachable by keyboard and assistive-technology users. Use **`EuiPopover`** when the content needs to be interactive.
 
 **Related guides:** **`overlays.md`** (`EuiPopover` for interactive content) · **`tooltip_icon.md`** (wrapping `EuiButtonIcon` with `EuiToolTip`) · **`icons_and_tooltips.md`** (`EuiIconTip` vs `EuiToolTip` + `EuiIcon`).
 
@@ -49,9 +49,9 @@ Tooltip `content` and `title` render inside a portal with `role="tooltip"`. The 
   <EuiButton>Hover me</EuiButton>
 </EuiToolTip>
 
-// RIGHT — use EuiPopover when content needs to be interactive (function component)
+// RIGHT — switch to EuiPopover so the link participates in the focus order
 const [isOpen, setIsOpen] = useState(false);
-const togglePopover = () => setIsOpen((isOpen) => !isOpen);
+const togglePopover = () => setIsOpen((open) => !open);
 const closePopover = () => setIsOpen(false);
 
 <EuiPopover
@@ -61,25 +61,6 @@ const closePopover = () => setIsOpen(false);
 >
   <EuiLink href="/docs">Learn more</EuiLink>
 </EuiPopover>
-
-// RIGHT — use EuiPopover when content needs to be interactive (class component)
-class MyComponent extends React.Component {
-  state = { isOpen: false };
-  togglePopover = () => this.setState((state) => ({ isOpen: !state.isOpen }));
-  closePopover = () => this.setState({ isOpen: false });
-
-  render() {
-    return (
-      <EuiPopover
-        button={<EuiButton onClick={this.togglePopover}>More info</EuiButton>}
-        isOpen={this.state.isOpen}
-        closePopover={this.closePopover}
-      >
-        <EuiLink href="/docs">Learn more</EuiLink>
-      </EuiPopover>
-    );
-  }
-}
 
 // WRONG — button inside `EuiIconTip` content
 <EuiIconTip content={<EuiButton>Click</EuiButton>} type="info" />
@@ -92,16 +73,18 @@ class MyComponent extends React.Component {
   <EuiButton>Hover</EuiButton>
 </EuiToolTip>
 
-// WRONG — interactive child hidden behind a conditional / fragment / wrapper
+// WRONG — interactive child wrapped in a fragment is reported recursively
+<EuiToolTip content={<><span>Text</span><EuiLink href="#">Link</EuiLink></>}>
+  <EuiButton>Hover</EuiButton>
+</EuiToolTip>
+
+// WRONG — interactive child behind `cond && …` is reported
 <EuiToolTip content={<span>{cond && <EuiLink href="#">Link</EuiLink>}</span>}>
   <EuiButton>Hover</EuiButton>
 </EuiToolTip>
 
+// WRONG — interactive child inside a ternary is reported
 <EuiToolTip content={cond ? <EuiLink href="#">Link</EuiLink> : null}>
-  <EuiButton>Hover</EuiButton>
-</EuiToolTip>
-
-<EuiToolTip content={<><span>Text</span><EuiLink href="#">Link</EuiLink></>}>
   <EuiButton>Hover</EuiButton>
 </EuiToolTip>
 
