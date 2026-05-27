@@ -17,7 +17,6 @@ import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { getDiscoverSessionEmbeddableSchema } from './embeddable/schema';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DISCOVER_APP_LOCATOR } from '../common';
@@ -83,7 +82,6 @@ export class DiscoverServerPlugin
         this.embeddableTransformsEnabled
           ? getDiscoverSessionEmbeddableSchema(getDrilldownsSchema)
           : undefined,
-      libraryType: SavedSearchType,
     });
 
     if (plugins.agentBuilder) {

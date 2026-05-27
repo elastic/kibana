@@ -11,12 +11,8 @@ import type { IRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext, SavedObjectsFindOptionsReference } from '@kbn/core/server';
 import { SEARCH_ROUTE_PATH } from '../../common/constants';
 import { searchLibraryRequestSchema, searchLibraryResponseSchema } from './types';
-import type { getEmbeddableServerRegistry } from '../embeddable_transforms/registry';
 
-export function registerSearchRoute(
-  router: IRouter<RequestHandlerContext>,
-  transformRegistry: ReturnType<typeof getEmbeddableServerRegistry>
-) {
+export function registerSearchRoute(router: IRouter<RequestHandlerContext>) {
   router.post(
     {
       path: SEARCH_ROUTE_PATH,
@@ -45,19 +41,6 @@ export function registerSearchRoute(
     async (ctx, req, res) => {
       const { core } = await ctx.resolve(['core']);
       const { type, search, tags, limit } = req.body;
-
-      const libraryTypes = transformRegistry.getLibraryTypes();
-      const filteredTypes = (typeof type === 'string' ? [type] : type).filter((t) =>
-        libraryTypes.includes(t)
-      );
-      if (!filteredTypes.length) {
-        return res.forbidden({
-          body: {
-            message:
-              'This endpoint should only be used to fetch the saved objects of registered embeddables.',
-          },
-        });
-      }
 
       const tagIdToSavedObjectReference = (tagId: string): SavedObjectsFindOptionsReference => ({
         type: 'tag',
