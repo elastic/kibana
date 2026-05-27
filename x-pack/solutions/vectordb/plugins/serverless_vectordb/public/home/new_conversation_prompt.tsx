@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiToolTip,
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
@@ -204,19 +205,29 @@ export const NewConversationPrompt: React.FC = () => {
               }}
             />
             <div css={sendButtonRowStyles}>
-              <EuiButtonIcon
-                iconType="kqlFunction"
-                display="fill"
-                size="m"
-                onClick={expand}
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.serverlessVectordb.home.newConversationPrompt.send',
                   {
                     defaultMessage: 'Open the AI agent chat',
                   }
                 )}
-                data-test-subj="vectordbHomeNewConversationSend"
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="kqlFunction"
+                  display="fill"
+                  size="m"
+                  onClick={expand}
+                  aria-label={i18n.translate(
+                    'xpack.serverlessVectordb.home.newConversationPrompt.send',
+                    {
+                      defaultMessage: 'Open the AI agent chat',
+                    }
+                  )}
+                  data-test-subj="vectordbHomeNewConversationSend"
+                />
+              </EuiToolTip>
             </div>
           </ConversationInputShell>
         </EuiFlexItem>

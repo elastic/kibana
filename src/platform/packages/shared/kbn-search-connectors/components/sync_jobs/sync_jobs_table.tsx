@@ -229,21 +229,34 @@ export const SyncJobsTable: React.FC<SyncJobHistoryTableProps> = ({
               {
                 render: (job: ConnectorSyncJob) => {
                   return isSyncCancellable(job.status) ? (
-                    <EuiButtonIcon
-                      iconType="cross"
-                      color="danger"
-                      onClick={() => cancelConfirmModalProps.setSyncJobIdToCancel(job.id)}
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'searchConnectors.index.syncJobs.actions.cancelSyncJob.caption',
                         {
                           defaultMessage: 'Cancel this sync job',
                         }
                       )}
+                      disableScreenReaderOutput
                     >
-                      {i18n.translate('searchConnectors.index.syncJobs.actions.deleteJob.caption', {
-                        defaultMessage: 'Delete',
-                      })}
-                    </EuiButtonIcon>
+                      <EuiButtonIcon
+                        iconType="cross"
+                        color="danger"
+                        onClick={() => cancelConfirmModalProps.setSyncJobIdToCancel(job.id)}
+                        aria-label={i18n.translate(
+                          'searchConnectors.index.syncJobs.actions.cancelSyncJob.caption',
+                          {
+                            defaultMessage: 'Cancel this sync job',
+                          }
+                        )}
+                      >
+                        {i18n.translate(
+                          'searchConnectors.index.syncJobs.actions.deleteJob.caption',
+                          {
+                            defaultMessage: 'Delete',
+                          }
+                        )}
+                      </EuiButtonIcon>
+                    </EuiToolTip>
                   ) : (
                     <></>
                   );

@@ -23,6 +23,7 @@ import {
   EuiStepNumber,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -80,12 +81,14 @@ const CredentialField: React.FC<{
           value ? (
             <EuiCopy textToCopy={value}>
               {(copy) => (
-                <EuiButtonIcon
-                  iconType="copyClipboard"
-                  onClick={copy}
-                  aria-label={copyAriaLabel}
-                  color="text"
-                />
+                <EuiToolTip content={copyAriaLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="copyClipboard"
+                    onClick={copy}
+                    aria-label={copyAriaLabel}
+                    color="text"
+                  />
+                </EuiToolTip>
               )}
             </EuiCopy>
           ) : undefined
