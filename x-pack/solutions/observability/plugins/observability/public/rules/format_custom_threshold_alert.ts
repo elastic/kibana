@@ -14,7 +14,6 @@ import {
 } from '@kbn/rule-data-utils';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import type {
   CustomThresholdExpressionMetric,
   SearchConfigurationWithExtractedReferenceType,
@@ -29,14 +28,18 @@ const getDataViewId = (searchConfiguration?: SearchConfigurationWithExtractedRef
     : searchConfiguration?.index?.title;
 
 export const formatCustomThresholdAlert = (
-  fields: ParsedTechnicalFields & Record<string, unknown>,
+  fields: Record<string, unknown>,
   logsLocator?: LocatorPublic<DiscoverAppLocatorParams>
 ) => {
-  const groups = getGroups(fields[ALERT_GROUP_FIELD], fields[ALERT_GROUP_VALUE]);
-  const searchConfiguration = fields[ALERT_RULE_PARAMETERS]?.searchConfiguration as
-    | SearchConfigurationWithExtractedReferenceType
+  const groups = getGroups(
+    fields[ALERT_GROUP_FIELD] as string[] | undefined,
+    fields[ALERT_GROUP_VALUE] as string[] | undefined
+  );
+  const ruleParams = fields[ALERT_RULE_PARAMETERS] as
+    | { searchConfiguration?: SearchConfigurationWithExtractedReferenceType; criteria?: unknown }
     | undefined;
-  const criteriaRaw = fields[ALERT_RULE_PARAMETERS]?.criteria;
+  const searchConfiguration = ruleParams?.searchConfiguration;
+  const criteriaRaw = ruleParams?.criteria;
   const criteria = (
     Array.isArray(criteriaRaw) ? criteriaRaw : criteriaRaw ? [criteriaRaw] : []
   ) as MetricExpression[];
