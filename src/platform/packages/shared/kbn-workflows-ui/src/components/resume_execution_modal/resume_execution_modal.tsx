@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -18,17 +17,27 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { StepContext } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import { z } from '@kbn/zod/v4';
-import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
+import {
+  useWorkflowsMonacoTheme,
+  WORKFLOWS_MONACO_EDITOR_THEME,
+} from '../../hooks/use_workflows_monaco_theme';
+
+export interface ContextOverrideData {
+  stepContext: Partial<StepContext>;
+  schema: z.ZodType;
+  /** Original JSON Schema (avoids lossy Zod → JSON Schema round-trip for Monaco validation) */
+  rawJsonSchema?: JsonModelSchemaType;
+}
 
 const DEFAULT_SCHEMA = z.object({}).catchall(z.unknown());
 const SCHEMA_URI = 'inmemory://schemas/resume-execution-json-editor-schema';
@@ -69,15 +78,33 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
   onSubmit,
   onClose,
 }) => {
-  const styles = useMemoCss(componentStyles);
   useWorkflowsMonacoTheme();
+  const euiThemeContext = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
+
+  const descriptionStyle = useMemo(
+    () => css({ ...euiFontSize(euiThemeContext, 's'), fontWeight: 'normal' }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [euiThemeContext.euiTheme]
+  );
+
+  const modalBodyStyle = useMemo(
+    () =>
+      css({
+        backgroundColor: euiThemeContext.euiTheme.colors.backgroundBaseSubdued,
+        borderTop: `1px solid ${euiThemeContext.euiTheme.colors.borderBasePlain}`,
+        borderBottom: `1px solid ${euiThemeContext.euiTheme.colors.borderBasePlain}`,
+      }),
+
+    [euiThemeContext.euiTheme]
+  );
 
   const [inputsJson, setInputsJson] = useState<string>(
     initialcontextOverride?.stepContext != null
       ? JSON.stringify(initialcontextOverride.stepContext, null, 2)
       : '{}'
   );
+
   const isResumePayloadValid = useMemo(() => {
     try {
       const parsed: unknown = JSON.parse(inputsJson);
@@ -155,7 +182,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
                 defaultMessage="Provide action"
               />
             </EuiFlexItem>
-            <EuiFlexItem css={styles.description}>
+            <EuiFlexItem css={descriptionStyle}>
               {resumeMessage ?? (
                 <FormattedMessage
                   id="workflowsManagement.resumeExecutionModal.description"
@@ -166,7 +193,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody css={styles.modalBody}>
+      <EuiModalBody css={modalBodyStyle}>
         <CodeEditor
           languageId="json"
           value={inputsJson}
@@ -216,18 +243,4 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
       </EuiModalFooter>
     </EuiModal>
   );
-};
-
-const componentStyles = {
-  description: (euiThemeContext: UseEuiTheme) =>
-    css({
-      ...euiFontSize(euiThemeContext, 's'),
-      fontWeight: 'normal',
-    }),
-  modalBody: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
-      borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
 };

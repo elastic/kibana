@@ -92,6 +92,35 @@ export function buildTriggerStepExecutionFromContext(
   } as WorkflowStepExecutionDto;
 }
 
+export function buildInputsStepExecutionFromContext(
+  workflowExecution: WorkflowExecutionDto
+): WorkflowStepExecutionDto | null {
+  const ctx = workflowExecution.context as Record<string, unknown> | undefined | null;
+  if (ctx?.inputs === undefined) return null;
+
+  const failedBeforeSteps = isFailedBeforeSteps(
+    workflowExecution.status,
+    workflowExecution.stepExecutions
+  );
+
+  return {
+    id: 'inputs',
+    stepId: 'manual',
+    stepType: 'trigger_manual',
+    status: failedBeforeSteps ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
+    input: ctx.inputs as JsonValue,
+    output: undefined,
+    error: failedBeforeSteps ? workflowExecution.error ?? undefined : undefined,
+    scopeStack: [],
+    workflowRunId: workflowExecution.id,
+    workflowId: workflowExecution.workflowId || '',
+    startedAt: '',
+    globalExecutionIndex: -1,
+    stepExecutionIndex: 0,
+    topologicalIndex: -1,
+  } as WorkflowStepExecutionDto;
+}
+
 export function buildOverviewStepExecutionFromContext(
   workflowExecution: WorkflowExecutionDto
 ): WorkflowStepExecutionDto {

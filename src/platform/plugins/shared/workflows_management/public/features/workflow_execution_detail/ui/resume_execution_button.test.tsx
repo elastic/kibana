@@ -28,7 +28,8 @@ jest.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => ({
   convertJsonSchemaToZod: jest.fn(),
 }));
 
-jest.mock('../../../../common/lib/generate_sample_from_json_schema', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
   generateSampleFromJsonSchema: jest.fn(),
 }));
 

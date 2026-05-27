@@ -8,7 +8,8 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import { INPUT_STRING_PLACEHOLDER } from '../consts/placeholders';
+
+export const INPUT_STRING_PLACEHOLDER = '<your_input>';
 
 /**
  * Generates a sample value from a JSON Schema.
