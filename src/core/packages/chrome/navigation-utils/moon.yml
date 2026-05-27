@@ -16,7 +16,6 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/chrome/navigation-utils
-dependsOn: []
 tags:
   - shared-browser
   - package
