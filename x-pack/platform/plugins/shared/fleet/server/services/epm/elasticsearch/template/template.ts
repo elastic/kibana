@@ -48,6 +48,7 @@ import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { isUserSettingsTemplate, fillConstantKeywordValues } from './utils';
 import { MappingsBuilder } from './mappings_builder';
+import { retryDataStreamUpdateOnClusterEventTimeout } from './retry_data_stream_update';
 
 export interface IndexTemplateMapping {
   [key: string]: any;
@@ -397,13 +398,16 @@ const queryDataStreamsFromTemplates = async (
   esClient: ElasticsearchClient,
   templates: IndexTemplateEntry[]
 ): Promise<CurrentDataStream[]> => {
+  const concurrency =
+    appContextService.getConfig()?.packageInstallation?.maxConcurrentDatastreamOperations ??
+    MAX_CONCURRENT_DATASTREAM_OPERATIONS;
   const dataStreamObjects = await pMap(
     templates,
     (template) => {
       return getDataStreams(esClient, template);
     },
     {
-      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+      concurrency,
     }
   );
   return dataStreamObjects.filter(isCurrentDataStream).flat();
@@ -481,19 +485,26 @@ const updateAllDataStreams = async (
     skipDataStreamRollover?: boolean;
   }
 ): Promise<void> => {
+  const concurrency =
+    appContextService.getConfig()?.packageInstallation?.maxConcurrentDatastreamOperations ??
+    MAX_CONCURRENT_DATASTREAM_OPERATIONS;
   await pMap(
     indexNameWithTemplates,
     (templateEntry) => {
-      return updateExistingDataStream({
-        esClient,
-        logger,
-        currentWriteIndex: templateEntry.currentWriteIndex,
-        dataStreamName: templateEntry.dataStreamName,
-        options,
-      });
+      return retryDataStreamUpdateOnClusterEventTimeout(
+        () =>
+          updateExistingDataStream({
+            esClient,
+            logger,
+            currentWriteIndex: templateEntry.currentWriteIndex,
+            dataStreamName: templateEntry.dataStreamName,
+            options,
+          }),
+        { logger, dataStreamName: templateEntry.dataStreamName }
+      );
     },
     {
-      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+      concurrency,
     }
   );
 };
