@@ -225,7 +225,6 @@ describe('KnowledgeIndicatorClient.getFeatures', () => {
     expect(runEsql).toHaveBeenCalledTimes(1);
     expect(printedQueryFor(runEsql)).toContain('feature.type');
   });
-
 });
 
 describe('KnowledgeIndicatorClient.getLatestRevisionTimestamp', () => {
@@ -283,7 +282,6 @@ describe('KnowledgeIndicatorClient.getLatestRevisionTimestamp', () => {
     expect(printedQueryFor(runEsql)).toContain('feature.type');
   });
 });
-
 
 describe('KnowledgeIndicatorClient.getExcludedFeatures', () => {
   const printedQueryFor = (runEsql: jest.Mock): string => {
@@ -363,7 +361,11 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     });
 
     expect(search).toHaveBeenCalledTimes(1);
-    const { retriever } = search.mock.calls[0][0] as { retriever: { standard: { query: { bool: { should: Array<{ wildcard: Record<string, unknown> }> } } } } };
+    const { retriever } = search.mock.calls[0][0] as {
+      retriever: {
+        standard: { query: { bool: { should: Array<{ wildcard: Record<string, unknown> }> } } };
+      };
+    };
     const fields = retriever.standard.query.bool.should.map((c) => Object.keys(c.wildcard)[0]);
     expect(fields).toContain('feature.type');
     expect(fields).toContain('feature.subtype');
@@ -408,7 +410,11 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     });
 
     expect(search).toHaveBeenCalledTimes(1);
-    const { retriever } = search.mock.calls[0][0] as { retriever: { standard: { query: { bool: { should: Array<{ wildcard: Record<string, unknown> }> } } } } };
+    const { retriever } = search.mock.calls[0][0] as {
+      retriever: {
+        standard: { query: { bool: { should: Array<{ wildcard: Record<string, unknown> }> } } };
+      };
+    };
     const fields = retriever.standard.query.bool.should.map((c) => Object.keys(c.wildcard)[0]);
     expect(fields).toContain('query.esql');
     expect(fields).toContain('query.features.id');

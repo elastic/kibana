@@ -39,12 +39,14 @@ function makeHandler(
     bulk?: jest.Mock;
   } = {}
 ) {
-  const getQueryLinks = overrides.getQueryLinks ?? jest.fn().mockResolvedValue(
-    currentLinks.filter((l) => toDelete.includes(l.query.id))
-  );
-  const getStreamToQueryLinksMap = overrides.getStreamToQueryLinksMap ?? jest.fn().mockResolvedValue({
-    'logs.test': currentLinks,
-  });
+  const getQueryLinks =
+    overrides.getQueryLinks ??
+    jest.fn().mockResolvedValue(currentLinks.filter((l) => toDelete.includes(l.query.id)));
+  const getStreamToQueryLinksMap =
+    overrides.getStreamToQueryLinksMap ??
+    jest.fn().mockResolvedValue({
+      'logs.test': currentLinks,
+    });
   const syncQueries = overrides.syncQueries ?? jest.fn().mockResolvedValue(undefined);
   const bulk = overrides.bulk ?? jest.fn().mockResolvedValue({ applied: 1, skipped: 0 });
 

@@ -46,7 +46,10 @@ export class KnowledgeIndicatorService {
     soClient: SavedObjectsClientContract;
     rulesClient: RulesClient;
     space: string;
-    config?: Pick<SigEventsTuningConfig, 'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'>;
+    config?: Pick<
+      SigEventsTuningConfig,
+      'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
+    >;
   }): Promise<KnowledgeIndicatorClient> {
     const [core] = await this.coreSetup.getStartServices();
 

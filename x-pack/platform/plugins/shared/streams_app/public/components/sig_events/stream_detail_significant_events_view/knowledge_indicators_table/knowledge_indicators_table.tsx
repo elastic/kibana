@@ -140,11 +140,16 @@ export function KnowledgeIndicatorsTable({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType={isExpanded ? 'minimize' : 'expand'}
-                  aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
-                  onClick={() => onViewDetails(knowledgeIndicator)}
-                />
+                <EuiToolTip
+                  content={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType={isExpanded ? 'minimize' : 'expand'}
+                    aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+                    onClick={() => onViewDetails(knowledgeIndicator)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink onClick={() => onViewDetails(knowledgeIndicator)}>{title}</EuiLink>

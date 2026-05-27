@@ -26,7 +26,12 @@ import { IndicatorReader } from './indicator_reader';
 import { IndicatorSearcher } from './indicator_searcher';
 import { QueryRuleOrchestrator } from './query_rule_orchestrator';
 
-export type { KIBulkOperation, KnowledgeIndicatorClientDeps, KnowledgeIndicatorDataStreamClient, RuleUnbackedFilter };
+export type {
+  KIBulkOperation,
+  KnowledgeIndicatorClientDeps,
+  KnowledgeIndicatorDataStreamClient,
+  RuleUnbackedFilter,
+};
 
 export class KnowledgeIndicatorClient {
   private readonly writer: IndicatorWriter;
@@ -121,9 +126,7 @@ export class KnowledgeIndicatorClient {
     return this.reader.bulkGetQueriesByIds(stream, ids);
   }
 
-  getPromotableUnbackedQueries(filters?: {
-    minSeverityScore?: number;
-  }): Promise<QueryLink[]> {
+  getPromotableUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<QueryLink[]> {
     return this.reader.getPromotableUnbackedQueries(filters);
   }
 

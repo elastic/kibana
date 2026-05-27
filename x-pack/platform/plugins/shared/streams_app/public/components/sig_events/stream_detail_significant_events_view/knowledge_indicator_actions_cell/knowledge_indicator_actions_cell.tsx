@@ -131,13 +131,15 @@ export function KnowledgeIndicatorActionsCell({
     <EuiPopover
       aria-label={ACTIONS_MENU_POPOVER_ARIA_LABEL}
       button={
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
-          isLoading={isMutating}
-          isDisabled={isMutating}
-          onClick={() => setIsActionsMenuOpen((current) => !current)}
-        />
+        <EuiToolTip content={ACTIONS_MENU_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
+            isLoading={isMutating}
+            isDisabled={isMutating}
+            onClick={() => setIsActionsMenuOpen((current) => !current)}
+          />
+        </EuiToolTip>
       }
       isOpen={isActionsMenuOpen}
       closePopover={() => setIsActionsMenuOpen(false)}

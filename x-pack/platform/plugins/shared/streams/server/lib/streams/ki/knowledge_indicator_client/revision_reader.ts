@@ -25,10 +25,7 @@ import {
 import { ID, KI_TYPE_FEATURE, STREAM_NAME, TYPE } from '../fields';
 
 export class RevisionReader {
-  constructor(
-    private readonly esClient: ElasticsearchClient,
-    private readonly space: string
-  ) {}
+  constructor(private readonly esClient: ElasticsearchClient, private readonly space: string) {}
 
   async fetchLatestRevisions(
     where?: LatestSourceWhereCondition,
@@ -42,10 +39,7 @@ export class RevisionReader {
     query = withSort(query, sort);
     query = query.keep('_source');
 
-    const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(
-      this.esClient,
-      query
-    );
+    const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
     return hits;
   }
 

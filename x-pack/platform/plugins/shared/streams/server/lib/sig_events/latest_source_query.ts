@@ -176,9 +176,13 @@ export const executeAndDecodeSource = async <T>(
   };
 };
 
-const executeEsqlQuery = async <T>(
-  { esClient, query }: { esClient: ElasticsearchClient; query: ComposerQuery }
-): Promise<T[]> => (await executeAndDecodeSource<T>(esClient, query)).hits;
+const executeEsqlQuery = async <T>({
+  esClient,
+  query,
+}: {
+  esClient: ElasticsearchClient;
+  query: ComposerQuery;
+}): Promise<T[]> => (await executeAndDecodeSource<T>(esClient, query)).hits;
 
 export const runLatestSourceEsqlQuery = async <T>({
   esClient,
