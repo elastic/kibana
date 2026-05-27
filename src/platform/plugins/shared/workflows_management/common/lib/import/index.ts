@@ -38,6 +38,7 @@ export const WORKFLOW_REFERENCE_KEY = 'workflow-id';
 export const isDynamicWorkflowReference = (value: string): boolean => value.includes('{{');
 
 const RESERVED_ID_PREFIXES = ['system', 'internal', 'system--'];
+const WORKFLOW_ID_FALLBACK_PREFIX = 'workflow';
 
 export const isUnsafeWorkflowId = isUnsafeId;
 
@@ -47,8 +48,13 @@ export const isReservedWorkflowId = (id: string): boolean =>
 export const isValidWorkflowId = (id: string): boolean =>
   isValidId(id) && !isReservedWorkflowId(id);
 
-export const generateWorkflowId = (name?: string | null): string =>
-  generateHumanReadableId(name, { fallbackPrefix: 'workflow' });
+const prefixReservedWorkflowId = (id: string): string =>
+  `${WORKFLOW_ID_FALLBACK_PREFIX}-${id}`.slice(0, HUMAN_READABLE_ID_MAX_LENGTH).replace(/-+$/, '');
+
+export const generateWorkflowId = (name?: string | null): string => {
+  const id = generateHumanReadableId(name, { fallbackPrefix: WORKFLOW_ID_FALLBACK_PREFIX });
+  return isReservedWorkflowId(id) ? prefixReservedWorkflowId(id) : id;
+};
 
 // ZIP magic bytes: PK (0x50 0x4B)
 const ZIP_MAGIC_BYTE_0 = 0x50;
