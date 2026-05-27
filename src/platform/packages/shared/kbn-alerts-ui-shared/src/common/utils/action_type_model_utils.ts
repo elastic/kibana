@@ -16,7 +16,6 @@ import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserializ
 import type { ConnectorZodSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import { getMeta, setMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 import { narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs/src/lib/narrow_secrets_schema_for_auth_mode';
-import { generateFormFields } from '@kbn/response-ops-form-generator';
 import type {
   ConnectorSpecResponse,
   ConnectorSpecWireResponse,
@@ -93,6 +92,9 @@ export function transformSpecToActionTypeModel(
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
     actionConnectorFields: lazy(async () => {
+      const { generateFormFields } = await import(
+        /* webpackPrefetch: true */ '@kbn/response-ops-form-generator'
+      );
       const parsedZodSchema = fromConnectorSpecSchema(spec.schema);
       if (!parsedZodSchema) {
         throw new Error(`Invalid connector spec schema for "${spec.metadata.id}"`);

@@ -4241,6 +4241,7 @@ const sparklineDefinition: FunctionDefinition = {
     defaultMessage:
       'The values representing the y-axis values of a sparkline graph for a given aggregation over a period of time.',
   }),
+  tsdbCompatible: false,
   preview: true,
   alias: undefined,
   signatures: [

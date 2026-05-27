@@ -54,6 +54,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     apm: {
       kibanaSettings: `${ELASTIC_DOCS}solutions/observability/apm/applications-ui-settings`,
       supportedServiceMaps: `${ELASTIC_DOCS}solutions/observability/apm/service-map`,
+      supportedServiceMapsLegend: `${ELASTIC_DOCS}solutions/observability/apm/service-map#service-maps-legend`,
       customLinks: `${ELASTIC_DOCS}solutions/observability/apm/create-custom-links`,
       droppedTransactionSpans: `${ELASTIC_DOCS}solutions/observability/apm/spans#apm-data-model-dropped-spans`,
       upgrading: `${ELASTIC_DOCS}solutions/observability/apm/upgrade`,

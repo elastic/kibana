@@ -10,6 +10,8 @@ import { Link } from 'react-router-dom-v5-compat';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 import type { SidebarNavItem } from '../../../../route_config';
 
@@ -54,6 +56,11 @@ export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive,
               to={item.path}
               css={isActive(item.path) ? activeLinkStyles : baseLinkStyles}
               onClick={onItemClick}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_NAVIGATION_CLICK,
+                detail: item.path.split('/').filter(Boolean).pop() ?? item.path,
+              })}
             >
               {item.icon && <EuiIcon type={item.icon} size="s" aria-hidden={true} />}
               {item.label}

@@ -16,13 +16,17 @@ import type {
 import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 
 const isoDateTimeString = z.string().datetime();
 
 export function validateDateString(dateString: string): void {
   const result = isoDateTimeString.safeParse(dateString);
   if (!result.success) {
-    throw Boom.badRequest(`Invalid date string - "${dateString}" is not a valid ISO datetime`);
+    throw Boom.badRequest(`Invalid date string - "${dateString}" is not a valid ISO datetime`, {
+      code: ALERTING_V2_ERROR_CODES.INVALID_DATE_STRING,
+      details: { value: dateString },
+    });
   }
 }
 
