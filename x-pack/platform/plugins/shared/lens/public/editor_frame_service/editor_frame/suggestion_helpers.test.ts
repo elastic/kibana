@@ -108,7 +108,7 @@ describe('suggestion helpers', () => {
     };
 
     datasourceMap.formBased.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
-      generateSuggestion(datasourceState),
+      generateSuggestion(datasourceState, 'layer1'),
     ]);
 
     const visualizationMap = {
