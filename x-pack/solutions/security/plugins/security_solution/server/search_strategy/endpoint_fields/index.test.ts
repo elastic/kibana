@@ -7,6 +7,7 @@
 
 import type { SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { CoreStart } from '@kbn/core/server';
 import { fieldsBeat as beatFields } from '@kbn/timelines-plugin/server/utils/beat_schema/fields.json';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { requestEndpointFieldsSearch } from '.';
@@ -16,6 +17,9 @@ import { eventsIndexPattern, METADATA_UNITED_INDEX } from '../../../common/endpo
 import { EndpointAuthorizationError } from '../../endpoint/errors';
 import type { IndexFieldsStrategyRequestByIndices } from '@kbn/timelines-plugin/common/search_strategy';
 import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
+import { resetCcsCache } from '../../endpoint/utils/ccs_utils';
+import type { DeepMutable } from '../../../common/endpoint/types/utility_types';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 jest.mock('../../../common/endpoint/utils/index_name_utilities', () => ({
   buildIndexNameWithNamespace: jest.fn(),
@@ -27,6 +31,7 @@ describe('Endpoint fields', () => {
   const getFieldsForWildcardMock = jest.fn();
   const esClientSearchMock = jest.fn();
   const esClientFieldCapsMock = jest.fn();
+  const remoteInfoMock = jest.fn().mockResolvedValue({});
   const endpointAppContextService = createMockEndpointAppContextService();
   let IndexPatterns: DataViewsServerPluginStart;
 
@@ -35,6 +40,12 @@ describe('Endpoint fields', () => {
       asInternalUser: { search: esClientSearchMock, fieldCaps: esClientFieldCapsMock },
     },
   } as unknown as SearchStrategyDependencies;
+
+  const esClient = {
+    asInternalUser: {
+      cluster: { remoteInfo: remoteInfoMock },
+    },
+  } as unknown as CoreStart['elasticsearch']['client'];
 
   const mockPattern = {
     title: 'test',
@@ -73,6 +84,7 @@ describe('Endpoint fields', () => {
   });
 
   beforeEach(async () => {
+    resetCcsCache();
     const [
       ,
       {
@@ -84,6 +96,7 @@ describe('Endpoint fields', () => {
     esClientSearchMock.mockClear();
     esClientFieldCapsMock.mockClear();
     buildIndexNameWithNamespaceMock.mockClear();
+    remoteInfoMock.mockClear().mockResolvedValue({});
 
     // Reset all mocks on endpointAppContextService
     (endpointAppContextService.getActiveSpace as jest.Mock).mockClear();
@@ -116,7 +129,8 @@ describe('Endpoint fields', () => {
           request,
           deps,
           beatFields,
-          IndexPatterns
+          IndexPatterns,
+          esClient
         );
         expect(response.indexFields).toHaveLength(0);
         expect(response.indicesExist).toEqual(indices);
@@ -135,7 +149,8 @@ describe('Endpoint fields', () => {
           request,
           deps,
           beatFields,
-          IndexPatterns
+          IndexPatterns,
+          esClient
         );
         expect(response.indexFields).toHaveLength(0);
         expect(response.indicesExist).toEqual(indices);
@@ -173,7 +188,8 @@ describe('Endpoint fields', () => {
           request,
           deps,
           beatFields,
-          IndexPatterns
+          IndexPatterns,
+          esClient
         );
 
         expect(response.indexFields).toHaveLength(0);
@@ -217,7 +233,8 @@ describe('Endpoint fields', () => {
           request,
           deps,
           beatFields,
-          IndexPatterns
+          IndexPatterns,
+          esClient
         );
 
         expect(response.indexFields).toHaveLength(0);
@@ -240,13 +257,50 @@ describe('Endpoint fields', () => {
           request,
           deps,
           beatFields,
-          IndexPatterns
+          IndexPatterns,
+          esClient
         );
 
         expect(response.indexFields).toHaveLength(0);
         expect(response.indicesExist).toEqual(indices);
         expect(endpointAppContextService.getActiveSpace).not.toHaveBeenCalled();
         expect(buildIndexNameWithNamespaceMock).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when CCS is enabled', () => {
+      beforeEach(() => {
+        (
+          endpointAppContextService.experimentalFeatures as DeepMutable<ExperimentalFeatures>
+        ).defendRemoteOutputCcs = true;
+        remoteInfoMock.mockResolvedValue({ cluster_a: { connected: true } });
+      });
+
+      afterEach(() => {
+        (
+          endpointAppContextService.experimentalFeatures as DeepMutable<ExperimentalFeatures>
+        ).defendRemoteOutputCcs = false;
+      });
+
+      it('should prefix the metadata index pattern when remotes are connected', async () => {
+        const indices = [METADATA_UNITED_INDEX];
+        const request = {
+          indices,
+          onlyCheckIfIndicesExist: false,
+        };
+
+        const response = await requestEndpointFieldsSearch(
+          endpointAppContextService,
+          request,
+          deps,
+          beatFields,
+          IndexPatterns,
+          esClient
+        );
+
+        const expectedPattern = `${METADATA_UNITED_INDEX},*:${METADATA_UNITED_INDEX}`;
+        expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: expectedPattern });
+        expect(response.indicesExist).toEqual([expectedPattern]);
       });
     });
 
@@ -263,7 +317,8 @@ describe('Endpoint fields', () => {
         request,
         deps,
         beatFields,
-        IndexPatterns
+        IndexPatterns,
+        esClient
       );
       expect(response.indexFields).toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
@@ -281,7 +336,8 @@ describe('Endpoint fields', () => {
         request,
         deps,
         beatFields,
-        IndexPatterns
+        IndexPatterns,
+        esClient
       );
       expect(response.indexFields).toHaveLength(0);
       expect(response.indicesExist).toEqual(indices);
@@ -299,7 +355,8 @@ describe('Endpoint fields', () => {
         request,
         deps,
         beatFields,
-        IndexPatterns
+        IndexPatterns,
+        esClient
       );
 
       expect(getFieldsForWildcardMock).toHaveBeenCalledWith({
@@ -323,7 +380,8 @@ describe('Endpoint fields', () => {
         request,
         deps,
         beatFields,
-        IndexPatterns
+        IndexPatterns,
+        esClient
       );
 
       expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: indices[0] });
@@ -341,7 +399,8 @@ describe('Endpoint fields', () => {
           request as unknown as IndexFieldsStrategyRequestByIndices,
           deps,
           beatFields,
-          IndexPatterns
+          IndexPatterns,
+          esClient
         );
       }).rejects.toThrowError(/invalid_type/);
     });
@@ -359,7 +418,8 @@ describe('Endpoint fields', () => {
           request,
           deps,
           beatFields,
-          IndexPatterns
+          IndexPatterns,
+          esClient
         );
       }).rejects.toThrowError('Invalid indices request invalid');
     });
@@ -377,7 +437,8 @@ describe('Endpoint fields', () => {
           request,
           deps,
           beatFields,
-          IndexPatterns
+          IndexPatterns,
+          esClient
         );
       }).rejects.toThrowError('Invalid indices request invalid, invalid2');
     });
@@ -405,7 +466,8 @@ describe('Endpoint fields', () => {
           request,
           deps,
           beatFields,
-          IndexPatterns
+          IndexPatterns,
+          esClient
         )
       ).rejects.toThrow(EndpointAuthorizationError);
     });
@@ -426,7 +488,8 @@ describe('Endpoint fields', () => {
           request,
           deps,
           beatFields,
-          IndexPatterns
+          IndexPatterns,
+          esClient
         )
       ).rejects.toThrow(EndpointAuthorizationError);
     });
