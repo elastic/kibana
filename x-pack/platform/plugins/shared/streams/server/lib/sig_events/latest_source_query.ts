@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esql, type ComposerQueryTagHole, type ComposerSortShorthand } from '@elastic/esql';
+import { esql, type ComposerSortShorthand } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';

@@ -30,7 +30,8 @@ export type VerdictsPaginatedSearchOptions = CommonSearchOptions & PaginationSea
 
 const GROUP_BY_FIELD = 'discovery_id';
 
-export class VerdictsClient {j
+export class VerdictsClient {
+  j;
   constructor(
     private readonly clients: {
       dataStreamClient: VerdictsDataStreamClient;
