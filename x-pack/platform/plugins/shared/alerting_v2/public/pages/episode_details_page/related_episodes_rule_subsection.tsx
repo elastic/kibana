@@ -45,7 +45,7 @@ export function RelatedEpisodesRuleSubsection({
 }: RelatedEpisodesRuleSubsectionProps) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { notifications, expressions },
+    services: { notifications, expressions, spaces },
   } = useKibana<AlertEpisodesKibanaServices>();
   const toastDanger = useCallback(
     (message: string) => {
@@ -60,7 +60,7 @@ export function RelatedEpisodesRuleSubsection({
       excludeEpisodeId: currentEpisodeId,
       pageSize: RELATED_ALERT_EPISODES_PAGE_SIZE,
       currentGroupHash,
-      expressions,
+      services: { expressions, spaces },
       toastDanger,
     });
 
@@ -80,12 +80,12 @@ export function RelatedEpisodesRuleSubsection({
 
   const { data: otherEpisodeActionsMap } = useFetchEpisodeActions({
     episodeIds: otherEpisodeIds,
-    expressions,
+    services: { expressions, spaces },
   });
 
   const { data: otherGroupActionsMap } = useFetchGroupActions({
     groupHashes: otherGroupHashes,
-    expressions,
+    services: { expressions, spaces },
   });
 
   return (

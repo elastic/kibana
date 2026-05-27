@@ -61,7 +61,7 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
 
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
-      cy.get(ALERTS_DONUT_CHART).first().should('have.text', 'Open');
+      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '0Open');
     });
 
     it(`finds the host when filtering with KQL search bar query`, () => {
@@ -77,7 +77,7 @@ describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
 
       cy.get(USER_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
-      cy.get(ALERTS_DONUT_CHART).first().should('have.text', 'Open');
+      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '0Open');
     });
 
     it(`finds the user when filtering with KQL search bar query`, () => {

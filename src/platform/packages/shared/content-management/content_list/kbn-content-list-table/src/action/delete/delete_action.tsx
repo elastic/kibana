@@ -7,47 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useLayoutEffect, useRef } from 'react';
-import type { ReactNode } from 'react';
-import { EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ContentListItem } from '@kbn/content-list-provider';
 import type { DeleteActionProps, ActionOutput, ActionBuilderContext } from '../types';
-
-/**
- * Action label that applies danger color to both the text and the sibling icon
- * in EUI's collapsed overflow menu.
- *
- * EUI renders icons in the overflow menu with `color: inherit`, so they pick up
- * the parent button's text color. This component uses a ref to find the parent
- * `.euiBasicTable__collapsedAction` button and set its color to `textDanger`,
- * making the icon inherit the danger color. In the inline (expanded) context,
- * no matching parent exists and the effect is a no-op.
- *
- * FRAGILE: Depends on EUI internal class `.euiBasicTable__collapsedAction`.
- * `DefaultItemAction.color` only applies to the expanded (inline) view; the
- * collapsed overflow menu ignores it. This workaround will break if EUI
- * renames that class. Tracked upstream: https://github.com/elastic/eui/issues/9384
- */
-const DangerActionName = ({ children }: { children: ReactNode }) => {
-  const ref = useRef<HTMLSpanElement>(null);
-  const { euiTheme } = useEuiTheme();
-
-  useLayoutEffect(() => {
-    const button = ref.current?.closest<HTMLElement>('.euiBasicTable__collapsedAction');
-    if (button) {
-      button.style.color = euiTheme.colors.textDanger;
-      return () => {
-        button.style.color = '';
-      };
-    }
-  }, [euiTheme.colors.textDanger]);
-
-  return (
-    <EuiTextColor color="danger">
-      <span ref={ref}>{children}</span>
-    </EuiTextColor>
-  );
-};
 
 /** Default i18n-translated label for the delete action. */
 const DEFAULT_DELETE_LABEL = i18n.translate(
@@ -64,12 +26,11 @@ const DEFAULT_DELETE_DESCRIPTION = i18n.translate(
 /**
  * Build a `DefaultItemAction` for the delete action preset.
  *
- * Returns `undefined` when:
- * - The table is in read-only mode.
- * - No delete handler (`onDelete`) is configured on the item config.
+ * Returns `undefined` when read-only or when `onBulkAction` is not configured.
+ * The `onClick` handler opens the table-level delete confirmation modal.
  *
- * The `onClick` handler calls {@link BuilderContextActions.onDelete} to open
- * the delete confirmation modal at the table level.
+ * Composes `enabled` and `description` with `actions.delete.restriction` to
+ * disable the icon and surface the reason when restricted.
  *
  * @param attributes - The declarative attributes from the parsed `Action.Delete` element.
  * @param context - Builder context with provider configuration.
@@ -84,21 +45,43 @@ export const buildDeleteAction = (
   if (isReadOnly) {
     return undefined;
   }
-  if (typeof itemConfig?.onDelete !== 'function') {
+
+  const deleteConfig = itemConfig?.actions?.delete;
+  if (typeof deleteConfig?.onBulkAction !== 'function') {
     return undefined;
   }
 
   const label = attributes.label ?? DEFAULT_DELETE_LABEL;
+  const { enabled: consumerEnabled } = attributes;
+  const restriction = deleteConfig.restriction;
+
+  const enabled = (item: ContentListItem): boolean => {
+    if (restriction && restriction(item) !== undefined) {
+      return false;
+    }
+    return consumerEnabled ? consumerEnabled(item) : true;
+  };
+
+  // EUI surfaces `description` as the icon's tooltip. When a restriction
+  // predicate is configured we forward a function so the tooltip can carry
+  // the per-item reason; otherwise we keep the static string (preserves the
+  // EUI fast-path for static descriptions).
+  const description: ActionOutput['description'] = restriction
+    ? (item) => {
+        const reason = restriction(item);
+        return reason ?? DEFAULT_DELETE_DESCRIPTION;
+      }
+    : DEFAULT_DELETE_DESCRIPTION;
 
   return {
-    name: <DangerActionName>{label}</DangerActionName>,
-    description: DEFAULT_DELETE_DESCRIPTION,
+    name: label,
+    description,
     icon: 'trash',
     type: 'icon',
     color: 'danger',
     isPrimary: true,
     onClick: (item) => actions?.onDelete?.([item]),
-    ...(attributes.enabled && { enabled: attributes.enabled }),
+    enabled,
     'data-test-subj': 'content-list-table-action-delete',
   };
 };

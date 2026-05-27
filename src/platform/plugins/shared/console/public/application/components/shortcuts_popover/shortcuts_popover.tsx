@@ -27,6 +27,9 @@ export const ShortcutsPopover = ({ button, isOpen, closePopover }: ShortcutsPopo
       closePopover={closePopover}
       anchorPosition="downRight"
       data-test-subj="consoleShortcutsPopover"
+      aria-label={i18n.translate('console.shortcutsPopover.ariaLabel', {
+        defaultMessage: 'Keyboard shortcuts',
+      })}
     >
       <EuiTitle size="xxs">
         <h5>

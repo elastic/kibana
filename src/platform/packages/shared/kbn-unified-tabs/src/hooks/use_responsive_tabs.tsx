@@ -73,7 +73,9 @@ export const useResponsiveTabs = ({
   useEffect(() => {
     onScroll();
     // `dimensions.width` added here to trigger in cases when the container width changes
-  }, [onScroll, dimensions.width]);
+    // `tabsSizeConfig.isScrollable` added here to trigger scroll state recalculation
+    // when items are added/removed and scrollability changes (e.g. after tab restoration)
+  }, [onScroll, dimensions.width, tabsSizeConfig.isScrollable]);
 
   const scrollLeft = useCallback(() => {
     if (tabsContainerElement) {

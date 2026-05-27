@@ -58,6 +58,12 @@ export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
               description: 'Count of METRICS_INFO rows where metric_type had more than one value',
             },
           },
+          units: {
+            type: 'integer',
+            _meta: {
+              description: 'Count of METRICS_INFO rows where unit had more than one value',
+            },
+          },
         },
       },
     },

@@ -480,7 +480,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 errorSource: TaskErrorSource.USER,
-                message: `error validating action params: ✖ Invalid input\n  → at subAction`,
+                message: `error validating action params: ✖ Invalid discriminator value. Expected 'getFields' | 'getIncident' | 'handshake' | 'pushToService' | 'getChoices' | 'closeIncident'\n  → at subAction`,
               });
             });
         });

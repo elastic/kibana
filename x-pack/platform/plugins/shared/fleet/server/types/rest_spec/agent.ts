@@ -23,12 +23,18 @@ const ActionIdSchema = schema.object({
 });
 
 const ActionIdOrMessageSchema = schema.oneOf([
-  schema.object({
-    actionId: schema.string(),
-  }),
-  schema.object({
-    message: schema.string(),
-  }),
+  schema.object(
+    {
+      actionId: schema.string(),
+    },
+    { meta: { id: 'action_id_response' } }
+  ),
+  schema.object(
+    {
+      message: schema.string(),
+    },
+    { meta: { id: 'action_message_response' } }
+  ),
 ]);
 
 export const GetAgentsRequestSchema = {
@@ -377,6 +383,7 @@ export const AgentResponseSchema = schema.object({
   capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   health: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   effective_config: schema.maybe(schema.any()),
+  signals: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({

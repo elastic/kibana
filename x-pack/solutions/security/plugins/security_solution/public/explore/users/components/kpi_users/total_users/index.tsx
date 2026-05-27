@@ -22,7 +22,7 @@ import type { UsersKpiProps } from '../types';
 export const useGetUsersStatItems: () => Readonly<StatItems[]> = () => {
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) === true;
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
 
   return useMemo(
     () => [

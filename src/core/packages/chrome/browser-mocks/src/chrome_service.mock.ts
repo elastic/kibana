@@ -100,6 +100,10 @@ const createStartContractMock = () => {
     }),
     next: lazyObject({
       isEnabled: false,
+      globalSearch: lazyObject({
+        set: jest.fn(),
+        get$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
+      }),
     }),
     setGlobalFooter: jest.fn(),
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
