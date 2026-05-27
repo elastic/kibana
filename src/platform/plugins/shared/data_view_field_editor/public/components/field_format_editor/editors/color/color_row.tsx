@@ -122,6 +122,10 @@ export const ColorRow = ({
       <EuiFlexItem grow={false}>
         <EuiColorPicker
           color={text}
+          aria-label={i18n.translate('indexPatternFieldEditor.color.textColorAriaLabel', {
+            defaultMessage: 'Text color for item {index}',
+            values: { index },
+          })}
           data-test-subj={`colorEditorColorPicker ${index}`}
           onChange={(newColor) => {
             onColorChange(
@@ -159,6 +163,10 @@ export const ColorRow = ({
       <EuiFlexItem grow={false}>
         <EuiColorPicker
           color={background}
+          aria-label={i18n.translate('indexPatternFieldEditor.color.backgroundColorAriaLabel', {
+            defaultMessage: 'Background color for item {index}',
+            values: { index },
+          })}
           data-test-subj={`colorEditorBackgroundPicker ${index}`}
           onChange={(newColor: string) => {
             onColorChange(
