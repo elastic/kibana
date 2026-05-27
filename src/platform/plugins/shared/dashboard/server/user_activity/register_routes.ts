@@ -44,7 +44,7 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
               errors: schema.arrayOf(
                 schema.object({
                   panel_id: schema.string({ maxLength: 100 }),
-                  error: schema.string(),
+                  error: schema.string({ maxLength: 100 }),
                 }),
                 {
                   maxSize: 100,
