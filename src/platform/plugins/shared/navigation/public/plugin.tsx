@@ -156,9 +156,21 @@ export class NavigationPublicPlugin
       chrome.project.registerCustomizeNavigationHandler(openCustomizeNavigationModal);
     }
 
-    // Reactively apply stored customization to the navigation. The initial emission
-    // is synchronous from the server-injected cache, so navigation is seeded before
-    // the first render. Subsequent emissions handle multi-tab sync.
+    // Reactively apply stored customization to the navigation.
+    //
+    // The initial emission is synchronous because NAV_CUSTOMIZATION_STORAGE_KEY is
+    // registered with preload: true on the server (see navigation/server/plugin.ts),
+    // so the value is server-injected at page load and the seed reaches
+    // customization$ before the first render and before any later
+    // chrome.project.initNavigation() call from solution plugins.
+    //
+    // This synchrony, plus the conditional write in initNavigation, is what keeps
+    // startup ordering between the navigation plugin and solution plugins from
+    // turning into a race that wipes the user's saved customization. If this
+    // storage key ever loses preload: true, the seed becomes async and the race
+    // returns.
+    //
+    // Subsequent emissions also handle multi-tab sync.
     if (!this.getIsUnauthenticated(core.http)) {
       core.userStorage
         .get$<NavigationCustomization>(NAV_CUSTOMIZATION_STORAGE_KEY)
