@@ -8,6 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
+import { flushState } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
 import { abortableTimeout, TimeoutAbortedError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
@@ -44,19 +45,24 @@ export async function handleExecutionDelay(
   const resumeAt = new Date(resumeAtFromState);
   const now = new Date();
   const diff = resumeAt.getTime() - now.getTime();
-  params.workflowExecutionState.updateWorkflowExecution({
-    status: ExecutionStatus.WAITING,
-  });
   if (diff < SHORT_DURATION_THRESHOLD) {
+    // Flush while workflow is still RUNNING so the persistence loop stays active and
+    // cancellation is not racing a freshly-persisted WAITING workflow status.
+    await flushState(params);
+    params.workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.WAITING,
+    });
     const timeout = diff > 0 ? diff : 0;
 
     try {
       await abortableTimeout(timeout, stepExecutionRuntime.abortController.signal);
     } catch (error) {
       if (error instanceof TimeoutAbortedError) {
-        // Delay was interrupted (e.g. by a timeout or cancellation).
-        // Reset status to RUNNING so the execution loop can continue
-        // after error handling (e.g. on-failure continue).
+        if (stepExecutionRuntime.abortController.signal.aborted) {
+          return;
+        }
+        // Delay was interrupted for other reasons (e.g. on-failure continue).
+        // Reset status to RUNNING so the execution loop can continue.
         params.workflowExecutionState.updateWorkflowExecution({
           status: ExecutionStatus.RUNNING,
         });
@@ -69,6 +75,9 @@ export async function handleExecutionDelay(
       status: ExecutionStatus.RUNNING,
     });
   } else {
+    params.workflowExecutionState.updateWorkflowExecution({
+      status: ExecutionStatus.WAITING,
+    });
     await params.workflowTaskManager.scheduleResumeTask({
       workflowExecution,
       resumeAt,

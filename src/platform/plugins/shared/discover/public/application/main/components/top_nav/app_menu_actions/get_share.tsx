@@ -298,7 +298,7 @@ export const getShareAppMenuItem = ({
       id: AppMenuActionId.export,
       order: 8,
       label: i18n.translate('discover.localMenu.exportTitle', {
-        defaultMessage: 'Export',
+        defaultMessage: 'Export tab',
       }),
       iconType: 'upload',
       testId: 'exportTopNavButton',

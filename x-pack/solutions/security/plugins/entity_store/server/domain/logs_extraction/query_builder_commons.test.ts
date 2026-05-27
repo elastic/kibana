@@ -63,10 +63,10 @@ describe('buildExtractionSourceClause', () => {
   it('should always use inclusive >= lower bound on @timestamp regardless of cursor', () => {
     const withCursor = buildExtractionSourceClause({
       ...baseParams,
-      logsPageCursorStart: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: '1' },
+      logsPageCursorStart: { timestampCursor: '2024-01-01T00:00:00.000Z' },
     });
     expect(withCursor).toContain('FROM logs-*, metrics-*');
-    expect(withCursor).toContain('METADATA _index, _id');
+    expect(withCursor).not.toContain('METADATA');
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
     expect(withCursor).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
@@ -101,27 +101,35 @@ describe('aggregationStats', () => {
     );
   });
 
-  it('should emit collect_values aggregation using TOP and MV_DEDUPE', () => {
+  it('should emit collect_values aggregation using VALUES for CCS (no merge step)', () => {
     const field: EntityField = {
       source: 'tags',
       destination: 'tags',
       mapping: { type: 'keyword' },
-      retention: { operation: 'collect_values', maxLength: 10 },
+      retention: { operation: 'collect_values' },
     };
-    expect(aggregationStats([field], false)).toBe(
-      'tags = MV_DEDUPE(TOP(TO_STRING(tags), 10)) WHERE TO_STRING(tags) IS NOT NULL'
-    );
+    expect(aggregationStats([field], false)).toBe('tags = VALUES(TO_STRING(tags))');
   });
 
-  it('should use the standard not-null guard for normalized entity.source aggregation', () => {
+  it('should emit collect_values aggregation using VALUES for main pipeline', () => {
+    const field: EntityField = {
+      source: 'tags',
+      destination: 'tags',
+      mapping: { type: 'keyword' },
+      retention: { operation: 'collect_values' },
+    };
+    expect(aggregationStats([field], true)).toBe('recent.tags = VALUES(TO_STRING(tags))');
+  });
+
+  it('should use VALUES for normalized entity.source aggregation', () => {
     const field: EntityField = {
       source: 'entity.source',
       destination: 'entity.source',
       mapping: { type: 'keyword' },
-      retention: { operation: 'collect_values', maxLength: 50 },
+      retention: { operation: 'collect_values' },
     };
     expect(aggregationStats([field], false)).toBe(
-      'entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE TO_STRING(entity.source) IS NOT NULL'
+      'entity.source = VALUES(TO_STRING(entity.source))'
     );
   });
 

@@ -24,6 +24,8 @@ import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useConnectorExists } from '../../hooks/use_connector_exists';
 import type { UseDefaultModelSettingsReturn } from '../../hooks/use_default_model_settings';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { EventType } from '../../analytics/constants';
 
 interface Props {
   defaultModelSettings: UseDefaultModelSettingsReturn;
@@ -89,6 +91,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
   const { exists: connectorExists, loading: connectorExistsLoading } = useConnectorExists(
     state.defaultModelId
   );
+  const usageTracker = useUsageTracker();
 
   const options = useMemo(() => getOptions(connectors), [connectors]);
   const selectedOptions = useMemo(
@@ -124,6 +127,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
 
   const onChangeDefaultModel = (selected: EuiComboBoxOptionOption<string>[]) => {
     const value = selected[0]?.value ?? NO_DEFAULT_MODEL;
+    usageTracker.count(EventType.DEFAULT_MODEL_CHANGED);
     setDefaultModelId(value);
   };
 

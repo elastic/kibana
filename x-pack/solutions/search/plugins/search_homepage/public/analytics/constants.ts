@@ -15,4 +15,6 @@ export enum AnalyticsEvents {
   // ingestVariantWebCrawlerClick = 'homepage_ingest_variant_web_crawler_click',
   // ingestVariantConnectorsClick = 'homepage_ingest_variant_add_connector_click',
   // ingestVariantManageAPIKeysClick = 'homepage_ingest_variant_manage_api_keys_click',
+  openedApp = 'opened_app',
+  metricFetchFailed = 'metric_fetch_failed',
 }

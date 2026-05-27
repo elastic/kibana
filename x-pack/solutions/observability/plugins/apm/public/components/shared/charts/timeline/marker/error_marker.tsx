@@ -16,6 +16,7 @@ import {
 import styled from '@emotion/styled';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { asDuration } from '../../../../../../common/utils/formatters';
 import type { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import type { ApmRoutes } from '../../../../routing/apm_route_config';
@@ -80,6 +81,9 @@ export function ErrorMarker({ mark, query }: Props) {
       isOpen={isPopoverOpen}
       closePopover={togglePopover}
       anchorPosition="upCenter"
+      aria-label={i18n.translate('xpack.apm.errorMarker.popoverAriaLabel', {
+        defaultMessage: 'Error details',
+      })}
     >
       <Popover>
         <EuiFlexGroup direction="column" gutterSize="s">

@@ -109,6 +109,32 @@ describe('transformOut', () => {
     `);
   });
 
+  test('should strip out unsupported properties from by-value state', () => {
+    const legacyState = {
+      title: 'Custom title',
+      layout: 'vertical',
+      enhancements: {}, // unsupported
+      links: [
+        {
+          type: 'externalLink',
+          destination: 'https://example.com/',
+        },
+      ],
+    } as StoredLinksEmbeddableState;
+    expect(transformOut(legacyState, [])).toMatchInlineSnapshot(`
+      Object {
+        "layout": "vertical",
+        "links": Array [
+          Object {
+            "destination": "https://example.com/",
+            "type": "externalLink",
+          },
+        ],
+        "title": "Custom title",
+      }
+    `);
+  });
+
   test('should inject dashboard references for by-value state', () => {
     const byValueState = {
       title: 'Custom title',

@@ -36,6 +36,7 @@ import {
 } from './execution_functions';
 import { cancelWaitingWorkflow } from './lib/cancel_waiting_workflow';
 import { checkLicense } from './lib/check_license';
+import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
   resolveExhaustedWorkflowRunTask,
@@ -594,11 +595,13 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
 
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
+
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const workflowExecutionRepository = new WorkflowExecutionRepository(
-      coreStart.elasticsearch.client.asInternalUser
-    );
+    const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+    const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
       workflowExecutionRepository
@@ -613,6 +616,23 @@ export class WorkflowsExecutionEnginePlugin
       config: this.config,
     };
 
+    // Re-check that a workflow is still enabled right before persisting an
+    // execution document.  The route-level check may have read a stale value
+    // if a concurrent hard-delete disabled the workflow in the meantime.
+    // Skipped for test runs — unsaved workflows don't exist in the index.
+    const ensureWorkflowEnabled = async (
+      workflow: WorkflowExecutionEngineModel,
+      spaceId: string
+    ) => {
+      if (workflow.isTestRun) {
+        return;
+      }
+      const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId);
+      if (!stillEnabled) {
+        throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
+      }
+    };
+
     // Helper function to create and persist a workflow execution
     const createAndPersistWorkflowExecution = async (
       workflow: WorkflowExecutionEngineModel,
@@ -625,6 +645,9 @@ export class WorkflowsExecutionEnginePlugin
       repository: WorkflowExecutionRepository;
     }> => {
       await this.initialize(coreStart);
+
+      await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
+
       const workflowCreatedAt = new Date();
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const executedBy = await getAuthenticatedUser(
@@ -712,6 +735,17 @@ export class WorkflowsExecutionEnginePlugin
 
       if (!isRunningInTaskManager && !request) {
         throw new Error('Workflows cannot be executed without the user context');
+      }
+
+      // Test-only hook: simulate slow execution creation so Scout API tests
+      // can deterministically reproduce the TOCTOU race in hardDeleteWorkflows.
+      // Only honoured for internal API requests (KbnClient sets x-elastic-internal-origin).
+      if (request?.isInternalApiRequest) {
+        const raw = request.headers['x-kbn-test-run-delay-ms'];
+        const delayMs = parseInt(String(Array.isArray(raw) ? raw[0] : raw ?? '0'), 10);
+        if (delayMs > 0) {
+          await new Promise((r) => setTimeout(r, delayMs));
+        }
       }
 
       const { workflowExecution } = await createAndPersistWorkflowExecution(
@@ -833,6 +867,8 @@ export class WorkflowsExecutionEnginePlugin
       await checkLicense(plugins.licensing);
 
       await this.initialize(coreStart);
+      await ensureWorkflowEnabled(workflow, workflow.spaceId || 'default');
+
       const workflowCreatedAt = new Date();
       const context: Record<string, unknown> = {
         ...(executionContext ?? {}),
