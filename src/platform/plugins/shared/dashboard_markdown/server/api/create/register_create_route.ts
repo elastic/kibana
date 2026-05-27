@@ -27,6 +27,10 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
   createRoute.addVersion(
     {
       version: PUBLIC_API_VERSION,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).createMarkdownOASOperationObject,
+      },
       validate: {
         request: {
           body: createRequestBodySchema,

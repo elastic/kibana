@@ -25,6 +25,10 @@ export function registerDeleteRoute(router: VersionedRouter<RequestHandlerContex
   deleteRoute.addVersion(
     {
       version: PUBLIC_API_VERSION,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).deleteMarkdownOASOperationObject,
+      },
       validate: {
         request: {
           params: schema.object({

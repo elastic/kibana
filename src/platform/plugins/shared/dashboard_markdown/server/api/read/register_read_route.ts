@@ -26,6 +26,10 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
   readRoute.addVersion(
     {
       version: PUBLIC_API_VERSION,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).readMarkdownOASOperationObject,
+      },
       validate: {
         request: {
           params: schema.object({

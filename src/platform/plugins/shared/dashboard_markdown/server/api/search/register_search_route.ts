@@ -20,12 +20,16 @@ export function registerSearchRoute(router: VersionedRouter<RequestHandlerContex
     summary: `Search markdown library items`,
     ...commonRouteConfig,
     description:
-      'Returns a paginated list of markdown library items. Each result includes title, description, and metadata, but not the content. Use `GET /api/markdown/{id}` to retrieve the complete state.',
+      'Returns a paginated list of markdown library items. Each result includes title, description, and metadata, but not the content. Use `GET /api/markdowns/{id}` to retrieve the complete state.',
   });
 
   searchRoute.addVersion(
     {
       version: PUBLIC_API_VERSION,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).searchMarkdownOASOperationObject,
+      },
       validate: {
         request: {
           query: searchRequestQuerySchema,
