@@ -16,7 +16,6 @@ import type {
   DashboardSection,
   DashboardState,
 } from '@kbn/dashboard-plugin/server';
-import { createRequestHandlerContext } from '../create_request_handler_context';
 
 const DASHBOARD_SML_TYPE = 'dashboard';
 
@@ -92,10 +91,8 @@ export const createDashboardSmlType = ({
 
   getSmlData: async (originId, context) => {
     try {
-      // todo: this should be passed from agent builder
-      const requestHandlerContext = createRequestHandlerContext(context.savedObjectsClient);
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(requestHandlerContext, originId);
+      const dashboard = await dashboardClient.read(context.savedObjectsClient, originId);
 
       return {
         chunks: [
@@ -117,10 +114,8 @@ export const createDashboardSmlType = ({
 
   toAttachment: async (item, context) => {
     try {
-      // todo: this should be passed from agent builder
-      const requestHandlerContext = createRequestHandlerContext(context.savedObjectsClient);
       const dashboardClient = await getDashboardClient();
-      const dashboard = await dashboardClient.read(requestHandlerContext, item.origin_id);
+      const dashboard = await dashboardClient.read(context.savedObjectsClient, item.origin_id);
 
       return {
         type: DASHBOARD_ATTACHMENT_TYPE,

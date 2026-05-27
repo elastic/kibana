@@ -208,6 +208,7 @@ export function buildAutocompleteContext({
       totalWorkflows: 0,
     },
     currentWorkflowId: editorState?.workflow?.id ?? null,
+    isCurrentWorkflowManaged: editorState?.workflow?.managed === true,
     workflowDefinition: workflowDefinition ?? null,
   };
 }

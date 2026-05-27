@@ -346,13 +346,6 @@ export class AssetManagerClient {
       'create'
     );
 
-    // Exclusion patterns (e.g. `-*elastic-cloud-logs-*`) come back from the
-    // security data view's index list and are valid for SEARCH (they subtract
-    // matches) but not for privilege checks — a user excluding a pattern from
-    // their search doesn't need read access to it. ES has no notion of
-    // "privileges on a negative pattern" and treats `-*foo*` as a literal
-    // index name, so leaving these in produces spurious 403s for roles that
-    // don't grant access to the excluded indices.
     const sourceIndexPrivileges = Object.fromEntries(
       sourceIndexPatterns
         .filter((idx) => !idx.startsWith('-'))
