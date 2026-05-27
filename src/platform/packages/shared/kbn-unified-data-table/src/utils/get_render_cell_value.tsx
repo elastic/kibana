@@ -168,7 +168,6 @@ export const getRenderCellValueFn = ({
         fieldFormats,
         closePopover,
         isPlainRecord,
-        columnsMeta,
       });
     }
 
@@ -201,7 +200,6 @@ export const getRenderCellValueFn = ({
           fieldFormats,
           dataView,
           field,
-          columnMeta: isPlainRecord ? columnsMeta?.[columnId] : undefined,
         })}
       </span>
     );
@@ -228,7 +226,6 @@ function renderPopoverContent({
   fieldFormats,
   closePopover,
   isPlainRecord,
-  columnsMeta,
 }: {
   row: DataTableRecord;
   field: DataViewField | undefined;
@@ -238,7 +235,6 @@ function renderPopoverContent({
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
   isPlainRecord?: boolean;
-  columnsMeta: DataTableColumnsMeta | undefined;
 }) {
   const closeButton = (
     <EuiButtonIcon
@@ -283,7 +279,6 @@ function renderPopoverContent({
               fieldFormats,
               dataView,
               field,
-              columnMeta: isPlainRecord ? columnsMeta?.[columnId] : undefined,
             })}
           </span>
         </DataTablePopoverCellValue>
