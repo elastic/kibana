@@ -14,19 +14,20 @@ import type { ComposeFormValues } from '../compose_form_types';
 
 const notificationsTitle = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.title',
-  { defaultMessage: 'Simple actions' }
+  { defaultMessage: 'Simple action policy' }
 );
 
 const notificationsSubtext = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.subtext',
   {
-    defaultMessage: "Send a notification when this rule's alerts change status.",
+    defaultMessage:
+      "Send a notification when this rule's alerts change status. A linked action policy will be created with this rule.",
   }
 );
 
 const createSingleActionLabel = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.createSingleActionLabel',
-  { defaultMessage: 'Create single action' }
+  { defaultMessage: 'Create action policy' }
 );
 
 interface Props {
