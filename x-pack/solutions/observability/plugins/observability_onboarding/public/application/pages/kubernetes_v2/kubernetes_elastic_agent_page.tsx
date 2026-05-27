@@ -115,25 +115,25 @@ export const KubernetesElasticAgentPage: React.FC = () => {
     () => [
       ...(metricsOnboardingEnabled
         ? [
-            {
-              id: CLUSTER_OVERVIEW_DASHBOARD_ID,
-              label: i18n.translate(
-                'xpack.observability_onboarding.kubernetesPanel.exploreDashboard',
-                { defaultMessage: 'Explore Kubernetes cluster' }
-              ),
-              title: i18n.translate(
-                'xpack.observability_onboarding.kubernetesPanel.monitoringCluster',
-                {
-                  defaultMessage: 'Overview your Kubernetes cluster with this pre-made dashboard',
-                }
-              ),
-              requires: 'metrics' as const,
-              href:
-                dashboardLocator?.getRedirectUrl({
-                  dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
-                }) ?? '',
-            },
-          ]
+          {
+            id: CLUSTER_OVERVIEW_DASHBOARD_ID,
+            label: i18n.translate(
+              'xpack.observability_onboarding.kubernetesPanel.exploreDashboard',
+              { defaultMessage: 'Explore Kubernetes cluster' }
+            ),
+            title: i18n.translate(
+              'xpack.observability_onboarding.kubernetesPanel.monitoringCluster',
+              {
+                defaultMessage: 'Overview your Kubernetes cluster with this pre-made dashboard',
+              }
+            ),
+            requires: 'metrics' as const,
+            href:
+              dashboardLocator?.getRedirectUrl({
+                dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
+              }) ?? '',
+          },
+        ]
         : []),
       {
         id: 'logs',
@@ -185,29 +185,29 @@ export const KubernetesElasticAgentPage: React.FC = () => {
 
     const installStep = error
       ? {
-          title: installStepTitle,
-          status: 'danger' as const,
-          children: (
-            <EmptyPrompt
-              inline
-              onboardingFlowType="kubernetes"
-              error={error}
-              onRetryClick={refetch}
-            />
-          ),
-        }
+        title: installStepTitle,
+        status: 'danger' as const,
+        children: (
+          <EmptyPrompt
+            inline
+            onboardingFlowType="kubernetes"
+            error={error}
+            onRetryClick={refetch}
+          />
+        ),
+      }
       : {
-          title: installStepTitle,
-          children: (
-            <KubernetesElasticAgentInstallStep
-              status={status}
-              data={data}
-              isMonitoringStepActive={isMonitoringStepActive}
-              ingestionMode={ingestionMode}
-              onIngestionModeChange={setIngestionMode}
-            />
-          ),
-        };
+        title: installStepTitle,
+        children: (
+          <KubernetesElasticAgentInstallStep
+            status={status}
+            data={data}
+            isMonitoringStepActive={isMonitoringStepActive}
+            ingestionMode={ingestionMode}
+            onIngestionModeChange={setIngestionMode}
+          />
+        ),
+      };
 
     if (error) {
       return [collectionMethodStep, installStep];
@@ -218,8 +218,8 @@ export const KubernetesElasticAgentPage: React.FC = () => {
       status: (dataReceived || hasPreExistingDataEarly
         ? 'complete'
         : isMonitoringStepActive
-        ? 'current'
-        : 'incomplete') as EuiStepStatus,
+          ? 'current'
+          : 'incomplete') as EuiStepStatus,
       children: (
         <KubernetesElasticAgentVisualizeStep
           isMonitoringStepActive={isMonitoringStepActive}
@@ -251,13 +251,13 @@ export const KubernetesElasticAgentPage: React.FC = () => {
   return (
     <OnboardingFlowLayout
       title={i18n.translate('xpack.observability_onboarding.kubernetesV2.elasticAgent.title', {
-        defaultMessage: 'Set up Kubernetes',
+        defaultMessage: 'Monitor your Kubernetes cluster',
       })}
       subtitle={i18n.translate(
         'xpack.observability_onboarding.kubernetesV2.elasticAgent.subtitle',
         {
           defaultMessage:
-            'Collect logs and metrics from your Kubernetes cluster with Elastic Agent.',
+            'Collect logs, metrics, and traces from your Kubernetes infrastructure.',
         }
       )}
       logo="kubernetes"

@@ -39,7 +39,7 @@ export const buildKubernetesCollectionMethodOptions = ({
       'xpack.observability_onboarding.kubernetesV2.collectionMethod.otel.description',
       {
         defaultMessage:
-          'Use the Elastic Distribution of OpenTelemetry Collector for Kubernetes logs and metrics.',
+          'Use the Elastic Distribution of OpenTelemetry (EDOT) Collector to send logs, metrics, and traces from your cluster.',
       }
     ),
     logo: 'opentelemetry',
@@ -57,7 +57,8 @@ export const buildKubernetesCollectionMethodOptions = ({
     description: i18n.translate(
       'xpack.observability_onboarding.kubernetesV2.collectionMethod.elasticAgent.description',
       {
-        defaultMessage: 'Deploy a standalone Elastic Agent on your Kubernetes cluster.',
+        defaultMessage:
+          'Deploy standalone or Fleet-managed Elastic Agent via Helm to collect logs and metrics from your Kubernetes nodes and workloads.',
       }
     ),
     euiIconType: 'agentApp',
