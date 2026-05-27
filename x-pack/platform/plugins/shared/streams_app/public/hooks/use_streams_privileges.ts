@@ -11,7 +11,6 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-  OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
@@ -60,8 +59,6 @@ export function useStreamsPrivileges() {
     false
   );
 
-  const overviewPageEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE, false);
-
   const draftStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS, false);
 
   return {
@@ -89,9 +86,6 @@ export function useStreamsPrivileges() {
       },
       wiredStreamViews: {
         enabled: wiredStreamViewsEnabled,
-      },
-      overviewPage: {
-        enabled: overviewPageEnabled,
       },
       draftStreams: {
         enabled: draftStreamsEnabled,

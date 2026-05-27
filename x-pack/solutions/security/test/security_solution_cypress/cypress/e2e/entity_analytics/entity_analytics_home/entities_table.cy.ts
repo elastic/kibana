@@ -27,6 +27,7 @@ import {
   FIELDS_SELECTOR_CLOSE,
   LAST_UPDATED,
   FLYOUT_RIGHT_PANEL,
+  FLYOUT_TITLE_TEXT,
 } from '../../../screens/entity_analytics/entity_analytics_home';
 import { TIMELINE_FLYOUT_WRAPPER } from '../../../screens/timeline';
 
@@ -78,7 +79,7 @@ describe(
       });
 
       it('displays the correct entity count', () => {
-        cy.contains('8 entities').should('be.visible');
+        cy.contains('13 entities').should('be.visible');
       });
 
       it('shows all default column headers', () => {
@@ -138,7 +139,7 @@ describe(
           .then((entityName) => {
             cy.get(EXPAND_ROW_BUTTON).first().click();
             cy.get(FLYOUT_RIGHT_PANEL).should('be.visible');
-            cy.get('[data-test-subj="flyoutTitleText"]').should('contain', entityName.trim());
+            cy.get(FLYOUT_TITLE_TEXT).should('contain', entityName.trim());
           });
       });
 

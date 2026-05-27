@@ -23,6 +23,7 @@ export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /[\\/]target[\\/]/,
   /\.tsbuildinfo$/,
   /\.test\.[jt]sx?$/,
+  /\.spec\.[jt]sx?$/,
   /\.stories\.[jt]sx?$/,
   /\.mock\.[jt]sx?$/,
   /[\\/]__(?:mocks|snapshots|fixtures|jest)__[\\/]/,
@@ -108,7 +109,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
     let hmrPort: number | undefined;
     if (hmr) {
-      hmrServer = new HmrServer(options.basePath);
+      hmrServer = new HmrServer(options.basePath, log);
       hmrPort = await hmrServer.start();
     }
 

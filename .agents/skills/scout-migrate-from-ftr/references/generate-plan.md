@@ -117,7 +117,7 @@ Scout is deployment-agnostic — the goal is "write once, run locally and on Ela
 
 For each test group, answer all four:
 
-1. **Where do the FTR tests run today?** Cross-reference existing FTR tags (`@skipServerless`, `@skipStateful`, etc.) and `.buildkite/ftr_*_configs.yml` so CI coverage is preserved.
+1. **Where do the FTR tests run today?** Cross-reference existing FTR tags (`@skipServerless`, `@skipStateful`, etc.) and `.buildkite/ftr-manifests/ftr_*_configs.yml` so CI coverage is preserved.
 2. **Where should they ideally run in Scout?**
    - **Platform tests** (`src/platform/**`, `x-pack/platform/**`): use `tags.deploymentAgnostic` when the original intent was "run everywhere."
    - **Solution tests** (`x-pack/solutions/observability|security|search/...`): use explicit `tags.stateful.*` + `tags.serverless.<solution>.*` rather than `tags.deploymentAgnostic`.

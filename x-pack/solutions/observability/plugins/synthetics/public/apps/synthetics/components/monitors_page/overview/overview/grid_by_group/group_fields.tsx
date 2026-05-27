@@ -16,12 +16,15 @@ import { ConfigKey } from '../../../../../../../../common/runtime_types';
 
 import type { GroupByState } from '../../../../../state/overview';
 import { selectOverviewGroupBy, setOverviewGroupByAction } from '../../../../../state/overview';
+import { selectOverviewStatus } from '../../../../../state/overview_status';
 
 const DEFAULT_GROUP_BY: GroupByState = { field: 'none', order: 'asc' };
 const LOCAL_STORAGE_KEY = 'synthetics.overviewGroupBy';
 
 export const GroupFields = () => {
   const { field: groupField, order: groupOrder } = useSelector(selectOverviewGroupBy);
+  const { allConfigs } = useSelector(selectOverviewStatus);
+  const hasRemoteMonitors = allConfigs?.some((config) => Boolean(config.remote)) ?? false;
   const dispatch = useDispatch();
   const [urlParams, updateUrlParams] = useUrlParams();
   const [localStorageGroupBy, setLocalStorageGroupBy] =
@@ -139,6 +142,22 @@ export const GroupFields = () => {
         });
       },
     },
+    ...(hasRemoteMonitors
+      ? [
+          {
+            label: REMOTE_CLUSTER_LABEL,
+            value: 'remoteName',
+            checked: groupField === 'remoteName',
+            defaultSortOrder: 'asc',
+            onClick: () => {
+              handleChange({
+                field: 'remoteName' as const,
+                order: groupOrder,
+              });
+            },
+          },
+        ]
+      : []),
   ];
 
   const { asc, desc, label } = getOrderContent(groupField);
@@ -224,6 +243,12 @@ const getOrderContent = (groupField: string) => {
         desc: SORT_ALPHABETICAL_DESC,
         label: MONITOR_LABEL,
       };
+    case 'remoteName':
+      return {
+        asc: SORT_ALPHABETICAL_ASC,
+        desc: SORT_ALPHABETICAL_DESC,
+        label: REMOTE_CLUSTER_LABEL,
+      };
 
     default:
       return {
@@ -287,3 +312,10 @@ const TAG_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.tag.lab
 const PROJECT_LABEL = i18n.translate('xpack.synthetics.overview.groupPopover.project.label', {
   defaultMessage: 'Project',
 });
+
+const REMOTE_CLUSTER_LABEL = i18n.translate(
+  'xpack.synthetics.overview.groupPopover.remoteCluster.label',
+  {
+    defaultMessage: 'Remote cluster',
+  }
+);

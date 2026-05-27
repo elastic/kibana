@@ -6,10 +6,25 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  FILE_ATTACHMENT_TYPE,
+  LEGACY_FILE_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+  LEGACY_LENS_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import { CommentAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/comment/v2';
+import { LensAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/lens/v2';
+import { FileAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/file/v2';
 import { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
-import { validateUnifiedRegisteredAttachments } from './validators';
+import { ExternalReferenceAttachmentTypeRegistry } from '../../attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import {
+  validateLegacyRegisteredAttachments,
+  validateUnifiedRegisteredAttachments,
+} from './validators';
+import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
 
 describe('validateUnifiedRegisteredAttachments', () => {
   const validCommentPayload = {
@@ -174,5 +189,154 @@ describe('validateUnifiedRegisteredAttachments', () => {
         unifiedAttachmentTypeRegistry,
       })
     ).toThrow(/Invalid attachment payload for type 'comment'/);
+  });
+});
+
+describe('validateLegacyRegisteredAttachments (migrated subtypes)', () => {
+  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+  const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+
+  const validFileEntry = {
+    name: 'screenshot',
+    extension: 'png',
+    mimeType: 'image/png',
+    created: '2024-01-01T00:00:00.000Z',
+  };
+
+  const buildLegacyFilePayload = (overrides: Record<string, unknown> = {}) => ({
+    type: AttachmentType.externalReference,
+    externalReferenceAttachmentTypeId: LEGACY_FILE_ATTACHMENT_TYPE,
+    externalReferenceId: 'file-so-id',
+    externalReferenceStorage: {
+      type: ExternalReferenceStorageType.savedObject,
+      soType: FILE_SO_TYPE,
+    },
+    externalReferenceMetadata: { files: [validFileEntry] },
+    owner: 'securitySolution',
+    ...overrides,
+  });
+
+  const buildLegacyLensPayload = (overrides: Record<string, unknown> = {}) => ({
+    type: AttachmentType.persistableState,
+    persistableStateAttachmentTypeId: LEGACY_LENS_ATTACHMENT_TYPE,
+    persistableStateAttachmentState: { state: { attributes: { state: { query: {} } } } },
+    owner: 'securitySolution',
+    ...overrides,
+  });
+
+  describe('migrated external reference (file)', () => {
+    it('accepts a valid legacy `.files` payload after transforming and validating against the unified zod schema', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: FILE_ATTACHMENT_TYPE,
+        schema: FileAttachmentPayloadSchema,
+      });
+
+      expect(() =>
+        validateLegacyRegisteredAttachments({
+          query: buildLegacyFilePayload() as never,
+          persistableStateAttachmentTypeRegistry,
+          externalReferenceAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
+        })
+      ).not.toThrow();
+    });
+
+    it('rejects a legacy `.files` payload with an invalid file entry (extra keys are strict)', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: FILE_ATTACHMENT_TYPE,
+        schema: FileAttachmentPayloadSchema,
+      });
+
+      expect(() =>
+        validateLegacyRegisteredAttachments({
+          query: buildLegacyFilePayload({
+            externalReferenceMetadata: {
+              files: [{ ...validFileEntry, extra: 'not-allowed' }],
+            },
+          }) as never,
+          persistableStateAttachmentTypeRegistry,
+          externalReferenceAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
+        })
+      ).toThrow(/Invalid attachment payload for type 'file'/);
+    });
+
+    it('rejects a legacy `.files` payload missing required file entry fields', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: FILE_ATTACHMENT_TYPE,
+        schema: FileAttachmentPayloadSchema,
+      });
+
+      expect(() =>
+        validateLegacyRegisteredAttachments({
+          query: buildLegacyFilePayload({
+            externalReferenceMetadata: { files: [{ name: 'screenshot' }] },
+          }) as never,
+          persistableStateAttachmentTypeRegistry,
+          externalReferenceAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
+        })
+      ).toThrow(/Invalid attachment payload for type 'file'/);
+    });
+
+    it('rejects a legacy `.files` payload with zero files', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: FILE_ATTACHMENT_TYPE,
+        schema: FileAttachmentPayloadSchema,
+      });
+
+      expect(() =>
+        validateLegacyRegisteredAttachments({
+          query: buildLegacyFilePayload({
+            externalReferenceMetadata: { files: [] },
+          }) as never,
+          persistableStateAttachmentTypeRegistry,
+          externalReferenceAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
+        })
+      ).toThrow(/Invalid attachment payload for type 'file'/);
+    });
+  });
+
+  describe('migrated persistable state (lens)', () => {
+    it('accepts a valid legacy `.lens` payload after transforming and validating against the unified zod schema', () => {
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: LENS_ATTACHMENT_TYPE,
+        schema: LensAttachmentPayloadSchema,
+      });
+
+      expect(() =>
+        validateLegacyRegisteredAttachments({
+          query: buildLegacyLensPayload() as never,
+          persistableStateAttachmentTypeRegistry,
+          externalReferenceAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
+        })
+      ).not.toThrow();
+    });
+
+    it('routes the transformed legacy `.lens` payload through the unified zod schema', () => {
+      // Register a stricter custom schema for `lens` and expect it to reject the
+      // transformed payload, proving the legacy → unified validation path is wired.
+      const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+      unifiedAttachmentTypeRegistry.register({
+        id: LENS_ATTACHMENT_TYPE,
+        schema: z.object({ never: z.literal('matches') }).strict(),
+      });
+
+      expect(() =>
+        validateLegacyRegisteredAttachments({
+          query: buildLegacyLensPayload() as never,
+          persistableStateAttachmentTypeRegistry,
+          externalReferenceAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
+        })
+      ).toThrow(/Invalid attachment payload for type 'lens'/);
+    });
   });
 });

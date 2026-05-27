@@ -46,6 +46,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ON_OPEN_PANEL_MENU, ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
 import type { Rule, RuleUiAction } from './types';
@@ -194,6 +195,7 @@ interface PluginsStart {
   contentManagement?: ContentManagementPublicStart;
   share: SharePluginStart;
   cps?: CPSPluginStart;
+  inspector?: InspectorStart;
 }
 
 export class Plugin
@@ -349,6 +351,7 @@ export class Plugin
             share: pluginsStart.share,
             uiActions: pluginsStart.uiActions,
             cps: pluginsStart.cps,
+            inspector: pluginsStart.inspector,
           });
         },
       });

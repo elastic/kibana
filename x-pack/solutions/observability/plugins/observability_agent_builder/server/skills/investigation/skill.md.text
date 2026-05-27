@@ -65,13 +65,35 @@ Based on what Steps 2-3 revealed, choose the most relevant deep-dive:
 **If alerts are relevant:**
 - `get_alerts` — fetch active and recovered alerts for a service or across all services.
 
-### Step 5: Synthesize
+### Step 5: Form Hypotheses
 
-Once you have enough evidence:
-1. **State the root cause** (or most likely cause with confidence level)
-2. **Cite specific evidence** — error messages, trace IDs, metric values, topology data
-3. **Explain the chain** — how the root cause propagates to the user-visible symptom
-4. **Suggest next steps** — remediation or further investigation
+Before reporting a cause, list every hypothesis consistent with the observed evidence. The same telemetry often supports multiple causes; collapsing to one too early produces confidently wrong answers.
+
+Each hypothesis has:
+1. **Claim** — the specific mechanism (be specific: not "there are errors" but "[component] is failing because [mechanism]")
+2. **Supporting evidence** — which tool outputs point to it
+3. **Confidence** — Critical / High / Medium / Speculative
+
+**Confidence levels:**
+- **Critical** — direct evidence naming the cause; no plausible alternatives remain
+- **High** — strongly supported by evidence; alternatives unlikely but not ruled out
+- **Medium** — supported by evidence but other hypotheses produce the same observable signature
+- **Speculative** — consistent with the evidence but not specifically supported
+
+**Observation vs. claim.** Evidence from one side of an interaction is evidence about that interaction, not about the other side. A caller seeing a failure when invoking a dependency is evidence that the call failed; it is not direct evidence about the dependency's internal state (whether it is running, healthy, misconfigured, or simply unreachable from this caller). State claims at the level the evidence supports. Going deeper requires evidence at that depth.
+
+Write the hypotheses out explicitly before proceeding to Step 6.
+
+### Step 6: Synthesize
+
+Report the diagnosis with hedging that matches confidence:
+1. **State the diagnosis** at the abstraction level the evidence supports. If one or more hypotheses are at Critical or High confidence, state them as the cause(s). When multiple are at the same confidence level, report them all rather than picking one — the evidence does not distinguish. If multiple are Medium or Speculative, report them as candidates rather than committing to one.
+2. **Cite specific evidence** — error messages, trace IDs, metric values, topology data.
+3. **Explain the chain** — how the cause(s) propagate to the user-visible symptom.
+4. **Quantify impact** — report concrete counts (failed transactions, error occurrences, affected hosts) alongside rates and percentages. Tool responses include these (e.g., `get_log_groups` per-pattern counts, `get_trace_metrics` success and failure transaction counts); use them rather than reporting only rates.
+5. **Include time-window context** — note the duration or onset of the issue. When tool responses extend beyond the focused investigation window (histograms, change-point baselines, longer time ranges), report broader counts alongside focused ones so the reader can tell whether the issue is new, sustained, or intermittent.
+6. **Interpret, don't just restate** — "100% error rate" is data; "service is completely unreachable" or "intermittently failing for the past hour" is what the data means behaviorally. State the interpretation, not just the raw metric.
+7. **Recommended next steps** — when several hypotheses remain plausible, recommendations should address each. Different causes require different remediation.
 
 ## Critical Rules
 
@@ -81,3 +103,5 @@ Once you have enough evidence:
 4. **Use the time range from screen context** when available. Pass `start` and `end` consistently to all tool calls.
 5. **Don't stop too early.** A service having errors is a symptom, not a root cause. Investigate WHY it has errors — check dependencies, traces, and logs.
 6. **Contrast healthy vs unhealthy.** When topology shows multiple dependencies, note which are healthy and which aren't. The contrast isolates the problem.
+7. **Form hypotheses before concluding.** When the same observable evidence is consistent with multiple causes, list them with confidence levels and report all that remain plausible. Picking the most familiar match without ruling out alternatives is the most common way investigations go wrong.
+8. **Match claims to evidence depth.** Evidence about an interaction (e.g., a caller's view of a call) does not justify claims about the entities involved (e.g., the callee's internal state). Deeper claims need deeper evidence. This applies to all formats — summary tables, bullet labels, status fields, and emoji-prefixed states — not just prose. A table cell that says "Down" is a state claim and needs the same evidence as a sentence saying "down". Prefer boundary-level labels ("Unreachable", "Error", "No telemetry") for entities whose internal state you cannot directly verify.

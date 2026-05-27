@@ -336,7 +336,7 @@ describe('<AutoFollowPatternList />', () => {
         await user.click(actionMenuButton);
 
         const contextMenu = screen.getByTestId('autoFollowPatternActionContextMenu');
-        const menuButtons = within(contextMenu).getAllByRole('button');
+        const menuButtons = within(contextMenu).getAllByRole('menuitem');
 
         expect(menuButtons[0].textContent).toEqual('Resume replication');
         expect(menuButtons[1].textContent).toEqual('Edit pattern');
@@ -361,7 +361,7 @@ describe('<AutoFollowPatternList />', () => {
         await user.click(actionMenuButton);
 
         const contextMenu = screen.getByTestId('autoFollowPatternActionContextMenu');
-        const deleteButton = within(contextMenu).getAllByRole('button')[2];
+        const deleteButton = within(contextMenu).getAllByRole('menuitem')[2];
         await user.click(deleteButton);
 
         expect(screen.getByTestId('deleteAutoFollowPatternConfirmation')).toBeInTheDocument();

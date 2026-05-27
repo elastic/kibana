@@ -133,7 +133,6 @@ export const FilterInContextMenu: FC<FilterInContextMenuProps> = ({
     <EuiContextMenuItem
       key="filterIn"
       icon="plusCircle"
-      size="s"
       onClick={() => {
         filterFn();
         onAnnounce(FILTER_IN_ANNOUNCEMENT(field, typeof data === 'string' ? data : ''));

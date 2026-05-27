@@ -12,6 +12,8 @@ import type {
   ExecutionStatus,
   ExecutionType,
   WorkflowDetailDto,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
 } from '@kbn/workflows';
 
 export interface BulkCreateWorkflowsParams {
@@ -73,8 +75,18 @@ export interface GetWorkflowExecutionsParams {
   executionTypes?: ExecutionType[];
   executedBy?: string[];
   omitStepRuns?: boolean;
+  /** Datemath lower bound for filtering executions by finishedAt (applied to finishedAt). */
+  finishedAfter?: string;
+  /** Datemath upper bound for filtering executions by finishedAt (applied to finishedAt). */
+  finishedBefore?: string;
+  sortField?: WorkflowExecutionSortField;
+  sortOrder?: WorkflowExecutionSortOrder;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering executions by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering executions by startedAt. */
+  startedBefore?: string;
 }
 
 export interface GetWorkflowStepExecutionsParams {
@@ -83,6 +95,10 @@ export interface GetWorkflowStepExecutionsParams {
   includeOutput?: boolean;
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering step executions by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering step executions by startedAt. */
+  startedBefore?: string;
 }
 
 export interface GetExecutionParams {

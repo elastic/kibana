@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { ACCESSES_ENGINE_CONFIGS } from './configs';
+import { ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS } from './configs';
 import { buildActorDiscoveryQuery } from '../engine/build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from '../engine/build_targets_per_actor_query';
 import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
 import type { BucketedRelationshipIntegrationConfig } from '../engine/types';
 
-const bucketedConfigs = ACCESSES_ENGINE_CONFIGS.filter(
+const bucketedConfigs = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.filter(
   (c): c is BucketedRelationshipIntegrationConfig => c.kind === 'bucketed'
 );
 
-describe('ACCESSES_ENGINE_CONFIGS', () => {
+describe('ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
   it('ships exactly the four expected integrations', () => {
-    expect(ACCESSES_ENGINE_CONFIGS.map((c) => c.id).sort()).toEqual([
+    expect(ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.map((c) => c.id).sort()).toEqual([
       'aws_cloudtrail',
       'elastic_defend',
       'system_auth',
@@ -26,15 +26,15 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
   });
 
   it('declares kind: "bucketed" on every accesses config (access-count classification is the contract)', () => {
-    for (const config of ACCESSES_ENGINE_CONFIGS) {
+    for (const config of ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS) {
       expect(config.kind).toBe('bucketed');
     }
     // Sanity-check that the typed filter lined up with the runtime assertion.
-    expect(bucketedConfigs).toHaveLength(ACCESSES_ENGINE_CONFIGS.length);
+    expect(bucketedConfigs).toHaveLength(ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.length);
   });
 
   it('declares targetEntityType "host" on every config (accesses is host-targeted)', () => {
-    for (const config of ACCESSES_ENGINE_CONFIGS) {
+    for (const config of ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS) {
       expect(config.targetEntityType).toBe('host');
     }
   });
@@ -50,12 +50,12 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
   });
 
   it('requires a target-EUID-exists gate on every accesses config (Step1/Step2 consistency)', () => {
-    for (const config of ACCESSES_ENGINE_CONFIGS) {
+    for (const config of ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS) {
       expect(config.requireTargetEntityIdExists).toBe(true);
     }
   });
 
-  it.each(ACCESSES_ENGINE_CONFIGS)(
+  it.each(ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS)(
     '$id: builds a syntactically-locked actor discovery query',
     (config) => {
       const query = buildActorDiscoveryQuery(config, undefined) as {
@@ -70,7 +70,7 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
     }
   );
 
-  it.each(ACCESSES_ENGINE_CONFIGS)(
+  it.each(ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS)(
     '$id: builds a syntactically-locked targets-per-actor ES|QL query',
     (config) => {
       const query = buildTargetsPerActorQuery(config, 'default');
@@ -84,7 +84,7 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
     }
   );
 
-  it.each(ACCESSES_ENGINE_CONFIGS)(
+  it.each(ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS)(
     '$id: emits both bucket-relationship STATS columns',
     (config) => {
       const query = buildTargetsPerActorQuery(config, 'default');
@@ -93,7 +93,7 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
     }
   );
 
-  it.each(ACCESSES_ENGINE_CONFIGS)(
+  it.each(ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS)(
     '$id: filters on event.outcome == "success" in both Step 1 and Step 2',
     (config) => {
       // Step 1: composite-agg additional filter array contains a success term.
@@ -106,7 +106,7 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
     }
   );
 
-  it.each(ACCESSES_ENGINE_CONFIGS)(
+  it.each(ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS)(
     '$id: indexPattern is namespace-templated (namespace appears verbatim in the index name)',
     (config) => {
       expect(config.indexPattern('myns')).toContain('-myns');
@@ -122,8 +122,11 @@ describe('ACCESSES_ENGINE_CONFIGS', () => {
   // Golden snapshots: any future template change will surface here in PR review.
   // Update with `--ci=false -u` only when the change is intentional and reviewed.
   describe('golden snapshots', () => {
-    it.each(ACCESSES_ENGINE_CONFIGS)('$id: targets-per-actor ES|QL is locked', (config) => {
-      expect(buildTargetsPerActorQuery(config, '__namespace__')).toMatchSnapshot();
-    });
+    it.each(ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS)(
+      '$id: targets-per-actor ES|QL is locked',
+      (config) => {
+        expect(buildTargetsPerActorQuery(config, '__namespace__')).toMatchSnapshot();
+      }
+    );
   });
 });

@@ -13,7 +13,7 @@ export function useRefreshCompositeSloSummaries(): void {
   const { sloClient } = usePluginContext();
 
   const { mutate } = useMutation(['requestCompositeSloSummaryRefresh'], () =>
-    sloClient.fetch('POST /internal/observability/slos/_composite_summary/refresh')
+    sloClient.fetch('POST /internal/observability/slo_composites/_summary_refresh')
   );
 
   useEffect(() => {

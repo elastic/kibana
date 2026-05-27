@@ -100,6 +100,7 @@ const TagsFilterPopoverComponent = ({
         onChange={handleSelectableOptionsChange}
         emptyMessage={i18n.NO_TAGS_AVAILABLE}
         noMatchesMessage={i18n.NO_TAGS_AVAILABLE}
+        listProps={{ paddingSize: 's' }}
       >
         {(list, search) => (
           <div css={{ width: TAGS_POPOVER_WIDTH }}>

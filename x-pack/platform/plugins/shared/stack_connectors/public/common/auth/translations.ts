@@ -332,3 +332,79 @@ export const OPTIONAL_LABEL = i18n.translate(
     defaultMessage: 'Optional',
   }
 );
+
+export const QUERY_PARAMS_SWITCH = i18n.translate(
+  'xpack.stackConnectors.components.auth.viewQueryParamsSwitch',
+  {
+    defaultMessage: 'Add secret query parameters',
+  }
+);
+
+export const QUERY_PARAMS_TITLE = i18n.translate(
+  'xpack.stackConnectors.components.auth.queryParamsTitle',
+  {
+    defaultMessage: 'Secret query parameters',
+  }
+);
+
+export const QUERY_PARAMS_SUBTITLE = i18n.translate(
+  'xpack.stackConnectors.components.auth.queryParamsSubtitle',
+  {
+    defaultMessage:
+      'Add query parameters to be appended to each request URL. Values are encrypted and never exposed.',
+  }
+);
+
+export const MAX_QUERY_PARAMS_LIMIT = (max: number) =>
+  i18n.translate('xpack.stackConnectors.components.auth.maxQueryParams', {
+    values: { max },
+    defaultMessage: 'Maximum number of {max} query parameters reached.',
+  });
+
+export const ADD_QUERY_PARAM_BUTTON = i18n.translate(
+  'xpack.stackConnectors.components.auth.addQueryParamButton',
+  {
+    defaultMessage: 'Add query parameter',
+  }
+);
+
+export const DELETE_QUERY_PARAM_BUTTON = i18n.translate(
+  'xpack.stackConnectors.components.auth.deleteQueryParamButton',
+  {
+    defaultMessage: 'Delete',
+    description: 'Delete secret query parameter',
+  }
+);
+
+export const SAME_QUERY_PARAM_KEY_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.sameQueryParamKeyError',
+  {
+    defaultMessage: 'This key is already used in another query parameter',
+  }
+);
+
+export const QUERY_PARAM_MISSING_KEY_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.queryParamMissingKeyError',
+  {
+    defaultMessage: 'Key is required',
+  }
+);
+
+export const QUERY_PARAM_MISSING_VALUE_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.auth.queryParamMissingValueError',
+  {
+    defaultMessage: 'Value is required',
+  }
+);
+
+export const QUERY_PARAM_KEY_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.stackConnectors.components.auth.queryParamKeyTooLongError', {
+    values: { max },
+    defaultMessage: 'Key must be {max} characters or fewer',
+  });
+
+export const QUERY_PARAM_VALUE_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.stackConnectors.components.auth.queryParamValueTooLongError', {
+    values: { max },
+    defaultMessage: 'Value must be {max} characters or fewer',
+  });

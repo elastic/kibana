@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 
 export type EvalsPublicSetup = Record<string, never>;
@@ -83,7 +82,6 @@ export interface AddToDatasetAction {
 }
 
 export interface EvalsPublicStart {
-  TraceWaterfall: ComponentType<{ traceId: string }>;
   openAddToDatasetFlyout: (options: AddToDatasetFlyoutOpenOptions) => void;
   getAddToDatasetAction: (config: AddToDatasetActionConfig) => AddToDatasetAction | null;
   canAddToDataset: boolean;

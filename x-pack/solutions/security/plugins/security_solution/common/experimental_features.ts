@@ -63,6 +63,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsScriptLibraryManagement: true,
 
   /**
+   * `cancel` response action for Elastic Defend Endpoint
+   * Release: 9.5
+   */
+  responseActionsEndpointCancel: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
@@ -84,14 +90,14 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the new Entity Analytics home page experience.
    */
-  entityAnalyticsNewHomePageEnabled: false,
+  entityAnalyticsNewHomePageEnabled: true,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.
    * When enabled, the lead generation engine, observation modules,
    * API routes, and persistence indices are activated.
    */
-  leadGenerationEnabled: false,
+  leadGenerationEnabled: true,
 
   /**
    * disables ES|QL rules
@@ -191,7 +197,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Entity Analytics Watchlist feature.
    */
-  entityAnalyticsWatchlistEnabled: false,
+  entityAnalyticsWatchlistEnabled: true,
 
   /**
    * Enables the Trial Companion feature.
@@ -238,13 +244,23 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Uses entity store v2 for entity analytics skill
    */
-  entityAnalyticsEntityStoreV2: false,
+  entityAnalyticsEntityStoreV2: true,
 
   /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */
   prebuiltRulesDeprecationUIEnabled: true,
+
+  /**
+   * Enables the Detection Rule Changes History API endpoint
+   * (`GET /api/detection_engine/rules/_history`).
+   *
+   * Independent of the alerting framework's `xpack.alerting.ruleChangeTracking.enabled`
+   * config flag, which gates the underlying primitive that produces the history
+   * records. Both must be enabled for the API to return non-empty results.
+   */
+  ruleChangesHistoryEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

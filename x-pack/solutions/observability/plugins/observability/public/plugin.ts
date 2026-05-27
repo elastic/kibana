@@ -84,9 +84,11 @@ import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observabil
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
+import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
   CASES_PATH,
+  NIGHTSHIFT_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
@@ -219,6 +221,16 @@ export class Plugin
       visibleIn: [],
       keywords: ['alerts', 'rules'],
     },
+    {
+      id: 'nightshift',
+      title: i18n.translate('xpack.observability.nightshiftLinkTitle', {
+        defaultMessage: 'Nightshift',
+      }),
+      order: 8002,
+      path: NIGHTSHIFT_PATH,
+      visibleIn: [],
+      keywords: ['nightshift', 'significant events'],
+    },
   ];
 
   constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
@@ -257,6 +269,7 @@ export class Plugin
           },
         })
       );
+      pluginsSetup.cases.attachmentFramework.registerUnified(getObservabilityAlertType());
     }
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';

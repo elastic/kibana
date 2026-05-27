@@ -661,6 +661,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  registered_domain: {
+    type: 'registered_domain' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.registeredDomainInputDisplay',
+      {
+        defaultMessage: 'Registered domain',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.registeredDomainHelpText"
+          defaultMessage="Extracts the {registeredDomainLink}, sub-domain, and top-level domain from a fully qualified domain name (FQDN)."
+          values={{
+            registeredDomainLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsRegisteredDomainLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.registeredDomain}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.registeredDomainLinkLabel', {
+                  defaultMessage: 'registered domain',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -712,6 +743,7 @@ const PROCESSOR_GROUP_MAP: Record<
   concat: 'set',
   network_direction: 'set',
   enrich: 'set',
+  registered_domain: 'extract',
 };
 
 const getProcessorDescription =
