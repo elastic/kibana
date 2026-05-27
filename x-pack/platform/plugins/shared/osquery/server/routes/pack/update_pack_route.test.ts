@@ -864,15 +864,93 @@ describe('updatePackRoute', () => {
       expect(getCallCount).toBeGreaterThanOrEqual(2);
       expect(mockResponse.ok).toHaveBeenCalled();
       const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
-      // The disabled-pack short-circuit at line 366-367 returns updatedPackSO
-      // directly (no PackResponseData build). The gate applied at the
-      // convertSOQueriesToPack mutation step covers this path too.
-      const responseQuery = responseBody.data.attributes.queries.q1;
+      const responseQuery = responseBody.data.queries.q1;
       expect(responseQuery).toBeDefined();
       expect(responseQuery).not.toHaveProperty('schedule_type');
       expect(responseQuery).not.toHaveProperty('rrule_schedule');
       // Per-query interval (legacy field) MUST still surface.
       expect(responseQuery.interval).toBe(60);
+    });
+
+    it('disabled pack PUT with flag off — pack-level schedule_type and rrule_schedule do not leak in response', async () => {
+      // Regression for the early-return that previously returned the raw SO
+      // bypassing both the response envelope and the flag gate.
+      const rruleValue = {
+        rrule: 'FREQ=WEEKLY',
+        start_date: '2026-06-01T00:00:00Z',
+      };
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          enabled: false,
+          schedule_type: 'rrule' as const,
+          rrule_schedule: rruleValue,
+          interval: null,
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(false);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'flag-off-leak-probe' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
+      // The PackResponseData envelope replaces the raw SO. None of the SO
+      // metadata fields are present.
+      expect(responseBody.data).not.toHaveProperty('type');
+      expect(responseBody.data).not.toHaveProperty('references');
+      expect(responseBody.data).not.toHaveProperty('coreMigrationVersion');
+      expect(responseBody.data.saved_object_id).toBe('pack-id');
+      // Flag-off branch surfaces no schedule fields.
+      expect(responseBody.data).not.toHaveProperty('schedule_type');
+      expect(responseBody.data).not.toHaveProperty('rrule_schedule');
+      expect(responseBody.data).not.toHaveProperty('interval');
+    });
+
+    it('disabled pack PUT with flag on — pack-level rrule_schedule surfaces via discriminated response', async () => {
+      const rruleValue = {
+        rrule: 'FREQ=WEEKLY',
+        start_date: '2026-06-01T00:00:00Z',
+      };
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          enabled: false,
+          schedule_type: 'rrule' as const,
+          rrule_schedule: rruleValue,
+          interval: null,
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'flag-on-probe' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
+      expect(responseBody.data.schedule_type).toBe('rrule');
+      expect(responseBody.data.rrule_schedule).toEqual(rruleValue);
+      expect(responseBody.data).not.toHaveProperty('interval');
     });
   });
 });

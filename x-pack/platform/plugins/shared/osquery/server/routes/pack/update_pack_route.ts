@@ -365,15 +365,14 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           request.params.id
         );
 
-        // @ts-expect-error update types
-        updatedPackSO.attributes.queries = stripPerQueryRruleFields(
+        const convertedQueries = stripPerQueryRruleFields(
           convertSOQueriesToPack(updatedPackSO.attributes.queries),
           isRruleFeatureEnabled
         );
 
         const buildFleetPackBlock = (agentPolicyId: string) => {
           const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
-            updatedPackSO.attributes.queries,
+            convertedQueries,
             {
               spaceId,
               packSchedule: {
@@ -393,8 +392,31 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           };
         };
 
+        const buildResponseData = (): PackResponseData => {
+          const { attributes: attrs } = updatedPackSO;
+
+          return {
+            name: attrs.name,
+            description: attrs.description,
+            queries: convertedQueries as unknown as PackResponseData['queries'],
+            version: attrs.version,
+            enabled: attrs.enabled,
+            created_at: attrs.created_at,
+            created_by: attrs.created_by,
+            created_by_profile_uid: attrs.created_by_profile_uid,
+            updated_at: attrs.updated_at,
+            updated_by: attrs.updated_by,
+            updated_by_profile_uid: attrs.updated_by_profile_uid,
+            policy_ids: attrs.policy_ids,
+            shards: attrs.shards,
+            saved_object_id: updatedPackSO.id,
+            // Discriminated response — see buildScheduleResponseSlice.
+            ...buildScheduleResponseSlice(attrs, isRruleFeatureEnabled),
+          };
+        };
+
         if (enabled == null && !currentPackSO.attributes.enabled) {
-          return response.ok({ body: { data: updatedPackSO } });
+          return response.ok({ body: { data: buildResponseData() } });
         }
 
         if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
@@ -549,29 +571,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           );
         }
 
-        const { attributes } = updatedPackSO;
-
-        const data: PackResponseData = {
-          name: attributes.name,
-          description: attributes.description,
-          queries: stripPerQueryRruleFields(attributes.queries, isRruleFeatureEnabled),
-          version: attributes.version,
-          enabled: attributes.enabled,
-          created_at: attributes.created_at,
-          created_by: attributes.created_by,
-          created_by_profile_uid: attributes.created_by_profile_uid,
-          updated_at: attributes.updated_at,
-          updated_by: attributes.updated_by,
-          updated_by_profile_uid: attributes.updated_by_profile_uid,
-          policy_ids: attributes.policy_ids,
-          shards: attributes.shards,
-          saved_object_id: updatedPackSO.id,
-          // Discriminated response — see buildScheduleResponseSlice.
-          ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),
-        };
-
         return response.ok({
-          body: { data },
+          body: { data: buildResponseData() },
         });
       }
     );
