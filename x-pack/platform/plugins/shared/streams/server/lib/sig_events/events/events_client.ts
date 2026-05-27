@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { esql } from '@elastic/esql';
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import {
   type CommonSearchOptions,
-  type PaginatedSearchOptions,
+  type PaginationSearchOptions,
   type PaginatedResponse,
 } from '../query_utils';
 import {
@@ -24,14 +26,20 @@ import {
   type eventsMappings,
 } from './data_stream';
 
-export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
+export type EventsDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 
 const GROUP_BY_FIELD = 'event_id';
 
-export class EventClient {
+export interface EventsSearchOptions extends CommonSearchOptions {
+  searchQuery?: string;
+}
+
+export type EventsPaginatedSearchOptions = EventsSearchOptions & PaginationSearchOptions;
+
+export class EventsClient {
   constructor(
     private readonly clients: {
-      dataStreamClient: EventDataStreamClient;
+      dataStreamClient: EventsDataStreamClient;
       esClient: ElasticsearchClient;
       space: string;
     }
@@ -44,24 +52,26 @@ export class EventClient {
     });
   }
 
-  async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: SigEvent[] }> {
+  async findLatest(options: EventsSearchOptions = {}): Promise<{ hits: SigEvent[] }> {
     return runLatestSourceEsqlQuery<SigEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: EVENTS_DATA_STREAM,
+      where: this.buildWhere(options),
       groupBy: GROUP_BY_FIELD,
     });
   }
 
   async findLatestPaginated(
-    options: PaginatedSearchOptions = {}
+    options: EventsPaginatedSearchOptions = {}
   ): Promise<PaginatedResponse<SigEvent>> {
     return runPaginatedLatestSourceEsqlQuery<SigEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: EVENTS_DATA_STREAM,
+      where: this.buildWhere(options),
       groupBy: GROUP_BY_FIELD,
     });
   }
@@ -74,5 +84,19 @@ export class EventClient {
       idField: GROUP_BY_FIELD,
       idValue: eventId,
     });
+  }
+
+  private buildWhere({ searchQuery }: EventsSearchOptions): ESQLAstExpression | undefined {
+    let where: ESQLAstExpression | undefined;
+
+    if (searchQuery !== undefined && searchQuery.trim() !== '') {
+      where = esql.exp(
+        `MATCH(${esql.col('title')}, ${esql.str(searchQuery)}) OR MATCH(${esql.col(
+          'summary'
+        )}, ${esql.str(searchQuery)})`
+      );
+    }
+
+    return where;
   }
 }

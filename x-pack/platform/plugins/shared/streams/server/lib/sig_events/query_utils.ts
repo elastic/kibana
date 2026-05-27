@@ -14,7 +14,7 @@ export interface CommonSearchOptions {
   to?: string;
 }
 
-export interface PaginatedSearchOptions extends CommonSearchOptions {
+export interface PaginationSearchOptions {
   page?: number;
   perPage?: number;
 }

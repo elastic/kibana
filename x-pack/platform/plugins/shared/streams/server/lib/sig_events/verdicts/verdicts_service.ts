@@ -7,11 +7,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamClient } from '@kbn/data-streams';
-import { VerdictClient } from './verdict_client';
+import { VerdictsClient } from './verdicts_client';
 import { verdictsDataStream, type StoredVerdict, type verdictsMappings } from './data_stream';
 
-export class VerdictService {
-  getClient({ esClient, space }: { esClient: ElasticsearchClient; space: string }): VerdictClient {
+export class VerdictsService {
+  getClient({ esClient, space }: { esClient: ElasticsearchClient; space: string }): VerdictsClient {
     const dataStreamClient = DataStreamClient.fromDefinition<
       typeof verdictsMappings,
       StoredVerdict
@@ -20,7 +20,7 @@ export class VerdictService {
       elasticsearchClient: esClient,
     });
 
-    return new VerdictClient({
+    return new VerdictsClient({
       dataStreamClient,
       esClient,
       space,

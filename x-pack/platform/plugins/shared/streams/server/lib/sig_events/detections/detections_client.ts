@@ -8,13 +8,13 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import {
   type CommonSearchOptions,
-  type PaginatedSearchOptions,
+  type PaginationSearchOptions,
   type PaginatedResponse,
 } from '../query_utils';
 import {
-  type LatestSourceWhereCondition,
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
@@ -26,7 +26,7 @@ import {
   type detectionsMappings,
 } from './data_stream';
 
-export type DetectionDataStreamClient = IDataStreamClient<
+export type DetectionsDataStreamClient = IDataStreamClient<
   typeof detectionsMappings,
   StoredDetection
 >;
@@ -36,24 +36,21 @@ export interface DetectionsSearchOptions extends CommonSearchOptions {
   rule_name?: string;
 }
 
-export interface DetectionsPaginatedSearchOptions extends PaginatedSearchOptions {
-  rule_uuid?: string[];
-  rule_name?: string;
-}
+export type DetectionsPaginatedSearchOptions = DetectionsSearchOptions & PaginationSearchOptions;
 
 const andWhere = (
-  current: LatestSourceWhereCondition | undefined,
-  next: LatestSourceWhereCondition
-): LatestSourceWhereCondition => {
+  current: ESQLAstExpression | undefined,
+  next: ESQLAstExpression
+): ESQLAstExpression => {
   return current ? esql.exp`${current} AND ${next}` : next;
 };
 
 const GROUP_BY_FIELD = 'detection_id';
 
-export class DetectionClient {
+export class DetectionsClient {
   constructor(
     private readonly clients: {
-      dataStreamClient: DetectionDataStreamClient;
+      dataStreamClient: DetectionsDataStreamClient;
       esClient: ElasticsearchClient;
       space: string;
     }
@@ -66,8 +63,8 @@ export class DetectionClient {
     });
   }
 
-  private buildWhere(options: DetectionsSearchOptions): LatestSourceWhereCondition | undefined {
-    let where: LatestSourceWhereCondition | undefined;
+  private buildWhere(options: DetectionsSearchOptions): ESQLAstExpression | undefined {
+    let where: ESQLAstExpression | undefined;
 
     const ruleUuidLiterals = options.rule_uuid?.map((ruleUuid) => esql.str(ruleUuid));
     if (ruleUuidLiterals?.length) {

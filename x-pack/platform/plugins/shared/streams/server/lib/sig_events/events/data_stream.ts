@@ -19,6 +19,8 @@ export const eventsMappings = {
     event_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
+    title: mappings.text(),
+    summary: mappings.text(),
     rule_names: mappings.keyword(),
   },
 } satisfies MappingsDefinition;

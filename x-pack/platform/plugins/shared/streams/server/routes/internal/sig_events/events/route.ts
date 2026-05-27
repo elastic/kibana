@@ -30,6 +30,7 @@ const eventsSearchRoute = createServerRoute({
       to: z.iso.datetime().optional(),
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
+      searchQuery: z.string().optional(),
     }),
   }),
   handler: async ({

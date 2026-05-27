@@ -12,7 +12,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
   type CommonSearchOptions,
   type PaginatedResponse,
-  type PaginatedSearchOptions,
+  type PaginationSearchOptions,
 } from './query_utils';
 
 const isIndexNotFoundError = (error: unknown): boolean => {
@@ -94,13 +94,11 @@ const executeCountQuery = async ({
   }
 };
 
-export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHole;
-
 interface BuildLatestSourceBaseQueryArgs {
   space: string;
   index: string;
   options: CommonSearchOptions;
-  where?: LatestSourceWhereCondition;
+  where?: ESQLAstExpression;
   groupBy: string;
 }
 
@@ -144,7 +142,7 @@ interface RunLatestSourceEsqlQueryArgs {
   space: string;
   options: CommonSearchOptions;
   index: string;
-  where?: LatestSourceWhereCondition;
+  where?: ESQLAstExpression;
   sort?: ComposerSortShorthand[];
   groupBy: string;
 }
@@ -176,9 +174,9 @@ const DEFAULT_PER_PAGE = 25;
 interface RunPaginatedLatestSourceEsqlQueryArgs {
   esClient: ElasticsearchClient;
   space: string;
-  options: PaginatedSearchOptions;
+  options: PaginationSearchOptions;
   index: string;
-  where?: LatestSourceWhereCondition;
+  where?: ESQLAstExpression;
   sort?: ComposerSortShorthand[];
   groupBy: string;
 }

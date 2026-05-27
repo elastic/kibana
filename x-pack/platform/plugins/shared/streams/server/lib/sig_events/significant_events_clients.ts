@@ -6,29 +6,29 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { DataStreamClient } from '@kbn/data-streams';
 import type { AnyDataStreamDefinition } from '@kbn/data-streams';
-import { DetectionService, detectionsDataStream } from './detections';
-import type { DetectionClient } from './detections';
-import { DiscoveryService, discoveriesDataStream } from './discoveries';
-import type { DiscoveryClient } from './discoveries';
-import { EventService, eventsDataStream } from './events';
-import type { EventClient } from './events';
-import { VerdictService, verdictsDataStream } from './verdicts';
-import type { VerdictClient } from './verdicts';
+import { DataStreamClient } from '@kbn/data-streams';
+import { detectionsDataStream, DetectionsService } from './detections';
+import type { DetectionsClient } from './detections';
+import { discoveriesDataStream, DiscoveriesService } from './discoveries';
+import type { DiscoveriesClient } from './discoveries';
+import { eventsDataStream, EventsService } from './events';
+import type { EventsClient } from './events';
+import { verdictsDataStream, VerdictsService } from './verdicts';
+import type { VerdictsClient } from './verdicts';
 
 export interface SignificantEventsServices {
-  detection: DetectionService;
-  discovery: DiscoveryService;
-  event: EventService;
-  verdict: VerdictService;
+  detection: DetectionsService;
+  discovery: DiscoveriesService;
+  event: EventsService;
+  verdict: VerdictsService;
 }
 
 export interface SignificantEventsClients {
-  getDetectionClient: () => DetectionClient;
-  getDiscoveryClient: () => DiscoveryClient;
-  getEventClient: () => EventClient;
-  getVerdictClient: () => VerdictClient;
+  getDetectionClient: () => DetectionsClient;
+  getDiscoveryClient: () => DiscoveriesClient;
+  getEventClient: () => EventsClient;
+  getVerdictClient: () => VerdictsClient;
 }
 
 const SIGNIFICANT_EVENTS_DATA_STREAMS: AnyDataStreamDefinition[] = [
@@ -40,10 +40,10 @@ const SIGNIFICANT_EVENTS_DATA_STREAMS: AnyDataStreamDefinition[] = [
 
 export function createSignificantEventsServices(): SignificantEventsServices {
   return {
-    detection: new DetectionService(),
-    discovery: new DiscoveryService(),
-    event: new EventService(),
-    verdict: new VerdictService(),
+    detection: new DetectionsService(),
+    discovery: new DiscoveriesService(),
+    event: new EventsService(),
+    verdict: new VerdictsService(),
   };
 }
 

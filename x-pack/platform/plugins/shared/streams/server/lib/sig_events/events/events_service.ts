@@ -7,17 +7,17 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamClient } from '@kbn/data-streams';
-import { EventClient } from './event_client';
+import { EventsClient } from './events_client';
 import { eventsDataStream, type StoredEvent, type eventsMappings } from './data_stream';
 
-export class EventService {
-  getClient({ esClient, space }: { esClient: ElasticsearchClient; space: string }): EventClient {
+export class EventsService {
+  getClient({ esClient, space }: { esClient: ElasticsearchClient; space: string }): EventsClient {
     const dataStreamClient = DataStreamClient.fromDefinition<typeof eventsMappings, StoredEvent>({
       dataStream: eventsDataStream,
       elasticsearchClient: esClient,
     });
 
-    return new EventClient({
+    return new EventsClient({
       dataStreamClient,
       esClient,
       space,

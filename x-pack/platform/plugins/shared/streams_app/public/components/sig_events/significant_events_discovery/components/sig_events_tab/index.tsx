@@ -12,11 +12,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SigEvent } from '@kbn/streams-schema';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import {
   useFetchSigEvents,
   useFetchSigEventHistory,
@@ -105,10 +107,13 @@ export const SigEventsTab = () => {
   const { timeState } = useTimefilter();
   const { rangeFrom, rangeTo } = useTimeRange();
   const { updateTimeRange } = useTimeRangeUpdate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearchQuery = useDebouncedValue(searchQuery, 300).trim().toLowerCase();
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchSigEvents({
     from: timeState.start,
     to: timeState.end,
+    searchQuery: debouncedSearchQuery,
   });
   const [selectedEvent, setSelectedEvent] = useState<SigEvent | undefined>();
 
@@ -224,7 +229,17 @@ export const SigEventsTab = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem>
+            <EuiFieldSearch
+              fullWidth
+              onSearch={setSearchQuery}
+              incremental={true}
+              placeholder={SEARCH_LABEL}
+              aria-label={SEARCH_LABEL}
+              compressed={true}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker
               start={rangeFrom}
@@ -272,3 +287,7 @@ export const SigEventsTab = () => {
     </EuiFlexGroup>
   );
 };
+
+const SEARCH_LABEL = i18n.translate('xpack.streams.sigEvents.eventsTab.searchFieldLabel', {
+  defaultMessage: 'Search significant events',
+});

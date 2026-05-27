@@ -15,9 +15,10 @@ import { useFetchErrorToast } from '../use_fetch_error_toast';
 interface UseFetchSigEventsParams {
   from: string | number;
   to: string | number;
+  searchQuery?: string;
 }
 
-export const useFetchSigEvents = ({ from, to }: UseFetchSigEventsParams) => {
+export const useFetchSigEvents = ({ from, to, searchQuery }: UseFetchSigEventsParams) => {
   const {
     dependencies: {
       start: {
@@ -42,16 +43,17 @@ export const useFetchSigEvents = ({ from, to }: UseFetchSigEventsParams) => {
             perPage: pagination.perPage,
             from: new Date(from).toISOString(),
             to: new Date(to).toISOString(),
+            searchQuery,
           },
         },
         signal: signal ?? null,
       });
     },
-    [streamsRepositoryClient, pagination, from, to]
+    [streamsRepositoryClient, pagination.page, pagination.perPage, from, to, searchQuery]
   );
 
   const query = useQuery<PaginatedResponse<SigEvent>, Error>({
-    queryKey: ['sigEvents', pagination.page, pagination.perPage, from, to],
+    queryKey: ['sigEvents', pagination.page, pagination.perPage, from, to, searchQuery],
     queryFn: fetchSigEvents,
     onError: showFetchErrorToast,
   });

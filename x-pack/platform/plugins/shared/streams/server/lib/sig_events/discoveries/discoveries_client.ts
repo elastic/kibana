@@ -9,7 +9,7 @@ import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   type CommonSearchOptions,
-  type PaginatedSearchOptions,
+  type PaginationSearchOptions,
   type PaginatedResponse,
 } from '../query_utils';
 import {
@@ -18,59 +18,64 @@ import {
   runFindByIdEsqlQuery,
 } from '../latest_source_query';
 import {
-  VERDICTS_DATA_STREAM,
-  type StoredVerdict,
-  type Verdict,
-  type verdictsMappings,
+  DISCOVERIES_DATA_STREAM,
+  type Discovery,
+  type StoredDiscovery,
+  type discoveriesMappings,
 } from './data_stream';
 
-export type VerdictDataStreamClient = IDataStreamClient<typeof verdictsMappings, StoredVerdict>;
+export type DiscoveriesDataStreamClient = IDataStreamClient<
+  typeof discoveriesMappings,
+  StoredDiscovery
+>;
+
+export type DiscoveriesPaginatedSearchOptions = CommonSearchOptions & PaginationSearchOptions;
 
 const GROUP_BY_FIELD = 'discovery_id';
 
-export class VerdictClient {
+export class DiscoveriesClient {
   constructor(
     private readonly clients: {
-      dataStreamClient: VerdictDataStreamClient;
+      dataStreamClient: DiscoveriesDataStreamClient;
       esClient: ElasticsearchClient;
       space: string;
     }
   ) {}
 
-  async bulkCreate(verdicts: Verdict[]) {
+  async bulkCreate(discoveries: Discovery[]) {
     return this.clients.dataStreamClient.create({
       space: this.clients.space,
-      documents: verdicts,
+      documents: discoveries,
     });
   }
 
-  async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: Verdict[] }> {
-    return runLatestSourceEsqlQuery<Verdict>({
+  async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: Discovery[] }> {
+    return runLatestSourceEsqlQuery<Discovery>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
-      index: VERDICTS_DATA_STREAM,
+      index: DISCOVERIES_DATA_STREAM,
       groupBy: GROUP_BY_FIELD,
     });
   }
 
   async findLatestPaginated(
-    options: PaginatedSearchOptions = {}
-  ): Promise<PaginatedResponse<Verdict>> {
-    return runPaginatedLatestSourceEsqlQuery<Verdict>({
+    options: DiscoveriesPaginatedSearchOptions = {}
+  ): Promise<PaginatedResponse<Discovery>> {
+    return runPaginatedLatestSourceEsqlQuery<Discovery>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
-      index: VERDICTS_DATA_STREAM,
+      index: DISCOVERIES_DATA_STREAM,
       groupBy: GROUP_BY_FIELD,
     });
   }
 
-  async findByDiscoveryId(discoveryId: string): Promise<{ hits: Verdict[] }> {
-    return runFindByIdEsqlQuery<Verdict>({
+  async findById(discoveryId: string): Promise<{ hits: Discovery[] }> {
+    return runFindByIdEsqlQuery<Discovery>({
       esClient: this.clients.esClient,
       space: this.clients.space,
-      index: VERDICTS_DATA_STREAM,
+      index: DISCOVERIES_DATA_STREAM,
       idField: GROUP_BY_FIELD,
       idValue: discoveryId,
     });

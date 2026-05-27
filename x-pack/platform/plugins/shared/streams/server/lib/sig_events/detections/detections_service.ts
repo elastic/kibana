@@ -7,30 +7,26 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamClient } from '@kbn/data-streams';
-import { DiscoveryClient } from './discovery_client';
-import {
-  discoveriesDataStream,
-  type StoredDiscovery,
-  type discoveriesMappings,
-} from './data_stream';
+import { DetectionsClient } from './detections_client';
+import { detectionsDataStream, type StoredDetection, type detectionsMappings } from './data_stream';
 
-export class DiscoveryService {
+export class DetectionsService {
   getClient({
     esClient,
     space,
   }: {
     esClient: ElasticsearchClient;
     space: string;
-  }): DiscoveryClient {
+  }): DetectionsClient {
     const dataStreamClient = DataStreamClient.fromDefinition<
-      typeof discoveriesMappings,
-      StoredDiscovery
+      typeof detectionsMappings,
+      StoredDetection
     >({
-      dataStream: discoveriesDataStream,
+      dataStream: detectionsDataStream,
       elasticsearchClient: esClient,
     });
 
-    return new DiscoveryClient({
+    return new DetectionsClient({
       dataStreamClient,
       esClient,
       space,

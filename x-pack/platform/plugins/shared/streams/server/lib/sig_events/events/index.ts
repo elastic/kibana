@@ -7,6 +7,6 @@
 
 export { EVENTS_DATA_STREAM, eventsDataStream, eventsMappings } from './data_stream';
 export type { SigEvent, StoredEvent } from './data_stream';
-export { EventClient } from './event_client';
-export type { EventDataStreamClient } from './event_client';
-export { EventService } from './event_service';
+export { EventsClient } from './events_client';
+export type { EventsDataStreamClient } from './events_client';
+export { EventsService } from './events_service';
