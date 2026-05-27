@@ -19,12 +19,15 @@ import {
 import { idParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
+const MANAGED_UPDATE_AVAILABILITY = { since: '9.5.0', stability: 'stable' } as const;
+
 interface UpdateWorkflowRouteConfig {
   routePath: string;
   security: typeof WORKFLOW_UPDATE_SECURITY;
   summary: string;
   description: string;
   oasOperationFile: string;
+  availability: typeof AVAILABILITY | typeof MANAGED_UPDATE_AVAILABILITY;
   allowManagedWorkflowMutation: boolean;
 }
 
@@ -36,6 +39,7 @@ const registerUpdateWorkflowRouteForPath = (
     summary,
     description,
     oasOperationFile,
+    availability,
     allowManagedWorkflowMutation,
   }: UpdateWorkflowRouteConfig
 ) => {
@@ -49,7 +53,7 @@ const registerUpdateWorkflowRouteForPath = (
       description,
       options: {
         tags: [OAS_TAG],
-        availability: AVAILABILITY,
+        availability,
       },
     })
     .addVersion(
@@ -93,6 +97,7 @@ export function registerUpdateWorkflowRoute(deps: RouteDependencies) {
     description:
       'Partially update an existing workflow. You can update individual fields such as name, description, enabled state, tags, or the YAML definition without providing all fields.',
     oasOperationFile: '../examples/update_workflow.yaml',
+    availability: AVAILABILITY,
     allowManagedWorkflowMutation: false,
   });
 
@@ -103,6 +108,7 @@ export function registerUpdateWorkflowRoute(deps: RouteDependencies) {
     description:
       'Partially update an existing managed workflow. This elevated route can update fields beyond the enabled state.',
     oasOperationFile: '../examples/update_managed_workflow.yaml',
+    availability: MANAGED_UPDATE_AVAILABILITY,
     allowManagedWorkflowMutation: true,
   });
 }

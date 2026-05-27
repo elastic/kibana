@@ -54,6 +54,7 @@ const createLicensingContext = () => ({
 
 describe('Workflow routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
+  let routeConfigs: Record<string, { path: string; options?: { availability?: unknown } }>;
   let mockApi: Record<string, jest.Mock>;
   let mockSpaces: { getSpaceId: jest.Mock };
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -63,6 +64,7 @@ describe('Workflow routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     routeHandlers = {};
+    routeConfigs = {};
     mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default-space') };
     mockLogger = loggingSystemMock.createLogger();
 
@@ -83,11 +85,16 @@ describe('Workflow routes', () => {
       getWorkflowJsonSchema: jest.fn(),
     };
 
-    const createVersionedRoute = (method: string, path: string) => ({
+    const createVersionedRoute = (
+      method: string,
+      path: string,
+      config: { path: string; options?: { availability?: unknown } }
+    ) => ({
       addVersion: jest
         .fn()
         .mockImplementation((_config: unknown, handler: (...args: any[]) => Promise<any>) => {
           routeHandlers[`${method}:${path}`] = { handler };
+          routeConfigs[`${method}:${path}`] = config;
           return { addVersion: jest.fn() };
         }),
     });
@@ -97,22 +104,22 @@ describe('Workflow routes', () => {
         get: jest
           .fn()
           .mockImplementation((config: { path: string }) =>
-            createVersionedRoute('GET', config.path)
+            createVersionedRoute('GET', config.path, config)
           ),
         post: jest
           .fn()
           .mockImplementation((config: { path: string }) =>
-            createVersionedRoute('POST', config.path)
+            createVersionedRoute('POST', config.path, config)
           ),
         put: jest
           .fn()
           .mockImplementation((config: { path: string }) =>
-            createVersionedRoute('PUT', config.path)
+            createVersionedRoute('PUT', config.path, config)
           ),
         delete: jest
           .fn()
           .mockImplementation((config: { path: string }) =>
-            createVersionedRoute('DELETE', config.path)
+            createVersionedRoute('DELETE', config.path, config)
           ),
       },
     } as unknown as jest.Mocked<IRouter>;
@@ -307,6 +314,13 @@ describe('Workflow routes', () => {
 
     it('should register route handler', () => {
       expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should be documented as available from 9.5.0', () => {
+      expect(routeConfigs[key].options?.availability).toEqual({
+        since: '9.5.0',
+        stability: 'stable',
+      });
     });
 
     it('should call api.updateWorkflow with managed mutation enabled', async () => {
