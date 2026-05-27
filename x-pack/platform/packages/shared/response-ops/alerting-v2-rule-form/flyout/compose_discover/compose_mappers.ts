@@ -6,7 +6,11 @@
  */
 
 import type { RuleResponse, CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
-import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import {
+  mapArtifacts,
+  mergeArtifactsByType,
+  splitArtifactsByType,
+} from '../../form/utils/artifact_mappers';
 import type {
   ComposeFormValues,
   RuleQuery,
@@ -110,40 +114,6 @@ export function transformQueryOut(query: RuleQuery, kind?: RuleKind): TransformQ
   return result;
 }
 
-// ---------------------------------------------------------------------------
-// ComposeFormValues → API request
-// ---------------------------------------------------------------------------
-
-type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
-
-const createRunbookArtifactId = () =>
-  `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-
-const mapArtifacts = (
-  artifacts: ComposeFormValues['artifacts']
-): RuleArtifactPayload | undefined => {
-  const currentArtifacts = artifacts ?? [];
-  const runbookArtifact = currentArtifacts.find(
-    (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
-  );
-  const runbookValue = runbookArtifact?.value.trim();
-
-  if (runbookArtifact && !runbookValue) {
-    const filtered = currentArtifacts.filter((a) => a.type !== RUNBOOK_ARTIFACT_TYPE);
-    return filtered.length ? filtered : undefined;
-  }
-  if (runbookArtifact && runbookValue) {
-    const runbookId = runbookArtifact.id.trim() ? runbookArtifact.id : createRunbookArtifactId();
-    if (runbookArtifact.value === runbookValue && runbookArtifact.id === runbookId) {
-      return currentArtifacts.length ? currentArtifacts : undefined;
-    }
-    return currentArtifacts.map((a) =>
-      a.type === RUNBOOK_ARTIFACT_TYPE ? { ...a, id: runbookId, value: runbookValue } : a
-    );
-  }
-  return currentArtifacts.length ? currentArtifacts : undefined;
-};
-
 const DELAY_IMMEDIATE = 'immediate';
 const DELAY_BREACHES = 'breaches';
 const DELAY_DURATION = 'duration';
@@ -186,7 +156,7 @@ export const composeFormToCreateRequest = (
   builderType?: string
 ): CreateRuleData => {
   const { evaluation, recovery_policy } = transformQueryOut(formValues.query, formValues.kind);
-  const artifacts = mapArtifacts(formValues.artifacts);
+  const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
 
   return {
     kind: formValues.kind,
@@ -277,6 +247,6 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValue
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayMode(stateTransition),
     stateTransitionRecoveryDelayMode: deriveRecoveryDelayMode(stateTransition),
-    ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
+    ...splitArtifactsByType(rule.artifacts),
   };
 };

@@ -45,26 +45,10 @@ const customRecoveryDescription = i18n.translate(
   { defaultMessage: 'Define a custom recovery condition.' }
 );
 
-const noRecoveryLabel = i18n.translate(
-  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryDropDownOptionLabel',
-  { defaultMessage: 'No recovery' }
-);
-
-const noRecoveryDescription = i18n.translate(
-  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryDescription',
-  { defaultMessage: 'Do not recover alerts automatically.' }
-);
-
-const noRecoveryComingSoonBadgeLabel = i18n.translate(
-  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryComingSoonBadgeLabel',
-  { defaultMessage: 'Coming soon' }
-);
-
 const RECOVERY_TYPE_OPTIONS: Array<{
   value: RecoveryType;
   inputDisplay: string;
   dropdownDisplay: React.ReactNode;
-  disabled?: boolean;
 }> = [
   {
     value: 'default',
@@ -86,26 +70,6 @@ const RECOVERY_TYPE_OPTIONS: Array<{
         <strong>{customRecoveryLabel}</strong>
         <EuiText size="s" color="subdued">
           <p>{customRecoveryDescription}</p>
-        </EuiText>
-      </>
-    ),
-  },
-  {
-    value: 'none',
-    disabled: true,
-    inputDisplay: noRecoveryLabel,
-    dropdownDisplay: (
-      <>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
-          <EuiFlexItem grow={false}>
-            <strong>{noRecoveryLabel}</strong>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{noRecoveryComingSoonBadgeLabel}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiText size="s" color="subdued">
-          <p>{noRecoveryDescription}</p>
         </EuiText>
       </>
     ),
