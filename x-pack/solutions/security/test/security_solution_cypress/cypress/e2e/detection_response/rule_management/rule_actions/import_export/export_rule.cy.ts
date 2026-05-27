@@ -12,10 +12,7 @@ import {
   deletePrebuiltRulesAssets,
 } from '../../../../../tasks/api_calls/common';
 import { getCustomQueryRuleParams } from '../../../../../objects/rule';
-import {
-  TOASTER_BODY,
-  TOASTER,
-} from '../../../../../screens/alerts_detection_rules';
+import { TOASTER_BODY, TOASTER } from '../../../../../screens/alerts_detection_rules';
 import {
   selectAllRules,
   waitForRuleExecution,
