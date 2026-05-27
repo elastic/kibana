@@ -37,8 +37,8 @@ export const AwsTemporaryKeysForm: React.FC<AwsTemporaryKeysFormProps> = ({
   });
 
   useEffect(() => {
-    onReadyChange?.(!!fields.access_key_id && !!fields.secret_access_key);
-  }, [fields.access_key_id, fields.secret_access_key, onReadyChange]);
+    onReadyChange?.(!!fields.access_key_id && !!fields.secret_access_key && !!fields.session_token);
+  }, [fields.access_key_id, fields.secret_access_key, fields.session_token, onReadyChange]);
 
   const handleChange = (key: keyof AwsTemporaryKeyCredentials, value: string) => {
     const next = { ...fields, [key]: value };
