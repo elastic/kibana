@@ -29,8 +29,8 @@ import type {
 } from './add_from_library/add_from_library_flyout';
 import type { registerDrilldown } from './drilldowns/registry';
 import type {
-  SearchEmbeddablesRequestType,
-  SearchEmbeddablesResponseType,
+  SearchLibraryRequestType,
+  SearchLibraryResponseType,
 } from '../server/search_route/types';
 
 export interface EmbeddableSetupDependencies {
@@ -112,7 +112,5 @@ export interface EmbeddableStart {
     type: string
   ) => Promise<EmbeddableTransforms['transformOut'] | undefined>;
   hasLegacyURLTransform: (type: string) => boolean;
-  getSavedObjects: (
-    request: SearchEmbeddablesRequestType
-  ) => Promise<SearchEmbeddablesResponseType>;
+  getSavedObjects: (request: SearchLibraryRequestType) => Promise<SearchLibraryResponseType>;
 }

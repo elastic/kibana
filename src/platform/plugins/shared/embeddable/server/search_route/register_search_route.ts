@@ -10,7 +10,7 @@
 import type { IRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext, SavedObjectsFindOptionsReference } from '@kbn/core/server';
 import { SEARCH_ROUTE_PATH } from '../../common/constants';
-import { searchEmbeddablesRequestSchema, searchEmbeddablesResponseSchema } from './types';
+import { searchLibraryRequestSchema, searchLibraryResponseSchema } from './types';
 import type { getEmbeddableServerRegistry } from '../embeddable_transforms/registry';
 
 export function registerSearchRoute(
@@ -22,11 +22,11 @@ export function registerSearchRoute(
       path: SEARCH_ROUTE_PATH,
       validate: {
         request: {
-          body: searchEmbeddablesRequestSchema,
+          body: searchLibraryRequestSchema,
         },
         response: {
           200: {
-            body: () => searchEmbeddablesResponseSchema,
+            body: () => searchLibraryResponseSchema,
             description: 'success',
           },
           403: {

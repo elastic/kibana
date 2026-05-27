@@ -31,7 +31,7 @@ import {
 } from '../kibana_services';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from './registry';
 import { SEARCH_ROUTE_PATH } from '../../common/constants';
-import type { SearchEmbeddablesResponseType } from '../../server/search_route/types';
+import type { SearchLibraryResponseType } from '../../server/search_route/types';
 
 const runAddTelemetry = (
   parent: unknown,
@@ -96,7 +96,7 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
                   limit: input.query.limit,
                   tags: input.query.tags,
                 }),
-              })) as SearchEmbeddablesResponseType;
+              })) as SearchLibraryResponseType;
               return { hits: result.hits, pagination: { total: result.total } };
             } catch (e) {
               return { hits: [], pagination: { total: 0 } };
