@@ -114,13 +114,14 @@ describe('transformOut', () => {
       title: 'Custom title',
       layout: 'vertical',
       enhancements: {}, // unsupported
+      disabledActions: [], // unsupported
       links: [
         {
           type: 'externalLink',
           destination: 'https://example.com/',
         },
       ],
-    } as StoredLinksEmbeddableState;
+    } as unknown as StoredLinksEmbeddableState;
     expect(transformOut(legacyState, [])).toMatchInlineSnapshot(`
       Object {
         "layout": "vertical",
