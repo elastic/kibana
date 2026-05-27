@@ -24,9 +24,11 @@ components:
           description: The KQL query for the rule
         queryFrequency:
           type: string
+          maxLength: 16
           description: The frequency in ISO 8601 duration format for this alert rule to run.
         queryPeriod:
           type: string
+          maxLength: 16
           description: The period in ISO 8601 duration format that this alert rule looks at.
         severity:
           type: string
