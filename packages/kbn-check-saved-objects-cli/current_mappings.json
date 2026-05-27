@@ -337,7 +337,6 @@
       "createdBy": {
         "type": "keyword"
       },
-
       "description": {
         "fields": {
           "keyword": {
@@ -466,30 +465,44 @@
           "base": {
             "type": "text"
           },
-          "blocks": {
+          "breach": {
             "properties": {
-              "breach": {
+              "query": {
                 "type": "text"
               },
-              "recover": {
+              "segment": {
                 "type": "text"
               }
             }
-          },
-          "breach": {
-            "type": "text"
           },
           "format": {
             "type": "keyword"
           },
           "no_data": {
-            "type": "text"
+            "properties": {
+              "behavior": {
+                "type": "keyword"
+              },
+              "query": {
+                "type": "text"
+              },
+              "segment": {
+                "type": "text"
+              }
+            }
           },
-          "recover": {
-            "type": "text"
-          }, 
-          "recovery_type": {
-            "type": "keyword"
+          "recovery": {
+            "properties": {
+              "query": {
+                "type": "text"
+              },
+              "segment": {
+                "type": "text"
+              },
+              "strategy": {
+                "type": "keyword"
+              }
+            }
           }
         }
       },
