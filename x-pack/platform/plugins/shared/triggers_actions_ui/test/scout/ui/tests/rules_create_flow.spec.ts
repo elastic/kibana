@@ -46,6 +46,13 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
       },
       { ignore: [400] }
     );
+    // Index a document so the terms-agg in /internal/triggers_actions_ui/data/_indices
+    // returns this index. An empty index has no _index values to aggregate on.
+    await esClient.index({
+      index: THRESHOLD_TEST_INDEX,
+      document: { '@timestamp': new Date().toISOString() },
+    });
+    await esClient.indices.refresh({ index: THRESHOLD_TEST_INDEX });
   });
 
   test.beforeEach(async ({ browserAuth, page }) => {
