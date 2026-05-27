@@ -81,7 +81,10 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
     );
     registerTriggerDefinitions(workflowsExtensionsSetup);
-    registerStepDefinitions(workflowsExtensionsSetup);
+    registerStepDefinitions(
+      workflowsExtensionsSetup,
+      container.get(CoreSetup('getStartServices'))
+    );
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);
