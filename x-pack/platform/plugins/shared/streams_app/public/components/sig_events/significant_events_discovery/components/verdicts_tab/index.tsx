@@ -35,7 +35,6 @@ const columns: Array<EuiBasicTableColumn<Verdict>> = [
     name: i18n.translate('xpack.streams.verdictsTab.timestampColumn', {
       defaultMessage: 'Timestamp',
     }),
-    sortable: true,
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {

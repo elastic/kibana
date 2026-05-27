@@ -20,7 +20,6 @@ import {
   apiPublishesSettings,
   initializeRelatedPanels,
   initializeStateApi,
-  initializeStateApi,
 } from '@kbn/presentation-publishing';
 
 import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
@@ -225,17 +224,13 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
         })
       );
 
-      function serializeState() {
-        return {
-          ...timeRangePercentage.getLatestState(),
-          is_anchored: isAnchored$.value,
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<TimeSliderControlState>({
+      const stateApi = initializeStateApi<TimeSliderControlState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: () => ({
+          ...timeRangePercentage.getLatestState(),
+          is_anchored: isAnchored$.value,
+        }),
         anyStateChange$: merge(
           timeRangePercentage.anyStateChange$,
           isAnchored$.pipe(
@@ -250,9 +245,9 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
             is_anchored: 'referenceEquality',
           };
         },
-        onReset: (lastSaved) => {
-          timeRangePercentage.reinitializeState(lastSaved);
-          setIsAnchored(lastSaved?.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);
+        applySerializedState: (nextState) => {
+          timeRangePercentage.reinitializeState(nextState);
+          setIsAnchored(nextState.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);
         },
       });
 
@@ -261,11 +256,9 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
       const api = finalizeApi({
         ...relatedPanelsApi,
         ...stateApi,
-        ...stateApi,
         isPinnable: false, // Disable the user-facing unpin action; panel can still be pinned programatically when it's created
         label$: new BehaviorSubject<string>(displayName),
         appliedTimeslice$: timeslice$,
-        serializeState,
         clearSelections: () => {
           setTimeslice(undefined);
           hasTimeSliceSelection$.next(false);

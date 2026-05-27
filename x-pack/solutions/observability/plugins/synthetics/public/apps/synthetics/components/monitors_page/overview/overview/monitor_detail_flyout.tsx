@@ -317,13 +317,21 @@ export function MonitorDetailFlyout(props: Props) {
   // local SO and the request would 404.
   useEffect(() => {
     if (isRemote) return;
+    // `useKibanaSpace` resolves asynchronously, so `space` is undefined on
+    // the first render. `getMonitorSpaceToAppend` short-circuits to `{}` in
+    // that case, which means an early dispatch would fetch the SO from the
+    // active space and 404 for cross-space monitors. The follow-up dispatch
+    // (after `space` resolves) is silently dropped by the `takeLeading`
+    // saga while the first request is still in flight, leaving the 404 in
+    // Redux state forever. Wait for the active space before dispatching.
+    if (!space) return;
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
         ...(crossSpaceId ? { spaceId: crossSpaceId } : {}),
       })
     );
-  }, [configId, crossSpaceId, dispatch, isRemote, upsertSuccess]);
+  }, [configId, crossSpaceId, dispatch, isRemote, space, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
