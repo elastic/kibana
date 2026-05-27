@@ -72,9 +72,7 @@ export class DetectionClient {
   // Exclude kind:handled from the main query — handled docs are pipeline stamps,
   // not anomaly state. processed is derived separately via getProcessedIds.
   private buildWhere(options: DetectionsSearchOptions): ESQLAstExpression {
-    let where: ESQLAstExpression = esql.exp`${esql.col('kind')} != ${esql.str(
-      KIND_HANDLED
-    )}`;
+    let where: ESQLAstExpression = esql.exp`${esql.col('kind')} != ${esql.str(KIND_HANDLED)}`;
 
     const ruleUuidLiterals = options.rule_uuid?.map((ruleUuid) => esql.str(ruleUuid));
     if (ruleUuidLiterals?.length) {
