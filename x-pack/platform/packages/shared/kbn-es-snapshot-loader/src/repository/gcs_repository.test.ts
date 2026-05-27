@@ -49,6 +49,7 @@ describe('createGcsRepository', () => {
         name: 'test-repo',
         master_timeout: '2m',
         timeout: '2m',
+        verify: true,
         body: {
           type: 'gcs',
           settings: {
@@ -78,6 +79,7 @@ describe('createGcsRepository', () => {
         name: 'test-repo',
         master_timeout: '2m',
         timeout: '2m',
+        verify: true,
         body: {
           type: 'gcs',
           settings: {

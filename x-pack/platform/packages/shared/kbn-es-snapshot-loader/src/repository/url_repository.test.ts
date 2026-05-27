@@ -53,6 +53,7 @@ describe('createUrlRepository', () => {
         name: 'test-repo',
         master_timeout: '2m',
         timeout: '2m',
+        verify: true,
         body: {
           type: 'url',
           settings: {

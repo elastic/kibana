@@ -48,6 +48,7 @@ describe('createFsRepository', () => {
         name: 'test-repo',
         master_timeout: '2m',
         timeout: '2m',
+        verify: true,
         body: {
           type: 'fs',
           settings: {
@@ -76,6 +77,7 @@ describe('createFsRepository', () => {
         name: 'test-repo',
         master_timeout: '2m',
         timeout: '2m',
+        verify: true,
         body: {
           type: 'fs',
           settings: {
