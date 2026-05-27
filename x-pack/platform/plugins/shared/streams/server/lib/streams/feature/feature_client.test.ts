@@ -32,6 +32,7 @@ import {
   FEATURE_EXCLUDED_AT,
   FEATURE_SEARCH_EMBEDDING,
 } from './fields';
+import type { esql } from '@elastic/esql';
 import { FeatureClient, buildSearchEmbeddingText } from './feature_client';
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
@@ -42,6 +43,7 @@ const createMockLogger = () => loggerMock.create();
 
 const createMockStorageClient = () => ({
   search: jest.fn().mockResolvedValue({ hits: { hits: [], total: { value: 0 } } }),
+  esql: jest.fn().mockResolvedValue({ columns: [], values: [] }),
   bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
   index: jest.fn(),
   delete: jest.fn().mockResolvedValue({ result: 'deleted', acknowledged: true }),
@@ -49,6 +51,17 @@ const createMockStorageClient = () => ({
   get: jest.fn(),
   existsIndex: jest.fn(),
 });
+
+/** Renders the ES|QL string from a mocked `storageClient.esql` call. */
+const renderEsqlCallQuery = (call: { pipeline: ReturnType<typeof esql.from> }): string =>
+  renderEsqlCall(call).query;
+
+/** Renders the full ES|QL request (query + params) from a mocked `storageClient.esql` call. */
+const renderEsqlCall = (call: {
+  pipeline: ReturnType<typeof esql.from>;
+}): ReturnType<ReturnType<typeof esql.from>['toRequest']> => {
+  return call.pipeline.toRequest();
+};
 
 const createFeatureClient = ({
   storageClient = createMockStorageClient(),
@@ -113,9 +126,19 @@ const createStoredFeature = (overrides: Partial<StoredFeature> = {}): StoredFeat
     ...overrides,
   } as StoredFeature);
 
-const toSearchHit = (doc: StoredFeature) => ({
-  _id: doc[FEATURE_UUID],
-  _source: doc,
+/** Wraps stored docs in the shape returned by storageClient.esql (source column only). */
+const toEsqlSourceResponse = (docs: StoredFeature[]) => ({
+  columns: [{ name: '_source', type: 'unsupported' as const }],
+  values: docs.map((doc) => [doc]),
+});
+
+/** Wraps stored docs in the shape returned by storageClient.esql (_id + _source columns). */
+const toEsqlIdSourceResponse = (docs: Array<[id: string, source: StoredFeature]>) => ({
+  columns: [
+    { name: '_id', type: 'keyword' as const },
+    { name: '_source', type: 'unsupported' as const },
+  ],
+  values: docs,
 });
 
 // ==================== Tests ====================
@@ -157,20 +180,17 @@ describe('FeatureClient', () => {
     it('returns empty result without hitting storage when stream list is empty', async () => {
       const { client, storageClient } = createFeatureClient();
       const result = await client.getFeatures([]);
-      expect(result).toEqual({ hits: [], total: 0 });
-      expect(storageClient.search).not.toHaveBeenCalled();
+      expect(result).toEqual({ hits: [] });
+      expect(storageClient.esql).not.toHaveBeenCalled();
     });
 
     it('maps stored documents back to Feature shape', async () => {
       const storageClient = createMockStorageClient();
-      storageClient.search.mockResolvedValue({
-        hits: { hits: [toSearchHit(createStoredFeature())], total: { value: 1 } },
-      });
+      storageClient.esql.mockResolvedValue(toEsqlSourceResponse([createStoredFeature()]));
       const { client } = createFeatureClient({ storageClient });
 
       const result = await client.getFeatures('logs.test');
 
-      expect(result.total).toBe(1);
       expect(result.hits).toEqual([
         {
           uuid: 'uuid-1',
@@ -199,7 +219,7 @@ describe('FeatureClient', () => {
       const { client, storageClient } = createFeatureClient();
       await client.getFeatures(['logs.a', 'logs.b']);
 
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
+      const filter = storageClient.esql.mock.calls[0][0].filter.bool.filter;
       expect(filter).toContainEqual({ terms: { [STREAM_NAME]: ['logs.a', 'logs.b'] } });
     });
 
@@ -207,7 +227,7 @@ describe('FeatureClient', () => {
       const { client, storageClient } = createFeatureClient();
       await client.getFeatures('logs.test', { id: ['feat-1', 'feat-2'] });
 
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
+      const filter = storageClient.esql.mock.calls[0][0].filter.bool.filter;
       expect(filter).toContainEqual({ terms: { [FEATURE_ID]: ['feat-1', 'feat-2'] } });
     });
 
@@ -215,7 +235,7 @@ describe('FeatureClient', () => {
       const { client, storageClient } = createFeatureClient();
       await client.getFeatures('logs.test', { type: ['service', 'host'] });
 
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
+      const filter = storageClient.esql.mock.calls[0][0].filter.bool.filter;
       const typeFilter = filter.find((f: Record<string, unknown>) => {
         const should = (f?.bool as Record<string, unknown>)?.should as
           | Array<Record<string, unknown>>
@@ -231,7 +251,7 @@ describe('FeatureClient', () => {
       const { client, storageClient } = createFeatureClient();
       await client.getFeatures('logs.test', { minConfidence: 50 });
 
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
+      const filter = storageClient.esql.mock.calls[0][0].filter.bool.filter;
       expect(filter).toContainEqual({ range: { [FEATURE_CONFIDENCE]: { gte: 50 } } });
     });
 
@@ -239,7 +259,7 @@ describe('FeatureClient', () => {
       const { client, storageClient } = createFeatureClient();
       await client.getFeatures('logs.test');
 
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
+      const filter = storageClient.esql.mock.calls[0][0].filter.bool.filter;
       const excludedFilter = filter.find(
         (f: Record<string, unknown>) =>
           (f?.bool as Record<string, Record<string, Record<string, string>>>)?.must_not?.exists
@@ -257,7 +277,7 @@ describe('FeatureClient', () => {
       const { client, storageClient } = createFeatureClient();
       await client.getFeatures('logs.test', { includeExpired: true });
 
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
+      const filter = storageClient.esql.mock.calls[0][0].filter.bool.filter;
       const expiredFilter = filter.find((f: Record<string, unknown>) =>
         JSON.stringify(f).includes(FEATURE_EXPIRES_AT)
       );
@@ -268,7 +288,7 @@ describe('FeatureClient', () => {
       const { client, storageClient } = createFeatureClient();
       await client.getFeatures('logs.test', { includeExcluded: true });
 
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
+      const filter = storageClient.esql.mock.calls[0][0].filter.bool.filter;
       const excludedFilter = filter.find(
         (f: Record<string, unknown>) =>
           (f?.bool as Record<string, Record<string, Record<string, string>>>)?.must_not?.exists
@@ -281,15 +301,15 @@ describe('FeatureClient', () => {
       const { client, storageClient } = createFeatureClient();
       await client.getFeatures('logs.test');
 
-      const sort = storageClient.search.mock.calls[0][0].sort;
-      expect(sort).toEqual([{ [FEATURE_CONFIDENCE]: { order: 'desc' } }]);
+      const query = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
+      expect(query).toContain(`SORT ${FEATURE_CONFIDENCE} DESC`);
     });
   });
 
   describe('getFeature()', () => {
     it('returns the mapped feature when found and stream matches', async () => {
       const storageClient = createMockStorageClient();
-      storageClient.get.mockResolvedValue({ _source: createStoredFeature() });
+      storageClient.esql.mockResolvedValue(toEsqlSourceResponse([createStoredFeature()]));
       const { client } = createFeatureClient({ storageClient });
 
       const feature = await client.getFeature('logs.test', 'uuid-1');
@@ -298,10 +318,10 @@ describe('FeatureClient', () => {
       expect(feature.stream_name).toBe('logs.test');
     });
 
-    it('throws 404 when storage reports the document is missing', async () => {
+    it('throws 404 when no matching document exists', async () => {
       const storageClient = createMockStorageClient();
-      const notFound = Object.assign(new Error('not found'), { statusCode: 404 });
-      storageClient.get.mockRejectedValue(notFound);
+      // Empty ES|QL response simulates missing document or stream mismatch
+      storageClient.esql.mockResolvedValue({ columns: [], values: [] });
       const { client } = createFeatureClient({ storageClient });
 
       await expect(client.getFeature('logs.test', 'uuid-1')).rejects.toMatchObject({
@@ -310,10 +330,10 @@ describe('FeatureClient', () => {
     });
 
     it('throws 404 when the stored feature belongs to a different stream', async () => {
+      // WHERE clause includes AND stream.name == ?stream, so a different stream
+      // simply returns no rows — handled identically to missing document.
       const storageClient = createMockStorageClient();
-      storageClient.get.mockResolvedValue({
-        _source: createStoredFeature({ [STREAM_NAME]: 'logs.other' }),
-      });
+      storageClient.esql.mockResolvedValue({ columns: [], values: [] });
       const { client } = createFeatureClient({ storageClient });
 
       await expect(client.getFeature('logs.test', 'uuid-1')).rejects.toMatchObject({
@@ -323,21 +343,22 @@ describe('FeatureClient', () => {
   });
 
   describe('getExcludedFeatures()', () => {
-    it('filters by stream and requires excluded_at to exist', async () => {
+    it('filters by stream and requires excluded_at to exist via IS NOT NULL', async () => {
       const { client, storageClient } = createFeatureClient();
       await client.getExcludedFeatures('logs.test');
 
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
-      expect(filter).toContainEqual({ term: { [STREAM_NAME]: 'logs.test' } });
-      expect(filter).toContainEqual({ exists: { field: FEATURE_EXCLUDED_AT } });
+      const { query, params } = renderEsqlCall(storageClient.esql.mock.calls[0][0]);
+      expect(query).toContain('IS NOT NULL');
+      // Stream name is now passed via a named param hole rather than baked into the query string.
+      expect(params).toContainEqual({ stream: 'logs.test' });
     });
 
     it('sorts by excluded_at descending', async () => {
       const { client, storageClient } = createFeatureClient();
       await client.getExcludedFeatures('logs.test');
 
-      const sort = storageClient.search.mock.calls[0][0].sort;
-      expect(sort).toEqual([{ [FEATURE_EXCLUDED_AT]: { order: 'desc' } }]);
+      const query = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
+      expect(query).toContain(`SORT ${FEATURE_EXCLUDED_AT} DESC`);
     });
   });
 
@@ -377,9 +398,9 @@ describe('FeatureClient', () => {
 
     it('translates a delete operation into a storage delete (when the feature exists in the stream)', async () => {
       const storageClient = createMockStorageClient();
-      storageClient.search.mockResolvedValueOnce({
-        hits: { hits: [{ _id: 'uuid-1', _source: createStoredFeature() }] },
-      });
+      storageClient.esql.mockResolvedValueOnce(
+        toEsqlIdSourceResponse([['uuid-1', createStoredFeature()]])
+      );
       const { client } = createFeatureClient({ storageClient });
 
       await client.bulk('logs.test', [{ delete: { id: 'uuid-1' } }]);
@@ -390,7 +411,7 @@ describe('FeatureClient', () => {
 
     it('drops delete/exclude/restore operations whose target does not belong to the stream', async () => {
       const storageClient = createMockStorageClient();
-      storageClient.search.mockResolvedValueOnce({ hits: { hits: [] } });
+      // Default esql mock returns empty — simulates missing / wrong-stream feature
       const { client } = createFeatureClient({ storageClient });
 
       const result = await client.bulk('logs.test', [
@@ -406,9 +427,7 @@ describe('FeatureClient', () => {
     it('skips exclude/restore for computed features (server protects type invariants)', async () => {
       const storageClient = createMockStorageClient();
       const computed = createStoredFeature({ [FEATURE_TYPE]: 'log_patterns' });
-      storageClient.search.mockResolvedValueOnce({
-        hits: { hits: [{ _id: 'uuid-1', _source: computed }] },
-      });
+      storageClient.esql.mockResolvedValueOnce(toEsqlIdSourceResponse([['uuid-1', computed]]));
       const { client } = createFeatureClient({ storageClient });
 
       const result = await client.bulk('logs.test', [{ exclude: { id: 'uuid-1' } }]);
@@ -419,9 +438,9 @@ describe('FeatureClient', () => {
 
     it('translates exclude into an index op that stamps excluded_at on a non-computed feature', async () => {
       const storageClient = createMockStorageClient();
-      storageClient.search.mockResolvedValueOnce({
-        hits: { hits: [{ _id: 'uuid-1', _source: createStoredFeature() }] },
-      });
+      storageClient.esql.mockResolvedValueOnce(
+        toEsqlIdSourceResponse([['uuid-1', createStoredFeature()]])
+      );
       const { client } = createFeatureClient({ storageClient });
 
       await client.bulk('logs.test', [{ exclude: { id: 'uuid-1' } }]);
@@ -436,9 +455,7 @@ describe('FeatureClient', () => {
     it('translates restore into an index op that clears excluded_at and refreshes last_seen/expires_at', async () => {
       const storageClient = createMockStorageClient();
       const stored = createStoredFeature({ [FEATURE_EXCLUDED_AT]: '2024-01-01T00:00:00.000Z' });
-      storageClient.search.mockResolvedValueOnce({
-        hits: { hits: [{ _id: 'uuid-1', _source: stored }] },
-      });
+      storageClient.esql.mockResolvedValueOnce(toEsqlIdSourceResponse([['uuid-1', stored]]));
       const { client } = createFeatureClient({ storageClient });
 
       await client.bulk('logs.test', [{ restore: { id: 'uuid-1' } }]);
@@ -453,14 +470,14 @@ describe('FeatureClient', () => {
   });
 
   describe('deleteFeature()', () => {
-    it('looks the feature up via getFeature, then issues a storage delete by uuid', async () => {
+    it('looks the feature up via getFeature (ES|QL), then issues a storage delete by uuid', async () => {
       const storageClient = createMockStorageClient();
-      storageClient.get.mockResolvedValue({ _source: createStoredFeature() });
+      storageClient.esql.mockResolvedValue(toEsqlSourceResponse([createStoredFeature()]));
       const { client } = createFeatureClient({ storageClient });
 
       await client.deleteFeature('logs.test', 'uuid-1');
 
-      expect(storageClient.get).toHaveBeenCalledWith({ id: 'uuid-1' });
+      expect(storageClient.esql).toHaveBeenCalledTimes(1);
       expect(storageClient.delete).toHaveBeenCalledWith({ id: 'uuid-1' });
     });
   });
@@ -472,19 +489,22 @@ describe('FeatureClient', () => {
         createStoredFeature({ [FEATURE_UUID]: 'uuid-a' }),
         createStoredFeature({ [FEATURE_UUID]: 'uuid-b' }),
       ];
-      storageClient.search.mockResolvedValue({
-        hits: { hits: stored.map(toSearchHit), total: { value: stored.length } },
-      });
+      storageClient.esql.mockResolvedValue(toEsqlSourceResponse(stored));
       const { client } = createFeatureClient({ storageClient });
 
       await client.deleteFeatures('logs.test');
 
-      const searchArgs = storageClient.search.mock.calls[0][0];
+      // getFeatures is called with includeExcluded=true, includeExpired=true,
+      // so the DSL filter passed to esql() must NOT contain excluded/expired clauses.
+      const esqlFilter = storageClient.esql.mock.calls[0][0].filter.bool.filter as unknown[];
       expect(
-        searchArgs.query.bool.filter.find(
-          (f: Record<string, unknown>) => (f?.bool as Record<string, unknown>)?.must_not
+        esqlFilter.find(
+          (f: unknown) =>
+            ((f as Record<string, unknown>)?.bool as Record<string, unknown>)?.must_not
         )
       ).toBeUndefined();
+      const filterJson = JSON.stringify(esqlFilter);
+      expect(filterJson).not.toContain(FEATURE_EXPIRES_AT);
 
       expect(storageClient.bulk).toHaveBeenCalledWith({
         operations: [{ delete: { _id: 'uuid-a' } }, { delete: { _id: 'uuid-b' } }],
@@ -517,17 +537,19 @@ describe('FeatureClient', () => {
     it('returns empty without hitting storage when stream list is empty', async () => {
       const { client, storageClient } = createFeatureClient();
       const result = await client.findFeatures([], 'http');
-      expect(result).toEqual({ hits: [], total: 0 });
+      expect(result).toEqual({ hits: [] });
       expect(storageClient.search).not.toHaveBeenCalled();
+      expect(storageClient.esql).not.toHaveBeenCalled();
     });
 
-    it('keyword mode issues a top-level keyword query (no retriever)', async () => {
+    it('keyword mode issues an ES|QL query (no retriever)', async () => {
       const { client, storageClient } = createFeatureClient();
       await client.findFeatures('logs.test', 'http', { searchMode: 'keyword' });
 
-      const args = storageClient.search.mock.calls[0][0];
-      expect(args.query).toBeDefined();
-      expect(args.retriever).toBeUndefined();
+      expect(storageClient.esql).toHaveBeenCalledTimes(1);
+      const args = storageClient.esql.mock.calls[0][0];
+      expect(args.pipeline).toBeDefined();
+      expect(storageClient.search).not.toHaveBeenCalled();
     });
 
     it('semantic mode issues a standard retriever against the embedding field', async () => {
@@ -565,32 +587,31 @@ describe('FeatureClient', () => {
       ).rejects.toThrow('boom');
     });
 
-    it('falls back to keyword search when an auto-resolved non-keyword mode throws', async () => {
+    it('falls back to keyword (ES|QL) search when an auto-resolved non-keyword mode throws', async () => {
       const storageClient = createMockStorageClient();
       const logger = createMockLogger();
-      storageClient.search
-        .mockRejectedValueOnce(new Error('retriever parse error'))
-        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } });
+      storageClient.search.mockRejectedValueOnce(new Error('retriever parse error'));
+      // esql default mock returns empty — keyword fallback succeeds silently
       const { client } = createFeatureClient({ storageClient, logger });
 
       await client.findFeatures('logs.test', 'http');
 
-      expect(storageClient.search).toHaveBeenCalledTimes(2);
+      expect(storageClient.search).toHaveBeenCalledTimes(1);
+      expect(storageClient.esql).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('falling back to keyword'));
-      const fallbackArgs = storageClient.search.mock.calls[1][0];
-      expect(fallbackArgs.query).toBeDefined();
-      expect(fallbackArgs.retriever).toBeUndefined();
+      const fallbackArgs = storageClient.esql.mock.calls[0][0];
+      expect(fallbackArgs.pipeline).toBeDefined();
     });
 
-    it('passes the limit through to the size argument', async () => {
+    it('passes the limit through to the LIMIT clause', async () => {
       const { client, storageClient } = createFeatureClient();
       await client.findFeatures('logs.test', 'http', {
         searchMode: 'keyword',
         limit: 25,
       });
 
-      const args = storageClient.search.mock.calls[0][0];
-      expect(args.size).toBe(25);
+      const rendered = renderEsqlCallQuery(storageClient.esql.mock.calls[0][0]);
+      expect(rendered).toMatch(/LIMIT\s+25\b/);
     });
   });
 

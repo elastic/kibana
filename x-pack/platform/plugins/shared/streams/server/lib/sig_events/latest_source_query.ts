@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { esql, type ComposerQueryTagHole, type ComposerSortShorthand } from '@elastic/esql';
+import {
+  esql,
+  type ComposerQuery,
+  type ComposerQueryTagHole,
+  type ComposerSortShorthand,
+} from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { getSourceColumnIndex, toEsqlRequest } from '../streams/helpers/esql';
 import {
   type CommonSearchOptions,
   type PaginatedResponse,
@@ -29,16 +35,19 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 // esClient.esql.query() return type doesn't match ESQLSearchResponse.
 // Known typing gap in the ES client — centralized here to avoid scattered assertions.
+// Uses `toEsqlRequest` so named-parameter holes (`${{ name: value }}`) are bound
+// at the protocol level rather than inlined into the query string.
 const queryEsql = async ({
   esClient,
   query,
 }: {
   esClient: ElasticsearchClient;
-  query: string;
-}): Promise<ESQLSearchResponse> => (await esClient.esql.query({ query })) as ESQLSearchResponse;
+  query: ComposerQuery;
+}): Promise<ESQLSearchResponse> =>
+  (await esClient.esql.query(toEsqlRequest(query))) as ESQLSearchResponse;
 
 const parseSourceResponse = <T>(response: ESQLSearchResponse): T[] => {
-  const sourceIdx = response.columns.findIndex((c) => c.name === '_source');
+  const sourceIdx = getSourceColumnIndex(response);
   if (sourceIdx === -1) {
     return [];
   }
@@ -60,7 +69,7 @@ const executeEsqlQuery = async <T>({
   query,
 }: {
   esClient: ElasticsearchClient;
-  query: string;
+  query: ComposerQuery;
 }): Promise<T[]> => {
   try {
     return parseSourceResponse<T>(await queryEsql({ esClient, query }));
@@ -77,7 +86,7 @@ const executeCountQuery = async ({
   query,
 }: {
   esClient: ElasticsearchClient;
-  query: string;
+  query: ComposerQuery;
 }): Promise<number> => {
   try {
     const response = await queryEsql({ esClient, query });
@@ -117,11 +126,13 @@ const buildLatestSourceBaseQuery = ({
   )} == ${space} OR ${esql.col('kibana.space_ids')} IS NULL`;
 
   if (options.from !== undefined) {
-    query = query.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
+    const fromIso = options.from;
+    query = query.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
   }
 
   if (options.to !== undefined) {
-    query = query.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
+    const toIso = options.to;
+    query = query.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
   }
 
   if (where) {
@@ -166,7 +177,7 @@ export const runLatestSourceEsqlQuery = async <T>({
 
   query = query.keep('_source');
 
-  const hits = await executeEsqlQuery<T>({ esClient, query: query.print() });
+  const hits = await executeEsqlQuery<T>({ esClient, query });
   return { hits };
 };
 
@@ -207,8 +218,8 @@ export const runPaginatedLatestSourceEsqlQuery = async <T>({
     .keep('_source');
 
   const [total, hits] = await Promise.all([
-    executeCountQuery({ esClient, query: countQuery.print() }),
-    executeEsqlQuery<T>({ esClient, query: dataQuery.print() }),
+    executeCountQuery({ esClient, query: countQuery }),
+    executeEsqlQuery<T>({ esClient, query: dataQuery }),
   ]);
 
   const start = (page - 1) * perPage;
@@ -241,6 +252,6 @@ export const runFindByIdEsqlQuery = async <T>({
   query = query.sort(['@timestamp', 'ASC']);
   query = query.keep('_source');
 
-  const hits = await executeEsqlQuery<T>({ esClient, query: query.print() });
+  const hits = await executeEsqlQuery<T>({ esClient, query });
   return { hits };
 };
