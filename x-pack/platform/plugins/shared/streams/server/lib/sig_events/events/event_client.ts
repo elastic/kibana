@@ -28,6 +28,19 @@ export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, Sto
 
 const GROUP_BY_FIELD = 'event_id';
 
+function enrichFromEvidences(e: SigEvent): SigEvent {
+  const evidences = e.evidences ?? [];
+  const streamNames = e.stream_names?.length
+    ? e.stream_names
+    : [...new Set(evidences.map((ev) => ev.stream_name).filter((s): s is string => !!s))];
+  const ruleNames = e.rule_names?.length
+    ? e.rule_names
+    : [...new Set(evidences.map((ev) => ev.rule_name).filter((s): s is string => !!s))];
+
+  if (streamNames === e.stream_names && ruleNames === e.rule_names) return e;
+  return { ...e, stream_names: streamNames, rule_names: ruleNames };
+}
+
 export class EventClient {
   constructor(
     private readonly clients: {
@@ -57,22 +70,24 @@ export class EventClient {
   async findLatestPaginated(
     options: PaginatedSearchOptions = {}
   ): Promise<PaginatedResponse<SigEvent>> {
-    return runPaginatedLatestSourceEsqlQuery<SigEvent>({
+    const result = await runPaginatedLatestSourceEsqlQuery<SigEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: EVENTS_DATA_STREAM,
       groupBy: GROUP_BY_FIELD,
     });
+
+    return { ...result, hits: result.hits.map(enrichFromEvidences) };
   }
 
-  async findById(eventId: string): Promise<{ hits: SigEvent[] }> {
+  async findById(discoverySlug: string): Promise<{ hits: SigEvent[] }> {
     return runFindByIdEsqlQuery<SigEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: EVENTS_DATA_STREAM,
-      idField: GROUP_BY_FIELD,
-      idValue: eventId,
+      idField: 'discovery_slug',
+      idValue: discoverySlug,
     });
   }
 }

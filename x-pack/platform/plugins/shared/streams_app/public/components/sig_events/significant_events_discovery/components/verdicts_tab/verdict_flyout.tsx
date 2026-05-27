@@ -45,19 +45,19 @@ const VERDICT_COLORS: Record<string, string> = {
   acknowledged: 'primary',
 };
 
-interface SigEventsFlyoutProps {
+interface VerdictFlyoutProps {
   verdict: Verdict;
   history: Verdict[];
   isHistoryLoading: boolean;
   onClose: () => void;
 }
 
-export const SigEventsFlyout = ({
+export const VerdictFlyout = ({
   verdict,
   history,
   isHistoryLoading,
   onClose,
-}: SigEventsFlyoutProps) => {
+}: VerdictFlyoutProps) => {
   const titleId = useGeneratedHtmlId();
 
   const streams = useMemo(() => {

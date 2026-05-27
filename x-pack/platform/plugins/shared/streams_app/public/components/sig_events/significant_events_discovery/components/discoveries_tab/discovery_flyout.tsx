@@ -26,6 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Discovery } from '@kbn/streams-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
+import { CHANGE_TYPE_LABELS } from '../shared/translations';
 
 const KIND_LABELS: Record<string, string> = {
   finding: i18n.translate('xpack.streams.discoveryFlyout.kind.finding', {
@@ -38,25 +39,8 @@ const KIND_LABELS: Record<string, string> = {
 
 const KIND_COLORS: Record<string, string> = { finding: 'warning', clearance: 'success' };
 
-const CHANGE_TYPE_LABELS: Record<string, string> = {
-  distribution_change: i18n.translate('xpack.streams.discoveryFlyout.changeType.distribution', {
-    defaultMessage: 'Distribution shift',
-  }),
-  spike: i18n.translate('xpack.streams.discoveryFlyout.changeType.spike', {
-    defaultMessage: 'Spike',
-  }),
-  dip: i18n.translate('xpack.streams.discoveryFlyout.changeType.dip', {
-    defaultMessage: 'Dip',
-  }),
-  step_change: i18n.translate('xpack.streams.discoveryFlyout.changeType.step', {
-    defaultMessage: 'Step change',
-  }),
-  stationary: i18n.translate('xpack.streams.discoveryFlyout.changeType.stationary', {
-    defaultMessage: 'Returned to baseline',
-  }),
-};
-
-// history is sorted @timestamp ASC — a finding after a clearance means a re-opened episode.
+// history is sorted @timestamp ASC.
+// finding after clearance → re-opened; finding after finding → updated (same episode, more detections added).
 const timelineLabel = (entry: Discovery, prev: Discovery | undefined): string => {
   const criticality = entry.criticality ?? '-';
   switch (entry.kind) {
@@ -64,6 +48,12 @@ const timelineLabel = (entry: Discovery, prev: Discovery | undefined): string =>
       if (prev?.kind === 'clearance') {
         return i18n.translate('xpack.streams.discoveryFlyout.transition.reopened', {
           defaultMessage: 'Re-opened — Criticality {criticality}',
+          values: { criticality },
+        });
+      }
+      if (prev?.kind === 'finding') {
+        return i18n.translate('xpack.streams.discoveryFlyout.transition.updated', {
+          defaultMessage: 'Updated — Criticality {criticality}',
           values: { criticality },
         });
       }

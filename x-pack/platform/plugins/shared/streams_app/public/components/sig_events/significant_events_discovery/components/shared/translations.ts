@@ -77,3 +77,30 @@ export const GENERATE_QUERIES_TOOLTIP = i18n.translate(
     defaultMessage: 'Runs only query generation on selected streams using the configured model.',
   }
 );
+
+export const CHANGE_TYPE_LABELS: Record<string, string> = {
+  dip: i18n.translate('xpack.streams.changeType.dip', {
+    defaultMessage: 'Dip',
+  }),
+  distribution_change: i18n.translate('xpack.streams.changeType.distributionChange', {
+    defaultMessage: 'Distribution change',
+  }),
+  non_stationary: i18n.translate('xpack.streams.changeType.nonStationary', {
+    defaultMessage: 'Non-stationary',
+  }),
+  spike: i18n.translate('xpack.streams.changeType.spike', {
+    defaultMessage: 'Spike',
+  }),
+  stationary: i18n.translate('xpack.streams.changeType.stationary', {
+    defaultMessage: 'Stationary',
+  }),
+  step_change: i18n.translate('xpack.streams.changeType.stepChange', {
+    defaultMessage: 'Step change',
+  }),
+  trend_change: i18n.translate('xpack.streams.changeType.trendChange', {
+    defaultMessage: 'Trend change',
+  }),
+};
+
+export const changeTypeLabel = (type?: string): string =>
+  (type ? CHANGE_TYPE_LABELS[type] : undefined) ?? type ?? '-';

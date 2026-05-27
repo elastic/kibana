@@ -22,7 +22,7 @@ import {
   useFetchDiscoveriesEntities,
   useFetchDiscoveryHistory,
 } from '../../../../../hooks/sig_events/use_fetch_discoveries_entities';
-import { DiscoveryFlyout } from '../discovery_flyout';
+import { DiscoveryFlyout } from './discovery_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 
 const MAX_VISIBLE_STREAMS = 3;
