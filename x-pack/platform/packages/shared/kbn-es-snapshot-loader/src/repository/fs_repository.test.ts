@@ -48,7 +48,7 @@ describe('createFsRepository', () => {
         name: 'test-repo',
         master_timeout: '2m',
         timeout: '2m',
-        verify: true,
+        verify: false,
         body: {
           type: 'fs',
           settings: {
@@ -61,7 +61,7 @@ describe('createFsRepository', () => {
     );
   });
 
-  it('registers with verify: false when explicitly requested', async () => {
+  it('registers with verify: true when explicitly requested', async () => {
     const createRepository = jest.fn().mockResolvedValue(undefined);
     const esClient = {
       snapshot: {
@@ -70,10 +70,10 @@ describe('createFsRepository', () => {
     } as unknown as Client;
     const repository = createFsRepository({ location: '/mount/backups' });
 
-    await repository.register({ esClient, log, repoName: 'test-repo', verify: false });
+    await repository.register({ esClient, log, repoName: 'test-repo', verify: true });
 
     expect(createRepository).toHaveBeenCalledWith(
-      expect.objectContaining({ verify: false }),
+      expect.objectContaining({ verify: true }),
       expect.anything()
     );
   });
@@ -94,7 +94,7 @@ describe('createFsRepository', () => {
         name: 'test-repo',
         master_timeout: '2m',
         timeout: '2m',
-        verify: true,
+        verify: false,
         body: {
           type: 'fs',
           settings: {

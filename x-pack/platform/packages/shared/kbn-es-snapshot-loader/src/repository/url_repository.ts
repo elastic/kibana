@@ -31,7 +31,7 @@ export function createUrlRepository(snapshotUrl: string): RepositoryStrategy {
           name: repoName,
           master_timeout: '2m',
           timeout: '2m',
-          verify: verify ?? true,
+          verify: verify ?? false,
           body: { type: 'url', settings: { url: snapshotUrl } },
         },
         { requestTimeout: DEFAULT_REPOSITORY_REGISTER_REQUEST_TIMEOUT_MS }

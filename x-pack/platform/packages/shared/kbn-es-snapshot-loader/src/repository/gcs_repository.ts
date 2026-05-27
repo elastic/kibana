@@ -30,7 +30,7 @@ export function createGcsRepository(config: GcsRepositoryConfig): RepositoryStra
           // especially for remote repository types (like GCS). Bump timeouts for reliability.
           master_timeout: '2m',
           timeout: '2m',
-          verify: verify ?? true,
+          verify: verify ?? false,
           body: {
             type: 'gcs',
             settings: {

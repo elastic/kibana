@@ -27,7 +27,7 @@ export function createFsRepository(config: FsRepositoryConfig): RepositoryStrate
           name: repoName,
           master_timeout: '2m',
           timeout: '2m',
-          verify: verify ?? true,
+          verify: verify ?? false,
           body: {
             type: 'fs',
             settings: {

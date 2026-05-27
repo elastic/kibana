@@ -35,7 +35,7 @@ export async function restoreSnapshot(config: RestoreConfig): Promise<LoadResult
     repository.validate();
 
     log.info('Step 1/3: Registering snapshot repository...');
-    await repository.register({ esClient, log, repoName, verify: false });
+    await repository.register({ esClient, log, repoName });
 
     log.info('Step 2/3: Retrieving snapshot metadata...');
     const snapshotInfo = await getSnapshotMetadata({
