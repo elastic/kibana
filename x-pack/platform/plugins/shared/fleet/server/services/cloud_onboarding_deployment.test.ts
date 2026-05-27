@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
@@ -13,7 +13,10 @@ import {
 } from '../../common/constants';
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
 
-import { cloudOnboardingDeploymentService } from './cloud_onboarding_deployment';
+import {
+  API_KEY_CLI_PLACEHOLDER,
+  cloudOnboardingDeploymentService,
+} from './cloud_onboarding_deployment';
 
 function makeAttributes(
   overrides: Partial<CloudOnboardingDeploymentSOAttributes> = {}
@@ -359,6 +362,241 @@ describe('cloudOnboardingDeploymentService', () => {
         CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
         'deploy-1'
       );
+    });
+  });
+
+  describe('prepare', () => {
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+
+    beforeEach(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.security.createApiKey.mockResolvedValue({
+        id: 'api-key-1',
+        encoded: 'ZW5jb2RlZA==',
+        name: 'cloud-onboarding-deploy-1-firehose',
+        api_key: 'plain-key',
+      } as any);
+    });
+
+    it('throws when the deployment is not in pending status', async () => {
+      const attrs = makeAttributes({ status: 'deploying', mechanisms: ['agentless'] });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+
+      await expect(
+        cloudOnboardingDeploymentService.prepare(soClient, esClient, 'deploy-1')
+      ).rejects.toThrow('not in pending status');
+      expect(esClient.security.createApiKey).not.toHaveBeenCalled();
+    });
+
+    it('does not create an API key for agentless-only (identity federation) deployments', async () => {
+      const attrs = makeAttributes({ mechanisms: ['agentless'] });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+
+      const result = await cloudOnboardingDeploymentService.prepare(soClient, esClient, 'deploy-1');
+
+      expect(esClient.security.createApiKey).not.toHaveBeenCalled();
+      expect(result.apiKeyId).toBeUndefined();
+      expect(result.templateParameters).not.toHaveProperty('ElasticApiKey');
+      expect(result.cliCommand).not.toContain('ElasticApiKey');
+    });
+
+    it('creates an API key and persists apiKeyId for firehose deployments', async () => {
+      const attrs = makeAttributes({ mechanisms: ['firehose'], services: ['firewall_logs'] });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+
+      const result = await cloudOnboardingDeploymentService.prepare(soClient, esClient, 'deploy-1');
+
+      expect(esClient.security.createApiKey).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'cloud-onboarding-deploy-1-firehose',
+          metadata: { deployment_id: 'deploy-1', mechanism: 'firehose' },
+        })
+      );
+      expect(result.apiKeyId).toBe('api-key-1');
+      expect(soClient.update).toHaveBeenCalledWith(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        'deploy-1',
+        { apiKeyId: 'api-key-1' }
+      );
+    });
+
+    it('returns the real encoded API key in templateParameters but a placeholder in the CLI', async () => {
+      const attrs = makeAttributes({
+        mechanisms: ['cloud_forwarder'],
+        services: ['cloudfront_logs'],
+      });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+
+      const result = await cloudOnboardingDeploymentService.prepare(soClient, esClient, 'deploy-1');
+
+      expect(result.templateParameters.ElasticApiKey).toBe('ZW5jb2RlZA==');
+      expect(result.cliCommand).toContain(API_KEY_CLI_PLACEHOLDER);
+      expect(result.cliCommand).not.toContain('ZW5jb2RlZA==');
+    });
+
+    it('includes a --region flag derived from serviceVars', async () => {
+      const attrs = makeAttributes({
+        mechanisms: ['cloud_forwarder'],
+        services: ['cloudfront_logs'],
+        serviceVars: {
+          cloudfront_logs: [{ regions: ['us-east-1'], bucket_arn: 'arn:aws:s3:::a' }],
+        },
+      });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+
+      const result = await cloudOnboardingDeploymentService.prepare(soClient, esClient, 'deploy-1');
+
+      expect(result.cliCommand).toMatch(/--region us-east-1/);
+      expect(result.templateParameters.Regions).toBe('us-east-1');
+    });
+
+    it('omits --region when no regions are available', async () => {
+      const attrs = makeAttributes({ mechanisms: ['firehose'], services: ['firehose'] });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+
+      const result = await cloudOnboardingDeploymentService.prepare(soClient, esClient, 'deploy-1');
+
+      expect(result.cliCommand).not.toContain('--region');
+    });
+
+    it('uses a stack name suffix derived from the deployment id', async () => {
+      const attrs = makeAttributes({ mechanisms: ['firehose'], services: ['firehose'] });
+      soClient.get.mockResolvedValue(makeSOResponse('abcdef0123456789', attrs));
+
+      const result = await cloudOnboardingDeploymentService.prepare(
+        soClient,
+        esClient,
+        'abcdef0123456789'
+      );
+
+      expect(result.cliCommand).toContain('--stack-name elastic-onboarding-firehose-abcdef01');
+    });
+
+    it('uses per-mechanism CFN capabilities', async () => {
+      const attrs = makeAttributes({
+        mechanisms: ['cloud_forwarder'],
+        services: ['cloudfront_logs'],
+      });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+
+      const result = await cloudOnboardingDeploymentService.prepare(soClient, esClient, 'deploy-1');
+
+      expect(result.cliCommand).toContain(
+        '--capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND'
+      );
+    });
+
+    it('shell-escapes parameter values containing special characters', async () => {
+      const attrs = makeAttributes({
+        mechanisms: ['cloud_forwarder'],
+        services: ['cloudfront_logs'],
+        serviceVars: {
+          cloudfront_logs: [{ regions: ["weird'region"], bucket_arn: 'arn:aws:s3:::a' }],
+        },
+      });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+
+      const result = await cloudOnboardingDeploymentService.prepare(soClient, esClient, 'deploy-1');
+
+      // POSIX-portable single-quote escape: ' -> '\''
+      expect(result.cliCommand).toContain("ParameterValue='weird'\\''region'");
+    });
+  });
+
+  describe('update with retry (API key revocation)', () => {
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+
+    beforeEach(() => {
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.security.invalidateApiKey.mockResolvedValue({} as any);
+    });
+
+    it('revokes the existing API key when retrying (status pending + attemptCount)', async () => {
+      const attrs = makeAttributes({
+        mechanisms: ['firehose'],
+        status: 'failed',
+        attemptCount: 1,
+        apiKeyId: 'api-key-1',
+      });
+      const retried = makeAttributes({
+        mechanisms: ['firehose'],
+        status: 'pending',
+        attemptCount: 2,
+      });
+      soClient.get
+        .mockResolvedValueOnce(makeSOResponse('deploy-1', attrs))
+        .mockResolvedValueOnce(makeSOResponse('deploy-1', retried));
+      soClient.update.mockResolvedValue(makeSOResponse('deploy-1', retried));
+
+      await cloudOnboardingDeploymentService.update(
+        soClient,
+        'deploy-1',
+        { status: 'pending', attemptCount: 2 },
+        esClient
+      );
+
+      expect(esClient.security.invalidateApiKey).toHaveBeenCalledWith({ ids: ['api-key-1'] });
+      expect(soClient.update).toHaveBeenCalledWith(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        'deploy-1',
+        expect.objectContaining({ status: 'pending', attemptCount: 2, apiKeyId: undefined })
+      );
+    });
+
+    it('skips revocation when no apiKeyId is stored on the deployment', async () => {
+      const attrs = makeAttributes({
+        mechanisms: ['agentless'],
+        status: 'failed',
+        attemptCount: 1,
+      });
+      const retried = makeAttributes({
+        mechanisms: ['agentless'],
+        status: 'pending',
+        attemptCount: 2,
+      });
+      soClient.get
+        .mockResolvedValueOnce(makeSOResponse('deploy-1', attrs))
+        .mockResolvedValueOnce(makeSOResponse('deploy-1', retried));
+      soClient.update.mockResolvedValue(makeSOResponse('deploy-1', retried));
+
+      await cloudOnboardingDeploymentService.update(
+        soClient,
+        'deploy-1',
+        { status: 'pending', attemptCount: 2 },
+        esClient
+      );
+
+      expect(esClient.security.invalidateApiKey).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('complete', () => {
+    it('transitions a deploying deployment to succeeded', async () => {
+      const before = makeAttributes({ status: 'deploying' });
+      const after = makeAttributes({ status: 'succeeded' });
+      soClient.get
+        .mockResolvedValueOnce(makeSOResponse('deploy-1', before))
+        .mockResolvedValueOnce(makeSOResponse('deploy-1', after));
+      soClient.update.mockResolvedValue(makeSOResponse('deploy-1', after));
+
+      const result = await cloudOnboardingDeploymentService.complete(soClient, 'deploy-1');
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        'deploy-1',
+        { status: 'succeeded' }
+      );
+      expect(result.status).toBe('succeeded');
+    });
+
+    it('throws when the deployment is not in deploying status', async () => {
+      const attrs = makeAttributes({ status: 'pending' });
+      soClient.get.mockResolvedValue(makeSOResponse('deploy-1', attrs));
+
+      await expect(cloudOnboardingDeploymentService.complete(soClient, 'deploy-1')).rejects.toThrow(
+        'not in deploying status'
+      );
+      expect(soClient.update).not.toHaveBeenCalled();
     });
   });
 

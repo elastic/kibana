@@ -24,12 +24,45 @@ const CLOUD_ONBOARDING_DEPLOYMENT_LIMIT = 100;
 
 const PUSH_MECHANISMS: CloudOnboardingDeploymentMechanism[] = ['firehose', 'cloud_forwarder'];
 
+// TODO: Replace with values served by the upcoming IaC template-generation plugin.
 const CFN_TEMPLATE_URLS: Record<string, string> = {
   identity_federation:
     'https://elastic-cloudformation-templates.s3.amazonaws.com/identity-federation/latest.yaml',
   firehose: 'https://elastic-cloudformation-templates.s3.amazonaws.com/firehose/latest.yaml',
   cloud_forwarder:
     'https://elastic-cloudformation-templates.s3.amazonaws.com/cloud-forwarder/latest.yaml',
+};
+
+// Per-mechanism CloudFormation capabilities. Each template declares the IAM
+// resources it manages; the user must acknowledge them via the matching capability.
+const CFN_CAPABILITIES: Record<string, readonly string[]> = {
+  identity_federation: ['CAPABILITY_NAMED_IAM'],
+  firehose: ['CAPABILITY_IAM'],
+  cloud_forwarder: ['CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
+};
+
+// Placeholder substituted for the encoded API key in the CLI command string so
+// the secret never ends up in the user's shell history. The real key is still
+// returned in `templateParameters` and `apiKeyId` for the AWS Console tab.
+export const API_KEY_CLI_PLACEHOLDER = '<paste-elastic-api-key-here>';
+
+// Quote a CLI argument with single quotes, escaping any embedded single quotes
+// using the POSIX-portable `'\''` sequence.
+const shellSingleQuote = (value: string): string => `'${value.replace(/'/g, "'\\''")}'`;
+
+const collectRegions = (serviceVars: CloudOnboardingDeployment['serviceVars']): string[] => {
+  const regions = new Set<string>();
+  if (!serviceVars) {
+    return [];
+  }
+  for (const entries of Object.values(serviceVars)) {
+    for (const entry of entries) {
+      for (const r of entry.regions ?? []) regions.add(r);
+      if (entry.aws_region) regions.add(entry.aws_region);
+      if (entry.region) regions.add(entry.region);
+    }
+  }
+  return [...regions];
 };
 
 export interface PrepareResult {
@@ -185,6 +218,9 @@ class CloudOnboardingDeploymentService {
     const templateUrl =
       CFN_TEMPLATE_URLS[primaryMechanism] ?? CFN_TEMPLATE_URLS.identity_federation;
 
+    const regions = collectRegions(deployment.serviceVars);
+    const primaryRegion = regions[0];
+
     const templateParameters: Record<string, string> = {
       DeploymentId: id,
     };
@@ -193,33 +229,37 @@ class CloudOnboardingDeploymentService {
       templateParameters.ElasticApiKey = apiKeyEncoded;
     }
 
-    if (deployment.serviceVars) {
-      const allRegions = new Set<string>();
-      for (const entries of Object.values(deployment.serviceVars)) {
-        for (const entry of entries) {
-          for (const r of entry.regions ?? []) {
-            allRegions.add(r);
-          }
-          if (entry.aws_region) allRegions.add(entry.aws_region);
-          if (entry.region) allRegions.add(entry.region);
-        }
-      }
-      if (allRegions.size > 0) {
-        templateParameters.Regions = [...allRegions].join(',');
-      }
+    if (regions.length > 0) {
+      templateParameters.Regions = regions.join(',');
     }
 
-    const paramFlags = Object.entries(templateParameters)
-      .map(([k, v]) => `ParameterKey=${k},ParameterValue=${v}`)
+    // The CLI variant uses a placeholder for the API key to keep the secret
+    // out of shell history. Everything else mirrors templateParameters.
+    const cliParameters: Record<string, string> = {
+      ...templateParameters,
+      ...(apiKeyEncoded ? { ElasticApiKey: API_KEY_CLI_PLACEHOLDER } : {}),
+    };
+
+    const paramFlags = Object.entries(cliParameters)
+      .map(([k, v]) => `ParameterKey=${k},ParameterValue=${shellSingleQuote(v)}`)
       .join(' ');
 
-    const cliCommand = [
+    // Suffix with first 8 chars of the SO id to make repeated runs distinguishable.
+    const stackName = `elastic-onboarding-${primaryMechanism}-${id.slice(0, 8)}`;
+    const capabilities = CFN_CAPABILITIES[primaryMechanism] ?? ['CAPABILITY_NAMED_IAM'];
+
+    const cliCommandParts = [
       'aws cloudformation create-stack',
-      `--stack-name elastic-onboarding-${primaryMechanism}`,
+      `--stack-name ${stackName}`,
       `--template-url ${templateUrl}`,
-      `--parameters ${paramFlags}`,
-      '--capabilities CAPABILITY_NAMED_IAM',
-    ].join(' \\\n  ');
+    ];
+    if (primaryRegion) {
+      cliCommandParts.push(`--region ${primaryRegion}`);
+    }
+    cliCommandParts.push(`--parameters ${paramFlags}`);
+    cliCommandParts.push(`--capabilities ${capabilities.join(' ')}`);
+
+    const cliCommand = cliCommandParts.join(' \\\n  ');
 
     return { templateUrl, templateParameters, cliCommand, apiKeyId };
   }
