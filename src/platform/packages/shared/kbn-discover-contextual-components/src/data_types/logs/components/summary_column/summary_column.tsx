@@ -169,7 +169,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   });
 
   // For formatted JSON values, render as JSON code block
-  // For plain text, use field formatter's reactConvert which handles search highlighting natively
+  // For plain text, use field formatter's convertToReact which handles search highlighting natively
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
     : {
