@@ -16,6 +16,7 @@ import {
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
+  runFindByIdsEsqlQuery,
 } from '../latest_source_query';
 import {
   VERDICTS_DATA_STREAM,
@@ -23,6 +24,7 @@ import {
   type Verdict,
   type verdictsMappings,
 } from './data_stream';
+import { FIELD_DISCOVERY_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
 
 export type VerdictDataStreamClient = IDataStreamClient<typeof verdictsMappings, StoredVerdict>;
 
@@ -63,7 +65,7 @@ export class VerdictClient {
       space: this.clients.space,
       options,
       index: VERDICTS_DATA_STREAM,
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DISCOVERY_ID,
     });
   }
 
@@ -75,7 +77,7 @@ export class VerdictClient {
       space: this.clients.space,
       options,
       index: VERDICTS_DATA_STREAM,
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DISCOVERY_ID,
     });
 
     return { ...result, hits: result.hits.map(enrichFromEvidences) };
@@ -86,8 +88,28 @@ export class VerdictClient {
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: VERDICTS_DATA_STREAM,
-      idField: GROUP_BY_FIELD,
+      idField: FIELD_DISCOVERY_ID,
       idValue: discoveryId,
+    });
+  }
+
+  async findByDiscoveryIds(discoveryIds: string[]): Promise<{ hits: Verdict[] }> {
+    return runFindByIdsEsqlQuery<Verdict>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: VERDICTS_DATA_STREAM,
+      idField: FIELD_DISCOVERY_ID,
+      idValues: discoveryIds,
+    });
+  }
+
+  async findByDiscoverySlug(slug: string): Promise<{ hits: Verdict[] }> {
+    return runFindByIdEsqlQuery<Verdict>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: VERDICTS_DATA_STREAM,
+      idField: FIELD_DISCOVERY_SLUG,
+      idValue: slug,
     });
   }
 }

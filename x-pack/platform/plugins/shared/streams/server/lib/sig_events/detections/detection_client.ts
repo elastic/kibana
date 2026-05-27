@@ -14,7 +14,7 @@ import {
   type PaginatedResponse,
 } from '../query_utils';
 import {
-  type LatestSourceWhereCondition,
+  andWhere,
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
@@ -27,6 +27,7 @@ import {
   type StoredDetection,
   type detectionsMappings,
 } from './data_stream';
+import { FIELD_DETECTION_ID } from '../field_names';
 
 export type DetectionDataStreamClient = IDataStreamClient<
   typeof detectionsMappings,
@@ -47,17 +48,8 @@ export interface DetectionsPaginatedSearchOptions extends PaginatedSearchOptions
   rule_name?: string;
 }
 
-const andWhere = (
-  current: LatestSourceWhereCondition | undefined,
-  next: LatestSourceWhereCondition
-): LatestSourceWhereCondition => {
-  return current ? esql.exp`${current} AND ${next}` : next;
-};
-
-const GROUP_BY_FIELD = 'detection_id';
 const KIND_HANDLED = 'handled' satisfies Detection['kind'];
 const KIND_QUIET = 'quiet' satisfies Detection['kind'];
-const PROCESSED_IDS_CHUNK_SIZE = 250;
 
 export class DetectionClient {
   constructor(
@@ -136,7 +128,7 @@ export class DetectionClient {
       options,
       index: DETECTIONS_DATA_STREAM,
       where: this.buildWhere(options),
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DETECTION_ID,
     });
     const processedIds = await this.getProcessedIds(
       result.hits.map((h) => h.detection_id).filter((id): id is string => Boolean(id))
@@ -157,7 +149,7 @@ export class DetectionClient {
       options,
       index: DETECTIONS_DATA_STREAM,
       where: this.buildWhere(options),
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DETECTION_ID,
       sort: [['detected_at', 'DESC']],
     });
     const processedIds = await this.getProcessedIds(
@@ -176,7 +168,7 @@ export class DetectionClient {
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DETECTIONS_DATA_STREAM,
-      idField: GROUP_BY_FIELD,
+      idField: FIELD_DETECTION_ID,
       idValue: detectionId,
     });
     // History returns all doc kinds including kind:handled.

@@ -19,6 +19,7 @@ import {
   runFindByIdEsqlQuery,
   queryEsql,
   esqlToObjects,
+  runFindByIdsEsqlQuery,
 } from '../latest_source_query';
 import {
   DISCOVERIES_DATA_STREAM,
@@ -26,13 +27,12 @@ import {
   type StoredDiscovery,
   type discoveriesMappings,
 } from './data_stream';
+import { FIELD_DISCOVERY_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
 
 export type DiscoveryDataStreamClient = IDataStreamClient<
   typeof discoveriesMappings,
   StoredDiscovery
 >;
-
-const GROUP_BY_FIELD = 'discovery_slug';
 
 export class DiscoveryClient {
   constructor(
@@ -56,7 +56,7 @@ export class DiscoveryClient {
       space: this.clients.space,
       options,
       index: DISCOVERIES_DATA_STREAM,
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DISCOVERY_ID,
     });
   }
 
@@ -68,7 +68,7 @@ export class DiscoveryClient {
       space: this.clients.space,
       options,
       index: DISCOVERIES_DATA_STREAM,
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DISCOVERY_ID,
     });
 
     if (result.hits.length === 0) return result;
@@ -109,12 +109,22 @@ export class DiscoveryClient {
     }
   }
 
+  async findByIds(discoveryIds: string[]): Promise<{ hits: Discovery[] }> {
+    return runFindByIdsEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DISCOVERIES_DATA_STREAM,
+      idField: FIELD_DISCOVERY_ID,
+      idValues: discoveryIds,
+    });
+  }
+
   async findBySlug(slug: string): Promise<{ hits: Discovery[] }> {
     return runFindByIdEsqlQuery<Discovery>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DISCOVERIES_DATA_STREAM,
-      idField: 'discovery_slug',
+      idField: FIELD_DISCOVERY_SLUG,
       idValue: slug,
     });
   }
