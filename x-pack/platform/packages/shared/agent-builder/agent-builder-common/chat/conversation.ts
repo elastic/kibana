@@ -346,9 +346,7 @@ export interface Conversation {
    */
   state?: ConversationInternalState;
   /**
-   * Identifier of the bash workspace document for this conversation.
-   * Created on first bash use; persisted in `chatSystemIndex('workspaces')`.
-   * Undefined for conversations that have never used the bash tool.
+   * Identifier of the bash/VFS workspace for this conversation.
    */
   workspace_id?: string;
 }

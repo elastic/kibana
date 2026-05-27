@@ -238,9 +238,7 @@ export interface RoundCompleteEventData {
    **/
   attachments?: VersionedAttachment[];
   /**
-   * Set when this round used the bash tool. Carries the workspace_id so the
-   * conversation document can be updated to reference it. Idempotent — once set
-   * on the conversation, subsequent rounds carry the same value.
+   * Set when this round initialized the bash/VFS workspace for this conversation.
    */
   workspace_id?: string;
 }

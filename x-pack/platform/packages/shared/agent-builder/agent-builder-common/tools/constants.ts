@@ -62,13 +62,6 @@ export const attachmentTools = {
   diff: `${internalNamespaces.attachments}.diff`,
 };
 
-/**
- * @deprecated The legacy filestore tool namespace. `ls`/`grep`/`glob` are removed
- * (replaced by bash equivalents) and `read` is replaced by `internalTools.readFile`.
- * Kept as an empty object for any third-party code that imports it.
- */
-export const filestoreTools = {} as const;
-
 export const internalTools = {
   runSubagent: 'run_subagent',
   sleep: 'sleep',
@@ -82,10 +75,7 @@ export const isAttachmentTool = (toolName: string) =>
   Object.values(attachmentTools).includes(toolName);
 
 /**
- * Recognises legacy filestore tool ids on persisted conversation documents.
- * The tools themselves are removed (replaced by `read_file` and `bash`), but
- * this predicate still classifies historical tool calls so they're inferred
- * as `internal` origin on read.
+ * Legacy filestore tool ids, used to classify these historical tool calls as `internal`.
  */
 const LEGACY_FILESTORE_TOOL_IDS = new Set([
   'filestore.read',
@@ -93,12 +83,12 @@ const LEGACY_FILESTORE_TOOL_IDS = new Set([
   'filestore.grep',
   'filestore.glob',
 ]);
-export const isFilestoreTool = (toolName: string) => LEGACY_FILESTORE_TOOL_IDS.has(toolName);
+const isLegacyFilestoreTool = (toolName: string) => LEGACY_FILESTORE_TOOL_IDS.has(toolName);
 
 const isInternalToolName = (toolName: string) => Object.values(internalTools).includes(toolName);
 
 export const isInternalTool = (toolName: string) =>
-  isAttachmentTool(toolName) || isFilestoreTool(toolName) || isInternalToolName(toolName);
+  isAttachmentTool(toolName) || isLegacyFilestoreTool(toolName) || isInternalToolName(toolName);
 
 export const isExcludedFromFilestore = (toolName: string) => isInternalTool(toolName);
 
