@@ -13,12 +13,10 @@ import {
   type PaginatedSearchOptions,
 } from '../query_utils';
 import {
-  executeAndDecodeSource,
-  latestSourceFrom,
-  pickLatestPerGroup,
   runFindByIdEsqlQuery,
+  runFindByIdsEsqlQuery,
+  runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
-  withTimeRange,
 } from '../latest_source_query';
 import {
   DISCOVERIES_DATA_STREAM,
@@ -26,13 +24,12 @@ import {
   type StoredDiscovery,
   type discoveriesMappings,
 } from './data_stream';
+import { FIELD_DISCOVERY_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
 
 export type DiscoveryDataStreamClient = IDataStreamClient<
   typeof discoveriesMappings,
   StoredDiscovery
 >;
-
-const GROUP_BY_FIELD = 'discovery_id';
 
 export class DiscoveryClient {
   constructor(
@@ -51,12 +48,13 @@ export class DiscoveryClient {
   }
 
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: Discovery[] }> {
-    let query = latestSourceFrom(DISCOVERIES_DATA_STREAM, this.clients.space);
-    query = withTimeRange(query, options);
-    query = pickLatestPerGroup(query, GROUP_BY_FIELD);
-    query = query.keep('_source');
-
-    return executeAndDecodeSource<Discovery>(this.clients.esClient, query);
+    return runLatestSourceEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      options,
+      index: DISCOVERIES_DATA_STREAM,
+      groupBy: FIELD_DISCOVERY_ID,
+    });
   }
 
   async findLatestPaginated(
@@ -67,7 +65,7 @@ export class DiscoveryClient {
       space: this.clients.space,
       options,
       index: DISCOVERIES_DATA_STREAM,
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DISCOVERY_ID,
     });
   }
 
@@ -76,8 +74,28 @@ export class DiscoveryClient {
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DISCOVERIES_DATA_STREAM,
-      idField: GROUP_BY_FIELD,
+      idField: FIELD_DISCOVERY_ID,
       idValue: discoveryId,
+    });
+  }
+
+  async findByIds(discoveryIds: string[]): Promise<{ hits: Discovery[] }> {
+    return runFindByIdsEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DISCOVERIES_DATA_STREAM,
+      idField: FIELD_DISCOVERY_ID,
+      idValues: discoveryIds,
+    });
+  }
+
+  async findBySlug(slug: string): Promise<{ hits: Discovery[] }> {
+    return runFindByIdEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DISCOVERIES_DATA_STREAM,
+      idField: FIELD_DISCOVERY_SLUG,
+      idValue: slug,
     });
   }
 }

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  esql,
-  type ComposerQuery,
-  type ComposerQueryTagHole,
-  type ComposerSortShorthand,
-} from '@elastic/esql';
+import { esql, type ComposerQuery, type ComposerSortShorthand } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
@@ -20,28 +15,70 @@ import {
 } from './query_utils';
 import { runEsqlQuery } from './run_esql_query';
 
-export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHole;
+export const andWhere = (
+  current: ESQLAstExpression | undefined,
+  next: ESQLAstExpression
+): ESQLAstExpression => {
+  return current ? esql.exp`${current} AND ${next}` : next;
+};
 
-/**
- * The grouping fields used to identify the "latest revision" per logical
- * record. Accepts a single field (e.g. `discovery_id`), a 2-tuple
- * (e.g. `[stream_name, alert_id]`), or a 3-tuple
- * (e.g. `[stream.name, type, id]` for the unified KI data stream).
- */
+export const inFilter = ({
+  where,
+  field,
+  values,
+}: {
+  where: ESQLAstExpression | undefined;
+  field: string;
+  values: string[] | undefined;
+}): ESQLAstExpression | undefined => {
+  if (!values?.length) return where;
+  return andWhere(where, esql.exp`${esql.col(field)} IN (${values.map((v) => esql.str(v))})`);
+};
+
+// TODO: Remove `IS NULL` fallback once workflows write `kibana.space_ids` on every document.
+export const fromIndexForSpace = ({
+  index,
+  space,
+  columns,
+}: {
+  index: string;
+  space: string;
+  columns?: string[];
+}): ComposerQuery => {
+  const base = columns ? esql.from([index], columns) : esql.from([index]);
+  return base.where`${esql.col('kibana.space_ids')} == ${space} OR ${esql.col(
+    'kibana.space_ids'
+  )} IS NULL`;
+};
+
+export const applyTimeRange = ({
+  query,
+  from,
+  to,
+}: {
+  query: ComposerQuery;
+  from?: string;
+  to?: string;
+}): ComposerQuery => {
+  let q = query;
+  if (from !== undefined) {
+    const fromIso = from;
+    q = q.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
+  }
+  if (to !== undefined) {
+    const toIso = to;
+    q = q.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
+  }
+  return q;
+};
+
 export type LatestSourceGroupBy = string | [string, string] | [string, string, string];
 
-/**
- * Start a `FROM <index> METADATA _id, _source | WHERE kibana.space_ids == <space>`
- * pipeline scoped to a single space.
- */
+export type LatestSourceWhereCondition = ESQLAstExpression;
+
 export const latestSourceFrom = (index: string, space: string): ComposerQuery =>
   esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
 
-/**
- * Add `@timestamp >=` / `@timestamp <=` predicates only when the matching
- * option is set. No-op for absent bounds so callers can pass a partial
- * range (or none at all) without conditional plumbing.
- */
 export const withTimeRange = (
   query: ComposerQuery,
   options: CommonSearchOptions
@@ -56,11 +93,6 @@ export const withTimeRange = (
   return next;
 };
 
-/**
- * Append a `WHERE` predicate when one is provided; identity otherwise.
- * Used both before grouping (filter the input set) and after grouping
- * (filter the latest-per-group output, e.g. drop tombstones).
- */
 export const withWhere = (
   query: ComposerQuery,
   condition?: LatestSourceWhereCondition
@@ -70,6 +102,16 @@ export const withWhere = (
   }
   return query.where`${condition}`;
 };
+
+interface RunLatestSourceEsqlQueryArgs {
+  esClient: ElasticsearchClient;
+  space: string;
+  options: CommonSearchOptions;
+  index: string;
+  where?: ESQLAstExpression;
+  sort?: ComposerSortShorthand[];
+  groupBy: string;
+}
 
 const buildGroupByCols = (groupBy: LatestSourceGroupBy) => {
   if (typeof groupBy === 'string') {
@@ -134,6 +176,29 @@ export const executeAndDecodeSource = async <T>(
   };
 };
 
+const executeEsqlQuery = async <T>(
+  { esClient, query }: { esClient: ElasticsearchClient; query: ComposerQuery }
+): Promise<T[]> => (await executeAndDecodeSource<T>(esClient, query)).hits;
+
+export const runLatestSourceEsqlQuery = async <T>({
+  esClient,
+  space,
+  options,
+  index,
+  where,
+  sort,
+  groupBy,
+}: RunLatestSourceEsqlQueryArgs): Promise<{ hits: T[] }> => {
+  let query = latestSourceFrom(index, space);
+  query = withTimeRange(query, options);
+  if (where) query = withWhere(query, where);
+  query = pickLatestPerGroup(query, groupBy);
+  const sortArgs: ComposerSortShorthand[] = sort ?? [['@timestamp', 'DESC']];
+  query = withSort(query, sortArgs);
+  query = query.keep('_source');
+  return executeAndDecodeSource<T>(esClient, query);
+};
+
 const executeCount = async (
   esClient: ElasticsearchClient,
   query: ComposerQuery
@@ -158,7 +223,7 @@ interface RunPaginatedLatestSourceEsqlQueryArgs {
   space: string;
   options: PaginatedSearchOptions;
   index: string;
-  where?: LatestSourceWhereCondition;
+  where?: ESQLAstExpression;
   sort?: ComposerSortShorthand[];
   groupBy: LatestSourceGroupBy;
 }
@@ -216,4 +281,34 @@ export const runFindByIdEsqlQuery = async <T>({
     .keep('_source');
 
   return executeAndDecodeSource<T>(esClient, query);
+};
+
+interface RunFindByIdsEsqlQueryArgs {
+  esClient: ElasticsearchClient;
+  space: string;
+  index: string;
+  idField: string;
+  idValues: string[];
+}
+
+export const runFindByIdsEsqlQuery = async <T>({
+  esClient,
+  space,
+  index,
+  idField,
+  idValues,
+}: RunFindByIdsEsqlQueryArgs): Promise<{ hits: T[] }> => {
+  if (idValues.length === 0) return { hits: [] };
+
+  const where = inFilter({ where: undefined, field: idField, values: idValues });
+  let query = fromIndexForSpace({ index, space, columns: ['_source'] });
+
+  if (where) {
+    query = query.where`${where}`;
+  }
+  query = query.sort(['@timestamp', 'ASC']);
+  query = query.keep('_source');
+
+  const hits = await executeEsqlQuery<T>({ esClient, query });
+  return { hits };
 };
