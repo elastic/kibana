@@ -30,7 +30,7 @@ type ObservedHostData = Omit<ObservedEntityData<HostItem>, 'anomalies'>;
 interface HostPanelContentProps {
   observedHost: ObservedHostData;
   riskScoreState: RiskScoreState<EntityType.host>;
-  entityRiskScores?: EntityRiskScoresState<EntityType.host>;
+  entityRiskScores: EntityRiskScoresState<EntityType.host>;
   contextID: string;
   scopeId: string;
   openDetailsPanel: (path: EntityDetailsPath) => void;

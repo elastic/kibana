@@ -62,10 +62,10 @@ export interface RiskSummaryProps<T extends EntityType> {
    */
   riskScoreData: RiskScoreState<T>;
   /**
-   * V2 only: the entity's base + resolution-group risk scores from the
+   * V2: the entity's base + resolution-group risk scores from the
    * risk-score index, keyed by EUID.
    */
-  entityRiskScores?: EntityRiskScoresState<T>;
+  entityRiskScores: EntityRiskScoresState<T>;
   entityType: T;
   recalculatingScore: boolean;
   queryId: string;

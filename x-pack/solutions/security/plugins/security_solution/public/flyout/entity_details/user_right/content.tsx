@@ -35,7 +35,7 @@ interface UserPanelContentProps {
   identityFields: IdentityFields;
   observedUser: ObservedUserData;
   riskScoreState: RiskScoreState<EntityType.user>;
-  entityRiskScores?: EntityRiskScoresState<EntityType.user>;
+  entityRiskScores: EntityRiskScoresState<EntityType.user>;
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;

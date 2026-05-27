@@ -29,7 +29,7 @@ interface ServicePanelContentProps {
   serviceName: string;
   observedService: ObservedEntityData<ServiceItem>;
   riskScoreState: RiskScoreState<EntityType.service>;
-  entityRiskScores?: EntityRiskScoresState<EntityType.service>;
+  entityRiskScores: EntityRiskScoresState<EntityType.service>;
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
