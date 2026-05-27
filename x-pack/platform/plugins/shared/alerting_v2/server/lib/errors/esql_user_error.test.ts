@@ -13,9 +13,12 @@ const makeResponseError = (statusCode: number) =>
   new errors.ResponseError({ statusCode } as DiagnosticResult);
 
 describe('isEsqlUserError', () => {
-  it('returns true for ResponseError with statusCode 400', () => {
-    expect(isEsqlUserError(makeResponseError(400))).toBe(true);
-  });
+  it.each([400, 401, 403, 404])(
+    'returns true for ResponseError with statusCode %i',
+    (statusCode) => {
+      expect(isEsqlUserError(makeResponseError(statusCode))).toBe(true);
+    }
+  );
 
   it('returns false for ResponseError with statusCode 503', () => {
     expect(isEsqlUserError(makeResponseError(503))).toBe(false);
