@@ -74,7 +74,6 @@ export const useConversationStream = () => {
         connectorId,
         attachments,
         conversationAttachments: conversation?.attachments,
-        lastRoundSteps: lastRound?.steps,
         resetAttachments,
         browserApiTools,
       });
@@ -85,7 +84,6 @@ export const useConversationStream = () => {
       connectorId,
       attachments,
       conversation?.attachments,
-      lastRound?.steps,
       resetAttachments,
       browserApiTools,
     ]
@@ -104,7 +102,6 @@ export const useConversationStream = () => {
       agentId,
       connectorId,
       conversationAttachments: conversation?.attachments,
-      lastRoundSteps: lastRound?.steps,
       browserApiTools,
     });
   }, [
@@ -113,7 +110,6 @@ export const useConversationStream = () => {
     agentId,
     connectorId,
     conversation?.attachments,
-    lastRound?.steps,
     browserApiTools,
   ]);
 
@@ -130,11 +126,10 @@ export const useConversationStream = () => {
         conversationId,
         agentId,
         connectorId,
-        lastRoundSteps: lastRound?.steps,
         browserApiTools,
       });
     },
-    [mutateResumeRound, conversationId, agentId, connectorId, lastRound?.steps, browserApiTools]
+    [mutateResumeRound, conversationId, agentId, connectorId, browserApiTools]
   );
 
   const retry = useCallback(() => {

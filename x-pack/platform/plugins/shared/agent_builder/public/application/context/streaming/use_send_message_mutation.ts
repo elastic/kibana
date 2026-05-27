@@ -54,7 +54,6 @@ export interface SendMessageVars {
   connectorId?: string;
   attachments?: ConversationAttachment[];
   conversationAttachments?: VersionedAttachment[];
-  lastRoundSteps?: ConversationRoundStep[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
 }
@@ -240,7 +239,15 @@ export const useSendMessageMutation = ({
         }
         succeeded = true;
       } catch (err) {
-        setError(vars.conversationId, err, vars.lastRoundSteps ?? []);
+        // Snapshot the failing round's accumulated steps from the cache BEFORE
+        // we tear down the optimistic round below. Without this, the in-progress
+        // steps (reasoning + any successful tool calls before the failure) are
+        // lost and the error panel renders with no context.
+        const cached = queryClient.getQueryData<Conversation>(
+          queryKeys.conversations.byId(vars.conversationId)
+        );
+        const inProgressSteps = cached?.rounds?.at(-1)?.steps ?? [];
+        setError(vars.conversationId, err, inProgressSteps);
         if (!isRegenerate) {
           // Remove the optimistic round immediately so the error round and the optimistic
           // round are not both visible.
