@@ -344,6 +344,7 @@ export const ActionForm = ({
                   ? item.iconClass
                   : suspendedComponentWithProps(item.iconClass as React.ComponentType)
               }
+              aria-hidden={true}
             />
           </EuiKeyPadMenuItem>
         );
