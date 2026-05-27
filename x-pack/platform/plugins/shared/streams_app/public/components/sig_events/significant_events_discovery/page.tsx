@@ -28,7 +28,7 @@ import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { SettingsTab } from './components/settings/tab';
 import { MemoryTab } from './components/memory/tab';
-import { DiscoveriesTab } from './components/discoveries_tab';
+import { InsightsTab } from './components/insights/tab';
 
 const discoveryTabs = [
   'streams',
@@ -229,7 +229,7 @@ export function SignificantEventsDiscoveryPage() {
           {tab === 'streams' && <StreamsView />}
           {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
           {tab === 'queries' && <QueriesTable />}
-          {tab === 'discoveries' && <DiscoveriesTab />}
+          {tab === 'discoveries' && <InsightsTab />}
           {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
           {tab === 'settings' && <SettingsTab />}
         </StreamsAppPageTemplate.Body>

@@ -159,7 +159,7 @@ export function StreamsView() {
                   onClick={() => {
                     toasts.remove(toast);
                     router.push('/_discovery/{tab}', {
-                      path: { tab: 'insights' },
+                      path: { tab: 'discoveries' },
                       query: {},
                     });
                   }}
