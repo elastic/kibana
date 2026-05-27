@@ -98,7 +98,7 @@ export const TakeActionButton = memo(() => {
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 });

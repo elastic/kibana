@@ -14,11 +14,17 @@ import { extendPageObjects } from './page_objects';
 export const KBN_ARCHIVES = {
   FUNCTIONAL_BASE:
     'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json',
+  SO_MANAGEMENT:
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/so_management/data.json',
+  DISCOVER:
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/discover/data.json',
   DASHBOARD:
     'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json',
   VISUALIZE:
     'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/visualize/data.json',
   MAPS: 'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/maps/data.json',
+  BULK_ASSIGN:
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign/data.json',
 } as const;
 
 export const ES_ARCHIVES = {

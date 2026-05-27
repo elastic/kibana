@@ -38,3 +38,16 @@ export enum InferenceEndpointProvider {
 export const elasticModelIds = {
   RainbowSprinkles: 'rainbow-sprinkles',
 } as const;
+
+export type EisInferenceEndpointMetadata = {
+  heuristics?: {
+    properties?: string[];
+    status?: string;
+    release_date?: string;
+    end_of_life_date?: string;
+  } & Record<string, unknown>;
+  display?: {
+    name?: string;
+    model_creator?: string;
+  } & Record<string, unknown>;
+} & Record<string, unknown>;

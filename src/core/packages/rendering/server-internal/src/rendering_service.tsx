@@ -18,6 +18,7 @@ import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
 import {
   type DarkModeValue,
   type ThemeName,
@@ -71,6 +72,7 @@ export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
+  private userStorageStart?: UserStorageServiceStart;
   constructor(private readonly coreContext: CoreContext) {}
 
   public async preboot({
@@ -140,7 +142,8 @@ export class RenderingService {
     };
   }
 
-  public start({ featureFlags }: RenderingStartDeps) {
+  public start({ featureFlags, userStorage }: RenderingStartDeps) {
+    this.userStorageStart = userStorage;
     featureFlags
       .getStringValue$<ThemeName>(DEFAULT_THEME_NAME_FEATURE_FLAG, DEFAULT_THEME_NAME)
       // Parse the input feature flag value to ensure it's of type ThemeName
@@ -189,32 +192,37 @@ export class RenderingService {
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
     // Grouping all async HTTP requests to run them concurrently for performance reasons.
+    // Anonymous pages skip user-scoped values and async default values (the latter typically
+    // call ES via `asCurrentUser`, which would 401 on an unauthenticated request).
     const [
       defaultSettings,
       settingsUserValues = {},
       globalSettingsUserValues = {},
       userSettingDarkMode,
       userSettingLocale,
-    ] = await Promise.all([
-      // All sites
-      withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
-      // Only non-anonymous pages
-      ...(!isAnonymousPage
-        ? ([
+      userStorageValues = {},
+    ] = await Promise.all(
+      isAnonymousPage
+        ? [uiSettings.client?.getRegistered() ?? {}]
+        : ([
+            withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
             uiSettings.client?.getUserProvided(true),
             uiSettings.globalClient?.getUserProvided(true),
             // dark mode
             userSettings?.getUserSettingDarkMode(request),
             // locale
             userSettings?.getUserSettingLocale(request),
+            // user storage
+            this.fetchUserStorageValues(request),
           ] as [
+            ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<DarkModeValue> | undefined,
-            Promise<string> | undefined
+            Promise<string> | undefined,
+            Promise<Record<string, unknown>>
           ])
-        : []),
-    ]);
+    );
 
     const settings = {
       defaults: defaultSettings,
@@ -384,6 +392,7 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
+        userStorage: { values: userStorageValues },
       },
     };
 
@@ -391,6 +400,16 @@ export class RenderingService {
   }
 
   public async stop() {}
+
+  private async fetchUserStorageValues(request: KibanaRequest): Promise<Record<string, unknown>> {
+    const userStorage = this.userStorageStart;
+    if (!userStorage) return {};
+
+    const client = userStorage.asScoped(request);
+    if (!client) return {};
+
+    return client.getForInjection();
+  }
 }
 
 const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {

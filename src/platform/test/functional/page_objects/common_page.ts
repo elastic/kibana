@@ -309,7 +309,8 @@ export class CommonPageObject extends FtrService {
         // accept alert if it pops up
         const alert = await this.browser.getAlert();
         await alert?.accept();
-        await this.sleep(700);
+        // browser.get() waits for document.readyState==='complete' before returning,
+        // so no sleep is needed here; the refresh below starts from a fully loaded page.
         this.log.debug('returned from get, calling refresh');
         await this.browser.refresh();
         let currentUrl = shouldLoginIfPrompted
@@ -365,8 +366,10 @@ export class CommonPageObject extends FtrService {
       });
 
       if (!skipUrlValidation) {
+        // Poll until the URL stops changing. No upfront sleep: if the URL has
+        // already settled we return immediately; the retry service's built-in
+        // 502ms delay provides spacing between checks when it is still moving.
         await this.retry.tryForTime(this.defaultFindTimeout, async () => {
-          await this.sleep(501);
           const currentUrl = await this.browser.getCurrentUrl();
           this.log.debug('in navigateTo url = ' + currentUrl);
           if (lastUrl !== currentUrl) {
@@ -511,10 +514,8 @@ export class CommonPageObject extends FtrService {
 
   async waitForSaveModalToClose() {
     this.log.debug('Waiting for save modal to close');
-    await this.retry.try(async () => {
-      if (await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 })) {
-        throw new Error('save modal still open');
-      }
+    await this.testSubjects.missingOrFail('savedObjectSaveModal', {
+      timeout: this.testSubjects.TRY_TIME,
     });
   }
 

@@ -8,3 +8,4 @@
  */
 
 export type { ChromeNext } from './chrome_next';
+export type { GlobalSearchConfig } from './global_search';

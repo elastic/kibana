@@ -12,6 +12,8 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 
+import { buildTimeRangeFilter } from './build_time_range_filter';
+
 export interface StepExecutionListResult {
   results: EsWorkflowStepExecution[];
   total: number;
@@ -33,6 +35,10 @@ export interface SearchStepExecutionsParams {
   sourceExcludes?: string[];
   page?: number;
   size?: number;
+  /** Datemath lower bound for filtering by startedAt. */
+  startedAfter?: string;
+  /** Datemath upper bound for filtering by startedAt. */
+  startedBefore?: string;
 }
 
 function buildMustQueries(params: {
@@ -41,6 +47,8 @@ function buildMustQueries(params: {
   stepId?: string;
   spaceId: string;
   additionalQuery?: estypes.QueryDslQueryContainer;
+  startedAfter?: string;
+  startedBefore?: string;
 }): estypes.QueryDslQueryContainer[] {
   const mustQueries: estypes.QueryDslQueryContainer[] = [{ term: { spaceId: params.spaceId } }];
   if (params.workflowExecutionId !== undefined) {
@@ -54,6 +62,14 @@ function buildMustQueries(params: {
   }
   if (params.additionalQuery) {
     mustQueries.push(params.additionalQuery);
+  }
+  const startedAtRange = buildTimeRangeFilter(
+    'startedAt',
+    params.startedAfter,
+    params.startedBefore
+  );
+  if (startedAtRange) {
+    mustQueries.push(startedAtRange);
   }
   return mustQueries;
 }
@@ -80,6 +96,8 @@ export const searchStepExecutions = async ({
   sourceExcludes,
   page,
   size,
+  startedAfter,
+  startedBefore,
 }: SearchStepExecutionsParams): Promise<StepExecutionListResult> => {
   if (workflowExecutionId === undefined && workflowId === undefined) {
     throw new Error('Either workflowExecutionId or workflowId must be provided');
@@ -94,6 +112,8 @@ export const searchStepExecutions = async ({
       stepId,
       spaceId,
       additionalQuery,
+      startedAfter,
+      startedBefore,
     });
 
     const isPaginated = workflowId !== undefined && (page !== undefined || size !== undefined);

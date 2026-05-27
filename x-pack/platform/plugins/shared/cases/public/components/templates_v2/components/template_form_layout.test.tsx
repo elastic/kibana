@@ -410,7 +410,7 @@ fields:
     expect(updatedYaml).toContain('default: 42');
   });
 
-  it('trims whitespace from INPUT_TEXT value', () => {
+  it('preserves whitespace in INPUT_TEXT value', () => {
     setupWithYaml(`name: Test
 fields:
   - name: summary
@@ -424,7 +424,7 @@ fields:
 
     expect(onYamlChange).toHaveBeenCalledTimes(1);
     const updatedYaml = onYamlChange.mock.calls[0][0] as string;
-    expect(updatedYaml).toContain('default: hello');
+    expect(updatedYaml).toContain('default: "  hello  "');
   });
 
   it('passes the string value unchanged for INPUT_TEXT control', () => {

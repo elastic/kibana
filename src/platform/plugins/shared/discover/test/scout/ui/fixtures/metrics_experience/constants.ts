@@ -55,6 +55,18 @@ export const METRICS_DIMENSION_FIELDS = {
 
 export const DATA_VIEW_NAME = METRICS_TEST_INDEX_NAME;
 
+/**
+ * Viewport wide enough (>= 1200px) for the metrics insights flyout to render
+ * in push mode (`type="push"`, `pushMinBreakpoint="xl"`).
+ *
+ * In overlay mode, an `euiOverlayMask` traps pointer events on the rest of
+ * the page (Discover tab bar, metrics toolbar), making any flow that
+ * interacts with the surrounding UI while the flyout is open unreachable.
+ * Apply this via `spaceTest.use({ viewport: PUSH_FLYOUT_VIEWPORT })` in
+ * suites that need the surrounding UI to stay interactable.
+ */
+export const PUSH_FLYOUT_VIEWPORT = { width: 1920, height: 1080 } as const;
+
 export const KBN_ARCHIVE =
   'src/platform/plugins/shared/discover/test/scout/ui/fixtures/metrics_experience/kbn_archives/metrics_data_view.json';
 

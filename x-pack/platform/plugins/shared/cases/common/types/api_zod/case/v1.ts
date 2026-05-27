@@ -263,9 +263,15 @@ const CasesSearchRequestSearchFieldsValues = [
   'cases-comments.comment',
   'cases-comments.alertId',
   'cases-comments.eventId',
+  'cases.ef_all_values',
 ] as const;
 
 export const CasesSearchRequestSearchFieldsSchema = z.enum(CasesSearchRequestSearchFieldsValues);
+
+const ExtendedFieldFilterSchema = z.object({
+  label: z.string(),
+  value: z.string(),
+});
 
 export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend({
   customFields: z
@@ -274,6 +280,7 @@ export const CasesSearchRequestSchema = CasesFindRequestBaseFieldsSchema.extend(
   searchFields: z
     .union([z.array(CasesSearchRequestSearchFieldsSchema), CasesSearchRequestSearchFieldsSchema])
     .optional(),
+  extendedFieldFilters: z.array(ExtendedFieldFilterSchema).optional(),
 });
 
 export const CasesFindRequestWithCustomFieldsSchema = CasesFindRequestSchema.extend({

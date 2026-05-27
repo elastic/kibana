@@ -10,6 +10,7 @@
 import equal from 'fast-deep-equal';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { MigrationInfoRecord } from '../../types';
+import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 import {
   validateNewModelVersionSchemas,
   validateModelVersionNumbers,
@@ -19,11 +20,12 @@ import {
 } from './common_utils';
 import {
   mappingsUpdated,
-  validateNoModelVersionChanges,
-  validateModelVersionsChanges,
+  validateNoStructuralModelVersionChanges,
   validateNewMappingsInModelVersion,
+  validateIgnoreAboveExistingType,
   validateNameTitleFieldTypesExistingType,
 } from './existing_type_utils';
+import { validateAdditiveOnlyMappings } from './additive_only_mappings';
 
 interface ValidateChangesExistingTypeParams {
   from: MigrationInfoRecord;
@@ -40,65 +42,85 @@ export function validateChangesExistingType({
 }: ValidateChangesExistingTypeParams): void {
   const name = to.name;
 
-  // check that no migrations have been removed or mutated
   if (
     (from.migrationVersions && !to.migrationVersions) ||
     !equal(to.migrationVersions, from.migrationVersions)
   ) {
-    throw new Error(
-      `❌ Modifications have been detected in the '${name}.migrations'. This property is deprected and no modifications are allowed.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.EXISTING_TYPE_MUTATED_MIGRATIONS,
+      severity: 'error',
+      typeName: name,
+      message: `Modifications have been detected in the '${name}.migrations'. This property is deprecated and no modifications are allowed.`,
+      fixHint: `Revert any changes to '${name}.migrations' and use a model version instead.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 
-  // check that no model versions have been removed
   if (
     (from.modelVersions && !to.modelVersions) ||
     to.modelVersions.length < from.modelVersions.length
   ) {
-    throw new Error(`❌ Some model versions have been deleted for SO type '${name}'.`);
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.EXISTING_TYPE_DELETED_MODEL_VERSIONS,
+      severity: 'error',
+      typeName: name,
+      message: `Some model versions have been deleted for SO type '${name}'.`,
+      fixHint: `Restore the missing model version(s); existing model versions cannot be deleted.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 
-  // check that defined modelVersions are consecutive integer numbers, starting at 1
   validateModelVersionNumbers(name, to.modelVersions);
 
-  // validate that name and title fields are of type "text"
   validateNameTitleFieldTypesExistingType(name, to, from, registeredType, log);
+
+  // assert that no mapped property has been removed compared to the baseline snapshot
+  validateAdditiveOnlyMappings(name, from.mappings, to.mappings);
+  // validate that keyword and flattened fields have ignore_above
+  validateIgnoreAboveExistingType(name, to, from, log);
+
+  // Validate existing model versions for structural and schema-only mutations.
+  // Structural mutations always throw; schema-only mutations are classified
+  // with granular diffing (breaking → throw, warnings → log).
+  validateNoStructuralModelVersionChanges(from, to, registeredType, log);
 
   const newModelVersionCount = to.modelVersions.length - from.modelVersions.length;
 
   switch (newModelVersionCount) {
-    case 0: // the type has been updated but no new model version has been added
+    case 0:
       if (mappingsUpdated(from, to)) {
-        throw new Error(
-          `❌ The '${name}' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
-        );
+        throw new SavedObjectsCheckError({
+          ruleId: RULE_IDS.EXISTING_TYPE_MAPPINGS_WITHOUT_NEW_MODEL_VERSION,
+          severity: 'error',
+          typeName: name,
+          message: `The '${name}' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`,
+          fixHint: `Add a new model version with a 'mappings_addition' change describing the new fields.`,
+          docsAnchor: '#defining-model-versions',
+        });
       }
-      // mappings are unchanged, so schema-only changes in the latest model version are allowed
-      validateModelVersionsChanges({ from, to, registeredType, log });
       break;
-    case 1: // a new model version has been added
-      // existing model versions must not have been mutated at all when introducing a new one
-      validateNoModelVersionChanges(from, to);
-
+    case 1: {
       const newModelVersion = getLatestModelVersion(to);
 
       if (to.modelVersions.length === 1) {
-        // an existing SO type can be defining its first model version ever
         validateInitialModelVersion(name, newModelVersion);
       }
 
-      // check that the last modelVersion has schemas and that schemas have both create and forwardCompatibility defined
       validateNewModelVersionSchemas(name, newModelVersion);
 
-      // validate that newly added mapping fields are declared in the new model version
       validateNewMappingsInModelVersion(name, from, to);
 
-      // validate that new mappings do not use index: false or enabled: false
       validateNoIndexOrEnabledFalse(name, to, [newModelVersion]);
       break;
-    default: // cannot define more than 1 new model version at a time
-      throw new Error(
-        `❌ The SO type '${name}' is defining ${newModelVersionCount} new model versions, but can only define one at a time.`
-      );
+    }
+    default:
+      throw new SavedObjectsCheckError({
+        ruleId: RULE_IDS.EXISTING_TYPE_TOO_MANY_NEW_MODEL_VERSIONS,
+        severity: 'error',
+        typeName: name,
+        message: `The SO type '${name}' is defining ${newModelVersionCount} new model versions, but can only define one at a time.`,
+        fixHint: `Split the change across multiple PRs so each one introduces a single new model version.`,
+        docsAnchor: '#defining-model-versions',
+      });
   }
 }

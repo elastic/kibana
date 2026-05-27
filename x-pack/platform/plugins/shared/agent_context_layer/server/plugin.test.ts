@@ -34,10 +34,6 @@ jest.mock('./features', () => ({
   registerFeatures: jest.fn(),
 }));
 
-jest.mock('./ui_settings', () => ({
-  registerUISettings: jest.fn(),
-}));
-
 jest.mock('./routes/search', () => ({
   registerSearchRoute: jest.fn(),
 }));

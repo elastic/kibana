@@ -24,6 +24,7 @@ import type {
   CreateCustomRuleArgs,
   CreatePrebuiltRuleArgs,
   DeleteRuleArgs,
+  GetHistoryForRuleArgs,
   IDetectionRulesClient,
   ImportRuleArgs,
   ImportRulesArgs,
@@ -41,6 +42,7 @@ import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
 import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
 import { revertPrebuiltRule } from './methods/revert_prebuilt_rule';
+import { getHistoryForRule } from './methods/get_history_for_rule';
 import { MINIMUM_RULE_CUSTOMIZATION_LICENSE } from '../../../../../../common/constants';
 
 interface DetectionRulesClientParams {
@@ -200,6 +202,12 @@ export const createDetectionRulesClient = ({
           detectionRulesClient: this,
           savedObjectsClient,
         });
+      });
+    },
+
+    async getHistoryForRule(args: GetHistoryForRuleArgs) {
+      return withSecuritySpan('DetectionRulesClient.getHistoryForRule', async () => {
+        return getHistoryForRule({ rulesClient, ...args });
       });
     },
   };

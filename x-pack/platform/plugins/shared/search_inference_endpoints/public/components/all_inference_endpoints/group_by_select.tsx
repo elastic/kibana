@@ -120,6 +120,7 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
           )}
           listProps={{
             onFocusBadge: false,
+            paddingSize: 's',
           }}
         >
           {(list, _search) => <div css={GroupBySelectableContainer}>{list}</div>}

@@ -222,9 +222,11 @@ export interface ICommandContext {
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
+  subquerySupport?: boolean;
   isCursorInSubquery?: boolean;
   isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;
+  isTimeseriesSource?: boolean;
 }
 /**
  * This is a list of locations within an ES|QL query.
@@ -267,6 +269,11 @@ export enum Location {
    * In a LIMIT grouping clause
    */
   LIMIT_BY = 'limit_by',
+
+  /**
+   * In a CHANGE_POINT grouping clause
+   */
+  CHANGE_POINT_BY = 'change_point_by',
 
   /**
    * In a per-agg filter

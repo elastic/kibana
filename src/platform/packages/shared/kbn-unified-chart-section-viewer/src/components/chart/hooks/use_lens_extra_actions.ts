@@ -80,8 +80,8 @@ const getExploreInDiscoverTabAction = (onExecute: () => void): Action => {
     order: 20, // same position as ACTION_OPEN_IN_DISCOVER action
     type: 'actionButton',
     getDisplayName() {
-      return i18n.translate('metricsExperience.lens.actions.exploreInDiscoverTab', {
-        defaultMessage: 'Explore',
+      return i18n.translate('metricsExperience.lens.actions.openInDiscoverTab', {
+        defaultMessage: 'Open in a Discover tab',
       });
     },
     getIconType() {

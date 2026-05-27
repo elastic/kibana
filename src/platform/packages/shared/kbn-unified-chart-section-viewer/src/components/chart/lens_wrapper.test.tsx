@@ -203,6 +203,45 @@ describe('LensWrapper', () => {
     });
   });
 
+  it('checks if  LensProps fields are passed to EmbeddableComponent', () => {
+    const lensProps = {
+      ...mockLensProps,
+      id: 'chart-1',
+      viewMode: 'view' as const,
+      esqlVariables: [{ key: 'k', value: 'v', type: ESQLVariableType.VALUES }],
+      noPadding: true,
+      searchSessionId: 'session-abc',
+      executionContext: { description: 'test ctx' },
+      lastReloadRequestTime: 123456,
+      userMessages: [{ message: 'test message', type: 'info' }],
+      description: 'A chart description',
+    };
+
+    render(
+      <EuiThemeProvider>
+        <LensWrapper {...defaultProps} lensProps={lensProps as any} />
+      </EuiThemeProvider>
+    );
+
+    expect(mockEmbeddableComponent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: lensProps.id,
+        viewMode: lensProps.viewMode,
+        timeRange: lensProps.timeRange,
+        attributes: lensProps.attributes,
+        esqlVariables: lensProps.esqlVariables,
+        noPadding: lensProps.noPadding,
+        searchSessionId: lensProps.searchSessionId,
+        executionContext: lensProps.executionContext,
+        lastReloadRequestTime: lensProps.lastReloadRequestTime,
+        userMessages: lensProps.userMessages,
+        description: lensProps.description,
+        title: lensProps.attributes.title,
+      }),
+      expect.anything()
+    );
+  });
+
   describe('handleExploreInDiscoverTab', () => {
     function captureExploreHandler(): { handler: (() => void) | undefined } {
       const captured: { handler: (() => void) | undefined } = { handler: undefined };

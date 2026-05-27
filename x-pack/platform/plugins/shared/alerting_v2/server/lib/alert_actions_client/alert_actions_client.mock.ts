@@ -26,7 +26,12 @@ export function createAlertActionsClient(): {
 
   userProfileService.getCurrent.mockResolvedValue(createUserProfile('test-uid'));
 
-  const alertActionsClient = new AlertActionsClient(queryService, storageService, userService);
+  const alertActionsClient = new AlertActionsClient(
+    queryService,
+    storageService,
+    userService,
+    'default'
+  );
 
   return { alertActionsClient, queryServiceEsClient, storageServiceEsClient, userProfileService };
 }

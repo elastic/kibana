@@ -1,17 +1,157 @@
 {
-  "sha1": "48f9495d3b98224373f26217265a1591d5fe5bd7",
+  "sha1": "1f08a81c51e953fa03d4482d91752bda0911ee9e",
   "tests": [
     {
       "id": "693cb822f00b147-c7297dddd0937a8",
       "title": "Tags management — accessibility tags management page a11y",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_a11y.spec.ts",
-        "line": 22,
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "41c1382f147b3f8-fdf162098c19a6e",
+      "title": "Tags management bulk actions deletes multiple tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_actions.spec.ts",
+        "line": 23,
+        "column": 7
+      }
+    },
+    {
+      "id": "41c1382f147b3f8-1b8aa9b0a15c3b1",
+      "title": "Tags management bulk actions cancels deleting multiple tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_actions.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "41c1382f147b3f8-688ad3dbba01197",
+      "title": "Tags management bulk actions clears current selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_actions.spec.ts",
+        "line": 54,
+        "column": 7
+      }
+    },
+    {
+      "id": "bec79a6211f4b31-81d977e259dfb94",
+      "title": "Tags management bulk assign bulk assigns tags to objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_assign.spec.ts",
+        "line": 23,
+        "column": 7
+      }
+    },
+    {
+      "id": "bec79a6211f4b31-65e8ca7e96489a8",
+      "title": "Tags management bulk assign bulk unassigns tags from objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_assign.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "bec79a6211f4b31-02a560b9585fb8d",
+      "title": "Tags management bulk assign cancels bulk assign without changing tag connections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_bulk_assign.spec.ts",
+        "line": 56,
+        "column": 7
+      }
+    },
+    {
+      "id": "0a2d86604b0fa20-c136fa3db3a54cb",
+      "title": "Tags management create creates a valid tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "0a2d86604b0fa20-a002c74d8ee8d0a",
+      "title": "Tags management create shows errors when validation fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "0a2d86604b0fa20-38b2849f6dfa352",
+      "title": "Tags management create creates a tag after fixing validation errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "0a2d86604b0fa20-5025b0b9ba7523f",
+      "title": "Tags management create closes the modal without creating a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_create.spec.ts",
+        "line": 88,
         "column": 7
       }
     },
@@ -110,6 +250,188 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
         "line": 132,
+        "column": 7
+      }
+    },
+    {
+      "id": "d2407247b78ab3c-761d33ee630fcfe",
+      "title": "Tags - discover integration open search allows manually typing tag filter query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
+        "line": 58,
+        "column": 7
+      }
+    },
+    {
+      "id": "d2407247b78ab3c-c6d3a4c924ee663",
+      "title": "Tags - discover integration open search allows filtering by selecting a tag in the filter menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
+        "line": 68,
+        "column": 7
+      }
+    },
+    {
+      "id": "d2407247b78ab3c-0cfe296f0e0ce27",
+      "title": "Tags - discover integration open search allows filtering by selecting multiple tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
+        "line": 79,
+        "column": 7
+      }
+    },
+    {
+      "id": "d2407247b78ab3c-e84cb15e5827420",
+      "title": "Tags - discover integration creating allows selecting tags for a new saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
+        "line": 93,
+        "column": 7
+      }
+    },
+    {
+      "id": "d2407247b78ab3c-7cedeb6b60eead1",
+      "title": "Tags - discover integration creating allows creating a tag from the tag selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
+        "line": 115,
+        "column": 7
+      }
+    },
+    {
+      "id": "d2407247b78ab3c-03d76a95b52d8f5",
+      "title": "Tags - discover integration editing allows selecting tags for an existing saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
+        "line": 141,
+        "column": 7
+      }
+    },
+    {
+      "id": "518fa3c42642f89-cb8d0b258308156",
+      "title": "Tags management edit displays tag attributes in the edit form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
+      "id": "518fa3c42642f89-287f7f9b9591d9c",
+      "title": "Tags management edit edits a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "518fa3c42642f89-e0085d97cff720a",
+      "title": "Tags management edit shows errors when edit validation fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
+        "line": 60,
+        "column": 7
+      }
+    },
+    {
+      "id": "518fa3c42642f89-0447e2d8a5d9d64",
+      "title": "Tags management edit edits a tag after fixing validation errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
+        "line": 76,
+        "column": 7
+      }
+    },
+    {
+      "id": "518fa3c42642f89-d01b78f6a506eb8",
+      "title": "Tags management edit closes modal without updating tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
+        "line": 101,
+        "column": 7
+      }
+    },
+    {
+      "id": "518fa3c42642f89-e8b6baa288f87d7",
+      "title": "Tags management edit disables save button when no property changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
+        "line": 122,
+        "column": 7
+      }
+    },
+    {
+      "id": "518fa3c42642f89-c6ea9f2467ff058",
+      "title": "Tags management edit enables save button when a property changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_edit.spec.ts",
+        "line": 136,
         "column": 7
       }
     },
@@ -439,6 +761,20 @@
       }
     },
     {
+      "id": "43e8e816e28ac84-a7f9f2a13be80d0",
+      "title": "Tags management listing searches by term",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_listing.spec.ts",
+        "line": 27,
+        "column": 7
+      }
+    },
+    {
       "id": "56de84615d65af8-5e3fc25a77b4a3d",
       "title": "Maps integration allows to manually type tag filter query",
       "expectedStatus": "passed",
@@ -519,6 +855,76 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
         "line": 105,
+        "column": 7
+      }
+    },
+    {
+      "id": "493e84ac313f8f1-39a5aee977a83e1",
+      "title": "Tags - saved objects management integration accesses saved objects management from tags with pre-applied filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
+        "line": 59,
+        "column": 7
+      }
+    },
+    {
+      "id": "493e84ac313f8f1-6f2979e3e3dc47c",
+      "title": "Tags - saved objects management integration allows manually typing tag filter query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
+        "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "493e84ac313f8f1-d489363d45a978f",
+      "title": "Tags - saved objects management integration allows filtering by selecting a single tag in the filter menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
+        "line": 90,
+        "column": 7
+      }
+    },
+    {
+      "id": "493e84ac313f8f1-497a22abd27b13c",
+      "title": "Tags - saved objects management integration allows filtering by selecting multiple tags in the filter menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
+        "line": 98,
+        "column": 7
+      }
+    },
+    {
+      "id": "493e84ac313f8f1-3ba4a4cdaa00b59",
+      "title": "Tags - saved objects management integration displays all tags for an object row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
+        "line": 107,
         "column": 7
       }
     },

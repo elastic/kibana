@@ -6,7 +6,12 @@
  */
 
 import { of, Subject } from 'rxjs';
-import { loggingSystemMock, coreMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import {
+  loggingSystemMock,
+  coreMock,
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import type { CoreSetup, CoreStart } from '@kbn/core/server';
 import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -21,7 +26,11 @@ import {
   RESCHEDULE_DELAY_MS,
 } from './constants';
 import { emptyState } from './uiam_api_key_provisioning_task_state';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  API_KEY_PENDING_INVALIDATION_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+  UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
+} from '../saved_objects';
 import {
   UiamApiKeyProvisioningEntityType,
   UiamApiKeyProvisioningStatus,
@@ -44,11 +53,26 @@ import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/b
 function createMockCore(uiamConvert: jest.Mock): {
   coreSetup: CoreSetup;
   coreStart: CoreStart;
+  unsafeSavedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   savedObjectsClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
   encryptedSavedObjectsClient: ReturnType<typeof encryptedSavedObjectsMock.createClient>;
 } {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
+  // Two distinct mocks so test assertions reflect the production wiring:
+  //   - `unsafeSavedObjectsClient` is what `getUnsafeInternalClient` returns
+  //     in production (a `SavedObjectsClient` with the ESO encryption
+  //     extension applied). The provisioning task uses it for rule writes
+  //     (`bulkUpdate`) and for `api_key_pending_invalidation` writes
+  //     dispatched through `bulkMarkApiKeysForInvalidation`.
+  //   - `savedObjectsClient` is what `createInternalRepository` returns (a
+  //     plain `ISavedObjectsRepository` with no extensions). The task uses
+  //     it only for `uiam_api_keys_provisioning_status` writes (`bulkCreate`),
+  //     which has no encrypted attributes.
+  // Conflating the two would hide the bug fixed by routing pending-
+  // invalidation writes through the encryption-aware client (see
+  // `create_provisioning_run_context.ts`).
+  const unsafeSavedObjectsClient = savedObjectsClientMock.create();
   const savedObjectsClient = savedObjectsRepositoryMock.create();
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 
@@ -59,7 +83,9 @@ function createMockCore(uiamConvert: jest.Mock): {
   };
   coreSetup.getStartServices = jest.fn().mockResolvedValue([coreStart, plugins]);
 
-  coreStart.savedObjects.getUnsafeInternalClient = jest.fn().mockReturnValue(savedObjectsClient);
+  coreStart.savedObjects.getUnsafeInternalClient = jest
+    .fn()
+    .mockReturnValue(unsafeSavedObjectsClient);
   coreStart.savedObjects.createInternalRepository = jest.fn().mockReturnValue(savedObjectsClient);
 
   const uiam = coreStart.security?.authc?.apiKeys?.uiam as
@@ -70,7 +96,13 @@ function createMockCore(uiamConvert: jest.Mock): {
     uiam.convert = uiamConvert;
   }
 
-  return { coreSetup, coreStart, savedObjectsClient, encryptedSavedObjectsClient };
+  return {
+    coreSetup,
+    coreStart,
+    unsafeSavedObjectsClient,
+    savedObjectsClient,
+    encryptedSavedObjectsClient,
+  };
 }
 
 /** Set up the ESO PIT finder to yield the given saved_objects (rules) when find() is iterated */
@@ -392,8 +424,12 @@ describe('UiamApiKeyProvisioningTask', () => {
   describe('runTask', () => {
     it('increments state.runs and returns no runAt when no rules to process', async () => {
       const uiamConvert = jest.fn().mockResolvedValueOnce({ results: [] });
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
-        createMockCore(uiamConvert);
+      const {
+        coreSetup,
+        savedObjectsClient,
+        unsafeSavedObjectsClient,
+        encryptedSavedObjectsClient,
+      } = createMockCore(uiamConvert);
 
       mockPitFinderRules(encryptedSavedObjectsClient, []);
 
@@ -413,8 +449,52 @@ describe('UiamApiKeyProvisioningTask', () => {
 
       expect(result).toEqual({ state: { runs: 6 } });
       expect(uiamConvert).not.toHaveBeenCalled();
-      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(unsafeSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
       expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    // Regression: the orphan-invalidation path used to receive a repository
+    // built via `createInternalRepository`, which has no extensions and stores
+    // `apiKeyId` / `uiamApiKey` as plaintext. The alerting invalidation task
+    // then failed to decrypt them with "Invalid initialization vector".
+    // The client used to write `api_key_pending_invalidation` SOs must come
+    // from `getUnsafeInternalClient` so the ESO encryption extension is wired
+    // up. The provisioning-status SO has no encrypted attributes and is fine
+    // on a plain internal repository.
+    it('builds the encryption-aware SO client with rule and api_key_pending_invalidation as hidden types', async () => {
+      const uiamConvert = jest.fn().mockResolvedValueOnce({ results: [] });
+      const { coreSetup, coreStart, encryptedSavedObjectsClient } = createMockCore(uiamConvert);
+
+      mockPitFinderRules(encryptedSavedObjectsClient, []);
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
+      const taskManager = { registerTaskDefinitions: jest.fn() };
+      task.register({
+        core: coreSetup as CoreSetup<AlertingPluginsStart>,
+        taskManager: taskManager as never,
+      });
+
+      const def =
+        taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+      const runner = def.createTaskRunner({ taskInstance: createTaskInstance() });
+      await runner.run();
+
+      expect(coreStart.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
+        includedHiddenTypes: expect.arrayContaining([
+          RULE_SAVED_OBJECT_TYPE,
+          API_KEY_PENDING_INVALIDATION_TYPE,
+        ]),
+      });
+      expect(coreStart.savedObjects.createInternalRepository).toHaveBeenCalledWith([
+        UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
+      ]);
+      // The plain internal repository must never be used for the encrypted
+      // `api_key_pending_invalidation` type.
+      const createInternalRepository = coreStart.savedObjects.createInternalRepository as jest.Mock;
+      const allInternalHiddenTypes = createInternalRepository.mock.calls.flatMap(
+        ([includedHiddenTypes]) => includedHiddenTypes ?? []
+      );
+      expect(allInternalHiddenTypes).not.toContain(API_KEY_PENDING_INVALIDATION_TYPE);
     });
 
     it('returns runAt RESCHEDULE_DELAY_MS from now when response.total indicates more batches to process', async () => {
@@ -432,11 +512,11 @@ describe('UiamApiKeyProvisioningTask', () => {
         ),
       } as ConvertUiamAPIKeysResponse);
 
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+      const { coreSetup, unsafeSavedObjectsClient, encryptedSavedObjectsClient } =
         createMockCore(uiamConvert);
       mockPitFinderRules(encryptedSavedObjectsClient, rules, batchSize + 1);
 
-      savedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsafeSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: rules.map((r) => ({
           id: r.id,
           type: RULE_SAVED_OBJECT_TYPE,
@@ -469,7 +549,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(runAt.getTime()).toBeGreaterThanOrEqual(beforeRun + RESCHEDULE_DELAY_MS - 1000);
       expect(runAt.getTime()).toBeLessThanOrEqual(afterRun + RESCHEDULE_DELAY_MS + 1000);
       expect(uiamConvert).toHaveBeenCalledTimes(1);
-      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(unsafeSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(logger.info).toHaveBeenCalledWith(
         `Wrote provisioning status: ${batchSize} total (0 skipped, 0 failed conversions, ${batchSize} completed, 0 failed updates).`,
         { tags: TAGS }
@@ -485,8 +565,12 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       } as ConvertUiamAPIKeysResponse);
 
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
-        createMockCore(uiamConvert);
+      const {
+        coreSetup,
+        savedObjectsClient,
+        unsafeSavedObjectsClient,
+        encryptedSavedObjectsClient,
+      } = createMockCore(uiamConvert);
 
       const rules = [
         createRuleSavedObject({
@@ -507,7 +591,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       ];
       mockPitFinderRules(encryptedSavedObjectsClient, rules);
 
-      savedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsafeSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: 'rule-1',
@@ -554,7 +638,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(uiamConvert).toHaveBeenCalledTimes(1);
       expect(uiamConvert).toHaveBeenCalledWith(['es-api-key-1', 'es-api-key-2', 'es-api-key-3']);
       // uiamApiKey is stored as base64(id:key) per task implementation
-      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+      expect(unsafeSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
             type: RULE_SAVED_OBJECT_TYPE,
@@ -632,8 +716,12 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       } as ConvertUiamAPIKeysResponse);
 
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
-        createMockCore(uiamConvert);
+      const {
+        coreSetup,
+        savedObjectsClient,
+        unsafeSavedObjectsClient,
+        encryptedSavedObjectsClient,
+      } = createMockCore(uiamConvert);
 
       mockPitFinderRules(encryptedSavedObjectsClient, [
         createRuleSavedObject({
@@ -653,7 +741,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      savedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsafeSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: 'rule-2',
@@ -683,7 +771,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(result).toEqual({ state: { runs: 1 } });
       expect(uiamConvert).toHaveBeenCalledWith(['es-api-key-2', 'es-api-key-3', 'es-api-key-4']);
       // uiamApiKey is stored as base64(id:key) per task implementation
-      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+      expect(unsafeSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
             type: RULE_SAVED_OBJECT_TYPE,
@@ -745,7 +833,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       } as ConvertUiamAPIKeysResponse);
 
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+      const { coreSetup, unsafeSavedObjectsClient, encryptedSavedObjectsClient } =
         createMockCore(uiamConvert);
 
       mockPitFinderRules(encryptedSavedObjectsClient, [
@@ -770,7 +858,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      savedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsafeSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: 'rule-default',
@@ -813,7 +901,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       });
       await runner.run();
 
-      const bulkUpdateCall = savedObjectsClient.bulkUpdate.mock.calls[0][0];
+      const bulkUpdateCall = unsafeSavedObjectsClient.bulkUpdate.mock.calls[0][0];
       expect(bulkUpdateCall).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ id: 'rule-default', namespace: 'default' }),
@@ -829,8 +917,12 @@ describe('UiamApiKeyProvisioningTask', () => {
 
     it('skips rules with no apiKey and writes SKIPPED status', async () => {
       const uiamConvert = jest.fn();
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
-        createMockCore(uiamConvert);
+      const {
+        coreSetup,
+        savedObjectsClient,
+        unsafeSavedObjectsClient,
+        encryptedSavedObjectsClient,
+      } = createMockCore(uiamConvert);
 
       mockPitFinderRules(encryptedSavedObjectsClient, [
         createRuleSavedObject({
@@ -855,7 +947,7 @@ describe('UiamApiKeyProvisioningTask', () => {
 
       expect(result).toEqual({ state: { runs: 1 } });
       expect(uiamConvert).not.toHaveBeenCalled();
-      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(unsafeSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
@@ -922,8 +1014,12 @@ describe('UiamApiKeyProvisioningTask', () => {
 
     it('skips rules that already have uiamApiKey and writes SKIPPED status', async () => {
       const uiamConvert = jest.fn();
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
-        createMockCore(uiamConvert);
+      const {
+        coreSetup,
+        savedObjectsClient,
+        unsafeSavedObjectsClient,
+        encryptedSavedObjectsClient,
+      } = createMockCore(uiamConvert);
 
       mockPitFinderRules(encryptedSavedObjectsClient, [
         createRuleSavedObject({
@@ -952,7 +1048,7 @@ describe('UiamApiKeyProvisioningTask', () => {
 
       expect(result).toEqual({ state: { runs: 1 } });
       expect(uiamConvert).not.toHaveBeenCalled();
-      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(unsafeSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
@@ -976,7 +1072,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         results: [createConvertSuccessResult({ key: 'uiam-1' })],
       });
 
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+      const { coreSetup, unsafeSavedObjectsClient, encryptedSavedObjectsClient } =
         createMockCore(uiamConvert);
 
       mockPitFinderRules(encryptedSavedObjectsClient, [
@@ -987,7 +1083,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      savedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsafeSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: 'rule-1',
@@ -1015,7 +1111,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       const result = await runner.run();
 
       expect(result).toEqual({ state: { runs: 1 } });
-      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(unsafeSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(logger.info).toHaveBeenCalledWith(
         'Wrote provisioning status: 1 total (0 skipped, 0 failed conversions, 1 completed, 0 failed updates).',
         { tags: TAGS }
@@ -1126,7 +1222,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       } as ConvertUiamAPIKeysResponse);
 
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+      const { coreSetup, unsafeSavedObjectsClient, encryptedSavedObjectsClient } =
         createMockCore(uiamConvert);
 
       mockPitFinderRules(encryptedSavedObjectsClient, [
@@ -1164,13 +1260,17 @@ describe('UiamApiKeyProvisioningTask', () => {
         'Error converting API keys: Number of converted API keys does not match the number of API keys to convert',
         expect.any(Object)
       );
-      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(unsafeSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
     });
 
     it('throws when createPointInTimeFinderDecryptedAsInternalUser throws', async () => {
       const uiamConvert = jest.fn();
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
-        createMockCore(uiamConvert);
+      const {
+        coreSetup,
+        savedObjectsClient,
+        unsafeSavedObjectsClient,
+        encryptedSavedObjectsClient,
+      } = createMockCore(uiamConvert);
 
       (
         encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock
@@ -1195,18 +1295,22 @@ describe('UiamApiKeyProvisioningTask', () => {
         expect.any(Object)
       );
       expect(uiamConvert).not.toHaveBeenCalled();
-      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(unsafeSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
       expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
     });
 
-    it('rethrows without invalidating minted UIAM keys when savedObjectsClient.bulkUpdate throws', async () => {
+    it('rethrows without invalidating minted UIAM keys when unsafeSavedObjectsClient.bulkUpdate throws', async () => {
       (bulkMarkApiKeysForInvalidation as jest.Mock).mockClear();
       const uiamConvert = jest.fn().mockResolvedValue({
         results: [createConvertSuccessResult({ key: 'uiam-key-1' })],
       });
 
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
-        createMockCore(uiamConvert);
+      const {
+        coreSetup,
+        savedObjectsClient,
+        unsafeSavedObjectsClient,
+        encryptedSavedObjectsClient,
+      } = createMockCore(uiamConvert);
 
       mockPitFinderRules(encryptedSavedObjectsClient, [
         createRuleSavedObject({
@@ -1216,7 +1320,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('bulkUpdate failed'));
+      unsafeSavedObjectsClient.bulkUpdate.mockRejectedValue(new Error('bulkUpdate failed'));
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
       const taskManager = { registerTaskDefinitions: jest.fn() };
@@ -1253,7 +1357,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       } as ConvertUiamAPIKeysResponse);
 
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+      const { coreSetup, unsafeSavedObjectsClient, encryptedSavedObjectsClient } =
         createMockCore(uiamConvert);
 
       mockPitFinderRules(encryptedSavedObjectsClient, [
@@ -1269,7 +1373,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      savedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsafeSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: 'r1',
@@ -1309,7 +1413,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
         { apiKeys: [orphanedKeyForR2] },
         logger,
-        savedObjectsClient
+        unsafeSavedObjectsClient
       );
     });
 
@@ -1321,8 +1425,12 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       });
 
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
-        createMockCore(uiamConvert);
+      const {
+        coreSetup,
+        savedObjectsClient,
+        unsafeSavedObjectsClient,
+        encryptedSavedObjectsClient,
+      } = createMockCore(uiamConvert);
 
       mockPitFinderRules(encryptedSavedObjectsClient, [
         createRuleSavedObject({
@@ -1337,7 +1445,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      savedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsafeSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: 'r1',
@@ -1367,7 +1475,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(result).toEqual({ state: { runs: 1 } });
       expect(uiamConvert).toHaveBeenCalledWith(['es-a', 'es-b']);
       // uiamApiKey is stored as base64(id:key) per task implementation
-      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+      expect(unsafeSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
             id: 'r1',
@@ -1401,8 +1509,12 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       } as ConvertUiamAPIKeysResponse);
 
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
-        createMockCore(uiamConvert);
+      const {
+        coreSetup,
+        savedObjectsClient,
+        unsafeSavedObjectsClient,
+        encryptedSavedObjectsClient,
+      } = createMockCore(uiamConvert);
 
       mockPitFinderRules(encryptedSavedObjectsClient, [
         createRuleSavedObject({
@@ -1417,7 +1529,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      savedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsafeSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: 'r1',
@@ -1490,8 +1602,12 @@ describe('UiamApiKeyProvisioningTask', () => {
         results: [createConvertSuccessResult({ key: 'uiam-1' })],
       } as ConvertUiamAPIKeysResponse);
 
-      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
-        createMockCore(uiamConvert);
+      const {
+        coreSetup,
+        savedObjectsClient,
+        unsafeSavedObjectsClient,
+        encryptedSavedObjectsClient,
+      } = createMockCore(uiamConvert);
 
       mockPitFinderRules(encryptedSavedObjectsClient, [
         createRuleSavedObject({
@@ -1501,7 +1617,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         }),
       ]);
 
-      savedObjectsClient.bulkUpdate.mockResolvedValue({
+      unsafeSavedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: 'r1',
@@ -1550,7 +1666,7 @@ describe('UiamApiKeyProvisioningTask', () => {
           ],
         } as ConvertUiamAPIKeysResponse);
 
-        const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        const { coreSetup, unsafeSavedObjectsClient, encryptedSavedObjectsClient } =
           createMockCore(uiamConvert);
 
         const rules = [
@@ -1571,7 +1687,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         ];
         mockPitFinderRules(encryptedSavedObjectsClient, rules);
 
-        savedObjectsClient.bulkUpdate.mockResolvedValue({
+        unsafeSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
             {
               id: 'rule-1',
