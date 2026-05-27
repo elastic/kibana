@@ -13,10 +13,20 @@ import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 
 export const markdownByValueStateSchema = schema.object({
-  content: schema.string(),
-  settings: schema.object({
-    open_links_in_new_tab: schema.boolean({ defaultValue: true }),
+  content: schema.string({
+    meta: { description: 'The markdown text content rendered by the panel.' },
   }),
+  settings: schema.object(
+    {
+      open_links_in_new_tab: schema.boolean({
+        defaultValue: true,
+        meta: { description: 'Open links in a new browser tab.' },
+      }),
+    },
+    {
+      meta: { description: 'Display settings for the markdown panel.' },
+    }
+  ),
 });
 
 const markdownByReferenceStateSchema = schema.object({

@@ -20,6 +20,8 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
     path: MARKDOWN_API_PATH,
     summary: 'Create a markdown library item',
     ...commonRouteConfig,
+    description:
+      'Creates a new markdown library item and returns its ID, full state, and metadata.',
   });
 
   createRoute.addVersion(

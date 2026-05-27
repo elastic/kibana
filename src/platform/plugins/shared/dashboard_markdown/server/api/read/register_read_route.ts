@@ -20,6 +20,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
     path: `${MARKDOWN_API_PATH}/{id}`,
     summary: `Get a markdown library item by ID`,
     ...commonRouteConfig,
+    description: 'Returns the complete state of a markdown library item by ID.',
   });
 
   readRoute.addVersion(
@@ -30,7 +31,8 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
           params: schema.object({
             id: schema.string({
               meta: {
-                description: 'A unique identifier for the markdown library item.',
+                description:
+                  'The markdown library item ID, as returned by the create or search endpoints.',
               },
             }),
           }),
