@@ -1,6 +1,6 @@
 overlay: 1.0.0
 info:
-  title: Strip requestBody.examples from Dashboards and Visualizations operations
+  title: Strip requestBody.examples from Dashboards, Visualizations, and Markdowns operations
   version: 0.0.1
   # ⚠️  TEMPORARY — applied only in the external pipeline (make api-docs-overlay-external)
   # to avoid rendering issues with the current external renderer, which relies on
@@ -15,4 +15,8 @@ actions:
   - target: "$.paths['/api/visualizations']['post'].requestBody.content['application/json'].examples"
     remove: true
   - target: "$.paths['/api/visualizations/{id}']['put'].requestBody.content['application/json'].examples"
+    remove: true
+  - target: "$.paths['/api/markdowns']['post'].requestBody.content['application/json'].examples"
+    remove: true
+  - target: "$.paths['/api/markdowns/{id}']['put'].requestBody.content['application/json'].examples"
     remove: true
