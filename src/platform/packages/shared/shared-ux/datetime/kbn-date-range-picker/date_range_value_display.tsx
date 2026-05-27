@@ -33,18 +33,19 @@ export function DateRangeValueDisplay({
 }: DateRangeValueDisplayProps) {
   const styles = useEuiMemoizedStyles(dateRangeValueDisplayStyles);
   const parts = parseDisplayParts(displayText);
-  const chunks: ReactNode[] = [];
-  let cursor = 0;
 
-  parts.forEach((part, index) => {
-    if (part.start > cursor) {
-      chunks.push(
-        <Fragment key={`text-${index}`}>{displayText.slice(cursor, part.start)}</Fragment>
+  const chunks = parts.flatMap((part, index) => {
+    const gapStart = index === 0 ? 0 : parts[index - 1].end;
+    const nodes: ReactNode[] = [];
+
+    if (part.start > gapStart) {
+      nodes.push(
+        <Fragment key={`text-${index}`}>{displayText.slice(gapStart, part.start)}</Fragment>
       );
     }
 
-    if (part.navigable) {
-      chunks.push(
+    nodes.push(
+      part.navigable ? (
         <span
           key={`part-${index}`}
           css={!disabled && styles.part}
@@ -53,17 +54,13 @@ export function DateRangeValueDisplay({
         >
           {part.text}
         </span>
-      );
-    } else {
-      chunks.push(<span key={`part-${index}`}>{part.text}</span>);
-    }
+      ) : (
+        <span key={`part-${index}`}>{part.text}</span>
+      )
+    );
 
-    cursor = part.end;
+    return nodes;
   });
-
-  if (cursor < displayText.length) {
-    chunks.push(<Fragment key="text-rest">{displayText.slice(cursor)}</Fragment>);
-  }
 
   return (
     <span
@@ -72,6 +69,7 @@ export function DateRangeValueDisplay({
       data-test-subj="dateRangePickerValueDisplay"
     >
       {chunks}
+      {displayText.slice(parts.at(-1)?.end ?? 0)}
     </span>
   );
 }
