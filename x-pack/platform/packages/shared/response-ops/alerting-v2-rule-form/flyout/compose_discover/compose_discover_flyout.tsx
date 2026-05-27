@@ -419,6 +419,15 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
     [runYamlParse]
   );
 
+  const handleBlurSync = useCallback(
+    (values: FormValues) => {
+      cancelYamlParse();
+      methods.reset(formValuesFromYamlToCompose(values));
+      syncSandbox();
+    },
+    [cancelYamlParse, methods, syncSandbox]
+  );
+
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
       if (enabled) {
@@ -480,7 +489,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
       methods.reset(formValuesFromYamlToCompose(result.values));
-      // No syncForm() here: draft is temporarily stale after methods.reset(), but
+      // No syncSandbox() here: sandbox is temporarily stale after methods.reset(), but
       // we're about to submit. On success the flyout closes; on failure the user is still
       // in YAML mode and handleToggleYamlMode(false) will resync draft when they switch back.
     }
@@ -576,6 +585,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                   services={baseServices}
                   yamlText={yamlText}
                   setYamlText={handleSetYamlText}
+                  onBlurSync={handleBlurSync}
                   isSubmitting={isSaving}
                 />
               </React.Suspense>
