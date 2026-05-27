@@ -8,32 +8,27 @@
  */
 
 import React from 'react';
-import { ErrorCallout, type ErrorCalloutProps } from '@kbn/discover-utils';
+import { ErrorCallout } from '@kbn/discover-utils';
 import { normalizeChartSectionSearchError } from '../../common/errors/normalize_chart_section_search_error';
 import { useExternalServices } from '../../context/external_services';
 
 export interface ChartSectionSearchErrorProps {
   error: unknown;
   title: string;
-  isEsqlMode?: ErrorCalloutProps['isEsqlMode'];
 }
 
 /**
  * Chart-section fetch failures (METRICS_INFO, Traces, etc.) using Discover's ErrorCallout.
  * Host injects notifications and doc links via `ExternalServicesProvider`.
  */
-export const ChartSectionSearchError = ({
-  error,
-  title,
-  isEsqlMode,
-}: ChartSectionSearchErrorProps) => {
+export const ChartSectionSearchError = ({ error, title }: ChartSectionSearchErrorProps) => {
   const services = useExternalServices();
 
   return (
     <ErrorCallout
       title={title}
       error={normalizeChartSectionSearchError(error)}
-      isEsqlMode={isEsqlMode}
+      isEsqlMode
       showErrorDialog={services?.notifications?.showErrorDialog}
       esqlReferenceHref={services?.docLinks?.links.query.queryESQL}
     />

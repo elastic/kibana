@@ -147,7 +147,6 @@ export const MetricsExperienceGrid = ({
         title={i18n.translate('metricsExperience.chartSectionError.title', {
           defaultMessage: 'Unable to retrieve search results',
         })}
-        isEsqlMode
       />
     );
   }

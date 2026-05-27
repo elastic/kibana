@@ -63,11 +63,7 @@ describe('ChartSectionSearchError', () => {
 
   it('renders ES|QL reference link when externalServices provides docLinks', () => {
     renderChartSectionSearchError(
-      <ChartSectionSearchError
-        error={new Error('x')}
-        title="Unable to retrieve search results"
-        isEsqlMode
-      />,
+      <ChartSectionSearchError error={new Error('x')} title="Unable to retrieve search results" />,
       {
         docLinks: {
           links: { query: { queryESQL: 'https://www.elastic.co/docs/reference/esql' } },
