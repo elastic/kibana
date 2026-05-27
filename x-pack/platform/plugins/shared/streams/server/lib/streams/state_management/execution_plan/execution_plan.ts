@@ -287,7 +287,7 @@ export class ExecutionPlan {
     }
     const kiClient = await getKnowledgeIndicatorClient();
     return Promise.all(
-      actions.map((action) => kiClient.deleteAllQueries(action.request.definition))
+      actions.map((action) => kiClient.deleteAllQueries(action.request.definition.name))
     );
   }
 
@@ -323,10 +323,15 @@ export class ExecutionPlan {
       );
     }
     const kiClient = await getKnowledgeIndicatorClient();
-    // Tombstones all KI (features + queries) for the stream. The unified data
-    // stream is shared between the two payload types, so a single call covers
-    // both unlinkFeatures and deleteQueries semantics. Idempotent on repeat.
-    return Promise.all(actions.map((action) => kiClient.deleteIndicators(action.request.name)));
+    // Uninstall backing alerting rules and tombstone all KIs for the stream.
+    // deleteAllQueries handles rule uninstall + query tombstoning; deleteIndicators
+    // then tombstones the remaining features. Both are idempotent on repeat.
+    return Promise.all(
+      actions.map(async (action) => {
+        await kiClient.deleteAllQueries(action.request.name);
+        await kiClient.deleteIndicators(action.request.name);
+      })
+    );
   }
 
   private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {

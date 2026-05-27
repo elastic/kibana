@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ComposerSortShorthand } from '@elastic/esql';
 import type { Feature, KnowledgeIndicator, QueryLink, StreamQuery } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema/src/models/streams';
 import {
@@ -80,6 +81,7 @@ export class KnowledgeIndicatorClient {
       minConfidence?: number;
       limit?: number;
       includeExcluded?: boolean;
+      sort?: ComposerSortShorthand[];
     }
   ): Promise<{ hits: Feature[]; total: number }> {
     return this.reader.getFeatures(streams, options);
@@ -171,8 +173,8 @@ export class KnowledgeIndicatorClient {
     return this.orchestrator.deleteQuery(definition, queryId);
   }
 
-  deleteAllQueries(definition: Streams.all.Definition): Promise<void> {
-    return this.orchestrator.deleteAllQueries(definition);
+  deleteAllQueries(streamName: string): Promise<void> {
+    return this.orchestrator.deleteAllQueries(streamName);
   }
 
   promoteQueries(

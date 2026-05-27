@@ -195,16 +195,15 @@ export class QueryRuleOrchestrator {
     await this.writer.bulk(stream, [{ delete: { type: KI_TYPE_QUERY, id: queryId } }]);
   }
 
-  async deleteAllQueries(definition: Streams.all.Definition): Promise<void> {
-    const stream = definition.name;
+  async deleteAllQueries(streamName: string): Promise<void> {
     if (!this.isSignificantEventsEnabled) {
       this.logger.debug(
-        `Skipping deleteAllQueries for stream "${stream}" because significant events feature is disabled.`
+        `Skipping deleteAllQueries for stream "${streamName}" because significant events feature is disabled.`
       );
       return;
     }
 
-    const { [stream]: currentLinks } = await this.reader.getStreamToQueryLinksMap([stream]);
+    const { [streamName]: currentLinks } = await this.reader.getStreamToQueryLinksMap([streamName]);
     const ruleBacked = currentLinks.filter((link) => link.rule_backed);
     if (ruleBacked.length > 0) {
       await uninstallQueries(this.rulesClient, this.logger, ruleBacked);
@@ -213,7 +212,7 @@ export class QueryRuleOrchestrator {
       return;
     }
     await this.writer.bulk(
-      stream,
+      streamName,
       currentLinks.map((link) => ({
         delete: { type: KI_TYPE_QUERY, id: link.query.id },
       }))

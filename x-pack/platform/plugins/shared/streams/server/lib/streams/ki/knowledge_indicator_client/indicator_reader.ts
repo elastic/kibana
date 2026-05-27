@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
+import { esql, type ComposerSortShorthand } from '@elastic/esql';
 import type { Feature, QueryLink } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { isStoredFeatureKnowledgeIndicator, isStoredQueryKnowledgeIndicator } from '../data_stream';
@@ -49,6 +49,7 @@ export class IndicatorReader {
       limit?: number;
       includeExcluded?: boolean;
       includeExpired?: boolean;
+      sort?: ComposerSortShorthand[];
     } = {}
   ): Promise<{ hits: Feature[]; total: number }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
@@ -79,7 +80,11 @@ export class IndicatorReader {
       minConfidenceFilter
     );
 
-    const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
+    const docs = await this.revisionReader.fetchLatestRevisions(
+      where,
+      postGroupingWhere,
+      options.sort ?? [['feature.confidence', 'DESC']]
+    );
     const features = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
     const limited = options.limit !== undefined ? features.slice(0, options.limit) : features;
     return { hits: limited, total: features.length };
