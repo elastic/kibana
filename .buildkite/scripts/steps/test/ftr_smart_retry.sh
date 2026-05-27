@@ -39,18 +39,14 @@ apply_smart_retry() {
   [[ "$prevFailedTests" ]] || return
 
   local junitDir="target/junit/$JOB"
-  local tmpPrevFile
-  tmpPrevFile=$(mktemp)
-  printf '%s' "$prevFailedTests" > "$tmpPrevFile"
 
   local intersectionCode
   set +e
-  node scripts/ftr_check_retry_result check-intersection \
+  printf '%s' "$prevFailedTests" | node scripts/ftr_check_retry_result check-intersection \
     --junit-dir "$junitDir" \
-    --prev-failures-file "$tmpPrevFile"
+    --prev-failures-stdin
   intersectionCode=$?
   set -e
-  rm -f "$tmpPrevFile"
 
   if [[ "$intersectionCode" == "0" ]]; then
     echo "--- [smart-retry] All previously-failing tests recovered on retry — marking step green"

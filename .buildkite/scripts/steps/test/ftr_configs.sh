@@ -99,9 +99,7 @@ while read -r config; do
   """
   fi
 
-  # Snapshot existing JUnit XML files so we can identify which ones this config produces
-  tmp_xml_before=$(mktemp)
-  find "target/junit/${JOB}" -maxdepth 1 -name "*.xml" 2>/dev/null | sort > "$tmp_xml_before" || true
+  node scripts/ftr_check_retry_result snapshot "target/junit/$JOB" 2>/dev/null || true
 
   # prevent non-zero exit code from breaking the loop
   set +e;
@@ -144,7 +142,6 @@ while read -r config; do
 
   config_link="[\`${config}\`](https://github.com/elastic/kibana/blob/${BUILDKITE_COMMIT:-main}/${config})"
   if [ $lastCode -eq 0 ]; then
-    rm -f "$tmp_xml_before"
     buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
     if [[ -n "$prevRunFailedConfigs" ]] && grep -qxF "$config" <<< "$prevRunFailedConfigs"; then
       annotation_rows+=("| ${config_link} | ${duration} | recovered |")
@@ -166,8 +163,7 @@ while read -r config; do
       annotation_rows+=("| ${config_link} | ${duration} | **failed** |")
     fi
 
-    config_failures=$(collect_config_failures "$tmp_xml_before")
-    rm -f "$tmp_xml_before"
+    config_failures=$(node scripts/ftr_check_retry_result list-new-failures "target/junit/$JOB" 2>/dev/null || true)
     if [[ -n "$config_failures" ]]; then
       failure_detail_lines+=("**Failing tests — \`${config}\`:**" "")
       while IFS= read -r t; do

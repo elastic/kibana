@@ -17,6 +17,8 @@ import normalize from 'normalize-path';
 
 import { makeFailedTestCaseIter, makeTestCaseIter, readTestReport } from './test_report';
 
+const SNAPSHOT_FILE = '.smart_retry_snapshot';
+
 export async function collectFailedTestNames(junitDir: string): Promise<Set<string>> {
   const xmlPaths = await globby(normalize(Path.resolve(junitDir, '*.xml')), { absolute: true });
   const names = new Set<string>();
@@ -49,14 +51,79 @@ export async function collectPassedTestNames(junitDir: string): Promise<Set<stri
   return names;
 }
 
+/**
+ * Writes the current XML file list in junitDir to a snapshot file.
+ * Call this before running a config so list-new-failures can diff against it.
+ */
+export async function snapshotJunitDir(junitDir: string): Promise<void> {
+  const xmlPaths = await globby(normalize(Path.resolve(junitDir, '*.xml')), { absolute: true });
+  Fs.mkdirSync(junitDir, { recursive: true });
+  Fs.writeFileSync(Path.join(junitDir, SNAPSHOT_FILE), JSON.stringify(xmlPaths.sort()));
+}
+
+/**
+ * Reads the snapshot written by snapshotJunitDir, diffs it against the current XML files,
+ * and returns the failing test names from XMLs that were produced after the snapshot.
+ * Deletes the snapshot file after reading.
+ */
+export async function collectNewFailedTestNames(junitDir: string): Promise<Set<string>> {
+  const snapshotPath = Path.join(junitDir, SNAPSHOT_FILE);
+  let before = new Set<string>();
+  if (Fs.existsSync(snapshotPath)) {
+    before = new Set<string>(JSON.parse(Fs.readFileSync(snapshotPath, 'utf8')));
+    Fs.unlinkSync(snapshotPath);
+  }
+  const xmlPaths = await globby(normalize(Path.resolve(junitDir, '*.xml')), { absolute: true });
+  const newPaths = xmlPaths.filter((p) => !before.has(p));
+  const names = new Set<string>();
+  for (const xmlPath of newPaths) {
+    const report = await readTestReport(xmlPath);
+    for (const tc of makeFailedTestCaseIter(report)) {
+      names.add(tc.$.name.trim());
+    }
+  }
+  return names;
+}
+
 export function computeIntersection(prev: Set<string>, current: Set<string>): string[] {
   return [...current].filter((name) => prev.has(name));
 }
+
+const readStdin = (): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    process.stdin.on('data', (chunk) =>
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+    );
+    process.stdin.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    process.stdin.on('error', reject);
+  });
 
 export function runRetryResultCheckerCli() {
   run(
     async ({ log, flags }) => {
       const [command, ...rest] = flags._;
+
+      if (command === 'snapshot') {
+        const [junitDir] = rest;
+        if (!junitDir) {
+          throw createFlagError('Usage: snapshot <junit-dir>');
+        }
+        await snapshotJunitDir(junitDir);
+        return;
+      }
+
+      if (command === 'list-new-failures') {
+        const [junitDir] = rest;
+        if (!junitDir) {
+          throw createFlagError('Usage: list-new-failures <junit-dir>');
+        }
+        const names = await collectNewFailedTestNames(junitDir);
+        if (names.size > 0) {
+          process.stdout.write([...names].join('\n') + '\n');
+        }
+        return;
+      }
 
       if (command === 'list-failures') {
         const [junitDir] = rest;
@@ -73,15 +140,21 @@ export function runRetryResultCheckerCli() {
       if (command === 'check-intersection') {
         const junitDir = flags['junit-dir'];
         const prevFailuresFile = flags['prev-failures-file'];
+        const prevFailuresStdin = flags['prev-failures-stdin'];
 
         if (typeof junitDir !== 'string' || !junitDir) {
           throw createFlagError('--junit-dir is required');
         }
-        if (typeof prevFailuresFile !== 'string' || !prevFailuresFile) {
-          throw createFlagError('--prev-failures-file is required');
+
+        let prevContent: string;
+        if (prevFailuresStdin) {
+          prevContent = await readStdin();
+        } else if (typeof prevFailuresFile === 'string' && prevFailuresFile) {
+          prevContent = Fs.readFileSync(prevFailuresFile, 'utf8');
+        } else {
+          throw createFlagError('Either --prev-failures-file or --prev-failures-stdin is required');
         }
 
-        const prevContent = Fs.readFileSync(prevFailuresFile, 'utf8');
         const prevFailed = new Set(
           prevContent
             .split('\n')
@@ -116,7 +189,7 @@ export function runRetryResultCheckerCli() {
       }
 
       throw createFlagError(
-        `Unknown command: ${command}. Valid commands: list-failures, check-intersection`
+        `Unknown command: ${command}. Valid commands: snapshot, list-new-failures, list-failures, check-intersection`
       );
     },
     {
@@ -124,20 +197,32 @@ export function runRetryResultCheckerCli() {
         Utilities for evaluating FTR retry results.
 
         Commands:
+          snapshot <junit-dir>
+            Writes the current list of *.xml files in <junit-dir> to a snapshot file.
+            Call this before running a config so list-new-failures can diff against it.
+
+          list-new-failures <junit-dir>
+            Reads the snapshot written by the snapshot command, diffs it against the
+            current *.xml files, and prints the failing test names from new XMLs only.
+            Deletes the snapshot file after reading.
+
           list-failures <junit-dir>
             Lists all failed test names (one per line) found in *.xml files under
             the given directory. Used to capture attempt-1 failures before retry.
 
-          check-intersection --junit-dir <dir> --prev-failures-file <file>
-            Checks whether every test named in <file> appears as an explicit pass in <dir>.
-            Exits 0 if all previously-failing tests passed (step can be marked green).
-            Exits 1 if any previously-failing test did not pass (still failing, skipped, or absent).
+          check-intersection --junit-dir <dir> --prev-failures-file <file>|--prev-failures-stdin
+            Checks whether every test named in <file> (or stdin) appears as an explicit
+            pass in <dir>. Exits 0 if all previously-failing tests passed (step can be
+            marked green). Exits 1 if any previously-failing test did not pass
+            (still failing, skipped, or absent).
       `,
       flags: {
         string: ['junit-dir', 'prev-failures-file'],
+        boolean: ['prev-failures-stdin'],
         help: `
-          --junit-dir            Directory containing JUnit XML files for the current attempt
-          --prev-failures-file   File with newline-separated test names that failed in attempt 1
+          --junit-dir              Directory containing JUnit XML files for the current attempt
+          --prev-failures-file     File with newline-separated test names that failed in attempt 1
+          --prev-failures-stdin    Read prev-failures from stdin instead of a file
         `,
       },
     }

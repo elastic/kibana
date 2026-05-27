@@ -2,23 +2,6 @@
 # Reads globals: exitCode, retry_recovered, annotation_rows, failure_detail_lines,
 # JOB, BUILDKITE_RETRY_COUNT, BUILDKITE_COMMIT.
 
-# Diffs the JUnit XML directory against a pre-run snapshot and prints failing test names.
-collect_config_failures() {
-  local xml_before="$1"
-  local tmp_xml_after new_xmls tmp_junit
-  tmp_xml_after=$(mktemp)
-  find "target/junit/${JOB}" -maxdepth 1 -name "*.xml" 2>/dev/null | sort > "$tmp_xml_after" || true
-  new_xmls=$(comm -13 "$xml_before" "$tmp_xml_after" 2>/dev/null | grep -v '^[[:space:]]*$' || true)
-  rm -f "$tmp_xml_after"
-  [[ -z "$new_xmls" ]] && return
-  tmp_junit=$(mktemp -d)
-  while IFS= read -r f; do
-    [[ -n "$f" ]] && cp "$f" "$tmp_junit/" 2>/dev/null || true
-  done <<< "$new_xmls"
-  node scripts/ftr_check_retry_result list-failures "$tmp_junit" 2>/dev/null || true
-  rm -rf "$tmp_junit"
-}
-
 write_job_annotation() {
   local attempt_num style
   attempt_num=$((${BUILDKITE_RETRY_COUNT:-0} + 1))

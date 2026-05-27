@@ -13,8 +13,10 @@ import Path from 'path';
 
 import {
   collectFailedTestNames,
+  collectNewFailedTestNames,
   collectPassedTestNames,
   computeIntersection,
+  snapshotJunitDir,
 } from './retry_result_checker';
 
 // Minimal JUnit XML helpers
@@ -149,6 +151,49 @@ describe('collectPassedTestNames', () => {
     );
     const names = await collectPassedTestNames(tmpDir);
     expect(names.has('test A')).toBe(false);
+  });
+});
+
+describe('snapshotJunitDir + collectNewFailedTestNames', () => {
+  let tmpDir: string;
+
+  beforeEach(() => {
+    tmpDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'retry-checker-test-'));
+  });
+
+  afterEach(() => {
+    Fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('returns only failures from XMLs written after the snapshot', async () => {
+    Fs.writeFileSync(Path.join(tmpDir, 'TEST-existing.xml'), buildXml(failedCase('old failure')));
+    await snapshotJunitDir(tmpDir);
+    Fs.writeFileSync(Path.join(tmpDir, 'TEST-new.xml'), buildXml(failedCase('new failure')));
+
+    const names = await collectNewFailedTestNames(tmpDir);
+    expect([...names]).toEqual(['new failure']);
+  });
+
+  it('deletes the snapshot file after reading', async () => {
+    await snapshotJunitDir(tmpDir);
+    await collectNewFailedTestNames(tmpDir);
+
+    expect(Fs.existsSync(Path.join(tmpDir, '.smart_retry_snapshot'))).toBe(false);
+  });
+
+  it('treats all XMLs as new when no snapshot exists', async () => {
+    Fs.writeFileSync(Path.join(tmpDir, 'TEST-a.xml'), buildXml(failedCase('test A')));
+
+    const names = await collectNewFailedTestNames(tmpDir);
+    expect([...names]).toEqual(['test A']);
+  });
+
+  it('returns empty set when no new XMLs were written after the snapshot', async () => {
+    Fs.writeFileSync(Path.join(tmpDir, 'TEST-existing.xml'), buildXml(failedCase('old failure')));
+    await snapshotJunitDir(tmpDir);
+
+    const names = await collectNewFailedTestNames(tmpDir);
+    expect(names.size).toBe(0);
   });
 });
 
