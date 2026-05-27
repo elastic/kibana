@@ -5,24 +5,15 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import React from 'react';
 
-import { getNightshiftIconDataUrl } from '../../../common';
+import {
+  getNightshiftNavIconSvg,
+  type NightshiftNavIconSvgOptions,
+} from '../../../common/nightshift_icon';
+import { NIGHTSHIFT_SIDENAV_ICON_ANIMATION_CSS } from '../../../common/nightshift_sidenav_icon_animation';
 
-/**
- * Brand-specified colors for the Nightshift solution-view home button in
- * the side nav. Hard-coded (not derived from EUI tokens) so the look stays
- * consistent regardless of theme.
- *
- *   unselected
- *     - background: none (transparent)
- *     - moon icon:  99° gradient #D9E8FF → #ECE2FE (very pale blue/lavender)
- *     - on :hover:  white @ 15% opacity overlay, icon unchanged
- *   selected (nav-item-isActive)
- *     - background: 131° gradient #0B64DD → #8144CC (deep blue/purple)
- *     - moon icon:  solid #FFFFFF (white)
- */
 const UNSELECTED_BG = 'none';
 const UNSELECTED_HOVER_BG = 'rgba(255, 255, 255, 0.15)';
 const SELECTED_BG = 'linear-gradient(131deg, #0B64DD 2.98%, #8144CC 66.24%)';
@@ -30,46 +21,29 @@ const UNSELECTED_ICON_START = '#D9E8FF';
 const UNSELECTED_ICON_END = '#ECE2FE';
 const SELECTED_ICON_FILL = '#FFFFFF';
 
-/**
- * Selector for the Nightshift solution view's "home" anchor in the
- * project-style side nav. Matches both selected and unselected states.
- *
- * Mirrors the data-test-subj scheme set by
- * `src/core/packages/chrome/browser-components/src/project/sidenav/navigation/to_navigation_items.tsx`:
- *   nav-item, nav-item-<deepLinkId>, nav-item-deepLinkId-<deepLinkId>,
- *   nav-item-id-<id>, [nav-item-isActive], nav-item-home
- */
 const HOME_BUTTON_SELECTOR =
   'a[data-test-subj~="nav-item-home"][data-test-subj*="nightshift"]';
 
 const ICON_WRAPPER_CLASS = 'kbnChromeNav-iconWrapper';
+const ICON_HOST_CLASS = 'nightshift-nav-icon-host';
 const NIGHTSHIFT_STYLED_ATTR = 'data-nightshift-styled';
-// Track the icon's original `src` so we can restore it if the rule needs to
-// be removed (e.g. on component unmount).
-const NIGHTSHIFT_ORIGINAL_SRC_ATTR = 'data-nightshift-original-src';
+const NIGHTSHIFT_HOVER_ATTR = 'data-nightshift-nav-hover';
+const NIGHTSHIFT_LISTENERS_ATTR = 'data-nightshift-nav-listeners';
+const ANIMATION_STYLE_ID = 'nightshift-sidenav-icon-animation';
 
 interface NightshiftStyles {
   unselectedBg: string;
   unselectedHoverBg: string;
   selectedBg: string;
-  unselectedIconUrl: string;
-  selectedIconUrl: string;
+  unselectedIcon: NightshiftNavIconSvgOptions;
+  selectedIcon: NightshiftNavIconSvgOptions;
 }
 
 function isActive(button: HTMLAnchorElement): boolean {
-  // data-test-subj is a space-separated token list; presence of
-  // `nav-item-isActive` means the side nav considers this item selected.
   const tokens = button.getAttribute('data-test-subj') ?? '';
   return tokens.split(/\s+/).includes('nav-item-isActive');
 }
 
-/**
- * Paint the icon wrapper with either a gradient image (`linear-gradient`),
- * a solid rgba/hex color, or no background at all (`none`). Lets us swap
- * between the three forms cleanly without leaving the previous slot
- * lingering (e.g. an old `background-image` showing through after we set
- * `background-color`).
- */
 function paintBackground(wrapper: HTMLElement, value: string) {
   if (value.startsWith('linear-gradient')) {
     wrapper.style.backgroundColor = 'transparent';
@@ -83,87 +57,94 @@ function paintBackground(wrapper: HTMLElement, value: string) {
   }
 }
 
+const getIconVariantKey = (active: boolean) => (active ? 'selected' : 'unselected');
+
 /**
- * Apply (or refresh) the brand-colored background + icon swap on every
- * Nightshift home button currently in the DOM. Picks the unselected vs
- * selected color set based on the `nav-item-isActive` token. Idempotent —
- * re-running with the same styles is a no-op except for refreshing values.
- *
- * The hover overlay (used only for the unselected state) is set up by
- * `attachHoverHandlers` separately; this function only sets the "resting"
- * background.
+ * Swap the default <img> for inline SVG once per variant. Skips writes when
+ * nothing changed so the MutationObserver cannot loop.
  */
+const ensureInlineIcon = (
+  wrapper: HTMLElement,
+  iconOptions: NightshiftNavIconSvgOptions,
+  variantKey: string
+) => {
+  let host = wrapper.querySelector<HTMLElement>(`.${ICON_HOST_CLASS}`);
+  if (host?.dataset.nightshiftIconVariant === variantKey) {
+    return;
+  }
+
+  if (!host) {
+    wrapper.querySelector('img')?.remove();
+    host = document.createElement('div');
+    host.className = ICON_HOST_CLASS;
+    host.style.cssText =
+      'display:flex;align-items:center;justify-content:center;width:100%;height:100%;line-height:0;';
+    wrapper.prepend(host);
+  }
+
+  host.innerHTML = getNightshiftNavIconSvg({
+    ...iconOptions,
+    gradientId: `nightshift-nav-${variantKey}`,
+  });
+  host.dataset.nightshiftIconVariant = variantKey;
+};
+
+const attachHoverListeners = (button: HTMLAnchorElement) => {
+  if (button.hasAttribute(NIGHTSHIFT_LISTENERS_ATTR)) {
+    return;
+  }
+
+  button.addEventListener('mouseenter', () => {
+    button.setAttribute(NIGHTSHIFT_HOVER_ATTR, 'true');
+  });
+  button.addEventListener('mouseleave', () => {
+    button.removeAttribute(NIGHTSHIFT_HOVER_ATTR);
+  });
+  button.setAttribute(NIGHTSHIFT_LISTENERS_ATTR, 'true');
+};
+
 function applyNightshiftStyles(styles: NightshiftStyles) {
   const buttons = document.querySelectorAll<HTMLAnchorElement>(HOME_BUTTON_SELECTOR);
   buttons.forEach((button) => {
     const active = isActive(button);
     const bg = active ? styles.selectedBg : styles.unselectedBg;
-    const iconUrl = active ? styles.selectedIconUrl : styles.unselectedIconUrl;
+    const iconOptions = active ? styles.selectedIcon : styles.unselectedIcon;
+    const variantKey = getIconVariantKey(active);
 
     const wrapper = button.querySelector<HTMLElement>(`.${ICON_WRAPPER_CLASS}`);
     if (wrapper) {
-      // Inline styles win over Emotion-generated classed rules without
-      // needing `!important`.
       paintBackground(wrapper, bg);
-      // Cache the resting + hover backgrounds for use by the
-      // pointerover/pointerout handlers in the React component.
       wrapper.dataset.nightshiftRestBg = bg;
       wrapper.dataset.nightshiftHoverBg = active ? bg : styles.unselectedHoverBg;
+      ensureInlineIcon(wrapper, iconOptions, variantKey);
     }
-    const icon = button.querySelector<HTMLImageElement>(`.${ICON_WRAPPER_CLASS} img`);
-    if (icon) {
-      if (!icon.hasAttribute(NIGHTSHIFT_ORIGINAL_SRC_ATTR)) {
-        icon.setAttribute(NIGHTSHIFT_ORIGINAL_SRC_ATTR, icon.src);
-      }
-      if (icon.src !== iconUrl) {
-        icon.src = iconUrl;
-      }
-    }
+
+    attachHoverListeners(button);
     button.setAttribute(NIGHTSHIFT_STYLED_ATTR, 'true');
   });
 }
 
-/**
- * Restore every Nightshift home button to its default look. Called on
- * unmount and when the active theme changes (the next apply runs with the
- * fresh values).
- */
 function restoreDefaults() {
-  const buttons = document.querySelectorAll<HTMLAnchorElement>(
-    `[${NIGHTSHIFT_STYLED_ATTR}="true"]`
-  );
-  buttons.forEach((button) => {
-    const wrapper = button.querySelector<HTMLElement>(`.${ICON_WRAPPER_CLASS}`);
-    if (wrapper) {
-      wrapper.style.removeProperty('background-color');
-      wrapper.style.removeProperty('background-image');
-      delete wrapper.dataset.nightshiftBase;
-      delete wrapper.dataset.nightshiftHover;
-    }
-    const icon = button.querySelector<HTMLImageElement>(`.${ICON_WRAPPER_CLASS} img`);
-    if (icon) {
-      const original = icon.getAttribute(NIGHTSHIFT_ORIGINAL_SRC_ATTR);
-      if (original) {
-        icon.src = original;
-        icon.removeAttribute(NIGHTSHIFT_ORIGINAL_SRC_ATTR);
+  document.querySelectorAll<HTMLAnchorElement>(`[${NIGHTSHIFT_STYLED_ATTR}="true"]`).forEach(
+    (button) => {
+      const wrapper = button.querySelector<HTMLElement>(`.${ICON_WRAPPER_CLASS}`);
+      wrapper?.querySelector(`.${ICON_HOST_CLASS}`)?.remove();
+      if (wrapper) {
+        wrapper.style.removeProperty('background-color');
+        wrapper.style.removeProperty('background-image');
+        delete wrapper.dataset.nightshiftRestBg;
+        delete wrapper.dataset.nightshiftHoverBg;
       }
+      button.removeAttribute(NIGHTSHIFT_HOVER_ATTR);
+      button.removeAttribute(NIGHTSHIFT_LISTENERS_ATTR);
+      button.removeAttribute(NIGHTSHIFT_STYLED_ATTR);
     }
-    button.removeAttribute(NIGHTSHIFT_STYLED_ATTR);
-  });
+  );
 }
 
 /**
- * Apply brand-colored backgrounds + moon icons to the Nightshift solution
- * view's home button in the project side nav. Two distinct states:
- *
- *   unselected  → pale background + saturated gradient moon
- *   selected    → deep background + solid white moon
- *
- * Implementation note: we use direct DOM mutation (inline styles + `src`
- * swap) rather than a CSS rule. Plain CSS approaches were not reliably
- * winning specificity against the MenuItem's own Emotion styles for the
- * `.kbnChromeNav-iconWrapper` class. Inline styles always win, and we
- * watch the DOM with a MutationObserver to re-apply after each re-render.
+ * Nightshift side-nav home: brand colours + inline SVG with hover motion
+ * (gentle moon drift and star twinkle, infinite while hovered).
  */
 export const NightshiftSidenavGlobalStyles: React.FC = () => {
   const styles: NightshiftStyles = useMemo(
@@ -171,30 +152,47 @@ export const NightshiftSidenavGlobalStyles: React.FC = () => {
       unselectedBg: UNSELECTED_BG,
       unselectedHoverBg: UNSELECTED_HOVER_BG,
       selectedBg: SELECTED_BG,
-      unselectedIconUrl: getNightshiftIconDataUrl({
+      unselectedIcon: {
         size: 16,
         startColor: UNSELECTED_ICON_START,
         endColor: UNSELECTED_ICON_END,
-      }),
-      selectedIconUrl: getNightshiftIconDataUrl({
+      },
+      selectedIcon: {
         size: 16,
         solidColor: SELECTED_ICON_FILL,
-      }),
+      },
     }),
     []
   );
 
-  useEffect(() => {
-    // Initial apply.
-    applyNightshiftStyles(styles);
+  const isApplyingRef = useRef(false);
 
-    // Re-apply whenever the side-nav DOM mutates. React re-renders the
-    // nav tree on every navigation; without an observer our inline styles
-    // get wiped (and the selected ↔ unselected state can change without a
-    // remount, so we have to watch data-test-subj attribute changes too).
-    const observer = new MutationObserver(() => {
-      applyNightshiftStyles(styles);
-    });
+  useEffect(() => {
+    if (!document.getElementById(ANIMATION_STYLE_ID)) {
+      const style = document.createElement('style');
+      style.id = ANIMATION_STYLE_ID;
+      style.textContent = `
+        .${ICON_HOST_CLASS} .nightshift-nav-icon { display: block; }
+        ${NIGHTSHIFT_SIDENAV_ICON_ANIMATION_CSS}
+      `;
+      document.head.appendChild(style);
+    }
+
+    const runApply = () => {
+      if (isApplyingRef.current) {
+        return;
+      }
+      isApplyingRef.current = true;
+      try {
+        applyNightshiftStyles(styles);
+      } finally {
+        isApplyingRef.current = false;
+      }
+    };
+
+    runApply();
+
+    const observer = new MutationObserver(runApply);
     observer.observe(document.body, {
       childList: true,
       subtree: true,
@@ -202,24 +200,27 @@ export const NightshiftSidenavGlobalStyles: React.FC = () => {
       attributeFilter: ['data-test-subj', 'class'],
     });
 
-    // Hover affordance: on pointerover, paint the cached hover background
-    // (white@15% for unselected, the same gradient for selected — so
-    // selected is a no-op on hover). On pointerout, restore the resting
-    // background. Each cached value is either `none`, a `linear-gradient`,
-    // or an `rgba(...)` solid; `paintBackground` handles all three.
     const handlePointerOver = (event: Event) => {
-      const target = (event.target as Element).closest(HOME_BUTTON_SELECTOR);
-      if (!target) return;
-      const wrapper = target.querySelector<HTMLElement>(`.${ICON_WRAPPER_CLASS}`);
+      const button = (event.target as Element).closest<HTMLAnchorElement>(HOME_BUTTON_SELECTOR);
+      if (!button) {
+        return;
+      }
+      const wrapper = button.querySelector<HTMLElement>(`.${ICON_WRAPPER_CLASS}`);
       const hover = wrapper?.dataset.nightshiftHoverBg;
-      if (wrapper && hover) paintBackground(wrapper, hover);
+      if (wrapper && hover) {
+        paintBackground(wrapper, hover);
+      }
     };
     const handlePointerOut = (event: Event) => {
-      const target = (event.target as Element).closest(HOME_BUTTON_SELECTOR);
-      if (!target) return;
-      const wrapper = target.querySelector<HTMLElement>(`.${ICON_WRAPPER_CLASS}`);
+      const button = (event.target as Element).closest<HTMLAnchorElement>(HOME_BUTTON_SELECTOR);
+      if (!button) {
+        return;
+      }
+      const wrapper = button.querySelector<HTMLElement>(`.${ICON_WRAPPER_CLASS}`);
       const rest = wrapper?.dataset.nightshiftRestBg;
-      if (wrapper && rest) paintBackground(wrapper, rest);
+      if (wrapper && rest) {
+        paintBackground(wrapper, rest);
+      }
     };
     document.body.addEventListener('pointerover', handlePointerOver);
     document.body.addEventListener('pointerout', handlePointerOut);
@@ -228,6 +229,7 @@ export const NightshiftSidenavGlobalStyles: React.FC = () => {
       observer.disconnect();
       document.body.removeEventListener('pointerover', handlePointerOver);
       document.body.removeEventListener('pointerout', handlePointerOut);
+      document.getElementById(ANIMATION_STYLE_ID)?.remove();
       restoreDefaults();
     };
   }, [styles]);
