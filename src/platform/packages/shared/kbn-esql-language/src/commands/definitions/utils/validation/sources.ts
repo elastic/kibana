@@ -22,7 +22,7 @@ function hasWildcard(name: string) {
  * Covers backing indices like `.ds-logs-default-000001` that are hidden in Elasticsearch
  * but are never surfaced as individual entries in the sources list.
  */
-function isDotPrefixedSource(sourceName: string): boolean {
+export function isDotPrefixedSource(sourceName: string): boolean {
   return sourceName.split(',').every((part) => {
     const cleaned = removeSourceNameQuotes(cleanIndex(part.trim()));
     // Strip optional CCS cluster prefix (cluster:indexName → indexName)
