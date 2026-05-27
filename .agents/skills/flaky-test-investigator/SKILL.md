@@ -11,13 +11,13 @@ Investigate a flaky Scout or FTR test failure and determine what should be done 
 - The outcome should be an accurate diagnosis, not a quick fix that treats the symptom.
 - Valid outcomes include "this is a real product bug, escalate to the owning team", "this is environmental and will likely self-resolve", or "there isn't enough data to draw a confident conclusion".
 
-## Investigation
+## Required input
 
-### Identify the failing GitHub issue
-
-If no link to a `failed-test` issue was provided, search for one in the `elastic/kibana` repository. Prioritize looking at the recent failures, but all failures and issue comments should be looked at.
+A link to a GitHub issue with the `failed-test` label is required. If none is provided, ask for one before proceeding.
 
 Ignore any prior root-cause analyses or fix proposals posted by automations; treat them as if they weren't there and reach your own conclusion. Failure-notification comments from `kibanamachine` are still useful as a history signal.
+
+## Investigation
 
 ### Understand the test environment
 
