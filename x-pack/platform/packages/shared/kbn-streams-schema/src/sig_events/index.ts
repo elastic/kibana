@@ -8,4 +8,13 @@
 export { detectionSchema, type Detection } from './detections';
 export { discoverySchema, type Discovery } from './discoveries';
 export { verdictSchema, type Verdict } from './verdicts';
-export { sigEventSchema, type SigEvent } from './events';
+export {
+  SIG_EVENT_VERDICT_OPTIONS,
+  SIG_EVENT_IMPACT_OPTIONS,
+  sigEventSchema,
+  sigEventVerdictSchema,
+  sigEventImpactSchema,
+  type SigEvent,
+  type SigEventVerdict,
+  type SigEventImpact,
+} from './events';

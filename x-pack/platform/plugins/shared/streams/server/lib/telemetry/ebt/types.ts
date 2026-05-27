@@ -89,6 +89,19 @@ interface StreamsAgentToolKiIdentificationStartedProps {
   error_message?: string;
 }
 
+interface StreamsAgentToolEventCreateProps {
+  success: boolean;
+  stream_names: string[];
+  error_message?: string;
+}
+
+interface StreamsAgentToolEventVerdictUpdateProps {
+  success: boolean;
+  event_id: string;
+  verdict: 'promoted' | 'acknowledged' | 'demoted';
+  error_message?: string;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
@@ -99,4 +112,6 @@ export {
   type StreamsFeaturesIdentifiedProps,
   type StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
   type StreamsAgentToolKiIdentificationStartedProps,
+  type StreamsAgentToolEventCreateProps,
+  type StreamsAgentToolEventVerdictUpdateProps,
 };

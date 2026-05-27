@@ -302,8 +302,14 @@ export {
   type Discovery,
   verdictSchema,
   type Verdict,
+  SIG_EVENT_VERDICT_OPTIONS,
+  SIG_EVENT_IMPACT_OPTIONS,
   sigEventSchema,
+  sigEventVerdictSchema,
+  sigEventImpactSchema,
   type SigEvent,
+  type SigEventVerdict,
+  type SigEventImpact,
 } from './src/sig_events';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';

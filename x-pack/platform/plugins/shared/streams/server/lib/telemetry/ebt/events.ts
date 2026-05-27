@@ -15,6 +15,8 @@ import {
   STREAMS_FEATURES_IDENTIFIED_EVENT_TYPE,
   STREAMS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
   STREAMS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  STREAMS_AGENT_TOOL_EVENT_VERDICT_UPDATE_EVENT_TYPE,
 } from './constants';
 import {
   streamsEndpointLatencySchema,
@@ -26,6 +28,8 @@ import {
   streamsFeaturesIdentifiedSchema,
   streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
   streamsAgentToolKiIdentificationStartedSchema,
+  streamsAgentToolEventCreateSchema,
+  streamsAgentToolEventVerdictUpdateSchema,
 } from './schemas';
 
 const streamsEndpointLatencyEventType = {
@@ -71,6 +75,16 @@ const streamsAgentToolKiIdentificationStartedEventType = {
   schema: streamsAgentToolKiIdentificationStartedSchema,
 };
 
+const streamsAgentToolEventCreateEventType = {
+  eventType: STREAMS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
+  schema: streamsAgentToolEventCreateSchema,
+};
+
+const streamsAgentToolEventVerdictUpdateEventType = {
+  eventType: STREAMS_AGENT_TOOL_EVENT_VERDICT_UPDATE_EVENT_TYPE,
+  schema: streamsAgentToolEventVerdictUpdateSchema,
+};
+
 export {
   streamsEndpointLatencyEventType,
   streamsStateErrorEventType,
@@ -81,4 +95,6 @@ export {
   streamsFeaturesIdentifiedEventType,
   streamsAgentBuilderKnowledgeIndicatorCreatedEventType,
   streamsAgentToolKiIdentificationStartedEventType,
+  streamsAgentToolEventCreateEventType,
+  streamsAgentToolEventVerdictUpdateEventType,
 };

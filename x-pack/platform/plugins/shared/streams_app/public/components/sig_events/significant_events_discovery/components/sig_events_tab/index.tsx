@@ -22,6 +22,7 @@ import type { EuiBasicTableColumn, EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { SIG_EVENT_VERDICT_OPTIONS } from '@kbn/streams-schema';
 import type { SigEvent } from '@kbn/streams-schema';
 import { useFetchSigEvents } from '../../../../../hooks/sig_events/use_fetch_sig_events';
 import { useTimefilter } from '../../../../../hooks/use_timefilter';
@@ -31,7 +32,7 @@ import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_con
 import { SigEventFlyout } from './sig_event_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
-import { VERDICT_OPTIONS, getVerdictColor } from './filter_constants';
+import { getVerdictColor } from './filter_constants';
 
 const MAX_VISIBLE_STREAMS = 3;
 
@@ -192,8 +193,11 @@ export const SigEventsTab = () => {
         ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.verdictAriaLabel', {
           defaultMessage: 'Filter by verdict',
         }),
-        options: buildSelectableOptions({ values: VERDICT_OPTIONS, selected: verdictFilter }),
-        numFilters: VERDICT_OPTIONS.length,
+        options: buildSelectableOptions({
+          values: SIG_EVENT_VERDICT_OPTIONS,
+          selected: verdictFilter,
+        }),
+        numFilters: SIG_EVENT_VERDICT_OPTIONS.length,
         numActiveFilters: verdictFilter.length,
         onChange: onVerdictChange,
       },

@@ -16,6 +16,8 @@ import type {
   StreamsFeaturesIdentifiedProps,
   StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
   StreamsAgentToolKiIdentificationStartedProps,
+  StreamsAgentToolEventCreateProps,
+  StreamsAgentToolEventVerdictUpdateProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -418,6 +420,63 @@ const streamsAgentToolKiIdentificationStartedSchema: RootSchema<StreamsAgentTool
     },
   };
 
+const streamsAgentToolEventCreateSchema: RootSchema<StreamsAgentToolEventCreateProps> = {
+  success: {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether the event creation succeeded',
+    },
+  },
+  stream_names: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A stream name',
+      },
+    },
+    _meta: {
+      description: 'The names of the Streams associated with the event',
+    },
+  },
+  error_message: {
+    type: 'text',
+    _meta: {
+      description: 'Error message when event creation fails',
+      optional: true,
+    },
+  },
+};
+
+const streamsAgentToolEventVerdictUpdateSchema: RootSchema<StreamsAgentToolEventVerdictUpdateProps> =
+  {
+    success: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the event verdict update succeeded',
+      },
+    },
+    event_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The identifier of the updated significant event',
+      },
+    },
+    verdict: {
+      type: 'keyword',
+      _meta: {
+        description: 'The verdict value set on the significant event',
+      },
+    },
+    error_message: {
+      type: 'text',
+      _meta: {
+        description: 'Error message when event verdict update fails',
+        optional: true,
+      },
+    },
+  };
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
@@ -428,4 +487,6 @@ export {
   streamsFeaturesIdentifiedSchema,
   streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
   streamsAgentToolKiIdentificationStartedSchema,
+  streamsAgentToolEventCreateSchema,
+  streamsAgentToolEventVerdictUpdateSchema,
 };
