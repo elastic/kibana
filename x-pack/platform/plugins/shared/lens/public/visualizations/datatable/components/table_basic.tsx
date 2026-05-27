@@ -382,24 +382,31 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         rowCellRender: function RowCellRender({ rowIndex }) {
           const { rowHasRowClickTriggerActions } = useContext(DataContext);
           return (
-            <EuiButtonIcon
-              aria-label={i18n.translate('xpack.lens.table.actionsLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.lens.table.actionsLabel', {
                 defaultMessage: 'Show actions',
               })}
-              iconType={
-                !!rowHasRowClickTriggerActions && !rowHasRowClickTriggerActions[rowIndex]
-                  ? 'empty'
-                  : 'boxesVertical'
-              }
-              color="text"
-              onClick={() => {
-                onRowContextMenuClick({
-                  rowIndex,
-                  table: firstTableRef.current,
-                  columns: columnConfig.columns.map((col) => col.columnId),
-                });
-              }}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                aria-label={i18n.translate('xpack.lens.table.actionsLabel', {
+                  defaultMessage: 'Show actions',
+                })}
+                iconType={
+                  !!rowHasRowClickTriggerActions && !rowHasRowClickTriggerActions[rowIndex]
+                    ? 'empty'
+                    : 'boxesVertical'
+                }
+                color="text"
+                onClick={() => {
+                  onRowContextMenuClick({
+                    rowIndex,
+                    table: firstTableRef.current,
+                    columns: columnConfig.columns.map((col) => col.columnId),
+                  });
+                }}
+              />
+            </EuiToolTip>
           );
         },
       },
