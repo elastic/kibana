@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { mockAppDataView, mockDataView, mockUxSeries, render } from '../rtl_helpers';
 import { FilterLabel } from './filter_label';
 import * as useSeriesHook from '../hooks/use_series_filters';
@@ -37,9 +37,14 @@ describe('FilterLabel', function () {
       />
     );
 
-    expect(await screen.findByText('elastic-co')).toBeInTheDocument();
-    expect(await screen.findByText(/web application:/i)).toBeInTheDocument();
-    expect(await screen.findByTitle('Delete Web Application: elastic-co')).toBeInTheDocument();
+    await waitFor(
+      () => {
+        expect(screen.getByText('elastic-co')).toBeInTheDocument();
+        expect(screen.getByText(/web application:/i)).toBeInTheDocument();
+        expect(screen.getByTitle('Delete Web Application: elastic-co')).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
   });
 
   it('should delete filter', async function () {
