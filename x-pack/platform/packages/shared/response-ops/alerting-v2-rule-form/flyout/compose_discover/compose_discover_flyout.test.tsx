@@ -14,6 +14,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { ComposeDiscoverFlyout } from './compose_discover_flyout';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
@@ -35,7 +36,6 @@ jest.mock('./compose_discover_form', () => {
           alertCondition: 'Alert Condition',
           recoveryCondition: 'Recovery Condition',
           details: 'Details & Artifacts',
-          notifications: 'Notifications',
         };
         return { id, title: titles[id], render: () => <div /> };
       }),
@@ -72,6 +72,7 @@ const createMockServices = (): RuleFormServices => ({
   application: applicationServiceMock.createStartContract(),
   lens: lensPluginMock.createStartContract(),
   workflowForm: { Component: () => null, defaultValue: () => ({}) },
+  uiActions: uiActionsPluginMock.createStartContract(),
 });
 
 const defaultProps: ComposeDiscoverFlyoutProps = {
@@ -98,7 +99,7 @@ describe('ComposeDiscoverFlyout', () => {
       expect(stepper).toBeInTheDocument();
     });
 
-    it('renders 2 steps for signal rules (default)', () => {
+    it('renders 2 steps when tracking is disabled (default)', () => {
       renderFlyout();
 
       expect(screen.getByText('1 / 2')).toBeInTheDocument();

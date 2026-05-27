@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { PropsWithChildren } from 'react';
-import React, { createContext, useContext, useMemo } from 'react';
 import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { WorkflowFormComponentProps } from '../types';
 
 export interface RuleFormServices<TWorkflow extends object = object> {
@@ -31,6 +32,7 @@ export interface RuleFormServices<TWorkflow extends object = object> {
      */
     supported?: boolean;
   };
+  uiActions?: UiActionsStart;
 }
 
 export const NOOP_WORKFLOW_FORM: RuleFormServices['workflowForm'] = {

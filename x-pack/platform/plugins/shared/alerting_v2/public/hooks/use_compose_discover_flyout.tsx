@@ -18,6 +18,9 @@ import {
   SingleStepWorkflowForm,
   type SingleStepWorkflowFormValue,
 } from '../components/single_step_workflow_form';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import type { ComposeDiscoverMode } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
@@ -44,6 +47,8 @@ export const useComposeDiscoverFlyout = ({
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
+  const uiActions = useService(PluginStart('uiActions')) as UiActionsStart;
+
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
   const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
@@ -69,8 +74,9 @@ export const useComposeDiscoverFlyout = ({
           return Boolean(value.typeId) && value.connectorId !== null && value.params.trim() !== '';
         },
       },
+      uiActions,
     }),
-    [http, data, dataViews, notifications, application, lens]
+    [http, data, dataViews, notifications, application, lens, uiActions]
   );
 
   const closeFlyout = useCallback(() => {

@@ -57,6 +57,12 @@ export function getRecoverQuery(query: RuleQuery | undefined): string {
 // types can be deleted without touching this file.
 // ---------------------------------------------------------------------------
 
+export interface ComposeRuleArtifact {
+  id: string;
+  type: string;
+  value: string;
+}
+
 export interface ComposeFormValues {
   kind: RuleKind;
   metadata: {
@@ -81,13 +87,10 @@ export interface ComposeFormValues {
   };
   stateTransitionAlertDelayMode: 'immediate' | 'breaches' | 'recoveries' | 'duration';
   stateTransitionRecoveryDelayMode: 'immediate' | 'breaches' | 'recoveries' | 'duration';
-  artifacts?: Array<{ id: string; type: string; value: string }>;
-  /**
-   * Notifications policy attached to the rule. Presence indicates the user enabled
-   * notifications; absence (`undefined`) means notifications are disabled. The
-   * concrete `TWorkflow` shape lives at the call site (e.g. `SingleStepWorkflowFormValue`).
-   */
   notifications?: RuleNotificationsValue;
+  artifacts?: ComposeRuleArtifact[];
+  runbookArtifacts?: ComposeRuleArtifact[];
+  dashboardArtifacts?: ComposeRuleArtifact[];
 }
 
 // Re-export for use by compose mappers

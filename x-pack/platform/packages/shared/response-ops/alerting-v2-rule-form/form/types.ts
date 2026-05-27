@@ -95,4 +95,6 @@ export interface FormValues {
   stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
   notifications?: RuleNotificationsValue;
+  runbookArtifacts?: RuleArtifact[];
+  dashboardArtifacts?: RuleArtifact[];
 }

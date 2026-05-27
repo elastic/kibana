@@ -61,6 +61,11 @@ const mockServices = {
     stateHelperApi: () => ({}),
   } as any,
   workflowForm: NOOP_WORKFLOW_FORM,
+  uiActions: {
+    getAction: async () => ({
+      execute: ({ onResults }: { onResults: (results: unknown[]) => void }) => onResults([]),
+    }),
+  } as any,
 };
 
 const mockFormServices: RuleFormServices = {
@@ -71,6 +76,7 @@ const mockFormServices: RuleFormServices = {
   notifications: mockServices.notifications,
   lens: mockServices.lens,
   workflowForm: NOOP_WORKFLOW_FORM,
+  uiActions: mockServices.uiActions,
 };
 
 // =============================================================================

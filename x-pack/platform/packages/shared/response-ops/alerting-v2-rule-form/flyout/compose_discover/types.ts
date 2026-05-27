@@ -12,16 +12,11 @@ import type { ComposeFormValues } from './compose_form_types';
 
 export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
 
-export type RecoveryType = 'default' | 'custom' | 'none';
+export type RecoveryType = 'default' | 'custom';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
-export type StepId =
-  | 'alertCondition'
-  | 'builderCondition'
-  | 'recoveryCondition'
-  | 'details'
-  | 'notifications';
+export type StepId = 'alertCondition' | 'builderCondition' | 'recoveryCondition' | 'details';
 
 export interface StepRenderProps {
   state: ComposeDiscoverState;
