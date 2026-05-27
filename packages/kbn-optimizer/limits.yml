@@ -29,7 +29,7 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10300
-  core: 548600
+  core: 605808
   cps: 9209
   crossClusterReplication: 12662
   customIntegrations: 11715
@@ -121,7 +121,7 @@ pageLoadAssetSize:
   ml: 99842
   mockIdpPlugin: 7463
   monitoring: 28983
-  navigation: 16671
+  navigation: 17513
   newsfeed: 11110
   noDataPage: 1749
   observability: 107797
