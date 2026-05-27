@@ -17,6 +17,7 @@ import { useCaseObservables } from './use_case_observables';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { getAttachmentItemCount } from './components/helpers';
 
 /**
  * Tab ids that resolve to the consolidated attachments view. Includes the
@@ -74,9 +75,9 @@ AttachmentsBadge.displayName = 'AttachmentsBadge';
 
 /**
  * Computes the total count shown on the top-level "Attachments" tab badge.
- * Matches what `CaseViewAttachments` actually renders: one row per attachment
- * whose registered type has a tab view (files excluded — counted via
- * `fileStatsData`), plus files and (license-permitting) observables.
+ * Reflects the active search filter so the badge tracks what the user actually
+ * sees: comments matching a registered type with a tab view, plus files (from
+ * `fileStatsData`) and — if licensed — observables.
  */
 export const useCaseAttachmentsTotal = ({
   caseData,
@@ -107,7 +108,7 @@ export const useCaseAttachmentsTotal = ({
     let registryTotal = 0;
     for (const comment of caseData.comments) {
       if (typesWithTabView.has(toUnifiedAttachmentType(comment.type, owner))) {
-        registryTotal += 1;
+        registryTotal += getAttachmentItemCount(comment);
       }
     }
 

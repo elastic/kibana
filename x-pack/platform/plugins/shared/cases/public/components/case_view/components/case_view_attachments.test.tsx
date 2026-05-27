@@ -160,7 +160,7 @@ describe('Case View Attachments tab', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('hides the files accordion when there are no files even if the file type is registered', () => {
+  it('hides the files accordion when fileStats reports 0 files', () => {
     useGetCaseFileStatsMock.mockReturnValue({ data: { total: 0 } });
     const unifiedAttachmentTypeRegistry = buildRegistry();
 
@@ -176,7 +176,7 @@ describe('Case View Attachments tab', () => {
     expect(screen.queryByTestId('case-view-attachment-accordion-file')).not.toBeInTheDocument();
   });
 
-  it('renders the files accordion when fileStats reports files', () => {
+  it('shows the file count from fileStats on the files badge', () => {
     useGetCaseFileStatsMock.mockReturnValue({ data: { total: 2 } });
     const unifiedAttachmentTypeRegistry = buildRegistry();
 
@@ -189,7 +189,29 @@ describe('Case View Attachments tab', () => {
       { wrapperProps: { unifiedAttachmentTypeRegistry } }
     );
 
-    expect(screen.getByTestId('case-view-attachment-accordion-file')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-attachment-badge-file')).toHaveTextContent('2');
+  });
+
+  it('badge counts bulk-added alerts by id length, not by comment/SO count', () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    // One alert SO wrapping three alert ids. The badge should read "3", not "1".
+    const bulkAlertComment = {
+      ...alertComment,
+      alertId: ['a-1', 'a-2', 'a-3'],
+      index: ['i-1', 'i-2', 'i-3'],
+    };
+    const caseWithBulkAlerts: CaseUI = { ...basicCase, comments: [bulkAlertComment] };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithBulkAlerts}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry } }
+    );
+
+    expect(screen.getByTestId('case-view-attachment-badge-security.alert')).toHaveTextContent('3');
   });
 
   it('renders accordions in alphabetical order by display name', () => {

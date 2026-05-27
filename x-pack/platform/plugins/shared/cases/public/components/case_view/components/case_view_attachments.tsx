@@ -16,11 +16,11 @@ import { useCasesFeatures } from '../../../common/use_cases_features';
 import { SEARCH_PLACEHOLDER } from '../../actions/translations';
 import { CaseViewAttachButton } from './case_view_attach_button';
 import { CaseViewTabs } from '../case_view_tabs';
-import { OBSERVABLES_TAB } from '../translations';
 import { CaseViewObservables } from './case_view_observables';
 import type { OnUpdateFields } from '../types';
 import { AttachmentAccordion } from './attachment_accordion';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
+import { getAttachmentItemCount } from './helpers';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;
@@ -46,12 +46,13 @@ export const CaseViewAttachments = ({
     const counts = new Map<string, number>();
     for (const comment of caseData.comments) {
       const unifiedType = toUnifiedAttachmentType(comment.type, owner);
-      counts.set(unifiedType, (counts.get(unifiedType) ?? 0) + 1);
+      counts.set(unifiedType, (counts.get(unifiedType) ?? 0) + getAttachmentItemCount(comment));
     }
     return counts;
   }, [caseData.comments, owner]);
 
-  // Render one accordion per registered type that has a tab view AND a non-zero count
+  // Render one accordion per registered type that has a tab view AND a non-zero count.
+  // file count uses the file client as the source of truth
   const attachmentSections = useMemo(
     () =>
       unifiedAttachmentTypeRegistry
@@ -59,7 +60,6 @@ export const CaseViewAttachments = ({
         .flatMap((type) => {
           const Children = type.getAttachmentTabViewObject?.()?.children;
           if (!Children) return [];
-          // file count rely on file client as source of truth
           const count =
             type.id === FILE_ATTACHMENT_TYPE ? fileCount : countsByType.get(type.id) ?? 0;
           if (count < 1) return [];
@@ -103,18 +103,12 @@ export const CaseViewAttachments = ({
             </AttachmentAccordion>
           ))}
           {showObservables && (
-            <AttachmentAccordion
-              id="observables"
-              title={OBSERVABLES_TAB}
-              count={caseData.observables?.length ?? 0}
-            >
-              <CaseViewObservables
-                isLoading={false}
-                caseData={caseData}
-                searchTerm={searchTerm}
-                onUpdateField={onUpdateField}
-              />
-            </AttachmentAccordion>
+            <CaseViewObservables
+              isLoading={false}
+              caseData={caseData}
+              searchTerm={searchTerm}
+              onUpdateField={onUpdateField}
+            />
           )}
         </EuiFlexGroup>
       </EuiFlexItem>

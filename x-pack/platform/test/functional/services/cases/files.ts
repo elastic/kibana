@@ -71,7 +71,10 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
     },
 
     async emptyOrFail() {
-      await testSubjects.existOrFail('cases-files-table-empty');
+      // The files accordion only renders when the case has at least one file
+      // (or one file matching the active search), so "no files" now means the
+      // accordion is missing rather than the table showing its empty state.
+      await testSubjects.missingOrFail('case-view-attachment-accordion-file');
     },
 
     async getFileByIndex(index: number) {

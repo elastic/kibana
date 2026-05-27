@@ -79,6 +79,27 @@ describe('useCaseAttachmentsTotal', () => {
     expect(result.current).toBe(4);
   });
 
+  it('counts bulk-added alerts by id length', () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    const bulkAlertComment = {
+      ...alertComment,
+      alertId: ['a-1', 'a-2', 'a-3'],
+      index: ['i-1', 'i-2', 'i-3'],
+    };
+    const caseWithBulkAlerts: CaseUI = { ...basicCase, comments: [bulkAlertComment] };
+
+    const { result } = renderHook(() => useCaseAttachmentsTotal({ caseData: caseWithBulkAlerts }), {
+      wrapper: ({ children }) => (
+        <TestProviders unifiedAttachmentTypeRegistry={unifiedAttachmentTypeRegistry}>
+          {children}
+        </TestProviders>
+      ),
+    });
+
+    // 3 alerts (from bulk comment) + 3 files = 6
+    expect(result.current).toBe(6);
+  });
+
   it('does not double-count file comments — files come from fileStats only', () => {
     const unifiedAttachmentTypeRegistry = buildRegistry();
 
