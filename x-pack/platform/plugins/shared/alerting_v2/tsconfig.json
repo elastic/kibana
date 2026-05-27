@@ -113,7 +113,6 @@
     "@kbn/workflows-yaml",
     "@kbn/workflows-ui",
     "@kbn/datemath",
-    "@kbn/coloring"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
