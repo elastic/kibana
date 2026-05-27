@@ -265,13 +265,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       </EuiFlyoutFooter>
       {isModalOpen && (
         <AddEndpointModal
-          mode={
-            editingEndpoint
-              ? editingEndpoint.task_type === 'chat_completion'
-                ? 'edit'
-                : 'view'
-              : 'add'
-          }
+          mode={editingEndpoint ? 'view' : 'add'}
           modelId={modelId}
           taskTypes={taskTypeOptions}
           initialEndpointId={editingEndpoint?.inference_id}
