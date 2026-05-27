@@ -52,7 +52,7 @@ import type { AggregateParams } from '../application/rule/methods/aggregate/type
 import { aggregateRules } from '../application/rule/methods/aggregate';
 import type { DeleteRuleParams } from '../application/rule/methods/delete';
 import { deleteRule } from '../application/rule/methods/delete';
-import type { BulkDeleteRulesRequestBody } from '../application/rule/methods/bulk_delete';
+import type { BulkDeleteRulesParams } from '../application/rule/methods/bulk_delete/types';
 import { bulkDeleteRules } from '../application/rule/methods/bulk_delete';
 import type { BulkDisableRulesRequestBody } from '../application/rule/methods/bulk_disable';
 import { bulkDisableRules } from '../application/rule/methods/bulk_disable';
@@ -193,7 +193,7 @@ export class RulesClient {
 
   public bulkGetRules = <Params extends RuleTypeParams = never>(params: BulkGetRulesParams) =>
     bulkGetRules<Params>(this.context, params);
-  public bulkDeleteRules = (options: BulkDeleteRulesRequestBody) =>
+  public bulkDeleteRules = (options: BulkDeleteRulesParams) =>
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
