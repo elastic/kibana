@@ -36,7 +36,9 @@ import {
   stripTrailingSlash,
   probeHttp,
   isExportProfileImplicitLocal,
+  VAULT_CONFIG_DIR,
 } from '../profiles';
+import { runConfigInit, runConnectorSetup } from './init';
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
@@ -217,12 +219,41 @@ export const startCmd: Command<void> = {
       'evaluations-kbn-url',
       'evaluations-kbn-api-key',
     ],
-    boolean: ['skip-server', 'dry-run'],
+    boolean: ['skip-server', 'dry-run', 'skip-init'],
     alias: { model: 'project', judge: 'evaluation-connector-id' },
-    default: { 'skip-server': false, 'dry-run': false },
+    default: { 'skip-server': false, 'dry-run': false, 'skip-init': false },
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
+    const profile = flagsReader.string('profile') ?? undefined;
+
+    if (!flagsReader.boolean('skip-init')) {
+      const configFileName = profile ? `config.${profile}.json` : 'config.json';
+      const vaultConfigPath = Path.join(repoRoot, VAULT_CONFIG_DIR, configFileName);
+      if (!Fs.existsSync(vaultConfigPath)) {
+        if (!isTTY()) {
+          throw createFlagError(
+            `No config found (${configFileName}). Run \`node scripts/evals init config\` to set up, or use --skip-init to bypass.`
+          );
+        }
+
+        log.info('No config found — running first-time setup...');
+        log.info('');
+        await runConfigInit(repoRoot, log, { profile });
+      }
+
+      if (getAllAvailableConnectors(repoRoot).length === 0) {
+        if (!isTTY()) {
+          throw createFlagError(
+            'No connectors available. Set KIBANA_TESTING_AI_CONNECTORS or run with a TTY to use the setup wizard.'
+          );
+        }
+      }
+
+      if (isTTY()) {
+        await runConnectorSetup(repoRoot, log);
+      }
+    }
 
     // --- Resolve suite ---
     let suiteId = flagsReader.string('suite');
@@ -280,7 +311,7 @@ export const startCmd: Command<void> = {
         ? projects.some(isEisConnectorId)
         : getAllAvailableConnectors(repoRoot).some((c) => isEisConnectorId(c.id)));
 
-    const baseProfile = flagsReader.string('profile') ?? undefined;
+    const baseProfile = profile;
     const datasetsProfile = flagsReader.string('datasets-profile') ?? baseProfile;
     const exportProfile =
       flagsReader.string('export-profile') ?? baseProfile ?? defaultExportProfile(repoRoot);

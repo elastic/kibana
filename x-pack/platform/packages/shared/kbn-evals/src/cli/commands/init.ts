@@ -12,7 +12,7 @@ import Path from 'path';
 import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
 import { set } from '@kbn/safer-lodash-set';
-import { parseConnectorsFromEnv, parseConnectorsFromKibanaDevYml } from '../prompts';
+import { isTTY, parseConnectorsFromEnv, parseConnectorsFromKibanaDevYml } from '../prompts';
 import { safeExec, getVaultAddr, VAULT_SECRET_PATH } from '../utils';
 import { VAULT_CONFIG_DIR } from '../profiles';
 import { buildApiKeyPayload } from '../../api_key/build_api_key_payload';
@@ -175,7 +175,7 @@ const getExistingApiKey = (configPath: string): string | null => {
   }
 };
 
-const runConfigInit = async (
+export const runConfigInit = async (
   repoRoot: string,
   log: { info: (msg: string) => void; warning: (msg: string) => void },
   options?: { profile?: string }
@@ -224,8 +224,9 @@ const runConfigInit = async (
     setNestedValue(example, 'tracingEs.apiKey', '');
     example.tracingExporters = [{ http: { url: 'http://localhost:4318/v1/traces' } }];
 
-    // This profile doesn't need golden-cluster dataset/GCS settings.
-    delete example.evaluationsKbn;
+    // Local profile points evaluationsKbn at local Kibana; no golden-cluster GCS settings needed.
+    setNestedValue(example, 'evaluationsKbn.url', 'http://elastic:changeme@localhost:5601/dev');
+    setNestedValue(example, 'evaluationsKbn.apiKey', '');
     delete example.gcsDatasetAccessCredentials;
 
     // Avoid prompting for unrelated secrets in the local export profile.
@@ -237,6 +238,21 @@ const runConfigInit = async (
   log.info('');
   log.info('The config has sensible URL defaults. You only need to fill in secret values.');
   log.info('');
+
+  // --- Local Kibana URL ---
+  if (isLocalProfile) {
+    const defaultKbnUrl = 'http://elastic:changeme@localhost:5601/dev';
+    const { kbnUrl } = await inquirer.prompt<{ kbnUrl: string }>({
+      type: 'input',
+      name: 'kbnUrl',
+      message: 'Local Kibana URL:',
+      default: defaultKbnUrl,
+    });
+    if (kbnUrl.trim()) {
+      setNestedValue(example, 'evaluationsKbn.url', kbnUrl.trim());
+    }
+    log.info('');
+  }
 
   // --- Golden cluster API key ---
   if (isLocalProfile) {
@@ -484,6 +500,145 @@ const listConnectorIds = (base64Payload: string): Array<{ id: string; name: stri
   }
 };
 
+export const runConnectorSetup = async (
+  repoRoot: string,
+  log: {
+    info: (msg: string) => void;
+    warning: (msg: string) => void;
+    error: (msg: string) => void;
+  },
+  options?: { skipDiscovery?: boolean }
+): Promise<void> => {
+  if (!isTTY()) {
+    throw new Error(
+      'No connectors available. Set KIBANA_TESTING_AI_CONNECTORS or run with a TTY to use the setup wizard.'
+    );
+  }
+
+  const existingConnectors = parseConnectorsFromEnv();
+  const hasExistingConnectors = existingConnectors.length > 0;
+  const kibanaDevYmlConnectors = parseConnectorsFromKibanaDevYml(repoRoot);
+  const hasKibanaDevYmlConnectors = kibanaDevYmlConnectors.length > 0;
+
+  const choices = [{ name: 'EIS (Cloud Connected Mode) -- recommended', value: 'eis' }];
+  if (hasKibanaDevYmlConnectors) {
+    choices.push({
+      name: `kibana.dev.yml (${kibanaDevYmlConnectors.length} preconfigured connector(s) found)`,
+      value: 'kibana-dev-yml',
+    });
+  }
+  if (hasExistingConnectors) {
+    choices.push({
+      name: `Already set (KIBANA_TESTING_AI_CONNECTORS has ${existingConnectors.length} connector(s))`,
+      value: 'existing',
+    });
+  }
+
+  const { connectorSource } = await inquirer.prompt<{ connectorSource: string }>({
+    type: 'list',
+    name: 'connectorSource',
+    message: 'How are your LLM connectors configured?',
+    choices,
+  });
+
+  if (connectorSource === 'existing') {
+    log.info('');
+    log.info('Available connectors:');
+    existingConnectors.forEach((c) => log.info(`  - ${c.id} (${c.name})`));
+    log.info('');
+    log.info('You are all set! Run an eval with:');
+    log.info('  node scripts/evals start --suite <suite-id>');
+    log.info('  node scripts/evals run --suite <suite-id> --evaluation-connector-id <id>');
+    return;
+  }
+
+  if (connectorSource === 'kibana-dev-yml') {
+    log.info('');
+    log.info(
+      `Found ${kibanaDevYmlConnectors.length} preconfigured connector(s) in config/kibana.dev.yml:`
+    );
+    kibanaDevYmlConnectors.forEach((c) => log.info(`  - ${c.id} (${c.name})`));
+    log.info('');
+    log.info(
+      'These connectors will be used automatically when KIBANA_TESTING_AI_CONNECTORS is not set.'
+    );
+    log.info('Set KBN_EVALS_SKIP_CONNECTOR_SETUP=true to skip connector setup/teardown.');
+    log.info('');
+    log.info('Run an eval with:');
+    log.info(
+      '  KBN_EVALS_SKIP_CONNECTOR_SETUP=true node scripts/evals run --suite <suite-id> --evaluation-connector-id <connector-id>'
+    );
+    return;
+  }
+
+  // --- EIS path ---
+  log.info('');
+
+  const vaultAddr = getVaultAddr();
+
+  // 1. Check Vault auth (auto-login if not authenticated)
+  log.info(`Checking Vault auth (VAULT_ADDR=${vaultAddr})...`);
+  await ensureVaultAuth(log);
+  log.info('Vault auth OK');
+
+  // 2. Fetch CCM API key
+  const apiKey = fetchCcmApiKey(log);
+  log.info('CCM API key retrieved');
+
+  // 3. Discover EIS models (starts temp ES)
+  if (!(options?.skipDiscovery ?? false)) {
+    log.info('');
+    log.info('Discovering available EIS models (this starts a temporary ES cluster)...');
+    log.info('');
+    runDiscoverEisModels(repoRoot, apiKey);
+  }
+
+  // 4. Check models file exists
+  const modelsPath = Path.resolve(repoRoot, EIS_MODELS_PATH);
+  if (!Fs.existsSync(modelsPath)) {
+    throw new Error(`EIS models file not found at ${modelsPath}. Run without --skip-discovery.`);
+  }
+
+  const modelsJson = JSON.parse(Fs.readFileSync(modelsPath, 'utf-8')) as {
+    models: Array<{ inferenceId: string; modelId: string }>;
+  };
+
+  if (modelsJson.models.length === 0) {
+    throw new Error(
+      'No EIS models were discovered. Check that KIBANA_EIS_CCM_API_KEY is valid and VPN is connected.'
+    );
+  }
+
+  log.info(`Found ${modelsJson.models.length} EIS model(s):`);
+  modelsJson.models.forEach((m) => log.info(`  - ${m.modelId} (${m.inferenceId})`));
+
+  // 5. Generate connectors payload
+  log.info('');
+  log.info('Generating connector payload...');
+  const base64Payload = runGenerateEisConnectors(repoRoot);
+  const connectors = listConnectorIds(base64Payload);
+
+  if (connectors.length === 0) {
+    throw new Error('No connectors generated from EIS models.');
+  }
+
+  log.info(`Generated ${connectors.length} connector(s)`);
+
+  // 6. Output the export command
+  log.info('');
+  log.info('Done! Run the following to export connectors to your shell:');
+  log.info('');
+  log.info(`  export KIBANA_TESTING_AI_CONNECTORS="${base64Payload}"`);
+  process.env.KIBANA_TESTING_AI_CONNECTORS = base64Payload;
+  log.info('');
+  log.info('Available connector IDs:');
+  connectors.forEach((c) => log.info(`  - ${c.id}`));
+  log.info('');
+  log.info('Then start an eval:');
+  log.info('  node scripts/evals start --suite <suite-id>');
+  log.info('  node scripts/evals run --suite <suite-id> --evaluation-connector-id <id>');
+};
+
 export const initCmd: Command<void> = {
   name: 'init',
   description: `
@@ -536,134 +691,11 @@ export const initCmd: Command<void> = {
 
     log.info('Welcome to kbn-evals setup!');
     log.info('');
-
-    // Step 0: Config init (always runs first)
     await runConfigInit(repoRoot, log, { profile });
-
-    if (configOnly) {
-      return;
-    }
-
-    const existingConnectors = parseConnectorsFromEnv();
-    const hasExistingConnectors = existingConnectors.length > 0;
-    const kibanaDevYmlConnectors = parseConnectorsFromKibanaDevYml(repoRoot);
-    const hasKibanaDevYmlConnectors = kibanaDevYmlConnectors.length > 0;
-
-    const choices = [{ name: 'EIS (Cloud Connected Mode) -- recommended', value: 'eis' }];
-    if (hasKibanaDevYmlConnectors) {
-      choices.push({
-        name: `kibana.dev.yml (${kibanaDevYmlConnectors.length} preconfigured connector(s) found)`,
-        value: 'kibana-dev-yml',
+    if (!configOnly) {
+      await runConnectorSetup(repoRoot, log, {
+        skipDiscovery: flagsReader.boolean('skip-discovery'),
       });
     }
-    if (hasExistingConnectors) {
-      choices.push({
-        name: `Already set (KIBANA_TESTING_AI_CONNECTORS has ${existingConnectors.length} connector(s))`,
-        value: 'existing',
-      });
-    }
-
-    const { connectorSource } = await inquirer.prompt<{ connectorSource: string }>({
-      type: 'list',
-      name: 'connectorSource',
-      message: 'How are your LLM connectors configured?',
-      choices,
-    });
-
-    if (connectorSource === 'existing') {
-      log.info('');
-      log.info('Available connectors:');
-      existingConnectors.forEach((c) => log.info(`  - ${c.id} (${c.name})`));
-      log.info('');
-      log.info('You are all set! Run an eval with:');
-      log.info('  node scripts/evals start --suite <suite-id>');
-      log.info('  node scripts/evals run --suite <suite-id> --evaluation-connector-id <id>');
-      return;
-    }
-
-    if (connectorSource === 'kibana-dev-yml') {
-      log.info('');
-      log.info(
-        `Found ${kibanaDevYmlConnectors.length} preconfigured connector(s) in config/kibana.dev.yml:`
-      );
-      kibanaDevYmlConnectors.forEach((c) => log.info(`  - ${c.id} (${c.name})`));
-      log.info('');
-      log.info(
-        'These connectors will be used automatically when KIBANA_TESTING_AI_CONNECTORS is not set.'
-      );
-      log.info('Set KBN_EVALS_SKIP_CONNECTOR_SETUP=true to skip connector setup/teardown.');
-      log.info('');
-      log.info('Run an eval with:');
-      log.info(
-        '  KBN_EVALS_SKIP_CONNECTOR_SETUP=true node scripts/evals run --suite <suite-id> --evaluation-connector-id <connector-id>'
-      );
-      return;
-    }
-
-    // --- EIS path ---
-    log.info('');
-
-    const vaultAddr = getVaultAddr();
-
-    // 1. Check Vault auth (auto-login if not authenticated)
-    log.info(`Checking Vault auth (VAULT_ADDR=${vaultAddr})...`);
-    await ensureVaultAuth(log);
-    log.info('Vault auth OK');
-
-    // 2. Fetch CCM API key
-    const apiKey = fetchCcmApiKey(log);
-    log.info('CCM API key retrieved');
-
-    // 3. Discover EIS models (starts temp ES)
-    if (!flagsReader.boolean('skip-discovery')) {
-      log.info('');
-      log.info('Discovering available EIS models (this starts a temporary ES cluster)...');
-      log.info('');
-      runDiscoverEisModels(repoRoot, apiKey);
-    }
-
-    // 4. Check models file exists
-    const modelsPath = Path.resolve(repoRoot, EIS_MODELS_PATH);
-    if (!Fs.existsSync(modelsPath)) {
-      throw new Error(`EIS models file not found at ${modelsPath}. Run without --skip-discovery.`);
-    }
-
-    const modelsJson = JSON.parse(Fs.readFileSync(modelsPath, 'utf-8')) as {
-      models: Array<{ inferenceId: string; modelId: string }>;
-    };
-
-    if (modelsJson.models.length === 0) {
-      throw new Error(
-        'No EIS models were discovered. Check that KIBANA_EIS_CCM_API_KEY is valid and VPN is connected.'
-      );
-    }
-
-    log.info(`Found ${modelsJson.models.length} EIS model(s):`);
-    modelsJson.models.forEach((m) => log.info(`  - ${m.modelId} (${m.inferenceId})`));
-
-    // 5. Generate connectors payload
-    log.info('');
-    log.info('Generating connector payload...');
-    const base64Payload = runGenerateEisConnectors(repoRoot);
-    const connectors = listConnectorIds(base64Payload);
-
-    if (connectors.length === 0) {
-      throw new Error('No connectors generated from EIS models.');
-    }
-
-    log.info(`Generated ${connectors.length} connector(s)`);
-
-    // 6. Output the export command
-    log.info('');
-    log.info('Done! Run the following to export connectors to your shell:');
-    log.info('');
-    log.info(`  export KIBANA_TESTING_AI_CONNECTORS="${base64Payload}"`);
-    log.info('');
-    log.info('Available connector IDs:');
-    connectors.forEach((c) => log.info(`  - ${c.id}`));
-    log.info('');
-    log.info('Then start an eval:');
-    log.info('  node scripts/evals start --suite <suite-id>');
-    log.info('  node scripts/evals run --suite <suite-id> --evaluation-connector-id <id>');
   },
 };
