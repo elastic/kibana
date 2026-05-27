@@ -15,6 +15,7 @@
     "server/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/advanced-settings-plugin",
     "@kbn/core",
     "@kbn/esql-language",
     "@kbn/esql-types",

@@ -8,6 +8,7 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { AdvancedSettingsSetup } from '@kbn/advanced-settings-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -38,6 +39,7 @@ export interface WorkflowsPublicPluginSetup {}
 
 export interface WorkflowsPublicPluginSetupDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  advancedSettings?: AdvancedSettingsSetup;
 }
 
 export interface WorkflowsPublicPluginStart {

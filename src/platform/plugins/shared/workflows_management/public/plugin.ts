@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { filter, Subject, type Subscription } from 'rxjs';
+import { SystemWorkflowSettingsSection } from './features/system_workflow_settings/system_workflow_settings_section';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type {
   AppDeepLinkLocations,
@@ -82,6 +84,25 @@ export class WorkflowsPlugin
     // Return early if workflows UI is not enabled, do not register the connector type and UI
     if (!isWorkflowsUiEnabled) {
       return {};
+    }
+
+    // Register system workflow settings section in Advanced Settings
+    if (plugins.advancedSettings) {
+      const uiSettingsClient = core.uiSettings;
+      const SEARCH_TERMS = ['workflows', 'system', 'system workflow'];
+
+      plugins.advancedSettings.addSpaceSection(
+        ({ toasts, enableSaving }) =>
+          React.createElement(SystemWorkflowSettingsSection, {
+            uiSettings: uiSettingsClient,
+            toasts,
+            enableSaving,
+          }),
+        (query) => {
+          const term = query.toLowerCase();
+          return SEARCH_TERMS.some((t) => t.includes(term) || term.includes(t));
+        }
+      );
     }
 
     // Register workflows connector UI component lazily to reduce main bundle size
