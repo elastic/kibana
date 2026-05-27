@@ -9,6 +9,6 @@ import { schema } from '@kbn/config-schema';
 
 export const PostManagedOtlpAPIKeyRequestSchema = {
   body: schema.object({
-    name: schema.string(),
+    name: schema.string({ maxLength: 256 }),
   }),
 };
