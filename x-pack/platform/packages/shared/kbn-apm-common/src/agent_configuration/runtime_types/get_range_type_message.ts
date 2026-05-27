@@ -1,10 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isFinite } from 'lodash';
@@ -22,7 +20,7 @@ function getRangeType(min?: number, max?: number) {
 }
 
 export function getRangeTypeMessage(min?: number | string, max?: number | string) {
-  return i18n.translate('xpack.apm.agentConfig.range.errorText', {
+  return i18n.translate('apmCommon.agentConfig.range.errorText', {
     defaultMessage: `{rangeType, select,
         between {Must be between {min} and {max}}
         gt {Must be greater than {min}}
