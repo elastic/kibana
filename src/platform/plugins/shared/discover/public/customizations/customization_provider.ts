@@ -20,7 +20,10 @@ import type {
 import { createCustomizationService } from './customization_service';
 import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
 import type { DiscoverServices } from '../build_services';
-import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux';
+import {
+  fromSavedObjectTabToAppState,
+  fromSavedSearchToSavedObjectTab,
+} from '../application/main/state_management/redux';
 
 const customizationContext = createContext(createCustomizationService());
 
@@ -47,13 +50,14 @@ export const getExtendedDiscoverStateContainer = (
 ): ExtendedDiscoverStateContainer => ({
   ...stateContainer,
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => {
+    const persistedTab = fromSavedSearchToSavedObjectTab({
+      tab: stateContainer.getCurrentTab(),
+      savedSearch: newSavedSearch,
+      services,
+    });
     return getInitialAppState({
-      initialUrlState: undefined,
-      persistedTab: fromSavedSearchToSavedObjectTab({
-        tab: stateContainer.getCurrentTab(),
-        savedSearch: newSavedSearch,
-        services,
-      }),
+      initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
+      persistedTab,
       dataView: newSavedSearch.searchSource.getField('index'),
       services,
     });

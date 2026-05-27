@@ -172,7 +172,6 @@
         "@smithy/node-http-handler",
         "@smithy/types",
         "@types/aws4",
-        "ajv",
         "aws4",
         "eventsource-parser",
         "fast-glob",
@@ -219,7 +218,6 @@
         "@playwright/test",
         "playwright",
         "pngjs",
-        "qs",
         "rxjs-marbles",
         "sharp",
         "superagent",
@@ -1487,6 +1485,7 @@
         "@apidevtools/swagger-parser",
         "@redocly/cli",
         "openapi-types",
+        "ajv",
         "ajv-draft-04",
         "ajv-formats"
       ],
@@ -1839,7 +1838,8 @@
       "groupName": "polyfills",
       "matchDepNames": [
         "blob-polyfill",
-        "core-js"
+        "core-js",
+        "qs"
       ],
       "matchDepPatterns": [
         "polyfill"

@@ -1026,6 +1026,7 @@ x-pack/platform/plugins/private/logstash @elastic/logstash
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
 x-pack/platform/plugins/private/observability_ai_assistant_management @elastic/obs-ai-team
+x-pack/platform/plugins/private/otel_telemetry_collection @elastic/observability-bi
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
 x-pack/platform/plugins/private/product_intercept @elastic/appex-sharedux
 x-pack/platform/plugins/private/reindex_service @elastic/kibana-management
@@ -3063,6 +3064,13 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 /.agents/skills/scout-create-scaffold/** @elastic/appex-qa
 /.agents/skills/scout-migrate-from-ftr/** @elastic/appex-qa
 /.agents/skills/scout-ui-testing/** @elastic/appex-qa
+
+
+/.mise.toml @elastic/kibana-operations
+
+# FTR config manifests have no single owner — touched by all solutions.
+# Leaving this unowned avoids routing every edit through Kibana Operations.
+/.buildkite/ftr-manifests/
 
 ####
 ## These rules are always last so they take ultimate priority over everything else

@@ -22,7 +22,7 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
   });
 
   apiTest('collector integration missing', async ({ profilingHelper, apiServices, apiClient }) => {
-    const ids = await profilingHelper.getPoliciyIds();
+    const ids = await profilingHelper.getPolicyIds();
     const collectorId = ids.collectorId;
 
     await apiServices.fleet.package_policies.delete(collectorId!);
@@ -52,7 +52,7 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
   apiTest(
     'Symbolizer integration is not installed',
     async ({ profilingHelper, apiClient, apiServices }) => {
-      const ids = await profilingHelper.getPoliciyIds();
+      const ids = await profilingHelper.getPolicyIds();
 
       const symbolizerId = ids.symbolizerId;
 

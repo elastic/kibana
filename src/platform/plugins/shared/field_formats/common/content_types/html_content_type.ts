@@ -47,7 +47,9 @@ export const setup = (
     }
 
     const subValues = value.map((v: unknown) => recurse(v, options));
-    const useMultiLine = subValues.some((sub: string) => sub.indexOf('\n') > -1);
+    const useMultiLine = subValues.some(
+      (sub: string) => typeof sub === 'string' && sub.indexOf('\n') > -1
+    );
 
     return subValues.join(highlight(',') + (useMultiLine ? '\n' : ' '));
   };
@@ -59,7 +61,7 @@ export const setup = (
       return convertedValue;
     }
 
-    if (convertedValue.includes('\n')) {
+    if (typeof convertedValue === 'string' && convertedValue.includes('\n')) {
       const indentedValue = convertedValue.replaceAll(/(\n+)/g, '$1  ');
 
       return highlight('[') + `\n  ${indentedValue}\n` + highlight(']');
