@@ -212,3 +212,27 @@ export const DeleteCloudOnboardingDeploymentRequestSchema = {
 export const DeleteCloudOnboardingDeploymentResponseSchema = schema.object({
   id: schema.string(),
 });
+
+// --- Prepare endpoint ---
+
+export const PrepareCloudOnboardingDeploymentRequestSchema = {
+  params: OnboardingDeploymentIdParamSchema,
+};
+
+export const PrepareCloudOnboardingDeploymentResponseSchema = schema.object({
+  templateUrl: schema.string({ meta: { description: 'S3 URL of the CloudFormation template.' } }),
+  templateParameters: schema.recordOf(schema.string(), schema.string(), {
+    meta: { description: 'Pre-filled CloudFormation stack parameters.' },
+  }),
+  cliCommand: schema.string({
+    meta: { description: 'Ready-to-paste AWS CLI create-stack command.' },
+  }),
+  apiKeyId: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Elasticsearch API key ID created for push mechanisms. Absent for agentless-only (IF) deployments.',
+      },
+    })
+  ),
+});

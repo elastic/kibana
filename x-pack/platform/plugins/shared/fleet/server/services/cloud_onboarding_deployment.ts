@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { nodeBuilder } from '@kbn/es-query';
 
 import {
@@ -14,12 +14,30 @@ import {
 } from '../../common/constants';
 import type {
   CloudOnboardingDeployment,
+  CloudOnboardingDeploymentMechanism,
   CreateCloudOnboardingDeploymentInput,
   UpdateCloudOnboardingDeploymentInput,
 } from '../../common/types/models/cloud_onboarding_deployment';
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
 
 const CLOUD_ONBOARDING_DEPLOYMENT_LIMIT = 100;
+
+const PUSH_MECHANISMS: CloudOnboardingDeploymentMechanism[] = ['firehose', 'cloud_forwarder'];
+
+const CFN_TEMPLATE_URLS: Record<string, string> = {
+  identity_federation:
+    'https://elastic-cloudformation-templates.s3.amazonaws.com/identity-federation/latest.yaml',
+  firehose: 'https://elastic-cloudformation-templates.s3.amazonaws.com/firehose/latest.yaml',
+  cloud_forwarder:
+    'https://elastic-cloudformation-templates.s3.amazonaws.com/cloud-forwarder/latest.yaml',
+};
+
+export interface PrepareResult {
+  templateUrl: string;
+  templateParameters: Record<string, string>;
+  cliCommand: string;
+  apiKeyId?: string;
+}
 
 class CloudOnboardingDeploymentService {
   public async create(
@@ -96,6 +114,80 @@ class CloudOnboardingDeploymentService {
     );
 
     return this.getById(soClient, id);
+  }
+
+  public async prepare(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    id: string
+  ): Promise<PrepareResult> {
+    const deployment = await this.getById(soClient, id);
+
+    if (deployment.status !== 'pending') {
+      throw new Error(`Deployment ${id} is not in pending status (current: ${deployment.status})`);
+    }
+
+    const primaryMechanism = deployment.mechanisms[0] ?? 'agentless';
+    const needsApiKey = deployment.mechanisms.some((m) => PUSH_MECHANISMS.includes(m));
+
+    let apiKeyId: string | undefined;
+    let apiKeyEncoded: string | undefined;
+
+    if (needsApiKey) {
+      const keyResponse = await esClient.security.createApiKey({
+        name: `cloud-onboarding-${id}-${primaryMechanism}`,
+        metadata: { deployment_id: id, mechanism: primaryMechanism },
+      });
+      apiKeyId = keyResponse.id;
+      apiKeyEncoded = keyResponse.encoded;
+
+      await soClient.update<CloudOnboardingDeploymentSOAttributes>(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        id,
+        { apiKeyId }
+      );
+    }
+
+    const templateUrl =
+      CFN_TEMPLATE_URLS[primaryMechanism] ?? CFN_TEMPLATE_URLS.identity_federation;
+
+    const templateParameters: Record<string, string> = {
+      DeploymentId: id,
+    };
+
+    if (apiKeyEncoded) {
+      templateParameters.ElasticApiKey = apiKeyEncoded;
+    }
+
+    if (deployment.serviceVars) {
+      const allRegions = new Set<string>();
+      for (const entries of Object.values(deployment.serviceVars)) {
+        for (const entry of entries) {
+          for (const r of entry.regions ?? []) {
+            allRegions.add(r);
+          }
+          if (entry.aws_region) allRegions.add(entry.aws_region);
+          if (entry.region) allRegions.add(entry.region);
+        }
+      }
+      if (allRegions.size > 0) {
+        templateParameters.Regions = [...allRegions].join(',');
+      }
+    }
+
+    const paramFlags = Object.entries(templateParameters)
+      .map(([k, v]) => `ParameterKey=${k},ParameterValue=${v}`)
+      .join(' ');
+
+    const cliCommand = [
+      'aws cloudformation create-stack',
+      `--stack-name elastic-onboarding-${primaryMechanism}`,
+      `--template-url ${templateUrl}`,
+      `--parameters ${paramFlags}`,
+      '--capabilities CAPABILITY_NAMED_IAM',
+    ].join(' \\\n  ');
+
+    return { templateUrl, templateParameters, cliCommand, apiKeyId };
   }
 
   public async delete(soClient: SavedObjectsClientContract, id: string): Promise<void> {
