@@ -51,13 +51,13 @@ export const UnenrollInProgressActivityItem: React.FunctionComponent<{
         <EuiFlexItem>
           <EuiText color="subdued" data-test-subj="unenrollInProgressDescription">
             <p>
-              {isScheduled && action.startTime ? (
+              {isScheduled ? (
                 <>
                   <FormattedMessage
                     id="xpack.fleet.agentActivityFlyout.unenrollScheduledDescription"
                     defaultMessage="Scheduled for "
                   />
-                  <strong>{formattedTime(action.startTime)}</strong>.
+                  <strong>{formattedTime(action.startTime!)}</strong>.
                 </>
               ) : (
                 <>{inProgressDescription(action.creationTime)}</>
@@ -77,7 +77,7 @@ export const UnenrollInProgressActivityItem: React.FunctionComponent<{
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText data-test-subj="unenrollInProgressTitle">
-                {isScheduled && action.startTime ? (
+                {isScheduled ? (
                   <FormattedMessage
                     id="xpack.fleet.agentActivityFlyout.unenrollScheduledTitle"
                     defaultMessage="{nbAgents} {agents} scheduled to be unenrolled"
@@ -95,7 +95,7 @@ export const UnenrollInProgressActivityItem: React.FunctionComponent<{
           </EuiFlexGroup>
         </EuiFlexItem>
 
-        {isScheduled && action.startTime && (
+        {isScheduled && (
           <EuiFlexItem>
             <EuiCallOut
               announceOnMount
@@ -107,7 +107,7 @@ export const UnenrollInProgressActivityItem: React.FunctionComponent<{
                 <FormattedMessage
                   id="xpack.fleet.agentActivityFlyout.unenrollGracePeriodWarning"
                   defaultMessage="Cancel before {time}."
-                  values={{ time: formattedTime(action.startTime) }}
+                  values={{ time: formattedTime(action.startTime!) }}
                 />
               }
             >
