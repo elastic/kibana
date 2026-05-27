@@ -230,13 +230,13 @@ export const toExpression = (
               .get(CUSTOM_PALETTE)
               .toExpression(computePaletteParams(paletteService, state.palette)),
           ]
-        : [],
+        : undefined,
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,
     secondaryLabelPosition:
       state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
-    applyColorTo: state.applyColorTo ?? LENS_METRIC_STATE_DEFAULTS.applyColorTo,
+    applyColorTo: state.applyColorTo,
   });
 
   return {

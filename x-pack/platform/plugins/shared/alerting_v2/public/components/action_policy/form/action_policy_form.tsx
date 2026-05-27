@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useFetchDataFields } from '../../../hooks/use_fetch_data_fields';
 import { DispatchSection } from './components/dispatch_section';
 import { MatcherInput } from './components/matcher_input';
@@ -36,7 +36,8 @@ const optionalLabel = (
 
 export const ActionPolicyForm = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
-  const { data: dataFieldNames } = useFetchDataFields();
+  const matcher = useWatch({ control, name: 'matcher' });
+  const { data: dataFieldNames } = useFetchDataFields(matcher);
 
   return (
     <>

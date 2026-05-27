@@ -97,7 +97,16 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
       {
         render: (fleetServerHost: FleetServerHost) =>
           fleetServerHost.is_default ? (
-            <EuiIcon type="check" data-test-subj="fleetServerHostTable.defaultIcon" />
+            <EuiIcon
+              type="check"
+              data-test-subj="fleetServerHostTable.defaultIcon"
+              aria-label={i18n.translate(
+                'xpack.fleet.settings.fleetServerHostsTable.defaultIconLabel',
+                {
+                  defaultMessage: 'Default Fleet Server host',
+                }
+              )}
+            />
           ) : null,
         width: '200px',
         name: i18n.translate('xpack.fleet.settings.fleetServerHostsTable.defaultColumnTitle', {

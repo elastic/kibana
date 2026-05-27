@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type { StateComparators } from '@kbn/presentation-publishing';
 import type { TimeSlice, TimeSliderControlState } from '@kbn/controls-schemas';
 import { DEFAULT_TIME_SLIDER_STATE } from '@kbn/controls-constants';
@@ -37,6 +37,16 @@ export function initTimeRangePercentage(
 
   return {
     setTimeRangePercentage(timeslice: TimeSlice | undefined, timeRangeMeta: TimeRangeMeta) {
+      if (!timeslice) {
+        timesliceStartAsPercentageOfTimeRange$.next(
+          DEFAULT_TIME_SLIDER_STATE.start_percentage_of_time_range
+        );
+        timesliceEndAsPercentageOfTimeRange$.next(
+          DEFAULT_TIME_SLIDER_STATE.end_percentage_of_time_range
+        );
+        return;
+      }
+
       let timesliceStartAsPercentageOfTimeRange:
         | TimeSliderControlState['start_percentage_of_time_range']
         | undefined;
@@ -65,9 +75,15 @@ export function initTimeRangePercentage(
       };
     },
     anyStateChange$: merge(
-      timesliceStartAsPercentageOfTimeRange$,
-      timesliceEndAsPercentageOfTimeRange$
-    ).pipe(map(() => undefined)),
+      timesliceStartAsPercentageOfTimeRange$.pipe(
+        skip(1),
+        map(() => undefined)
+      ),
+      timesliceEndAsPercentageOfTimeRange$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     reinitializeState: (lastSaved?: TimeSliderControlState) => {
       const startPercentage =
         lastSaved?.start_percentage_of_time_range ??

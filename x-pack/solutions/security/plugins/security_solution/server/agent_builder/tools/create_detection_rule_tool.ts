@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type {
   SecuritySolutionPluginStart,
   SecuritySolutionPluginStartDependencies,
@@ -57,11 +58,29 @@ The tool stores the result as an attachment (creating new or updating existing).
           };
         }
 
-        return getAgentBuilderResourceAvailability({
+        const spaceAvailability = await getAgentBuilderResourceAvailability({
           core,
           request,
           logger,
         });
+
+        if (spaceAvailability.status === 'unavailable') {
+          return spaceAvailability;
+        }
+
+        const [coreStart] = await core.getStartServices();
+        const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+        const isEsqlEnabled = await uiSettingsClient.get<boolean>(ENABLE_ESQL);
+
+        if (!isEsqlEnabled) {
+          return {
+            status: 'unavailable',
+            reason: 'ES|QL is disabled in this space via the enableESQL advanced setting.',
+          };
+        }
+
+        return { status: 'available' };
       },
     },
     handler: async (

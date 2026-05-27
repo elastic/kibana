@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import * as React from 'react';
 import { getTestRunDetailLink } from '../common/links/test_details_link';
 import { useLocations } from '../../hooks';
+import { useUrlSpaceId } from '../../hooks/use_url_space_id';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import type { JourneyStep, Ping } from '../../../../../common/runtime_types';
 import { formatDuration } from '../../utils/formatting';
@@ -40,6 +41,7 @@ export function TestResultHeader({
   configId,
 }: Props) {
   const { basePath } = useSyntheticsSettingsContext();
+  const spaceId = useUrlSpaceId();
   let duration = 0;
   if (summaryDocs && summaryDocs.length > 0) {
     summaryDocs.forEach((sDoc) => {
@@ -100,6 +102,7 @@ export function TestResultHeader({
               monitorId: configId,
               checkGroup: checkGroupId,
               locationId: getLocationByLabel(summaryDoc?.observer?.geo?.name!)?.id,
+              spaceId,
             })}
           >
             {VIEW_DETAILS}

@@ -45,6 +45,18 @@ export const TEST_RUN_DETAILS_ROUTE = '/monitor/:monitorId/test-run/:checkGroupI
 
 export const ERROR_DETAILS_ROUTE = '/monitor/:monitorId/errors/:errorStateId';
 
+export const SYNTHETICS_APP_BASE_PATH = '/app/synthetics';
+
+// Path helpers prefixed with SYNTHETICS_APP_BASE_PATH
+// suitable for deep-linking when building remote-cluster URLs.
+export const paths = {
+  monitorDetail: (configId: string) =>
+    `${SYNTHETICS_APP_BASE_PATH}${MONITOR_ROUTE.replace(
+      ':monitorId?',
+      encodeURIComponent(configId)
+    )}`,
+};
+
 export enum STATUS {
   UP = 'up',
   DOWN = 'down',

@@ -6,17 +6,38 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBasicTable, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import {
+  SloBurnRateWindowColumnHeader,
+  type SloBurnRateWindow,
+} from './common/slo_burn_rate_window_column_header';
+import { MemberStatusBadge } from './composite_slo_member_status_badge';
 
 const SLODetailsFlyout = lazy(() => import('../../slo_details/shared_flyout/slo_details_flyout'));
 
+function getMemberBurnRateValue(
+  item: CompositeSLOMemberSummary,
+  window: SloBurnRateWindow
+): number | undefined {
+  const map = {
+    '5m': item.fiveMinuteBurnRate,
+    '1h': item.oneHourBurnRate,
+    '1d': item.oneDayBurnRate,
+  } as const;
+  return map[window];
+}
+
 const getMemberColumns = (
-  percentFormat: string
+  percentFormat: string,
+  burnRateWindow: SloBurnRateWindow,
+  setBurnRateWindow: (w: SloBurnRateWindow) => void,
+  isBurnRatePopoverOpen: boolean,
+  setIsBurnRatePopoverOpen: React.Dispatch<React.SetStateAction<boolean>>
 ): Array<EuiBasicTableColumn<CompositeSLOMemberSummary>> => [
   {
     field: 'name',
@@ -25,6 +46,14 @@ const getMemberColumns = (
     }),
     truncateText: true,
     width: '220px',
+  },
+  {
+    field: 'status',
+    name: i18n.translate('xpack.slo.compositeSloList.members.status', {
+      defaultMessage: 'Status',
+    }),
+    width: '110px',
+    render: (status: CompositeSLOMemberSummary['status']) => <MemberStatusBadge status={status} />,
   },
   {
     field: 'instanceId',
@@ -44,7 +73,7 @@ const getMemberColumns = (
   {
     field: 'normalisedWeight',
     name: i18n.translate('xpack.slo.compositeSloList.members.normalisedWeight', {
-      defaultMessage: 'Normalised weight',
+      defaultMessage: 'Normalized weight',
     }),
     width: '140px',
     render: (value: number) =>
@@ -60,13 +89,51 @@ const getMemberColumns = (
       value === -1 ? NOT_AVAILABLE_LABEL : numeral(value).format(percentFormat),
   },
   {
-    field: 'contribution',
-    name: i18n.translate('xpack.slo.compositeSloList.members.contribution', {
-      defaultMessage: 'Contribution',
+    field: 'errorBudget.remaining',
+    name: i18n.translate('xpack.slo.compositeSloList.members.budgetRemaining', {
+      defaultMessage: 'Budget remaining',
     }),
-    width: '110px',
-    render: (value: number) =>
-      value === -1 ? NOT_AVAILABLE_LABEL : numeral(value).format(percentFormat),
+    width: '130px',
+    render: (_: unknown, item: CompositeSLOMemberSummary) => {
+      if (item.status === 'NO_DATA') {
+        return NOT_AVAILABLE_LABEL;
+      }
+      if (item.errorBudget === undefined) {
+        return NOT_AVAILABLE_LABEL;
+      }
+      return numeral(item.errorBudget.remaining).format(percentFormat);
+    },
+  },
+  {
+    name: (
+      <SloBurnRateWindowColumnHeader
+        burnRateWindow={burnRateWindow}
+        onBurnRateWindowChange={setBurnRateWindow}
+        isPopoverOpen={isBurnRatePopoverOpen}
+        setIsPopoverOpen={setIsBurnRatePopoverOpen}
+        buttonTestSubj="compositeSloMembersBurnRateWindowSelector"
+        popoverAriaLabel={i18n.translate(
+          'xpack.slo.compositeSloList.members.burnRate.windowAriaLabel',
+          {
+            defaultMessage: 'Select burn rate window for member SLOs',
+          }
+        )}
+        burnRateLabel={i18n.translate('xpack.slo.compositeSloList.members.burnRateColumn', {
+          defaultMessage: 'Burn rate',
+        })}
+      />
+    ),
+    width: '130px',
+    render: (item: CompositeSLOMemberSummary) => {
+      if (item.status === 'NO_DATA') {
+        return NOT_AVAILABLE_LABEL;
+      }
+      const windowValue = getMemberBurnRateValue(item, burnRateWindow);
+      if (windowValue === undefined) {
+        return NOT_AVAILABLE_LABEL;
+      }
+      return <EuiText size="s">{`${numeral(windowValue).format('0.[00]')}x`}</EuiText>;
+    },
   },
 ];
 
@@ -77,8 +144,21 @@ export function CompositeSloMembersTable({
   members: CompositeSLOMemberSummary[];
   percentFormat: string;
 }) {
-  const columns = useMemo(() => getMemberColumns(percentFormat), [percentFormat]);
+  const [burnRateWindow, setBurnRateWindow] = useState<SloBurnRateWindow>('5m');
+  const [isBurnRatePopoverOpen, setIsBurnRatePopoverOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<CompositeSLOMemberSummary | null>(null);
+
+  const columns = useMemo(
+    () =>
+      getMemberColumns(
+        percentFormat,
+        burnRateWindow,
+        setBurnRateWindow,
+        isBurnRatePopoverOpen,
+        setIsBurnRatePopoverOpen
+      ),
+    [percentFormat, burnRateWindow, isBurnRatePopoverOpen]
+  );
 
   return (
     <div css={{ padding: '16px' }}>

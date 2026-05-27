@@ -12,6 +12,13 @@ export const registerGetTagRoute = (router: TagsPluginRouter) => {
   router.get(
     {
       path: '/api/saved_objects_tagging/tags/{id}',
+      options: {
+        deprecated: {
+          documentationUrl: 'https://www.elastic.co/docs/api/doc/kibana/group/endpoint-tags',
+          severity: 'warning',
+          reason: { type: 'migrate', newApiMethod: 'GET', newApiPath: '/api/tags/{id}' },
+        },
+      },
       security: {
         authz: {
           enabled: false,

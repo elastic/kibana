@@ -6,14 +6,15 @@ consts:
   abuseipdb_base_url: https://api.abuseipdb.com/api/v2
   ipapi_base_url: http://ip-api.com/json
 
-inputs:
-  - name: ip_address
-    type: string
-    description: The IP address to check for malicious activity (e.g., 8.8.8.8)
-    required: true
+
 
 triggers:
   - type: manual
+    inputs:
+      - name: ip_address
+        type: string
+        description: The IP address to check for malicious activity (e.g., 8.8.8.8)
+        required: true
 
 steps:
   - name: check_abuseipdb

@@ -42,6 +42,7 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/workflows-yaml'
   - '@kbn/react-query'
+  - '@kbn/agent-builder-workflow-gen'
 tags:
   - plugin
   - prod

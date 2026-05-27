@@ -132,6 +132,7 @@ For general Scout API auth patterns (`requestAuth`, `samlAuth`, common headers, 
 - Put shared helpers in `test/scout*/ui/fixtures/helpers.ts` (or API helpers in API fixtures).
 - Add test-subject constants in `fixtures/constants.ts` for reuse across tests and page objects.
 - For `parallel_tests/` ingestion, use `parallel_tests/global.setup.ts` + `globalSetupHook` (no `esArchiver` in spec files).
+- For suite-wide Elasticsearch/Kibana state reset (e.g. reverting feature flags or global `uiSettings`, dropping hand-indexed data that affects other Scout configs sharing the cluster), use the **optional** `globalTeardownHook` in `parallel_tests/global.teardown.ts`. Picked up automatically when `runGlobalSetup: true` — no extra config flag. Use `esClient.indices.delete` / `deleteDataStream` / `deleteByQuery`, `kbnClient.uiSettings.unset(...)`, and `apiServices.core.settings(...)` to reset state. Per-test/per-suite cleanup still belongs in `afterEach`/`afterAll`.
 
 #### Synthtrace in Scout **API** tests
 
@@ -197,6 +198,7 @@ Once the new specs typecheck and run, control returns to the parent skill. Step 
 - Use `test.step(...)` inside a single `test(...)` when an FTR suite used multiple `it(...)` blocks as one journey.
 - Parallel UI: isolate per-space state via `spaceTest` + `scoutSpace`; avoid hardcoded saved object IDs and make names unique (often suffix with `scoutSpace.id`).
 - Use `globalSetupHook` in `parallel_tests/global.setup.ts` to ingest shared data once.
+- Use the optional `globalTeardownHook` in `parallel_tests/global.teardown.ts` to reset shared state once after the suite (no `esArchiver`; `esClient`/`kbnClient`/`apiServices` only). See step 6 above for the cleanup primitives and cautions.
 - Use `page.addInitScript(...)` before navigation to set localStorage/cookies (skip tours/onboarding).
 - When FTR used rison-encoded query params, replicate with `@kbn/rison` and add **`@kbn/rison`** to **`kbn_references`** on the `tsconfig.json` that includes the Scout UI files (plugin root under **Pattern A**, or `test/scout/ui/tsconfig.json` under **Pattern B**).
 - Add stable `data-test-subj` attributes when selectors are unstable.

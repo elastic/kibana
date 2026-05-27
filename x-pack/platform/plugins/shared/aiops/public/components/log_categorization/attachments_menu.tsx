@@ -207,6 +207,12 @@ export const AttachmentsMenu = ({
       {!!panels[0]?.items?.length && (
         <EuiFlexItem>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.aiops.logCategorization.attachmentsPopoverAriaLabel',
+              {
+                defaultMessage: 'Attachments',
+              }
+            )}
             button={
               <EuiButtonIcon
                 data-test-subj="aiopsLogPatternAnalysisAttachmentsMenuButton"

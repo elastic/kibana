@@ -301,7 +301,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkCircleFill" color="success" />
+            <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexCompleteText}</EuiText>
@@ -313,7 +313,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="warningFill" color="danger" />
+              <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s">{i18nTexts.reindexFailedText}</EuiText>
@@ -326,7 +326,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warningFill" color="danger" />
+            <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexFetchFailedText}</EuiText>
@@ -337,7 +337,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warningFill" color="danger" />
+            <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.reindexPausedText}</EuiText>
@@ -364,7 +364,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkCircleFill" color="success" />
+            <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts[`${updateAction}CompleteText`]}</EuiText>

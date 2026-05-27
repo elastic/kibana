@@ -13,6 +13,7 @@ import {
   type UptimeOverviewLocatorInfraParams,
 } from '@kbn/deeplinks-observability';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { BrowserUrlService } from '@kbn/share-plugin/public';
 import React, { useMemo } from 'react';
@@ -74,6 +75,9 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
   return (
     <EuiPopover
       anchorPosition="downRight"
+      aria-label={i18n.translate('xpack.logsShared.logEntryActionsMenu.popoverAriaLabel', {
+        defaultMessage: 'Investigate actions',
+      })}
       button={
         <EuiButton
           data-test-subj="logEntryActionsMenuButton"

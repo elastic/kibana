@@ -24,25 +24,15 @@ const ThroughputChartContent = ({
   color,
   title,
 }: ThroughputChartContentProps) => {
-  const {
-    services,
-    fetchParams,
-    discoverFetch$,
-    indexes,
-    onBrushEnd,
-    onFilter,
-    actions,
-    profileId,
-  } = useTraceMetricsContext();
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
+    useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
     metricItem: {
       metricName: 'id',
       metricTypes: ['counter'],
       units: ['count'],
-      dataStream: indexes,
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-      dimensionFields: [],
     },
     color,
     seriesType,

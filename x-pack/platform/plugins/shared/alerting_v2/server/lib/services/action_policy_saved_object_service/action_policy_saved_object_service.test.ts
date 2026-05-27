@@ -15,6 +15,7 @@ import { createActionPolicySavedObjectService } from './action_policy_saved_obje
 const mockAttrs: ActionPolicySavedObjectAttributes = {
   name: 'test-policy',
   description: 'A test action policy',
+  type: 'global',
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   auth: {
@@ -23,9 +24,7 @@ const mockAttrs: ActionPolicySavedObjectAttributes = {
     createdByUser: false,
   },
   createdBy: 'elastic',
-  createdByUsername: 'elastic',
   updatedBy: 'elastic',
-  updatedByUsername: 'elastic',
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
 };

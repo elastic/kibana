@@ -22,7 +22,8 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
 import type { DocViewerExtensionParams } from '../../context_awareness';
-import { useProfileAccessor } from '../../context_awareness';
+import { DocumentType, useProfileAccessor } from '../../context_awareness';
+import { recordHasContext } from '../../context_awareness/profiles_manager/record_has_context';
 
 export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 
@@ -52,6 +53,9 @@ export interface DiscoverGridFlyoutProps
   ) => void;
   hideFilteringOnComputedColumns?: boolean;
 }
+
+const getOriginDocType = (record: DataTableRecord): DocumentType =>
+  recordHasContext(record) ? record.context.type : DocumentType.Default;
 
 /**
  * Flyout displaying an expanded Elasticsearch document
@@ -108,8 +112,11 @@ export function DiscoverGridFlyout({
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.docViewer);
   }, []);
 
+  const originDocType = useMemo(() => getOriginDocType(actualHit), [actualHit]);
+
   return (
     <UnifiedDocViewerFlyout
+      originDocType={originDocType}
       flyoutTitle={docViewer.title}
       flyoutActions={
         !isESQLQuery && flyoutActions.length > 0 ? (

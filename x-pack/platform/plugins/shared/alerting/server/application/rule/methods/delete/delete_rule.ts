@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -20,6 +21,7 @@ import type { DeleteRuleParams } from './types';
 import { deleteRuleParamsSchema } from './schemas';
 import { deleteRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export async function deleteRule(context: RulesClientContext, params: DeleteRuleParams) {
   try {
@@ -128,9 +130,19 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
     context.logger.error(`delete(): Failed to soft delete gaps for rule ${id}: ${error.message}`);
   }
 
+  const deleteTime = Date.now();
   const removeResult = await deleteRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     id,
+  });
+
+  await logRuleChanges({
+    ruleSOs: [rule],
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleDelete,
+      timestamp: deleteTime,
+    },
   });
 
   await Promise.all([
