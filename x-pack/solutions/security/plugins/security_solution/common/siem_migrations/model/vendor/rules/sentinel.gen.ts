@@ -36,11 +36,11 @@ export const SentinelRuleProperties = lazySchema(() =>
     /**
      * The frequency in ISO 8601 duration format for this alert rule to run.
      */
-    queryFrequency: z.string().optional(),
+    queryFrequency: z.string().max(16).optional(),
     /**
      * The period in ISO 8601 duration format that this alert rule looks at.
      */
-    queryPeriod: z.string().optional(),
+    queryPeriod: z.string().max(16).optional(),
     /**
      * The rule severity
      */
