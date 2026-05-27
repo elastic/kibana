@@ -7,7 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiCallOut, EuiSpacer, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut, EuiSpacer, EuiToolTip } from '@elastic/eui';
 
 interface Props {
   title: React.ReactNode;
@@ -30,13 +30,15 @@ export const FieldLoadingError: FunctionComponent<Props> = (props) => {
           <>
             {title}
 
-            <EuiButtonIcon
-              size="s"
-              color="warning"
-              onClick={resendRequest}
-              iconType="refresh"
-              aria-label={props['aria-label']}
-            />
+            <EuiToolTip content={props['aria-label']} disableScreenReaderOutput>
+              <EuiButtonIcon
+                size="s"
+                color="warning"
+                onClick={resendRequest}
+                iconType="refresh"
+                aria-label={props['aria-label']}
+              />
+            </EuiToolTip>
           </>
         }
       >

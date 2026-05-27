@@ -35,15 +35,17 @@ export const DiscoverLink = ({
   });
 
   let link = (
-    <EuiButtonIcon
-      onClick={onClick}
-      display="empty"
-      size="xs"
-      iconType="discoverApp"
-      aria-label={tooltipContent}
-      data-test-subj="discoverIconLink"
-      css={{ margin: '0 0.3em' }}
-    />
+    <EuiToolTip content={tooltipContent} disableScreenReaderOutput>
+      <EuiButtonIcon
+        onClick={onClick}
+        display="empty"
+        size="xs"
+        iconType="discoverApp"
+        aria-label={tooltipContent}
+        data-test-subj="discoverIconLink"
+        css={{ margin: '0 0.3em' }}
+      />
+    </EuiToolTip>
   );
   if (asButton) {
     link = fill ? (

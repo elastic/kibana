@@ -11,13 +11,14 @@ import type { FC } from 'react';
 import React from 'react';
 import { get } from 'lodash';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
-  EuiButtonEmpty,
+  EuiHealth,
   EuiSpacer,
   EuiTitle,
-  EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { TextField, SelectField, SuperSelectField } from '../../../components';
@@ -202,11 +203,13 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
                   </EuiFlexItem>
                   {items.length > 1 && (
                     <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        iconType="minusCircle"
-                        onClick={() => removeItem(id)}
-                        aria-label="Remove processor"
-                      />
+                      <EuiToolTip content="Remove processor" disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          iconType="minusCircle"
+                          onClick={() => removeItem(id)}
+                          aria-label="Remove processor"
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>

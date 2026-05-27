@@ -358,14 +358,16 @@ export class RemoteClusterTable extends Component<Props, State> {
                 <EuiToolTip content={label}>
                   <RemoveClusterButtonProvider clusterNames={[name]}>
                     {(removeCluster) => (
-                      <EuiButtonIcon
-                        data-test-subj="remoteClusterTableRowRemoveButton"
-                        aria-label={label}
-                        iconType="trash"
-                        color="danger"
-                        isDisabled={isConfiguredByNode}
-                        onClick={removeCluster}
-                      />
+                      <EuiToolTip content={label} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          data-test-subj="remoteClusterTableRowRemoveButton"
+                          aria-label={label}
+                          iconType="trash"
+                          color="danger"
+                          isDisabled={isConfiguredByNode}
+                          onClick={removeCluster}
+                        />
+                      </EuiToolTip>
                     )}
                   </RemoveClusterButtonProvider>
                 </EuiToolTip>

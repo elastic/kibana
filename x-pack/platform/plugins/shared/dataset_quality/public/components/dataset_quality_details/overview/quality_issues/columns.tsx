@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon, EuiText, formatNumber } from '@elastic/eui';
+import { EuiButtonIcon, EuiText, EuiToolTip, formatNumber } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -63,15 +63,19 @@ export const getQualityIssuesColumns = ({
       };
 
       return (
-        <EuiButtonIcon
-          data-test-subj="datasetQualityDetailsQualityIssuesExpandButton"
-          size="xs"
-          color="text"
-          onClick={onExpandClick}
-          iconType={isExpanded ? 'minimize' : 'expand'}
-          title={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
-          aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
-        />
+        <EuiToolTip
+          content={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="datasetQualityDetailsQualityIssuesExpandButton"
+            size="xs"
+            color="text"
+            onClick={onExpandClick}
+            iconType={isExpanded ? 'minimize' : 'expand'}
+            aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
+          />
+        </EuiToolTip>
       );
     },
     width: '40px',
