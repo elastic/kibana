@@ -1,16 +1,12 @@
 ---
 name: flaky-test-investigator
-description: >-
-  Investigate Scout, FTR, and Jest flaky test failures in Kibana. Use when
-  triaging a failed-test issue, a Buildkite-reported failure, a test path
-  that has been failing intermittently, or any time the user asks to look at
-  a flaky test, deflake a test, or stabilize a test.
+description: Investigate Scout and FTR flaky test failures in Kibana. Use when triaging a failed-test issue, a Buildkite-reported failure, a test path that has been failing intermittently, or any time the user asks to look at a flaky test, deflake a test, or stabilize a test.
 disable-model-invocation: true
 ---
 
 # Flaky Test Investigator
 
-Investigate a flaky Scout, FTR, or Jest test failure and determine what should be done about it.
+Investigate a flaky Scout or FTR test failure and determine what should be done about it.
 
 - The outcome should be an accurate diagnosis, not a quick fix that treats the symptom.
 - Valid outcomes include "this is a real product bug, escalate to the owning team", "this is environmental and will likely self-resolve", or "there isn't enough data to draw a confident conclusion".
