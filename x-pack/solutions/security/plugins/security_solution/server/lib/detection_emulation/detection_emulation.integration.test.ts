@@ -11,11 +11,8 @@ import type { ResponseActionAgentType } from '../../../common/endpoint/service/r
 import {
   tagAlertsWithEmulation,
   buildEmulationAlertQuery,
-  buildEmulationModeQuery,
-  extractEmulationMetadata,
-  isEmulationAlert,
+
   ALERT_EMULATION_ID,
-  ALERT_EMULATION_MODE,
 } from './alert_tagging';
 import { buildEmulationComment } from './execution/audit_logger';
 import {
@@ -142,15 +139,9 @@ describe('detection_emulation — alert tagging', () => {
     );
   });
 
-  it('buildEmulationAlertQuery and buildEmulationModeQuery produce correct term filters', () => {
+  it('buildEmulationAlertQuery produces correct term filters', () => {
     expect(buildEmulationAlertQuery('emu-abc')).toEqual({
       term: { [ALERT_EMULATION_ID]: 'emu-abc' },
-    });
-    expect(buildEmulationModeQuery('test')).toEqual({
-      term: { [ALERT_EMULATION_MODE]: 'test' },
-    });
-    expect(buildEmulationModeQuery('production')).toEqual({
-      term: { [ALERT_EMULATION_MODE]: 'production' },
     });
   });
 
@@ -169,28 +160,7 @@ describe('detection_emulation — alert tagging', () => {
     expect(mockUpdateByQuery).not.toHaveBeenCalled();
   });
 
-  it('tagged alerts are identified by extractEmulationMetadata and isEmulationAlert', () => {
-    const alertDoc = {
-      [ALERT_EMULATION_ID]: 'emu-meta',
-      [ALERT_EMULATION_MODE]: 'validation',
-    };
 
-    expect(isEmulationAlert(alertDoc)).toBe(true);
-    expect(extractEmulationMetadata(alertDoc)).toEqual({
-      emulationId: 'emu-meta',
-      mode: 'validation',
-    });
-  });
-
-  it('non-tagged alerts are not identified as emulation alerts', () => {
-    const alertDoc = {
-      '@timestamp': new Date().toISOString(),
-      'kibana.alert.uuid': 'untagged-alert',
-    };
-
-    expect(isEmulationAlert(alertDoc)).toBe(false);
-    expect(extractEmulationMetadata(alertDoc)).toBeUndefined();
-  });
 });
 
 // ─── Audit comment helper (pure function, no ES needed) ──────────────────────

@@ -189,49 +189,4 @@ export function buildEmulationAlertQuery(emulationId: string) {
   };
 }
 
-/**
- * Builds an Elasticsearch query to filter alerts by emulation mode.
- *
- * @param mode - The emulation mode to filter by
- * @returns Elasticsearch query object
- */
-export function buildEmulationModeQuery(mode: EmulationMode) {
-  return {
-    term: {
-      [ALERT_EMULATION_MODE]: mode,
-    },
-  };
-}
 
-/**
- * Extracts emulation metadata from an alert document.
- * Returns undefined if the alert does not have emulation metadata.
- *
- * @param alert - The alert document (any structure with string keys)
- * @returns Emulation metadata if present, undefined otherwise
- */
-export function extractEmulationMetadata(
-  alert: Record<string, unknown>
-): EmulationAlertMetadata | undefined {
-  const emulationId = alert[ALERT_EMULATION_ID];
-  const mode = alert[ALERT_EMULATION_MODE];
-
-  if (typeof emulationId === 'string' && typeof mode === 'string') {
-    return {
-      emulationId,
-      mode: mode as EmulationMode,
-    };
-  }
-
-  return undefined;
-}
-
-/**
- * Checks if an alert document has emulation metadata.
- *
- * @param alert - The alert document to check
- * @returns True if the alert has emulation metadata
- */
-export function isEmulationAlert(alert: Record<string, unknown>): boolean {
-  return extractEmulationMetadata(alert) !== undefined;
-}
