@@ -7,7 +7,12 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
-import { createMemoryTools } from '../../tools/memory';
+import {
+  createMemorySearchTool,
+  createMemoryReadTool,
+  createMemoryWriteTool,
+  createMemoryListTool,
+} from '../../tools/memory';
 import type { MemoryToolsOptions } from '../../tools/memory';
 import { createSearchKnowledgeIndicatorsTool } from '../../tools/search_knowledge_indicators/tool';
 import { STREAMS_INSPECT_STREAMS_TOOL_ID } from '../../tools/register_tools';
@@ -90,10 +95,16 @@ Concrete actions to fill the most critical gaps (e.g. "Ask the team to document 
 - **Always overwrite**: use \`platform_streams_memory_write\` (not patch) to replace the entire \`_gaps/overview\` page each run.
 - **Categories**: assign the page to categories \`['_system/gaps']\`.`,
     getInlineTools: () => {
-      const memoryTools = createMemoryTools(options).map(({ tags, id, ...rest }) => ({
+      // Gap detection only needs list, search, read, and write — 4 tools + 1 KI tool = 5 total (limit: 7).
+      const memoryTools: SkillBoundedTool[] = [
+        createMemorySearchTool(options),
+        createMemoryReadTool(options),
+        createMemoryWriteTool(options),
+        createMemoryListTool(options),
+      ].map(({ tags, id, ...rest }) => ({
         ...rest,
         id: id.replaceAll('.', '_'),
-      }));
+      })) as SkillBoundedTool[];
 
       const extraTools: SkillBoundedTool[] = [];
       if (options.getScopedClients && options.server && options.logger) {
