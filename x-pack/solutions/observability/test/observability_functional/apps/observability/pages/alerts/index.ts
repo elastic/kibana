@@ -231,7 +231,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
               await (
                 await find.byCssSelector('[data-test-subj*="breadcrumb first"]')
               ).getVisibleText()
-            ).to.eql('Rules');
+            ).to.eql('Stack Management');
           });
         });
       });
