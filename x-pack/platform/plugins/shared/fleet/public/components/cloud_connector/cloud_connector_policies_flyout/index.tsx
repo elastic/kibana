@@ -293,21 +293,32 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={identifier}>
                 {(copy) => (
-                  <EuiButtonIcon
-                    onClick={copy}
-                    iconType="copy"
-                    aria-label={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'xpack.fleet.cloudConnector.policiesFlyout.copyIdentifier',
                       {
                         defaultMessage: 'Copy {label}',
                         values: { label: identifierLabel },
                       }
                     )}
-                    size="xs"
-                    data-test-subj={
-                      CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.COPY_IDENTIFIER_BUTTON
-                    }
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="copy"
+                      aria-label={i18n.translate(
+                        'xpack.fleet.cloudConnector.policiesFlyout.copyIdentifier',
+                        {
+                          defaultMessage: 'Copy {label}',
+                          values: { label: identifierLabel },
+                        }
+                      )}
+                      size="xs"
+                      data-test-subj={
+                        CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.COPY_IDENTIFIER_BUTTON
+                      }
+                    />
+                  </EuiToolTip>
                 )}
               </EuiCopy>
             </EuiFlexItem>
