@@ -47,16 +47,6 @@ export class DashboardAddPanelService extends FtrService {
     await this.savedObjectsFinder.waitForListLoading();
   }
 
-  async clickCreateNewLink() {
-    this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
-    await this.openAddPanelFlyout();
-    await this.testSubjects.click('create-action-Lens');
-    await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.existOrFail('lnsApp', {
-      timeout: 5000,
-    });
-  }
-
   async clickAddVega() {
     await this.openAddPanelFlyout();
     await this.clickAddNewPanelFromUIActionLink('Vega');
@@ -77,6 +67,10 @@ export class DashboardAddPanelService extends FtrService {
     this.log.debug('DashboardAddPanel.clickAddLensPanel');
     await this.openAddPanelFlyout();
     await this.clickAddNewPanelFromUIActionLink('Visualization');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.existOrFail('lnsApp', {
+      timeout: 5000,
+    });
   }
 
   async clickAddControlPanel() {
