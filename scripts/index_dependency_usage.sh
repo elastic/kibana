@@ -8,7 +8,7 @@
 #   bash scripts/index_dependency_usage.sh --paths <plugin_path> [options]
 #
 # Environment variables:
-#   ELASTICSEARCH_URL      ES base URL (default: http://localhost:9200)
+#   ELASTICSEARCH_URL      ES base URL (default: https://localhost:9200)
 #   ELASTICSEARCH_API_KEY  API key for authentication
 #
 # Examples:
@@ -22,8 +22,7 @@
 #   ELASTICSEARCH_URL=https://my-deployment.es.us-east-1.aws.elastic-cloud.com \
 #   ELASTICSEARCH_API_KEY=id:key \
 #   bash scripts/index_dependency_usage.sh \
-#     --paths x-pack/platform/plugins/shared x-pack/platform/plugins/private \
-#     --concurrency 4
+#     --paths x-pack/platform/plugins/shared x-pack/platform/plugins/private
 
 # Node 24 can run TypeScript natively via --experimental-strip-types.
 # No ts-node or build step required.
