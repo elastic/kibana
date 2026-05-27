@@ -327,6 +327,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     output: JsonValue | null,
     sizeBytes?: number
   ): void {
+    // Fresh in-memory output is authoritative — do not let a subsequent
+    // prepareForRead rehydrate from ES and overwrite with a stale doc
+    // (common when a deferred step completes on resume before flush).
+    this.clearEvicted(stepExecutionId);
+
     if (this.state.getStepExecution(stepExecutionId)?.stepType === 'data.set') {
       this.recordDataSetOutput(stepExecutionId, output);
     }
