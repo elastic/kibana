@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
   isContextLengthExceededAgentError,
   isHooksExecutionError,
@@ -23,7 +22,6 @@ import { WorkflowError } from './workflow_error';
 import { HookError } from './hook_error';
 import { GenericRoundError } from './generic_round_error';
 import { RoundErrorThinkingPanel } from './round_error_thinking_panel';
-import { RoundEvents } from '../round_events/round_events';
 
 const shouldShowThinkingPanel = (error: unknown): boolean => {
   return (
@@ -70,7 +68,6 @@ const renderErrorContent = (error: unknown): React.ReactNode => {
 
 interface RoundErrorProps {
   error: unknown;
-  errorSteps: ConversationRoundStep[];
   onRetry: () => void;
 }
 
@@ -83,7 +80,7 @@ const labels = {
   }),
 };
 
-export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRetry }) => {
+export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
   const { euiTheme } = useEuiTheme();
 
   const errorContent = renderErrorContent(error);
@@ -96,10 +93,7 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRet
       data-test-subj="agentBuilderRoundError"
     >
       {shouldShowThinkingPanel(error) ? (
-        <RoundErrorThinkingPanel>
-          <RoundEvents steps={errorSteps} isReloadedRound={false} />
-          {errorContent}
-        </RoundErrorThinkingPanel>
+        <RoundErrorThinkingPanel>{errorContent}</RoundErrorThinkingPanel>
       ) : (
         errorContent
       )}
