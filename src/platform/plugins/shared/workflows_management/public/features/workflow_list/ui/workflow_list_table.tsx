@@ -141,11 +141,6 @@ export const WorkflowListTable = ({
                       </EuiText>
                     )}
                   </EuiFlexItem>
-                  {item.managed === true ? (
-                    <EuiFlexItem grow={false}>
-                      <ManagedWorkflowBadge dataTestSubj={`workflowManagedBadge-${item.id}`} />
-                    </EuiFlexItem>
-                  ) : null}
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -181,7 +176,7 @@ export const WorkflowListTable = ({
         }),
         width: '18%',
         render: (value: unknown, item: WorkflowListItemDto) => (
-          <WorkflowTagsCell tags={item.definition?.tags} />
+          <WorkflowTagsCell tags={item.definition?.tags} isManaged={item.managed === true} />
         ),
       },
       {
@@ -431,15 +426,25 @@ const overflowPopoverStyle = css`
   overflow: auto;
 `;
 
-const WorkflowTagsCell = ({ tags }: { tags: readonly string[] | undefined }) => {
+const WorkflowTagsCell = ({
+  tags,
+  isManaged,
+}: {
+  tags: readonly string[] | undefined;
+  isManaged: boolean;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
   const close = useCallback(() => setIsOpen(false), []);
 
-  if (!tags || tags.length === 0) return null;
+  if (!isManaged && (!tags || tags.length === 0)) return null;
 
-  const visible = tags.slice(0, MAX_VISIBLE_TAGS);
-  const hidden = tags.slice(MAX_VISIBLE_TAGS);
+  const workflowTags = tags ?? [];
+  const visibleWorkflowTags = workflowTags.slice(
+    0,
+    isManaged ? MAX_VISIBLE_TAGS - 1 : MAX_VISIBLE_TAGS
+  );
+  const hidden = workflowTags.slice(visibleWorkflowTags.length);
 
   return (
     <EuiFlexGroup
@@ -449,7 +454,12 @@ const WorkflowTagsCell = ({ tags }: { tags: readonly string[] | undefined }) => 
       css={tagsRowStyle}
       data-test-subj="workflowTags"
     >
-      {visible.map((tag) => (
+      {isManaged ? (
+        <EuiFlexItem grow={false} css={visibleTagStyle}>
+          <ManagedWorkflowBadge />
+        </EuiFlexItem>
+      ) : null}
+      {visibleWorkflowTags.map((tag) => (
         <EuiFlexItem key={tag} grow={false} css={visibleTagStyle}>
           <EuiBadge color="hollow" title={tag}>
             {tag}

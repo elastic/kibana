@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowListDto, WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { createMockWorkflowsCapabilities as mockCreateMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
@@ -106,7 +106,7 @@ jest.mock('../../run_workflow/ui/workflow_execute_modal', () => ({
 
 jest.mock('../../../shared/ui', () => ({
   getRunTooltipContent: () => 'Run',
-  ManagedWorkflowBadge: ({ dataTestSubj }: { dataTestSubj?: string }) => (
+  ManagedWorkflowBadge: ({ dataTestSubj = 'managedWorkflowBadge' }: { dataTestSubj?: string }) => (
     <span data-test-subj={dataTestSubj}>{'Managed'}</span>
   ),
   StatusBadge: ({ status }: { status: string }) => <span>{status}</span>,
@@ -290,9 +290,21 @@ describe('WorkflowList', () => {
       expect(screen.getByText('A workflow for testing')).toBeInTheDocument();
     });
 
-    it('renders a managed badge for managed workflows', () => {
+    it('renders the managed badge as the first tag for managed workflows', () => {
+      const workflow = createMockWorkflow({
+        managed: true,
+        definition: {
+          version: '1',
+          name: 'My Test Workflow',
+          enabled: true,
+          triggers: [],
+          steps: [],
+          tags: ['custom', 'second'],
+        },
+      });
+
       mockUseWorkflows.mockReturnValue({
-        data: createMockWorkflowListDto([createMockWorkflow({ managed: true })]),
+        data: createMockWorkflowListDto([workflow]),
         isLoading: false,
         error: null,
         refetch: mockRefetch,
@@ -300,7 +312,14 @@ describe('WorkflowList', () => {
 
       renderComponent();
 
-      expect(screen.getByTestId('workflowManagedBadge-wf-1')).toHaveTextContent('Managed');
+      const tagsCell = screen.getByTestId('workflowTags');
+      const managedBadge = within(tagsCell).getByTestId('managedWorkflowBadge');
+      const firstWorkflowTag = within(tagsCell).getByText('custom');
+
+      expect(managedBadge).toHaveTextContent('Managed');
+      expect(managedBadge.compareDocumentPosition(firstWorkflowTag)).toEqual(
+        Node.DOCUMENT_POSITION_FOLLOWING
+      );
     });
 
     it('shows "No description" for workflows without description', () => {

@@ -29,7 +29,6 @@ export const ManagedWorkflowBadge = ({
   <EuiToolTip content={managedWorkflowTooltip} position="bottom">
     <EuiBadge
       color="primary"
-      iconType="readOnly"
       title={managedWorkflowLabel}
       data-test-subj={dataTestSubj}
       tabIndex={0}
