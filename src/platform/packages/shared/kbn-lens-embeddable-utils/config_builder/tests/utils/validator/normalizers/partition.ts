@@ -176,14 +176,14 @@ const alignLegacyTypes: NormalizerConfig<PartitionAttributes> = {
       layer.legendMaxLines = 1;
     }
 
-    // if chart has only collapsed groups, colorMapping is ignored -> delete it
+    // if chart has only collapsed primary groups, colorMapping and palette should be ignored -> delete it
     const allPrimariesCollapsed =
       layer.primaryGroups.length > 0 &&
       layer.primaryGroups.every((id) => Boolean(layer.collapseFns?.[id]));
     const noPrimaries = layer.primaryGroups.length === 0;
-    const noUncollapsedSecondaries = !layer.secondaryGroups?.some((id) => !layer.collapseFns?.[id]);
-    if ((noPrimaries || allPrimariesCollapsed) && noUncollapsedSecondaries && layer.colorMapping) {
+    if (noPrimaries || allPrimariesCollapsed) {
       delete layer.colorMapping;
+      delete viz.palette;
     }
 
     return attributes;
