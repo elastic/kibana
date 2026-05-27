@@ -9,6 +9,8 @@ import { apiTest } from '@kbn/scout';
 import type { RoleSessionCredentials, SamlAuth } from '@kbn/scout';
 import { ML_USERS } from './constants';
 
+export { apiTest };
+
 export interface MlSamlAuthFixture extends SamlAuth {
   asMlPoweruser: () => Promise<RoleSessionCredentials>;
   asMlViewer: () => Promise<RoleSessionCredentials>;
@@ -30,3 +32,4 @@ export const mlApiTest = apiTest.extend<{
 });
 
 export { ML_USERS, COMMON_HEADERS, INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from './constants';
+export { CUSTOM_ROLES } from './custom_roles';
