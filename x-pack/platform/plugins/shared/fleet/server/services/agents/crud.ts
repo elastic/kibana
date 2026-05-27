@@ -179,7 +179,6 @@ export async function getAgentTags(
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const runtimeFields = {
     ...(await buildAgentStatusRuntimeField(soClient)),
-    ...SIGNALS_RUNTIME_FIELD,
     ...(appContextService.getExperimentalFeatures().enableOpAMP
       ? PIPELINE_CONFIG_RUNTIME_FIELD
       : {}),
@@ -490,7 +489,6 @@ export async function fetchAllAgentsByKuery(
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const runtimeFields = {
     ...(await buildAgentStatusRuntimeField(soClient)),
-    ...SIGNALS_RUNTIME_FIELD,
     ...(appContextService.getExperimentalFeatures().enableOpAMP
       ? PIPELINE_CONFIG_RUNTIME_FIELD
       : {}),
@@ -606,7 +604,6 @@ async function _filterAgents(
   const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
   const runtimeFields = {
     ...(await buildAgentStatusRuntimeField(soClient)),
-    ...SIGNALS_RUNTIME_FIELD,
     ...(appContextService.getExperimentalFeatures().enableOpAMP
       ? PIPELINE_CONFIG_RUNTIME_FIELD
       : {}),
