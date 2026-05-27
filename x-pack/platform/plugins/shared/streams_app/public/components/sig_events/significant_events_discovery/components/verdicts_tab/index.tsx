@@ -53,13 +53,6 @@ const columns: Array<EuiBasicTableColumn<Verdict>> = [
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
-    field: 'title',
-    name: i18n.translate('xpack.streams.verdictsTab.titleColumn', {
-      defaultMessage: 'Title',
-    }),
-    truncateText: true,
-  },
-  {
     field: 'verdict',
     name: i18n.translate('xpack.streams.verdictsTab.verdictColumn', {
       defaultMessage: 'Verdict',
@@ -70,20 +63,11 @@ const columns: Array<EuiBasicTableColumn<Verdict>> = [
     ),
   },
   {
-    field: 'criticality',
-    name: i18n.translate('xpack.streams.verdictsTab.criticalityColumn', {
-      defaultMessage: 'Criticality',
+    field: 'title',
+    name: i18n.translate('xpack.streams.verdictsTab.titleColumn', {
+      defaultMessage: 'Title',
     }),
-    width: '100px',
-    render: (value: number | undefined) => (value != null ? String(value) : '-'),
-  },
-  {
-    field: 'confidence',
-    name: i18n.translate('xpack.streams.verdictsTab.confidenceColumn', {
-      defaultMessage: 'Confidence',
-    }),
-    width: '100px',
-    render: (value: number | undefined) => (value != null ? String(value) : '-'),
+    truncateText: true,
   },
   {
     name: i18n.translate('xpack.streams.verdictsTab.streamsColumn', {
@@ -107,6 +91,22 @@ const columns: Array<EuiBasicTableColumn<Verdict>> = [
         </EuiFlexGroup>
       ) : null;
     },
+  },
+  {
+    field: 'criticality',
+    name: i18n.translate('xpack.streams.verdictsTab.criticalityColumn', {
+      defaultMessage: 'Criticality',
+    }),
+    width: '100px',
+    render: (value: number | undefined) => (value != null ? String(value) : '-'),
+  },
+  {
+    field: 'confidence',
+    name: i18n.translate('xpack.streams.verdictsTab.confidenceColumn', {
+      defaultMessage: 'Confidence',
+    }),
+    width: '100px',
+    render: (value: number | undefined) => (value != null ? `${value}%` : '-'),
   },
 ];
 

@@ -62,10 +62,25 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
+    field: 'kind',
+    name: i18n.translate('xpack.streams.detectionsTab.statusColumn', {
+      defaultMessage: 'Status',
+    }),
+    width: '90px',
+    render: (kind: string) => <EuiBadge color={kindColor(kind)}>{kindLabel(kind)}</EuiBadge>,
+  },
+  {
     field: 'rule_name',
     name: i18n.translate('xpack.streams.detectionsTab.ruleColumn', {
       defaultMessage: 'Rule',
     }),
+  },
+  {
+    field: 'stream_name',
+    name: i18n.translate('xpack.streams.detectionsTab.streamColumn', {
+      defaultMessage: 'Stream',
+    }),
+    width: '140px',
   },
   {
     name: i18n.translate('xpack.streams.detectionsTab.changeTypeColumn', {
@@ -76,21 +91,6 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
       CHANGE_TYPE_LABELS[detection.detection_evidence?.change_point_type ?? ''] ??
       detection.detection_evidence?.change_point_type ??
       '-',
-  },
-  {
-    field: 'kind',
-    name: i18n.translate('xpack.streams.detectionsTab.statusColumn', {
-      defaultMessage: 'Status',
-    }),
-    width: '90px',
-    render: (kind: string) => <EuiBadge color={kindColor(kind)}>{kindLabel(kind)}</EuiBadge>,
-  },
-  {
-    field: 'stream_name',
-    name: i18n.translate('xpack.streams.detectionsTab.streamColumn', {
-      defaultMessage: 'Stream',
-    }),
-    width: '140px',
   },
   {
     name: i18n.translate('xpack.streams.detectionsTab.discoveryColumn', {
