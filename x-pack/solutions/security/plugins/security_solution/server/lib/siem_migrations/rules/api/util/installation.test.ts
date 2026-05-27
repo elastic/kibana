@@ -58,4 +58,49 @@ describe('installCustomRules', () => {
     expect(createCustomRule.mock.calls[0][0].params).not.toHaveProperty('timestamp_override');
     expect(createCustomRule.mock.calls[0][0].params).not.toHaveProperty('ignored_annotation');
   });
+
+  it('uses Sentinel query frequency default when no interval annotation is present', async () => {
+    const createCustomRule = jest.fn().mockResolvedValue({ id: 'created-rule-id' });
+    const detectionRulesClient = { createCustomRule } as unknown as IDetectionRulesClient;
+    const ruleWithoutAnnotations: StoredRuleMigrationRule = {
+      ...translatedRule,
+      original_rule: {
+        ...translatedRule.original_rule,
+        annotations: undefined,
+      },
+    };
+
+    await installCustomRules([ruleWithoutAnnotations], false, detectionRulesClient);
+
+    expect(createCustomRule).toHaveBeenCalledWith({
+      params: expect.objectContaining({
+        from: 'now-360s',
+        to: 'now',
+        interval: '1m',
+      }),
+    });
+  });
+
+  it('uses shared interval default for non-Sentinel rules without interval annotation', async () => {
+    const createCustomRule = jest.fn().mockResolvedValue({ id: 'created-rule-id' });
+    const detectionRulesClient = { createCustomRule } as unknown as IDetectionRulesClient;
+    const ruleWithoutAnnotations: StoredRuleMigrationRule = {
+      ...translatedRule,
+      original_rule: {
+        ...translatedRule.original_rule,
+        vendor: 'qradar',
+        annotations: undefined,
+      },
+    };
+
+    await installCustomRules([ruleWithoutAnnotations], false, detectionRulesClient);
+
+    expect(createCustomRule).toHaveBeenCalledWith({
+      params: expect.objectContaining({
+        from: 'now-360s',
+        to: 'now',
+        interval: '5m',
+      }),
+    });
+  });
 });

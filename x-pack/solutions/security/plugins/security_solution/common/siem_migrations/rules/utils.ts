@@ -41,7 +41,7 @@ export const isMigrationCustomRule = (rule?: ElasticRule): rule is MigrationCust
 export const convertMigrationCustomRuleToSecurityRulePayload = (
   rule: MigrationCustomRule,
   enabled: boolean,
-  translationFields: MigrationTranslationFields = DEFAULT_TRANSLATION_FIELDS
+  translationFields?: MigrationTranslationFields
 ) => {
   return {
     type: rule.query_language,
@@ -53,6 +53,7 @@ export const convertMigrationCustomRuleToSecurityRulePayload = (
     severity: rule.severity as Severity,
     risk_score: rule.risk_score,
     threat: rule.threat ?? [],
-    ...translationFields,
+    ...DEFAULT_TRANSLATION_FIELDS,
+    ...(translationFields != null ? translationFields : {}),
   };
 };

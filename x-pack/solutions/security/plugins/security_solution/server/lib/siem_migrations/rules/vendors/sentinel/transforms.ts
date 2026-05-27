@@ -6,7 +6,6 @@
  */
 
 import type { Threat } from '../../../../../../common/api/detection_engine';
-import { DEFAULT_TRANSLATION_FIELDS } from '../../../../../../common/siem_migrations/constants';
 import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SentinelRule } from '../../../../../../common/siem_migrations/parsers/sentinel/types';
 import type { MigrationTranslationFields } from '../../../../../../common/siem_migrations/rules/utils';
@@ -15,6 +14,7 @@ import {
   TECHNIQUES_BASE_URL,
   SENTINEL_TACTIC_NAME_TO_ID,
   SENTINEL_TACTIC_NAME_TO_DISPLAY,
+  ISO_8601_DURATION_PATTERN,
 } from './constants';
 
 /**
@@ -64,11 +64,6 @@ export function transformSentinelMitreMapping(
     };
   });
 }
-
-const ISO_8601_DURATION_PATTERN =
-  /^P(?=\d|T\d)(?:(?<years>\d+)Y)?(?:(?<months>\d+)M)?(?:(?<days>\d+)D)?(?:T(?=\d)(?:(?<hours>\d+)H)?(?:(?<minutes>\d+)M)?(?:(?<seconds>\d+)S)?)?$/;
-
-const SENTINEL_DEFAULT_QUERY_FREQUENCY = '1m';
 
 function convertIsoDurationToDateMath(isoString: string): string | undefined {
   const match = ISO_8601_DURATION_PATTERN.exec(isoString);
@@ -138,6 +133,14 @@ const transformQueryPeriodToTimeRange = (
   };
 };
 
+const transformQueryFrequencyToInterval = (
+  queryFrequencyIso: string
+): Pick<MigrationTranslationFields, 'interval'> | undefined => {
+  const interval = convertIsoDurationToDateMath(queryFrequencyIso);
+
+  return interval ? { interval } : undefined;
+};
+
 /**
  * Transforms a parsed Sentinel rule into the OriginalRule format
  * used by the SIEM migrations pipeline.
@@ -155,17 +158,11 @@ export function transformSentinelRuleToOriginalRule(rule: SentinelRule): Origina
     severity: rule.severity.toLowerCase(),
     annotations: {
       ...(isNonEmptyString(rule.queryPeriod)
-        ? transformQueryPeriodToTimeRange(rule.queryPeriod) ?? {
-            from: DEFAULT_TRANSLATION_FIELDS.from,
-            to: DEFAULT_TRANSLATION_FIELDS.to,
-          }
-        : {
-            from: DEFAULT_TRANSLATION_FIELDS.from,
-            to: DEFAULT_TRANSLATION_FIELDS.to,
-          }),
-      interval: isNonEmptyString(rule.queryFrequency)
-        ? convertIsoDurationToDateMath(rule.queryFrequency) ?? SENTINEL_DEFAULT_QUERY_FREQUENCY
-        : SENTINEL_DEFAULT_QUERY_FREQUENCY,
+        ? transformQueryPeriodToTimeRange(rule.queryPeriod)
+        : {}),
+      ...(isNonEmptyString(rule.queryFrequency)
+        ? transformQueryFrequencyToInterval(rule.queryFrequency)
+        : {}),
     },
   };
 

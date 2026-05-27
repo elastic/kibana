@@ -79,11 +79,7 @@ describe('transformSentinelRuleToOriginalRule', () => {
       description: 'Detects suspicious sign-in activity',
       query: 'SigninLogs | where ResultType != 0',
       query_language: 'kql',
-      annotations: {
-        from: 'now-360s',
-        to: 'now',
-        interval: '1m',
-      },
+      annotations: {},
     });
   });
 
@@ -154,21 +150,17 @@ describe('transformSentinelRuleToOriginalRule', () => {
     });
   });
 
-  it('uses defaults for mixed calendar durations that cannot be represented as one unit', () => {
+  it('omits mixed calendar durations that cannot be represented as one unit', () => {
     const result = transformSentinelRuleToOriginalRule({
       ...baseSentinelRule,
       queryFrequency: 'P1Y2M',
       queryPeriod: 'P2M1D',
     });
 
-    expect(result.annotations).toEqual({
-      from: 'now-360s',
-      to: 'now',
-      interval: '1m',
-    });
+    expect(result.annotations).toEqual({});
   });
 
-  it('uses the default time range when queryPeriod is empty', () => {
+  it('omits the time range when queryPeriod is empty', () => {
     const result = transformSentinelRuleToOriginalRule({
       ...baseSentinelRule,
       queryFrequency: 'PT1M',
@@ -176,13 +168,11 @@ describe('transformSentinelRuleToOriginalRule', () => {
     });
 
     expect(result.annotations).toEqual({
-      from: 'now-360s',
-      to: 'now',
       interval: '1m',
     });
   });
 
-  it('uses the default interval when queryFrequency is empty', () => {
+  it('omits the interval when queryFrequency is empty', () => {
     const result = transformSentinelRuleToOriginalRule({
       ...baseSentinelRule,
       queryFrequency: '',
@@ -192,7 +182,6 @@ describe('transformSentinelRuleToOriginalRule', () => {
     expect(result.annotations).toEqual({
       from: 'now-1m',
       to: 'now',
-      interval: '1m',
     });
   });
 });

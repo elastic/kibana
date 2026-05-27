@@ -53,3 +53,26 @@ export const SENTINEL_TACTIC_NAME_TO_DISPLAY: Record<string, string> = {
   ImpairProcessControl: 'Impair Process Control',
   InhibitResponseFunction: 'Inhibit Response Function',
 };
+
+export const SENTINEL_DEFAULT_QUERY_FREQUENCY = '1m';
+
+/**
+ * A regular expression to match ISO 8601 duration strings.
+ * In ISO 8601 durations, T starts the time portion.
+ * Use T when the duration includes hours, minutes, or seconds:
+ * PT5M = 5 minutes
+ * PT1H = 1 hour
+ * PT30S = 30 seconds
+ * P1DT2H = 1 day and 2 hours
+ *
+ * Do not use T for date-only units:
+ * P1D = 1 day
+ * P2M = 2 months
+ * P1Y = 1 year
+ * Important ambiguity: M means months before T, but minutes after T.
+ *
+ * P1M = 1 month
+ * PT1M = 1 minute
+ **/
+export const ISO_8601_DURATION_PATTERN =
+  /^P(?=\d|T\d)(?:(?<years>\d+)Y)?(?:(?<months>\d+)M)?(?:(?<days>\d+)D)?(?:T(?=\d)(?:(?<hours>\d+)H)?(?:(?<minutes>\d+)M)?(?:(?<seconds>\d+)S)?)?$/;

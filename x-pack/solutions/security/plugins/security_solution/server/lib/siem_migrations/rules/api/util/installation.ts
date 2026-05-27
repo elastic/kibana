@@ -27,19 +27,26 @@ import {
 } from '../../../../../../common/siem_migrations/rules/utils';
 import { DEFAULT_TRANSLATION_FIELDS } from '../../../../../../common/siem_migrations/constants';
 import { getVendorTag } from '../../../common/api/util/tags';
+import { SENTINEL_DEFAULT_QUERY_FREQUENCY } from '../../vendors/sentinel/constants';
 
 const MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL = 50;
 
 const getTranslationFieldsFromAnnotations = (
-  annotations?: OriginalRule['annotations']
-): MigrationTranslationFields => ({
-  from: typeof annotations?.from === 'string' ? annotations.from : DEFAULT_TRANSLATION_FIELDS.from,
-  to: typeof annotations?.to === 'string' ? annotations.to : DEFAULT_TRANSLATION_FIELDS.to,
-  interval:
-    typeof annotations?.interval === 'string'
-      ? annotations.interval
-      : DEFAULT_TRANSLATION_FIELDS.interval,
-});
+  originalRule: OriginalRule
+): MigrationTranslationFields => {
+  const { annotations } = originalRule;
+  const defaultInterval =
+    originalRule.vendor === 'microsoft-sentinel'
+      ? SENTINEL_DEFAULT_QUERY_FREQUENCY
+      : DEFAULT_TRANSLATION_FIELDS.interval;
+
+  return {
+    from:
+      typeof annotations?.from === 'string' ? annotations.from : DEFAULT_TRANSLATION_FIELDS.from,
+    to: typeof annotations?.to === 'string' ? annotations.to : DEFAULT_TRANSLATION_FIELDS.to,
+    interval: typeof annotations?.interval === 'string' ? annotations.interval : defaultInterval,
+  };
+};
 
 const installPrebuiltRules = async (
   rulesToInstall: StoredRuleMigrationRule[],
@@ -123,7 +130,7 @@ export const installCustomRules = async (
       const payloadRule = convertMigrationCustomRuleToSecurityRulePayload(
         rule.elastic_rule,
         enabled,
-        getTranslationFieldsFromAnnotations(rule.original_rule.annotations)
+        getTranslationFieldsFromAnnotations(rule.original_rule)
       );
       const tags = [getVendorTag(rule.original_rule.vendor)];
       const createdRule = await detectionRulesClient.createCustomRule({
