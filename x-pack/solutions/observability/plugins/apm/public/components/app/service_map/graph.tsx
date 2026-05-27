@@ -153,7 +153,7 @@ function GraphInner({
   const [viewFilters, setViewFilters] = useState<ServiceMapViewFilters>(
     DEFAULT_SERVICE_MAP_VIEW_FILTERS
   );
-  const [panelExpanded, setPanelExpanded] = useState(true);
+  const [panelExpanded, setPanelExpanded] = useState(!isEmbedded);
   const [internalOrientation, setInternalOrientation] = useState<ServiceMapOrientation>(
     controlledOrientation ?? 'horizontal'
   );
@@ -586,12 +586,10 @@ function GraphInner({
             <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
             <Panel position="top-left" css={topLeftToolbarStyles}>
               <div css={topLeftToolbarColumnStyles}>
-                {!isEmbedded && (
-                  <ServiceMapOptionsPanelToggle
-                    isExpanded={panelExpanded}
-                    onExpandedChange={setPanelExpanded}
-                  />
-                )}
+                <ServiceMapOptionsPanelToggle
+                  isExpanded={panelExpanded}
+                  onExpandedChange={setPanelExpanded}
+                />
                 <EuiPanel
                   hasBorder
                   hasShadow={false}
@@ -685,7 +683,7 @@ function GraphInner({
                   <ServiceMapLegend controlIconCss={mapToolbarControlIconCss} />
                 </EuiPanel>
               </div>
-              {!isEmbedded && panelExpanded && (
+              {panelExpanded && (
                 <ServiceMapOptionsPanel
                   nodes={nodesAfterFilters}
                   filterOptionCounts={filterOptionCounts}
