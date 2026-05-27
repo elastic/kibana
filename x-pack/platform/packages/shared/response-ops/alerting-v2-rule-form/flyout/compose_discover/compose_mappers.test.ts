@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { ComposeFormValues } from './compose_form_types';
 import {
   transformQueryIn,
@@ -333,6 +334,61 @@ describe('composeFormToCreateRequest', () => {
       expect.objectContaining({ pending_count: 3, pending_timeframe: '10m' })
     );
   });
+
+  it('trims runbook and dashboard artifacts', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      runbookArtifacts: [
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '  Runbook steps  ' },
+      ],
+      dashboardArtifacts: [
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '  dashboard-123  ' },
+      ],
+    };
+
+    const result = composeFormToCreateRequest(values);
+
+    expect(result.artifacts).toEqual([
+      { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
+      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+    ]);
+  });
+
+  it('removes empty runbook and dashboard artifacts while preserving other artifacts', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      runbookArtifacts: [{ id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' }],
+      dashboardArtifacts: [{ id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '' }],
+      artifacts: [{ id: 'other-id', type: 'other', value: 'kept' }],
+    };
+
+    const result = composeFormToCreateRequest(values);
+
+    expect(result.artifacts).toEqual([{ id: 'other-id', type: 'other', value: 'kept' }]);
+  });
+
+  it('generates missing IDs for runbook and dashboard artifacts', () => {
+    const values: ComposeFormValues = {
+      ...baseFormValues,
+      runbookArtifacts: [{ id: '', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' }],
+      dashboardArtifacts: [{ id: '', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' }],
+    };
+
+    const result = composeFormToCreateRequest(values);
+
+    expect(result.artifacts).toEqual([
+      expect.objectContaining({
+        id: expect.stringMatching(/^runbook-/),
+        type: RUNBOOK_ARTIFACT_TYPE,
+        value: 'Runbook steps',
+      }),
+      expect.objectContaining({
+        id: expect.stringMatching(/^dashboard-/),
+        type: DASHBOARD_ARTIFACT_TYPE,
+        value: 'dashboard-123',
+      }),
+    ]);
+  });
 });
 
 // ── composeFormToUpdateRequest ───────────────────────────────────────────────
@@ -453,13 +509,23 @@ describe('mapRuleToComposeFormValues', () => {
     expect(result.stateTransition).toBeUndefined();
   });
 
-  it('maps artifacts when present', () => {
+  it('splits artifacts by field ownership when present', () => {
     const rule = {
       ...baseRuleResponse,
-      artifacts: [{ id: 'a1', type: 'runbook', value: 'steps here' }],
+      artifacts: [
+        { id: 'host-id', type: 'host', value: 'host-a' },
+        { id: 'runbook-id', type: 'runbook', value: 'steps here' },
+        { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+      ],
     } as RuleResponse;
     const result = mapRuleToComposeFormValues(rule);
-    expect(result.artifacts).toEqual([{ id: 'a1', type: 'runbook', value: 'steps here' }]);
+    expect(result.artifacts).toEqual([{ id: 'host-id', type: 'host', value: 'host-a' }]);
+    expect(result.runbookArtifacts).toEqual([
+      { id: 'runbook-id', type: 'runbook', value: 'steps here' },
+    ]);
+    expect(result.dashboardArtifacts).toEqual([
+      { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+    ]);
   });
 
   it('derives recoveries delay mode from recovering_count', () => {
