@@ -10,6 +10,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
 import { LazyAwsConnectSetup } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 
@@ -25,7 +26,7 @@ export function ConnectStep({ onNext }: ConnectStepProps) {
     <div data-test-subj="onboardingStep-connect">
       <Suspense fallback={<EuiLoadingSpinner data-test-subj="onboardingStep-connect-loading" />}>
         <LazyAwsConnectSetup
-          cloud={services.cloud as any}
+          cloud={services.cloud as CloudSetupForCloudConnector | undefined}
           initialConnectorId={connectStep.connectorId}
           initialStaticKeys={connectStep.staticKeys}
           initialTemporaryKeys={connectStep.temporaryKeys}

@@ -15,7 +15,7 @@ export interface ConnectStepState {
   temporaryKeys?: AwsTemporaryKeyCredentials;
 }
 
-// Only non-sensitive fields are persisted — password values are never written to session storage
+// Only non-sensitive fields are persistedConnectStep — password values are never written to session storage
 interface PersistedConnectStep {
   connectorId?: string;
   authType?: 'identity_federation' | 'static_keys' | 'temporary_keys';
@@ -32,7 +32,7 @@ interface OnboardingFlowState {
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
 
 export function OnboardingFlowProvider({ children }: { children: React.ReactNode }) {
-  const [persisted, setPersisted] = useSessionStorage<PersistedConnectStep>(
+  const [persistedConnectStep, setPersistedConnectStep] = useSessionStorage<PersistedConnectStep>(
     'onboarding.aws.connectStep',
     {}
   );
@@ -40,15 +40,19 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   // Sensitive fields (secret_access_key, session_token) live in memory only.
   // access_key_id is restored from session storage; passwords start empty on page refresh.
   const [staticKeys, setStaticKeysState] = useState<AwsStaticKeyCredentials | undefined>(() =>
-    persisted?.authType === 'static_keys' && persisted.accessKeyId
-      ? { access_key_id: persisted.accessKeyId, secret_access_key: '' }
+    persistedConnectStep?.authType === 'static_keys' && persistedConnectStep.accessKeyId
+      ? { access_key_id: persistedConnectStep.accessKeyId, secret_access_key: '' }
       : undefined
   );
 
   const [temporaryKeys, setTemporaryKeysState] = useState<AwsTemporaryKeyCredentials | undefined>(
     () =>
-      persisted?.authType === 'temporary_keys' && persisted.accessKeyId
-        ? { access_key_id: persisted.accessKeyId, secret_access_key: '', session_token: '' }
+      persistedConnectStep?.authType === 'temporary_keys' && persistedConnectStep.accessKeyId
+        ? {
+            access_key_id: persistedConnectStep.accessKeyId,
+            secret_access_key: '',
+            session_token: '',
+          }
         : undefined
   );
 
@@ -56,43 +60,40 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     (id: string | undefined) => {
       setStaticKeysState(undefined);
       setTemporaryKeysState(undefined);
-      setPersisted({
+      setPersistedConnectStep({
         connectorId: id,
         authType: id ? 'identity_federation' : undefined,
-        accessKeyId: undefined,
       });
     },
-    [setPersisted]
+    [setPersistedConnectStep]
   );
 
   const setStaticKeys = useCallback(
     (keys: AwsStaticKeyCredentials | undefined) => {
       setStaticKeysState(keys);
       setTemporaryKeysState(undefined);
-      setPersisted({
-        connectorId: undefined,
+      setPersistedConnectStep({
         authType: keys ? 'static_keys' : undefined,
         accessKeyId: keys?.access_key_id,
       });
     },
-    [setPersisted]
+    [setPersistedConnectStep]
   );
 
   const setTemporaryKeys = useCallback(
     (keys: AwsTemporaryKeyCredentials | undefined) => {
       setTemporaryKeysState(keys);
       setStaticKeysState(undefined);
-      setPersisted({
-        connectorId: undefined,
+      setPersistedConnectStep({
         authType: keys ? 'temporary_keys' : undefined,
         accessKeyId: keys?.access_key_id,
       });
     },
-    [setPersisted]
+    [setPersistedConnectStep]
   );
 
   const connectStep: ConnectStepState = {
-    connectorId: persisted?.connectorId,
+    connectorId: persistedConnectStep?.connectorId,
     staticKeys,
     temporaryKeys,
   };

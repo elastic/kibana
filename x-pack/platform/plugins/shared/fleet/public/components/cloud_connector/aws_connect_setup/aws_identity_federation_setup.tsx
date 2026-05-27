@@ -19,7 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
+
+import type { CloudSetupForCloudConnector } from '../types';
 
 import type { AccountType } from '../../../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
@@ -35,7 +36,7 @@ export interface AwsIdentityFederationSetupProps {
   accountType?: AccountType;
   packageName?: string;
   policyTemplate?: string;
-  cloud?: CloudSetup;
+  cloud?: CloudSetupForCloudConnector;
   iacTemplateUrl?: string;
   hasInvalidRequiredVars?: boolean;
   isEditPage?: boolean;

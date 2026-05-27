@@ -11,7 +11,7 @@ export {
   type CloudConnectorTab,
   type CloudConnectorTabsProps,
 } from './cloud_connector_tabs';
-export type { UpdatePolicy, CloudConnectorCredentials } from './types';
+export type { UpdatePolicy, CloudConnectorCredentials, CloudSetupForCloudConnector } from './types';
 export {
   AwsConnectSetup,
   type AwsConnectSetupProps,

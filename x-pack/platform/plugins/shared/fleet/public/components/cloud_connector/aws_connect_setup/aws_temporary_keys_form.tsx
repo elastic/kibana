@@ -48,6 +48,7 @@ export const AwsTemporaryKeysForm: React.FC<AwsTemporaryKeysFormProps> = ({
 
   const accessKeyIdInvalid = hasInvalidRequiredVars && !fields.access_key_id;
   const secretAccessKeyInvalid = hasInvalidRequiredVars && !fields.secret_access_key;
+  const sessionTokenInvalid = hasInvalidRequiredVars && !fields.session_token;
 
   return (
     <div data-test-subj={AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ}>
@@ -108,11 +109,20 @@ export const AwsTemporaryKeysForm: React.FC<AwsTemporaryKeysFormProps> = ({
         helpText={i18n.translate('xpack.fleet.awsTemporaryKeysForm.sessionTokenHelp', {
           defaultMessage: 'The session token returned by AWS STS for temporary credentials.',
         })}
+        isInvalid={sessionTokenInvalid}
+        error={
+          sessionTokenInvalid
+            ? i18n.translate('xpack.fleet.awsTemporaryKeysForm.sessionTokenRequired', {
+                defaultMessage: 'Session token is required',
+              })
+            : undefined
+        }
         fullWidth
       >
         <EuiFieldPassword
           fullWidth
           value={fields.session_token}
+          isInvalid={sessionTokenInvalid}
           onChange={(e) => handleChange('session_token', e.target.value)}
           data-test-subj={`${AWS_TEMPORARY_KEYS_FORM_TEST_SUBJ}-sessionToken`}
         />

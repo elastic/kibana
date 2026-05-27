@@ -8,9 +8,9 @@
 import React, { useState, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import type { AccountType } from '../../../../common/types';
+import type { CloudSetupForCloudConnector } from '../types';
 
 import { AwsAuthTypeSelector } from './aws_auth_type_selector';
 import type { AwsAuthType } from './aws_auth_type_selector';
@@ -24,7 +24,7 @@ export type { AwsAuthType, AwsStaticKeyCredentials, AwsTemporaryKeyCredentials }
 
 export interface AwsConnectSetupProps {
   hasInvalidRequiredVars?: boolean;
-  cloud?: CloudSetup;
+  cloud?: CloudSetupForCloudConnector;
   accountType?: AccountType;
   isEditPage?: boolean;
   initialConnectorId?: string;
