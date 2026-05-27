@@ -165,7 +165,7 @@ export default ({ getService }: FtrProviderContext): void => {
               command: 'isolate',
               targets: [{ endpointId: 'endpoint-1', hostname: 'host-1', agentType: 'endpoint' }],
             },
-          } as unknown as AttachmentRequest,
+          } as AttachmentRequestV2,
         });
         const unifiedId = unifiedCase.comments![0].id;
 
