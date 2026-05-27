@@ -645,18 +645,10 @@ describe('SmlCrawlerImpl', () => {
   });
 
   describe('schema version check', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    it('known incompatible mapping (illegal_argument_exception): wipes immediately without retrying', async () => {
+    it('mapping update failure: drops index and forces full re-index', async () => {
       const mappingError = {
         statusCode: 400,
-        body: { error: { type: 'illegal_argument_exception' } },
+        body: { error: { type: 'mapper_parsing_exception' } },
       };
       mockUpdateMappingsIfNeeded.mockRejectedValue(mappingError);
 
@@ -667,14 +659,12 @@ describe('SmlCrawlerImpl', () => {
       mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
 
       const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      const crawlPromise = crawler.crawl({ definition, esClient, savedObjectsClient });
-      await jest.runAllTimersAsync();
-      await crawlPromise;
+      await crawler.crawl({ definition, esClient, savedObjectsClient });
 
       expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(1);
       expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('incompatible mapping change detected')
+        expect.stringContaining('mapping update failed')
       );
       const createOp = mockStateClient.bulk.mock.calls
         .flatMap((c: unknown[]) => (c[0] as { operations?: unknown[] }).operations ?? [])
@@ -683,55 +673,6 @@ describe('SmlCrawlerImpl', () => {
             op.index?.document?.update_action === 'create'
         );
       expect(createOp).toBeDefined();
-    });
-
-    it('unknown mapping error fails on all retries: drops index and forces full re-index', async () => {
-      const mappingError = {
-        statusCode: 400,
-        body: { error: { type: 'mapper_parsing_exception' } },
-      };
-      mockUpdateMappingsIfNeeded.mockRejectedValue(mappingError);
-
-      const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
-      const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages(items)),
-      });
-      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
-
-      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      const crawlPromise = crawler.crawl({ definition, esClient, savedObjectsClient });
-      await jest.runAllTimersAsync();
-      await crawlPromise;
-
-      expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(4);
-      expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('mapping update failed after 4 attempts')
-      );
-    });
-
-    it('mapping update fails transiently then succeeds: does not clean', async () => {
-      const mappingError = {
-        statusCode: 400,
-        body: { error: { type: 'mapper_parsing_exception' } },
-      };
-      mockUpdateMappingsIfNeeded
-        .mockRejectedValueOnce(mappingError)
-        .mockResolvedValueOnce(undefined);
-
-      const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
-      const definition = createMockDefinition({
-        list: jest.fn().mockReturnValue(yieldPages(items)),
-      });
-      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
-
-      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
-      const crawlPromise = crawler.crawl({ definition, esClient, savedObjectsClient });
-      await jest.runAllTimersAsync();
-      await crawlPromise;
-
-      expect(mockUpdateMappingsIfNeeded).toHaveBeenCalledTimes(2);
-      expect(mockSmlClient.clean).not.toHaveBeenCalled();
     });
 
     it('non-response error propagates immediately without retrying', async () => {
