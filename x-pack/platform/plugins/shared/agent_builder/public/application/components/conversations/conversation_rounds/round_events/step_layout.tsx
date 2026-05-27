@@ -77,7 +77,6 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
   `;
 
   const expansionStyles = css`
-    padding-left: ${euiTheme.size.xl};
     padding-top: ${euiTheme.size.s};
   `;
 

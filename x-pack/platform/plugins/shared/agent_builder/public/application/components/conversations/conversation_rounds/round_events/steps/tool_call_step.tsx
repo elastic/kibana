@@ -5,33 +5,46 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiBadge, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import React, { Fragment, useCallback, useState } from 'react';
+import {
+  EuiAccordion,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { internalTools, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
-import type { ToolResult as ToolResultData } from '@kbn/agent-builder-common/tools/tool_result';
 import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
+import { getEbtProps } from '@kbn/ebt-click';
 import { StepLayout } from '../step_layout';
 import { JsonCodeBlock } from '../json_code_block';
-import { ToolResult, isInlineRenderableResult } from '../results/tool_result';
-import { ViewResponseButton } from '../results/view_response_button';
-import { ViewExecutionButton } from '../results/view_execution_button';
+import { ToolResult } from '../results/tool_result';
+import { ToolResponseFlyout } from '../flyouts/tool_response_flyout';
+import { SubAgentExecutionFlyout } from '../flyouts/sub_agent_execution_flyout';
 
 const labels = {
   toolCall: i18n.translate('xpack.agentBuilder.roundEvents.steps.toolCall.ariaLabel', {
     defaultMessage: 'Tool call',
   }),
   parameters: i18n.translate('xpack.agentBuilder.roundEvents.steps.toolCall.parametersLabel', {
-    defaultMessage: 'Parameters',
-  }),
-  progression: i18n.translate('xpack.agentBuilder.roundEvents.steps.toolCall.progressionLabel', {
-    defaultMessage: 'Progression',
+    defaultMessage: 'Parameters sent',
   }),
   result: i18n.translate('xpack.agentBuilder.roundEvents.steps.toolCall.resultLabel', {
-    defaultMessage: 'Response returned.',
+    defaultMessage: 'Response returned',
+  }),
+  viewJson: i18n.translate('xpack.agentBuilder.roundEvents.steps.toolCall.viewJson', {
+    defaultMessage: 'View JSON',
+  }),
+  viewExecution: i18n.translate('xpack.agentBuilder.roundEvents.steps.toolCall.viewExecution', {
+    defaultMessage: 'View execution',
   }),
 };
 
@@ -40,13 +53,11 @@ interface ToolCallStepProps {
 }
 
 /**
- * Renders a `ToolCallStep`. Clickable to expand into sub-fields:
- *   - Parameters (JSON)
- *   - Progression (each ToolCallProgress.message)
- *   - Result (inline-renderable types inline; non-inline types via View response button)
- *
- * Expansion state is local to this component — there's no shared map across
- * the round, since no caller needs to know which steps are expanded.
+ * Renders a `ToolCallStep`. Clickable to expand into:
+ *   - A "Parameters sent" accordion (JSON)
+ *   - Each progression message as a plain row
+ *   - A "Response returned" row with an inline "View JSON" (or
+ *     "View execution" for sub-agent calls) link
  */
 export const ToolCallStep: React.FC<ToolCallStepProps> = ({ step }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -65,22 +76,13 @@ export const ToolCallStep: React.FC<ToolCallStepProps> = ({ step }) => {
   );
 };
 
-interface ToolCallHeadlineProps {
-  step: ToolCallStepData;
-  hasResults: boolean;
-}
-
-const ToolCallHeadline: React.FC<ToolCallHeadlineProps> = ({ step, hasResults }) => {
-  const { tool_id: toolId } = step;
-
-  // If any of the tool's results is an `error` result, render the headline
-  // in danger color so a failing step is immediately visible at a glance.
+const ToolCallHeadline: React.FC<{ step: ToolCallStepData; hasResults: boolean }> = ({
+  step,
+  hasResults,
+}) => {
   const hasErrorResult = step.results.some(isErrorResult);
 
-  // Tool name rendered as an EuiBadge with a wrench icon. Not clickable —
-  // the entire row (handled by StepLayout) is the click target that expands
-  // the step's sub-fields.
-  const toolNode = (
+  const toolBadge = (
     <EuiBadge
       iconType="wrench"
       color={hasErrorResult ? 'danger' : 'default'}
@@ -88,7 +90,7 @@ const ToolCallHeadline: React.FC<ToolCallHeadlineProps> = ({ step, hasResults })
         vertical-align: inherit;
       `}
     >
-      {toolId}
+      {step.tool_id}
     </EuiBadge>
   );
 
@@ -99,13 +101,13 @@ const ToolCallHeadline: React.FC<ToolCallHeadlineProps> = ({ step, hasResults })
           <FormattedMessage
             id="xpack.agentBuilder.roundEvents.steps.toolCall.responded"
             defaultMessage="Tool {tool} responded"
-            values={{ tool: toolNode }}
+            values={{ tool: toolBadge }}
           />
         ) : (
           <FormattedMessage
             id="xpack.agentBuilder.roundEvents.steps.toolCall.calling"
             defaultMessage="Calling tool {tool}"
-            values={{ tool: toolNode }}
+            values={{ tool: toolBadge }}
           />
         )}
       </p>
@@ -113,96 +115,159 @@ const ToolCallHeadline: React.FC<ToolCallHeadlineProps> = ({ step, hasResults })
   );
 };
 
-interface ToolCallExpansionProps {
-  step: ToolCallStepData;
-}
+const ToolCallExpansion: React.FC<{ step: ToolCallStepData }> = ({ step }) => {
+  const { euiTheme } = useEuiTheme();
 
-const ToolCallExpansion: React.FC<ToolCallExpansionProps> = ({ step }) => {
-  const inlineResults = step.results.filter(isInlineRenderableResult);
-  const flyoutResults = step.results.filter((r: ToolResultData) => !isInlineRenderableResult(r));
-
-  // Sub-agent invocations get a "View execution" affordance that opens the
-  // rich SubAgentExecutionFlyout (nested steps + final response) instead of
-  // the generic ToolResponseFlyout (JSON dump). The execution_id is available
-  // from results once the sub-agent completes, or from progression metadata
-  // while it's still running — we look in both.
+  // Sub-agent invocations get the rich `SubAgentExecutionFlyout` (nested
+  // steps + final response). The execution_id is available from results once
+  // the sub-agent completes, or from progression metadata while it's still
+  // running — we look in both.
   const isSubAgentCall = step.tool_id === internalTools.runSubagent;
   const subAgentExecutionId = isSubAgentCall ? getSubAgentExecutionId(step) : undefined;
+  const showResponseRow = isSubAgentCall ? Boolean(subAgentExecutionId) : step.results.length > 0;
 
-  const hasInlineResults = inlineResults.length > 0;
-  const hasFlyoutResults = flyoutResults.length > 0;
-  const showResultSection = isSubAgentCall
-    ? Boolean(subAgentExecutionId)
-    : hasInlineResults || hasFlyoutResults;
+  const containerStyles = css`
+    padding-left: ${euiTheme.size.s};
+    display: flex;
+    flex-direction: column;
+    gap: ${euiTheme.size.s};
+  `;
 
   return (
-    <SubStepList>
-      <SubStep label={labels.parameters}>
-        <JsonCodeBlock data={step.params} />
-      </SubStep>
+    <div css={containerStyles}>
+      <ParametersAccordion id={`${step.tool_call_id}-parameters`} params={step.params} />
 
-      {step.progression && step.progression.length > 0 && (
-        <SubStep label={labels.progression}>
-          {step.progression.map((p, idx) => (
-            <EuiText key={`progression-${idx}`} size="s">
-              <p>{p.message}</p>
-            </EuiText>
-          ))}
-        </SubStep>
-      )}
+      {step.progression?.map((p, idx) => (
+        <EuiText key={`progression-${idx}`} size="s" color="subdued">
+          <p>{p.message}</p>
+        </EuiText>
+      ))}
 
-      {showResultSection && (
-        <SubStep label={labels.result}>
-          {isSubAgentCall ? (
-            <ViewExecutionButton executionId={subAgentExecutionId!} params={step.params} />
-          ) : (
-            <>
-              {inlineResults.map((result, idx) => (
-                <React.Fragment key={`inline-result-${idx}`}>
-                  <ToolResult result={result} mode="inline" />
-                  {idx < inlineResults.length - 1 && <EuiSpacer size="s" />}
-                </React.Fragment>
-              ))}
-              {hasInlineResults && hasFlyoutResults && <EuiSpacer size="s" />}
-              {hasFlyoutResults && <ViewResponseButton results={flyoutResults} />}
-            </>
-          )}
-        </SubStep>
+      {showResponseRow && (
+        <ResponseRow
+          step={step}
+          isSubAgentCall={isSubAgentCall}
+          subAgentExecutionId={subAgentExecutionId}
+        />
       )}
-    </SubStepList>
+    </div>
   );
 };
 
-const SubStepList: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { euiTheme } = useEuiTheme();
-  const styles = css`
-    list-style: disc;
-    margin: 0;
-    & > li::marker {
-      color: ${euiTheme.colors.textSubdued};
-    }
-  `;
-  return <ul css={styles}>{children}</ul>;
+const ParametersAccordion: React.FC<{
+  id: string;
+  params: ToolCallStepData['params'];
+}> = ({ id, params }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <EuiAccordion
+      id={id}
+      forceState={isOpen ? 'open' : 'closed'}
+      onToggle={setIsOpen}
+      arrowDisplay="none"
+      buttonContent={
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="s"
+          alignItems="center"
+          responsive={false}
+          css={css`
+            width: fit-content;
+          `}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {labels.parameters}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type={isOpen ? 'arrowUp' : 'arrowDown'}
+              size="s"
+              color="subdued"
+              aria-hidden={true}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      paddingSize="s"
+    >
+      <JsonCodeBlock data={params} />
+    </EuiAccordion>
+  );
 };
 
-interface SubStepProps {
-  label: string;
-  children: React.ReactNode;
-}
-
-const SubStep: React.FC<SubStepProps> = ({ label, children }) => {
+/**
+ * "Response returned • View JSON" (or "• View execution" for sub-agent calls)
+ * row. Not an accordion — clicking the link opens a flyout.
+ */
+const ResponseRow: React.FC<{
+  step: ToolCallStepData;
+  isSubAgentCall: boolean;
+  subAgentExecutionId: string | undefined;
+}> = ({ step, isSubAgentCall, subAgentExecutionId }) => {
   const { euiTheme } = useEuiTheme();
-  const itemStyles = css`
-    padding-bottom: ${euiTheme.size.s};
-  `;
+
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
+  const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+
+  const showSubAgentFlyout = isSubAgentCall && Boolean(subAgentExecutionId);
+  const linkLabel = showSubAgentFlyout ? labels.viewExecution : labels.viewJson;
+  const linkTestSubj = showSubAgentFlyout ? 'toolCallViewExecutionLink' : 'toolCallViewJsonLink';
+  const linkAction = showSubAgentFlyout
+    ? AGENT_BUILDER_UI_EBT.action.conversation.VIEW_SUB_AGENT_EXECUTION
+    : AGENT_BUILDER_UI_EBT.action.conversation.VIEW_TOOL_RESPONSE;
+
   return (
-    <li css={itemStyles}>
-      <EuiText size="s" color="subdued">
-        {label}
-      </EuiText>
-      <EuiSpacer size="xs" />
-      {children}
-    </li>
+    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          {labels.result}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIcon
+          type="dot"
+          size="s"
+          css={css`
+            color: ${euiTheme.colors.textDisabled};
+          `}
+          aria-hidden={true}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiLink
+          color="text"
+          onClick={openFlyout}
+          data-test-subj={linkTestSubj}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: linkAction,
+            detail: 'conversation',
+          })}
+        >
+          {linkLabel}
+        </EuiLink>
+      </EuiFlexItem>
+      {showSubAgentFlyout && isFlyoutOpen && (
+        <SubAgentExecutionFlyout
+          executionId={subAgentExecutionId!}
+          params={step.params}
+          onClose={closeFlyout}
+        />
+      )}
+      {!showSubAgentFlyout && (
+        <ToolResponseFlyout isOpen={isFlyoutOpen} onClose={closeFlyout}>
+          {step.results.map((result, idx) => (
+            <Fragment key={`flyout-result-${idx}`}>
+              <ToolResult result={result} mode="flyout" />
+              {idx < step.results.length - 1 && <EuiSpacer size="m" />}
+            </Fragment>
+          ))}
+        </ToolResponseFlyout>
+      )}
+    </EuiFlexGroup>
   );
 };
 
