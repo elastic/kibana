@@ -143,6 +143,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should apply groupHash filter', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { groupHash: 'abc123' }
     );
@@ -153,6 +154,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should not apply groupHash filter when null', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       { groupHash: null }
     );
@@ -163,6 +165,7 @@ describe('buildEpisodesQuery', () => {
 
   it('should treat groupingValues as display-only and not add a clause', () => {
     const query = buildEpisodesQuery(
+      SPACE_ID,
       { sortField: '@timestamp', sortDirection: 'desc' },
       {
         groupHash: 'abc123',
