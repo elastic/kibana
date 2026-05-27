@@ -156,8 +156,6 @@ export const ActionTypeMenu = ({
 
       return actionType.enabledInConfig === true && !shouldHideInUi;
     })
-    // Card subtitle (`RegisteredActionType.selectMessage`): spec-backed rows use connector-types
-    // list `description`; stack-backed rows use the in-process registry model `selectMessage`.
     .map(([id, actionType]) => {
       if (actionType.source === ACTION_TYPE_SOURCES.spec) {
         return {
