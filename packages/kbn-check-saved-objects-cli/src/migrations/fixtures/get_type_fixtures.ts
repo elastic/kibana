@@ -10,6 +10,7 @@
 import { join } from 'path';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { fileToJson } from '../../util';
+import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 import type { ModelVersionFixtures } from './types';
 import { FIXTURES_BASE_PATH } from './constants';
 import { createFixtureFile } from './create_fixture_file';
@@ -42,26 +43,33 @@ export async function getTypeFixtures({
         current,
         previous,
       });
-      throw new Error(
-        `❌ '${name}' SO type is missing test fixtures for '${current}'. Please populate sample data on '${path}'.`
-      );
+      throw new SavedObjectsCheckError({
+        ruleId: RULE_IDS.MODEL_VERSION_FIXTURE_MISSING,
+        severity: 'error',
+        typeName: name,
+        message: `'${name}' SO type is missing test fixtures for '${current}'.`,
+        fixHint: `The template file '${path}' has been generated. Populate it with sample documents.`,
+        docsAnchor: '#defining-model-versions',
+      });
     } else {
-      throw new Error(
-        `❌ '${name}' SO type is missing test fixtures for the new modelVersion '${current}'. Please run with --fix to generate '${path}' and then add sample data.`
-      );
+      throw new SavedObjectsCheckError({
+        ruleId: RULE_IDS.MODEL_VERSION_FIXTURE_MISSING,
+        severity: 'error',
+        typeName: name,
+        message: `'${name}' SO type is missing test fixtures for the new modelVersion '${current}'.`,
+        fixHint: `Run with --fix to generate the template file '${path}', then populate it with sample documents.`,
+        docsAnchor: '#defining-model-versions',
+      });
     }
   } else if (!isValidFixtureFile(fixtures, previous, current)) {
-    throw new Error(
-      `❌ The contents of '${path}' are invalid. Please ensure it:
-{
-  "${previous}": [
-    // has one or more documents of type ${name} on version ${previous}
-  ],
-  "${current}": [
-    // what the documents above should look like after migrating them to ${current}
-  ],
-}`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_FIXTURE_INVALID,
+      severity: 'error',
+      typeName: name,
+      message: `The contents of '${path}' are invalid.`,
+      fixHint: `Ensure the file contains a JSON object with a '${previous}' key (documents of type '${name}' on version ${previous}) and a '${current}' key (those documents after migration to ${current}), each holding a non-empty array.`,
+      docsAnchor: '#defining-model-versions',
+    });
   } else {
     return fixtures;
   }

@@ -15,7 +15,6 @@ import { fromPath } from '../element_path';
 import type { ElementPath } from '../element_path';
 import { buildTransform } from '../../../../edit_engine/resize_helpers';
 import {
-  setImportant,
   unfreezeChildren,
   softHideElement,
   reflowManagedStyle,
@@ -23,9 +22,13 @@ import {
   roundRect,
 } from '../../../../edit_engine/clone_element';
 import { cloneElement } from '../../../../edit_engine/clone_element';
+import { hasNoWrapTextInChain } from '../../../../edit_engine/text_layout_helpers';
+import { setImportant } from '../../../dom/set_important';
 import {
+  DEVTOOL_MANAGED_ATTR,
   DEVTOOL_LIBRARY_ID_ATTR,
   IMPORT_CLONE_Z_INDEX,
+  MAX_TREE_DEPTH,
   PSEUDO_CLASS_PREFIX,
   PSEUDO_CLASS_RE,
 } from '../../../constants';
@@ -413,6 +416,7 @@ export const importState = async (
         })
         .filter((e): e is NonNullable<typeof e> => e !== null);
 
+      const replayedTextParents = new Set<HTMLElement>();
       const textEdits = exported.textEdits
         .map((e) => {
           const parent = resolveEditElement(
@@ -421,6 +425,7 @@ export const importState = async (
             e.parentRelativeSelector
           );
           if (!parent) return null;
+          replayedTextParents.add(parent);
           const node = parent.childNodes[e.childIndex];
           if (!node || node.nodeType !== Node.TEXT_NODE) return null;
           // Re-apply the current text content.
@@ -431,6 +436,23 @@ export const importState = async (
           return { node: node as Text, original: e.original };
         })
         .filter((e): e is NonNullable<typeof e> => e !== null);
+
+      // Keep import behavior consistent with runtime text reflow.
+      // In no-wrap text contexts, root width is intentionally unfrozen so
+      // text can grow horizontally (e.g. badges). Avoid force-freezing it.
+      const shouldKeepRootWidthAuto = Array.from(replayedTextParents).some((parent) =>
+        hasNoWrapTextInChain(parent, el, MAX_TREE_DEPTH)
+      );
+      const rootWidthReleasedByStyleEdit = exported.styleEdits.some(
+        (e) => e.relativeSelector === '' && e.property === 'width' && e.current === ''
+      );
+      const keepRootWidthAuto = shouldKeepRootWidthAuto || rootWidthReleasedByStyleEdit;
+      const shouldKeepRootHeightAuto =
+        el.hasAttribute(DEVTOOL_MANAGED_ATTR) && replayedTextParents.size > 0;
+      const rootHeightReleasedByStyleEdit = exported.styleEdits.some(
+        (e) => e.relativeSelector === '' && e.property === 'height' && e.current === ''
+      );
+      const keepRootHeightAuto = shouldKeepRootHeightAuto || rootHeightReleasedByStyleEdit;
 
       const mediaEdits = exported.mediaEdits
         .map((e) => {
@@ -494,8 +516,12 @@ export const importState = async (
       // the root dimensions so the managed element keeps its size.
       const finalW = exported.originalRect.width + exported.dw;
       const finalH = exported.originalRect.height + exported.dh;
-      setImportant(el, 'width', `${finalW}px`);
-      setImportant(el, 'height', `${finalH}px`);
+      if (!keepRootWidthAuto) {
+        setImportant(el, 'width', `${finalW}px`);
+      }
+      if (!keepRootHeightAuto) {
+        setImportant(el, 'height', `${finalH}px`);
+      }
 
       // Re-apply the CSS transform so the element visually moves.
       // transform-origin must be 0 0 so scale pivots from the top-left

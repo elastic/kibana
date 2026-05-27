@@ -51,12 +51,21 @@ export function MetricsExperienceStateProvider({
     [setCurrentPage, setSelectedDimensions]
   );
 
-  const onPageChange = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
+  const onPageChange = useCallback(
+    (page: number) => {
+      setCurrentPage(page);
+    },
+    [setCurrentPage]
+  );
 
   const onSearchTermChange = useCallback(
     (term: string) => {
-      setCurrentPage(0);
-      setSearchTerm(term);
+      setSearchTerm((prevTerm) => {
+        if (prevTerm !== term) {
+          setCurrentPage(0);
+        }
+        return term;
+      });
     },
     [setSearchTerm, setCurrentPage]
   );
