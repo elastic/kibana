@@ -154,7 +154,6 @@ export const StartMigrationModal: FC<StartMigrationModalProps> = React.memo(
                     defaultMessage={'To set up other LLM connectors, visit {link}.'}
                     values={{
                       link: (
-                        /* eslint-disable-next-line @elastic/eui/href-or-on-click */
                         <EuiLink href={setupAIConnectorLink} onClick={onClickSetupAIConnector}>
                           {i18n.START_MIGRATION_MODAL_SETUP_NEW_AI_CONNECTOR_HELP_TEXT}
                         </EuiLink>
