@@ -21,7 +21,6 @@ import { RULE_BUILDER_REGISTRY } from '../rule_builder';
 import { AlertConditionStep } from './alert_condition_step';
 import { RecoveryConditionStep } from './recovery_condition_step';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
-import { NotificationsStep } from './notifications_step';
 
 interface ComposeDiscoverFormProps {
   state: ComposeDiscoverState;
@@ -78,13 +77,6 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     }),
     render: () => <DetailsAndArtifactsStep />,
     validate: async (methods) => methods.trigger(['metadata.name']),
-  },
-  notifications: {
-    id: 'notifications',
-    title: i18n.translate('xpack.alertingV2.composeDiscover.notifications.stepTitle', {
-      defaultMessage: 'Notifications',
-    }),
-    render: () => <NotificationsStep />,
   },
 };
 

@@ -581,6 +581,21 @@ Generates infrastructure host metrics along with APM host data.
 node scripts/synthtrace infra_hosts_with_apm_hosts --live
 ```
 
+#### `infra_hosts_minimal_host`
+
+Generates a single ECS infrastructure host row without numeric system metric fields. Useful for verifying Hosts page `N/A` behavior when a host exists but utilization/throughput values are unavailable.
+
+**Options:**
+
+- `hostName` (string, default: `minimal-host`): Host name to generate.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace infra_hosts_minimal_host --from=now-15m --to=now --clean
+node scripts/synthtrace infra_hosts_minimal_host --scenarioOpts.hostName=my-host --from=now-15m --to=now --clean
+```
+
 #### `infra_docker_containers`
 
 Generates Docker container metrics.
@@ -609,6 +624,23 @@ Generates AWS RDS infrastructure metrics.
 
 ```sh
 node scripts/synthtrace infra_aws_rds --live
+```
+
+#### `infra_hosts_missing_normalized_load`
+
+Generates three groups of hosts to reproduce missing metrics in the Hosts table and KPIs. Linux hosts emit all metrics; Windows "partial" hosts emit everything except `system.load` (the primary bug case — normalized load shows "0%" instead of "N/A"); Windows "minimal" hosts emit only CPU (maximizing N/A columns).
+
+**Options:**
+
+- `numLinuxHosts` (number, default: 2): Hosts with full metrics
+- `numWindowsPartialHosts` (number, default: 2): All metrics except load (primary bug case)
+- `numWindowsMinimalHosts` (number, default: 1): Only CPU metrics (maximum N/A)
+
+**Usage:**
+
+```sh
+node scripts/synthtrace infra_hosts_missing_normalized_load --from now-1w --to now
+node scripts/synthtrace infra_hosts_missing_normalized_load --from now-1w --to now --scenarioOpts='{"numLinuxHosts":2,"numWindowsPartialHosts":3,"numWindowsMinimalHosts":1}'
 ```
 
 ### Combined Scenarios
