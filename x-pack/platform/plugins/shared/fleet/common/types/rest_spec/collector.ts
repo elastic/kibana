@@ -55,7 +55,7 @@ export const CollectorGroupSchema = schema.object({
   }),
   signals: schema.arrayOf(schema.string({ maxLength: 64 }), {
     maxSize: 10,
-    meta: { description: 'Signal types present in this group (e.g. logs, metrics, traces)' },
+    meta: { description: 'Signal types present in this group (for example, logs, metrics, traces)' },
   }),
   isUngrouped: schema.maybe(
     schema.boolean({
