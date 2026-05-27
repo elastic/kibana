@@ -28,8 +28,6 @@ import { FIELD_DISCOVERY_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
 
 export type VerdictDataStreamClient = IDataStreamClient<typeof verdictsMappings, StoredVerdict>;
 
-const GROUP_BY_FIELD = 'discovery_id';
-
 function enrichFromEvidences(v: Verdict): Verdict {
   const evidences = v.evidences ?? [];
   const streamNames = v.stream_names?.length

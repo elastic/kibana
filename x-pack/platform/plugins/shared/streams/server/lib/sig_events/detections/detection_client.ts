@@ -7,6 +7,7 @@
 
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   type CommonSearchOptions,
@@ -70,8 +71,8 @@ export class DetectionClient {
 
   // Exclude kind:handled from the main query — handled docs are pipeline stamps,
   // not anomaly state. processed is derived separately via getProcessedIds.
-  private buildWhere(options: DetectionsSearchOptions): LatestSourceWhereCondition {
-    let where: LatestSourceWhereCondition = esql.exp`${esql.col('kind')} != ${esql.str(
+  private buildWhere(options: DetectionsSearchOptions): ESQLAstExpression {
+    let where: ESQLAstExpression = esql.exp`${esql.col('kind')} != ${esql.str(
       KIND_HANDLED
     )}`;
 
