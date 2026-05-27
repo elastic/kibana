@@ -85,11 +85,6 @@ export function httpHandlerFromKbnClient({
     }
 
     let lastError: unknown;
-    // Network-level errors (SocketError / ECONNRESET) have no HTTP status code.
-    // They happen when Kibana's keep-alive socket closes while the eval worker is
-    // busy with a long ES replay operation. Retry once unconditionally.
-    let networkErrorRetries = 0;
-    const NETWORK_ERROR_RETRY_LIMIT = 1;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
@@ -136,17 +131,6 @@ export function httpHandlerFromKbnClient({
         const status = error.status;
 
         lastError = error;
-
-        // No HTTP status → network-level error (stale keep-alive socket). Retry once.
-        if (status === undefined && networkErrorRetries < NETWORK_ERROR_RETRY_LIMIT) {
-          networkErrorRetries++;
-          log.warning(
-            `Network error (no HTTP response) on ${method} ${options.path}; retrying (${networkErrorRetries}/${NETWORK_ERROR_RETRY_LIMIT}): ${error.message}`
-          );
-          await sleep(1000);
-          attempt--; // re-run the same attempt index after the for-loop's attempt++
-          continue;
-        }
 
         const shouldRetry =
           attempt < maxRetries && typeof status === 'number' && retryStatuses.has(status);

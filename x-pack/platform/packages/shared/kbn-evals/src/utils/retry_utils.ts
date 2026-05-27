@@ -129,7 +129,7 @@ function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
       message
     )
   ) {
-    return { retry: true };
+    return { retry: true, retryAfterMs };
   }
 
   return { retry: false };
