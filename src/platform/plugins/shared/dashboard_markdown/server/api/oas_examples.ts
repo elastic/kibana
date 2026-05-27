@@ -87,17 +87,43 @@ const markdownDeleteDescription = 'Permanently deletes a markdown library item b
 // ---------------------------------------------------------------------------
 
 const markdownCreateBody: MarkdownCreateRequestBody = {
-  title: 'Welcome message',
-  description: 'Intro paragraph for the web logs overview dashboard.',
-  content: '## Web logs overview\n\nThis dashboard summarizes the Kibana sample web logs dataset.',
+  title: 'Web logs overview',
+  description: 'Intro and context for the web logs dashboard.',
+  content:
+    '## Web logs overview\n' +
+    '\n' +
+    'A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).\n' +
+    '\n' +
+    '**Key metrics in this dashboard:**\n' +
+    '\n' +
+    '- Total request count by HTTP method\n' +
+    '- Average response size over time\n' +
+    '- Geographic distribution of client IPs\n' +
+    '\n' +
+    '> Use the time picker above to narrow the dashboard to an incident window.\n' +
+    '\n' +
+    'For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).\n',
   settings: { open_links_in_new_tab: true },
 };
 
 const markdownUpdateBody: MarkdownUpdateRequestBody = {
-  title: 'Welcome message',
-  description: 'Intro paragraph for the web logs overview dashboard.',
+  title: 'Web logs overview',
+  description: 'Intro and context for the web logs dashboard.',
   content:
-    '## Web logs overview\n\nThis dashboard summarizes the Kibana sample web logs dataset.\n\nUpdated with the latest layout.',
+    '## Web logs overview\n' +
+    '\n' +
+    'A quick reference for the **Kibana sample web logs** dataset (`kibana_sample_data_logs`).\n' +
+    '\n' +
+    '**Key metrics in this dashboard:**\n' +
+    '\n' +
+    '- Total request count by HTTP method\n' +
+    '- Average response size over time\n' +
+    '- Geographic distribution of client IPs\n' +
+    '- _New:_ error rate broken down by status code\n' +
+    '\n' +
+    '> Use the time picker above to narrow the dashboard to an incident window.\n' +
+    '\n' +
+    'For field reference, see the [sample data documentation](https://www.elastic.co/docs/manage-data/ingest/sample-data).\n',
   settings: { open_links_in_new_tab: true },
 };
 
@@ -210,13 +236,7 @@ const markdownCreateResponseExamples = {
       'Response to creating a markdown library item. Returns the generated ID, the full item state in `data`, and metadata.',
     value: {
       id: '5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e',
-      data: {
-        title: 'Welcome message',
-        description: 'Intro paragraph for the web logs overview dashboard.',
-        content:
-          '## Web logs overview\n\nThis dashboard summarizes the Kibana sample web logs dataset.',
-        settings: { open_links_in_new_tab: true },
-      },
+      data: markdownCreateBody,
       meta: {
         created_at: '2026-04-13T10:00:00.000Z',
         managed: false,
@@ -237,8 +257,8 @@ const markdownSearchResponseExamples = {
         {
           id: '5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e',
           data: {
-            title: 'Welcome message',
-            description: 'Intro paragraph for the web logs overview dashboard.',
+            title: markdownCreateBody.title,
+            description: markdownCreateBody.description,
           },
           meta: {
             created_at: '2026-04-13T10:00:00.000Z',
@@ -264,13 +284,7 @@ const markdownReadResponseExamples = {
       'The full markdown library item state including `content`, `settings`, and metadata.',
     value: {
       id: '5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e',
-      data: {
-        title: 'Welcome message',
-        description: 'Intro paragraph for the web logs overview dashboard.',
-        content:
-          '## Web logs overview\n\nThis dashboard summarizes the Kibana sample web logs dataset.',
-        settings: { open_links_in_new_tab: true },
-      },
+      data: markdownCreateBody,
       meta: {
         created_at: '2026-04-13T10:00:00.000Z',
         managed: false,
@@ -288,13 +302,7 @@ const markdownUpdateResponseExamples = {
       'The complete updated markdown library item state after a full replacement. PUT replaces the entire item — fields omitted from the request are reset to their defaults.',
     value: {
       id: '5e1f3a20-c4d6-11ef-be8b-3c7c2b9d1f4e',
-      data: {
-        title: 'Welcome message',
-        description: 'Intro paragraph for the web logs overview dashboard.',
-        content:
-          '## Web logs overview\n\nThis dashboard summarizes the Kibana sample web logs dataset.\n\nUpdated with the latest layout.',
-        settings: { open_links_in_new_tab: true },
-      },
+      data: markdownUpdateBody,
       meta: {
         created_at: '2026-04-13T10:00:00.000Z',
         managed: false,
@@ -311,14 +319,8 @@ const markdownUpdateCreatedResponseExamples = {
     description:
       'Returned when the upsert created a new item because no item existed with the specified ID.',
     value: {
-      id: 'welcome-message',
-      data: {
-        title: 'Welcome message',
-        description: 'Intro paragraph for the web logs overview dashboard.',
-        content:
-          '## Web logs overview\n\nThis dashboard summarizes the Kibana sample web logs dataset.',
-        settings: { open_links_in_new_tab: true },
-      },
+      id: 'web-logs-overview',
+      data: markdownCreateBody,
       meta: {
         created_at: '2026-04-13T10:00:00.000Z',
         managed: false,

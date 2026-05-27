@@ -1,8 +1,8 @@
 overlay: 1.0.0
 info:
-  title: Bump slim overlay — replace Dashboards & Visualizations with tech-preview placeholders
+  title: Bump slim overlay — replace Dashboards, Visualizations & Markdowns with tech-preview placeholders
   version: 0.0.1
-  # ⚠️  TEMPORARY — retire this file when Dashboards & Visualizations APIs reach GA.
+  # ⚠️  TEMPORARY — retire this file when Dashboards, Visualizations & Markdowns APIs reach GA.
   # See https://github.com/elastic/kibana/issues/266195 for the full revert checklist.
   # Current external hosting: https://elastic.github.io/dashboards-api-spec/
 
@@ -195,6 +195,94 @@ actions:
             description: See the full Visualizations API reference for detailed response schemas.
 
   # ──────────────────────────────────────────────
+  # MARKDOWNS — same strategy.
+  # ──────────────────────────────────────────────
+
+  # ⚠️  TODO before tech preview GA: update the URLs in the descriptions below.
+  - target: "$.paths['/api/markdowns'].get"
+    description: "Strip GET /api/markdowns down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/markdowns'].post"
+    description: "Strip POST /api/markdowns down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/markdowns']"
+    description: "Re-inject minimal GET and POST for /api/markdowns"
+    update:
+      get:
+        tags:
+          - Markdowns
+        summary: "Search markdown library items"
+        operationId: search-markdowns-redirect
+        description: |
+          > **Technical preview** — The Markdowns API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Markdowns API reference →](https://elastic.github.io/dashboards-api-spec/markdowns#tag/Markdowns)**
+        responses:
+          '200':
+            description: See the full Markdowns API reference for detailed response schemas.
+      post:
+        tags:
+          - Markdowns
+        summary: "Create a markdown library item"
+        operationId: create-markdown-redirect
+        description: |
+          > **Technical preview** — The Markdowns API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Markdowns API reference →](https://elastic.github.io/dashboards-api-spec/markdowns#tag/Markdowns)**
+        responses:
+          '200':
+            description: See the full Markdowns API reference for detailed response schemas.
+
+  - target: "$.paths['/api/markdowns/{id}'].get"
+    description: "Strip GET /api/markdowns/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/markdowns/{id}'].put"
+    description: "Strip PUT /api/markdowns/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/markdowns/{id}'].delete"
+    description: "Strip DELETE /api/markdowns/{id} down to redirect notice"
+    remove: true
+  - target: "$.paths['/api/markdowns/{id}']"
+    description: "Re-inject minimal GET, PUT, DELETE for /api/markdowns/{id}"
+    update:
+      get:
+        tags:
+          - Markdowns
+        summary: "Get a markdown library item by ID"
+        operationId: get-markdown-redirect
+        description: |
+          > **Technical preview** — The Markdowns API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Markdowns API reference →](https://elastic.github.io/dashboards-api-spec/markdowns#tag/Markdowns)**
+        responses:
+          '200':
+            description: See the full Markdowns API reference for detailed response schemas.
+      put:
+        tags:
+          - Markdowns
+        summary: "Upsert a markdown library item"
+        operationId: upsert-markdown-redirect
+        description: |
+          > **Technical preview** — The Markdowns API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Markdowns API reference →](https://elastic.github.io/dashboards-api-spec/markdowns#tag/Markdowns)**
+        responses:
+          '200':
+            description: See the full Markdowns API reference for detailed response schemas.
+      delete:
+        tags:
+          - Markdowns
+        summary: "Delete a markdown library item"
+        operationId: delete-markdown-redirect
+        description: |
+          > **Technical preview** — The Markdowns API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
+          >
+          > **[View the full Markdowns API reference →](https://elastic.github.io/dashboards-api-spec/markdowns#tag/Markdowns)**
+        responses:
+          '200':
+            description: See the full Markdowns API reference for detailed response schemas.
+
+  # ──────────────────────────────────────────────
   # Tag-level descriptions (section intro above the operations list).
   # ──────────────────────────────────────────────
   # ⚠️  TODO before tech preview GA: update the URLs below.
@@ -213,3 +301,11 @@ actions:
         > **Technical preview** — The Visualizations API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
         >
         > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+
+  - target: '$.tags[?(@.name=="Markdowns")]'
+    description: "Replace Markdowns tag description with tech-preview notice"
+    update:
+      description: |
+        > **Technical preview** — The Markdowns API is currently in technical preview and its reference documentation is temporarily hosted at a separate location.
+        >
+        > **[View the full Markdowns API reference →](https://elastic.github.io/dashboards-api-spec/markdowns#tag/Markdowns)**

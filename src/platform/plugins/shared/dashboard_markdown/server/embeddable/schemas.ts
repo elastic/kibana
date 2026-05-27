@@ -14,7 +14,10 @@ import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publ
 
 export const markdownByValueStateSchema = schema.object({
   content: schema.string({
-    meta: { description: 'The markdown text content rendered by the panel.' },
+    meta: {
+      description:
+        'The Markdown text rendered by the panel. Supports GitHub-flavored Markdown — including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\\n` for line breaks within JSON strings.',
+    },
   }),
   settings: schema.object(
     {
