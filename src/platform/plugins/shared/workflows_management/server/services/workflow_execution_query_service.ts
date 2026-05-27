@@ -166,6 +166,7 @@ export class WorkflowExecutionQueryService {
       from,
       page,
       sort,
+      collapse: params.collapse ? { field: params.collapse } : undefined,
     });
   }
 
