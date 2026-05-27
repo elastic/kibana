@@ -52,6 +52,7 @@ const mockSharedContext = {
   },
   categoriesResult: mockCategories,
   packageToPlatform: new Map(),
+  indexToPlatform: new Map(),
 };
 
 const makePayload = (overrides: Partial<RetentionPayload> = {}): RetentionPayload => ({

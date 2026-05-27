@@ -72,12 +72,8 @@ const classifyPlatform = (row: IndexPlatformRow): string | undefined => {
   if (cloudProvider) {
     return cloudProvider.toUpperCase();
   }
-  if (hostOsFamily === 'windows') return 'Windows Endpoints';
-  if (hostOsFamily === 'macos') return 'macOS Endpoints';
   if (hostOsFamily) return `${hostOsFamily} Endpoints`;
-  if (eventModule === 'okta') return 'Okta (Identity)';
   if (eventModule) return eventModule;
-  if (observerVendor === 'Palo Alto Networks') return 'Palo Alto (Network)';
   if (observerVendor) return observerVendor;
 
   // Last-resort: extract dataset portion from the index name
