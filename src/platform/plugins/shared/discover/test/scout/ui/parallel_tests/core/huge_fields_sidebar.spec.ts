@@ -11,79 +11,19 @@
  * Discover sidebar virtualization behavior with a very large field list.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import { spaceTest, tags } from '@kbn/scout';
-import type { EsClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+const HUGE_FIELDS_ARCHIVE_PATH = 'src/platform/test/functional/fixtures/es_archiver/huge_fields';
 const HUGE_FIELDS_INDEX = 'testhuge';
 const HUGE_FIELDS_DATA_VIEW = `${HUGE_FIELDS_INDEX}*`;
-const HUGE_FIELDS_DOC_ID = '1';
-const MAX_HUGE_FIELD_INDEX = 11_000;
 const HUGE_FIELDS_TIME_DEFAULTS = '{ "from": "2016-10-05T00:00:00", "to": "2016-10-06T00:00:00"}';
-
-const ensureHugeFieldsData = async (esClient: EsClient) => {
-  try {
-    await esClient.indices.create({
-      index: HUGE_FIELDS_INDEX,
-      settings: {
-        index: {
-          mapping: {
-            total_fields: {
-              limit: 50_000,
-            },
-          },
-          number_of_replicas: 0,
-          number_of_shards: 1,
-        },
-      },
-      mappings: {
-        properties: {
-          date: {
-            type: 'date',
-          },
-        },
-      },
-    });
-  } catch (error) {
-    if (
-      !(error instanceof errors.ResponseError) ||
-      error.body?.error?.type !== 'resource_already_exists_exception'
-    ) {
-      throw error;
-    }
-  }
-
-  const document: Record<string, number | string> = {
-    date: '2016-10-05T14:00:00',
-  };
-
-  for (let i = 0; i <= MAX_HUGE_FIELD_INDEX; i++) {
-    document[`myvar${i}`] = i;
-  }
-
-  try {
-    await esClient.create({
-      index: HUGE_FIELDS_INDEX,
-      id: HUGE_FIELDS_DOC_ID,
-      document,
-      refresh: 'wait_for',
-    });
-  } catch (error) {
-    if (
-      !(error instanceof errors.ResponseError) ||
-      error.body?.error?.type !== 'version_conflict_engine_exception'
-    ) {
-      throw error;
-    }
-  }
-};
 
 spaceTest.describe('Discover huge field list virtualization', { tag: tags.stateful.all }, () => {
   let hugeFieldsDataViewId: string | undefined;
 
-  spaceTest.beforeAll(async ({ scoutSpace, apiServices, esClient }) => {
-    await ensureHugeFieldsData(esClient);
+  spaceTest.beforeAll(async ({ scoutSpace, apiServices, esArchiver }) => {
+    await esArchiver.loadIfNeeded(HUGE_FIELDS_ARCHIVE_PATH);
 
     const { data } = await apiServices.dataViews.create({
       title: HUGE_FIELDS_DATA_VIEW,
@@ -108,7 +48,7 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
     await pageObjects.discover.waitUntilSearchingHasFinished();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
+  spaceTest.afterAll(async ({ scoutSpace, apiServices, esArchiver }) => {
     await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
 
     if (hugeFieldsDataViewId) {
@@ -116,6 +56,7 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
     }
 
     await scoutSpace.savedObjects.cleanStandardList();
+    await esArchiver.unload(HUGE_FIELDS_ARCHIVE_PATH);
   });
 
   spaceTest(
