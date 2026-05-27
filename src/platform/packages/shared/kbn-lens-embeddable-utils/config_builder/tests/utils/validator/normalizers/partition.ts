@@ -177,6 +177,8 @@ const alignLegacyTypes: NormalizerConfig<PartitionAttributes> = {
     }
 
     // if chart has only collapsed primary groups, colorMapping and palette should be ignored -> delete it
+    // TODO: Currently for Mosaic if a SO has no uncollapsed primary groups but has uncollapsed secondary groups,
+    // the colorMapping and palette are not ignored. This should be fixed at runtime.
     const allPrimariesCollapsed =
       layer.primaryGroups.length > 0 &&
       layer.primaryGroups.every((id) => Boolean(layer.collapseFns?.[id]));
