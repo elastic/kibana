@@ -280,6 +280,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       isCompleted: true,
       isExpired: false,
       wasSuccessful: true,
+      wasCanceled: false,
       errors: undefined,
       startedAt: '2022-04-27T16:08:47.449Z',
       status: 'successful',
@@ -293,6 +294,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
           isCompleted: true,
           completedAt: '2022-04-30T16:08:47.449Z',
           wasSuccessful: true,
+          wasCanceled: false,
         };
         return acc;
       }, {} as ActionDetails['agentState']),
