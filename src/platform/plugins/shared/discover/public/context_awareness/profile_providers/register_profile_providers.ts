@@ -10,6 +10,7 @@
 import { createSecurityDocumentProfileProviders } from './security/security_profile_providers';
 import type { DiscoverServices } from '../../build_services';
 import type {
+  DataSourceProfileProvider,
   DataSourceProfileService,
   DocumentProfileService,
   RootProfileService,
@@ -126,6 +127,13 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
   createSparklineDataSourceProfileProvider(providerServices),
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
   ...createObservabilityTracesDataSourceProfileProviders(providerServices),
+  // alerting_v2 owns its own profile; we cast because alerting_v2 cannot import
+  // DataSourceProfileProvider without creating a circular plugin dependency.
+  ...(providerServices.alertingVTwo
+    ? [
+        providerServices.alertingVTwo.createDiscoverProfile() as unknown as DataSourceProfileProvider,
+      ]
+    : []),
 ];
 
 /**

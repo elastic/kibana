@@ -6,6 +6,7 @@
  */
 
 export * from './rule_data_schema';
+export * from './episodes_view_query';
 export * from './rule_attachment_schema';
 export * from './error_response_schema';
 export * from './constants';

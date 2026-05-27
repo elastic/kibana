@@ -6,6 +6,9 @@
  */
 
 import type { AlertingV2KibanaServices } from './kibana_services';
+import type { IUiSettingsClient, UserProfileService } from '@kbn/core/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -22,6 +25,13 @@ const createMockServices = (): AlertingV2KibanaServices => ({
   lens: lensPluginMock.createStartContract(),
   expressions: {} as AlertingV2KibanaServices['expressions'],
   uiActions: {} as AlertingV2KibanaServices['uiActions'],
+  userProfile: {} as UserProfileService,
+  spaces: {} as SpacesApi,
+  uiSettings: {} as IUiSettingsClient,
+  unifiedDocViewer: {} as UnifiedDocViewerStart,
+  overlays: {} as AlertingV2KibanaServices['overlays'],
+  rendering: {} as AlertingV2KibanaServices['rendering'],
+  docLinks: {} as AlertingV2KibanaServices['docLinks'],
 });
 
 describe('kibana_services', () => {

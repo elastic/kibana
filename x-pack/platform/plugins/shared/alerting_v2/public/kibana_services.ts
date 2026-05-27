@@ -6,14 +6,27 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import type { IUiSettingsClient, UserProfileService } from '@kbn/core/public';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 
 /** Services shared by rule UI, episodes UI, and other alerting_v2 surfaces. */
 export type AlertingV2KibanaServices = RuleFormServices & {
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
+  userProfile: UserProfileService;
+  spaces: SpacesApi;
+  uiSettings: IUiSettingsClient;
+  unifiedDocViewer: UnifiedDocViewerStart;
+  overlays: OverlayStart;
+  rendering: CoreStart['rendering'];
+  docLinks: DocLinksStart;
 };
 
 const servicesReady$ = new BehaviorSubject<AlertingV2KibanaServices | undefined>(undefined);

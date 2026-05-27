@@ -325,6 +325,11 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     alertingVTwo: {
       DynamicRuleFormFlyout: jest.fn(() => null),
+      createDiscoverProfile: jest.fn(() => ({
+        profileId: 'alerting-v2-data-source-profile',
+        profile: {},
+        resolve: jest.fn().mockResolvedValue({ isMatch: false }),
+      })),
     },
     trackUiMetric: jest.fn(),
   } as unknown as DiscoverServices;

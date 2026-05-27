@@ -12,8 +12,12 @@ import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import {
   ALERT_EVENTS_DATA_STREAM,
   ALERT_ACTIONS_DATA_STREAM,
-  PAGE_SIZE_ESQL_VARIABLE,
-} from '../constants';
+  addGroupHashActionStats,
+  addEpisodeIdActionStats,
+  addEpisodeAggregation,
+} from '@kbn/alerting-v2-schemas';
+export { addEpisodeAggregation } from '@kbn/alerting-v2-schemas';
+import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
 
 export interface AlertEpisode {
   '@timestamp': string;
@@ -87,41 +91,6 @@ const ALLOWLISTED_SORT_FIELDS = new Set([
 
 const sanitizeSortField = (field: string) => {
   return ALLOWLISTED_SORT_FIELDS.has(field) ? field : '@timestamp';
-};
-
-export const addEpisodeAggregation = (query: ComposerQuery) => {
-  /* This will be simplified when the `$.alerting-episodes` ES|QL view works.
-   * Matches `buildEpisodeEventDataQuery` and `buildRelatedEpisodesQuery`.
-   */
-
-  // prettier-ignore
-  query
-    .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY episode.id`
-    .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
-    .pipe`WHERE @timestamp == last_timestamp`;
-};
-
-const addGroupHashActionStats = (query: ComposerQuery) => {
-  // prettier-ignore
-  query
-    .pipe`INLINE STATS last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-                       last_snooze_action     = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
-                       snooze_expiry          = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
-                       last_tags              = LAST(tags, @timestamp)        WHERE action_type == "tag"
-          BY group_hash`;
-};
-
-const addEpisodeIdActionStats = (query: ComposerQuery) => {
-  // `.rule-events` documents carry the nested `episode.id`, while `.alert-actions`
-  // documents carry a flat `episode_id` — unify them so INLINE STATS groups both
-  // sides under the same key.
-  // prettier-ignore
-  query
-    .pipe`EVAL episode_id = COALESCE(\`episode.id\`, episode_id)`
-    .pipe`INLINE STATS last_ack_action      = LAST(action_type,  @timestamp) WHERE action_type IN ("ack", "unack"),
-                       last_assignee_uid    = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"
-          BY episode_id`;
 };
 
 const addTagsFilter = (query: ComposerQuery, tags: string[]) => {

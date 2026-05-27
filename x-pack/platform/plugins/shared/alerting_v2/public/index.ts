@@ -17,6 +17,8 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import {
   ALERTING_V2_SECTION_ID,
@@ -31,6 +33,7 @@ import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { setKibanaServices } from './kibana_services';
+import { createDiscoverProfile } from './discover_profile/profile';
 import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
 import type { AlertingV2PublicStart } from './types';
 
@@ -46,6 +49,7 @@ export const module = new ContainerModule(({ bind }) => {
     .inSingletonScope();
   bind(Start).toConstantValue({
     DynamicRuleFormFlyout,
+    createDiscoverProfile,
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
@@ -66,6 +70,13 @@ export const module = new ContainerModule(({ bind }) => {
         lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
         expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
+        userProfile: coreStart.userProfile,
+        uiSettings: coreStart.uiSettings,
+        spaces: diContainer.get(PluginStart('spaces')) as SpacesApi,
+        unifiedDocViewer: diContainer.get(PluginStart('unifiedDocViewer')) as UnifiedDocViewerStart,
+        overlays: coreStart.overlays,
+        rendering: coreStart.rendering,
+        docLinks: coreStart.docLinks,
       });
 
       const experimentalEnabled = coreStart.settings.globalClient.get<boolean>(
