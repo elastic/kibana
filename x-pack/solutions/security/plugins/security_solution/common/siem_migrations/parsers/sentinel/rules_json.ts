@@ -46,7 +46,10 @@ export class SentinelRulesParser {
       return undefined;
     }
 
-    const { displayName, description, query, queryFrequency, queryPeriod, severity } = properties;
+    const { displayName, description, query, queryFrequency:originalQueryFrequency, queryPeriod:originalQueryPeriod, severity } = properties;
+    
+    const queryFrequency = rule.kind  === "NRT" ? "PT1M" : originalQueryFrequency;
+     const queryPeriod = rule.kind  === "NRT" ? "PT1M" : originalQueryPeriod;
 
     if (!displayName || !query) {
       return undefined;
