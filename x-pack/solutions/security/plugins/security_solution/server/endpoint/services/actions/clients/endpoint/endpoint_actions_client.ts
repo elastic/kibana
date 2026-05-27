@@ -114,7 +114,10 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     hosts: HostMetadata[];
   }> {
     const uniqueIds = [...new Set(ids)];
-    const ccsEnabled = await hasConnectedRemoteClusters(this.options.esClient);
+    const ccsEnabled = await hasConnectedRemoteClusters(
+      this.options.esClient,
+      this.options.endpointService.experimentalFeatures.defendRemoteOutputCcs
+    );
     const foundEndpointHosts = await this.options.endpointService
       .getEndpointMetadataService(this.options.spaceId)
       .getMetadataForEndpoints(uniqueIds, ccsEnabled);
@@ -136,7 +139,10 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected async validateRequest(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
   ): Promise<ResponseActionsClientValidateRequestResponse> {
-    const ccsEnabled = await hasConnectedRemoteClusters(this.options.esClient);
+    const ccsEnabled = await hasConnectedRemoteClusters(
+      this.options.esClient,
+      this.options.endpointService.experimentalFeatures.defendRemoteOutputCcs
+    );
 
     // Memory Dump: ensure that agents/Endpoint support this command
     if (actionRequest.command === 'memory-dump') {
@@ -194,7 +200,8 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         const actionToCancel = await getActionDetailsById(
           this.options.endpointService,
           this.options.spaceId,
-          actionRequest.parameters.id
+          actionRequest.parameters.id,
+          { ccsEnabled }
         );
 
         if (actionToCancel.agentType !== 'endpoint') {

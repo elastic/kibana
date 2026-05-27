@@ -20,7 +20,10 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
     const metadataService = this.options.endpointService.getEndpointMetadataService(
       soClient.getCurrentNamespace()
     );
-    const ccsEnabled = await hasConnectedRemoteClusters(this.options.esClient);
+    const ccsEnabled = await hasConnectedRemoteClusters(
+      this.options.esClient,
+      this.options.endpointService.experimentalFeatures.defendRemoteOutputCcs
+    );
 
     try {
       const agentIdsKql = agentIds.map((agentId) => `agent.id: ${agentId}`).join(' or ');
@@ -33,7 +36,12 @@ export class EndpointAgentStatusClient extends AgentStatusClient {
           },
           ccsEnabled
         ),
-        getPendingActionsSummary(this.options.endpointService, this.options.spaceId, agentIds),
+        getPendingActionsSummary(
+          this.options.endpointService,
+          this.options.spaceId,
+          agentIds,
+          ccsEnabled
+        ),
       ]).catch(catchAndWrapError);
 
       return agentIds.reduce<AgentStatusRecords>((acc, agentId) => {

@@ -46,6 +46,7 @@ describe('EndpointAgentStatusClient', () => {
     (endpointAppContextServiceMock.getEndpointMetadataService as jest.Mock).mockReturnValue(
       metadataMocks.endpointMetadataService
     );
+    getPendingActionsSummaryMock.mockResolvedValue([]);
     constructorOptions = {
       spaceId: 'default',
       endpointService: endpointAppContextServiceMock,
@@ -86,12 +87,14 @@ describe('EndpointAgentStatusClient', () => {
     expect(getPendingActionsSummaryMock).toHaveBeenCalledWith(
       expect.anything(),
       'default',
-      agentIds
+      agentIds,
+      false
     );
   });
 
   it('should pass ccsEnabled=true to metadata service when remote clusters are connected', async () => {
     const metadataClient = constructorOptions.endpointService.getEndpointMetadataService();
+    constructorOptions.endpointService.experimentalFeatures.defendRemoteOutputCcs = true;
     (constructorOptions.esClient.cluster.remoteInfo as jest.Mock).mockResolvedValue({
       cluster_a: { connected: true },
     });

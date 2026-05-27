@@ -25,34 +25,41 @@ describe('hasConnectedRemoteClusters', () => {
       cluster_a: { connected: true },
       cluster_b: { connected: false },
     });
-    expect(await hasConnectedRemoteClusters(esClient)).toBe(true);
+    expect(await hasConnectedRemoteClusters(esClient, true)).toBe(true);
   });
 
   it('returns false when no remote clusters are connected', async () => {
     const esClient = mockEsClient({
       cluster_a: { connected: false },
     });
-    expect(await hasConnectedRemoteClusters(esClient)).toBe(false);
+    expect(await hasConnectedRemoteClusters(esClient, true)).toBe(false);
   });
 
   it('returns false when there are no remote clusters', async () => {
     const esClient = mockEsClient({});
-    expect(await hasConnectedRemoteClusters(esClient)).toBe(false);
+    expect(await hasConnectedRemoteClusters(esClient, true)).toBe(false);
   });
 
   it('returns cached result without calling remoteInfo again within TTL', async () => {
     const esClient = mockEsClient({ cluster_a: { connected: true } });
-    await hasConnectedRemoteClusters(esClient);
-    await hasConnectedRemoteClusters(esClient);
+    await hasConnectedRemoteClusters(esClient, true);
+    await hasConnectedRemoteClusters(esClient, true);
     expect(esClient.cluster.remoteInfo).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns false without calling remoteInfo when the feature flag is disabled', async () => {
+    const esClient = mockEsClient({ cluster_a: { connected: true } });
+
+    expect(await hasConnectedRemoteClusters(esClient, false)).toBe(false);
+    expect(esClient.cluster.remoteInfo).not.toHaveBeenCalled();
   });
 
   it('returns false and caches the result when remoteInfo throws', async () => {
     const esClient = {
       cluster: { remoteInfo: jest.fn().mockRejectedValue(new Error('permission denied')) },
     } as unknown as ElasticsearchClient;
-    expect(await hasConnectedRemoteClusters(esClient)).toBe(false);
-    expect(await hasConnectedRemoteClusters(esClient)).toBe(false);
+    expect(await hasConnectedRemoteClusters(esClient, true)).toBe(false);
+    expect(await hasConnectedRemoteClusters(esClient, true)).toBe(false);
     expect(esClient.cluster.remoteInfo).toHaveBeenCalledTimes(1);
   });
 });

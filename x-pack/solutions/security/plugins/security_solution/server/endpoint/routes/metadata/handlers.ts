@@ -52,7 +52,10 @@ export function getMetadataListRequestHandler(
     const spaceId = (await context.securitySolution).getSpaceId();
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService(spaceId);
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
-    const ccsEnabled = await hasConnectedRemoteClusters(esClient);
+    const ccsEnabled = await hasConnectedRemoteClusters(
+      esClient,
+      endpointAppContext.service.experimentalFeatures.defendRemoteOutputCcs
+    );
 
     try {
       const { data, total } = await endpointMetadataService.getHostMetadataList(
@@ -90,7 +93,10 @@ export const getMetadataRequestHandler = function (
     const spaceId = (await context.securitySolution).getSpaceId();
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService(spaceId);
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
-    const ccsEnabled = await hasConnectedRemoteClusters(esClient);
+    const ccsEnabled = await hasConnectedRemoteClusters(
+      esClient,
+      endpointAppContext.service.experimentalFeatures.defendRemoteOutputCcs
+    );
 
     try {
       return response.ok({

@@ -20,7 +20,14 @@ export const resetCcsCache = (): void => {
   ccsCache = null;
 };
 
-export const hasConnectedRemoteClusters = (esClient: ElasticsearchClient): Promise<boolean> => {
+export const hasConnectedRemoteClusters = (
+  esClient: ElasticsearchClient,
+  ffEnabled: boolean = false
+): Promise<boolean> => {
+  if (ffEnabled === false) {
+    return Promise.resolve(false);
+  }
+
   const now = Date.now();
 
   if (ccsCache !== null && now - ccsCache.timestamp < CCS_CACHE_TTL_MS) {
