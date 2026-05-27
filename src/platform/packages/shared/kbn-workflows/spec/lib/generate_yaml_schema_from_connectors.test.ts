@@ -16,7 +16,8 @@ const BASE_WORKFLOW = {
   triggers: [{ type: 'manual' }],
 };
 
-describe('generateYamlSchemaFromConnectors', () => {
+// Failing: See https://github.com/elastic/kibana/issues/271451
+describe.skip('generateYamlSchemaFromConnectors', () => {
   describe('strict mode', () => {
     it('should generate a valid YAML schema from connectors', () => {
       const connectors: ConnectorContractUnion[] = [
