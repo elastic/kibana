@@ -10,8 +10,8 @@
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import {
-  setupEsqlEnv,
   runClientValidation,
+  setupEsqlEnv,
   type EsqlEnv,
   type EsqlValidationFixtures,
 } from './helpers';
@@ -39,7 +39,8 @@ describe('ES|QL validation error integration', () => {
         )}\n`
       );
     }
-    await esqlEnv?.integrationEnv.shutdown();
+    await esqlEnv?.cleanup();
+    await esqlEnv?.integrationEnv.stop();
   });
 
   it('does not report client-side validation errors for queries accepted by Elasticsearch', async () => {

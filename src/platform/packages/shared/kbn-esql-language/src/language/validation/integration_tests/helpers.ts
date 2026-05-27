@@ -114,6 +114,8 @@ const createIndexRequest = (index: string, fieldList: Array<{ name: string; type
 export const runClientValidation = (query: string) => validateQuery(query, getCallbackMocks());
 
 const setupIntegrationEnv = async () => {
+  // ES-only: we spin up a local ES test cluster without Kibana.
+  // Faster startup and fewer moving parts, while still validating against real ES responses.
   const es = createTestEsCluster({
     license: 'basic',
     log: new ToolingLog({
@@ -122,17 +124,21 @@ const setupIntegrationEnv = async () => {
     }),
   });
 
+  // The ES test cluster startup time varies a lot in CI; align Jest timeout
+  // with the cluster's own start timeout plus some buffer.
+  jest.setTimeout(es.getStartTimeout() + 100_000);
+
   await es.start();
 
   const esClient = es.getClient();
-  const shutdown = async () => {
+  const stop = async () => {
     await es.cleanup();
   };
 
   return {
     es,
     esClient,
-    shutdown,
+    stop,
   };
 };
 
