@@ -1,5 +1,5 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { KqlPlugin } from './plugin';
+import type { KqlPlugin } from './plugin';
 export type { KqlPluginStart, KqlPluginSetup } from './plugin';
 export type { QueryStringInputProps } from './components/query_string_input';
 export { QueryStringInput } from './components/query_string_input';
