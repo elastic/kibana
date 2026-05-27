@@ -31,7 +31,7 @@ This README is the architecture reference for AD 2.0. Read top-to-bottom for the
 
 ## Status & Feature Flag
 
-The whole feature is gated behind `securitySolution.attackDiscoveryWorkflowsEnabled` (default **OFF**). With the flag OFF every PR preserves existing behavior exactly — the public `elastic_assistant` API surface is unchanged, no new routes accept requests, no workflow steps register, and no integrity verification or pre-execution validation runs.
+The whole feature is gated behind `securitySolution.attackDiscoveryWorkflowsEnabled` (default **OFF**). With the flag OFF every PR preserves existing behavior exactly — the public `elastic_assistant` API surface is unchanged, no new routes accept requests, no workflow steps register, and no managed-workflow integrity check or pre-execution validation runs.
 
 Enable in `kibana.dev.yml`:
 

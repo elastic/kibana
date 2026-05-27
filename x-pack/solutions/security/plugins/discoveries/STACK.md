@@ -19,9 +19,15 @@
 
 ## PR Stack
 
-### PR 1: Feature Flag + Shared Packages + elastic_assistant Refactor
+### PR 1: Feature Flag + Extract `@kbn/discoveries` + `@kbn/discoveries-schemas` + AD-specific `elastic_assistant` refactor
 
-**Goal**: Extract shared logic from `elastic_assistant` into reusable packages and prove zero regression when the feature flag is OFF.
+**Goal**: Extract the AD-specific shared logic from `elastic_assistant` into `@kbn/discoveries` and `@kbn/discoveries-schemas`, and prove zero regression when the feature flag is OFF.
+
+> **Rebalance note.** After Phase 2 this PR no longer contains:
+> - `@kbn/attack-discovery-schedules-common` — moved to **PR 10** (lands with the rest of the scheduling slice).
+> - `defend_insights` graph extraction — moved to **PR 9**.
+> - Shared telemetry helpers (`@kbn/discoveries` `impl/lib/telemetry/`) — moved to **PR 5**.
+> What remains is the core AD-specific `@kbn/discoveries` + `@kbn/discoveries-schemas` packages and the matching `elastic_assistant` refactor.
 
 <details>
 <summary><strong>Commit Message</strong></summary>
@@ -45,9 +51,9 @@ feature_flags.overrides:
 
 | Package | Purpose |
 |---------|---------|
-| `@kbn/discoveries` | Shared server-side logic: LangGraph graphs, event logging utilities, hallucination detection, anonymization, schedule transforms, telemetry definitions. Consumed by both `elastic_assistant` and the upcoming `discoveries` plugin. |
+| `@kbn/discoveries` | Shared server-side logic: LangGraph graphs, event logging utilities, hallucination detection, anonymization, schedule transforms. Consumed by both `elastic_assistant` and the upcoming `discoveries` plugin. *(Telemetry helpers land in PR 5; defend-insights extraction lands in PR 9.)* |
 | `@kbn/discoveries-schemas` | OpenAPI schemas (`.schema.yaml`), generated TypeScript types, and Zod validators for route validation. |
-| `@kbn/attack-discovery-schedules-common` | Shared schedule infrastructure: data client, field map, transforms. Extracted from `elastic_assistant` to keep things DRY. |
+| `@kbn/attack-discovery-schedules-common` | *(Extracted in **PR 10**, not this PR — listed here for orientation.)* Shared schedule infrastructure: data client, field map, transforms. |
 
 ### What Moved
 
@@ -56,13 +62,10 @@ feature_flags.overrides:
 | `server/lib/attack_discovery/graphs/` | `@kbn/discoveries` `impl/attack_discovery/graphs/` | LangGraph graph, hallucination detection, anonymization |
 | `server/lib/attack_discovery/persistence/event_logging/` | `@kbn/discoveries` `impl/attack_discovery/persistence/event_logging/` | Event logging utilities |
 | `server/lib/attack_discovery/schedules/` | `@kbn/attack-discovery-schedules-common` | Data client, field map, transforms |
-| `server/lib/defend_insights/graphs/` | `@kbn/discoveries` `impl/defend_insights/graphs/` | Defend insights graph (code move, no logic changes) |
 
-`elastic_assistant` now imports from the shared packages instead of local files. All existing public API routes, defend insights functionality, and schedule behavior are unchanged.
+`elastic_assistant` now imports from the shared packages instead of local files. All existing public API routes and schedule behavior are unchanged.
 
-### Defend Insights Migration
-
-The defend insights graph code is relocated from `elastic_assistant` to `@kbn/discoveries`. This is a pure code move with import path updates — no logic changes. The `@elastic/security-defend-workflows` team expects this migration.
+> The `defend_insights` graph extraction (originally part of this PR) moved to **PR 9** during the Phase 2 rebalance; this PR no longer touches defend insights code.
 
 </details>
 
@@ -387,9 +390,11 @@ Before the pipeline starts, concurrent checks validate all preconditions:
 
 ---
 
-### PR 5: Telemetry (EBT Events)
+### PR 5: Telemetry (EBT Events) + telemetry helper extraction
 
-**Goal**: Add fleet-wide telemetry for misconfigurations, step failures, schedule actions, and UI interactions.
+**Goal**: Add fleet-wide telemetry for misconfigurations, step failures, schedule actions, and UI interactions, AND extract shared telemetry helpers from `elastic_assistant` into `@kbn/discoveries`.
+
+> **Rebalance note.** The shared telemetry helpers (`@kbn/discoveries` `impl/lib/telemetry/`) are extracted here (rather than in PR 1) so the AD-specific extraction is concentrated alongside the events they support. PR 1 no longer touches telemetry code.
 
 <details>
 <summary><strong>Commit Message</strong></summary>
@@ -449,7 +454,9 @@ All events avoid collecting user-defined names, query content, alert data, or us
 
 ### PR 6: UI — Workflow Configuration (Settings Flyout)
 
-**Goal**: Add workflow configuration UI to the Attack Discovery settings flyout.
+**Goal**: Add workflow configuration UI to the Attack Discovery settings flyout: settings panels, validation callout, custom-workflow picker.
+
+> **Rebalance note.** The schedule UI (schedules flyout, schedule list, schedule editing) is no longer part of this PR — it moved to **PR 10** alongside the `@kbn/attack-discovery-schedules-common` extraction so the entire scheduling story lands as a single reviewable unit.
 
 <details>
 <summary><strong>Commit Message</strong></summary>
@@ -524,9 +531,11 @@ When workflow settings change, the UI performs async runtime checks:
 
 ---
 
-### PR 7: UI — Workflow Execution Monitoring + Details Flyout
+### PR 7: UI — Live Execution Monitoring (loading callout, live timer, pipeline cards)
 
-**Goal**: Add real-time workflow execution monitoring and detailed inspection UI.
+**Goal**: Add real-time workflow execution monitoring UI: loading callout, live timer, per-step pipeline cards.
+
+> **Rebalance note.** The execution details flyout and step data modal (originally part of this PR) moved to **PR 8** alongside the Agent Builder skills work so the inspection UI lands with the consumers that drive it (`run` step + skills).
 
 <details>
 <summary><strong>Commit Message</strong></summary>
@@ -610,9 +619,11 @@ Generation history view showing past executions with status, timing, and discove
 
 ---
 
-### PR 8: Skills (Edit with AI + Troubleshoot with AI)
+### PR 8: Agent Builder skills + `attack-discovery.run` step + step data modal + execution details flyout
 
-**Goal**: Register Agent Builder skills for workflow editing and troubleshooting.
+**Goal**: Land the Agent Builder integration: the `security.attack-discovery.run` step + Edit with AI / Troubleshoot with AI skills, plus the supporting inspection UI (step data modal + execution details flyout).
+
+> **Rebalance note.** During Phase 2 the `attack-discovery.run` step handler, the step data modal, and the execution details flyout were consolidated here from PR 4 / PR 7 so the inspection surface ships in the same PR as its primary consumers (the Agent Builder skills + the `run` step).
 
 <details>
 <summary><strong>Commit Message</strong></summary>
@@ -666,79 +677,61 @@ Skills only register when the feature flag is ON. Registration failures are hand
 
 ---
 
-### PR 9: Self-Healing + Workflow Integrity Verification
+### PR 9: Extract `@kbn/discoveries` `defend_insights` to shared package
 
-**Goal**: Implement automatic detection and repair of damaged/missing/disabled workflows.
+**Goal**: Relocate the `defend_insights` graph from `elastic_assistant` into the shared `@kbn/discoveries` package, alongside the `workflow_steps` schemas and `elastic_assistant` defend cleanup. Replaces the (reverted) self-healing slot.
+
+> **History.** The original PR 9 implemented SHA-256-based self-healing workflow integrity verification (`verify_and_repair_workflows`, `get_bundled_yaml_entries`). That feature was reverted in `kibana-onp.13` because the system-workflows framework migration moved reconciliation, version-based upgrade, and orphan cleanup into the platform. The PR 9 slot was then repurposed to carry the `defend_insights` extraction (relocated from PR 1 during the Phase 2 rebalance) plus related schema and cleanup work, keeping the AD-specific `elastic_assistant` refactor concentrated in PR 1. The current AD-side `checkManagedWorkflowIntegrity` function (diagnostic-only) lives in PR 4.
 
 <details>
 <summary><strong>Commit Message</strong></summary>
 
-## [Security Solution] [Attack Discovery] Add self-healing workflow integrity verification
+## [Security Solution] [Attack Discovery] Extract `@kbn/discoveries` `defend_insights` to shared package
 
-This PR implements automatic detection and repair of the 3 required default workflows (alert retrieval, generation, validation). Before each generation run, the system verifies workflow integrity via SHA-256 hash comparison against bundled definitions. If any workflow has been deleted or modified, it is automatically restored. If restoration fails, the pipeline aborts with a clear error.
+This PR completes the shared-package extraction story begun in PR 1 by relocating the `defend_insights` graph from `elastic_assistant` into `@kbn/discoveries/impl/defend_insights/`. It also lands the `workflow_steps` schemas and the matching `elastic_assistant` defend cleanup.
 
-### Algorithm
+### What Moved
 
-Runs in parallel for all 3 required workflows:
+| From (`elastic_assistant`) | To | Notes |
+|---|---|---|
+| `server/lib/defend_insights/graphs/` | `@kbn/discoveries` `impl/defend_insights/graphs/` | Defend insights graph (code move, no logic changes) |
+| Workflow step Zod schemas | `@kbn/discoveries-schemas` (`workflow_steps/*`) | Centralised step schemas |
+| Defend-insights helper modules consumed only by the moved graph | `@kbn/discoveries` `impl/defend_insights/` | Companion helpers |
 
-1. Fetch each workflow from Elasticsearch via the Workflows Management API
-2. **If missing**: re-create from the bundled YAML definition
-3. **If present**: compute SHA-256 hash and compare against the bundled hash
-4. **If hashes match**: no action (`all_intact`)
-5. **If hashes differ**: overwrite with bundled YAML (`repaired`)
-6. **If restore fails**: record as `unrepairableError`
+`elastic_assistant` now imports the defend-insights graph from `@kbn/discoveries`. Existing defend-insights behaviour is unchanged — the `@elastic/security-defend-workflows` team expects this migration.
 
-### Outcomes
+### Feature flag deployability
 
-| Status | Meaning | Pipeline |
-|--------|---------|----------|
-| `all_intact` | All 3 workflows match bundled definitions | Continues |
-| `repaired` | One or more workflows were restored; `workflow_modified` telemetry emitted per workflow | Continues |
-| `repair_failed` | One or more workflows could not be restored | **Aborted** — `generation-failed` event with error reason |
-
-### Observability
-
-| Scenario | Log Level | Telemetry |
-|----------|-----------|-----------|
-| All intact | DEBUG | None |
-| Modified, restoration succeeds | INFO | `workflow_modified` per workflow |
-| Missing, re-creation succeeds | ERROR (detection) + INFO (success) | `workflow_modified` per workflow |
-| Repair fails | ERROR | None (execution aborted) |
-
-The bundled YAML hash utility reads the 3 required YAML files from disk at first access, computes SHA-256 hashes (Node.js `crypto`), and caches results (bundled files are immutable at runtime).
+This PR is independently deployable with `securitySolution.attackDiscoveryWorkflowsEnabled` OFF. It is a pure code-relocation + schema-grouping change: no new routes, no new step handlers, no UI changes.
 
 </details>
 
 **Scope**:
-- `server/lib/workflow_initialization/` — service interface + implementation
-- `server/lib/workflow_initialization/verify_and_repair_workflows/` — verify-and-repair logic
-- `@kbn/discoveries` `impl/attack_discovery/generation/verify_workflow_integrity/` — execution integration
-- `server/workflows/helpers/get_bundled_yaml_entries/` — bundled YAML hash utility (SHA-256)
+- `@kbn/discoveries` `impl/defend_insights/` — extracted graph + helpers (moved from `elastic_assistant`)
+- `@kbn/discoveries-schemas` `workflow_steps/` — centralised workflow step schemas
+- `elastic_assistant` defend cleanup: deletions of relocated code, updated import paths
+- Removal of vestigial self-healing placeholder files left behind by the `kibana-onp.13` revert
 
 **Review objectives**:
-- [S5] Self-healing for damaged/missing workflows
-- [S17] Self-healing works in default and non-default spaces when workflows manually modified
-- [S18] Self-healing works when workflows manually deleted
-- [S19] Self-healing works when workflows manually disabled
-- [G11] Resilient against failures
-- [G12] Users can recover without contacting support
+- [G1] AD + schedules work when FF OFF (no new code paths active)
+- [G2] Defend insights still works (graph code moved but re-consumed)
+- [G7] One function per file with unit tests
+- [G10] No accidental artifacts
 
 **Review checklist**:
-- [ ] SHA-256 hash comparison against bundled YAML is correct
-- [ ] Missing workflows are re-created from bundled definitions
-- [ ] Modified workflows are overwritten with bundled definitions
-- [ ] Disabled workflows are re-enabled (or handled appropriately)
-- [ ] Repair failures are logged and abort the pipeline cleanly
-- [ ] `workflow_modified` telemetry emitted per repaired workflow
-- [ ] Self-healing runs in the correct space context
-- [ ] Hash cache is invalidated appropriately (bundled files are immutable at runtime)
-- [ ] Concurrent repair attempts are safe (no race conditions)
+- [ ] `elastic_assistant` imports defend-insights graph from `@kbn/discoveries` (no local copy)
+- [ ] Defend-insights behaviour is unchanged (existing tests pass)
+- [ ] No new exports leak workflow-only types into `elastic_assistant`'s public API
+- [ ] Workflow-step schemas are colocated in `@kbn/discoveries-schemas`
+- [ ] No vestigial self-healing files remain (the reverted `verify_and_repair_workflows`, `get_bundled_yaml_entries`, etc.)
 
 ---
 
-### PR 10: Schedule Integration (Workflows-Based Scheduling)
+### PR 10: Scheduling + extract `@kbn/attack-discovery-schedules-common` + schedule UI
 
-**Goal**: Integrate workflow-based generation with the Alerting Framework scheduler.
+**Goal**: Integrate workflow-based generation with the Alerting Framework scheduler AND land the full scheduling story end-to-end: the `@kbn/attack-discovery-schedules-common` extraction (data client, field map, transforms) + the schedule UI (settings panels, schedule list, schedule editing).
+
+> **Rebalance note.** After Phase 2 this PR carries the complete scheduling slice in one reviewable unit: the `@kbn/attack-discovery-schedules-common` extraction (relocated from PR 1) + the schedule UI (relocated from PR 6) + the original workflow-based scheduler integration.
 
 <details>
 <summary><strong>Commit Message</strong></summary>
@@ -812,8 +805,8 @@ These objectives apply to ALL PRs in the stack:
 | G8 | Pure functions, no side effects | All PRs |
 | G9 | No unnecessary mutation | All PRs |
 | G10 | No accidental artifacts | All PRs |
-| G11 | Resilient against failures | PR 3, 4, 9 |
-| G12 | Users can recover without support | PR 4, 7, 9 |
+| G11 | Resilient against failures | PR 3, 4 |
+| G12 | Users can recover without support | PR 4, 7 |
 | G13 | Platform changes are registrations only | PR 2 |
 
 | ID | Specific Item | PR |
@@ -822,7 +815,6 @@ These objectives apply to ALL PRs in the stack:
 | S2 | Health checks | PR 4 |
 | S3 | Edit with AI | PR 6, 8 |
 | S4 | Troubleshoot with AI | PR 7, 8 |
-| S5 | Self-healing | PR 9 |
 | S6 | Execution status monitoring | PR 7 |
 | S7 | Tracing via execution UUID | PR 4 |
 | S8 | Routes throw when FF disabled | PR 3 |
@@ -834,9 +826,6 @@ These objectives apply to ALL PRs in the stack:
 | S14 | FF OFF: legacy schedules isolated | PR 10 |
 | S15 | FF ON: legacy schedules still isolated | PR 10 |
 | S16 | Alerts and Attacks Alignment not broken | All PRs |
-| S17 | Self-healing: modified workflows | PR 9 |
-| S18 | Self-healing: deleted workflows | PR 9 |
-| S19 | Self-healing: disabled workflows | PR 9 |
 | S20 | Troubleshoot with AI works | PR 7, 8 |
 | S21 | Event log entries correct | PR 4 |
 | S22 | Query builder correct when FF off | PR 6 |
@@ -853,22 +842,22 @@ These objectives apply to ALL PRs in the stack:
 ## Dependency Graph
 
 ```
-PR 1 (Shared Packages + elastic_assistant Refactor)
+PR 1 (Shared Packages + AD-specific elastic_assistant Refactor)
  ├── PR 2 (Plugin Scaffold + Step Registration)
  │    ├── PR 3 (Internal API Routes + ES|QL Mode)
- │    │    ├── PR 4 (Orchestration + Event Logging)
- │    │    │    ├── PR 9 (Self-Healing)
- │    │    │    └── PR 10 (Schedule Integration)
- │    │    └── PR 8 (Skills)
- │    └── PR 5 (Telemetry)
+ │    │    ├── PR 4 (Orchestration + Event Logging + Pre-Execution Validation)
+ │    │    │    ├── PR 9 (Extract defend_insights to @kbn/discoveries + workflow_steps schemas)
+ │    │    │    └── PR 10 (Scheduling + extract @kbn/attack-discovery-schedules-common + schedule UI)
+ │    │    └── PR 8 (Agent Builder skills + run step + step data modal + execution details flyout)
+ │    └── PR 5 (Telemetry + telemetry helper extraction)
  ├── PR 6 (UI: Workflow Configuration)
- └── PR 7 (UI: Execution Monitoring)
+ └── PR 7 (UI: Execution Monitoring — loading callout, live timer, pipeline cards)
 ```
 
 **Parallelizable**:
 - PR 5, 6, 7 can be developed in parallel after PR 2
 - PR 8 can be developed in parallel after PR 3
-- PR 9 and PR 10 can be developed in parallel after PR 4
+- PR 9 (defend_insights extraction) and PR 10 (scheduling) can be developed in parallel after PR 4
 
 ---
 
@@ -886,9 +875,8 @@ PR 1 (Shared Packages + elastic_assistant Refactor)
 | Risk | Mitigation | PRs |
 |------|-----------|-----|
 | Shared package extraction breaks existing behavior | PR 1 review focuses on import path changes only; all existing tests must pass | PR 1 |
-| Defend insights regression | Explicit test coverage for defend insights graphs | PR 1 |
+| Defend insights regression | Explicit test coverage for defend insights graphs; relocation is a pure code move | PR 9 |
 | New plugin side effects when FF OFF | Plugin setup/start gated by FF check; startup health check is defensive | PR 2 |
 | Route privilege escalation | All routes use `asCurrentUser`; RBAC matches existing AD privileges | PR 3 |
-| Self-healing race conditions | Verify-and-repair runs synchronously per request; concurrent requests are safe because repair is idempotent | PR 9 |
 | Schedule isolation leak | Schedule data client filters by source field; cross-API queries return empty | PR 10 |
 | Serverless differences | Workflows engine availability varies; pre-execution validation handles gracefully | PR 4 |
