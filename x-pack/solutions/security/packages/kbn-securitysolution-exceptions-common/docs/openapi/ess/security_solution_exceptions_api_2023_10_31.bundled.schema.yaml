@@ -851,6 +851,7 @@ paths:
           name: filter
           required: false
           schema:
+            maxLength: 10000
             type: string
         - description: Determines whether to include expired exceptions in the exported
             list. Expiration date defined by `expire_time`.
