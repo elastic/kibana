@@ -25,7 +25,7 @@ const schema = z.object({
     .string()
     .optional()
     .describe(
-      'Job ID. Required for all operations except get_jobs, get_available_metadata, and validate_permissions.'
+      'Job ID. Required for all operations except get_jobs (optional filter), get_available_metadata, and validate_permissions.'
     ),
 });
 
@@ -46,8 +46,17 @@ export const adGetJobInfoTool: BuiltinToolDefinition<typeof schema> = {
         }
 
         case 'get_datafeed_config': {
-          const datafeedId = jobId ? `datafeed-${jobId}` : undefined;
-          const response = await ml.getDatafeeds(datafeedId ? { datafeed_id: datafeedId } : {});
+          if (!jobId) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.text,
+                  data: 'job_id is required for get_datafeed_config',
+                },
+              ],
+            };
+          }
+          const response = await ml.getDatafeeds({ datafeed_id: `datafeed-${jobId}` });
           return { results: [{ type: ToolResultType.json, data: response }] };
         }
 
@@ -177,10 +186,9 @@ export const adGetJobInfoTool: BuiltinToolDefinition<typeof schema> = {
           };
       }
     } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
       return {
-        results: [
-          { type: ToolResultType.text, data: `Error executing ${operation}: ${err.message}` },
-        ],
+        results: [{ type: ToolResultType.text, data: `Error executing ${operation}: ${message}` }],
       };
     }
   },

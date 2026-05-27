@@ -70,6 +70,18 @@ describe('adGetJobInfoTool', () => {
       expect(ml.getDatafeeds).toHaveBeenCalledWith({ datafeed_id: 'datafeed-my-job' });
     });
 
+    it('operation=get_datafeed_config returns error when job_id is missing', async () => {
+      const context = createContext();
+
+      const result = await adGetJobInfoTool.handler({ operation: 'get_datafeed_config' }, context);
+
+      expect(result).toEqual({
+        results: [
+          { type: ToolResultType.text, data: 'job_id is required for get_datafeed_config' },
+        ],
+      });
+    });
+
     it('operation=get_job_messages returns error when job_id is missing', async () => {
       const context = createContext();
 

@@ -46,7 +46,7 @@ export const adCreateJobTool: BuiltinToolDefinition<typeof schema> = {
               ],
             };
           }
-          const response = await ml.validateDetector({ body: jobConfig as any });
+          const response = await ml.validate({ body: jobConfig as any });
           return { results: [{ type: ToolResultType.json, data: response }] };
         }
 
@@ -102,10 +102,9 @@ export const adCreateJobTool: BuiltinToolDefinition<typeof schema> = {
           };
       }
     } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
       return {
-        results: [
-          { type: ToolResultType.text, data: `Error executing ${operation}: ${err.message}` },
-        ],
+        results: [{ type: ToolResultType.text, data: `Error executing ${operation}: ${message}` }],
       };
     }
   },

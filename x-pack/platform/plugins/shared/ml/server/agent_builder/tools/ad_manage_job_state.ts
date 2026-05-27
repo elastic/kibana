@@ -102,10 +102,9 @@ export const adManageJobStateTool: BuiltinToolDefinition<typeof schema> = {
           };
       }
     } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
       return {
-        results: [
-          { type: ToolResultType.text, data: `Error executing ${operation}: ${err.message}` },
-        ],
+        results: [{ type: ToolResultType.text, data: `Error executing ${operation}: ${message}` }],
       };
     }
   },

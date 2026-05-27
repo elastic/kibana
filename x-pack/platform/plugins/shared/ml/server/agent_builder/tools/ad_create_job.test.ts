@@ -11,7 +11,7 @@ import { adCreateJobTool } from './ad_create_job';
 import { AD_CREATE_JOB_TOOL_ID } from './tool_ids';
 
 const createMlMock = () => ({
-  validateDetector: jest.fn().mockResolvedValue({ valid: true }),
+  validate: jest.fn().mockResolvedValue({ valid: true }),
   estimateModelMemory: jest.fn().mockResolvedValue({ model_memory_estimate: '100mb' }),
   putJob: jest.fn().mockResolvedValue({ job_id: 'test-job' }),
   putDatafeed: jest.fn().mockResolvedValue({ datafeed_id: 'datafeed-test-job' }),
@@ -29,7 +29,7 @@ describe('adCreateJobTool', () => {
   });
 
   describe('handler', () => {
-    it('operation=validate_spec calls ml.validateDetector', async () => {
+    it('operation=validate_spec calls ml.validate', async () => {
       const ml = createMlMock();
       const jobConfig = { analysis_config: { detectors: [{ function: 'rare' }] } };
 
@@ -38,7 +38,7 @@ describe('adCreateJobTool', () => {
         createContext(ml)
       );
 
-      expect(ml.validateDetector).toHaveBeenCalledWith({ body: jobConfig });
+      expect(ml.validate).toHaveBeenCalledWith({ body: jobConfig });
       expect(result.results[0].type).toBe(ToolResultType.json);
     });
 
