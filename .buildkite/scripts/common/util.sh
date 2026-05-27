@@ -218,11 +218,27 @@ download_tmp_artifact() {
 }
 upload_tmp_artifact() {
   local local_path="$1" artifact_name="$2" build_id="$3"
+  local region pid exit_code=0
+  local upload_pids=()
 
   "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"
 
-  printf '%s\n' "${GCS_CI_ARTIFACT_REGIONS[@]}" | xargs -P 0 -I{} \
-    gcloud storage cp "$local_path" "gs://kibana-ci-artifacts-{}/tmp/builds/${build_id}/${artifact_name}"
+  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
+    (
+      retry 3 1 gcloud storage cp \
+        "$local_path" \
+        "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
+    ) &
+    upload_pids+=("$!")
+  done
+
+  for pid in "${upload_pids[@]}"; do
+    if ! wait "$pid"; then
+      exit_code=1
+    fi
+  done
+
+  return "$exit_code"
 }
 
 print_if_dry_run() {
