@@ -29,7 +29,7 @@ import {
   removeAllArtifacts,
 } from '../../tasks/artifacts';
 import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_page';
-import type { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../types';
 import { performUserActions, type FormAction } from '../../tasks/perform_user_actions';
 import { getArtifactListEmptyStateAddButton } from '../../screens';
