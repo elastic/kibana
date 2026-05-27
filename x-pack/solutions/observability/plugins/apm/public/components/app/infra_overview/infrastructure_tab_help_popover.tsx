@@ -21,9 +21,13 @@ export function InfrastructureTabHelpPopover() {
       anchorPosition="leftUp"
       button={
         <EuiToolTip
-          content={i18n.translate('xpack.apm.infraOverview.helpPopover.tooltipContent', {
-            defaultMessage: 'Infrastructure tab information',
-          })}
+          content={
+            <span data-test-subj="apmInfrastructureTabHelpPopoverTooltipContent">
+              {i18n.translate('xpack.apm.infraOverview.helpPopover.tooltipContent', {
+                defaultMessage: 'Infrastructure tab information',
+              })}
+            </span>
+          }
         >
           <HelpPopoverButton
             onClick={() => {
@@ -35,7 +39,7 @@ export function InfrastructureTabHelpPopover() {
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
     >
-      <p>
+      <p data-test-subj="apmInfrastructureTabHelpPopoverContent">
         <FormattedMessage
           id="xpack.apm.infraOverview.helpPopover.supportedInfrastructureDescription"
           defaultMessage="Shows containers, pods, and hosts that the selected service is linked to. The data sources and navigation behavior depend on whether the service is instrumented with Elastic APM or OpenTelemetry (OTel)."

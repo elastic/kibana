@@ -12,8 +12,14 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useInfrastructureAttributes } from '../use_infrastructure_attributes';
 import { EmptyPrompt } from './empty_prompt';
 import { FailurePrompt } from './failure_prompt';
-import { useTabs } from './use_tabs';
+import { InfraTab, useTabs } from './use_tabs';
 import { push } from '../../../shared/links/url_helpers';
+
+const infraTabTestSubjects: Record<InfraTab, string> = {
+  [InfraTab.containers]: 'apmInfraTabsContainersTab',
+  [InfraTab.pods]: 'apmInfraTabsPodsTab',
+  [InfraTab.hosts]: 'apmInfraTabsHostsTab',
+};
 
 export function InfraTabs() {
   const { agentName, data, detailTab, end, start, status } = useInfrastructureAttributes();
@@ -77,6 +83,7 @@ export function InfraTabs() {
               }}
               isSelected={currentTab.id === id}
               id={id}
+              data-test-subj={infraTabTestSubjects[id]}
             >
               {name}
             </EuiTab>

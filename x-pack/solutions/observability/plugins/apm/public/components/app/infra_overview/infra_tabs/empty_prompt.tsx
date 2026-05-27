@@ -40,7 +40,7 @@ export function EmptyPrompt() {
         </EuiText>
       }
       color="subdued"
-      data-test-subj="metricsTableEmptyIndicesContent"
+      data-test-subj="apmInfraTabsEmptyPrompt"
       icon={<NoResultsIllustration />}
       layout="horizontal"
       title={

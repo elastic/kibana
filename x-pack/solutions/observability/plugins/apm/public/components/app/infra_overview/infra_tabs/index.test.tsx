@@ -18,6 +18,11 @@ jest.mock('../use_infrastructure_attributes', () => ({
 }));
 
 jest.mock('./use_tabs', () => ({
+  InfraTab: {
+    containers: 'containers',
+    pods: 'pods',
+    hosts: 'hosts',
+  },
   useTabs: jest.fn(),
 }));
 
@@ -70,7 +75,7 @@ describe('InfraTabs', () => {
 
     renderWithContext(<InfraTabs />);
 
-    expect(screen.getByText('There is no data to display.')).toBeInTheDocument();
+    expect(screen.getByTestId('apmInfraTabsEmptyPrompt')).toBeInTheDocument();
   });
 
   it('shows a failure prompt when loading infrastructure data fails', () => {

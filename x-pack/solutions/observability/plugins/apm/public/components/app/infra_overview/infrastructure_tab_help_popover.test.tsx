@@ -15,20 +15,21 @@ describe('InfrastructureTabHelpPopover', () => {
   it('shows supported infrastructure guidance with a docs link', async () => {
     renderWithContext(<InfrastructureTabHelpPopover />);
 
-    expect(screen.queryByText('Help')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('apmInfrastructureTabHelpPopoverTooltipContent')
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('apmInfrastructureTabHelpPopoverContent')).not.toBeInTheDocument();
 
     await userEvent.hover(screen.getByTestId('apmHelpPopoverButtonButton'));
 
-    expect(await screen.findByText('Infrastructure tab information')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('apmInfrastructureTabHelpPopoverTooltipContent')
+    ).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('apmHelpPopoverButtonButton'));
 
-    expect(
-      screen.getByText(
-        'Shows containers, pods, and hosts that the selected service is linked to. The data sources and navigation behavior depend on whether the service is instrumented with Elastic APM or OpenTelemetry (OTel).'
-      )
-    ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /documentation/ })).toHaveAttribute(
+    expect(screen.getByTestId('apmInfrastructureTabHelpPopoverContent')).toBeInTheDocument();
+    expect(screen.getByTestId('apmInfrastructureTabHelpPopoverDocumentationLink')).toHaveAttribute(
       'href',
       'https://www.elastic.co/docs/solutions/observability/apm/infrastructure#observability-apm-infrastructure-elastic-apm'
     );

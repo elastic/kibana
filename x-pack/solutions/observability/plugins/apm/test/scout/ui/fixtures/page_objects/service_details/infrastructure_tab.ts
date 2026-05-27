@@ -25,10 +25,10 @@ export class InfrastructureTab extends ServiceDetailsTab {
     this.tab = this.page.getByTestId(`${this.tabName}Tab`);
     this.panel = this.page.getByTestId('apmInfrastructureTabPanel');
     this.helpButton = this.page.getByTestId('apmHelpPopoverButtonButton');
-    this.containersTab = this.page.getByRole('tab', { name: 'Containers' });
-    this.podsTab = this.page.getByRole('tab', { name: 'Pods' });
-    this.hostsTab = this.page.getByRole('tab', { name: 'Hosts' });
-    this.emptyPrompt = this.panel.getByText('There is no data to display.');
+    this.containersTab = this.page.getByTestId('apmInfraTabsContainersTab');
+    this.podsTab = this.page.getByTestId('apmInfraTabsPodsTab');
+    this.hostsTab = this.page.getByTestId('apmInfraTabsHostsTab');
+    this.emptyPrompt = this.panel.getByTestId('apmInfraTabsEmptyPrompt');
   }
 
   protected async waitForTabLoad(): Promise<void> {
