@@ -81,6 +81,7 @@ export {
   injectWhereClauseAfterSourceCommand,
   type ESQLStatsQueryMeta,
   type EsqlColumnsWithHighlights,
+  type ESQLHighlightTags,
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';

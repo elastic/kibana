@@ -8,5 +8,4 @@
  */
 
 export { getHighlightReact } from './highlight_react';
-export { getInlineEmSnippetHighlightReact } from './inline_em_snippet_highlight_react';
 export { getHighlightRequest } from './highlight_request';

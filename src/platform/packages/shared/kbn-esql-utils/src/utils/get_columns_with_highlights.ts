@@ -34,12 +34,12 @@ const POST_TAG_OPTION_NAME = 'post_tag';
  */
 export const FUNCTIONS_WITH_HIGHLIGHT_SUPPORT = ['top_snippets'];
 
-export interface EsqlHighlight {
+export interface ESQLHighlightTags {
   preTag: string;
   postTag: string;
 }
 
-export type EsqlColumnsWithHighlights = Record<string, EsqlHighlight>;
+export type EsqlColumnsWithHighlights = Record<string, ESQLHighlightTags>;
 
 /**
  * Returns columns built using a highlighting algorithm,

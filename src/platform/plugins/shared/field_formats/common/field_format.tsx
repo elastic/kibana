@@ -20,7 +20,7 @@ import type {
   FieldFormatMetaParams,
   FieldFormatParams,
 } from './types';
-import { getHighlightReact, getInlineEmSnippetHighlightReact } from './utils/highlight';
+import { getHighlightReact } from './utils/highlight';
 import type {
   ReactContextTypeConvert,
   ReactConvertFunction,
@@ -95,19 +95,7 @@ export abstract class FieldFormat {
 
     const formatted = this.convertToText(val, options);
     const fieldName = options?.field?.name;
-    const highlights = fieldName ? options?.hit?.highlight?.[fieldName] : undefined;
-    if (typeof formatted !== 'string') {
-      return formatted;
-    }
-    // Classic search: parallel hit.highlight snippets (Kibana highlight tags).
-    if (highlights) {
-      return getHighlightReact(formatted, highlights);
-    }
-    // ES|QL: inline <em> markup in the cell value.
-    if (options?.hasHighlights) {
-      return getInlineEmSnippetHighlightReact(formatted);
-    }
-    return formatted;
+    return getHighlightReact(formatted, fieldName, options?.hit);
   };
 
   /**

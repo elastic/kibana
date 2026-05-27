@@ -77,6 +77,7 @@ export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
 export {
   getColumnsWithHighlights,
   type EsqlColumnsWithHighlights,
+  type ESQLHighlightTags,
 } from './utils/get_columns_with_highlights';
 export { buildRenameSourceFieldMap } from './utils/build_rename_source_field_map';
 export { getAllEsqlControls, getEsqlControls } from './utils/get_esql_controls';

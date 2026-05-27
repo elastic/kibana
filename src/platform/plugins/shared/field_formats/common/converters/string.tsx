@@ -137,10 +137,6 @@ export class StringFormat extends FieldFormat {
     const formatted = this.textConvert(val);
     const fieldName = field?.name;
 
-    if (fieldName && hit?.highlight?.[fieldName]) {
-      return getHighlightReact(formatted, hit.highlight[fieldName]);
-    }
-
-    return formatted;
+    return getHighlightReact(formatted, fieldName, hit);
   };
 }
