@@ -87,7 +87,7 @@ export function registerChatRoutes({
     ),
     prompts: schema.maybe(
       schema.recordOf(
-        schema.string(),
+        schema.string({ minLength: 1, maxLength: 512 }),
         schema.oneOf([
           schema.object({ allow: schema.boolean() }),
           schema.object({ authorized: schema.boolean() }),
