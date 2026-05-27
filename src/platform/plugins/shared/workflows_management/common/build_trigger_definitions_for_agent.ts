@@ -9,12 +9,11 @@
 
 import type { BaseTriggerDefinition } from '@kbn/workflows';
 import {
+  AlertEventSchema,
+  BaseEventSchema,
   builtInTriggerDefinitions,
   EventTimestampSchema,
-  WorkflowEventsSchema,
 } from '@kbn/workflows';
-import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
-import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import { z } from '@kbn/zod/v4';
 
@@ -78,7 +77,6 @@ function getCustomTriggerYamlSchema(triggerId: string): z.ZodType {
     on: z
       .object({
         condition: z.string().optional(),
-        workflowEvents: WorkflowEventsSchema.optional(),
       })
       .optional(),
   });
