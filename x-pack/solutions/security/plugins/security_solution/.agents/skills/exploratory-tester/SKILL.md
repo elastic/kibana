@@ -108,6 +108,9 @@ Environment:
 | Reporting the same duplicate API call across multiple steps | One finding per unique `method + path` pair per flow, regardless of how many steps it reappears in. |
 | Uploading test files from `/tmp` | `browser_file_upload` only accepts paths within the repo directory. Write temp files to `.exploratory-session/` before uploading — never to `/tmp` or any path outside the repo. |
 | Page content hidden after navigation | After `browser_navigate` in Security Solution, a side panel may re-open as a blocking dialog (e.g., "Admin and settings"). Check the first snapshot for an open `dialog` element and press `Escape` before taking any other action. |
+| Navigation times out when leaving a page with unsaved state | `browser_navigate` will time out if a `beforeunload` dialog is blocking it (e.g., a Timeline with unsaved changes). If a navigation times out, call `browser_snapshot` — if it reports a modal state with a `"beforeunload"` dialog, call `browser_handle_dialog` with `accept: true` and then retry the navigation. |
+| Spending more than 2 attempts on Monaco editor input | `fill()` and `pressSequentially()` do not propagate to Monaco's internal model. After 2 failed attempts to interact with a Monaco editor, log the observation as "partial interaction — Monaco editor prevented automated input" and move on rather than debugging the tooling. |
+| Creating Security Solution test alerts via direct ES indexing | Direct indexing into `.alerts-security.alerts-*` satisfies KPI aggregation queries but NOT the Alerts data grid — the grid requires the full signal schema (`kibana.alert.rule.uuid`, `kibana.alert.instance.id`, `kibana.alert.start`, etc.). To get rows in the Alerts table, create alerts by enabling and running a detection engine rule, not by direct indexing. |
 
 ---
 
@@ -144,6 +147,18 @@ Resolve env var references in credentials (`$VAR` → environment variable value
 **Inline mode:** extract `Area`, `Flows`, `Setup`, `Environment`, and `mode` directly from the invocation text.
 
 For each flow, parse optional sub-fields: `entry:`, `expected:`, `timeout:` (minutes, default 4).
+
+**Assigning `source` to each flow:**
+- `"specified"` — the flow came directly from the invocation text (`Flows:` block) or from the `## Exploratory testing scope` comment on a GitHub issue/PR. The user or PR author explicitly named it.
+- `"agent"` — the agent added the flow based on its own assessment of the area (e.g. adjacent paths, edge cases not listed in the PR test plan, regression checks the agent judged worth covering). These flows are valuable but must be clearly attributed so the user knows what was tested vs. what they asked for.
+
+**When to add agent-sourced flows — and how many:**
+Add agent flows only after all specified flows are listed. Add at most **2–3** agent flows per session regardless of how many specified flows exist. Prefer:
+1. **Permission boundary checks** — repeat the most interesting specified flow as a lower-privilege role, if a different role is feasible
+2. **Adjacent pages sharing the same component** — if specified flows only cover one page of a multi-page feature area
+3. **Error recovery paths** — if specified flows only cover happy paths and no "cancel / back-navigate" flow was specified
+
+Do **not** add agent flows that duplicate the intent of a specified flow. If the specified flows already cover the area comprehensively, add 0 agent flows.
 
 **GitHub mode:**
 ```bash
@@ -241,7 +256,8 @@ Write `.exploratory-session/config.json`:
       "name": "<flow name>",
       "entry": "<entry path or null>",
       "expected": "<expected outcome or null>",
-      "timeout_minutes": 4
+      "timeout_minutes": 4,
+      "source": "<specified | agent>"
     }
   ],
   "setup": {
@@ -258,7 +274,7 @@ Write `.exploratory-session/config.json`:
 
 `data_setup` is `"skip"` when the invocation includes `data-setup: skip` in the Environment block; otherwise `"run"`.
 
-For **user-provided environments**: `space_id` defaults to `"default"` unless the invocation includes `space: <id>` in the Environment block. `test_user` is omitted — the provided credentials are used directly.
+For **user-provided environments**: `space_id` defaults to `"exploratory-testing"` (same as agent-managed) unless the invocation includes `space: <id>` in the Environment block. The space is created in Phase 1c using the provided credentials; if creation fails, `space_id` is updated to `"default"`. `test_user` is omitted — the provided credentials are used directly throughout.
 
 Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md` if it exists — load its contents as context for Phase 2.
 
@@ -309,7 +325,7 @@ _This login is for setup only (creating space, connectors, test user). The agent
 
 Fill credentials:
 - Agent-managed environments: username `elastic`, password `changeme`
-- User-provided environments: skip this step — go directly to Step 1f
+- User-provided environments: skip browser login — proceed to Step 1c
 
 If login fails — retry once with a fresh navigation. If still failing — **stop** and report the exact error message visible in the browser.
 
@@ -323,16 +339,24 @@ Skip this step entirely if `environment.data_setup` is `"skip"` in `config.json`
 
 Check environment capabilities before each step. Record every skipped step in `config.json` → `skipped_setup` with its reason.
 
-**Create test space (all agent-managed environment types):**
+**Create test space (all environment types, including user-provided):**
+
+For agent-managed environments:
 ```bash
 curl -s -u elastic:changeme -X POST http://localhost:5620/api/spaces/space \
   -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
   -d '{"id":"exploratory-testing","name":"Exploratory Testing","description":"Isolated space for agent-driven testing sessions","color":"#DD0A73"}'
 ```
+
+For user-provided environments, substitute the environment URL and credentials from `config.json`:
+```bash
+curl -s -u "<username>:<password>" -X POST "<environment.url>/api/spaces/space" \
+  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+  -d '{"id":"exploratory-testing","name":"Exploratory Testing","description":"Isolated space for agent-driven testing sessions","color":"#DD0A73"}'
+```
+
 If the response is `409 Conflict`, the space already exists — reuse it silently.
 If any other error — add to `skipped_setup` and continue in the `default` space (update `environment.space_id` to `"default"` in `config.json`).
-
-For **user-provided environments**: skip space creation.
 
 **Connectors (all environment types):**
 ```bash
@@ -364,6 +388,14 @@ curl -s -u elastic:changeme -X PUT http://localhost:5620/internal/security/users
   -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
   -d '{"username":"exploratory-tester","password":"Exploratory123!","roles":["<resolved_role>"],"full_name":"Exploratory Tester"}'
 ```
+
+If the Kibana internal user API returns **404** (common on Elastic Cloud Hosted / ECH where the internal API is unavailable), fall back to the Elasticsearch Security API:
+```bash
+curl -s -u "<username>:<password>" -X POST "<environment.es_url>/_security/user/exploratory-tester" \
+  -H 'Content-Type: application/json' \
+  -d '{"password":"Exploratory123!","roles":["<resolved_role>"],"full_name":"Exploratory Tester"}'
+```
+`environment.es_url` is the Elasticsearch endpoint (replace `kb.` with `es.` in ECH URLs, or ask the user if unknown). If this also fails — add to `skipped_setup` and continue without a separate test user (the provided admin credentials are used instead).
 
 For **serverless**: skip user creation — project roles are pre-provisioned. Add to `skipped_setup`:
 ```json
@@ -401,7 +433,7 @@ If the page shows an empty state (e.g., "No migrations to view", "No data", empt
 
 2. After each creation attempt, navigate back to the entry path and re-check with `browser_snapshot`
 
-3. If data was created successfully — continue to Step 1e
+3. If data was created successfully — continue to Step 1f
 
 4. If the agent cannot determine how to create the data — **stop** and tell the user:
    > "The area shows an empty state and I couldn't find a way to create the required data automatically. Can you tell me how to set it up, or should I explore the empty state instead?"
@@ -517,9 +549,9 @@ Record the flow end time when the checklist completes or the timebox fires. Both
 
 Before moving to the next checklist step, run a bounded investigation:
 - Spend at most **2 extra minutes** (or 2 targeted actions, whichever fires first).
-- Try 1–2 variations that test the scope of the issue: a different data item, an adjacent navigation path within the same area, or a closely related action.
+- Try 1–2 variations that test the scope of the issue: a different data item, an adjacent navigation path within the same area, or a closely related action. **When the finding involves a shared UI component** (a header widget, a KPI card type, a picker, a data view selector), the highest-value probe is to visit 1–2 adjacent pages that use the same component — this reveals whether the issue is page-specific or systemic, and often determines whether a Level 2 finding should be elevated to Level 1. Navigating to another page for a cross-page comparison **is** allowed during a mini-probe.
 - Log any new findings immediately in the same findings file (same flow, same checklist step label, suffix "— mini-probe").
-- Do **not** navigate away from the current area or start a new flow.
+- Do **not** start a new flow or claim a new flow's timebox. The mini-probe budget comes entirely from the parent flow's remaining time.
 - If the parent flow's timebox fires during a mini-probe, stop the probe immediately and log remaining checklist steps as `skipped: time budget exhausted`.
 
 **When uncertain how to perform an action or what the expected behavior is:**
@@ -639,14 +671,22 @@ Read all `.exploratory-session/findings-flow-<N>.md` files. Write `.exploratory-
 - Level 1 (confirmed bugs): N
 - Level 2 (suspicious — your review needed): N
 - Level 3 (observations): N
-- Skipped (time budget / session lost): N
 - Known / suppressed: N
+- **Flows completed:** N of N
+- **Flows not fully completed:** N — list each with its status (timed out / blocked / not started / session lost)
 
 ## Timing
-| Flow | Started | Duration |
-|---|---|---|
-| <flow name> | <ISO start> | <Xm Ys> |
-| **Total session** | <session_started_at> | **<Xh Ym>** |
+| Flow | Source | Started | Duration | Budget | Over? | Status |
+|---|---|---|---|---|---|---|
+| <flow name> | specified / agent | <ISO start> | <Xm Ys> | <timeout_minutes>m | ✓ / ⚠️ over | completed / timed out / blocked / not started / session lost |
+| **Total session** | — | <session_started_at> | **<Xh Ym>** | — | — | — |
+
+**Status definitions:**
+- `completed` — all 5 checklist steps were attempted (individual steps may still have been skipped for valid reasons such as missing prerequisites)
+- `timed out` — time budget exhausted before all steps were attempted; list which steps were skipped
+- `blocked` — flow could not run due to an unresolvable prerequisite (e.g. no data, required feature disabled); state the blocker
+- `not started` — flow was in `config.json` but was never reached (e.g. session ended early)
+- `session lost` — browser session was lost mid-flow before the checklist completed
 
 ## Level 1 — Confirmed Bugs
 <all Level 1 findings in full finding format>
