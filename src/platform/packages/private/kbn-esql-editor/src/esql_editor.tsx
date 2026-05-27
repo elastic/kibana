@@ -195,14 +195,21 @@ const ESQLEditorInternal = function ESQLEditor({
   const variablesService = esqlService?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(fixedQuery ?? '');
-  // To make server side errors less "sticky", register the query that last errored
-  const [lastErroredCode, setLastErroredCode] = useState(serverErrors?.length ? code : undefined);
 
+  // To make server side errors less "sticky", register the query that last errored
+  const [lastErroredCode, setLastErroredCode] = useState<string | undefined>(() =>
+    serverErrors?.length || serverWarning ? fixedQuery : undefined
+  );
+
+  const fixedQueryRef = useRef(fixedQuery);
+  fixedQueryRef.current = fixedQuery;
   useEffect(() => {
-    setLastErroredCode(serverErrors?.length ? code : undefined);
-    // `code` is omitted from deps so typing after a run does not re-sync.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverErrors]);
+    if (serverErrors?.length || serverWarning) {
+      setLastErroredCode(fixedQueryRef.current);
+    } else {
+      setLastErroredCode(undefined);
+    }
+  }, [serverErrors, serverWarning]);
 
   const [editorHeight, setEditorHeight] = useRestorableState(
     'editorHeight',
