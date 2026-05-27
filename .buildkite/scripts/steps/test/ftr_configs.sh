@@ -17,15 +17,11 @@ test -z "$EXTRA_ARGS" || buildkite-agent meta-data set "ftr-extra-args" "$EXTRA_
 export JOB="$FTR_CONFIG_GROUP_KEY"
 
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}"
-
 FAILED_TESTS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}_failed_tests"
 
-# a FTR failure will result in the script returning an exit code of 10
 exitCode=0
-
-# Per-config rows for the job annotation summary, plus a flag set when
-# the retry-only-failed logic marks an otherwise-red step green.
 annotation_rows=()
+failure_detail_lines=()
 retry_recovered=false
 
 configs="${FTR_CONFIG:-}"
@@ -53,14 +49,29 @@ fi
 
 failedConfigs=""
 results=()
-failure_detail_lines=()
 
 # Capture which configs failed in the previous attempt before the meta-data key is overwritten below.
-# Used in the annotation to distinguish "new failure", "still failing", and "recovered" per config.
 prevRunFailedConfigs=""
 if [[ "${BUILDKITE_RETRY_COUNT:-0}" -ge "1" ]]; then
   prevRunFailedConfigs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '' 2>/dev/null || true)
 fi
+
+# Diffs the JUnit XML directory against a pre-run snapshot and returns failing test names.
+collect_config_failures() {
+  local xml_before="$1"
+  local tmp_xml_after new_xmls tmp_junit
+  tmp_xml_after=$(mktemp)
+  find "target/junit/${JOB}" -maxdepth 1 -name "*.xml" 2>/dev/null | sort > "$tmp_xml_after" || true
+  new_xmls=$(comm -13 "$xml_before" "$tmp_xml_after" 2>/dev/null | grep -v '^[[:space:]]*$' || true)
+  rm -f "$tmp_xml_after"
+  [[ -z "$new_xmls" ]] && return
+  tmp_junit=$(mktemp -d)
+  while IFS= read -r f; do
+    [[ -n "$f" ]] && cp "$f" "$tmp_junit/" 2>/dev/null || true
+  done <<< "$new_xmls"
+  node scripts/ftr_check_retry_result list-failures "$tmp_junit" 2>/dev/null || true
+  rm -rf "$tmp_junit"
+}
 
 while read -r config; do
   if [[ ! "$config" ]]; then
@@ -143,7 +154,6 @@ while read -r config; do
   config_link="[\`${config}\`](https://github.com/elastic/kibana/blob/${BUILDKITE_COMMIT:-main}/${config})"
   if [ $lastCode -eq 0 ]; then
     rm -f "$tmp_xml_before"
-    # Test was successful, so mark it as executed
     buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
     if [[ -n "$prevRunFailedConfigs" ]] && grep -qxF "$config" <<< "$prevRunFailedConfigs"; then
       annotation_rows+=("| ${config_link} | ${duration} | recovered |")
@@ -155,11 +165,8 @@ while read -r config; do
     echo "FTR exited with code $lastCode"
     echo "^^^ +++"
 
-    if [[ "$failedConfigs" ]]; then
-      failedConfigs="${failedConfigs}"$'\n'"$config"
-    else
-      failedConfigs="$config"
-    fi
+    failedConfigs="${failedConfigs:+${failedConfigs}$'\n'}$config"
+
     if [[ -n "$prevRunFailedConfigs" ]] && grep -qxF "$config" <<< "$prevRunFailedConfigs"; then
       annotation_rows+=("| ${config_link} | ${duration} | **still failing** |")
     elif [[ -n "$prevRunFailedConfigs" ]]; then
@@ -168,26 +175,14 @@ while read -r config; do
       annotation_rows+=("| ${config_link} | ${duration} | **failed** |")
     fi
 
-    # Find JUnit XML files produced by this config and extract individual failing test names
-    tmp_xml_after=$(mktemp)
-    find "target/junit/${JOB}" -maxdepth 1 -name "*.xml" 2>/dev/null | sort > "$tmp_xml_after" || true
-    new_config_xmls=$(comm -13 "$tmp_xml_before" "$tmp_xml_after" 2>/dev/null | grep -v '^[[:space:]]*$' || true)
-    rm -f "$tmp_xml_before" "$tmp_xml_after"
-    if [[ -n "$new_config_xmls" ]]; then
-      tmp_junit=$(mktemp -d)
-      while IFS= read -r f; do
-        [[ -n "$f" ]] && cp "$f" "$tmp_junit/" 2>/dev/null || true
-      done <<< "$new_config_xmls"
-      config_test_failures=$(node scripts/ftr_check_retry_result list-failures "$tmp_junit" 2>/dev/null || true)
-      rm -rf "$tmp_junit"
-      if [[ -n "$config_test_failures" ]]; then
-        failure_detail_lines+=("**Failing tests — \`${config}\`:**")
-        failure_detail_lines+=("")
-        while IFS= read -r t; do
-          [[ -n "$t" ]] && failure_detail_lines+=("- ${t}")
-        done <<< "$config_test_failures"
-        failure_detail_lines+=("")
-      fi
+    config_failures=$(collect_config_failures "$tmp_xml_before")
+    rm -f "$tmp_xml_before"
+    if [[ -n "$config_failures" ]]; then
+      failure_detail_lines+=("**Failing tests — \`${config}\`:**" "")
+      while IFS= read -r t; do
+        [[ -n "$t" ]] && failure_detail_lines+=("- ${t}")
+      done <<< "$config_failures"
+      failure_detail_lines+=("")
     fi
   fi
 done <<< "$configs"
@@ -196,7 +191,6 @@ if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
 
-# --- retry-only-failed feature ---
 # Attempt 1: record the names of failing tests so the retry can evaluate whether they recovered.
 # On the first retry, the step is marked green if every previously-failing test passes — even if
 # a different (previously-passing) test happens to fail on retry.
@@ -237,22 +231,15 @@ if [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" && \
     fi
   fi
 fi
-# --- end retry-only-failed feature ---
 
 echo "--- FTR configs complete"
 printf "%s\n" "${results[@]}"
 echo ""
 
 write_job_annotation() {
-  local style attempt_num prev_attempt_num
+  local attempt_num style
   attempt_num=$((${BUILDKITE_RETRY_COUNT:-0} + 1))
-  prev_attempt_num=$((attempt_num - 1))
-
-  if [[ "$exitCode" == "0" ]]; then
-    style="success"
-  else
-    style="error"
-  fi
+  style=$([[ "$exitCode" == "0" ]] && echo "success" || echo "error")
 
   {
     echo "### FTR Configs — \`${JOB}\` (attempt ${attempt_num})"
@@ -260,38 +247,6 @@ write_job_annotation() {
 
     if [[ "$retry_recovered" == "true" ]]; then
       echo "**Recovered on retry** — all previously-failing tests passed; step marked green."
-      echo ""
-    elif [[ -n "$failedConfigs" && -n "$prevRunFailedConfigs" ]]; then
-      # On a retry, split failures into persistent (seen before) vs new (regression)
-      local persistentFailures="" newFailures=""
-      while IFS= read -r f; do
-        [[ -z "$f" ]] && continue
-        if grep -qxF "$f" <<< "$prevRunFailedConfigs"; then
-          persistentFailures="${persistentFailures:+${persistentFailures}$'\n'}$f"
-        else
-          newFailures="${newFailures:+${newFailures}$'\n'}$f"
-        fi
-      done <<< "$failedConfigs"
-
-      if [[ -n "$persistentFailures" ]]; then
-        echo "**Still failing** (attempt ${prev_attempt_num} → attempt ${attempt_num}):"
-        while IFS= read -r f; do
-          [[ -n "$f" ]] && echo "- \`$f\`"
-        done <<< "$persistentFailures"
-        echo ""
-      fi
-      if [[ -n "$newFailures" ]]; then
-        echo "**New failures** (passed attempt ${prev_attempt_num}, failed attempt ${attempt_num}):"
-        while IFS= read -r f; do
-          [[ -n "$f" ]] && echo "- \`$f\`"
-        done <<< "$newFailures"
-        echo ""
-      fi
-    elif [[ -n "$failedConfigs" ]]; then
-      echo "**Failed configs:**"
-      while IFS= read -r f; do
-        [[ -n "$f" ]] && echo "- \`$f\`"
-      done <<< "$failedConfigs"
       echo ""
     fi
 
