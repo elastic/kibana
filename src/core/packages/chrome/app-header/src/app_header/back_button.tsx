@@ -30,6 +30,10 @@ const getBackToLabel = (destination: string) =>
     values: { destination },
   });
 
+const backMenuLabel = i18n.translate('core.ui.chrome.appHeader.backButtonMenuAriaLabel', {
+  defaultMessage: 'Open back navigation menu',
+});
+
 const useBackButtonStyles = () => {
   const { euiTheme } = useEuiTheme();
 
@@ -57,6 +61,7 @@ export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
   const tooltip = primary?.backDestinationLabel
     ? getBackToLabel(primary.backDestinationLabel)
     : backLabel;
+  const buttonLabel = targets.length > 1 ? backMenuLabel : tooltip;
 
   if (!primary) {
     return null;
@@ -69,10 +74,14 @@ export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
       display="empty"
       size="xs"
       css={styles.button}
-      aria-label={tooltip}
+      aria-label={buttonLabel}
       data-test-subj="appHeaderBack"
       {...(targets.length > 1
-        ? { onClick: togglePopover }
+        ? {
+            onClick: togglePopover,
+            'aria-haspopup': 'menu' as const,
+            'aria-expanded': isPopoverOpen,
+          }
         : { href: primary.backHref, onClick: primary.backOnClick })}
     />
   );
@@ -89,7 +98,14 @@ export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
       >
         <EuiContextMenuPanel
           items={targets.map((target, idx) => (
-            <EuiContextMenuItem key={idx} href={target.backHref} onClick={target.backOnClick}>
+            <EuiContextMenuItem
+              key={idx}
+              href={target.backHref}
+              onClick={(event) => {
+                closePopover();
+                target.backOnClick?.(event);
+              }}
+            >
               {target.backDestinationLabel ?? target.backHref}
             </EuiContextMenuItem>
           ))}

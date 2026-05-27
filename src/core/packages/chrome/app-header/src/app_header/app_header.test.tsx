@@ -10,7 +10,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { BehaviorSubject } from 'rxjs';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiButtonIcon } from '@elastic/eui';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
@@ -98,5 +98,34 @@ describe('AppHeaderView', () => {
 
     expect(screen.getByTestId('alertsTab')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
+  });
+
+  it('only treats exact base path prefixes as already prepended for back links', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.componentDeps.basePath.get.mockReturnValue('/base');
+    chrome.componentDeps.basePath.prepend.mockImplementation((path: string) => `/base${path}`);
+
+    renderAppHeader(<AppHeaderView back="/base-other/app" />, chrome);
+
+    expect(screen.getByTestId('appHeaderBack')).toHaveAttribute('href', '/base/base-other/app');
+  });
+
+  it('renders multiple back targets as a menu and closes it after selection', async () => {
+    const backClick = jest.fn((event: React.MouseEvent) => event.preventDefault());
+
+    renderAppHeader(
+      <AppHeaderView
+        back={[
+          { href: '/app/first', label: 'First app' },
+          { href: '/app/second', label: 'Second app', onClick: backClick },
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open back navigation menu' }));
+    fireEvent.click(screen.getByText('Second app'));
+
+    expect(backClick).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(screen.queryByText('Second app')).not.toBeInTheDocument());
   });
 });
