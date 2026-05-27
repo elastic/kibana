@@ -31,6 +31,8 @@ import type { OnUpdateFields } from '../types';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
+const EMPTY_EXTENDED_FIELDS: Record<string, unknown> = {};
+
 interface TemplateFieldsProps {
   caseData: CaseUI;
   onUpdateField: (args: OnUpdateFields) => void;
@@ -144,7 +146,7 @@ export const TemplateFields = React.memo<TemplateFieldsProps>(({ caseData, onUpd
       <TemplateFieldsForm
         parsedTemplate={parsedTemplate}
         owner={templateData.owner}
-        extendedFields={caseData.extendedFields ?? {}}
+        extendedFields={caseData.extendedFields ?? EMPTY_EXTENDED_FIELDS}
         onUpdateField={onUpdateField}
       />
     </div>
@@ -213,7 +215,7 @@ export const GlobalCaseFields = React.memo<GlobalCaseFieldsProps>(({ caseData, o
       <EuiSpacer size="s" />
       <TemplateFieldsFormReady
         resolvedFields={visibleGlobalFields}
-        extendedFields={caseData.extendedFields ?? {}}
+        extendedFields={caseData.extendedFields ?? EMPTY_EXTENDED_FIELDS}
         onUpdateField={onUpdateField}
       />
     </div>
