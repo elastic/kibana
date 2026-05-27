@@ -19,6 +19,10 @@ import { test, makeEsQueryRule } from '../fixtures';
 // of chaining tests through shared browser state is not used here. Instead
 // each test navigates independently to set up the correct return-path context
 // before asserting the post-save/cancel destination.
+//
+// Inner test.describe blocks are flattened (max nesting depth = 1); context is
+// preserved in the test name prefixes ("Edit from rules list: …" and
+// "Edit from rule details page: …").
 
 const RULES_LIST_URL_RE = /\/app\/rules(\/|$|\?|#)/;
 const RULES_EDIT_URL_RE = /\/app\/rules\/edit\//;
@@ -44,115 +48,117 @@ test.describe('Edit Rule Flow', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  test.describe('Edit from rules list', () => {
-    test('navigates to edit page when clicking edit button', async ({ page }) => {
-      await page.gotoApp('rules');
-      await expect(page.testSubj.locator('rulesList')).toBeVisible();
+  // ── Edit from rules list ─────────────────────────────────────────────────────
 
-      // Hover reveals the edit (pencil) action button in the row.
-      // Playwright's click() triggers an automatic hover, but an explicit
-      // hover on the row first ensures the button is visible before clicking.
-      await page.testSubj.locator(`checkboxSelectRow-${testRuleId}`).hover();
-      await page.testSubj.click('editActionHoverButton');
+  test('Edit from rules list: navigates to edit page when clicking edit button', async ({
+    page,
+  }) => {
+    await page.gotoApp('rules');
+    await expect(page.testSubj.locator('rulesList')).toBeVisible();
 
-      await page.waitForURL(RULES_EDIT_URL_RE);
-      expect(page.url()).toContain(`/app/rules/edit/${testRuleId}`);
+    // Hover reveals the edit (pencil) action button in the row.
+    // Playwright's click() triggers an automatic hover, but an explicit
+    // hover on the row first ensures the button is visible before clicking.
+    await page.testSubj.locator(`checkboxSelectRow-${testRuleId}`).hover();
+    await page.testSubj.click('editActionHoverButton');
 
-      await expect(page.testSubj.locator('ruleForm')).toBeVisible();
+    await page.waitForURL(RULES_EDIT_URL_RE);
+    expect(page.url()).toContain(`/app/rules/edit/${testRuleId}`);
 
-      const nameValue = page.testSubj.locator('ruleDetailsNameInput');
-      await expect(nameValue).toHaveValue(testRuleName);
-    });
-
-    test('returns to rules list after saving', async ({ page }) => {
-      await page.gotoApp('rules');
-      await expect(page.testSubj.locator('rulesList')).toBeVisible();
-
-      await page.testSubj.locator(`checkboxSelectRow-${testRuleId}`).hover();
-      await page.testSubj.click('editActionHoverButton');
-      await expect(page.testSubj.locator('ruleForm')).toBeVisible();
-
-      // Minor name change to make the form dirty
-      const nameInput = page.testSubj.locator('ruleDetailsNameInput');
-      await nameInput.fill(`${testRuleName}-updated`);
-
-      await page.testSubj.click('rulePageFooterSaveButton');
-      if (await page.testSubj.locator('confirmModalConfirmButton').isVisible()) {
-        await page.testSubj.click('confirmModalConfirmButton');
-      }
-
-      await page.waitForURL(RULES_LIST_URL_RE);
-      expect(page.url()).not.toMatch(RULES_EDIT_URL_RE);
-      await expect(page.testSubj.locator('createRuleButton')).toBeVisible();
-    });
-
-    test('returns to rules list after clicking cancel', async ({ page, kbnUrl }) => {
-      await page.goto(kbnUrl.get(`/app/rules/edit/${testRuleId}`));
-      await expect(page.testSubj.locator('ruleForm')).toBeVisible();
-
-      await page.testSubj.click('rulePageFooterCancelButton');
-
-      await page.waitForURL(RULES_LIST_URL_RE);
-      expect(page.url()).not.toMatch(RULES_EDIT_URL_RE);
-      await expect(page.testSubj.locator('createRuleButton')).toBeVisible();
-    });
+    await expect(page.testSubj.locator('ruleForm')).toBeVisible();
+    await expect(page.testSubj.locator('ruleDetailsNameInput')).toHaveValue(testRuleName);
   });
 
-  test.describe('Edit from rule details page', () => {
-    test('navigates to edit page when clicking edit button from details', async ({
-      page,
-      kbnUrl,
-    }) => {
-      await page.goto(kbnUrl.get(`/app/rules/rule/${testRuleId}`));
-      await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
+  test('Edit from rules list: returns to rules list after saving', async ({ page }) => {
+    await page.gotoApp('rules');
+    await expect(page.testSubj.locator('rulesList')).toBeVisible();
 
-      await page.testSubj.click('ruleActionsButton');
-      await page.testSubj.click('openEditRuleFlyoutButton');
+    await page.testSubj.locator(`checkboxSelectRow-${testRuleId}`).hover();
+    await page.testSubj.click('editActionHoverButton');
+    await expect(page.testSubj.locator('ruleForm')).toBeVisible();
 
-      await page.waitForURL(RULES_EDIT_URL_RE);
-      expect(page.url()).toContain(`/app/rules/edit/${testRuleId}`);
-      await expect(page.testSubj.locator('ruleForm')).toBeVisible();
-    });
+    // Minor name change to make the form dirty
+    const nameInput = page.testSubj.locator('ruleDetailsNameInput');
+    await nameInput.fill(`${testRuleName}-updated`);
 
-    test('returns to rule details page after saving from details', async ({ page, kbnUrl }) => {
-      // Navigate via details page so the edit page has the correct return path
-      await page.goto(kbnUrl.get(`/app/rules/rule/${testRuleId}`));
-      await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
+    // Edit saves directly — the create-confirmation modal only appears for new rules.
+    await page.testSubj.click('rulePageFooterSaveButton');
 
-      await page.testSubj.click('ruleActionsButton');
-      await page.testSubj.click('openEditRuleFlyoutButton');
-      await expect(page.testSubj.locator('ruleForm')).toBeVisible();
+    await page.waitForURL(RULES_LIST_URL_RE);
+    expect(page.url()).not.toMatch(RULES_EDIT_URL_RE);
+    await expect(page.testSubj.locator('createRuleButton')).toBeVisible();
+  });
 
-      const nameInput = page.testSubj.locator('ruleDetailsNameInput');
-      const currentName = await nameInput.inputValue();
-      await nameInput.fill(`${currentName}-details-v2`);
+  test('Edit from rules list: returns to rules list after clicking cancel', async ({
+    page,
+    kbnUrl,
+  }) => {
+    await page.goto(kbnUrl.get(`/app/rules/edit/${testRuleId}`));
+    await expect(page.testSubj.locator('ruleForm')).toBeVisible();
 
-      await page.testSubj.click('rulePageFooterSaveButton');
-      if (await page.testSubj.locator('confirmModalConfirmButton').isVisible()) {
-        await page.testSubj.click('confirmModalConfirmButton');
-      }
+    await page.testSubj.click('rulePageFooterCancelButton');
 
-      await page.waitForURL(RULES_DETAILS_URL_RE);
-      expect(page.url()).toContain(`/app/rules/rule/${testRuleId}`);
-      await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
-    });
+    await page.waitForURL(RULES_LIST_URL_RE);
+    expect(page.url()).not.toMatch(RULES_EDIT_URL_RE);
+    await expect(page.testSubj.locator('createRuleButton')).toBeVisible();
+  });
 
-    test('returns to rule details page after clicking cancel from details', async ({
-      page,
-      kbnUrl,
-    }) => {
-      await page.goto(kbnUrl.get(`/app/rules/rule/${testRuleId}`));
-      await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
+  // ── Edit from rule details page ──────────────────────────────────────────────
 
-      await page.testSubj.click('ruleActionsButton');
-      await page.testSubj.click('openEditRuleFlyoutButton');
-      await expect(page.testSubj.locator('ruleForm')).toBeVisible();
+  test('Edit from rule details page: navigates to edit page when clicking edit button', async ({
+    page,
+    kbnUrl,
+  }) => {
+    await page.goto(kbnUrl.get(`/app/rules/rule/${testRuleId}`));
+    await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
 
-      await page.testSubj.click('rulePageFooterCancelButton');
+    await page.testSubj.click('ruleActionsButton');
+    await page.testSubj.click('openEditRuleFlyoutButton');
 
-      await page.waitForURL(RULES_DETAILS_URL_RE);
-      expect(page.url()).toContain(`/app/rules/rule/${testRuleId}`);
-      await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
-    });
+    await page.waitForURL(RULES_EDIT_URL_RE);
+    expect(page.url()).toContain(`/app/rules/edit/${testRuleId}`);
+    await expect(page.testSubj.locator('ruleForm')).toBeVisible();
+  });
+
+  test('Edit from rule details page: returns to rule details page after saving', async ({
+    page,
+    kbnUrl,
+  }) => {
+    // Navigate via details page so the edit page has the correct return path
+    await page.goto(kbnUrl.get(`/app/rules/rule/${testRuleId}`));
+    await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
+
+    await page.testSubj.click('ruleActionsButton');
+    await page.testSubj.click('openEditRuleFlyoutButton');
+    await expect(page.testSubj.locator('ruleForm')).toBeVisible();
+
+    const nameInput = page.testSubj.locator('ruleDetailsNameInput');
+    const currentName = await nameInput.inputValue();
+    await nameInput.fill(`${currentName}-details-v2`);
+
+    // Edit saves directly — the create-confirmation modal only appears for new rules.
+    await page.testSubj.click('rulePageFooterSaveButton');
+
+    await page.waitForURL(RULES_DETAILS_URL_RE);
+    expect(page.url()).toContain(`/app/rules/rule/${testRuleId}`);
+    await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
+  });
+
+  test('Edit from rule details page: returns to rule details page after clicking cancel', async ({
+    page,
+    kbnUrl,
+  }) => {
+    await page.goto(kbnUrl.get(`/app/rules/rule/${testRuleId}`));
+    await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
+
+    await page.testSubj.click('ruleActionsButton');
+    await page.testSubj.click('openEditRuleFlyoutButton');
+    await expect(page.testSubj.locator('ruleForm')).toBeVisible();
+
+    await page.testSubj.click('rulePageFooterCancelButton');
+
+    await page.waitForURL(RULES_DETAILS_URL_RE);
+    expect(page.url()).toContain(`/app/rules/rule/${testRuleId}`);
+    await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible();
   });
 });

@@ -71,13 +71,12 @@ const searchMws = async (page: ScoutPage, text: string) => {
 };
 
 const getMwRowStatuses = async (page: ScoutPage): Promise<string[]> => {
-  const rows = page.testSubj.locator('list-item');
-  const count = await rows.count();
+  const rows = await page.testSubj.locator('list-item').all();
   const statuses: string[] = [];
-  for (let i = 0; i < count; i++) {
-    const cell = rows
-      .nth(i)
-      .locator('[data-test-subj="maintenance-windows-column-status"] .euiTableCellContent');
+  for (const row of rows) {
+    const cell = row.locator(
+      '[data-test-subj="maintenance-windows-column-status"] .euiTableCellContent'
+    );
     statuses.push(((await cell.textContent()) ?? '').trim());
   }
   return statuses;
@@ -121,7 +120,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await searchMws(page, title);
 
     let statuses = await getMwRowStatuses(page);
-    expect(statuses).toEqual(['Running']);
+    expect(statuses).toStrictEqual(['Running']);
 
     await clickTableAction(page, 'table-actions-cancel');
     await page.testSubj.click('confirmModalConfirmButton');
@@ -148,7 +147,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await searchMws(page, title);
 
     let statuses = await getMwRowStatuses(page);
-    expect(statuses).toEqual(['Finished']);
+    expect(statuses).toStrictEqual(['Finished']);
 
     await clickTableAction(page, 'table-actions-archive');
     await page.testSubj.click('confirmModalConfirmButton');
@@ -159,7 +158,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
 
     await searchMws(page, title);
     statuses = await getMwRowStatuses(page);
-    expect(statuses).toEqual(['Archived']);
+    expect(statuses).toStrictEqual(['Archived']);
   });
 
   test('should cancel and archive a running maintenance window', async ({
@@ -175,7 +174,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await searchMws(page, title);
 
     let statuses = await getMwRowStatuses(page);
-    expect(statuses).toEqual(['Running']);
+    expect(statuses).toStrictEqual(['Running']);
 
     await clickTableAction(page, 'table-actions-cancel-and-archive');
     await page.testSubj.click('confirmModalConfirmButton');
@@ -186,7 +185,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
 
     await searchMws(page, title);
     statuses = await getMwRowStatuses(page);
-    expect(statuses).toEqual(['Archived']);
+    expect(statuses).toStrictEqual(['Archived']);
   });
 
   test('should unarchive a maintenance window', async ({ page, kbnClient, kbnUrl }) => {
@@ -210,7 +209,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
 
     await searchMws(page, title);
     let statuses = await getMwRowStatuses(page);
-    expect(statuses).toEqual(['Archived']);
+    expect(statuses).toStrictEqual(['Archived']);
 
     // Then unarchive
     await clickTableAction(page, 'table-actions-unarchive');
@@ -221,7 +220,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
 
     await searchMws(page, title);
     statuses = await getMwRowStatuses(page);
-    expect(statuses).toEqual(['Finished']);
+    expect(statuses).toStrictEqual(['Finished']);
   });
 
   test('should filter maintenance windows by status', async ({ page, kbnClient, kbnUrl }) => {
@@ -253,7 +252,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
 
     await page.locator(TABLE_LOADED_CSS).waitFor();
     const filteredStatuses = await getMwRowStatuses(page);
-    expect(filteredStatuses).toEqual(['Upcoming']);
+    expect(filteredStatuses).toStrictEqual(['Upcoming']);
   });
 
   test('should filter maintenance windows by archived status', async ({
@@ -298,7 +297,7 @@ test.describe('Maintenance windows table', { tag: tags.stateful.classic }, () =>
     await page.locator(TABLE_LOADED_CSS).waitFor();
 
     statuses = await getMwRowStatuses(page);
-    expect(statuses).toEqual(['Archived']);
+    expect(statuses).toStrictEqual(['Archived']);
   });
 
   test('paginates maintenance windows correctly', async ({ page, kbnClient, kbnUrl }) => {

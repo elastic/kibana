@@ -187,6 +187,6 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
         },
         { timeout: 15_000, intervals: [1_000] }
       )
-      .toEqual([NEW_ACTIVE_ID]);
+      .toStrictEqual([NEW_ACTIVE_ID]);
   });
 });
