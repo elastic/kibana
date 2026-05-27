@@ -8,14 +8,6 @@
 import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
-// Set a fallback EVALUATION_CONNECTOR_ID if not provided
-// This is needed for the evals framework even when using custom CODE evaluators
-if (!process.env.EVALUATION_CONNECTOR_ID) {
-  // Use the first available project connector as fallback
-  // Custom CODE evaluators don't actually use this, but the framework requires it
-  process.env.EVALUATION_CONNECTOR_ID = 'azure-gpt-5-chat';
-}
-
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
   repetitions: 1,
