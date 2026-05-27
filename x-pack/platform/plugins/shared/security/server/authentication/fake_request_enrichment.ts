@@ -12,14 +12,10 @@ import type { Logger } from '@kbn/logging';
 import { deepFreeze } from '@kbn/std';
 
 /**
- * Identity fields blocked on the synthetic user produced by
- * {@link FakeRequestEnrichment.enrichRequestWithUserProfile}. Reading any of
- * these throws so callers can't derive identity from an enriched fake request;
- * only `profile_uid` is intentionally accessible.
- *
- * The `Record<keyof Omit<AuthenticatedUser, 'profile_uid'>, true>` shape forces
- * this list to stay in sync with the type — adding/removing a field on
- * `AuthenticatedUser` is a compile error until reflected here.
+ * Identity fields suppressed on the enriched user — reads return `undefined`
+ * (matching the pre-enrichment `getCurrentUser === null` contract). Only
+ * `profile_uid` is intentionally exposed. The `Record<keyof Omit<...>>` shape
+ * keeps this list in sync with `AuthenticatedUser` via the type checker.
  */
 const ENRICHED_USER_BLOCKED_PROPERTIES_RECORD: Record<
   keyof Omit<AuthenticatedUser, 'profile_uid'>,
@@ -44,12 +40,7 @@ const ENRICHED_USER_BLOCKED_PROPERTIES = new Set<string>(
   Object.keys(ENRICHED_USER_BLOCKED_PROPERTIES_RECORD)
 );
 
-/**
- * Snapshotted alongside the synthetic user so {@link getOverride} can detect a
- * post-enrichment swap of the `authorization` header — a confused-deputy where
- * the API key driving the request no longer matches the profile we promised
- * to expose.
- */
+/** Captured at enrichment time so {@link getOverride} can detect a confused-deputy header swap. */
 interface EnrichmentEntry {
   user: AuthenticatedUser;
   authorization: string | undefined;
@@ -86,19 +77,14 @@ export const createFakeRequestEnrichment = (logger: Logger): FakeRequestEnrichme
 
     logger.debug(`Enriching request with user profile ID "${userProfileId}".`);
 
-    // Synthetic user that only exposes `profile_uid`. Reading any blocked
-    // identity field throws; everything else (symbols, unknown props) falls
-    // through to the empty target so JS reflection (`then`, `JSON.stringify`,
-    // etc.) keeps working.
+    // Only `profile_uid` is exposed; blocked fields return undefined, other
+    // props (symbols, `then`, `toJSON`) fall through so JS reflection works.
     const enrichedUserStub: Partial<AuthenticatedUser> = { profile_uid: userProfileId };
     const enrichedUser = deepFreeze(
       new Proxy(enrichedUserStub as AuthenticatedUser, {
         get: (target, prop, receiver) => {
           if (typeof prop === 'string' && ENRICHED_USER_BLOCKED_PROPERTIES.has(prop)) {
-            throw new Error(
-              `Property "${prop}" is not available on a fake request enriched ` +
-                `with a user profile. Use profile_uid for per-user lookups.`
-            );
+            return undefined;
           }
           return Reflect.get(target, prop, receiver);
         },
@@ -117,9 +103,7 @@ export const createFakeRequestEnrichment = (logger: Logger): FakeRequestEnrichme
       return undefined;
     }
 
-    // Fake request headers aren't frozen by the HTTP layer, so a downstream
-    // caller could swap `authorization` after enrichment. Detect the mismatch
-    // and refuse to vouch for the profile.
+    // Detect post-enrichment `authorization` swap and refuse to vouch for the profile.
     const currentAuthorization = readAuthorization(request);
     if (currentAuthorization !== entry.authorization) {
       logger.error(

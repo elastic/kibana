@@ -57,16 +57,14 @@ describe('createFakeRequestEnrichment', () => {
       'elastic_cloud_user',
       'operator',
       'api_key',
-    ])('throws when reading "%s" off the enriched user', (property) => {
+    ])('returns undefined when reading "%s" off the enriched user', (property) => {
       const { enrichRequestWithUserProfile, getOverride } = createFakeRequestEnrichment(logger);
       const request = httpServerMock.createFakeKibanaRequest({});
 
       enrichRequestWithUserProfile(request, 'u_test_profile_123');
 
       const user = getOverride(request)!;
-      expect(() => user[property]).toThrow(
-        new RegExp(`Property "${property}" is not available on a fake request enriched`)
-      );
+      expect(user[property]).toBeUndefined();
     });
 
     it.each(['someUnknownProp', 'then', 'toJSON'])(

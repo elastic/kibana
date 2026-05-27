@@ -344,8 +344,7 @@ describe('api_key_utils', () => {
       };
       const fakeRequest = kibanaRequestFactory(fakeRawRequest);
 
-      // Mirror the production proxy: reading any AuthenticatedUser field
-      // other than `profile_uid` throws.
+      // Mirror the production proxy: only `profile_uid` is readable.
       const blockedFields = new Set([
         'username',
         'email',
@@ -364,9 +363,7 @@ describe('api_key_utils', () => {
       const enrichedUser = new Proxy({ profile_uid: 'u_profile_enriched' } as AuthenticatedUser, {
         get: (target, prop, receiver) => {
           if (typeof prop === 'string' && blockedFields.has(prop)) {
-            throw new Error(
-              `Property "${prop}" is not available on a fake request enriched with a user profile.`
-            );
+            return undefined;
           }
           return Reflect.get(target, prop, receiver);
         },
