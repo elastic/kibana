@@ -77,6 +77,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
         ExecutionStatus.PENDING,
         ExecutionStatus.RUNNING,
         ExecutionStatus.WAITING_FOR_INPUT,
+        ExecutionStatus.WAITING_FOR_CHILD,
       ].includes(execution.status)
     );
 

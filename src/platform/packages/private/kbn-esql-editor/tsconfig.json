@@ -43,7 +43,8 @@
     "@kbn/aiops-utils",
     "@kbn/esql-resource-browser",
     "@kbn/data-views-plugin",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/es-types"
   ],
   "exclude": [
     "target/**/*",

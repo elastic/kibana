@@ -10,7 +10,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import type { ActionType } from '@kbn/actions-types';
+import type { ActionTypeSource } from '@kbn/actions-types';
 import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
@@ -36,55 +36,65 @@ export interface UseActionTypeModelResult {
 }
 
 /**
- * Hook to get an ActionTypeModel for a given ActionType.
+ * Hook to get an ActionTypeModel for a given action type id and source.
  *
  * For stack connectors (registered in the actionTypeRegistry), returns the model synchronously.
  * For spec-based connectors, fetches the spec from the API and transforms it into an ActionTypeModel.
  */
 export function useActionTypeModel({
   actionTypeRegistry,
-  actionType,
+  actionTypeId,
+  source,
   http,
   uiSettings,
 }: {
   actionTypeRegistry: ActionTypeRegistryContract;
-  actionType: ActionType | null;
+  actionTypeId: string | undefined;
+  source?: ActionTypeSource;
   http: HttpSetup;
   uiSettings?: IUiSettingsClient;
 }): UseActionTypeModelResult {
   const registeredModel = useMemo(() => {
-    if (actionType == null) {
+    if (!actionTypeId) {
       return null;
     }
-    if (actionTypeRegistry.has(actionType.id)) {
-      return actionTypeRegistry.get(actionType.id);
+    if (actionTypeRegistry.has(actionTypeId)) {
+      return actionTypeRegistry.get(actionTypeId);
     }
     return null;
-  }, [actionType, actionTypeRegistry]);
+  }, [actionTypeId, actionTypeRegistry]);
 
-  const shouldFetchSpec = actionType != null && actionType.source === ACTION_TYPE_SOURCES.spec;
+  const shouldFetchSpec = !!actionTypeId && source === ACTION_TYPE_SOURCES.spec;
 
   const {
-    data: specBasedModel = null,
+    data = null,
     isLoading,
     error,
     refetch,
-  } = useQuery<ConnectorSpecResponse, Error, ActionTypeModel | null>({
-    queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionType?.id],
+  } = useQuery<ConnectorSpecResponse, Error>({
+    queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionTypeId],
     queryFn: async ({ signal }) => {
-      const spec = await fetchConnectorSpec(http, actionType!.id, signal);
+      const spec = await fetchConnectorSpec(http, actionTypeId!, signal);
       // Validate eagerly — fail fast before caching. The schema is re-parsed
       // lazily inside actionConnectorFields when the form component mounts.
       if (!fromConnectorSpecSchema(spec.schema)) {
-        throw new Error(`Failed to parse connector spec schema for "${actionType!.id}"`);
+        throw new Error(`Failed to parse connector spec schema for "${actionTypeId}"`);
       }
       return spec;
     },
-    select: (spec) => transformSpecToActionTypeModel(spec, uiSettings),
     enabled: shouldFetchSpec,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
+
+  // transformSpecToActionTypeModel calls lazy() internally, producing new object references on
+  // every invocation. Memoizing on data keeps the ActionTypeModel reference stable between
+  // renders, preventing infinite re-render loops in React Query (which re-runs select when its
+  // function reference changes).
+  const specBasedModel = useMemo(
+    () => (data ? transformSpecToActionTypeModel(data, uiSettings) : null),
+    [data, uiSettings]
+  );
 
   return {
     actionTypeModel: shouldFetchSpec ? specBasedModel : registeredModel,

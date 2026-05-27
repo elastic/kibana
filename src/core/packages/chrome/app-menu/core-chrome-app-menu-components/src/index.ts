@@ -13,6 +13,7 @@ export { AppMenuActionButton } from './components';
 export { AppMenuOverflowButton } from './components';
 export { AppMenuPopover } from './components';
 export { AppMenuPopoverActionButtons } from './components';
+export { AppMenuSwitchComponent } from './components';
 
 export type {
   AppMenuRunAction,
@@ -23,6 +24,7 @@ export type {
   AppMenuPopoverItem,
   AppMenuSplitButtonProps,
   AppMenuStaticItem,
+  AppMenuSwitch,
 } from './types';
 
 export { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
@@ -36,5 +38,6 @@ export {
   getAppMenuItems,
   getPopoverPanels,
   getPopoverActionItems,
+  getPopoverSwitchItems,
   getIsSelectedColor,
 } from './utils';

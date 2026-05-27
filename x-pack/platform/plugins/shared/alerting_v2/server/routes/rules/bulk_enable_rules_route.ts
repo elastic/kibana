@@ -8,8 +8,11 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { bulkOperationParamsSchema, bulkOperationResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  bulkOperationParamsSchema,
+  bulkOperationResponseSchema,
+  errorResponseSchema,
+} from '@kbn/alerting-v2-schemas';
 import type { BulkOperationParams } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
@@ -30,9 +33,9 @@ export class BulkEnableRulesRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Enable rules in bulk',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(bulkOperationParamsSchema),
+      body: bulkOperationParamsSchema,
     },
     response: {
       200: {
@@ -40,6 +43,7 @@ export class BulkEnableRulesRoute extends BaseAlertingRoute {
         description: 'Indicates a successful call.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
       },
     },

@@ -27,4 +27,10 @@ const durationSchema = z.string().superRefine((value, ctx) => {
  */
 const tagsSchema = z.array(z.string().min(1).max(128)).max(20);
 
-export { durationSchema, tagsSchema };
+/** Make a schema optional while preserving its `.describe()` metadata. */
+const optionalWithDescription = <T extends z.ZodType>(schema: T) => {
+  const optional = schema.optional();
+  return schema.description ? optional.describe(schema.description) : optional;
+};
+
+export { durationSchema, tagsSchema, optionalWithDescription };

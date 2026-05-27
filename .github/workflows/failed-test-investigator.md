@@ -25,6 +25,9 @@ concurrency:
   group: 'failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}'
   cancel-in-progress: true
 
+env:
+  ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
+
 engine:
   id: claude
   version: '2.1.111'
@@ -64,12 +67,12 @@ safe-outputs:
   report-failure-as-issue: false
   add-comment:
     max: 1
-    target: '*'
+    target: *issue_number
     hide-older-comments: true
   add-labels:
     allowed: [ai:auto-flaky-fix]
     max: 1
-    target: 'triggering'
+    target: *issue_number
 
 strict: false
 timeout-minutes: 20

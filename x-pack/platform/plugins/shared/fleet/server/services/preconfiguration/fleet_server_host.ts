@@ -13,7 +13,7 @@ import { DEFAULT_FLEET_SERVER_HOST_ID, ECH_AGENTLESS_FLEET_SERVER_HOST_ID } from
 
 import { FleetError } from '../../errors';
 
-import type { FleetServerHost } from '../../types';
+import type { FleetServerHost, NewFleetServerHost } from '../../types';
 import { appContextService } from '../app_context';
 import { fleetServerHostService } from '../fleet_server_host';
 import { isAgentlessEnabled } from '../utils/agentless';
@@ -104,6 +104,15 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
     { ignoreNotFound: true }
   );
 
+  const toCreate: Array<
+    NewFleetServerHost & { id: string; is_preconfigured: true; secretHashes: Record<string, any> }
+  > = [];
+  const toUpdate: Array<{
+    id: string;
+    data: Partial<FleetServerHost>;
+    secretHashes: Record<string, any>;
+  }> = [];
+
   await Promise.all(
     preconfiguredFleetServerHosts.map(async (preconfiguredFleetServerHost) => {
       const existingHost = existingFleetServerHosts.find(
@@ -111,9 +120,9 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
       );
 
       const { id, ...data } = preconfiguredFleetServerHost;
+      const secretHashes = await hashSecrets(preconfiguredFleetServerHost);
 
       const isCreate = !existingHost;
-
       const isUpdateWithNewData =
         existingHost &&
         (!existingHost.is_preconfigured ||
@@ -122,35 +131,29 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
             preconfiguredFleetServerHost
           )));
 
-      const secretHashes = await hashSecrets(preconfiguredFleetServerHost);
-
       if (isCreate) {
-        await fleetServerHostService.create(
-          soClient,
-          esClient,
-          {
-            ...data,
-            is_preconfigured: true,
-          },
-          { id, overwrite: true, fromPreconfiguration: true, secretHashes }
-        );
+        toCreate.push({ ...data, is_preconfigured: true, id, secretHashes });
       } else if (isUpdateWithNewData) {
-        await fleetServerHostService.update(
-          soClient,
-          esClient,
-          id,
-          {
-            ...data,
-            is_preconfigured: true,
-          },
-          { fromPreconfiguration: true, secretHashes }
-        );
-        if (data.is_default) {
-          await agentPolicyService.bumpAllAgentPolicies(esClient);
-        } else {
-          await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, id);
-        }
+        toUpdate.push({ id, data: { ...data, is_preconfigured: true }, secretHashes });
       }
+    })
+  );
+
+  if (toCreate.length > 0) {
+    await fleetServerHostService.bulkCreateForPreconfiguration(soClient, esClient, toCreate, {
+      fromPreconfiguration: true,
+    });
+  }
+
+  await Promise.all(
+    toUpdate.map(async ({ id, data, secretHashes }) => {
+      await fleetServerHostService.update(soClient, esClient, id, data, {
+        fromPreconfiguration: true,
+        secretHashes,
+      });
+      await agentPolicyService.bumpAllAgentPoliciesForFleetServerHosts(esClient, id, {
+        isDefault: data.is_default,
+      });
     })
   );
 }
