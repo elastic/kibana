@@ -5,23 +5,4 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { either } from 'fp-ts/Either';
-
-export const floatThreeDecimalPlacesRt = new t.Type<string, string, unknown>(
-  'floatThreeDecimalPlacesRt',
-  t.string.is,
-  (input, context) => {
-    return either.chain(t.string.validate(input, context), (inputAsString) => {
-      const inputAsFloat = parseFloat(inputAsString);
-      const maxThreeDecimals = parseFloat(inputAsFloat.toFixed(3)) === inputAsFloat;
-
-      const isValid = inputAsFloat >= 0 && inputAsFloat <= 1 && maxThreeDecimals;
-
-      return isValid
-        ? t.success(inputAsString)
-        : t.failure(input, context, 'Must be a number between 0.000 and 1');
-    });
-  },
-  t.identity
-);
+export { floatThreeDecimalPlacesRt } from '@kbn/apm-common';
