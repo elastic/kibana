@@ -48,7 +48,11 @@ export const renderApp = (
   ReactDOM.render(
     <KibanaRenderContextProvider {...startServices}>
       <I18nProvider>
-        <SearchExamplePage exampleLinks={LINKS} basePath={http.basePath}>
+        <SearchExamplePage
+          exampleLinks={LINKS}
+          basePath={http.basePath}
+          navigateToPath={(path) => history.push(path)}
+        >
           <Router history={history}>
             <Routes>
               <Route path={LINKS[0].path}>

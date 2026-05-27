@@ -573,6 +573,7 @@ export const Tabs: React.FC<TabsProps> = ({
               <RelationshipsTable
                 basePath={http.basePath}
                 capabilities={application.capabilities}
+                navigateToUrl={application.navigateToUrl}
                 relationships={relationships}
                 allowedTypes={allowedTypes}
                 getDefaultTitle={savedObjectsManagement.getDefaultTitle}

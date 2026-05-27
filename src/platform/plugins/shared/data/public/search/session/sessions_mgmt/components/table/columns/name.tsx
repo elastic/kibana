@@ -109,6 +109,9 @@ export const nameColumn = ({
         href={href}
         onClick={(event) => {
           if (hasActiveModifierKey(event)) return;
+          if (onBackgroundSearchOpened) {
+            event.preventDefault();
+          }
           trackAction?.();
           onBackgroundSearchOpened?.({ session, event });
         }}

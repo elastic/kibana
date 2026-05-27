@@ -70,6 +70,7 @@ describe('name column', () => {
           event: expect.any(Object),
           session: mockSession,
         });
+        expect(onBackgroundSearchOpened.mock.calls[0][0].event.defaultPrevented).toBe(true);
       });
     });
   });
