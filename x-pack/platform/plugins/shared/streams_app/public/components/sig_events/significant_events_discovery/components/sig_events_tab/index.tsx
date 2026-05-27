@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBasicTable,
   EuiBadge,
@@ -15,122 +15,105 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { Verdict } from '@kbn/streams-schema';
+import type { SigEvent } from '@kbn/streams-schema';
 import {
-  useFetchVerdicts,
-  useFetchVerdictHistory,
-} from '../../../../../hooks/sig_events/use_fetch_verdicts';
-import { SigEventsFlyout } from '../sig_events_flyout';
+  useFetchSigEvents,
+  useFetchSigEventHistory,
+} from '../../../../../hooks/sig_events/use_fetch_sig_events';
+import { useTimefilter } from '../../../../../hooks/use_timefilter';
+import { useTimeRange } from '../../../../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
+import { EntityDetailFlyout } from '../entity_detail_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 
-const VERDICT_LABELS: Record<string, string> = {
-  promoted: i18n.translate('xpack.streams.verdictsTab.verdict.promoted', {
-    defaultMessage: 'Promoted',
-  }),
-  demoted: i18n.translate('xpack.streams.verdictsTab.verdict.demoted', {
-    defaultMessage: 'Demoted',
-  }),
-  acknowledged: i18n.translate('xpack.streams.verdictsTab.verdict.acknowledged', {
-    defaultMessage: 'Acknowledged',
-  }),
-};
+const MAX_VISIBLE_STREAMS = 3;
+const MAX_VISIBLE_RULES = 2;
 
-const VERDICT_COLORS: Record<string, string> = {
-  promoted: 'warning',
-  demoted: 'success',
-  acknowledged: 'primary',
-};
-
-const columns: Array<EuiBasicTableColumn<Verdict>> = [
+const columns: Array<EuiBasicTableColumn<SigEvent>> = [
   {
     field: '@timestamp',
-    name: i18n.translate('xpack.streams.verdictsTab.timestampColumn', {
-      defaultMessage: 'Last verdict',
+    name: i18n.translate('xpack.streams.sigEventsTab.timestampColumn', {
+      defaultMessage: 'Timestamp',
     }),
-    width: '200px',
+    sortable: true,
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
     field: 'title',
-    name: i18n.translate('xpack.streams.verdictsTab.titleColumn', {
+    name: i18n.translate('xpack.streams.sigEventsTab.titleColumn', {
       defaultMessage: 'Title',
     }),
     truncateText: true,
   },
   {
     field: 'verdict',
-    name: i18n.translate('xpack.streams.verdictsTab.verdictColumn', {
+    name: i18n.translate('xpack.streams.sigEventsTab.verdictColumn', {
       defaultMessage: 'Verdict',
     }),
-    width: '110px',
-    render: (v: string) => (
-      <EuiBadge color={VERDICT_COLORS[v] ?? 'default'}>{VERDICT_LABELS[v] ?? v}</EuiBadge>
-    ),
   },
   {
     field: 'criticality',
-    name: i18n.translate('xpack.streams.verdictsTab.criticalityColumn', {
+    name: i18n.translate('xpack.streams.sigEventsTab.criticalityColumn', {
       defaultMessage: 'Criticality',
     }),
-    width: '100px',
-    render: (value: number | undefined) => (value != null ? String(value) : '-'),
+    render: (value: number | undefined) => (value ? String(value) : '-'),
   },
   {
-    field: 'confidence',
-    name: i18n.translate('xpack.streams.verdictsTab.confidenceColumn', {
-      defaultMessage: 'Confidence',
-    }),
-    width: '100px',
-    render: (value: number | undefined) => (value != null ? String(value) : '-'),
-  },
-  {
-    name: i18n.translate('xpack.streams.verdictsTab.streamsColumn', {
+    field: 'stream_names',
+    name: i18n.translate('xpack.streams.sigEventsTab.streamsColumn', {
       defaultMessage: 'Streams',
     }),
-    width: '160px',
-    render: (row: Verdict) => {
-      const fromEvidences = (row.evidences ?? [])
-        .map((e) => e.stream_name)
-        .filter((s): s is string => !!s);
-      const streams = [
-        ...new Set(fromEvidences.length > 0 ? fromEvidences : row.stream_names ?? []),
-      ];
-      return streams.length > 0 ? (
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          {streams.map((name) => (
-            <EuiFlexItem key={name} grow={false}>
-              <EuiBadge color="hollow">{name}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      ) : null;
-    },
+    render: (streamNames: string[]) => (
+      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+        {(streamNames ?? []).slice(0, MAX_VISIBLE_STREAMS).map((name) => (
+          <EuiFlexItem key={name} grow={false} style={{ maxWidth: '200px' }}>
+            <EuiBadge color="hollow">{name}</EuiBadge>
+          </EuiFlexItem>
+        ))}
+        {(streamNames ?? []).length > MAX_VISIBLE_STREAMS && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">+{streamNames.length - MAX_VISIBLE_STREAMS}</EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    ),
+  },
+  {
+    field: 'rule_names',
+    name: i18n.translate('xpack.streams.sigEventsTab.rulesColumn', {
+      defaultMessage: 'Rules',
+    }),
+    render: (ruleNames: string[]) => (
+      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+        {(ruleNames ?? []).slice(0, MAX_VISIBLE_RULES).map((name) => (
+          <EuiFlexItem key={name} grow={false} style={{ maxWidth: '200px' }}>
+            <EuiBadge color="hollow">{name}</EuiBadge>
+          </EuiFlexItem>
+        ))}
+        {(ruleNames ?? []).length > MAX_VISIBLE_RULES && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">+{ruleNames.length - MAX_VISIBLE_RULES}</EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    ),
   },
 ];
 
-const DEFAULT_SIG_EVENTS_RANGE = { from: 'now-7d', to: 'now' };
-
 export const SigEventsTab = () => {
-  const [pickerRange, setPickerRange] = useState(DEFAULT_SIG_EVENTS_RANGE);
-  const [absoluteRange, setAbsoluteRange] = useState(() =>
-    getAbsoluteTimeRange(DEFAULT_SIG_EVENTS_RANGE, { forceNow: new Date() })
-  );
+  const { timeState } = useTimefilter();
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
 
-  const handleTimeChange = ({ start: s, end: e }: { start: string; end: string }) => {
-    setPickerRange({ from: s, to: e });
-    setAbsoluteRange(getAbsoluteTimeRange({ from: s, to: e }, { forceNow: new Date() }));
-  };
-
-  const { data, isLoading, refetch, pagination, setPagination } = useFetchVerdicts({
-    from: absoluteRange.from,
-    to: absoluteRange.to,
+  const { data, isLoading, refetch, pagination, setPagination } = useFetchSigEvents({
+    from: timeState.start,
+    to: timeState.end,
   });
-  const [selectedVerdict, setSelectedVerdict] = useState<Verdict | undefined>();
+  const [selectedEvent, setSelectedEvent] = useState<SigEvent | undefined>();
 
-  const { data: historyData, isLoading: isHistoryLoading } = useFetchVerdictHistory(
-    selectedVerdict?.discovery_slug
+  const { data: historyData, isLoading: isHistoryLoading } = useFetchSigEventHistory(
+    selectedEvent?.event_id
   );
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
@@ -146,19 +129,108 @@ export const SigEventsTab = () => {
     pageSizeOptions: [10, 25, 50],
   };
 
+  const flyoutDetails = selectedEvent
+    ? [
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.eventId', {
+            defaultMessage: 'Event ID',
+          }),
+          description: selectedEvent.event_id,
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.title', {
+            defaultMessage: 'Title',
+          }),
+          description: selectedEvent.title,
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.verdict', {
+            defaultMessage: 'Verdict',
+          }),
+          description: selectedEvent.verdict,
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.criticality', {
+            defaultMessage: 'Criticality',
+          }),
+          description: selectedEvent.criticality ? String(selectedEvent.criticality) : '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.confidence', {
+            defaultMessage: 'Confidence',
+          }),
+          description: selectedEvent.confidence ? String(selectedEvent.confidence) : '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.summary', {
+            defaultMessage: 'Summary',
+          }),
+          description: selectedEvent.summary,
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.rootCause', {
+            defaultMessage: 'Root Cause',
+          }),
+          description: selectedEvent.root_cause,
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.impact', {
+            defaultMessage: 'Impact',
+          }),
+          description: selectedEvent.impact ?? '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.recommendedAction', {
+            defaultMessage: 'Recommended Action',
+          }),
+          description: selectedEvent.recommended_action ?? '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.streams', {
+            defaultMessage: 'Streams',
+          }),
+          description: (selectedEvent.stream_names ?? []).join(', ') || '-',
+        },
+        {
+          title: i18n.translate('xpack.streams.sigEventsTab.flyout.rules', {
+            defaultMessage: 'Rules',
+          }),
+          description: (selectedEvent.rule_names ?? []).join(', ') || '-',
+        },
+      ]
+    : [];
+
+  const historyEntries = useMemo(
+    () =>
+      (historyData?.hits ?? []).map((entry) => ({
+        timestamp: formatTimestamp(entry['@timestamp']),
+        summary: entry.criticality
+          ? i18n.translate('xpack.streams.sigEventsTab.historySummaryWithCriticality', {
+              defaultMessage: '{verdict}: {title} (criticality: {criticality})',
+              values: {
+                verdict: entry.verdict,
+                title: entry.title,
+                criticality: String(entry.criticality),
+              },
+            })
+          : i18n.translate('xpack.streams.sigEventsTab.historySummary', {
+              defaultMessage: '{verdict}: {title}',
+              values: { verdict: entry.verdict, title: entry.title },
+            }),
+      })),
+    [historyData]
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker
-              start={pickerRange.from}
-              end={pickerRange.to}
-              onTimeChange={handleTimeChange}
-              onRefresh={() => {
-                setAbsoluteRange(getAbsoluteTimeRange(pickerRange, { forceNow: new Date() }));
-                refetch();
-              }}
+              start={rangeFrom}
+              end={rangeTo}
+              onTimeChange={({ start: s, end: e }) => updateTimeRange({ from: s, to: e })}
+              onRefresh={() => refetch()}
               compressed
               showUpdateButton="iconOnly"
               updateButtonProps={{ size: 's', fill: false }}
@@ -168,31 +240,33 @@ export const SigEventsTab = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable
-          tableCaption={i18n.translate('xpack.streams.verdictsTab.tableCaption', {
-            defaultMessage: 'Verdicts',
+          tableCaption={i18n.translate('xpack.streams.sigEventsTab.tableCaption', {
+            defaultMessage: 'Significant Events',
           })}
           items={data?.hits ?? []}
           columns={columns}
           pagination={euiPagination}
           onChange={onTableChange}
           loading={isLoading}
-          noItemsMessage={i18n.translate('xpack.streams.verdictsTab.emptyBody', {
-            defaultMessage: 'No verdicts found.',
+          noItemsMessage={i18n.translate('xpack.streams.sigEventsTab.emptyBody', {
+            defaultMessage: 'No significant events found.',
           })}
           rowProps={(item) => ({
-            onClick: () => setSelectedVerdict(item),
+            onClick: () => setSelectedEvent(item),
             css: css`
               cursor: pointer;
             `,
           })}
         />
       </EuiFlexItem>
-      {selectedVerdict && (
-        <SigEventsFlyout
-          verdict={selectedVerdict}
-          history={historyData?.hits ?? []}
+      {selectedEvent && (
+        <EntityDetailFlyout
+          title={selectedEvent.title}
+          entityId={selectedEvent.event_id}
+          details={flyoutDetails}
+          history={historyEntries}
           isHistoryLoading={isHistoryLoading}
-          onClose={() => setSelectedVerdict(undefined)}
+          onClose={() => setSelectedEvent(undefined)}
         />
       )}
     </EuiFlexGroup>

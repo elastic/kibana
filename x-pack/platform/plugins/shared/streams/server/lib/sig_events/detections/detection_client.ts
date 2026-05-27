@@ -116,7 +116,7 @@ export class DetectionClient {
         | WHERE max_handled_ts >= max_state_ts OR max_state_ts IS NULL
         | KEEP detection_id`;
 
-      const response = await queryEsql({ esClient: this.clients.esClient, query: query.print() });
+      const response = await queryEsql({ esClient: this.clients.esClient, query });
       const rows = esqlToObjects<{ detection_id?: string }>(response);
       for (const r of rows) {
         if (r.detection_id) processed.add(r.detection_id);

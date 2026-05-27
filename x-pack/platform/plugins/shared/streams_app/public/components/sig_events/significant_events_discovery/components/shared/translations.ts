@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Detection, Discovery, Verdict } from '@kbn/streams-schema';
 
 export const GENERATE_FEATURES_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.generateFeaturesButtonLabel',
@@ -105,36 +104,3 @@ export const CHANGE_TYPE_LABELS: Record<string, string> = {
 
 export const changeTypeLabel = (type?: string): string =>
   (type ? CHANGE_TYPE_LABELS[type] : undefined) ?? type ?? '-';
-
-export const DETECTION_KIND_LABELS: Record<Detection['kind'], string> = {
-  detection: i18n.translate('xpack.streams.detection.kind.detected', {
-    defaultMessage: 'Detected',
-  }),
-  quiet: i18n.translate('xpack.streams.detection.kind.recovered', {
-    defaultMessage: 'Recovered',
-  }),
-  handled: i18n.translate('xpack.streams.detection.kind.investigated', {
-    defaultMessage: 'Processed',
-  }),
-};
-
-export const DISCOVERY_KIND_LABELS: Record<Discovery['kind'], string> = {
-  finding: i18n.translate('xpack.streams.discovery.kind.finding', {
-    defaultMessage: 'Open',
-  }),
-  clearance: i18n.translate('xpack.streams.discovery.kind.clearance', {
-    defaultMessage: 'Cleared',
-  }),
-};
-
-export const VERDICT_LABELS: Record<Verdict['verdict'], string> = {
-  promoted: i18n.translate('xpack.streams.verdict.promoted', {
-    defaultMessage: 'Promoted',
-  }),
-  demoted: i18n.translate('xpack.streams.verdict.demoted', {
-    defaultMessage: 'Demoted',
-  }),
-  acknowledged: i18n.translate('xpack.streams.verdict.acknowledged', {
-    defaultMessage: 'Acknowledged',
-  }),
-};

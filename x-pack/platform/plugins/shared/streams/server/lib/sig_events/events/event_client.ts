@@ -6,8 +6,6 @@
  */
 
 import type { IDataStreamClient } from '@kbn/data-streams';
-import { esql } from '@elastic/esql';
-import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   type CommonSearchOptions,
@@ -15,8 +13,6 @@ import {
   type PaginatedResponse,
 } from '../query_utils';
 import {
-  andWhere,
-  inFilter,
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
@@ -27,18 +23,23 @@ import {
   type StoredEvent,
   type eventsMappings,
 } from './data_stream';
-import { FIELD_EVENT_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
-import { enrichFromEvidences } from '../utils';
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 
-export interface EventsFilterOptions {
-  verdict?: string[];
-  stream?: string[];
-  search?: string;
-}
+const GROUP_BY_FIELD = 'event_id';
 
-export interface EventsPaginatedSearchOptions extends PaginatedSearchOptions, EventsFilterOptions {}
+function enrichFromEvidences(e: SigEvent): SigEvent {
+  const evidences = e.evidences ?? [];
+  const streamNames = e.stream_names?.length
+    ? e.stream_names
+    : [...new Set(evidences.map((ev) => ev.stream_name).filter((s): s is string => !!s))];
+  const ruleNames = e.rule_names?.length
+    ? e.rule_names
+    : [...new Set(evidences.map((ev) => ev.rule_name).filter((s): s is string => !!s))];
+
+  if (streamNames === e.stream_names && ruleNames === e.rule_names) return e;
+  return { ...e, stream_names: streamNames, rule_names: ruleNames };
+}
 
 export class EventClient {
   constructor(
@@ -48,25 +49,6 @@ export class EventClient {
       space: string;
     }
   ) {}
-
-  private buildWhere(options: EventsFilterOptions): ESQLAstExpression | undefined {
-    let where: ESQLAstExpression | undefined;
-    where = inFilter({ where, field: 'verdict', values: options.verdict });
-    where = inFilter({ where, field: 'stream_names', values: options.stream });
-
-    if (options.search) {
-      const escaped = options.search.toLowerCase().replace(/\\/g, '\\\\').replace(/[*?]/g, '\\$&');
-      const pattern = esql.str(`*${escaped}*`);
-      where = andWhere(
-        where,
-        esql.exp`(TO_LOWER(${esql.col('title')}) LIKE ${pattern} OR TO_LOWER(${esql.col(
-          'summary'
-        )}) LIKE ${pattern})`
-      );
-    }
-
-    return where;
-  }
 
   async bulkCreate(events: SigEvent[]) {
     return this.clients.dataStreamClient.create({
@@ -81,42 +63,31 @@ export class EventClient {
       space: this.clients.space,
       options,
       index: EVENTS_DATA_STREAM,
-      groupBy: FIELD_DISCOVERY_SLUG,
+      groupBy: GROUP_BY_FIELD,
     });
   }
 
   async findLatestPaginated(
-    options: EventsPaginatedSearchOptions = {}
+    options: PaginatedSearchOptions = {}
   ): Promise<PaginatedResponse<SigEvent>> {
     const result = await runPaginatedLatestSourceEsqlQuery<SigEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: EVENTS_DATA_STREAM,
-      where: this.buildWhere(options),
-      groupBy: FIELD_DISCOVERY_SLUG,
+      groupBy: GROUP_BY_FIELD,
     });
 
     return { ...result, hits: result.hits.map(enrichFromEvidences) };
   }
 
-  async findById(id: string): Promise<{ hits: SigEvent[] }> {
+  async findById(discoverySlug: string): Promise<{ hits: SigEvent[] }> {
     return runFindByIdEsqlQuery<SigEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: EVENTS_DATA_STREAM,
-      idField: FIELD_EVENT_ID,
-      idValue: id,
-    });
-  }
-
-  async findByDiscoverySlug(slug: string): Promise<{ hits: SigEvent[] }> {
-    return runFindByIdEsqlQuery<SigEvent>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      index: EVENTS_DATA_STREAM,
-      idField: FIELD_DISCOVERY_SLUG,
-      idValue: slug,
+      idField: 'discovery_slug',
+      idValue: discoverySlug,
     });
   }
 }

@@ -22,8 +22,9 @@ import {
   useFetchDetections,
   useFetchDetectionHistory,
 } from '../../../../../hooks/sig_events/use_fetch_detections';
-import { DetectionFlyout } from '../detection_flyout';
+import { DetectionFlyout } from './detection_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
+import { CHANGE_TYPE_LABELS } from '../shared/translations';
 
 const KIND_LABELS: Record<string, string> = {
   detection: i18n.translate('xpack.streams.detectionsTab.statusActive', {
@@ -46,22 +47,6 @@ const KIND_COLORS: Record<string, string> = {
 
 const kindLabel = (kind: string) => KIND_LABELS[kind] ?? kind;
 const kindColor = (kind: string) => KIND_COLORS[kind] ?? 'default';
-
-const CHANGE_TYPE_LABELS: Record<string, string> = {
-  distribution_change: i18n.translate('xpack.streams.detectionsTab.changeType.distribution', {
-    defaultMessage: 'Distribution shift',
-  }),
-  spike: i18n.translate('xpack.streams.detectionsTab.changeType.spike', {
-    defaultMessage: 'Spike',
-  }),
-  dip: i18n.translate('xpack.streams.detectionsTab.changeType.dip', { defaultMessage: 'Dip' }),
-  step_change: i18n.translate('xpack.streams.detectionsTab.changeType.step', {
-    defaultMessage: 'Step change',
-  }),
-  stationary: i18n.translate('xpack.streams.detectionsTab.changeType.stationary', {
-    defaultMessage: 'Returned to baseline',
-  }),
-};
 
 // Unhandled detections older than this window are outside the discovery lookback
 // and won't be picked up automatically by the discovery pipeline.
@@ -132,7 +117,13 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
           </EuiBadge>
         );
       }
-      return null;
+      return (
+        <EuiBadge color="hollow">
+          {i18n.translate('xpack.streams.detectionsTab.discoveryPending', {
+            defaultMessage: 'Pending',
+          })}
+        </EuiBadge>
+      );
     },
   },
 ];

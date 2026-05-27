@@ -12,6 +12,9 @@ import {
   causeKiSchema,
   evidenceSchema,
 } from '../common_schemas';
+import { MAX_STREAM_NAME_LENGTH } from '../../helpers/stream_name_validation';
+
+const MAX_RULE_NAME_LENGTH = 256;
 
 export const verdictSchema = z.object({
   '@timestamp': z.iso.datetime(),
@@ -19,8 +22,8 @@ export const verdictSchema = z.object({
   verdict_id: z.string().optional(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
-  rule_names: z.array(z.string()).optional(),
-  stream_names: z.array(z.string()).optional(),
+  rule_names: z.array(z.string().max(MAX_RULE_NAME_LENGTH)).optional(),
+  stream_names: z.array(z.string().max(MAX_STREAM_NAME_LENGTH)).optional(),
   title: z.string(),
   summary: z.string(),
   root_cause: z.string(),

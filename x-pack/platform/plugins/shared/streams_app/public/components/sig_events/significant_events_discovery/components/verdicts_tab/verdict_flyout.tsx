@@ -26,8 +26,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Verdict } from '@kbn/streams-schema';
 import { formatTimestamp } from '../../../../../util/formatters';
-import { VERDICT_LABELS } from '../shared/translations';
-import { VERDICT_COLORS } from '../shared/constants';
+
+const VERDICT_LABELS: Record<string, string> = {
+  promoted: i18n.translate('xpack.streams.verdictFlyout.verdict.promoted', {
+    defaultMessage: 'Promoted',
+  }),
+  demoted: i18n.translate('xpack.streams.verdictFlyout.verdict.demoted', {
+    defaultMessage: 'Demoted',
+  }),
+  acknowledged: i18n.translate('xpack.streams.verdictFlyout.verdict.acknowledged', {
+    defaultMessage: 'Acknowledged',
+  }),
+};
+
+const VERDICT_COLORS: Record<string, string> = {
+  promoted: 'warning',
+  demoted: 'success',
+  acknowledged: 'primary',
+};
 
 interface VerdictFlyoutProps {
   verdict: Verdict;
@@ -63,7 +79,7 @@ export const VerdictFlyout = ({
         title: i18n.translate('xpack.streams.verdictFlyout.confidence', {
           defaultMessage: 'Confidence',
         }),
-        description: verdict.confidence != null ? `${verdict.confidence}%` : '-',
+        description: verdict.confidence != null ? String(verdict.confidence) : '-',
       },
       ...(streams.length > 0
         ? [
