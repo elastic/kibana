@@ -51,7 +51,7 @@ export function useOpenInDiscoverSectionAction(
     const actionBase = {
       dataTestSubj,
       label: canOpenInNewTab ? OPEN_IN_A_DISCOVER_TAB_LABEL : OPEN_IN_DISCOVER_LABEL,
-      icon: 'discoverApp',
+      icon: canOpenInNewTab ? 'productDiscover' : 'discoverApp',
       ariaLabel: canOpenInNewTab ? OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL : OPEN_IN_DISCOVER_ARIA_LABEL,
       ebt: {
         action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,

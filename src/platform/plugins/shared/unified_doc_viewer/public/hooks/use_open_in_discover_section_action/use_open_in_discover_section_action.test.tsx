@@ -114,7 +114,7 @@ describe('useOpenInDiscoverSectionAction', () => {
       expect.objectContaining({
         label: OPEN_IN_A_DISCOVER_TAB_LABEL,
         ariaLabel: OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL,
-        icon: 'discoverApp',
+        icon: 'productDiscover',
         dataTestSubj,
         onClick: expect.any(Function),
       })
@@ -155,7 +155,7 @@ describe('useOpenInDiscoverSectionAction', () => {
         href,
         label: OPEN_IN_A_DISCOVER_TAB_LABEL,
         ariaLabel: OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL,
-        icon: 'discoverApp',
+        icon: 'productDiscover',
         dataTestSubj,
         onClick: expect.any(Function),
       })

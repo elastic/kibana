@@ -85,7 +85,7 @@ const getExploreInDiscoverTabAction = (onExecute: () => void): Action => {
       });
     },
     getIconType() {
-      return 'discoverApp';
+      return 'productDiscover';
     },
     async isCompatible() {
       return true;
