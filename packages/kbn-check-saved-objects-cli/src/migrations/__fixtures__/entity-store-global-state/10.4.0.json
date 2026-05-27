@@ -24,8 +24,7 @@
     {
       "historySnapshot": {
         "status": "stopped",
-        "frequency": "1h",
-        "timezone": "UTC"
+        "frequency": "1h"
       },
       "logsExtraction": {
         "additionalIndexPatterns": [],
