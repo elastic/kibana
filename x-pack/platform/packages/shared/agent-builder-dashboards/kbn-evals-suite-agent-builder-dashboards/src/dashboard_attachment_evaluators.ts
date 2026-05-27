@@ -86,6 +86,12 @@ const getDashboardSections = (panels: DashboardPanel[]): DashboardPanel[] => {
   return panels.filter((panel) => Array.isArray(panel.panels));
 };
 
+const getDashboardLeafPanels = (panels: DashboardPanel[]): DashboardPanel[] => {
+  return panels.flatMap((panel) =>
+    Array.isArray(panel.panels) ? getDashboardLeafPanels(panel.panels) : [panel]
+  );
+};
+
 const countDashboardPanels = (panels: DashboardPanel[]): number => {
   return panels.reduce((total, panel) => {
     if (Array.isArray(panel.panels)) {
@@ -120,6 +126,119 @@ const getGridOverflowViolations = (
   }
 
   return violations;
+};
+
+const getGridRows = (
+  panels: DashboardPanel[]
+): Array<{ y: number; panels: DashboardPanel[]; maxHeight: number }> => {
+  const rowMap = new Map<number, DashboardPanel[]>();
+
+  for (const panel of getDashboardLeafPanels(panels)) {
+    const { grid } = panel;
+    if (typeof grid?.y !== 'number') {
+      continue;
+    }
+    const row = rowMap.get(grid.y) ?? [];
+    row.push(panel);
+    rowMap.set(grid.y, row);
+  }
+
+  return [...rowMap.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([y, rowPanels]) => {
+      const panelsSortedByX = rowPanels.sort((a, b) => (a.grid?.x ?? 0) - (b.grid?.x ?? 0));
+      const maxHeight = Math.max(...panelsSortedByX.map((panel) => panel.grid?.h ?? 0));
+
+      return {
+        y,
+        panels: panelsSortedByX,
+        maxHeight,
+      };
+    });
+};
+
+const rowFillsWidth = (panels: DashboardPanel[], maxColumns: number): boolean => {
+  let nextX = 0;
+
+  for (const panel of panels) {
+    const { grid } = panel;
+    if (typeof grid?.x !== 'number' || typeof grid.w !== 'number') {
+      return false;
+    }
+    if (grid.x !== nextX) {
+      return false;
+    }
+    nextX = grid.x + grid.w;
+  }
+
+  return nextX === maxColumns;
+};
+
+const isInRange = (
+  value: number | undefined,
+  range: { min?: number; max?: number } | undefined
+): boolean => {
+  if (!range) {
+    return true;
+  }
+  if (typeof value !== 'number') {
+    return false;
+  }
+  return (
+    (typeof range.min !== 'number' || value >= range.min) &&
+    (typeof range.max !== 'number' || value <= range.max)
+  );
+};
+
+const sectionMatchesExpectation = (
+  section: DashboardPanel,
+  expectedSection: NonNullable<
+    NonNullable<DashboardDatasetExample['output']['expectedDashboardAttachment']>['sections']
+  >[number]
+): boolean => {
+  const title = section.title?.toLowerCase() ?? '';
+  const requiredTitleTerms = expectedSection.titleIncludes ?? [];
+  const optionalTitleTerms = expectedSection.titleIncludesAny ?? [];
+
+  if (requiredTitleTerms.some((term) => !title.includes(term.toLowerCase()))) {
+    return false;
+  }
+
+  if (
+    optionalTitleTerms.length > 0 &&
+    !optionalTitleTerms.some((term) => title.includes(term.toLowerCase()))
+  ) {
+    return false;
+  }
+
+  const panelCount = section.panels?.length ?? 0;
+  if (typeof expectedSection.minPanels === 'number' && panelCount < expectedSection.minPanels) {
+    return false;
+  }
+  if (typeof expectedSection.maxPanels === 'number' && panelCount > expectedSection.maxPanels) {
+    return false;
+  }
+
+  return true;
+};
+
+const describeExpectedSection = (
+  expectedSection: NonNullable<
+    NonNullable<DashboardDatasetExample['output']['expectedDashboardAttachment']>['sections']
+  >[number]
+): string => {
+  const titleTerms = [
+    ...(expectedSection.titleIncludes ?? []),
+    ...(expectedSection.titleIncludesAny ?? []),
+  ];
+  const titleDescription =
+    titleTerms.length > 0 ? `title terms [${titleTerms.join(', ')}]` : 'any title';
+  const panelDescription =
+    typeof expectedSection.minPanels === 'number' || typeof expectedSection.maxPanels === 'number'
+      ? `panel count ${expectedSection.minPanels ?? '-∞'}-${expectedSection.maxPanels ?? '∞'}`
+      : 'any panel count';
+
+  return `${titleDescription}, ${panelDescription}`;
 };
 
 export const dashboardAttachmentExistsEvaluator: Evaluator<
@@ -223,33 +342,22 @@ export const dashboardSectionShapeEvaluator: Evaluator<
       typeof expectedSectionCount !== 'number' || sectionCount === expectedSectionCount;
     const sectionFailures: string[] = [];
 
+    const matchedSectionIndexes = new Set<number>();
     for (const [index, expectedSection] of expectedSections.entries()) {
-      const section = sections[index];
-      if (!section) {
-        sectionFailures.push(`Missing section at index ${index}.`);
+      const matchingSectionIndex = sections.findIndex((section, sectionIndex) => {
+        return (
+          !matchedSectionIndexes.has(sectionIndex) &&
+          sectionMatchesExpectation(section, expectedSection)
+        );
+      });
+
+      if (matchingSectionIndex === -1) {
+        sectionFailures.push(
+          `Expected section ${index} was not found (${describeExpectedSection(expectedSection)}).`
+        );
         continue;
       }
-
-      const title = section.title?.toLowerCase() ?? '';
-      const missingTitleTerms =
-        expectedSection.titleIncludes?.filter((term) => !title.includes(term.toLowerCase())) ?? [];
-      if (missingTitleTerms.length > 0) {
-        sectionFailures.push(
-          `Section ${index} title is missing terms: ${missingTitleTerms.join(', ')}.`
-        );
-      }
-
-      const panelCount = section.panels?.length ?? 0;
-      if (typeof expectedSection.minPanels === 'number' && panelCount < expectedSection.minPanels) {
-        sectionFailures.push(
-          `Section ${index} expected at least ${expectedSection.minPanels} panel(s), found ${panelCount}.`
-        );
-      }
-      if (typeof expectedSection.maxPanels === 'number' && panelCount > expectedSection.maxPanels) {
-        sectionFailures.push(
-          `Section ${index} expected at most ${expectedSection.maxPanels} panel(s), found ${panelCount}.`
-        );
-      }
+      matchedSectionIndexes.add(matchingSectionIndex);
     }
 
     const passed = sectionCountPassed && sectionFailures.length === 0;
@@ -262,7 +370,12 @@ export const dashboardSectionShapeEvaluator: Evaluator<
         : `Dashboard section shape did not match expectations. Expected ${
             expectedSectionCount ?? 'any'
           } section(s), found ${sectionCount}. ${sectionFailures.join(' ')}`,
-      metadata: { expectedSectionCount, sectionCount, sectionFailures },
+      metadata: {
+        expectedSectionCount,
+        sectionCount,
+        sectionFailures,
+        matchedSectionCount: matchedSectionIndexes.size,
+      },
     };
   },
 };
@@ -295,5 +408,108 @@ export const dashboardGridBoundsEvaluator: Evaluator<
   },
 };
 
-export const dashboardMinPanelCountEvaluator = dashboardPanelCountEvaluator;
-export const dashboardSectionCountEvaluator = dashboardSectionShapeEvaluator;
+export const dashboardGridRowLayoutEvaluator: Evaluator<
+  DashboardDatasetExample,
+  DashboardAgentTaskOutput
+> = {
+  name: 'Dashboard grid row layout',
+  kind: 'CODE',
+  evaluate: async ({ expected, output }): Promise<EvaluationResult> => {
+    const gridExpectation = expected?.expectedDashboardAttachment?.grid;
+    const expectedRows = gridExpectation?.rows ?? [];
+    if (expectedRows.length === 0) {
+      return { score: 1, label: 'SKIPPED' };
+    }
+
+    const maxColumns = gridExpectation?.maxColumns ?? 48;
+    const rows = getGridRows(getDashboardContentPanels(output));
+    const failures: string[] = [];
+
+    for (const [index, expectedRow] of expectedRows.entries()) {
+      const row = rows[index];
+      if (!row) {
+        failures.push(`Missing row at index ${index}.`);
+        continue;
+      }
+
+      if (
+        typeof expectedRow.panelCount === 'number' &&
+        row.panels.length !== expectedRow.panelCount
+      ) {
+        failures.push(
+          `Row ${index} expected ${expectedRow.panelCount} panel(s), found ${row.panels.length}.`
+        );
+      }
+
+      if (typeof expectedRow.y === 'number' && row.y !== expectedRow.y) {
+        failures.push(`Row ${index} expected y=${expectedRow.y}, found y=${row.y}.`);
+      }
+
+      if (expectedRow.yAfterPreviousRow === true && index > 0) {
+        const previousRow = rows[index - 1];
+        const expectedY = previousRow.y + previousRow.maxHeight;
+        if (row.y !== expectedY) {
+          failures.push(`Row ${index} expected y=${expectedY}, found y=${row.y}.`);
+        }
+      }
+
+      if (expectedRow.widths) {
+        const widths = row.panels.map((panel) => panel.grid?.w);
+        if (
+          widths.length !== expectedRow.widths.length ||
+          widths.some((width, widthIndex) => width !== expectedRow.widths?.[widthIndex])
+        ) {
+          failures.push(
+            `Row ${index} expected widths [${expectedRow.widths.join(', ')}], found [${widths.join(
+              ', '
+            )}].`
+          );
+        }
+      }
+
+      if (
+        expectedRow.widthRange &&
+        row.panels.some((panel) => !isInRange(panel.grid?.w, expectedRow.widthRange))
+      ) {
+        failures.push(
+          `Row ${index} expected every panel width to be in range ${
+            expectedRow.widthRange.min ?? '-∞'
+          }-${expectedRow.widthRange.max ?? '∞'}.`
+        );
+      }
+
+      if (
+        typeof expectedRow.height === 'number' &&
+        row.panels.some((panel) => panel.grid?.h !== expectedRow.height)
+      ) {
+        failures.push(`Row ${index} expected every panel height to be ${expectedRow.height}.`);
+      }
+
+      if (
+        expectedRow.heightRange &&
+        row.panels.some((panel) => !isInRange(panel.grid?.h, expectedRow.heightRange))
+      ) {
+        failures.push(
+          `Row ${index} expected every panel height to be in range ${
+            expectedRow.heightRange.min ?? '-∞'
+          }-${expectedRow.heightRange.max ?? '∞'}.`
+        );
+      }
+
+      if (expectedRow.fillsWidth === true && !rowFillsWidth(row.panels, maxColumns)) {
+        failures.push(`Row ${index} does not fill ${maxColumns} columns without gaps.`);
+      }
+    }
+
+    const passed = failures.length === 0;
+
+    return {
+      score: passed ? 1 : 0,
+      label: passed ? 'PASS' : 'FAIL',
+      explanation: passed
+        ? `Dashboard grid rows matched expectations.`
+        : `Dashboard grid rows did not match expectations. ${failures.join(' ')}`,
+      metadata: { failures, rowCount: rows.length },
+    };
+  },
+};

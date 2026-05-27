@@ -41,12 +41,29 @@ export interface DashboardDatasetExample extends Example {
       sectionCount?: number;
       sections?: Array<{
         titleIncludes?: string[];
+        titleIncludesAny?: string[];
         minPanels?: number;
         maxPanels?: number;
       }>;
       grid?: {
         maxColumns?: number;
         noOverflow?: boolean;
+        rows?: Array<{
+          panelCount?: number;
+          y?: number;
+          widths?: number[];
+          widthRange?: {
+            min?: number;
+            max?: number;
+          };
+          height?: number;
+          heightRange?: {
+            min?: number;
+            max?: number;
+          };
+          fillsWidth?: boolean;
+          yAfterPreviousRow?: boolean;
+        }>;
       };
     };
   };
