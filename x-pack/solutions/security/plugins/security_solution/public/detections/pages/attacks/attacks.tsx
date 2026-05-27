@@ -6,8 +6,10 @@
  */
 
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import type { DocLinks } from '@kbn/doc-links';
+import { useHistory, useLocation } from 'react-router-dom';
+import { useStore } from 'react-redux';
 import { Wrapper } from '../../components/attacks/wrapper';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_key_callout';
@@ -22,8 +24,70 @@ import { MissingAttacksPrivilegesCallOut } from '../../components/callouts/missi
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useKibana } from '../../../common/lib/kibana';
+import { AttackDetailsFlyout } from '../../../flyout_v2/attack_details/main/attack_details_flyout';
+import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
+import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
+import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { ATTACK_ID_URL_PARAM, ATTACK_INDEX_URL_PARAM } from './utils';
 
 export const ATTACKS_PAGE_LOADING_TEST_ID = 'attacks-page-loading';
+
+/**
+ * Reads the V2 deep-link redirect params (`attackId` + `index`) from the URL
+ * on mount; when both are present and `newFlyoutSystemEnabled` is on,
+ * imperatively opens the V2 attack-details flyout and strips the two params
+ * from the URL via `history.replace`. After stripping, the effect re-runs
+ * with the cleaned `location.search` and early-returns. Legacy mode
+ * (`newFlyoutSystemEnabled` off) leaves the URL alone — the legacy `flyout`
+ * URL param is consumed by the expandable-flyout machinery elsewhere.
+ */
+const useAttackDetailsDeepLinkOpener = () => {
+  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const location = useLocation();
+  const history = useHistory();
+  const { services } = useKibana();
+  const { overlays } = services;
+  const store = useStore();
+  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+
+  useEffect(() => {
+    if (!newFlyoutSystemEnabled) return;
+    const searchParams = new URLSearchParams(location.search);
+    const attackId = searchParams.get(ATTACK_ID_URL_PARAM);
+    const indexName = searchParams.get(ATTACK_INDEX_URL_PARAM);
+    if (!attackId || !indexName) return;
+    overlays.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <AttackDetailsFlyout attackId={attackId} indexName={indexName} />,
+      }),
+      {
+        ...defaultFlyoutProperties,
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      }
+    );
+    searchParams.delete(ATTACK_ID_URL_PARAM);
+    searchParams.delete(ATTACK_INDEX_URL_PARAM);
+    const nextSearch = searchParams.toString();
+    history.replace({
+      ...location,
+      search: nextSearch ? `?${nextSearch}` : '',
+    });
+  }, [
+    defaultFlyoutProperties,
+    history,
+    location,
+    newFlyoutSystemEnabled,
+    overlays,
+    services,
+    store,
+  ]);
+};
 
 /**
  * Renders the potential callouts, handles missing privileges and the basic loading before
@@ -35,6 +99,7 @@ export const AttacksPage = memo(() => {
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { signalIndexNeedsInit } = useSignalHelpers();
+  useAttackDetailsDeepLinkOpener();
 
   const loading: boolean = useMemo(
     () => userInfoLoading || listsConfigLoading,

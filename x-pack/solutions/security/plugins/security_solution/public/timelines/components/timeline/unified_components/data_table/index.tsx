@@ -59,7 +59,12 @@ import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { DocumentFlyoutWrapper } from '../../../../../flyout_v2/document/main/document_flyout_wrapper';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
-import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import {
+  defaultToolsFlyoutProperties,
+  useDefaultDocumentFlyoutProperties,
+} from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { AttackDetails } from '../../../../../flyout_v2/attack_details/main';
+import { NotesDetails } from '../../../../../flyout_v2/shared/tools/notes';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -188,6 +193,49 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
         if (newFlyoutSystemEnabled) {
+          if (isAttackDiscoveryRow(eventData)) {
+            // Attack-discovery rows can't go through DocumentFlyoutWrapper:
+            // the wrapper fetches via the default page-scope dataview, which
+            // doesn't match `.alerts-security.attack.discovery.alerts-*` and
+            // returns zero hits ("Cannot find document"). Mount AttackDetails
+            // directly with the eventData hit, mirroring how `DocumentFlyout`
+            // routes attack hits in Discover.
+            const onShowAttackNotes = () => {
+              overlays.openSystemFlyout(
+                flyoutProviders({
+                  services,
+                  store,
+                  history,
+                  children: <NotesDetails hit={eventData} />,
+                }),
+                {
+                  ...defaultToolsFlyoutProperties,
+                  historyKey: documentFlyoutHistoryKey,
+                }
+              );
+            };
+            overlays.openSystemFlyout(
+              flyoutProviders({
+                services,
+                store,
+                history,
+                children: (
+                  <AttackDetails
+                    hit={eventData}
+                    onShowNotes={onShowAttackNotes}
+                    renderCellActions={cellActionRenderer}
+                    onAlertUpdated={refetch}
+                  />
+                ),
+              }),
+              {
+                ...defaultFlyoutProperties,
+                historyKey: documentFlyoutHistoryKey,
+                session: 'start',
+              }
+            );
+            return;
+          }
           overlays.openSystemFlyout(
             flyoutProviders({
               services,

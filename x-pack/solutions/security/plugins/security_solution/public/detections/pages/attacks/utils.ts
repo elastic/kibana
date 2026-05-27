@@ -17,6 +17,19 @@ export interface ResolveAttackFlyoutParamsConfig {
 }
 
 /**
+ * Query-string keys used by the V2 attack-details deep-link redirect to
+ * carry the attack id and index name to the Attacks page. The Attacks page
+ * consumes these on mount, imperatively opens the V2 system flyout, and
+ * strips both keys from the URL via `history.replace`.
+ *
+ * Used only when `newFlyoutSystemEnabled` is on. The legacy redirect path
+ * keeps using {@link resolveAttackFlyoutParams} to serialise the panel-key
+ * state into the `flyout` URL param consumed by the expandable flyout.
+ */
+export const ATTACK_ID_URL_PARAM = 'attackId';
+export const ATTACK_INDEX_URL_PARAM = 'index';
+
+/**
  * Resolves url parameters for the attack details flyout, serialized as rison.
  * Preserves existing flyout query when present (e.g. user opened a share link that already encoded flyout state).
  */

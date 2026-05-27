@@ -17,9 +17,11 @@ import {
 } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { mockHistory } from '../../../common/utils/route/mocks';
-import { resolveAttackFlyoutParams } from './utils';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { ATTACK_ID_URL_PARAM, ATTACK_INDEX_URL_PARAM, resolveAttackFlyoutParams } from './utils';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/hooks/use_experimental_features');
 
 const testAttackId = 'test-attack-id';
 const mockRouteParams: { attackId?: string } = { attackId: testAttackId };
@@ -36,6 +38,7 @@ const mockPathname = `${ATTACK_DETAILS_REDIRECT_PATH}/${testAttackId}`;
 describe('AttackDetailsRedirect', () => {
   beforeEach(() => {
     mockRouteParams.attackId = testAttackId;
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -117,6 +120,49 @@ describe('AttackDetailsRedirect', () => {
         search: `?${expectedSearchParam.toString()}`,
         state: undefined,
       });
+    });
+  });
+
+  describe('with newFlyoutSystemEnabled', () => {
+    beforeEach(() => {
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    });
+
+    it('redirects with attackId + index query params instead of a flyout panel-key', () => {
+      const testSearch = `?index=${testIndex}&timestamp=${testTimestamp}`;
+      const historyMock = {
+        ...mockHistory,
+        location: {
+          hash: '',
+          pathname: mockPathname,
+          search: testSearch,
+          state: '',
+        },
+      };
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <AttackDetailsRedirect />
+          </Router>
+        </TestProviders>
+      );
+
+      const expectedSearch = new URLSearchParams({
+        query: "(language:kuery,query:'_id: test-attack-id')",
+        timerange:
+          "(global:(linkTo:!(timeline),timerange:(from:'2023-04-20T12:00:00.000Z',kind:absolute,to:'2023-04-20T12:05:00.000Z')),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now/d,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now/d)))",
+        [ATTACK_ID_URL_PARAM]: testAttackId,
+        [ATTACK_INDEX_URL_PARAM]: testIndex,
+      });
+
+      expect(historyMock.replace).toHaveBeenCalledWith({
+        hash: '',
+        pathname: ATTACKS_PATH,
+        search: `?${expectedSearch.toString()}`,
+        state: undefined,
+      });
+      // No `flyout` URL param when V2 is on.
+      expect(historyMock.replace.mock.calls[0][0].search).not.toContain(`${URL_PARAM_KEY.flyout}=`);
     });
   });
 

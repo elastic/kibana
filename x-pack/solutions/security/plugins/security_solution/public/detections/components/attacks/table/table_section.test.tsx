@@ -31,6 +31,18 @@ import { useGroupStats } from './grouping_settings/use_group_stats';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 import { useLocalStorage } from '../../../../common/components/local_storage';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
+jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../flyout/attack_details/hooks/use_attack_hit', () => ({
+  useAttackHit: () => ({ hit: null, loading: true, refetch: jest.fn() }),
+}));
+jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+}));
+jest.mock('../../../../flyout_v2/attack_details/main', () => ({
+  AttackDetails: () => <div data-test-subj="mock-attack-details" />,
+}));
 
 jest.mock('../../../../common/components/local_storage', () => ({
   useLocalStorage: jest.fn(),
@@ -88,6 +100,7 @@ const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.Mock;
 const mockUseGroupStats = useGroupStats as jest.Mock;
 
 const reportEvent = jest.fn();
+const mockOpenSystemFlyout = jest.fn();
 
 const defaultProps: Parameters<typeof TableSection>[0] = {
   assignees: [],
@@ -110,8 +123,12 @@ describe('<TableSection />', () => {
         telemetry: {
           reportEvent,
         },
+        overlays: {
+          openSystemFlyout: mockOpenSystemFlyout,
+        },
       },
     });
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
     mockUseGetDefaultGroupTitleRenderers.mockReturnValue({
       defaultGroupTitleRenderers: jest.fn(),
     });
@@ -201,6 +218,72 @@ describe('<TableSection />', () => {
     const { openAttackDetailsFlyout } = mockUseGetDefaultGroupTitleRenderers.mock.calls[0][0];
     openAttackDetailsFlyout('group-1', {});
 
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.DetailsFlyoutOpened, {
+      id: 'attack-1',
+      source: 'attacks_page_table',
+    });
+  });
+
+  it('should open the legacy expandable flyout when newFlyoutSystemEnabled is false', async () => {
+    mockUseAttackGroupHandler.mockReturnValue({
+      getAttack: jest.fn().mockReturnValue({ id: 'attack-1' }),
+      isLoading: false,
+    });
+    const openFlyout = jest.fn();
+    mockUseExpandableFlyoutApi.mockReturnValue({ openFlyout });
+
+    render(
+      <TestProviders>
+        <TableSection {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalled();
+    });
+
+    const { openAttackDetailsFlyout } = mockUseGetDefaultGroupTitleRenderers.mock.calls[0][0];
+    openAttackDetailsFlyout('group-1', {});
+
+    expect(openFlyout).toHaveBeenCalledWith({
+      right: {
+        id: 'attack-details-right',
+        params: {
+          attackId: 'attack-1',
+          indexName: dataView.getIndexPattern(),
+        },
+      },
+    });
+    expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
+  });
+
+  it('should open the v2 system flyout when newFlyoutSystemEnabled is true', async () => {
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    mockUseAttackGroupHandler.mockReturnValue({
+      getAttack: jest.fn().mockReturnValue({ id: 'attack-1' }),
+      isLoading: false,
+    });
+    const openFlyout = jest.fn();
+    mockUseExpandableFlyoutApi.mockReturnValue({ openFlyout });
+
+    render(
+      <TestProviders>
+        <TableSection {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalled();
+    });
+
+    const { openAttackDetailsFlyout } = mockUseGetDefaultGroupTitleRenderers.mock.calls[0][0];
+    openAttackDetailsFlyout('group-1', {});
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalled();
+    const element = mockOpenSystemFlyout.mock.calls[0][0];
+    expect(element.props.attackId).toBe('attack-1');
+    expect(element.props.indexName).toBe(dataView.getIndexPattern());
+    expect(openFlyout).not.toHaveBeenCalled();
     expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.DetailsFlyoutOpened, {
       id: 'attack-1',
       source: 'attacks_page_table',

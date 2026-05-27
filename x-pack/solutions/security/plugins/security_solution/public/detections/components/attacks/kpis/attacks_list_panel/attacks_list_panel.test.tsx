@@ -14,10 +14,22 @@ import { useAttacksListData } from './use_attacks_list_data';
 import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details/constants/panel_keys';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { TestProviders } from '../../../../../common/mock';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('./use_attacks_list_data');
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../../flyout/attack_details/hooks/use_attack_hit', () => ({
+  useAttackHit: () => ({ hit: null, loading: true, refetch: jest.fn() }),
+}));
+jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+}));
+jest.mock('../../../../../flyout_v2/attack_details/main', () => ({
+  AttackDetails: () => <div data-test-subj="mock-attack-details" />,
+}));
 jest.mock('../../../../../entity_analytics/components/severity/severity_bar', () => ({
   SeverityBar: () => <div data-test-subj="severity-bar" />,
 }));
@@ -29,6 +41,7 @@ describe('AttacksListPanel', () => {
   } as unknown as DataView;
 
   const mockOpenFlyout = jest.fn();
+  const mockOpenSystemFlyout = jest.fn();
   const reportEvent = jest.fn();
 
   beforeEach(() => {
@@ -40,8 +53,12 @@ describe('AttacksListPanel', () => {
         telemetry: {
           reportEvent,
         },
+        overlays: {
+          openSystemFlyout: mockOpenSystemFlyout,
+        },
       },
     });
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -59,7 +76,11 @@ describe('AttacksListPanel', () => {
       setPageSize: jest.fn(),
     });
 
-    render(<AttacksListPanel dataView={mockDataView} />);
+    render(
+      <TestProviders>
+        <AttacksListPanel dataView={mockDataView} />
+      </TestProviders>
+    );
     expect(screen.getByRole('progressbar', { name: /loading/i })).toBeInTheDocument();
   });
 
@@ -89,7 +110,11 @@ describe('AttacksListPanel', () => {
       setPageSize: jest.fn(),
     });
 
-    render(<AttacksListPanel dataView={mockDataView} />);
+    render(
+      <TestProviders>
+        <AttacksListPanel dataView={mockDataView} />
+      </TestProviders>
+    );
 
     expect(screen.getByText('2 attacks detected')).toBeInTheDocument();
     expect(screen.getByText('Attack 1')).toBeInTheDocument();
@@ -99,7 +124,7 @@ describe('AttacksListPanel', () => {
     expect(screen.getAllByTestId('severity-bar')).toHaveLength(2);
   });
 
-  it('calls openFlyout when clicking on an attack name', () => {
+  it('calls openFlyout when clicking on an attack name and newFlyoutSystemEnabled is false', () => {
     const mockItems = [{ id: 'attack-1', name: 'Attack 1', alertsCount: 5, severityCount: {} }];
 
     (useAttacksListData as jest.Mock).mockReturnValue({
@@ -112,7 +137,11 @@ describe('AttacksListPanel', () => {
       setPageSize: jest.fn(),
     });
 
-    render(<AttacksListPanel dataView={mockDataView} />);
+    render(
+      <TestProviders>
+        <AttacksListPanel dataView={mockDataView} />
+      </TestProviders>
+    );
 
     const link = screen.getByText('Attack 1');
     link.click();
@@ -126,6 +155,41 @@ describe('AttacksListPanel', () => {
         },
       },
     });
+    expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.DetailsFlyoutOpened, {
+      id: 'attack-1',
+      source: 'attacks_page_summary_kpi',
+    });
+  });
+
+  it('opens the v2 system flyout when newFlyoutSystemEnabled is true', () => {
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    const mockItems = [{ id: 'attack-1', name: 'Attack 1', alertsCount: 5, severityCount: {} }];
+
+    (useAttacksListData as jest.Mock).mockReturnValue({
+      items: mockItems,
+      isLoading: false,
+      pageIndex: 0,
+      pageSize: 10,
+      total: 1,
+      setPageIndex: jest.fn(),
+      setPageSize: jest.fn(),
+    });
+
+    render(
+      <TestProviders>
+        <AttacksListPanel dataView={mockDataView} />
+      </TestProviders>
+    );
+
+    const link = screen.getByText('Attack 1');
+    link.click();
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalled();
+    const element = mockOpenSystemFlyout.mock.calls[0][0];
+    expect(element.props.attackId).toBe('attack-1');
+    expect(element.props.indexName).toBe('test-index-pattern');
+    expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.DetailsFlyoutOpened, {
       id: 'attack-1',
       source: 'attacks_page_summary_kpi',
@@ -146,7 +210,11 @@ describe('AttacksListPanel', () => {
       setPageSize,
     });
 
-    render(<AttacksListPanel dataView={mockDataView} />);
+    render(
+      <TestProviders>
+        <AttacksListPanel dataView={mockDataView} />
+      </TestProviders>
+    );
 
     // Find next page button and click it
     const nextPageButton = screen.getByLabelText('Next page');

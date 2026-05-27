@@ -38,6 +38,8 @@ const mockOpenSystemFlyout = jest.fn();
 const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
   <div>{'MockDocumentFlyoutWrapper'}</div>
 ));
+const mockAttackDetails = jest.fn((_props?: unknown) => <div>{'MockAttackDetails'}</div>);
+const mockNotesDetails = jest.fn((_props?: unknown) => <div>{'MockNotesDetails'}</div>);
 
 const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
 
@@ -50,6 +52,12 @@ jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
 }));
 jest.mock('../../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
   DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
+}));
+jest.mock('../../../../../flyout_v2/attack_details/main', () => ({
+  AttackDetails: (props: unknown) => mockAttackDetails(props),
+}));
+jest.mock('../../../../../flyout_v2/shared/tools/notes', () => ({
+  NotesDetails: (props: unknown) => mockNotesDetails(props),
 }));
 jest.mock('../../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../../common/lib/kibana');
@@ -204,6 +212,34 @@ describe('unified data table', () => {
       expect(flyoutElement.props.documentId).toBe(mockTimelineData[0]._id);
       expect(flyoutElement.props.indexName).toBe(mockTimelineData[0].ecs._index);
       expect(flyoutElement.props.onAlertUpdated).toBe(refetchMock);
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'opens the v2 attack details flyout when newFlyoutSystemEnabled is enabled and the row is an attack discovery alert',
+    async () => {
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+
+      render(<TestComponent events={mockAttackTimelineData} />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getByTestId('docTableExpandToggleColumn'));
+
+      await waitFor(() => {
+        expect(mockOpenSystemFlyout).toHaveBeenCalled();
+      });
+
+      // flyoutProviders is mocked to return its children, so the element passed
+      // to openSystemFlyout is the AttackDetails ReactElement directly.
+      const attackDetailsElement = mockOpenSystemFlyout.mock.calls[0][0];
+      expect(attackDetailsElement.props.hit.id).toBe(mockAttackTimelineData[0]._id);
+      expect(attackDetailsElement.props.onAlertUpdated).toBe(refetchMock);
+
+      attackDetailsElement.props.onShowNotes();
+      expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(2);
+      const notesElement = mockOpenSystemFlyout.mock.calls[1][0];
+      expect(notesElement.props.hit.id).toBe(mockAttackTimelineData[0]._id);
     },
     SPECIAL_TEST_TIMEOUT
   );

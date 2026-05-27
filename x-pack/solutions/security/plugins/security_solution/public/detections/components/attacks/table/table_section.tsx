@@ -14,7 +14,15 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { GroupingSort, ParsedGroupingAggregation, RawBucket } from '@kbn/grouping/src';
 import { isGroupingBucket } from '@kbn/grouping/src';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
+
 import { AttackDetailsRightPanelKey } from '../../../../flyout/attack_details/constants/panel_keys';
+import { AttackDetailsFlyout } from '../../../../flyout_v2/attack_details/main/attack_details_flyout';
+import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
+import { documentFlyoutHistoryKey } from '../../../../flyout_v2/shared/constants/flyout_history';
+import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
@@ -108,9 +116,12 @@ export const TableSection = React.memo(
 
     const { to, from } = useGlobalTime();
 
-    const {
-      services: { telemetry },
-    } = useKibana();
+    const { services } = useKibana();
+    const { telemetry, overlays } = services;
+    const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+    const store = useStore();
+    const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     const [{ loading: userInfoLoading }] = useUserData();
 
@@ -147,23 +158,51 @@ export const TableSection = React.memo(
     const openAttackDetailsFlyout = useCallback(
       (selectedGroup: string, bucket: RawBucket<AlertsGroupingAggregation>) => {
         const attack = getAttack(selectedGroup, bucket);
-        if (attack) {
+        if (!attack) return;
+        const attackId = attack.id;
+        const indexName = dataView.getIndexPattern();
+        if (newFlyoutSystemEnabled) {
+          overlays.openSystemFlyout(
+            flyoutProviders({
+              services,
+              store,
+              history,
+              children: <AttackDetailsFlyout attackId={attackId} indexName={indexName} />,
+            }),
+            {
+              ...defaultFlyoutProperties,
+              historyKey: documentFlyoutHistoryKey,
+              session: 'start',
+            }
+          );
+        } else {
           openFlyout({
             right: {
               id: AttackDetailsRightPanelKey,
               params: {
-                attackId: attack.id,
-                indexName: dataView.getIndexPattern(),
+                attackId,
+                indexName,
               },
             },
           });
-          telemetry.reportEvent(AttacksEventTypes.DetailsFlyoutOpened, {
-            id: attack.id,
-            source: 'attacks_page_table',
-          });
         }
+        telemetry.reportEvent(AttacksEventTypes.DetailsFlyoutOpened, {
+          id: attackId,
+          source: 'attacks_page_table',
+        });
       },
-      [dataView, getAttack, openFlyout, telemetry]
+      [
+        dataView,
+        defaultFlyoutProperties,
+        getAttack,
+        history,
+        newFlyoutSystemEnabled,
+        openFlyout,
+        overlays,
+        services,
+        store,
+        telemetry,
+      ]
     );
 
     const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({
