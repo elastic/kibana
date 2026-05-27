@@ -33,7 +33,7 @@ import {
 } from '../../../common/domain/euid/esql';
 import { getFieldEvaluationsFromDefinition } from '../../../common/domain/euid/field_evaluations';
 
-export const MAX_AMOUNT_OF_VALUES_IN_COLLECT = 100;
+export const MAX_COLLECTED_VALUES_PER_FIELD = 50;
 
 export const ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD =
   'entity.EngineMetadata.FirstSeenLogInPage';

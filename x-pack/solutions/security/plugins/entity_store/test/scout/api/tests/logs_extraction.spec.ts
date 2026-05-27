@@ -407,12 +407,18 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           'hash-6',
           'hash-7',
           'hash-8',
+          'hash-9',
           'hash-10',
           'hash-11',
         ]),
         domain: 'example.com',
       },
     });
+    // With cap=100 all 11 distinct hashes must be collected (exercises the raised cap).
+    const userHash = (
+      updatedLatestDomain.hits.hits[0]._source as Record<string, Record<string, unknown>>
+    ).user.hash;
+    expect(normalizeKeywordList(userHash)).toHaveLength(11);
   });
 
   apiTest(

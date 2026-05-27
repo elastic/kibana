@@ -121,7 +121,7 @@ describe('aggregationStats', () => {
     expect(aggregationStats([field], true)).toBe('recent.tags = VALUES(TO_STRING(tags))');
   });
 
-  it('should use the standard not-null guard for normalized entity.source aggregation', () => {
+  it('should use VALUES for normalized entity.source aggregation', () => {
     const field: EntityField = {
       source: 'entity.source',
       destination: 'entity.source',
