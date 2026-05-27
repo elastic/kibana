@@ -28,13 +28,14 @@ type DatasetExample = Example<
   }
 >;
 
-interface ToolResult {
-  data?: { esql?: string };
+interface EsqlToolCallStep {
   type?: string;
+  tool_id?: string;
+  params?: { id?: string; input?: { query?: string } };
 }
 
 interface ToolTaskOutput {
-  results: unknown[];
+  steps: unknown[];
   errors: unknown[];
   esql: string;
 }
@@ -58,18 +59,16 @@ function createEvaluateEsqlDataset({
         messages: [{ message: input!.question }],
       });
 
-      const toolResults = (response.steps ?? [])
-        .filter((step) => (step as { type?: string }).type === 'tool_call')
-        .flatMap((step) => ((step as { results?: unknown[] }).results ?? []));
+      const steps = (response.steps ?? []) as EsqlToolCallStep[];
 
-      const esql = (toolResults as ToolResult[])
-        .filter((r) => r.type === 'query')
-        .map((r) => r.data?.esql)
-        .filter(Boolean)
+      const esql = steps
+        .filter((step) => step.type === 'tool_call' && step.tool_id === 'exec' && step.params?.id == "es.esql.query")
+        .map((step) => step.params?.input?.query)
+        .filter((query): query is string => Boolean(query))
         .join('\n');
 
       return {
-        results: toolResults,
+        steps,
         errors: response.errors,
         esql,
       };
