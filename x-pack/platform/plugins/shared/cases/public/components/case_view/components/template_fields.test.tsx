@@ -81,7 +81,10 @@ describe('TemplateFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
-    mockUseGetFieldDefinitions.mockReturnValue({ data: { fieldDefinitions: [] }, isLoading: false });
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [] },
+      isLoading: false,
+    });
   });
 
   it('renders the Extended fields heading and all template fields', () => {
