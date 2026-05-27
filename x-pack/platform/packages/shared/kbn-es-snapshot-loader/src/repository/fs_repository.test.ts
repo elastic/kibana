@@ -61,6 +61,23 @@ describe('createFsRepository', () => {
     );
   });
 
+  it('registers with verify: false when explicitly requested', async () => {
+    const createRepository = jest.fn().mockResolvedValue(undefined);
+    const esClient = {
+      snapshot: {
+        createRepository,
+      },
+    } as unknown as Client;
+    const repository = createFsRepository({ location: '/mount/backups' });
+
+    await repository.register({ esClient, log, repoName: 'test-repo', verify: false });
+
+    expect(createRepository).toHaveBeenCalledWith(
+      expect.objectContaining({ verify: false }),
+      expect.anything()
+    );
+  });
+
   it('omits optional settings when undefined', async () => {
     const createRepository = jest.fn().mockResolvedValue(undefined);
     const esClient = {
