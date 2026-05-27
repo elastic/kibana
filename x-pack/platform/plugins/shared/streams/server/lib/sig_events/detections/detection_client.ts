@@ -8,11 +8,17 @@
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type CommonSearchOptions } from '../query_utils';
+import {
+  type CommonSearchOptions,
+  type PaginatedResponse,
+  type PaginatedSearchOptions,
+} from '../query_utils';
 import {
   executeAndDecodeSource,
   latestSourceFrom,
   pickLatestPerGroup,
+  runFindByIdEsqlQuery,
+  runPaginatedLatestSourceEsqlQuery,
   withTimeRange,
   withWhere,
   type LatestSourceWhereCondition,
@@ -34,12 +40,19 @@ export interface DetectionsSearchOptions extends CommonSearchOptions {
   rule_name?: string;
 }
 
+export interface DetectionsPaginatedSearchOptions extends PaginatedSearchOptions {
+  rule_uuid?: string[];
+  rule_name?: string;
+}
+
 const andWhere = (
   current: LatestSourceWhereCondition | undefined,
   next: LatestSourceWhereCondition
 ): LatestSourceWhereCondition => {
   return current ? esql.exp`${current} AND ${next}` : next;
 };
+
+const GROUP_BY_FIELD = 'detection_id';
 
 export class DetectionClient {
   constructor(
@@ -57,7 +70,7 @@ export class DetectionClient {
     });
   }
 
-  async findLatest(options: DetectionsSearchOptions = {}): Promise<{ hits: Detection[] }> {
+  private buildWhere(options: DetectionsSearchOptions): LatestSourceWhereCondition | undefined {
     let where: LatestSourceWhereCondition | undefined;
 
     const ruleUuidLiterals = options.rule_uuid?.map((ruleUuid) => esql.str(ruleUuid));
@@ -69,12 +82,39 @@ export class DetectionClient {
       where = andWhere(where, esql.exp`${esql.col('rule_name')} == ${esql.str(options.rule_name)}`);
     }
 
+    return where;
+  }
+
+  async findLatest(options: DetectionsSearchOptions = {}): Promise<{ hits: Detection[] }> {
     let query = latestSourceFrom(DETECTIONS_DATA_STREAM, this.clients.space);
     query = withTimeRange(query, options);
-    query = withWhere(query, where);
-    query = pickLatestPerGroup(query, 'detection_id');
+    query = withWhere(query, this.buildWhere(options));
+    query = pickLatestPerGroup(query, GROUP_BY_FIELD);
     query = query.keep('_source');
 
     return executeAndDecodeSource<Detection>(this.clients.esClient, query);
+  }
+
+  async findLatestPaginated(
+    options: DetectionsPaginatedSearchOptions = {}
+  ): Promise<PaginatedResponse<Detection>> {
+    return runPaginatedLatestSourceEsqlQuery<Detection>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      options,
+      index: DETECTIONS_DATA_STREAM,
+      where: this.buildWhere(options),
+      groupBy: GROUP_BY_FIELD,
+    });
+  }
+
+  async findById(detectionId: string): Promise<{ hits: Detection[] }> {
+    return runFindByIdEsqlQuery<Detection>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DETECTIONS_DATA_STREAM,
+      idField: GROUP_BY_FIELD,
+      idValue: detectionId,
+    });
   }
 }

@@ -14,6 +14,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { ComposeDiscoverFlyout } from './compose_discover_flyout';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
@@ -35,7 +36,6 @@ jest.mock('./compose_discover_form', () => {
           alertCondition: 'Alert Condition',
           recoveryCondition: 'Recovery Condition',
           details: 'Details & Artifacts',
-          notifications: 'Notifications',
         };
         return { id, title: titles[id], render: () => <div /> };
       }),
@@ -71,6 +71,7 @@ const createMockServices = (): RuleFormServices => ({
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
   lens: lensPluginMock.createStartContract(),
+  uiActions: uiActionsPluginMock.createStartContract(),
 });
 
 const defaultProps: ComposeDiscoverFlyoutProps = {
@@ -90,17 +91,17 @@ const renderFlyout = (overrides: Partial<ComposeDiscoverFlyoutProps> = {}) =>
 
 describe('ComposeDiscoverFlyout', () => {
   describe('HorizontalMinimalStepper', () => {
-    it('renders the stepper with the correct aria-label for step 1 of 3', () => {
+    it('renders the stepper with the correct aria-label for step 1 of 2', () => {
       renderFlyout();
 
-      const stepper = screen.getByRole('group', { name: /Step 1 of 3: Alert Condition/ });
+      const stepper = screen.getByRole('group', { name: /Step 1 of 2: Alert Condition/ });
       expect(stepper).toBeInTheDocument();
     });
 
-    it('renders 3 steps when tracking is disabled (default)', () => {
+    it('renders 2 steps when tracking is disabled (default)', () => {
       renderFlyout();
 
-      expect(screen.getByText('1 / 3')).toBeInTheDocument();
+      expect(screen.getByText('1 / 2')).toBeInTheDocument();
       expect(screen.getByText('Alert Condition')).toBeInTheDocument();
     });
 

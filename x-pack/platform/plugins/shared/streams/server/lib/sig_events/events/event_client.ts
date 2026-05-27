@@ -7,11 +7,17 @@
 
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type CommonSearchOptions } from '../query_utils';
+import {
+  type CommonSearchOptions,
+  type PaginatedResponse,
+  type PaginatedSearchOptions,
+} from '../query_utils';
 import {
   executeAndDecodeSource,
   latestSourceFrom,
   pickLatestPerGroup,
+  runFindByIdEsqlQuery,
+  runPaginatedLatestSourceEsqlQuery,
   withTimeRange,
 } from '../latest_source_query';
 import {
@@ -22,6 +28,8 @@ import {
 } from './data_stream';
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
+
+const GROUP_BY_FIELD = 'event_id';
 
 export class EventClient {
   constructor(
@@ -42,9 +50,31 @@ export class EventClient {
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: SigEvent[] }> {
     let query = latestSourceFrom(EVENTS_DATA_STREAM, this.clients.space);
     query = withTimeRange(query, options);
-    query = pickLatestPerGroup(query, 'event_id');
+    query = pickLatestPerGroup(query, GROUP_BY_FIELD);
     query = query.keep('_source');
 
     return executeAndDecodeSource<SigEvent>(this.clients.esClient, query);
+  }
+
+  async findLatestPaginated(
+    options: PaginatedSearchOptions = {}
+  ): Promise<PaginatedResponse<SigEvent>> {
+    return runPaginatedLatestSourceEsqlQuery<SigEvent>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      options,
+      index: EVENTS_DATA_STREAM,
+      groupBy: GROUP_BY_FIELD,
+    });
+  }
+
+  async findById(eventId: string): Promise<{ hits: SigEvent[] }> {
+    return runFindByIdEsqlQuery<SigEvent>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: EVENTS_DATA_STREAM,
+      idField: GROUP_BY_FIELD,
+      idValue: eventId,
+    });
   }
 }

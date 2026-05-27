@@ -7,11 +7,17 @@
 
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type CommonSearchOptions } from '../query_utils';
+import {
+  type CommonSearchOptions,
+  type PaginatedResponse,
+  type PaginatedSearchOptions,
+} from '../query_utils';
 import {
   executeAndDecodeSource,
   latestSourceFrom,
   pickLatestPerGroup,
+  runFindByIdEsqlQuery,
+  runPaginatedLatestSourceEsqlQuery,
   withTimeRange,
 } from '../latest_source_query';
 import {
@@ -22,6 +28,8 @@ import {
 } from './data_stream';
 
 export type VerdictDataStreamClient = IDataStreamClient<typeof verdictsMappings, StoredVerdict>;
+
+const GROUP_BY_FIELD = 'discovery_id';
 
 export class VerdictClient {
   constructor(
@@ -42,9 +50,31 @@ export class VerdictClient {
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: Verdict[] }> {
     let query = latestSourceFrom(VERDICTS_DATA_STREAM, this.clients.space);
     query = withTimeRange(query, options);
-    query = pickLatestPerGroup(query, 'verdict_id');
+    query = pickLatestPerGroup(query, GROUP_BY_FIELD);
     query = query.keep('_source');
 
     return executeAndDecodeSource<Verdict>(this.clients.esClient, query);
+  }
+
+  async findLatestPaginated(
+    options: PaginatedSearchOptions = {}
+  ): Promise<PaginatedResponse<Verdict>> {
+    return runPaginatedLatestSourceEsqlQuery<Verdict>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      options,
+      index: VERDICTS_DATA_STREAM,
+      groupBy: GROUP_BY_FIELD,
+    });
+  }
+
+  async findByDiscoveryId(discoveryId: string): Promise<{ hits: Verdict[] }> {
+    return runFindByIdEsqlQuery<Verdict>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: VERDICTS_DATA_STREAM,
+      idField: GROUP_BY_FIELD,
+      idValue: discoveryId,
+    });
   }
 }
