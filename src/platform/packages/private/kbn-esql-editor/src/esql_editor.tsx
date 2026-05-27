@@ -336,10 +336,7 @@ const ESQLEditorInternal = function ESQLEditor({
     reportInputLatency();
   }, [code, reportInputLatency]);
 
-  // Sync the editor's internal code state whenever fixedQuery changes externally (e.g. from
-  // updateFieldValues). This intentionally omits `code` from the deps so user keystrokes do not
-  // re-trigger the effect, and has no Monaco-mount guard — React bails out automatically when the
-  // new value equals the current state, so calling setCode with the same string is always safe.
+  // Sync external fixedQuery; omit `code` from deps so keystrokes aren't overwritten.
   useEffect(() => {
     setCode(fixedQuery);
   }, [fixedQuery]);
