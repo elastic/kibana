@@ -10,7 +10,6 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -29,9 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover unsaved changes modal', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
