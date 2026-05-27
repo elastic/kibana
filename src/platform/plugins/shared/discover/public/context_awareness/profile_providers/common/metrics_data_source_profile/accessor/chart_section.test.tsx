@@ -29,6 +29,7 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
+import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 
 type UnifiedGridProps = ChartSectionProps & {
   actions: ChartSectionConfigurationExtensionParams['actions'];
@@ -39,6 +40,7 @@ type UnifiedGridProps = ChartSectionProps & {
     dataViews?: unknown;
     notifications?: { showErrorDialog: (args: { title: string; error: Error }) => void };
     docLinks?: { links: { query: { queryESQL: string } } };
+    logger?: unknown;
   };
 };
 
@@ -64,6 +66,8 @@ const mockDiscoverShared = { __sentinel: 'discoverShared' };
 const mockDataViews = { __sentinel: 'dataViews' };
 const mockShowErrorDialog = jest.fn();
 const mockEsqlReferenceHref = 'https://www.elastic.co/docs/reference/esql';
+const mockScopedLogger = { __sentinel: 'scopedLogger' };
+const mockLogger = { __sentinel: 'logger', get: jest.fn(() => mockScopedLogger) };
 
 jest.mock('../../../../../hooks/use_discover_services', () => ({
   useDiscoverServices: jest.fn(() => ({
@@ -79,6 +83,7 @@ jest.mock('../../../../../hooks/use_discover_services', () => ({
         },
       },
     },
+    logger: mockLogger,
   })),
 }));
 
@@ -169,9 +174,10 @@ describe('MetricsExperienceGridWrapper', () => {
     });
   });
 
-  it('forwards externalServices (discoverShared, dataViews, notifications, docLinks) to the metrics grid', () => {
+  it('forwards externalServices (discoverShared, dataViews, notifications, docLinks, scoped logger) to the metrics grid', () => {
     renderChartSection();
 
+    expect(mockLogger.get).toHaveBeenCalledWith(METRICS_DATA_SOURCE_PROFILE_ID);
     expect(unifiedGridProps?.externalServices).toEqual({
       discoverShared: mockDiscoverShared,
       dataViews: mockDataViews,
@@ -181,6 +187,7 @@ describe('MetricsExperienceGridWrapper', () => {
       docLinks: expect.objectContaining({
         links: { query: { queryESQL: mockEsqlReferenceHref } },
       }),
+      logger: mockScopedLogger,
     });
   });
 });

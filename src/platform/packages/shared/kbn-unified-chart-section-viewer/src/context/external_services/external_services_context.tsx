@@ -10,6 +10,7 @@
 import type { DocLinksStart, NotificationsStart } from '@kbn/core/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { Logger } from '@kbn/logging';
 import React, { createContext, useContext, useMemo } from 'react';
 
 export interface ExternalServices {
@@ -19,6 +20,7 @@ export interface ExternalServices {
   notifications?: NotificationsStart;
   /** Host doc links for Discover ErrorCallout ES|QL reference footer. */
   docLinks?: DocLinksStart;
+  logger?: Logger;
 }
 
 const ExternalServicesContext = createContext<ExternalServices | undefined>(undefined);

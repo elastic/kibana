@@ -23,12 +23,18 @@ const ActionIdSchema = schema.object({
 });
 
 const ActionIdOrMessageSchema = schema.oneOf([
-  schema.object({
-    actionId: schema.string(),
-  }),
-  schema.object({
-    message: schema.string(),
-  }),
+  schema.object(
+    {
+      actionId: schema.string(),
+    },
+    { meta: { id: 'action_id_response' } }
+  ),
+  schema.object(
+    {
+      message: schema.string(),
+    },
+    { meta: { id: 'action_message_response' } }
+  ),
 ]);
 
 export const GetAgentsRequestSchema = {
