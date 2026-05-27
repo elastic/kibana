@@ -87,6 +87,7 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
       {favorite ? (
         // Temporary slot: favorite is still a caller-owned React node.
         // Replace with a typed app-header action before treating it as a stable API.
+        // https://github.com/elastic/kibana/issues/271402
         <div css={styles.favoriteSlot} data-test-subj="appHeaderFavorite">
           {favorite}
         </div>

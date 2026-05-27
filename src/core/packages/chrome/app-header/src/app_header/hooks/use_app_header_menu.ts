@@ -83,7 +83,7 @@ const useResolvedAppMenu = (menu: AppMenuConfig | undefined): ResolvedAppMenu =>
 
     // Temporary bridge: share is still modeled as a legacy app-menu item.
     // Replace this with a typed app-header action once share requirements are clear.
-    // https://github.com/elastic/kibana/issues/259985
+    // https://github.com/elastic/kibana/issues/271401
     const shareItem = menu.items?.find((item) => item.id === APP_MENU_SHARE_ID);
 
     if (!shareItem) return { menu, shareItem: undefined };
