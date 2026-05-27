@@ -15,9 +15,11 @@ const dateRangeValueDisplayStyles = ({ euiTheme }: UseEuiTheme) => ({
     white-space: nowrap;
   `,
   part: css`
-    &:hover {
-      color: ${euiTheme.colors.textPrimary};
-      background-color: ${euiTheme.colors.backgroundLightPrimary};
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        color: ${euiTheme.colors.textPrimary};
+        background-color: ${euiTheme.colors.backgroundLightPrimary};
+      }
     }
   `,
 });
