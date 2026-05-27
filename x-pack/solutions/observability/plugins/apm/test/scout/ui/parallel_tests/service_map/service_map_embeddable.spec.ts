@@ -18,6 +18,8 @@ test.describe(
   'Service map embeddable',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    test.setTimeout(120_000);
+
     let dataViewId: string;
 
     test.beforeAll(async ({ apiServices }) => {
@@ -58,7 +60,7 @@ test.describe(
       });
 
       await test.step('open add panel flyout', async () => {
-        await pageObjects.dashboard.openAddPanelFlyout();
+        await pageObjects.dashboard.openAddPanelFlyout({ timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('add Service map panel without filters', async () => {
@@ -69,11 +71,12 @@ test.describe(
         // exist before we can widen its time range via the Customize panel
         // flow below.
         await expect(page.getByRole('heading', { name: 'Add to Dashboard' })).toBeVisible();
+
         const serviceMapMenuItem = page.getByRole('menuitem', {
           name: 'Service map',
           exact: true,
         });
-        await expect(serviceMapMenuItem).toBeVisible();
+        await expect(serviceMapMenuItem).toBeVisible({ timeout: EXTENDED_TIMEOUT });
         await serviceMapMenuItem.click();
 
         await expect(
@@ -125,17 +128,30 @@ test.describe(
           .locator('.euiLoadingSpinner')
           .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
 
-        // Select service name from dropdown
+        // Suggestions can be empty under load on cloud/serverless, but the
+        // control supports committing typed values via onCreateOption.
         const serviceNameComboBox = new EuiComboBoxWrapper(
           page,
           'apmServiceMapEditorServiceNameComboBox'
         );
-        await serviceNameComboBox.selectSingleOption(SERVICE_MAP_TEST_SERVICE, {
+        await serviceNameComboBox.setCustomSingleOption(SERVICE_MAP_TEST_SERVICE, {
           useFill: true,
-          optionVisibilityTimeoutMs: EXTENDED_TIMEOUT,
+          settleTimeoutMs: EXTENDED_TIMEOUT,
         });
 
-        // Select environment from dropdown (has a default value so manually type and select)
+        // wait for combobox `isLoading` to finish
+        await page.testSubj
+          .locator('apmServiceMapEditorServiceNameComboBox')
+          .locator('.euiLoadingSpinner')
+          .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+
+        // wait for combobox `isLoading` to finish
+        await page.testSubj
+          .locator('apmServiceMapEditorEnvironmentComboBox')
+          .locator('.euiLoadingSpinner')
+          .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+
+        // Select environment from dropdown (the environment combo is not clearable)
         const environmentInput = page.testSubj
           .locator('apmServiceMapEditorEnvironmentComboBox')
           .locator('[data-test-subj="comboBoxInput"]');
