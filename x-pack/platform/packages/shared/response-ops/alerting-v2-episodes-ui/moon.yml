@@ -55,6 +55,8 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/user-profile-components'
   - '@kbn/unified-data-table'
+  - '@kbn/coloring'
+  - '@kbn/lens-plugin'
 tags:
   - shared-browser
   - package
