@@ -125,7 +125,6 @@ spaceTest.describe(
       });
     });
 
-
     spaceTest('should persist fullscreen state during interactions', async ({ pageObjects }) => {
       await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
