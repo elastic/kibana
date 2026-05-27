@@ -17,8 +17,6 @@ const SCHEDULED_RULE: SentinelArmResource = {
     displayName: 'Suspicious Login Activity',
     description: 'Detects suspicious login attempts',
     query: 'SecurityEvent | where EventID == 4625 | summarize count() by Account',
-    queryFrequency: 'PT5M',
-    queryPeriod: 'PT10M',
     severity: 'Medium',
     tactics: ['InitialAccess'],
     techniques: ['T1078'],
@@ -48,8 +46,6 @@ describe('SentinelRulesParser', () => {
         displayName: 'Suspicious Login Activity',
         description: 'Detects suspicious login attempts',
         query: 'SecurityEvent | where EventID == 4625 | summarize count() by Account',
-        queryFrequency: 'PT5M',
-        queryPeriod: 'PT10M',
         severity: 'Medium',
         tactics: ['InitialAccess'],
         techniques: ['T1078'],
@@ -78,6 +74,8 @@ describe('SentinelRulesParser', () => {
         query: 'SecurityEvent | where EventID == 1102',
         severity: 'High',
       });
+      expect(rules[0].queryFrequency).toBeUndefined();
+      expect(rules[0].queryPeriod).toBeUndefined();
     });
 
     it('filters out unsupported rule kinds', () => {
