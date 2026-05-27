@@ -37,12 +37,15 @@ Runs can stop unexpectedly due to agent loss. Buildkite retries these automatica
 
 ## How are tests distributed?
 
-In **local** pipelines:
+### Scout
 
-- **Scout** tests are split into "lanes". All Playwright configs in the same lane run against the same test servers, so state can leak between configs.
-- **FTR** tests are divided into groups. A fresh set of test servers is started for each config, so cross-config pollution is unlikely.
+- **Local pipelines:** tests are split into "lanes". All Playwright configs in the same lane run against the same test servers, so state can leak between configs.
+- **Cloud pipelines:** a fresh project or deployment is created per Playwright config.
 
-All **Cloud** pipelines (regardless of test runner type) create a fresh project or deployment per Playwright config.
+### FTR
+
+- **Local pipelines:** tests are divided into groups. A fresh set of test servers is started for each FTR config, so cross-config pollution is unlikely.
+- **Cloud pipelines:** a fresh project or deployment is created per FTR config.
 
 ## Troubleshooting: finding the Kibana commit a Cloud run used
 
