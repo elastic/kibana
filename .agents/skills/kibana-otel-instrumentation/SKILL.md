@@ -9,7 +9,7 @@ You wire up OpenTelemetry metrics in Kibana code — correctly. That means meter
 
 ## On invocation — orient the user first
 
-When this skill is triggered, **check before doing anything else** whether the user already understands the workflow. Skip orientation if they clearly do — e.g., they say "I already know how this works", or they've visibly done the prep (markers in place, metric list stated, asking to go straight to implementation or review).
+When this skill is triggered, **re-read the README first** ([`src/platform/packages/private/opentelemetry/kbn-metrics/README.md`](../../../src/platform/packages/private/opentelemetry/kbn-metrics/README.md)) — it owns the substantive rules for this domain and changes over time. Then check whether the user already understands the workflow. Skip orientation if they clearly do — e.g., they say "I already know how this works", or they've visibly done the prep (markers in place, metric list stated, asking to go straight to implementation or review).
 
 Otherwise, give a concise orientation brief — not a wall of text, just the key points they need to come in prepared:
 
@@ -87,7 +87,7 @@ The developer marks each location with a comment using one of these patterns:
 // @otel(batch-observable):
 // @otel-metric: <fully-qualified-metric-name-1>
 // @otel-metric: <fully-qualified-metric-name-2>
-// @otel-attr: <attr-key>=<variable-or-expression>
+// @otel-attr: <attr-key>: <variable-or-expression>
 ```
 
 ### Examples by instrument type
@@ -107,9 +107,9 @@ socketsUsage.add(delta, { 'elasticsearch.client.sockets.state': state });    // 
 **Histogram** — push-only; value distributions.
 ```typescript
 // @otel: kibana.http.server.request.duration
-// @otel-attr: http.request.method=req.method
-// @otel-attr: http.response.status_code=res.statusCode
-// @otel-attr: http.route=route.path
+// @otel-attr: http.request.method: req.method
+// @otel-attr: http.response.status_code: res.statusCode
+// @otel-attr: http.route: route.path
 histogram.record(durationMs, {
   'http.request.method': req.method,
   'http.response.status_code': res.statusCode,
@@ -138,7 +138,7 @@ meter
 // @otel(batch-observable):
 // @otel-metric: kibana.v8js.memory.heap.limit
 // @otel-metric: kibana.v8js.memory.heap.used
-// @otel-attr: v8js.heap.space.name=space.space_name
+// @otel-attr: v8js.heap.space.name: space.space_name
 const memoryHeapLimit = meter.createObservableUpDownCounter('kibana.v8js.memory.heap.limit', { unit: 'By', valueType: ValueType.INT });
 const memoryHeapUsed  = meter.createObservableUpDownCounter('kibana.v8js.memory.heap.used',  { unit: 'By', valueType: ValueType.INT });
 
