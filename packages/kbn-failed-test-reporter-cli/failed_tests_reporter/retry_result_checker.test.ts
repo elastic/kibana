@@ -11,7 +11,11 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 
-import { collectFailedTestNames, computeIntersection } from './retry_result_checker';
+import {
+  collectFailedTestNames,
+  collectPassedTestNames,
+  computeIntersection,
+} from './retry_result_checker';
 
 // Minimal JUnit XML helpers
 const buildXml = (testcases: string) => `<?xml version="1.0" encoding="utf-8"?>
@@ -24,6 +28,9 @@ const failedCase = (name: string) =>
 
 const passedCase = (name: string) =>
   `<testcase name="${name}" classname="suite.file" time="1"></testcase>`;
+
+const skippedCase = (name: string) =>
+  `<testcase name="${name}" classname="suite.file" time="1"><skipped/></testcase>`;
 
 const hookFailure = (hookName: string) =>
   `<testcase name='suite "${hookName}" hook' classname="suite.file" time="0"><failure>error</failure></testcase>`;
@@ -70,6 +77,78 @@ describe('collectFailedTestNames', () => {
     Fs.writeFileSync(Path.join(tmpDir, 'TEST-a.xml'), buildXml(hookFailure('before all')));
     const names = await collectFailedTestNames(tmpDir);
     expect([...names]).toEqual(['suite "before all" hook']);
+  });
+});
+
+describe('collectPassedTestNames', () => {
+  let tmpDir: string;
+
+  beforeEach(() => {
+    tmpDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'retry-checker-test-'));
+  });
+
+  afterEach(() => {
+    Fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('returns only tests that passed (no failure, no skipped)', async () => {
+    Fs.writeFileSync(
+      Path.join(tmpDir, 'TEST-report.xml'),
+      buildXml(passedCase('test A') + failedCase('test B') + skippedCase('test C'))
+    );
+    const names = await collectPassedTestNames(tmpDir);
+    expect([...names]).toEqual(['test A']);
+  });
+
+  it('does not count skipped tests as passed (beforeAll hook scenario)', async () => {
+    Fs.writeFileSync(Path.join(tmpDir, 'TEST-a.xml'), buildXml(skippedCase('test A')));
+    const names = await collectPassedTestNames(tmpDir);
+    expect(names.size).toBe(0);
+  });
+
+  it('returns empty set when no XML files exist (runner crash scenario)', async () => {
+    const names = await collectPassedTestNames(tmpDir);
+    expect(names.size).toBe(0);
+  });
+
+  it('aggregates passed tests across multiple XML files', async () => {
+    Fs.writeFileSync(Path.join(tmpDir, 'TEST-a.xml'), buildXml(passedCase('test A')));
+    Fs.writeFileSync(
+      Path.join(tmpDir, 'TEST-b.xml'),
+      buildXml(passedCase('test B') + failedCase('test C'))
+    );
+    const names = await collectPassedTestNames(tmpDir);
+    expect([...names].sort()).toEqual(['test A', 'test B']);
+  });
+
+  it('finds a recovered test even when a stale attempt-1 XML is present', async () => {
+    // Stale file from attempt 1 where the test failed
+    Fs.writeFileSync(
+      Path.join(tmpDir, 'TEST-attempt1-bk__OLD.xml'),
+      buildXml(failedCase('test A'))
+    );
+    // New file from attempt 2 where the test passes
+    Fs.writeFileSync(
+      Path.join(tmpDir, 'TEST-attempt2-bk__NEW.xml'),
+      buildXml(passedCase('test A'))
+    );
+    const names = await collectPassedTestNames(tmpDir);
+    expect(names.has('test A')).toBe(true);
+  });
+
+  it('does not count a test as passed when it fails in both attempts (stale XMLs present)', async () => {
+    // Stale file from attempt 1: test A failed
+    Fs.writeFileSync(
+      Path.join(tmpDir, 'TEST-attempt1-bk__OLD.xml'),
+      buildXml(failedCase('test A'))
+    );
+    // New file from attempt 2: test A still fails
+    Fs.writeFileSync(
+      Path.join(tmpDir, 'TEST-attempt2-bk__NEW.xml'),
+      buildXml(failedCase('test A'))
+    );
+    const names = await collectPassedTestNames(tmpDir);
+    expect(names.has('test A')).toBe(false);
   });
 });
 

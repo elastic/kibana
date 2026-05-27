@@ -15,7 +15,7 @@ import { run } from '@kbn/dev-cli-runner';
 import globby from 'globby';
 import normalize from 'normalize-path';
 
-import { makeFailedTestCaseIter, readTestReport } from './test_report';
+import { makeFailedTestCaseIter, makeTestCaseIter, readTestReport } from './test_report';
 
 export async function collectFailedTestNames(junitDir: string): Promise<Set<string>> {
   const xmlPaths = await globby(normalize(Path.resolve(junitDir, '*.xml')), { absolute: true });
@@ -23,7 +23,27 @@ export async function collectFailedTestNames(junitDir: string): Promise<Set<stri
   for (const xmlPath of xmlPaths) {
     const report = await readTestReport(xmlPath);
     for (const testCase of makeFailedTestCaseIter(report)) {
-      names.add(testCase.$.name);
+      names.add(testCase.$.name.trim());
+    }
+  }
+  return names;
+}
+
+/**
+ * Returns the names of test cases that completed without failure and without being skipped.
+ * Used on retry to verify previously-failing tests explicitly passed, not merely that they
+ * were absent from results (e.g. runner crash, beforeAll hook failure, or stale XML files
+ * from the previous attempt coexisting on a persistent-workspace agent).
+ */
+export async function collectPassedTestNames(junitDir: string): Promise<Set<string>> {
+  const xmlPaths = await globby(normalize(Path.resolve(junitDir, '*.xml')), { absolute: true });
+  const names = new Set<string>();
+  for (const xmlPath of xmlPaths) {
+    const report = await readTestReport(xmlPath);
+    for (const testCase of makeTestCaseIter(report)) {
+      if (!testCase.failure && !testCase.skipped) {
+        names.add(testCase.$.name.trim());
+      }
     }
   }
   return names;
@@ -74,20 +94,22 @@ export function runRetryResultCheckerCli() {
           return;
         }
 
-        const currentFailed = await collectFailedTestNames(junitDir);
-        const intersection = computeIntersection(prevFailed, currentFailed);
+        // Require every previously-failing test to appear as an explicit pass on retry.
+        // Checking for explicit passes (rather than absence of failure) guards against
+        // three false-green scenarios: (a) the runner crashes before reaching the test
+        // leaving an empty JUnit directory, (b) a beforeAll hook failure causes the test
+        // to be reported as skipped rather than failed, and (c) stale XML files from the
+        // previous attempt persist in the directory on a persistent-workspace agent.
+        const currentPassed = await collectPassedTestNames(junitDir);
+        const notRecovered = [...prevFailed].filter((name) => !currentPassed.has(name));
 
-        if (intersection.length === 0) {
-          // Known limitation: if a different test fails before reaching the previously-failing test on retry (due to --bail), the intersection will appear empty and the step will be marked green even though the original failing test was never verified.
-          // We could possibly drop the bail flag.
-          log.success(
-            `All ${prevFailed.size} previously-failing test(s) either passed or did not run on retry`
-          );
+        if (notRecovered.length === 0) {
+          log.success(`All ${prevFailed.size} previously-failing test(s) passed on retry`);
           return;
         }
 
-        log.error(`${intersection.length} test(s) failed in both attempts:`);
-        for (const name of intersection) {
+        log.error(`${notRecovered.length} test(s) did not pass on retry:`);
+        for (const name of notRecovered) {
           log.error(`  ${name}`);
         }
         process.exit(1);
@@ -107,9 +129,9 @@ export function runRetryResultCheckerCli() {
             the given directory. Used to capture attempt-1 failures before retry.
 
           check-intersection --junit-dir <dir> --prev-failures-file <file>
-            Compares the failed tests in <dir> against the names in <file>.
-            Exits 0 if the intersection is empty (previously-failing tests recovered).
-            Exits 1 if any previously-failing test still fails.
+            Checks whether every test named in <file> appears as an explicit pass in <dir>.
+            Exits 0 if all previously-failing tests passed (step can be marked green).
+            Exits 1 if any previously-failing test did not pass (still failing, skipped, or absent).
       `,
       flags: {
         string: ['junit-dir', 'prev-failures-file'],
