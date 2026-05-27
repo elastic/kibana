@@ -31,6 +31,10 @@ spaceTest.describe(
       await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
     });
 
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
+    });
+
     spaceTest('opens the schedule flyout from attacks page', async ({ pageObjects }) => {
       const { detectionsAttackDiscoveryPage } = pageObjects;
 
@@ -42,5 +46,20 @@ spaceTest.describe(
       await expect(detectionsAttackDiscoveryPage.settingsFlyout).toBeVisible();
       await expect(detectionsAttackDiscoveryPage.schedulesTable).toBeVisible();
     });
+
+    spaceTest(
+      'opens the schedule details flyout from the attack table row',
+      async ({ pageObjects }) => {
+        const { detectionsAttackDiscoveryPage } = pageObjects;
+
+        await detectionsAttackDiscoveryPage.navigateToAttacksPage();
+
+        await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
+        await expect(detectionsAttackDiscoveryPage.tableScheduleButtons).toHaveCount(1);
+
+        await detectionsAttackDiscoveryPage.openFirstScheduleDetailsFromTable();
+        await expect(detectionsAttackDiscoveryPage.scheduleDetailsFlyout).toBeVisible();
+      }
+    );
   }
 );

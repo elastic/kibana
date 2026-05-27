@@ -60,11 +60,13 @@ export class DetectionsAttackDiscoveryPage {
   public attacksTableSection: Locator;
   public scheduleButton: Locator;
   public settingsFlyout: Locator;
+  public scheduleDetailsFlyout: Locator;
   public schedulesTable: Locator;
   public attackDetailsFlyoutBody: Locator;
   public assigneesFilterButton: Locator;
   public connectorFilterButton: Locator;
   public tableExpandAttackDetailsButtons: Locator;
+  public tableScheduleButtons: Locator;
   public settingsButton: Locator;
   public generateButton: Locator;
   public runButton: Locator;
@@ -91,12 +93,16 @@ export class DetectionsAttackDiscoveryPage {
     this.attacksTableSection = this.page.testSubj.locator(ATTACKS_PAGE_TABLE_SECTION_TEST_ID);
     this.scheduleButton = this.page.testSubj.locator(SCHEDULE_BUTTON_TEST_ID);
     this.settingsFlyout = this.page.testSubj.locator(SETTINGS_FLYOUT_TEST_ID);
+    this.scheduleDetailsFlyout = this.page.testSubj.locator('scheduleDetailsFlyout');
     this.schedulesTable = this.page.testSubj.locator(SCHEDULES_TABLE_TEST_ID);
     this.attackDetailsFlyoutBody = this.page.testSubj.locator(ATTACK_DETAILS_FLYOUT_BODY_TEST_ID);
     this.assigneesFilterButton = this.page.testSubj.locator(FILTER_BY_ASSIGNEES_BUTTON_TEST_ID);
     this.connectorFilterButton = this.page.testSubj.locator(CONNECTOR_FILTER_BUTTON_TEST_ID);
     this.tableExpandAttackDetailsButtons = this.attacksTableSection.locator(
       `[data-test-subj="${EXPAND_ATTACK_BUTTON_TEST_ID}"]`
+    );
+    this.tableScheduleButtons = this.attacksTableSection.locator(
+      `[data-test-subj="scheduleButton"]`
     );
     this.settingsButton = this.page.testSubj.locator('settings');
     this.generateButton = this.page.testSubj.locator('generate');
@@ -176,5 +182,16 @@ export class DetectionsAttackDiscoveryPage {
 
     await firstExpandAttackButton.click();
     await this.attackDetailsFlyoutBody.waitFor({ state: 'visible' });
+  }
+
+  async openFirstScheduleDetailsFromTable() {
+    const [firstScheduleButton] = await this.tableScheduleButtons.all();
+
+    if (!firstScheduleButton) {
+      throw new Error('No schedule button found');
+    }
+
+    await firstScheduleButton.click();
+    await this.scheduleDetailsFlyout.waitFor({ state: 'visible' });
   }
 }
