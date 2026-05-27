@@ -52,13 +52,17 @@ export interface SecondaryMenuSection {
    */
   id: string;
   /**
-   * The items contained in the secondary menu section.
-   */
-  items: SecondaryMenuItem[];
-  /**
    * (optional) The label to display for the secondary menu section.
    */
   label?: string;
+  /**
+   * Static secondary menu items. Mutually exclusive with `extensionPointId`.
+   */
+  items?: SecondaryMenuItem[];
+  /**
+   * Named extension point rendered by a lazy component. Mutually exclusive with `items`.
+   */
+  extensionPointId?: string;
 }
 
 /**
@@ -90,6 +94,11 @@ export interface MenuItem {
    * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
+  /**
+   * (optional) When true, sections are only shown in the hover popover and never
+   * in the persistent expanded side panel.
+   */
+  popoverOnly?: boolean;
   /**
    * (optional) The secondary menu sections belonging to the menu item.
    */

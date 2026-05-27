@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ChromeService } from './src';
-export type { InternalChromeSetup, InternalChromeStart } from './src';
-export type {
-  ExtensionPointRenderersMap,
-  SecondaryNavExtensionPointContext,
-  SecondaryNavExtensionPointLazy,
-  SecondaryNavExtensionPointComponent,
-} from '@kbn/core-chrome-browser-internal-types';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { ExtensionPointRenderersFor } from './types';
+
+export const defineExtensionPointRenderers = <T extends NavigationTreeDefinition>(
+  renderers: ExtensionPointRenderersFor<T>
+): ExtensionPointRenderersFor<T> => renderers;

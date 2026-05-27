@@ -32,6 +32,20 @@ import type {
   SolutionId,
 } from '@kbn/core-chrome-browser';
 
+import type {
+  ExtensionPointRenderersMap,
+  SecondaryNavExtensionPointContext,
+  SecondaryNavExtensionPointLazy,
+  SecondaryNavExtensionPointComponent,
+} from './extension_points';
+
+export type {
+  ExtensionPointRenderersMap,
+  SecondaryNavExtensionPointContext,
+  SecondaryNavExtensionPointLazy,
+  SecondaryNavExtensionPointComponent,
+};
+
 /** @internal */
 export type InternalChromeSetup = ChromeSetup;
 
@@ -124,6 +138,15 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
+
+    /** Register lazy extension point renderers for a solution navigation. */
+    setExtensionPointRenderers(
+      id: SolutionId,
+      extensionPointRenderers: ExtensionPointRenderersMap
+    ): void;
+
+    /** Get lazy extension point renderers for the active solution navigation. */
+    getActiveExtensionPointRenderers$(): Observable<ExtensionPointRenderersMap | undefined>;
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */

@@ -108,6 +108,9 @@ export class NavigationPublicPlugin
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
     }
 
+    const getActiveExtensionPointRenderers$ = () =>
+      chrome.project.getActiveExtensionPointRenderers$();
+
     return {
       ui: {
         /**
@@ -137,6 +140,7 @@ export class NavigationPublicPlugin
           );
         })
       ),
+      getActiveExtensionPointRenderers$,
     };
   }
 
@@ -146,6 +150,9 @@ export class NavigationPublicPlugin
 
   private addSolutionNavigation(def: AddSolutionNavigationArg) {
     this.solutionNavDefinitions.set(def.id, def);
+    if (def.extensionPointRenderers) {
+      this.chrome?.project.setExtensionPointRenderers(def.id, def.extensionPointRenderers);
+    }
     this.tryInitNavigation();
   }
 
@@ -154,6 +161,12 @@ export class NavigationPublicPlugin
     const def = this.solutionNavDefinitions.get(this.activeSolutionId);
     if (!def) return;
     this.chrome.project.initNavigation(this.activeSolutionId, def.navigationTree$);
+    if (def.extensionPointRenderers) {
+      this.chrome.project.setExtensionPointRenderers(
+        this.activeSolutionId,
+        def.extensionPointRenderers
+      );
+    }
   }
 
   private initiateChromeStyleAndSideNav(

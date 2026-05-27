@@ -109,7 +109,7 @@ export type CloudLinks = {
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
-export type RenderAs = 'home' | 'panelOpener';
+export type RenderAs = 'home' | 'panelOpener' | 'extensionPoint';
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -152,6 +152,7 @@ interface NodeDefinitionBase {
   /**
    * Indicate if this is a special node
    * - home - node should be rendered as the home link
+   * - extensionPoint - secondary nav section rendered by a registered lazy component
    */
   renderAs?: RenderAs;
 
@@ -159,6 +160,16 @@ interface NodeDefinitionBase {
    * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
   badgeType?: BadgeType;
+
+  /**
+   * Unique id for an extension point section. Required when `renderAs` is `extensionPoint`.
+   */
+  extensionPointId?: string;
+
+  /**
+   * When true on an extension point section, content is shown in the hover popover only.
+   */
+  popoverOnly?: boolean;
 }
 
 /** @public */

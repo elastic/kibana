@@ -10,7 +10,14 @@
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { Observable } from 'rxjs';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
+import type {
+  NavigationTreeDefinition,
+  SolutionNavigationDefinition,
+} from '@kbn/core-chrome-browser';
+import type {
+  ExtensionPointRenderersMap,
+  SecondaryNavExtensionPointContext,
+} from '@kbn/core-chrome-browser-internal';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -19,6 +26,13 @@ import type {
   createTopNav,
 } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
+import type { ExtractExtensionPointIds } from './extension_point_ids';
+
+export type { SecondaryNavExtensionPointContext };
+
+export type ExtensionPointRenderersFor<T extends NavigationTreeDefinition> = {
+  [K in ExtractExtensionPointIds<T>]: ExtensionPointRenderersMap[string];
+};
 
 export interface NavigationPublicSetup {
   /**
@@ -27,8 +41,15 @@ export interface NavigationPublicSetup {
   registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
 }
 
-export type SolutionNavigation = SolutionNavigationDefinition;
-export type AddSolutionNavigationArg = SolutionNavigation;
+export interface SolutionNavigation<T extends NavigationTreeDefinition = NavigationTreeDefinition>
+  extends Omit<SolutionNavigationDefinition, 'navigationTree$'> {
+  navigationTree$: Observable<NavigationTreeDefinition>;
+  extensionPointRenderers?: ExtensionPointRenderersFor<T>;
+}
+
+export type AddSolutionNavigationArg<
+  T extends NavigationTreeDefinition = NavigationTreeDefinition
+> = SolutionNavigation<T>;
 
 export interface NavigationPublicStart {
   ui: {
@@ -49,9 +70,13 @@ export interface NavigationPublicStart {
     ) => ReturnType<typeof createTopNav>;
   };
   /** Add a solution navigation to the header nav switcher. */
-  addSolutionNavigation: (solutionNavigationAgg: AddSolutionNavigationArg) => void;
+  addSolutionNavigation: <T extends NavigationTreeDefinition = NavigationTreeDefinition>(
+    solutionNavigationAgg: AddSolutionNavigationArg<T>
+  ) => void;
   /** Flag to indicate if the solution navigation is enabled.*/
   isSolutionNavEnabled$: Observable<boolean>;
+  /** Lazy extension point renderers for the active solution navigation. */
+  getActiveExtensionPointRenderers$: () => Observable<ExtensionPointRenderersMap | undefined>;
 }
 
 export interface NavigationPublicSetupDependencies {

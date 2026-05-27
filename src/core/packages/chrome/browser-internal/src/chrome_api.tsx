@@ -79,6 +79,11 @@ export function createChromeApi({
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
     getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
     getProjectHome$: () => projectNavigation.getProjectHome$(),
+    setExtensionPointRenderers: (id, extensionPointRenderers) => {
+      validateProjectStyle();
+      projectNavigation.setExtensionPointRenderers(id, extensionPointRenderers);
+    },
+    getActiveExtensionPointRenderers$: () => projectNavigation.getActiveExtensionPointRenderers$(),
   };
 
   let appHeaderRegistrationId = 0;

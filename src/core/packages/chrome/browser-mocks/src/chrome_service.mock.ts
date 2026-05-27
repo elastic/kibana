@@ -117,6 +117,8 @@ const createStartContractMock = () => {
       getBreadcrumbs$: jest.fn().mockReturnValue(new BehaviorSubject([])),
       getNavigation$: jest.fn().mockReturnValue(new BehaviorSubject({} as any)),
       getProjectHome$: jest.fn().mockReturnValue(of('/')),
+      setExtensionPointRenderers: jest.fn(),
+      getActiveExtensionPointRenderers$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
     }),
     next: lazyObject({
       isEnabled: false,
