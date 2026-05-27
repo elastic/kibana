@@ -10,9 +10,12 @@
 /**
  * Tests for metrics grid pagination behavior in Discover tabs.
  *
- * Covers two related behaviors:
+ * Covers:
  *  1. Tab duplication preserves `currentPage` and breakdown dimension.
  *  2. Changing the breakdown via the toolbar resets `currentPage` to 1.
+ *  3. Adding or removing a secondary breakdown dimension also resets
+ *     `currentPage` to 1, because the fetch query depends on the full
+ *     set of selected dimensions (not only the first).
  */
 
 import { expect } from '@kbn/scout/ui';
@@ -110,6 +113,55 @@ spaceTest.describe(
           ).toBeVisible();
           await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_1);
         });
+      }
+    );
+
+    spaceTest(
+      'resets currentPage to 1 when the user adds a secondary breakdown dimension',
+      async ({ pageObjects }) => {
+        const { metricsExperience } = pageObjects;
+
+        await spaceTest.step('select first breakdown and navigate to last page', async () => {
+          await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
+          await expect(
+            metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
+          ).toBeVisible();
+          await metricsExperience.pagination.getPageButton(TOTAL_PAGES - 1).click();
+          await metricsExperience.waitForFirstCard(FIRST_CARD_LAST_PAGE);
+        });
+
+        await spaceTest.step('add a secondary dimension and verify page resets to 1', async () => {
+          await metricsExperience.breakdownSelector.selectDimension(SECOND_DIMENSION);
+          await expect(
+            metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
+          ).toBeVisible();
+          await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_1);
+        });
+      }
+    );
+
+    spaceTest(
+      'resets currentPage to 1 when the user removes a secondary breakdown dimension',
+      async ({ pageObjects }) => {
+        const { metricsExperience } = pageObjects;
+
+        await spaceTest.step('select both dimensions and navigate to last page', async () => {
+          await metricsExperience.breakdownSelector.selectDimension(FIRST_DIMENSION);
+          await metricsExperience.breakdownSelector.selectDimension(SECOND_DIMENSION);
+          await metricsExperience.pagination.getPageButton(TOTAL_PAGES - 1).click();
+          await metricsExperience.waitForFirstCard(FIRST_CARD_LAST_PAGE);
+        });
+
+        await spaceTest.step(
+          'remove the secondary dimension and verify page resets to 1',
+          async () => {
+            await metricsExperience.breakdownSelector.selectDimension(SECOND_DIMENSION);
+            await expect(
+              metricsExperience.breakdownSelector.getToggleWithSelection(SECOND_DIMENSION)
+            ).toBeHidden();
+            await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_1);
+          }
+        );
       }
     );
   }

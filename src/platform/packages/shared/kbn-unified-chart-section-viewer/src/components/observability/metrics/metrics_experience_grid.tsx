@@ -24,7 +24,7 @@ import {
   useDimensionsWipe,
   useDiscoverFieldForBreakdown,
   useMetricFieldsFilter,
-  useResetPageOnBreakdownChange,
+  useResetPageOnDimensionsChange,
 } from './hooks';
 import { isSuppressedFetchError } from '../../chart/utils/is_suppressed_fetch_error';
 
@@ -80,7 +80,7 @@ export const MetricsExperienceGrid = ({
     onDimensionsChange
   );
 
-  useResetPageOnBreakdownChange(breakdownField, onPageChange);
+  useResetPageOnDimensionsChange(selectedDimensions, onPageChange);
 
   const onToolbarDimensionsChange = useCallback(
     (nextSelectedDimensions: Dimension[]) => {
