@@ -110,6 +110,7 @@
     "@kbn/cps",
     "@kbn/evals-plugin",
     "@kbn/shared-ux-ai-components",
+    "@kbn/agent-builder-browser",
     "@kbn/deeplinks-management",
     "@kbn/rule-data-utils",
     "@kbn/core-http-browser",

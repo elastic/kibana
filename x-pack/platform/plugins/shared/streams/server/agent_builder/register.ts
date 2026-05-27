@@ -13,7 +13,21 @@ import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
+import { createSigEventsOnboardingSkill } from './skills/sigevents_onboarding_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
+
+type AgentDefinition = Parameters<AgentBuilderPluginSetup['agents']['register']>[0];
+
+const systemOnboardingAgent: AgentDefinition = {
+  id: 'sigevents.memory.system-onboarding',
+  name: 'System Onboarding',
+  description:
+    'Interviews the user to build a mental model of their system and stores operational context in the sigevents memory knowledge base.',
+  configuration: {
+    skill_ids: ['significant-events-onboarding'],
+    tools: [],
+  },
+};
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
@@ -55,6 +69,9 @@ export const registerStreamsAgentBuilder = async ({
   });
   registerAgentBuilderSkills({ agentBuilder, getScopedClients, telemetry, memoryToolsOptions });
 
+  agentBuilder.agents.register(systemOnboardingAgent);
+  logger.info('sigevents system onboarding agent registered');
+
   let memorySkillRegistered = false;
 
   const ensureMemorySkillRegistered = () => {
@@ -63,6 +80,7 @@ export const registerStreamsAgentBuilder = async ({
     }
     memorySkillRegistered = true;
     agentBuilder.skills.register(createSigEventsMemorySkill(memoryToolsOptions));
+    agentBuilder.skills.register(createSigEventsOnboardingSkill(memoryToolsOptions));
     logger.info('Memory skill registered (observability:streamsEnableMemory is enabled)');
   };
 
