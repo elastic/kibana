@@ -17,11 +17,10 @@ import { visitRuleEditPage } from '../../../../tasks/edit_rule';
 import { setPreferredChatExperienceToAgent } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import {
   clickNewAgentBuilderAttachmentButton,
-  assertAgentBuilderConversationInputEditorContains,
+  assertAgentBuilderSidebarIsOpen,
+  assertAgentBuilderAttachmentPillContains,
 } from '../../../../tasks/agent_builder';
 import { NEW_AGENT_BUILDER_ATTACHMENT_BUTTON } from '../../../../screens/agent_builder';
-
-const prompt = 'Analyze the attached Security detection rule and provide actionable insights.';
 
 describe(
   'Add rule attachment to chat button',
@@ -42,7 +41,8 @@ describe(
 
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();
-      assertAgentBuilderConversationInputEditorContains(prompt);
+      assertAgentBuilderSidebarIsOpen();
+      assertAgentBuilderAttachmentPillContains('New Rule');
     });
 
     it('should show the "Add to chat" button on the rule details page', () => {
@@ -54,7 +54,8 @@ describe(
 
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();
-      assertAgentBuilderConversationInputEditorContains(prompt);
+      assertAgentBuilderSidebarIsOpen();
+      assertAgentBuilderAttachmentPillContains('Test Rule');
     });
 
     it('should show the "Add to chat" button on the rule editing page', () => {
@@ -66,7 +67,8 @@ describe(
 
       cy.get(NEW_AGENT_BUILDER_ATTACHMENT_BUTTON).should('be.visible');
       clickNewAgentBuilderAttachmentButton();
-      assertAgentBuilderConversationInputEditorContains(prompt);
+      assertAgentBuilderSidebarIsOpen();
+      assertAgentBuilderAttachmentPillContains('Test Rule');
     });
   }
 );
