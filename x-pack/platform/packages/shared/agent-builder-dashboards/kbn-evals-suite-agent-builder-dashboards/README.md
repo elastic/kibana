@@ -16,12 +16,9 @@ For general information about writing evaluation tests, configuration, reporting
 
 ### Configure EIS Connectors
 
-For local EIS-backed model runs, authenticate to Elastic Vault and run the eval setup wizard:
+For local EIS-backed model runs, run the eval setup wizard:
 
 ```bash
-export VAULT_ADDR=https://secrets.elastic.co:8200
-vault login --method oidc
-vault token lookup
 node scripts/evals init
 ```
 
