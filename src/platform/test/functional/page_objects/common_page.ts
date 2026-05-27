@@ -30,8 +30,14 @@ export class CommonPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly loginPage = this.ctx.getPageObject('login');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
-  private readonly cookieAuth = this.ctx.getService('cookieAuth');
-  private readonly browserAuth = this.ctx.getService('browserAuth');
+  // cookieAuth / browserAuth are only registered in stateful functional configs.
+  // Use hasService guards so this page object remains safe in serverless configs too.
+  private readonly cookieAuth = this.ctx.hasService('cookieAuth')
+    ? this.ctx.getService('cookieAuth')
+    : undefined;
+  private readonly browserAuth = this.ctx.hasService('browserAuth')
+    ? this.ctx.getService('browserAuth')
+    : undefined;
 
   private readonly defaultTryTimeout = this.config.get('timeouts.try');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -85,7 +91,7 @@ export class CommonPageObject extends FtrService {
 
     if (loginPage && !wantedLoginPage) {
       this.log.debug('Found login page');
-      if (this.config.get('security.cookieLogin')) {
+      if (this.config.get('security.cookieLogin') && this.cookieAuth && this.browserAuth) {
         // Cookie-login path: generate a session via the login API and inject the sid cookie
         // directly, bypassing the Selenium form fill entirely.
         // Pass appUrl as targetUrl so loginByCookie navigates there in one step.
