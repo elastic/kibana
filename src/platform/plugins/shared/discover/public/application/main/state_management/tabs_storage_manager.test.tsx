@@ -102,6 +102,7 @@ describe('TabsStorageManager', () => {
       tabsStorageManager: createTabsStorageManager({
         urlStateStorage,
         storage: services.storage,
+        profileStateRegistry: services.profileStateRegistry,
         enabled: true,
       }),
     };
@@ -116,6 +117,7 @@ describe('TabsStorageManager', () => {
     attributes: tab.attributes,
     appState: tab.appState,
     globalState: tab.globalState,
+    profileState: tab.profileState,
     ...('closedAt' in tab ? { closedAt: tab.closedAt } : {}),
   });
 
@@ -625,6 +627,7 @@ describe('TabsStorageManager', () => {
       globalState: {
         refreshInterval: { pause: false, value: 300 },
       },
+      profileState: mockTab1.profileState,
     };
 
     tabsStorageManager.updateTabStateLocally(mockTab1.id, updatedTabState);

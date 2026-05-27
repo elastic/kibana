@@ -9,6 +9,8 @@
 
 import { isEqual } from 'lodash';
 import { distinctUntilChanged, map, type Observable, skip } from 'rxjs';
+import type { ProfileStateRegistry } from '../../../../context_awareness';
+import { ProfileStateType } from '../../../../context_awareness';
 import { type DiscoverInternalState, selectTab, type TabState } from '../redux';
 import { isEqualState } from './state_comparators';
 
@@ -16,18 +18,27 @@ export const createTabPersistableStateObservable = ({
   tabId,
   internalState$,
   getState,
+  profileStateRegistry,
 }: {
   tabId: string;
   internalState$: Observable<DiscoverInternalState>;
   getState: () => DiscoverInternalState;
-}): Observable<Pick<TabState, 'appState' | 'globalState' | 'attributes'>> => {
-  const getTabState = (): Pick<TabState, 'appState' | 'globalState' | 'attributes'> => {
+  profileStateRegistry: ProfileStateRegistry;
+}): Observable<Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>> => {
+  const getTabState = (): Pick<
+    TabState,
+    'appState' | 'globalState' | 'attributes' | 'profileState'
+  > => {
     const tabState = selectTab(getState(), tabId);
 
     return {
       appState: tabState.appState,
       globalState: tabState.globalState,
       attributes: tabState.attributes,
+      profileState: profileStateRegistry.pickStateByType({
+        profileState: tabState.profileState,
+        stateType: ProfileStateType.Persistent,
+      }),
     };
   };
 
@@ -37,7 +48,8 @@ export const createTabPersistableStateObservable = ({
       (a, b) =>
         isEqualState(a.appState, b.appState) &&
         isEqualState(a.globalState, b.globalState) &&
-        isEqual(a.attributes, b.attributes)
+        isEqual(a.attributes, b.attributes) &&
+        isEqual(a.profileState, b.profileState)
     ),
     skip(1)
   );

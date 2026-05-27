@@ -40,7 +40,11 @@ describe('createContextAwarenessToolkit', () => {
       }),
     });
 
-    return { internalState: toolkit.internalState, tabId: persistedTab.id };
+    return {
+      internalState: toolkit.internalState,
+      stateRegistry: services.profileStateRegistry,
+      tabId: persistedTab.id,
+    };
   };
 
   beforeEach(() => {
@@ -48,22 +52,28 @@ describe('createContextAwarenessToolkit', () => {
   });
 
   it('wires updateESQLQuery to updateESQLQuery action with tab id', async () => {
-    const { internalState, tabId } = await setup();
+    const { internalState, stateRegistry, tabId } = await setup();
     const updateEsqlQuerySpy = jest.spyOn(internalStateActions, 'updateESQLQuery');
     const queryOrUpdater = 'FROM logs-*';
 
-    createContextAwarenessToolkit({ internalState, tabId }).actions.updateESQLQuery?.(
-      queryOrUpdater
-    );
+    createContextAwarenessToolkit({
+      internalState,
+      stateRegistry,
+      tabId,
+    }).actions.updateESQLQuery?.(queryOrUpdater);
 
     expect(updateEsqlQuerySpy).toHaveBeenCalledWith({ tabId, queryOrUpdater });
   });
 
   it('wires addFilter to addFilter action with tab id', async () => {
-    const { internalState, tabId } = await setup();
+    const { internalState, stateRegistry, tabId } = await setup();
     const addFilterSpy = jest.spyOn(internalStateActions, 'addFilter');
 
-    createContextAwarenessToolkit({ internalState, tabId }).actions.addFilter?.('status', 200, '+');
+    createContextAwarenessToolkit({ internalState, stateRegistry, tabId }).actions.addFilter?.(
+      'status',
+      200,
+      '+'
+    );
 
     expect(addFilterSpy).toHaveBeenCalledWith({
       tabId,
@@ -74,12 +84,15 @@ describe('createContextAwarenessToolkit', () => {
   });
 
   it('maps setExpandedDoc options.initialTabId to initialDocViewerTabId', async () => {
-    const { internalState, tabId } = await setup();
+    const { internalState, stateRegistry, tabId } = await setup();
     const setExpandedDocSpy = jest.spyOn(internalStateActions, 'setExpandedDoc');
 
-    createContextAwarenessToolkit({ internalState, tabId }).actions.setExpandedDoc?.(undefined, {
-      initialTabId: 'overview',
-    });
+    createContextAwarenessToolkit({ internalState, stateRegistry, tabId }).actions.setExpandedDoc?.(
+      undefined,
+      {
+        initialTabId: 'overview',
+      }
+    );
 
     expect(setExpandedDocSpy).toHaveBeenCalledWith({
       tabId,
@@ -89,7 +102,7 @@ describe('createContextAwarenessToolkit', () => {
   });
 
   it('dispatches openInNewTab through openInNewTabExtPointAction', async () => {
-    const { internalState, tabId } = await setup();
+    const { internalState, stateRegistry, tabId } = await setup();
     const openInNewTabSpy = jest.spyOn(internalStateActions, 'openInNewTabExtPointAction');
     const params = {
       query: { esql: 'FROM logs-*' },
@@ -97,28 +110,32 @@ describe('createContextAwarenessToolkit', () => {
       tabLabel: 'Logs',
     };
 
-    createContextAwarenessToolkit({ internalState, tabId }).actions.openInNewTab?.(params);
+    createContextAwarenessToolkit({ internalState, stateRegistry, tabId }).actions.openInNewTab?.(
+      params
+    );
 
     expect(openInNewTabSpy).toHaveBeenCalledWith(params);
   });
 
   it('dispatches refreshData through fetchData with tab id', async () => {
-    const { internalState, tabId } = await setup();
+    const { internalState, stateRegistry, tabId } = await setup();
     const fetchDataSpy = jest.spyOn(internalStateActions, 'fetchData');
 
-    createContextAwarenessToolkit({ internalState, tabId }).actions.refreshData?.();
+    createContextAwarenessToolkit({ internalState, stateRegistry, tabId }).actions.refreshData?.();
 
     expect(fetchDataSpy).toHaveBeenCalledWith({ tabId });
   });
 
   it('awaits updateAdHocDataViews dispatch', async () => {
-    const { internalState, tabId } = await setup();
+    const { internalState, stateRegistry, tabId } = await setup();
     const updateAdHocDataViewsSpy = jest.spyOn(internalStateActions, 'updateAdHocDataViews');
     const adHocDataViews = [dataViewMockWithTimeField];
 
-    await createContextAwarenessToolkit({ internalState, tabId }).actions.updateAdHocDataViews?.(
-      adHocDataViews
-    );
+    await createContextAwarenessToolkit({
+      internalState,
+      stateRegistry,
+      tabId,
+    }).actions.updateAdHocDataViews?.(adHocDataViews);
 
     expect(updateAdHocDataViewsSpy).toHaveBeenCalledWith(adHocDataViews);
   });

@@ -36,6 +36,7 @@ describe('InternalStateStore', () => {
     const tabsStorageManager = createTabsStorageManager({
       urlStateStorage,
       storage: services.storage,
+      profileStateRegistry: services.profileStateRegistry,
     });
     const store = createInternalStateStore({
       services,

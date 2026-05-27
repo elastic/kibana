@@ -53,7 +53,10 @@ export interface ProfileStateDefinition<TState extends object> {
 }
 
 export class ProfileStateRegistry {
-  private readonly stateDefinitions = new Map<string, ProfileStateDefinition<object>>();
+  private readonly stateDefinitions = new Map<
+    string,
+    ProfileStateDefinition<Record<string, unknown>>
+  >();
 
   public registerDefinition<TState extends object>(definition: ProfileStateDefinition<TState>) {
     if (this.stateDefinitions.has(definition.key.rawKey)) {
@@ -71,15 +74,51 @@ export class ProfileStateRegistry {
     }
     return definition as ProfileStateDefinition<TState>;
   }
+
+  public pickStateByType({
+    profileState,
+    stateType,
+  }: {
+    profileState: Record<string, object | undefined>;
+    stateType: ProfileStateType;
+  }): Record<string, object | undefined> {
+    const filteredProfileState: Record<string, object | undefined> = {};
+
+    for (const [rawKey, state] of Object.entries(profileState)) {
+      if (!state) {
+        continue;
+      }
+
+      const definition = this.stateDefinitions.get(rawKey);
+
+      if (!definition) {
+        continue;
+      }
+
+      const filteredState: Record<string, unknown> = {};
+
+      for (const [field, value] of Object.entries(state)) {
+        if (definition.descriptor[field]?.type === stateType) {
+          filteredState[field] = value;
+        }
+      }
+
+      if (Object.keys(filteredState).length > 0) {
+        filteredProfileState[rawKey] = filteredState;
+      }
+    }
+
+    return filteredProfileState;
+  }
 }
 
 export const registerProfileStateDefinitions = (registry: ProfileStateRegistry) => {
   registry.registerDefinition(colorStateDefinition);
 };
 
-interface ColorState {
-  favouriteColor: string;
-  leastFavouriteColor: string;
+export interface ColorState {
+  favoriteColor: string;
+  rowControlColor: 'primary' | 'success' | 'danger';
 }
 
 export const COLOR_STATE_KEY = ProfileStateKey.create<ColorState>('color_state');
@@ -87,7 +126,7 @@ export const COLOR_STATE_KEY = ProfileStateKey.create<ColorState>('color_state')
 const colorStateDefinition: ProfileStateDefinition<ColorState> = {
   key: COLOR_STATE_KEY,
   descriptor: {
-    favouriteColor: { type: ProfileStateType.Ui },
-    leastFavouriteColor: { type: ProfileStateType.Ui },
+    favoriteColor: { type: ProfileStateType.Ui },
+    rowControlColor: { type: ProfileStateType.Persistent },
   },
 };

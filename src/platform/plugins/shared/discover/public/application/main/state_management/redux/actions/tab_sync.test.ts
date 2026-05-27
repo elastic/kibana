@@ -221,7 +221,7 @@ describe('tab_sync actions', () => {
 
     it('should subscribe to createTabPersistableStateObservable for syncing locally persisted tab state', async () => {
       const mockTabState$ = new Subject<
-        Pick<TabState, 'appState' | 'globalState' | 'attributes'>
+        Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>
       >();
       const createTabPersistableStateObservableSpy = jest
         .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
@@ -236,6 +236,7 @@ describe('tab_sync actions', () => {
           tabId,
           internalState$: expect.any(Object),
           getState: expect.any(Function),
+          profileStateRegistry: expect.any(Object),
         })
       );
 
@@ -245,7 +246,7 @@ describe('tab_sync actions', () => {
 
     it('should dispatch syncLocallyPersistedTabState when tabState observable emits', async () => {
       const mockTabState$ = new Subject<
-        Pick<TabState, 'appState' | 'globalState' | 'attributes'>
+        Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>
       >();
       jest
         .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
@@ -264,8 +265,8 @@ describe('tab_sync actions', () => {
       // Clear any calls that happened during initialization
       syncLocallyPersistedTabStateSpy.mockClear();
 
-      const { appState, globalState, attributes } = getCurrentTab();
-      const nextState = { appState, globalState, attributes };
+      const { appState, globalState, attributes, profileState } = getCurrentTab();
+      const nextState = { appState, globalState, attributes, profileState };
 
       // Emit a state change
       mockTabState$.next(nextState);
@@ -276,7 +277,7 @@ describe('tab_sync actions', () => {
 
     it('should unsubscribe from tabStateSubscription when stopSyncing is called', async () => {
       const mockTabState$ = new Subject<
-        Pick<TabState, 'appState' | 'globalState' | 'attributes'>
+        Pick<TabState, 'appState' | 'globalState' | 'attributes' | 'profileState'>
       >();
       jest
         .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')

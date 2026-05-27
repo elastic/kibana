@@ -18,7 +18,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { RowControlColumn } from '@kbn/discover-utils';
+import type {
+  RowControlColumn,
+  RowControlComponent,
+  RowControlRowProps,
+} from '@kbn/discover-utils';
 import { AppMenuActionId, getFieldValue } from '@kbn/discover-utils';
 import { capitalize } from 'lodash';
 import React from 'react';
@@ -29,7 +33,7 @@ import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { ChartWithCustomButtons, CustomDocViewerFooter, CustomDocViewerHeader } from './components';
 import { CustomDocView } from './components/custom_doc_view';
 import { RestorableStateDocView } from './components/restorable_state_doc_view';
-import { COLOR_STATE_KEY } from '../../../profile_state';
+import { COLOR_STATE_KEY, type ColorState } from '../../../profile_state';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -110,11 +114,17 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               order: 2,
               render: function Render() {
                 const colorState = useObservable(colorState$, stateAdapter.getState());
-                const options = [
+                const favoriteColorOptions = [
                   { value: 'default', text: 'None' },
                   { value: 'blue', text: 'Blue' },
                   { value: 'pink', text: 'Pink' },
                   { value: 'green', text: 'Green' },
+                ];
+                const rowControlColorOptions = [
+                  { value: 'default', text: 'None' },
+                  { value: 'primary', text: 'Primary' },
+                  { value: 'success', text: 'Success' },
+                  { value: 'danger', text: 'Danger' },
                 ];
 
                 return (
@@ -125,14 +135,28 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                         <h3>Extensible State Example</h3>
                       </EuiTitle>
                       <EuiFlexItem grow={false}>
-                        <EuiFormRow label="Favourite color">
+                        <EuiFormRow label="Favorite color (UI state)">
                           <EuiSelect
-                            options={options}
-                            value={colorState.favouriteColor}
+                            options={favoriteColorOptions}
+                            value={colorState.favoriteColor}
                             onChange={(e) => {
-                              stateAdapter.updateState({ favouriteColor: e.target.value });
+                              stateAdapter.updateState({ favoriteColor: e.target.value });
                             }}
-                            aria-label="Select favourite color"
+                            aria-label="Select favorite color"
+                          />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiFormRow label="Row control color (Persistent state)">
+                          <EuiSelect
+                            options={rowControlColorOptions}
+                            value={colorState.rowControlColor}
+                            onChange={(e) => {
+                              stateAdapter.updateState({
+                                rowControlColor: e.target.value as ColorState['rowControlColor'],
+                              });
+                            }}
+                            aria-label="Select row control color"
                           />
                         </EuiFormRow>
                       </EuiFlexItem>
@@ -236,30 +260,49 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         },
       };
     },
-    getRowAdditionalLeadingControls: (prev) => (params) => {
-      const additionalControls = prev(params) || [];
+    getRowAdditionalLeadingControls: (prev, { toolkit }) => {
+      const stateAdapter = toolkit.getStateAdapter(COLOR_STATE_KEY);
+      const colorState$ = stateAdapter.getState$();
+      const RowControl = ({
+        Control,
+        rowProps,
+        iconType,
+      }: {
+        Control: RowControlComponent;
+        rowProps: RowControlRowProps;
+        iconType: string;
+      }) => {
+        const colorState = useObservable(colorState$, stateAdapter.getState());
 
-      return [
-        ...additionalControls,
-        ...['chartBarVerticalStack', 'heart', 'inspect'].map(
-          (iconType): RowControlColumn => ({
-            id: `exampleControl_${iconType}`,
-            render: (Control, rowProps) => {
-              return (
-                <Control
-                  data-test-subj={`exampleLogsControl_${iconType}`}
-                  label={`Example ${iconType}`}
-                  tooltipContent={`Example ${iconType}`}
-                  iconType={iconType}
-                  onClick={() => {
-                    alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
-                  }}
-                />
-              );
-            },
-          })
-        ),
-      ];
+        return (
+          <Control
+            data-test-subj={`exampleLogsControl_${iconType}`}
+            label={`Example ${iconType}`}
+            tooltipContent={`Example ${iconType}`}
+            iconType={iconType}
+            onClick={() => {
+              alert(`Example "${iconType}" control clicked. Row index: ${rowProps.rowIndex}`);
+            }}
+            color={colorState.rowControlColor}
+          />
+        );
+      };
+
+      return (params) => {
+        const additionalControls = prev(params) || [];
+
+        return [
+          ...additionalControls,
+          ...['chartBarVerticalStack', 'heart', 'inspect'].map(
+            (iconType): RowControlColumn => ({
+              id: `exampleControl_${iconType}`,
+              render: (Control, rowProps) => {
+                return <RowControl Control={Control} rowProps={rowProps} iconType={iconType} />;
+              },
+            })
+          ),
+        ];
+      };
     },
     getDefaultAppState: () => () => ({
       breakdownField: 'log.level',

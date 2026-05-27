@@ -225,6 +225,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       tabId,
       internalState$: getInternalState$(),
       getState,
+      profileStateRegistry: services.profileStateRegistry,
     }).subscribe(() => {
       dispatch(
         internalStateActions.syncLocallyPersistedTabState({
