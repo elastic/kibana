@@ -17,6 +17,7 @@ project:
   owner: '@elastic/obs-onboarding-team @elastic/obs-sig-events-team'
   sourceRoot: x-pack/platform/plugins/shared/streams_app
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/dataset-quality-plugin'
