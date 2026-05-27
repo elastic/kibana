@@ -164,7 +164,7 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
 
     let nextPollAt: string | undefined;
     const attempt = stepState?.pollState?.attempt ?? 0;
-    const lastPollAt = stepState?.pollState?.lastPollAt ?? stepState.startedAt;
+    const lastPollAt = stepState?.pollState?.nextPollAt ?? stepState.startedAt;
     const nextAttempt = attempt + 1;
 
     if (nextPollAtOverride) {
@@ -281,12 +281,7 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
     nextPollAt: string;
     startedAt: string;
   }): PolicyCalculationResult {
-    const {
-      ceilings,
-      attempt,
-      nextPollAt: currentNextPollAtString,
-      startedAt: startedAtString,
-    } = params;
+    const { ceilings, attempt, nextPollAt: currentNextPollAtString } = params;
     const maxWaitMs = ceilings?.maxWaitMs ?? DEFAULT_POLL_CEILINGS.maxWaitMs;
     const maxAttempts = ceilings?.maxAttempts ?? DEFAULT_POLL_CEILINGS.maxAttempts;
 
@@ -295,21 +290,16 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
       return { outcome: 'maxAttemptReached' };
     }
 
-    const startedAt = new Date(startedAtString);
-    let nextPollAt = new Date(currentNextPollAtString);
     const now = new Date();
+    const nextPollAt = new Date(currentNextPollAtString);
+    const currentDuration = nextPollAt.getTime() - now.getTime();
 
-    if (nextPollAt.getTime() - startedAt.getTime() > maxWaitMs) {
-      const timeLeft = startedAt.getTime() + maxWaitMs - now.getTime();
-
-      if (timeLeft <= 0) {
-        // If no time left, we don't need to schedule a next poll.
-        return {
-          outcome: 'maxWaitMsExceeded',
-        };
-      }
-
-      nextPollAt = new Date(now.getTime() + timeLeft);
+    const remainingTime = maxWaitMs - (currentDuration ?? 0);
+    if (remainingTime <= 0) {
+      return {
+        outcome: 'success',
+        nextPollAt: new Date(now.getTime() + maxWaitMs).toISOString(),
+      };
     }
 
     return {
