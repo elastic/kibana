@@ -46,6 +46,21 @@ const createDatasourceState = (includeEmptyRows?: boolean) => ({
   },
 });
 
+const createMultiLayerDatasourceState = (
+  includeEmptyRowsByLayer: Record<string, boolean | undefined>
+) => ({
+  layers: Object.fromEntries(
+    Object.entries(includeEmptyRowsByLayer).map(([layerId, includeEmptyRows]) => [
+      layerId,
+      {
+        columns: {
+          date: createDateHistogramColumn(includeEmptyRows),
+        },
+      },
+    ])
+  ),
+});
+
 const createDatasourceStates = (includeEmptyRows?: boolean) => ({
   formBased: createDatasourceState(includeEmptyRows),
 });
@@ -231,6 +246,34 @@ describe('applying visualization datasource defaults', () => {
     });
   });
 
+  it('can scope runtime overwrite behavior to selected layers', () => {
+    const datasourceState = createMultiLayerDatasourceState({
+      layer1: true,
+      layer2: true,
+    });
+
+    expect(
+      applyDatasourceDefaultsToDatasourceState(
+        datasourceState,
+        getVisualizationDatasourceDefaults('lnsXY', SeriesTypes.BAR),
+        { overwriteExisting: true, layerIds: ['layer2'] }
+      )
+    ).toEqual({
+      layers: {
+        layer1: {
+          columns: {
+            date: createDateHistogramColumn(true),
+          },
+        },
+        layer2: {
+          columns: {
+            date: createDateHistogramColumn(false),
+          },
+        },
+      },
+    });
+  });
+
   it('preserves explicit datasource values for datasource states', () => {
     const datasourceStates = createDatasourceStates(true);
 
@@ -278,6 +321,38 @@ describe('applying visualization datasource defaults', () => {
           layer1: {
             columns: {
               date: createDateHistogramColumn(true),
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it('can scope datasource state overwrites to selected layers', () => {
+    const datasourceStates = {
+      formBased: createMultiLayerDatasourceState({
+        layer1: false,
+        layer2: false,
+      }),
+    };
+
+    expect(
+      applyDatasourceDefaultsToDatasourceStates(
+        datasourceStates,
+        getVisualizationDatasourceDefaults('lnsDatatable'),
+        { overwriteExisting: true, layerIds: ['layer1'] }
+      )
+    ).toEqual({
+      formBased: {
+        layers: {
+          layer1: {
+            columns: {
+              date: createDateHistogramColumn(true),
+            },
+          },
+          layer2: {
+            columns: {
+              date: createDateHistogramColumn(false),
             },
           },
         },

@@ -179,6 +179,13 @@ Object {
           "columnId": "trendline-time-col-id",
         },
       ],
+      "datasourceDefaults": Object {
+        "operationParams": Object {
+          "date_histogram": Object {
+            "includeEmptyRows": false,
+          },
+        },
+      },
       "filterOperations": [Function],
       "groupId": "trendTime",
       "groupLabel": "Time field",
@@ -192,6 +199,13 @@ Object {
           "columnId": "trendline-breakdown-col-id",
         },
       ],
+      "datasourceDefaults": Object {
+        "operationParams": Object {
+          "date_histogram": Object {
+            "includeEmptyRows": false,
+          },
+        },
+      },
       "filterOperations": [Function],
       "groupId": "trendBreakdownBy",
       "groupLabel": "Break down by",

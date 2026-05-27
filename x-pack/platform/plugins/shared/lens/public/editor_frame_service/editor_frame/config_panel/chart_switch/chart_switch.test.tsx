@@ -547,6 +547,100 @@ describe('chart_switch', () => {
     });
   });
 
+  it('should forward datasource updates for compatible active subtype switches', async () => {
+    visualizationMap = {
+      ...(visualizationMap as unknown as Record<string, unknown>),
+      lnsXY: {
+        ...createMockVisualization('lnsXY'),
+        initialize: jest.fn((_frame, state) => state ?? { preferredSeriesType: 'line' }),
+        visualizationTypes: ['line', 'bar'].map((id) => ({
+          icon: 'empty',
+          id,
+          label: id,
+          sortPriority: 1,
+          description: faker.lorem.sentence(),
+        })),
+        getVisualizationTypeId: jest.fn((state) => state.preferredSeriesType),
+        isSubtypeCompatible: jest.fn(() => true),
+        switchVisualizationType: jest.fn((seriesType, state) => ({
+          ...(state as Record<string, unknown>),
+          preferredSeriesType: seriesType,
+        })),
+      },
+    } as unknown as typeof visualizationMap;
+    datasourceStates = {
+      formBased: {
+        state: {
+          layers: {
+            a: {
+              columns: {
+                date: {
+                  dataType: 'date',
+                  isBucketed: true,
+                  label: '@timestamp',
+                  operationType: 'date_histogram',
+                  params: {
+                    interval: 'auto',
+                    includeEmptyRows: true,
+                  },
+                  scale: 'interval',
+                  sourceField: '@timestamp',
+                },
+              },
+            },
+          },
+        },
+        isLoading: false,
+      },
+    };
+
+    const { store, openChartSwitch, switchToVis } = renderChartSwitch(undefined, {
+      preloadedStateOverrides: {
+        visualization: {
+          activeId: 'lnsXY',
+          state: { preferredSeriesType: 'line' },
+          selectedLayerId: null,
+        },
+        datasourceStates,
+      },
+    });
+
+    await openChartSwitch();
+    await switchToVis('bar');
+
+    expect(store.dispatch).toHaveBeenCalledWith({
+      type: 'lens/switchVisualization',
+      payload: {
+        suggestion: {
+          visualizationState: { preferredSeriesType: 'bar' },
+          newVisualizationId: 'lnsXY',
+          datasourceId: 'formBased',
+          datasourceState: {
+            layers: {
+              a: {
+                columns: {
+                  date: {
+                    dataType: 'date',
+                    isBucketed: true,
+                    label: '@timestamp',
+                    operationType: 'date_histogram',
+                    params: {
+                      interval: 'auto',
+                      includeEmptyRows: false,
+                    },
+                    scale: 'interval',
+                    sourceField: '@timestamp',
+                  },
+                },
+              },
+            },
+          },
+        },
+        clearStagedPreview: true,
+      },
+    });
+  });
+
   it('should use the suggestion that matches the subtype', async () => {
     const { openChartSwitch, switchToVis } = renderChartSwitch(undefined, {
       preloadedStateOverrides: {

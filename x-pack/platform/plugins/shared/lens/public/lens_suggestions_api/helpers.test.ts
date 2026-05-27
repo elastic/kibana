@@ -5,9 +5,18 @@
  * 2.0.
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { mergeSuggestionWithVisContext, injectESQLQueryIntoLensLayers } from './helpers';
+import {
+  mergeSuggestionWithVisContext,
+  injectESQLQueryIntoLensLayers,
+  selectAndApplyChartSuggestion,
+} from './helpers';
 import { mockAllSuggestions } from '../mocks';
-import type { TypedLensByValueInput, TypedLensSerializedState } from '@kbn/lens-common';
+import type {
+  TypedLensByValueInput,
+  TypedLensSerializedState,
+  VisualizationMap,
+} from '@kbn/lens-common';
+import { ChartType } from '@kbn/visualization-utils';
 
 const context = {
   dataViewSpec: {
@@ -724,6 +733,110 @@ describe('lens suggestions api helpers', () => {
         suggestionWithoutIndexRefs
       );
       expect(newAttributes).toStrictEqual(expectedLensAttributes);
+    });
+  });
+
+  describe('selectAndApplyChartSuggestion', () => {
+    it('reapplies datasource defaults after switching the suggestion subtype', () => {
+      const visualizationMap = {
+        lnsXY: {
+          isSubtypeSupported: jest.fn(() => true),
+          getVisualizationTypeId: jest.fn((state) => state.preferredSeriesType),
+          switchVisualizationType: jest.fn(
+            (seriesType: string, state: Record<string, unknown>) => ({
+              ...state,
+              preferredSeriesType: seriesType,
+              layers: [
+                {
+                  ...(state.layers as Array<Record<string, unknown>>)[0],
+                  seriesType,
+                },
+              ],
+            })
+          ),
+        },
+      } as unknown as VisualizationMap;
+
+      const suggestion = selectAndApplyChartSuggestion({
+        suggestionsList: [
+          {
+            title: 'bar',
+            visualizationId: 'lnsXY',
+            visualizationState: {
+              preferredSeriesType: 'line',
+              layers: [
+                {
+                  layerId: 'layer1',
+                  layerType: 'data',
+                  seriesType: 'line',
+                },
+              ],
+            },
+            keptLayerIds: ['layer1'],
+            datasourceId: 'formBased',
+            datasourceState: {
+              layers: {
+                layer1: {
+                  columns: {
+                    date: {
+                      dataType: 'date',
+                      isBucketed: true,
+                      label: '@timestamp',
+                      operationType: 'date_histogram',
+                      params: {
+                        interval: 'auto',
+                        includeEmptyRows: true,
+                      },
+                      scale: 'interval',
+                      sourceField: '@timestamp',
+                    },
+                  },
+                },
+              },
+            },
+            columns: 1,
+            changeType: 'unchanged',
+            score: 1,
+            previewIcon: 'empty',
+          },
+        ],
+        targetChartType: ChartType.Bar,
+        chartType: 'bar',
+        visualizationMap,
+        preferredVisAttributes: undefined,
+        context,
+      });
+
+      expect(suggestion.visualizationState).toEqual({
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'layer1',
+            layerType: 'data',
+            seriesType: 'bar',
+          },
+        ],
+      });
+      expect(suggestion.datasourceState).toEqual({
+        layers: {
+          layer1: {
+            columns: {
+              date: {
+                dataType: 'date',
+                isBucketed: true,
+                label: '@timestamp',
+                operationType: 'date_histogram',
+                params: {
+                  interval: 'auto',
+                  includeEmptyRows: false,
+                },
+                scale: 'interval',
+                sourceField: '@timestamp',
+              },
+            },
+          },
+        },
+      });
     });
   });
 });

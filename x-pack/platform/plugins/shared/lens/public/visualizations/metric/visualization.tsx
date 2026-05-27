@@ -281,6 +281,11 @@ const getTrendlineLayerConfiguration = (
   hidden: boolean;
   groups: VisualizationDimensionGroupConfig[];
 } => {
+  const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+    LENS_METRIC_ID,
+    props.state
+  );
+
   return {
     hidden: true,
     groups: [
@@ -321,6 +326,7 @@ const getTrendlineLayerConfiguration = (
       {
         groupId: LENS_METRIC_GROUP_ID.TREND_TIME,
         groupLabel: i18n.translate('xpack.lens.metric.timeField', { defaultMessage: 'Time field' }),
+        datasourceDefaults,
         accessors: props.state.trendlineTimeAccessor
           ? [
               {
@@ -338,6 +344,7 @@ const getTrendlineLayerConfiguration = (
         groupLabel: i18n.translate('xpack.lens.metric.breakdownBy', {
           defaultMessage: 'Break down by',
         }),
+        datasourceDefaults,
         accessors: props.state.trendlineBreakdownByAccessor
           ? [
               {

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import {
+  applyDatasourceDefaultsToDatasourceState,
+  getVisualizationDatasourceDefaultsForVisualizationState,
+  LENS_DATASOURCE_ID,
+} from '@kbn/lens-common';
 
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { ChartType } from '@kbn/visualization-utils';
@@ -216,11 +220,25 @@ export const selectAndApplyChartSuggestion = ({
     if (vis?.isSubtypeSupported?.(chartType) && vis?.switchVisualizationType) {
       const currentSubType = vis.getVisualizationTypeId?.(selectedSuggestion.visualizationState);
       if (currentSubType !== chartType) {
+        const visualizationState = vis.switchVisualizationType(
+          chartType,
+          selectedSuggestion.visualizationState
+        );
+        const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
+          selectedSuggestion.visualizationId,
+          visualizationState
+        );
+
         finalSuggestion = {
           ...selectedSuggestion,
-          visualizationState: vis.switchVisualizationType(
-            chartType,
-            selectedSuggestion.visualizationState
+          visualizationState,
+          datasourceState: applyDatasourceDefaultsToDatasourceState(
+            selectedSuggestion.datasourceState,
+            datasourceDefaults,
+            {
+              overwriteExisting: true,
+              layerIds: selectedSuggestion.keptLayerIds,
+            }
           ),
         };
       }

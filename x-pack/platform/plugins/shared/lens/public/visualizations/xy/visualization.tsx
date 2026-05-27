@@ -36,7 +36,6 @@ import { getKbnPalettes, useKbnPalettes, KbnPalette } from '@kbn/palettes';
 import {
   applyDatasourceDefaultsToDatasourceState,
   getVisualizationDatasourceDefaults,
-  getVisualizationDatasourceDefaultsForVisualizationState,
 } from '@kbn/lens-common';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -487,10 +486,7 @@ export const getXyVisualization = ({
       );
       colors = palette.getCategoricalColors(10, dataLayer.palette?.params);
     }
-    const datasourceDefaults = getVisualizationDatasourceDefaultsForVisualizationState(
-      'lnsXY',
-      state
-    );
+    const datasourceDefaults = getVisualizationDatasourceDefaults(XY_ID, dataLayer.seriesType);
     return {
       groups: [
         {
@@ -1329,12 +1325,13 @@ export function switchXYVisualizationType(
 
 export const applyXYSeriesTypeDatasourceDefaults = <T,>(
   datasourceState: T,
-  seriesType: SeriesType
+  seriesType: SeriesType,
+  layerId?: string
 ) =>
   applyDatasourceDefaultsToDatasourceState(
     datasourceState,
     getVisualizationDatasourceDefaults(XY_ID, seriesType),
-    { overwriteExisting: true }
+    { overwriteExisting: true, layerIds: layerId ? [layerId] : undefined }
   );
 
 /**
@@ -1650,17 +1647,23 @@ const SubtypeSwitch = ({
               return;
             }
             const nextSeriesType = chosenType.value as SeriesType;
-            setState(switchXYVisualizationType(state, nextSeriesType, layerId));
+            const nextState = switchXYVisualizationType(state, nextSeriesType, layerId);
+            const nextLayer = nextState.layers.find((candidate): candidate is XYDataLayerConfig => {
+              return candidate.layerId === layerId && isDataLayer(candidate);
+            });
+
+            setState(nextState);
 
             const datasourceId = frame.datasourceLayers[layerId]?.datasourceId;
             const currentDatasourceState = datasourceId
               ? datasourceStates[datasourceId]?.state
               : undefined;
 
-            if (datasourceId && currentDatasourceState !== undefined) {
+            if (datasourceId && currentDatasourceState !== undefined && nextLayer) {
               const nextDatasourceState = applyXYSeriesTypeDatasourceDefaults(
                 currentDatasourceState,
-                nextSeriesType
+                nextLayer.seriesType,
+                layerId
               );
 
               if (nextDatasourceState !== currentDatasourceState) {

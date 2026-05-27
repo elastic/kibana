@@ -115,14 +115,21 @@ export const ChartSwitch = memo(function ChartSwitch({
       (selection.sameDatasources && currentDatasourceState !== undefined
         ? applyDatasourceDefaultsToDatasourceState(currentDatasourceState, datasourceDefaults, {
             overwriteExisting: true,
+            layerIds: layerId ? [layerId] : undefined,
           })
         : undefined);
+    const updatedActiveDatasource =
+      updatedDatasourceState !== undefined && updatedDatasourceState !== currentDatasourceState
+        ? activeDatasourceId
+        : undefined;
+    const nextDatasourceId = selection.datasourceId ?? updatedActiveDatasource ?? undefined;
 
     switchToSuggestion(
       dispatchLens,
       {
         ...selection,
         visualizationState,
+        datasourceId: nextDatasourceId,
         datasourceState:
           updatedDatasourceState !== currentDatasourceState
             ? updatedDatasourceState

@@ -278,7 +278,10 @@ function getVisualizationSuggestions(
         const datasourceState = applyDatasourceDefaultsToDatasourceState(
           datasourceSuggestion.state,
           datasourceDefaults,
-          { overwriteExisting: true }
+          {
+            overwriteExisting: true,
+            layerIds: datasourceSuggestion.keptLayerIds,
+          }
         );
 
         return {

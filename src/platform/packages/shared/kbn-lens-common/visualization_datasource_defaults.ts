@@ -36,6 +36,7 @@ interface DatasourceStatesLike {
 
 export interface ApplyDatasourceDefaultsOptions {
   overwriteExisting?: boolean;
+  layerIds?: string[];
 }
 
 export interface VisualizationDatasourceDefaults {
@@ -239,8 +240,13 @@ export const applyDatasourceDefaultsToDatasourceState = <T>(
   }
 
   let hasChanges = false;
+  const layerIds = options?.layerIds ? new Set(options.layerIds) : undefined;
   const layers = Object.fromEntries(
     Object.entries(datasourceState.layers).map(([layerId, layer]) => {
+      if (layerIds && !layerIds.has(layerId)) {
+        return [layerId, layer];
+      }
+
       let layerHasChanges = false;
       const columns = Object.fromEntries(
         Object.entries(layer.columns).map(([columnId, column]) => {
