@@ -849,6 +849,48 @@ describe('Pack utils', () => {
       ).toBeNull();
     });
 
+    // Without a pack-level mode, the wire-emission branch falls back to
+    // legacy `interval`-only output and the per-query rrule fields are
+    // dropped — the agent silently never runs the query. Reject at the edge.
+    test('rejects per-query schedule_type: rrule when pack has no schedule_type', () => {
+      expect(
+        validatePackScheduleFields({
+          queries: {
+            q1: {
+              schedule_type: 'rrule',
+              rrule_schedule: {
+                rrule: 'FREQ=MINUTELY;INTERVAL=1',
+                start_date: '2024-01-01T00:00:00.000Z',
+              },
+            },
+          },
+        })
+      ).toMatch(/pack has no schedule_type/);
+    });
+
+    test('rejects per-query rrule_schedule without schedule_type when pack has no mode', () => {
+      expect(
+        validatePackScheduleFields({
+          queries: {
+            q1: {
+              rrule_schedule: {
+                rrule: 'FREQ=MINUTELY;INTERVAL=1',
+                start_date: '2024-01-01T00:00:00.000Z',
+              },
+            },
+          },
+        })
+      ).toMatch(/pack has no schedule_type/);
+    });
+
+    test('rejects per-query schedule_type: interval when pack has no mode', () => {
+      expect(
+        validatePackScheduleFields({
+          queries: { q1: { schedule_type: 'interval', interval: 30 } },
+        })
+      ).toMatch(/pack has no schedule_type/);
+    });
+
     test('field-probe scenario — pack FREQ=MINUTELY;INTERVAL=2 + splay 2m rejected', () => {
       expect(
         validatePackScheduleFields({

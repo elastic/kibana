@@ -687,6 +687,10 @@ export const validatePackScheduleFields = ({
       return `Query "${queryId}" cannot specify both interval and rrule_schedule`;
     }
 
+    if (!packScheduleType && (query.schedule_type || query.rrule_schedule)) {
+      return `Query "${queryId}" specifies schedule_type/rrule_schedule but the pack has no schedule_type; set the pack-level schedule_type first`;
+    }
+
     if (query.schedule_type === 'rrule') {
       if (!query.rrule_schedule) {
         return `Query "${queryId}" schedule_type "rrule" requires rrule_schedule`;
