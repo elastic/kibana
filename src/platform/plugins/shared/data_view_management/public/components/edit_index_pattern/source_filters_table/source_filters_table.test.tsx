@@ -8,168 +8,175 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
+import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen, waitFor } from '@testing-library/react';
 import { SourceFiltersTable } from './source_filters_table';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { userEvent } from '@testing-library/user-event';
 
-jest.mock('@elastic/eui', () => ({
-  EuiButton: 'eui-button',
-  EuiTitle: 'eui-title',
-  EuiText: 'eui-text',
-  EuiHorizontalRule: 'eui-horizontal-rule',
-  EuiSpacer: 'eui-spacer',
-  EuiCallOut: 'eui-call-out',
-  EuiLink: 'eui-link',
-  EuiOverlayMask: 'eui-overlay-mask',
-  EuiConfirmModal: 'eui-confirm-modal',
-  EuiLoadingSpinner: 'eui-loading-spinner',
-  Comparators: {
-    property: () => {},
-    default: () => {},
-  },
-}));
+const createDataView = (
+  sourceFilters = [{ value: 'time*' }, { value: 'nam*' }, { value: 'age*' }]
+) =>
+  createStubDataView({
+    spec: {
+      fields: {
+        time: { name: 'time', type: 'date', searchable: true, aggregatable: true },
+        name: { name: 'name', type: 'string', searchable: true, aggregatable: true },
+        age: { name: 'age', type: 'number', searchable: true, aggregatable: true },
+      },
+      sourceFilters,
+      title: 'test-data-view',
+    },
+  });
 
-jest.mock('./components/header', () => ({ Header: 'header' }));
-jest.mock('./components/table', () => ({
-  // Note: this seems to fix React complaining about non lowercase attributes
-  Table: () => {
-    return 'table';
-  },
-}));
+const fieldWildcardMatcher = (filters: string[]) => {
+  const [query = ''] = filters;
+  const normalizedQuery = query.replace('*', '');
 
-const getIndexPatternMock = (mockedFields: any = {}) =>
-  ({
-    sourceFilters: [{ value: 'time*' }, { value: 'nam*' }, { value: 'age*' }],
-    ...mockedFields,
-  } as DataView);
+  return (field: string) => field.includes(normalizedQuery);
+};
+
+const getFilterActionButton = (filterValue: string, buttonIndex: number) => {
+  const button = getFilterRow(filterValue).querySelectorAll('button')[buttonIndex];
+
+  if (!button) {
+    throw new Error(`Unable to find action button ${buttonIndex} for filter ${filterValue}`);
+  }
+
+  return button;
+};
+
+const getFilterRow = (filterValue: string) => {
+  const row = screen.getByText(filterValue).closest('tr');
+
+  if (!row) throw new Error(`Unable to find row for filter ${filterValue}`);
+
+  return row;
+};
+
+const renderSourceFiltersTable = ({
+  filterFilter = '',
+  indexPattern = createDataView(),
+  saveIndexPattern = jest.fn(async () => {}),
+}: Partial<React.ComponentProps<typeof SourceFiltersTable>> = {}) => {
+  renderWithI18n(
+    <SourceFiltersTable
+      fieldWildcardMatcher={fieldWildcardMatcher}
+      filterFilter={filterFilter}
+      indexPattern={indexPattern}
+      saveIndexPattern={saveIndexPattern}
+    />
+  );
+
+  return { indexPattern, saveIndexPattern };
+};
 
 describe('SourceFiltersTable', () => {
-  test('should render normally', () => {
-    const component = shallow(
-      <SourceFiltersTable
-        indexPattern={getIndexPatternMock()}
-        fieldWildcardMatcher={() => {}}
-        filterFilter={''}
-        saveIndexPattern={async () => {}}
-      />
-    );
-
-    expect(component).toMatchSnapshot();
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {}); // Silent EUI warnings during tests
   });
 
-  test('should filter based on the query bar', () => {
-    const component = shallow(
-      <SourceFiltersTable
-        indexPattern={getIndexPatternMock()}
-        fieldWildcardMatcher={() => {}}
-        filterFilter={''}
-        saveIndexPattern={async () => {}}
-      />
-    );
-
-    component.setProps({ filterFilter: 'ti' });
-    expect(component).toMatchSnapshot();
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
-  test('should should a loading indicator when saving', () => {
-    const component = shallow(
-      <SourceFiltersTable
-        indexPattern={getIndexPatternMock({
-          sourceFilters: [{ value: 'tim*' }],
-        })}
-        filterFilter={''}
-        fieldWildcardMatcher={() => {}}
-        saveIndexPattern={async () => {}}
-      />
-    );
+  it('should render normally', () => {
+    renderSourceFiltersTable();
 
-    component.setState({ isSaving: true });
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('time*')).toBeVisible();
+    expect(screen.getByText('nam*')).toBeVisible();
+    expect(screen.getByText('age*')).toBeVisible();
+    expect(screen.getByTestId('fieldFilterInput')).toBeVisible();
+    expect(screen.getByText('Add')).toBeVisible();
   });
 
-  test('should show a delete modal', () => {
-    const component = shallow<SourceFiltersTable>(
-      <SourceFiltersTable
-        indexPattern={
-          getIndexPatternMock({
-            sourceFilters: [{ value: 'tim*' }],
-          }) as DataView
-        }
-        filterFilter={''}
-        fieldWildcardMatcher={() => {}}
-        saveIndexPattern={async () => {}}
-      />
-    );
+  it('should filter based on the query bar', () => {
+    renderSourceFiltersTable({ filterFilter: 'ti' });
 
-    component.instance().startDeleteFilter({ value: 'tim*', clientId: 1 });
-    component.update(); // We are not calling `.setState` directly so we need to re-render
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText('time*')).toBeVisible();
+    expect(screen.queryByText('nam*')).not.toBeInTheDocument();
+    expect(screen.queryByText('age*')).not.toBeInTheDocument();
   });
 
-  test('should remove a filter', async () => {
+  it('should show a loading indicator when saving', async () => {
+    const user = userEvent.setup();
     const saveIndexPattern = jest.fn(async () => {});
-    const component = shallow<SourceFiltersTable>(
-      <SourceFiltersTable
-        indexPattern={
-          getIndexPatternMock({
-            sourceFilters: [{ value: 'tim*' }, { value: 'na*' }],
-          }) as DataView
-        }
-        filterFilter={''}
-        fieldWildcardMatcher={() => {}}
-        saveIndexPattern={saveIndexPattern}
-      />
-    );
 
-    component.instance().startDeleteFilter({ value: 'tim*', clientId: 1 });
-    component.update(); // We are not calling `.setState` directly so we need to re-render
-    await component.instance().deleteFilter();
-    component.update(); // We are not calling `.setState` directly so we need to re-render
+    renderSourceFiltersTable({
+      indexPattern: createDataView([{ value: 'tim*' }]),
+      saveIndexPattern,
+    });
+
+    await user.type(screen.getByTestId('fieldFilterInput'), 'na*');
+    await user.click(screen.getByText('Add'));
+
+    expect(saveIndexPattern).toHaveBeenCalled();
+    expect(screen.getByText('tim*')).toBeVisible();
+  });
+
+  it('should show a delete modal', async () => {
+    const user = userEvent.setup();
+    renderSourceFiltersTable({ indexPattern: createDataView([{ value: 'tim*' }]) });
+
+    await user.click(getFilterActionButton('tim*', 1));
+
+    expect(screen.getByText("Delete field filter 'tim*'?")).toBeVisible();
+  });
+
+  it('should remove a filter', async () => {
+    const user = userEvent.setup();
+    const saveIndexPattern = jest.fn(async () => {});
+
+    const { indexPattern } = renderSourceFiltersTable({
+      indexPattern: createDataView([{ value: 'tim*' }, { value: 'na*' }]),
+      saveIndexPattern,
+    });
+    await user.click(getFilterActionButton('tim*', 1));
+    await user.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    expect(saveIndexPattern).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.queryByText('tim*')).not.toBeInTheDocument();
+    });
+
+    expect(screen.getByText('na*')).toBeVisible();
+    expect(indexPattern.sourceFilters).toEqual([{ value: 'na*', clientId: 2 }]);
+  });
+
+  it('should add a filter', async () => {
+    const user = userEvent.setup();
+    const saveIndexPattern = jest.fn(async () => {});
+
+    const { indexPattern } = renderSourceFiltersTable({
+      indexPattern: createDataView([{ value: 'tim*' }]),
+      saveIndexPattern,
+    });
+
+    await user.type(screen.getByTestId('fieldFilterInput'), 'na*');
+    await user.click(screen.getByText('Add'));
 
     expect(saveIndexPattern).toBeCalled();
-    expect(component).toMatchSnapshot();
+    expect(await screen.findByText('na*')).toBeVisible();
+
+    expect(indexPattern.sourceFilters).toEqual([{ value: 'tim*' }, { value: 'na*' }]);
   });
 
-  test('should add a filter', async () => {
+  it('should update a filter', async () => {
+    const user = userEvent.setup();
     const saveIndexPattern = jest.fn(async () => {});
-    const component = shallow<SourceFiltersTable>(
-      <SourceFiltersTable
-        indexPattern={getIndexPatternMock({
-          sourceFilters: [{ value: 'tim*' }],
-        })}
-        filterFilter={''}
-        fieldWildcardMatcher={() => {}}
-        saveIndexPattern={saveIndexPattern}
-      />
-    );
 
-    await component.instance().onAddFilter('na*');
-    component.update(); // We are not calling `.setState` directly so we need to re-render
+    const { indexPattern } = renderSourceFiltersTable({
+      indexPattern: createDataView([{ value: 'tim*' }]),
+      saveIndexPattern,
+    });
+
+    await user.click(screen.getByTestId('edit_filter-tim*'));
+    await user.clear(screen.getByTestId('filter_input_tim*'));
+    await user.type(screen.getByTestId('filter_input_tim*'), 'ti*');
+    await user.click(screen.getByTestId('save_filter-tim*'));
 
     expect(saveIndexPattern).toBeCalled();
-    expect(component).toMatchSnapshot();
-  });
-
-  test('should update a filter', async () => {
-    const saveIndexPattern = jest.fn(async () => {});
-    const component = shallow<SourceFiltersTable>(
-      <SourceFiltersTable
-        indexPattern={
-          getIndexPatternMock({
-            sourceFilters: [{ value: 'tim*' }],
-          }) as DataView
-        }
-        filterFilter={''}
-        fieldWildcardMatcher={() => {}}
-        saveIndexPattern={saveIndexPattern}
-      />
-    );
-
-    await component.instance().saveFilter({ clientId: 'tim*', value: 'ti*' });
-    component.update(); // We are not calling `.setState` directly so we need to re-render
-
-    expect(saveIndexPattern).toBeCalled();
-    expect(component).toMatchSnapshot();
+    expect(await screen.findByText('ti*')).toBeVisible();
+    expect(indexPattern.sourceFilters).toEqual([{ value: 'ti*', clientId: 1 }]);
   });
 });

@@ -33,7 +33,7 @@ import type {
   ReviewRuleUpgradeResponseBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
 import {
-  BOOTSTRAP_PREBUILT_RULES_URL,
+  BOOTSTRAP_EASE_RULES_URL,
   GET_PREBUILT_RULES_BASE_VERSION_URL,
   GET_PREBUILT_RULES_STATUS_URL,
   PERFORM_RULE_INSTALLATION_URL,
@@ -96,7 +96,7 @@ import type {
   RulesSnoozeSettingsMap,
   UpdateRulesProps,
 } from '../logic/types';
-import type { BootstrapPrebuiltRulesResponse } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
+import type { RuleBootstrapResults } from '../../../../common/api/detection_engine/prebuilt_rules/bootstrap_ease_rules/bootstrap_ease_rules.gen';
 import { defaultRangeValue } from '../../rule_gaps/constants';
 
 /**
@@ -832,8 +832,8 @@ export const performUpgradeRules = async (
     body: JSON.stringify(body),
   });
 
-export const bootstrapPrebuiltRules = async (): Promise<BootstrapPrebuiltRulesResponse> =>
-  KibanaServices.get().http.fetch(BOOTSTRAP_PREBUILT_RULES_URL, {
+export const bootstrapEaseRules = async (): Promise<RuleBootstrapResults> =>
+  KibanaServices.get().http.fetch(BOOTSTRAP_EASE_RULES_URL, {
     method: 'POST',
     version: '1',
   });

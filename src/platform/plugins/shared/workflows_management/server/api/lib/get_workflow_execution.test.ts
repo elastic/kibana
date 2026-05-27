@@ -29,6 +29,7 @@ describe('getWorkflowExecution', () => {
     startedAt: '2024-01-01T00:00:00Z',
     stepExecutionIds: ['step-doc-1', 'step-doc-2'],
     workflowDefinition: { version: '1', name: 'test', enabled: true, triggers: [], steps: [] },
+    concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
   };
 
   beforeEach(() => {
@@ -237,6 +238,7 @@ describe('getWorkflowExecution', () => {
       expect(result).not.toBeNull();
       expect(result?.id).toBe('exec-1');
       expect(result?.stepExecutions).toHaveLength(2);
+      expect(result?.concurrencyGroupKey).toBe('streams-ki-onboarding-my-stream');
     });
   });
 });

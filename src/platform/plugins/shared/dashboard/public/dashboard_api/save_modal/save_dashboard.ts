@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { getDashboardBackupService } from '../../services/dashboard_api_services';
 import { coreServices } from '../../services/kibana_services';
 import { dashboardClient } from '../../dashboard_client';
+import { showDashboardSavedToast } from './show_dashboard_saved_toast';
 import type { SaveDashboardProps, SaveDashboardReturn } from './types';
 
 export const saveDashboard = async ({
@@ -29,13 +30,9 @@ export const saveDashboard = async ({
     const newId = result.id;
 
     if (newId) {
-      coreServices.notifications.toasts.addSuccess({
-        title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
-          defaultMessage: `Dashboard ''{title}'' was saved`,
-          values: { title: dashboardState.title },
-        }),
-        className: 'eui-textBreakWord',
-        'data-test-subj': 'saveDashboardSuccess',
+      showDashboardSavedToast({
+        savedDashboardId: newId,
+        dashboardTitle: dashboardState.title,
       });
 
       /**

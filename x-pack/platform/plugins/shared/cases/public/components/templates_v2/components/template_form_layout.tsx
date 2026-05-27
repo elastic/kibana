@@ -68,7 +68,6 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
-  const [savedValue, setSavedValue] = useState(initialValue);
   const [isEnabled, setIsEnabled] = useState(initialIsEnabled);
 
   const {
@@ -83,17 +82,14 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     (newValue) => form.setValue('definition', newValue),
     templateId
   );
-
-  const hasChanges = yamlValue !== savedValue;
+  const hasChanges = yamlValue.trimEnd() !== initialValue.trimEnd();
 
   const yamlValueRef = useRef(yamlValue);
   yamlValueRef.current = yamlValue;
 
   const handleFieldDefaultChange = useCallback(
     (fieldName: string, value: string, control: string) => {
-      const trimmedValue = value.trim();
-
-      const isEmptyNumeric = control === FieldType.INPUT_NUMBER && trimmedValue === '';
+      const isEmptyNumeric = control === FieldType.INPUT_NUMBER && value.trim() === '';
       const isEmptyUserPicker =
         control === FieldType.USER_PICKER && (value === '' || value === '[]');
 
@@ -107,7 +103,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
       let parsedValue: FieldDefaultValue;
       if (control === FieldType.INPUT_NUMBER) {
-        parsedValue = Number(trimmedValue);
+        parsedValue = Number(value.trim());
       } else if (control === FieldType.CHECKBOX_GROUP) {
         try {
           parsedValue = JSON.parse(value) as string[];
@@ -122,7 +118,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
           parsedValue = [];
         }
       } else {
-        parsedValue = trimmedValue;
+        parsedValue = value;
       }
       const updatedYaml = updateYamlFieldDefault(yamlValueRef.current, fieldName, parsedValue);
       if (updatedYaml !== yamlValueRef.current) {
@@ -151,7 +147,6 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       async (data) => {
         try {
           await onCreate(data, isEnabled);
-          setSavedValue(data.definition);
         } catch (e) {
           setSubmitError(e?.message ?? i18n.FAILED_TO_SAVE_TEMPLATE);
         }
@@ -199,6 +194,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             isYamlSaved={isYamlSaved}
             previewWidth={previewWidth}
             onPreviewWidthChange={setPreviewWidth}
+            currentTemplateId={templateId}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

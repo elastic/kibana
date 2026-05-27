@@ -15,6 +15,8 @@ jest.mock('../utils/execute_esql_query');
 
 const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
 
+const SPACE_ID = 'default';
+
 describe('fetchAlertingEpisodes', () => {
   const mockExpressions = {} as ExpressionsStart;
 
@@ -25,12 +27,13 @@ describe('fetchAlertingEpisodes', () => {
 
   it('should call executeEsqlQuery with correct parameters', async () => {
     const pageSize = 10;
-    const expectedQuery = buildEpisodesQuery({
+    const expectedQuery = buildEpisodesQuery(SPACE_ID, {
       sortField: '@timestamp',
       sortDirection: 'desc',
     }).print('basic');
 
     await fetchAlertingEpisodes({
+      spaceId: SPACE_ID,
       pageSize,
       services: { expressions: mockExpressions },
     });
@@ -55,12 +58,13 @@ describe('fetchAlertingEpisodes', () => {
 
   it('should call executeEsqlQuery with different page size', async () => {
     const pageSize = 20;
-    const expectedQuery = buildEpisodesQuery({
+    const expectedQuery = buildEpisodesQuery(SPACE_ID, {
       sortField: '@timestamp',
       sortDirection: 'desc',
     }).print('basic');
 
     await fetchAlertingEpisodes({
+      spaceId: SPACE_ID,
       pageSize,
       services: { expressions: mockExpressions },
     });
@@ -87,12 +91,13 @@ describe('fetchAlertingEpisodes', () => {
     const pageSize = 15;
     const abortController = new AbortController();
     const abortSignal = abortController.signal;
-    const expectedQuery = buildEpisodesQuery({
+    const expectedQuery = buildEpisodesQuery(SPACE_ID, {
       sortField: '@timestamp',
       sortDirection: 'desc',
     }).print('basic');
 
     await fetchAlertingEpisodes({
+      spaceId: SPACE_ID,
       pageSize,
       abortSignal,
       services: { expressions: mockExpressions },
@@ -122,9 +127,10 @@ describe('fetchAlertingEpisodes', () => {
       sortField: 'episode.status',
       sortDirection: 'asc' as const,
     };
-    const expectedQuery = buildEpisodesQuery(sortState).print('basic');
+    const expectedQuery = buildEpisodesQuery(SPACE_ID, sortState).print('basic');
 
     await fetchAlertingEpisodes({
+      spaceId: SPACE_ID,
       pageSize,
       sortState,
       services: { expressions: mockExpressions },

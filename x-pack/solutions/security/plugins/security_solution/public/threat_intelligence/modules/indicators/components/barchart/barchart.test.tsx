@@ -83,8 +83,10 @@ describe('<IndicatorsBarChart />', () => {
           />
         </div>
         <div
+          aria-roledescription="visualization"
           class="echChart"
           data-testid="echChart"
+          role="graphics-document"
           style="width: 100%; height: 200px;"
         >
           <div

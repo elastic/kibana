@@ -213,7 +213,6 @@ export const SpaceCopyResultDetails = (props: Props) => {
                   onChange={selectProps.onChange}
                   prepend={objectIdLabel}
                   aria-label={objectIdLabel}
-                  hasDividers
                   fullWidth
                   compressed
                 />

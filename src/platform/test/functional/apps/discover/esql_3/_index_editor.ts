@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const es = getService('es');
   const retry = getService('retry');
-  const browser = getService('browser');
   const dataGrid = getService('dataGrid');
 
   const { indexEditor, common, discover } = getPageObjects([
@@ -243,6 +242,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await es.bulk({
         index: INDEX_NAME_EDITION,
+        refresh: 'wait_for',
         operations: [
           {
             index: { _id: '1' },
@@ -268,7 +268,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
         ],
       });
-      await browser.refresh();
+
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
+      await discover.selectTextBaseLang();
+      await discover.waitUntilSearchingHasFinished();
 
       // Type lookup join query
       await esql.typeEsqlEditorQuery(`from logstash-* | LOOKUP JOIN ${INDEX_NAME_EDITION}`);

@@ -58,6 +58,11 @@ export class SearchSessionsService extends FtrService {
   }: { searchSessionName?: string; isSubmitButton?: boolean; withRefresh?: boolean } = {}) {
     this.log.debug('save the search session');
     if (withRefresh) {
+      // The button might be in the cancel or loading state, in those cases we won't be able to find the test subject, so we wait for it to be present.
+      await this.retry.waitFor('refresh button to be present', async () => {
+        return await this.testSubjects.exists('querySubmitButton');
+      });
+
       await this.testSubjects.clickWhenNotDisabledWithoutRetry('querySubmitButton');
     }
 
@@ -74,6 +79,13 @@ export class SearchSessionsService extends FtrService {
         const count = await this.toasts.getCount();
         return count > 0;
       }
+    );
+  }
+
+  public async expectCompletedSearchToast() {
+    await this.retry.waitFor(
+      'the toast appears indicating that the search session is completed',
+      () => this.testSubjects.exists('backgroundSearchCompletedToastLink')
     );
   }
 
@@ -146,7 +158,7 @@ export class SearchSessionsService extends FtrService {
     expect(await this.hasErrorsOrWarnings()).to.be(false);
   }
 
-  private async hasErrorsOrWarnings() {
+  public async hasErrorsOrWarnings() {
     const messages = [
       // Warnings
       'Your background search is still running',

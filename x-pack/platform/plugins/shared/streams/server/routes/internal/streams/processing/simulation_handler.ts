@@ -38,6 +38,7 @@ import type {
 import {
   getInheritedFieldsFromAncestors,
   getRoot,
+  isDraftStream,
   LOGS_ECS_STREAM_NAME,
   Streams,
 } from '@kbn/streams-schema';
@@ -53,6 +54,7 @@ import {
   normalizeGeoPointsInObject,
   detectGeoPointPatternsFromDocuments,
 } from '../../../../lib/streams/helpers/normalize_geo_points';
+import { resolveFirstNonDraftAncestor } from '../../../../lib/streams/helpers/draft_helpers';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import { createStreamlangResolverOptions } from '../../../../lib/streams/resolvers';
@@ -115,13 +117,21 @@ export const simulateProcessing = async ({
   fieldsMetadataClient,
 }: SimulateProcessingDeps): Promise<ProcessingSimulationResponse> => {
   /* 0. Retrieve required data to prepare the simulation */
-  const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
-    await Promise.all([
-      streamsClient.getStream(params.path.name),
-      getStreamIndex(esClient, streamsClient, params.path.name),
-    ]);
+  const stream = await streamsClient.getStream(params.path.name);
 
-  const streamFields = await getStreamFields(streamsClient, stream);
+  const isDraft = Streams.WiredStream.Definition.is(stream) && isDraftStream(stream);
+  const indexStreamName = isDraft
+    ? await resolveFirstNonDraftAncestor(streamsClient, params.path.name)
+    : params.path.name;
+
+  const { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps } = await getStreamIndex(
+    esClient,
+    streamsClient,
+    indexStreamName
+  );
+
+  const ancestors = await streamsClient.getAncestors(params.path.name);
+  const streamFields = getStreamFieldsFromDefinition(stream, ancestors);
 
   // Get reserved fields for validation
   const reservedFields = Object.entries(streamFields)
@@ -171,7 +181,9 @@ export const simulateProcessing = async ({
     simulationData,
     stream,
     streamIndexState,
-    params
+    params,
+    ancestors,
+    indexStreamName
   );
   /**
    * 2. Run both pipeline and ingest simulations in parallel.
@@ -317,35 +329,49 @@ const prepareIngestSimulationBody = (
   simulationData: PreparedSimulationData,
   stream: Streams.all.Definition,
   streamIndex: IndicesIndexState,
-  params: ProcessingSimulationParams
+  params: ProcessingSimulationParams,
+  ancestors: Streams.WiredStream.Definition[],
+  indexStreamName: string
 ): SimulateIngestRequest => {
   const { body } = params;
   const { detected_fields } = body;
 
   const { docs, processors } = simulationData;
 
-  const defaultPipelineName = streamIndex.settings?.index?.default_pipeline;
+  const isWiredDraft = Streams.WiredStream.Definition.is(stream) && isDraftStream(stream);
 
   const pipelineSubstitutions: SimulateIngestRequest['pipeline_substitutions'] = {};
 
-  if (defaultPipelineName) {
-    pipelineSubstitutions[defaultPipelineName] = {
-      processors,
-      field_access_pattern: 'flexible',
-    };
-  }
   if (Streams.WiredStream.Definition.is(stream)) {
-    // need to reroute from the root
     pipelineSubstitutions[getProcessingPipelineName(getRoot(stream.name))] = {
       processors: [
         {
           reroute: {
-            destination: stream.name,
+            destination: indexStreamName,
           },
         },
       ],
     };
   }
+
+  {
+    const defaultPipelineName = streamIndex.settings?.index?.default_pipeline;
+    if (defaultPipelineName) {
+      pipelineSubstitutions[defaultPipelineName] = {
+        processors,
+        field_access_pattern: 'flexible',
+      };
+    }
+  }
+
+  // Build mapping_addition from explicit detected_fields in the request body.
+  // For drafts, also include field definitions from the stream and all its
+  // ancestors (including other drafts in the chain) since there is no backing
+  // index template to provide them to the simulate API.
+  const mappingProperties: StreamsMappingProperties = {
+    ...(isWiredDraft ? computeDraftFieldMappings(stream, ancestors) : {}),
+    ...(detected_fields ? computeMappingProperties(detected_fields) : {}),
+  };
 
   const simulationBody: SimulateIngestRequest = {
     docs,
@@ -354,14 +380,51 @@ const prepareIngestSimulationBody = (
     // But the ingest simulation API does not validate correctly the mappings unless they are specified in the simulation body.
     // So we need to merge the mappings from the stream index with the detected fields.
     // This is a workaround until the ingest simulation API works as expected.
-    ...(detected_fields && {
+    ...(!isEmpty(mappingProperties) && {
       mapping_addition: {
-        properties: computeMappingProperties(detected_fields),
+        properties: mappingProperties,
       },
     }),
   };
 
   return simulationBody;
+};
+
+const TYPES_SUPPORTING_IGNORE_MALFORMED = new Set([
+  'boolean',
+  'date',
+  'date_nanos',
+  'double',
+  'float',
+  'half_float',
+  'scaled_float',
+  'integer',
+  'long',
+  'short',
+  'byte',
+  'unsigned_long',
+  'geo_point',
+  'geo_shape',
+  'ip',
+]);
+
+const computeDraftFieldMappings = (
+  stream: Streams.WiredStream.Definition,
+  ancestors: Streams.WiredStream.Definition[]
+): StreamsMappingProperties => {
+  const allFieldSources = [...ancestors, stream];
+  return Object.fromEntries(
+    allFieldSources.flatMap((def) =>
+      Object.entries(def.ingest.wired.fields).flatMap(([name, config]) => {
+        if (
+          !FIELD_DEFINITION_TYPES.includes(config.type as (typeof FIELD_DEFINITION_TYPES)[number])
+        ) {
+          return [];
+        }
+        return [[name, { type: config.type }]];
+      })
+    )
+  ) as StreamsMappingProperties;
 };
 
 /**
@@ -1015,12 +1078,10 @@ const getStreamIndex = async (
   };
 };
 
-const getStreamFields = async (
-  streamsClient: StreamsClient,
-  stream: Streams.all.Definition
-): Promise<FieldDefinition> => {
-  const ancestors = await streamsClient.getAncestors(stream.name);
-
+const getStreamFieldsFromDefinition = (
+  stream: Streams.all.Definition,
+  ancestors: Streams.WiredStream.Definition[]
+): FieldDefinition => {
   if (Streams.WiredStream.Definition.is(stream)) {
     return { ...stream.ingest.wired.fields, ...getInheritedFieldsFromAncestors(ancestors) };
   }
@@ -1125,7 +1186,10 @@ const computeMappingProperties = (
       }
 
       const { name, description: _description, ...config } = field;
-      return [[name, { ...config, ignore_malformed: false }]];
+      const mapping = TYPES_SUPPORTING_IGNORE_MALFORMED.has(config.type)
+        ? { ...config, ignore_malformed: false }
+        : { ...config };
+      return [[name, mapping]];
     })
   ) as StreamsMappingProperties;
 };

@@ -17,6 +17,7 @@ import type {
   WorkflowDetailDto,
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
+import { pickManagedWorkflowFields } from '@kbn/workflows';
 import { validateWorkflowForExecution, type WorkflowRepository } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
@@ -203,7 +204,7 @@ export class TriggerEventHandler {
       eventChainDepth: nextScheduledEventChainDepth(eventChainContext),
     };
 
-    this.validateTrigger(triggerId, spaceId, eventContextForResolution);
+    this.validateTrigger(triggerId, spaceId, payload);
 
     const resolutionStartMs = Date.now();
     const { workflows, stats: resolutionStats } = await this.resolveMatchingWorkflowSubscriptions(
@@ -510,6 +511,7 @@ export class TriggerEventHandler {
               enabled: workflow.enabled,
               definition: workflow.definition,
               yaml: workflow.yaml,
+              ...pickManagedWorkflowFields(workflow),
             };
             const context: Record<string, unknown> = {
               event: scheduleResult.event,

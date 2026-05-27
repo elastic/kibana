@@ -49,7 +49,8 @@ Here are some context for you to reference for your task, read it carefully as y
 You have to replace the macros syntax in the SPL query and use their value inline, if provided.
 
 Always follow the below guidelines when replacing macros:
-- The macros are always identified by backticks (\`).
+- The macros are always identified by single backticks (\`), e.g. \`macroName\`.
+- IMPORTANT: Do NOT confuse macros with SPL comments. SPL comments use triple backticks (\`\`\` comment text \`\`\`). Triple-backtick comments must be preserved as-is and must NOT be treated as macros.
 - Macros names can be in any case:
   - camelCase eg. \`someMacroName\`
   - snake_case eg. \`some_macro_name\`

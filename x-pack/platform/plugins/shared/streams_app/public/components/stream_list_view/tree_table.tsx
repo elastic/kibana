@@ -31,6 +31,7 @@ import {
   LOGS_ROOT_STREAM_NAME,
   ROOT_STREAM_NAMES,
   isRoot,
+  isDraftStream,
 } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
@@ -70,7 +71,12 @@ import {
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
-import { DeprecatedLogsBadge, DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
+import {
+  DeprecatedLogsBadge,
+  DiscoverBadgeButton,
+  DraftStreamBadge,
+  QueryStreamBadge,
+} from '../stream_badges';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -463,8 +469,11 @@ export function StreamsTreeTable({
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
                   {(ROOT_STREAM_NAMES.includes(item.stream.name as RootStreamName) ||
-                    Streams.QueryStream.Definition.is(item.stream)) && <TechnicalPreviewBadge />}
+                    Streams.QueryStream.Definition.is(item.stream) ||
+                    (Streams.WiredStream.Definition.is(item.stream) &&
+                      isDraftStream(item.stream))) && <TechnicalPreviewBadge />}
                   {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
+                  {isDraftStream(item.stream) && <DraftStreamBadge />}
                   {item.stream.name === LOGS_ROOT_STREAM_NAME &&
                     !Streams.QueryStream.Definition.is(item.stream) && (
                       <DeprecatedLogsBadge
@@ -577,17 +586,31 @@ export function StreamsTreeTable({
           sortable: (row: TableRow) => row.rootRetentionMs,
           dataType: 'number',
           width: '220px',
-          render: (_: unknown, item: TableRow) => (
-            <RetentionColumn
-              lifecycle={item.effective_lifecycle!}
-              streamName={item.stream.name}
-              aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
-                defaultMessage: 'Retention policy for {name}',
-                values: { name: item.stream.name },
-              })}
-              dataTestSubj={`retentionColumn-${item.stream.name}`}
-            />
-          ),
+          render: (_: unknown, item: TableRow) => {
+            if (isDraftStream(item.stream)) {
+              return (
+                <span>
+                  {i18n.translate('xpack.streams.streamsTreeTable.span.naLabel', {
+                    defaultMessage: 'N/A',
+                  })}
+                </span>
+              );
+            }
+            return (
+              <RetentionColumn
+                lifecycle={item.effective_lifecycle!}
+                streamName={item.stream.name}
+                aria-label={i18n.translate(
+                  'xpack.streams.streamsTreeTable.retentionCellAriaLabel',
+                  {
+                    defaultMessage: 'Retention policy for {name}',
+                    values: { name: item.stream.name },
+                  }
+                )}
+                dataTestSubj={`retentionColumn-${item.stream.name}`}
+              />
+            );
+          },
         },
         {
           field: 'definition',

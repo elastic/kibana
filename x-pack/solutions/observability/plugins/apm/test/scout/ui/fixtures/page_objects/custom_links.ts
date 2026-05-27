@@ -50,6 +50,7 @@ export class CustomLinksPage {
     await saveButton.waitFor({ state: 'visible' });
     await expect(saveButton).toBeEnabled();
     await saveButton.click();
+    await saveButton.waitFor({ state: 'hidden' });
   }
 
   async clickDelete() {
@@ -57,6 +58,7 @@ export class CustomLinksPage {
       timeout: EXTENDED_TIMEOUT,
     });
     await this.page.getByTestId('apmDeleteButtonDeleteButton').click();
+    await this.page.getByTestId('apmDeleteButtonDeleteButton').waitFor({ state: 'hidden' });
   }
 
   async getEditCustomLinkButton() {
@@ -113,7 +115,10 @@ export class CustomLinksPage {
     await valueInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 
     const valueComboBox = new EuiComboBoxWrapper(this.page, { dataTestSubj: `${key}.value` });
-    await valueComboBox.selectSingleOption(value);
+    // SuggestionsSelect pulls options from `/internal/apm/suggestions`; on serverless terms_enum is
+    // stubbed and aggregation can return empty under load, leaving no clickable option (#262047).
+    // The same control supports committing a typed value via Enter (onCreateOption).
+    await valueComboBox.setCustomSingleOption(value, { settleTimeoutMs: EXTENDED_TIMEOUT });
   }
 
   /**

@@ -14,6 +14,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { getTabStateMock, getPersistedTabMock } from './__mocks__/internal_state.mocks';
 import {
+  fromSavedObjectTabToAppState,
   fromSavedObjectTabToSearchSource,
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
@@ -61,6 +62,42 @@ const tab2 = getTabStateMock({
 });
 
 describe('tab mapping utils', () => {
+  describe('fromSavedObjectTabToAppState', () => {
+    it('should map saved object tab to app state', () => {
+      const persistedTab = getPersistedTabMock({
+        tabId: 'test-tab',
+        dataView: dataViewMockWithTimeField,
+        services,
+        appStateOverrides: {
+          columns: ['column1'],
+          sort: [],
+        },
+      });
+      expect(fromSavedObjectTabToAppState({ tab: persistedTab })).toMatchInlineSnapshot(`
+        Object {
+          "breakdownField": "",
+          "columns": Array [
+            "column1",
+          ],
+          "dataSource": Object {
+            "dataViewId": "the-data-view-id",
+            "type": "dataView",
+          },
+          "filters": Array [],
+          "grid": Object {},
+          "hideChart": false,
+          "hideTable": false,
+          "interval": "auto",
+          "query": Object {
+            "language": "kuery",
+            "query": "",
+          },
+          "sort": Array [],
+        }
+      `);
+    });
+  });
+
   describe('fromSavedObjectTabToTabState', () => {
     it('should map saved object tab to tab state', () => {
       let tabState = fromSavedObjectTabToTabState({
@@ -83,20 +120,10 @@ describe('tab mapping utils', () => {
               "dataViewId": "test-data-view-2",
               "type": "dataView",
             },
-            "density": undefined,
-            "filters": undefined,
             "grid": Object {},
-            "headerRowHeight": undefined,
-            "hideAggregatedPreview": undefined,
             "hideChart": false,
             "hideTable": false,
-            "interval": undefined,
-            "query": undefined,
-            "rowHeight": undefined,
-            "rowsPerPage": undefined,
-            "sampleSize": undefined,
             "sort": Array [],
-            "viewMode": undefined,
           },
           "attributes": Object {
             "controlGroupState": undefined,
@@ -108,6 +135,7 @@ describe('tab mapping utils', () => {
           "cascadedDocumentsState": Object {
             "availableCascadeGroups": Array [],
             "cascadedDocumentsMap": Object {},
+            "columnsMeta": Object {},
             "selectedCascadeGroups": Array [],
           },
           "dataRequestParams": Object {
@@ -177,20 +205,10 @@ describe('tab mapping utils', () => {
               "dataViewId": "test-data-view-2",
               "type": "dataView",
             },
-            "density": undefined,
-            "filters": undefined,
             "grid": Object {},
-            "headerRowHeight": undefined,
-            "hideAggregatedPreview": undefined,
             "hideChart": false,
             "hideTable": false,
-            "interval": undefined,
-            "query": undefined,
-            "rowHeight": undefined,
-            "rowsPerPage": undefined,
-            "sampleSize": undefined,
             "sort": Array [],
-            "viewMode": undefined,
           },
           "attributes": Object {
             "controlGroupState": undefined,
@@ -202,6 +220,7 @@ describe('tab mapping utils', () => {
           "cascadedDocumentsState": Object {
             "availableCascadeGroups": Array [],
             "cascadedDocumentsMap": Object {},
+            "columnsMeta": Object {},
             "selectedCascadeGroups": Array [],
           },
           "dataRequestParams": Object {

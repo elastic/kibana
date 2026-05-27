@@ -42,7 +42,7 @@ import {
   operationFromColumn,
 } from '../utils';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
-import { getHistogramColumn } from '../../columns/date_histogram';
+import { fromDateHistogramLensApiToLensState } from '../columns/date_histogram';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import type { MetricConfig } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
@@ -254,7 +254,7 @@ function buildVisualizationState(config: MetricConfig): MetricVisualizationState
       ? { palette: fromColorByValueAPIToLensState(primaryMetric.color) }
       : {}),
     ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
-    subtitle: primaryMetric.subtitle ?? '',
+    ...(primaryMetric.subtitle ? { subtitle: primaryMetric.subtitle } : {}),
     showBar: false,
     ...convertStylingToStateFormat(layer.styling, !!secondaryMetric),
     ...(secondaryMetric
@@ -579,7 +579,18 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
   addLayerColumn(defaultLayer, getAccessorName('metric'), newPrimaryColumns);
   if (trendLineLayer) {
     // Histogram first so columnOrder matches editor-built trendline layers and tabify agg order.
-    addLayerColumn(trendLineLayer, HISTOGRAM_COLUMN_NAME, getHistogramColumn({}));
+    addLayerColumn(
+      trendLineLayer,
+      HISTOGRAM_COLUMN_NAME,
+      fromDateHistogramLensApiToLensState({
+        operation: 'date_histogram',
+        field: '',
+        suggested_interval: 'auto',
+        use_original_time_range: false,
+        include_empty_rows: true,
+        drop_partial_intervals: false,
+      })
+    );
     addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, newPrimaryColumns);
   }
 

@@ -99,15 +99,10 @@ const Wrapper = ({
     const tooltipProps = SHAREABLE_SOON_OBJECT_TYPES.includes(objectType)
       ? { title: shareableSoonObjectTypeTitle, content: shareableSoonObjectTypeContent }
       : { title: isolatedObjectTypeTitle, content: isolatedObjectTypeContent };
-    return <EuiIconTip type="minus" position="left" delay="long" {...tooltipProps} />;
+    return <EuiIconTip type="minus" position="left" {...tooltipProps} />;
   } else if (objectNamespaceType === 'agnostic') {
     return (
-      <EuiToolTip
-        position="left"
-        delay="long"
-        title={globalObjectTypeTitle}
-        content={globalObjectTypeContent}
-      >
+      <EuiToolTip position="left" title={globalObjectTypeTitle} content={globalObjectTypeContent}>
         <LazySpaceAvatar
           space={{ id: '*', initials: '*', color: '#D3DAE6' }}
           isDisabled={true}

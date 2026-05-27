@@ -20,6 +20,7 @@ import type {
 } from '../../../shared/links/discover_links/get_esql_query';
 import { getESQLQuery } from '../../../shared/links/discover_links/get_esql_query';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
+import type { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
 
 const openLabel = i18n.translate('xpack.apm.alertDetails.chartActions.open', {
   defaultMessage: 'Open',
@@ -43,6 +44,9 @@ const errorsInDiscoverLabel = i18n.translate(
   }
 );
 
+export type RedMetricsChartElement =
+  (typeof APM_CHART_EBT_ELEMENTS)[keyof typeof APM_CHART_EBT_ELEMENTS];
+
 interface RedMetricsChartActionsProps {
   queryParams: Pick<
     ESQLQueryParams,
@@ -51,6 +55,7 @@ interface RedMetricsChartActionsProps {
   timeRange: { from: string; to: string };
   indexType?: IndexType;
   ruleTypeId?: string;
+  element: RedMetricsChartElement;
 }
 
 export function RedMetricsChartActions(props: RedMetricsChartActionsProps) {
@@ -77,6 +82,7 @@ function RedMetricsChartActionsPopover({
   timeRange,
   ruleTypeId,
   indexType = 'traces',
+  element,
   apmLocator,
   apmSourcesAccess,
   share,
@@ -168,8 +174,9 @@ function RedMetricsChartActionsPopover({
           href={apmLink}
           disabled={!apmLink}
           data-test-subj="apmAlertDetailsOpenInApmAction"
-          data-action="openInApm"
-          data-source={`alertDetails-${ruleTypeId}`}
+          data-ebt-action="openInApm"
+          data-ebt-element={element}
+          data-ebt-detail={ruleTypeId}
         >
           {inApmLabel}
         </EuiContextMenuItem>
@@ -178,8 +185,9 @@ function RedMetricsChartActionsPopover({
             href={discoverLink}
             disabled={!discoverLink}
             data-test-subj="apmAlertDetailsTracesOpenInDiscoverAction"
-            data-action="openTracesInDiscover"
-            data-source={`alertDetails-${ruleTypeId}`}
+            data-ebt-action="openInDiscover"
+            data-ebt-element={element}
+            data-ebt-detail={ruleTypeId}
           >
             {tracesInDiscoverLabel}
           </EuiContextMenuItem>
@@ -189,8 +197,9 @@ function RedMetricsChartActionsPopover({
             href={discoverLink}
             disabled={!discoverLink}
             data-test-subj="apmAlertDetailsErrorsOpenInDiscoverAction"
-            data-action="openErrorsInDiscover"
-            data-source={`alertDetails-${ruleTypeId}`}
+            data-ebt-action="openInDiscover"
+            data-ebt-element={element}
+            data-ebt-detail={ruleTypeId}
           >
             {errorsInDiscoverLabel}
           </EuiContextMenuItem>

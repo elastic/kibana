@@ -15,10 +15,11 @@ import {
   type ESQLFieldWithMetadata,
   SOURCES_TYPES,
 } from '@kbn/esql-types';
-import type { EsqlFieldType } from '@kbn/esql-types';
+import type { EsqlFieldType, EsqlViewsResult } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ESQLSourceResult,
+  EsqlDatasetsResult,
   InferenceEndpointAutocompleteItem,
   InferenceEndpointsAutocompleteResult,
 } from '@kbn/esql-types';
@@ -196,7 +197,7 @@ export class EsqlService {
    * Get all ES|QL views from the cluster (GET _query/view).
    * @returns A promise that resolves to the views response (list of view names and queries).
    */
-  public async getViews(): Promise<{ views: Array<{ name: string; query: string }> }> {
+  public async getViews(): Promise<EsqlViewsResult> {
     const { client } = this.options;
     const response = await client.transport.request<{
       views: Array<{ name: string; query: string }>;
@@ -205,6 +206,19 @@ export class EsqlService {
       path: '/_query/view',
     });
     return response ?? { views: [] };
+  }
+
+  /**
+   * Get all ES|QL datasets from the cluster (GET _query/dataset).
+   * @returns A promise that resolves to the datasets response.
+   */
+  public async getDatasets(): Promise<EsqlDatasetsResult> {
+    const { client } = this.options;
+    const response = await client.transport.request<EsqlDatasetsResult>({
+      method: 'GET',
+      path: '/_query/dataset',
+    });
+    return response ?? { datasets: [] };
   }
 
   /**

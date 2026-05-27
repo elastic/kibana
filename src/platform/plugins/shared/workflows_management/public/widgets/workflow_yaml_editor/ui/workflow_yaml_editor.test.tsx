@@ -155,7 +155,8 @@ jest.mock('../styles/use_workflow_editor_styles', () => ({
   useWorkflowEditorStyles: jest.fn(() => ({})),
 }));
 
-jest.mock('../styles/use_workflows_monaco_theme', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsMonacoTheme: jest.fn(),
 }));
 

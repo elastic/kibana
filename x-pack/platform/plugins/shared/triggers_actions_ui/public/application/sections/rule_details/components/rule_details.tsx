@@ -73,6 +73,7 @@ import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import type { RefreshToken } from './types';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 import { ViewInDiscover } from './view_in_discover';
+import { RuleQueryInspector } from '../../../components/rule_query_inspector';
 
 export type RuleDetailsProps = {
   rule: Rule;
@@ -446,6 +447,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               isInternallyManaged={ruleType.isInternallyManaged}
             />
           ),
+          <RuleQueryInspector ruleId={rule.id} ruleTypeId={rule.ruleTypeId} />,
           <ViewInDiscover rule={rule} />,
           <ViewLinkedObject rule={rule} />,
         ]}
@@ -490,7 +492,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 iconType="warning"
               >
                 <p>
-                  <EuiIcon color="warning" type="warning" />
+                  <EuiIcon color="warning" type="warning" aria-hidden={true} />
                   &nbsp;
                   {getRuleStatusWarningReasonText()}
                   &nbsp;
@@ -511,7 +513,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 size="s"
               >
                 <p>
-                  <EuiIcon color="warning" type="warning" />
+                  <EuiIcon color="warning" type="warning" aria-hidden={true} />
                   &nbsp;
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle"

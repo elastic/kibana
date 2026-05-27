@@ -22,10 +22,13 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -40,6 +43,7 @@ interface PluginsTabProps {
   plugins: PluginDefinition[];
   isLoading: boolean;
   isFormDisabled: boolean;
+  areElasticCapabilitiesEnabled: boolean;
 }
 
 export const PluginsTab: React.FC<PluginsTabProps> = ({
@@ -47,6 +51,7 @@ export const PluginsTab: React.FC<PluginsTabProps> = ({
   plugins,
   isLoading,
   isFormDisabled,
+  areElasticCapabilitiesEnabled,
 }) => {
   const [showActiveOnly, setShowActiveOnly] = useState(false);
   const showActiveOnlyChangeHandler = !isFormDisabled ? setShowActiveOnly : undefined;
@@ -66,6 +71,7 @@ export const PluginsTab: React.FC<PluginsTabProps> = ({
             disabled={isFormDisabled}
             showActiveOnly={showActiveOnly || isFormDisabled}
             onShowActiveOnlyChange={showActiveOnlyChangeHandler}
+            areElasticCapabilitiesEnabled={areElasticCapabilitiesEnabled}
           />
         )}
       />
@@ -81,6 +87,7 @@ interface PluginsSelectionProps {
   disabled?: boolean;
   showActiveOnly: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
+  areElasticCapabilitiesEnabled: boolean;
 }
 
 const PluginsSelection: React.FC<PluginsSelectionProps> = ({
@@ -91,6 +98,7 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
   disabled = false,
   showActiveOnly,
   onShowActiveOnlyChange,
+  areElasticCapabilitiesEnabled,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
@@ -98,9 +106,14 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
 
   const selectedIdSet = useMemo(() => new Set(selectedPlugins ?? []), [selectedPlugins]);
 
+  const isPluginAutoIncluded = useCallback(
+    (plugin: PluginDefinition) => areElasticCapabilitiesEnabled && plugin.readonly,
+    [areElasticCapabilitiesEnabled]
+  );
+
   const isPluginActive = useCallback(
-    (plugin: PluginDefinition) => selectedIdSet.has(plugin.id),
-    [selectedIdSet]
+    (plugin: PluginDefinition) => selectedIdSet.has(plugin.id) || isPluginAutoIncluded(plugin),
+    [selectedIdSet, isPluginAutoIncluded]
   );
 
   const displayPlugins = useMemo(() => {
@@ -126,6 +139,8 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
 
   const handleTogglePlugin = useCallback(
     (pluginId: string) => {
+      const plugin = plugins.find((p) => p.id === pluginId);
+      if (plugin && isPluginAutoIncluded(plugin)) return;
       const currentIds = selectedPlugins ?? [];
       if (currentIds.includes(pluginId)) {
         onPluginsChange(currentIds.filter((id) => id !== pluginId));
@@ -133,7 +148,7 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
         onPluginsChange([...currentIds, pluginId]);
       }
     },
-    [selectedPlugins, onPluginsChange]
+    [selectedPlugins, onPluginsChange, plugins, isPluginAutoIncluded]
   );
 
   const handleSearchChange = useCallback((query: string) => {
@@ -159,7 +174,7 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
   }
 
   const columns = [
-    createCheckboxColumn(isPluginActive, handleTogglePlugin, disabled),
+    createCheckboxColumn(isPluginActive, isPluginAutoIncluded, handleTogglePlugin, disabled),
     createPluginDetailsColumn(),
     createVersionColumn(),
   ];
@@ -261,7 +276,7 @@ const ActivePluginsStatus: React.FC<{ activePluginsCount: number; totalPlugins: 
             <EuiFlexItem>
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={iconType} color={statusColor} size="m" />
+                  <EuiIcon type={iconType} color={statusColor} size="m" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="m" color={statusColor}>
@@ -283,7 +298,14 @@ const ActivePluginsStatus: React.FC<{ activePluginsCount: number; totalPlugins: 
                   defaultMessage="{pluginsLink} extend agents with additional skills and capabilities."
                   values={{
                     pluginsLink: (
-                      <EuiLink href={createAgentBuilderUrl(appPaths.plugins.list)}>
+                      <EuiLink
+                        href={createAgentBuilderUrl(appPaths.plugins.list)}
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action: AGENT_BUILDER_UI_EBT.action.agentEdit.MANAGE_ALL,
+                          detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+                        })}
+                      >
                         {labels.plugins.title}
                       </EuiLink>
                     ),
@@ -332,18 +354,27 @@ const PluginDetailsColumn: React.FC<{ plugin: PluginDefinition }> = ({ plugin })
 
 const createCheckboxColumn = (
   isPluginActive: (plugin: PluginDefinition) => boolean,
+  isPluginAutoIncluded: (plugin: PluginDefinition) => boolean,
   onToggle: (pluginId: string) => void,
   disabled: boolean
 ) => ({
   width: '40px',
-  render: (plugin: PluginDefinition) => (
-    <EuiCheckbox
-      id={`plugin-${plugin.id}`}
-      checked={isPluginActive(plugin)}
-      onChange={() => onToggle(plugin.id)}
-      disabled={disabled}
-    />
-  ),
+  render: (plugin: PluginDefinition) => {
+    const autoIncluded = isPluginAutoIncluded(plugin);
+    const checkbox = (
+      <EuiCheckbox
+        id={`plugin-${plugin.id}`}
+        checked={isPluginActive(plugin)}
+        onChange={() => onToggle(plugin.id)}
+        disabled={disabled || autoIncluded}
+      />
+    );
+    return autoIncluded ? (
+      <EuiToolTip content={labels.agentPlugins.autoPluginManagedTooltip}>{checkbox}</EuiToolTip>
+    ) : (
+      checkbox
+    );
+  },
 });
 
 const createPluginDetailsColumn = () => ({
