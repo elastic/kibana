@@ -12,10 +12,9 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { testData } from '../../fixtures/common';
 
 const HUGE_FIELDS_INDEX = 'testhuge';
 const HUGE_FIELDS_DATA_VIEW = `${HUGE_FIELDS_INDEX}*`;
@@ -80,98 +79,92 @@ const ensureHugeFieldsData = async (esClient: EsClient) => {
   }
 };
 
-spaceTest.describe(
-  'Discover huge field list virtualization',
-  { tag: testData.DISCOVER_CORE_TAGS },
-  () => {
-    let hugeFieldsDataViewId: string | undefined;
+spaceTest.describe('Discover huge field list virtualization', { tag: tags.stateful.all }, () => {
+  let hugeFieldsDataViewId: string | undefined;
 
-    spaceTest.beforeAll(async ({ scoutSpace, apiServices, esClient }) => {
-      await ensureHugeFieldsData(esClient);
+  spaceTest.beforeAll(async ({ scoutSpace, apiServices, esClient }) => {
+    await ensureHugeFieldsData(esClient);
 
-      const { data } = await apiServices.dataViews.create({
-        title: HUGE_FIELDS_DATA_VIEW,
-        name: HUGE_FIELDS_DATA_VIEW,
-        timeFieldName: 'date',
-        override: true,
-        spaceId: scoutSpace.id,
-      });
-
-      hugeFieldsDataViewId = data.id;
-
-      await scoutSpace.uiSettings.set({
-        defaultIndex: hugeFieldsDataViewId,
-        'timepicker:timeDefaults': HUGE_FIELDS_TIME_DEFAULTS,
-      });
+    const { data } = await apiServices.dataViews.create({
+      title: HUGE_FIELDS_DATA_VIEW,
+      name: HUGE_FIELDS_DATA_VIEW,
+      timeFieldName: 'date',
+      override: true,
+      spaceId: scoutSpace.id,
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsAdmin();
-      await pageObjects.discover.setQueryMode('classic');
+    hugeFieldsDataViewId = data.id;
 
-      let discoverLoaded = false;
-      for (let attempt = 0; attempt < 2; attempt++) {
-        try {
-          await pageObjects.discover.goto();
-          discoverLoaded = true;
-          break;
-        } catch (error) {
-          if (attempt === 1) {
-            throw error;
-          }
+    await scoutSpace.uiSettings.set({
+      defaultIndex: hugeFieldsDataViewId,
+      'timepicker:timeDefaults': HUGE_FIELDS_TIME_DEFAULTS,
+    });
+  });
+
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.discover.setQueryMode('classic');
+
+    let discoverLoaded = false;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        await pageObjects.discover.goto();
+        discoverLoaded = true;
+        break;
+      } catch (error) {
+        if (attempt === 1) {
+          throw error;
         }
       }
+    }
 
-      if (!discoverLoaded) {
-        throw new Error('Unable to load Discover page after retrying navigation');
+    if (!discoverLoaded) {
+      throw new Error('Unable to load Discover page after retrying navigation');
+    }
+
+    await pageObjects.discover.waitUntilSearchingHasFinished();
+  });
+
+  spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
+    await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+
+    if (hugeFieldsDataViewId) {
+      await apiServices.dataViews.delete(hugeFieldsDataViewId, scoutSpace.id);
+    }
+
+    await scoutSpace.savedObjects.cleanStandardList();
+  });
+
+  spaceTest(
+    'test_huge data should have expected number of fields',
+    async ({ page, pageObjects }) => {
+      await expect(pageObjects.discover.getSelectedDataView()).toContainText(HUGE_FIELDS_DATA_VIEW);
+
+      await expect(
+        page.testSubj.locator('fieldListGroupedAvailableFields-countLoading')
+      ).toBeHidden({
+        timeout: 30_000,
+      });
+
+      const availableFieldCount = Number(
+        (await page.testSubj.innerText('fieldListGroupedAvailableFields-count')).replace(/,/g, '')
+      );
+      expect(availableFieldCount).toBeGreaterThan(5_000);
+
+      const virtualizedField = page.testSubj.locator('field-myvar1050');
+
+      // Initially this field should not be rendered in the virtualized list.
+      await expect(virtualizedField).toBeHidden();
+
+      // Scrolling down should render this field.
+      const availableFieldsGroup = page.testSubj.locator('fieldListGroupedAvailableFields');
+      await availableFieldsGroup.hover();
+
+      for (let i = 0; i < 25; i++) {
+        await page.mouse.wheel(0, 1_200);
       }
 
-      await pageObjects.discover.waitUntilSearchingHasFinished();
-    });
-
-    spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-
-      if (hugeFieldsDataViewId) {
-        await apiServices.dataViews.delete(hugeFieldsDataViewId, scoutSpace.id);
-      }
-
-      await scoutSpace.savedObjects.cleanStandardList();
-    });
-
-    spaceTest(
-      'test_huge data should have expected number of fields',
-      async ({ page, pageObjects }) => {
-        await expect(pageObjects.discover.getSelectedDataView()).toContainText(
-          HUGE_FIELDS_DATA_VIEW
-        );
-
-        await expect(
-          page.testSubj.locator('fieldListGroupedAvailableFields-countLoading')
-        ).toBeHidden({
-          timeout: 30_000,
-        });
-
-        const availableFieldCount = Number(
-          (await page.testSubj.innerText('fieldListGroupedAvailableFields-count')).replace(/,/g, '')
-        );
-        expect(availableFieldCount).toBeGreaterThan(5_000);
-
-        const virtualizedField = page.testSubj.locator('field-myvar1050');
-
-        // Initially this field should not be rendered in the virtualized list.
-        await expect(virtualizedField).toBeHidden();
-
-        // Scrolling down should render this field.
-        const availableFieldsGroup = page.testSubj.locator('fieldListGroupedAvailableFields');
-        await availableFieldsGroup.hover();
-
-        for (let i = 0; i < 25; i++) {
-          await page.mouse.wheel(0, 1_200);
-        }
-
-        await expect(virtualizedField).toBeVisible();
-      }
-    );
-  }
-);
+      await expect(virtualizedField).toBeVisible();
+    }
+  );
+});
