@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/data-views-plugin'
   - '@kbn/monaco'
+  - '@kbn/code-editor'
 tags:
   - shared-browser
   - package
