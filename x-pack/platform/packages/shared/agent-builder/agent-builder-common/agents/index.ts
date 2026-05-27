@@ -64,6 +64,7 @@ export {
   type AuthorizationPromptDefinition,
   type AuthorizationPrompt,
   type AuthorizationPromptResponse,
+  type AuthorizationMethod,
   type PromptResponse,
   type PromptRequest,
   type ToolCallPromptRequestSource,

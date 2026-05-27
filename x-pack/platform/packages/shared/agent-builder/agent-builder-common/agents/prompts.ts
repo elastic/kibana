@@ -68,6 +68,11 @@ export interface ConfirmPromptDefinition {
   color?: ConfirmPromptColor;
 }
 
+/**
+ * Authorization methods supported by {@link AuthorizationPromptDefinition}.
+ */
+export type AuthorizationMethod = 'oauth_authorization_code';
+
 export interface AuthorizationPromptDefinition {
   /** Unique id for the authorization request */
   id: string;
@@ -77,11 +82,8 @@ export interface AuthorizationPromptDefinition {
   connector_name: string;
   /** Action type ID of the connector (e.g., '.slack2', '.mcp') */
   connector_type: string;
-  /**
-   * authentication method that needs to be re-completed, e.g.
-   * 'oauth_authorization_code'.
-   */
-  auth_method: string;
+  /** authentication method that needs to be re-completed */
+  auth_method: AuthorizationMethod;
 }
 
 export interface ConfirmationPromptResponse {

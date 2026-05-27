@@ -12,6 +12,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AuthorizationPromptDefinition } from '@kbn/agent-builder-common/agents';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { OAuthRedirectMode, useConnectorOAuthConnect } from '@kbn/response-ops-oauth-hooks';
 import { borderRadiusXlStyles } from '../../../../../common.styles';
@@ -102,6 +104,8 @@ export const AuthorizationPrompt = ({
     onCancel();
   }, [cancelConnect, onCancel]);
 
+  const isInteractionDisabled = isDisabled || isLoading || isAnswered || isConnecting;
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -136,21 +140,31 @@ export const AuthorizationPrompt = ({
       <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
         <EuiButtonEmpty
           onClick={handleCancel}
-          disabled={isDisabled || isLoading || isAnswered}
+          disabled={isInteractionDisabled}
           size="s"
           color={isAnswered && answeredValue === false ? 'danger' : 'text'}
           data-test-subj="agentBuilderAuthorizationPromptCancelButton"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.AUTH_PROMPT_CANCEL,
+            detail: 'conversation',
+          })}
         >
           {isAnswered && answeredValue === false ? labels.declined : labels.cancel}
         </EuiButtonEmpty>
         <EuiButton
           onClick={handleAuthorize}
           isLoading={isLoading || isConnecting}
-          disabled={isDisabled || isLoading || isAnswered || isConnecting}
+          disabled={isInteractionDisabled}
           fill={!isAnswered || answeredValue === true}
           size="s"
           color={isAnswered && answeredValue === true ? 'success' : 'warning'}
           data-test-subj="agentBuilderAuthorizationPromptAuthorizeButton"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.AUTH_PROMPT_AUTHORIZE,
+            detail: 'conversation',
+          })}
         >
           {isAnswered && answeredValue === true ? labels.authorized : labels.authorize}
         </EuiButton>
