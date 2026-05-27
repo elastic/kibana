@@ -81,6 +81,7 @@ describe('TemplateFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseGetTemplate.mockReturnValue({ data: mockTemplate, isLoading: false });
+    mockUseGetFieldDefinitions.mockReturnValue({ data: { fieldDefinitions: [] }, isLoading: false });
   });
 
   it('renders the Extended fields heading and all template fields', () => {
@@ -597,13 +598,13 @@ describe('GlobalCaseFields', () => {
     expect(container.textContent).toBe('');
   });
 
-  it('renders global fields section when applyToAllCases definitions exist', () => {
+  it('renders global fields form when applyToAllCases definitions exist', () => {
     mockUseGetFieldDefinitions.mockReturnValue({
       data: { fieldDefinitions: [makeGlobalDef('incident_type')] },
       isLoading: false,
     });
     render(<GlobalCaseFields caseData={caseData} onUpdateField={globalOnUpdateField} />);
-    expect(screen.getByText('Global fields')).toBeInTheDocument();
+    expect(screen.queryByText('Global fields')).not.toBeInTheDocument();
     expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
   });
 

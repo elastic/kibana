@@ -820,19 +820,51 @@ describe('validators', () => {
       });
       templatesService.getTemplate.mockResolvedValue(templateSOWithRequired);
 
+      // Explicitly setting a required field to empty string should still fail.
+      // Omitting the key entirely (partial update) is allowed — the server merges
+      // existing values, so absent keys retain their stored value.
       await expect(
         validateExtendedFieldsInRequest({
           updateReq: {
             id: 'case-1',
             version: '1',
             template: { id: 'tpl-1', version: 1 },
-            extended_fields: {},
+            extended_fields: { summary_as_keyword: '' },
           },
           originalCase: makeOriginalCase(),
           templatesService: templatesService as unknown as TemplatesService,
           globalKeys: makeGlobalKeys(),
         })
       ).rejects.toThrow('Invalid extended_fields: Field "Summary" is required');
+    });
+
+    it('does not throw when only global fields are provided for a case with required template fields', async () => {
+      const templateSOWithRequired = makeTemplatesSO({
+        fields: [
+          {
+            control: 'INPUT_TEXT',
+            name: 'summary',
+            label: 'Summary',
+            type: 'keyword',
+            validation: { required: true },
+          },
+        ],
+      });
+      templatesService.getTemplate.mockResolvedValue(templateSOWithRequired);
+
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'tpl-1', version: 1 },
+            extended_fields: { my_global_field_as_keyword: 'value' },
+          },
+          originalCase: makeOriginalCase('tpl-1'),
+          templatesService: templatesService as unknown as TemplatesService,
+          globalKeys: makeGlobalKeys([{ name: 'my_global_field', type: 'keyword' }]),
+        })
+      ).resolves.toBeUndefined();
     });
 
     it('throws when template definition is invalid YAML/schema', async () => {
