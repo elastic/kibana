@@ -31,6 +31,7 @@ import {
   EuiLoadingSpinner,
   EuiSwitch,
   EuiFormPrepend,
+  EuiToolTip,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import type {

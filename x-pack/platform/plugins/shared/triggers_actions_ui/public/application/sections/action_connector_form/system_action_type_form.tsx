@@ -24,6 +24,7 @@ import {
   EuiSplitPanel,
   EuiCallOut,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { isEmpty, partition, some } from 'lodash';
