@@ -97,6 +97,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           enableSloTemplates: true,
           enableVersionSpecificPolicies: true,
           enableOpAMP: true,
+          installIntegrationsKnowledge: false,
           enableIntegrationConditions: true,
           enableCloudOnboardingDeployments: true,
         })}`,
