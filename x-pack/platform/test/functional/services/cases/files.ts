@@ -21,8 +21,9 @@ export function CasesFilesTableServiceProvider({ getService, getPageObject }: Ft
 
   return {
     async addFile(fileInputPath: string) {
-      // click the AddFile button
-      await testSubjects.click('cases-files-add');
+      // open the Attach popover and choose the file option
+      await testSubjects.click('case-view-attach-button');
+      await testSubjects.click('case-view-attach-menu-file');
       await find.byCssSelector('[aria-label="Upload a file"]');
 
       // upload a file
