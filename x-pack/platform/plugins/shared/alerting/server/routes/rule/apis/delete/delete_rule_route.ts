@@ -6,16 +6,12 @@
  */
 
 import type { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
+import type { RouteSecurity } from '@kbn/core-http-server';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type {
-  DeleteRuleRequestParamsV1,
-  DeleteRuleRequestQueryV1,
-} from '../../../../../common/routes/rule/apis/delete';
-import {
-  deleteRuleRequestParamsSchemaV1,
-  deleteRuleRequestQuerySchemaV1,
-} from '../../../../../common/routes/rule/apis/delete';
+import type { DeleteRuleRequestParamsV1 } from '../../../../../common/routes/rule/apis/delete';
+import { deleteRuleRequestParamsSchemaV1 } from '../../../../../common/routes/rule/apis/delete';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
@@ -26,13 +22,15 @@ interface BuildDeleteRuleRouteParams {
   path: string;
   router: IRouter<AlertingRequestHandlerContext>;
   options: RouteConfigOptions<RouteMethod>;
+  security: RouteSecurity;
   /**
-   * When true, the route accepts an `invalidate_api_key_now` query param that
-   * triggers synchronous invalidation of the rule's API keys. Reserved for the
-   * internal route only — it is an admin / test-cleanup escape hatch and is
-   * intentionally excluded from the public REST surface.
+   * When true, the route synchronously invalidates the rule's API keys instead of
+   * queuing them for the background invalidation task. Reserved for the internal
+   * superuser route — used by test cleanup helpers to avoid the
+   * `xpack.alerting.invalidateApiKeysTask.removalDelay` (default 1h) wait that
+   * would otherwise let UIAM keys accumulate between test runs.
    */
-  supportsInvalidateApiKeyNow?: boolean;
+  invalidateApiKeyNow?: boolean;
 }
 
 const buildDeleteRuleRoute = ({
@@ -40,17 +38,17 @@ const buildDeleteRuleRoute = ({
   path,
   router,
   options,
-  supportsInvalidateApiKeyNow = false,
+  security,
+  invalidateApiKeyNow = false,
 }: BuildDeleteRuleRouteParams) => {
   router.delete(
     {
       path,
-      security: DEFAULT_ALERTING_ROUTE_SECURITY,
+      security,
       options,
       validate: {
         request: {
           params: deleteRuleRequestParamsSchemaV1,
-          ...(supportsInvalidateApiKeyNow ? { query: deleteRuleRequestQuerySchemaV1 } : {}),
         },
         response: {
           204: {
@@ -75,9 +73,6 @@ const buildDeleteRuleRoute = ({
         const ruleTypes = alertingContext.listTypes();
 
         const params: DeleteRuleRequestParamsV1 = req.params;
-        const invalidateApiKeyNow = supportsInvalidateApiKeyNow
-          ? (req.query as DeleteRuleRequestQueryV1 | undefined)?.invalidate_api_key_now
-          : undefined;
 
         const rule = await rulesClient.get({ id: params.id });
 
@@ -89,7 +84,7 @@ const buildDeleteRuleRoute = ({
 
         await rulesClient.delete({
           id: params.id,
-          ...(supportsInvalidateApiKeyNow ? { invalidateApiKeyNow } : {}),
+          ...(invalidateApiKeyNow ? { invalidateApiKeyNow: true } : {}),
         });
         return res.noContent();
       })
@@ -105,6 +100,7 @@ export const deleteRuleRoute = (
     licenseState,
     path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
+    security: DEFAULT_ALERTING_ROUTE_SECURITY,
     options: {
       access: 'public',
       summary: `Delete a rule`,
@@ -112,7 +108,7 @@ export const deleteRuleRoute = (
     },
   });
 
-export const deleteInternalRuleRoute = (
+export const internalDeleteRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) =>
@@ -120,6 +116,13 @@ export const deleteInternalRuleRoute = (
     licenseState,
     path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
+    // Superuser-only: this route exists exclusively as an admin / test-cleanup
+    // escape hatch that synchronously invalidates the rule's API keys.
+    security: {
+      authz: {
+        requiredPrivileges: [ReservedPrivilegesSet.superuser],
+      },
+    },
     options: { access: 'internal' },
-    supportsInvalidateApiKeyNow: true,
+    invalidateApiKeyNow: true,
   });

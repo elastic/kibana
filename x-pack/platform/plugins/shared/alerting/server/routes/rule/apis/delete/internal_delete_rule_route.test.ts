@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { deleteInternalRuleRoute } from './delete_rule_route';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
+import { internalDeleteRuleRoute } from './delete_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
@@ -35,60 +36,32 @@ const mockedRule = {
   updatedAt: new Date('2019-02-12T21:01:22.479Z'),
 };
 
-describe('deleteInternalRuleRoute', () => {
+describe('internalDeleteRuleRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
   });
 
-  it('registers the internal path and access level', () => {
+  it('registers the internal path, access, and superuser-only authz', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    deleteInternalRuleRoute(router, licenseState);
+    internalDeleteRuleRoute(router, licenseState);
 
     const [config] = router.delete.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}"`);
     expect(config.options).toMatchObject({ access: 'internal' });
-    expect(config.validate).toEqual(
-      expect.objectContaining({ request: expect.objectContaining({ query: expect.anything() }) })
-    );
-  });
-
-  it('deletes a rule without invalidating API keys synchronously by default', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    deleteInternalRuleRoute(router, licenseState);
-
-    const [, handler] = router.delete.mock.calls[0];
-
-    rulesClient.delete.mockResolvedValueOnce({});
-
-    const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
-      {
-        params: { id: '1' },
-        query: {},
-      },
-      ['noContent']
-    );
-
-    await handler(context, req, res);
-
-    expect(rulesClient.delete).toHaveBeenCalledWith({
-      id: '1',
-      invalidateApiKeyNow: undefined,
+    expect(config.security).toEqual({
+      authz: { requiredPrivileges: [ReservedPrivilegesSet.superuser] },
     });
-    expect(res.noContent).toHaveBeenCalled();
   });
 
-  it('forwards invalidate_api_key_now=true to the rules client', async () => {
+  it('always invokes synchronous API key invalidation when deleting a rule', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    deleteInternalRuleRoute(router, licenseState);
+    internalDeleteRuleRoute(router, licenseState);
 
     const [, handler] = router.delete.mock.calls[0];
 
@@ -98,7 +71,6 @@ describe('deleteInternalRuleRoute', () => {
       { rulesClient },
       {
         params: { id: '1' },
-        query: { invalidate_api_key_now: true },
       },
       ['noContent']
     );
@@ -109,13 +81,14 @@ describe('deleteInternalRuleRoute', () => {
       id: '1',
       invalidateApiKeyNow: true,
     });
+    expect(res.noContent).toHaveBeenCalled();
   });
 
   it('ensures the license allows deleting rules', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    deleteInternalRuleRoute(router, licenseState);
+    internalDeleteRuleRoute(router, licenseState);
 
     const [, handler] = router.delete.mock.calls[0];
 
@@ -125,7 +98,6 @@ describe('deleteInternalRuleRoute', () => {
       { rulesClient },
       {
         params: { id: '1' },
-        query: {},
       }
     );
 

@@ -14,13 +14,3 @@ export const deleteRuleRequestParamsSchema = schema.object({
     },
   }),
 });
-
-/**
- * Query schema for the internal-only delete rule route. The `invalidate_api_key_now`
- * flag is an admin / test-cleanup escape hatch that bypasses the background
- * `xpack.alerting.invalidateApiKeysTask` queue and invalidates the rule's API keys
- * synchronously. Reserved for the internal route; not exposed on the public API.
- */
-export const deleteRuleRequestQuerySchema = schema.object({
-  invalidate_api_key_now: schema.maybe(schema.boolean()),
-});
