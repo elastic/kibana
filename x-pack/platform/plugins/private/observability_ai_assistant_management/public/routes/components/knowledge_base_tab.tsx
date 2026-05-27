@@ -27,6 +27,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -81,16 +82,21 @@ export function KnowledgeBaseTab() {
       ),
       render: (category: KnowledgeBaseEntryCategory) => {
         return (
-          <EuiButtonIcon
-            data-test-subj="pluginsColumnsButton"
-            onClick={() => setSelectedCategory(category)}
-            aria-label={
-              category.categoryKey === selectedCategory?.categoryKey ? 'Collapse' : 'Expand'
-            }
-            iconType={
-              category.categoryKey === selectedCategory?.categoryKey ? 'minimize' : 'expand'
-            }
-          />
+          <EuiToolTip
+            content={category.categoryKey === selectedCategory?.categoryKey ? 'Collapse' : 'Expand'}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="pluginsColumnsButton"
+              onClick={() => setSelectedCategory(category)}
+              aria-label={
+                category.categoryKey === selectedCategory?.categoryKey ? 'Collapse' : 'Expand'
+              }
+              iconType={
+                category.categoryKey === selectedCategory?.categoryKey ? 'minimize' : 'expand'
+              }
+            />
+          </EuiToolTip>
         );
       },
     },

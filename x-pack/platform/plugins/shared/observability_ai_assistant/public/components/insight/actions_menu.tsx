@@ -6,7 +6,14 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
 import { useKibana } from '../../hooks/use_kibana';
@@ -88,14 +95,21 @@ export function ActionsMenu({
   ];
 
   const button = (
-    <EuiButtonIcon
-      aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.openActions', {
+    <EuiToolTip
+      content={i18n.translate('xpack.observabilityAiAssistant.insight.openActions', {
         defaultMessage: 'Open insight actions',
       })}
-      data-test-subj="observabilityAiAssistantInsightActionsButtonIcon"
-      iconType="boxesVertical"
-      onClick={onButtonClick}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.openActions', {
+          defaultMessage: 'Open insight actions',
+        })}
+        data-test-subj="observabilityAiAssistantInsightActionsButtonIcon"
+        iconType="boxesVertical"
+        onClick={onButtonClick}
+      />
+    </EuiToolTip>
   );
 
   return (
