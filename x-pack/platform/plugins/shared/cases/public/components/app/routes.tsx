@@ -157,10 +157,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
             {casesRedesign.details ? (
               <CaseViewRedesignLazy />
             ) : (
-              <CaseViewLazy
-                refreshRef={refreshRef}
-                timelineIntegration={timelineIntegration}
-              />
+              <CaseViewLazy refreshRef={refreshRef} timelineIntegration={timelineIntegration} />
             )}
           </Suspense>
         </Route>
