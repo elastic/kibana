@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document, Pair, Scalar, YAMLMap } from 'yaml';
-import { isMap, isScalar, parseDocument, visit } from 'yaml';
+import type { Document, Scalar } from 'yaml';
+import { isMap, isScalar, LineCounter, parseDocument } from 'yaml';
 import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
-import type { WorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import {
+  buildWorkflowLookup,
+  type WorkflowLookup,
+} from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 /**
  * ES|QL step regions for validation and autocomplete share scalar extraction here.
@@ -74,30 +77,13 @@ export function findEsqlStepRegions(
   if (!document?.contents) {
     return [];
   }
-  const out: EsqlStepRegion[] = [];
 
-  visit(document, {
-    Map(_key, mapNode) {
-      if (mapNode.get('type') !== ESQL_QUERY_STEP_TYPE) {
-        return undefined;
-      }
-      const withNode = mapNode.get('with', true);
-      if (!isMap(withNode)) {
-        return undefined;
-      }
-      const queryPair = findQueryPair(withNode);
-      if (!queryPair) {
-        return undefined;
-      }
-      const region = extractEsqlRegionFromScalar(queryPair.value as Scalar, modelText);
-      if (region && region.esql.trim().length > 0) {
-        out.push(region);
-      }
-      return undefined;
-    },
-  });
-
-  return out;
+  // Prefer the lookup-based extraction (same as validators) to avoid walking every map node.
+  // We re-parse here with `lineCounter`/`keepSourceTokens` so the lookup has the data it needs.
+  const lineCounter = new LineCounter();
+  const fresh = parseDocument(modelText, { lineCounter, keepSourceTokens: true });
+  const workflowLookup = buildWorkflowLookup(fresh, lineCounter);
+  return collectEsqlRegionsFromLookup(workflowLookup, modelText);
 }
 
 /** Convenience: parse + find in one call. Swallows parse errors. */
@@ -118,17 +104,26 @@ export function findEsqlStepRegionsFromText(modelText: string): EsqlStepRegion[]
  */
 export function findEsqlRegionContainingCursor(
   modelText: string,
-  absoluteOffset: number
+  absoluteOffset: number,
+  pathHint?: Array<string | number>
 ): EsqlStepRegion | null {
   if (!modelText.includes(ESQL_QUERY_STEP_TYPE)) {
     return null;
   }
 
+  const lineCounter = new LineCounter();
   let document: Document;
   try {
-    document = parseDocument(modelText);
+    document = parseDocument(modelText, { lineCounter, keepSourceTokens: true });
   } catch {
     return null;
+  }
+
+  if (pathHint && pathHint.length > 0) {
+    const fromHint = tryEsqlRegionFromPath(document, pathHint, modelText, absoluteOffset);
+    if (fromHint !== null) {
+      return fromHint;
+    }
   }
 
   try {
@@ -141,7 +136,8 @@ export function findEsqlRegionContainingCursor(
     // Path resolution can fail on partial YAML; fall through to the scan.
   }
 
-  for (const region of findEsqlStepRegions(document, modelText)) {
+  const workflowLookup = buildWorkflowLookup(document, lineCounter);
+  for (const region of collectEsqlRegionsFromLookup(workflowLookup, modelText)) {
     if (isOffsetInEsqlQueryRegion(absoluteOffset, region, modelText)) {
       return region;
     }
@@ -273,15 +269,6 @@ function tryEsqlRegionFromPath(
     return null;
   }
   return region;
-}
-
-function findQueryPair(withNode: YAMLMap): Pair | undefined {
-  for (const item of withNode.items) {
-    if (isScalar(item.key) && item.key.value === 'query') {
-      return item;
-    }
-  }
-  return undefined;
 }
 
 function scalarTypeToStyle(type: Scalar['type']): EsqlScalarStyle {

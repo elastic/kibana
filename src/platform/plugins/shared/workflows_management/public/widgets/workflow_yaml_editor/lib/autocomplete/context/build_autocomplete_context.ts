@@ -168,7 +168,7 @@ export function buildAutocompleteContext({
   const { isInTriggerConditionField, triggerConditionDefinition } =
     resolveTriggerConditionAutocomplete(path, yamlDocument);
 
-  const esqlRegion = findEsqlRegionContainingCursor(model.getValue(), absoluteOffset);
+  const esqlRegion = findEsqlRegionContainingCursor(model.getValue(), absoluteOffset, path);
   const esqlOffsetInQuery =
     esqlRegion !== null ? absoluteOffset - esqlRegion.contentStartInFile : null;
 

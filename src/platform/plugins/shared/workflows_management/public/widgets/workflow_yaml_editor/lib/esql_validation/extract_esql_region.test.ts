@@ -106,14 +106,12 @@ describe('findEsqlStepRegions', () => {
     with:
       query: "FROM events | KEEP id"
 `;
-    const lineCounter = new LineCounter();
-    const document = parseDocument(text, { lineCounter, keepSourceTokens: true });
     const fromLookup = regionsFromText(text);
-    const fromVisit = findEsqlStepRegions(document, text);
+    const fromFind = findEsqlStepRegions(parseDocument(text), text);
 
-    expect(fromVisit).toHaveLength(fromLookup.length);
+    expect(fromFind).toHaveLength(fromLookup.length);
     for (let i = 0; i < fromLookup.length; i++) {
-      expect(fromVisit[i]).toEqual(fromLookup[i]);
+      expect(fromFind[i]).toEqual(fromLookup[i]);
     }
   });
 });
@@ -130,6 +128,37 @@ describe('findEsqlRegionContainingCursor', () => {
     expect(region).not.toBeNull();
     expect(region!.esql).toBe('        FROM logs-*');
     expect(cursor).toBeGreaterThan(region!.contentEndInFile);
+  });
+
+  it('uses a provided path hint to avoid re-resolving the path', () => {
+    const text = `steps:
+  - id: a
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-*`;
+    const cursor = text.indexOf('logs-*') + 'logs-*'.length;
+
+    // Hint points at the `with.query` scalar; tryEsqlRegionFromPath should succeed.
+    const hint = ['steps', 0, 'with', 'query'];
+    const region = findEsqlRegionContainingCursor(text, cursor, hint);
+    expect(region).not.toBeNull();
+    expect(region!.esql.includes('FROM logs-*')).toBe(true);
+  });
+
+  it('falls back safely when the path hint is stale', () => {
+    const text = `steps:
+  - id: a
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM logs-*`;
+    const cursor = text.indexOf('FROM logs-*') + 'FROM'.length;
+
+    // Stale hint points at a non-existent step index; must not throw and should still find the region.
+    const staleHint = ['steps', 99, 'with', 'query'];
+    const region = findEsqlRegionContainingCursor(text, cursor, staleHint);
+    expect(region).not.toBeNull();
   });
 
   it('returns null when the cursor is outside the query scalar', () => {
