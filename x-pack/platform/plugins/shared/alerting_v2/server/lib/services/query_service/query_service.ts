@@ -14,7 +14,7 @@ import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import type { ExecutionContext } from '../../execution_context';
 import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
-import { isEsqlUserError } from './esql_user_error';
+import { isEsqlUserError } from '../../errors/esql_user_error';
 
 export interface ExecuteQueryParams {
   query: EsqlQueryRequest['query'];
