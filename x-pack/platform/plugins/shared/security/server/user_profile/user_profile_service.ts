@@ -356,6 +356,13 @@ export class UserProfileService {
     sessionlessUserProfileRetrievalEnabled: boolean,
     { request, dataPath }: UserProfileGetCurrentParams
   ) {
+    if (!this.license?.isEnabled()) {
+      this.logger.debug(
+        'Skipping user profile retrieval: security features are disabled in Elasticsearch.'
+      );
+      return null;
+    }
+
     if (request.auth.isAuthenticated === false) {
       throw new Error('Request to get current user profile is not authenticated.');
     }
