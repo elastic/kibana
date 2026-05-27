@@ -7,6 +7,7 @@
 
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   type CommonSearchOptions,
@@ -14,7 +15,8 @@ import {
   type PaginatedResponse,
 } from '../query_utils';
 import {
-  type LatestSourceWhereCondition,
+  andWhere,
+  inFilter,
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
@@ -25,6 +27,7 @@ import {
   type StoredDetection,
   type detectionsMappings,
 } from './data_stream';
+import { FIELD_DETECTION_ID } from '../field_names';
 
 export type DetectionDataStreamClient = IDataStreamClient<
   typeof detectionsMappings,
@@ -40,15 +43,6 @@ export interface DetectionsPaginatedSearchOptions extends PaginatedSearchOptions
   rule_uuid?: string[];
   rule_name?: string;
 }
-
-const andWhere = (
-  current: LatestSourceWhereCondition | undefined,
-  next: LatestSourceWhereCondition
-): LatestSourceWhereCondition => {
-  return current ? esql.exp`${current} AND ${next}` : next;
-};
-
-const GROUP_BY_FIELD = 'detection_id';
 
 export class DetectionClient {
   constructor(
@@ -66,13 +60,9 @@ export class DetectionClient {
     });
   }
 
-  private buildWhere(options: DetectionsSearchOptions): LatestSourceWhereCondition | undefined {
-    let where: LatestSourceWhereCondition | undefined;
-
-    const ruleUuidLiterals = options.rule_uuid?.map((ruleUuid) => esql.str(ruleUuid));
-    if (ruleUuidLiterals?.length) {
-      where = andWhere(where, esql.exp`${esql.col('rule_uuid')} IN (${ruleUuidLiterals})`);
-    }
+  private buildWhere(options: DetectionsSearchOptions): ESQLAstExpression | undefined {
+    let where: ESQLAstExpression | undefined;
+    where = inFilter({ where, field: 'rule_uuid', values: options.rule_uuid });
 
     if (options.rule_name) {
       where = andWhere(where, esql.exp`${esql.col('rule_name')} == ${esql.str(options.rule_name)}`);
@@ -88,7 +78,7 @@ export class DetectionClient {
       options,
       index: DETECTIONS_DATA_STREAM,
       where: this.buildWhere(options),
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DETECTION_ID,
     });
   }
 
@@ -101,7 +91,7 @@ export class DetectionClient {
       options,
       index: DETECTIONS_DATA_STREAM,
       where: this.buildWhere(options),
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DETECTION_ID,
     });
   }
 
@@ -110,7 +100,7 @@ export class DetectionClient {
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DETECTIONS_DATA_STREAM,
-      idField: GROUP_BY_FIELD,
+      idField: FIELD_DETECTION_ID,
       idValue: detectionId,
     });
   }
