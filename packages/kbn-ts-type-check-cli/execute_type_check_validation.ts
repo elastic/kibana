@@ -31,6 +31,7 @@ import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifact
 import { LOCAL_CACHE_ROOT } from './src/archive/constants';
 import { isCiEnvironment } from './src/archive/utils';
 import { formatPathForLog } from './src/normalize_project_path';
+import { resolveTscBinary } from './src/resolve_tsc_binary';
 
 export const TSC_LABEL = 'tsc';
 
@@ -87,6 +88,10 @@ export async function createTypeCheckConfigs(
         noEmit: false,
         emitDeclarationOnly: true,
         paths: project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined,
+        // Canary lane: when running against a non-default compiler (TS 6 in
+        // particular), silence the soft-deprecation diagnostics so the lane
+        // surfaces real type errors instead. Has no effect on TS 5.x.
+        ...(process.env.KBN_TS_COMPILER_PACKAGE ? { ignoreDeprecations: '6.0' } : {}),
       },
       kbn_references: undefined,
       references: project.getKbnRefs(allProjects).map((refd) => {
@@ -307,7 +312,7 @@ export const executeTypeCheckValidation = async ({
 
     if (buildTargets.length > 0) {
       await procRunner.run(TSC_LABEL, {
-        cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
+        cmd: Path.relative(REPO_ROOT, resolveTscBinary()),
         args: [
           '-b',
           ...buildTargets,

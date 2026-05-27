@@ -2195,6 +2195,7 @@
     "ts-morph": "15.1.0",
     "tsd": "0.33.0",
     "typescript": "5.9.3",
+    "typescript-6": "npm:typescript@6.0.3",
     "val-loader": "6.0.0",
     "vinyl-fs": "4.0.0",
     "vscode-languageserver-textdocument": "1.0.12",
