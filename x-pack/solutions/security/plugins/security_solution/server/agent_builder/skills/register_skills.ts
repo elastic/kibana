@@ -18,6 +18,10 @@ import { alertAnalysisSkill } from './alert_analysis';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { siemReadinessSkill } from './siem_readiness';
+import {
+  getAutomaticMigrationContextSkill,
+  getAutomaticMigrationCorrectionSkill,
+} from './automatic_migration';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -65,5 +69,10 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {
     agentBuilder.skills.register(pciComplianceSkill);
+  }
+
+  if (experimentalFeatures.automaticMigrationSkillsEnabled) {
+    agentBuilder.skills.register(getAutomaticMigrationCorrectionSkill());
+    agentBuilder.skills.register(getAutomaticMigrationContextSkill());
   }
 };

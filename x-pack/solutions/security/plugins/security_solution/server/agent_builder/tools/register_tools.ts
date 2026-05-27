@@ -17,6 +17,11 @@ import { pciComplianceTool } from './pci_compliance_tool';
 import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
 import { registerSiemReadinessTools } from './siem_readiness';
+import {
+  migrationTranslatedRulesSearchTool,
+  migrationTranslatedRuleGetTool,
+} from './migration_translated_rules_tools';
+import { migrationResourcesListTool } from './migration_resources_tools';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -24,6 +29,12 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_c
  *
  * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder` so
  * the feature can ship dark and be enabled per environment.
+ *
+ * Read-only migration tools (search, get, list) are registered as registry tools.
+ * Write operations (rule update, resource upsert) route through
+ * `workflow_execute_step` + `kibana.request` targeting the canonical migration
+ * HTTP routes, which apply license checks, audit logging, and validation
+ * middleware server-side. The platform's HITL dialog gates execution.
  */
 export const registerTools = async (
   agentBuilder: AgentBuilderPluginSetup,
@@ -47,4 +58,12 @@ export const registerTools = async (
   }
 
   registerSiemReadinessTools(agentBuilder, core, logger, isServerless);
+
+  if (experimentalFeatures.automaticMigrationSkillsEnabled) {
+    agentBuilder.tools.register(
+      migrationTranslatedRulesSearchTool(core, logger, experimentalFeatures)
+    );
+    agentBuilder.tools.register(migrationTranslatedRuleGetTool(core, logger, experimentalFeatures));
+    agentBuilder.tools.register(migrationResourcesListTool(core, logger, experimentalFeatures));
+  }
 };
