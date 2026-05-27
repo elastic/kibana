@@ -126,6 +126,7 @@ export class BashService {
       executionLimits: DEFAULT_EXECUTION_LIMITS,
       commands: [...ALLOWED_BASH_COMMANDS],
       customCommands: [execToolCommand],
+      defenseInDepth: false,
     });
 
     const timeoutMs = this.deps.timeoutMs ?? DEFAULT_BASH_TIMEOUT_MS;
