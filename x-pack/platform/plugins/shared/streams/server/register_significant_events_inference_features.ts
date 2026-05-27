@@ -28,7 +28,6 @@ const KI_QUERY_GENERATION_RECOMMENDED_MODELS = [
 ];
 
 const DISCOVERY_RECOMMENDED_MODELS = [
-  '.anthropic-claude-4.6-opus-chat_completion',
   '.anthropic-claude-4.6-sonnet-chat_completion',
   '.openai-gpt-5.2-chat_completion',
 ];
