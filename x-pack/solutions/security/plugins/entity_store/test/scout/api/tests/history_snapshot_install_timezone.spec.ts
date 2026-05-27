@@ -7,10 +7,26 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import type { EsClient } from '@kbn/scout-security';
 import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
-import { getHistorySnapshotTaskRunAt } from './history_snapshot_task_cadence.spec';
+
+const HISTORY_SNAPSHOT_TASK_DOC_ID = 'task:entity_store:v2:history_snapshot_task:default';
+
+const getHistorySnapshotTaskRunAt = async (esClient: EsClient): Promise<Date> => {
+  try {
+    const doc = await esClient.get({
+      index: '.kibana_task_manager',
+      id: HISTORY_SNAPSHOT_TASK_DOC_ID,
+    });
+    const { task } = doc._source as { task: { runAt: string } };
+    return new Date(task.runAt);
+  } catch {
+    // Task not yet created — return epoch so poll retries
+    return new Date(0);
+  }
+};
 
 apiTest.describe(
   'Entity Store History Snapshot — install with timezone',
