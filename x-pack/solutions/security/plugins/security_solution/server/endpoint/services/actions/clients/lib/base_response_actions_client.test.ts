@@ -290,7 +290,25 @@ describe('ResponseActionsClientImpl base class', () => {
         expect.anything(),
         expect.anything(),
         'one',
-        { bypassSpaceValidation: false }
+        { bypassSpaceValidation: false, ccsEnabled: false }
+      );
+    });
+
+    it('should pass ccsEnabled=true when the feature flag is enabled and remote clusters are connected', async () => {
+      constructorOptions.endpointService.experimentalFeatures.defendRemoteOutputCcs = true;
+      constructorOptions.esClient.cluster.remoteInfo.mockResolvedValue({
+        cluster_a: { connected: true },
+      });
+
+      await baseClassMock.fetchActionDetails('one').catch(() => {
+        // just ignoring error
+      });
+
+      expect(getActionDetailsByIdMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'one',
+        { bypassSpaceValidation: false, ccsEnabled: true }
       );
     });
   });
@@ -746,9 +764,7 @@ describe('ResponseActionsClientImpl base class', () => {
     it('should return an async iterable', () => {
       const iterable = baseClassMock.fetchAllPendingActions();
 
-      expect(iterable).toEqual({
-        [Symbol.asyncIterator]: expect.any(Function),
-      });
+      expect(iterable[Symbol.asyncIterator]).toEqual(expect.any(Function));
     });
 
     it('should query ES with expected criteria', async () => {
