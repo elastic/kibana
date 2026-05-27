@@ -256,7 +256,6 @@ enabled:
   - x-pack/platform/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
-  - x-pack/platform/test/functional/apps/data_views/config.ts
   - x-pack/platform/test/functional/apps/discover/group1/config.ts
   - x-pack/platform/test/functional/apps/discover/group2/config.ts
   - x-pack/platform/test/functional/apps/discover/group3/config.ts
@@ -337,9 +336,6 @@ enabled:
   - x-pack/platform/test/functional/config_security_basic.ts
   - x-pack/platform/test/functional/config.ccs.ts
   - x-pack/platform/test/functional/config.firefox.ts
-  - x-pack/platform/test/functional_cloud/config.ts
-  - x-pack/platform/test/functional_cloud/saml.config.ts
-  - x-pack/platform/test/functional_cloud/intercepts.config.ts
   - x-pack/platform/test/licensing_plugin/config.public.ts
   - x-pack/platform/test/licensing_plugin/config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
