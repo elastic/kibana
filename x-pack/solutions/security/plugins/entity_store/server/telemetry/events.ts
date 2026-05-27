@@ -65,8 +65,12 @@ interface EntityMaintainerRunSummaryFunnel {
   scanned: number;
   /** Entities that passed business-logic qualification */
   qualified: number;
-  /** Bulk-update objects built after cross-source merge */
-  proposed: number;
+  /**
+   * Bulk-update objects built after cross-source merge; omitted when the
+   * maintainer has no distinct proposal phase (relationship and resolution
+   * maintainers go straight from qualified → applied).
+   */
+  proposed?: number;
   /** Writes successfully applied to the entity store */
   applied: number;
   /** 404 bulk errors — entity absent from store; omitted when not applicable */
@@ -137,9 +141,17 @@ export interface EntityMaintainerRunSummaryEvent {
   /** Error message capped at 500 chars, set only on error */
   errorMessage?: string;
   funnel: EntityMaintainerRunSummaryFunnel;
-  /** Per-source early funnel breakdown (scanned, qualified); empty means not applicable */
+  /**
+   * Per-source pre-merge funnel: counts how many records each integration or logical input
+   * contributed, before cross-source deduplication. Answers "where did the inputs come from?".
+   * Pairs with breakdown, which counts outputs by relationship kind. Omitted when not applicable.
+   */
   sources?: EntityMaintainerRunSummarySource[];
-  /** Per-relationship-kind split of applied; omitted when not applicable */
+  /**
+   * Per-relationship-kind split of applied writes: counts outputs after the merge, grouped by
+   * what was written (e.g. relationship type, sub-category). Answers "what was produced?".
+   * Pairs with sources, which counts inputs by integration. Omitted when not applicable.
+   */
   breakdown?: EntityMaintainerRunSummaryBreakdown[];
   /** Per-stage execution detail for multi-stage maintainers; omitted when not applicable */
   stages?: EntityMaintainerRunSummaryStage[];
@@ -336,7 +348,11 @@ export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
         },
         proposed: {
           type: 'long',
-          _meta: { description: 'Bulk-update objects built after cross-source merge' },
+          _meta: {
+            optional: true,
+            description:
+              'Bulk-update objects built after cross-source merge; omitted when the maintainer has no distinct proposal phase (relationship and resolution maintainers go straight from qualified → applied)',
+          },
         },
         applied: {
           type: 'long',
@@ -390,7 +406,7 @@ export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
       _meta: {
         optional: true,
         description:
-          'Per-source early funnel breakdown (scanned, qualified); empty means not applicable',
+          'Per-source pre-merge funnel: counts how many records each integration or logical input contributed, before cross-source deduplication. Answers "where did the inputs come from?". Pairs with breakdown, which counts outputs by relationship kind. Omitted when not applicable.',
       },
     },
     breakdown: {
@@ -409,7 +425,8 @@ export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
       },
       _meta: {
         optional: true,
-        description: 'Per-relationship-kind split of applied; omitted when not applicable',
+        description:
+          'Per-relationship-kind split of applied writes: counts outputs after the merge, grouped by what was written (e.g. relationship type, sub-category). Answers "what was produced?". Pairs with sources, which counts inputs by integration. Omitted when not applicable.',
       },
     },
     stages: {
