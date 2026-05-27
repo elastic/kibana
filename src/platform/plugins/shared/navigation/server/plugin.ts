@@ -31,11 +31,11 @@ import {
 const navCustomizationSchema = z.object({
   moves: z.array(
     z.object({
-      id: z.string(),
-      afterId: z.string().nullable(),
+      id: z.string().max(100),
+      afterId: z.string().max(100).nullable(),
     })
   ),
-  hidden: z.array(z.string()),
+  hidden: z.array(z.string().max(100)),
 });
 
 export class NavigationServerPlugin
