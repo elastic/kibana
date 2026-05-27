@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ChromeNext } from './chrome_next';
+export type {
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderBadgeItem,
+  AppHeaderConfig,
+  AppHeaderTab,
+  ChromeNext,
+} from './chrome_next';
 export type { GlobalSearchConfig } from './global_search';

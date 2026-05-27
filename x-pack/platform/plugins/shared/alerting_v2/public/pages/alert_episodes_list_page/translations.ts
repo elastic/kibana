@@ -13,6 +13,13 @@ export const EPISODES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.episode
   defaultMessage: 'Alert episodes',
 });
 
+export const EPISODES_LIST_MANAGE_RULES = i18n.translate(
+  'xpack.alertingV2.episodes.manageRulesButton',
+  {
+    defaultMessage: 'Manage rules',
+  }
+);
+
 export const EPISODES_LIST_TABLE_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2.episodes.tableAriaLabel',
   {
