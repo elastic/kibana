@@ -49,7 +49,11 @@ Tooltip `content` and `title` render inside a portal with `role="tooltip"`. The 
   <EuiButton>Hover me</EuiButton>
 </EuiToolTip>
 
-// RIGHT — use EuiPopover when content needs to be interactive
+// RIGHT — use EuiPopover when content needs to be interactive (function component)
+const [isOpen, setIsOpen] = useState(false);
+const togglePopover = () => setIsOpen((isOpen) => !isOpen);
+const closePopover = () => setIsOpen(false);
+
 <EuiPopover
   button={<EuiButton onClick={togglePopover}>More info</EuiButton>}
   isOpen={isOpen}
@@ -57,6 +61,25 @@ Tooltip `content` and `title` render inside a portal with `role="tooltip"`. The 
 >
   <EuiLink href="/docs">Learn more</EuiLink>
 </EuiPopover>
+
+// RIGHT — use EuiPopover when content needs to be interactive (class component)
+class MyComponent extends React.Component {
+  state = { isOpen: false };
+  togglePopover = () => this.setState((state) => ({ isOpen: !state.isOpen }));
+  closePopover = () => this.setState({ isOpen: false });
+
+  render() {
+    return (
+      <EuiPopover
+        button={<EuiButton onClick={this.togglePopover}>More info</EuiButton>}
+        isOpen={this.state.isOpen}
+        closePopover={this.closePopover}
+      >
+        <EuiLink href="/docs">Learn more</EuiLink>
+      </EuiPopover>
+    );
+  }
+}
 
 // WRONG — button inside `EuiIconTip` content
 <EuiIconTip content={<EuiButton>Click</EuiButton>} type="info" />
