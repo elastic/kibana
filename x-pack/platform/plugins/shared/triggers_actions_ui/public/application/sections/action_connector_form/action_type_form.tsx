@@ -418,16 +418,14 @@ export const ActionTypeForm = ({
     setActionFrequencyProperty('summary', summary, index);
   };
 
-  const {
-    actionTypeModel: actionTypeRegistered,
-    isLoading: isLoadingActionTypeModel,
-  } = useActionTypeModel({
-    actionTypeRegistry,
-    actionTypeId:
-      actionTypesIndex[actionConnector.actionTypeId]?.id ?? actionConnector.actionTypeId,
-    http,
-    uiSettings,
-  });
+  const { actionTypeModel: actionTypeRegistered, isLoading: isLoadingActionTypeModel } =
+    useActionTypeModel({
+      actionTypeRegistry,
+      actionTypeId:
+        actionTypesIndex[actionConnector.actionTypeId]?.id ?? actionConnector.actionTypeId,
+      http,
+      uiSettings,
+    });
 
   if (isLoadingActionTypeModel) {
     return (

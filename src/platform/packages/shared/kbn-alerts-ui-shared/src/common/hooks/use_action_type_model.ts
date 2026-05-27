@@ -10,13 +10,13 @@
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 import {
   fetchConnectorSpec,
   transformSpecToActionTypeModel,
   type ConnectorSpecResponse,
 } from '../utils/action_type_model_utils';
-import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 
 const CONNECTOR_SPEC_QUERY_KEY = 'connectorSpec';
 

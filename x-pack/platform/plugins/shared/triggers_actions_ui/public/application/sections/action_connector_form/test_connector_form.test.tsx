@@ -125,7 +125,7 @@ describe('test_connector_form', () => {
       },
       actionConnectorFields: null,
       actionParamsFields: mockedActionParamsFieldsExecutionMode,
-        };
+    };
     const actionTypeRegistryExecutionMode = actionTypeRegistryMock.create();
     actionTypeRegistryExecutionMode.get.mockReturnValue(actionTypeExecutionMode);
 
