@@ -21,9 +21,14 @@ import { ContextExceededRoundError } from './context_exceeded_round_error';
 import { WorkflowError } from './workflow_error';
 import { HookError } from './hook_error';
 import { GenericRoundError } from './generic_round_error';
-import { RoundErrorThinkingPanel } from './round_error_thinking_panel';
+import { ReasoningErrorPanel } from './reasoning_error_panel';
 
-const shouldShowThinkingPanel = (error: unknown): boolean => {
+/**
+ * Returns `true` when the error should be rendered inside the generic
+ * `ReasoningErrorPanel` wrapper. Specialized error types (workflow, hook)
+ * have their own self-contained UI and skip the wrapper.
+ */
+const isReasoningError = (error: unknown): boolean => {
   return (
     !isWorkflowAbortedError(error) &&
     !isWorkflowExecutionError(error) &&
@@ -92,8 +97,8 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
       responsive={false}
       data-test-subj="agentBuilderRoundError"
     >
-      {shouldShowThinkingPanel(error) ? (
-        <RoundErrorThinkingPanel>{errorContent}</RoundErrorThinkingPanel>
+      {isReasoningError(error) ? (
+        <ReasoningErrorPanel>{errorContent}</ReasoningErrorPanel>
       ) : (
         errorContent
       )}

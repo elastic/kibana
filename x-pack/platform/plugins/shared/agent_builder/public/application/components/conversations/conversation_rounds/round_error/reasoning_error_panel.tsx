@@ -17,10 +17,10 @@ const labels = {
   }),
 };
 
-interface RoundErrorThinkingPanelProps {
+interface ReasoningErrorPanelProps {
   children: React.ReactNode;
 }
-export const RoundErrorThinkingPanel: React.FC<RoundErrorThinkingPanelProps> = ({ children }) => {
+export const ReasoningErrorPanel: React.FC<ReasoningErrorPanelProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
 
   const containerStyles = css`
@@ -33,7 +33,7 @@ export const RoundErrorThinkingPanel: React.FC<RoundErrorThinkingPanelProps> = (
 
   return (
     <EuiFlexGroup direction="column" css={containerStyles} responsive={false}>
-      {/* Error thinking panel title */}
+      {/* Reasoning error panel title */}
       <EuiFlexGroup direction="row" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle
@@ -46,7 +46,7 @@ export const RoundErrorThinkingPanel: React.FC<RoundErrorThinkingPanelProps> = (
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {/* Error thinking panel content */}
+      {/* Reasoning error panel content */}
       {children}
     </EuiFlexGroup>
   );
