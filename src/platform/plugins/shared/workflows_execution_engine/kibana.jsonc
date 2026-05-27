@@ -16,5 +16,10 @@
       "workflowsExtensions",
       "licensing"
     ],
+    "optionalPlugins": [
+      "usageApi",
+      "cloud",
+      "spaces",
+    ],
   }
 }

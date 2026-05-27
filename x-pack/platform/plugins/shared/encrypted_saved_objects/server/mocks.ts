@@ -22,6 +22,7 @@ function createEncryptedSavedObjectsSetupMock(
     canEncrypt,
     createMigration: jest.fn(),
     createModelVersion: jest.fn(),
+    __testCreateDangerousExtension: jest.fn(),
   } as jest.Mocked<EncryptedSavedObjectsPluginSetup>;
 }
 

@@ -1,7 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "../../../../../typings/**/*",
@@ -17,6 +17,7 @@
     "@kbn/aiops-components",
     "@kbn/aiops-log-pattern-analysis",
     "@kbn/aiops-log-rate-analysis",
+    "@kbn/aiops-server-schemas",
     "@kbn/aiops-test-utils",
     "@kbn/analytics",
     "@kbn/cases-plugin",
@@ -60,7 +61,6 @@
     "@kbn/ml-time-buckets",
     "@kbn/ml-ui-actions",
     "@kbn/ml-url-state",
-    "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/presentation-util-plugin",
     "@kbn/react-kibana-mount",
@@ -83,8 +83,7 @@
     "@kbn/licensing-types",
     "@kbn/unified-data-table",
     "@kbn/presentation-publishing-schemas",
+    "@kbn/cps"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

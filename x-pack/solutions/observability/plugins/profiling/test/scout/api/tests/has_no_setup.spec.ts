@@ -5,48 +5,69 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esResourcesEndpoint } from '../../common/fixtures/constants';
 
-apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess'] }, () => {
-  let viewerApiCreditials: RoleApiCredentials;
-  let adminApiCreditials: RoleApiCredentials;
-  apiTest.beforeAll(async ({ profilingHelper, profilingSetup, requestAuth }) => {
-    await profilingHelper.cleanupPolicies();
-    await profilingHelper.installPolicies();
-    await profilingSetup.cleanup();
-    viewerApiCreditials = await requestAuth.getApiKey('viewer');
-    adminApiCreditials = await requestAuth.getApiKey('admin');
-  });
+apiTest.describe(
+  'Profiling is not setup and no data is loaded',
+  { tag: tags.stateful.classic },
+  () => {
+    let viewerApiCreditials: RoleApiCredentials;
+    let adminApiCreditials: RoleApiCredentials;
 
-  apiTest('Admin users', async ({ apiClient }) => {
-    const adminRes = await apiClient.get(esResourcesEndpoint, {
-      headers: {
-        ...adminApiCreditials.apiKeyHeader,
-        'content-type': 'application/json',
-        'kbn-xsrf': 'reporting',
-      },
-    });
-    const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBe(false);
-    expect(adminStatus.has_data).toBe(false);
-    expect(adminStatus.pre_8_9_1_data).toBe(false);
-  });
+    apiTest.beforeAll(async ({ profilingSetup, requestAuth }) => {
+      await profilingSetup.cleanup();
 
-  apiTest('Viewer users', async ({ apiClient }) => {
-    const readRes = await apiClient.get(esResourcesEndpoint, {
-      headers: {
-        ...viewerApiCreditials.apiKeyHeader,
-        'content-type': 'application/json',
-        'kbn-xsrf': 'reporting',
-      },
+      // Poll until ES state converges after deleting data streams and indices.
+      await expect
+        .poll(
+          async () => {
+            const status = await profilingSetup.checkStatus();
+            return status.has_setup === false && status.has_data === false;
+          },
+          {
+            timeout: 30_000,
+            intervals: [500, 1000, 2000, 4000],
+            message:
+              'Profiling status did not converge to has_setup: false, has_data: false after cleanup',
+          }
+        )
+        .toBe(true);
+
+      viewerApiCreditials = await requestAuth.getApiKey('viewer');
+      adminApiCreditials = await requestAuth.getApiKey('admin');
     });
-    const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBe(false);
-    expect(readStatus.has_data).toBe(false);
-    expect(readStatus.pre_8_9_1_data).toBe(false);
-    expect(readStatus.has_required_role).toBe(false);
-  });
-});
+
+    apiTest('Admin users', async ({ apiClient }) => {
+      const adminRes = await apiClient.get(esResourcesEndpoint, {
+        headers: {
+          ...adminApiCreditials.apiKeyHeader,
+          'content-type': 'application/json',
+          'kbn-xsrf': 'reporting',
+        },
+      });
+      const adminStatus = adminRes.body;
+      expect(adminStatus.has_setup).toBe(false);
+      expect(adminStatus.has_data).toBe(false);
+      expect(adminStatus.pre_8_9_1_data).toBe(false);
+    });
+
+    apiTest('Viewer users', async ({ apiClient }) => {
+      const readRes = await apiClient.get(esResourcesEndpoint, {
+        headers: {
+          ...viewerApiCreditials.apiKeyHeader,
+          'content-type': 'application/json',
+          'kbn-xsrf': 'reporting',
+        },
+      });
+      const readStatus = readRes.body;
+      expect(readStatus.has_setup).toBe(false);
+      expect(readStatus.has_data).toBe(false);
+      expect(readStatus.pre_8_9_1_data).toBe(false);
+      expect(readStatus.has_required_role).toBe(false);
+    });
+  }
+);

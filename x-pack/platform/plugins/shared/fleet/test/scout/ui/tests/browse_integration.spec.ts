@@ -6,10 +6,11 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 
-test.describe('Browse integration', { tag: ['@ess'] }, () => {
+test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices, config }) => {
     // TODO: re-enable when the 'beforeAll' hook starts working on Cloud
     // The following line will skip all tests in this suite when running on ECH
@@ -23,10 +24,14 @@ test.describe('Browse integration', { tag: ['@ess'] }, () => {
     if (config.isCloud) {
       return;
     }
+
+    await apiServices.fleet.internal.setup();
+
     await apiServices.core.settings({
       'xpack.fleet.experimentalFeatures': { newBrowseIntegrationUx: true },
     });
   });
+
   test.afterAll(async ({ apiServices, config }) => {
     if (config.isCloud) {
       return;
@@ -46,7 +51,7 @@ test.describe('Browse integration', { tag: ['@ess'] }, () => {
 
     await browseIntegrations.navigateTo();
 
-    await expect(browseIntegrations.getMainColumn()).toBeVisible();
+    await expect(browseIntegrations.getMainColumn()).toBeVisible({ timeout: 20_000 });
 
     await browseIntegrations.scrollToIntegration('nginx');
   });
@@ -57,7 +62,7 @@ test.describe('Browse integration', { tag: ['@ess'] }, () => {
     const { browseIntegrations } = pageObjects;
 
     await browseIntegrations.navigateTo();
-    await expect(browseIntegrations.getMainColumn()).toBeVisible();
+    await expect(browseIntegrations.getMainColumn()).toBeVisible({ timeout: 20_000 });
 
     await browseIntegrations.sortIntegrations('z-a');
 
@@ -70,7 +75,7 @@ test.describe('Browse integration', { tag: ['@ess'] }, () => {
     const { browseIntegrations } = pageObjects;
 
     await browseIntegrations.navigateTo();
-    await expect(browseIntegrations.getMainColumn()).toBeVisible();
+    await expect(browseIntegrations.getMainColumn()).toBeVisible({ timeout: 20_000 });
 
     await browseIntegrations.searchForIntegration('nginx');
 

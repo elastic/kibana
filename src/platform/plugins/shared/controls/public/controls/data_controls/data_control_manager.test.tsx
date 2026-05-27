@@ -12,11 +12,13 @@ import { first, skip } from 'rxjs';
 import { dataViewsService } from '../../services/kibana_services';
 import { initializeDataControlManager } from './data_control_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing';
+import { DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
 describe('initializeDataControlManager', () => {
   const dataControlState = {
-    dataViewId: 'myDataViewId',
-    fieldName: 'myFieldName',
+    ...DEFAULT_DATA_CONTROL_STATE,
+    data_view_id: 'myDataViewId',
+    field_name: 'myFieldName',
   };
 
   dataViewsService.get = async (id: string): Promise<DataView> => {
@@ -37,7 +39,7 @@ describe('initializeDataControlManager', () => {
     } as unknown as DataView;
   };
 
-  describe('dataViewId subscription', () => {
+  describe('data_view_id subscription', () => {
     describe('no blocking errors', () => {
       let dataControlManager: undefined | Awaited<ReturnType<typeof initializeDataControlManager>>;
       beforeAll((done) => {
@@ -78,7 +80,7 @@ describe('initializeDataControlManager', () => {
           controlType: 'myControlType',
           state: {
             ...dataControlState,
-            dataViewId: 'notGonnaFindMeDataViewId',
+            data_view_id: 'notGonnaFindMeDataViewId',
           },
           editorStateManager: initializeStateManager({}, {}),
           parentApi: {},
@@ -117,7 +119,7 @@ describe('initializeDataControlManager', () => {
           controlType: 'myControlType',
           state: {
             ...dataControlState,
-            fieldName: 'notGonnaFindMeFieldName',
+            field_name: 'notGonnaFindMeFieldName',
           },
           editorStateManager: initializeStateManager({}, {}),
           parentApi: {},

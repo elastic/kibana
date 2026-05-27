@@ -62,7 +62,7 @@ export function TraceCorrelationAnalysis({
         <>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="checkInCircleFilled" color="success" />
+              <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
@@ -103,7 +103,7 @@ export function TraceCorrelationAnalysis({
         <>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="alert" color="warning" />
+              <EuiIcon type="warning" color="warning" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>

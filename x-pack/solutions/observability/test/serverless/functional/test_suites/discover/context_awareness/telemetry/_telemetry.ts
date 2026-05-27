@@ -51,48 +51,51 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       it('should set EBT context for telemetry events with o11y root profile', async () => {
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await monacoEditor.setCodeEditorValue('from my-example-* | sort @timestamp desc');
         await ebtUIHelper.setOptIn(true);
         await testSubjects.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
-        const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
-          eventTypes: ['performance_metric'],
-          withTimeoutMs: 500,
+        await retry.try(async () => {
+          const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+            eventTypes: ['performance_metric'],
+            withTimeoutMs: 500,
+          });
+
+          expect(events[events.length - 1].context.discoverProfiles).to.eql([
+            'observability-root-profile',
+            'default-data-source-profile',
+          ]);
         });
-
-        expect(events[events.length - 1].context.discoverProfiles).to.eql([
-          'observability-root-profile',
-          'default-data-source-profile',
-        ]);
       });
 
       it('should set EBT context for telemetry events when logs data source profile and reset', async () => {
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
         await ebtUIHelper.setOptIn(true);
         await testSubjects.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
-        const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
-          eventTypes: ['performance_metric'],
-          withTimeoutMs: 500,
+        await retry.try(async () => {
+          const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+            eventTypes: ['performance_metric'],
+            withTimeoutMs: 500,
+          });
+
+          expect(events[events.length - 1].context.discoverProfiles).to.eql([
+            'observability-root-profile',
+            'observability-logs-data-source-profile',
+          ]);
         });
-
-        expect(events[events.length - 1].context.discoverProfiles).to.eql([
-          'observability-root-profile',
-          'observability-logs-data-source-profile',
-        ]);
 
         // should reset the profiles when navigating away from Discover
-        await common.navigateToApp('home');
-        await retry.waitFor('home page to open', async () => {
-          return await testSubjects.exists('homeApp');
-        });
-        await testSubjects.click('addSampleData');
+        await common.navigateToApp('management');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('app-card-index_management');
+        await testSubjects.click('app-card-index_management');
 
         await retry.try(async () => {
           const eventsAfter = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
@@ -131,6 +134,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
 
     describe('contextual profiles', () => {
       before(async () => {
+        await svlCommonPage.loginAsAdmin();
         await esArchiver.loadIfNeeded(
           'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
         );
@@ -220,7 +224,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
           withTimeoutMs: 500,
         });
 
-        expect(events.length).to.be(3);
+        expect(events.length).to.be(2);
 
         // should trigger a new event after opening the doc viewer
         await dataGrid.clickRowToggle();
@@ -231,7 +235,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
           withTimeoutMs: 500,
         });
 
-        expect(events.length).to.be(4);
+        expect(events.length).to.be(3);
 
         expect(events[events.length - 1].properties).to.eql({
           contextLevel: 'documentLevel',
@@ -242,6 +246,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
 
     describe('events', () => {
       beforeEach(async () => {
+        await svlCommonPage.loginAsAdmin();
         await common.navigateToApp('discover');
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();

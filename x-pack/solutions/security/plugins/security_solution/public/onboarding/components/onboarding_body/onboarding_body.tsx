@@ -8,7 +8,7 @@
 import React, { Suspense, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CenteredLoadingSpinner } from '../../../common/components/centered_loading_spinner';
-import type { OnboardingCardId } from '../../constants';
+import type { OnboardingCardId, OnboardingTopicId } from '../../constants';
 import { useBodyConfig } from './hooks/use_body_config';
 import { OnboardingCardGroup } from './onboarding_card_group';
 import { OnboardingCardPanel } from './onboarding_card_panel';
@@ -16,8 +16,8 @@ import { useExpandedCard } from './hooks/use_expanded_card';
 import { useCompletedCards } from './hooks/use_completed_cards';
 import type { IsCardAvailable } from '../../types';
 
-export const OnboardingBody = React.memo(() => {
-  const bodyConfig = useBodyConfig();
+export const OnboardingBody = React.memo<{ topicId?: OnboardingTopicId }>(({ topicId }) => {
+  const bodyConfig = useBodyConfig(topicId);
   const { expandedCardId, setExpandedCardId } = useExpandedCard();
   const { isCardComplete, setCardComplete, getCardCheckCompleteResult, checkCardComplete } =
     useCompletedCards(bodyConfig);

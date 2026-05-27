@@ -9,6 +9,7 @@
 
 export type {
   // commands
+  BulkCreateWorkflowsCommand,
   CreateWorkflowCommand,
   // elasticsearch documents types
   EsWorkflow,
@@ -21,10 +22,12 @@ export type {
   RunWorkflowCommand,
   RunStepCommand,
   RunWorkflowResponseDto,
+  ResumeWorkflowExecutionResponseDto,
   TestWorkflowResponseDto,
   TestWorkflowCommand,
   StackFrame,
   UpdatedWorkflowResponseDto,
+  ValidateWorkflowResponseDto,
   // dtos
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -39,6 +42,12 @@ export type {
   WorkflowListItemDto,
   WorkflowAggsDto,
   WorkflowStatsDto,
+  WorkflowStepExecutionListDto,
+  WorkflowMgetResponseDto,
+  ChildWorkflowExecutionItem,
+  WorkflowExecutionCollapseField,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
   // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
@@ -52,26 +61,38 @@ export type {
   InternalConnectorContract,
   DynamicConnectorContract,
   BaseConnectorContract,
+  StepStabilityLevel,
   HttpMethod,
+  EditorHandlers,
+  EditorHandlersConfig,
+  EditorHandlersInput,
+  DynamicSchema,
   StepPropertyHandler,
   PropertySelectionHandler,
   SelectionOption,
   SelectionDetails,
   SelectionContext,
-  PropertyValidationContext,
+  StepSelectionValues,
   RequestOptions,
+  GetAvailableConnectorsResponse,
+  BulkScheduleWorkflowResult,
 } from './v1';
 
 // exported full to use enum as values
 export {
   // command schemas
+  BulkCreateWorkflowsCommandSchema,
   CreateWorkflowCommandSchema,
   ExecutionStatus,
   ExecutionType,
   ExecutionStatusValues,
   ExecutionTypeValues,
+  WorkflowExecutionCollapseFields,
+  WorkflowExecutionSortFields,
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
+  // shared constants
+  MAX_WORKFLOW_YAML_LENGTH,
 } from './v1';

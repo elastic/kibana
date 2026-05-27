@@ -18,6 +18,5 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./data_views'));
     loadTestFile(require.resolve('./disabled_uis'));
     loadTestFile(require.resolve('./landing_page.ts'));
-    loadTestFile(require.resolve('./ingest_pipelines'));
   });
 };

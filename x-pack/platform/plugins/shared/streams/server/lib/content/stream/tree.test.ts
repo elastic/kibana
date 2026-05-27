@@ -54,7 +54,15 @@ describe('content pack tree helpers', () => {
       const child2 = testContentPackEntry({ name: 'root.child2' });
       const child1Nested = testContentPackEntry({
         name: 'root.child1.nested',
-        queries: [{ id: 'keep', title: 'keep query', kql: { query: 'keep' } }],
+        queries: [
+          {
+            id: 'keep',
+            type: 'match',
+            title: 'keep query',
+            description: '',
+            esql: { query: 'FROM logs | LIMIT 1' },
+          },
+        ],
       });
 
       const tree = asTree({
@@ -80,7 +88,13 @@ describe('content pack tree helpers', () => {
       expect(tree.children[0].children).toHaveLength(1);
       expect(tree.children[0].children[0].name).toEqual('root.child1.nested');
       expect(tree.children[0].children[0].request.queries).toEqual([
-        { id: 'keep', title: 'keep query', kql: { query: 'keep' } },
+        {
+          id: 'keep',
+          type: 'match',
+          title: 'keep query',
+          description: '',
+          esql: { query: 'FROM logs | LIMIT 1' },
+        },
       ]);
     });
 
@@ -88,8 +102,20 @@ describe('content pack tree helpers', () => {
       const root = testContentPackEntry({
         name: 'root',
         queries: [
-          { id: 'keep', title: 'keep query', kql: { query: 'keep' } },
-          { id: 'drop', title: 'drop query', kql: { query: 'drop' } },
+          {
+            id: 'keep',
+            type: 'match',
+            title: 'keep query',
+            description: '',
+            esql: { query: 'FROM logs | LIMIT 1' },
+          },
+          {
+            id: 'drop',
+            type: 'match',
+            title: 'drop query',
+            description: '',
+            esql: { query: 'FROM logs | LIMIT 10' },
+          },
         ],
       });
 
@@ -106,7 +132,13 @@ describe('content pack tree helpers', () => {
       });
 
       expect(tree.request.queries).toEqual([
-        { id: 'keep', title: 'keep query', kql: { query: 'keep' } },
+        {
+          id: 'keep',
+          type: 'match',
+          title: 'keep query',
+          description: '',
+          esql: { query: 'FROM logs | LIMIT 1' },
+        },
       ]);
     });
 
@@ -245,7 +277,15 @@ describe('content pack tree helpers', () => {
         streams: [
           testContentPackEntry({
             name: 'logs',
-            queries: [{ id: 'one', title: 'title', kql: { query: 'qty: one' } }],
+            queries: [
+              {
+                id: 'one',
+                type: 'match',
+                title: 'title',
+                description: '',
+                esql: { query: 'FROM logs | WHERE qty == "one"' },
+              },
+            ],
           }),
         ],
         include: { objects: { all: {} } },
@@ -256,7 +296,15 @@ describe('content pack tree helpers', () => {
         streams: [
           testContentPackEntry({
             name: 'logs',
-            queries: [{ id: 'one', title: 'title', kql: { query: 'qty: two' } }],
+            queries: [
+              {
+                id: 'one',
+                type: 'match',
+                title: 'title',
+                description: '',
+                esql: { query: 'FROM logs | WHERE qty == "two"' },
+              },
+            ],
           }),
         ],
         include: { objects: { all: {} } },

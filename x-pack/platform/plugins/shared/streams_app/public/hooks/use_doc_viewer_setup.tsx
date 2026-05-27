@@ -8,8 +8,8 @@
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
-import { docViewDiff } from '../components/data_management/stream_detail_enrichment/doc_viewer_diff';
-import { docViewJson } from '../components/data_management/stream_detail_enrichment/doc_viewer_json';
+import { docViewDiff } from '../components/stream_management/data_management/stream_detail_enrichment/doc_viewer_diff';
+import { docViewJson } from '../components/stream_management/data_management/stream_detail_enrichment/doc_viewer_json';
 
 export const useDocViewerSetup = (includeDocViewDiff = false) => {
   const { dependencies } = useKibana();

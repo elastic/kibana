@@ -29,9 +29,10 @@
       "unifiedDocViewer",
       "dashboard",
     ],
-    "optionalPlugins": ["cloud", "spaces", "indexLifecycleManagement"],
+    "optionalPlugins": ["cloud", "cps", "spaces", "indexLifecycleManagement", "evals"],
     "requiredBundles": [
       "discover",
+      "esql",
       "kibanaReact",
       "kibanaUtils",
       "observabilityAIAssistant",

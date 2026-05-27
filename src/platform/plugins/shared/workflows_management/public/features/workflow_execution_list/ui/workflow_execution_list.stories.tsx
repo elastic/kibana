@@ -8,22 +8,55 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { parseDuration } from '@kbn/workflows-execution-engine/server/utils/parse-duration/parse-duration';
 import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
 import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 
-const WorkflowExecutionListWithState = (props: WorkflowExecutionListProps) => {
-  const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>({
-    statuses: [],
-    executionTypes: [],
-  });
-  return <WorkflowExecutionList {...props} filters={filters} onFiltersChange={setFilters} />;
+type WorkflowExecutionListStoryProps = Omit<
+  WorkflowExecutionListProps,
+  'canCancel' | 'isCancelInProgress' | 'onConfirmCancel' | 'filters' | 'onFiltersChange'
+>;
+
+const WorkflowExecutionListWithState = (
+  props: WorkflowExecutionListStoryProps & {
+    filters?: ExecutionListFiltersQueryParams;
+    onFiltersChange?: WorkflowExecutionListProps['onFiltersChange'];
+  }
+) => {
+  const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(
+    () =>
+      props.filters ?? {
+        statuses: [],
+        executionTypes: [],
+        executedBy: [],
+      }
+  );
+  const [isCancelInProgress, setIsCancelInProgress] = useState(false);
+
+  const onConfirmCancel = useCallback(async () => {
+    setIsCancelInProgress(true);
+    await new Promise((r) => setTimeout(r, 300));
+    setIsCancelInProgress(false);
+  }, []);
+
+  const { filters: _initialFilters, onFiltersChange: propsOnFiltersChange, ...rest } = props;
+
+  return (
+    <WorkflowExecutionList
+      {...rest}
+      filters={filters}
+      onFiltersChange={propsOnFiltersChange ?? setFilters}
+      canCancel={true}
+      isCancelInProgress={isCancelInProgress}
+      onConfirmCancel={onConfirmCancel}
+    />
+  );
 };
 
-const meta: Meta<typeof WorkflowExecutionList> = {
+const meta: Meta<typeof WorkflowExecutionListWithState> = {
   component: WorkflowExecutionListWithState,
   title: 'Workflows Management/Workflow Execution List',
   decorators: [kibanaReactDecorator],
@@ -31,11 +64,12 @@ const meta: Meta<typeof WorkflowExecutionList> = {
 
 export default meta;
 
-type Story = StoryObj<typeof WorkflowExecutionList>;
+type Story = StoryObj<typeof WorkflowExecutionListWithState>;
 
 const mockFilters: WorkflowExecutionListProps['filters'] = {
   statuses: [ExecutionStatus.PENDING, ExecutionStatus.RUNNING, ExecutionStatus.WAITING_FOR_INPUT],
   executionTypes: [ExecutionType.PRODUCTION],
+  executedBy: [],
 };
 
 export const Default: Story = {
@@ -82,8 +116,8 @@ export const Default: Story = {
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           error: null,
-          duration: parseDuration('1w2d'),
           spaceId: 'default',
+          duration: parseDuration('1w2d'),
           stepId: 'my_first_step',
         },
         {
@@ -93,8 +127,8 @@ export const Default: Story = {
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           error: null,
-          duration: parseDuration('1m28s'),
           spaceId: 'default',
+          duration: parseDuration('1m28s'),
           stepId: 'my_first_step',
         },
         {
@@ -104,8 +138,8 @@ export const Default: Story = {
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           error: null,
-          duration: parseDuration('280ms'),
           spaceId: 'default',
+          duration: parseDuration('280ms'),
           stepId: 'my_first_step',
         },
         {
@@ -115,8 +149,8 @@ export const Default: Story = {
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           error: null,
-          duration: parseDuration('28s'),
           spaceId: 'default',
+          duration: parseDuration('28s'),
           stepId: 'my_first_step',
         },
       ],

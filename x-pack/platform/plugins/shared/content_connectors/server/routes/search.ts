@@ -28,6 +28,7 @@ export function registerSearchRoute({ router, log }: SearchConnectorsPluginSetup
       validate: {
         body: schema.object({
           searchQuery: schema.string({
+            maxLength: 1000,
             defaultValue: '',
           }),
         }),
@@ -62,7 +63,7 @@ export function registerSearchRoute({ router, log }: SearchConnectorsPluginSetup
         if (isIndexNotFoundException(error)) {
           return createError({
             errorCode: ErrorCode.INDEX_NOT_FOUND,
-            message: 'Could not found index',
+            message: 'Could not find index',
             response,
             statusCode: 404,
           });

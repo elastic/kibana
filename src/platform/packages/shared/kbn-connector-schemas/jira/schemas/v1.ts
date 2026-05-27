@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod';
-import { Coerced, validateKeysAllowed, validateRecordMaxKeys } from '../../common/utils';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { Coerced, validateRecordKeysAllowed, validateRecordMaxKeys } from '../../common/utils';
 import { MAX_OTHER_FIELDS_LENGTH } from '../constants';
 
 export const ExternalIncidentServiceConfiguration = {
@@ -15,27 +15,18 @@ export const ExternalIncidentServiceConfiguration = {
   projectKey: z.string(),
 };
 
-export const ExternalIncidentServiceConfigurationSchema = z
-  .object(ExternalIncidentServiceConfiguration)
-  .strict();
+export const ExternalIncidentServiceConfigurationSchema = lazySchema(() =>
+  z.object(ExternalIncidentServiceConfiguration).strict()
+);
 
 export const ExternalIncidentServiceSecretConfiguration = {
   email: z.string(),
   apiToken: z.string(),
 };
 
-export const ExternalIncidentServiceSecretConfigurationSchema = z
-  .object(ExternalIncidentServiceSecretConfiguration)
-  .strict();
-
-const validateOtherFieldsKeys = (key: string, ctx: z.RefinementCtx) => {
-  validateKeysAllowed({
-    key,
-    ctx,
-    disallowList: incidentSchemaObjectProperties,
-    fieldName: 'otherFields',
-  });
-};
+export const ExternalIncidentServiceSecretConfigurationSchema = lazySchema(() =>
+  z.object(ExternalIncidentServiceSecretConfiguration).strict()
+);
 
 const incidentSchemaObject = {
   summary: z.string(),
@@ -45,22 +36,30 @@ const incidentSchemaObject = {
   priority: z.string().nullable().default(null),
   labels: z
     .array(
-      z.string().refine(
-        (val) => !val.match(/\s/g),
-        (val) => ({ message: `The label ${val} cannot contain spaces` })
-      )
+      z.string().check((ctx) => {
+        if ((ctx.value as string).match(/\s/g)) {
+          ctx.issues.push({
+            code: 'custom',
+            message: `The label ${ctx.value} cannot contain spaces`,
+            input: ctx.value,
+          });
+        }
+      })
     )
     .nullable()
     .default(null),
   parent: z.string().nullable().default(null),
   otherFields: Coerced(
     z
-      .record(
-        z.string().superRefine((value, ctx) => {
-          validateOtherFieldsKeys(value, ctx);
-        }),
-        z.any()
-      )
+      .record(z.string(), z.any())
+      .superRefine((val, ctx) => {
+        validateRecordKeysAllowed({
+          record: val,
+          ctx,
+          disallowList: incidentSchemaObjectProperties,
+          fieldName: 'otherFields',
+        });
+      })
       .superRefine((val, ctx) =>
         validateRecordMaxKeys({
           record: val,
@@ -76,87 +75,99 @@ const incidentSchemaObject = {
 
 export const incidentSchemaObjectProperties = Object.keys(incidentSchemaObject);
 
-export const ExecutorSubActionPushParamsSchema = z.object({
-  incident: z.object(incidentSchemaObject).strict(),
-  comments: z
-    .array(
-      z
-        .object({
-          comment: z.string(),
-          commentId: z.string(),
-        })
-        .strict()
-    )
-    .nullable()
-    .default(null),
-});
-
-export const ExecutorSubActionGetIncidentParamsSchema = z
-  .object({
-    externalId: z.string(),
+export const ExecutorSubActionPushParamsSchema = lazySchema(() =>
+  z.object({
+    incident: z.object(incidentSchemaObject).strict(),
+    comments: z
+      .array(
+        z
+          .object({
+            comment: z.string(),
+            commentId: z.string(),
+          })
+          .strict()
+      )
+      .nullable()
+      .default(null),
   })
-  .strict();
+);
+
+export const ExecutorSubActionGetIncidentParamsSchema = lazySchema(() =>
+  z
+    .object({
+      externalId: z.string(),
+    })
+    .strict()
+);
 
 // Reserved for future implementation
-export const ExecutorSubActionCommonFieldsParamsSchema = z.object({}).strict();
-export const ExecutorSubActionHandshakeParamsSchema = z.object({}).strict();
-export const ExecutorSubActionGetCapabilitiesParamsSchema = z.object({}).strict();
-export const ExecutorSubActionGetIssueTypesParamsSchema = z.object({}).strict();
-export const ExecutorSubActionGetFieldsByIssueTypeParamsSchema = z
-  .object({
-    id: z.string(),
-  })
-  .strict();
-export const ExecutorSubActionGetIssuesParamsSchema = z.object({ title: z.string() }).strict();
-export const ExecutorSubActionGetIssueParamsSchema = z.object({ id: z.string() }).strict();
+export const ExecutorSubActionCommonFieldsParamsSchema = lazySchema(() => z.object({}).strict());
+export const ExecutorSubActionHandshakeParamsSchema = lazySchema(() => z.object({}).strict());
+export const ExecutorSubActionGetCapabilitiesParamsSchema = lazySchema(() => z.object({}).strict());
+export const ExecutorSubActionGetIssueTypesParamsSchema = lazySchema(() => z.object({}).strict());
+export const ExecutorSubActionGetFieldsByIssueTypeParamsSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string(),
+    })
+    .strict()
+);
+export const ExecutorSubActionGetIssuesParamsSchema = lazySchema(() =>
+  z.object({ title: z.string() }).strict()
+);
+export const ExecutorSubActionGetIssueParamsSchema = lazySchema(() =>
+  z.object({ id: z.string() }).strict()
+);
 
-export const ExecutorParamsSchema = z.discriminatedUnion('subAction', [
-  z
-    .object({
-      subAction: z.literal('getFields'),
-      subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal('getIncident'),
-      subActionParams: ExecutorSubActionGetIncidentParamsSchema,
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal('handshake'),
-      subActionParams: ExecutorSubActionHandshakeParamsSchema,
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal('pushToService'),
-      subActionParams: ExecutorSubActionPushParamsSchema,
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal('issueTypes'),
-      subActionParams: ExecutorSubActionGetIssueTypesParamsSchema,
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal('fieldsByIssueType'),
-      subActionParams: ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal('issues'),
-      subActionParams: ExecutorSubActionGetIssuesParamsSchema,
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal('issue'),
-      subActionParams: ExecutorSubActionGetIssueParamsSchema,
-    })
-    .strict(),
-]);
+export const ExecutorParamsSchema = lazySchema(() =>
+  z.discriminatedUnion('subAction', [
+    z
+      .object({
+        subAction: z.literal('getFields'),
+        subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
+      })
+      .strict(),
+    z
+      .object({
+        subAction: z.literal('getIncident'),
+        subActionParams: ExecutorSubActionGetIncidentParamsSchema,
+      })
+      .strict(),
+    z
+      .object({
+        subAction: z.literal('handshake'),
+        subActionParams: ExecutorSubActionHandshakeParamsSchema,
+      })
+      .strict(),
+    z
+      .object({
+        subAction: z.literal('pushToService'),
+        subActionParams: ExecutorSubActionPushParamsSchema,
+      })
+      .strict(),
+    z
+      .object({
+        subAction: z.literal('issueTypes'),
+        subActionParams: ExecutorSubActionGetIssueTypesParamsSchema,
+      })
+      .strict(),
+    z
+      .object({
+        subAction: z.literal('fieldsByIssueType'),
+        subActionParams: ExecutorSubActionGetFieldsByIssueTypeParamsSchema,
+      })
+      .strict(),
+    z
+      .object({
+        subAction: z.literal('issues'),
+        subActionParams: ExecutorSubActionGetIssuesParamsSchema,
+      })
+      .strict(),
+    z
+      .object({
+        subAction: z.literal('issue'),
+        subActionParams: ExecutorSubActionGetIssueParamsSchema,
+      })
+      .strict(),
+  ])
+);

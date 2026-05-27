@@ -8,14 +8,20 @@
 import { uniq } from 'lodash';
 import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { loadIndexPatterns, getMatchingIndices, getESIndexFields } from '../lib/data_apis';
+import type { FieldOption } from '../types';
 
 export interface IOption {
   label: string;
   options: Array<{ value: string; label: string }>;
 }
 
-export const getIndexOptions = async (http: HttpSetup, pattern: string) => {
+export const getIndexOptions = async (
+  http: HttpSetup,
+  pattern: string,
+  projectRouting?: string
+) => {
   const options: IOption[] = [];
 
   if (!pattern) {
@@ -26,6 +32,7 @@ export const getIndexOptions = async (http: HttpSetup, pattern: string) => {
     getMatchingIndices({
       pattern,
       http,
+      projectRouting,
     }),
     loadIndexPatterns(pattern),
   ]);
@@ -65,6 +72,34 @@ export const getIndexOptions = async (http: HttpSetup, pattern: string) => {
   });
 
   return options;
+};
+
+export const convertFieldSpecToFieldOption = (
+  fieldSpec: FieldSpec[],
+  onlyMappedOrRuntime: boolean = true
+): FieldOption[] => {
+  return (fieldSpec ?? [])
+    .filter((spec: FieldSpec) => (onlyMappedOrRuntime ? spec.isMapped || spec.runtimeField : true))
+    .map((spec: FieldSpec) => {
+      const converted = {
+        name: spec.name,
+        searchable: spec.searchable,
+        aggregatable: spec.aggregatable,
+        type: spec.type,
+        normalizedType: spec.type,
+      };
+
+      if (spec.type === 'string') {
+        const esType = spec.esTypes && spec.esTypes.length > 0 ? spec.esTypes[0] : spec.type;
+        converted.type = esType;
+        converted.normalizedType = esType;
+      } else if (spec.type === 'number') {
+        const esType = spec.esTypes && spec.esTypes.length > 0 ? spec.esTypes[0] : spec.type;
+        converted.type = esType;
+      }
+
+      return converted;
+    });
 };
 
 export const getFields = async (http: HttpSetup, indexes: string[]) => {

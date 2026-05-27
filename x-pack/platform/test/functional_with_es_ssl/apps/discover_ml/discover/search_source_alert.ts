@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects([
+    'appMenu',
     'settings',
     'common',
     'header',
@@ -204,9 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openManagementAlertFlyout = async () => {
-    await PageObjects.common.navigateToApp('management');
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    await testSubjects.click('triggersActions');
+    await PageObjects.common.navigateToApp('rules');
     await PageObjects.header.waitUntilLoadingHasFinished();
     await testSubjects.click('createFirstRuleButton');
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -241,6 +240,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ruleId = value;
     }
 
+    await testSubjects.click('discoverQueryTotalHits'); // dismiss tooltip
     await filterBar.addFilter({ field: 'rule_id', operation: 'is', value: ruleId });
 
     await retry.waitFor('results', async () => {
@@ -266,10 +266,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const openAlertRuleInManagement = async (ruleName: string) => {
-    await PageObjects.common.navigateToApp('management');
-    await PageObjects.header.waitUntilLoadingHasFinished();
-
-    await testSubjects.click('triggersActions');
+    await PageObjects.common.navigateToApp('rules');
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     let retries = 0;
@@ -291,7 +288,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const clickViewInApp = async (ruleName: string) => {
     // navigate to discover using view in app link
     await openAlertRuleInManagement(ruleName);
-    await testSubjects.click('ruleDetails-viewInApp');
+    await testSubjects.click('ruleDetails-viewInDiscover');
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
@@ -438,6 +435,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await testSubjects.click('ruleFormStep-details');
+      await toasts.dismissIfExists();
       await testSubjects.click('ruleFlyoutFooterSaveButton');
 
       await testSubjects.click('ruleFormStep-definition');
@@ -466,6 +464,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await testSubjects.click('ruleFormStep-details');
+      await toasts.dismissIfExists();
       await testSubjects.click('ruleFlyoutFooterSaveButton');
       await retry.try(async () => {
         await testSubjects.missingOrFail('ruleFlyoutFooterSaveButton');
@@ -474,7 +473,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertRuleInManagement(RULE_NAME);
-      await testSubjects.click('ruleDetails-viewInApp');
+      await testSubjects.click('ruleDetails-viewInDiscover');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW, true);
@@ -490,6 +489,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openAlertRuleInManagement(RULE_NAME);
 
       // change rule configuration
+      await testSubjects.click('ruleActionsButton');
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
@@ -516,7 +516,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await clickViewInApp(RULE_NAME);
       await dataViews.switchToAndValidate(OTHER_DATA_VIEW);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('discoverNewButton');
+      await PageObjects.appMenu.clickMenuItem('discoverNewButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       let selectedDataView = await dataViews.getSelectedName();
       expect(selectedDataView).to.be.equal(OTHER_DATA_VIEW);
@@ -586,6 +586,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openDiscoverAlertFlyout();
       await defineSearchSourceAlert('test-adhoc-alert');
       await testSubjects.click('ruleFormStep-details');
+      await toasts.dismissIfExists();
       await testSubjects.click('ruleFlyoutFooterSaveButton');
       await retry.try(async () => {
         await testSubjects.missingOrFail('ruleFlyoutFooterSaveButton');
@@ -648,13 +649,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should check that there are no errors detected after an alert is created', async () => {
+      try {
+        await deleteDataView(SOURCE_DATA_VIEW);
+      } catch {
+        // continue
+      }
+
       const newAlert = 'New Alert for checking its status';
-      await createDataView('search-source*');
+      await createDataView(SOURCE_DATA_VIEW);
 
-      await PageObjects.common.navigateToApp('management');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      await testSubjects.click('triggersActions');
+      await PageObjects.common.navigateToApp('rules');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('createRuleButton');
@@ -679,7 +683,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       const dataViewsElem = await testSubjects.find('euiSelectableList');
       const sourceDataViewOption = await dataViewsElem.findByCssSelector(
-        `[title="search-source*"]`
+        `[title="${SOURCE_DATA_VIEW}"]`
       );
       await sourceDataViewOption.click();
 

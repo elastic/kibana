@@ -10,6 +10,9 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
+import { getEbtProps } from '@kbn/ebt-click';
+import { getLinkActionProps } from '../utils/link_action';
 
 interface BaseAction {
   icon: IconType;
@@ -17,6 +20,7 @@ interface BaseAction {
   dataTestSubj?: string;
   label?: string;
   id?: string;
+  ebt: EbtClickAttrs;
 }
 
 export type Action =
@@ -27,10 +31,6 @@ export interface SectionActionsProps {
   actions: Action[];
 }
 
-function isPlainLeftClick(e: React.MouseEvent) {
-  return e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
-}
-
 export const SectionActions = ({ actions }: SectionActionsProps) => {
   if (!actions.length) return null;
   const size = 'xs';
@@ -38,21 +38,9 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       {actions.map((action, idx) => {
-        const { icon, ariaLabel, dataTestSubj, label, onClick, href } = action;
-        const handleClick = onClick
-          ? (e: React.MouseEvent) => {
-              // If we have an href, keep native link behaviour for right clicks and modifier clicks.
-              // Plain left click should run the provided handler instead.
-              if (href && !isPlainLeftClick(e)) return;
-              if (href) e.preventDefault();
-              onClick();
-            }
-          : undefined;
-
-        const buttonProps = {
-          href,
-          onClick: handleClick,
-        };
+        const { icon, ariaLabel, dataTestSubj, label, onClick, href, ebt } = action;
+        const buttonProps = getLinkActionProps({ href, onClick });
+        const ebtProps = getEbtProps(ebt);
 
         return (
           <EuiFlexItem grow={false} key={action.id ?? idx} id={action.id}>
@@ -62,6 +50,7 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
                 iconType={icon}
                 aria-label={ariaLabel}
                 data-test-subj={dataTestSubj}
+                {...ebtProps}
                 {...buttonProps}
               >
                 {label}
@@ -72,6 +61,7 @@ export const SectionActions = ({ actions }: SectionActionsProps) => {
                 iconType={icon}
                 aria-label={ariaLabel}
                 data-test-subj={dataTestSubj}
+                {...ebtProps}
                 {...buttonProps}
               />
             )}

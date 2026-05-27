@@ -20,6 +20,25 @@ import { useKibana } from '../../common/lib/kibana';
 import { AGENT_STATUS_ERROR, EMPTY_PROMPT, NOT_AVAILABLE, PERMISSION_DENIED } from './translations';
 
 jest.mock('../../common/lib/kibana');
+jest.mock('../../common/experimental_features_context', () => ({
+  ...jest.requireActual('../../common/experimental_features_context'),
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
+// Infra's embedded usage renders <OsqueryAction formType="simple" hideAgentsField ... />,
+// which terminates in <LiveQuery ...>. Stub LiveQuery so these tests can assert the
+// props the osquery package receives from the embedder without mounting the full
+// Monaco + agent-selector + submit subtree.
+jest.mock('../../live_queries', () => ({
+  LiveQuery: (props: Record<string, unknown>) => (
+    <div
+      data-test-subj="live-query-mock"
+      data-form-type={String(props.formType ?? '')}
+      data-hide-agents-field={String(props.hideAgentsField ?? '')}
+      data-agent-id={String(props.agentId ?? '')}
+    />
+  ),
+}));
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
@@ -165,5 +184,87 @@ describe('Osquery Action', () => {
     expect(queryByText(EMPTY_PROMPT)).not.toBeInTheDocument();
     expect(queryByText(PERMISSION_DENIED)).not.toBeInTheDocument();
     expect(queryByText(AGENT_STATUS_ERROR)).not.toBeInTheDocument();
+  });
+
+  // Covers the osquery-owned surface of the Infra "Infrastructure → Host details
+  // → Osquery" tab embed (osquery.tsx renders <OsqueryAction agentId hideAgentsField
+  // formType="simple" />). The `formType: 'simple'` branch was previously untested;
+  // every existing case above exercises `formType: 'steps'` only. These cases
+  // verify (a) the prompt / error paths still fire in simple mode and (b) the
+  // happy path hands the embedder's props through to LiveQuery unchanged.
+  describe('formType: simple (Infra embed)', () => {
+    it('renders the empty prompt when the agent is fetched but no agent data is returned', () => {
+      spyOsquery();
+      mockKibana();
+
+      const { getByText, queryByTestId } = renderWithContext(
+        <OsqueryAction agentId={'test'} formType={'simple'} hideAgentsField />
+      );
+
+      expect(getByText(EMPTY_PROMPT)).toBeInTheDocument();
+      expect(queryByTestId('live-query-mock')).not.toBeInTheDocument();
+    });
+
+    it('renders the agent-status error when permissions are ok but the agent is not online', () => {
+      spyOsquery({ agentData: { status: 'offline' } });
+      mockKibana(properPermissions);
+
+      const { getByText, queryByTestId } = renderWithContext(
+        <OsqueryAction agentId={'test'} formType={'simple'} hideAgentsField />
+      );
+
+      expect(getByText(AGENT_STATUS_ERROR)).toBeInTheDocument();
+      expect(queryByTestId('live-query-mock')).not.toBeInTheDocument();
+    });
+
+    it('renders the not-available prompt when osquery is not installed on the policy', () => {
+      spyOsquery({ agentData: { status: 'online' }, osqueryAvailable: false });
+      mockKibana(properPermissions);
+
+      const { getByText, queryByTestId } = renderWithContext(
+        <OsqueryAction agentId={'test'} formType={'simple'} hideAgentsField />
+      );
+
+      expect(getByText(NOT_AVAILABLE)).toBeInTheDocument();
+      expect(queryByTestId('live-query-mock')).not.toBeInTheDocument();
+    });
+
+    it('passes formType="simple" + hideAgentsField through to LiveQuery on the happy path', () => {
+      spyOsquery({ agentData: { status: 'online' } });
+      mockKibana(properPermissions);
+
+      const { getByTestId } = renderWithContext(
+        <OsqueryAction agentId={'agent-42'} formType={'simple'} hideAgentsField />
+      );
+
+      const liveQuery = getByTestId('live-query-mock');
+      expect(liveQuery).toBeInTheDocument();
+      expect(liveQuery).toHaveAttribute('data-form-type', 'simple');
+      expect(liveQuery).toHaveAttribute('data-hide-agents-field', 'true');
+      expect(liveQuery).toHaveAttribute('data-agent-id', 'agent-42');
+    });
+
+    it('does not hide the agent selector when hideAgentsField is not set, even in simple mode', () => {
+      spyOsquery({ agentData: { status: 'online' } });
+      mockKibana(properPermissions);
+
+      const { getByTestId } = renderWithContext(
+        <OsqueryAction agentId={'agent-42'} formType={'simple'} />
+      );
+
+      expect(getByTestId('live-query-mock')).toHaveAttribute('data-hide-agents-field', '');
+    });
+
+    it('renders permission denied in simple mode when the user lacks all osquery privileges', () => {
+      spyOsquery({ agentData: { status: 'online' } });
+      mockKibana();
+
+      const { getByText, queryByTestId } = renderWithContext(
+        <OsqueryAction agentId={'test'} formType={'simple'} hideAgentsField />
+      );
+
+      expect(getByText(PERMISSION_DENIED)).toBeInTheDocument();
+      expect(queryByTestId('live-query-mock')).not.toBeInTheDocument();
+    });
   });
 });

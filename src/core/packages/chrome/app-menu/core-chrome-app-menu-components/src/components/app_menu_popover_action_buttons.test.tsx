@@ -19,13 +19,6 @@ describe('AppMenuPopoverActionButtons', () => {
     iconType: 'save',
   };
 
-  const secondaryActionItem = {
-    id: 'cancel',
-    label: 'Cancel',
-    run: jest.fn(),
-    iconType: 'cross',
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -42,49 +35,9 @@ describe('AppMenuPopoverActionButtons', () => {
     expect(screen.getByTestId('app-menu-popover-action-buttons-container')).toBeInTheDocument();
   });
 
-  it('should render container when secondary action item is provided', () => {
-    render(<AppMenuPopoverActionButtons secondaryActionItem={secondaryActionItem} />);
-
-    expect(screen.getByTestId('app-menu-popover-action-buttons-container')).toBeInTheDocument();
-  });
-
   it('should render primary action button', () => {
     render(<AppMenuPopoverActionButtons primaryActionItem={primaryActionItem} />);
 
     expect(screen.getByText('Save')).toBeInTheDocument();
-  });
-
-  it('should render secondary action button', () => {
-    render(<AppMenuPopoverActionButtons secondaryActionItem={secondaryActionItem} />);
-
-    expect(screen.getByText('Cancel')).toBeInTheDocument();
-  });
-
-  it('should render both primary and secondary action buttons', () => {
-    render(
-      <AppMenuPopoverActionButtons
-        primaryActionItem={primaryActionItem}
-        secondaryActionItem={secondaryActionItem}
-      />
-    );
-
-    expect(screen.getByText('Save')).toBeInTheDocument();
-    expect(screen.getByText('Cancel')).toBeInTheDocument();
-  });
-
-  it('should render secondary action before primary action in DOM order', () => {
-    render(
-      <AppMenuPopoverActionButtons
-        primaryActionItem={primaryActionItem}
-        secondaryActionItem={secondaryActionItem}
-      />
-    );
-
-    const container = screen.getByTestId('app-menu-popover-action-buttons-container');
-    const buttons = container.querySelectorAll('button');
-
-    // Secondary should come first, then primary
-    expect(buttons[0]).toHaveTextContent('Cancel');
-    expect(buttons[1]).toHaveTextContent('Save');
   });
 });

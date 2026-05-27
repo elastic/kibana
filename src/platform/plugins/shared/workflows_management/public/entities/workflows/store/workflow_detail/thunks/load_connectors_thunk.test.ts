@@ -8,12 +8,18 @@
  */
 
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
 
 import { loadConnectorsThunk } from './load_connectors_thunk';
 import type { ConnectorsResponse } from '../../../../connectors/model/types';
 import { createMockStore, getMockServices } from '../../__mocks__/store.mock';
 import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { setConnectors } from '../slice';
+
+const mockWorkflowApi = createMockWorkflowApi();
+jest.mock('@kbn/workflows-ui', () => ({
+  WorkflowApi: jest.fn().mockImplementation(() => mockWorkflowApi),
+}));
 
 // Mock the schema functions
 jest.mock('../../../../../../common/schema', () => ({
@@ -63,15 +69,17 @@ describe('loadConnectorsThunk', () => {
   });
 
   it('should load connectors successfully for the first time', async () => {
-    mockServices.http.get.mockResolvedValue(mockConnectorsResponse1);
+    mockWorkflowApi.getConnectors.mockResolvedValue(mockConnectorsResponse1);
 
     const result = await store.dispatch(loadConnectorsThunk());
 
-    expect(mockServices.http.get).toHaveBeenCalledWith('/api/workflows/connectors');
     expect(addDynamicConnectorsToCache).toHaveBeenCalledWith(
       mockConnectorsResponse1.connectorTypes
     );
-    expect(getWorkflowZodSchema).toHaveBeenCalledWith(mockConnectorsResponse1.connectorTypes);
+    expect(getWorkflowZodSchema).toHaveBeenCalledWith(
+      mockConnectorsResponse1.connectorTypes,
+      expect.any(Array)
+    );
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
     expect(result.payload).toEqual(mockConnectorsResponse1);
   });
@@ -81,15 +89,17 @@ describe('loadConnectorsThunk', () => {
     store.dispatch(setConnectors(mockConnectorsResponse1));
 
     // Load new connectors
-    mockServices.http.get.mockResolvedValue(mockConnectorsResponse2);
+    mockWorkflowApi.getConnectors.mockResolvedValue(mockConnectorsResponse2);
 
     const result = await store.dispatch(loadConnectorsThunk());
 
-    expect(mockServices.http.get).toHaveBeenCalledWith('/api/workflows/connectors');
     expect(addDynamicConnectorsToCache).toHaveBeenCalledWith(
       mockConnectorsResponse2.connectorTypes
     );
-    expect(getWorkflowZodSchema).toHaveBeenCalledWith(mockConnectorsResponse2.connectorTypes);
+    expect(getWorkflowZodSchema).toHaveBeenCalledWith(
+      mockConnectorsResponse2.connectorTypes,
+      expect.any(Array)
+    );
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
     expect(result.payload).toEqual(mockConnectorsResponse2);
   });
@@ -100,11 +110,10 @@ describe('loadConnectorsThunk', () => {
     store.dispatch(setConnectors(response));
 
     // Load the same connectors
-    mockServices.http.get.mockResolvedValue(response);
+    mockWorkflowApi.getConnectors.mockResolvedValue(response);
 
     const result = await store.dispatch(loadConnectorsThunk());
 
-    expect(mockServices.http.get).toHaveBeenCalledWith('/api/workflows/connectors');
     expect(addDynamicConnectorsToCache).not.toHaveBeenCalled();
     expect(getWorkflowZodSchema).not.toHaveBeenCalled();
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
@@ -117,7 +126,7 @@ describe('loadConnectorsThunk', () => {
       message: 'Bad Request',
     };
 
-    mockServices.http.get.mockRejectedValue(error);
+    mockWorkflowApi.getConnectors.mockRejectedValue(error);
 
     const result = await store.dispatch(loadConnectorsThunk());
 
@@ -136,7 +145,7 @@ describe('loadConnectorsThunk', () => {
       message: 'Network Error',
     };
 
-    mockServices.http.get.mockRejectedValue(error);
+    mockWorkflowApi.getConnectors.mockRejectedValue(error);
 
     const result = await store.dispatch(loadConnectorsThunk());
 
@@ -153,7 +162,7 @@ describe('loadConnectorsThunk', () => {
   it('should handle error without message', async () => {
     const error = {};
 
-    mockServices.http.get.mockRejectedValue(error);
+    mockWorkflowApi.getConnectors.mockRejectedValue(error);
 
     const result = await store.dispatch(loadConnectorsThunk());
 
@@ -172,14 +181,17 @@ describe('loadConnectorsThunk', () => {
     store.dispatch(setConnectors(mockConnectorsResponse2));
 
     // Load connectors with only 1 type
-    mockServices.http.get.mockResolvedValue(mockConnectorsResponse1);
+    mockWorkflowApi.getConnectors.mockResolvedValue(mockConnectorsResponse1);
 
     const result = await store.dispatch(loadConnectorsThunk());
 
     expect(addDynamicConnectorsToCache).toHaveBeenCalledWith(
       mockConnectorsResponse1.connectorTypes
     );
-    expect(getWorkflowZodSchema).toHaveBeenCalledWith(mockConnectorsResponse1.connectorTypes);
+    expect(getWorkflowZodSchema).toHaveBeenCalledWith(
+      mockConnectorsResponse1.connectorTypes,
+      expect.any(Array)
+    );
     expect(result.type).toBe('detail/loadConnectorsThunk/fulfilled');
     expect(result.payload).toEqual(mockConnectorsResponse1);
   });

@@ -25,6 +25,8 @@ export const EPMApp: React.FunctionComponent = () => {
   const { automaticImport } = useStartServices();
   useBreadcrumbs('integrations');
 
+  const hasCreateIntegration = Boolean(automaticImport);
+
   return (
     <Routes>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_policy_edit}>
@@ -45,8 +47,13 @@ export const EPMApp: React.FunctionComponent = () => {
           </React.Suspense>
         </IntegrationsStateContextProvider>
       </Route>
-      {automaticImport && (
+      {hasCreateIntegration && (
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_create}>
+          <CreateIntegration />
+        </Route>
+      )}
+      {hasCreateIntegration && (
+        <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_upload}>
           <CreateIntegration />
         </Route>
       )}

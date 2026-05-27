@@ -107,22 +107,6 @@ ${Object.entries(connectorInfo.examples.params || {})
    * Categorize connector types to provide better help
    */
   private getConnectorInfo(connectorType: string): ConnectorInfo | null {
-    // HTTP-related connectors
-    if (connectorType.includes('http') || connectorType.includes('webhook')) {
-      return {
-        name: 'HTTP',
-        description: 'HTTP request connector for web API integration',
-        documentation: 'Configure URL, method, headers, and body parameters',
-        examples: {
-          params: {
-            url: 'https://api.example.com/endpoint',
-            method: 'GET',
-            headers: { Authorization: 'Bearer token' },
-          },
-        },
-      };
-    }
-
     // Slack connectors
     if (connectorType.includes('slack')) {
       return {
@@ -148,6 +132,20 @@ ${Object.entries(connectorInfo.examples.params || {})
             to: ['user@example.com', 'other@example.com'],
             subject: 'Workflow Notification',
             message: 'Your workflow has completed successfully.',
+          },
+        },
+      };
+    }
+
+    // Human-in-the-loop wait
+    if (connectorType === 'waitForInput') {
+      return {
+        name: 'Wait For Input',
+        description: 'Pause execution until external input is provided (human-in-the-loop)',
+        documentation: 'Configure the message displayed to the user when waiting for input',
+        examples: {
+          params: {
+            message: 'Please approve before continuing',
           },
         },
       };

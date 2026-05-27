@@ -15,6 +15,7 @@ export {
   isDerivativeAgg,
   isSumBucketAgg,
   isTermsWithAggregation,
+  isFilterWithAggregations,
 } from './inventory_models';
 
 export {
@@ -54,7 +55,7 @@ export {
   METRICSET_MODULE,
   METRICSET_NAME,
   DATASTREAM_DATASET,
-  OS_NAME,
+  OS_TYPE,
   SYSTEM_INTEGRATION,
   HOST_METRICS_RECEIVER_OTEL,
 } from './constants';

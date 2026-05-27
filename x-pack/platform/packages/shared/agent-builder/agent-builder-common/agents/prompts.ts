@@ -35,17 +35,21 @@ export enum ConfirmationStatus {
   rejected = 'rejected',
 }
 
+export type ConfirmPromptColor = 'primary' | 'warning' | 'danger';
+
 export interface ConfirmPromptDefinition {
   /** id of the permission to ask confirmation for */
   id: string;
   /** optional title to display for the confirmation prompt */
   title?: string;
-  /** optional message to display for the confirmation prompt */
+  /** optional markdown body to display in the confirmation prompt */
   message?: string;
   /** optional text to display for the confirmation prompt's confirm button */
   confirm_text?: string;
   /** optional text to display for the confirmation prompt's cancel button */
   cancel_text?: string;
+  /** visual color theme for the confirmation card (default: 'warning') */
+  color?: ConfirmPromptColor;
 }
 
 export interface ConfirmationPromptResponse {

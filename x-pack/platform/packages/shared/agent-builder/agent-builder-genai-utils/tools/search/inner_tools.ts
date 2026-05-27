@@ -5,33 +5,31 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { tool as toTool } from '@langchain/core/tools';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
-import type { ResourceResult, ToolResult } from '@kbn/agent-builder-common/tools';
+import type { TimeRange } from '@kbn/agent-builder-common';
+import type { Resource, ResourceListResult, ToolResult } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server/tools';
+import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server/tools';
 import { relevanceSearch } from '../relevance_search';
 import { naturalLanguageSearch } from '../nl_search';
 import type { MatchResult } from '../steps/perform_match_search';
+import type { TopSnippetsConfig } from '../steps/extract_snippets';
 import { progressMessages } from './i18n';
 
-const convertMatchResult = (result: MatchResult): ResourceResult => {
+const convertMatchResult = (result: MatchResult): Resource => {
   return {
-    tool_result_id: getToolResultId(),
-    type: ToolResultType.resource,
-    data: {
-      reference: {
-        id: result.id,
-        index: result.index,
-      },
-      partial: true,
-      content: {
-        highlights: result.highlights,
-      },
+    reference: {
+      id: result.id,
+      index: result.index,
+    },
+    partial: true,
+    content: {
+      snippets: result.snippets,
     },
   };
 };
@@ -43,11 +41,13 @@ export const createRelevanceSearchTool = ({
   esClient,
   events,
   logger,
+  topSnippetsConfig,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   events?: ToolEventEmitter;
   logger: Logger;
+  topSnippetsConfig?: TopSnippetsConfig;
 }) => {
   return toTool(
     async ({ term, index, size }) => {
@@ -63,11 +63,20 @@ export const createRelevanceSearchTool = ({
             model,
             esClient,
             logger,
+            topSnippetsConfig,
           });
-          const results = rawResults.map(convertMatchResult);
+          const resources = rawResults.map(convertMatchResult);
 
-          const content = JSON.stringify(results);
-          const artifact = { results };
+          const result: ResourceListResult = {
+            type: ToolResultType.resourceList,
+            tool_result_id: getToolResultId(),
+            data: {
+              resources,
+            },
+          };
+
+          const content = JSON.stringify({ results: [result] });
+          const artifact = { results: [result] };
           return [content, artifact];
         }
       );
@@ -95,6 +104,7 @@ export const createNaturalLanguageSearchTool = ({
   logger,
   rowLimit,
   customInstructions,
+  timeRange,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
@@ -102,6 +112,7 @@ export const createNaturalLanguageSearchTool = ({
   logger: Logger;
   rowLimit?: number;
   customInstructions?: string;
+  timeRange: TimeRange;
 }) => {
   return toTool(
     async ({ query, index }) => {
@@ -119,6 +130,7 @@ export const createNaturalLanguageSearchTool = ({
             logger,
             rowLimit,
             customInstructions,
+            timeRange,
           });
 
           const results: ToolResult[] = response.esqlData
@@ -132,12 +144,13 @@ export const createNaturalLanguageSearchTool = ({
                 },
                 {
                   tool_result_id: getToolResultId(),
-                  type: ToolResultType.tabularData,
+                  type: ToolResultType.esqlResults,
                   data: {
                     source: 'esql',
                     query: response.generatedQuery,
                     columns: response.esqlData.columns,
                     values: response.esqlData.values,
+                    time_range: timeRange,
                   },
                 },
               ]
@@ -170,6 +183,28 @@ Example of natural language queries which can be passed to the tool:
   - "what is the average order value?"
   - "list all products where status is 'in_stock' and price is less than 50"
   - "how many errors were logged in the past hour?"`,
+    }
+  );
+};
+
+export const noMatchingResourceToolName = 'no_matching_resource';
+
+export const NO_MATCHING_RESOURCE_ERROR = 'Could not figure out which data source to use';
+
+export const createNoMatchingResourceTool = () => {
+  return toTool(
+    async () => {
+      const result = createErrorResult({ message: NO_MATCHING_RESOURCE_ERROR });
+      const content = JSON.stringify({ results: [result] });
+      const artifact = { results: [result] };
+      return [content, artifact];
+    },
+    {
+      name: noMatchingResourceToolName,
+      responseFormat: 'content_and_artifact',
+      schema: z.object({}),
+      description:
+        'Call this ONLY when none of the available resources can plausibly answer the query. Prefer attempting a search with one of the other tools when any resource plausibly fits.',
     }
   );
 };

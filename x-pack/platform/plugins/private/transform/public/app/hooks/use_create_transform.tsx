@@ -29,6 +29,7 @@ interface CreateTransformArgs {
   transformConfig: PutTransformsRequestSchema;
   createDataView: boolean;
   timeFieldName?: string;
+  deferValidation?: boolean;
 }
 
 export const useCreateTransform = () => {
@@ -52,11 +53,12 @@ export const useCreateTransform = () => {
       transformConfig,
       createDataView = false,
       timeFieldName,
+      deferValidation,
     }: CreateTransformArgs) => {
       return http.put<PutTransformsResponseSchema>(
         addInternalBasePath(`transforms/${transformId}`),
         {
-          query: { createDataView, timeFieldName },
+          query: { createDataView, timeFieldName, deferValidation },
           body: JSON.stringify(transformConfig),
           version: '1',
         }

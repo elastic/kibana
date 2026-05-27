@@ -66,7 +66,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
     setPopover(false);
   };
   const { selectedConnector, rawName } = useValues(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [flyoutContent, setFlyoutContent] = useState<'manual_config' | 'client'>();
@@ -182,7 +182,7 @@ GET connector-${rawName}/_search
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="edit"
-      icon="console"
+      icon="commandLine"
       onClick={() => {
         closePopover();
       }}
@@ -209,7 +209,7 @@ GET connector-${rawName}/_search
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="share"
-      icon="console"
+      icon="commandLine"
       onClick={() => {
         setFlyoutContent('client');
         setIsFlyoutVisible(true);
@@ -227,6 +227,10 @@ GET connector-${rawName}/_search
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate(
+          'xpack.contentConnectors.createConnector.finishUpStep.popover.ariaLabel',
+          { defaultMessage: 'More configuration options' }
+        )}
         id={splitButtonPopoverId}
         button={
           <EuiButtonIcon

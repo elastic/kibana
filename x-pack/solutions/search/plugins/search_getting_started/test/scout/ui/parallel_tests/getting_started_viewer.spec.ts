@@ -5,34 +5,29 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-search';
 import { expect } from '@kbn/scout-search/ui';
 import { test } from '../fixtures';
 
-test.describe('Getting Started - Viewer', { tag: ['@ess', '@svlSearch'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsViewer();
-    await pageObjects.gettingStarted.goto();
-  });
+test.describe(
+  'Getting Started - Viewer',
+  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  () => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsViewer();
+      await pageObjects.gettingStarted.goto();
+    });
 
-  test('verifies viewer has limited access to API keys functionality', async ({ pageObjects }) => {
-    await test.step('should display no API keys access message', async () => {
+    test('should display kibana version badge', async ({ pageObjects }) => {
+      const versionBadge = await pageObjects.gettingStarted.getKibanaVersionBadge();
+      await expect(versionBadge).toBeVisible();
+    });
+
+    test('verifies viewer has no access to Search API keys', async ({ pageObjects }) => {
+      // The Search API key form (requires cluster:manage) shows a no-access message for viewers.
+      // Connection Details flyout tab visibility is environment-dependent and covered separately.
       const noAccessMessage = await pageObjects.gettingStarted.getNoApiKeysAccessMessage();
       await expect(noAccessMessage).toBeVisible();
     });
-
-    await test.step('connection details flyout should not show API Keys tab', async () => {
-      await pageObjects.gettingStarted.clickViewConnectionDetailsLink();
-
-      const modalTitle = await pageObjects.gettingStarted.getConnectionDetailsModalTitle();
-      await expect(modalTitle).toBeVisible();
-
-      // Endpoints tab should exist
-      const endpointsTab = await pageObjects.gettingStarted.getConnectionDetailsEndpointsTab();
-      await expect(endpointsTab).toBeVisible();
-
-      // API Keys tab should NOT exist for viewer
-      const apiKeysTab = await pageObjects.gettingStarted.getConnectionDetailsApiKeysTab();
-      await expect(apiKeysTab).toBeHidden();
-    });
-  });
-});
+  }
+);

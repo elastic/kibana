@@ -54,6 +54,7 @@ describe('getMaintenanceWindowRoute', () => {
           "since": "9.1.0",
           "stability": "stable",
         },
+        "oasOperationObject": [Function],
         "summary": "Get maintenance window details.",
         "tags": Array [
           "oas-tag:maintenance-window",
@@ -82,7 +83,7 @@ describe('getMaintenanceWindowRoute', () => {
         id: 'test-id',
         schedule: {
           custom: {
-            duration: '60m',
+            duration: '1h',
             recurring: {
               every: '1w',
               occurrences: 2,

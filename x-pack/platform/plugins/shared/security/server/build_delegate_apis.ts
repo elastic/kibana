@@ -15,14 +15,18 @@ import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-ser
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
 import type { InternalAuthenticationServiceStart } from './authentication';
+import type { Session } from './session_management';
+import { getPrintableSessionId } from './session_management';
 import type { UserProfileServiceStartInternal } from './user_profile';
 
 export const buildSecurityApi = ({
   getAuthc,
+  getSession,
   audit,
   config,
 }: {
   getAuthc: () => InternalAuthenticationServiceStart;
+  getSession: () => Pick<Session, 'getSID'>;
   audit: AuditServiceSetup;
   config: { uiam?: { enabled: boolean } };
 }): CoreSecurityDelegateContract => {
@@ -31,11 +35,17 @@ export const buildSecurityApi = ({
       getCurrentUser: (request) => {
         return getAuthc().getCurrentUser(request);
       },
+      getRedactedSessionId: async (request) => {
+        const sid = await getSession().getSID(request);
+        return sid ? getPrintableSessionId(sid) : undefined;
+      },
       apiKeys: {
         areAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
         areCrossClusterAPIKeysEnabled: () => getAuthc().apiKeys.areAPIKeysEnabled(),
         grantAsInternalUser: (request, createParams) =>
           getAuthc().apiKeys.grantAsInternalUser(request, createParams),
+        cloneAsInternalUser: (request, cloneParams) =>
+          getAuthc().apiKeys.cloneAsInternalUser(request, cloneParams),
         create: (request, createParams) => getAuthc().apiKeys.create(request, createParams),
         update: (request, updateParams) => getAuthc().apiKeys.update(request, updateParams),
         validate: (apiKeyParams) => getAuthc().apiKeys.validate(apiKeyParams),
@@ -49,8 +59,7 @@ export const buildSecurityApi = ({
                 request: KibanaRequest,
                 invalidateUiamApiKeyParams: InvalidateUiamAPIKeyParams
               ) => getAuthc().apiKeys.uiam!.invalidate(request, invalidateUiamApiKeyParams),
-              getScopedClusterClientWithApiKey: (apiKey: string) =>
-                getAuthc().apiKeys.uiam!.getScopedClusterClientWithApiKey(apiKey),
+              convert: (keys: string[]) => getAuthc().apiKeys.uiam!.convert(keys),
             }
           : null,
       },

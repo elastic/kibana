@@ -7,12 +7,16 @@
 
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
-import { createEsClientForTesting } from '@kbn/test';
+import { createEsClientForTesting } from '@kbn/test-es-server';
+import {
+  computePairedTTestResults,
+  pairScores,
+  type EvaluationScoreDocument as CommonEvaluationScoreDocument,
+} from '@kbn/evals-common';
 import { EvaluationScoreRepository } from '../../utils/score_repository';
 import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
-import { computePairedTTestResults, pairScores } from '../../utils/statistical_analysis';
 
-const DEFAULT_EVALUATIONS_ES_URL = 'http://elastic:changeme@localhost:9220';
+const DEFAULT_EVALUATIONS_ES_URL = 'http://elastic:changeme@localhost:9200';
 
 export const compareCmd: Command<void> = {
   name: 'compare',
@@ -82,10 +86,10 @@ export const compareCmd: Command<void> = {
       overlappingDatasetSet.has(score.example.dataset.id)
     );
 
-    const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(
-      filteredFirstRunScores,
-      filteredSecondRunScores
-    );
+    const scoresA = filteredFirstRunScores as unknown as CommonEvaluationScoreDocument[];
+    const scoresB = filteredSecondRunScores as unknown as CommonEvaluationScoreDocument[];
+
+    const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(scoresA, scoresB);
 
     if (pairs.length === 0) {
       throw new Error('No paired scores found between the two runs.');
@@ -95,7 +99,7 @@ export const compareCmd: Command<void> = {
       `Paired ${pairs.length} scores (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
     );
 
-    const results = computePairedTTestResults(filteredFirstRunScores, filteredSecondRunScores);
+    const results = computePairedTTestResults(pairs);
     if (results.length === 0) {
       log.warning('No t-test results returned.');
       return;

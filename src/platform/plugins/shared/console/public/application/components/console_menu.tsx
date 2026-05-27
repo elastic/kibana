@@ -130,7 +130,7 @@ export class ConsoleMenu extends Component<Props, State> {
           this.closePopover();
           this.copyAsCurl();
         }}
-        icon="copyClipboard"
+        icon="copy"
       >
         <FormattedMessage
           id="console.requestOptions.copyAsUrlButtonLabel"
@@ -141,7 +141,7 @@ export class ConsoleMenu extends Component<Props, State> {
         data-test-subj="consoleMenuAutoIndent"
         key="Auto indent"
         onClick={this.autoIndent}
-        icon="arrowEnd"
+        icon="chevronLimitRight"
       >
         <FormattedMessage
           id="console.requestOptions.autoIndentButtonLabel"
@@ -172,6 +172,9 @@ export class ConsoleMenu extends Component<Props, State> {
           closePopover={this.closePopover}
           panelPaddingSize="none"
           anchorPosition="downLeft"
+          aria-label={i18n.translate('console.consoleMenu.popoverAriaLabel', {
+            defaultMessage: 'Request options',
+          })}
         >
           <EuiContextMenuPanel items={items} data-test-subj="consoleMenu" />
         </EuiPopover>

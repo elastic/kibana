@@ -16,6 +16,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { escapeQuotes } from '@kbn/es-query';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
@@ -241,7 +242,9 @@ export class AutomaticAgentUpgradeTask {
     const totalActiveAgents = await this.getAgentCount(
       esClient,
       soClient,
-      `policy_id:${agentPolicy.id} AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
+      `policy_id:"${escapeQuotes(
+        agentPolicy.id
+      )}" AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
     );
     if (totalActiveAgents === 0) {
       this.logger.debug(
@@ -280,14 +283,16 @@ export class AutomaticAgentUpgradeTask {
         (totalActiveAgents * requiredVersion.percentage) / 100
       );
 
-      // Subtract the total number of agents already or on or updating to target version.
+      // Subtract the total number of agents already on or updating to target version.
+      // Both conditions must be scoped to policy_id to avoid counting upgrading agents
+      // from other policies, which would cause a false "target percentage already reached".
       const updatingToKuery = `(upgrade_details.target_version:${requiredVersion.version} AND NOT upgrade_details.state:UPG_FAILED)`;
       const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
         esClient,
         soClient,
-        `((policy_id:${agentPolicy.id} AND agent.version:${
+        `policy_id:"${escapeQuotes(agentPolicy.id)}" AND (agent.version:${
           requiredVersion.version
-        }) OR ${updatingToKuery}) AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
+        } OR ${updatingToKuery}) AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
       );
 
       numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
@@ -414,9 +419,9 @@ export class AutomaticAgentUpgradeTask {
     const statusKuery =
       '(status:online OR status:offline OR status:enrolling OR status:degraded OR status:error OR status:orphaned)'; // active status except updating
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-      kuery: `policy_id:${
+      kuery: `policy_id:"${escapeQuotes(
         agentPolicy.id
-      } AND (NOT upgrade_attempts:*) AND (${statusKuery} OR ${this.updatingQuery(
+      )}" AND (NOT upgrade_attempts:*) AND (${statusKuery} OR ${this.updatingQuery(
         requiredVersion.version
       )})`,
       perPage: AGENTS_BATCHSIZE,
@@ -470,9 +475,9 @@ export class AutomaticAgentUpgradeTask {
     let retriedAgentsCounter = 0;
 
     const retryingAgentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-      kuery: `policy_id:${agentPolicy.id} AND upgrade_attempts:* AND ${this.updatingQuery(
-        version
-      )}`,
+      kuery: `policy_id:"${escapeQuotes(
+        agentPolicy.id
+      )}" AND upgrade_attempts:* AND ${this.updatingQuery(version)}`,
       perPage: AGENTS_BATCHSIZE,
       sortField: 'agent.version',
       sortOrder: 'asc',

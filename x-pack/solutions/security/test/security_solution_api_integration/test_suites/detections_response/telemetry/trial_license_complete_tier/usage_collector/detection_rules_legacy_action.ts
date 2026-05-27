@@ -520,6 +520,7 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions: false,
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
+            ai_created: false,
           });
           checkRuleTypeUsageFields(
             stats.detection_rules.detection_rule_usage,
@@ -611,6 +612,7 @@ export default ({ getService }: FtrProviderContext) => {
             has_response_actions: false,
             has_response_actions_endpoint: false,
             has_response_actions_osquery: false,
+            ai_created: false,
           });
           checkRuleTypeUsageFields(
             stats.detection_rules.detection_rule_usage,

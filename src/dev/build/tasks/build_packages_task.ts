@@ -9,10 +9,11 @@
 
 import Path from 'path';
 import * as Fsp from 'fs/promises';
+import { cpus } from 'os';
 
 import * as Peggy from '@kbn/peggy';
 import * as DotText from '@kbn/dot-text';
-import { asyncForEach } from '@kbn/std';
+import { asyncForEachWithLimit } from '@kbn/std';
 import type { TransformConfig } from '@kbn/babel-transform';
 import { withFastAsyncTransform } from '@kbn/babel-transform';
 import { makeMatcher } from '@kbn/picomatcher';
@@ -121,7 +122,7 @@ export const BuildPackages: Task = {
     };
 
     await withFastAsyncTransform(transformConfig, async (transform) => {
-      await asyncForEach(packages, async (pkg) => {
+      await asyncForEachWithLimit(packages, cpus().length, async (pkg) => {
         const allPaths = new Set(Array.from(pkgFileMap.getFiles(pkg), (p) => p.abs));
         const pkgDistPath = build.resolvePath(pkg.normalizedRepoRelativeDir);
         const peggyConfigOutputPaths = new Set<string>();
@@ -162,6 +163,17 @@ export const BuildPackages: Task = {
                 if (excludeFileByName(rec.source.name) || excludeFileByTags(rec.source.tags)) {
                   return false;
                 }
+              }
+
+              // For plugins, exclude public/ source (bundled by the optimizer).
+              // Keep public/assets/ — served at runtime via registerStaticDir.
+              if (
+                pkg.isPlugin() &&
+                rec.source.rel.startsWith('public/') &&
+                rec.source.rel !== 'public/assets' &&
+                !rec.source.rel.startsWith('public/assets/')
+              ) {
+                return false;
               }
 
               // ignore files selected by the package's "build.extraExcludes" config
@@ -209,6 +221,16 @@ export const BuildPackages: Task = {
                     ...rec,
                     dest: rec.dest.withName(rec.dest.name + '.js'),
                     content: result.source,
+                  };
+                }
+
+                case '.yaml':
+                case '.yml': {
+                  const yamlSource = await Fsp.readFile(rec.source.abs, 'utf8');
+                  return {
+                    ...rec,
+                    dest: rec.dest.withName(rec.dest.name + '.js'),
+                    content: `module.exports = ${JSON.stringify(yamlSource)};\n`,
                   };
                 }
 

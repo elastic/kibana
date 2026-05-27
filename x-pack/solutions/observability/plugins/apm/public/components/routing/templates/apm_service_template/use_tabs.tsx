@@ -6,7 +6,6 @@
  */
 
 import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { keyBy, omit } from 'lodash';
 import React from 'react';
@@ -24,9 +23,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useProfilingPluginSetting } from '../../../../hooks/use_profiling_integration_setting';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
@@ -106,27 +103,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   } = useApmParams(`/services/{serviceName}/${selectedTab}` as const);
   const query = omit(queryFromUrl, 'page', 'pageSize', 'sortField', 'sortDirection');
 
-  const { rangeFrom, rangeTo, environment } = queryFromUrl;
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { data: serviceAlertsCount = { alertsCount: 0 } } = useFetcher(
-    (callApmApi) => {
-      return callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
-        params: {
-          path: {
-            serviceName,
-          },
-          query: {
-            start,
-            end,
-            environment,
-          },
-        },
-      });
-    },
-    [serviceName, start, end, environment]
-  );
-
   const allTabsDefinitions: Tab[] = [
     {
       key: 'overview',
@@ -178,7 +154,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="beaker" />,
+      append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="flask" />,
       hidden: isMetricsTabHidden({
         agentName,
         serverlessType,
@@ -219,7 +195,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="beaker" />,
+      append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="flask" />,
       hidden: !agentName || isRumAgentName(agentName) || isAzureFunctionsAgentName(serverlessType),
     },
     {
@@ -228,22 +204,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append:
-        serviceAlertsCount.alertsCount > 0 ? (
-          <EuiToolTip
-            position="bottom"
-            content={i18n.translate(
-              'xpack.apm.home.serviceAlertsTable.tooltip.activeAlertsExplanation',
-              {
-                defaultMessage: 'Active alerts',
-              }
-            )}
-          >
-            <EuiBadge color="danger" tabIndex={0}>
-              {serviceAlertsCount.alertsCount}
-            </EuiBadge>
-          </EuiToolTip>
-        ) : null,
       label: i18n.translate('xpack.apm.home.alertsTabLabel', {
         defaultMessage: 'Alerts',
       }),
@@ -273,7 +233,7 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.dashboardsTabLabel', {
         defaultMessage: 'Dashboards',
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
+      append: <TechnicalPreviewBadge icon="flask" />,
     },
   ];
 

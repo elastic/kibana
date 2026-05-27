@@ -69,7 +69,7 @@ const WorkflowsFilterPopoverComponent = ({
   const triggerButton = (
     <EuiFilterButton
       grow
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={() => setIsFilterPopoverOpen(!isFilterPopoverOpen)}
       numFilters={values.length}
       isSelected={isFilterPopoverOpen}

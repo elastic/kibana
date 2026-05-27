@@ -18,6 +18,10 @@ import type { ConfigureSubClient } from './configure/client';
 import { createConfigurationSubClient } from './configure/client';
 import type { MetricsSubClient } from './metrics/client';
 import { createMetricsSubClient } from './metrics/client';
+import type { TemplatesSubClient } from './templates/client';
+import { createTemplatesSubClient } from './templates/client';
+import type { FieldDefinitionsSubClient } from './field_definitions/client';
+import { createFieldDefinitionsSubClient } from './field_definitions/client';
 
 /**
  * Client wrapper that contains accessor methods for individual entities within the cases system.
@@ -29,6 +33,8 @@ export class CasesClient {
   private readonly _userActions: UserActionsSubClient;
   private readonly _configure: ConfigureSubClient;
   private readonly _metrics: MetricsSubClient;
+  private readonly _templates: TemplatesSubClient;
+  private readonly _fieldDefinitions: FieldDefinitionsSubClient;
 
   constructor(args: CasesClientArgs) {
     this._casesClientInternal = createCasesClientInternal(args);
@@ -37,6 +43,22 @@ export class CasesClient {
     this._userActions = createUserActionsSubClient(args, this);
     this._configure = createConfigurationSubClient(args, this._casesClientInternal);
     this._metrics = createMetricsSubClient(args, this);
+    this._templates = createTemplatesSubClient(args);
+    this._fieldDefinitions = createFieldDefinitionsSubClient(args);
+  }
+
+  /**
+   * Retrieves an interface for interacting with templates.
+   */
+  public get templates() {
+    return this._templates;
+  }
+
+  /**
+   * Retrieves an interface for interacting with the reusable field definitions library.
+   */
+  public get fieldDefinitions() {
+    return this._fieldDefinitions;
   }
 
   /**

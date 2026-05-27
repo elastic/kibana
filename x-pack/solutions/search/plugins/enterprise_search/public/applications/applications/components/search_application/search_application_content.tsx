@@ -99,7 +99,7 @@ export const SearchApplicationContent = () => {
               ),
             text: (
               <>
-                <EuiIcon size="s" type="arrowLeft" /> {searchApplicationName}
+                <EuiIcon aria-hidden size="s" type="chevronSingleLeft" /> {searchApplicationName}
               </>
             ),
           },
@@ -110,7 +110,7 @@ export const SearchApplicationContent = () => {
           <EuiButton
             data-telemetry-id="entSearchApplications-indices-addNewIndices"
             data-test-subj="search-application-add-new-indices-btn"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             fill
             onClick={openAddIndicesFlyout}
           >
@@ -132,7 +132,7 @@ export const SearchApplicationContent = () => {
             isSelected: contentTabId === SearchApplicationContentTabs.SCHEMA,
             label: (
               <EuiFlexGroup gutterSize="s" alignItems="center">
-                {hasSchemaConflicts && <EuiIcon type="warning" color="danger" />}
+                {hasSchemaConflicts && <EuiIcon aria-hidden type="warning" color="danger" />}
                 {SCHEMA_TAB_TITLE}
               </EuiFlexGroup>
             ),

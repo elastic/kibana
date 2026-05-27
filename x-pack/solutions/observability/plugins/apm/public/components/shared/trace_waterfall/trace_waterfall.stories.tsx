@@ -11,22 +11,41 @@ import { action } from '@storybook/addon-actions';
 import { TraceWaterfall } from '.';
 import { traceUnprocessedOtelSample } from './mock/trace_unprocessed_otel_sample';
 import { traceSample } from './mock/trace_sample';
-import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
 const stories: Meta = {
-  title: 'UnifiedTraceWaterfall',
+  title: 'shared/TraceWaterfall/UnifiedTraceWaterfall',
   component: TraceWaterfall,
-  decorators: [
-    (StoryComponent) => (
-      <MockApmPluginStorybook>
-        <StoryComponent />
-      </MockApmPluginStorybook>
-    ),
-  ],
 };
 
 export default stories;
+
+const DEEP_NESTED_NODE_COUNT = 600;
+const DEEP_NESTED_TRACE_ID = 'deep-nested-trace-id';
+const DEEP_NESTED_START_TIMESTAMP_US = new Date('2025-05-21T18:50:00.000Z').getTime() * 1000;
+
+const createDeepNestedTraceItems = (count: number): TraceItem[] => {
+  return Array.from({ length: count }, (_, index) => {
+    const id = `deep-node-${index + 1}`;
+    return {
+      id,
+      parentId: index > 0 ? `deep-node-${index}` : undefined,
+      timestampUs: DEEP_NESTED_START_TIMESTAMP_US,
+      name: index === 0 ? 'Deep Root Transaction' : `Deep Child Span ${index}`,
+      duration: 1000000,
+      serviceName: `deep-service-${(index % 8) + 1}`,
+      traceId: DEEP_NESTED_TRACE_ID,
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: index === 0 ? 'transaction' : 'span',
+    };
+  });
+};
+
+export const DeepNestedChildren600: StoryFn<{}> = () => {
+  return <TraceWaterfall traceItems={createDeepNestedTraceItems(DEEP_NESTED_NODE_COUNT)} />;
+};
 
 export const ManyChildren: StoryFn<{}> = () => {
   return (
@@ -41,6 +60,8 @@ export const ManyChildren: StoryFn<{}> = () => {
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
           errors: [{ errorDocId: '1' }],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
+          status: { fieldName: 'event.outcome', value: 'failure' },
         },
         ...Array(200)
           .fill(0)
@@ -54,6 +75,7 @@ export const ManyChildren: StoryFn<{}> = () => {
             traceId: 'ed1aacaf31264b93e0e405e42b00af74',
             errors: [],
             spanLinksCount: { incoming: 0, outgoing: 0 },
+            docType: 'span' as const,
           })),
       ]}
     />
@@ -75,6 +97,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
           errors: [{ errorDocId: '1' }],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: 'cdd3568d81149715',
@@ -86,6 +109,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
           errors: [],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: 'a111aabbccddeeff',
@@ -97,6 +121,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
           errors: [],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
       ]}
     />
@@ -115,6 +140,7 @@ export const Example: StoryFn<{}> = () => {
           errors: [],
           serviceName: 'load-generator',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: '2b18312dfedbf16a',
@@ -126,6 +152,8 @@ export const Example: StoryFn<{}> = () => {
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
+          status: { fieldName: 'event.outcome', value: 'failure' },
         },
         {
           id: '41b39c13ec0166a8',
@@ -137,6 +165,7 @@ export const Example: StoryFn<{}> = () => {
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '255547a7b6b19871',
@@ -148,9 +177,11 @@ export const Example: StoryFn<{}> = () => {
           parentId: '41b39c13ec0166a8',
           serviceName: 'product-catalog',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
+          status: { fieldName: 'event.outcome', value: 'failure' },
         },
       ]}
-      highlightedTraceId="41b39c13ec0166a8"
+      contextSpanIds={['41b39c13ec0166a8']}
     />
   );
 };
@@ -168,6 +199,7 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           errors: [],
           serviceName: 'load-generator',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: '2b18312dfedbf16a',
@@ -179,6 +211,7 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '41b39c13ec0166a8',
@@ -190,6 +223,7 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '255547a7b6b19871',
@@ -201,9 +235,10 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           parentId: '41b39c13ec0166a8',
           serviceName: 'product-catalog',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
       ]}
-      highlightedTraceId="41b39c13ec0166a8"
+      contextSpanIds={['41b39c13ec0166a8']}
       showLegend
     />
   );
@@ -222,6 +257,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           errors: [],
           serviceName: 'frontend',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: '2b18312dfedbf16a',
@@ -234,6 +270,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           serviceName: 'frontend',
           type: 'http',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '41b39c13ec0166a8',
@@ -246,6 +283,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           serviceName: 'frontend',
           type: 'http',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '255547a7b6b19871',
@@ -258,9 +296,10 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           serviceName: 'frontend',
           type: 'css',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
       ]}
-      highlightedTraceId="41b39c13ec0166a8"
+      contextSpanIds={['41b39c13ec0166a8']}
       serviceName="frontend"
       showLegend
     />
@@ -277,13 +316,16 @@ export const HiddenAccordionExample: StoryFn<{}> = () => {
         traceId: item._source.trace_id,
         parentId: item._source.parent_span_id,
         serviceName: item._source.resource.attributes['service.name'],
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       } as TraceItem)
   );
   return (
     <TraceWaterfall
       traceItems={traceItems}
       showAccordion={false}
-      highlightedTraceId="99e36adf40935241"
+      contextSpanIds={['99e36adf40935241']}
       onClick={() => {}}
     />
   );
@@ -299,6 +341,9 @@ export const OpenTelemetryExample: StoryFn<{}> = () => {
         traceId: item._source.trace_id,
         parentId: item._source.parent_span_id,
         serviceName: item._source.resource.attributes['service.name'],
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       } as TraceItem)
   );
   return <TraceWaterfall traceItems={traceItems} />;
@@ -310,11 +355,14 @@ export const APMExample: StoryFn<{}> = () => {
       ({
         id: item.span.id || item.transaction?.id,
         name: item.span.name || item.transaction?.name,
-        timestampUs: item.timestamp.us,
+        timestampUs: getTimestampUs(item),
         duration: item.span.duration?.us || item.transaction?.duration?.us,
         traceId: item.trace.id,
         parentId: item.parent?.id,
         serviceName: item.service.name,
+        errors: [],
+        spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       } as TraceItem)
   );
 
@@ -334,6 +382,7 @@ export const CompositeSpanExample: StoryFn<{}> = () => {
           errors: [],
           serviceName: 'api-service',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: 'composite-span',
@@ -352,6 +401,7 @@ export const CompositeSpanExample: StoryFn<{}> = () => {
             sum: 4500000,
             compressionStrategy: 'exact_match',
           },
+          docType: 'span',
         },
       ]}
     />

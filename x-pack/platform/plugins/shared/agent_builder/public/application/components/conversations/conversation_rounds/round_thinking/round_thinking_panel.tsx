@@ -15,11 +15,17 @@ import {
   EuiHorizontalRule,
   EuiIcon,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
+import { useTraceExists } from '../../../../hooks/use_trace_exists';
 import { RoundFlyout } from './round_flyout';
+import { TraceFlyout } from './trace_flyout';
 import { RoundSteps } from './steps/round_steps';
 import { ThinkingTimeDisplay } from './thinking_time_display';
 import { RoundIcon } from './round_icon';
@@ -28,6 +34,10 @@ import { borderRadiusXlStyles } from '../../../../../common.styles';
 
 const rawResponseButtonLabel = i18n.translate('xpack.agentBuilder.conversation.rawResponseButton', {
   defaultMessage: 'View JSON',
+});
+
+const viewTraceButtonLabel = i18n.translate('xpack.agentBuilder.conversation.viewTraceButton', {
+  defaultMessage: 'View Trace',
 });
 
 const closePanelLabel = i18n.translate('xpack.agentBuilder.conversation.closePanel', {
@@ -52,14 +62,49 @@ export const RoundThinkingPanel = ({
   onClose,
 }: RoundThinkingPanelProps) => {
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana();
   const [showFlyout, setShowFlyout] = useState(false);
+  const [showTraceFlyout, setShowTraceFlyout] = useState(false);
 
+  const traceId = useMemo(() => {
+    const id = rawRound.trace_id;
+    if (!id) return undefined;
+    return Array.isArray(id) ? id[0] : id;
+  }, [rawRound.trace_id]);
+
+  const isExperimentalEnabled = useExperimentalFeatures();
+
+  const { exists: traceExists } = useTraceExists(traceId ?? null, {
+    enabled: isExperimentalEnabled,
+  });
+
+  const addToDatasetAction = services.plugins.evals?.getAddToDatasetAction
+    ? services.plugins.evals.getAddToDatasetAction({
+        initialExample: {
+          input: {
+            round: rawRound,
+          },
+          output: {
+            steps,
+          },
+          metadata: {
+            source: 'agent_builder',
+            trace_id: traceId ?? null,
+          },
+        },
+      })
+    : null;
+
+  const showTraceButton = traceExists;
+  const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction != null;
+
+  const shadowStyles = useEuiShadow('l');
   const containerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
     ${borderRadiusXlStyles}
     border: ${isLoading ? `1px solid ${euiTheme.colors.borderStrongPrimary}` : 'none'};
     padding: ${euiTheme.size.base};
-    ${useEuiShadow('l')};
+    ${shadowStyles};
   `;
 
   const toggleFlyout = () => {
@@ -85,13 +130,18 @@ export const RoundThinkingPanel = ({
           css={css`
             cursor: pointer;
           `}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.THINKING_TOGGLE,
+            detail: 'conversation',
+          })}
         >
           <EuiFlexGroup responsive={false} gutterSize="m" direction="row" alignItems="center">
             <RoundIcon isLoading={isLoading} />
             <EuiTitle size="xs">
               <p>{reasoningLabel}</p>
             </EuiTitle>
-            <EuiIcon type="arrowDown" color="subdued" size="m" />
+            <EuiIcon type="chevronSingleDown" color="subdued" size="m" aria-hidden={true} />
           </EuiFlexGroup>
         </EuiFlexGroup>
 
@@ -106,16 +156,65 @@ export const RoundThinkingPanel = ({
                 <ThinkingTimeDisplay timeToFirstToken={rawRound.time_to_first_token} />
                 <InputOutputTokensDisplay modelUsage={rawRound.model_usage} />
               </EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton iconType={'code'} color="text" iconSide="left" onClick={toggleFlyout}>
-                  {rawResponseButtonLabel}
-                </EuiButton>
-              </EuiFlexItem>
+              <EuiFlexGroup responsive={false} gutterSize="s" justifyContent="flexEnd">
+                {showAddToDatasetButton && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      iconType={addToDatasetAction?.iconType}
+                      color="text"
+                      iconSide="left"
+                      onClick={addToDatasetAction?.onClick}
+                      {...getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.conversation.ROUND_ADD_TO_DATASET,
+                        detail: 'conversation',
+                      })}
+                    >
+                      {addToDatasetAction?.label}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+                {showTraceButton && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      iconType="apmTrace"
+                      color="text"
+                      iconSide="left"
+                      onClick={() => setShowTraceFlyout(true)}
+                      {...getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_TRACE,
+                        detail: 'conversation',
+                      })}
+                    >
+                      {viewTraceButtonLabel}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    iconType="code"
+                    color="text"
+                    iconSide="left"
+                    onClick={toggleFlyout}
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_JSON,
+                      detail: 'conversation',
+                    })}
+                  >
+                    {rawResponseButtonLabel}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexGroup>
           </EuiFlexGroup>
         )}
       </EuiFlexGroup>
       <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
+      {showTraceFlyout && traceId && (
+        <TraceFlyout traceId={traceId} onClose={() => setShowTraceFlyout(false)} />
+      )}
     </>
   );
 };

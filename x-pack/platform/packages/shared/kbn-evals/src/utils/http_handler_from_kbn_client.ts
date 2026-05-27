@@ -5,8 +5,7 @@
  * 2.0.
  */
 import type { HttpFetchOptions, HttpFetchOptionsWithPath, HttpHandler } from '@kbn/core/public';
-import type { KbnClient } from '@kbn/test';
-import { KbnClientRequesterError } from '@kbn/test';
+import type { KbnClient, KbnClientRequesterError } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 // redefine args type to make it easier to handle in a type-safe way
@@ -19,14 +18,16 @@ type HttpHandlerArgs =
 
 /**
  * Creates a function that matches the HttpHandler interface from Core's
- * API, using the KbnClient from @kbn/test
+ * API, using the KbnClient from @kbn/kbn-client
  */
 export function httpHandlerFromKbnClient({
   kbnClient,
   log,
+  getRunId,
 }: {
   kbnClient: KbnClient;
   log: ToolingLog;
+  getRunId?: () => string | undefined;
 }) {
   const fetch: HttpHandler = async (...args: HttpHandlerArgs) => {
     const options: HttpFetchOptionsWithPath =
@@ -34,9 +35,9 @@ export function httpHandlerFromKbnClient({
 
     const { method = 'GET', body, asResponse, rawResponse, query, signal, headers } = options;
 
-    // Add a W3C baggage entry so Kibana can tag OTEL spans with the eval run id.
-    // This enables correlating traces (traces-*) with eval score docs (.kibana-evaluations*) via run_id.
-    const runId = process.env.TEST_RUN_ID;
+    // Add a W3C baggage entry so Kibana can tag OTel spans with the eval run id.
+    // This enables correlating traces (traces-*) with eval score docs (kibana-evaluations*) via run_id.
+    const runId = getRunId?.() ?? process.env.TEST_RUN_ID;
     const nextHeaders: Record<string, string> = headers
       ? ({ ...(headers as Record<string, unknown>) } as Record<string, string>)
       : {};
@@ -59,6 +60,30 @@ export function httpHandlerFromKbnClient({
       await new Promise((r) => setTimeout(r, ms));
     }
 
+    function parseRetryAfterMsFromHeaders(
+      responseHeaders: Headers | undefined
+    ): number | undefined {
+      const value = responseHeaders?.get('retry-after');
+      if (!value) {
+        return undefined;
+      }
+
+      const seconds = Number.parseInt(value, 10);
+      if (!Number.isFinite(seconds) || seconds <= 0) {
+        return undefined;
+      }
+
+      return seconds * 1000;
+    }
+
+    function parseRetryAfterMsFromMessage(message: string): number | undefined {
+      const match = message.match(/retry after\s+(\d+)\s*seconds?/i);
+      if (!match) return undefined;
+      const seconds = Number(match[1]);
+      if (!Number.isFinite(seconds) || seconds <= 0) return undefined;
+      return seconds * 1000;
+    }
+
     let lastError: unknown;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -75,52 +100,62 @@ export function httpHandlerFromKbnClient({
           retries: 0,
         });
         // success
-        const undiciHeaders = new Headers();
-        for (const [key, value] of Object.entries(response.headers)) {
-          if (Array.isArray(value)) {
-            for (const v of value) undiciHeaders.append(key, v);
-          } else if (value != null) {
-            undiciHeaders.set(key, value);
-          }
-        }
+        if (asResponse) {
+          // `HttpResponse.request` is required by Core's type. We don't have access to undici's
+          // underlying outgoing Request, so reconstruct an equivalent stub from the inputs. Strip
+          // user:pass from the URL because `new Request(...)` rejects URLs with embedded credentials
+          // (same WHATWG parsing as fetch).
+          const requestUrl = new URL(kbnClient.resolveUrl(options.path));
+          requestUrl.username = '';
+          requestUrl.password = '';
 
-        return asResponse
-          ? {
-              fetchOptions: options,
-              request: response.request!,
-              body: undefined,
-              response: new Response(response.data as BodyInit, {
-                status: response.status,
-                statusText: response.statusText,
-                headers: undiciHeaders,
-              }),
-            }
-          : (response.data as any);
+          return {
+            fetchOptions: options,
+            request: new Request(requestUrl, {
+              method,
+              headers: finalHeaders,
+              signal: signal || undefined,
+            }),
+            body: undefined,
+            response: new Response(response.data as BodyInit, {
+              status: response.status,
+              statusText: response.statusText,
+              headers: response.headers,
+            }),
+          };
+        }
+        return response.data as any;
       } catch (err) {
-        // Keep the richest error message possible.
-        const maybeKbn = err instanceof KbnClientRequesterError ? err.axiosError ?? err : err;
-        if (err instanceof KbnClientRequesterError && err.axiosError) {
-          err.axiosError.message = err.message;
-        }
-
-        const status = (maybeKbn as any)?.status;
+        // `kbnClient.request` only ever throws `KbnClientRequesterError`.
+        const error = err as KbnClientRequesterError;
+        const status = error.status;
         const shouldRetry =
           attempt < maxRetries && typeof status === 'number' && retryStatuses.has(status);
 
-        lastError = maybeKbn;
+        lastError = error;
 
         if (!shouldRetry) {
-          throw maybeKbn;
+          throw error;
         }
 
-        // Basic exponential backoff (1s, 2s, 4s, ...)
-        const backoffMs = 1000 * Math.pow(2, attempt);
+        const retryAfterMs =
+          parseRetryAfterMsFromHeaders(error.headers) ??
+          parseRetryAfterMsFromMessage(error.message);
+
+        // Exponential backoff (1s, 2s, 4s, ...) with jitter, but never sooner than retry-after.
+        const baseBackoffMs = 1000 * Math.pow(2, attempt);
+        const baseDelayMs = retryAfterMs ? Math.max(baseBackoffMs, retryAfterMs) : baseBackoffMs;
+        const jitterMs = Math.floor(
+          Math.random() * Math.min(1000, Math.max(100, baseDelayMs * 0.15))
+        );
+        const delayMs = baseDelayMs + jitterMs;
+
         log.warning(
-          `HTTP ${status} from Kibana; retrying in ${Math.round(backoffMs / 1000)}s (attempt ${
+          `HTTP ${status} from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${
             attempt + 1
           }/${maxRetries + 1})`
         );
-        await sleep(backoffMs);
+        await sleep(delayMs);
       }
     }
 

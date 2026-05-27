@@ -100,9 +100,10 @@ describe('Cases Ui Plugin', () => {
           "attachmentFramework": Object {
             "registerExternalReference": [Function],
             "registerPersistableState": [Function],
+            "registerUnified": [Function],
           },
         }
-    `);
+      `);
     });
 
     it('registers cases page view event type', async () => {
@@ -148,6 +149,10 @@ describe('Cases Ui Plugin', () => {
             getCasesMetrics: expect.any(Function),
           },
           getRelatedCases: expect.any(Function),
+        },
+        config: {
+          templatesEnabled: false,
+          casesRedesign: { list: false, details: false, settings: false },
         },
         helpers: {
           canUseCases: expect.any(Function),

@@ -1,4 +1,5 @@
 summary: The get all data views API returns a list of data views.
+description: A list of available data views including their identifiers, names, and index patterns.
 value:
   {
     "data_view": [

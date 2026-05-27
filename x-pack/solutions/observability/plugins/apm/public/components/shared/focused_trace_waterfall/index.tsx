@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TraceWaterfall } from '../trace_waterfall';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
+import type { WaterfallGetServiceBadgeHref } from '../../../../common/waterfall/typings';
 import { TraceSummary } from './trace_summary';
 
 type FocusedTrace = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/summary'>;
@@ -17,6 +18,7 @@ interface Props {
   items: FocusedTrace;
   isEmbeddable?: boolean;
   onErrorClick?: (params: { traceId: string; docId: string }) => void;
+  getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
 }
 
 export function flattenChildren(
@@ -65,18 +67,28 @@ function getTraceItems(items: NonNullable<FocusedTrace['traceItems']>) {
   return traceItems;
 }
 
-export function FocusedTraceWaterfall({ items, onErrorClick, isEmbeddable }: Props) {
+export function FocusedTraceWaterfall({
+  items,
+  onErrorClick,
+  isEmbeddable,
+  getServiceBadgeHref,
+}: Props) {
   const reparentedItems = reparentDocumentToRoot(items.traceItems);
   const traceItems = reparentedItems ? getTraceItems(reparentedItems) : [];
+  const contextSpanIds = useMemo(
+    () => (reparentedItems?.focusedTraceDoc.id ? [reparentedItems.focusedTraceDoc.id] : undefined),
+    [reparentedItems?.focusedTraceDoc.id]
+  );
 
   return (
     <>
       <TraceWaterfall
         traceItems={traceItems}
         showAccordion={false}
-        highlightedTraceId={reparentedItems?.focusedTraceDoc.id}
+        contextSpanIds={contextSpanIds}
         onErrorClick={onErrorClick}
         isEmbeddable={isEmbeddable}
+        getServiceBadgeHref={getServiceBadgeHref}
       />
       {reparentedItems ? (
         <>

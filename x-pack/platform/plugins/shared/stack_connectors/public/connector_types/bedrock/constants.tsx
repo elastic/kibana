@@ -14,7 +14,11 @@ import {
   DEFAULT_URL,
   DEFAULT_TOKEN_LIMIT,
 } from '@kbn/connector-schemas/bedrock/constants';
-import { contextWindowLengthField, temperatureField } from '../../common/genai_connectors';
+import {
+  contextWindowLengthField,
+  OptionalFieldLabel,
+  temperatureField,
+} from '../../common/genai_connectors';
 import * as i18n from './translations';
 
 const human = '\n\nHuman:';
@@ -47,6 +51,18 @@ export const bedrockConfig: ConfigFieldSchema[] = [
             </EuiLink>
           ),
         }}
+      />
+    ),
+  },
+  {
+    id: 'region',
+    label: i18n.REGION_LABEL,
+    isRequired: false,
+    labelAppend: OptionalFieldLabel,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Optional AWS region for request signing. Required when using a custom endpoint URL that does not include the region in the hostname (for example, `us-west-1`)."
+        id="xpack.stackConnectors.components.bedrock.regionHelpText"
       />
     ),
   },

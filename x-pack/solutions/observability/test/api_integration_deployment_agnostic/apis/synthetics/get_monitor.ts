@@ -21,7 +21,10 @@ import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_mana
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 import { omitMonitorKeys } from './create_monitor';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 import { getFixtureJson } from './helpers/get_fixture_json';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -55,7 +58,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await retry.try(async () => {
+        await cleanSyntheticsTestData(kibanaServer);
+      });
       await privateLocationTestService.installSyntheticsPackage();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       privateLocation = await privateLocationTestService.addTestPrivateLocation();
@@ -83,9 +88,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('get many monitors', () => {
       it('without params', async () => {
         const uuid = uuidv4();
-        const [mon1, mon2] = await Promise.all(
-          monitors.map((mon, i) => saveMonitor({ ...mon, name: `${mon.name}-${uuid}-${i}` }))
-        );
+        const saved = [];
+        for (let i = 0; i < monitors.length; i++) {
+          saved.push(
+            await saveMonitor({ ...monitors[i], name: `${monitors[i].name}-${uuid}-${i}` })
+          );
+        }
+        const [mon1, mon2] = saved;
 
         const apiResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '?perPage=1000&internal=true') // 1000 to sort of load all saved monitors
@@ -147,11 +156,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('with single monitorQueryId filter', async () => {
         const uuid = uuidv4();
-        const [_, { id: id2 }] = await Promise.all(
-          monitors
-            .map((mon, i) => ({ ...mon, name: `mon.name-${uuid}-${i}` }))
-            .map((mon) => saveMonitor(mon))
-        );
+        const saved = [];
+        for (let i = 0; i < monitors.length; i++) {
+          saved.push(await saveMonitor({ ...monitors[i], name: `mon.name-${uuid}-${i}` }));
+        }
+        const [_, { id: id2 }] = saved;
 
         const resp = await supertest
           .get(
@@ -168,11 +177,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('with multiple monitorQueryId filter', async () => {
         const uuid = uuidv4();
-        const [_, { id: id2 }, { id: id3 }] = await Promise.all(
-          monitors
-            .map((mon, i) => ({ ...mon, name: `${mon.name}-${uuid}-${i}` }))
-            .map((monT) => saveMonitor(monT))
-        );
+        const saved = [];
+        for (let i = 0; i < monitors.length; i++) {
+          saved.push(
+            await saveMonitor({ ...monitors[i], name: `${monitors[i].name}-${uuid}-${i}` })
+          );
+        }
+        const [_first, { id: id2 }, { id: id3 }] = saved;
 
         const resp = await supertest
           .get(
@@ -191,20 +202,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('monitorQueryId respects custom_heartbeat_id while filtering', async () => {
         const customHeartbeatId0 = 'custom-heartbeat-id-test-01';
         const customHeartbeatId1 = 'custom-heartbeat-id-test-02';
-        await Promise.all(
-          [
-            {
-              ...monitors[0],
-              [ConfigKey.CUSTOM_HEARTBEAT_ID]: customHeartbeatId0,
-              [ConfigKey.NAME]: `NAME-${customHeartbeatId0}`,
-            },
-            {
-              ...monitors[1],
-              [ConfigKey.CUSTOM_HEARTBEAT_ID]: customHeartbeatId1,
-              [ConfigKey.NAME]: `NAME-${customHeartbeatId1}`,
-            },
-          ].map((monT) => saveMonitor(monT))
-        );
+        await saveMonitor({
+          ...monitors[0],
+          [ConfigKey.CUSTOM_HEARTBEAT_ID]: customHeartbeatId0,
+          [ConfigKey.NAME]: `NAME-${customHeartbeatId0}`,
+        });
+        await saveMonitor({
+          ...monitors[1],
+          [ConfigKey.CUSTOM_HEARTBEAT_ID]: customHeartbeatId1,
+          [ConfigKey.NAME]: `NAME-${customHeartbeatId1}`,
+        });
 
         const resp = await supertest
           .get(
@@ -281,11 +288,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('get one monitor', () => {
       it('should get by id', async () => {
         const uuid = uuidv4();
-        const [{ id: id1 }] = await Promise.all(
-          monitors
-            .map((mon, i) => ({ ...mon, name: `${mon.name}-${uuid}-${i}` }))
-            .map((monT) => saveMonitor(monT))
-        );
+        const saved = [];
+        for (let i = 0; i < monitors.length; i++) {
+          saved.push(
+            await saveMonitor({ ...monitors[i], name: `${monitors[i].name}-${uuid}-${i}` })
+          );
+        }
+        const [{ id: id1 }] = saved;
 
         const apiResponse = await monitorTestService.getMonitor(id1, { user: editorUser });
 
@@ -304,11 +313,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('should get by id with ui query param', async () => {
         const uuid = uuidv4();
-        const [{ id: id1 }] = await Promise.all(
-          monitors
-            .map((mon, i) => ({ ...mon, name: `${mon.name}-${uuid}-${i}` }))
-            .map((monT) => saveMonitor(monT))
-        );
+        const saved = [];
+        for (let i = 0; i < monitors.length; i++) {
+          saved.push(
+            await saveMonitor({ ...monitors[i], name: `${monitors[i].name}-${uuid}-${i}` })
+          );
+        }
+        const [{ id: id1 }] = saved;
 
         const apiResponse = await monitorTestService.getMonitor(id1, {
           internal: true,

@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatAgentEvent } from '@kbn/agent-builder-common';
+import type { ChatAgentEvent, AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { AgentParams, AgentResponse } from './provider';
 
 export interface RunAgentReturn {
@@ -19,6 +19,10 @@ export interface RunAgentReturn {
  */
 export interface RunAgentParams {
   /**
+   * Execution mode for this run. When 'standalone', HITL is disabled.
+   **/
+  executionMode?: AgentExecutionMode;
+  /**
    * ID of the agent to call.
    */
   agentId: string;
@@ -26,6 +30,10 @@ export interface RunAgentParams {
    * Parameters to call the agent with.
    */
   agentParams: AgentParams;
+  /**
+   * ID of the agent execution to associate with the run.
+   */
+  executionId?: string;
   /**
    * Optional event handler.
    */

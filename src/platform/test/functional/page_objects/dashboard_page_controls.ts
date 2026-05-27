@@ -99,18 +99,9 @@ export class DashboardPageControls extends FtrService {
     }
   }
 
-  public async openControlsMenu() {
-    const isOpen = await this.testSubjects.exists(`controls-create-button`, { timeout: 2500 });
-    if (!isOpen) {
-      await this.dashboardAddPanel.clickTopNavAddMenu();
-      await this.testSubjects.click('dashboard-controls-menu-button');
-    }
-  }
-
   public async openCreateControlFlyout() {
     this.log.debug(`Opening flyout for creating a control`);
-    await this.openControlsMenu();
-    await this.testSubjects.click('controls-create-button');
+    await this.dashboardAddPanel.clickAddControlPanel();
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
     });
@@ -303,8 +294,8 @@ export class DashboardPageControls extends FtrService {
 
   public async createTimeSliderControl() {
     this.log.debug(`Creating time slider control`);
-    await this.openControlsMenu();
-    await this.testSubjects.click('controls-create-timeslider-button');
+    await this.dashboardAddPanel.openAddPanelFlyout();
+    await this.testSubjects.click('create-action-Time slider');
   }
 
   public async hoverOverExistingControl(controlId: string) {
@@ -479,10 +470,16 @@ export class DashboardPageControls extends FtrService {
     const suggestions: { [key: string]: number } = {};
     while (Object.keys(suggestions).length < optionsCount) {
       await selectableListItems._webElement.sendKeys(this.browser.keys.ARROW_DOWN);
-      const currentOption = await selectableListItems.findByCssSelector('[aria-selected="true"]');
-      const [suggestion, docCount] = (await currentOption.getVisibleText()).split('\n');
-      if (suggestion !== 'Exists') {
-        suggestions[suggestion] = Number(docCount);
+
+      const list = await selectableListItems.findByCssSelector(`ul[role="listbox"]`);
+      const activeDescendantId = await list.getAttribute('aria-activedescendant');
+
+      if (activeDescendantId) {
+        const currentOption = await selectableListItems.findByCssSelector(`#${activeDescendantId}`);
+        const [suggestion, docCount] = (await currentOption.getVisibleText()).split('\n');
+        if (suggestion !== 'Exists') {
+          suggestions[suggestion] = Number(docCount);
+        }
       }
     }
 
@@ -771,7 +768,7 @@ export class DashboardPageControls extends FtrService {
   public async rangeSliderEnsurePopoverIsClosed(controlId: string) {
     this.log.debug(`Closing popover for Range Slider: ${controlId}`);
     const controlLabel = await this.find.byCssSelector(
-      `li:has([data-control-id='${controlId}']) label`
+      `li:has([data-control-id='${controlId}']) .controlFrame__dragHandle`
     );
     await controlLabel.click();
     await this.testSubjects.waitForDeleted(`rangeSlider__slider`);

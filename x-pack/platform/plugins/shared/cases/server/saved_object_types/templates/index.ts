@@ -33,6 +33,43 @@ const mappings = {
     deletedAt: {
       type: 'date',
     },
+    // Optional fields - not indexed due to dynamic: false, but needed for type checking
+    description: {
+      type: 'text',
+    },
+    tags: {
+      type: 'keyword',
+    },
+    author: {
+      type: 'keyword',
+    },
+    usageCount: {
+      type: 'integer',
+    },
+    fieldCount: {
+      type: 'integer',
+    },
+    fieldNames: {
+      type: 'nested',
+      properties: {
+        name: { type: 'keyword' },
+        label: { type: 'text' },
+        type: { type: 'keyword' },
+        control: { type: 'keyword' },
+      },
+    },
+    lastUsedAt: {
+      type: 'date',
+    },
+    isDefault: {
+      type: 'boolean',
+    },
+    isLatest: {
+      type: 'boolean',
+    },
+    isEnabled: {
+      type: 'boolean',
+    },
   },
 } as const;
 

@@ -8,7 +8,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { AnomalyValueDisplay } from './anomaly_value_display';
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 jest.mock('../../contexts/kibana', () => ({
@@ -17,8 +16,8 @@ jest.mock('../../contexts/kibana', () => ({
 
 jest.mock('../../formatters/format_value', () => ({
   formatValue: jest.fn((value, mlFunction, fieldFormat) => {
-    if (fieldFormat && fieldFormat.convert) {
-      return fieldFormat.convert(value, 'text');
+    if (fieldFormat && fieldFormat.convertToText) {
+      return fieldFormat.convertToText(value);
     }
     return value.toString();
   }),
@@ -88,7 +87,6 @@ describe('AnomalyValueDisplay', () => {
     expect(element).toBeInTheDocument();
 
     fireEvent.mouseOver(element);
-    await waitForEuiToolTipVisible();
 
     const tooltip = screen.getByTestId('mlAnomalyTimeValueTooltip');
     expect(tooltip).toHaveTextContent('January 1st 14:30');
@@ -106,7 +104,6 @@ describe('AnomalyValueDisplay', () => {
     expect(offsetText).toBeInTheDocument();
 
     fireEvent.mouseOver(timeText);
-    await waitForEuiToolTipVisible();
 
     const tooltip = screen.getByTestId('mlAnomalyTimeValueTooltip');
     expect(tooltip).toHaveTextContent('January 1st 14:30');
@@ -121,7 +118,6 @@ describe('AnomalyValueDisplay', () => {
     expect(element).toBeInTheDocument();
 
     fireEvent.mouseOver(element);
-    await waitForEuiToolTipVisible();
 
     const tooltip = screen.getByTestId('mlAnomalyTimeValueTooltip');
     expect(tooltip).toHaveTextContent('January 1st 14:30');
@@ -138,7 +134,7 @@ describe('AnomalyValueDisplay', () => {
 
   it('Handles custom field format for non-time functions', () => {
     const customFormat = {
-      convert: jest.fn().mockReturnValue('42.50%'),
+      convertToText: jest.fn().mockReturnValue('42.50%'),
     } as unknown as FieldFormat;
 
     const { getByTestId } = render(

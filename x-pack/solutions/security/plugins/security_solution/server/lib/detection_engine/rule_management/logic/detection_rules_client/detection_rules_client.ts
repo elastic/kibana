@@ -11,6 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ILicense } from '@kbn/licensing-types';
+import type { DetectionRulesAuthz } from '../../../../../../common/detection_engine/rule_management/authz';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { MlAuthz } from '../../../../machine_learning/authz';
@@ -18,9 +19,12 @@ import type { ProductFeaturesService } from '../../../../product_features_servic
 import { createPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import type { RuleImportErrorObject } from '../import/errors';
 import type {
+  BulkDeleteRulesArgs,
+  BulkDeleteRulesReturn,
   CreateCustomRuleArgs,
   CreatePrebuiltRuleArgs,
   DeleteRuleArgs,
+  GetHistoryForRuleArgs,
   IDetectionRulesClient,
   ImportRuleArgs,
   ImportRulesArgs,
@@ -30,6 +34,7 @@ import type {
   UpgradePrebuiltRuleArgs,
 } from './detection_rules_client_interface';
 import { createRule } from './methods/create_rule';
+import { bulkDeleteRules } from './methods/bulk_delete_rules';
 import { deleteRule } from './methods/delete_rule';
 import { importRule } from './methods/import_rule';
 import { importRules } from './methods/import_rules';
@@ -37,6 +42,7 @@ import { patchRule } from './methods/patch_rule';
 import { updateRule } from './methods/update_rule';
 import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
 import { revertPrebuiltRule } from './methods/revert_prebuilt_rule';
+import { getHistoryForRule } from './methods/get_history_for_rule';
 import { MINIMUM_RULE_CUSTOMIZATION_LICENSE } from '../../../../../../common/constants';
 
 interface DetectionRulesClientParams {
@@ -44,6 +50,7 @@ interface DetectionRulesClientParams {
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   mlAuthz: MlAuthz;
+  rulesAuthz: DetectionRulesAuthz;
   productFeaturesService: ProductFeaturesService;
   license: ILicense;
 }
@@ -52,6 +59,7 @@ export const createDetectionRulesClient = ({
   actionsClient,
   rulesClient,
   mlAuthz,
+  rulesAuthz,
   savedObjectsClient,
   productFeaturesService,
   license,
@@ -116,6 +124,7 @@ export const createDetectionRulesClient = ({
           rulesClient,
           prebuiltRuleAssetClient,
           mlAuthz,
+          rulesAuthz,
           ruleUpdate,
         });
       });
@@ -128,6 +137,7 @@ export const createDetectionRulesClient = ({
           rulesClient,
           prebuiltRuleAssetClient,
           mlAuthz,
+          rulesAuthz,
           rulePatch,
         });
       });
@@ -136,6 +146,12 @@ export const createDetectionRulesClient = ({
     async deleteRule({ ruleId }: DeleteRuleArgs): Promise<void> {
       return withSecuritySpan('DetectionRulesClient.deleteRule', async () => {
         return deleteRule({ rulesClient, ruleId });
+      });
+    },
+
+    async bulkDeleteRules({ ruleIds }: BulkDeleteRulesArgs): Promise<BulkDeleteRulesReturn> {
+      return withSecuritySpan('DetectionRulesClient.bulkDeleteRules', async () => {
+        return bulkDeleteRules({ rulesClient, ruleIds });
       });
     },
 
@@ -186,6 +202,12 @@ export const createDetectionRulesClient = ({
           detectionRulesClient: this,
           savedObjectsClient,
         });
+      });
+    },
+
+    async getHistoryForRule(args: GetHistoryForRuleArgs) {
+      return withSecuritySpan('DetectionRulesClient.getHistoryForRule', async () => {
+        return getHistoryForRule({ rulesClient, ...args });
       });
     },
   };

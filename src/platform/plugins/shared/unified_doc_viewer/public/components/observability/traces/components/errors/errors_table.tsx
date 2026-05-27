@@ -24,7 +24,6 @@ import { ContentFrameworkSection } from '../../../../content_framework/lazy_cont
 import { getColumns } from './get_columns';
 import { useFetchErrorsByTraceId } from './use_fetch_errors_by_trace_id';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
-import { useGetGenerateDiscoverLink } from '../../../../../hooks/use_generate_discover_link';
 import { createTraceContextWhereClauseForErrors } from '../../common/create_trace_context_where_clause';
 import {
   ScrollableSectionWrapper,
@@ -32,12 +31,18 @@ import {
 } from '../../../../doc_viewer_logs_overview/scrollable_section_wrapper';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
 
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors',
   {
     defaultMessage: 'Errors',
   }
+);
+
+const sectionDescription = i18n.translate(
+  'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description',
+  { defaultMessage: 'Errors that occurred during this span and their causes' }
 );
 
 export interface Props {
@@ -52,10 +57,6 @@ const sorting: EuiInMemoryTableProps['sorting'] = {
 export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
   ({ traceId, docId }, ref) => {
     const { indexes } = useDataSourcesContext();
-    const { generateDiscoverLink } = useGetGenerateDiscoverLink({
-      indexPattern: indexes.apm.errors,
-    });
-
     const { loading, error, response } = useFetchErrorsByTraceId({
       traceId,
       docId,
@@ -71,6 +72,10 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
       esql: esqlQueryString,
       tabLabel: sectionTitle,
       dataTestSubj: 'docViewerErrorsOpenInDiscoverButton',
+      ebt: {
+        element: TRACES_DOC_VIEWER_EBT_ELEMENTS.ERRORS,
+        detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+      },
     });
     const actions = useMemo(
       () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
@@ -78,10 +83,10 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
     );
 
     const { columns } = useMemo(() => {
-      const cols = getColumns({ traceId, docId, generateDiscoverLink, source: response.source });
+      const cols = getColumns({ traceId, docId, source: response.source });
 
       return { columns: cols };
-    }, [traceId, docId, generateDiscoverLink, response.source]);
+    }, [traceId, docId, response.source]);
 
     if (loading || (!error && response.traceErrors.length === 0)) {
       return null;
@@ -94,10 +99,7 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
             data-test-subj="unifiedDocViewerErrorsAccordion"
             id="errorsSection"
             title={sectionTitle}
-            description={i18n.translate(
-              'unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description',
-              { defaultMessage: 'Errors that occurred during this span and their causes' }
-            )}
+            description={sectionDescription}
             actions={actions}
           >
             <EuiSpacer size="s" />
@@ -114,6 +116,7 @@ export const ErrorsTable = forwardRef<ScrollableSectionWrapperApi, Props>(
               <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem>
                   <EuiInMemoryTable
+                    tableCaption={sectionDescription}
                     responsiveBreakpoint={false}
                     items={response.traceErrors}
                     columns={columns}

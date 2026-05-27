@@ -106,34 +106,45 @@ describe('utils', () => {
   });
 
   describe('createServiceError', () => {
-    test('it creates an error when the response is null', async () => {
-      const error = new Error('An error occurred');
-      // @ts-expect-error
-      expect(addServiceMessageToError(error, 'Unable to do action').message).toBe(
-        '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown: errorResponse was null'
-      );
+    describe('Table API errors', () => {
+      test('it creates an error with response correctly', async () => {
+        const axiosError = {
+          message: 'An error occurred',
+          response: { data: { error: { message: 'Denied', detail: 'no access' } } },
+        } as ResponseError;
+
+        expect(addServiceMessageToError(axiosError, 'Unable to do action').message).toBe(
+          '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: Denied: no access'
+        );
+      });
+
+      test('it creates an error correctly when the ServiceNow error is null', async () => {
+        const axiosError = {
+          message: 'An error occurred',
+          response: { data: { error: null } },
+        } as ResponseError;
+
+        expect(addServiceMessageToError(axiosError, 'Unable to do action').message).toBe(
+          '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown: no error in error response'
+        );
+      });
     });
+    describe('OAuth errors', () => {
+      test('it extracts error and error_description from JSON in error message', async () => {
+        const error = new Error('{"error":"invalid_grant","error_description":"User not found"}');
+        // @ts-expect-error
+        expect(addServiceMessageToError(error, 'Unable to do action').message).toBe(
+          '[Action][ServiceNow]: Unable to do action. Error: invalid_grant Reason: User not found'
+        );
+      });
 
-    test('it creates an error with response correctly', async () => {
-      const axiosError = {
-        message: 'An error occurred',
-        response: { data: { error: { message: 'Denied', detail: 'no access' } } },
-      } as ResponseError;
-
-      expect(addServiceMessageToError(axiosError, 'Unable to do action').message).toBe(
-        '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: Denied: no access'
-      );
-    });
-
-    test('it creates an error correctly when the ServiceNow error is null', async () => {
-      const axiosError = {
-        message: 'An error occurred',
-        response: { data: { error: null } },
-      } as ResponseError;
-
-      expect(addServiceMessageToError(axiosError, 'Unable to do action').message).toBe(
-        '[Action][ServiceNow]: Unable to do action. Error: An error occurred Reason: unknown: no error in error response'
-      );
+      test('it handles OAuth error without error_description', async () => {
+        const error = new Error('{"error":"invalid_grant"}');
+        // @ts-expect-error
+        expect(addServiceMessageToError(error, 'Unable to do action').message).toBe(
+          '[Action][ServiceNow]: Unable to do action. Error: invalid_grant'
+        );
+      });
     });
   });
 

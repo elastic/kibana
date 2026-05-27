@@ -7,6 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 
+import { DEFAULT_EXCLUDED_GAP_REASONS } from '../../../../../common/constants';
 import type { GapAutoFillSchedulerResponse } from '../result/types';
 import type { GapAutoFillSchedulerSO } from '../../../../data/gap_auto_fill_scheduler/types/gap_auto_fill_scheduler';
 
@@ -38,6 +39,7 @@ export const transformSavedObjectToGapAutoFillSchedulerResult = ({
     numRetries: attributes.numRetries,
     scope: attributes.scope,
     ruleTypes: attributes.ruleTypes,
+    excludedReasons: attributes.excludedReasons ?? DEFAULT_EXCLUDED_GAP_REASONS,
     createdBy: attributes.createdBy ?? null,
     updatedBy: attributes.updatedBy ?? null,
     createdAt: attributes.createdAt,

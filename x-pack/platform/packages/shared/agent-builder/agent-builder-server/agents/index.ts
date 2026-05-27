@@ -12,6 +12,9 @@ export type {
   AgentHandlerFn,
   AgentEventEmitter,
   AgentEventEmitterFn,
+  ExperimentalFeatures,
+  SubAgentExecutor,
+  SubAgentExecution,
 } from './provider';
 export type {
   RunAgentFn,
@@ -30,3 +33,8 @@ export type {
   AgentAvailabilityResult,
   AgentAvailabilityConfig,
 } from './builtin_definition';
+export type {
+  InternalAgentDefinition,
+  InternalAgentDefinitionAvailabilityHandler,
+  AgentRegistry,
+} from './registry';

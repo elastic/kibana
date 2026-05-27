@@ -54,6 +54,7 @@ export interface HierarchicalActionsMenuProps {
       iconSide?: 'left' | 'right';
       color?: 'primary' | 'text' | 'accent' | 'success' | 'warning' | 'danger';
       fill?: boolean;
+      isLoading?: boolean;
     };
     children: React.ReactNode;
   };
@@ -115,7 +116,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
           return {
             name: item.name,
             icon: item.icon ? (
-              <EuiIcon type={item.icon} size="m" color={item.iconColor} />
+              <EuiIcon type={item.icon} size="m" color={item.iconColor} aria-hidden={true} />
             ) : undefined,
             disabled: item.disabled,
             panel: itemPath,
@@ -126,7 +127,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
         return {
           name: item.name,
           icon: item.icon ? (
-            <EuiIcon type={item.icon} size="m" color={item.iconColor} />
+            <EuiIcon type={item.icon} size="m" color={item.iconColor} aria-hidden={true} />
           ) : undefined,
           disabled: item.disabled,
           onClick: (event: React.MouseEvent) => {
@@ -178,6 +179,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
       iconSide={button.props?.iconSide}
       color={button.props?.color}
       fill={button.props?.fill}
+      isLoading={button.props?.isLoading}
       onClick={toggleMenu}
       data-test-subj={dataTestSubj}
     >
@@ -185,7 +187,7 @@ export const HierarchicalActionsMenu: React.FC<HierarchicalActionsMenuProps> = (
     </EuiButton>
   ) : (
     <EuiButtonIcon
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       onClick={toggleMenu}
       aria-label={i18n.translate('xpack.fleet.hierarchicalMenu.openMenuAriaLabel', {
         defaultMessage: 'Open menu',

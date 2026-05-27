@@ -646,6 +646,35 @@ node scripts/synthtrace logs_traces_hosts --type=log --live
 node scripts/synthtrace logs_traces_hosts --type=log --scenarioOpts='{"numServices":20,"numHosts":50}' --live
 ```
 
+#### `kubernetes_logs_traces_pods`
+
+Generates a comprehensive set of correlated Kubernetes logs, APM traces, and Kubernetes pod/container metrics.
+
+**Options:**
+
+- `numServices` (number, default: 10): Number of Kubernetes services to generate
+- `numPods` (number, default: 20): Number of Kubernetes pods to generate
+- `numContainers` (number, default: 30): Number of Kubernetes containers to generate
+- `numAgents` (number, default: 5): Number of agents
+- `logsInterval` (string, default: '1m'): Log generation interval
+- `logsRate` (number, default: 1): Log generation rate
+- `ingestPods` (boolean, default: true): Whether to ingest pod metrics
+- `ingestContainers` (boolean, default: true): Whether to ingest container metrics
+- `ingestTraces` (boolean, default: true): Whether to ingest traces
+- `logsdb` (boolean, default: false): Use LogsDB format
+
+**Usage:**
+
+```sh
+node scripts/synthtrace kubernetes_logs_traces_pods --live
+```
+
+**Example with options:**
+
+```sh
+node scripts/synthtrace kubernetes_logs_traces_pods --scenarioOpts='{"numServices":20,"numPods":50,"numContainers":100}'
+```
+
 ### Specialized Scenarios
 
 #### `aws_lambda`
@@ -686,6 +715,52 @@ Generates simple OpenTelemetry traces.
 
 ```sh
 node scripts/synthtrace otel_simple_trace --live
+```
+
+#### `apm_service_legacy_to_otel_metrics`
+
+Simulates a service migrating from classic Elastic APM to OTel instrumentation. The first half of the time range produces classic APM Java data (metrics + transactions), the second half produces OTel data with stable semconv `jvm.*` metrics in a dedicated OTel index. Both halves share the same `service.name`, so the APM Metrics tab must select the correct dashboard based on the latest agent data.
+
+**Options:**
+
+- `serviceName` (string, default: `migration-svc`): The shared service name across both phases
+- `rpm` (number, default: 2): Transactions per minute per phase
+
+**Usage:**
+
+```sh
+node scripts/synthtrace apm_service_legacy_to_otel_metrics --from now-1w --to now --clean
+```
+
+#### `apm_service_overlapping_otel_metrics`
+
+Simulates a service migrating from classic Elastic APM to OTel instrumentation with an overlap period where both instrumentations send data simultaneously. Classic APM runs from `from` to 75% of the range, OTel runs from 25% to `to`, so the middle 50% has both types sending data at the same time. Both phases share the same `service.name`, so the APM Metrics tab must handle the overlap and let the user switch between dashboard variants.
+
+**Options:**
+
+- `serviceName` (string, default: `overlap-svc`): The shared service name across both phases
+- `rpm` (number, default: 2): Transactions per minute per phase
+
+**Usage:**
+
+```sh
+node scripts/synthtrace apm_service_overlapping_otel_metrics --from now-2d --to now --clean
+```
+
+#### `apm_jvm_metrics_type_conflict`
+
+Reproduces `verification_exception` errors on the APM Metrics tab when both classic (Elastic APM) and OTel Java agents ingest data for the same service. The OTel metrics index is configured as TSDB with gauge annotations, causing type conflicts with classic APM fields when queried via ES|QL.
+
+**Options:**
+
+- `serviceName` (string, default: `kms-gps-synth`): OTel service name
+- `classicServiceName` (string, default: `kms-gps-classic`): Classic APM service name
+- `rpm` (number, default: 2): OTel traces per minute
+
+**Usage:**
+
+```sh
+node scripts/synthtrace apm_jvm_metrics_type_conflict --from now-1w --to now --clean
 ```
 
 #### `degraded_synthetics_monitors`

@@ -24,6 +24,7 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/core-analytics-browser",
     "@kbn/licensing-plugin",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/home-plugin"
   ]
 }

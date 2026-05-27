@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { EvaluationScoreRepository, type EvaluationScoreDocument } from './score_repository';
+import {
+  EvaluationScoreRepository,
+  computeScoreDocumentId,
+  type EvaluationScoreDocument,
+} from './score_repository';
 import type { Model } from '@kbn/inference-common';
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
@@ -39,6 +43,7 @@ const createMockScoreDocument = (
   task: {
     trace_id: 'trace-task-123',
     repetition_index: 0,
+    output: null,
     model: baseTaskModel,
   },
   evaluator: {
@@ -66,16 +71,66 @@ describe('EvaluationScoreRepository', () => {
   let mockLog: jest.Mocked<SomeDevLog>;
   let repository: EvaluationScoreRepository;
 
+  const ENV_KEYS_THAT_AFFECT_EXPORT = [
+    'BUILDKITE_BUILD_ID',
+    'BUILDKITE_JOB_ID',
+    'BUILDKITE_BUILD_URL',
+    'BUILDKITE_PIPELINE_SLUG',
+    'BUILDKITE_PULL_REQUEST',
+    'BUILDKITE_BRANCH',
+    'BUILDKITE_COMMIT',
+    'EVAL_SUITE_ID',
+  ] as const;
+
+  let savedEnv: Partial<Record<(typeof ENV_KEYS_THAT_AFFECT_EXPORT)[number], string | undefined>>;
+
   beforeEach(() => {
+    // Make these unit tests deterministic. On CI, Buildkite env vars are present and will cause
+    // score export to enrich documents with `ci.buildkite`/`suite`. That behavior is tested
+    // elsewhere; here we keep assertions stable by clearing those env vars.
+    savedEnv = {};
+    for (const key of ENV_KEYS_THAT_AFFECT_EXPORT) {
+      savedEnv[key] = process.env[key];
+      delete process.env[key];
+    }
+
     mockEsClient = {
       indices: {
-        existsIndexTemplate: jest.fn(),
-        putIndexTemplate: jest.fn(),
-        getDataStream: jest.fn(),
-        createDataStream: jest.fn(),
-        create: jest.fn(),
-        delete: jest.fn(),
+        existsIndexTemplate: jest.fn().mockResolvedValue(false),
+        putIndexTemplate: jest.fn().mockResolvedValue({}),
+        getIndexTemplate: jest.fn().mockResolvedValue({
+          index_templates: [
+            {
+              index_template: {
+                template: {
+                  mappings: {
+                    _meta: { kbn_evals: { schema_version: 1 } },
+                    properties: {
+                      example: { properties: { input: { enabled: false } } },
+                      task: { properties: { output: { enabled: false } } },
+                      evaluator: { properties: { metadata: { type: 'flattened' } } },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        }),
+        getDataStream: jest.fn().mockResolvedValue({
+          data_streams: [
+            {
+              name: 'kibana-evaluations',
+              indices: [{ index_name: '.ds-kibana-evaluations-000001' }],
+            },
+          ],
+        }),
+        createDataStream: jest.fn().mockResolvedValue({}),
       },
+      security: {
+        hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: true }),
+      },
+      create: jest.fn().mockResolvedValue({}),
+      delete: jest.fn().mockResolvedValue({}),
       helpers: {
         bulk: jest.fn(),
       },
@@ -90,6 +145,17 @@ describe('EvaluationScoreRepository', () => {
     } as any;
 
     repository = new EvaluationScoreRepository(mockEsClient, mockLog);
+  });
+
+  afterEach(() => {
+    for (const key of ENV_KEYS_THAT_AFFECT_EXPORT) {
+      const prev = savedEnv?.[key];
+      if (typeof prev === 'string') {
+        process.env[key] = prev;
+      } else {
+        delete process.env[key];
+      }
+    }
   });
 
   describe('exportScores', () => {
@@ -116,9 +182,8 @@ describe('EvaluationScoreRepository', () => {
       }),
     ];
 
-    it('should successfully export scores when index template and datastream exist', async () => {
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true as any);
-      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
+    it('should create index template then export scores when template does not exist', async () => {
+      mockEsClient.indices.existsIndexTemplate.mockResolvedValueOnce(false);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 2,
         failed: 0,
@@ -127,8 +192,7 @@ describe('EvaluationScoreRepository', () => {
 
       await repository.exportScores(mockDocuments);
 
-      expect(mockEsClient.indices.existsIndexTemplate).toHaveBeenCalled();
-      expect(mockEsClient.indices.getDataStream).toHaveBeenCalled();
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(mockEsClient.helpers.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           datasource: mockDocuments,
@@ -140,10 +204,8 @@ describe('EvaluationScoreRepository', () => {
       );
     });
 
-    it('should create index template if it does not exist', async () => {
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(false as any);
-      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
-      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
+    it('should export scores without creating template when it already exists', async () => {
+      mockEsClient.indices.existsIndexTemplate.mockResolvedValueOnce(true);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 2,
         failed: 0,
@@ -152,39 +214,16 @@ describe('EvaluationScoreRepository', () => {
 
       await repository.exportScores(mockDocuments);
 
-      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect(mockEsClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockEsClient.helpers.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: 'kibana-evaluations-template',
-          index_patterns: ['.kibana-evaluations*'],
+          datasource: mockDocuments,
+          refresh: 'wait_for',
         })
       );
-      expect(mockLog.debug).toHaveBeenCalledWith(
-        'Created Elasticsearch index template for evaluation scores'
-      );
-    });
-
-    it('should create datastream if it does not exist', async () => {
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true as any);
-      mockEsClient.indices.getDataStream.mockRejectedValue({ statusCode: 404 });
-      mockEsClient.indices.createDataStream.mockResolvedValue({} as any);
-      mockEsClient.helpers.bulk.mockResolvedValue({
-        total: 2,
-        failed: 0,
-        successful: 2,
-      } as any);
-
-      await repository.exportScores(mockDocuments);
-
-      expect(mockEsClient.indices.createDataStream).toHaveBeenCalledWith({
-        name: '.kibana-evaluations',
-      });
-      expect(mockLog.debug).toHaveBeenCalledWith(expect.stringContaining('Created datastream'));
     });
 
     it('should handle empty dataset scores', async () => {
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true as any);
-      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
-
       await repository.exportScores([]);
 
       expect(mockLog.warning).toHaveBeenCalledWith('No evaluation scores to export');
@@ -192,8 +231,6 @@ describe('EvaluationScoreRepository', () => {
     });
 
     it('should throw error if bulk indexing fails', async () => {
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true as any);
-      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 2,
         failed: 2,
@@ -201,43 +238,39 @@ describe('EvaluationScoreRepository', () => {
       } as any);
 
       await expect(repository.exportScores(mockDocuments)).rejects.toThrow(
-        'Bulk indexing failed: 2 of 2 operations failed'
+        'Bulk indexing failed: 2 of 2 operations failed. First error: unknown failure reason'
       );
 
-      expect(mockLog.error).toHaveBeenCalledWith('Bulk indexing had 2 failed operations out of 2');
+      expect(mockLog.error).toHaveBeenCalled();
+      const errorMessages = mockLog.error.mock.calls.map(([msg]) => msg);
+      expect(errorMessages.join('\n')).toContain('Bulk indexing had 2 failed operations out of 2');
     });
 
-    it('should handle index template creation errors', async () => {
-      const error = new Error('Template creation failed');
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(false as any);
-      mockEsClient.indices.putIndexTemplate.mockRejectedValue(error);
+    it('should ignore 409 conflicts to keep export idempotent', async () => {
+      mockEsClient.helpers.bulk.mockImplementation(async (options: any) => {
+        // Simulate re-exporting the same deterministic IDs -> ES returns 409 conflict.
+        options.onDrop?.({
+          status: 409,
+          error: {
+            type: 'version_conflict_engine_exception',
+            reason: 'document already exists',
+          },
+        });
+        return {
+          total: 1,
+          failed: 1,
+          successful: 0,
+        } as any;
+      });
 
-      await expect(repository.exportScores(mockDocuments)).rejects.toThrow(
-        'Template creation failed'
-      );
+      await expect(repository.exportScores([createMockScoreDocument()])).resolves.toBeUndefined();
 
-      expect(mockLog.error).toHaveBeenCalledWith('Failed to create index template:', error);
-    });
-
-    it('should handle datastream creation errors', async () => {
-      const error = new Error('Datastream creation failed');
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true as any);
-      mockEsClient.indices.getDataStream.mockRejectedValue({ statusCode: 404 });
-      mockEsClient.indices.createDataStream.mockRejectedValue(error);
-
-      await expect(repository.exportScores(mockDocuments)).rejects.toThrow(
-        'Datastream creation failed'
-      );
-
-      expect(mockLog.error).toHaveBeenCalledWith(
-        'Failed to export scores to Elasticsearch:',
-        error
-      );
+      const debugMessages = mockLog.debug.mock.calls.map(([arg]) => String(arg));
+      expect(debugMessages.join('\n')).toContain('409 conflicts');
+      expect(debugMessages.join('\n')).toContain('already existed');
     });
 
     it('should export multiple documents for multiple evaluators', async () => {
-      mockEsClient.indices.existsIndexTemplate.mockResolvedValue(true as any);
-      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 2,
         failed: 0,
@@ -252,10 +285,109 @@ describe('EvaluationScoreRepository', () => {
       expect(bulkCall.datasource[1].evaluator.name).toBe('Groundedness');
       expect(bulkCall.onDocument(mockDocuments[0])).toEqual({
         create: {
-          _index: '.kibana-evaluations',
-          _id: 'run-123-dataset-1-example-1-Correctness-0',
+          _index: 'kibana-evaluations',
+          _id: 'run-123-unknown-suite-gpt-4-dataset-1-example-1-Correctness-0',
         },
       });
+    });
+
+    it('should enrich documents with suite/buildkite via exportScores options', async () => {
+      mockEsClient.helpers.bulk.mockResolvedValue({
+        total: 1,
+        failed: 0,
+        successful: 1,
+      } as any);
+
+      await repository.exportScores([createMockScoreDocument()], {
+        suiteId: 'my-suite',
+        buildkite: {
+          build_id: 'bk-build-1',
+          job_id: 'bk-job-1',
+          build_url: 'https://example.test/build/1',
+          pipeline_slug: 'my-pipeline',
+          pull_request: '123',
+          branch: 'feature-branch',
+          commit: 'deadbeef',
+        },
+      });
+
+      const bulkCall = mockEsClient.helpers.bulk.mock.calls[0][0];
+      expect(bulkCall.datasource).toHaveLength(1);
+      expect(bulkCall.datasource[0].suite).toEqual({ id: 'my-suite' });
+      expect(bulkCall.datasource[0].ci?.buildkite).toMatchObject({
+        build_id: 'bk-build-1',
+        job_id: 'bk-job-1',
+        pipeline_slug: 'my-pipeline',
+        pull_request: '123',
+        branch: 'feature-branch',
+        commit: 'deadbeef',
+      });
+      expect(bulkCall.onDocument(bulkCall.datasource[0])).toEqual({
+        create: {
+          _index: 'kibana-evaluations',
+          _id: 'run-123-my-suite-gpt-4-dataset-1-example-1-Correctness-0',
+        },
+      });
+    });
+  });
+
+  describe('preflightExport', () => {
+    it('performs a sentinel write (and best-effort cleanup) for external clusters', async () => {
+      const prev = process.env.EVALUATIONS_ES_URL;
+      process.env.EVALUATIONS_ES_URL = 'https://example.test';
+      try {
+        await expect(repository.preflightExport()).resolves.toBeUndefined();
+
+        expect(mockEsClient.indices.getIndexTemplate).not.toHaveBeenCalled();
+        expect(mockEsClient.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: 'kibana-evaluations',
+            refresh: 'wait_for',
+            id: expect.stringContaining('preflight-'),
+            document: expect.objectContaining({
+              run_id: 'kbn-evals-preflight',
+              experiment_id: 'preflight',
+              evaluator: expect.objectContaining({ name: 'preflight' }),
+            }),
+          })
+        );
+        expect(mockEsClient.delete).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: 'kibana-evaluations',
+            refresh: 'wait_for',
+            id: expect.stringContaining('preflight-'),
+          })
+        );
+      } finally {
+        if (prev) process.env.EVALUATIONS_ES_URL = prev;
+        else delete process.env.EVALUATIONS_ES_URL;
+      }
+    });
+
+    it('bootstraps template and datastream for local clusters before the sentinel write', async () => {
+      // Local cluster path: no EVALUATIONS_ES_URL/EVALUATIONS_ES_API_KEY.
+      mockEsClient.indices.existsIndexTemplate.mockResolvedValueOnce(false);
+      mockEsClient.indices.getDataStream.mockRejectedValueOnce({ statusCode: 404 });
+
+      await expect(repository.preflightExport()).resolves.toBeUndefined();
+
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalled();
+      expect(mockEsClient.indices.createDataStream).toHaveBeenCalledWith({
+        name: 'kibana-evaluations',
+      });
+      expect(mockEsClient.create).toHaveBeenCalled();
+    });
+
+    it('ignores delete 403 errors for writer keys without delete privileges', async () => {
+      const prev = process.env.EVALUATIONS_ES_URL;
+      process.env.EVALUATIONS_ES_URL = 'https://example.test';
+      mockEsClient.delete.mockRejectedValueOnce({ statusCode: 403 });
+      try {
+        await expect(repository.preflightExport()).resolves.toBeUndefined();
+      } finally {
+        if (prev) process.env.EVALUATIONS_ES_URL = prev;
+        else delete process.env.EVALUATIONS_ES_URL;
+      }
     });
   });
 
@@ -393,7 +525,7 @@ describe('EvaluationScoreRepository', () => {
       expect(result).toEqual(mockScores);
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: '.kibana-evaluations*',
+          index: 'kibana-evaluations',
           query: {
             bool: {
               must: [{ term: { run_id: 'run-123' } }],
@@ -435,6 +567,94 @@ describe('EvaluationScoreRepository', () => {
         'Failed to retrieve scores for run ID run-123:',
         error
       );
+    });
+  });
+
+  describe('indexSingleScore', () => {
+    it('creates a single document with deterministic id and refresh: wait_for', async () => {
+      const doc = createMockScoreDocument();
+      await repository.indexSingleScore(doc);
+
+      expect(mockEsClient.create).toHaveBeenCalledWith({
+        index: 'kibana-evaluations',
+        id: 'run-123-unknown-suite-gpt-4-dataset-1-example-1-Correctness-0',
+        document: doc,
+        refresh: 'wait_for',
+      });
+    });
+
+    it('enriches the document with suite and buildkite metadata from options', async () => {
+      const doc = createMockScoreDocument();
+      await repository.indexSingleScore(doc, {
+        suiteId: 'my-suite',
+        buildkite: { build_id: 'bk-1', job_id: 'bk-j1' },
+      });
+
+      expect(mockEsClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'run-123-my-suite-gpt-4-dataset-1-example-1-Correctness-0',
+          document: expect.objectContaining({
+            suite: { id: 'my-suite' },
+            ci: { buildkite: { build_id: 'bk-1', job_id: 'bk-j1' } },
+          }),
+        })
+      );
+    });
+
+    it('treats 409 conflict as success', async () => {
+      mockEsClient.create.mockRejectedValueOnce({ statusCode: 409 });
+
+      await expect(repository.indexSingleScore(createMockScoreDocument())).resolves.toBeUndefined();
+    });
+
+    it('throws on non-409 errors', async () => {
+      const error = Object.assign(new Error('forbidden'), { statusCode: 403 });
+      mockEsClient.create.mockRejectedValueOnce(error);
+
+      await expect(repository.indexSingleScore(createMockScoreDocument())).rejects.toThrow(
+        'forbidden'
+      );
+    });
+  });
+
+  describe('computeScoreDocumentId', () => {
+    it('builds a deterministic id from document key fields', () => {
+      const doc = createMockScoreDocument();
+      expect(computeScoreDocumentId(doc)).toBe(
+        'run-123-unknown-suite-gpt-4-dataset-1-example-1-Correctness-0'
+      );
+    });
+
+    it('uses suite id when present', () => {
+      const doc = createMockScoreDocument({ suite: { id: 'attack-discovery' } });
+      expect(computeScoreDocumentId(doc)).toBe(
+        'run-123-attack-discovery-gpt-4-dataset-1-example-1-Correctness-0'
+      );
+    });
+
+    it('produces different ids for different evaluators on the same example', () => {
+      const docA = createMockScoreDocument();
+      const docB = createMockScoreDocument({
+        evaluator: { ...createMockScoreDocument().evaluator, name: 'Groundedness' },
+      });
+      expect(computeScoreDocumentId(docA)).not.toBe(computeScoreDocumentId(docB));
+    });
+
+    it('matches the id used by exportScores bulk onDocument', async () => {
+      const doc = createMockScoreDocument();
+
+      mockEsClient.helpers.bulk.mockResolvedValue({
+        total: 1,
+        failed: 0,
+        successful: 1,
+      } as any);
+
+      await repository.exportScores([doc]);
+
+      const bulkCall = mockEsClient.helpers.bulk.mock.calls[0][0];
+      const bulkDocId = bulkCall.onDocument(doc).create._id;
+
+      expect(bulkDocId).toBe(computeScoreDocumentId(doc));
     });
   });
 });

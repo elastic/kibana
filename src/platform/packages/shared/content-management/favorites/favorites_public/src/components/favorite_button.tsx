@@ -10,9 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiButtonIcon, euiCanAnimate } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButtonIcon } from '@elastic/eui';
 import { useAddFavorite, useFavorites, useRemoveFavorite } from '../favorites_query';
 import { useFavoritesClient } from '../favorites_context';
 import { StardustWrapper } from './stardust_wrapper';
@@ -30,7 +28,9 @@ export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
 
   const favoritesClient = useFavoritesClient();
 
-  if (!data) return null;
+  if (!data) {
+    return null;
+  }
 
   const isFavorite = data.favoriteIds.includes(id);
   const isFavoriteOptimistic = isFavorite || addFavorite.isLoading;
@@ -52,9 +52,11 @@ export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
         isLoading={removeFavorite.isLoading}
         title={title}
         aria-label={title}
-        iconType={isFavoriteOptimistic ? 'starFilled' : 'starEmpty'}
+        iconType={isFavoriteOptimistic ? 'starFill' : 'star'}
         onClick={() => {
-          if (addFavorite.isLoading || removeFavorite.isLoading) return;
+          if (addFavorite.isLoading || removeFavorite.isLoading) {
+            return;
+          }
 
           if (isFavorite) {
             favoritesClient?.reportRemoveFavoriteClick();
@@ -73,26 +75,3 @@ export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
     </StardustWrapper>
   );
 };
-
-/**
- * CSS to apply to euiTable to show the favorite button on hover or when active
- * @param euiTheme
- */
-export const cssFavoriteHoverWithinEuiTableRow = (euiTheme: EuiThemeComputed) => css`
-  @media (hover: hover) {
-    .euiTableRow .cm-favorite-button--empty {
-      visibility: hidden;
-      opacity: 0;
-      ${euiCanAnimate} {
-        transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
-      }
-    }
-    .euiTableRow:hover,
-    .euiTableRow:focus-within {
-      .cm-favorite-button--empty {
-        visibility: visible;
-        opacity: 1;
-      }
-    }
-  }
-`;

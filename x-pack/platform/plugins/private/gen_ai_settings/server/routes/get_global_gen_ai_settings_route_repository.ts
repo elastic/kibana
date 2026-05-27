@@ -6,10 +6,12 @@
  */
 
 import { connectorRoutes } from './connectors/route';
+import { installTokenUsageDashboardRoutes } from './install_token_usage_dashboard/route';
 
 export function getGlobalGenAiSettingsServerRouteRepository() {
   return {
     ...connectorRoutes,
+    ...installTokenUsageDashboardRoutes,
   };
 }
 

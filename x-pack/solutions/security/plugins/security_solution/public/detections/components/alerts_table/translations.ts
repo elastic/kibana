@@ -164,21 +164,21 @@ export const ALERTS_HEADERS_SERVICE_CRITICALITY = i18n.translate(
 export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineTitle',
   {
-    defaultMessage: 'Investigate in timeline',
+    defaultMessage: 'Investigate in Timeline',
   }
 );
 
 export const ACTION_CANNOT_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.cannotInvestigateInTimelineTitle',
   {
-    defaultMessage: 'Please navigate to a page with timeline to investigate',
+    defaultMessage: 'Please navigate to a page with Timeline to investigate',
   }
 );
 
 export const ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineAriaLabel',
   {
-    defaultMessage: 'Send alert to timeline',
+    defaultMessage: 'Send alert to Timeline',
   }
 );
 
@@ -249,7 +249,7 @@ export const ADD_TO_NEW_CASE = i18n.translate(
 export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addBulkToTimeline',
   {
-    defaultMessage: 'Investigate in timeline',
+    defaultMessage: 'Investigate in Timeline',
   }
 );
 
@@ -357,5 +357,47 @@ export const INSUFFICIENT_PRIVILEGES = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.insufficientPrivileges',
   {
     defaultMessage: 'Insufficient privileges',
+  }
+);
+
+export const WORKFLOW_START_SUCCESS_TOAST = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.start.success.toast',
+  {
+    defaultMessage: 'Workflow successfully started',
+  }
+);
+
+export const WORKFLOW_START_SUCCESS_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.start.success.button',
+  {
+    defaultMessage: 'View workflow execution',
+  }
+);
+
+export const WORKFLOW_START_FAILED_TOAST = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.start.failed.toast',
+  {
+    defaultMessage: 'Workflow failed to start',
+  }
+);
+
+export const CONTEXT_MENU_RUN_WORKFLOW = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.menu.run.workflow',
+  {
+    defaultMessage: 'Run workflow',
+  }
+);
+
+export const RUN_WORKFLOW_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.menu.run.workflow.button',
+  {
+    defaultMessage: 'Run workflow',
+  }
+);
+
+export const SELECT_WORKFLOW_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.workflow.select.title',
+  {
+    defaultMessage: 'Select workflow',
   }
 );

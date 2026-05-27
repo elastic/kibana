@@ -9,19 +9,21 @@
 
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { createSamplePanelAction } from './sample_panel_action';
-import { createSamplePanelLink } from './sample_panel_link';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { SAMPLE_PANEL_ACTION, SAMPLE_PANEL_LINK } from './constants';
 
 export class SampelPanelActionTestPlugin
   implements Plugin<SampelPanelActionTestPluginSetup, SampelPanelActionTestPluginStart>
 {
   public setup(core: CoreSetup, { uiActions }: { uiActions: UiActionsSetup }) {
-    const samplePanelAction = createSamplePanelAction(core.getStartServices);
-    const samplePanelLink = createSamplePanelLink();
-
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, samplePanelAction);
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, samplePanelLink);
+    uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, SAMPLE_PANEL_ACTION, async () => {
+      const { createSamplePanelAction } = await import('./sample_panel_action');
+      return createSamplePanelAction(core.getStartServices);
+    });
+    uiActions.addTriggerActionAsync(ON_OPEN_PANEL_MENU, SAMPLE_PANEL_LINK, async () => {
+      const { createSamplePanelLink } = await import('./sample_panel_link');
+      return createSamplePanelLink();
+    });
 
     return {};
   }

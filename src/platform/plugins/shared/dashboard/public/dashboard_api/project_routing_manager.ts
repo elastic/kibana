@@ -11,7 +11,8 @@ import type { ProjectRouting } from '@kbn/es-query';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
 import type { Subscription } from 'rxjs';
-import { BehaviorSubject, combineLatestWith, debounceTime, map } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith } from 'rxjs';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { cpsService } from '../services/kibana_services';
 import type { DashboardState } from '../../common';
 
@@ -24,8 +25,11 @@ export function initializeProjectRoutingManager(
   if (!cpsService?.cpsManager) {
     return;
   }
-
   const cpsManager = cpsService.cpsManager;
+
+  cpsManager.registerAppAccess('dashboards', (location: string) =>
+    location.includes('#/list') ? ProjectRoutingAccess.DISABLED : ProjectRoutingAccess.EDITABLE
+  );
 
   const projectRouting$ = new BehaviorSubject<ProjectRouting>(initialState.project_routing);
 
@@ -68,14 +72,23 @@ export function initializeProjectRoutingManager(
     };
   };
 
+  const anyStateChange$ = projectRouting$.pipe(
+    skip(1),
+    map(() => undefined)
+  );
+
   return {
     api: {
       projectRouting$,
       setProjectRouting,
     },
     internalApi: {
+      anyStateChange$,
       startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return projectRouting$.pipe(
+        return anyStateChange$.pipe(
+          // anyStateChange$ does not emit on subscribe
+          // use startWith to compare unsaved changes on subscribe
+          startWith(undefined),
           debounceTime(COMPARE_DEBOUNCE),
           map(() => getState()),
           combineLatestWith(lastSavedState$),

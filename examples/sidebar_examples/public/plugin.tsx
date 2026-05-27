@@ -13,8 +13,8 @@ import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core
 import type { SidebarAppUpdater } from '@kbn/core-chrome-sidebar';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { counterAppId } from './counter_app';
-import { tabSelectionAppId, getTabSelectionParamsSchema } from './tab_selection_app';
-import { textInputAppId, getTextInputParamsSchema } from './text_input_app';
+import { tabSelectionAppId, tabSelectionStore } from './tab_selection_app';
+import { textInputAppId, textInputStore } from './text_input_app';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -26,21 +26,21 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
   public setup(core: CoreSetup, deps: SetupDeps) {
     core.chrome.sidebar.registerApp({
       appId: textInputAppId,
-      getParamsSchema: getTextInputParamsSchema,
+      store: textInputStore,
       loadComponent: () => import('./text_input_app').then((m) => m.TextInputApp),
     });
 
     core.chrome.sidebar.registerApp({
       appId: counterAppId,
-      restoreOnReload: false, // Uses internal React state, not persisted params
+      restoreOnReload: false, // Uses internal React state, not persisted store state
       loadComponent: () => import('./counter_app').then((m) => m.CounterApp),
     });
 
-    // Register tab selection app as initially inaccessible (simulating permission check)
+    // Register tab selection app as initially pending (simulating permission check)
     this.updateTabSelectionApp = core.chrome.sidebar.registerApp({
       appId: tabSelectionAppId,
-      status: 'inaccessible', // Initially inaccessible
-      getParamsSchema: getTabSelectionParamsSchema,
+      status: 'pending', // Initially pending async check
+      store: tabSelectionStore,
       loadComponent: () => import('./tab_selection_app').then((m) => m.TabSelectionApp),
     });
 
@@ -64,11 +64,11 @@ export class SidebarExamplesPlugin implements Plugin<void, void, SetupDeps> {
   }
 
   public start(core: CoreStart) {
-    // Simulate async permission check - make tab selection app accessible after 2 seconds
+    // Simulate async permission check - make tab selection app available after 2 seconds
     setTimeout(() => {
-      this.updateTabSelectionApp?.({ status: 'accessible' });
+      this.updateTabSelectionApp?.({ status: 'available' });
       // eslint-disable-next-line no-console
-      console.log('[Sidebar Example] Tab Selection app is now accessible after permission check');
+      console.log('[Sidebar Example] Tab Selection app is now available after permission check');
     }, 2000);
 
     return {};

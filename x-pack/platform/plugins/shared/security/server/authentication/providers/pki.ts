@@ -9,14 +9,15 @@ import Boom from '@hapi/boom';
 import type { DetailedPeerCertificate } from 'tls';
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 
 import { BaseAuthenticationProvider } from './base';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { getDetailedErrorMessage } from '../../errors';
+import type { SessionValue } from '../../session_management';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { HTTPAuthorizationHeader } from '../http_authentication';
 import { Tokens } from '../tokens';
 
 /**
@@ -91,7 +92,7 @@ function stringifyCertificate(peerCertificate: DetailedPeerCertificate) {
 /**
  * Provider that supports PKI request authentication.
  */
-export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
+export class PKIAuthenticationProvider extends BaseAuthenticationProvider<ProviderState> {
   /**
    * Type of the provider.
    */
@@ -109,9 +110,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs PKI request authentication.
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
+  public async authenticate(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(
       `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
     );
@@ -122,8 +123,8 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     let authenticationResult = AuthenticationResult.notHandled();
-    if (state) {
-      authenticationResult = await this.authenticateViaState(request, state);
+    if (session?.state) {
+      authenticationResult = await this.authenticateViaState(request, session);
 
       // If access token expired or doesn't match to the certificate fingerprint we should try to get
       // a new one in exchange to peer certificate chain. Since we know that we had a valid session
@@ -134,7 +135,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
         (authenticationResult.failed() &&
           Tokens.isAccessTokenExpiredError(authenticationResult.error));
       if (invalidAccessToken) {
-        authenticationResult = await this.authenticateViaPeerCertificate(request, state);
+        authenticationResult = await this.authenticateViaPeerCertificate(request, session.state);
         // If we have an active session that we couldn't use to authenticate user and at the same time
         // we couldn't use peer's certificate to establish a new one, then we should respond with 401
         // and force authenticator to clear the session.
@@ -148,28 +149,28 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     // to start a new session, and if so try to authenticate request using its peer certificate chain,
     // otherwise just return authentication result we have.
     return authenticationResult.notHandled() && canStartNewSession(request)
-      ? await this.authenticateViaPeerCertificate(request, state)
+      ? await this.authenticateViaPeerCertificate(request, session?.state)
       : authenticationResult;
   }
 
   /**
    * Invalidates access token retrieved in exchange for peer certificate chain if it exists.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async logout(request: KibanaRequest, state?: ProviderState | null) {
+  public async logout(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
 
-    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // Having a `null` session means that provider was specifically called to do a logout, but when
     // session isn't defined then provider is just being probed whether or not it can perform logout.
-    if (state === undefined) {
+    if (session === undefined) {
       this.logger.debug('There is no access token to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
-    if (state) {
+    if (session?.state) {
       try {
-        await this.options.tokens.invalidate({ accessToken: state.accessToken });
+        await this.options.tokens.invalidate({ accessToken: session.state.accessToken });
       } catch (err) {
         this.logger.debug(
           () => `Failed invalidating access token: ${getDetailedErrorMessage(err)}`
@@ -193,12 +194,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
    * Tries to extract access token from state and adds it to the request before it's
    * forwarded to Elasticsearch backend.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param session Session value previously stored by the provider.
    */
-  private async authenticateViaState(
-    request: KibanaRequest,
-    { accessToken, peerCertificateFingerprint256 }: ProviderState
-  ) {
+  private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
     this.logger.debug('Trying to authenticate via state.');
 
     // If peer is authorized, but its certificate isn't available, that likely means the connection
@@ -215,14 +213,14 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     if (
       !request.socket.authorized ||
       peerCertificate === null ||
-      (peerCertificate as any).fingerprint256 !== peerCertificateFingerprint256
+      (peerCertificate as any).fingerprint256 !== session.state.peerCertificateFingerprint256
     ) {
       this.logger.debug(
         'Peer certificate is not present or its fingerprint does not match to the one associated with the access token. Invalidating access token...'
       );
 
       try {
-        await this.options.tokens.invalidate({ accessToken });
+        await this.options.tokens.invalidate({ accessToken: session.state.accessToken });
       } catch (err) {
         this.logger.error(`Failed to invalidate access token: ${getDetailedErrorMessage(err)}`);
         return AuthenticationResult.failed(err);
@@ -233,11 +231,11 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
+    const authHeaders = {
+      authorization: new HTTPAuthorizationHeader('Bearer', session.state.accessToken).toString(),
+    };
     try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      };
-      const user = await this.getUser(request, authHeaders);
+      const user = await this.getUser(request, authHeaders, session);
 
       this.logger.debug('Request has been authenticated via state.');
       return AuthenticationResult.succeeded(user, { authHeaders });

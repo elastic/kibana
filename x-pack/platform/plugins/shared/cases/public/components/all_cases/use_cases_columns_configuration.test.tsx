@@ -9,6 +9,7 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { renderHook } from '@testing-library/react';
 
 import { TestProviders } from '../../common/mock';
+import { KibanaServices } from '../../common/lib/kibana';
 import { useCasesFeatures } from '../../common/use_cases_features';
 
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
@@ -35,6 +36,11 @@ describe('useCasesColumnsConfiguration ', () => {
       isAlertsEnabled: true,
     });
     useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('returns all columns correctly', async () => {
@@ -67,6 +73,12 @@ describe('useCasesColumnsConfiguration ', () => {
           "field": "createdAt",
           "isCheckedDefault": true,
           "name": "Created on",
+        },
+        "extendedFields": Object {
+          "canDisplay": false,
+          "field": "extendedFields",
+          "isCheckedDefault": false,
+          "name": "Extended fields",
         },
         "externalIncident": Object {
           "canDisplay": true,
@@ -199,5 +211,51 @@ describe('useCasesColumnsConfiguration ', () => {
       canDisplay: true,
       isCheckedDefault: false,
     });
+  });
+
+  it('does not display extended fields when templates are disabled', () => {
+    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+      templates: { enabled: false },
+    } as ReturnType<typeof KibanaServices.getConfig>);
+
+    const { result } = renderHook(() => useCasesColumnsConfiguration(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    expect(result.current.extendedFields).toEqual({
+      field: 'extendedFields',
+      name: 'Extended fields',
+      canDisplay: false,
+      isCheckedDefault: false,
+    });
+  });
+
+  it('displays extended fields when templates are enabled', () => {
+    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+      templates: { enabled: true },
+    } as ReturnType<typeof KibanaServices.getConfig>);
+
+    const { result } = renderHook(() => useCasesColumnsConfiguration(), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    expect(result.current.extendedFields).toEqual({
+      field: 'extendedFields',
+      name: 'Extended fields',
+      canDisplay: true,
+      isCheckedDefault: false,
+    });
+  });
+
+  it('never displays extended fields in selector view', () => {
+    jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+      templates: { enabled: true },
+    } as ReturnType<typeof KibanaServices.getConfig>);
+
+    const { result } = renderHook(() => useCasesColumnsConfiguration(true), {
+      wrapper: (props) => <TestProviders {...props} license={license} />,
+    });
+
+    expect(result.current.extendedFields.canDisplay).toBe(false);
   });
 });

@@ -8,10 +8,19 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { scan, takeUntil, finalize, Observable } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import { isSSEError } from '@kbn/sse-utils';
+import type { ConnectorInfo } from '../../common';
+
+export type { ConnectorInfo };
 
 interface ContextEvent {
   type: 'context';
   context: string;
+}
+
+interface ConnectorInfoEvent {
+  type: 'connectorInfo';
+  connector: ConnectorInfo;
 }
 
 interface ChatCompletionChunkEvent {
@@ -26,17 +35,26 @@ interface ChatCompletionMessageEvent {
 
 export type InsightStreamEvent =
   | ContextEvent
+  | ConnectorInfoEvent
   | ChatCompletionChunkEvent
   | ChatCompletionMessageEvent;
 
 export interface InsightResponse {
   summary: string;
   context: string;
+  connectorInfo?: ConnectorInfo;
 }
 
-const handleStreamError = (err: unknown, setError: (error: string | undefined) => void): void => {
+const handleStreamError = (
+  err: unknown,
+  setError: (error: string | undefined) => void,
+  setIsErrorRetryable: (isRetryable: boolean) => void
+): void => {
   if (err instanceof AbortError) {
     return;
+  }
+  if (isSSEError(err) && err.meta) {
+    setIsErrorRetryable(err.meta.retryable === true);
   }
   setError(err instanceof Error ? err.message : 'Failed to load AI insight');
 };
@@ -46,8 +64,10 @@ export function useStreamingAiInsight(
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [isErrorRetryable, setIsErrorRetryable] = useState(true);
   const [summary, setSummary] = useState('');
   const [context, setContext] = useState('');
+  const [connectorInfo, setConnectorInfo] = useState<ConnectorInfo | undefined>(undefined);
   const [wasStopped, setWasStopped] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const cleanupRef = useRef<() => void>();
@@ -64,9 +84,11 @@ export function useStreamingAiInsight(
 
     setIsLoading(true);
     setError(undefined);
+    setIsErrorRetryable(true);
     setWasStopped(false);
     setSummary('');
     setContext('');
+    setConnectorInfo(undefined);
 
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
@@ -92,6 +114,9 @@ export function useStreamingAiInsight(
             if (event.type === 'context') {
               return { ...acc, context: event.context };
             }
+            if (event.type === 'connectorInfo') {
+              return { ...acc, connectorInfo: event.connector };
+            }
             if (event.type === 'chatCompletionChunk') {
               return { ...acc, summary: acc.summary + event.content };
             }
@@ -112,8 +137,11 @@ export function useStreamingAiInsight(
         next: (state: InsightResponse) => {
           setSummary(state.summary);
           setContext(state.context);
+          if (state.connectorInfo) {
+            setConnectorInfo(state.connectorInfo);
+          }
         },
-        error: (err: unknown) => handleStreamError(err, setError),
+        error: (streamErr: unknown) => handleStreamError(streamErr, setError, setIsErrorRetryable),
       });
 
       cleanupRef.current = () => {
@@ -121,7 +149,7 @@ export function useStreamingAiInsight(
         subscription.unsubscribe();
       };
     } catch (e) {
-      handleStreamError(e, setError);
+      handleStreamError(e, setError, setIsErrorRetryable);
       setIsLoading(false);
     }
   }, [createStream]);
@@ -131,8 +159,10 @@ export function useStreamingAiInsight(
   return {
     isLoading,
     error,
+    isErrorRetryable,
     summary,
     context,
+    connectorInfo,
     wasStopped,
     fetch,
     stop,

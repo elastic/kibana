@@ -52,7 +52,6 @@ export const App = ({ core, plugins }: { core: CoreStart; plugins: StartDependen
               onTextLangQuerySubmit={async () => {
                 setQuerySubmitted(true);
               }}
-              hideRunQueryText={true}
               hasOutline
             />
           </EuiPanel>

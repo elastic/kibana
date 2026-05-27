@@ -172,6 +172,56 @@ describe('generateOpenApiDocument', () => {
       ).toMatchSnapshot();
     });
 
+    it('propagates field availability metadata to the generated OpenAPI document', async () => {
+      const oas = await generateOpenApiDocument(
+        {
+          routers: [
+            createRouter({
+              routes: [
+                {
+                  isVersioned: false,
+                  path: '/availability',
+                  method: 'post',
+                  validationSchemas: {
+                    request: {
+                      body: schema.object({
+                        foo: schema.string({
+                          meta: { availability: { stability: 'stable', since: '9.4.0' } },
+                        }),
+                      }),
+                    },
+                  },
+                  options: { tags: ['foo'], access: 'public' },
+                  handler: jest.fn(),
+                },
+              ],
+            }),
+          ],
+          versionedRouters: [],
+        },
+        {
+          title: 'test',
+          baseUrl: 'https://test.oas',
+          version: '99.99.99',
+        }
+      );
+
+      expect(
+        get(oas, [
+          'paths',
+          '/availability',
+          'post',
+          'requestBody',
+          'content',
+          'application/json',
+          'schema',
+          'properties',
+          'foo',
+          'x-state',
+        ])
+      ).toBe('Generally available; added in 9.4.0');
+    });
+
     it('handles recursive schemas', async () => {
       const id = 'recursive';
       const recursiveSchema: Type<RecursiveType> = schema.object(
@@ -491,7 +541,7 @@ describe('generateOpenApiDocument', () => {
           versionedRouters: {},
         } as CreateTestRouterArgs,
         expectedPath: '/test-path/{id}/{path}',
-        expectedState: 'Technical Preview',
+        expectedState: 'Experimental',
       },
       {
         name: 'router with beta stability',
@@ -566,7 +616,7 @@ describe('generateOpenApiDocument', () => {
           },
         } as CreateTestRouterArgs,
         expectedPath: '/test-path',
-        expectedState: 'Technical Preview',
+        expectedState: 'Experimental',
       },
       {
         name: 'versioned router with beta stability',

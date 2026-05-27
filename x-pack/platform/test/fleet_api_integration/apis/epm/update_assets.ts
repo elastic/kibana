@@ -310,7 +310,7 @@ export default function (providerContext: FtrProviderContext) {
       } catch (err) {
         resDashboard2 = err;
       }
-      expect(resDashboard2.response.data.statusCode).equal(404);
+      expect(resDashboard2.status).equal(404);
       const resVis = await kibanaServer.savedObjects.get({
         type: 'visualization',
         id: 'sample_visualization',
@@ -325,7 +325,7 @@ export default function (providerContext: FtrProviderContext) {
       } catch (err) {
         resSearch = err;
       }
-      expect(resSearch.response.data.statusCode).equal(404);
+      expect(resSearch.status).equal(404);
       const resSearch2 = await kibanaServer.savedObjects.get({
         type: 'search',
         id: 'sample_search2',
@@ -345,6 +345,10 @@ export default function (providerContext: FtrProviderContext) {
           installed_kibana_space_id: 'default',
           installed_kibana: sortBy(
             [
+              {
+                id: 'fleet-all_assets-inactivity-monitoring',
+                type: 'alerting_rule_template',
+              },
               {
                 id: 'sample_alerting_rule_template',
                 type: 'alerting_rule_template',
@@ -658,6 +662,10 @@ export default function (providerContext: FtrProviderContext) {
             )
           ).to.not.be(undefined);
         });
+
+        const installedAsDependency = res.attributes.installed_as_dependency;
+        delete res.attributes.installed_as_dependency;
+        expect(Boolean(installedAsDependency)).eql(false);
 
         expect({
           ...res.attributes,

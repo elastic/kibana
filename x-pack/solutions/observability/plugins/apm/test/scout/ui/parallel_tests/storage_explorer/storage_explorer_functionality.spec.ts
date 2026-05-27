@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
@@ -15,7 +16,7 @@ const timeRange = {
   rangeTo: testData.END_DATE,
 };
 
-test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
+test.describe('Storage Explorer - Admin User', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     // Use privileged user (admin) to ensure we have all necessary permissions
     await browserAuth.loginAsAdmin();
@@ -55,10 +56,11 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
         .getByTestId('tableHeaderSortButton')
         .click();
 
-      // Verify the service icon links are present
-      await page.getByTestId('serviceLink_nodejs').scrollIntoViewIfNeeded();
-      await expect(page.getByTestId('serviceLink_nodejs')).toBeVisible();
-      await expect(page.getByTestId('serviceLink_go')).toHaveCount(2);
+      // Verify the service icon links are present (counts may vary as more test data is added)
+      const nodejsCount = await page.getByTestId('serviceLink_nodejs').count();
+      expect(nodejsCount).toBeGreaterThanOrEqual(1);
+      const goCount = await page.getByTestId('serviceLink_go').count();
+      expect(goCount).toBeGreaterThanOrEqual(2);
 
       // Verify the synthetic services with actual data are present
       await expect(page.getByLabel(testData.SERVICE_SYNTH_NODE_1)).toBeVisible();

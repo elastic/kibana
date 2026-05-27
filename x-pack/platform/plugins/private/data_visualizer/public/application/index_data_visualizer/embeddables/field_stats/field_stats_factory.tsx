@@ -6,13 +6,9 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import {
-  APPLY_FILTER_TRIGGER,
-  generateFilters,
-  type DataPublicPluginStart,
-} from '@kbn/data-plugin/public';
+import { generateFilters, type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasExecutionContext,
@@ -24,7 +20,7 @@ import {
   titleComparators,
   timeRangeComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -49,6 +45,7 @@ import { FilterStateStore } from '@kbn/es-query';
 import { ENABLE_ESQL, getESQLAdHocDataview } from '@kbn/esql-utils';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
 import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
@@ -107,7 +104,7 @@ export const getFieldStatsChartEmbeddableFactory = (
     DataVisualizerPluginStart
   >
 ) => {
-  const factory: EmbeddableFactory<
+  const factory: EmbeddablePublicDefinition<
     FieldStatisticsTableEmbeddableState,
     FieldStatisticsTableEmbeddableApi
   > = {
@@ -194,18 +191,14 @@ export const getFieldStatsChartEmbeddableFactory = (
 
       const { toasts } = deps.notifications;
 
-      const serializeState = () => {
-        return {
+      const stateApi = initializeStateApi<FieldStatisticsTableEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...serializeFieldStatsChartState(),
-        };
-      };
-
-      const unsavedChangesApi = initializeUnsavedChanges({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -216,10 +209,10 @@ export const getFieldStatsChartEmbeddableFactory = (
           ...fieldStatsControlsComparators,
           ...timeRangeComparators,
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          timeRangeManager.reinitializeState(lastSaved);
-          fieldStatsStateManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          timeRangeManager.reinitializeState(nextState);
+          fieldStatsStateManager.reinitializeState(nextState);
         },
       });
 
@@ -227,7 +220,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         ...timeRangeManager.api,
         ...titleManager.api,
         ...fieldStatsControlsApi,
-        ...unsavedChangesApi,
+        ...stateApi,
         // PublishesDataLoading
         dataLoading$,
         // PublishesBlockingError
@@ -265,7 +258,6 @@ export const getFieldStatsChartEmbeddableFactory = (
           });
         },
         dataViews$,
-        serializeState,
       });
 
       const reload$ = fetch$(api).pipe(
@@ -288,7 +280,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
           return;
         }
-        const trigger = pluginStart.uiActions.getTrigger(APPLY_FILTER_TRIGGER);
+        const trigger = pluginStart.uiActions.getTrigger(ON_APPLY_FILTER);
         if (!trigger) {
           toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
           return;
@@ -409,7 +401,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                     </h3>
                   }
                   color="warning"
-                  iconType="alert"
+                  iconType="warning"
                 />
               </EuiFlexItem>
             );

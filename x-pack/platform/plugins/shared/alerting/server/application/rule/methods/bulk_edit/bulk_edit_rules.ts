@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectsFindResult } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { UntypedNormalizedRuleType } from '../../../../rule_type_registry';
 import { updateRuleInMemory } from '../../../../rules_client/common/bulk_edit';
 import type {
@@ -66,6 +67,7 @@ export async function bulkEditRules<Params extends RuleParams>(
     auditAction,
     requiredAuthOperation,
     shouldInvalidateApiKeys,
+    changeTrackingAction: RuleChangeTrackingAction.ruleUpdate,
     shouldValidateSchedule: options.operations.some((operation) => operation.field === 'schedule'),
     updateFn: (opts: UpdateOperationOpts) =>
       updateRuleAttributesAndParamsInMemory<Params>({
@@ -198,15 +200,20 @@ async function ensureAuthorizationForBulkUpdate(
     return;
   }
 
+  const needsAuth = new Set<BulkEditFields>();
   for (const operation of operations) {
-    const { field } = operation;
-    if (field === 'snoozeSchedule' || field === 'apiKey') {
-      try {
-        await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-        break;
-      } catch (error) {
-        throw Error(`Rule not authorized for bulk ${field} update - ${error.message}`);
-      }
+    if (operation.field === 'snoozeSchedule' || operation.field === 'apiKey') {
+      needsAuth.add(operation.field);
+    }
+  }
+
+  if (needsAuth.size > 0) {
+    try {
+      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
+    } catch (error) {
+      throw Error(
+        `Rule not authorized for bulk ${[...needsAuth].join(', ')} update - ${error.message}`
+      );
     }
   }
 }

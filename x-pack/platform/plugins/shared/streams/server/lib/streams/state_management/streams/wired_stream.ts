@@ -15,15 +15,21 @@ import {
   getSegments,
   isInheritLifecycle,
   getInheritedFieldsFromAncestors,
+  validateStreamName,
+  getEsqlViewName,
+  getWiredStreamViewQuery,
+  isDraftStream,
 } from '@kbn/streams-schema';
 import {
   getAncestors,
   getAncestorsAndSelf,
   getParentId,
+  getRoot,
   isChildOf,
   isDescendantOf,
   isRootStreamDefinition,
   isIlmLifecycle,
+  LOGS_ECS_STREAM_NAME,
 } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
@@ -32,7 +38,6 @@ import {
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { validateStreamlang } from '@kbn/streamlang';
-import { MAX_STREAM_NAME_LENGTH } from '../../../../../common/constants';
 import { generateLayer } from '../../component_templates/generate_layer';
 import { getComponentTemplateName } from '../../component_templates/name';
 import { isDefinitionNotFoundError } from '../../errors/definition_not_found_error';
@@ -63,7 +68,12 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
-import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
+import {
+  computeChange,
+  formatSettings,
+  settingsUpdateRequiresRollover,
+  validateQueryStreams,
+} from './helpers';
 import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
 interface WiredStreamChanges extends StreamChanges {
@@ -73,6 +83,8 @@ interface WiredStreamChanges extends StreamChanges {
   failure_store: boolean;
   lifecycle: boolean;
   settings: boolean;
+  query_streams: boolean;
+  draft: boolean;
 }
 
 export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definition> {
@@ -83,6 +95,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     lifecycle: false,
     failure_store: false,
     settings: false,
+    query_streams: false,
+    draft: false,
   };
 
   constructor(definition: Streams.WiredStream.Definition, dependencies: StateDependencies) {
@@ -126,41 +140,83 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       throw new StatusError('Unexpected starting state stream type', 400);
     }
 
-    this._changes.ownFields =
+    // For existing streams, check if the value changed
+    // For new streams, only mark as changed if the value is non-empty/meaningful
+    const isExistingStream = !!startingStateStreamDefinition;
+
+    this._changes.ownFields = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: Object.keys(this._definition.ingest.wired.fields || {}).length > 0,
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.wired.fields,
+          startingStateStreamDefinition!.ingest.wired.fields
+        ),
+    });
+
+    this._changes.routing = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: (this._definition.ingest.wired.routing || []).length > 0,
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.wired.routing,
+          startingStateStreamDefinition!.ingest.wired.routing
+        ),
+    });
+
+    this._changes.failure_store = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: !isInheritFailureStore(this._definition.ingest.failure_store),
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.failure_store,
+          startingStateStreamDefinition!.ingest.failure_store
+        ),
+    });
+
+    this._changes.processing = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: (this._definition.ingest.processing.steps || []).length > 0,
+      hasChanged: () =>
+        !_.isEqual(
+          _.omit(this._definition.ingest.processing, ['updated_at']),
+          _.omit(startingStateStreamDefinition!.ingest.processing, ['updated_at'])
+        ),
+    });
+
+    this._changes.lifecycle = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: !isInheritLifecycle(this._definition.ingest.lifecycle),
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.lifecycle,
+          startingStateStreamDefinition!.ingest.lifecycle
+        ),
+    });
+
+    this._changes.settings = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: Object.keys(this._definition.ingest.settings || {}).length > 0,
+      hasChanged: () =>
+        !_.isEqual(
+          this._definition.ingest.settings,
+          startingStateStreamDefinition!.ingest.settings
+        ),
+    });
+
+    this._changes.query_streams =
       !startingStateStreamDefinition ||
       !_.isEqual(
-        this._definition.ingest.wired.fields,
-        startingStateStreamDefinition.ingest.wired.fields
+        this._definition.query_streams ?? [],
+        startingStateStreamDefinition.query_streams ?? []
       );
 
-    this._changes.routing =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        this._definition.ingest.wired.routing,
-        startingStateStreamDefinition.ingest.wired.routing
-      );
-
-    this._changes.failure_store =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        this._definition.ingest.failure_store,
-        startingStateStreamDefinition.ingest.failure_store
-      );
-
-    this._changes.processing =
-      !startingStateStreamDefinition ||
-      !_.isEqual(
-        _.omit(this._definition.ingest.processing, ['updated_at']),
-        _.omit(startingStateStreamDefinition.ingest.processing, ['updated_at'])
-      );
-
-    this._changes.lifecycle =
-      !startingStateStreamDefinition ||
-      !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
-
-    this._changes.settings =
-      !startingStateStreamDefinition ||
-      !_.isEqual(this._definition.ingest.settings, startingStateStreamDefinition.ingest.settings);
+    this._changes.draft = computeChange({
+      isExistingStream,
+      hasMeaningfulValue: isDraftStream(this._definition),
+      hasChanged: () =>
+        isDraftStream(this._definition) !== isDraftStream(startingStateStreamDefinition!),
+    });
 
     // The newly upserted definition will always have a new updated_at timestamp. But, if processing didn't change,
     // we should keep the existing updated_at as processing wasn't touched.
@@ -177,6 +233,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       cascadingChanges.push({
         type: 'upsert',
         definition: {
+          type: 'wired',
           name: parentId,
           description: '',
           updated_at: now,
@@ -201,16 +258,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     if (this._changes.routing) {
-      const routeTargets = this._definition.ingest.wired.routing.map(
-        (routing) => routing.destination
-      );
-
-      for (const routeTarget of routeTargets) {
-        if (!desiredState.has(routeTarget)) {
+      for (const route of this._definition.ingest.wired.routing) {
+        if (!desiredState.has(route.destination)) {
           cascadingChanges.push({
             type: 'upsert',
             definition: {
-              name: routeTarget,
+              type: 'wired',
+              name: route.destination,
               description: '',
               updated_at: now,
               ingest: {
@@ -220,6 +274,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                 wired: {
                   fields: {},
                   routing: [],
+                  ...(route.draft ? { draft: true } : {}),
                 },
                 failure_store: { inherit: {} },
               },
@@ -242,9 +297,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: parentId,
               description: '',
               updated_at: now,
+              query_streams: parentStream.definition.query_streams,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
@@ -263,6 +320,31 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           });
         }
       }
+    }
+
+    const isMaterializing =
+      isExistingStream &&
+      isDraftStream(startingStateStreamDefinition!) &&
+      !isDraftStream(this._definition);
+
+    if (isMaterializing && parentId && desiredState.has(parentId)) {
+      const parentStream = desiredState.get(parentId) as WiredStream;
+      cascadingChanges.push({
+        type: 'upsert',
+        definition: {
+          ...parentStream.definition,
+          updated_at: now,
+          ingest: {
+            ...parentStream.definition.ingest,
+            wired: {
+              ...parentStream.definition.ingest.wired,
+              routing: parentStream.definition.ingest.wired.routing.map((r) =>
+                r.destination === this._definition.name ? { ...r, draft: false } : r
+              ),
+            },
+          },
+        },
+      });
     }
 
     return { cascadingChanges, changeStatus: 'upserted' };
@@ -292,9 +374,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              type: 'wired',
               name: parentId,
               description: '',
               updated_at: new Date().toISOString(),
+              query_streams: parentStream.definition.query_streams,
               ingest: {
                 ...parentStream.definition.ingest,
                 wired: {
@@ -317,6 +401,15 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }))
     );
 
+    // Cascade delete to all child query streams
+    const childQueryStreams = this._definition.query_streams ?? [];
+    for (const childRef of childQueryStreams) {
+      cascadingChanges.push({
+        type: 'delete',
+        name: childRef.name,
+      });
+    }
+
     return { cascadingChanges, changeStatus: 'deleted' };
   }
 
@@ -328,6 +421,15 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       return {
         isValid: false,
         errors: [new Error('Cannot create wired stream due to unsupported root stream')],
+      };
+    }
+
+    // Validate the stream's own name
+    const nameValidation = validateStreamName(this._definition.name);
+    if (!nameValidation.valid) {
+      return {
+        isValid: false,
+        errors: [new Error(nameValidation.message)],
       };
     }
 
@@ -346,8 +448,22 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     const existsInStartingState = startingState.has(this._definition.name);
 
-    if (!existsInStartingState) {
-      // Check for conflicts
+    const startingStateStreamDefinition = existsInStartingState
+      ? (startingState.get(this._definition.name)!.definition as Streams.WiredStream.Definition)
+      : undefined;
+
+    if (
+      startingStateStreamDefinition &&
+      !isDraftStream(startingStateStreamDefinition) &&
+      isDraftStream(this._definition)
+    ) {
+      return {
+        isValid: false,
+        errors: [new Error('Cannot revert a materialized stream to draft')],
+      };
+    }
+
+    if (!existsInStartingState && !isDraftStream(this._definition)) {
       const { existsAsIndex, existsAsManagedDataStream, existsAsDataStream } =
         await this.getMatchingDataStream();
       if (existsAsIndex) {
@@ -361,7 +477,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         };
       }
       if (existsAsDataStream && !existsAsManagedDataStream) {
-        // if the data stream exists, but is not managed by streams, we cannot create a wired stream with the same name
         return {
           isValid: false,
           errors: [
@@ -384,25 +499,22 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const children: Set<string> = new Set();
     const prefix = this.definition.name + '.';
     for (const routing of this._definition.ingest.wired.routing) {
-      const hasUpperCaseChars = routing.destination !== routing.destination.toLowerCase();
-      if (hasUpperCaseChars) {
-        return {
-          isValid: false,
-          errors: [new Error(`Stream name cannot contain uppercase characters.`)],
-        };
+      // Only validate child stream name if the child doesn't exist in desired state.
+      // If it exists, it will validate its own name in its own doValidateUpsertion call,
+      // avoiding duplicate error messages.
+      if (!desiredState.has(routing.destination)) {
+        const childNameValidation = validateStreamName(routing.destination);
+        if (!childNameValidation.valid) {
+          return {
+            isValid: false,
+            errors: [new Error(childNameValidation.message)],
+          };
+        }
       }
       if (routing.destination.length <= prefix.length) {
         return {
           isValid: false,
           errors: [new Error(`Stream name must not be empty.`)],
-        };
-      }
-      if (routing.destination.length > MAX_STREAM_NAME_LENGTH) {
-        return {
-          isValid: false,
-          errors: [
-            new Error(`Stream name cannot be longer than ${MAX_STREAM_NAME_LENGTH} characters.`),
-          ],
         };
       }
       if (children.has(routing.destination)) {
@@ -432,6 +544,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       if (
         !stream.isDeleted() &&
         isChildOf(this._definition.name, stream.definition.name) &&
+        Streams.WiredStream.Definition.is(stream.definition) &&
         !children.has(stream.definition.name)
       ) {
         return {
@@ -445,27 +558,75 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
-    if (!existsInStartingState) {
+    if (isDraftStream(this._definition)) {
+      for (const routing of this._definition.ingest.wired.routing) {
+        if (!routing.draft) {
+          return {
+            isValid: false,
+            errors: [
+              new Error(
+                `Draft stream "${this._definition.name}" cannot have materialized child "${routing.destination}"`
+              ),
+            ],
+          };
+        }
+      }
+    }
+
+    let seenDraft = false;
+    for (const routing of this._definition.ingest.wired.routing) {
+      if (routing.draft) {
+        seenDraft = true;
+      } else if (seenDraft) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Materialized stream "${routing.destination}" cannot appear after a draft stream in the routing list of "${this._definition.name}"`
+            ),
+          ],
+        };
+      }
+    }
+
+    const queryStreamsValidation = validateQueryStreams({
+      desiredState,
+      name: this._definition.name,
+      queryStreams: this._definition.query_streams ?? [],
+    });
+
+    if (queryStreamsValidation) {
+      return queryStreamsValidation;
+    }
+
+    if (!existsInStartingState && !isDraftStream(this._definition)) {
       await this.assertNoHierarchicalConflicts(this._definition.name);
     }
 
     const ancestors = desiredState
       .all()
-      .filter((stream) => {
-        return isDescendantOf(stream.definition.name, this._definition.name);
+      .filter((stream): stream is StreamActiveRecord<Streams.WiredStream.Definition> => {
+        return (
+          isDescendantOf(stream.definition.name, this._definition.name) &&
+          Streams.WiredStream.Definition.is(stream.definition)
+        );
       })
-      .map((stream) => stream.definition as Streams.WiredStream.Definition);
+      .map((stream) => stream.definition);
 
     const descendants = desiredState
       .all()
-      .filter((stream) => {
-        return isDescendantOf(this._definition.name, stream.definition.name);
+      .filter((stream): stream is StreamActiveRecord<Streams.WiredStream.Definition> => {
+        return (
+          isDescendantOf(this._definition.name, stream.definition.name) &&
+          Streams.WiredStream.Definition.is(stream.definition)
+        );
       })
-      .map((stream) => stream.definition as Streams.WiredStream.Definition);
+      .map((stream) => stream.definition);
 
     validateAncestorFields({
       ancestors,
       fields: this._definition.ingest.wired.fields,
+      streamName: this._definition.name,
     });
 
     validateDescendantFields({
@@ -497,9 +658,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         .map(([name]) => name);
 
       // Validate the Streamlang DSL
+      const rootStream = getRoot(this._definition.name);
       const validationResult = validateStreamlang(this._definition.ingest.processing, {
         reservedFields,
         streamType: 'wired',
+        skipNamespaceValidation: rootStream === LOGS_ECS_STREAM_NAME,
       });
 
       if (!validationResult.isValid) {
@@ -542,30 +705,31 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       return allowlistValidation;
     }
 
-    const shouldValidateSettingsWithDryRun =
-      existsInStartingState && ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings());
+    if (!isDraftStream(this._definition)) {
+      const shouldValidateSettingsWithDryRun =
+        existsInStartingState && ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings());
 
-    await Promise.all([
-      shouldValidateSettingsWithDryRun
-        ? validateSettingsWithDryRun({
-            scopedClusterClient: this.dependencies.scopedClusterClient,
-            streamName: this._definition.name,
-            settings: inheritedSettings,
-            isServerless: this.dependencies.isServerless,
-          })
-        : Promise.resolve(),
-      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
-    ]);
+      await Promise.all([
+        shouldValidateSettingsWithDryRun
+          ? validateSettingsWithDryRun({
+              esClient: this.dependencies.esClient,
+              streamName: this._definition.name,
+              settings: inheritedSettings,
+              isServerless: this.dependencies.isServerless,
+            })
+          : Promise.resolve(),
+        validateSimulation(this._definition, this.dependencies.esClient),
+      ]);
+    }
 
     return { isValid: true, errors: [] };
   }
 
   private async getMatchingDataStream() {
     try {
-      const response =
-        await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
-          name: this._definition.name,
-        });
+      const response = await this.dependencies.esClient.indices.getDataStream({
+        name: this._definition.name,
+      });
 
       if (response.data_streams.length === 0) {
         // the request didn't throw an error, but the data stream doesn't exist
@@ -623,7 +787,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     try {
-      await this.dependencies.scopedClusterClient.asCurrentUser.indices.get({
+      await this.dependencies.esClient.indices.get({
         index: name,
       });
 
@@ -649,7 +813,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     const settings = getInheritedSettings(ancestors);
     const failureStore = this.getInheritedFailureStoreFromAncestors(ancestors);
 
-    return [
+    const shouldDeferDataStream =
+      !existsAsManagedDataStream &&
+      this.dependencies.deferRootDataStreamMaterialization === true &&
+      isRootStreamDefinition(this._definition);
+
+    const nonDraftDestinations = this.getNonDraftDestinations();
+
+    const actions: ElasticsearchAction[] = [
       {
         type: 'upsert_component_template',
         request: generateLayer(
@@ -661,59 +832,83 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       {
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: await generateIngestPipeline(
+          this._definition.name,
+          this._definition,
+          this.dependencies.esClient
+        ),
       },
       {
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
         request: generateReroutePipeline({
           definition: this._definition,
+          excludeDestinations: this.getDraftDestinations(),
         }),
       },
       {
         type: 'upsert_index_template',
-        request: generateIndexTemplate(this._definition.name),
-      },
-      existsAsManagedDataStream
-        ? {
-            type: 'rollover',
-            request: {
-              name: this._definition.name,
-            },
-          }
-        : {
-            type: 'upsert_datastream',
-            request: {
-              name: this._definition.name,
-            },
-          },
-      {
-        type: 'update_lifecycle',
-        request: {
-          name: this._definition.name,
+        request: generateIndexTemplate(
+          this._definition.name,
           lifecycle,
-        },
-      },
-      {
-        type: 'update_ingest_settings',
-        request: {
-          name: this._definition.name,
-          settings: formatSettings(settings, this.dependencies.isServerless),
-        },
-      },
-      {
-        type: 'update_failure_store',
-        request: {
-          name: this._definition.name,
-          failure_store: failureStore,
-          definition: this._definition,
-        },
+          failureStore,
+          this.dependencies.isServerless,
+          shouldDeferDataStream
+            ? formatSettings(settings, this.dependencies.isServerless)
+            : undefined
+        ),
       },
       {
         type: 'upsert_dot_streams_document',
         request: this._definition,
       },
     ];
+
+    if (!shouldDeferDataStream) {
+      actions.push(
+        existsAsManagedDataStream
+          ? { type: 'rollover' as const, request: { name: this._definition.name } }
+          : { type: 'upsert_datastream' as const, request: { name: this._definition.name } },
+        { type: 'update_lifecycle', request: { name: this._definition.name, lifecycle } },
+        {
+          type: 'update_ingest_settings',
+          request: {
+            name: this._definition.name,
+            settings: formatSettings(settings, this.dependencies.isServerless),
+          },
+        },
+        {
+          type: 'update_failure_store',
+          request: {
+            name: this._definition.name,
+            failure_store: failureStore,
+            definition: this._definition,
+          },
+        }
+      );
+    }
+
+    if (this.dependencies.isWiredStreamViewsEnabled) {
+      actions.push({
+        type: 'upsert_esql_view',
+        request: {
+          name: getEsqlViewName(this._definition.name),
+          query: getWiredStreamViewQuery(this._definition.name, nonDraftDestinations),
+        },
+      });
+    }
+
+    return actions;
+  }
+
+  private getNonDraftDestinations(): string[] {
+    return this._definition.ingest.wired.routing.filter((r) => !r.draft).map((r) => r.destination);
+  }
+
+  private getDraftDestinations(): Set<string> {
+    return new Set(
+      this._definition.ingest.wired.routing.filter((r) => r.draft).map((r) => r.destination)
+    );
   }
 
   public hasChangedFields(): boolean {
@@ -795,14 +990,29 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         stream: this._definition.name,
         request: generateReroutePipeline({
           definition: this._definition,
+          excludeDestinations: this.getDraftDestinations(),
         }),
       });
+      if (this.dependencies.isWiredStreamViewsEnabled) {
+        const nonDraftDestinations = this.getNonDraftDestinations();
+        actions.push({
+          type: 'upsert_esql_view',
+          request: {
+            name: getEsqlViewName(this._definition.name),
+            query: getWiredStreamViewQuery(this._definition.name, nonDraftDestinations),
+          },
+        });
+      }
     }
     if (this._changes.processing) {
       actions.push({
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition),
+        request: await generateIngestPipeline(
+          this._definition.name,
+          this._definition,
+          this.dependencies.esClient
+        ),
       });
     }
     const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).reverse();
@@ -907,7 +1117,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
-    return [
+    const actions: ElasticsearchAction[] = [
       {
         type: 'delete_index_template',
         request: {
@@ -947,7 +1157,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       {
         type: 'delete_queries',
         request: {
-          name: this._definition.name,
+          definition: this._definition,
         },
       },
       {
@@ -969,5 +1179,16 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         },
       },
     ];
+
+    if (this.dependencies.isWiredStreamViewsEnabled) {
+      actions.push({
+        type: 'delete_esql_view',
+        request: {
+          name: getEsqlViewName(this._definition.name),
+        },
+      });
+    }
+
+    return actions;
   }
 }

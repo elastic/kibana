@@ -16,6 +16,7 @@ import { LatencyChart } from './latency';
 import { ThroughputChart } from './throughput';
 import { ChartsGrid } from '../../charts_grid';
 import type { UnifiedMetricsGridProps } from '../../../types';
+import { extractUsedMetadataFields } from '../../../utils';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
@@ -26,6 +27,7 @@ function TraceMetricsGrid({
   onBrushEnd,
   onFilter,
   actions,
+  profileId,
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
@@ -45,6 +47,13 @@ function TraceMetricsGrid({
   const filters = useMemo(() => {
     return [...esqlQuery.filters, ...kqlFilters];
   }, [esqlQuery.filters, kqlFilters]);
+
+  const usedMetadataFields = useMemo(() => {
+    return extractUsedMetadataFields({
+      metadataFields: esqlQuery.metadataFields,
+      filters,
+    });
+  }, [esqlQuery.metadataFields, filters]);
 
   const toolbar = useMemo(
     () => ({
@@ -70,12 +79,14 @@ function TraceMetricsGrid({
         value={{
           indexes: indexPattern,
           filters,
+          metadataFields: usedMetadataFields,
           services,
           onBrushEnd,
           onFilter,
           fetchParams,
           discoverFetch$,
           actions,
+          profileId,
         }}
       >
         <EuiPanel

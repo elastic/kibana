@@ -23,46 +23,65 @@ export class UrlValidator {
   }
 
   /**
-   * Checks if a URL is allowed based on the allowedHosts configuration
+   * Parses and validates a URL string into a URL object.
+   * Returns null if the URL cannot be parsed.
    */
-  isUrlAllowed(uri: string): boolean {
+  parseUrl(uri: string): URL | null {
     try {
-      // Reject protocol-relative URLs as they are ambiguous in server context
       if (uri.startsWith('//')) {
-        return false;
+        return null;
       }
 
       const parsedUrl = new URL(uri);
-      const hostname = parsedUrl.hostname;
-
-      if (!hostname) {
-        return false;
+      if (!parsedUrl.hostname) {
+        return null;
       }
 
-      return this.isHostnameAllowed(hostname);
+      return parsedUrl;
     } catch (error) {
+      return null;
+    }
+  }
+
+  /**
+   * Checks if a URL is allowed based on the allowedHosts configuration
+   */
+  isUrlAllowed(uri: string): boolean {
+    const parsedUrl = this.parseUrl(uri);
+    if (!parsedUrl) {
       return false;
     }
+
+    return this.isHostnameAllowed(parsedUrl.hostname);
   }
 
   /**
    * Checks if a hostname is allowed
    */
   isHostnameAllowed(hostname: string): boolean {
-    // Check for wildcard '*' which allows any host
     if (this.allowedHosts.has('*')) {
       return true;
     }
 
-    // Check if the specific hostname is allowed
     return this.allowedHosts.has(hostname);
   }
 
   /**
-   * Validates a URL and throws an error if not allowed
+   * Validates a URL and throws an error if not allowed.
+   * Provides specific error messages for unparseable URLs vs disallowed hosts.
    */
   ensureUrlAllowed(uri: string): void {
-    if (!this.isUrlAllowed(uri)) {
+    const parsedUrl = this.parseUrl(uri);
+
+    if (!parsedUrl) {
+      const hasProtocol = /^https?:\/\//i.test(uri);
+      const message = hasProtocol
+        ? `Invalid URL "${uri}". Ensure the URL is well-formed.`
+        : `Invalid URL "${uri}". URLs must include a protocol (e.g., https://${uri}).`;
+      throw new Error(message);
+    }
+
+    if (!this.isHostnameAllowed(parsedUrl.hostname)) {
       throw new Error(
         `target url "${uri}" is not added to the Kibana config workflowsExecutionEngine.http.allowedHosts`
       );
