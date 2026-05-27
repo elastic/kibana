@@ -4576,8 +4576,7 @@ components:
         reason:
           $ref: '#/components/schemas/Reason'
         rule_ids:
-          description: >-
-            Optional list of detection rule_ids (the static rule.rule_id, not
+          description: Optional list of detection rule_ids (the static rule.rule_id, not
             the saved-object id) whose declared source indices the server reads
             runtime field mappings from. Resolved runtime fields are attached to
             the underlying updateByQuery as runtime_mappings so the exception
@@ -9009,8 +9008,7 @@ components:
           additionalProperties: true
           type: object
         rule_ids:
-          description: >-
-            Optional list of detection rule_ids (the static rule.rule_id, not
+          description: Optional list of detection rule_ids (the static rule.rule_id, not
             the saved-object id) whose declared source indices the server reads
             runtime field mappings from. Resolved runtime fields are attached to
             the underlying updateByQuery as runtime_mappings so the exception
