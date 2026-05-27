@@ -84,17 +84,18 @@ export function getDashboardApi({
     await layoutManager.api.getChildApi(id);
   }, dashboardContainerRef$);
 
+  const settingsManager = initializeSettingsManager(initialState, viewModeManager.api.viewMode$);
   const layoutManager = initializeLayoutManager(
     viewModeManager,
     incomingEmbeddables,
     initialState.panels,
     initialState.pinned_panels,
-    trackPanel
+    trackPanel,
+    settingsManager.api.fetchSetting$
   );
 
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(layoutManager.api.children$);
-  const settingsManager = initializeSettingsManager(initialState);
 
   const forcePublishOnReset$ = new Subject<void>();
 
@@ -321,6 +322,7 @@ export function getDashboardApi({
     } as DashboardApi,
     internalApi,
     cleanup: () => {
+      settingsManager.cleanup();
       dataLoadingManager.cleanup();
       dataViewsManager.cleanup();
       searchSessionManager.cleanup();

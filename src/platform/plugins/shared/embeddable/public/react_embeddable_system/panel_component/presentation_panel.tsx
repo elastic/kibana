@@ -25,6 +25,7 @@ import type { PresentationPanelHoverActionsProps } from './panel_header/presenta
 import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 import { PresentationPanelError } from './presentation_panel_error';
 import type { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
+import { usePresentationPanelVisibilityManager } from './presentation_panel_visibility_manager';
 
 const PresentationPanelChrome = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -164,6 +165,7 @@ export const PresentationPanel = <
   );
   const hideBorder = Boolean(panelHideBorder) || Boolean(parentHideBorder);
 
+  const visibilityTrackerRef = usePresentationPanelVisibilityManager(componentApi);
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
   const setDragHandle = useCallback(
@@ -177,6 +179,7 @@ export const PresentationPanel = <
   const InnerPanel = useMemo(() => {
     return (
       <>
+        <div ref={visibilityTrackerRef} css={styles.embVisibilityTracker} />
         {blockingError && <PresentationPanelError api={componentApi} error={blockingError} />}
         <div
           className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}
@@ -188,7 +191,7 @@ export const PresentationPanel = <
         </div>
       </>
     );
-  }, [blockingError, componentApi, Component, componentProps]);
+  }, [visibilityTrackerRef, blockingError, componentApi, Component, componentProps]);
 
   return hidePanelChrome ? (
     InnerPanel
@@ -218,6 +221,12 @@ const styles = {
     height: '100%',
     position: 'relative',
     overflow: 'hidden',
+  }),
+  embVisibilityTracker: css({
+    pointerEvents: 'none',
+    position: 'absolute',
+    height: '100%',
+    width: '100%',
   }),
   embPanelContent: css({
     '&.embPanel__content': {

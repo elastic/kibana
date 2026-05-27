@@ -19,6 +19,12 @@ export interface DashboardChildren {
   [uuid: string]: DefaultEmbeddableApi;
 }
 
+export interface PanelCounts {
+  panelCount: number;
+  visiblePanelsCount: number;
+  sectionCount: number;
+}
+
 export interface DashboardLayoutPanel {
   grid: DashboardPanel['grid'] & { sectionId?: string };
   type: DashboardPanel['type'];

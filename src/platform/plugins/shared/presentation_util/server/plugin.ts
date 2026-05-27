@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
-import { getUISettings } from './ui_settings';
+import type { Plugin } from '@kbn/core/server';
 
 export class PresentationUtilPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup) {
-    core.uiSettings.register(getUISettings());
+  public setup() {
     return {};
   }
 

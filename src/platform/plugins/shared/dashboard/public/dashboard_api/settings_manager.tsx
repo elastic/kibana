@@ -7,12 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
+import type {
+  FetchSetting,
+  PublishingSubject,
+  StateComparators,
+  ViewMode,
+  WithAllKeys,
+} from '@kbn/presentation-publishing';
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
-import type { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map, startWith } from 'rxjs';
 import type { DashboardState, DashboardOptions } from '../../server';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
+import { coreServices } from '../services/kibana_services';
 
 export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardState['description'];
@@ -57,12 +64,26 @@ function deserializeState(state: DashboardState) {
   };
 }
 
-export function initializeSettingsManager(initialState: DashboardState) {
+export function initializeSettingsManager(
+  initialState: DashboardState,
+  viewMode$: PublishingSubject<ViewMode>
+) {
   const stateManager = initializeStateManager(
     deserializeState(initialState),
     DEFAULT_SETTINGS,
     comparators
   );
+
+  // fetch setting
+  const deferBelowFold = coreServices.uiSettings.get('labs:dashboard:deferBelowFold', false);
+  const getFetchSetting = (): FetchSetting => {
+    if (viewMode$.value === 'print') return 'always';
+    return deferBelowFold ? 'onlyVisible' : 'always';
+  };
+  const fetchSetting$ = new BehaviorSubject<FetchSetting>(getFetchSetting());
+  const fetchSettingSubscription = viewMode$
+    .pipe(map(() => getFetchSetting()))
+    .subscribe((nextSetting) => fetchSetting$.next(nextSetting));
 
   function serializeSettings() {
     const { description, tags, time_restore, project_routing_restore, title, ...options } =
@@ -77,6 +98,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
 
   return {
     api: {
+      fetchSetting$,
       setTags: stateManager.api.setTags,
       getSettings: stateManager.getLatestState,
       setSettings: (settings: Partial<DashboardSettings>) => {
@@ -139,6 +161,9 @@ export function initializeSettingsManager(initialState: DashboardState) {
       reset: (lastSavedState: DashboardState) => {
         stateManager.reinitializeState(deserializeState(lastSavedState));
       },
+    },
+    cleanup: () => {
+      fetchSettingSubscription.unsubscribe();
     },
   };
 }
