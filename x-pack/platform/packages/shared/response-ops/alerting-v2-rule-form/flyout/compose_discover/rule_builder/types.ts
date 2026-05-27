@@ -17,11 +17,17 @@ export interface RuleBuilderStepProps<TState = unknown> {
   onBuilderStateChange: (state: TState) => void;
 }
 
+export type RuleBuilderRecoveryProps<TState = unknown> = Omit<
+  RuleBuilderStepProps<TState>,
+  'services'
+>;
+
 export interface RuleBuilderDefinition<TState = unknown> {
   type: string;
   stepTitle: string;
   createDefaultState: () => TState;
   renderStep: (props: RuleBuilderStepProps<TState>) => React.ReactNode;
+  renderRecoveryStep?: (props: RuleBuilderRecoveryProps<TState>) => React.ReactNode;
   validate?: (state: ComposeDiscoverState, builderState?: TState) => boolean;
-  parseState?: (query: string) => TState | null;
+  parseState?: (query: string, recoveryQuery?: string) => TState | null;
 }
