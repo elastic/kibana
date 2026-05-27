@@ -8,7 +8,8 @@
  */
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, concatMap, merge, Observable, of, Subject } from 'rxjs';
+import type { Observable} from 'rxjs';
+import { BehaviorSubject, concatMap, merge, of, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
@@ -43,7 +44,7 @@ import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
 import { initializePauseFetchManager } from './pause_fetch_manager';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
-import { DashboardChildren } from './layout_manager/types';
+import type { DashboardChildren } from './layout_manager/types';
 
 export function getDashboardApi({
   creationOptions,
