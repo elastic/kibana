@@ -10,7 +10,6 @@ import type { XYBrushEvent } from '@elastic/charts';
 import {
   Chart,
   BarSeries,
-  AreaSeries,
   Axis,
   Settings,
   ScaleType,
@@ -232,7 +231,7 @@ export const ErrorsOverTimeChart = ({
           />
 
           {viewMode === 'total' ? (
-            <AreaSeries
+            <BarSeries
               id="totalErrors"
               name={TOTAL_ERRORS_LABEL}
               color={euiTheme.colors.danger}
@@ -242,10 +241,6 @@ export const ErrorsOverTimeChart = ({
               xScaleType={ScaleType.Time}
               yAccessors={[1]}
               yScaleType={ScaleType.Linear}
-              areaSeriesStyle={{
-                area: { opacity: 0.15 },
-                line: { strokeWidth: 2 },
-              }}
             />
           ) : (
             groupedData.map((series) => (
