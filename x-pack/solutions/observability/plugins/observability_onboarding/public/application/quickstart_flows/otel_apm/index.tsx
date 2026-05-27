@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiText,
+  EuiToolTip,
   copyToClipboard,
   useEuiTheme,
 } from '@elastic/eui';
