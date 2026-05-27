@@ -613,6 +613,31 @@ describe('Pack utils', () => {
       expect(isValidRfc3339(42 as never)).toBe(false);
       expect(isValidRfc3339('garbage')).toBe(false);
     });
+    // Beats's Go `time.Parse(time.RFC3339, ...)` rejects calendar-invalid dates
+    // and aborts the entire RRULE scheduler update on the agent, halting every
+    // other RRULE pack on the policy. We must catch these at the API edge.
+    test('rejects calendar-invalid dates that JS Date silently normalizes', () => {
+      expect(isValidRfc3339('2024-02-31T00:00:00Z')).toBe(false); // Feb has 29 days in 2024
+      expect(isValidRfc3339('2023-02-29T00:00:00Z')).toBe(false); // 2023 not a leap year
+      expect(isValidRfc3339('2024-04-31T00:00:00Z')).toBe(false); // April has 30
+      expect(isValidRfc3339('2024-06-31T00:00:00Z')).toBe(false); // June has 30
+    });
+    test('accepts leap day in a leap year', () => {
+      expect(isValidRfc3339('2024-02-29T00:00:00Z')).toBe(true);
+    });
+    test('rejects out-of-range wall-clock components', () => {
+      expect(isValidRfc3339('2024-00-15T00:00:00Z')).toBe(false); // month 00
+      expect(isValidRfc3339('2024-13-01T00:00:00Z')).toBe(false); // month 13
+      expect(isValidRfc3339('2024-01-00T00:00:00Z')).toBe(false); // day 00
+      expect(isValidRfc3339('2024-01-32T00:00:00Z')).toBe(false); // day 32
+      expect(isValidRfc3339('2024-01-01T24:00:00Z')).toBe(false); // hour 24
+      expect(isValidRfc3339('2024-01-01T00:60:00Z')).toBe(false); // minute 60
+      expect(isValidRfc3339('2024-01-01T00:00:60Z')).toBe(false); // second 60
+    });
+    test('preserves wall-clock semantics across explicit offset', () => {
+      expect(isValidRfc3339('2024-02-29T23:00:00-05:00')).toBe(true);
+      expect(isValidRfc3339('2024-02-31T23:00:00-05:00')).toBe(false);
+    });
   });
 
   describe('validateRruleConfig', () => {

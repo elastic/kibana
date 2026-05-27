@@ -23,6 +23,7 @@ import {
   isUndefined,
   mapValues,
 } from 'lodash';
+import moment from 'moment-timezone';
 import { satisfies } from 'semver';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Shard } from '../../../common/utils/converters';
@@ -439,18 +440,31 @@ const formatGoDurationSeconds = (totalSeconds: number): string => {
  * - Optional fractional seconds
  * - Timezone offset `Z` or `±HH:MM`
  */
-const RFC_3339_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+// Tightened component ranges (hour 00-23, minute/second 00-59, day 01-31,
+// month 01-12) so the regex itself rejects the wall-clock values beats's
+// `time.Parse(time.RFC3339, ...)` rejects without us having to round-trip
+// through a parser. Calendar validity (Feb-31, leap-year Feb-29) is checked
+// by `moment.parseZone(..., true)` below.
+const RFC_3339_REGEX =
+  /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
 /**
  * Strict RFC 3339 datetime validator. Rejects loose strings like
- * `"2024-01-01"` (no time component) which `Date.parse` would accept.
+ * `"2024-01-01"` (no time component) which `Date.parse` would accept, AND
+ * rejects calendar-invalid dates like `"2024-02-31T00:00:00Z"` that the JS
+ * `Date` parser silently normalizes (Feb-31 → Mar-2). Beats's Go
+ * `time.Parse(time.RFC3339, ...)` rejects these and aborts the entire RRULE
+ * scheduler update on the agent, halting every other RRULE pack on the
+ * policy — so we reject at the API edge.
+ *
+ * The regex enforces shape; `moment.parseZone(..., ISO_8601, true)` enforces
+ * calendar validity (rejects Feb-31, Feb-29 in a non-leap year, etc.).
  */
 export const isValidRfc3339 = (value: unknown): value is string => {
   if (typeof value !== 'string') return false;
   if (!RFC_3339_REGEX.test(value)) return false;
 
-  // Defensive: regex matches `2024-13-40T...` — verify with Date parse.
-  return !Number.isNaN(Date.parse(value));
+  return moment.parseZone(value, moment.ISO_8601, true).isValid();
 };
 
 /**
