@@ -9,10 +9,12 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { rollDataStreamIfRequired } from './roll_data_stream_if_required';
+import {
+  WORKFLOWS_EVENTS_DATA_STREAM,
+  WORKFLOWS_EVENTS_MANAGED_INDEX_MAPPINGS_VERSION,
+} from './workflows_events_constants';
 import { WORKFLOWS_EXECUTION_LOGS_DATA_STREAM } from '../../repositories/logs_repository/constants';
 import { WORKFLOWS_LOGS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../repositories/logs_repository/data_stream';
-import { WORKFLOWS_EVENTS_DATA_STREAM } from '../../trigger_events/event_logs/constants';
-import { WORKFLOWS_EVENTS_MANAGED_INDEX_MAPPINGS_VERSION } from '../../trigger_events/event_logs/trigger_events_data_stream';
 
 export async function ensureWorkflowsDataStreamsRolledOver(
   logger: Logger,
