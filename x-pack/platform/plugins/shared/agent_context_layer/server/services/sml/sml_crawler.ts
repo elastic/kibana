@@ -373,7 +373,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
         const action = doc.update_action!;
 
         if (action !== 'delete' && manualOriginIds.has(doc.origin_id)) {
-          this.logger.info(
+          this.logger.debug(
             `SML crawler: skipping '${action}' for origin '${doc.origin_id}' (type: ${doc.type_id}) — manual entry exists`
           );
           stateAckOps.push({
@@ -388,7 +388,7 @@ export class SmlCrawlerImpl implements SmlCrawler {
 
         return limit(async () => {
           try {
-            this.logger.info(
+            this.logger.debug(
               `SML crawler: processing '${action}' for origin '${doc.origin_id}' (type: ${doc.type_id})`
             );
 

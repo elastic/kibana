@@ -72,6 +72,7 @@ const createMockDefinition = (overrides: Partial<SmlTypeDefinition> = {}): SmlTy
 
 const mockIndexer = {
   indexAttachment: jest.fn().mockResolvedValue(undefined),
+  deleteChunks: jest.fn().mockResolvedValue(undefined),
 };
 
 const createMockLogger = () => {
@@ -537,7 +538,7 @@ describe('SmlCrawlerImpl', () => {
       expect(ackedIds).toEqual(
         expect.arrayContaining(['test-type:manual-origin', 'test-type:normal-origin'])
       );
-      expect(logger.info).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         expect.stringContaining("skipping 'create' for origin 'manual-origin'")
       );
     });

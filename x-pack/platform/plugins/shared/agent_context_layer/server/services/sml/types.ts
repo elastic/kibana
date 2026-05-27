@@ -119,9 +119,6 @@ export interface SmlTypeDefinition {
  * - `'manual'`: written explicitly by a user/admin — via the HTTP upsert route or via
  *   `indexAttachment` content-mode. Manual entries are protected from being overwritten
  *   by the crawler / origin-mode `indexAttachment` unless `force: true` is passed.
- *
- * Documents written before this field was introduced have it omitted; queries treat
- * a missing value as `'crawled'`.
  */
 export type SmlIngestionMethod = 'manual' | 'crawled';
 
@@ -153,8 +150,8 @@ export interface SmlDocument {
   spaces: string[];
   /** Permissions required to access the underlying element */
   permissions: string[];
-  /** How this chunk was produced. Missing on legacy documents (treated as `'crawled'`). */
-  ingestion_method?: SmlIngestionMethod;
+  /** How this chunk was produced. */
+  ingestion_method: SmlIngestionMethod;
 }
 
 /**
