@@ -81,17 +81,26 @@ The developer marks each emit location with a comment using this pattern:
 Examples:
 
 ```typescript
-// Single-line with attribute values provided
+// Counter — single-line with attribute values provided
 // @otel: kibana.elasticsearch.cps.request.count { outcome: result.outcome, target: host }
+counter.add(1, { outcome: result.outcome, target: host });
 
-// Attribute values not yet known — placeholders will be inserted
-// @otel: kibana.saved_objects.migrations.duration
+// Counter — attribute values not yet known (placeholders will be inserted)
+// @otel: kibana.saved_objects.migrations.count
 
-// Multi-line form for long attribute lists
+// Histogram — record a duration with multi-line attributes
 // @otel: kibana.http.server.request.duration
-// @otel-attr: http.method=req.method
-// @otel-attr: http.status_code=res.statusCode
+// @otel-attr: http.request.method=req.method
+// @otel-attr: http.response.status_code=res.statusCode
 // @otel-attr: http.route=route.path
+histogram.record(durationMs, { 'http.request.method': req.method, 'http.response.status_code': res.statusCode, 'http.route': route.path });
+
+// Gauge (push) — record a point-in-time value
+// @otel: kibana.task_manager.worker.utilization { worker_type: workerType }
+gauge.record(utilizationRatio, { worker_type: workerType });
+
+// Observable gauge — sampled-state value; no marker needed at emit, mark the registration site instead
+// @otel: kibana.memory.heap.used_bytes  (observable — registered in setup, not emitted per-event)
 ```
 
 **Finding markers:** `grep -n "@otel:"` in the target files. Read each marker and the code immediately around it (3–5 lines) before writing any emit code.
