@@ -39,7 +39,10 @@ export interface ActionResponseOutput<
      * `action`: the action was canceled by a `cancel` action
      */
     canceled_by?: string;
-    /** If action was canceled by an `action`, this property will have the cancel's action id */
+    /**
+     * If action was canceled by an `action`, this property MAY have the cancel's action id. For 3rd party EDR
+     * this value may not be available and thus will be empty string in those cases
+     */
     canceled_id?: string;
   } & TOutputContent;
 }
