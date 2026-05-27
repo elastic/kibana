@@ -6,7 +6,7 @@
  */
 
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_START } from '@kbn/rule-data-utils';
-import { formatCustomThresholdAlert } from './register_observability_rule_types';
+import { formatCustomThresholdAlert } from './format_custom_threshold_alert';
 import { Aggregators } from '../../common/custom_threshold_rule/types';
 
 jest.mock('../../common/custom_threshold_rule/get_view_in_app_url', () => ({

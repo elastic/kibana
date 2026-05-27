@@ -18,10 +18,12 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { getViewInAppLocatorParams } from '../../../../../../common/custom_threshold_rule/get_view_in_app_url';
 import type { BaseMetricExpressionParams } from '../../../../../../common/custom_threshold_rule/types';
 
+const TIME_UNIT_CHARS: ReadonlyArray<BaseMetricExpressionParams['timeUnit']> = ['s', 'm', 'h', 'd'];
+
 const isTimeUnitChar = (
   timeUnit: string | undefined
 ): timeUnit is BaseMetricExpressionParams['timeUnit'] =>
-  timeUnit === 's' || timeUnit === 'm' || timeUnit === 'h' || timeUnit === 'd';
+  TIME_UNIT_CHARS.includes(timeUnit as BaseMetricExpressionParams['timeUnit']);
 
 export const getCustomThresholdRuleData = ({ rule }: { rule: Rule }) => {
   const ruleParams = rule.params as CustomThresholdParams;

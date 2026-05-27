@@ -94,7 +94,9 @@ describe('getViewInAppUrl', () => {
         dataset: undefined,
         dataViewSpec: undefined,
         timeRange: {
+          // startedAt - 7d * 20 = 2023-12-07 - 140d = 2023-07-20
           from: '2023-07-20T16:30:15.403Z',
+          // endedAt + 7d * 20 = 2023-12-07 + 140d = 2024-04-25
           to: '2024-04-25T20:30:15.403Z',
         },
         filters: [],
