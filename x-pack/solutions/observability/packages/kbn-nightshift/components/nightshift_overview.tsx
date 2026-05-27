@@ -5,19 +5,37 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { EuiAvatarProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { StatusHeader } from './status_header';
 import { MainSignificantEvent } from './main_significant_event';
 import type { ImpactedService } from './main_significant_event';
+import {
+  DEFAULT_MAIN_EVENT_SCORE,
+  DEFAULT_MAIN_EVENT_TITLE,
+  DEFAULT_MAIN_EVENT_DESCRIPTION,
+} from './main_significant_event';
 import { ImpactedCard } from './impacted_card';
 import type { ImpactedCardProps } from './impacted_card';
 import { MetadataIconCard } from './metadata_icon_card';
 import { LowerPriorityEvents } from './lower_priority_events';
 import { OtherPromotedEvents } from './other_promoted_events';
+import { SignificantEventDetailBody } from './significant_event_detail_body';
+import type { SignificantEventDetailFields } from './significant_event_detail_body';
+import { SignificantEventDetailHeader } from './significant_event_detail_header';
+import { useFlyoutFocusManagement } from '../hooks/use_flyout_focus_management';
 import type { EventDocument } from '../hooks/use_fetch_system_overview';
 import type { LatestSignificantEventData } from '../hooks/use_fetch_latest_significant_event';
 
@@ -52,6 +70,7 @@ export interface NightshiftOverviewProps {
   description?: string;
   mainEventTitle?: string;
   mainEventDescription?: string;
+  mainEventDetailFields?: SignificantEventDetailFields;
   impactedServices?: ImpactedService[];
   impactedCards?: ImpactedCardItem[];
   healthyMetrics?: HealthyMetricCardItem[];
@@ -72,6 +91,7 @@ export function NightshiftOverview({
   description,
   mainEventTitle,
   mainEventDescription,
+  mainEventDetailFields,
   impactedServices,
   impactedCards = DEFAULT_IMPACTED_CARDS,
   healthyMetrics,
@@ -85,6 +105,44 @@ export function NightshiftOverview({
   onSelectedEventChange,
 }: NightshiftOverviewProps) {
   const { euiTheme } = useEuiTheme();
+  const [isMainEventFlyoutOpen, setIsMainEventFlyoutOpen] = useState(false);
+  const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'mainSignificantEventFlyout' });
+
+  const closeMainEventFlyout = useCallback(() => {
+    setIsMainEventFlyoutOpen(false);
+  }, []);
+
+  const { open: openMainEventFlyout } = useFlyoutFocusManagement({
+    isOpen: isMainEventFlyoutOpen,
+    onClose: closeMainEventFlyout,
+    flyoutTestSubj: 'mainSignificantEventDetailFlyout',
+  });
+
+  const resolvedDetailFields: SignificantEventDetailFields = mainEventDetailFields ?? {
+    id: 'main-event',
+    label: mainEventTitle ?? DEFAULT_MAIN_EVENT_TITLE,
+    subtitle: '',
+    summary: mainEventDescription ?? DEFAULT_MAIN_EVENT_DESCRIPTION,
+    rootCause: '',
+    recommendations: [],
+    recommendedAction: 'investigate',
+    criticality: blastRadiusScore ?? DEFAULT_MAIN_EVENT_SCORE,
+    ruleNames: [],
+    streamNames: [],
+    evidences: [],
+    dependencyEdges: [],
+    causeKis: [],
+    timestamp: new Date().toISOString(),
+  };
+
+  const handleViewDetails = useCallback(() => {
+    if (onViewDetails) {
+      onViewDetails();
+    } else {
+      openMainEventFlyout();
+      setIsMainEventFlyoutOpen(true);
+    }
+  }, [onViewDetails, openMainEventFlyout]);
 
   const containerCss = css`
     width: 100%;
@@ -261,8 +319,38 @@ export function NightshiftOverview({
         impactedServices={impactedServices}
         lastUpdatedLabel={lastUpdatedLabel}
         onRemediate={onRemediate}
-        onViewDetails={onViewDetails}
+        onViewDetails={handleViewDetails}
       />
+
+      {isMainEventFlyoutOpen ? (
+        <EuiFlyout
+          type="push"
+          side="right"
+          size={620}
+          onClose={closeMainEventFlyout}
+          ownFocus={false}
+          pushMinBreakpoint="s"
+          paddingSize="m"
+          aria-labelledby={flyoutHeadingId}
+          data-test-subj="mainSignificantEventDetailFlyout"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <div id={flyoutHeadingId}>
+              <SignificantEventDetailHeader
+                title={resolvedDetailFields.label || mainEventTitle || ''}
+                severityScore={blastRadiusScore}
+              />
+            </div>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <SignificantEventDetailBody
+              event={resolvedDetailFields}
+              hideHeader
+              onRemediate={onRemediate}
+            />
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      ) : null}
 
       {otherPromotedEvents && otherPromotedEvents.length > 0 && (
         <>

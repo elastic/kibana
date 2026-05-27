@@ -46,14 +46,14 @@ export interface MainSignificantEventProps {
   onViewDetails?: () => void;
 }
 
-const DEFAULT_SCORE = 90;
+export const DEFAULT_MAIN_EVENT_SCORE = 90;
 
-const DEFAULT_LAST_UPDATED_LABEL = i18n.translate(
+export const DEFAULT_MAIN_EVENT_LAST_UPDATED_LABEL = i18n.translate(
   'xpack.nightshift.sigeventsOverview.mainSignificantEvent.lastUpdated',
   { defaultMessage: '(5 minutes ago)' }
 );
 
-const DEFAULT_TITLE = i18n.translate(
+export const DEFAULT_MAIN_EVENT_TITLE = i18n.translate(
   'xpack.nightshift.sigeventsOverview.mainSignificantEvent.defaultTitle',
   {
     defaultMessage:
@@ -61,7 +61,7 @@ const DEFAULT_TITLE = i18n.translate(
   }
 );
 
-const DEFAULT_DESCRIPTION = i18n.translate(
+export const DEFAULT_MAIN_EVENT_DESCRIPTION = i18n.translate(
   'xpack.nightshift.sigeventsOverview.mainSignificantEvent.defaultDescription',
   {
     defaultMessage:
@@ -69,18 +69,18 @@ const DEFAULT_DESCRIPTION = i18n.translate(
   }
 );
 
-const DEFAULT_IMPACTED_SERVICES: ImpactedService[] = [
+export const DEFAULT_MAIN_EVENT_IMPACTED_SERVICES: ImpactedService[] = [
   { id: 'payment', label: 'payment', iconType: 'layers' },
   { id: 'checkout', label: 'checkout', iconType: 'layers' },
 ];
 
 export function MainSignificantEvent(props: MainSignificantEventProps) {
   const {
-    blastRadiusScore = DEFAULT_SCORE,
-    lastUpdatedLabel = DEFAULT_LAST_UPDATED_LABEL,
-    title = DEFAULT_TITLE,
-    impactedServices = DEFAULT_IMPACTED_SERVICES,
-    description = DEFAULT_DESCRIPTION,
+    blastRadiusScore = DEFAULT_MAIN_EVENT_SCORE,
+    lastUpdatedLabel = DEFAULT_MAIN_EVENT_LAST_UPDATED_LABEL,
+    title = DEFAULT_MAIN_EVENT_TITLE,
+    impactedServices = DEFAULT_MAIN_EVENT_IMPACTED_SERVICES,
+    description = DEFAULT_MAIN_EVENT_DESCRIPTION,
     remediateLabel,
     viewDetailsLabel,
     onRemediate,
