@@ -283,6 +283,7 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
           <EuiComboBox
             isInvalid={validation.errors.indexPattern}
             isLoading={isLoadingIndices && !indicesError}
+            isInvalid={validation.errors.indexPattern}
             fullWidth
             aria-label={WATCHLIST_INDEX_PATTERN_PLACEHOLDER}
             placeholder={WATCHLIST_INDEX_PATTERN_PLACEHOLDER}

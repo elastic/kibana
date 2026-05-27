@@ -11,7 +11,7 @@ An attacker could exploit unbounded array validation by sending extremely large 
 - Application crashes due to out-of-memory conditions
 - Degraded performance affecting all users of the system
 
-The query specifically targets `schema.arrayOf()` calls that are missing the `maxSize` option in the second argument. It excludes configuration files (`config.ts`) and plugin entry points (`server/index.ts`) as these typically handle trusted internal configuration rather than external user input.
+The query specifically targets `schema.arrayOf()` calls that are missing the `maxSize` option in the second argument. It uses a shared exclusion list (defined in `KibanaDoSExclusions.qll`) to skip files whose schemas are known to never validate HTTP request payloads, such as saved-object attribute schemas, plugin configuration, UI settings definitions, content-management layer schemas, and similar structural/data-at-rest categories. See that file for the full set of excluded path patterns.
 
 ## Recommendation
 
@@ -118,6 +118,19 @@ router.post({
   },
 }, handler);
 ```
+
+## False positives and suppression
+
+This query intentionally casts a wide net — it flags all unbounded `schema.arrayOf()` calls except those in file paths that are clearly non-payload contexts. Some findings will be in schemas that validate route **responses**, saved-object attributes in shared files, or other non-request-payload contexts. These are expected false positives.
+
+To suppress a legitimate false positive, add a `codeql[...]` comment on the line above the flagged call:
+
+```javascript
+// codeql[js/kibana/unbounded-array-in-schema] internal registration — not route input
+schema.arrayOf(schema.string())
+```
+
+The exclusion list in `KibanaDoSExclusions.qll` is maintained conservatively and may be updated as new non-payload schema patterns are identified. If you encounter a false positive that affects an entire file category (not a one-off), consider proposing an addition to the shared exclusion library rather than adding per-line suppressions.
 
 ## References
 
