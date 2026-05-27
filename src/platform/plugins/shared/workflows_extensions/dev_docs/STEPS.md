@@ -1042,8 +1042,12 @@ A runnable **simulated async report** step ships in the example plugin:
 | Server (`start` + `poll`) | `examples/workflows_extensions_example/server/step_types/durable_poll_step.ts` |
 | Public (UI metadata) | `examples/workflows_extensions_example/public/step_types/durable_poll_step.ts` |
 | Step type id | `example.durablePollDemo` |
+| Poll-only common | `examples/workflows_extensions_example/common/step_types/poll_only_job_step.ts` |
+| Poll-only server | `examples/workflows_extensions_example/server/step_types/poll_only_job_step.ts` |
+| Poll-only public | `examples/workflows_extensions_example/public/step_types/poll_only_job_step.ts` |
+| Poll-only step type id | `example.pollOnlyJobDemo` |
 
-Run Kibana with `yarn start --run-examples`, open **Developer examples** → **Workflows Extensions Example**, and use the **Async report (start + poll demo)** step in the editor.
+Run Kibana with `yarn start --run-examples`, open **Developer examples** → **Workflows Extensions Example**, and use the **Async report (start + poll demo)** or **Wait for async job (poll-only demo)** step in the editor.
 
 **Demo vs production**
 
@@ -1088,20 +1092,7 @@ export const durablePollStepDefinition = createPollServerStepDefinition({
 });
 ```
 
-**Poll-only variant** (sketch): when the job id is already in `input`, omit `start` and use `poll` from the first execution:
-
-```typescript
-createPollServerStepDefinition({
-  ...common,
-  poll: async (context) => {
-    const job = await getJob(context.input.jobId);
-    if (job.status === 'complete') return { output: { result: job.result } };
-    return {};
-  },
-  policy: { strategy: 'exponential', initialMs: 1000, maxMs: 60_000, jitter: true },
-  ceilings: { maxAttempts: 30, maxWaitMs: 600_000 },
-});
-```
+**Poll-only variant** (`example.pollOnlyJobDemo`): when the job id is already in `input`, omit `start` and use `poll` from the first execution. See `examples/workflows_extensions_example/server/step_types/poll_only_job_step.ts` for a runnable simulated transform/snapshot wait loop.
 
 ### Step 3: Public definition and registration
 

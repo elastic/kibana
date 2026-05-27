@@ -63,7 +63,6 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
     rawInput: unknown,
     config: Record<string, unknown>
   ): Promise<void> {
-    // TBD: Implement cancellation cleanup for polling steps
     if ('onCancel' in this.stepDefinition && this.stepDefinition.onCancel) {
       await this.stepDefinition.onCancel(this.createPollHandlerContext(input, rawInput, config));
     }
