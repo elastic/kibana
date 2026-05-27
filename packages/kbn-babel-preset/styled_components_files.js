@@ -57,7 +57,6 @@ module.exports = {
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agents[\/\\]agent_details_page[\/\\]components[\/\\]agent_logs[\/\\]agent_logs.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agents[\/\\]agent_list_page[\/\\]components[\/\\]agent_activity_flyout[\/\\]flyout_body.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agents[\/\\]agent_list_page[\/\\]components[\/\\]agent_activity_flyout[\/\\]index.tsx/,
-    /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agents[\/\\]agent_list_page[\/\\]components[\/\\]agent_policy_outputs_summary.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agents[\/\\]agent_list_page[\/\\]components[\/\\]agent_status_filter.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agents[\/\\]agent_list_page[\/\\]components[\/\\]agents_selection_status.tsx/,
     /x-pack[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]fleet[\/\\]public[\/\\]applications[\/\\]fleet[\/\\]sections[\/\\]agents[\/\\]agent_list_page[\/\\]components[\/\\]status_bar.tsx/,

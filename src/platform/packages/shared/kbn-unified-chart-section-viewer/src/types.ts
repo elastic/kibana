@@ -91,6 +91,7 @@ export interface MetricsTelemetry {
     data_streams: number;
     field_types: number;
     metric_types: number;
+    units: number;
   };
 }
 

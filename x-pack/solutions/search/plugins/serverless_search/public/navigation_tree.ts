@@ -272,6 +272,10 @@ export function createNavigationTree({
                       link: 'management:action_policies' as const,
                       breadcrumbStatus: 'hidden' as const,
                     },
+                    {
+                      link: 'management:execution_history' as const,
+                      breadcrumbStatus: 'hidden' as const,
+                    },
                   ],
                 },
               ]

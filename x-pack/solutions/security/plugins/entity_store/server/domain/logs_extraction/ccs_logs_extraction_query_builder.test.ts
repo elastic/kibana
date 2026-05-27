@@ -60,16 +60,14 @@ describe('buildCcsLogsExtractionEsqlQuery', () => {
       docsLimit: 10000,
       logsPageCursorStart: {
         timestampCursor: '2022-01-01T06:00:00.000Z',
-        idCursor: 'start-doc-id',
       },
       logsPageCursorEnd: {
         timestampCursor: '2022-01-01T12:00:00.000Z',
-        idCursor: 'end-doc-id',
       },
     });
-    // Start filter: exclusive lower bound
+    // Start filter: inclusive lower bound on @timestamp
     expect(query).toContain('2022-01-01T06:00:00.000Z');
-    // End filter: inclusive upper bound
+    // End filter: inclusive upper bound on @timestamp
     expect(query).toContain('2022-01-01T12:00:00.000Z');
     expect(query).toMatchSnapshot();
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);

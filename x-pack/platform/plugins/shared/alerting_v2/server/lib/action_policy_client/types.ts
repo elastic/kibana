@@ -41,12 +41,7 @@ export interface BulkActionActionPoliciesResponse {
   total: number;
   errors: Array<{ id: string; message: string }>;
 }
-export type FindActionPoliciesSortField =
-  | 'name'
-  | 'createdAt'
-  | 'updatedAt'
-  | 'createdByUsername'
-  | 'updatedByUsername';
+export type FindActionPoliciesSortField = 'name' | 'createdAt' | 'updatedAt';
 
 export interface FindActionPoliciesParams {
   page?: number;

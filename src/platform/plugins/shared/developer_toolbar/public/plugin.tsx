@@ -25,8 +25,14 @@ export type DeveloperToolbarSetup = DeveloperToolbarItemRegistry;
 export type DeveloperToolbarStart = DeveloperToolbarItemRegistry;
 
 const LazyMeasureButton = lazy(() =>
-  import('@kbn/measure-component').then(({ MeasureButton }) => ({
+  import('@kbn/design-tools').then(({ MeasureButton }) => ({
     default: MeasureButton,
+  }))
+);
+
+const LazyDesignToolsButton = lazy(() =>
+  import('@kbn/design-tools').then(({ DesignToolsButton }) => ({
+    default: DesignToolsButton,
   }))
 );
 
@@ -56,6 +62,15 @@ export class DeveloperToolbarPlugin
       children: (
         <Suspense fallback={null}>
           <LazyMeasureButton />
+        </Suspense>
+      ),
+    });
+
+    this.registerItem({
+      id: 'Design Tools',
+      children: (
+        <Suspense fallback={null}>
+          <LazyDesignToolsButton />
         </Suspense>
       ),
     });

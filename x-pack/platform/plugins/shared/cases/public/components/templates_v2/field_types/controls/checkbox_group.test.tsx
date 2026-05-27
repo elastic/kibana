@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useForm, FormProvider } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, FormProvider } from 'react-hook-form';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { CheckboxGroup } from './checkbox_group';
 
@@ -21,22 +21,25 @@ interface FormWrapperProps {
 }
 
 const FormWrapper: React.FC<FormWrapperProps> = ({ isRequired, initialValue, onSubmitResult }) => {
-  const { form } = useForm<{}>({
-    defaultValue: {
+  const form = useForm({
+    defaultValues: {
       [CASE_EXTENDED_FIELDS]: initialValue
         ? { affected_systems_as_keyword: JSON.stringify(initialValue) }
         : {},
     },
-    options: { stripEmptyFields: false },
   });
 
-  const handleSubmit = async () => {
-    const { isValid, data } = await form.submit();
-    onSubmitResult({ isValid: isValid ?? false, data: data as Record<string, unknown> });
-  };
+  const handleSubmit = form.handleSubmit(
+    (data) => onSubmitResult({ isValid: true, data: data as Record<string, unknown> }),
+    (_errors) =>
+      onSubmitResult({
+        isValid: false,
+        data: form.getValues() as Record<string, unknown>,
+      })
+  );
 
   return (
-    <FormProvider form={form}>
+    <FormProvider {...form}>
       <CheckboxGroup
         name="affected_systems"
         control="CHECKBOX_GROUP"
