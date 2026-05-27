@@ -6,6 +6,7 @@
  */
 
 export * from './routes';
+export { validateFleetSavedObjectId } from './validate_fleet_id';
 export * as AgentStatusKueryHelper from './agent_status';
 export * from './package_helpers';
 export {
@@ -16,6 +17,7 @@ export {
   varsReducer,
   getInputEffectiveName,
   buildInputKey,
+  dataStreamUsesOtelInput,
 } from './package_to_package_policy';
 export type {
   DocumentationPageInput,
