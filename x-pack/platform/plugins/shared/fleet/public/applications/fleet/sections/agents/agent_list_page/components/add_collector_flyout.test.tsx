@@ -88,7 +88,10 @@ describe('AddCollectorFlyout', () => {
     } as any);
 
     mockedUseFleetStatus.mockReturnValue({ spaceId: 'default' } as any);
-    mockedUseStartServices.mockReturnValue({ cloud: { isCloudEnabled: false } } as any);
+    mockedUseStartServices.mockReturnValue({
+      cloud: { isCloudEnabled: false },
+      docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+    } as any);
     mockedUseGetCreateApiKey.mockReturnValue({
       apiKey: undefined,
       apiKeyEncoded: undefined,
@@ -314,7 +317,10 @@ describe('AddCollectorFlyout', () => {
     });
 
     it('includes insecure_skip_verify when not on cloud', async () => {
-      mockedUseStartServices.mockReturnValue({ cloud: { isCloudEnabled: false } } as any);
+      mockedUseStartServices.mockReturnValue({
+      cloud: { isCloudEnabled: false },
+      docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+    } as any);
 
       const component = renderFlyout();
 
@@ -325,7 +331,10 @@ describe('AddCollectorFlyout', () => {
     });
 
     it('omits insecure_skip_verify when on cloud', async () => {
-      mockedUseStartServices.mockReturnValue({ cloud: { isCloudEnabled: true } } as any);
+      mockedUseStartServices.mockReturnValue({
+        cloud: { isCloudEnabled: true },
+        docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+      } as any);
 
       const component = renderFlyout();
 
@@ -555,10 +564,7 @@ describe('AddCollectorFlyout', () => {
       expect(component.queryByTestId('addCollectorManagedOtlpDocsLink')).not.toBeInTheDocument();
     });
 
-    it('uses the otlp/managed exporter on serverless without showing the tech-preview callout', async () => {
-      mockedUseStartServices.mockReturnValue({
-        cloud: { isCloudEnabled: true, isServerlessEnabled: true },
-      } as any);
+    it('uses the otlp/managed exporter and inlines the managed OTLP docs link when MOTLP is available', async () => {
       mockedUseManagedOtlp.mockReturnValue({
         available: true,
         endpoint: 'https://motlp.example.com:443',
@@ -575,27 +581,6 @@ describe('AddCollectorFlyout', () => {
         expect(yaml).toContain('endpoint: "https://motlp.example.com:443"');
         expect(yaml).toContain('Authorization: "ApiKey ${API_KEY}"');
         expect(yaml).not.toContain('elasticsearch/otel');
-      });
-      expect(component.queryByTestId('addCollectorManagedOtlpDocsLink')).not.toBeInTheDocument();
-    });
-
-    it('shows the ECH tech-preview callout when MOTLP is available on a non-serverless cloud deployment', async () => {
-      mockedUseStartServices.mockReturnValue({
-        cloud: { isCloudEnabled: true, isServerlessEnabled: false },
-      } as any);
-      mockedUseManagedOtlp.mockReturnValue({
-        available: true,
-        endpoint: 'https://motlp.example.com:443',
-        apiKeyEncoded: undefined,
-        isCreatingApiKey: false,
-        onCreateApiKey: jest.fn(),
-      });
-
-      const component = renderFlyout();
-
-      await waitFor(() => {
-        const yaml = component.getByTestId('opampConfigYaml').textContent ?? '';
-        expect(yaml).toContain('otlp/managed:');
       });
       expect(component.getByTestId('addCollectorManagedOtlpDocsLink')).toBeInTheDocument();
     });

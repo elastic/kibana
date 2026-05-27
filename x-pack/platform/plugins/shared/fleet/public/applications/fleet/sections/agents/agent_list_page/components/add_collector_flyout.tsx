@@ -144,7 +144,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   onClickViewAgents,
 }) => {
   const instanceUid = useRef(uuidv4());
-  const { cloud } = useStartServices();
+  const { cloud, docLinks } = useStartServices();
 
   const esApiKey = useGetCreateApiKey();
   const motlp = useManagedOtlp();
@@ -545,53 +545,27 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
           )}
           {token && defaultFleetServerHost && isFormValid ? (
             <>
-              {motlpAvailable && cloud?.isCloudEnabled && !cloud?.isServerlessEnabled && (
-                <>
-                  <EuiCallOut
-                    announceOnMount
-                    color="warning"
-                    iconType="info"
-                    title={i18n.translate(
-                      'xpack.fleet.addCollectorFlyout.managedOtlpTechPreviewTitle',
-                      {
-                        defaultMessage:
-                          'Managed OTLP Endpoint is in Tech Preview for Elastic Cloud Hosted',
-                      }
-                    )}
-                  >
-                    <p>
-                      <FormattedMessage
-                        id="xpack.fleet.addCollectorFlyout.managedOtlpTechPreviewDescription"
-                        defaultMessage="Managed OTLP Endpoint should not be used in production yet for Elastic Cloud Hosted deployments. For more details, refer to the {motlpDocumentation}."
-                        values={{
-                          motlpDocumentation: (
-                            <EuiLink
-                              data-test-subj="addCollectorManagedOtlpDocsLink"
-                              target="_blank"
-                              href="https://www.elastic.co/docs/reference/opentelemetry/motlp"
-                            >
-                              <FormattedMessage
-                                id="xpack.fleet.addCollectorFlyout.managedOtlpDocsLinkLabel"
-                                defaultMessage="Managed OTLP Endpoint documentation"
-                              />
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </p>
-                  </EuiCallOut>
-                  <EuiSpacer size="m" />
-                </>
-              )}
               <EuiText>
                 <p>
                   {motlpAvailable ? (
                     <FormattedMessage
                       id="xpack.fleet.addCollectorFlyout.managedOtlpApiKeyDescription"
-                      defaultMessage="Either use an existing managed OTLP API key and replace {apiKeyPlaceholder} in the {apiKeyField} header of the config below, or click the button to generate a new one."
+                      defaultMessage="Either use an existing managed OTLP API key and replace {apiKeyPlaceholder} in the {apiKeyField} header of the config below, or click the button to generate a new one. Refer to the {motlpDocumentation} for more details."
                       values={{
                         apiKeyPlaceholder: <EuiCode>{'${API_KEY}'}</EuiCode>,
                         apiKeyField: <EuiCode>Authorization</EuiCode>,
+                        motlpDocumentation: (
+                          <EuiLink
+                            data-test-subj="addCollectorManagedOtlpDocsLink"
+                            target="_blank"
+                            href={docLinks.links.fleet.managedOtlp}
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.addCollectorFlyout.managedOtlpDocsLinkLabel"
+                              defaultMessage="Managed OTLP Endpoint documentation"
+                            />
+                          </EuiLink>
+                        ),
                       }}
                     />
                   ) : (

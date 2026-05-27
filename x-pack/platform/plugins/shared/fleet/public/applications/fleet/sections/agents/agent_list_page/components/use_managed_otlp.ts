@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 
 import { sendCreateManagedOtlpApiKey, useStartServices } from '../../../../hooks';
 
-// Defined in `observability_onboarding/common/feature_flags.ts`. Re-declared here because
-// Fleet (platform group) cannot import from the observability solution group.
+// LaunchDarkly feature flag (FF) ID, evaluated via `core.featureFlags`. Originally defined in
+// `observability_onboarding/common/feature_flags.ts` and re-declared here because Fleet (platform
+// group) cannot import from the observability solution group.
 const IS_MANAGED_OTLP_SERVICE_ENABLED = 'observability.managedOtlpServiceEnabled';
 
 export interface UseManagedOtlpResult {
