@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DeploymentStep } from './deployment';
+export { DeploymentStep } from './deployment_step';
