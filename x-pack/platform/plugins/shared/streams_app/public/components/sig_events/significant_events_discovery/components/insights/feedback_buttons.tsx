@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import type { InsightUserEvaluation } from '@kbn/streams-schema';
 
 interface FeedbackButtonsProps {
@@ -42,26 +42,40 @@ export function FeedbackButtons({ onFeedback }: FeedbackButtonsProps) {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="thumbUp"
-          aria-label={i18n.translate('xpack.streams.significantEventsSummary.thumbsUpLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.significantEventsSummary.thumbsUpLabel', {
             defaultMessage: 'Helpful',
           })}
-          color="success"
-          data-test-subj="significant_events_summary_helpful_button"
-          onClick={() => handleFeedback('helpful')}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="thumbUp"
+            aria-label={i18n.translate('xpack.streams.significantEventsSummary.thumbsUpLabel', {
+              defaultMessage: 'Helpful',
+            })}
+            color="success"
+            data-test-subj="significant_events_summary_helpful_button"
+            onClick={() => handleFeedback('helpful')}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="thumbDown"
-          aria-label={i18n.translate('xpack.streams.significantEventsSummary.thumbsDownLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.significantEventsSummary.thumbsDownLabel', {
             defaultMessage: 'Not helpful',
           })}
-          color="danger"
-          data-test-subj="significant_events_summary_not_helpful_button"
-          onClick={() => handleFeedback('not_helpful')}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="thumbDown"
+            aria-label={i18n.translate('xpack.streams.significantEventsSummary.thumbsDownLabel', {
+              defaultMessage: 'Not helpful',
+            })}
+            color="danger"
+            data-test-subj="significant_events_summary_not_helpful_button"
+            onClick={() => handleFeedback('not_helpful')}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

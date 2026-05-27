@@ -19,6 +19,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -209,13 +210,15 @@ export function KnowledgeIndicatorDetailsFlyout({
             <EuiPopover
               aria-label={ACTIONS_MENU_POPOVER_ARIA_LABEL}
               button={
-                <EuiButtonIcon
-                  iconType="boxesVertical"
-                  aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
-                  isLoading={isMutating}
-                  isDisabled={isMutating}
-                  onClick={() => setIsActionsMenuOpen((open) => !open)}
-                />
+                <EuiToolTip content={ACTIONS_MENU_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="boxesVertical"
+                    aria-label={ACTIONS_MENU_BUTTON_ARIA_LABEL}
+                    isLoading={isMutating}
+                    isDisabled={isMutating}
+                    onClick={() => setIsActionsMenuOpen((open) => !open)}
+                  />
+                </EuiToolTip>
               }
               isOpen={isActionsMenuOpen}
               closePopover={() => setIsActionsMenuOpen(false)}
@@ -226,11 +229,13 @@ export function KnowledgeIndicatorDetailsFlyout({
             </EuiPopover>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              aria-label={CLOSE_BUTTON_ARIA_LABEL}
-              onClick={onClose}
-            />
+            <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                aria-label={CLOSE_BUTTON_ARIA_LABEL}
+                onClick={onClose}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </FlyoutToolbarHeader>
 

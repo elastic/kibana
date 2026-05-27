@@ -7,15 +7,16 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  type CriteriaWithPagination,
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiInMemoryTable,
   EuiLink,
   EuiSpacer,
+  EuiToolTip,
+  type CriteriaWithPagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
@@ -106,15 +107,26 @@ export function RulesTable({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType={selectedKnowledgeIndicatorId === item.query.id ? 'minimize' : 'expand'}
-                  aria-label={
+                <EuiToolTip
+                  content={
                     selectedKnowledgeIndicatorId === item.query.id
                       ? MINIMIZE_DETAILS_ARIA_LABEL
                       : VIEW_DETAILS_ARIA_LABEL
                   }
-                  onClick={() => onViewDetails(item)}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType={
+                      selectedKnowledgeIndicatorId === item.query.id ? 'minimize' : 'expand'
+                    }
+                    aria-label={
+                      selectedKnowledgeIndicatorId === item.query.id
+                        ? MINIMIZE_DETAILS_ARIA_LABEL
+                        : VIEW_DETAILS_ARIA_LABEL
+                    }
+                    onClick={() => onViewDetails(item)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink onClick={() => onViewDetails(item)}>
