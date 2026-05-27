@@ -113,6 +113,9 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/workflows-yaml'
   - '@kbn/workflows-ui'
+  - '@kbn/core-overlays-browser'
+  - '@kbn/core-lifecycle-browser'
+  - '@kbn/core-doc-links-browser'
 tags:
   - plugin
   - prod
