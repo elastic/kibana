@@ -25,7 +25,7 @@ import type {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiDataGrid, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiDataGrid, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
@@ -379,24 +379,31 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         rowCellRender: function RowCellRender({ rowIndex }) {
           const { rowHasRowClickTriggerActions } = useContext(DataContext);
           return (
-            <EuiButtonIcon
-              aria-label={i18n.translate('xpack.lens.table.actionsLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.lens.table.actionsLabel', {
                 defaultMessage: 'Show actions',
               })}
-              iconType={
-                !!rowHasRowClickTriggerActions && !rowHasRowClickTriggerActions[rowIndex]
-                  ? 'empty'
-                  : 'boxesVertical'
-              }
-              color="text"
-              onClick={() => {
-                onRowContextMenuClick({
-                  rowIndex,
-                  table: firstTableRef.current,
-                  columns: columnConfig.columns.map((col) => col.columnId),
-                });
-              }}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                aria-label={i18n.translate('xpack.lens.table.actionsLabel', {
+                  defaultMessage: 'Show actions',
+                })}
+                iconType={
+                  !!rowHasRowClickTriggerActions && !rowHasRowClickTriggerActions[rowIndex]
+                    ? 'empty'
+                    : 'boxesVertical'
+                }
+                color="text"
+                onClick={() => {
+                  onRowContextMenuClick({
+                    rowIndex,
+                    table: firstTableRef.current,
+                    columns: columnConfig.columns.map((col) => col.columnId),
+                  });
+                }}
+              />
+            </EuiToolTip>
           );
         },
       },
