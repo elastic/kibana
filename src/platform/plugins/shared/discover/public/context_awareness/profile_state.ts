@@ -7,19 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable max-classes-per-file */
-
+import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
-
-export class ProfileStateKey<TState extends object> {
-  private declare readonly __stateBrand: (_state: TState) => TState;
-
-  private constructor(public readonly rawKey: string) {}
-
-  static create<TState extends object>(rawKey: string): ProfileStateKey<TState> {
-    return new ProfileStateKey<TState>(rawKey);
-  }
-}
 
 export enum ProfileStateHistoryMethod {
   Push = 'push',
@@ -50,7 +39,7 @@ export type ProfileStateDescriptor<TState extends object> = {
 };
 
 export interface ProfileStateDefinition<TState extends object> {
-  key: ProfileStateKey<TState>;
+  key: string;
   descriptor: ProfileStateDescriptor<TState>;
 }
 
@@ -61,23 +50,21 @@ export class ProfileStateRegistry {
   >();
 
   public registerDefinition<TState extends object>(definition: ProfileStateDefinition<TState>) {
-    if (this.stateDefinitions.has(definition.key.rawKey)) {
-      throw new Error(`State with key ${definition.key.rawKey} is already registered.`);
+    if (this.stateDefinitions.has(definition.key)) {
+      throw new Error(`State with key ${definition.key} is already registered.`);
     }
-    this.stateDefinitions.set(
-      definition.key.rawKey,
-      definition as ProfileStateDefinition<Record<string, unknown>>
-    );
+
+    this.stateDefinitions.set(definition.key, definition);
   }
 
-  public getDefinition<TState extends object>(
-    key: ProfileStateKey<TState>
-  ): ProfileStateDefinition<TState> {
-    const definition = this.stateDefinitions.get(key.rawKey);
-    if (!definition) {
-      throw new Error(`State with key ${key.rawKey} is not registered.`);
+  public hasDefinition<TState extends object>(definition: ProfileStateDefinition<TState>): boolean {
+    const registeredDefinition = this.stateDefinitions.get(definition.key);
+
+    if (!registeredDefinition) {
+      return false;
     }
-    return definition as ProfileStateDefinition<TState>;
+
+    return isEqual(registeredDefinition.descriptor, definition.descriptor);
   }
 
   public pickStateByType({
@@ -118,7 +105,7 @@ export class ProfileStateRegistry {
 }
 
 export const registerProfileStateDefinitions = (registry: ProfileStateRegistry) => {
-  registry.registerDefinition(colorStateDefinition);
+  registry.registerDefinition(COLOR_STATE_DEF);
 };
 
 export interface ColorState {
@@ -126,10 +113,8 @@ export interface ColorState {
   rowControlColor: 'primary' | 'success' | 'danger';
 }
 
-export const COLOR_STATE_KEY = ProfileStateKey.create<ColorState>('color_state');
-
-const colorStateDefinition: ProfileStateDefinition<ColorState> = {
-  key: COLOR_STATE_KEY,
+export const COLOR_STATE_DEF: ProfileStateDefinition<ColorState> = {
+  key: 'colorState',
   descriptor: {
     favoriteColor: { type: ProfileStateType.Ui },
     rowControlColor: { type: ProfileStateType.Persistent },

@@ -14,7 +14,7 @@ import { internalStateActions } from '.';
 import { selectTab } from './selectors';
 import type {
   ProfileStateAdapter,
-  ProfileStateKey,
+  ProfileStateDefinition,
   ProfileStateRegistry,
 } from '../../../../context_awareness';
 
@@ -56,16 +56,18 @@ export const createContextAwarenessToolkit = ({
         );
       },
     },
-    getStateAdapter: <TState extends object>(key: ProfileStateKey<TState>) => {
-      if (stateAdapters.has(key.rawKey)) {
-        return stateAdapters.get(key.rawKey) as unknown as ProfileStateAdapter<TState>;
+    getStateAdapter: <TState extends object>(definition: ProfileStateDefinition<TState>) => {
+      if (!stateRegistry.hasDefinition(definition)) {
+        throw new Error(`State with key ${definition.key} is not registered.`);
       }
 
-      stateRegistry.getDefinition(key);
+      if (stateAdapters.has(definition.key)) {
+        return stateAdapters.get(definition.key) as unknown as ProfileStateAdapter<TState>;
+      }
 
       const getState = () => {
         const tabState = selectTab(internalState.getState(), tabId);
-        return (tabState?.profileState[key.rawKey] ?? {}) as TState;
+        return (tabState?.profileState[definition.key] ?? {}) as TState;
       };
 
       const state$ = from(internalState).pipe(map(getState), distinctUntilChanged());
@@ -75,21 +77,21 @@ export const createContextAwarenessToolkit = ({
         getState$: () => state$,
         setState: (profileState, _options) => {
           internalState.dispatch(
-            internalStateActions.setProfileState({ tabId, key: key.rawKey, profileState })
+            internalStateActions.setProfileState({ tabId, key: definition.key, profileState })
           );
         },
         updateState: (stateUpdate, _options) => {
           internalState.dispatch(
             internalStateActions.setProfileState({
               tabId,
-              key: key.rawKey,
+              key: definition.key,
               profileState: { ...getState(), ...stateUpdate },
             })
           );
         },
       };
 
-      stateAdapters.set(key.rawKey, adapter as unknown as ProfileStateAdapter<object>);
+      stateAdapters.set(definition.key, adapter as unknown as ProfileStateAdapter<object>);
 
       return adapter;
     },

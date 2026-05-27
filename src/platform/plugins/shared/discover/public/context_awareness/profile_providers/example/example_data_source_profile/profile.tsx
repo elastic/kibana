@@ -33,14 +33,18 @@ import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import { ChartWithCustomButtons, CustomDocViewerFooter, CustomDocViewerHeader } from './components';
 import { CustomDocView } from './components/custom_doc_view';
 import { RestorableStateDocView } from './components/restorable_state_doc_view';
-import { COLOR_STATE_KEY, type ColorState } from '../../../profile_state';
+import { COLOR_STATE_DEF, type ColorState } from '../../../profile_state';
 
-export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<
-  {
-    formatRecord: (flattenedRecord: Record<string, unknown>) => string;
-  },
+interface ExampleDataSourceContext {
+  formatRecord: (flattenedRecord: Record<string, unknown>) => string;
+}
+
+type ExampleDataSourceProfileProvider = DataSourceProfileProvider<
+  ExampleDataSourceContext,
   ColorState
-> => ({
+>;
+
+export const createExampleDataSourceProfileProvider = (): ExampleDataSourceProfileProvider => ({
   profileId: 'example-data-source-profile',
   isExperimental: true,
   profile: {
@@ -80,7 +84,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       },
     }),
     getDocViewer: (prev, { context, toolkit }) => {
-      const stateAdapter = toolkit.getStateAdapter(COLOR_STATE_KEY);
+      const stateAdapter = toolkit.getStateAdapter(COLOR_STATE_DEF);
       const colorState$ = stateAdapter.getState$();
 
       return (params) => {
@@ -264,7 +268,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       };
     },
     getRowAdditionalLeadingControls: (prev, { toolkit }) => {
-      const stateAdapter = toolkit.getStateAdapter(COLOR_STATE_KEY);
+      const stateAdapter = toolkit.getStateAdapter(COLOR_STATE_DEF);
       const colorState$ = stateAdapter.getState$();
       const RowControl = ({
         Control,
@@ -393,7 +397,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       isMatch: true,
       context: {
         category: DataSourceCategory.Logs,
-        profileStateKey: COLOR_STATE_KEY,
+        profileState: COLOR_STATE_DEF,
         formatRecord: (record) => JSON.stringify(record, null, 2),
       },
     };

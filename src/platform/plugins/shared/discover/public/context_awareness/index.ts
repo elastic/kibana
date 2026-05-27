@@ -23,7 +23,6 @@ export {
   type ProfileStateAdapter,
   type ProfileStateDefinition,
   type ProfileStateDescriptor,
-  ProfileStateKey,
   ProfileStateType,
   ProfileStateRegistry,
 } from './profile_state';

@@ -14,7 +14,7 @@ import { useObservable } from '@kbn/use-observable';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
-import { COLOR_STATE_KEY } from '../../../profile_state';
+import { COLOR_STATE_DEF } from '../../../profile_state';
 
 export const createExampleRootProfileProvider = (): RootProfileProvider => ({
   profileId: 'example-root-profile',
@@ -23,7 +23,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
     getDefaultAdHocDataViews,
     getDefaultEsqlQuery,
     getCellRenderers: (prev, { toolkit }) => {
-      const stateAdapter = toolkit.getStateAdapter(COLOR_STATE_KEY);
+      const stateAdapter = toolkit.getStateAdapter(COLOR_STATE_DEF);
       const colorState$ = stateAdapter.getState$();
       const Timestamp = (props: DataGridCellValueElementProps) => {
         const timestamp = getFieldValue(props.row, '@timestamp') as string;
