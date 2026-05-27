@@ -183,30 +183,40 @@ describe('AddEndpointModal', () => {
       expect(screen.queryByTestId('addEndpointReasoningToggle')).not.toBeInTheDocument();
     });
 
-    it('hides the effort level button group when the toggle is off', () => {
+    it('hides the effort level button group when auto mode is on (default)', () => {
       renderModal();
       expect(screen.queryByTestId('addEndpointReasoningButtonGroup')).not.toBeInTheDocument();
     });
 
-    it('shows the effort level button group and token usage note when the toggle is enabled', () => {
+    it('shows the effort level button group and token usage note when auto mode is turned off', () => {
       renderModal();
       fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
       expect(screen.getByTestId('addEndpointReasoningButtonGroup')).toBeInTheDocument();
       expect(screen.getByTestId('addEndpointReasoningTokenUsageNote')).toBeInTheDocument();
     });
 
-    it('defaults to Medium effort when toggle is first enabled', () => {
+    it('shows all five effort levels: min, low, med, high, extra-high', () => {
       renderModal();
       fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
-      const mediumButton = screen.getByRole('button', { name: 'Medium' });
-      expect(mediumButton).toBeInTheDocument();
-      expect(mediumButton.getAttribute('aria-pressed')).toBe('true');
+      expect(screen.getByRole('button', { name: 'min' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'low' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'med' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'high' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'extra-high' })).toBeInTheDocument();
+    });
+
+    it('defaults to med effort when auto mode is first turned off', () => {
+      renderModal();
+      fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      const medButton = screen.getByRole('button', { name: 'med' });
+      expect(medButton).toBeInTheDocument();
+      expect(medButton.getAttribute('aria-pressed')).toBe('true');
     });
 
     it('changes effort level when a different option is clicked', () => {
       renderModal();
       fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
-      const highButton = screen.getByRole('button', { name: 'High' });
+      const highButton = screen.getByRole('button', { name: 'high' });
       fireEvent.click(highButton);
       expect(highButton.getAttribute('aria-pressed')).toBe('true');
     });
@@ -220,7 +230,7 @@ describe('AddEndpointModal', () => {
       expect(screen.queryByTestId('addEndpointReasoningToggle')).not.toBeInTheDocument();
     });
 
-    it('resets the toggle to off when switching back to chat_completion', () => {
+    it('resets to auto mode when switching back to chat_completion', () => {
       renderModal();
       fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
       fireEvent.click(screen.getByLabelText('Completion'));
@@ -239,7 +249,7 @@ describe('AddEndpointModal', () => {
     it('does not include taskTypeConfig in the save payload (pending backend support)', () => {
       renderModal();
       fireEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
-      fireEvent.click(screen.getByRole('button', { name: 'High' }));
+      fireEvent.click(screen.getByRole('button', { name: 'high' }));
 
       fireEvent.click(screen.getByTestId('addEndpointModalSaveButton'));
       expect(mockMutate).toHaveBeenCalledWith(

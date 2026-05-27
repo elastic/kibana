@@ -55,26 +55,39 @@ export interface AddEndpointModalProps {
 const ENDPOINT_ID_PATTERN = /^[a-z0-9][a-z0-9_-]*[a-z0-9]$/;
 const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
 
-type ReasoningEffortLevel = 'low' | 'medium' | 'high';
+type ReasoningEffortLevel = 'minimal' | 'low' | 'medium' | 'high' | 'extra_high';
 
 const REASONING_EFFORT_OPTIONS: Array<{ id: ReasoningEffortLevel; label: string }> = [
   {
+    id: 'minimal',
+    label: i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.reasoningEffortMin', {
+      defaultMessage: 'min',
+    }),
+  },
+  {
     id: 'low',
     label: i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.reasoningEffortLow', {
-      defaultMessage: 'Low',
+      defaultMessage: 'low',
     }),
   },
   {
     id: 'medium',
     label: i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.reasoningEffortMedium', {
-      defaultMessage: 'Medium',
+      defaultMessage: 'med',
     }),
   },
   {
     id: 'high',
     label: i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.reasoningEffortHigh', {
-      defaultMessage: 'High',
+      defaultMessage: 'high',
     }),
+  },
+  {
+    id: 'extra_high',
+    label: i18n.translate(
+      'xpack.searchInferenceEndpoints.addEndpointModal.reasoningEffortExtraHigh',
+      { defaultMessage: 'extra-high' }
+    ),
   },
 ];
 
@@ -123,7 +136,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
     () => initialEndpointId ?? generateEndpointId(modelId, defaultTaskType)
   );
   const [endpointIdTouched, setEndpointIdTouched] = useState(isView);
-  const [reasoningEnabled, setReasoningEnabled] = useState(false);
+  const [reasoningAutoMode, setReasoningAutoMode] = useState(true);
   const [effortLevel, setEffortLevel] = useState<ReasoningEffortLevel>('medium');
 
   useEffect(() => {
@@ -134,7 +147,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
 
   useEffect(() => {
     if (selectedTaskType !== CHAT_COMPLETION_TASK_TYPE) {
-      setReasoningEnabled(false);
+      setReasoningAutoMode(true);
     }
   }, [selectedTaskType]);
 
@@ -294,14 +307,14 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
                 <EuiSwitch
                   label={i18n.translate(
                     'xpack.searchInferenceEndpoints.addEndpointModal.reasoningSwitchLabel',
-                    { defaultMessage: 'Customize reasoning effort' }
+                    { defaultMessage: 'Auto: Use model default' }
                   )}
-                  checked={reasoningEnabled}
-                  onChange={(e) => setReasoningEnabled(e.target.checked)}
+                  checked={reasoningAutoMode}
+                  onChange={(e) => setReasoningAutoMode(e.target.checked)}
                   disabled={isView}
                   data-test-subj="addEndpointReasoningToggle"
                 />
-                {reasoningEnabled && (
+                {!reasoningAutoMode && (
                   <>
                     <EuiButtonGroup
                       legend={i18n.translate(
