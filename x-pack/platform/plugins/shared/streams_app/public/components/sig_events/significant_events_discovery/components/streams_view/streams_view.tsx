@@ -13,7 +13,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   TaskStatus,
-  OnboardingStatus,
+  ONBOARDING_IN_PROGRESS_STATUSES,
 } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -37,11 +37,6 @@ import {
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
-
-const IN_PROGRESS_STATUSES = new Set<OnboardingStatus>([
-  OnboardingStatus.InProgress,
-  OnboardingStatus.BeingCanceled,
-]);
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -97,7 +92,7 @@ export function StreamsView() {
     (streamName: string) => {
       if (generatingStreamNames.includes(streamName)) return false;
       const result = streamStatusMap[streamName];
-      return !!result && !IN_PROGRESS_STATUSES.has(result.status);
+      return !!result && !ONBOARDING_IN_PROGRESS_STATUSES.has(result.status);
     },
     [generatingStreamNames, streamStatusMap]
   );

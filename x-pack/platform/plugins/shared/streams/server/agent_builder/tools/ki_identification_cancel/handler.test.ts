@@ -37,11 +37,12 @@ describe('cancelKiIdentificationToolHandler', () => {
     );
     expect(result).toEqual({
       stream_name: 'logs.nginx',
+      execution_id: 'exec-1',
       status: OnboardingStatus.Canceled,
     });
   });
 
-  it('returns cancel status even when no execution is found', async () => {
+  it('returns cancel status with null execution_id when no execution is found', async () => {
     const managementApi = {
       getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
       cancelWorkflowExecution: jest.fn(),
@@ -60,6 +61,7 @@ describe('cancelKiIdentificationToolHandler', () => {
     expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
     expect(result).toEqual({
       stream_name: 'logs.nginx',
+      execution_id: null,
       status: OnboardingStatus.Canceled,
     });
   });

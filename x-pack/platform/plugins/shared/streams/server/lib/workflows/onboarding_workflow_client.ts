@@ -124,25 +124,20 @@ const mapExecutionToStatusResult = (
     return {
       status: OnboardingStatus.Completed,
       featuresSkipped: output.featuresSkipped === true,
-      discoveredFeaturesCount: Array.isArray(output.discoveredFeatures)
-        ? output.discoveredFeatures.length
-        : 0,
+      discoveredFeatures: Array.isArray(output.discoveredFeatures) ? output.discoveredFeatures : [],
       featuresConnectorUsed: output.featuresConnectorUsed ?? '',
+      featuresTokensUsed: output.featuresTokensUsed ?? {},
       queriesSkipped: output.queriesSkipped === true,
-      persistedQueriesCount: Array.isArray(output.persistedQueries)
-        ? output.persistedQueries.length
-        : 0,
+      persistedQueries: Array.isArray(output.persistedQueries) ? output.persistedQueries : [],
       queriesConnectorUsed: output.queriesConnectorUsed ?? '',
+      queriesTokensUsed: output.queriesTokensUsed ?? {},
     };
   }
 
   return { status: onboardingStatus };
 };
 
-// TODO: request collapse-by-concurrencyGroupKey and source filtering from the
-// workflows team so we can fetch exactly 1 execution per stream with only the
-// fields we need (status, startedAt, finishedAt, concurrencyGroupKey).
-const MAX_EXECUTIONS_QUERY_SIZE = 2000;
+const MAX_STREAMS_PER_QUERY = 10000;
 
 /**
  * Client that wraps the workflows management API to provide a stream-centric
@@ -196,7 +191,11 @@ export class OnboardingWorkflowClient {
    * For completed executions a second fetch retrieves the full execution
    * context so output counts can be included in the result.
    */
-  async getStatus({ streamName }: { streamName: string }): Promise<OnboardingStatusResult> {
+  async getStatus({
+    streamName,
+  }: {
+    streamName: string;
+  }): Promise<OnboardingStatusResult & { executionId: string | null }> {
     const { results } = await this.managementApi.getWorkflowExecutions(
       {
         workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
@@ -207,7 +206,7 @@ export class OnboardingWorkflowClient {
     );
 
     if (results.length === 0) {
-      return { status: OnboardingStatus.NotStarted };
+      return { status: OnboardingStatus.NotStarted, executionId: null };
     }
 
     const execution = results[0];
@@ -220,20 +219,25 @@ export class OnboardingWorkflowClient {
       );
 
       if (fullExecution) {
-        return mapExecutionToStatusResult({
-          ...execution,
-          context: fullExecution.context,
-        });
+        return {
+          ...mapExecutionToStatusResult({
+            ...execution,
+            context: fullExecution.context,
+          }),
+          executionId: execution.id,
+        };
       }
     }
 
-    return mapExecutionToStatusResult(execution);
+    return { ...mapExecutionToStatusResult(execution), executionId: execution.id };
   }
 
   /**
    * Cancels the latest non-terminal onboarding execution for a stream.
    * No-ops if no active execution exists or the latest execution already reached
    * a terminal state.
+   *
+   * @returns The ID of the canceled execution, or `null` if nothing was running.
    */
   async cancel({
     streamName,
@@ -241,7 +245,7 @@ export class OnboardingWorkflowClient {
   }: {
     streamName: string;
     request: KibanaRequest;
-  }): Promise<void> {
+  }): Promise<string | null> {
     const { results } = await this.managementApi.getWorkflowExecutions(
       {
         workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
@@ -257,14 +261,17 @@ export class OnboardingWorkflowClient {
         ONBOARDING_EXECUTIONS_SPACE_ID,
         request
       );
+      return results[0].id;
     }
+
+    return null;
   }
 
   /**
    * Cancels every non-terminal onboarding execution across all streams.
    * Used during teardown of the continuous KI extraction workflow.
    */
-  async cancelAllRunning(): Promise<void> {
+  async cancelAllRunning({ request }: { request: KibanaRequest }): Promise<void> {
     const { results } = await this.managementApi.getWorkflowExecutions(
       {
         workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
@@ -279,23 +286,28 @@ export class OnboardingWorkflowClient {
 
     await Promise.all(
       results.map((result) =>
-        this.managementApi.cancelWorkflowExecution(result.id, ONBOARDING_EXECUTIONS_SPACE_ID)
+        this.managementApi.cancelWorkflowExecution(
+          result.id,
+          ONBOARDING_EXECUTIONS_SPACE_ID,
+          request
+        )
       )
     );
   }
 
   /**
-   * Returns up to {@link MAX_EXECUTIONS_QUERY_SIZE} most recent onboarding
-   * executions sorted by creation date (newest first). Callers are responsible
-   * for deduplicating by stream via the concurrency group key.
+   * Returns the latest onboarding execution per stream, collapsed by
+   * concurrency group key. At most {@link MAX_STREAMS_PER_QUERY} streams
+   * are returned (one execution each), sorted by creation date descending.
    */
   async getRecentExecutions(): Promise<WorkflowExecutionListItemDto[]> {
     const { results } = await this.managementApi.getWorkflowExecutions(
       {
         workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
-        size: MAX_EXECUTIONS_QUERY_SIZE,
+        size: MAX_STREAMS_PER_QUERY,
         sortField: 'createdAt',
         sortOrder: 'desc',
+        collapse: 'concurrencyGroupKey',
       },
       ONBOARDING_EXECUTIONS_SPACE_ID
     );

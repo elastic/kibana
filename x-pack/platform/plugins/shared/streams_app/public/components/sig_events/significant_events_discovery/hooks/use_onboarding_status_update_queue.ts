@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OnboardingStatus, type OnboardingStatusResult } from '@kbn/streams-schema';
+import { ONBOARDING_IN_PROGRESS_STATUSES, type OnboardingStatusResult } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import { useCallback, useRef } from 'react';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
@@ -31,11 +31,7 @@ export function useOnboardingStatusUpdateQueue(
 
         onStreamStatusUpdate(streamName, statusResult);
 
-        if (
-          ![OnboardingStatus.InProgress, OnboardingStatus.BeingCanceled].includes(
-            statusResult.status
-          )
-        ) {
+        if (!ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status)) {
           queue.current.delete(streamName);
         }
       },

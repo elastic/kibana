@@ -157,7 +157,7 @@ describe('OnboardingWorkflowClient', () => {
 
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
-      expect(result).toEqual({ status: OnboardingStatus.NotStarted });
+      expect(result).toEqual({ status: OnboardingStatus.NotStarted, executionId: null });
     });
 
     it('returns InProgress for a running execution', async () => {
@@ -169,7 +169,7 @@ describe('OnboardingWorkflowClient', () => {
 
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
-      expect(result).toEqual({ status: OnboardingStatus.InProgress });
+      expect(result).toEqual({ status: OnboardingStatus.InProgress, executionId: 'exec-1' });
     });
 
     it('returns Completed with output details for a completed execution', async () => {
@@ -183,9 +183,11 @@ describe('OnboardingWorkflowClient', () => {
               featuresSkipped: false,
               discoveredFeatures: ['f1', 'f2'],
               featuresConnectorUsed: 'connector-1',
+              featuresTokensUsed: { prompt: 100, completion: 50 },
               queriesSkipped: true,
               persistedQueries: [],
               queriesConnectorUsed: '',
+              queriesTokensUsed: {},
             },
           },
         }),
@@ -195,12 +197,15 @@ describe('OnboardingWorkflowClient', () => {
 
       expect(result).toEqual({
         status: OnboardingStatus.Completed,
+        executionId: 'exec-1',
         featuresSkipped: false,
-        discoveredFeaturesCount: 2,
+        discoveredFeatures: ['f1', 'f2'],
         featuresConnectorUsed: 'connector-1',
+        featuresTokensUsed: { prompt: 100, completion: 50 },
         queriesSkipped: true,
-        persistedQueriesCount: 0,
+        persistedQueries: [],
         queriesConnectorUsed: '',
+        queriesTokensUsed: {},
       });
     });
 
@@ -216,12 +221,15 @@ describe('OnboardingWorkflowClient', () => {
 
       expect(result).toEqual({
         status: OnboardingStatus.Completed,
+        executionId: 'exec-1',
         featuresSkipped: false,
-        discoveredFeaturesCount: 0,
+        discoveredFeatures: [],
         featuresConnectorUsed: '',
+        featuresTokensUsed: {},
         queriesSkipped: false,
-        persistedQueriesCount: 0,
+        persistedQueries: [],
         queriesConnectorUsed: '',
+        queriesTokensUsed: {},
       });
     });
 
@@ -242,6 +250,7 @@ describe('OnboardingWorkflowClient', () => {
 
       expect(result).toEqual({
         status: OnboardingStatus.Failed,
+        executionId: 'exec-1',
         error: 'something broke',
       });
     });
@@ -257,6 +266,7 @@ describe('OnboardingWorkflowClient', () => {
 
       expect(result).toEqual({
         status: OnboardingStatus.Failed,
+        executionId: 'exec-1',
         error: 'Onboarding workflow timed out',
       });
     });
@@ -270,7 +280,7 @@ describe('OnboardingWorkflowClient', () => {
 
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
-      expect(result).toEqual({ status: OnboardingStatus.Canceled });
+      expect(result).toEqual({ status: OnboardingStatus.Canceled, executionId: 'exec-1' });
     });
 
     it('queries with the correct concurrency group key', async () => {
@@ -326,25 +336,35 @@ describe('OnboardingWorkflowClient', () => {
           ],
         }),
       });
+      const request = httpServerMock.createKibanaRequest();
 
-      await client.cancelAllRunning();
+      await client.cancelAllRunning({ request });
 
       expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledTimes(2);
-      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith('exec-1', 'default');
-      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith('exec-2', 'default');
+      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'exec-1',
+        'default',
+        request
+      );
+      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'exec-2',
+        'default',
+        request
+      );
     });
 
     it('does nothing when no running executions exist', async () => {
       const { client, managementApi } = createClient();
+      const request = httpServerMock.createKibanaRequest();
 
-      await client.cancelAllRunning();
+      await client.cancelAllRunning({ request });
 
       expect(managementApi.cancelWorkflowExecution).not.toHaveBeenCalled();
     });
   });
 
   describe('getRecentExecutions', () => {
-    it('returns all executions sorted by createdAt desc', async () => {
+    it('returns one execution per stream collapsed by concurrencyGroupKey', async () => {
       const executions = [
         { id: 'exec-1', status: ExecutionStatus.COMPLETED },
         { id: 'exec-2', status: ExecutionStatus.RUNNING },
@@ -360,7 +380,8 @@ describe('OnboardingWorkflowClient', () => {
         expect.objectContaining({
           sortField: 'createdAt',
           sortOrder: 'desc',
-          size: 2000,
+          size: 10000,
+          collapse: 'concurrencyGroupKey',
         }),
         'default'
       );

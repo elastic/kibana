@@ -9,6 +9,7 @@ import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/interna
 import {
   OnboardingStep,
   OnboardingStatus,
+  ONBOARDING_IN_PROGRESS_STATUSES,
   type OnboardingStatusResult,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
@@ -28,11 +29,6 @@ import type { ScheduleOnboardingOptions } from '../../../../../hooks/use_onboard
 import { useBulkOnboarding } from '../../hooks/use_bulk_onboarding';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
 import type { OnboardingConfig } from '../shared/types';
-
-const IN_PROGRESS_STATUSES = new Set<OnboardingStatus>([
-  OnboardingStatus.InProgress,
-  OnboardingStatus.BeingCanceled,
-]);
 
 interface ConnectorState {
   resolvedConnectorId: string | undefined;
@@ -127,7 +123,7 @@ export function KiGenerationProvider({
     (streamName: string, statusResult: OnboardingStatusResult) => {
       setStreamStatusMap((current) => ({ ...current, [streamName]: statusResult }));
 
-      const isInProgress = IN_PROGRESS_STATUSES.has(statusResult.status);
+      const isInProgress = ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status);
 
       setGeneratingStreams((current) => {
         const has = current.has(streamName);

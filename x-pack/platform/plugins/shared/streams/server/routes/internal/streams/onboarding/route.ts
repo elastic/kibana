@@ -10,6 +10,7 @@ import { OnboardingStep, OnboardingStatus, type OnboardingStatusResult } from '@
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { StatusError } from '../../../../lib/streams/errors/status_error';
 import type { OnboardingWorkflowInputs } from '../../../../lib/workflows/onboarding_workflow_client';
 
 const timestampFromString = z.string().transform((input) => new Date(input).getTime());
@@ -71,7 +72,7 @@ export const onboardingExecuteRoute = createServerRoute({
     onboardingClient,
   }): Promise<OnboardingStatusResult> => {
     if (!onboardingClient) {
-      throw new Error('Workflows management is not available');
+      throw new StatusError('Workflows management is not available', 503);
     }
 
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
@@ -130,7 +131,7 @@ export const onboardingStatusRoute = createServerRoute({
     onboardingClient,
   }): Promise<OnboardingStatusResult> => {
     if (!onboardingClient) {
-      throw new Error('Workflows management is not available');
+      throw new StatusError('Workflows management is not available', 503);
     }
 
     const { licensing, uiSettingsClient } = await getScopedClients({ request });

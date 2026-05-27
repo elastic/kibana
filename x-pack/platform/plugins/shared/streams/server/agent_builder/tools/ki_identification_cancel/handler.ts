@@ -17,6 +17,7 @@ interface CancelKiIdentificationHandlerParams {
 
 interface CancelKiIdentificationHandlerResult {
   stream_name: string;
+  execution_id: string | null;
   status: OnboardingStatus.Canceled;
 }
 
@@ -25,10 +26,11 @@ export async function cancelKiIdentificationToolHandler({
   onboardingClient,
   request,
 }: CancelKiIdentificationHandlerParams): Promise<CancelKiIdentificationHandlerResult> {
-  await onboardingClient.cancel({ streamName, request });
+  const executionId = await onboardingClient.cancel({ streamName, request });
 
   return {
     stream_name: streamName,
+    execution_id: executionId,
     status: OnboardingStatus.Canceled,
   };
 }

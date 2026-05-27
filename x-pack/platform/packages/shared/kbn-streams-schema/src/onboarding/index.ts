@@ -7,11 +7,13 @@
 
 export interface OnboardingResult {
   featuresSkipped: boolean;
-  discoveredFeaturesCount: number;
+  discoveredFeatures: unknown[];
   featuresConnectorUsed: string;
+  featuresTokensUsed: Record<string, unknown>;
   queriesSkipped: boolean;
-  persistedQueriesCount: number;
+  persistedQueries: unknown[];
   queriesConnectorUsed: string;
+  queriesTokensUsed: Record<string, unknown>;
 }
 
 export enum OnboardingStep {
@@ -39,3 +41,9 @@ export type OnboardingStatusResult =
     }
   | ({ status: OnboardingStatus.Failed; error: string } & Partial<OnboardingResult>)
   | ({ status: OnboardingStatus.Completed } & OnboardingResult);
+
+/** Statuses that indicate the onboarding pipeline is still active (running or pending cancel). */
+export const ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<OnboardingStatus> = new Set([
+  OnboardingStatus.InProgress,
+  OnboardingStatus.BeingCanceled,
+]);

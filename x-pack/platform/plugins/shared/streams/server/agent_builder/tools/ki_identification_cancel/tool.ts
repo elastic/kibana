@@ -35,7 +35,7 @@ export const createKiIdentificationCancelTool = ({
     - Stop a running KI identification background task when the user requests cancellation
 
     Returns:
-    - On success: task cancel acknowledgement payload with stream and status
+    - On success: cancel acknowledgement payload with stream, execution_id, and status
     - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
   `,
   schema: cancelSchema,

@@ -45,6 +45,7 @@ describe('createKiIdentificationCancelTool', () => {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual({
         stream_name: 'logs.nginx',
+        execution_id: 'exec-1',
         status: OnboardingStatus.Canceled,
       });
     }

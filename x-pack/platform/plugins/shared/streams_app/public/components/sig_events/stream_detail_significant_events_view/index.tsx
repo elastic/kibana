@@ -84,9 +84,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   } = useFetchKnowledgeIndicators({ definition });
   const onKnowledgeIndicatorsOnboardingComplete = useCallback(
     (completedState: Extract<OnboardingStatusResult, { status: OnboardingStatus.Completed }>) => {
-      const { featuresSkipped, discoveredFeaturesCount, persistedQueriesCount } = completedState;
+      const { featuresSkipped, discoveredFeatures, persistedQueries } = completedState;
 
-      const count = discoveredFeaturesCount + persistedQueriesCount;
+      const count = discoveredFeatures.length + persistedQueries.length;
 
       toasts.addSuccess({
         title: i18n.translate(

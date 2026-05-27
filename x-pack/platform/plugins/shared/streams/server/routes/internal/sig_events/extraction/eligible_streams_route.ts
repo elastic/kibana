@@ -92,7 +92,7 @@ const eligibleStreamsRoute = createServerRoute({
     onboardingClient,
   }): Promise<EligibleStreamsResponse> => {
     if (!onboardingClient) {
-      throw new Error('Workflows management is not available');
+      throw new StatusError('Workflows management is not available', 503);
     }
 
     const { streamsClient, globalUiSettingsClient, uiSettingsClient, licensing } =

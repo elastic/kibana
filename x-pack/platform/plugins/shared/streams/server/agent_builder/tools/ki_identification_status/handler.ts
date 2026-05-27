@@ -16,10 +16,11 @@ export async function getKiIdentificationStatusToolHandler({
   streamName,
   onboardingClient,
 }: GetKiIdentificationStatusHandlerParams) {
-  const statusResult = await onboardingClient.getStatus({ streamName });
+  const { executionId, ...statusResult } = await onboardingClient.getStatus({ streamName });
 
   return {
     stream_name: streamName,
+    execution_id: executionId,
     ...statusResult,
   };
 }

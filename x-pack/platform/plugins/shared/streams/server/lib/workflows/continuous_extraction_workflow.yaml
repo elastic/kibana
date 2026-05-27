@@ -159,5 +159,6 @@ steps:
               streamName: "{{ foreach.item.streamName }}"
               status: "${{ steps.check_status.output.status }}"
               featuresSkipped: "${{ steps.check_status.output.featuresSkipped }}"
-              discoveredFeaturesCount: "${{ steps.check_status.output.discoveredFeaturesCount }}"
+              discoveredFeatures: "${{ steps.check_status.output.discoveredFeatures }}"
               featuresConnectorUsed: "${{ steps.check_status.output.featuresConnectorUsed }}"
+              featuresTokensUsed: "${{ steps.check_status.output.featuresTokensUsed }}"

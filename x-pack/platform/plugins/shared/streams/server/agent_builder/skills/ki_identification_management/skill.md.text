@@ -92,6 +92,7 @@ Example call:
 Example output shape:
 {
   "stream_name": "logs.ecs.linux",
+  "execution_id": "exec-abc123",
   "status": "canceled"
 }
 </tool_examples>

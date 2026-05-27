@@ -95,7 +95,7 @@ export const createContinuousKiExtractionWorkflowService = ({
 
       if (existing) {
         try {
-          await onboardingClient.cancelAllRunning();
+          await onboardingClient.cancelAllRunning({ request });
         } catch (err) {
           throw new Error('Cannot delete workflow: failed to cancel running onboarding workflows', {
             cause: err,

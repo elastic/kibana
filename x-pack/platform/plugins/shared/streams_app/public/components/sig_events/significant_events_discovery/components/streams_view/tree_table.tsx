@@ -22,7 +22,12 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { Streams, OnboardingStatus, type OnboardingStatusResult } from '@kbn/streams-schema';
+import {
+  Streams,
+  OnboardingStatus,
+  ONBOARDING_IN_PROGRESS_STATUSES,
+  type OnboardingStatusResult,
+} from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../../streams_tour';
@@ -426,11 +431,7 @@ export function StreamsTreeTable({
               render: (_: unknown, item: TableRow) => {
                 const onboardingResult = streamOnboardingResultMap[item.stream.name];
 
-                if (
-                  [OnboardingStatus.InProgress, OnboardingStatus.BeingCanceled].includes(
-                    onboardingResult?.status
-                  )
-                ) {
+                if (ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
                   return (
                     <EuiToolTip
                       position="top"

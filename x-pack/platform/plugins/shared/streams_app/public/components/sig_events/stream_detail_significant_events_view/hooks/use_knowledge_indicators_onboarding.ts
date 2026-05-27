@@ -7,8 +7,12 @@
 
 import { useMutation, useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { OnboardingStatus, type OnboardingStatusResult } from '@kbn/streams-schema';
+import { useCallback, useRef, useState } from 'react';
+import {
+  OnboardingStatus,
+  ONBOARDING_IN_PROGRESS_STATUSES,
+  type OnboardingStatusResult,
+} from '@kbn/streams-schema';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { getFormattedError } from '../../../../util/errors';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -34,7 +38,7 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
   } = useKibana();
   const { getOnboardingStatus, scheduleOnboarding, cancelOnboarding } = useOnboardingApi();
 
-  const scheduleMutation = useMutation({
+  const { mutate: scheduleMutate, isLoading: isScheduleLoading } = useMutation({
     mutationFn: scheduleOnboarding,
     onError: (error: Error) => {
       toasts.addError(getFormattedError(error), {
@@ -43,7 +47,7 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
     },
   });
 
-  const cancelMutation = useMutation({
+  const { mutate: cancelMutate, isLoading: isCancelLoading } = useMutation({
     mutationFn: cancelOnboarding,
     onError: (error: Error) => {
       toasts.addError(getFormattedError(error), {
@@ -52,45 +56,10 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
     },
   });
 
-  useEffect(() => {
-    getOnboardingStatus(streamName)
-      .then((state) => {
-        setOnboardingState(state);
-        previousStatusRef.current = state.status;
-      })
-      .catch(() => {
-        setOnboardingState({ status: OnboardingStatus.NotStarted });
-        previousStatusRef.current = OnboardingStatus.NotStarted;
-      });
-    /**
-     * Explicitly running this hook only once to get the initial
-     * onboarding state
-     */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const scheduleKnowledgeIndicatorsOnboarding = useCallback(() => {
-    setOnboardingState({
-      status: OnboardingStatus.InProgress,
-    });
-
-    scheduleMutation.mutate(streamName);
-  }, [scheduleMutation, streamName]);
-
-  const cancelKnowledgeIndicatorsOnboarding = useCallback(() => {
-    setOnboardingState({
-      status: OnboardingStatus.BeingCanceled,
-    });
-    previousStatusRef.current = OnboardingStatus.BeingCanceled;
-
-    cancelMutation.mutate(streamName);
-  }, [cancelMutation, streamName]);
-
   const isPending =
-    onboardingState !== null &&
-    [OnboardingStatus.InProgress, OnboardingStatus.BeingCanceled].includes(onboardingState.status);
+    onboardingState !== null && ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingState.status);
 
-  const fetchStatus = async () => {
+  const fetchStatus = useCallback(async () => {
     const state = await getOnboardingStatus(streamName);
 
     // Preserve the optimistic BeingCanceled state while the engine
@@ -103,9 +72,11 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
       previousStatusRef.current === OnboardingStatus.BeingCanceled &&
       state.status === OnboardingStatus.InProgress;
 
-    if (!shouldPreserveBeingCanceled) {
-      setOnboardingState(state);
+    if (shouldPreserveBeingCanceled) {
+      return state;
     }
+
+    setOnboardingState(state);
 
     /**
      * Firing an explicit callback when onboarding **changes** to
@@ -131,19 +102,28 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
       onError(state);
     }
 
-    if (!shouldPreserveBeingCanceled) {
-      previousStatusRef.current = state.status;
-    }
+    previousStatusRef.current = state.status;
 
     return state;
-  };
+  }, [getOnboardingStatus, streamName, onComplete, onError]);
 
   useQuery<OnboardingStatusResult, Error>({
     queryKey: ['knowledgeIndicatorsOnboardingStatus', streamName],
     queryFn: fetchStatus,
-    enabled: !scheduleMutation.isLoading && !cancelMutation.isLoading,
-    refetchInterval: 2000,
+    enabled: !isScheduleLoading && !isCancelLoading,
+    refetchInterval: isPending ? 2000 : false,
   });
+
+  const scheduleKnowledgeIndicatorsOnboarding = useCallback(() => {
+    setOnboardingState({ status: OnboardingStatus.InProgress });
+    scheduleMutate(streamName);
+  }, [scheduleMutate, streamName]);
+
+  const cancelKnowledgeIndicatorsOnboarding = useCallback(() => {
+    setOnboardingState({ status: OnboardingStatus.BeingCanceled });
+    previousStatusRef.current = OnboardingStatus.BeingCanceled;
+    cancelMutate(streamName);
+  }, [cancelMutate, streamName]);
 
   return {
     isPending,
