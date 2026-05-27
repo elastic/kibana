@@ -115,6 +115,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
 
   const { attachment, isSidebar } = canvasState;
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
+  const description = uiDefinition?.getDescription?.(attachment);
 
   const flyoutType = isSidebar || isNarrowViewport ? 'overlay' : 'push';
   const width = uiDefinition.canvasWidth ?? DEFAULT_CANVAS_WIDTH;
@@ -148,6 +149,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     >
       <AttachmentHeader
         title={title}
+        description={description}
         actionButtons={canvasHeaderActionButtons}
         onClose={closeCanvas}
         previewBadgeState="preview_available"

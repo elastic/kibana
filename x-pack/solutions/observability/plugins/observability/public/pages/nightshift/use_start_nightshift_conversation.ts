@@ -13,6 +13,11 @@ import {
   NIGHTSHIFT_AGENT_BRIEF_TYPE,
   type NightshiftAgentBriefData,
 } from './agent_brief/nightshift_agent_brief_definition';
+import {
+  NIGHTSHIFT_SIGNIFICANT_EVENT_TYPE,
+  type NightshiftSignificantEventData,
+} from './agent_brief/nightshift_significant_event_definition';
+import { SIGNIFICANT_EVENTS } from './nightshift_critical_events';
 
 /** Kibana app id of the Agent Builder application. */
 const AGENT_BUILDER_APP_ID = 'agent_builder';
@@ -99,20 +104,35 @@ export function useStartNightshiftConversation() {
 
       /*
        * Build the `initialAttachments` payload Agent Builder will
-       * consume in `RoutedConversationsProvider`. The brief is a single
-       * `nightshift.agentBrief` attachment carrying the current
-       * Nightshift mode — the registered UI definition picks the
-       * right Nightshift panel to render inside the canvas flyout.
+       * consume in `RoutedConversationsProvider`.
+       *
+       *  - `loading` / `healthy` → one `nightshift.agentBrief`
+       *    attachment carrying the current mode. The registered UI
+       *    definition renders the matching Nightshift panel inside the
+       *    canvas flyout.
+       *  - `critical` → one `nightshift.significantEvent` attachment
+       *    per critical-state significant event (no single "brief"
+       *    attachment). This lets the user — and the agent — work
+       *    through each event as its own first-class attachment.
+       *  - omitted → no attachments pre-staged.
        */
-      const initialAttachments = briefMode
-        ? [
-            {
-              id: `nightshift-agent-brief-${briefMode}`,
-              type: NIGHTSHIFT_AGENT_BRIEF_TYPE,
-              data: { mode: briefMode } satisfies NightshiftAgentBriefData,
-            },
-          ]
-        : undefined;
+      const initialAttachments = (() => {
+        if (!briefMode) return undefined;
+        if (briefMode === 'critical') {
+          return SIGNIFICANT_EVENTS.map((event) => ({
+            id: `nightshift-significant-event-${event.id}`,
+            type: NIGHTSHIFT_SIGNIFICANT_EVENT_TYPE,
+            data: event satisfies NightshiftSignificantEventData,
+          }));
+        }
+        return [
+          {
+            id: `nightshift-agent-brief-${briefMode}`,
+            type: NIGHTSHIFT_AGENT_BRIEF_TYPE,
+            data: { mode: briefMode } satisfies NightshiftAgentBriefData,
+          },
+        ];
+      })();
 
       timeoutRef.current = setTimeout(() => {
         application.navigateToApp(AGENT_BUILDER_APP_ID, {

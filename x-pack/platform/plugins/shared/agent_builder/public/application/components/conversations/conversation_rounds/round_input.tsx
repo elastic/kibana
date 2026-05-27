@@ -38,6 +38,7 @@ interface RoundInputProps {
   attachmentRefs?: AttachmentVersionRef[];
   conversationAttachments?: VersionedAttachment[];
   fallbackAttachments?: Attachment[];
+  conversationId?: string;
 }
 
 export const RoundInput = ({
@@ -45,29 +46,37 @@ export const RoundInput = ({
   attachmentRefs,
   conversationAttachments,
   fallbackAttachments,
+  conversationId,
 }: RoundInputProps) => {
   const { euiTheme } = useEuiTheme();
   const [isHovering, setIsHovering] = useState(false);
 
+  const roundInputBlockStyles = css`
+    width: 100%;
+    max-width: 100%;
+  `;
+
   const inputContainerStyles = css`
-    align-self: end;
-    max-inline-size: 90%;
+    width: 100%;
+    max-width: 100%;
     background: ${euiTheme.colors.backgroundLightPrimary};
     ${euiTextBreakWord()}
     white-space: pre-wrap;
-    border-radius: ${`${ROUNDED_BORDER_RADIUS_LARGE} ${ROUNDED_BORDER_RADIUS_LARGE} 0 ${ROUNDED_BORDER_RADIUS_LARGE}`};
+    border-radius: ${ROUNDED_BORDER_RADIUS_LARGE};
   `;
 
   return (
     <EuiFlexGroup
       direction="column"
       gutterSize="s"
-      alignItems="flexEnd"
+      alignItems="stretch"
+      css={roundInputBlockStyles}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      <EuiPanel
-        css={inputContainerStyles}
+      <EuiFlexItem grow={false} css={roundInputBlockStyles}>
+        <EuiPanel
+          css={inputContainerStyles}
         paddingSize="m"
         hasShadow={false}
         hasBorder={false}
@@ -80,14 +89,17 @@ export const RoundInput = ({
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
-      <EuiFlexItem grow={false}>
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={roundInputBlockStyles}>
         <RoundAttachmentReferences
           attachmentRefs={attachmentRefs}
           conversationAttachments={conversationAttachments}
           fallbackAttachments={fallbackAttachments}
           actorFilter={[ATTACHMENT_REF_ACTOR.user]}
           justifyContent="flexEnd"
+          conversationId={conversationId}
+          variant="compact"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

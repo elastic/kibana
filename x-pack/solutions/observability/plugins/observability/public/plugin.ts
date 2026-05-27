@@ -627,6 +627,30 @@ export class Plugin
           }
         }
       );
+
+      /*
+       * Register the per-event attachment type used when the user hands
+       * off from the Critical state — one attachment is pushed per
+       * critical significant event, replacing the single "Agent brief"
+       * attachment used by the Loading / Healthy states.
+       */
+      void import(
+        './pages/nightshift/agent_brief/nightshift_significant_event_definition'
+      ).then(
+        ({
+          createNightshiftSignificantEventDefinition,
+          NIGHTSHIFT_SIGNIFICANT_EVENT_TYPE,
+        }) => {
+          if (
+            !attachments.getAttachmentUiDefinition(NIGHTSHIFT_SIGNIFICANT_EVENT_TYPE)
+          ) {
+            attachments.addAttachmentType(
+              NIGHTSHIFT_SIGNIFICANT_EVENT_TYPE,
+              createNightshiftSignificantEventDefinition()
+            );
+          }
+        }
+      );
     }
 
     return {

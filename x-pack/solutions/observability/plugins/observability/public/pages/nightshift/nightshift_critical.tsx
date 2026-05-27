@@ -31,21 +31,32 @@ import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 
 import { addNightshiftAttachment } from './nightshift_attachments';
+import {
+  IN_PROGRESS_EVENTS,
+  SIGNIFICANT_EVENTS,
+  type EventSeverity,
+  type SignificantEvent,
+} from './nightshift_critical_events';
 import { ShellSpinner } from './shell_spinner';
 import { useStartNightshiftConversation } from './use_start_nightshift_conversation';
 
 /* ----------------------------------------------------------------------- *
- * Static mock data — mirrors the Figma node 1080:78874 exactly. Real data
- * wiring is intentionally deferred (Nightshift is still a prototype).
+ * Static mock data — mirrors the Figma nodes 1152:82875 (events panel)
+ * and 1152:82850 (Overview panel). Real data wiring is intentionally
+ * deferred (Nightshift is still a prototype).
  * ----------------------------------------------------------------------- */
 
+/**
+ * Affected entity shown in the Overview panel — a service / piece of
+ * infrastructure currently implicated in a critical significant event.
+ */
 interface AffectedEntity {
   id: string;
-  /** Category label rendered in red above the entity name (Service / Infrastructure). */
+  /** Category label ("Service" / "Infrastructure"). */
   category: string;
-  /** Icon shown next to the category — layers for service, package for infrastructure, … */
+  /** Glyph next to the category — layers for service, kubernetesPod for infra. */
   icon: IconType;
-  /** Bold entity name — the actual subject of the incident (e.g. "payment"). */
+  /** Bold entity name — the subject of the incident (e.g. "payment"). */
   name: string;
 }
 
@@ -78,52 +89,6 @@ const RISK_SUMMARY: RiskSummaryStat[] = [
   { id: 'low', label: 'Low', value: '12', tone: 'subdued' },
 ];
 
-interface SignificantEvent {
-  id: string;
-  title: string;
-}
-
-const SIGNIFICANT_EVENTS: SignificantEvent[] = [
-  {
-    id: 'oteldemo-auth',
-    title:
-      'Dropped payments on oteldemo.com and video streams on otelfix.com due to unav…',
-  },
-  { id: 'password-reset', title: 'Password Reset Feature Downtime' },
-  {
-    id: 'payment-failures',
-    title: 'Payment Service — payment processing failures (steady state)',
-  },
-];
-
-/**
- * Mock list of significant events currently being worked on by an
- * agent / on-call engineer. Matches Figma node 902:77309. Each row
- * shows the title plus a shell-style spinner on the left to signal
- * "task running in the background".
- */
-const IN_PROGRESS_EVENTS: SignificantEvent[] = [
-  {
-    id: 'oteldemo-auth',
-    title:
-      'Dropped payments on oteldemo.com and video streams on otelfix.com due to unavailable Auth Service',
-  },
-  { id: '2fa-delay', title: 'Two-factor Authentication Delay Issues' },
-  { id: 'password-reset', title: 'Password Reset Feature Downtime' },
-  {
-    id: 'payment-failures',
-    title: 'Payment Service — payment processing failures (steady state)',
-  },
-];
-
-const FEATURED_EVENT = {
-  title: i18n.translate('xpack.observability.nightshift.critical.featuredEvent.title', {
-    defaultMessage:
-      'Dropped payments on oteldemo.com and video streams on otelfix.com due to unavailable Auth Service',
-  }),
-  badges: ['payment', 'checkout', 'Escalate'] as const,
-  score: 90,
-};
 
 const FILTER_OPTIONS = [
   { id: 'active', label: 'Active' },
@@ -144,76 +109,10 @@ const REMEDIATE_PROMPT = i18n.translate(
  * ----------------------------------------------------------------------- */
 
 /**
- * Tiny circular risk-score gauge for the featured event. Built with two
- * SVG circles: a faded base ring + a dashed foreground arc whose length
- * encodes the score. No EUI primitive matches this exactly so we draw
- * it inline.
+ * Pink "affected entity" card — one of the 4 tiles in the Overview
+ * panel. Uses the same light-danger background and danger text colors
+ * as the Figma reference (1152:82850).
  */
-const RiskScore: React.FC<{ value: number }> = ({ value }) => {
-  const { euiTheme } = useEuiTheme();
-  const size = 76;
-  const stroke = 8;
-  const radius = (size - stroke) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const clamped = Math.max(0, Math.min(100, value));
-  const dash = (clamped / 100) * circumference;
-
-  return (
-    <div
-      role="img"
-      aria-label={i18n.translate(
-        'xpack.observability.nightshift.critical.riskScoreAriaLabel',
-        { defaultMessage: 'Risk score: {value} out of 100', values: { value: clamped } }
-      )}
-      css={css`
-        position: relative;
-        width: ${size}px;
-        height: ${size}px;
-        flex-shrink: 0;
-      `}
-    >
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden>
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={euiTheme.colors.backgroundBaseDanger}
-          strokeWidth={stroke}
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={euiTheme.colors.textDanger}
-          strokeWidth={stroke}
-          strokeDasharray={`${dash} ${circumference - dash}`}
-          strokeDashoffset={circumference / 4}
-          strokeLinecap="round"
-          transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        />
-      </svg>
-      <span
-        css={css`
-          position: absolute;
-          inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: ${euiTheme.font.familyCode};
-          font-weight: 500;
-          font-size: 16px;
-          color: ${euiTheme.colors.textDanger};
-        `}
-      >
-        {clamped}
-      </span>
-    </div>
-  );
-};
-
-/** Pink "affected entity" card — one of the 4 tiles in the State panel. */
 const AffectedEntityCard: React.FC<{ entity: AffectedEntity }> = ({ entity }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -333,12 +232,42 @@ const RiskStat: React.FC<{ stat: RiskSummaryStat }> = ({ stat }) => {
   );
 };
 
+/**
+ * Mapping from a `SignificantEvent.severity` to the visual props EUI's
+ * `EuiBadge` needs (colour + i18n label). Kept close to the row component
+ * because no other code reads it.
+ */
+const SEVERITY_BADGE: Record<
+  EventSeverity,
+  { color: 'danger' | 'warning' | 'hollow'; label: string }
+> = {
+  critical: {
+    color: 'danger',
+    label: i18n.translate('xpack.observability.nightshift.critical.severity.critical', {
+      defaultMessage: 'Critical',
+    }),
+  },
+  medium: {
+    color: 'warning',
+    label: i18n.translate('xpack.observability.nightshift.critical.severity.medium', {
+      defaultMessage: 'Medium',
+    }),
+  },
+  low: {
+    color: 'hollow',
+    label: i18n.translate('xpack.observability.nightshift.critical.severity.low', {
+      defaultMessage: 'Low',
+    }),
+  },
+};
+
 /** Compact accordion-style event row with right-side action icons. */
 const SignificantEventRow: React.FC<{ event: SignificantEvent; isLast: boolean }> = ({
   event,
   isLast,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const severity = SEVERITY_BADGE[event.severity];
   return (
     <div
       css={css`
@@ -375,14 +304,10 @@ const SignificantEventRow: React.FC<{ event: SignificantEvent; isLast: boolean }
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiBadge
-                color="danger"
-                iconType="alert"
-                iconSide="left"
+                color={severity.color}
                 data-test-subj={`nightshiftCriticalEvent-${event.id}-badge`}
               >
-                {i18n.translate('xpack.observability.nightshift.critical.eventBadge', {
-                  defaultMessage: 'Critical',
-                })}
+                {severity.label}
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -551,7 +476,7 @@ export const NightshiftCritical: React.FC = () => {
         }
       `}
     >
-      {/* ---------- Header ---------- */}
+      {/* ---------- Header — matches the Loading / Healthy pages ---------- */}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -586,7 +511,7 @@ export const NightshiftCritical: React.FC = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      {/* ---------- State panel: affected entities ---------- */}
+      {/* ---------- Overview panel: affected entities (Figma 1152:82850) ---------- */}
       <EuiFlexItem
         grow={false}
         css={css`
@@ -603,35 +528,17 @@ export const NightshiftCritical: React.FC = () => {
             border-radius: 8px;
           `}
         >
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            responsive={false}
-            gutterSize="s"
+          <EuiText
+            size="s"
+            css={css`
+              color: ${euiTheme.colors.textSubdued};
+              font-weight: ${euiTheme.font.weight.semiBold};
+            `}
           >
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>
-                  {i18n.translate('xpack.observability.nightshift.critical.stateLabel', {
-                    defaultMessage: 'State',
-                  })}
-                </strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                flush="right"
-                onClick={() => {}}
-                data-test-subj="nightshiftCriticalGoToKnowledgeIndicators"
-              >
-                {i18n.translate(
-                  'xpack.observability.nightshift.critical.goToKnowledgeIndicators',
-                  { defaultMessage: 'Go to Knowledge Indicators' }
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            {i18n.translate('xpack.observability.nightshift.critical.overviewLabel', {
+              defaultMessage: 'Overview',
+            })}
+          </EuiText>
           <EuiSpacer size="s" />
           <EuiFlexGrid columns={4} gutterSize="s">
             {AFFECTED_ENTITIES.map((entity) => (
@@ -740,42 +647,6 @@ export const NightshiftCritical: React.FC = () => {
               </>
             )}
           </div>
-
-          {filter === 'active' && (
-            <div
-              css={css`
-                padding: ${euiTheme.size.l};
-                background: ${euiTheme.colors.backgroundBasePlain};
-                border-bottom: ${euiTheme.border.thin};
-              `}
-            >
-              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <RiskScore value={FEATURED_EVENT.score} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xxs">
-                        <h4>{FEATURED_EVENT.title}</h4>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-                        {FEATURED_EVENT.badges.map((label) => (
-                          <EuiFlexItem grow={false} key={label}>
-                            <EuiBadge color="hollow" iconType="layers" iconSide="left">
-                              {label}
-                            </EuiBadge>
-                          </EuiFlexItem>
-                        ))}
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-          )}
 
           {/*
            * Body list — content depends on the active filter:

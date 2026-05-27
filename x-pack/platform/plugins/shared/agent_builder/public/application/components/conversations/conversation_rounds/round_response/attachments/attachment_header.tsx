@@ -11,9 +11,11 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSplitPanel,
   EuiText,
   useEuiTheme,
+  type IconType,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
@@ -39,6 +41,13 @@ export const HEADER_HEIGHT = 72;
 
 interface AttachmentHeaderProps {
   title: string;
+  /**
+   * Optional one-line description rendered below the title. Useful for
+   * ambient metadata (severity, status, …) on header-only attachments.
+   */
+  description?: React.ReactNode;
+  /** Optional leading icon from the attachment type's UI definition. */
+  iconType?: IconType;
   actionButtons?: ActionButton[];
   onClose?: () => void;
   /**
@@ -52,6 +61,8 @@ interface AttachmentHeaderProps {
 
 export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   title,
+  description,
+  iconType,
   actionButtons,
   onClose,
   previewBadgeState = 'none',
@@ -93,7 +104,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
    * button too. The canvas flyout always provides `onClose`, so this
    * keeps the close affordance reachable from the header.
    */
-  if (!hasActionButtons && !onClose && previewBadgeState === 'none') {
+  if (!hasActionButtons && !onClose && previewBadgeState === 'none' && !title && !description && !iconType) {
     return null;
   }
 
@@ -108,12 +119,42 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
         responsive={false}
         justifyContent="spaceBetween"
         alignItems="center"
+        gutterSize="s"
         style={{ width: '100%' }}
       >
+        {iconType && (
+          <EuiFlexItem grow={false}>
+            <div
+              aria-hidden
+              css={css`
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: ${euiTheme.size.xl};
+                height: ${euiTheme.size.xl};
+                border-radius: ${euiTheme.border.radius.small};
+                background-color: ${euiTheme.colors.backgroundBasePrimary};
+              `}
+            >
+              <EuiIcon type={iconType} size="m" color="primary" />
+            </div>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
           <EuiText css={textStyles} size="s">
             {title}
           </EuiText>
+          {description && (
+            <EuiText
+              size="xs"
+              color="subdued"
+              css={css`
+                margin-top: ${euiTheme.size.xs};
+              `}
+            >
+              {description}
+            </EuiText>
+          )}
         </EuiFlexItem>
         {previewBadgeState !== 'previewing' && hasActionButtons && (
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>

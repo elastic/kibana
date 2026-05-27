@@ -122,9 +122,26 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getLabel: (attachment: TAttachment) => string;
   /**
+   * Returns an optional short description rendered immediately below the
+   * title in the attachment header (both inline-in-conversation and in
+   * the canvas flyout). Useful for ambient metadata like a severity
+   * label, status badge, or one-line subtitle.
+   *
+   * When combined with omitting `renderInlineContent`, this lets an
+   * attachment present as a compact header-only card (title +
+   * description) — no body slot is rendered if there is no inline
+   * content to fill it.
+   */
+  getDescription?: (attachment: TAttachment) => ReactNode;
+  /**
    * Returns the icon type to display for the attachment.
    */
   getIcon?: () => IconType;
+  /**
+   * Optional leading icon for compact attachment rows shown under the
+   * user prompt (icon tile only — no title/actions in the tile).
+   */
+  getCompactLeadingIcon?: (attachment: TAttachment) => ReactNode;
   /**
    * Optional custom click handler for attachment pills.
    * When provided, pills will invoke this instead of the default behavior.

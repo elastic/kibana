@@ -221,6 +221,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
           attachmentRefs={input.attachment_refs}
           conversationAttachments={conversationAttachments}
           fallbackAttachments={input.attachments}
+          conversationId={conversationId}
         />
       </EuiFlexItem>
 
@@ -310,6 +311,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
             attachmentRefs={input.attachment_refs}
             conversationAttachments={conversationAttachments}
             actorFilter={[ATTACHMENT_REF_ACTOR.agent, ATTACHMENT_REF_ACTOR.system]}
+            conversationId={conversationId}
           />
         </EuiFlexItem>
       )}

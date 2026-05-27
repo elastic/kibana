@@ -54,6 +54,7 @@ import { getCasesFeatureV2 } from './features/cases_v2';
 import { getCasesFeatureV3 } from './features/cases_v3';
 import { observabilityAlertAttachmentType } from './cases/attachments/alert';
 import { nightshiftAgentBriefAttachmentType } from './agent_brief/nightshift_agent_brief_type';
+import { nightshiftSignificantEventAttachmentType } from './agent_brief/nightshift_significant_event_type';
 import { setEsqlRecommendedQueries } from './lib/esql_extensions/set_esql_recommended_queries';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -116,6 +117,11 @@ export class ObservabilityPlugin
     // The client side renders the brief; the server only validates the
     // payload shape and provides a text representation for the LLM.
     plugins.agentBuilder?.attachments.registerType(nightshiftAgentBriefAttachmentType);
+
+    // Register the per-event attachment type used by the Critical state
+    // (one attachment per significant event) — same validate-only role
+    // as the brief above.
+    plugins.agentBuilder?.attachments.registerType(nightshiftSignificantEventAttachmentType);
 
     plugins.features.registerKibanaFeature(getLogsFeature());
 

@@ -5,23 +5,38 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, type EuiFlexGroupProps } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  useGeneratedHtmlId,
+  type EuiFlexGroupProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   Attachment,
   AttachmentVersionRef,
   AttachmentRefActor,
   AttachmentRefOperation,
+  UnknownAttachment,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_ACTOR,
   ATTACHMENT_REF_OPERATION,
   estimateTokens,
+  getVersion,
   hashContent,
 } from '@kbn/agent-builder-common/attachments';
 import { css } from '@emotion/react';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { InlineAttachmentWithActions } from './round_response/attachments/inline_attachment_with_actions';
+import { RoundUserAttachmentItem } from './round_user_attachment_item';
+
+export type RoundAttachmentReferencesVariant = 'compact' | 'standard';
 
 export interface RoundAttachmentReferencesProps {
   attachmentRefs?: AttachmentVersionRef[];
@@ -29,6 +44,12 @@ export interface RoundAttachmentReferencesProps {
   fallbackAttachments?: Attachment[];
   actorFilter?: AttachmentRefActor[];
   justifyContent?: EuiFlexGroupProps['justifyContent'];
+  conversationId?: string;
+  /**
+   * `compact` — slim rows under the user message (icon, title, expand only).
+   * `standard` — full inline attachment cards (agent / system references).
+   */
+  variant?: RoundAttachmentReferencesVariant;
 }
 
 interface ResolvedReference {
@@ -42,18 +63,28 @@ const labels = {
   attachments: i18n.translate('xpack.agentBuilder.roundAttachmentReferences.attachments', {
     defaultMessage: 'Attachments',
   }),
-  attachmentAdded: (description: string) =>
-    i18n.translate('xpack.agentBuilder.roundAttachmentReferences.attachmentAdded', {
-      defaultMessage: 'Attachment added: {description}',
-      values: { description },
+  showAttachments: (count: number) =>
+    i18n.translate('xpack.agentBuilder.roundAttachmentReferences.showAttachments', {
+      defaultMessage: 'Show attachments ({count})',
+      values: { count },
     }),
+  hideAttachments: i18n.translate('xpack.agentBuilder.roundAttachmentReferences.hideAttachments', {
+    defaultMessage: 'Hide attachments',
+  }),
 };
 
-const attachmentItemStyles = css`
-  font-style: italic;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+const attachmentsBlockStyles = css`
+  width: 100%;
+  max-width: 100%;
+
+  .euiAccordion__button {
+    width: 100%;
+  }
+`;
+
+const attachmentListItemStyles = css`
+  width: 100%;
+  max-width: 100%;
 `;
 
 const resolveOperation = (
@@ -91,13 +122,82 @@ const buildFallbackVersionedAttachments = (attachments: Attachment[]): Versioned
   }));
 };
 
+const toInlineAttachment = (
+  versioned: VersionedAttachment,
+  version: number
+): UnknownAttachment | null => {
+  const versionData = getVersion(versioned, version);
+  if (!versionData) {
+    return null;
+  }
+
+  return {
+    id: versioned.id,
+    type: versioned.type,
+    data: versionData.data,
+    hidden: versioned.hidden,
+    origin: versioned.origin,
+  };
+};
+
+interface RoundAttachmentReferenceItemProps {
+  resolvedReference: ResolvedReference;
+  conversationId: string;
+  variant: RoundAttachmentReferencesVariant;
+}
+
+const RoundAttachmentReferenceItem: React.FC<RoundAttachmentReferenceItemProps> = ({
+  resolvedReference,
+  conversationId,
+  variant,
+}) => {
+  const { attachmentsService } = useAgentBuilderServices();
+  const inlineAttachment = toInlineAttachment(
+    resolvedReference.attachment,
+    resolvedReference.version
+  );
+
+  if (!inlineAttachment) {
+    return null;
+  }
+
+  if (!attachmentsService.getAttachmentUiDefinition(inlineAttachment.type)) {
+    return null;
+  }
+
+  if (variant === 'compact') {
+    return (
+      <RoundUserAttachmentItem
+        attachment={inlineAttachment}
+        version={resolvedReference.version}
+      />
+    );
+  }
+
+  return (
+    <InlineAttachmentWithActions
+      attachment={inlineAttachment}
+      attachmentsService={attachmentsService}
+      isSidebar={false}
+      conversationId={conversationId}
+      version={resolvedReference.version}
+    />
+  );
+};
+
 export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps> = ({
   attachmentRefs,
   conversationAttachments,
   fallbackAttachments,
   actorFilter,
   justifyContent = 'flexStart',
+  conversationId,
+  variant = 'standard',
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const accordionId = useGeneratedHtmlId({ prefix: 'agentBuilderRoundAttachmentRefs' });
+  const isRightAligned = justifyContent === 'flexEnd';
+
   const resolvedReferences = useMemo((): ResolvedReference[] => {
     const fallbackVersioned = fallbackAttachments?.length
       ? buildFallbackVersionedAttachments(fallbackAttachments)
@@ -161,9 +261,23 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
     return resolved;
   }, [attachmentRefs, conversationAttachments, fallbackAttachments, actorFilter]);
 
-  if (resolvedReferences.length === 0) {
+  if (resolvedReferences.length === 0 || !conversationId) {
     return null;
   }
+
+  const attachmentCount = resolvedReferences.length;
+  const accordionLabel = isExpanded
+    ? labels.hideAttachments
+    : labels.showAttachments(attachmentCount);
+
+  const accordionButtonStyles = css`
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    ${isRightAligned ? 'justify-content: flex-end;' : ''}
+  `;
 
   return (
     <EuiFlexGroup
@@ -171,20 +285,53 @@ export const RoundAttachmentReferences: React.FC<RoundAttachmentReferencesProps>
       direction="column"
       responsive={false}
       justifyContent={justifyContent}
-      role="list"
+      alignItems="stretch"
+      css={attachmentsBlockStyles}
       aria-label={labels.attachments}
       data-test-subj="agentBuilderRoundAttachmentReferences"
     >
-      {resolvedReferences.map((ref) => (
-        <EuiFlexItem
-          css={attachmentItemStyles}
-          key={`${ref.attachment.id}-v${ref.version}-${ref.actor}`}
+      <EuiFlexItem grow={false} css={attachmentsBlockStyles}>
+        <EuiAccordion
+          id={accordionId}
+          arrowDisplay="none"
+          forceState={isExpanded ? 'open' : 'closed'}
+          onToggle={setIsExpanded}
+          data-test-subj="agentBuilderRoundAttachmentReferencesAccordion"
+          css={attachmentsBlockStyles}
+          buttonContent={
+            <EuiText color="subdued" size="s">
+              <p css={accordionButtonStyles}>
+                <EuiIcon type="paperClip" size="m" />
+                <EuiText size="s">{accordionLabel}</EuiText>
+              </p>
+            </EuiText>
+          }
         >
-          <EuiText color="subdued" size="xs">
-            {labels.attachmentAdded(ref.attachment.description ?? '')}
-          </EuiText>
-        </EuiFlexItem>
-      ))}
+          <EuiFlexGroup
+            gutterSize="s"
+            direction="column"
+            responsive={false}
+            css={attachmentsBlockStyles}
+            role="list"
+            aria-label={labels.attachments}
+            data-test-subj="agentBuilderRoundAttachmentReferencesList"
+          >
+            {resolvedReferences.map((resolvedReference) => (
+              <EuiFlexItem
+                grow={false}
+                key={`${resolvedReference.attachment.id}-v${resolvedReference.version}-${resolvedReference.actor}-${resolvedReference.operation}`}
+                css={attachmentListItemStyles}
+              >
+                <RoundAttachmentReferenceItem
+                  resolvedReference={resolvedReference}
+                  conversationId={conversationId}
+                  variant={variant}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiAccordion>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

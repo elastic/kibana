@@ -129,6 +129,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   }
 
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
+  const description = uiDefinition?.getDescription?.(attachment);
+  const iconType = uiDefinition?.getIcon?.();
 
   return (
     <EuiSplitPanel.Outer
@@ -141,22 +143,33 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     >
       <AttachmentHeader
         title={title}
+        description={description}
+        iconType={iconType}
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
       />
-      <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.(
-          {
-            attachment,
-            isSidebar,
-            screenContext,
-            openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-          },
-          {
-            registerActionButtons,
-          }
-        )}
-      </EuiSplitPanel.Inner>
+      {/*
+       * Only render the inline-content slot when the attachment type
+       * defines a `renderInlineContent` renderer. Without this guard the
+       * `EuiSplitPanel.Inner` shows up as an empty bordered box for
+       * header-only attachments (e.g. when the type opts to put all its
+       * info into the header via `getDescription`).
+       */}
+      {uiDefinition?.renderInlineContent && (
+        <EuiSplitPanel.Inner grow={false} paddingSize="none">
+          {uiDefinition.renderInlineContent(
+            {
+              attachment,
+              isSidebar,
+              screenContext,
+              openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+            },
+            {
+              registerActionButtons,
+            }
+          )}
+        </EuiSplitPanel.Inner>
+      )}
     </EuiSplitPanel.Outer>
   );
 };
