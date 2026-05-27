@@ -472,6 +472,7 @@ src/platform/packages/shared/content-management/table_list_view @elastic/appex-s
 src/platform/packages/shared/content-management/table_list_view_common @elastic/appex-sharedux
 src/platform/packages/shared/content-management/table_list_view_table @elastic/appex-sharedux
 src/platform/packages/shared/content-management/user_profiles @elastic/appex-sharedux
+src/platform/packages/shared/context-switcher-components @elastic/appex-sharedux
 src/platform/packages/shared/controls/control-group-renderer @elastic/kibana-presentation
 src/platform/packages/shared/controls/controls-constants @elastic/kibana-presentation
 src/platform/packages/shared/controls/controls-schemas @elastic/kibana-presentation
@@ -1017,6 +1018,7 @@ x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana @elastic
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-ai-tools-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
+x-pack/platform/packages/shared/kbn-apm-common @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-change-history @elastic/security-detection-rule-management
 x-pack/platform/packages/shared/kbn-classic-stream-flyout @elastic/kibana-management
@@ -1035,6 +1037,7 @@ x-pack/platform/packages/shared/kbn-evals-common @elastic/obs-ai-team @elastic/s
 x-pack/platform/packages/shared/kbn-evals-extensions @elastic/obs-ai-team @elastic/security-genai-research-and-development
 x-pack/platform/packages/shared/kbn-evals-phoenix-executor @elastic/obs-ai-team
 x-pack/platform/packages/shared/kbn-evals-suite-significant-events @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests @elastic/obs-ai-team
 x-pack/platform/packages/shared/kbn-evals-suite-streams @elastic/obs-onboarding-team
 x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-presentation-team @elastic/obs-exploration-team
 x-pack/platform/packages/shared/kbn-failure-store-modal @elastic/kibana-management
@@ -1328,6 +1331,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
+x-pack/solutions/security/packages/kbn-evals-suite-lead-generation @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/security-threat-hunting
@@ -1384,6 +1388,11 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 ## Items lower in the file have higher precedence:
 ##  https://help.github.com/articles/about-codeowners/
 ####
+
+# limits.yml changes frequently as bundle sizes shift; no owner means the ops
+# team isn't auto-requested as reviewer on every bump. A GitHub Actions workflow
+# (bundle-size-limits-comment.yml) flags increases ≥15% instead.
+packages/kbn-optimizer/limits.yml
 
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
@@ -1460,7 +1469,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/api_integration/apis/management/rollup/index_patterns_extensions.js @elastic/kibana-data-discovery
 /x-pack/platform/test/api_integration/apis/search @elastic/kibana-data-discovery
 /x-pack/platform/test/examples/search_examples @elastic/kibana-data-discovery
-/x-pack/platform/test/functional/apps/data_views @elastic/kibana-data-discovery
 /x-pack/platform/test/functional/apps/discover @elastic/kibana-data-discovery
 /x-pack/platform/test/functional/apps/saved_query_management @elastic/kibana-data-discovery
 /x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/discover @elastic/kibana-data-discovery
@@ -2854,6 +2862,9 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/scout-best-practices-reviewer @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-reproduce @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
@@ -3486,6 +3497,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/scripts/steps/checks/capture_oas_snapshot.sh @elastic/kibana-core
 /.buildkite/scripts/steps/checks/notify_api_contract_owners.ts @elastic/kibana-core
 /.buildkite/scripts/steps/checks/notify_api_contract_owners.test.ts @elastic/kibana-core
+/.buildkite/scripts/steps/checks/unused_deps.sh @elastic/kibana-security
 /.buildkite/pipelines/performance/streams_weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-otel-semconv-sync.yml @elastic/obs-onboarding-team
 /.buildkite/pipeline-resource-definitions/kibana-streams-performance-weekly.yml @elastic/obs-sig-events-team @elastic/obs-onboarding-team
@@ -3515,6 +3527,8 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 
 /.mise.toml @elastic/kibana-operations
+
+/knip.jsonc @elastic/kibana-security
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
