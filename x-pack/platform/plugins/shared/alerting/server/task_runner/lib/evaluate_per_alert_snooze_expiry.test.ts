@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { evaluatePerAlertSnooze } from './evaluate_per_alert_snooze';
+import { evaluatePerAlertSnoozeExpiry } from './evaluate_per_alert_snooze_expiry';
 import type { RawRuleSnoozedInstance } from '../../saved_objects/schemas/raw_rule';
 
 const NOW = new Date('1970-01-01T00:00:00.000Z');
 
-describe('evaluatePerAlertSnooze', () => {
+describe('evaluatePerAlertSnoozeExpiry', () => {
   it('returns empty arrays when snoozedInstances is empty', () => {
-    const result = evaluatePerAlertSnooze([], NOW);
+    const result = evaluatePerAlertSnoozeExpiry([], NOW);
     expect(result.activeInstances).toHaveLength(0);
     expect(result.expiredInstances).toHaveLength(0);
   });
@@ -23,7 +23,7 @@ describe('evaluatePerAlertSnooze', () => {
       snoozedAt: '1969-12-01T00:00:00.000Z',
       snoozedBy: 'user',
     };
-    const result = evaluatePerAlertSnooze([instance], NOW);
+    const result = evaluatePerAlertSnoozeExpiry([instance], NOW);
     expect(result.activeInstances).toHaveLength(1);
     expect(result.activeInstances[0].instanceId).toBe('alert-1');
     expect(result.expiredInstances).toHaveLength(0);
@@ -36,7 +36,7 @@ describe('evaluatePerAlertSnooze', () => {
       snoozedBy: 'user',
       expiresAt: '1970-01-02T00:00:00.000Z',
     };
-    const result = evaluatePerAlertSnooze([instance], NOW);
+    const result = evaluatePerAlertSnoozeExpiry([instance], NOW);
     expect(result.activeInstances).toHaveLength(1);
     expect(result.activeInstances[0].instanceId).toBe('alert-2');
     expect(result.expiredInstances).toHaveLength(0);
@@ -49,7 +49,7 @@ describe('evaluatePerAlertSnooze', () => {
       snoozedBy: 'user',
       expiresAt: '1970-01-01T00:00:00.000Z',
     };
-    const result = evaluatePerAlertSnooze([instance], NOW);
+    const result = evaluatePerAlertSnoozeExpiry([instance], NOW);
     expect(result.activeInstances).toHaveLength(0);
     expect(result.expiredInstances).toHaveLength(1);
     expect(result.expiredInstances[0].instanceId).toBe('alert-3');
@@ -62,7 +62,7 @@ describe('evaluatePerAlertSnooze', () => {
       snoozedBy: 'user',
       expiresAt: '1969-12-31T23:59:59.000Z',
     };
-    const result = evaluatePerAlertSnooze([instance], NOW);
+    const result = evaluatePerAlertSnoozeExpiry([instance], NOW);
     expect(result.activeInstances).toHaveLength(0);
     expect(result.expiredInstances).toHaveLength(1);
   });
@@ -83,7 +83,7 @@ describe('evaluatePerAlertSnooze', () => {
         expiresAt: '1969-12-31T23:59:59.000Z',
       },
     ];
-    const result = evaluatePerAlertSnooze(instances, NOW);
+    const result = evaluatePerAlertSnoozeExpiry(instances, NOW);
     expect(result.activeInstances.map((i) => i.instanceId)).toContain('active-indefinite');
     expect(result.activeInstances.map((i) => i.instanceId)).toContain('active-future');
     expect(result.activeInstances).toHaveLength(2);

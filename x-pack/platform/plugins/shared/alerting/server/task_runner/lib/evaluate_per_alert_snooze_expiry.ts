@@ -7,15 +7,15 @@
 
 import type { RawRuleSnoozedInstance } from '../../saved_objects/schemas/raw_rule';
 
-export interface EvaluatePerAlertSnoozeResult {
+export interface EvaluatePerAlertSnoozeExpiryResult {
   activeInstances: RawRuleSnoozedInstance[];
   expiredInstances: RawRuleSnoozedInstance[];
 }
 
-export const evaluatePerAlertSnooze = (
+export const evaluatePerAlertSnoozeExpiry = (
   snoozedInstances: RawRuleSnoozedInstance[],
   now: Date
-): EvaluatePerAlertSnoozeResult => {
+): EvaluatePerAlertSnoozeExpiryResult => {
   const activeInstances: RawRuleSnoozedInstance[] = [];
   const expiredInstances: RawRuleSnoozedInstance[] = [];
 

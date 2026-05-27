@@ -9,10 +9,13 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import {
   ALERT_UUID,
+  ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
 import { get, isEmpty } from 'lodash';
 import type {
@@ -111,6 +114,7 @@ export class AlertsClient<
   private indexTemplateAndPattern: IIndexPatternString;
 
   private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
+  private activeAlertsDataCache: Map<string, Record<string, unknown>> = new Map();
   private _isUsingDataStreams: boolean;
   private ruleInfoMessage: string;
   private logTags: { tags: string[] };
@@ -316,6 +320,17 @@ export class AlertsClient<
     return this.legacyAlertsClient.getRawAlertInstancesForState(shouldOptimizeTaskState);
   }
 
+  /**
+   * Returns the alert document for a given alert instance ID as it was
+   * constructed and indexed during `persistAlerts()` for this execution.
+   * Returns undefined when the alert was not indexed this execution.
+   */
+  public getBuiltActiveAlertDataByInstanceId(
+    instanceId: string
+  ): Record<string, unknown> | undefined {
+    return this.activeAlertsDataCache.get(instanceId);
+  }
+
   public factory() {
     return this.legacyAlertsClient.factory();
   }
@@ -413,6 +428,15 @@ export class AlertsClient<
     });
 
     const alertsToIndex = alertBuilder.buildAlerts();
+
+    this.activeAlertsDataCache = new Map();
+    for (const alert of alertsToIndex) {
+      const instanceId = get(alert, ALERT_INSTANCE_ID) as string | undefined;
+      const status = get(alert, ALERT_STATUS) as string | undefined;
+      if (instanceId && status === ALERT_STATUS_ACTIVE) {
+        this.activeAlertsDataCache.set(instanceId, alert as Record<string, unknown>);
+      }
+    }
 
     if (alertsToIndex.length > 0) {
       const bulkBody = alertBuilder.getBulkBody(alertsToIndex);
