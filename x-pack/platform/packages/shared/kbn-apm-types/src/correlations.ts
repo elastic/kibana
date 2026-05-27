@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { Environment } from '@kbn/apm-types-shared';
+import type { Environment } from './environment_rt';
 
 export interface FieldValuePair {
   fieldName: string;
