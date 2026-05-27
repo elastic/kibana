@@ -7,6 +7,7 @@
 
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   type CommonSearchOptions,
@@ -14,7 +15,6 @@ import {
   type PaginatedResponse,
 } from '../query_utils';
 import {
-  type LatestSourceWhereCondition,
   andWhere,
   inFilter,
   runLatestSourceEsqlQuery,
@@ -48,16 +48,19 @@ export class EventClient {
     }
   ) {}
 
-  private buildWhere(options: EventsFilterOptions): LatestSourceWhereCondition | undefined {
-    let where: LatestSourceWhereCondition | undefined;
+  private buildWhere(options: EventsFilterOptions): ESQLAstExpression | undefined {
+    let where: ESQLAstExpression | undefined;
     where = inFilter({ where, field: 'verdict', values: options.verdict });
     where = inFilter({ where, field: 'stream_names', values: options.stream });
 
     if (options.search) {
       const escaped = options.search.toLowerCase().replace(/\\/g, '\\\\').replace(/[*?]/g, '\\$&');
+      const pattern = esql.str(`*${escaped}*`);
       where = andWhere(
         where,
-        esql.exp`TO_LOWER(${esql.col('title')}) LIKE ${esql.str(`*${escaped}*`)}`
+        esql.exp`(TO_LOWER(${esql.col('title')}) LIKE ${pattern} OR TO_LOWER(${esql.col(
+          'summary'
+        )}) LIKE ${pattern})`
       );
     }
 

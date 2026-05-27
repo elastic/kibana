@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  esql,
-  type ComposerQuery,
-  type ComposerQueryTagHole,
-  type ComposerSortShorthand,
-} from '@elastic/esql';
+import { esql, type ComposerQuery, type ComposerSortShorthand } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -103,12 +98,10 @@ const executeCountQuery = async ({
   }
 };
 
-export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHole;
-
 export const andWhere = (
-  current: LatestSourceWhereCondition | undefined,
-  next: LatestSourceWhereCondition
-): LatestSourceWhereCondition => {
+  current: ESQLAstExpression | undefined,
+  next: ESQLAstExpression
+): ESQLAstExpression => {
   return current ? esql.exp`${current} AND ${next}` : next;
 };
 
@@ -117,10 +110,10 @@ export const inFilter = ({
   field,
   values,
 }: {
-  where: LatestSourceWhereCondition | undefined;
+  where: ESQLAstExpression | undefined;
   field: string;
   values: string[] | undefined;
-}): LatestSourceWhereCondition | undefined => {
+}): ESQLAstExpression | undefined => {
   if (!values?.length) return where;
   return andWhere(where, esql.exp`${esql.col(field)} IN (${values.map((v) => esql.str(v))})`);
 };
@@ -166,7 +159,7 @@ interface BuildLatestSourceBaseQueryArgs {
   space: string;
   index: string;
   options: CommonSearchOptions;
-  where?: LatestSourceWhereCondition;
+  where?: ESQLAstExpression;
   groupBy: string;
 }
 
@@ -203,7 +196,7 @@ interface RunLatestSourceEsqlQueryArgs {
   space: string;
   options: CommonSearchOptions;
   index: string;
-  where?: LatestSourceWhereCondition;
+  where?: ESQLAstExpression;
   sort?: ComposerSortShorthand[];
   groupBy: string;
 }
@@ -237,7 +230,7 @@ interface RunPaginatedLatestSourceEsqlQueryArgs {
   space: string;
   options: PaginatedSearchOptions;
   index: string;
-  where?: LatestSourceWhereCondition;
+  where?: ESQLAstExpression;
   sort?: ComposerSortShorthand[];
   groupBy: string;
 }

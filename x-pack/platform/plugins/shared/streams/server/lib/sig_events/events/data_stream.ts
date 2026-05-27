@@ -24,7 +24,8 @@ export const eventsMappings = {
     stream_names: mappings.keyword(),
     verdict: mappings.keyword(),
     impact: mappings.keyword(),
-    title: mappings.keyword(),
+    title: mappings.text(),
+    summary: mappings.text(),
   },
 } satisfies MappingsDefinition;
 

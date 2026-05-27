@@ -7,6 +7,7 @@
 
 import type { IDataStreamClient } from '@kbn/data-streams';
 import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   type CommonSearchOptions,
@@ -14,7 +15,6 @@ import {
   type PaginatedResponse,
 } from '../query_utils';
 import {
-  type LatestSourceWhereCondition,
   andWhere,
   inFilter,
   runLatestSourceEsqlQuery,
@@ -60,8 +60,8 @@ export class DetectionClient {
     });
   }
 
-  private buildWhere(options: DetectionsSearchOptions): LatestSourceWhereCondition | undefined {
-    let where: LatestSourceWhereCondition | undefined;
+  private buildWhere(options: DetectionsSearchOptions): ESQLAstExpression | undefined {
+    let where: ESQLAstExpression | undefined;
     where = inFilter({ where, field: 'rule_uuid', values: options.rule_uuid });
 
     if (options.rule_name) {
