@@ -59,6 +59,7 @@ const convertBaseFromEs = (document: Document) => {
     title: document._source.title,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
+    ...(document._source.read !== undefined && { read: document._source.read }),
   };
 };
 
@@ -193,6 +194,7 @@ export const fromEs = (document: Document): Conversation => {
       ...base,
       rounds: roundsWithRefs,
       attachments: existingAttachments,
+      ...(document._source!.read !== undefined && { read: document._source!.read }),
       ...(document._source!.state && { state: document._source!.state }),
     };
   }
@@ -202,6 +204,7 @@ export const fromEs = (document: Document): Conversation => {
       ...base,
       rounds: roundsWithRefs,
       ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
+      ...(document._source!.read !== undefined && { read: document._source!.read }),
       ...(document._source!.state && { state: document._source!.state }),
     };
   }
@@ -209,6 +212,7 @@ export const fromEs = (document: Document): Conversation => {
   return {
     ...base,
     rounds: roundsWithRefs,
+    ...(document._source!.read !== undefined && { read: document._source!.read }),
     ...(document._source!.state && { state: document._source!.state }),
   };
 };
@@ -231,6 +235,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
     state: conversation.state,
+    ...(conversation.read !== undefined && { read: conversation.read }),
   };
 };
 
@@ -277,5 +282,6 @@ export const createRequestToEs = ({
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
     state: conversation.state,
+    ...(conversation.read !== undefined && { read: conversation.read }),
   };
 };
