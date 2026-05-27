@@ -84,15 +84,18 @@ export const getLegendAction = (
       return null;
     }
 
-    const hasComputedColumn =
+    const noFilterableEsqlComputedColumn =
       isEsqlMode &&
       filterActionData.some((data) => {
         const column = data.table.columns[data.column];
-        return column?.isComputedColumn === true;
+        return (
+          column?.isComputedColumn === true &&
+          column.name === column.meta?.sourceParams?.sourceField
+        );
       });
 
     const filterHandler = ({ negate }: { negate?: boolean } = {}) => {
-      if (!hasComputedColumn) {
+      if (!noFilterableEsqlComputedColumn) {
         onFilter({ data: filterActionData, negate });
       }
     };
@@ -123,7 +126,7 @@ export const getLegendAction = (
         label={label}
         onFilter={filterHandler}
         legendCellValueActions={legendCellValueActions}
-        hasComputedColumn={hasComputedColumn}
+        hasComputedColumn={noFilterableEsqlComputedColumn}
         panelHasConfiguredDrilldowns={panelHasConfiguredDrilldowns}
       />
     );

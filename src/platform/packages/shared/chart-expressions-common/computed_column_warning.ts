@@ -66,15 +66,17 @@ export const getComputedColumnWarningForColumns = (
     return undefined;
   }
 
-  const computedColumnNames = defined.filter((col) => col.isComputedColumn).map((col) => col.name);
+  const nonFilterableComputedColumnNames = defined
+    .filter((col) => col.isComputedColumn && col.name === col.meta?.sourceParams?.sourceField)
+    .map((col) => col.name);
 
-  if (computedColumnNames.length === 0) {
+  if (nonFilterableComputedColumnNames.length === 0) {
     return undefined;
   }
 
-  const allColumnsAreComputed = computedColumnNames.length === defined.length;
+  const allColumnsAreComputed = nonFilterableComputedColumnNames.length === defined.length;
   return getComputedColumnFilterDisabledMessage({
-    computedColumnNames,
+    computedColumnNames: nonFilterableComputedColumnNames,
     allColumnsAreComputed,
     panelHasConfiguredDrilldowns,
   });

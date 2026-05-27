@@ -72,16 +72,19 @@ export const getLegendActions = (
 
     const isEsqlMode = visData.meta?.type === ESQL_TABLE_TYPE;
     const column = columnIndex !== -1 ? visData.columns[columnIndex] : undefined;
-    const hasComputedColumn = isEsqlMode && column?.isComputedColumn === true;
+    const hasComputedNonFilterableColumn =
+      isEsqlMode &&
+      column?.isComputedColumn === true &&
+      column.name === column.meta?.sourceParams?.sourceField;
 
     useEffect(() => {
-      if (!canFilter || !filterData || hasComputedColumn) {
+      if (!canFilter || !filterData || hasComputedNonFilterableColumn) {
         setIsFilterable(false);
         return;
       }
 
       (async () => setIsFilterable(await canFilter(filterData)))();
-    }, [filterData, hasComputedColumn]);
+    }, [filterData, hasComputedNonFilterableColumn]);
 
     if (columnIndex === -1) {
       return null;
@@ -98,13 +101,13 @@ export const getLegendActions = (
 
     const compatibleCellActions = columnCellValueActions[columnIndex] ?? [];
 
-    const computedColumnWarningMessage = hasComputedColumn
+    const computedColumnWarningMessage = hasComputedNonFilterableColumn
       ? getComputedColumnWarningForColumns([column], panelHasConfiguredDrilldowns ?? false)
       : undefined;
 
     const panelItems: EuiContextMenuPanelDescriptor['items'] = [];
 
-    if (hasComputedColumn) {
+    if (hasComputedNonFilterableColumn) {
       // Show disabled filter items with a warning message for ES|QL computed columns
       panelItems.push(
         {
