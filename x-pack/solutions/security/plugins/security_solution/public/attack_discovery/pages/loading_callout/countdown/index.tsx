@@ -12,6 +12,7 @@ import {
   EuiOutsideClickDetector,
   EuiPopover,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -72,7 +73,11 @@ const CountdownComponent: React.FC<Props> = ({
   }, [approximateFutureTime]);
 
   const iconInQuestionButton = useMemo(
-    () => <EuiButtonIcon aria-label={i18n.INFORMATION} iconType="question" onClick={onClick} />,
+    () => (
+      <EuiToolTip content={i18n.INFORMATION} disableScreenReaderOutput>
+        <EuiButtonIcon aria-label={i18n.INFORMATION} iconType="question" onClick={onClick} />
+      </EuiToolTip>
+    ),
     [onClick]
   );
 
