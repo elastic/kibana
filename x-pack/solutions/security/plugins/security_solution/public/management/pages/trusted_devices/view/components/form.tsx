@@ -454,14 +454,16 @@ const ConditionEntryRow = memo<ConditionEntryRowProps>(
         <EuiFlexItem grow={false}>
           {/* Unicode nbsp so the button aligns with other fields when labels are shown */}
           <EuiFormRow label={showLabels ? '\u00A0' : undefined}>
-            <EuiButtonIcon
-              color="danger"
-              iconType="trash"
-              onClick={handleRemove}
-              isDisabled={isRemoveDisabled || disabled}
-              aria-label={REMOVE_ENTRY_ARIA_LABEL}
-              data-test-subj={getTestId(`entry${index}removeButton`)}
-            />
+            <EuiToolTip content={REMOVE_ENTRY_ARIA_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                color="danger"
+                iconType="trash"
+                onClick={handleRemove}
+                isDisabled={isRemoveDisabled || disabled}
+                aria-label={REMOVE_ENTRY_ARIA_LABEL}
+                data-test-subj={getTestId(`entry${index}removeButton`)}
+              />
+            </EuiToolTip>
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
