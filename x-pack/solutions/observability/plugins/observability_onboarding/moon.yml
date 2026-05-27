@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/dashboard-plugin'
+  - '@kbn/core-chrome-layout-constants'
 tags:
   - plugin
   - prod
