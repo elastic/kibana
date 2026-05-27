@@ -64,11 +64,19 @@ test.describe(
         ).toContainText(MOCKED_TITLE);
       }).toPass({ timeout: 120_000 });
 
-      await pageObjects.agentBuilder.clickThinkingToggle();
-      await expect(async () => {
-        const thinking = await pageObjects.agentBuilder.getThinkingDetails();
-        expect(thinking).toContain('Calling tool platform.core.search');
-      }).toPass({ timeout: 60_000 });
+      // The reasoning panel is expanded by default for live rounds (per
+      // `RoundEvents`'s `useState(!isReloadedRound)`), so no toggle click is
+      // needed. The tool-call headline flips from "Calling tool …" →
+      // "Tool … responded" once results arrive; by this point the round is
+      // complete and the responded wording is the stable terminal state.
+      //
+      // `toContainText` normalises whitespace, which matters because EuiBadge
+      // injects non-breaking spaces around its content — a plain `innerText`
+      // + substring match would fail despite the words being visually present.
+      await expect(page.testSubj.locator('agentBuilderThinkingPanel')).toContainText(
+        'Tool platform.core.search responded',
+        { timeout: 60_000 }
+      );
 
       await pageObjects.agentBuilder.clickNewConversationButton();
       await expect(async () => {
