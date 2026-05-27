@@ -562,7 +562,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
                           >
                             <FormattedMessage
                               id="xpack.fleet.addCollectorFlyout.managedOtlpDocsLinkLabel"
-                              defaultMessage="Managed OTLP Endpoint documentation"
+                              defaultMessage="Managed OTLP Endpoint (mOTLP) documentation"
                             />
                           </EuiLink>
                         ),
