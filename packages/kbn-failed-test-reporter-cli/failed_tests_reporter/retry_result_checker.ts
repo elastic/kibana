@@ -49,10 +49,6 @@ export async function collectPassedTestNames(junitDir: string): Promise<Set<stri
   return names;
 }
 
-export function computeIntersection(prev: Set<string>, current: Set<string>): string[] {
-  return [...current].filter((name) => prev.has(name));
-}
-
 const readStdin = (): Promise<string> =>
   new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];

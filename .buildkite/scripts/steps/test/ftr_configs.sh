@@ -21,6 +21,7 @@ FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}"
 FAILED_TESTS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}_failed_tests"
 
 exitCode=0
+retry_recovered=false
 
 configs="${FTR_CONFIG:-}"
 
@@ -97,19 +98,13 @@ while read -r config; do
   lastCode=$?
   set -e;
 
-  # Scout reporter — run under set+e so a failure here does not abort the config loop
+  # Scout reporter
   if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
+    # Upload events after running each config
     echo "Upload Scout reporter events to AppEx QA's team cluster for config $config"
-    set +e
     node scripts/scout upload-events --dontFailOnError
-    scout_upload_code=$?
-    set -e
-    if [[ $scout_upload_code -ne 0 ]]; then
-      echo "Scout reporter upload exited $scout_upload_code (continuing)"
-    else
-      echo "Upload successful, removing local events at .scout/reports"
-      rm -rf .scout/reports
-    fi
+    echo "Upload successful, removing local events at .scout/reports"
+    rm -rf .scout/reports
   else
     echo "SCOUT_REPORTER_ENABLED=$SCOUT_REPORTER_ENABLED, skipping event upload."
   fi

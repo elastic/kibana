@@ -11,11 +11,7 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 
-import {
-  collectFailedTestNames,
-  collectPassedTestNames,
-  computeIntersection,
-} from './retry_result_checker';
+import { collectFailedTestNames, collectPassedTestNames } from './retry_result_checker';
 
 // Minimal JUnit XML helpers
 const buildXml = (testcases: string) => `<?xml version="1.0" encoding="utf-8"?>
@@ -149,37 +145,5 @@ describe('collectPassedTestNames', () => {
     );
     const names = await collectPassedTestNames(tmpDir);
     expect(names.has('test A')).toBe(false);
-  });
-});
-
-describe('computeIntersection', () => {
-  it('returns empty when no overlap', () => {
-    const prev = new Set(['test A', 'test B']);
-    const current = new Set(['test C']);
-    expect(computeIntersection(prev, current)).toEqual([]);
-  });
-
-  it('returns overlapping tests', () => {
-    const prev = new Set(['test A', 'test B']);
-    const current = new Set(['test A', 'test C']);
-    expect(computeIntersection(prev, current)).toEqual(['test A']);
-  });
-
-  it('returns empty when current is empty', () => {
-    const prev = new Set(['test A']);
-    const current = new Set<string>();
-    expect(computeIntersection(prev, current)).toEqual([]);
-  });
-
-  it('returns empty when prev is empty', () => {
-    const prev = new Set<string>();
-    const current = new Set(['test A']);
-    expect(computeIntersection(prev, current)).toEqual([]);
-  });
-
-  it('returns all current failures when all were previously failing', () => {
-    const prev = new Set(['test A', 'test B']);
-    const current = new Set(['test A', 'test B']);
-    expect(computeIntersection(prev, current).sort()).toEqual(['test A', 'test B']);
   });
 });
