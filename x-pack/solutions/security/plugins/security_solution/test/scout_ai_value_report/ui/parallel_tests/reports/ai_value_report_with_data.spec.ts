@@ -25,8 +25,9 @@ spaceTest.describe(
 
     spaceTest(
       'renders the live report layout when Attack Discovery data exists',
-      async ({ browserAuth, pageObjects }) => {
+      async ({ browserAuth, pageObjects, config }) => {
         const { aiValueReportPage } = pageObjects;
+        const isServerless = config.serverless ?? false;
 
         await browserAuth.loginAsSecurityRole('admin');
         await aiValueReportPage.navigate();
@@ -35,7 +36,13 @@ spaceTest.describe(
         await expect(aiValueReportPage.sampleBanner).toBeHidden();
         await expect(aiValueReportPage.sampleDataBadge).toBeHidden();
         await expect(aiValueReportPage.executiveSummary).toBeVisible({ timeout: 30000 });
-        await expect(aiValueReportPage.exportButton).toBeEnabled();
+        await expect(aiValueReportPage.exportButton).toBeVisible();
+        // Serverless enables the export button on report data alone; stateful also
+        // waits for an AI-generated insight, which requires a configured default AI
+        // connector that this env does not provide.
+        await expect
+          .poll(() => aiValueReportPage.exportButton.isEnabled(), { timeout: 30000 })
+          .toBe(isServerless);
       }
     );
 
