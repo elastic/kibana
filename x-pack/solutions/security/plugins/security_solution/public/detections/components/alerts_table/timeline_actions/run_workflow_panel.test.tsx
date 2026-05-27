@@ -87,7 +87,6 @@ jest.mock('./run_workflow_inputs_modal', () => ({
   ),
 }));
 
-
 const mockNavigateToApp = jest.fn();
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const actual = jest.requireActual('@kbn/kibana-react-plugin/public');

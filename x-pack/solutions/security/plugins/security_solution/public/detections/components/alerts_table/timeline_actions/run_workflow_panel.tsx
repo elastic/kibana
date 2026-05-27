@@ -203,7 +203,6 @@ export const RunWorkflowPanel = ({
           onCancel={() => setIsInputsModalOpen(false)}
         />
       )}
-
     </>
   );
 };
