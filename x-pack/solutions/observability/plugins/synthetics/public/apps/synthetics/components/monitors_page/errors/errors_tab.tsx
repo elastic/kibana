@@ -98,6 +98,7 @@ export const ErrorsTab = () => {
       {apiError && (
         <>
           <EuiCallOut
+            announceOnMount
             title={ERROR_TITLE}
             color="danger"
             iconType="warning"
