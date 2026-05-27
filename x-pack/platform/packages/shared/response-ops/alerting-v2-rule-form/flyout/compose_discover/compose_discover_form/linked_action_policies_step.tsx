@@ -61,15 +61,12 @@ const errorTitle = i18n.translate(
   { defaultMessage: 'Failed to load linked action policies' }
 );
 
-interface LinkedActionPoliciesStepProps {
+interface Props {
   http: HttpStart;
   ruleId?: string;
 }
 
-export const LinkedActionPoliciesStep: React.FC<LinkedActionPoliciesStepProps> = ({
-  http,
-  ruleId,
-}) => {
+export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
   const metadata = useWatch<ComposeFormValues, 'metadata'>({ name: 'metadata' });
   const name = ruleId ? undefined : metadata?.name;
   const tags = ruleId ? undefined : metadata?.tags;

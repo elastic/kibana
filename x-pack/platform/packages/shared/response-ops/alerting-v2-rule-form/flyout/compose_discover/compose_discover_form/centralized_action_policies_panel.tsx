@@ -58,13 +58,11 @@ const illustrationAlt = i18n.translate(
   { defaultMessage: 'Centralized action policies illustration' }
 );
 
-interface CentralizedActionPoliciesPanelProps {
+interface Props {
   http: HttpStart;
 }
 
-export const CentralizedActionPoliciesPanel: React.FC<CentralizedActionPoliciesPanelProps> = ({
-  http,
-}) => {
+export const CentralizedActionPoliciesPanel = ({ http }: Props) => {
   const createUrl = http.basePath.prepend(ACTION_POLICY_CREATE_PATH);
 
   return (

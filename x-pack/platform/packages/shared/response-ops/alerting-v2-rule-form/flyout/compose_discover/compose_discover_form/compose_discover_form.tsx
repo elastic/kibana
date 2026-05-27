@@ -26,7 +26,7 @@ import { NotificationsStep } from './notifications_step';
 import { LinkedActionPoliciesStep } from './linked_action_policies_step';
 import { CentralizedActionPoliciesPanel } from './centralized_action_policies_panel';
 
-interface ComposeDiscoverFormProps {
+interface Props {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
@@ -140,7 +140,7 @@ export const getSteps = (isAlert: boolean, builderType?: string): StepDefinition
   });
 };
 
-export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
+export const ComposeDiscoverForm = ({
   state,
   dispatch,
   services,
@@ -150,7 +150,7 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   builderType,
   builderState,
   onBuilderStateChange,
-}) => {
+}: Props) => {
   const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const steps = getSteps(isAlert, builderType);
   return steps[state.step].render({

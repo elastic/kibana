@@ -29,11 +29,11 @@ const createSingleActionLabel = i18n.translate(
   { defaultMessage: 'Create single action' }
 );
 
-interface NotificationsStepProps {
+interface Props {
   services: RuleFormServices;
 }
 
-export const NotificationsStep: React.FC<NotificationsStepProps> = ({ services }) => {
+export const NotificationsStep = ({ services }: Props) => {
   const { watch, setValue } = useFormContext<ComposeFormValues>();
   const notifications = watch('notifications');
   const enabled = !!notifications;
