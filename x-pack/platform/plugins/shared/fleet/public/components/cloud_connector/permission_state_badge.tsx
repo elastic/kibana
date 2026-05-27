@@ -123,7 +123,7 @@ function visualFor(state: CellState, hideCount: boolean): BadgeVisual {
         iconType: 'unlink',
         label: i18n.translate(
           'xpack.fleet.cloudConnector.permissionStatus.badge.verificationFailed',
-          { defaultMessage: 'Verification Failed' }
+          { defaultMessage: 'Verification failed' }
         ),
         ariaLabel: i18n.translate(
           'xpack.fleet.cloudConnector.permissionStatus.badge.verificationFailedAria',
