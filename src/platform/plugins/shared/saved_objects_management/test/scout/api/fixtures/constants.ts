@@ -33,12 +33,9 @@ export const KBN_ARCHIVES = {
     'x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management/spaces_integration',
 };
 
-// Inspect-view target inside the FEATURE_CONTROLS_SECURITY archive. The stable
-// id lets the UI inspect URL be deep-linked without scanning the listing.
+// Inspect-view target inside the FEATURE_CONTROLS_SECURITY archive.
 export const INSPECT_TARGETS = {
   DASHBOARD_TITLE: 'A Dashboard',
-  DASHBOARD_ID: 'i-exist',
-  DASHBOARD_TYPE: 'dashboard',
 } as const;
 
 // Cross-version saved-object .ndjson exports. Paths are repo-relative so they
