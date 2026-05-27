@@ -74,8 +74,8 @@ test.describe('Saved objects management - imports (UI)', { tag: tags.stateful.cl
     await pageObjects.datePicker.setAbsoluteRange({ from: LOGSTASH_FROM, to: LOGSTASH_TO });
     await pageObjects.dashboard.waitForRenderComplete();
 
-    const errorEmbeddables = await page.locator('[data-test-subj="embeddableError"]').count();
-    expect(errorEmbeddables).toBe(0);
+    const errorEmbeddables = page.locator('[data-test-subj="embeddableError"]');
+    await expect(errorEmbeddables).toHaveCount(0);
   });
 
   test('copy-to-space flyout copies a dashboard from one space to another', async ({
