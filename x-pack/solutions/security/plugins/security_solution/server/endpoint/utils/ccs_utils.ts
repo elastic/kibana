@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 const CCS_CACHE_TTL_MS = 60 * 1000;
 
 interface CcsCache {
-  value: boolean;
+  promise: Promise<boolean>;
   timestamp: number;
 }
 
@@ -20,27 +20,21 @@ export const resetCcsCache = (): void => {
   ccsCache = null;
 };
 
-export const hasConnectedRemoteClusters = async (
-  esClient: ElasticsearchClient
-): Promise<boolean> => {
+export const hasConnectedRemoteClusters = (esClient: ElasticsearchClient): Promise<boolean> => {
   const now = Date.now();
 
   if (ccsCache !== null && now - ccsCache.timestamp < CCS_CACHE_TTL_MS) {
-    return ccsCache.value;
+    return ccsCache.promise;
   }
 
-  try {
-    const response = await esClient.cluster.remoteInfo();
-    const connected = Object.values(response).some((r) => r.connected);
+  const promise = esClient.cluster
+    .remoteInfo()
+    .then((response) => Object.values(response).some((r) => r.connected))
+    .catch(() => false);
 
-    ccsCache = { value: connected, timestamp: now };
+  ccsCache = { promise, timestamp: now };
 
-    return connected;
-  } catch {
-    ccsCache = { value: false, timestamp: now };
-
-    return false;
-  }
+  return promise;
 };
 
 export const prefixIndexPatternsWithCcs = (indexPattern: string, ccsEnabled: boolean): string => {

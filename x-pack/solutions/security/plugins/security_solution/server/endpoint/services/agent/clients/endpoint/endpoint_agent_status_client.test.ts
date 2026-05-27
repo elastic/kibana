@@ -13,6 +13,7 @@ import { getPendingActionsSummary as _getPendingActionsSummary } from '../../../
 import { createMockEndpointAppContextService } from '../../../../mocks';
 import { appContextService as fleetAppContextService } from '@kbn/fleet-plugin/server/services';
 import { createAppContextStartContractMock as fleetCreateAppContextStartContractMock } from '@kbn/fleet-plugin/server/mocks';
+import { resetCcsCache } from '../../../../utils/ccs_utils';
 
 jest.mock('../../../actions/pending_actions_summary', () => {
   const realModule = jest.requireActual('../../../actions/pending_actions_summary');
@@ -30,6 +31,7 @@ describe('EndpointAgentStatusClient', () => {
   let dataMocks: ApplyMetadataMocksResponse;
 
   beforeEach(() => {
+    resetCcsCache();
     const endpointAppContextServiceMock = createMockEndpointAppContextService();
     const metadataMocks = createEndpointMetadataServiceTestContextMock();
     const soClient = endpointAppContextServiceMock.savedObjects.createInternalScopedSoClient({
@@ -78,12 +80,28 @@ describe('EndpointAgentStatusClient', () => {
     await statusClient.getAgentStatuses(agentIds);
 
     expect(metadataClient.getHostMetadataList).toHaveBeenCalledWith(
-      expect.objectContaining({ kuery: 'agent.id: one or agent.id: two' })
+      expect.objectContaining({ kuery: 'agent.id: one or agent.id: two' }),
+      false
     );
     expect(getPendingActionsSummaryMock).toHaveBeenCalledWith(
       expect.anything(),
       'default',
       agentIds
+    );
+  });
+
+  it('should pass ccsEnabled=true to metadata service when remote clusters are connected', async () => {
+    const metadataClient = constructorOptions.endpointService.getEndpointMetadataService();
+    (constructorOptions.esClient.cluster.remoteInfo as jest.Mock).mockResolvedValue({
+      cluster_a: { connected: true },
+    });
+    jest.spyOn(metadataClient, 'getHostMetadataList');
+
+    await statusClient.getAgentStatuses(['one']);
+
+    expect(metadataClient.getHostMetadataList).toHaveBeenCalledWith(
+      expect.objectContaining({ kuery: 'agent.id: one' }),
+      true
     );
   });
 
