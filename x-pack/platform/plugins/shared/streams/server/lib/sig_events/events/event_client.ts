@@ -16,14 +16,10 @@ import {
 import {
   type LatestSourceWhereCondition,
   andWhere,
-  applyTimeRange,
-  fromIndexForSpace,
   inFilter,
-  isIndexNotFoundError,
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
-  queryEsql,
 } from '../latest_source_query';
 import {
   EVENTS_DATA_STREAM,
@@ -31,19 +27,17 @@ import {
   type StoredEvent,
   type eventsMappings,
 } from './data_stream';
+import { FIELD_EVENT_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 
 export interface EventsFilterOptions {
   verdict?: string[];
   stream?: string[];
-  impact?: string[];
   search?: string;
 }
 
 export interface EventsPaginatedSearchOptions extends PaginatedSearchOptions, EventsFilterOptions {}
-
-const GROUP_BY_FIELD = 'event_id';
 
 export class EventClient {
   constructor(
@@ -58,7 +52,6 @@ export class EventClient {
     let where: LatestSourceWhereCondition | undefined;
     where = inFilter({ where, field: 'verdict', values: options.verdict });
     where = inFilter({ where, field: 'stream_names', values: options.stream });
-    where = inFilter({ where, field: 'impact', values: options.impact });
 
     if (options.search) {
       const escaped = options.search.toLowerCase().replace(/\\/g, '\\\\').replace(/[*?]/g, '\\$&');
@@ -84,31 +77,20 @@ export class EventClient {
       space: this.clients.space,
       options,
       index: EVENTS_DATA_STREAM,
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DISCOVERY_SLUG,
     });
   }
 
   async findLatestPaginated(
     options: EventsPaginatedSearchOptions = {}
   ): Promise<PaginatedResponse<SigEvent>> {
-    const supersededIds = await this.findSupersededEventIds({
-      from: options.from,
-      to: options.to,
-    });
-
-    let where = this.buildWhere(options);
-    if (supersededIds.size > 0) {
-      const literals = [...supersededIds].map((id) => esql.str(id));
-      where = andWhere(where, esql.exp`NOT ${esql.col('event_id')} IN (${literals})`);
-    }
-
     return runPaginatedLatestSourceEsqlQuery<SigEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: EVENTS_DATA_STREAM,
-      where,
-      groupBy: GROUP_BY_FIELD,
+      where: this.buildWhere(options),
+      groupBy: FIELD_DISCOVERY_SLUG,
     });
   }
 
@@ -117,42 +99,18 @@ export class EventClient {
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: EVENTS_DATA_STREAM,
-      idField: GROUP_BY_FIELD,
+      idField: FIELD_EVENT_ID,
       idValue: eventId,
     });
   }
 
-  async findSupersededEventIds(
-    timeRange: { from?: string; to?: string } = {}
-  ): Promise<Set<string>> {
-    const { space } = this.clients;
-    const prevId = esql.col('previous_event_id');
-
-    const baseQuery = fromIndexForSpace({ index: EVENTS_DATA_STREAM, space })
-      .where`${prevId} IS NOT NULL AND ${prevId} != ${esql.str('')}`;
-
-    const query = applyTimeRange({ query: baseQuery, ...timeRange })
-      .pipe`STATS ids = VALUES(${prevId})`.keep('ids');
-
-    try {
-      const response = await queryEsql({
-        esClient: this.clients.esClient,
-        query,
-      });
-
-      const idsIdx = response.columns.findIndex((c) => c.name === 'ids');
-      if (idsIdx === -1 || response.values.length === 0) {
-        return new Set();
-      }
-
-      const rawValue = response.values[0][idsIdx];
-      const ids = Array.isArray(rawValue) ? rawValue : [rawValue];
-      return new Set(ids.filter((v): v is string => typeof v === 'string'));
-    } catch (error) {
-      if (isIndexNotFoundError(error)) {
-        return new Set();
-      }
-      throw error;
-    }
+  async findByDiscoverySlug(slug: string): Promise<{ hits: SigEvent[] }> {
+    return runFindByIdEsqlQuery<SigEvent>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: EVENTS_DATA_STREAM,
+      idField: FIELD_DISCOVERY_SLUG,
+      idValue: slug,
+    });
   }
 }

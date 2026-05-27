@@ -17,7 +17,6 @@ interface UseFetchSigEventsParams {
   to: string | number;
   verdict?: string[];
   stream?: string[];
-  impact?: string[];
   search?: string;
 }
 
@@ -26,7 +25,6 @@ export const useFetchSigEvents = ({
   to,
   verdict,
   stream,
-  impact,
   search,
 }: UseFetchSigEventsParams) => {
   const {
@@ -42,20 +40,10 @@ export const useFetchSigEvents = ({
 
   useEffect(() => {
     setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
-  }, [from, to, verdict, stream, impact, search]);
+  }, [from, to, verdict, stream, search]);
 
   const query = useQuery<PaginatedResponse<SigEvent>, Error>({
-    queryKey: [
-      'sigEvents',
-      pagination.page,
-      pagination.perPage,
-      from,
-      to,
-      verdict,
-      stream,
-      impact,
-      search,
-    ],
+    queryKey: ['sigEvents', pagination.page, pagination.perPage, from, to, verdict, stream, search],
     queryFn: async ({ signal }: QueryFunctionContext): Promise<PaginatedResponse<SigEvent>> => {
       return streamsRepositoryClient.fetch('GET /internal/sig_events/events', {
         params: {
@@ -66,7 +54,6 @@ export const useFetchSigEvents = ({
             to: new Date(to).toISOString(),
             ...(verdict?.length ? { verdict } : {}),
             ...(stream?.length ? { stream } : {}),
-            ...(impact?.length ? { impact } : {}),
             ...(search ? { search } : {}),
           },
         },

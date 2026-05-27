@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import type { SigEvent } from '@kbn/streams-schema';
 import { useFetchEventLifecycle } from '../../../../../hooks/sig_events/use_fetch_sig_events';
 import { LifecycleTimeline } from './lifecycle_timeline';
-import { getVerdictColor, getImpactColor } from './filter_constants';
+import { getVerdictColor } from './filter_constants';
 import { formatTimestamp } from '../../../../../util/formatters';
 
 const evidencePanelCss = css`
@@ -100,11 +100,6 @@ export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
             <EuiFlexItem grow={false}>
               <EuiBadge color={getVerdictColor(event.verdict)}>{event.verdict}</EuiBadge>
             </EuiFlexItem>
-            {event.impact && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={getImpactColor(event.impact)}>{event.impact}</EuiBadge>
-              </EuiFlexItem>
-            )}
             {event.recommended_action && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color={event.recommended_action === 'escalate' ? 'danger' : 'hollow'}>

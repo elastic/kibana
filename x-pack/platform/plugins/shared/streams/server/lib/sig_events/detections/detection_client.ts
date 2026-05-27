@@ -27,6 +27,7 @@ import {
   type StoredDetection,
   type detectionsMappings,
 } from './data_stream';
+import { FIELD_DETECTION_ID } from '../field_names';
 
 export type DetectionDataStreamClient = IDataStreamClient<
   typeof detectionsMappings,
@@ -42,8 +43,6 @@ export interface DetectionsPaginatedSearchOptions extends PaginatedSearchOptions
   rule_uuid?: string[];
   rule_name?: string;
 }
-
-const GROUP_BY_FIELD = 'detection_id';
 
 export class DetectionClient {
   constructor(
@@ -79,7 +78,7 @@ export class DetectionClient {
       options,
       index: DETECTIONS_DATA_STREAM,
       where: this.buildWhere(options),
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DETECTION_ID,
     });
   }
 
@@ -92,7 +91,7 @@ export class DetectionClient {
       options,
       index: DETECTIONS_DATA_STREAM,
       where: this.buildWhere(options),
-      groupBy: GROUP_BY_FIELD,
+      groupBy: FIELD_DETECTION_ID,
     });
   }
 
@@ -101,7 +100,7 @@ export class DetectionClient {
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DETECTIONS_DATA_STREAM,
-      idField: GROUP_BY_FIELD,
+      idField: FIELD_DETECTION_ID,
       idValue: detectionId,
     });
   }

@@ -21,44 +21,6 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 const toArray = (val: string | string[] | undefined): string[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
 
-const MAX_CHAIN_DEPTH = 10;
-
-interface EventChain {
-  events: SigEvent[];
-  discoveryIds: string[];
-}
-
-const walkEventChain = async ({
-  eventId,
-  findById,
-}: {
-  eventId: string;
-  findById: (id: string) => Promise<{ hits: SigEvent[] }>;
-}): Promise<EventChain> => {
-  const visited = new Set<string>();
-  const events: SigEvent[] = [];
-  const discoveryIds = new Set<string>();
-
-  let currentId: string | undefined = eventId;
-
-  while (currentId && !visited.has(currentId) && visited.size < MAX_CHAIN_DEPTH) {
-    visited.add(currentId);
-
-    const { hits } = await findById(currentId);
-    if (hits.length === 0) break;
-
-    events.push(...hits);
-
-    const latest = hits[hits.length - 1];
-    if (latest.discovery_id) {
-      discoveryIds.add(latest.discovery_id);
-    }
-    currentId = latest.previous_event_id;
-  }
-
-  return { events, discoveryIds: [...discoveryIds] };
-};
-
 const collectDetections = (discoveries: Discovery[]): LifecycleDetection[] => {
   const seen = new Set<string>();
   const detections: LifecycleDetection[] = [];
@@ -101,7 +63,6 @@ const eventsSearchRoute = createServerRoute({
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
       verdict: z.union([z.string().max(50), z.array(z.string().max(50)).max(50)]).optional(),
       stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
-      impact: z.union([z.string().max(50), z.array(z.string().max(50)).max(50)]).optional(),
       search: z.string().max(500).optional(),
     }),
   }),
@@ -115,13 +76,12 @@ const eventsSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { verdict, stream, impact, search, ...rest } = params.query;
+    const { verdict, stream, search, ...rest } = params.query;
 
     return getEventClient().findLatestPaginated({
       ...rest,
       verdict: toArray(verdict),
       stream: toArray(stream),
-      impact: toArray(impact),
       search: search || undefined,
     });
   },
@@ -206,19 +166,17 @@ const eventsLifecycleRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const eventClient = getEventClient();
-    const { events, discoveryIds } = await walkEventChain({
-      eventId: params.path.id,
-      findById: (id) => eventClient.findById(id),
-    });
-
-    if (events.length === 0) {
+    const { hits: initialHits } = await getEventClient().findById(params.path.id);
+    if (initialHits.length === 0) {
       return { detections: [], discoveries: [], verdicts: [], events: [] };
     }
 
-    const [{ hits: discoveries }, { hits: verdicts }] = await Promise.all([
-      getDiscoveryClient().findByIds(discoveryIds),
-      getVerdictClient().findByDiscoveryIds(discoveryIds),
+    const { discovery_slug: slug } = initialHits[0];
+
+    const [{ hits: events }, { hits: discoveries }, { hits: verdicts }] = await Promise.all([
+      getEventClient().findByDiscoverySlug(slug),
+      getDiscoveryClient().findBySlug(slug),
+      getVerdictClient().findByDiscoverySlug(slug),
     ]);
 
     return {

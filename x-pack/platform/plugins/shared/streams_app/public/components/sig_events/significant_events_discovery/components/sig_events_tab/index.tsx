@@ -31,12 +31,7 @@ import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_con
 import { SigEventFlyout } from './sig_event_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
-import {
-  VERDICT_OPTIONS,
-  IMPACT_OPTIONS,
-  getVerdictColor,
-  getImpactColor,
-} from './filter_constants';
+import { VERDICT_OPTIONS, getVerdictColor } from './filter_constants';
 
 const MAX_VISIBLE_STREAMS = 3;
 
@@ -117,14 +112,6 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
     },
   },
   {
-    field: 'impact',
-    name: i18n.translate('xpack.streams.sigEventsTab.impactColumn', {
-      defaultMessage: 'Impact',
-    }),
-    width: '90px',
-    render: (impact: string) => <EuiBadge color={getImpactColor(impact)}>{impact}</EuiBadge>,
-  },
-  {
     field: 'criticality',
     name: i18n.translate('xpack.streams.sigEventsTab.criticalityColumn', {
       defaultMessage: 'Criticality',
@@ -170,7 +157,6 @@ export const SigEventsTab = () => {
 
   const [verdictFilter, setVerdictFilter] = useState<string[]>([]);
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
-  const [impactFilter, setImpactFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
@@ -184,17 +170,12 @@ export const SigEventsTab = () => {
     to: timeState.end,
     verdict: verdictFilter.length > 0 ? verdictFilter : undefined,
     stream: streamFilter.length > 0 ? streamFilter : undefined,
-    impact: impactFilter.length > 0 ? impactFilter : undefined,
     search: debouncedSearch || undefined,
   });
   const [selectedEvent, setSelectedEvent] = useState<SigEvent | undefined>();
 
   const onVerdictChange = useCallback(
     (opts: EuiSelectableOption[]) => setVerdictFilter(extractCheckedKeys(opts)),
-    []
-  );
-  const onImpactChange = useCallback(
-    (opts: EuiSelectableOption[]) => setImpactFilter(extractCheckedKeys(opts)),
     []
   );
   const onStreamChange = useCallback(
@@ -217,18 +198,6 @@ export const SigEventsTab = () => {
         onChange: onVerdictChange,
       },
       {
-        label: i18n.translate('xpack.streams.sigEventsTab.filter.impact', {
-          defaultMessage: 'Impact',
-        }),
-        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.impactAriaLabel', {
-          defaultMessage: 'Filter by impact',
-        }),
-        options: buildSelectableOptions({ values: IMPACT_OPTIONS, selected: impactFilter }),
-        numFilters: IMPACT_OPTIONS.length,
-        numActiveFilters: impactFilter.length,
-        onChange: onImpactChange,
-      },
-      {
         label: i18n.translate('xpack.streams.sigEventsTab.filter.stream', {
           defaultMessage: 'Stream',
         }),
@@ -245,15 +214,7 @@ export const SigEventsTab = () => {
         onChange: onStreamChange,
       },
     ],
-    [
-      verdictFilter,
-      impactFilter,
-      streamFilter,
-      streamOptions,
-      onVerdictChange,
-      onImpactChange,
-      onStreamChange,
-    ]
+    [verdictFilter, streamFilter, streamOptions, onVerdictChange, onStreamChange]
   );
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
