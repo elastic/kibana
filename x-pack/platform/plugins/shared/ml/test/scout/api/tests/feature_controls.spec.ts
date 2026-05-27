@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { mlApiTest, COMMON_HEADERS } from '../fixtures';
+import { mlApiTest as apiTest, COMMON_HEADERS } from '../fixtures';
 
 interface CapabilitiesResponse {
   navLinks: Record<string, boolean>;
@@ -21,18 +21,18 @@ const CAPABILITIES_API_PATH = 'api/core/capabilities';
 const ENABLED_SPACE_ID = 'ml_fc_api_enabled_space';
 const DISABLED_SPACE_ID = 'ml_fc_api_disabled_space';
 
-mlApiTest.describe('Machine Learning feature controls', { tag: tags.stateful.classic }, () => {
-  mlApiTest.beforeAll(async ({ apiServices }) => {
+apiTest.describe('Machine Learning feature controls', { tag: tags.stateful.classic }, () => {
+  apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.spaces.create({ id: ENABLED_SPACE_ID, disabledFeatures: [] });
     await apiServices.spaces.create({ id: DISABLED_SPACE_ID, disabledFeatures: ['ml'] });
   });
 
-  mlApiTest.afterAll(async ({ apiServices }) => {
+  apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.spaces.delete(ENABLED_SPACE_ID);
     await apiServices.spaces.delete(DISABLED_SPACE_ID);
   });
 
-  mlApiTest(
+  apiTest(
     'global:all sees Machine Learning navlink and ml management entry',
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForMlGlobalAll();
@@ -49,7 +49,7 @@ mlApiTest.describe('Machine Learning feature controls', { tag: tags.stateful.cla
     }
   );
 
-  mlApiTest(
+  apiTest(
     'ml:read sees Machine Learning navlink with read-only ML capabilities',
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForMlRead();
@@ -67,7 +67,7 @@ mlApiTest.describe('Machine Learning feature controls', { tag: tags.stateful.cla
     }
   );
 
-  mlApiTest(
+  apiTest(
     'discover:read alone does NOT see Machine Learning navlink',
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForMlNone();
@@ -83,7 +83,7 @@ mlApiTest.describe('Machine Learning feature controls', { tag: tags.stateful.cla
     }
   );
 
-  mlApiTest(
+  apiTest(
     'global:all sees Machine Learning navlink in a space where ML is enabled',
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForMlGlobalAll();
@@ -99,7 +99,7 @@ mlApiTest.describe('Machine Learning feature controls', { tag: tags.stateful.cla
     }
   );
 
-  mlApiTest(
+  apiTest(
     'global:all does NOT see Machine Learning navlink in a space where ML is disabled',
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForMlGlobalAll();
