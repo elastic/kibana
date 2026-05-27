@@ -122,7 +122,6 @@ export function formatHitReact(
       fieldFormats,
       dataView,
       field,
-      columnMeta: columnsMeta?.[key],
     });
   }
 
