@@ -8,9 +8,12 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
-import { findRulesParamsSchema, findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  errorResponseSchema,
+  findRulesParamsSchema,
+  findRulesResponseSchema,
+} from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -30,9 +33,9 @@ export class GetRulesRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'List rules',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(findRulesParamsSchema),
+      query: findRulesParamsSchema,
     },
     response: {
       200: {
@@ -40,6 +43,7 @@ export class GetRulesRoute extends BaseAlertingRoute {
         description: 'Indicates a successful call.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
       },
     },

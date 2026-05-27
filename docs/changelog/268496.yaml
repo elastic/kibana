@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/268496
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+areas:
+- Alerting and reporting
+title: Validate email address format in email connector
+description: 'Fixes the email connector to reject malformed email addresses (such as addresses with leading/trailing hyphens in the local part or domain labels) that would be rejected by mail servers, preventing unnecessary SMTP connection attempts. Note: existing connectors saved with such addresses will start failing validation on upgrade and will need to be updated.'

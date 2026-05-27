@@ -45,7 +45,7 @@ export function RelatedEpisodesGroupSubsection({
 }: RelatedEpisodesGroupSubsectionProps) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { notifications, expressions },
+    services: { notifications, expressions, spaces },
   } = useKibana<AlertEpisodesKibanaServices>();
   const toastDanger = useCallback(
     (message: string) => {
@@ -60,7 +60,7 @@ export function RelatedEpisodesGroupSubsection({
       excludeEpisodeId: currentEpisodeId,
       pageSize: RELATED_ALERT_EPISODES_PAGE_SIZE,
       groupHash,
-      expressions,
+      services: { expressions, spaces },
       toastDanger,
     });
 
@@ -81,12 +81,12 @@ export function RelatedEpisodesGroupSubsection({
   /** We need the actions to display the correct status badges. */
   const { data: sameGroupEpisodeActionsMap } = useFetchEpisodeActions({
     episodeIds: sameGroupEpisodeIds,
-    expressions,
+    services: { expressions, spaces },
   });
 
   const { data: sameGroupGroupActionsMap } = useFetchGroupActions({
     groupHashes: sameGroupGroupHashes,
-    expressions,
+    services: { expressions, spaces },
   });
 
   return (

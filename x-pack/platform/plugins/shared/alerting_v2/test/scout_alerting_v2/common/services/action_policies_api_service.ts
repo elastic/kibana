@@ -108,7 +108,6 @@ export const getActionPoliciesApiService = ({
         });
         return response.data;
       }),
-
     disable: (id) =>
       measurePerformanceAsync(log, 'actionPolicies.disable', async () => {
         const response = await kbnClient.request<ActionPolicyResponse>({
@@ -118,7 +117,6 @@ export const getActionPoliciesApiService = ({
         });
         return response.data;
       }),
-
     snooze: (id, snoozedUntil) =>
       measurePerformanceAsync(log, 'actionPolicies.snooze', async () => {
         const response = await kbnClient.request<ActionPolicyResponse>({

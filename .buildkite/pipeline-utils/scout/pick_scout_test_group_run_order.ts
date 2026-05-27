@@ -144,10 +144,16 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   const scoutCiRunGroups = scheduledModules.map((module) => {
     const usesParallelWorkers = module.configs.some((config) => config.usesParallelWorkers);
     const affectedPrefix = module.isAffected ? 'affected ' : '';
+    // Buildkite step keys only allow alphanumeric, underscores, dashes, and colons.
+    // Plugin names like "cloud_integrations/cloud_links" contain slashes, so we replace
+    // any invalid characters with dashes. The original name is preserved separately and
+    // passed as SCOUT_CONFIG_GROUP_KEY so child steps can still look up the manifest entry.
+    const stepKey = module.name.replace(/[^a-zA-Z0-9_\-:]/g, '-');
 
     return {
       label: `${affectedPrefix}Scout: [ ${module.group} / ${module.name} ] ${module.type}`,
-      key: module.name,
+      key: stepKey,
+      configGroupKey: module.name,
       agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
       group: module.group,
     };
@@ -159,14 +165,14 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       key: 'scout-configs',
       depends_on: SCOUT_CONFIGS_DEPS,
       steps: scoutCiRunGroups.map(
-        ({ label, key, group, agents }): BuildkiteStep => ({
+        ({ label, key, configGroupKey, group, agents }): BuildkiteStep => ({
           label,
           command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
           timeout_in_minutes: 60,
           key,
           agents,
           env: {
-            SCOUT_CONFIG_GROUP_KEY: key,
+            SCOUT_CONFIG_GROUP_KEY: configGroupKey,
             SCOUT_CONFIG_GROUP_TYPE: group,
             ...envFromlabels,
             ...scoutExtraEnv,

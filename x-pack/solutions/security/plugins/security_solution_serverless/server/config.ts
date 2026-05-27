@@ -21,7 +21,7 @@ import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/meteri
 const tlsConfig = schema.object({
   certificate: schema.string(),
   key: schema.string(),
-  ca: schema.string(),
+  ca: schema.maybe(schema.string()),
 });
 export type TlsConfigSchema = TypeOf<typeof tlsConfig>;
 

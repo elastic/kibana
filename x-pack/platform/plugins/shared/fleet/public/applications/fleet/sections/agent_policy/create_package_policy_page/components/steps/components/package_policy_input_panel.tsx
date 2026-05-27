@@ -408,28 +408,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       <>
         {/* Header / input-level toggle */}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          {isSingleInputAndStreams ? (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h3
-                      data-test-subj="PackagePolicy.InputStreamConfig.title"
-                      style={
-                        isDeprecatedInput ? { color: theme.euiTheme.colors.textSubdued } : undefined
-                      }
-                    >
-                      {packageInput.title || packageInput.type}
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                {inputReleaseBadge && <EuiFlexItem grow={false}>{inputReleaseBadge}</EuiFlexItem>}
-                {migrationTooltip}
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              {showTopLevelDescription && topLevelDescription}
-            </EuiFlexItem>
-          ) : (
+          {
             <EuiFlexItem grow={false}>
               <EuiSwitch
                 data-test-subj="PackagePolicy.InputStreamConfig.Switch"
@@ -486,7 +465,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               <EuiSpacer size="s" />
               {showTopLevelDescription && topLevelDescription}
             </EuiFlexItem>
-          )}
+          }
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">
               {/* Bubble up deprecation warning when collapsed and input has deprecated features */}
@@ -519,7 +498,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   </EuiText>
                 </EuiFlexItem>
               ) : null}
-              {(!isSingleInputAndStreams || packageInfo.type === 'input') && (
+              {
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color={hasErrors ? 'danger' : 'primary'}
@@ -545,7 +524,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     }
                   </EuiButtonEmpty>
                 </EuiFlexItem>
-              )}
+              }
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -572,7 +551,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               varGroups={inputVarGroups}
               varGroupSelections={inputVarGroupSelections}
               onVarGroupSelectionChange={handleInputVarGroupSelectionChange}
-              showDescriptionColumn={!isSingleInputAndStreams}
               streamAdvancedVars={consolidatedStreamAdvancedVars}
               sections={packageInput.sections}
               isUpgrade={isUpgrade}
@@ -600,7 +578,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     hasStreamToggle={hasStreamToggle}
                     packagePolicyInputStream={packagePolicyInputStream!}
                     inputPolicyTemplate={packagePolicyInput.policy_template}
-                    showDescriptionColumn={!isSingleInputAndStreams}
                     isUpgrade={isUpgrade}
                     updatePackagePolicyInputStream={(
                       updatedStream: Partial<PackagePolicyInputStream>
