@@ -58,12 +58,10 @@ export function formatHitReact(
     return cached.formattedHit;
   }
 
-  const highlights = hit.raw.highlight ?? {};
+  const highlights = hit.raw.highlight ?? hit.raw.inline_highlights ?? {};
   const flattened = hit.flattened;
   const renderedPairs: PartialHitReactPair[] = [];
   const otherPairs: PartialHitReactPair[] = [];
-
-  // HD TODO: contemplate ES|QL highlights when ordering.
 
   // Add each flattened field into the corresponding array for rendered or other pairs,
   // depending on whether the original hit had a highlight for it. That way we can ensure
