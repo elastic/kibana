@@ -7,6 +7,8 @@
 
 import type { CloudProvider } from '../types/models/cloud_connector';
 
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from './package_policy';
+
 // Backward compatibility for CSPM and Asset Discovery
 export const AWS_ROLE_ARN_VAR_NAME = 'aws.role_arn';
 export const AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME = 'aws.credentials.external_id';
@@ -43,6 +45,30 @@ export const VERIFIER_POLICY_TEMPLATE = 'verifierreceiver';
 export const VERIFIER_INPUT_TYPE = 'otelcol';
 export const VERIFIER_DATA_STREAM_TYPE = 'logs';
 export const VERIFIER_DATASET = `${VERIFIER_PKG_NAME}.${VERIFIER_POLICY_TEMPLATE}`;
+
+// Packages that should be hidden from the Identity Federation Flyout usage list.
+// These are internal integrations (e.g. the permission verifier) that attach a
+// cloud_connector_id but should not be surfaced to users.
+export const CLOUD_CONNECTOR_HIDDEN_PACKAGES: readonly string[] = [VERIFIER_PKG_NAME];
+
+/** Default page size for listing cloud connectors (service + HTTP API). */
+export const CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE = 20;
+
+/**
+ * Appends NOT package.name filters for {@link CLOUD_CONNECTOR_HIDDEN_PACKAGES} and
+ * `latest_revision:true` to a package-policy Kuery fragment (same pattern as usage routes;
+ * latest revision excludes rollback snapshot rows such as `:prev`).
+ */
+export function buildPackagePolicyFilterExcludingHiddenPackages(baseFilter: string): string {
+  const hiddenFilter = CLOUD_CONNECTOR_HIDDEN_PACKAGES.map(
+    (pkg) => `NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:"${pkg}"`
+  ).join(' AND ');
+  const latestRevision = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`;
+  if (hiddenFilter) {
+    return `${baseFilter} AND ${hiddenFilter} AND ${latestRevision}`;
+  }
+  return `${baseFilter} AND ${latestRevision}`;
+}
 
 // Account type variable names for different cloud providers
 export const AWS_ACCOUNT_TYPE_VAR_NAME = 'aws.account_type';

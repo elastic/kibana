@@ -55,7 +55,7 @@ describe('TimelineWrapper', () => {
       </TestProviders>
     );
 
-    expect(getByText('Untitled timeline')).toBeInTheDocument();
+    expect(getByText('Untitled Timeline')).toBeInTheDocument();
   });
 
   it('should show timeline when bottom bar button is clicked', async () => {

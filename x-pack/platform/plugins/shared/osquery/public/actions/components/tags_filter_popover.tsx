@@ -38,6 +38,9 @@ const CLEAR_FILTER_LABEL = i18n.translate('xpack.osquery.historyFilters.clearTag
 const PANEL_PROPS = { 'data-test-subj': 'history-tags-filter-popover' };
 const POPOVER_CONTENT_STYLE = { width: POPOVER_WIDTH };
 const SEARCH_PROPS = { placeholder: SEARCH_TAGS_PLACEHOLDER };
+const LIST_PROPS = {
+  paddingSize: 's' as const,
+};
 
 interface TagsFilterPopoverProps {
   selectedTags: string[];
@@ -110,6 +113,7 @@ const TagsFilterPopoverComponent: React.FC<TagsFilterPopoverProps> = ({
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={PANEL_PROPS}
+      aria-label={TAGS_LABEL}
     >
       <EuiSelectable
         searchable
@@ -124,6 +128,7 @@ const TagsFilterPopoverComponent: React.FC<TagsFilterPopoverProps> = ({
         noMatchesMessage={i18n.translate('xpack.osquery.historyFilters.noTagsMatch', {
           defaultMessage: 'No tags match search',
         })}
+        listProps={LIST_PROPS}
       >
         {(list, search) => (
           <div css={POPOVER_CONTENT_STYLE}>

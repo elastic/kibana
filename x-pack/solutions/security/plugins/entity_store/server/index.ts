@@ -15,10 +15,12 @@ export type {
 export type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 export type { EntityUpdateClient, BulkObject, BulkObjectResponse } from './domain/crud';
 export type { ResolutionClient } from './domain/resolution';
-export { getLatestEntitiesIndexName } from '../common';
+export { getLatestEntitiesIndexName, getEntitiesAlias, ENTITY_LATEST } from '../common';
 export { getHistorySnapshotIndexPattern } from './domain/asset_manager/history_snapshot_index';
 export { ENGINE_METADATA_TYPE_FIELD } from './domain/logs_extraction/query_builder_commons';
 export { getFieldValue } from '../common/domain/euid/commons';
+export { EngineDescriptorTypeName } from './domain/saved_objects/engine_descriptor/types';
+export { EntityStoreGlobalStateTypeName } from './domain/saved_objects/global_state/types';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { EntityStorePlugin } = await import('./plugin');

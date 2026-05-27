@@ -22,6 +22,7 @@ import {
   EuiSplitButton,
   EuiRefreshInterval,
   EuiText,
+  EuiButton,
   EuiTitle,
   EuiEmptyPrompt,
   useEuiTheme,
@@ -31,10 +32,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useParams } from 'react-router-dom';
+import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type { TraceSummary } from '@kbn/evals-common';
-import { useProjectTraces } from '../../hooks/use_evals_api';
-import { TraceWaterfall } from '../../components/trace_waterfall';
+import { useEvalsTraceFetcher, useProjectTraces } from '../../hooks/use_evals_api';
 import { LastUpdatedAt } from '../../components/last_updated_at';
+import { formatLatency, formatTokens } from '../../utils/format_utils';
 import * as i18n from './translations';
 
 const MIN_REFRESH_INTERVAL = 5000;
@@ -48,6 +50,13 @@ export const TracingProjectDetailPage: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
+  const fetchTrace = useEvalsTraceFetcher();
+  const {
+    spans,
+    durationMs,
+    isLoading: traceLoading,
+    error: traceError,
+  } = useTraceSpans(selectedTraceId, { fetchTrace });
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchText), 300);
@@ -172,7 +181,7 @@ export const TracingProjectDetailPage: React.FC = () => {
         width: '90px',
         render: (ms: number) => (
           <EuiBadge color={ms > 30000 ? 'danger' : ms > 10000 ? 'warning' : 'default'}>
-            {i18n.formatLatency(ms)}
+            {formatLatency(ms)}
           </EuiBadge>
         ),
       },
@@ -181,7 +190,7 @@ export const TracingProjectDetailPage: React.FC = () => {
         name: i18n.COLUMN_TOKENS,
         width: '90px',
         render: (tokens: TraceSummary['tokens']) =>
-          tokens?.total != null ? i18n.formatTokens(tokens.total) : '-',
+          tokens?.total != null ? formatTokens(tokens.total) : '-',
       },
       {
         field: 'total_spans',
@@ -223,6 +232,7 @@ export const TracingProjectDetailPage: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={i18n.AUTO_REFRESH_ARIA_LABEL}
                   button={
                     <EuiSplitButton isLoading={isFetching} data-test-subj="projectTracesRefresh">
                       <EuiSplitButton.ActionPrimary
@@ -273,14 +283,20 @@ export const TracingProjectDetailPage: React.FC = () => {
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         {error ? (
-          <>
-            <EuiText color="danger" size="s">
-              <p>{String(error)}</p>
-            </EuiText>
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
-        {!isLoading && (data?.traces ?? []).length === 0 ? (
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="warning"
+            title={<h2>{i18n.LOAD_ERROR_TITLE}</h2>}
+            body={
+              <p>{i18n.getLoadErrorBody(error instanceof Error ? error.message : String(error))}</p>
+            }
+            actions={[
+              <EuiButton onClick={() => refetch()} iconType="refresh">
+                {i18n.RETRY_BUTTON}
+              </EuiButton>,
+            ]}
+          />
+        ) : !isLoading && (data?.traces ?? []).length === 0 ? (
           <EuiEmptyPrompt
             iconType="editorStrike"
             title={<h3>{i18n.NO_TRACES_TITLE}</h3>}
@@ -332,7 +348,14 @@ export const TracingProjectDetailPage: React.FC = () => {
             `}
           >
             <div style={{ height: '100%', padding: 16 }}>
-              <TraceWaterfall traceId={selectedTraceId} layout="horizontal" />
+              <TraceWaterfall
+                spans={spans}
+                traceId={selectedTraceId}
+                durationMs={durationMs}
+                isLoading={traceLoading}
+                error={traceError}
+                layout="horizontal"
+              />
             </div>
           </EuiFlyoutBody>
         </EuiFlyoutResizable>

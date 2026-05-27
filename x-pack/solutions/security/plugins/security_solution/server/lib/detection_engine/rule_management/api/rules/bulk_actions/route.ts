@@ -307,6 +307,8 @@ export const performBulkActionRoute = (
                     rulePayload: {},
                     spaceId,
                     existingRule: rule,
+                    checkOsqueryResponseActionAuthz:
+                      ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
                   });
 
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early

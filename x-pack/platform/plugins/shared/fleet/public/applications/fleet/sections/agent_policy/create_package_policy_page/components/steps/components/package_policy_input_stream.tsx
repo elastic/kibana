@@ -84,8 +84,7 @@ interface Props {
   forceShowErrors?: boolean;
   isEditPage?: boolean;
   isUpgrade?: boolean;
-  totalStreams?: number;
-  showDescriptionColumn?: boolean;
+  hasStreamToggle?: boolean;
   varGroupSelections?: Record<string, string>;
   /** Parent input's `policy_template`; required for correct composable multi-template matching. */
   inputPolicyTemplate?: string;
@@ -101,8 +100,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     forceShowErrors,
     isEditPage,
     isUpgrade,
-    totalStreams,
-    showDescriptionColumn = true,
+    hasStreamToggle = true,
     varGroupSelections = {},
     inputPolicyTemplate,
   }) => {
@@ -126,7 +124,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       !!packagePolicyInputStream.id &&
       packagePolicyInputStream.id === defaultDataStreamId;
     const isPackagePolicyEdit = !!packagePolicyId;
-    const shouldShowStreamsToggles = totalStreams ? totalStreams > 1 : true;
     const customDatasetVar = packagePolicyInputStream.vars?.[DATASET_VAR_NAME];
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
 
@@ -299,7 +296,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     return (
       <>
         <EuiFlexGrid
-          columns={showDescriptionColumn ? 2 : 1}
+          columns={2}
           data-test-subj={`streamOptions.inputStreams.${packageInputStream.data_stream.dataset}`}
         >
           <ScrollAnchor ref={containerRef} />
@@ -307,72 +304,72 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
             <EuiFlexGroup gutterSize="none" alignItems="flexStart">
               <EuiFlexItem grow={1} />
               <EuiFlexItem grow={flexWidth}>
-                <EuiFlexGroup
-                  gutterSize="none"
-                  alignItems="flexStart"
-                  justifyContent="spaceBetween"
-                >
-                  {packageInfo.type !== 'input' && shouldShowStreamsToggles && (
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center" gutterSize="s">
+                {hasStreamToggle && (
+                  <>
+                    <EuiFlexGroup
+                      gutterSize="none"
+                      alignItems="flexStart"
+                      justifyContent="spaceBetween"
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup alignItems="center" gutterSize="s">
+                          <EuiFlexItem grow={false}>
+                            <EuiSwitch
+                              data-test-subj="streamOptions.switch"
+                              label={packageInputStream.title}
+                              disabled={packagePolicyInputStream.keep_enabled}
+                              checked={packagePolicyInputStream.enabled}
+                              onChange={(e) => {
+                                const enabled = e.target.checked;
+                                updatePackagePolicyInputStream({
+                                  enabled,
+                                });
+                              }}
+                            />
+                          </EuiFlexItem>
+                          {showStreamDeprecationIcon && (
+                            <EuiFlexItem grow={false}>
+                              <span data-test-subj="streamOptions.deprecatedIcon">
+                                <EuiIconTip
+                                  type="warning"
+                                  color="warning"
+                                  position="top"
+                                  content={streamDeprecationTooltip}
+                                />
+                              </span>
+                            </EuiFlexItem>
+                          )}
+                          {isUpgrade &&
+                            packagePolicyInputStream.migrate_from &&
+                            !showStreamDeprecationIcon && (
+                              <MigrationTooltip
+                                migrateFrom={packagePolicyInputStream.migrate_from}
+                                isStream
+                              />
+                            )}
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      {packageInputStream.data_stream.release &&
+                      packageInputStream.data_stream.release !== 'ga' ? (
                         <EuiFlexItem grow={false}>
-                          <EuiSwitch
-                            data-test-subj="streamOptions.switch"
-                            label={packageInputStream.title}
-                            disabled={packagePolicyInputStream.keep_enabled}
-                            checked={packagePolicyInputStream.enabled}
-                            onChange={(e) => {
-                              const enabled = e.target.checked;
-                              updatePackagePolicyInputStream({
-                                enabled,
-                              });
-                            }}
+                          <InlineReleaseBadge
+                            release={mapPackageReleaseToIntegrationCardRelease(
+                              packageInputStream.data_stream.release
+                            )}
                           />
                         </EuiFlexItem>
-                        {showStreamDeprecationIcon && (
-                          <EuiFlexItem grow={false}>
-                            <span data-test-subj="streamOptions.deprecatedIcon">
-                              <EuiIconTip
-                                type="warning"
-                                color="warning"
-                                position="top"
-                                content={streamDeprecationTooltip}
-                              />
-                            </span>
-                          </EuiFlexItem>
-                        )}
-                        {isUpgrade &&
-                          packagePolicyInputStream.migrate_from &&
-                          !showStreamDeprecationIcon && (
-                            <MigrationTooltip
-                              migrateFrom={packagePolicyInputStream.migrate_from}
-                              isStream
-                            />
-                          )}
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  )}
-                  {packageInputStream.data_stream.release &&
-                  packageInputStream.data_stream.release !== 'ga' ? (
-                    <EuiFlexItem grow={false}>
-                      <InlineReleaseBadge
-                        release={mapPackageReleaseToIntegrationCardRelease(
-                          packageInputStream.data_stream.release
-                        )}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-                {packageInfo.type !== 'input' &&
-                packageInputStream.description &&
-                shouldShowStreamsToggles ? (
-                  <>
-                    <EuiSpacer size="s" />
-                    <EuiText size="s" color="subdued">
-                      <ReactMarkdown>{packageInputStream.description}</ReactMarkdown>
-                    </EuiText>
+                      ) : null}
+                    </EuiFlexGroup>
+                    {packageInputStream.description ? (
+                      <>
+                        <EuiSpacer size="s" />
+                        <EuiText size="s" color="subdued">
+                          <ReactMarkdown>{packageInputStream.description}</ReactMarkdown>
+                        </EuiText>
+                      </>
+                    ) : null}
                   </>
-                ) : null}
+                )}
                 {hasRequiredVarGroupErrors && (
                   <>
                     <EuiSpacer size="m" />
@@ -460,6 +457,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       datastreams={datastreams}
                       isEditPage={isEditPage}
                       isRequiredByVarGroup={requiredByVarGroup}
+                      isUpgrade={isUpgrade}
                     />
                   </EuiFlexItem>
                 );
@@ -590,6 +588,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               datastreams={datastreams}
                               isEditPage={isEditPage}
                               isRequiredByVarGroup={requiredByVarGroup}
+                              isUpgrade={isUpgrade}
                             />
                           </EuiFlexItem>
                         );

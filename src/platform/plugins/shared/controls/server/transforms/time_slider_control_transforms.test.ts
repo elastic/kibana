@@ -15,7 +15,7 @@ const getTransformOut = () => {
   const embeddable = createEmbeddableSetupMock();
   registerTimeSliderControlTransforms(embeddable);
 
-  const [, transformsSetup] = embeddable.registerTransforms.mock.calls[0];
+  const [, transformsSetup] = embeddable.registerEmbeddableServerDefinition.mock.calls[0];
   const { transformOut } = transformsSetup.getTransforms!({} as DrilldownTransforms);
   return transformOut!;
 };

@@ -64,7 +64,7 @@ export const useDeleteSkillService = ({
     DeleteSkillMutationVariables
   >({
     mutationFn: ({ skillId, force }) => skillsService.delete({ skillId, force }),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.skills.all }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.skills.list }),
     onSuccess,
     onError,
   });

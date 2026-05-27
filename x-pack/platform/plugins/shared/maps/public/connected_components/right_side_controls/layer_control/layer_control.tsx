@@ -61,7 +61,6 @@ export function LayerControl({
 
     return (
       <EuiToolTip
-        delay="long"
         content={i18n.translate('xpack.maps.layerControl.openLayerTOCButtonAriaLabel', {
           defaultMessage: 'Expand layers panel',
         })}
@@ -124,7 +123,6 @@ export function LayerControl({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
-                delay="long"
                 content={i18n.translate('xpack.maps.layerControl.hideAllLayersButton', {
                   defaultMessage: 'Hide all layers',
                 })}
@@ -142,7 +140,6 @@ export function LayerControl({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
-                delay="long"
                 content={i18n.translate('xpack.maps.layerControl.showAllLayersButton', {
                   defaultMessage: 'Show all layers',
                 })}
@@ -160,7 +157,6 @@ export function LayerControl({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
-                delay="long"
                 content={i18n.translate('xpack.maps.layerControl.closeLayerTOCButtonAriaLabel', {
                   defaultMessage: 'Collapse layers panel',
                 })}

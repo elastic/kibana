@@ -10,7 +10,7 @@
 /* eslint-disable no-console */
 
 import * as fs from 'fs';
-import * as path from 'path';
+import { readElasticsearchDefinitions } from '@kbn/esql-scripts';
 import {
   processingCommandsIntro,
   processingCommandsItems,
@@ -18,18 +18,7 @@ import {
 import { sourceCommandsIntro, sourceCommandsItems } from './resources/commands/source_data';
 import type { CommandDefinition, MultipleLicenseInfo } from '../src/types';
 import { getLicenseInfoForCommand } from '../src/utils/get_license_info';
-import {
-  DEFINITION_DIR_SUFFIX,
-  ELASTISEARCH_ESQL_DOCS_BASE_PATH,
-  OUTPUT_DIR,
-} from './scripts.constants';
-import { loadElasticDefinitions } from '../src/utils/load_elastic_definitions';
-
-const ELASTIC_COMMAND_DIR_PATH = path.join(
-  ELASTISEARCH_ESQL_DOCS_BASE_PATH,
-  DEFINITION_DIR_SUFFIX,
-  'commands'
-);
+import { OUTPUT_DIR } from './constants';
 
 interface CommandItemMetadata {
   name: string;
@@ -86,9 +75,13 @@ const commandsData: CommandSectionMetadata[] = [
       );
     }
 
-    const esCommandDirPath = path.join(pathToElasticsearch, ELASTIC_COMMAND_DIR_PATH);
-    const cmdDefinitions = loadElasticDefinitions<CommandDefinition>(esCommandDirPath);
-    const commands = commandsData.map((cmd) => addDefinitionsToCommands(cmd, cmdDefinitions));
+    const cmdDefinitions = readElasticsearchDefinitions<CommandDefinition>({
+      pathToElasticsearch,
+      keywordType: 'commands',
+      language: 'esql',
+    });
+    const cmdDefinitionsMap = new Map(cmdDefinitions.map((cmd) => [cmd.name, cmd]));
+    const commands = commandsData.map((cmd) => addDefinitionsToCommands(cmd, cmdDefinitionsMap));
     const docContents = commands.map((cmd) => generateDoc(cmd));
 
     // Ensure the output directory exists

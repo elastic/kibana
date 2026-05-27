@@ -31,16 +31,10 @@ export const getCasesLazy = ({
   permissions,
   basePath,
   actionsNavigation,
-  ruleDetailsNavigation,
-  showAlertDetails,
-  useFetchAlertData,
-  onAlertsTableLoaded,
   refreshRef,
   timelineIntegration,
   features,
   releasePhase,
-  renderAlertsTable,
-  renderEventsTable,
 }: GetCasesPropsInternal) => (
   <CasesProvider
     value={{
@@ -58,14 +52,8 @@ export const getCasesLazy = ({
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CasesRoutesLazy
         actionsNavigation={actionsNavigation}
-        ruleDetailsNavigation={ruleDetailsNavigation}
-        showAlertDetails={showAlertDetails}
-        useFetchAlertData={useFetchAlertData}
-        onAlertsTableLoaded={onAlertsTableLoaded}
         refreshRef={refreshRef}
         timelineIntegration={timelineIntegration}
-        renderAlertsTable={renderAlertsTable}
-        renderEventsTable={renderEventsTable}
       />
     </Suspense>
   </CasesProvider>

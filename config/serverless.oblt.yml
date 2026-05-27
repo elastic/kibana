@@ -25,8 +25,6 @@ xpack.features.overrides:
   ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
   ### fine-tuned to grant access to Observability app.
   discover_v2.category: 'observability'
-  ### Agent Builder should be moved from Analytics category to the Observability one.
-  agentBuilder.category: 'observability'
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'
@@ -106,10 +104,6 @@ xpack.ml.nlp:
       high:
         max: 128
 xpack.ml.compatibleModuleType: 'observability'
-
-# ES|QL Views API is not available in serverless Elasticsearch builds
-uiSettings.overrides:
-  observability:streamsEnableWiredStreamViews: false
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false

@@ -51,6 +51,28 @@ fields:
     type: keyword
     metadata:
       default: Enter details here...
+  # TEXTAREA with markdown: true renders a markdown editor instead of plain text
+  - name: instructions
+    control: TEXTAREA
+    label: Investigation instructions
+    type: keyword
+    metadata:
+      markdown: true
+      default: |
+        ## Investigation playbook
+
+        Follow these steps when triaging the case:
+
+        1. **Collect evidence** — gather relevant logs and screenshots
+        2. **Identify scope** — determine affected systems and users
+        3. **Escalate** if severity is *critical* or impact is widespread
+
+        ### Useful links
+
+        - [Incident runbook](https://example.com/runbook)
+        - [Escalation matrix](https://example.com/escalation)
+
+        > Remember to update the case status as you progress through each step.
   - name: priority
     control: SELECT_BASIC
     label: Priority
@@ -120,4 +142,107 @@ fields:
         field: scheduled_at
         operator: eq
         value: "2024-06-01T09:00:00.000Z"
+  # RADIO_GROUP: select exactly one option, requires at least 2 options (max 20)
+  - name: environment
+    control: RADIO_GROUP
+    label: Environment
+    type: keyword
+    metadata:
+      options:
+        - development
+        - staging
+        - production
+      default: staging
+    display:
+      show_when:
+        combine: all
+        rules:
+          - field: affected_components
+            operator: contains
+            value: api
+          - field: affected_components
+            operator: contains
+            value: ui
+  # CHECKBOX_GROUP: select 0-N options, optional defaults
+  - name: affected_components
+    control: CHECKBOX_GROUP
+    label: Affected components
+    type: keyword
+    metadata:
+      options:
+        - api
+        - ui
+        - database
+        - auth
+        - infrastructure
+      default:
+        - api
+  # shown only when "database" is among the selected components
+  - name: db_connection
+    control: INPUT_TEXT
+    label: Database connection string
+    type: keyword
+    display:
+      show_when:
+        field: affected_components
+        operator: contains
+        value: database
+    validation:
+      required_when:
+        field: affected_components
+        operator: contains
+        value: database
+  # shown only when "auth" is among the selected components
+  - name: auth_details
+    control: TEXTAREA
+    label: Auth provider details
+    type: keyword
+    display:
+      show_when:
+        field: affected_components
+        operator: contains
+        value: auth
+  # shown only when BOTH "api" and "ui" are selected (compound all condition)
+  - name: integration_notes
+    control: TEXTAREA
+    label: Integration test notes
+    type: keyword
+    display:
+      show_when:
+        combine: all
+        rules:
+          - field: affected_components
+            operator: contains
+            value: api
+          - field: affected_components
+            operator: contains
+            value: ui
+          - field: environment
+            operator: eq 
+            value: production
+  # USER_PICKER lets the user select one or many Kibana users
+  # set multiple: false to restrict to a single selection
+  # default is an optional list of pre-selected users (uid + name)
+  - name: reviewers
+    control: USER_PICKER
+    label: Reviewers
+    type: keyword
+    metadata:
+      multiple: true
+      # default:
+      #   - uid: "abc123"
+      #     name: "Jane Doe"
+  # notes is shown only when at least one reviewer has been selected
+  - name: review_notes
+    control: TEXTAREA
+    label: Review notes
+    type: keyword
+    display:
+      show_when:
+        field: reviewers
+        operator: not_empty
+    validation:
+      required_when:
+        field: reviewers
+        operator: not_empty
 `.trimStart();

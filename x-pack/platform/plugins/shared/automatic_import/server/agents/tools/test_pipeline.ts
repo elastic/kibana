@@ -31,6 +31,12 @@ interface TestPipelineToolOptions {
   samples: string[];
 }
 
+const indentJson = (obj: Record<string, unknown>, indent: string): string =>
+  JSON.stringify(obj, null, 2)
+    .split('\n')
+    .map((line) => `${indent}${line}`)
+    .join('\n');
+
 const formatVerboseResults = (
   processorResults: estypes.IngestPipelineProcessorResult[]
 ): string => {
@@ -57,15 +63,9 @@ const formatVerboseResults = (
       const src = pr.doc?._source as Record<string, unknown> | undefined;
       if (src) {
         const stripped = stripBoilerplateFields(src);
-        const allKeys = Object.keys(stripped);
-        const shown = allKeys.slice(0, 10);
-        if (shown.length > 0) {
-          lines.push(
-            `        output fields: ${shown.join(', ')}${
-              allKeys.length > 10 ? ` (+${allKeys.length - 10} more)` : ''
-            }`
-          );
-        }
+        const label = isLastBeforeFailure ? 'document before failure' : 'final document';
+        lines.push(`        ${label}:`);
+        lines.push(indentJson(stripped, '          '));
       }
     }
   }

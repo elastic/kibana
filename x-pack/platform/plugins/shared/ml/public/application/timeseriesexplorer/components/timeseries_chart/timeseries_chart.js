@@ -405,7 +405,7 @@ class TimeseriesChartIntl extends Component {
       .append('text')
       .text((d) => {
         if (fieldFormat !== undefined) {
-          return fieldFormat.convert(d, 'text');
+          return fieldFormat.convertToText(d);
         } else {
           return focusYScale.tickFormat()(d);
         }
@@ -714,7 +714,7 @@ class TimeseriesChartIntl extends Component {
       (focusForecastData !== undefined && focusForecastData.length > 0)
     ) {
       if (this.fieldFormat !== undefined) {
-        this.focusYAxis.tickFormat((d) => this.fieldFormat.convert(d, 'text'));
+        this.focusYAxis.tickFormat((d) => this.fieldFormat.convertToText(d));
       } else {
         // Use default tick formatter.
         this.focusYAxis.tickFormat(null);
@@ -2012,6 +2012,7 @@ class TimeseriesChartIntl extends Component {
         <RuleEditorFlyout
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+          telemetrySource={this.props.telemetrySource}
         />
         {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
           <MlAnomalyAlertFlyout
@@ -2032,6 +2033,12 @@ class TimeseriesChartIntl extends Component {
               closePopover={() => this.closePopover()}
               panelPaddingSize="none"
               anchorPosition="upLeft"
+              aria-label={i18n.translate(
+                'xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyActionsPopoverAriaLabel',
+                {
+                  defaultMessage: 'Anomaly actions',
+                }
+              )}
             >
               <LinksMenuUI
                 anomaly={this.state.popoverData}

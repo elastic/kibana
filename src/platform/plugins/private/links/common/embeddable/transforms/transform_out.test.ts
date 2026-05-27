@@ -25,7 +25,7 @@ describe('transformOut', () => {
             openInNewTab: false,
             useCurrentDateRange: false,
             useCurrentFilters: false,
-          } as LinkOptions,
+          } as unknown,
         },
       ],
     } as LinksEmbeddableState;
@@ -49,7 +49,7 @@ describe('transformOut', () => {
           options: {
             openInNewTab: false,
             encodeUrl: true,
-          } as LinkOptions,
+          } as unknown,
         },
       ],
     } as LinksEmbeddableState;
@@ -106,6 +106,32 @@ describe('transformOut', () => {
           "type": "externalLink",
         },
       ]
+    `);
+  });
+
+  test('should strip out unsupported properties from by-value state', () => {
+    const legacyState = {
+      title: 'Custom title',
+      layout: 'vertical',
+      enhancements: {}, // unsupported
+      links: [
+        {
+          type: 'externalLink',
+          destination: 'https://example.com/',
+        },
+      ],
+    } as StoredLinksEmbeddableState;
+    expect(transformOut(legacyState, [])).toMatchInlineSnapshot(`
+      Object {
+        "layout": "vertical",
+        "links": Array [
+          Object {
+            "destination": "https://example.com/",
+            "type": "externalLink",
+          },
+        ],
+        "title": "Custom title",
+      }
     `);
   });
 
@@ -190,7 +216,7 @@ describe('transformOut', () => {
     ];
     expect(transformOut(byReferenceState, references)).toMatchInlineSnapshot(`
       Object {
-        "savedObjectId": "820b40ee-307f-427a-ab61-5a5cdc5af7cd",
+        "ref_id": "820b40ee-307f-427a-ab61-5a5cdc5af7cd",
         "title": "Custom title",
       }
     `);

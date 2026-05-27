@@ -9,8 +9,10 @@ import type { Logger } from '@kbn/logging';
 import type {
   BulkOperationContainer,
   BulkUpdateAction,
+  QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   Result,
+  SearchHit,
   SortOrder,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -18,7 +20,12 @@ import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
 import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
-import { BadCRUDRequestError, EntityNotFoundError, EntityAlreadyExistsError } from '../errors';
+import {
+  BadCRUDRequestError,
+  EntityNotFoundError,
+  EntityAlreadyExistsError,
+  EntityStoreNotInstalledError,
+} from '../errors';
 import { validateAndTransformDoc } from './utils';
 import { runWithSpan } from '../../telemetry/traces';
 import {
@@ -41,6 +48,7 @@ export interface ListEntitiesParams {
   size?: number;
   source?: string[] | undefined;
   searchAfter?: Array<string | number>;
+  fields?: (QueryDslFieldAndFormat | string)[];
   /** Page/search mode (unified latest index); mutually exclusive with KQL `filter` / cursor params on the route. */
   entityTypes?: EntityType[];
   filterQuery?: string;
@@ -52,6 +60,7 @@ export interface ListEntitiesParams {
 
 export interface ListEntitiesResult {
   entities: Entity[];
+  fields?: Array<SearchHit['fields']>; // Only present if `fields` was specified in ListEntitiesParams
   nextSearchAfter?: Array<string | number>;
   total?: number;
   page?: number;
@@ -212,6 +221,14 @@ export class CRUDClient {
     });
   }
 
+  private async assertInstalled(): Promise<void> {
+    const indexName = getLatestEntitiesIndexName(this.namespace);
+    const exists = await this.esClient.indices.exists({ index: indexName });
+    if (!exists) {
+      throw new EntityStoreNotInstalledError();
+    }
+  }
+
   /**
    * Page/search over the v2 unified LATEST entities index (normalized hits, optional JSON `filterQuery`, entity-type filter).
    * Prefer {@link listEntities} from HTTP routes; this remains for direct server callers.
@@ -233,6 +250,7 @@ export class CRUDClient {
   // ID will be validated and used if correct
   // 3. Identity only - no ID and identifying data - ID will be generated
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
+    await this.assertInstalled();
     const generatedId = getEuidFromObject(entityType, doc);
     const valid = validateAndTransformDoc(
       'update',
@@ -273,6 +291,7 @@ export class CRUDClient {
     objects,
     force = false,
   }: BulkUpdateEntityParams): Promise<BulkObjectResponse[]> {
+    await this.assertInstalled();
     const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
     this.logger.debug(`Preparing ${objects.length} entities for bulk update`);
     for (const { type: entityType, doc } of objects) {
@@ -317,6 +336,7 @@ export class CRUDClient {
 
   // createEntity generates EUID and creates the entity in the LATEST index
   public async createEntity(entityType: EntityType, doc: Entity): Promise<void> {
+    await this.assertInstalled();
     const id = getEuidFromObject(entityType, doc);
     if (!id) {
       throw new BadCRUDRequestError(`Could not derive EUID from document`);
@@ -390,7 +410,7 @@ export class CRUDClient {
 
     this.logger.debug('Listing entities (cursor mode)');
 
-    const { filter, size, searchAfter, source } = p;
+    const { filter, size, searchAfter, source, fields } = p;
 
     let query: QueryDslQueryContainer = { match_all: {} };
     if (filter) {
@@ -407,13 +427,19 @@ export class CRUDClient {
       size,
       sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],
       search_after: searchAfter,
+      ...(fields && fields.length > 0 ? { fields } : {}),
       ...(source && source.length > 0 ? { _source: source } : {}),
     });
 
     const hits = resp.hits.hits;
     const entities = hits.map((hit) => hit._source as Entity);
     const lastHit = hits[hits.length - 1];
+    const entityFields = fields && fields.length > 0 ? hits.map((hit) => hit.fields) : undefined;
 
-    return { entities, nextSearchAfter: lastHit?.sort as Array<string | number> | undefined };
+    return {
+      entities,
+      nextSearchAfter: lastHit?.sort as Array<string | number> | undefined,
+      ...(entityFields ? { fields: entityFields } : {}),
+    };
   }
 }

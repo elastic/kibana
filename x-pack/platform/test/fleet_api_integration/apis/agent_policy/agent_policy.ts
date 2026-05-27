@@ -577,6 +577,49 @@ export default function (providerContext: FtrProviderContext) {
         expect(policy.package_policies[0].name).be('system-457');
       });
 
+      it('should create unique system package policy names when creating multiple policies concurrently with sys_monitoring', async () => {
+        const concurrentCount = 3;
+
+        const results = await Promise.all(
+          new Array(concurrentCount).fill(null).map((_, i) =>
+            supertest
+              .post(`/api/fleet/agent_policies`)
+              .query({ sys_monitoring: true })
+              .set('kbn-xsrf', 'xxxx')
+              .send({
+                name: `Concurrent sys monitoring policy ${Date.now()}-${i}`,
+                namespace: 'default',
+                force: true,
+              })
+              .expect(200)
+          )
+        );
+
+        const policyIds = results.map((r: any) => r.body.item.id);
+
+        // Use _bulk_get with explicit IDs to avoid pagination issues and get full package policy details
+        const {
+          body: { items: createdPolicies },
+        } = await supertest
+          .post('/api/fleet/agent_policies/_bulk_get')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: policyIds, full: true })
+          .expect(200);
+
+        const systemPolicyNames: string[] = createdPolicies.map(
+          (p: any) => p.package_policies[0].name
+        );
+
+        // All system package policy names must be unique — no duplicates from the race condition
+        const uniqueNames = new Set(systemPolicyNames);
+        expect(uniqueNames.size).to.equal(concurrentCount);
+
+        // Names must follow the numeric scheme (system-N), not fall back to UUID suffixes
+        systemPolicyNames.forEach((name) => {
+          expect(name).to.match(/^system-\d+$/);
+        });
+      });
+
       it('should create policy with global data tags given valid tags', async () => {
         const {
           body: { item: createdPolicy },

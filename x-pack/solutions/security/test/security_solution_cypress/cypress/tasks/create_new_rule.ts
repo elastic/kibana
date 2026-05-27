@@ -470,7 +470,8 @@ export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   }
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
-    .type(rule.query || '');
+    .should('not.be.disabled')
+    .type(rule.query || '', { force: true });
 };
 
 export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
@@ -573,7 +574,8 @@ export const fillDefineThresholdRule = (rule: ThresholdRuleCreateProps) => {
 
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
-    .type(rule.query || '');
+    .should('not.be.disabled')
+    .type(rule.query || '', { force: true });
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
@@ -622,7 +624,8 @@ export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
 export const fillDefineNewTermsRule = (rule: NewTermsRuleCreateProps) => {
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
-    .type(rule.query || '');
+    .should('not.be.disabled')
+    .type(rule.query || '', { force: true });
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click();
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(`${rule.new_terms_fields[0]}{enter}`);
 
@@ -690,7 +693,7 @@ export const fillAboutSpecificEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) 
  * which row is valid or not.
  *
  * There are special tricks below with Eui combo box:
- * cy.get(`button[title="${indexField}"]`)
+ * cy.get(`.euiComboBoxOption[title="${indexField}"]`)
  * .should('be.visible')
  * .then(([e]) => e.click());
  *
@@ -721,14 +724,14 @@ export const fillIndicatorMatchRow = ({
     .eq(0)
     .type(indexField);
   if (computedValueRows === 'indexField' || computedValueRows === 'both') {
-    cy.get(`button[title="${indexField}"]`).then(([e]) => e.click());
+    cy.get(`.euiComboBoxOption[title="${indexField}"]`).then(([e]) => e.click());
   }
   cy.get(THREAT_MAPPING_COMBO_BOX_INPUT)
     .eq(computedRowNumber * 2 - 1)
     .type(indicatorIndexField);
 
   if (computedValueRows === 'indicatorField' || computedValueRows === 'both') {
-    cy.get(`button[title="${indicatorIndexField}"]`).then(([e]) => e.click());
+    cy.get(`.euiComboBoxOption[title="${indicatorIndexField}"]`).then(([e]) => e.click());
   }
 
   if (doesNotMatch) {
@@ -898,6 +901,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
+      cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
       cy.get([EMPTY_ALERT_TABLE, ALERTS_TABLE_COUNT].join(', '));
       return cy.root().then(($el) => {
         const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
@@ -960,8 +964,16 @@ export const fillAlertSuppressionFields = (fields: string[], checkFieldsInComboB
       cy.get(COMBO_BOX_OPTION).should('contain.text', field);
     }
 
-    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}{esc}`);
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(field);
+    // Using a click instead of keyboard navigation to avoid potential focus loss when page is still loading
+    cy.contains(COMBO_BOX_OPTION, field).click();
+    // Wait for the field to be selected as a pill before closing the dropdown,
+    // otherwise {esc} can race with {enter} and cancel the selection
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX)
+      .find('[data-test-subj="euiComboBoxPill"]')
+      .should('contain.text', field);
   });
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type('{esc}');
 };
 
 export const clearAlertSuppressionFields = () => {

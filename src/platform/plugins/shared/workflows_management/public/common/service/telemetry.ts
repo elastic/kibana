@@ -92,6 +92,9 @@ export class WorkflowsBaseTelemetry {
       tagCount: metadata.tagCount,
       constCount: metadata.constCount,
       hasTriggerConditions: metadata.hasTriggerConditions,
+      hasTriggerWorkflowEventsIgnore: metadata.hasTriggerWorkflowEventsIgnore,
+      hasTriggerWorkflowEventsAllow: metadata.hasTriggerWorkflowEventsAllow,
+      hasTriggerWorkflowEventsAvoidLoop: metadata.hasTriggerWorkflowEventsAvoidLoop,
       ...this.getBaseResultParams(error),
     });
   };
@@ -441,6 +444,46 @@ export class WorkflowsBaseTelemetry {
     });
   };
 
+  /**
+   * Reports a bulk cancellation request for all non-terminal executions of a workflow (current space).
+   * Use {@link reportWorkflowRunCancelled} when cancelling a single execution by id.
+   */
+  reportWorkflowExecutionsCancelled = (params: {
+    workflowId: string;
+    error?: Error;
+    origin?: WorkflowTelemetryOrigin;
+  }) => {
+    const { workflowId, error, origin } = params;
+    this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowExecutionsCancelled, {
+      eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowExecutionsCancelled],
+      workflowId,
+      ...(origin && { origin }),
+      ...this.getBaseResultParams(error),
+    });
+  };
+
+  /**
+   * Reports a HITL workflow execution resume attempt.
+   */
+  reportWorkflowRunResumed = (params: {
+    workflowExecutionId: string;
+    workflowId?: string;
+    timeInModalMs?: number;
+    timeSinceStepStartedMs?: number;
+    error?: Error;
+  }) => {
+    const { workflowExecutionId, workflowId, timeInModalMs, timeSinceStepStartedMs, error } =
+      params;
+    this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowRunResumed, {
+      eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowRunResumed],
+      workflowExecutionId,
+      ...(workflowId && { workflowId }),
+      ...(timeInModalMs !== undefined && { timeInModalMs }),
+      ...(timeSinceStepStartedMs !== undefined && { timeSinceStepStartedMs }),
+      ...this.getBaseResultParams(error),
+    });
+  };
+
   // UI interaction actions
 
   /**
@@ -499,6 +542,24 @@ export class WorkflowsBaseTelemetry {
     this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowCreateOpened, {
       eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowCreateOpened],
       ...(params.editorType && { editorType: params.editorType }),
+    });
+  };
+
+  reportWorkflowAccessDeniedPrivileges = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges],
+    });
+  };
+
+  reportWorkflowAccessDeniedLicense = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedLicense, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedLicense],
+    });
+  };
+
+  reportWorkflowAccessDeniedServerlessTier = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier],
     });
   };
 

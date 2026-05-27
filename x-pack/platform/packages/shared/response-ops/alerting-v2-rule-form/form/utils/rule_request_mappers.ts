@@ -11,12 +11,14 @@ import type {
   CreateRuleData,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
-import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition } from '../types';
-
-const createRunbookArtifactId = () =>
-  `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
+import {
+  mapArtifacts,
+  mergeArtifactsByType,
+  splitArtifactsByType,
+  type RuleArtifactPayload,
+} from './artifact_mappers';
 
 // ---------------------------------------------------------------------------
 // FormValues → API request
@@ -44,7 +46,7 @@ const mapMetadata = (metadata: FormValues['metadata']) => ({
   name: metadata.name,
   description: metadata.description,
   owner: metadata.owner,
-  tags: metadata.tags,
+  ...(metadata.tags?.length ? { tags: metadata.tags } : {}),
 });
 
 const mapSchedule = (schedule: FormValues['schedule']) => ({
@@ -73,23 +75,25 @@ const mapRecoveryPolicy = (recoveryPolicy: FormValues['recoveryPolicy']) => {
 export const deriveAlertDelayModeFromStateTransition = (
   stateTransition?: StateTransition | null
 ): FormValues['stateTransitionAlertDelayMode'] => {
-  if (stateTransition?.pendingTimeframe != null) return 'duration';
-  if (stateTransition?.pendingCount != null) return 'breaches';
-  return 'immediate';
+  if (stateTransition?.pendingTimeframe != null) return DELAY_MODE.duration;
+  if (stateTransition?.pendingCount != null && stateTransition.pendingCount > 0)
+    return DELAY_MODE.breaches;
+  return DELAY_MODE.immediate;
 };
 
 /** Derives recovery-delay mode from persisted `state_transition` (same rules as `RecoveryDelayField`). */
 export const deriveRecoveryDelayModeFromStateTransition = (
   stateTransition?: StateTransition | null
 ): FormValues['stateTransitionRecoveryDelayMode'] => {
-  if (stateTransition?.recoveringTimeframe != null) return 'duration';
-  if (stateTransition?.recoveringCount != null) return 'breaches';
-  return 'immediate';
+  if (stateTransition?.recoveringTimeframe != null) return DELAY_MODE.duration;
+  if (stateTransition?.recoveringCount != null && stateTransition.recoveringCount > 0)
+    return DELAY_MODE.recoveries;
+  return DELAY_MODE.immediate;
 };
 
 const mapStateTransition = (formValues: FormValues) => {
   const { kind, stateTransition } = formValues;
-  if (kind !== 'alert' || stateTransition == null) return undefined;
+  if (kind !== 'alert') return undefined;
 
   const alertMode =
     formValues.stateTransitionAlertDelayMode ??
@@ -100,31 +104,29 @@ const mapStateTransition = (formValues: FormValues) => {
 
   const out: NonNullable<RuleRequestCommon['state_transition']> = {};
 
-  if (alertMode !== 'immediate') {
-    if (alertMode === 'breaches' && stateTransition.pendingCount != null) {
-      out.pending_count = stateTransition.pendingCount;
+  if (alertMode === DELAY_MODE.immediate) {
+    out.pending_count = 0;
+  } else if (alertMode === DELAY_MODE.breaches && stateTransition?.pendingCount != null) {
+    out.pending_count = stateTransition.pendingCount;
+  } else if (alertMode === DELAY_MODE.duration) {
+    if (stateTransition?.pendingTimeframe != null) {
+      out.pending_timeframe = stateTransition.pendingTimeframe;
     }
-    if (alertMode === 'duration') {
-      if (stateTransition.pendingTimeframe != null) {
-        out.pending_timeframe = stateTransition.pendingTimeframe;
-      }
-      if (stateTransition.pendingCount != null) {
-        out.pending_count = stateTransition.pendingCount;
-      }
+    if (stateTransition?.pendingCount != null) {
+      out.pending_count = stateTransition.pendingCount;
     }
   }
 
-  if (recoveryMode !== 'immediate') {
-    if (recoveryMode === 'breaches' && stateTransition.recoveringCount != null) {
-      out.recovering_count = stateTransition.recoveringCount;
+  if (recoveryMode === DELAY_MODE.immediate) {
+    out.recovering_count = 0;
+  } else if (recoveryMode !== DELAY_MODE.duration && stateTransition?.recoveringCount != null) {
+    out.recovering_count = stateTransition.recoveringCount;
+  } else if (recoveryMode === DELAY_MODE.duration) {
+    if (stateTransition?.recoveringTimeframe != null) {
+      out.recovering_timeframe = stateTransition.recoveringTimeframe;
     }
-    if (recoveryMode === 'duration') {
-      if (stateTransition.recoveringTimeframe != null) {
-        out.recovering_timeframe = stateTransition.recoveringTimeframe;
-      }
-      if (stateTransition.recoveringCount != null) {
-        out.recovering_count = stateTransition.recoveringCount;
-      }
+    if (stateTransition?.recoveringCount != null) {
+      out.recovering_count = stateTransition.recoveringCount;
     }
   }
 
@@ -152,44 +154,13 @@ export interface RuleRequestCommon {
   artifacts?: RuleArtifactPayload;
 }
 
-const mapArtifacts = (artifacts: FormValues['artifacts']): RuleRequestCommon['artifacts'] => {
-  const currentArtifacts = artifacts ?? [];
-  const runbookArtifact = currentArtifacts.find(
-    (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
-  );
-  const runbookValue = runbookArtifact?.value.trim();
-
-  if (runbookArtifact && !runbookValue) {
-    const artifactsWithoutRunbook = currentArtifacts.filter(
-      (artifact) => artifact.type !== RUNBOOK_ARTIFACT_TYPE
-    );
-    return artifactsWithoutRunbook.length ? artifactsWithoutRunbook : undefined;
-  }
-
-  if (runbookArtifact && runbookValue) {
-    const runbookId = runbookArtifact.id.trim() ? runbookArtifact.id : createRunbookArtifactId();
-    if (runbookArtifact.value === runbookValue && runbookArtifact.id === runbookId) {
-      return currentArtifacts.length ? currentArtifacts : undefined;
-    }
-
-    return currentArtifacts.map((artifact) =>
-      artifact.type === RUNBOOK_ARTIFACT_TYPE
-        ? { ...artifact, id: runbookId, value: runbookValue }
-        : artifact
-    );
-  }
-
-  return currentArtifacts.length ? currentArtifacts : undefined;
-};
-
 /**
  * Maps `FormValues` to the common API request shape (snake_case) shared by
  * both create and update endpoints. Does not include `kind`.
  */
 export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestCommon => {
-  const { metadata, timeField, schedule, evaluation, grouping, recoveryPolicy, artifacts } =
-    formValues;
-  const mappedArtifacts = mapArtifacts(artifacts);
+  const { metadata, timeField, schedule, evaluation, grouping, recoveryPolicy } = formValues;
+  const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
 
   return {
     metadata: mapMetadata(metadata),
@@ -285,6 +256,6 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
     stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),
-    ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
+    ...splitArtifactsByType(rule.artifacts),
   };
 };

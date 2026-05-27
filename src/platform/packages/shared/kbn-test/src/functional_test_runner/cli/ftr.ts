@@ -18,6 +18,7 @@ import exitHook from 'exit-hook';
 
 import { readConfigFile, EsVersion } from '../lib';
 import { FunctionalTestRunner } from '../functional_test_runner';
+import { applyFipsOverrides, fipsIsEnabled } from '../../functional_tests/lib/fips';
 
 export function runFtrCli() {
   const runStartTime = Date.now();
@@ -61,7 +62,13 @@ export function runFtrCli() {
         updateSnapshots: flagsReader.boolean('updateSnapshots') || flagsReader.boolean('u'),
       };
 
-      const config = await readConfigFile(log, esVersion, configPaths[0], settingOverrides);
+      const config = await readConfigFile(
+        log,
+        esVersion,
+        configPaths[0],
+        settingOverrides,
+        fipsIsEnabled() ? applyFipsOverrides : undefined
+      );
 
       const functionalTestRunner = new FunctionalTestRunner(log, config, esVersion);
 

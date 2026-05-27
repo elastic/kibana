@@ -7,14 +7,18 @@
 
 import { z } from '@kbn/zod/v4';
 import type { AuthMode, ConnectorSpec } from '@kbn/connector-specs';
-import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
+import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib/generate_secrets_schema_from_spec';
 
 export const generateSchema = (
   spec: ConnectorSpec,
-  { isPfxEnabled, authMode }: { isPfxEnabled?: boolean; authMode?: AuthMode } = {}
+  {
+    isPfxEnabled,
+    isEarsEnabled,
+    authMode,
+  }: { isPfxEnabled?: boolean; isEarsEnabled?: boolean; authMode?: AuthMode } = {}
 ) => {
   return z.object({
     config: spec.schema ?? z.object({}),
-    secrets: generateSecretsSchemaFromSpec(spec.auth, { isPfxEnabled, authMode }),
+    secrets: generateSecretsSchemaFromSpec(spec.auth, { isPfxEnabled, isEarsEnabled, authMode }),
   });
 };

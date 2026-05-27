@@ -72,6 +72,7 @@ describe('getAxiosConfig', () => {
       crt: null,
       pfx: null,
       secretHeaders: null,
+      secretQueryParams: null,
       proxyUsername: null,
       proxyPassword: null,
     },

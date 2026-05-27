@@ -22,12 +22,14 @@ export function filterForFeatureAvailability(
 export const createNavigationTree = ({
   streamsAvailable,
   overviewAvailable = true,
+  genAiSettingsAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
   showAlertingV2 = false,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
+  genAiSettingsAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
   showAlertingV2?: boolean;
@@ -65,29 +67,12 @@ export const createNavigationTree = ({
       {
         link: 'workflows',
       },
-      showAlertingV2
-        ? {
-            id: 'alerting',
-            renderAs: 'panelOpener',
-            title: i18n.translate('xpack.serverlessObservability.nav.alerts', {
-              defaultMessage: 'Alerts',
-            }),
-            icon: 'warning',
-            children: [
-              {
-                link: 'observability-overview:alerts',
-              },
-              {
-                link: 'observability-overview:alerts_v2',
-              },
-            ],
-          }
-        : {
-            link: 'observability-overview:alerts',
-            icon: 'warning',
-            getIsActive: ({ pathNameSerialized, prepend }) =>
-              pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
-          },
+      {
+        link: 'observability-overview:alerts',
+        icon: 'warning',
+        getIsActive: ({ pathNameSerialized, prepend }) =>
+          pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
+      },
       ...filterForFeatureAvailability(
         {
           link: 'observability-overview:cases' as const,
@@ -133,12 +118,24 @@ export const createNavigationTree = ({
                 title: i18n.translate('xpack.serverlessObservability.nav.apm.services', {
                   defaultMessage: 'Service inventory',
                 }),
+                getIsActive: ({ pathNameSerialized }) => {
+                  const regex = /app\/apm\/.*service.*/;
+
+                  return regex.test(pathNameSerialized);
+                },
               },
               {
                 link: 'apm:service-map',
                 title: i18n.translate('xpack.serverlessObservability.nav.apm.serviceMap', {
                   defaultMessage: 'Service map',
                 }),
+                sideNavStatus: 'hidden',
+              },
+              {
+                link: 'apm:service-groups-list',
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  return pathNameSerialized.startsWith(prepend('/app/apm/service-groups'));
+                },
                 sideNavStatus: 'hidden',
               },
               { link: 'apm:traces' },
@@ -304,6 +301,15 @@ export const createNavigationTree = ({
               }),
               breadcrumbStatus: 'hidden',
               children: [
+                {
+                  link: 'management:anomaly_detection',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.anomaly_detection.manage_jobs',
+                    {
+                      defaultMessage: 'Manage jobs',
+                    }
+                  ),
+                },
                 {
                   link: 'ml:anomalyExplorer',
                 },
@@ -508,7 +514,9 @@ export const createNavigationTree = ({
               breadcrumbStatus: 'hidden',
               children: [
                 { link: 'management:rules', breadcrumbStatus: 'hidden' },
-                { link: 'management:notification_policies', breadcrumbStatus: 'hidden' },
+                { link: 'management:episodes', breadcrumbStatus: 'hidden' },
+                { link: 'management:action_policies', breadcrumbStatus: 'hidden' },
+                { link: 'management:execution_history', breadcrumbStatus: 'hidden' },
               ],
             },
             showAlertingV2
@@ -524,7 +532,7 @@ export const createNavigationTree = ({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:triggersActionsAlerts' },
-              { link: 'management:triggersActions' },
+              { link: 'rules' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
             ],

@@ -17,7 +17,7 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
-import { EsqlResponseError } from './esql_response_error';
+import { EsqlResponseError } from '../../../chart/utils/esql_response_error';
 import { executeEsqlQuery, fetchEsqlResponseOrThrow } from './execute_esql_query';
 import { getMetricsExecutionContext } from './execution_context';
 
@@ -76,6 +76,7 @@ describe('executeEsqlQuery', () => {
       filters: [],
       variables,
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(mockGetESQLResults).toHaveBeenCalledTimes(1);
@@ -88,7 +89,8 @@ describe('executeEsqlQuery', () => {
         variables,
         ...getMetricsExecutionContext(
           MetricsExecutionContextAction.FETCH,
-          MetricsExecutionContextName.METRICS_INFO
+          MetricsExecutionContextName.METRICS_INFO,
+          { profile_id: 'metrics-data-source-profile' }
         ),
       })
     );
@@ -100,14 +102,35 @@ describe('executeEsqlQuery', () => {
       search: mockSearch,
       dataView: dataViewWithAtTimefieldMock,
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(mockGetESQLResults).toHaveBeenCalledWith(
       expect.objectContaining({
         executionContext: getMetricsExecutionContext(
           MetricsExecutionContextAction.FETCH,
-          MetricsExecutionContextName.METRICS_INFO
+          MetricsExecutionContextName.METRICS_INFO,
+          { profile_id: 'metrics-data-source-profile' }
         ).executionContext,
+      })
+    );
+  });
+
+  it('forwards profileId onto executionContext.meta so the server-side APM transaction is tagged via the standardized pipeline', async () => {
+    await executeEsqlQuery({
+      esqlQuery: 'TS metrics-* | METRICS_INFO',
+      search: mockSearch,
+      dataView: dataViewWithAtTimefieldMock,
+      uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
+    });
+
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: expect.objectContaining({
+          page: 'metrics_fetch_metrics_info',
+          meta: { profile_id: 'metrics-data-source-profile' },
+        }),
       })
     );
   });
@@ -118,9 +141,10 @@ describe('executeEsqlQuery', () => {
       search: mockSearch,
       dataView: dataViewWithAtTimefieldMock,
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
-    expect(result).toStrictEqual([
+    expect(result.documents).toStrictEqual([
       {
         metric_name: 'metric.name',
         data_stream: 'metrics-stream-1',
@@ -130,6 +154,10 @@ describe('executeEsqlQuery', () => {
         dimension_fields: 'host',
       },
     ]);
+    expect(result.requestParams).toStrictEqual({
+      query: 'TS metrics-* | METRICS_INFO',
+    });
+    expect(result.rawResponse).toBeDefined();
   });
 
   it('builds filter from time and filters when timeRange and dataView have timeFieldName', async () => {
@@ -146,6 +174,7 @@ describe('executeEsqlQuery', () => {
       timeRange: { from: 'now-1h', to: 'now' },
       filters: [],
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(mockGetTime).toHaveBeenCalledWith(
@@ -170,6 +199,7 @@ describe('executeEsqlQuery', () => {
       dataView: dataViewWithAtTimefieldMock,
       filters: [],
       uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
     });
 
     expect(mockGetESQLResults).toHaveBeenCalledWith(
@@ -196,6 +226,7 @@ describe('executeEsqlQuery', () => {
         search: mockSearch,
         dataView: dataViewWithAtTimefieldMock,
         uiSettings: mockUiSettings,
+        profileId: 'metrics-data-source-profile',
       })
     ).rejects.toThrow(EsqlResponseError);
   });
@@ -218,6 +249,7 @@ describe('executeEsqlQuery', () => {
         search: mockSearch,
         dataView: dataViewWithAtTimefieldMock,
         uiSettings: mockUiSettings,
+        profileId: 'metrics-data-source-profile',
       })
     ).rejects.toMatchObject({ status: 400 });
   });

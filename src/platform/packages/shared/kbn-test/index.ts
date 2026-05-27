@@ -76,6 +76,18 @@ export type { JestConfigResult, JestValidationResult } from './src/jest/run_cont
 
 export { runJestAll } from './src/jest/run_all';
 
+export {
+  runJestViaMoon,
+  parseMoonJestOutput,
+  findJestConfig,
+  JEST_CONFIG_NAMES,
+} from './src/jest/run_jest_via_moon';
+export type {
+  MoonJestResult,
+  MoonJestTaskResult,
+  JestFailedTest,
+} from './src/jest/run_jest_via_moon';
+
 export * from './src/kbn_archiver_cli';
 
 export * from '@kbn/kbn-client';

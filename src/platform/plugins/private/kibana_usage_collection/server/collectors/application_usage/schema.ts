@@ -130,6 +130,7 @@ export const applicationUsageSchema = {
   status: commonSchema,
   kibanaOverview: commonSchema,
   r: commonSchema,
+  workflows: commonSchema,
 
   // X-Pack
   agent_builder: commonSchema,
@@ -165,6 +166,7 @@ export const applicationUsageSchema = {
   'observability-overview': commonSchema,
   observabilityOnboarding: commonSchema,
   observabilityAIAssistant: commonSchema,
+  onboarding: commonSchema,
   'exploratory-view': commonSchema,
   osquery: commonSchema,
   profiling: commonSchema,

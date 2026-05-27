@@ -8,10 +8,9 @@
 import type { SavedObject } from '@kbn/core/server';
 
 import type {
-  AlertAttachmentAttributes,
   AttachmentsV2,
   AttachmentV2,
-  EventAttachmentAttributes,
+  DocumentAttachmentAttributesV2,
 } from '../../../common/types/domain';
 import { AttachmentType } from '../../../common';
 import type { DocumentResponse, AttachmentsFindResponse } from '../../../common/types/api';
@@ -26,6 +25,7 @@ import type { CasesClientArgs } from '../types';
 import type { FindCommentsArgs, GetAllDocumentsAttachedToCase, GetAllArgs, GetArgs } from './types';
 
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import { getAttachmentAuthorizationFilter } from '../../authorization/utils';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import {
   defaultSortField,
@@ -41,7 +41,7 @@ import { Operations } from '../../authorization';
 import { AttachmentRtV2, AttachmentsRtV2 } from '../../../common/types/domain';
 
 const normalizeDocumentResponse = (
-  documents: Array<SavedObject<AlertAttachmentAttributes | EventAttachmentAttributes>>
+  documents: Array<SavedObject<DocumentAttachmentAttributesV2>>
 ): DocumentResponse =>
   documents.reduce((acc: DocumentResponse, document) => {
     const { ids, indices } = getIDsAndIndicesAsArrays(document.attributes);
@@ -72,6 +72,7 @@ export const getAllDocumentsAttachedToCase = async (
     authorization,
     services: { attachmentService },
     logger,
+    config,
   } = clientArgs;
 
   try {
@@ -82,15 +83,18 @@ export const getAllDocumentsAttachedToCase = async (
     });
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
+      await getAttachmentAuthorizationFilter(authorization, Operations.getAlertsAttachedToCase, {
+        isCasesAttachmentsEnabled: config.attachments?.enabled === true,
+      });
 
-    const filterArray = [authorizationFilter];
+    const filterArray = authorizationFilter ? [authorizationFilter] : [];
     if (filter) filterArray.push(filter);
 
     const documents = await attachmentService.getter.getAllDocumentsAttachedToCase({
       attachmentTypes,
       caseId: theCase.id,
       filter: combineFilters(filterArray),
+      owner: theCase.owner,
     });
 
     ensureSavedObjectsAreAuthorized(
@@ -123,14 +127,19 @@ export async function find(
     services: { attachmentService },
     logger,
     authorization,
+    config,
   } = clientArgs;
 
   try {
     const queryParams = decodeWithExcessOrThrow(FindAttachmentsQueryParamsRt)(findQueryParams);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.findComments);
+      await getAttachmentAuthorizationFilter(authorization, Operations.findComments, {
+        isCasesAttachmentsEnabled: config.attachments?.enabled === true,
+      });
 
+    // TODO https://github.com/elastic/security-team/issues/17089
+    // include `cases-attachments.attributes.type === 'comment'`
     const filter = combineFilters([
       buildFilter({
         filters: [AttachmentType.user],
@@ -219,11 +228,14 @@ export async function getAll(
     services: { caseService },
     logger,
     authorization,
+    config,
   } = clientArgs;
 
   try {
-    const { filter, ensureSavedObjectsAreAuthorized } = await authorization.getAuthorizationFilter(
-      Operations.getAllComments
+    const { filter, ensureSavedObjectsAreAuthorized } = await getAttachmentAuthorizationFilter(
+      authorization,
+      Operations.getAllComments,
+      { isCasesAttachmentsEnabled: config.attachments?.enabled === true }
     );
 
     const comments = await caseService.getAllCaseComments({

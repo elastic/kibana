@@ -7,6 +7,10 @@
 
 import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } from './epm';
 import type { SecretReference } from './secret';
+import type { GlobalDataTag } from './agent_policy';
+
+/** Boolean expression syntax evaluated by Elastic Agent. */
+export type AgentConditionExpression = string;
 
 export interface PackagePolicyPackage {
   name: string;
@@ -51,6 +55,7 @@ export interface NewPackagePolicyInputStream {
   vars?: PackagePolicyConfigRecord;
   var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
+  condition?: AgentConditionExpression;
   migrate_from?: string;
 }
 
@@ -60,7 +65,10 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 }
 
 export interface NewPackagePolicyInput {
+  /** Auto-generated instance identifier for this input within a saved package policy (e.g. `otelcol-nginx-abc123`). Distinct from `name`, which comes from the registry manifest and is used to disambiguate inputs of the same type. */
   id?: string;
+  /** The registry input's `name` field, when set. Used to disambiguate multiple inputs of the same `type` within a policy template. Falls back to `type` when absent. */
+  name?: string;
   type: string;
   policy_template?: string;
   enabled: boolean;
@@ -69,6 +77,7 @@ export interface NewPackagePolicyInput {
   var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
+  condition?: AgentConditionExpression;
   deprecated?: DeprecationInfo;
   migrate_from?: string;
 }
@@ -106,6 +115,8 @@ export interface NewPackagePolicy {
   supports_agentless?: boolean | null;
   supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[];
+  global_data_tags?: GlobalDataTag[];
+  condition?: AgentConditionExpression;
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {

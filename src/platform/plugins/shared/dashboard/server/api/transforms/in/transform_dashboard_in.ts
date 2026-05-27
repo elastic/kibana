@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { uniqBy } from 'lodash';
+
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { RequestTiming } from '@kbn/core-http-server';
 import type { DashboardState } from '../../types';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { transformPanelsIn } from './transform_panels_in';
@@ -18,18 +21,14 @@ import { transformOptionsIn } from './transform_options_in';
 
 export const transformDashboardIn = (
   dashboardState: Partial<DashboardState>,
-  isDashboardAppRequest: boolean = false
-):
-  | {
-      attributes: DashboardSavedObjectAttributes;
-      references: SavedObjectReference[];
-      error: null;
-    }
-  | {
-      attributes: null;
-      references: null;
-      error: Error;
-    } => {
+  isDashboardAppRequest: boolean = false,
+  serverTiming?: RequestTiming
+): {
+  attributes: DashboardSavedObjectAttributes;
+  references: SavedObjectReference[];
+} => {
+  const timer = serverTiming?.start('transform-dashboard-in');
+
   try {
     const {
       pinned_panels,
@@ -63,14 +62,15 @@ export const transformDashboardIn = (
       query
     );
 
-    const { pinnedPanels, references: controlGroupReferences } =
-      transformPinnedPanelsIn(pinned_panels);
+    const { pinnedPanels, references: controlGroupReferences } = transformPinnedPanelsIn(
+      pinned_panels ?? []
+    );
 
     const attributes = {
       description: '',
       title: '',
       ...rest,
-      ...(pinnedPanels && {
+      ...(Object.keys(pinnedPanels).length && {
         pinned_panels: { panels: pinnedPanels },
       }),
       optionsJSON: transformOptionsIn(options ?? {}),
@@ -86,15 +86,17 @@ export const transformDashboardIn = (
 
     return {
       attributes,
-      references: [
-        ...tagReferences,
-        ...panelReferences,
-        ...controlGroupReferences,
-        ...searchSourceReferences,
-      ],
-      error: null,
+      references: uniqBy(
+        [
+          ...tagReferences,
+          ...panelReferences,
+          ...controlGroupReferences,
+          ...searchSourceReferences,
+        ],
+        'name'
+      ),
     };
-  } catch (e) {
-    return { attributes: null, references: null, error: e };
+  } finally {
+    timer?.end();
   }
 };

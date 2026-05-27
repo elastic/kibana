@@ -11,11 +11,8 @@ import {
   registerRefreshTokenRoute,
   registerRevokeTokenRoute,
 } from './ears';
-import { registerGetInferenceEndpointsRoute } from './get_inference_endpoints';
-
 export const registerRoutes = (dependencies: RouteDependencies) => {
   const { router, logger, config } = dependencies;
-  registerGetInferenceEndpointsRoute(router);
 
   // EARS OAuth routes
   registerExchangeCodeRoute({ router, logger, config });

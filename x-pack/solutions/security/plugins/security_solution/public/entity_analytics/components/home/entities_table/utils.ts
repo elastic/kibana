@@ -10,6 +10,7 @@ import type { EntityType } from '../../../../../common/entity_analytics/types';
 
 interface EntitySource {
   entity?: {
+    id?: string;
     name?: string;
     EngineMetadata?: { Type?: EntityType };
   };
@@ -20,5 +21,6 @@ export const getEntityFields = (doc: DataTableRecord) => {
   return {
     entityType: entity?.EngineMetadata?.Type,
     entityName: entity?.name,
+    entityId: entity?.id,
   };
 };

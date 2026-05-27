@@ -9,9 +9,10 @@ import { EntityType } from '../../../../common/search_strategy';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildRiskScoreBucket,
+  getBaseScoreESQL,
   getESQL,
   getResolutionCompositeQuery,
-  getResolutionScoreESQL,
+  getResolutionScoreESQLByIds,
 } from './calculate_esql_risk_scores';
 import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
@@ -35,7 +36,11 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toEqual({
         index: '.entity_analytics.risk_score.lookup-default',
         size: 0,
-        query: { exists: { field: 'resolution_target_id' } },
+        query: {
+          term: {
+            relationship_type: 'entity.relationships.resolution.resolved_to',
+          },
+        },
         aggs: {
           by_resolution_target: {
             composite: {
@@ -48,10 +53,10 @@ describe('Calculate risk scores with ESQL', () => {
       });
     });
 
-    it('builds resolution ESQL query with lookup join and related entity aggregation', () => {
-      const query = getResolutionScoreESQL(
+    it('builds resolution ESQL query for explicit resolution target ids', () => {
+      const query = getResolutionScoreESQLByIds(
         EntityType.user,
-        { lower: 'user:a', upper: 'user:z' },
+        ['user:target-a', 'user:target-z'],
         5000,
         1000,
         '.alerts-security.alerts-default',
@@ -61,10 +66,73 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain(
         'LOOKUP JOIN .entity_analytics.risk_score.lookup-default ON entity_id'
       );
+      expect(query).toContain('resolution_target_id IN ("user:target-a", "user:target-z")');
       expect(query).toContain('BY resolution_target_id');
       expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
-      expect(query).toContain('resolution_target_id > "user:a"');
-      expect(query).toContain('resolution_target_id <= "user:z"');
+    });
+
+    it('escapes quote and backslash characters in resolution target ID list', () => {
+      const query = getResolutionScoreESQLByIds(
+        EntityType.user,
+        ['user:target-a', 'user:with"quote\\slash@okta'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain('"user:target-a"');
+      expect(query).toContain('"user:with\\"quote\\\\slash@okta"');
+    });
+
+    it.each([
+      ['NUL', '\u0000'],
+      ['LF', '\u000A'],
+      ['CR', '\u000D'],
+      ['LS', '\u2028'],
+      ['PS', '\u2029'],
+    ])('throws when resolution target id list contains %s control character', (_label, char) => {
+      expect(() =>
+        getResolutionScoreESQLByIds(
+          EntityType.user,
+          ['user:target-a', `user:bad${char}@okta`],
+          5000,
+          1000,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        )
+      ).toThrow('Entity ID contains an unsupported control character');
+    });
+
+    it('escapes quote and backslash characters in getBaseScoreESQL bounds', () => {
+      const query = getBaseScoreESQL(
+        EntityType.host,
+        { lower: 'host:edge"with-quote', upper: 'host:edge\\with-slash' },
+        10000,
+        3500,
+        '.alerts-security.alerts-default'
+      );
+
+      expect(query).toContain('entity_id > "host:edge\\"with-quote"');
+      expect(query).toContain('entity_id <= "host:edge\\\\with-slash"');
+    });
+
+    it.each([
+      ['NUL', '\u0000'],
+      ['LF', '\u000A'],
+      ['CR', '\u000D'],
+      ['LS', '\u2028'],
+      ['PS', '\u2029'],
+    ])('throws when getBaseScoreESQL bounds contain %s control character', (_label, char) => {
+      expect(() =>
+        getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:abel', upper: `host:bad${char}` },
+          10000,
+          3500,
+          '.alerts-security.alerts-default'
+        )
+      ).toThrow('Entity ID contains an unsupported control character');
     });
   });
 

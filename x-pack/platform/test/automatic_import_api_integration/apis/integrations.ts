@@ -75,7 +75,7 @@ export default function ({ getService }: AutomaticImportApiFtrProviderContext) {
 
       it('should return error for non-existent integration', async function () {
         const res = await supertest
-          .get('/api/automatic_import/integrations/non-existent-id')
+          .get('/api/automatic_import/integrations/non_existent_id')
           .set('kbn-xsrf', 'true')
           .set('x-elastic-internal-origin', 'automatic-import-test')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1');

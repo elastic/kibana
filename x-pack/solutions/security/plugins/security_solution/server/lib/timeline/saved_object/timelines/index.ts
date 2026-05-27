@@ -47,6 +47,7 @@ export { pickSavedTimeline } from './pick_saved_timeline';
 export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 
 type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'savedQueryId'>;
+const DELETE_TIMELINE_BATCH_SIZE = 10;
 
 export const getTimeline = async (
   request: FrameworkRequest,
@@ -564,17 +565,23 @@ export const deleteTimeline = async (
   searchIds?: string[]
 ) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
+  const uniqueTimelineIds = [...new Set(timelineIds)];
 
-  await Promise.all([
-    ...timelineIds.map((timelineId) =>
-      Promise.all([
-        savedObjectsClient.delete(timelineSavedObjectType, timelineId),
-        note.deleteNotesByTimelineId(request, timelineId),
-        pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
-      ])
-    ),
-    deleteSearchByTimelineId(request, searchIds),
-  ]);
+  for (let index = 0; index < uniqueTimelineIds.length; index += DELETE_TIMELINE_BATCH_SIZE) {
+    const timelineIdsBatch = uniqueTimelineIds.slice(index, index + DELETE_TIMELINE_BATCH_SIZE);
+
+    await Promise.all(
+      timelineIdsBatch.map((timelineId) =>
+        Promise.all([
+          savedObjectsClient.delete(timelineSavedObjectType, timelineId),
+          note.deleteNotesByTimelineId(request, timelineId),
+          pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
+        ])
+      )
+    );
+  }
+
+  await deleteSearchByTimelineId(request, searchIds);
 };
 
 export const copyTimeline = async (

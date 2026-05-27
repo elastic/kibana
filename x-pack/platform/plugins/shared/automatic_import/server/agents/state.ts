@@ -22,6 +22,14 @@ export interface PipelineValidationResults {
   failure_details: PipelineValidationFailureDetail[];
 }
 
+export const FIELD_MAPPING_TYPES = ['keyword', 'long', 'ip', 'date'] as const;
+export type FieldMappingType = (typeof FIELD_MAPPING_TYPES)[number];
+
+export interface FieldMapping {
+  name: string;
+  type: FieldMappingType;
+}
+
 const lastValueReducer = <T>(_: T, right: T): T => right;
 
 export const AutomaticImportAgentState = Annotation.Root({
@@ -58,6 +66,10 @@ export const AutomaticImportAgentState = Annotation.Root({
   review: Annotation<string>({
     reducer: lastValueReducer,
     default: () => '',
+  }),
+  field_mappings: Annotation<FieldMapping[]>({
+    reducer: lastValueReducer,
+    default: () => [],
   }),
 });
 

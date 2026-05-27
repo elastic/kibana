@@ -31,7 +31,7 @@ test.describe(
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs.otel' });
     });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing mappings before each test
       await apiServices.streams.clearStreamMappings('logs.otel.info');

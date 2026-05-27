@@ -4,21 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   useForm,
   useFormContext,
   useFormData,
+  useFormIsModified,
   Form,
   type FormConfig,
   type FormHook,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { createFormSchema, REQUIRED_FIELDS } from './integration_form_validation';
 import type { IntegrationFormData } from './types';
-import { useKibana, getInstalledPackages, getAllIntegrations } from '../../../common';
+import { useKibana, fetchTakenPackageNames } from '../../../common';
 import * as i18n from './translations';
-import { DEFAULT_DATA_STREAM_VALUES, DEFAULT_INTEGRATION_VALUES } from './constants';
-import { normalizeTitleName } from '../../../common/lib/helper_functions';
+import {
+  DEFAULT_DATA_STREAM_VALUES,
+  DEFAULT_INTEGRATION_VALUES,
+  INTEGRATION_DETAILS_UNTRACKED_FIELDS,
+} from './constants';
+
+const PackageNamesContext = createContext<Set<string> | undefined>(undefined);
+
+export const usePackageNames = (): Set<string> | undefined => useContext(PackageNamesContext);
 
 export interface IntegrationFormProviderProps {
   children?: React.ReactNode;
@@ -39,32 +47,14 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
   // Load installed package names and existing AIV2 integration IDs for duplicate title validation
   useEffect(() => {
     const abortController = new AbortController();
-    const deps = { http, abortSignal: abortController.signal };
     (async () => {
       try {
-        const [packagesResponse, aiv2Integrations] = await Promise.all([
-          getInstalledPackages(deps),
-          getAllIntegrations(deps),
-        ]);
+        const takenNames = await fetchTakenPackageNames({
+          http,
+          abortSignal: abortController.signal,
+        });
         if (abortController.signal.aborted) return;
-
-        const allNames = new Set<string>();
-
-        // Add installed package IDs
-        if (packagesResponse?.items?.length) {
-          packagesResponse.items.forEach((pkg) => allNames.add(pkg.id));
-        }
-
-        // Add AIV2 integration IDs (normalized to match how new titles are converted)
-        if (aiv2Integrations?.length) {
-          aiv2Integrations.forEach((integration) => {
-            // Add both the raw integrationId and the normalized title
-            allNames.add(integration.integrationId);
-            allNames.add(normalizeTitleName(integration.title));
-          });
-        }
-
-        setPackageNames(allNames);
+        setPackageNames(takenNames);
       } catch (e) {
         if (!abortController.signal.aborted) {
           notifications?.toasts.addError(e, {
@@ -116,22 +106,25 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
   });
 
   return (
-    <Form
-      form={form}
-      onKeyDown={(e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
-          e.preventDefault();
-        }
-      }}
-    >
-      {children}
-    </Form>
+    <PackageNamesContext.Provider value={packageNames}>
+      <Form
+        form={form}
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement)) {
+            e.preventDefault();
+          }
+        }}
+      >
+        {children}
+      </Form>
+    </PackageNamesContext.Provider>
   );
 };
 
 export const useIntegrationForm = () => {
   const form = useFormContext<IntegrationFormData>();
   const [formData] = useFormData<IntegrationFormData>();
+  const isFormModified = useFormIsModified({ discard: INTEGRATION_DETAILS_UNTRACKED_FIELDS });
 
   // Check if all required fields for the current context are filled
   const isValid = useMemo(() => {
@@ -161,6 +154,7 @@ export const useIntegrationForm = () => {
     form: form as FormHook<IntegrationFormData>,
     formData,
     isValid,
+    isFormModified,
     submit: () => form.submit(),
     reset: () => form.reset(),
     validate: () => form.validate(),

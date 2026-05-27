@@ -186,11 +186,12 @@ const ConnectorFilterComponent: React.FC<ConnectorFilterProps> = ({
   return (
     <EuiFilterGroup compressed={compressed}>
       <EuiPopover
+        aria-label={i18n.CONNECTOR}
         button={button}
         closePopover={closePopover}
         id={filterGroupPopoverId}
         isOpen={isPopoverOpen}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
       >
         <EuiSelectable
           aria-label={i18n.CONNECTOR}
@@ -201,6 +202,7 @@ const ConnectorFilterComponent: React.FC<ConnectorFilterProps> = ({
         >
           {(list) => (
             <div
+              data-test-subj="connectorFilterSelectable"
               css={css`
                 width: 260px;
               `}

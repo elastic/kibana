@@ -35,7 +35,14 @@ export class DefaultTransformManager implements TransformManager {
   async install(slo: SLODefinition): Promise<TransformId> {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
-      this.logger.debug(`No transform generator found for indicator type [${slo.indicator.type}]`);
+      this.logger.debug('No transform generator found for indicator type.', {
+        service: { name: 'transform_manager' },
+        labels: {
+          slo_id: slo.id,
+          indicator_type: slo.indicator.type,
+          error_type: 'unsupported_indicator_type',
+        },
+      });
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
@@ -49,9 +56,15 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.debug(
-        `Cannot create SLO transform for indicator type [${slo.indicator.type}]. ${err}`
-      );
+      this.logger.warn('Cannot install SLO transform.', {
+        service: { name: 'transform_manager' },
+        labels: {
+          slo_id: slo.id,
+          indicator_type: slo.indicator.type,
+          error_type: 'transform_install_failed',
+        },
+        error: err,
+      });
       if (err.meta?.body?.error?.type === 'security_exception') {
         throw new SecurityException(err.meta.body.error.reason);
       }
@@ -83,7 +96,11 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.debug(`Cannot preview SLO transform [${transformId}]. ${err}`);
+      this.logger.warn('Cannot preview SLO transform.', {
+        service: { name: 'transform_manager' },
+        labels: { transform_id: transformId, error_type: 'transform_preview_failed' },
+        error: err,
+      });
       throw err;
     }
   }
@@ -100,7 +117,11 @@ export class DefaultTransformManager implements TransformManager {
       );
       await this.scheduleNowTransform(transformId);
     } catch (err) {
-      this.logger.debug(`Cannot start SLO transform [${transformId}]. ${err}`);
+      this.logger.warn('Cannot start SLO transform.', {
+        service: { name: 'transform_manager' },
+        labels: { transform_id: transformId, error_type: 'transform_start_failed' },
+        error: err,
+      });
       throw err;
     }
   }
@@ -121,7 +142,11 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.debug(`Cannot stop SLO transform [${transformId}]. ${err}`);
+      this.logger.warn('Cannot stop SLO transform.', {
+        service: { name: 'transform_manager' },
+        labels: { transform_id: transformId, error_type: 'transform_stop_failed' },
+        error: err,
+      });
       throw err;
     }
   }
@@ -137,7 +162,11 @@ export class DefaultTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.debug(`Cannot delete SLO transform [${transformId}]. ${err}`);
+      this.logger.warn('Cannot uninstall SLO transform.', {
+        service: { name: 'transform_manager' },
+        labels: { transform_id: transformId, error_type: 'transform_uninstall_failed' },
+        error: err,
+      });
       throw err;
     }
   }
@@ -163,7 +192,11 @@ export class DefaultTransformManager implements TransformManager {
         return undefined;
       }
 
-      this.logger.debug(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
+      this.logger.warn('Cannot retrieve SLO transform version.', {
+        service: { name: 'transform_manager' },
+        labels: { transform_id: transformId, error_type: 'transform_get_version_failed' },
+        error: err,
+      });
       throw err;
     }
   }
@@ -175,7 +208,11 @@ export class DefaultTransformManager implements TransformManager {
         this.logger.debug(`SLO transform [${transformId}] scheduled now successfully`);
       })
       .catch((e) => {
-        this.logger.debug(`Cannot schedule now SLO transform [${transformId}]. ${e}`);
+        this.logger.warn('Cannot schedule now SLO transform.', {
+          service: { name: 'transform_manager' },
+          labels: { transform_id: transformId, error_type: 'transform_schedule_failed' },
+          error: e,
+        });
       });
   }
 }

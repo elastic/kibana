@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import type { EditorError, ESQLMessage } from '@elastic/esql/types';
+import type { EditorError } from '@elastic/esql/types';
 import { getCallbackMocks } from '../../../__tests__/language/helpers';
 import { validateQuery } from '../validation';
+import type { ESQLMessage } from '../../../commands';
 
 /**
  * Wraps a promise to ensure it is awaited. If the promise is not awaited

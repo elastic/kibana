@@ -8,7 +8,7 @@ import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
-import { ConfigKey } from '../../../../../../common/runtime_types';
+import { ConfigKey, type SelectedSyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import {
   getMonitorAction,
@@ -18,17 +18,29 @@ import {
   selectSyntheticsMonitorError,
 } from '../../../state';
 import { useGetUrlParams } from '../../../hooks';
+import { useRemoteMonitor } from './use_remote_monitor';
 
 interface UseSelectedMonitorOptions {
   refetchMonitorEnabled?: boolean;
 }
 
+interface UseSelectedMonitorResult {
+  monitor: SelectedSyntheticsMonitor | null;
+  loading: boolean;
+  error: ReturnType<typeof selectSyntheticsMonitorError>;
+  isMonitorMissing: boolean;
+}
+
 export const useSelectedMonitor = ({
   refetchMonitorEnabled = true,
-}: UseSelectedMonitorOptions = {}) => {
+}: UseSelectedMonitorOptions = {}): UseSelectedMonitorResult => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const { space } = useKibanaSpace();
-  const { spaceId } = useGetUrlParams();
+  const { spaceId, remoteName } = useGetUrlParams();
+
+  // Remote monitors have no local saved object — the local fetch would 404.
+  // We compose `useRemoteMonitor` to synthesize identity from remote pings via CCS.
+  const isRemote = Boolean(remoteName);
 
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
@@ -43,23 +55,43 @@ export const useSelectedMonitor = ({
     useSelector(selectorMonitorDetailsState);
   const dispatch = useDispatch();
 
+  // Remote error is not propagated through this hook's `error` field for PR 2;
+  // the local-monitor `error` is an HTTP-fetch error with `body.statusCode`,
+  // whereas the remote error is a plain ES `Error`. Surface remote errors at
+  // the data-fetching layer (later PRs) when those hooks gain CCS awareness.
+  const { data: remoteMonitor, loading: remoteMonitorLoading } = useRemoteMonitor({
+    configId: monitorId,
+    remoteName,
+  });
+
   const isMonitorFromListValid =
     monitorId && monitorFromList && monitorFromList[ConfigKey.CONFIG_ID] === monitorId;
   const isLoadedSyntheticsMonitorValid =
     monitorId && syntheticsMonitor && syntheticsMonitor[ConfigKey.CONFIG_ID] === monitorId;
 
-  const availableMonitor = isLoadedSyntheticsMonitorValid
+  const availableLocalMonitor = isLoadedSyntheticsMonitorValid
     ? syntheticsMonitor
     : isMonitorFromListValid
     ? monitorFromList
     : null;
 
+  const availableMonitor: SelectedSyntheticsMonitor | null = isRemote
+    ? remoteMonitor ?? null
+    : availableLocalMonitor;
+
   const isMonitorMissing =
+    !isRemote &&
     error?.body?.statusCode === 404 &&
     (error.getPayload as { monitorId: string })?.monitorId === monitorId;
 
   useEffect(() => {
-    if (monitorId && !availableMonitor && !syntheticsMonitorLoading && !isMonitorMissing) {
+    if (
+      monitorId &&
+      !isRemote &&
+      !availableMonitor &&
+      !syntheticsMonitorLoading &&
+      !isMonitorMissing
+    ) {
       dispatch(
         getMonitorAction.get({
           monitorId,
@@ -70,6 +102,7 @@ export const useSelectedMonitor = ({
   }, [
     dispatch,
     monitorId,
+    isRemote,
     availableMonitor,
     syntheticsMonitorLoading,
     isMonitorMissing,
@@ -81,6 +114,7 @@ export const useSelectedMonitor = ({
     // Only perform periodic refresh if the last dispatch was earlier enough
     if (
       monitorId &&
+      !isRemote &&
       !syntheticsMonitorLoading &&
       !monitorListLoading &&
       syntheticsMonitorDispatchedAt > 0 &&
@@ -99,6 +133,7 @@ export const useSelectedMonitor = ({
     lastRefresh,
     refreshInterval,
     monitorId,
+    isRemote,
     monitorListLoading,
     syntheticsMonitorLoading,
     syntheticsMonitorDispatchedAt,
@@ -109,8 +144,8 @@ export const useSelectedMonitor = ({
 
   return {
     monitor: availableMonitor,
-    loading: syntheticsMonitorLoading || monitorListLoading,
-    error,
+    loading: isRemote ? remoteMonitorLoading : syntheticsMonitorLoading || monitorListLoading,
+    error: isRemote ? null : error,
     isMonitorMissing,
   };
 };

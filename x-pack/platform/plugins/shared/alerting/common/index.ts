@@ -185,6 +185,7 @@ export { GAP_AUTO_FILL_STATUS } from './constants';
 export type { GapAutoFillStatus } from './constants';
 export { backfillInitiator } from './constants';
 export type { BackfillInitiator } from './constants';
+export { PROVISION_UIAM_API_KEYS_FEATURE_FLAG } from './constants';
 export {
   mappingFromFieldMap,
   getComponentTemplateFromFieldMap,

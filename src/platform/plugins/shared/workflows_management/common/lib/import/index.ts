@@ -7,8 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAX_WORKFLOW_YAML_LENGTH, WORKFLOW_ID_PATTERN } from '@kbn/workflows';
+import {
+  generateHumanReadableId,
+  HUMAN_READABLE_ID_MAX_LENGTH,
+  HUMAN_READABLE_ID_MIN_LENGTH,
+  HUMAN_READABLE_ID_PATTERN,
+  isUnsafeId,
+  isValidId,
+} from '@kbn/human-readable-id';
+import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+
+export {
+  buildSuffixedCandidate,
+  resolveCollisionId,
+  MAX_COLLISION_RETRIES,
+} from '@kbn/human-readable-id';
 
 export const MAX_IMPORT_WORKFLOWS = 500;
 
@@ -23,16 +37,24 @@ export const WORKFLOW_REFERENCE_KEY = 'workflow-id';
 /** Returns true when a workflow-id value is a dynamic template (e.g. `{{ inputs.id }}`). */
 export const isDynamicWorkflowReference = (value: string): boolean => value.includes('{{');
 
-const UNSAFE_IDS = new Set(['__proto__', 'constructor', 'prototype']);
+const RESERVED_ID_PREFIXES = ['system', 'internal', 'system--'];
+const WORKFLOW_ID_FALLBACK_PREFIX = 'workflow';
 
-/**
- * Validates that a workflow ID only contains safe characters and is within
- * a reasonable length. Rejects empty strings, IDs starting with special
- * characters, and known prototype-pollution keys.
- */
-export function isValidWorkflowId(id: string): boolean {
-  return !UNSAFE_IDS.has(id) && WORKFLOW_ID_PATTERN.test(id);
-}
+export const isUnsafeWorkflowId = isUnsafeId;
+
+export const isReservedWorkflowId = (id: string): boolean =>
+  RESERVED_ID_PREFIXES.some((prefix) => id.startsWith(prefix));
+
+export const isValidWorkflowId = (id: string): boolean =>
+  isValidId(id) && !isReservedWorkflowId(id);
+
+const prefixReservedWorkflowId = (id: string): string =>
+  `${WORKFLOW_ID_FALLBACK_PREFIX}-${id}`.slice(0, HUMAN_READABLE_ID_MAX_LENGTH).replace(/-+$/, '');
+
+export const generateWorkflowId = (name?: string | null): string => {
+  const id = generateHumanReadableId(name, { fallbackPrefix: WORKFLOW_ID_FALLBACK_PREFIX });
+  return isReservedWorkflowId(id) ? prefixReservedWorkflowId(id) : id;
+};
 
 // ZIP magic bytes: PK (0x50 0x4B)
 const ZIP_MAGIC_BYTE_0 = 0x50;
@@ -53,8 +75,15 @@ export function detectFileFormat(bytes: Uint8Array): 'zip' | 'yaml' {
 export const WORKFLOW_EXPORT_VERSION = '1';
 export { MAX_WORKFLOW_YAML_LENGTH };
 
+/** Zod schema for workflow IDs — reused in WorkflowExportEntrySchema and isValidWorkflowId. */
+const workflowIdSchema = z
+  .string()
+  .min(HUMAN_READABLE_ID_MIN_LENGTH)
+  .max(HUMAN_READABLE_ID_MAX_LENGTH)
+  .regex(HUMAN_READABLE_ID_PATTERN);
+
 export const WorkflowExportEntrySchema = z.object({
-  id: z.string(),
+  id: workflowIdSchema,
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
 });
 

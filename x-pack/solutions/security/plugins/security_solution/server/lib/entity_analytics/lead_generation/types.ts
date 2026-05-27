@@ -11,15 +11,24 @@ import type { Entity } from '../../../../common/api/entity_analytics/entity_stor
  * Entity representation flowing through the lead generation pipeline.
  *
  * Entity Store V2 records already embed risk scores (`entity.risk`), attributes
- * (`entity.attributes.privileged`, etc.), and behaviors, so we carry the full
+ * (`entity.attributes.watchlists`, etc.), and behaviors, so we carry the full
  * entity record through the pipeline rather than fetching data separately.
  */
 export interface LeadEntity {
   /** The full Entity Store V2 record (UserEntity | HostEntity | …) */
   readonly record: Entity;
+  /** Entity Store unique identifier (EUID, e.g. `"user:alice"`). This is the
+   *  identity key used by all observation modules for queries and joins.
+   *  Derived from `entity.id`; entities without an EUID are excluded at the
+   *  conversion boundary.
+   */
+  readonly id: string;
   /** Convenience: entity type derived from `entity.type` */
   readonly type: string;
-  /** Convenience: entity name derived from `entity.name` */
+  /** Display name derived from `entity.name`. Use this only for
+   *  human-readable strings (descriptions, log lines). For identity, use
+   *  {@link LeadEntity.id}.
+   */
   readonly name: string;
 }
 
@@ -27,7 +36,7 @@ export type ObservationSeverity = 'low' | 'medium' | 'high' | 'critical';
 
 /** A single signal produced by an {@link ObservationModule}. */
 export interface Observation {
-  /** Stable entity key (format: `type:name`, see {@link entityToKey}) */
+  /** Stable entity key: the Entity Store EUID (e.g. `"user:alice"`) — i.e. `LeadEntity.id`. */
   readonly entityId: string;
   /** The module that produced this observation */
   readonly moduleId: string;

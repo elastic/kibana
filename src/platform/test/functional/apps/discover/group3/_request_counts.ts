@@ -12,13 +12,13 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const { common, discover, timePicker, header } = getPageObjects([
+  const { appMenu, common, discover, timePicker, header } = getPageObjects([
+    'appMenu',
     'common',
     'discover',
     'timePicker',
     'header',
   ]);
-  const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
@@ -28,9 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
       );
@@ -160,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         log.debug('Clearing saved search');
         await expectSearches(type, 2, async () => {
-          await testSubjects.click('discoverNewButton');
+          await appMenu.clickMenuItem('discoverNewButton');
           if (type === 'esql') {
             await queryBar.clickQuerySubmitButton();
           }
@@ -212,7 +209,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should send 2 requests (chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
-        await testSubjects.click('discoverNewButton');
+        await appMenu.clickMenuItem('discoverNewButton');
         await expectSearches(type, 2, async () => {
           await discover.chooseBreakdownField('geo.src');
         });

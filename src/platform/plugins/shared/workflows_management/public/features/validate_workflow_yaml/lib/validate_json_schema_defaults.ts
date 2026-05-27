@@ -13,7 +13,11 @@ import { isPair, isScalar, visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
-import { normalizeFieldsToJsonSchema, resolveRef } from '@kbn/workflows/spec/lib/field_conversion';
+import {
+  extractNormalizedInputsFromYaml,
+  normalizeFieldsToJsonSchema,
+  resolveRef,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { YamlValidationResult } from '../model/types';
 
@@ -32,20 +36,7 @@ export function validateJsonSchemaDefaults(
   }
 
   // Get inputs from workflowDefinition or extract from YAML as fallback
-  const inputs =
-    workflowDefinition?.inputs ??
-    (() => {
-      try {
-        const yamlJson = yamlDocument.toJSON();
-        return (
-          yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson
-            ? (yamlJson as Record<string, unknown>).inputs
-            : undefined
-        ) as WorkflowYaml['inputs'] | undefined;
-      } catch {
-        return undefined;
-      }
-    })();
+  const inputs = extractNormalizedInputsFromYaml(workflowDefinition, yamlDocument);
 
   if (!inputs) {
     return errors;
@@ -158,18 +149,29 @@ export function validateJsonSchemaDefaults(
     } else if (isLegacyArray) {
       // Legacy array format: inputs[0].default -> find the input name and map to normalized property
       const arrayIndex = path[1] as number;
+      let inputName: string | undefined;
       if (
         Array.isArray(inputs) &&
         inputs[arrayIndex] &&
         typeof inputs[arrayIndex] === 'object' &&
         'name' in inputs[arrayIndex]
       ) {
-        const inputName = String(inputs[arrayIndex].name);
-        propertyName = inputName;
-        propertyKey = `inputs.properties.${inputName}`;
-      } else {
+        inputName = String((inputs[arrayIndex] as { name: unknown }).name);
+      } else if (
+        normalizedInputs?.properties &&
+        typeof normalizedInputs.properties === 'object' &&
+        !Array.isArray(normalizedInputs.properties)
+      ) {
+        // `extractNormalizedInputsFromYaml` returns JSON Schema object form, not the legacy array.
+        // Property order matches legacy array order from `convertLegacyFieldsToJsonSchema`.
+        const orderedKeys = Object.keys(normalizedInputs.properties);
+        inputName = orderedKeys[arrayIndex];
+      }
+      if (!inputName) {
         return null;
       }
+      propertyName = inputName;
+      propertyKey = `inputs.properties.${inputName}`;
     } else {
       const definitionName = String(path[2]);
       const propertyPath = path.slice(4, -1);
@@ -305,7 +307,8 @@ export function validateJsonSchemaDefaults(
       }
 
       // Get the path to this default value
-      const path = getPathFromAncestors(ancestors, node);
+      // slice [triggers, <index>] so the path starts from inputs
+      const path = getPathFromAncestors(ancestors, node).slice(2);
 
       // Check if this is within inputs (either properties/definitions format or legacy array format)
       // New format: ['inputs', 'properties', 'greeting', 'default'] - length 4

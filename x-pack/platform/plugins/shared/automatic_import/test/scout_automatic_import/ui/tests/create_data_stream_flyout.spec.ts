@@ -148,10 +148,69 @@ test.describe(
       await expect(pageObjects.integrationManagement.getAnalyzeLogsButton()).toBeEnabled();
     });
 
+    test('Analyze Logs button stays disabled when integration title has only one character', async ({
+      pageObjects,
+    }) => {
+      await pageObjects.integrationManagement.getIntegrationTitleInput().clear();
+      await pageObjects.integrationManagement.getIntegrationTitleInput().fill('T');
+
+      const flyout = pageObjects.integrationManagement.getCreateDataStreamFlyout();
+
+      await pageObjects.integrationManagement
+        .getDataStreamTitleInput()
+        .fill('Audit Logs Data Stream');
+      await pageObjects.integrationManagement
+        .getDataStreamDescriptionInput()
+        .fill('Audit log events from security appliances');
+
+      const comboInput = pageObjects.integrationManagement
+        .getDataCollectionMethodSelect()
+        .locator('input');
+      await comboInput.click();
+      await comboInput.press('ArrowDown');
+      await comboInput.press('Enter');
+
+      const fileInput = flyout.locator('input[type="file"]');
+      await fileInput.setInputFiles({
+        name: 'sample.log',
+        mimeType: 'text/plain',
+        buffer: Buffer.from('2024-01-01T00:00:00Z level=info msg="sample log line"\n'),
+      });
+
+      await expect(pageObjects.integrationManagement.getAnalyzeLogsButton()).toBeDisabled();
+    });
+
     test('Analyze Logs button stays disabled when data stream title is empty', async ({
       pageObjects,
     }) => {
       const flyout = pageObjects.integrationManagement.getCreateDataStreamFlyout();
+
+      const comboInput = pageObjects.integrationManagement
+        .getDataCollectionMethodSelect()
+        .locator('input');
+      await comboInput.click();
+      await comboInput.press('ArrowDown');
+      await comboInput.press('Enter');
+
+      const fileInput = flyout.locator('input[type="file"]');
+      await fileInput.setInputFiles({
+        name: 'sample.log',
+        mimeType: 'text/plain',
+        buffer: Buffer.from('2024-01-01T00:00:00Z level=info msg="sample log line"\n'),
+      });
+
+      await expect(pageObjects.integrationManagement.getAnalyzeLogsButton()).toBeDisabled();
+    });
+
+    test('Analyze Logs button stays disabled when data stream title has only one character', async ({
+      pageObjects,
+    }) => {
+      const flyout = pageObjects.integrationManagement.getCreateDataStreamFlyout();
+
+      await pageObjects.integrationManagement.getDataStreamTitleInput().fill('L');
+      await pageObjects.integrationManagement
+        .getDataStreamDescriptionInput()
+        .fill('Stream description');
 
       const comboInput = pageObjects.integrationManagement
         .getDataCollectionMethodSelect()

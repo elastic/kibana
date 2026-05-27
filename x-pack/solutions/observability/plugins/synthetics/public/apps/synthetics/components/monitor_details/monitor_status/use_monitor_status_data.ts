@@ -31,13 +31,26 @@ import type { MonitorStatusHeatmapBucket } from '../../../../../../common/runtim
 
 type Props = Pick<MonitorStatusPanelProps, 'from' | 'to'> & {
   initialSizeRef?: React.MutableRefObject<HTMLDivElement | null>;
+  monitorId?: string;
+  locationLabel?: string;
+  remoteName?: string;
 };
 
-export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
+export const useMonitorStatusData = ({
+  from,
+  to,
+  initialSizeRef,
+  monitorId: monitorIdOverride,
+  locationLabel: locationLabelOverride,
+  remoteName,
+}: Props) => {
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const { monitor } = useSelectedMonitor();
-  const location = useSelectedLocation();
+  const { monitor } = useSelectedMonitor({ refetchMonitorEnabled: !monitorIdOverride });
+  const location = useSelectedLocation({ refetchMonitorEnabled: !monitorIdOverride });
   const pageLocation = useLocation();
+
+  const resolvedMonitorId = monitorIdOverride ?? monitor?.id;
+  const resolvedLocationLabel = locationLabelOverride ?? location?.label;
 
   const fromMillis = dateToMilli(from);
   const toMillis = dateToMilli(to);
@@ -54,9 +67,6 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
 
   const getBinsNo = useCallback(
     (maxNoOfBins: number) => {
-      // Each bin represents a time interval of at least 1 minute. If the available width allows for more bins
-      // than there are minutes in the time range, we cap the number of bins to match the number of minutes
-      // to ensure each bin represents a meaningful time interval.
       return Math.min(maxNoOfBins, totalMinutes);
     },
     [totalMinutes]
@@ -71,14 +81,15 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
   }, [binsAvailableByWidth, initialSizeRef, getBinsNo]);
 
   useEffect(() => {
-    if (monitor?.id && location?.label && debouncedBinsCount !== null && !!minsPerBin) {
+    if (resolvedMonitorId && resolvedLocationLabel && debouncedBinsCount !== null && !!minsPerBin) {
       dispatch(
         quietGetMonitorStatusHeatmapAction.get({
-          monitorId: monitor.id,
-          location: location.label,
+          monitorId: resolvedMonitorId,
+          location: resolvedLocationLabel,
           from,
           to,
           interval: minsPerBin,
+          remoteName,
         })
       );
     }
@@ -87,8 +98,9 @@ export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
     from,
     to,
     minsPerBin,
-    location?.label,
-    monitor?.id,
+    resolvedLocationLabel,
+    resolvedMonitorId,
+    remoteName,
     lastRefresh,
     debouncedBinsCount,
   ]);

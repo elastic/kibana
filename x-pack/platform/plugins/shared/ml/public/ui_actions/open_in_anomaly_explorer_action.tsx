@@ -13,8 +13,8 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { ML_APP_LOCATOR } from '../../common/constants/locator';
-import type { ExplorerAppState } from '../../common/types/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import type { ExplorerAppState } from '@kbn/ml-common-types/locator';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalyChartsApi, AnomalyChartsEmbeddableApi } from '../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
@@ -22,6 +22,7 @@ import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimla
 import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
 import { getEmbeddableTimeRange } from './get_embeddable_time_range';
+import { checkPermissionAsync } from '../application/capabilities/check_capabilities';
 
 export interface OpenInAnomalyExplorerSwimLaneActionContext extends EmbeddableApiContext {
   embeddable: AnomalySwimLaneEmbeddableApi;
@@ -154,6 +155,7 @@ export function createOpenInExplorerAction(
       }
     },
     async isCompatible(context: EmbeddableApiContext) {
+      if (!(await checkPermissionAsync(getStartServices, 'canGetJobs'))) return false;
       return isSwimLaneEmbeddableContext(context) || isAnomalyChartsEmbeddableContext(context);
     },
   };

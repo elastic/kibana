@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import * as i18n from './translations';
 
 export const FieldType = {
   INPUT_TEXT: 'INPUT_TEXT',
@@ -13,6 +14,9 @@ export const FieldType = {
   SELECT_BASIC: 'SELECT_BASIC',
   TEXTAREA: 'TEXTAREA',
   DATE_PICKER: 'DATE_PICKER',
+  CHECKBOX_GROUP: 'CHECKBOX_GROUP',
+  RADIO_GROUP: 'RADIO_GROUP',
+  USER_PICKER: 'USER_PICKER',
 } as const;
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType];
@@ -65,6 +69,8 @@ export interface ConditionRenderProps {
   max?: number;
   minLength?: number;
   maxLength?: number;
+  /** When provided, the control renders inline confirm/cancel buttons and only calls this on confirm. */
+  onConfirm?: () => void;
 }
 
 const BaseFieldSchema = z.object({
@@ -75,10 +81,7 @@ const BaseFieldSchema = z.object({
   validation: ValidationSchema.optional(),
   metadata: z
     .object({
-      default: z.preprocess(
-        (val) => (val instanceof Date ? val.toISOString() : val),
-        z.string().optional()
-      ),
+      default: z.union([z.string(), z.number(), z.array(z.string())]).optional(),
     })
     .catchall(z.unknown())
     .optional(),
@@ -120,6 +123,13 @@ export const SelectBasicFieldSchema = BaseFieldSchema.extend({
 
 export const TextareaFieldSchema = BaseFieldSchema.extend({
   control: z.literal(FieldType.TEXTAREA),
+  metadata: z
+    .object({
+      default: z.string().optional(),
+      markdown: z.boolean().optional(),
+    })
+    .catchall(z.unknown())
+    .optional(),
 });
 
 export const DatePickerFieldSchema = BaseFieldSchema.extend({
@@ -134,13 +144,121 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
     .optional(),
 });
 
+export const UserPickerDefaultSchema = z.array(z.object({ uid: z.string(), name: z.string() }));
+
+export const UserPickerFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.USER_PICKER),
+  metadata: z
+    .object({
+      multiple: z.boolean().optional(),
+      default: UserPickerDefaultSchema.optional(),
+    })
+    .catchall(z.unknown())
+    .optional(),
+});
+
+const uniqueStrings = (arr: string[]) => new Set(arr).size === arr.length;
+
+export const CheckboxGroupFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.CHECKBOX_GROUP),
+  metadata: z
+    .object({
+      options: z
+        .array(z.string())
+        .max(30, { message: i18n.FIELD_OPTIONS_MAX_ITEMS(30) })
+        .refine(uniqueStrings, { message: i18n.FIELD_OPTIONS_MUST_BE_UNIQUE }),
+      default: z
+        .array(z.string())
+        .refine(uniqueStrings, { message: i18n.FIELD_DEFAULT_VALUES_MUST_BE_UNIQUE })
+        .optional(),
+    })
+    .catchall(z.unknown())
+    .superRefine((meta, ctx) => {
+      if (meta.default === undefined) return;
+      const invalidValues = (meta.default as string[]).filter(
+        (v) => v !== '' && !(meta.options as string[]).includes(v)
+      );
+      if (invalidValues.length > 0) {
+        ctx.addIssue({
+          code: 'custom',
+          message: i18n.FIELD_DEFAULT_VALUES_NOT_IN_OPTIONS(invalidValues),
+        });
+      }
+    }),
+});
+
+export const RadioGroupFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.RADIO_GROUP),
+  metadata: z
+    .object({
+      options: z
+        .array(z.string())
+        .min(2, { message: i18n.FIELD_OPTIONS_MIN_ITEMS(2) })
+        .max(20, { message: i18n.FIELD_OPTIONS_MAX_ITEMS(20) })
+        .refine(uniqueStrings, { message: i18n.FIELD_OPTIONS_MUST_BE_UNIQUE }),
+      default: z.string().optional(),
+    })
+    .catchall(z.unknown())
+    .superRefine((meta, ctx) => {
+      if (
+        meta.default !== undefined &&
+        meta.default !== '' &&
+        !(meta.options as string[]).includes(meta.default as string)
+      ) {
+        ctx.addIssue({
+          code: 'custom',
+          message: i18n.FIELD_DEFAULT_NOT_IN_OPTIONS(meta.default as string),
+        });
+      }
+    }),
+});
+
+/**
+ * A reference to a named field definition in the owner's field library.
+ * When a template is parsed, the referenced field is resolved by looking up the library
+ * field by its `$ref` name. `name` is an optional local alias; if omitted the `$ref` value
+ * is used as the effective field name within the template.
+ *
+ * `metadata.default` is an optional per-template override for the resolved field's default
+ * value. It must satisfy the resolved field's control type — this is enforced when the
+ * override is merged onto the inline field at resolve time.
+ */
+export const RefFieldSchema = z.object({
+  name: z.string().optional(),
+  $ref: z.string().min(1),
+  metadata: z
+    .object({
+      default: z
+        .union([z.string(), z.number(), z.array(z.string()), UserPickerDefaultSchema])
+        .optional(),
+    })
+    .optional(),
+});
+
+export type RefField = z.infer<typeof RefFieldSchema>;
+
 /**
  * This can be used to parse `fields` section in the YAML `definition` of the template.
+ * Includes both inline field definitions (with `control`) and library references (with `ref`).
  */
-export const FieldSchema = z.discriminatedUnion('control', [
+export const FieldSchema = z.union([
   InputTextFieldSchema,
   InputNumberFieldSchema,
   SelectBasicFieldSchema,
   TextareaFieldSchema,
   DatePickerFieldSchema,
+  UserPickerFieldSchema,
+  CheckboxGroupFieldSchema,
+  RadioGroupFieldSchema,
+  RefFieldSchema,
 ]);
+
+export type Field = z.infer<typeof FieldSchema>;
+
+/** Union of all inline (control-based) field types — excludes RefField. */
+export type InlineField = Exclude<Field, RefField>;
+
+export const isRefField = (field: Field): field is RefField =>
+  '$ref' in field && !('control' in field);
+
+export const isInlineField = (field: Field): field is InlineField => !isRefField(field);

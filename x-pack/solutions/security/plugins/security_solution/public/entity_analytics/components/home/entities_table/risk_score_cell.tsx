@@ -69,7 +69,7 @@ export const RiskScoreCell: React.FC<{ riskScore?: number }> = ({ riskScore }) =
         css={css`
           font-weight: ${euiTheme.font.weight.semiBold};
         `}
-        size="s"
+        size="xs"
         color={colors.text}
       >
         {formatRiskScore(riskScore)}

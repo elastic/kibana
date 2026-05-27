@@ -148,9 +148,11 @@ export const deleteAllCaseItems = async (es: Client) => {
     deleteCasesByESQuery(es),
     deleteCasesUserActions(es),
     deleteComments(es),
+    deleteUnifiedAttachments(es),
     deleteConfiguration(es),
     deleteMappings(es),
     deleteTemplates(es),
+    deleteFieldDefinitions(es),
   ]);
 };
 
@@ -187,6 +189,17 @@ export const deleteComments = async (es: Client): Promise<void> => {
   });
 };
 
+export const deleteUnifiedAttachments = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    q: 'type:cases-attachments',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+    conflicts: 'proceed',
+  });
+};
+
 export const deleteConfiguration = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
@@ -213,6 +226,17 @@ export const deleteTemplates = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
     q: 'type:cases-templates',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+    conflicts: 'proceed',
+  });
+};
+
+export const deleteFieldDefinitions = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    q: 'type:cases-field-definition',
     wait_for_completion: true,
     refresh: true,
     body: {},

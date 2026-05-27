@@ -59,6 +59,9 @@ describe('setupDependencies', () => {
       allowedHosts: ['*'],
     },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
+    eviction: {
+      minPayloadSize: new ByteSizeValue(10 * 1024),
+    },
     collectQueueMetrics: false,
   };
 
@@ -198,6 +201,86 @@ describe('setupDependencies', () => {
       expect(WorkflowGraph.fromWorkflowDefinition).toHaveBeenCalledWith(expect.anything(), {
         timeout: '6h',
       });
+    });
+  });
+
+  it('throws when the workflow execution document is missing', async () => {
+    const mockFakeRequest = { headers: {} } as KibanaRequest;
+    mockWorkflowExecutionRepository.getWorkflowExecutionById = jest.fn().mockResolvedValue(null);
+
+    const mockScopedClient = {
+      search: jest.fn(),
+      index: jest.fn(),
+    } as unknown as ElasticsearchClient;
+    mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+      asCurrentUser: mockScopedClient,
+    });
+
+    await expect(
+      setupDependencies(
+        workflowRunId,
+        spaceId,
+        mockLogger,
+        mockConfig,
+        mockDependencies,
+        mockFakeRequest
+      )
+    ).rejects.toThrow(`Workflow execution with ID ${workflowRunId} not found`);
+
+    expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+      workflowRunId,
+      spaceId
+    );
+  });
+
+  describe('workflowsExtensions', () => {
+    beforeEach(() => {
+      const mockScopedClient = {
+        search: jest.fn(),
+        index: jest.fn(),
+      } as unknown as ElasticsearchClient;
+
+      mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+        asCurrentUser: mockScopedClient,
+      });
+    });
+
+    it('should await workflowsExtensions.isReady before reading the workflow execution', async () => {
+      const mockFakeRequest = { headers: {} } as KibanaRequest;
+
+      let isReadyResolved = false;
+      let resolveIsReady!: () => void;
+      const isReadyPromise = new Promise<void>((resolve) => {
+        resolveIsReady = () => {
+          isReadyResolved = true;
+          resolve();
+        };
+      });
+      (mockDependencies.workflowsExtensions.isReady as jest.Mock).mockReturnValue(isReadyPromise);
+
+      const setupPromise = setupDependencies(
+        workflowRunId,
+        spaceId,
+        mockLogger,
+        mockConfig,
+        mockDependencies,
+        mockFakeRequest
+      );
+
+      // Let any microtasks before the isReady await run
+      await Promise.resolve();
+
+      expect(mockDependencies.workflowsExtensions.isReady).toHaveBeenCalledTimes(1);
+      expect(isReadyResolved).toBe(false);
+      expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+
+      resolveIsReady();
+      await setupPromise;
+
+      expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+        workflowRunId,
+        spaceId
+      );
     });
   });
 });

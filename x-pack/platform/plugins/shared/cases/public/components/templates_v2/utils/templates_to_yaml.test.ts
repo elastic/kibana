@@ -26,6 +26,7 @@ describe('templatesToYaml', () => {
         latestVersion: 3,
         isLatest: true,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'My template',
           fields: [
@@ -93,6 +94,7 @@ describe('templatesToYaml', () => {
         latestVersion: 1,
         isLatest: true,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'DatePicker Template',
           fields: [
@@ -130,6 +132,7 @@ describe('templatesToYaml', () => {
         latestVersion: 1,
         isLatest: true,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'DatePicker Template',
           fields: [
@@ -163,6 +166,7 @@ describe('templatesToYaml', () => {
         latestVersion: 1,
         isLatest: true,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'DatePicker Template',
           fields: [
@@ -192,6 +196,7 @@ describe('templatesToYaml', () => {
         latestVersion: 1,
         isLatest: true,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'Conditions Template',
           fields: [
@@ -227,6 +232,7 @@ describe('templatesToYaml', () => {
         latestVersion: 1,
         isLatest: true,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'Validation Template',
           fields: [
@@ -274,6 +280,7 @@ describe('templatesToYaml', () => {
         isLatest: true,
         isEnabled: false,
         deletedAt: null,
+        definitionString: '',
         definition: {
           name: 'Meta Template',
           severity: 'high',
@@ -288,6 +295,543 @@ describe('templatesToYaml', () => {
     expect(yaml).toContain('severity: high');
     expect(yaml).toContain('category: "Security"');
     expect(yaml).toContain('isEnabled: false');
+  });
+
+  describe('$ref field serialization', () => {
+    const baseRefTemplate = (
+      refField: ParsedTemplate['definition']['fields'][number]
+    ): ParsedTemplate => ({
+      templateId: 'tpl-ref',
+      name: 'Ref template',
+      owner: 'securitySolution',
+      templateVersion: 1,
+      latestVersion: 1,
+      isLatest: true,
+      deletedAt: null,
+      definitionString: '',
+      definition: {
+        name: 'Ref template',
+        fields: [refField],
+      },
+    });
+
+    it('serializes a bare $ref entry without metadata', () => {
+      const yaml = templatesToYaml([baseRefTemplate({ $ref: 'lib_field' })]);
+      expect(yaml).toContain('    - $ref: "lib_field"');
+      expect(yaml).not.toContain('metadata:');
+    });
+
+    it('serializes a $ref entry with name alias and metadata.default scalar', () => {
+      const yaml = templatesToYaml([
+        baseRefTemplate({
+          name: 'my_alias',
+          $ref: 'lib_field',
+          metadata: { default: 'override_value' },
+        }),
+      ]);
+      expect(yaml).toContain('    - name: "my_alias"');
+      expect(yaml).toContain('      $ref: "lib_field"');
+      expect(yaml).toContain('      metadata:');
+      expect(yaml).toContain('        default: "override_value"');
+    });
+
+    it('serializes a $ref entry with an array string default', () => {
+      const yaml = templatesToYaml([
+        baseRefTemplate({
+          $ref: 'lib_field',
+          metadata: { default: ['a', 'b'] },
+        }),
+      ]);
+      expect(yaml).toContain('        default:');
+      expect(yaml).toContain('          - "a"');
+      expect(yaml).toContain('          - "b"');
+    });
+  });
+});
+
+describe('RADIO_GROUP field serialization', () => {
+  const baseTemplate: ParsedTemplate = {
+    templateId: 'tpl-radio',
+    name: 'Radio template',
+    owner: 'securitySolution',
+    tags: [],
+    usageCount: 0,
+    fieldCount: 1,
+    templateVersion: 1,
+    latestVersion: 1,
+    isLatest: true,
+    deletedAt: null,
+    definition: { name: 'Radio template', fields: [] },
+    definitionString: 'name: Radio template\nfields: []',
+  };
+
+  it('serializes options as a YAML sequence and default as a scalar', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Radio template',
+        fields: [
+          {
+            name: 'severity',
+            control: 'RADIO_GROUP',
+            type: 'keyword',
+            metadata: {
+              options: ['low', 'medium', 'high'],
+              default: 'medium',
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      control: "RADIO_GROUP"');
+    expect(yaml).toContain('        options:');
+    expect(yaml).toContain('          - "low"');
+    expect(yaml).toContain('          - "medium"');
+    expect(yaml).toContain('          - "high"');
+    expect(yaml).toContain('        default: "medium"');
+    // default must be a scalar, not a YAML sequence
+    expect(yaml).not.toMatch(/default:\n\s+- /);
+  });
+
+  it('omits the default line when no default is provided', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Radio template',
+        fields: [
+          {
+            name: 'env',
+            control: 'RADIO_GROUP',
+            type: 'keyword',
+            metadata: {
+              options: ['staging', 'production'],
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('        options:');
+    expect(yaml).not.toContain('        default:');
+  });
+});
+
+describe('CHECKBOX_GROUP field serialization', () => {
+  const baseTemplate: ParsedTemplate = {
+    templateId: 'tpl-1',
+    name: 'Checkbox template',
+    owner: 'securitySolution',
+    tags: [],
+    usageCount: 0,
+    fieldCount: 1,
+    templateVersion: 1,
+    latestVersion: 1,
+    isLatest: true,
+    deletedAt: null,
+    definition: { name: 'Checkbox template', fields: [] },
+    definitionString: 'name: Checkbox template\nfields: []',
+  };
+
+  it('serializes options and defaults as YAML sequences', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Checkbox template',
+        fields: [
+          {
+            name: 'affected_systems',
+            control: 'CHECKBOX_GROUP',
+            type: 'keyword',
+            metadata: {
+              options: ['api', 'ui', 'database'],
+              default: ['api', 'database'],
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      control: "CHECKBOX_GROUP"');
+    expect(yaml).toContain('        options:');
+    expect(yaml).toContain('          - "api"');
+    expect(yaml).toContain('          - "ui"');
+    expect(yaml).toContain('          - "database"');
+    expect(yaml).toContain('        default:');
+    // default items are a subset of options
+    const lines = yaml.split('\n');
+    const defaultIdx = lines.findIndex((l) => l.trim() === 'default:');
+    expect(defaultIdx).toBeGreaterThan(-1);
+    const defaultBlock = lines.slice(defaultIdx + 1, defaultIdx + 3).join('\n');
+    expect(defaultBlock).toContain('"api"');
+    expect(defaultBlock).toContain('"database"');
+    expect(defaultBlock).not.toContain('"ui"');
+  });
+
+  it('omits the default block when no defaults are provided', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Checkbox template',
+        fields: [
+          {
+            name: 'tags',
+            control: 'CHECKBOX_GROUP',
+            type: 'keyword',
+            metadata: {
+              options: ['a', 'b', 'c'],
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('        options:');
+    expect(yaml).not.toContain('        default:');
+  });
+
+  it('omits the default block when defaults array is empty', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Checkbox template',
+        fields: [
+          {
+            name: 'tags',
+            control: 'CHECKBOX_GROUP',
+            type: 'keyword',
+            metadata: {
+              options: ['a', 'b'],
+              default: [],
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('        options:');
+    expect(yaml).not.toContain('        default:');
+  });
+});
+
+describe('display and validation serialization', () => {
+  const baseTemplate: ParsedTemplate = {
+    templateId: 'tpl-cond',
+    name: 'Conditions template',
+    owner: 'securitySolution',
+    tags: [],
+    usageCount: 0,
+    fieldCount: 1,
+    templateVersion: 1,
+    latestVersion: 1,
+    isLatest: true,
+    deletedAt: null,
+    definition: { name: 'Conditions template', fields: [] },
+    definitionString: 'name: Conditions template\nfields: []',
+  };
+
+  it('serializes display.show_when with a simple condition rule', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [
+          {
+            name: 'details',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            display: {
+              show_when: { field: 'env', operator: 'eq', value: 'production' },
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      display:');
+    expect(yaml).toContain('        show_when:');
+    expect(yaml).toContain('          field: env');
+    expect(yaml).toContain('          operator: eq');
+    expect(yaml).toContain('          value: production');
+  });
+
+  it('serializes display.show_when with a compound condition', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [
+          {
+            name: 'notes',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            display: {
+              show_when: {
+                combine: 'all',
+                rules: [
+                  { field: 'env', operator: 'eq', value: 'prod' },
+                  { field: 'severity', operator: 'neq', value: 'low' },
+                ],
+              },
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      display:');
+    expect(yaml).toContain('        show_when:');
+    expect(yaml).toContain('          combine: all');
+    expect(yaml).toContain('          rules:');
+    expect(yaml).toContain('            - field: env');
+    expect(yaml).toContain('            - field: severity');
+  });
+
+  it('omits display when not present', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [{ name: 'summary', control: 'INPUT_TEXT', type: 'keyword' }],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).not.toContain('display:');
+  });
+
+  it('serializes simple validation flags', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [
+          {
+            name: 'score',
+            control: 'INPUT_NUMBER',
+            type: 'integer',
+            validation: { required: true, min: 1, max: 100 },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      validation:');
+    expect(yaml).toContain('        required: true');
+    expect(yaml).toContain('        min: 1');
+    expect(yaml).toContain('        max: 100');
+  });
+
+  it('serializes validation.pattern', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [
+          {
+            name: 'ticket_id',
+            control: 'INPUT_TEXT',
+            type: 'keyword',
+            validation: { pattern: { regex: '^[A-Z]+-\\d+$', message: 'Must be a ticket ID' } },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      validation:');
+    expect(yaml).toContain('        pattern:');
+    expect(yaml).toContain('          regex:');
+    expect(yaml).toContain('          message: Must be a ticket ID');
+  });
+
+  it('serializes validation.required_when with a condition', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [
+          {
+            name: 'reason',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            validation: {
+              required_when: { field: 'severity', operator: 'eq', value: 'critical' },
+            },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      validation:');
+    expect(yaml).toContain('        required_when:');
+    expect(yaml).toContain('          field: severity');
+    expect(yaml).toContain('          operator: eq');
+    expect(yaml).toContain('          value: critical');
+  });
+
+  it('omits validation when not present', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Conditions template',
+        fields: [{ name: 'summary', control: 'INPUT_TEXT', type: 'keyword' }],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).not.toContain('validation:');
+  });
+});
+
+describe('TEXTAREA field serialization', () => {
+  const baseTemplate: ParsedTemplate = {
+    templateId: 'tpl-textarea',
+    name: 'Textarea template',
+    owner: 'securitySolution',
+    tags: [],
+    usageCount: 0,
+    fieldCount: 1,
+    templateVersion: 1,
+    latestVersion: 1,
+    isLatest: true,
+    deletedAt: null,
+    definition: { name: 'Textarea template', fields: [] },
+    definitionString: 'name: Textarea template\nfields: []',
+  };
+
+  it('serializes TEXTAREA with markdown: true', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'instructions',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            metadata: { markdown: true, default: '## Steps' },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      control: "TEXTAREA"');
+    expect(yaml).toContain('      metadata:');
+    expect(yaml).toContain('        default: "## Steps"');
+    expect(yaml).toContain('        markdown: true');
+  });
+
+  it('serializes TEXTAREA with only default (no markdown)', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'details',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            metadata: { default: 'Enter details here...' },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      metadata:');
+    expect(yaml).toContain('        default: "Enter details here..."');
+    expect(yaml).not.toContain('markdown');
+  });
+
+  it('omits metadata block when TEXTAREA has no metadata', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'notes',
+            control: 'TEXTAREA',
+            type: 'keyword',
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      control: "TEXTAREA"');
+    expect(yaml).not.toContain('metadata:');
+  });
+
+  it('omits metadata block when markdown is false and no default', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'notes',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            metadata: { markdown: false },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).not.toContain('metadata:');
+    expect(yaml).not.toContain('markdown');
+  });
+
+  it('serializes TEXTAREA with only markdown: true (no default)', () => {
+    const template: ParsedTemplate = {
+      ...baseTemplate,
+      definition: {
+        name: 'Textarea template',
+        fields: [
+          {
+            name: 'instructions',
+            control: 'TEXTAREA',
+            type: 'keyword',
+            metadata: { markdown: true },
+          },
+        ],
+      },
+    };
+
+    const yaml = templatesToYaml([template]);
+
+    expect(yaml).toContain('      metadata:');
+    expect(yaml).toContain('        markdown: true');
+    expect(yaml).not.toContain('default:');
   });
 });
 
@@ -305,6 +849,7 @@ describe('templateToYaml', () => {
       templateVersion: 1,
       latestVersion: 1,
       isLatest: true,
+      definitionString: 'name: My template\nfields: []',
       deletedAt: null,
       definition: {
         name: 'My template',

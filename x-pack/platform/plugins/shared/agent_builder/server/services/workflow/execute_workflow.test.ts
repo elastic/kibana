@@ -6,112 +6,109 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { executeWorkflow } from './execute_workflow';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
+const mockSetAttribute = jest.fn();
+
 jest.mock('@kbn/inference-tracing', () => ({
   withActiveInferenceSpan: (_name: string, _opts: unknown, fn: (span?: unknown) => unknown) =>
-    fn(undefined),
+    fn({ setAttribute: mockSetAttribute }),
   ElasticGenAIAttributes: { InferenceSpanKind: 'InferenceSpanKind' },
 }));
 
-jest.mock('@kbn/agent-builder-genai-utils/tools/utils/workflows', () => ({
-  getExecutionState: jest.fn().mockResolvedValue({ status: 'completed', output: {} }),
+jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
+  toWorkflowExecutionState: jest.fn((execution) => ({
+    execution_id: execution.id,
+    status: execution.status,
+    workflow_id: execution.workflowId,
+    started_at: execution.startedAt,
+    finished_at: execution.finishedAt,
+    workflow_name: execution.workflowDefinition.name,
+  })),
 }));
 
 describe('executeWorkflow', () => {
   const request = httpServerMock.createKibanaRequest();
   let mockWorkflowApi: jest.Mocked<WorkflowApi>;
 
-  const validWorkflow = {
-    id: 'wf-1',
-    name: 'Test Workflow',
-    enabled: true,
-    valid: true,
-    yaml: 'name: test',
-    createdAt: '2025-01-01T00:00:00.000Z',
-    createdBy: 'user',
-    lastUpdatedAt: '2025-01-01T00:00:00.000Z',
-    lastUpdatedBy: 'user',
-    definition: {
-      version: '1' as const,
+  const workflowExecution = {
+    id: 'exec-1',
+    workflowId: 'wf-1',
+    status: ExecutionStatus.COMPLETED,
+    startedAt: '2025-01-01T00:00:00.000Z',
+    finishedAt: '2025-01-01T00:00:01.000Z',
+    workflowDefinition: {
       name: 'Test Workflow',
-      enabled: true,
-      triggers: [{ type: 'manual' as const }],
       steps: [],
     },
+    stepExecutions: [],
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
     mockWorkflowApi = {
-      getWorkflow: jest.fn().mockResolvedValue(validWorkflow),
-      runWorkflow: jest.fn().mockResolvedValue('exec-1'),
+      executeWorkflow: jest.fn().mockResolvedValue({
+        workflowExecutionId: 'exec-1',
+        execution: workflowExecution,
+      }),
     } as unknown as jest.Mocked<WorkflowApi>;
   });
 
   afterEach(() => {
-    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
-  const runWithTimers = async (promise: Promise<unknown>) => {
-    const result = promise;
-    await jest.advanceTimersByTimeAsync(10_000);
-    return result;
-  };
-
-  it('forwards metadata to runWorkflow when provided', async () => {
-    const result = await runWithTimers(
-      executeWorkflow({
-        workflowId: 'wf-1',
-        workflowParams: {},
-        request,
-        spaceId: 'default',
-        workflowApi: mockWorkflowApi,
-        waitForCompletion: false,
-        metadata: { agent_id: 'agent-abc' },
-      })
-    );
+  it('forwards metadata to executeWorkflow when provided', async () => {
+    const result = await executeWorkflow({
+      workflowId: 'wf-1',
+      workflowParams: {},
+      request,
+      spaceId: 'default',
+      workflowApi: mockWorkflowApi,
+      waitForCompletion: false,
+      metadata: { agent_id: 'agent-abc' },
+    });
 
     expect(result).toEqual(expect.objectContaining({ success: true }));
-    expect(mockWorkflowApi.runWorkflow).toHaveBeenCalledWith(
-      expect.any(Object),
-      'default',
-      {},
+    expect(mockWorkflowApi.executeWorkflow).toHaveBeenCalledWith({
+      workflowId: 'wf-1',
+      inputs: {},
       request,
-      undefined,
-      { agent_id: 'agent-abc' }
-    );
+      spaceId: 'default',
+      waitForCompletion: false,
+      completionTimeoutSec: 120,
+      metadata: { agent_id: 'agent-abc' },
+    });
+    expect(mockSetAttribute).toHaveBeenCalledWith('elastic.workflow.name', 'Test Workflow');
   });
 
-  it('passes undefined metadata to runWorkflow when not provided', async () => {
-    const result = await runWithTimers(
-      executeWorkflow({
-        workflowId: 'wf-1',
-        workflowParams: {},
-        request,
-        spaceId: 'default',
-        workflowApi: mockWorkflowApi,
-        waitForCompletion: false,
-      })
-    );
+  it('passes undefined metadata to executeWorkflow when not provided', async () => {
+    const result = await executeWorkflow({
+      workflowId: 'wf-1',
+      workflowParams: {},
+      request,
+      spaceId: 'default',
+      workflowApi: mockWorkflowApi,
+      waitForCompletion: false,
+    });
 
     expect(result).toEqual(expect.objectContaining({ success: true }));
-    expect(mockWorkflowApi.runWorkflow).toHaveBeenCalledWith(
-      expect.any(Object),
-      'default',
-      {},
+    expect(mockWorkflowApi.executeWorkflow).toHaveBeenCalledWith({
+      workflowId: 'wf-1',
+      inputs: {},
       request,
-      undefined,
-      undefined
-    );
+      spaceId: 'default',
+      waitForCompletion: false,
+      completionTimeoutSec: 120,
+      metadata: undefined,
+    });
   });
 
   it('returns error when workflow is not found', async () => {
-    mockWorkflowApi.getWorkflow.mockResolvedValue(null as any);
+    mockWorkflowApi.executeWorkflow.mockRejectedValue(new Error("Workflow 'missing' not found."));
 
     const result = await executeWorkflow({
       workflowId: 'missing',
@@ -122,11 +119,13 @@ describe('executeWorkflow', () => {
     });
 
     expect(result.success).toBe(false);
-    expect(mockWorkflowApi.runWorkflow).not.toHaveBeenCalled();
+    expect(mockWorkflowApi.executeWorkflow).toHaveBeenCalled();
   });
 
   it('returns error when workflow is disabled', async () => {
-    mockWorkflowApi.getWorkflow.mockResolvedValue({ ...validWorkflow, enabled: false });
+    mockWorkflowApi.executeWorkflow.mockRejectedValue(
+      new Error("Workflow 'wf-1' is disabled and cannot be executed.")
+    );
 
     const result = await executeWorkflow({
       workflowId: 'wf-1',
@@ -137,6 +136,6 @@ describe('executeWorkflow', () => {
     });
 
     expect(result.success).toBe(false);
-    expect(mockWorkflowApi.runWorkflow).not.toHaveBeenCalled();
+    expect(mockWorkflowApi.executeWorkflow).toHaveBeenCalled();
   });
 });

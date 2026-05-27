@@ -20,9 +20,6 @@ import { useDataView } from '../../common/containers/source/use_data_view';
 import type { State } from '../../common/store/types';
 import { useSourcererDataView } from '.';
 import { useSyncSourcererUrlState } from '../../data_view_manager/hooks/use_sync_url_state';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-
-const defaultInitResult = { browserFields: {} };
 
 export const useInitSourcerer = (
   scopeId:
@@ -31,15 +28,6 @@ export const useInitSourcerer = (
     | PageScope.attacks
     | PageScope.explore = PageScope.default
 ) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  /* eslint-disable react-hooks/rules-of-hooks */
-  // NOTE: skipping the entire hook on purpose when the new picker is enabled
-  // will be removed as part of the cleanup in https://github.com/elastic/security-team/issues/11959
-  if (newDataViewPickerEnabled) {
-    return defaultInitResult;
-  }
-
   const dispatch = useDispatch();
   const initialTimelineSourcerer = useRef(true);
   const initialDetectionSourcerer = useRef(true);
@@ -248,20 +236,22 @@ export const useInitSourcerer = (
     } else if (
       scopeId === PageScope.alerts &&
       signalIndexNameSourcerer != null &&
-      initialTimelineSourcerer.current &&
+      initialDetectionSourcerer.current &&
       defaultDataView.id.length > 0
     ) {
       initialDetectionSourcerer.current = false;
-      sourcererActions.setSelectedDataView({
-        id: PageScope.alerts,
-        selectedDataViewId: defaultDataView.id,
-        selectedPatterns: getScopePatternListSelection(
-          defaultDataView,
-          PageScope.alerts,
-          signalIndexNameSourcerer,
-          true
-        ),
-      });
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: PageScope.alerts,
+          selectedDataViewId: defaultDataView.id,
+          selectedPatterns: getScopePatternListSelection(
+            defaultDataView,
+            PageScope.alerts,
+            signalIndexNameSourcerer,
+            true
+          ),
+        })
+      );
     }
   }, [
     defaultDataView,

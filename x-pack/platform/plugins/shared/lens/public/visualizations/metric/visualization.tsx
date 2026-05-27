@@ -11,7 +11,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { getOverridePaletteStops } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 // eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ThemeServiceStart } from '@kbn/core/public';
@@ -31,8 +31,9 @@ import {
   LENS_LAYER_TYPES as layerTypes,
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
+  LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
 } from '@kbn/lens-common';
-import { getUpdatedMetricState } from '../../../common/content_management/v1/transforms/metric';
+import { convertToRuntimeState } from './runtime_state';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { getSuggestions } from './suggestions';
 import {
@@ -60,7 +61,7 @@ export const showingBar = (
 
 export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric?: boolean) => {
   if (showingBar(state) && isMetricNumeric) {
-    return euiLightVars.euiColorPrimary;
+    return euiThemeVars.euiColorVis2;
   }
   if (state.applyColorTo === 'value') {
     return euiThemeVars.euiColorVisText0;
@@ -99,6 +100,12 @@ const getMetricLayerConfiguration = (
   );
 
   const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
+    if (props.state.applyColorTo === undefined) {
+      return {
+        triggerIconType: 'none',
+      };
+    }
+
     const hasDynamicColoring = Boolean(isPrimaryMetricNumeric && props.state.palette);
 
     if (hasDynamicColoring) {
@@ -394,9 +401,7 @@ const cleanupMetricState = (
   ) {
     return {
       ...updatedState,
-      secondaryLabel: undefined,
       secondaryTrend: getDefaultConfigForMode(colorMode),
-      secondaryLabelPosition: 'before',
     };
   }
 
@@ -453,13 +458,18 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    if (state) return getUpdatedMetricState(state);
+    if (state) return convertToRuntimeState(state);
 
     return {
       layerId: addNewLayer(),
       layerType: layerTypes.DATA,
+      ...LENS_METRIC_DEFAULT_STYLE_TEMPLATE_CONFIG,
       palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
     };
+  },
+
+  convertToRuntimeState(state) {
+    return convertToRuntimeState(state);
   },
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],

@@ -19,7 +19,7 @@ export function transformOut(
   storedState: LinksEmbeddableState | StoredLinksEmbeddableState | StoredLinksByValueState910,
   references?: Reference[]
 ) {
-  const latestState = isLegacyState(storedState)
+  const { enhancements, ...latestState } = isLegacyState(storedState)
     ? transformLegacyState(storedState)
     : (storedState as StoredLinksEmbeddableState);
   const state = {
@@ -37,7 +37,7 @@ export function transformOut(
   if (savedObjectRef) {
     return {
       ...state,
-      savedObjectId: savedObjectRef.id,
+      ref_id: savedObjectRef.id,
     };
   }
 

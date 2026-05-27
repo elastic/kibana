@@ -42,6 +42,7 @@ describe('useTagsAction', () => {
         "data-test-subj": "cases-bulk-action-tags",
         "disabled": false,
         "icon": <EuiIcon
+          aria-hidden={true}
           size="m"
           type="tag"
         />,

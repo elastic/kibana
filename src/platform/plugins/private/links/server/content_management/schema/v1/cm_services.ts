@@ -17,7 +17,8 @@ import {
   createOptionsSchemas,
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
-import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-plugin/server';
+import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../../common/constants';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
 import {
   LINKS_HORIZONTAL_LAYOUT,
@@ -30,47 +31,59 @@ const baseLinkSchema = {
   ),
 };
 
-export const dashboardLinkSchema = schema.object({
-  ...baseLinkSchema,
-  destination: schema.string({
-    meta: { description: 'Linked dashboard saved object id' },
-  }),
-  type: schema.literal(DASHBOARD_LINK_TYPE),
-  options: schema.maybe(dashboardNavigationOptionsSchema),
-});
+export const dashboardLinkSchema = schema.object(
+  {
+    ...baseLinkSchema,
+    type: schema.literal(DASHBOARD_LINK_TYPE),
+    destination: schema.string({
+      meta: { description: 'Linked dashboard saved object id' },
+    }),
+    options: dashboardNavigationOptionsSchema,
+  },
+  {
+    meta: {
+      id: `kbn-link-panel-type-${DASHBOARD_LINK_TYPE}`,
+    },
+  }
+);
 
 export const externalLinkOptionsSchema = schema.object(
   {
-    open_in_new_tab: schema.maybe(
-      schema.boolean({
-        meta: {
-          description: 'Whether to open this link in a new tab when clicked',
-        },
-      })
-    ),
-    encode_url: schema.maybe(
-      schema.boolean({
-        meta: {
-          description: 'Whether to escape the URL with percent encoding',
-        },
-      })
-    ),
+    open_in_new_tab: schema.boolean({
+      meta: {
+        description: 'Whether to open this link in a new tab when clicked',
+      },
+      defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS.open_in_new_tab,
+    }),
+    encode_url: schema.boolean({
+      meta: {
+        description: 'Whether to escape the URL with percent encoding',
+      },
+      defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS.encode_url,
+    }),
   },
-  { unknowns: 'forbid' }
+  { defaultValue: DEFAULT_EXTERNAL_LINK_OPTIONS, unknowns: 'forbid' }
 );
 
-export const externalLinkSchema = schema.object({
-  ...baseLinkSchema,
-  type: schema.literal(EXTERNAL_LINK_TYPE),
-  destination: schema.string({ meta: { description: 'The external URL to link to' } }),
-  options: schema.maybe(externalLinkOptionsSchema),
-});
+export const externalLinkSchema = schema.object(
+  {
+    ...baseLinkSchema,
+    type: schema.literal(EXTERNAL_LINK_TYPE),
+    destination: schema.string({ meta: { description: 'The external URL to link to' } }),
+    options: externalLinkOptionsSchema,
+  },
+  {
+    meta: {
+      id: `kbn-link-type-${EXTERNAL_LINK_TYPE}`,
+    },
+  }
+);
 
 export const linksArraySchema = schema.arrayOf(
-  schema.oneOf([dashboardLinkSchema, externalLinkSchema]),
+  schema.discriminatedUnion('type', [dashboardLinkSchema, externalLinkSchema]),
   {
     meta: { description: 'The list of links to display' },
-    maxSize: 9999, // For DoS prevention, no actual user will insert this many links
+    maxSize: 100,
   }
 );
 

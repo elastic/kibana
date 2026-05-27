@@ -11,8 +11,11 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLensProps } from './use_lens_props';
 import { useChartLayers } from './use_chart_layers';
-import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import {
+  LensConfigBuilder,
+  type LensAttributes,
+  type LensSeriesLayer,
+} from '@kbn/lens-embeddable-utils';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { UnifiedHistogramServices } from '@kbn/unified-histogram';
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
@@ -20,7 +23,11 @@ import type { TimeRange } from '@kbn/data-plugin/common';
 import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 
 jest.mock('./use_chart_layers');
-jest.mock('@kbn/lens-embeddable-utils/config_builder');
+jest.mock('@kbn/lens-embeddable-utils');
+const mockReportError = jest.fn();
+jest.mock('./use_report_chart_section_error', () => ({
+  useReportChartSectionError: jest.fn(() => mockReportError),
+}));
 
 const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
 const useChartLayersMock = useChartLayers as jest.MockedFunction<typeof useChartLayers>;
@@ -83,12 +90,15 @@ describe('useLensProps', () => {
       IntersectionObserver: MockIntersectionObserver,
     });
 
-    LensConfigBuilderMock.prototype.build.mockImplementation(() =>
-      Promise.resolve({
-        attributes: {} as any,
-        state: {} as any,
+    // Fresh object per call so reference-identity assertions work.
+    const createMockLensAttributes = (): LensAttributes =>
+      ({
+        attributes: {},
+        state: {},
         visualizationType: 'lnsXY',
-      })
+      } as unknown as LensAttributes);
+    LensConfigBuilderMock.prototype.build.mockImplementation(() =>
+      Promise.resolve(createMockLensAttributes())
     );
     useChartLayersMock.mockReturnValue(mockChartLayers);
   });
@@ -103,6 +113,7 @@ describe('useLensProps', () => {
 
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -110,6 +121,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
       })
     );
 
@@ -135,6 +147,7 @@ describe('useLensProps', () => {
 
     renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -142,6 +155,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
       })
     );
 
@@ -186,6 +200,7 @@ describe('useLensProps', () => {
     };
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -193,6 +208,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
       })
     );
     expect(result.current).toBeUndefined();
@@ -205,7 +221,14 @@ describe('useLensProps', () => {
       expect(result.current).toStrictEqual(
         expect.objectContaining({
           attributes: { attributes: {}, state: {}, visualizationType: 'lnsXY' },
-          executionContext: { description: 'metrics experience chart data' },
+          executionContext: {
+            description: 'metrics experience chart data',
+            meta: {
+              profile_id: 'testProfileId',
+              metric_id: 'testChartId',
+              metric_type: 'lnsXY',
+            },
+          },
           id: 'metricsExperienceLensComponent',
           noPadding: true,
           searchSessionId: fetchParams.searchSessionId,
@@ -220,6 +243,7 @@ describe('useLensProps', () => {
   it('handles chartRef as null gracefully', async () => {
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -227,6 +251,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef: undefined,
         chartLayers: mockChartLayers,
+        profileId: 'testProfileId',
       })
     );
 
@@ -247,6 +272,7 @@ describe('useLensProps', () => {
 
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -254,6 +280,7 @@ describe('useLensProps', () => {
         discoverFetch$,
         chartRef,
         chartLayers: mockEmptyChartLayers,
+        profileId: 'testProfileId',
       })
     );
 
@@ -272,6 +299,7 @@ describe('useLensProps', () => {
 
     const { result } = renderHook(() =>
       useLensProps({
+        chartId: 'testChartId',
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
@@ -280,6 +308,7 @@ describe('useLensProps', () => {
         chartRef,
         chartLayers: mockEmptyChartLayers,
         error: mockError,
+        profileId: 'testProfileId',
       })
     );
 
@@ -296,6 +325,203 @@ describe('useLensProps', () => {
       expect(result.current).toBeDefined();
       expect(result.current?.attributes.state).toEqual({});
       expect(result.current?.attributes.state.datasourceStates).toBeUndefined();
+    });
+  });
+
+  describe('LensConfigBuilder error surfacing', () => {
+    it('reports the caught builder error and rebuilds with no datasource', async () => {
+      const chartRef = createMockChartRef();
+      const builderError = new Error('builder failed');
+
+      LensConfigBuilderMock.prototype.build.mockImplementationOnce(() =>
+        Promise.reject(builderError)
+      );
+
+      const { result } = renderHook(() =>
+        useLensProps({
+          chartId: 'testChartId',
+          title: 'Test Chart',
+          query: 'FROM metrics-*',
+          services: servicesMock as UnifiedHistogramServices,
+          fetchParams,
+          discoverFetch$,
+          chartRef,
+          chartLayers: mockChartLayers,
+          profileId: 'testProfileId',
+        })
+      );
+
+      await waitFor(() => {
+        expect(mockReportError).toHaveBeenCalledTimes(1);
+      });
+
+      expect(mockReportError).toHaveBeenCalledWith({
+        error: builderError,
+        source: 'useLensProps',
+        labels: {
+          profile_id: 'testProfileId',
+          chart_id: 'testChartId',
+        },
+      });
+
+      await waitFor(() => {
+        expect(result.current).toBeDefined();
+      });
+
+      expect((LensConfigBuilder.prototype.build as jest.Mock).mock.calls.length).toBeGreaterThan(1);
+    });
+
+    it('clears a latched builder error after a successful rebuild', async () => {
+      const chartRef = createMockChartRef();
+      const builderError = new Error('transient build failure');
+
+      // First call fails, subsequent calls resolve normally (from beforeEach).
+      LensConfigBuilderMock.prototype.build.mockImplementationOnce(() =>
+        Promise.reject(builderError)
+      );
+
+      const { result, rerender } = renderHook(
+        ({ query }: { query: string }) =>
+          useLensProps({
+            chartId: 'testChartId',
+            title: 'Test Chart',
+            query,
+            services: servicesMock as UnifiedHistogramServices,
+            fetchParams,
+            discoverFetch$,
+            chartRef,
+            chartLayers: mockChartLayers,
+            profileId: 'testProfileId',
+          }),
+        { initialProps: { query: 'FROM metrics-*' } }
+      );
+
+      await waitFor(() => {
+        expect(mockReportError).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(result.current).toBeDefined();
+      });
+
+      const latchedAttributes = result.current?.attributes;
+
+      rerender({ query: 'FROM other-metrics-*' });
+
+      await act(async () => {
+        discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+      });
+
+      await waitFor(() => {
+        expect(result.current?.attributes).not.toBe(latchedAttributes);
+      });
+
+      expect(result.current).toBeDefined();
+    });
+
+    it('reports a persistent build failure only once across repeat fetches', async () => {
+      const chartRef = createMockChartRef();
+
+      // Same name+message but fresh Error reference each call — the dedup target.
+      LensConfigBuilderMock.prototype.build.mockImplementation(() =>
+        Promise.reject(new Error('persistent failure'))
+      );
+
+      renderHook(() =>
+        useLensProps({
+          chartId: 'testChartId',
+          title: 'Test Chart',
+          query: 'FROM metrics-*',
+          services: servicesMock as UnifiedHistogramServices,
+          fetchParams,
+          discoverFetch$,
+          chartRef,
+          chartLayers: mockChartLayers,
+          profileId: 'testProfileId',
+        })
+      );
+
+      await waitFor(() => {
+        expect(mockReportError).toHaveBeenCalledTimes(1);
+      });
+
+      for (let i = 0; i < 5; i++) {
+        await act(async () => {
+          discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+        });
+      }
+
+      expect(mockReportError).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports again after a recovery when the same failure resurfaces', async () => {
+      const chartRef = createMockChartRef();
+      const failureMessage = 'flaky failure';
+
+      // reject → resolve (clears dedup) → reject (new streak should re-fire).
+      LensConfigBuilderMock.prototype.build
+        .mockImplementationOnce(() => Promise.reject(new Error(failureMessage)))
+        .mockImplementationOnce(() =>
+          Promise.resolve({
+            attributes: {},
+            state: {},
+            visualizationType: 'lnsXY',
+          } as unknown as LensAttributes)
+        )
+        .mockImplementationOnce(() => Promise.reject(new Error(failureMessage)));
+
+      renderHook(() =>
+        useLensProps({
+          chartId: 'testChartId',
+          title: 'Test Chart',
+          query: 'FROM metrics-*',
+          services: servicesMock as UnifiedHistogramServices,
+          fetchParams,
+          discoverFetch$,
+          chartRef,
+          chartLayers: mockChartLayers,
+          profileId: 'testProfileId',
+        })
+      );
+
+      await waitFor(() => {
+        expect(mockReportError).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it('does not terminate the subscription — subsequent fetches continue to build', async () => {
+      const chartRef = createMockChartRef();
+      const builderError = new Error('first build fails');
+
+      LensConfigBuilderMock.prototype.build.mockImplementationOnce(() =>
+        Promise.reject(builderError)
+      );
+
+      const { result } = renderHook(() =>
+        useLensProps({
+          chartId: 'testChartId',
+          title: 'Test Chart',
+          query: 'FROM metrics-*',
+          services: servicesMock as UnifiedHistogramServices,
+          fetchParams,
+          discoverFetch$,
+          chartRef,
+          chartLayers: mockChartLayers,
+          profileId: 'testProfileId',
+        })
+      );
+
+      await waitFor(() => {
+        expect(mockReportError).toHaveBeenCalled();
+      });
+
+      await act(async () => {
+        discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+      });
+
+      await waitFor(() => {
+        expect(result.current).toBeDefined();
+      });
     });
   });
 });

@@ -53,14 +53,17 @@ export const useLookupsFileUploadStep = ({
   }, [isLoading, error, status]);
 
   return {
-    title: i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_TITLE,
+    title:
+      migrationStats.vendor === MigrationSource.SPLUNK
+        ? i18n.LOOKUPS_DATA_INPUT_FILE_UPLOAD_TITLE
+        : i18n.WATCHLIST_DATA_INPUT_FILE_UPLOAD_TITLE,
     status: uploadStepStatus,
     children: (
       <LookupsFileUpload
         createResources={upsertMigrationResources}
         isLoading={isLoading}
         apiError={error?.message}
-        migrationSource={MigrationSource.SPLUNK}
+        migrationSource={migrationStats.vendor as MigrationSource}
       />
     ),
   };

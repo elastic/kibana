@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -16,8 +17,9 @@ import type {
   MathIndexPatternColumn,
   AvgIndexPatternColumn,
 } from '@kbn/lens-common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes } from '../../types';
-import type { LensApiState } from '../../schema';
+import type { XYConfig } from '../../schema';
 
 export const minimalAttributesXY: LensAttributes = {
   visualizationType: 'lnsXY',
@@ -1068,10 +1070,10 @@ export const xyWithFormulaRefColumnsAndRankByTermsBucketOperationAttributes: Len
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
-export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
+export const apiXYWithNoYTitleAndInsideLegend: XYConfig = {
   title: '',
   type: 'xy',
   legend: {
@@ -1090,19 +1092,9 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
         orientation: 'horizontal',
       },
     },
-    left: {
+    y: {
       title: {
         visible: false,
-      },
-      ticks: { visible: true },
-      grid: { visible: true },
-      labels: {
-        orientation: 'horizontal',
-      },
-    },
-    right: {
-      title: {
-        visible: true,
       },
       ticks: { visible: true },
       grid: { visible: true },
@@ -1117,9 +1109,9 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
   layers: [
     {
       type: 'bar_stacked',
-      dataset: {
-        type: 'dataView',
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
       sampling: 1,
       ignore_global_filters: false,
@@ -1145,8 +1137,8 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         aggregate_first: true,
@@ -1159,7 +1151,7 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
   },
 };
 
-export const apiXYWithTopListWithTruncationLegend: LensApiState = {
+export const apiXYWithTopListWithTruncationLegend: XYConfig = {
   title: '',
   type: 'xy',
   legend: {
@@ -1167,9 +1159,6 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
     position: 'top',
     layout: {
       type: 'list',
-      truncate: {
-        max_pixels: 777,
-      },
     },
   },
   axis: {
@@ -1183,19 +1172,9 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
         orientation: 'horizontal',
       },
     },
-    left: {
+    y: {
       title: {
         visible: false,
-      },
-      ticks: { visible: true },
-      grid: { visible: true },
-      labels: {
-        orientation: 'horizontal',
-      },
-    },
-    right: {
-      title: {
-        visible: true,
       },
       ticks: { visible: true },
       grid: { visible: true },
@@ -1210,9 +1189,9 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
   layers: [
     {
       type: 'bar_stacked',
-      dataset: {
-        type: 'dataView',
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
       sampling: 1,
       ignore_global_filters: false,
@@ -1238,8 +1217,8 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         aggregate_first: true,
@@ -1252,7 +1231,7 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
   },
 };
 
-export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
+export const apiXYWithNoTitleAndCustomOutsideLegend: XYConfig = {
   title: '',
   type: 'xy',
   legend: {
@@ -1271,19 +1250,9 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
         orientation: 'horizontal',
       },
     },
-    left: {
+    y: {
       title: {
         visible: false,
-      },
-      ticks: { visible: true },
-      grid: { visible: true },
-      labels: {
-        orientation: 'horizontal',
-      },
-    },
-    right: {
-      title: {
-        visible: true,
       },
       ticks: { visible: true },
       grid: { visible: true },
@@ -1298,9 +1267,9 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
   layers: [
     {
       type: 'bar_stacked',
-      dataset: {
-        type: 'dataView',
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
       },
       sampling: 1,
       ignore_global_filters: false,
@@ -1326,8 +1295,8 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
           include_documents_without_field: false,
         },
         rank_by: {
-          type: 'column',
-          metric: 0,
+          type: 'metric',
+          metric_index: 0,
           direction: 'desc',
         },
         aggregate_first: true,

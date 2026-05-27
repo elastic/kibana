@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { execSync, spawnSync } from 'child_process';
+import { execSync, spawnSync, spawn } from 'child_process';
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
@@ -13,7 +13,7 @@ import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
 import { set } from '@kbn/safer-lodash-set';
 import { parseConnectorsFromEnv, parseConnectorsFromKibanaDevYml } from '../prompts';
-import { safeExec, VAULT_SECRET_PATH } from '../utils';
+import { safeExec, getVaultAddr, VAULT_SECRET_PATH } from '../utils';
 import { VAULT_CONFIG_DIR } from '../profiles';
 import { buildApiKeyPayload } from '../../api_key/build_api_key_payload';
 
@@ -380,6 +380,49 @@ const checkVaultAuth = (): boolean => {
   return safeExec('vault', ['token', 'lookup', '-format=json']) !== null;
 };
 
+const vaultLogin = async (log: {
+  info: (msg: string) => void;
+  error: (msg: string) => void;
+}): Promise<void> => {
+  const vaultAddr = getVaultAddr();
+  log.info(`Launching Vault OIDC login against ${vaultAddr}...`);
+  log.info('A browser window should open. If it does not, follow the URL printed below.');
+
+  const child = spawn('vault', ['login', '--method', 'oidc'], {
+    env: { ...process.env, VAULT_ADDR: vaultAddr },
+    stdio: 'inherit',
+  });
+
+  const exitCode = await new Promise<number | null>((resolve, reject) => {
+    child.on('error', (err) => reject(err));
+    child.on('exit', (code) => resolve(code));
+  });
+
+  if (exitCode !== 0) {
+    throw new Error(
+      [
+        `Vault login failed (exit code ${exitCode}).`,
+        '',
+        'See https://docs.elastic.dev/vault for setup instructions.',
+      ].join('\n')
+    );
+  }
+};
+
+const ensureVaultAuth = async (log: {
+  info: (msg: string) => void;
+  error: (msg: string) => void;
+}): Promise<void> => {
+  if (checkVaultAuth()) {
+    return;
+  }
+  log.info('Vault session expired or not found — attempting login...');
+  await vaultLogin(log);
+  if (!checkVaultAuth()) {
+    throw new Error('Vault authentication still failing after login attempt.');
+  }
+};
+
 const fetchCcmApiKey = (log: { info: (msg: string) => void }): string => {
   log.info('Fetching EIS CCM API key from Vault...');
   const result = safeExec('vault', ['read', '-field=key', VAULT_SECRET_PATH]);
@@ -456,18 +499,40 @@ export const initCmd: Command<void> = {
   Examples:
     node scripts/evals init
     node scripts/evals init config
+    node scripts/evals init config --profile local
     node scripts/evals init --skip-discovery
   `,
   flags: {
     boolean: ['skip-discovery'],
     string: ['profile'],
     default: { 'skip-discovery': false },
+    help: `
+      --profile <name>   Write config to config.<name>.json instead of config.json
+                          (e.g. --profile local creates config.local.json)
+      --skip-discovery    Skip EIS model discovery (only applies to full init)
+    `,
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
     const positionals = flagsReader.getPositionals();
     const configOnly = positionals.includes('config');
     const profile = flagsReader.string('profile') ?? undefined;
+
+    const knownPositionals = new Set(['config']);
+    const unknownPositionals = positionals.filter((p) => !knownPositionals.has(p));
+    if (unknownPositionals.length > 0) {
+      const hint = unknownPositionals.length === 1 && !profile ? unknownPositionals[0] : null;
+      throw new Error(
+        [
+          `Unknown argument${unknownPositionals.length > 1 ? 's' : ''}: ${unknownPositionals.join(
+            ', '
+          )}`,
+          hint
+            ? `Did you mean --profile ${hint}? (e.g. node scripts/evals init config --profile ${hint})`
+            : 'Use --profile <name> to specify a config profile name.',
+        ].join('\n')
+      );
+    }
 
     log.info('Welcome to kbn-evals setup!');
     log.info('');
@@ -538,15 +603,11 @@ export const initCmd: Command<void> = {
     // --- EIS path ---
     log.info('');
 
-    // 1. Check Vault auth
-    log.info('Checking Vault auth...');
-    if (!checkVaultAuth()) {
-      log.error('Vault authentication failed. Please log in first:');
-      log.error('  vault login --method oidc');
-      log.error('');
-      log.error('Then re-run: node scripts/evals init');
-      throw new Error('Vault authentication required');
-    }
+    const vaultAddr = getVaultAddr();
+
+    // 1. Check Vault auth (auto-login if not authenticated)
+    log.info(`Checking Vault auth (VAULT_ADDR=${vaultAddr})...`);
+    await ensureVaultAuth(log);
     log.info('Vault auth OK');
 
     // 2. Fetch CCM API key

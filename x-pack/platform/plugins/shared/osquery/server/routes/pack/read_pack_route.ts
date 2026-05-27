@@ -22,6 +22,7 @@ import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
 import { readPacksRequestParamsSchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { readPackResponseSchema } from './response_schemas';
 
 export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -43,6 +44,11 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
               typeof readPacksRequestParamsSchema,
               ReadPacksRequestParamsSchema
             >(readPacksRequestParamsSchema),
+          },
+          response: {
+            200: {
+              body: () => readPackResponseSchema,
+            },
           },
         },
       },
@@ -96,7 +102,8 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           saved_object_id: id,
           queries: mapValues(
             convertSOQueriesToPack(attributes.queries),
-            ({ schedule_id: _s, start_date: _d, ...restQuery }) => restQuery
+            // `start_date` is a write-side detail and must not leak to the public API.
+            ({ start_date: _omit, ...query }) => query
           ),
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,

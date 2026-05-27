@@ -34,6 +34,7 @@ import type {
 import { SolutionType } from '../context_awareness';
 import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 
 jest.mock('./utils/serialization_utils', () => ({}));
 
@@ -171,7 +172,7 @@ describe('saved search embeddable', () => {
       runtimeState = getInitialRuntimeState({ searchMock: search });
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { discover_session_id: 'id', overrides: {} },
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -206,7 +207,7 @@ describe('saved search embeddable', () => {
 
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { discover_session_id: 'id', overrides: {} },
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -288,7 +289,7 @@ describe('saved search embeddable', () => {
       });
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { discover_session_id: 'id', overrides: {} },
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -394,6 +395,46 @@ describe('saved search embeddable', () => {
         ).not.toBeInTheDocument();
       });
     });
+
+    describe('anyStateChange$', () => {
+      let embeddableApi: SearchEmbeddableApi;
+      beforeEach((done) => {
+        const { search } = createSearchFnMock(1);
+        runtimeState = getInitialRuntimeState({
+          searchMock: search,
+          partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
+        });
+        factory
+          .buildEmbeddable({
+            initializeDrilldownsManager,
+            initialState: { ref_id: 'id', overrides: {} },
+            finalizeApi: finalizeApiMock,
+            uuid,
+            parentApi: mockedDashboardApi,
+          })
+          .then(({ api }) => {
+            embeddableApi = api;
+            done();
+          })
+          .catch(done);
+      });
+
+      test('should not emit on subscribe and emit when any state changes', (done) => {
+        embeddableApi.anyStateChange$.subscribe(() => {
+          try {
+            const title = embeddableApi.title$.value;
+            expect(title).toBe('cute puppies');
+          } catch (error) {
+            // title assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        });
+        embeddableApi.setTitle('cute puppies');
+      });
+    });
   });
 
   describe('deleted tab', () => {
@@ -446,7 +487,7 @@ describe('saved search embeddable', () => {
       runtimeState = getInitialRuntimeState();
       await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { discover_session_id: 'id', overrides: {} },
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -471,7 +512,7 @@ describe('saved search embeddable', () => {
       };
       await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { discover_session_id: 'id', overrides: {} },
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -498,7 +539,7 @@ describe('saved search embeddable', () => {
       runtimeState = getInitialRuntimeState();
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { discover_session_id: 'id', overrides: {} },
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,
@@ -531,7 +572,7 @@ describe('saved search embeddable', () => {
       });
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
-        initialState: { discover_session_id: 'id', overrides: {} },
+        initialState: { ref_id: 'id', overrides: {} },
         finalizeApi: finalizeApiMock,
         uuid,
         parentApi: mockedDashboardApi,

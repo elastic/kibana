@@ -20,9 +20,11 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/core-plugins-browser'
   - '@kbn/developer-toolbar'
-  - '@kbn/core-chrome-layout-components'
+  - '@kbn/ui-chrome-layout'
   - '@kbn/config-schema'
   - '@kbn/core-chrome-browser-internal-types'
+  - '@kbn/core-chrome-feature-flags'
+  - '@kbn/design-tools'
 tags:
   - plugin
   - prod

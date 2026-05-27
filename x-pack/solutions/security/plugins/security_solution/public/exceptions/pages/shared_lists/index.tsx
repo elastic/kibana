@@ -19,6 +19,7 @@ import {
   EuiPageHeader,
   EuiPagination,
   EuiPopover,
+  EuiScreenReaderLive,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -162,6 +163,7 @@ export const SharedLists = React.memo(() => {
 
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const [displayImportListFlyout, setDisplayImportListFlyout] = useState(false);
+  const [screenReaderMessage, setScreenReaderMessage] = useState('');
   const { addError, addSuccess } = useAppToasts();
 
   // Loading states
@@ -216,7 +218,18 @@ export const SharedLists = React.memo(() => {
   const handleExportSuccess = useCallback(
     (listId: string, name: string) =>
       (blob: Blob): void => {
-        addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(name));
+        const message = i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(name);
+        addSuccess(message);
+        // If the same list is exported twice in a row, React won't re-render
+        // since state hasn't changed, so the live region won't re-announce.
+        // Clearing to '' first ensures VoiceOver sees a new change on the next frame.
+        setScreenReaderMessage((current) => {
+          if (current === message) {
+            requestAnimationFrame(() => setScreenReaderMessage(message));
+            return '';
+          }
+          return message;
+        });
         setExportDownload({ name: listId, blob });
       },
     [addSuccess]
@@ -480,6 +493,9 @@ export const SharedLists = React.memo(() => {
 
   return (
     <>
+      <EuiScreenReaderLive aria-live="assertive" aria-atomic="true" focusRegionOnTextChange>
+        {screenReaderMessage}
+      </EuiScreenReaderLive>
       <MissingDetectionsPrivilegesCallOut />
       <EuiPageHeader
         pageTitle={i18n.ALL_EXCEPTIONS}
@@ -654,33 +670,35 @@ export const SharedLists = React.memo(() => {
             )}
           </>
         )}
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="flexStart">
-              <EuiFlexItem>
-                <EuiPopover
-                  button={rowSizeButton}
-                  isOpen={isRowSizePopoverOpen}
-                  closePopover={closeRowSizePopover}
-                >
-                  <EuiContextMenuPanel items={rowSizeItems} />
-                </EuiPopover>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem css={{ alignItems: 'flex-end' }}>
-            <EuiFlexGroup alignItems="flexEnd">
-              <EuiFlexItem>
-                <EuiPagination
-                  aria-label={'Custom pagination example'}
-                  pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
-                  activePage={activePage}
-                  onPageClick={goToPage}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {viewerStatus == null && (
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="flexStart">
+                <EuiFlexItem>
+                  <EuiPopover
+                    button={rowSizeButton}
+                    isOpen={isRowSizePopoverOpen}
+                    closePopover={closeRowSizePopover}
+                  >
+                    <EuiContextMenuPanel items={rowSizeItems} />
+                  </EuiPopover>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem css={{ alignItems: 'flex-end' }}>
+              <EuiFlexGroup alignItems="flexEnd">
+                <EuiFlexItem>
+                  <EuiPagination
+                    aria-label={'Custom pagination example'}
+                    pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
+                    activePage={activePage}
+                    onPageClick={goToPage}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
 
         <AutoDownload
           blob={exportDownload.blob}
