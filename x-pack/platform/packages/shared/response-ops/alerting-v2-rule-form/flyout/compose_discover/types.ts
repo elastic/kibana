@@ -16,7 +16,12 @@ export type RecoveryType = 'default' | 'custom';
 
 export type QueryTab = 'base' | 'alert' | 'recovery';
 
-export type StepId = 'alertCondition' | 'builderCondition' | 'recoveryCondition' | 'details';
+export type StepId =
+  | 'alertCondition'
+  | 'builderCondition'
+  | 'recoveryCondition'
+  | 'details'
+  | 'notifications';
 
 export interface StepRenderProps {
   state: ComposeDiscoverState;

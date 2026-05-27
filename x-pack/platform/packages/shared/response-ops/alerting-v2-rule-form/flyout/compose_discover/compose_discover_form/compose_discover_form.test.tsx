@@ -281,12 +281,13 @@ describe('step validation', () => {
     });
   });
 
-  it('does not include the placeholder notifications step', () => {
+  it('includes the correct steps based on isAlert', () => {
     expect(getSteps(false).map((step) => step.id)).toEqual(['alertCondition', 'details']);
     expect(getSteps(true).map((step) => step.id)).toEqual([
       'alertCondition',
       'recoveryCondition',
       'details',
+      'notifications',
     ]);
   });
 });
