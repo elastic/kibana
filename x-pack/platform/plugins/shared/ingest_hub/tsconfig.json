@@ -13,6 +13,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/fleet-plugin",
     "@kbn/i18n",
     "@kbn/shared-ux-utility",
     "@kbn/shared-ux-router",
