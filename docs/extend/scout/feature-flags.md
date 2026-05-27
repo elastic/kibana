@@ -44,6 +44,21 @@ globalSetupHook('Enable feature flags', async ({ apiServices, log }) => {
 });
 ```
 
+Because feature-flag overrides are server-wide, they survive past your suite and would leak into other Scout configs sharing the same Kibana. Pair the setup with a [global teardown hook](./global-setup-hook.md#global-teardown-hook) in `global.teardown.ts` to revert the override after the suite finishes:
+
+```ts
+import { globalTeardownHook } from '@kbn/scout';
+
+globalTeardownHook('Revert feature flags', async ({ apiServices, log }) => {
+  log.info('[teardown] Reverting my-feature-flag...');
+  await apiServices.core.settings({
+    'feature_flags.overrides': {
+      'my-plugin.my-feature-flag': false,
+    },
+  });
+});
+```
+
 ### In a test suite (sequential tests) [scout-feature-flags-test-suite]
 
 For sequential suites you can enable flags in `beforeAll` and reset them in `afterAll`:

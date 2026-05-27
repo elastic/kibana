@@ -158,6 +158,20 @@ export interface KibanaContentListPageProps {
    * context value, so `Header` and `Section` are always synchronized.
    */
   headingId?: string;
+  /**
+   * Forwarded to {@link KibanaPageTemplate}'s `restrictWidth` prop.
+   *
+   * Defaults to `false` so listing pages run full-width — the
+   * `ContentListTable` column presets each have their own `maxWidth` cap, so
+   * trailing whitespace lives inside the table rather than as a centred
+   * page-section gutter. This intentionally overrides EUI's `true` default
+   * (which resolves to a 1200px page cap and would prevent column
+   * `maxWidth` defaults from engaging on wide viewports).
+   *
+   * Pass `true` for the EUI default (1200px), or a specific number/string
+   * to centre the page chrome at a custom width.
+   */
+  restrictWidth?: boolean | number | string;
   /** Override the root `data-test-subj`. */
   'data-test-subj'?: string;
 }
@@ -165,6 +179,7 @@ export interface KibanaContentListPageProps {
 const KibanaContentListPageRoot = ({
   children,
   headingId: headingIdProp,
+  restrictWidth = false,
   'data-test-subj': dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
 }: KibanaContentListPageProps) => {
   // Generate a unique id per instance so two `KibanaContentListPage` trees
@@ -179,7 +194,7 @@ const KibanaContentListPageRoot = ({
 
   return (
     <KibanaContentListPageContext.Provider value={contextValue}>
-      <KibanaPageTemplate panelled data-test-subj={dataTestSubj}>
+      <KibanaPageTemplate panelled restrictWidth={restrictWidth} data-test-subj={dataTestSubj}>
         {children}
       </KibanaPageTemplate>
     </KibanaContentListPageContext.Provider>
@@ -196,6 +211,12 @@ const KibanaContentListPageRoot = ({
  * - {@link KibanaContentListPage.Header} — page title, description, and actions.
  * - {@link KibanaContentListPage.Section} — a labelled `KibanaPageTemplate.Section`.
  *
+ * The page renders full-width by default (`restrictWidth={false}`). The
+ * `ContentListTable` column presets each have their own `maxWidth` cap, so
+ * trailing whitespace lives inside the table rather than as a centred
+ * page-section gutter. Pass `restrictWidth={true}` (or a specific
+ * number/string) to opt back into a centred page chrome.
+ *
  * @example
  * ```tsx
  * <KibanaContentListPage>
@@ -207,6 +228,14 @@ const KibanaContentListPageRoot = ({
  *       <ContentListFooter />
  *     </ContentList>
  *   </KibanaContentListPage.Section>
+ * </KibanaContentListPage>
+ * ```
+ *
+ * @example Restrict the page width (legacy 1200px chrome)
+ * ```tsx
+ * <KibanaContentListPage restrictWidth>
+ *   <KibanaContentListPage.Header title="Maps" />
+ *   <KibanaContentListPage.Section>{...}</KibanaContentListPage.Section>
  * </KibanaContentListPage>
  * ```
  */

@@ -42,8 +42,9 @@ const defaultPlaceholder = i18n.translate(
  * `ContentListToolbar` component.
  *
  * `queryText` from state flows directly to `EuiSearchBar`'s `query` prop.
- * When the user types, `onChange` stores `query.text` back to state.
- * No displayText, no typingRef, no sync hacks — one source of truth.
+ * When the user types or commits a filter, `onChange` stores `query.text`
+ * back to state. No displayText, no typingRef, no sync hacks — one source
+ * of truth.
  */
 const ContentListToolbarComponent = ({
   children,

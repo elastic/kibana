@@ -6,8 +6,8 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
+import styled from '@emotion/styled';
 import { has } from 'lodash/fp';
-import styled from 'styled-components';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineId } from '../../../../../../../../common/types';

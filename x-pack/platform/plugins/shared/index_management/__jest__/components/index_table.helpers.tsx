@@ -155,7 +155,7 @@ export const getRowIndicesByStatus = (statusText: string) => {
 export const openMenuAndGetButtonText = async (rowIndex: number) => {
   const menu = await openMenu(rowIndex);
   return within(menu)
-    .getAllByRole('button')
+    .getAllByRole('menuitem')
     .map((btn) => (btn.textContent || '').trim())
     .filter((t) => t.length > 0);
 };

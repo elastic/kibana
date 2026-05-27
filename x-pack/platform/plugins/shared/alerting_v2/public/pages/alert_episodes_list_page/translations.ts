@@ -13,6 +13,13 @@ export const EPISODES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.episode
   defaultMessage: 'Alert episodes',
 });
 
+export const EPISODES_LIST_MANAGE_RULES = i18n.translate(
+  'xpack.alertingV2.episodes.manageRulesButton',
+  {
+    defaultMessage: 'Manage rules',
+  }
+);
+
 export const EPISODES_LIST_TABLE_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2.episodes.tableAriaLabel',
   {
@@ -53,6 +60,20 @@ export const EPISODES_ASSIGNEE_UNKNOWN_USER = i18n.translate(
   'xpack.alertingV2.episodes.assignees.unknownUser',
   {
     defaultMessage: 'Unknown user',
+  }
+);
+
+export const EPISODES_FILTER_BAR_RESET_FILTERS = i18n.translate(
+  'xpack.alertingV2.episodes.filterBar.resetFilters',
+  {
+    defaultMessage: 'Reset filters',
+  }
+);
+
+export const EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2.episodes.filterBar.searchPlaceholder',
+  {
+    defaultMessage: 'Search episodes…',
   }
 );
 

@@ -19,6 +19,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
 
+  // Note: `/api/metrics/overview/top` (TopNodesRequestRT in
+  // x-pack/solutions/observability/plugins/infra/common/http_api/overview_api.ts) does
+  // NOT accept a `schema` field in its request body — the schema is resolved
+  // server-side from the source configuration via `get_preferred_schema`. The
+  // request bodies below intentionally omit `schema`; this is the explicit,
+  // documented behavior, not a missed audit. See issue #264011.
   describe('API /metrics/overview/top', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
 

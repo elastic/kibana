@@ -26,10 +26,7 @@ import { i18n } from '@kbn/i18n';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
@@ -59,8 +56,6 @@ import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 import { NoChangePointsCallout } from './no_change_points_callout';
 
 const selectControlCss = { width: '350px' };
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 /**
  * Contains panels with controls and change point results.
@@ -431,13 +426,13 @@ const FieldPanel: FC<FieldPanelProps> = ({
                   setIsActionMenuOpen(false);
                   openCasesModalCallback({
                     time_range: timeRange,
-                    viewType: caseAttachment.viewType,
-                    fn: fieldConfig.fn,
-                    metricField: fieldConfig.metricField,
-                    dataViewId: dataView.id,
+                    view_type: caseAttachment.viewType,
+                    aggregation_function: fieldConfig.fn,
+                    metric_field: fieldConfig.metricField,
+                    data_view_id: dataView.id,
                     ...(fieldConfig.splitField
                       ? {
-                          splitField: fieldConfig.splitField,
+                          split_field: fieldConfig.splitField,
                           partitions: selectedPartitions,
                         }
                       : {}),
@@ -484,13 +479,13 @@ const FieldPanel: FC<FieldPanelProps> = ({
         serializedState: {
           title: newTitle,
           description: newDescription,
-          viewType: dashboardAttachment.viewType,
-          dataViewId: dataView.id,
-          metricField: fieldConfig.metricField,
-          splitField: fieldConfig.splitField,
-          fn: fieldConfig.fn,
-          ...(dashboardAttachment.applyTimeRange ? { timeRange } : {}),
-          maxSeriesToPlot: dashboardAttachment.maxSeriesToPlot,
+          view_type: dashboardAttachment.viewType,
+          data_view_id: dataView.id,
+          metric_field: fieldConfig.metricField,
+          split_field: fieldConfig.splitField,
+          aggregation_function: fieldConfig.fn,
+          ...(dashboardAttachment.applyTimeRange ? { time_range: timeRange } : {}),
+          max_series_to_plot: dashboardAttachment.maxSeriesToPlot,
           ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
         },
         type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
@@ -527,9 +522,13 @@ const FieldPanel: FC<FieldPanelProps> = ({
             data-test-subj="aiopsChangePointDetectionExpandConfigButton"
             iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
-            aria-label={i18n.translate('xpack.aiops.changePointDetection.expandConfigLabel', {
-              defaultMessage: 'Expand configuration',
-            })}
+            aria-label={i18n.translate(
+              'xpack.aiops.changePointDetection.toggleChangePointsTableLabel',
+              {
+                defaultMessage: 'Toggle change points table',
+              }
+            )}
+            aria-expanded={isExpanded}
             size="s"
           />
         </EuiFlexItem>

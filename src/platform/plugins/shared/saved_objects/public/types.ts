@@ -44,8 +44,6 @@ export interface SavedObject<T extends SavedObjectAttributes = SavedObjectAttrib
 
 export interface SavedObjectSaveOpts {
   confirmOverwrite?: boolean;
-  isTitleDuplicateConfirmed?: boolean;
-  onTitleDuplicate?: () => void;
   returnToOrigin?: boolean;
 }
 

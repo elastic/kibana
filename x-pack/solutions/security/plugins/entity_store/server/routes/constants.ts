@@ -23,11 +23,15 @@ export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallPara
 export const LogExtractionInstallParams = LogExtractionConfig.pick({
   fieldHistoryLength: true,
   additionalIndexPatterns: true,
+  excludedIndexPatterns: true,
   lookbackPeriod: true,
   frequency: true,
   delay: true,
   docsLimit: true,
   maxLogsPerPage: true,
+  maxTimeWindowSize: true,
+  maxLogsPerWindow: true,
+  maxLogsPerWindowCapBehavior: true,
 }).partial();
 
 export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams>;
@@ -35,6 +39,7 @@ export type LogExtractionUpdateParams = z.infer<typeof LogExtractionUpdateParams
 export const LogExtractionUpdateParams = z.object({
   fieldHistoryLength: z.number().int().optional(),
   additionalIndexPatterns: z.array(z.string()).optional(),
+  excludedIndexPatterns: z.array(z.string()).optional(),
   lookbackPeriod: z
     .string()
     .regex(/[smdh]$/)
@@ -49,6 +54,12 @@ export const LogExtractionUpdateParams = z.object({
     .optional(),
   docsLimit: z.number().int().min(1).optional(),
   maxLogsPerPage: z.number().int().min(1).optional(),
+  maxTimeWindowSize: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional(),
+  maxLogsPerWindow: z.number().int().min(0).optional(),
+  maxLogsPerWindowCapBehavior: z.enum(['defer', 'drop']).optional(),
 });
 
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;

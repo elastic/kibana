@@ -86,13 +86,11 @@ export const DiscoverSessionSaveModalContainer = ({
   }, []);
 
   const executeSave = async ({
-    isTitleDuplicateConfirmed,
     newCopyOnSave,
     newDescription,
     newTags,
     newTimeRestore,
     newTitle,
-    onTitleDuplicate,
   }: OnSaveProps & {
     newTags: string[];
     newTimeRestore: boolean;
@@ -110,8 +108,6 @@ export const DiscoverSessionSaveModalContainer = ({
         newCopyOnSave: effectiveCopyOnSave,
         newDescription,
         newTags,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate,
       })
     ).unwrap();
   };
@@ -181,6 +177,7 @@ export const DiscoverSessionSaveModalContainer = ({
   return (
     <DiscoverSessionSaveDashboardModal
       description={persistedDiscoverSession?.description}
+      hasLibraryItemWithTitle={services.savedSearch.hasLibraryItemWithTitle}
       hideDashboardOptions={!showDashboardOptions}
       initialTags={persistedDiscoverSession?.tags ?? []}
       initialTimeRestore={timeRestore}

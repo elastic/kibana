@@ -41,6 +41,7 @@ test('generates xy chart config', async () => {
 
   expect(result).toMatchInlineSnapshot(`
     Object {
+      "description": undefined,
       "references": Array [],
       "state": Object {
         "adHocDataViews": Object {

@@ -17,6 +17,7 @@ import {
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { TemplateYamlEditor } from './template_form';
 import { TemplatePreview } from './template_preview';
+import { ExtendsSelector } from './extends_selector';
 import { componentStyles } from './template_form_layout.styles';
 import { MIN_EDITOR_WIDTH, MIN_PREVIEW_WIDTH } from '../constants';
 
@@ -29,6 +30,8 @@ interface TemplateEditorLayoutProps {
   isYamlSaved: boolean;
   previewWidth: number;
   onPreviewWidthChange: (width: number) => void;
+  currentTemplateId?: string;
+  savedValue?: string;
 }
 
 export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
@@ -40,6 +43,8 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
   isYamlSaved,
   previewWidth,
   onPreviewWidthChange,
+  currentTemplateId,
+  savedValue,
 }) => {
   const styles = useMemoCss(componentStyles);
 
@@ -61,12 +66,18 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
             onChange={onYamlChange}
             isSaving={isYamlSaving}
             isSaved={isYamlSaved}
+            savedValue={savedValue}
           />
         </div>
       }
       minFlexPanelSize={MIN_EDITOR_WIDTH}
       fixedPanel={
         <div css={styles.previewPanel}>
+          <ExtendsSelector
+            yamlValue={yamlValue}
+            onYamlChange={onYamlChange}
+            currentTemplateId={currentTemplateId}
+          />
           <TemplatePreview onFieldDefaultChange={onFieldDefaultChange} />
         </div>
       }

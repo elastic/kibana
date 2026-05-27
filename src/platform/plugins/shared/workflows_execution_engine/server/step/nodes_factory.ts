@@ -88,9 +88,9 @@ import { WorkflowOutputStepImpl } from './workflow_output_step/workflow_output_s
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
-import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 export class NodesFactory {
@@ -101,7 +101,7 @@ export class NodesFactory {
     private workflowGraph: WorkflowGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
     private dependencies: ContextDependencies,
-    private workflowExecutionState: WorkflowExecutionState
+    private stepIoService: StepIoService
   ) {}
 
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
@@ -195,7 +195,7 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger,
-          this.workflowExecutionState,
+          this.stepIoService,
           this.workflowGraph
         );
       case 'enter-while':
@@ -211,7 +211,7 @@ export class NodesFactory {
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger,
-          this.workflowExecutionState,
+          this.stepIoService,
           this.workflowGraph
         );
       case 'loop-break':
@@ -221,7 +221,7 @@ export class NodesFactory {
           this.workflowRuntime,
           stepLogger,
           this.stepExecutionRuntimeFactory,
-          this.workflowExecutionState,
+          this.stepIoService,
           this.workflowGraph
         );
       case 'loop-continue':
@@ -231,7 +231,7 @@ export class NodesFactory {
           this.workflowRuntime,
           stepLogger,
           this.stepExecutionRuntimeFactory,
-          this.workflowExecutionState,
+          this.stepIoService,
           this.workflowGraph
         );
       case 'enter-retry':

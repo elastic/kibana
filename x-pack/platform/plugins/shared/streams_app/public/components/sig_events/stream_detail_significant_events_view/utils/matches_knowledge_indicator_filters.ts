@@ -8,11 +8,13 @@
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { isComputedFeature } from '@kbn/streams-schema';
 import { getKnowledgeIndicatorStreamName } from './get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorSubtype } from './get_knowledge_indicator_subtype';
 import { getKnowledgeIndicatorType } from './get_knowledge_indicator_type';
 
 export interface KnowledgeIndicatorFilterCriteria {
   statusFilter?: 'active' | 'excluded';
   selectedTypes?: string[];
+  selectedSubtypes?: string[];
   selectedStreams?: string[];
   hideComputedTypes?: boolean;
   searchTerm?: string;
@@ -25,13 +27,25 @@ export const matchesKnowledgeIndicatorFilters = (
   ki: KnowledgeIndicator,
   criteria: KnowledgeIndicatorFilterCriteria
 ): boolean => {
-  const { statusFilter, selectedTypes, selectedStreams, hideComputedTypes, searchTerm } = criteria;
+  const {
+    statusFilter,
+    selectedTypes,
+    selectedSubtypes,
+    selectedStreams,
+    hideComputedTypes,
+    searchTerm,
+  } = criteria;
 
   if (statusFilter === 'active' && !isActive(ki)) return false;
   if (statusFilter === 'excluded' && isActive(ki)) return false;
 
   if (selectedTypes?.length) {
     if (!selectedTypes.includes(getKnowledgeIndicatorType(ki))) return false;
+  }
+
+  if (selectedSubtypes?.length) {
+    const subtype = getKnowledgeIndicatorSubtype(ki);
+    if (!subtype || !selectedSubtypes.includes(subtype)) return false;
   }
 
   if (selectedStreams?.length) {

@@ -111,5 +111,6 @@ function transformToWorkflowExecutionDetailDto(
     yaml,
     traceId: workflowExecution.traceId,
     entryTransactionId: workflowExecution.entryTransactionId,
+    concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
   };
 }

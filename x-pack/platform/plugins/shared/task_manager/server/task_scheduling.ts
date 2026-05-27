@@ -12,16 +12,16 @@ import type { Logger } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
-import type {
-  ApiKeyOptions,
-  ConcreteTaskInstance,
-  IntervalSchedule,
-  RruleSchedule,
-  ScheduleOptions,
-  TaskInstanceWithDeprecatedFields,
-  TaskInstanceWithId,
+import {
+  TaskStatus,
+  type ApiKeyOptions,
+  type ConcreteTaskInstance,
+  type IntervalSchedule,
+  type RruleSchedule,
+  type ScheduleOptions,
+  type TaskInstanceWithDeprecatedFields,
+  type TaskInstanceWithId,
 } from './task';
-import { TaskStatus } from './task';
 import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
@@ -30,6 +30,25 @@ import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
 import { getExecutionId } from './lib/get_execution_id';
+
+const scheduleOptionsToStoreApiKeyOptions = (
+  options?: ScheduleOptions
+): ApiKeyOptions | undefined => {
+  if (!options) {
+    return undefined;
+  }
+  const storeOpts: ApiKeyOptions = {};
+  if (options.request) {
+    storeOpts.request = options.request;
+  }
+  if (options.onEsKey === true) {
+    storeOpts.onEsKey = true;
+  }
+  if (options.regenerateApiKey !== undefined) {
+    storeOpts.regenerateApiKey = options.regenerateApiKey;
+  }
+  return Object.keys(storeOpts).length ? storeOpts : undefined;
+};
 
 const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
@@ -110,11 +129,7 @@ export class TaskScheduling {
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
-      options?.request
-        ? {
-            request: options?.request,
-          }
-        : undefined
+      scheduleOptionsToStoreApiKeyOptions(options)
     );
   }
 
@@ -133,26 +148,33 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
     const modifiedTasks = await Promise.all(
-      taskInstances.map(async (taskInstance) => {
+      taskInstances.map(async (taskInstance, i) => {
         const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
           ...omit(options, 'apiKey', 'request'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
+        const enabled = modifiedTask.enabled ?? true;
+        let scheduling: Partial<{ runAt: Date; scheduledAt: Date }> = {};
+        if (enabled) {
+          // Run the first task now. Run all other tasks a random number of ms in the future,
+          // with a maximum of 5 minutes or the task interval, whichever is smaller.
+          scheduling =
+            i === 0
+              ? { runAt: new Date(), scheduledAt: new Date() }
+              : addJitter(modifiedTask.schedule?.interval) ?? {};
+        }
         return {
           ...modifiedTask,
           traceparent: traceparent || '',
-          enabled: modifiedTask.enabled ?? true,
+          enabled,
+          ...scheduling,
         };
       })
     );
 
     return await this.store.bulkSchedule(
       modifiedTasks,
-      options?.request
-        ? {
-            request: options?.request,
-          }
-        : undefined
+      scheduleOptionsToStoreApiKeyOptions(options)
     );
   }
 
@@ -189,11 +211,9 @@ export class TaskScheduling {
         if (runSoon) {
           // Run the first task now. Run all other tasks a random number of ms in the future,
           // with a maximum of 5 minutes or the task interval, whichever is smaller.
-          const taskToRun =
-            i === 0
-              ? { ...task, runAt: new Date(), scheduledAt: new Date() }
-              : randomlyOffsetRunTimestamp(task);
-          return { ...taskToRun, enabled: true };
+          return i === 0
+            ? { ...task, enabled: true, runAt: new Date(), scheduledAt: new Date() }
+            : { ...task, enabled: true, ...addJitter(task.schedule?.interval ?? '0s') };
         }
         return { ...task, enabled: true };
       },
@@ -364,17 +384,16 @@ export class TaskScheduling {
   }
 }
 
-const randomlyOffsetRunTimestamp: (task: ConcreteTaskInstance) => ConcreteTaskInstance = (task) => {
+const addJitter = (interval?: string): { runAt: Date; scheduledAt: Date } | undefined => {
+  // Adhoc tasks run immediately.
+  if (!interval) return { runAt: new Date(), scheduledAt: new Date() };
+
   const now = Date.now();
   const maximumOffsetTimestamp = now + 1000 * 60 * 5; // now + 5 minutes
-  const taskIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+  const taskIntervalInMs = parseIntervalAsMillisecond(interval);
   const maximumRunAt = Math.min(now + taskIntervalInMs, maximumOffsetTimestamp);
 
   // Offset between 1 and maximumRunAt ms
   const runAt = new Date(now + Math.floor(Math.random() * (maximumRunAt - now) + 1));
-  return {
-    ...task,
-    runAt,
-    scheduledAt: runAt,
-  };
+  return { runAt, scheduledAt: runAt };
 };

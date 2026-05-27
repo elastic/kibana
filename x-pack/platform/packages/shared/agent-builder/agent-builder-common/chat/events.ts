@@ -12,6 +12,7 @@ import type {
   ConversationInternalState,
   ConversationRound,
   BackgroundExecutionState,
+  TodoItem,
 } from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
 import type { VersionedAttachment } from '../attachments';
@@ -350,6 +351,19 @@ export const isBackgroundAgentCompleteEvent = (
   event: AgentBuilderEvent<string, any>
 ): event is BackgroundAgentCompleteEvent => {
   return event.type === ChatEventType.backgroundAgentComplete;
+};
+
+export const TODOS_UPDATED_UI_EVENT = 'todos_updated' as const;
+
+export interface TodosUpdatedUiEventData {
+  todos: TodoItem[];
+}
+
+export const isTodosUpdatedEvent = (event: AgentBuilderEvent<string, any>) => {
+  return isToolUiEvent<typeof TODOS_UPDATED_UI_EVENT, TodosUpdatedUiEventData>(
+    event,
+    TODOS_UPDATED_UI_EVENT
+  );
 };
 
 /**

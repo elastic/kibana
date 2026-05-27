@@ -15,6 +15,8 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   version: 'WzEsMV0=',
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
+  type: 'global',
+  ruleId: null,
   enabled: true,
   matcher: 'data.severity : "critical"',
   groupBy: ['host.name', 'service.name'],
@@ -24,10 +26,8 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   snoozedUntil: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   createdBy: 'elastic',
-  createdByUsername: 'elastic',
   createdAt: '2026-03-01T10:00:00.000Z',
   updatedBy: 'elastic',
-  updatedByUsername: 'elastic',
   updatedAt: '2026-03-01T10:00:00.000Z',
   auth: {
     owner: 'elastic',
@@ -81,8 +81,9 @@ describe('useActionPolicyForm', () => {
       expect(onSubmitCreate).toHaveBeenCalledWith({
         name: 'My policy',
         description: 'A description',
+        type: 'global',
         groupingMode: 'per_episode',
-        throttle: { strategy: 'on_status_change' },
+        throttle: { strategy: 'on_status_change', interval: null },
         destinations: [],
       });
     });
@@ -111,7 +112,7 @@ describe('useActionPolicyForm', () => {
       expect(payload).not.toHaveProperty('matcher');
       expect(payload).not.toHaveProperty('groupBy');
       expect(payload.groupingMode).toBe('per_episode');
-      expect(payload.throttle).toEqual({ strategy: 'on_status_change' });
+      expect(payload.throttle).toEqual({ strategy: 'on_status_change', interval: null });
     });
   });
 

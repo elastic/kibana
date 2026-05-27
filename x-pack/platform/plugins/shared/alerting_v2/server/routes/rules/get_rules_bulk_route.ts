@@ -8,16 +8,19 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
-import { findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  errorResponseSchema,
+  findRulesResponseSchema,
+  ID_MAX_LENGTH,
+} from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 
-const ruleIdSchema = z.string().trim().min(1).describe('A rule identifier.');
+const ruleIdSchema = z.string().trim().min(1).max(ID_MAX_LENGTH).describe('A rule identifier.');
 
 const getRulesBulkQuerySchema = z.object({
   ids: z.union([
@@ -43,9 +46,9 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Get rules in bulk',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(getRulesBulkQuerySchema),
+      query: getRulesBulkQuerySchema,
     },
     response: {
       200: {
@@ -53,6 +56,7 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
         description: 'Indicates a successful call.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
       },
     },

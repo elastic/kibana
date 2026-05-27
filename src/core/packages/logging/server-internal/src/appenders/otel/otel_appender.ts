@@ -28,6 +28,12 @@ import type { OtelAppenderConfig, LayoutConfigType } from '@kbn/core-logging-ser
 import { buildOtelResources } from '@kbn/telemetry';
 import { getFlattenedObject } from '@kbn/std';
 import { Layouts } from '../../layouts/layouts';
+import {
+  buildGrpcVerifyOptions,
+  buildHttpsAgentTlsOptions,
+  resolveTlsMaterial,
+  toGrpcRootCerts,
+} from './otel_tls';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
 
@@ -199,6 +205,38 @@ export class OtelAppender implements DisposableAppender {
     layout: schema.maybe(Layouts.configSchema),
     // Optional: user-provided attributes override the service attributes derived from APM config.
     attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    ssl: schema.maybe(
+      schema.object(
+        {
+          certificateAuthorities: schema.maybe(
+            schema.oneOf([
+              schema.string(),
+              schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+            ])
+          ),
+          certificate: schema.maybe(schema.string()),
+          key: schema.maybe(schema.string()),
+          keyPassphrase: schema.maybe(schema.string()),
+          verificationMode: schema.oneOf(
+            [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+            { defaultValue: 'full' }
+          ),
+        },
+        {
+          validate: (raw) => {
+            if (raw.certificate && !raw.key) {
+              return 'Must specify [ssl.key] when [ssl.certificate] is set';
+            }
+            if (raw.key && !raw.certificate) {
+              return 'Must specify [ssl.certificate] when [ssl.key] is set';
+            }
+            if (raw.keyPassphrase && !raw.key) {
+              return 'Must specify [ssl.key] when [ssl.keyPassphrase] is set';
+            }
+          },
+        }
+      )
+    ),
   });
 
   private readonly loggerProvider: LoggerProvider;
@@ -269,23 +307,33 @@ export class OtelAppender implements DisposableAppender {
 const createExporter = (
   config: OtelAppenderConfig
 ): OTLPLogExporterHTTP | OTLPLogExporterGRPC | OTLPLogExporterPROTO => {
+  const tls = resolveTlsMaterial(config.ssl);
+
   switch (config.protocol) {
     case 'http': {
       // No need to import the module at the top if not used in the switch statement.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http');
-      return new OTLPLogExporter({ url: config.url, headers: config.headers ?? {} });
+      return new OTLPLogExporter({
+        url: config.url,
+        headers: config.headers ?? {},
+        ...(tls ? { httpAgentOptions: buildHttpsAgentTlsOptions(tls) } : {}),
+      });
     }
     case 'proto': {
       // No need to import the module at the top if not used in the switch statement.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-proto');
-      return new OTLPLogExporter({ url: config.url, headers: config.headers ?? {} });
+      return new OTLPLogExporter({
+        url: config.url,
+        headers: config.headers ?? {},
+        ...(tls ? { httpAgentOptions: buildHttpsAgentTlsOptions(tls) } : {}),
+      });
     }
     case 'grpc': {
       // No need to import the module at the top if not used in the switch statement.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { Metadata } = require('@grpc/grpc-js');
+      const { Metadata, credentials } = require('@grpc/grpc-js');
       const metadata = new Metadata();
       Object.entries(config.headers ?? {}).forEach(([key, value]) => {
         metadata.add(key, value);
@@ -293,7 +341,20 @@ const createExporter = (
       // No need to import the module at the top if not used in the switch statement.
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-grpc');
-      return new OTLPLogExporter({ url: config.url, metadata });
+      return new OTLPLogExporter({
+        url: config.url,
+        metadata,
+        ...(tls
+          ? {
+              credentials: credentials.createSsl(
+                toGrpcRootCerts(tls),
+                tls.key ?? null,
+                tls.cert ?? null,
+                buildGrpcVerifyOptions(tls)
+              ),
+            }
+          : {}),
+      });
     }
   }
 };

@@ -67,6 +67,7 @@ export const runResolutionScoringStep = async ({
     now,
     calculationRunId,
     watchlistConfigs,
+    abortSignal,
   })) {
     if (abortSignal?.aborted) {
       runLogger.info('Resolution scoring aborted between pages');

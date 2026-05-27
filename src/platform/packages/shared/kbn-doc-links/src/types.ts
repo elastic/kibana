@@ -38,6 +38,7 @@ export interface DocLinks {
   readonly apm: {
     readonly kibanaSettings: string;
     readonly supportedServiceMaps: string;
+    readonly supportedServiceMapsLegend: string;
     readonly customLinks: string;
     readonly droppedTransactionSpans: string;
     readonly upgrading: string;
@@ -49,6 +50,7 @@ export interface DocLinks {
     readonly spanCompression: string;
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
+    readonly metricsUi: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -338,6 +340,8 @@ export interface DocLinks {
     readonly eventMerging: string;
     readonly blocklist: string;
     readonly endpointArtifacts: string;
+    readonly endpointArtifactsNoEscaping: string;
+    readonly scriptLibrary: string;
     readonly policyResponseTroubleshooting: {
       full_disk_access: string;
       macos_system_ext: string;
@@ -729,6 +733,7 @@ export interface DocLinks {
     readonly agentBuilderPlugins: string;
     readonly agentBuilderConnectors: string;
     readonly agentBuilderTools: string;
+    readonly elasticCapabilities: string;
     readonly programmaticAccess: string;
     readonly kibanaApi: string;
     readonly mcpServer: string;
@@ -743,6 +748,7 @@ export interface DocLinks {
   readonly subscriptions: string;
   readonly cases: {
     readonly casesPermissions: string;
+    readonly configureCaseSettings: string;
   };
 }
 

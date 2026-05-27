@@ -7,21 +7,24 @@
 
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { type EisInferenceEndpoint, EisModelStatus } from '../../common/types';
 import {
+  isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
 } from '../../common/type_guards';
 import type { MultiSelectFilterOption } from '../components/filter/multi_select_filter';
 
-export type EisInferenceEndpoint = InferenceAPIConfigResponse & {
-  service: 'elastic';
-  service_settings: { model_id: string };
-};
+// Inference ID prefixes for internal Elastic endpoints kept for backwards
+// compatibility that must not be surfaced in the UI.
+const HIDDEN_EIS_INFERENCE_ID_PREFIXES = ['.gp-llm-v2', '.rainbow-sprinkles'];
 
-export const isEisEndpoint = (ep: InferenceAPIConfigResponse): ep is EisInferenceEndpoint =>
-  ep.service === 'elastic';
+export const isHiddenEisEndpoint = (ep: InferenceAPIConfigResponse): boolean =>
+  HIDDEN_EIS_INFERENCE_ID_PREFIXES.some((prefix) => ep.inference_id.startsWith(prefix));
 
 export type TaskTypeCategory = 'LLM' | 'Embedding' | 'Rerank';
 
@@ -51,15 +54,20 @@ export const TASK_TYPE_DISPLAY_NAME: Record<InferenceTaskType, string> = {
   rerank: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.rerank', {
     defaultMessage: 'rerank',
   }),
+  embedding: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.embedding', {
+    defaultMessage: 'embedding',
+  }),
 };
 
 export interface GroupedModel {
   service: 'elastic';
   modelName: string;
   modelCreator: string;
+  modelStatus: EisModelStatus;
   taskTypes: InferenceTaskType[];
   categories: TaskTypeCategory[];
   endpoints: EisInferenceEndpoint[];
+  modelMetadata?: EisInferenceEndpointMetadata;
 }
 
 export const getModelName = (endpoint: EisInferenceEndpoint): string => {
@@ -75,6 +83,30 @@ export const getModelCreator = (endpoint: EisInferenceEndpoint): string => {
     return endpoint.metadata.display.model_creator;
   }
   return SERVICE_PROVIDERS[endpoint.service]?.name ?? endpoint.service;
+};
+
+export const getModelMetadata = (
+  endpoint: EisInferenceEndpoint
+): EisInferenceEndpointMetadata | undefined => {
+  if (isInferenceEndpointWithMetadata(endpoint)) return endpoint.metadata;
+  return undefined;
+};
+
+export const getModelStatus = (
+  metadata: EisInferenceEndpointMetadata | undefined
+): EisModelStatus => {
+  if (!metadata) return EisModelStatus.Unknown;
+  if (isModelEndOfLifeReached(metadata)) return EisModelStatus.DeprecatedEOL;
+  // use helper function to catch eol dates within the next month regardless of status value
+  if (isModelDeprecated(metadata)) return EisModelStatus.Deprecated;
+  switch (metadata.heuristics?.status?.toLowerCase()) {
+    case EisModelStatus.GA:
+      return EisModelStatus.GA;
+    case EisModelStatus.Preview:
+      return EisModelStatus.Preview;
+    default:
+      return EisModelStatus.Unknown;
+  }
 };
 
 const CREATOR_TO_PROVIDER_KEY: Record<string, ServiceProviderKeys> = {
@@ -116,15 +148,22 @@ export const groupEndpointsByModel = (endpoints: EisInferenceEndpoint[]): Groupe
       if (isInferenceEndpointWithDisplayCreatorMetadata(ep)) {
         existing.modelCreator = ep.metadata.display.model_creator;
       }
+      if (!existing.modelMetadata && isInferenceEndpointWithMetadata(ep)) {
+        existing.modelMetadata = ep.metadata;
+        existing.modelStatus = getModelStatus(ep.metadata);
+      }
     } else {
       const cat = TASK_TYPE_CATEGORY[ep.task_type];
+      const modelMetadata = getModelMetadata(ep);
       groups.set(key, {
         service: ep.service,
         modelName: getModelName(ep),
         modelCreator: getModelCreator(ep),
+        modelStatus: getModelStatus(modelMetadata),
         taskTypes: [ep.task_type],
         categories: cat ? [cat] : [],
         endpoints: [ep],
+        modelMetadata,
       });
     }
   }
@@ -192,3 +231,78 @@ export const filterGroupedModels = (
     })
     .sort((a, b) => a.modelName.localeCompare(b.modelName));
 };
+
+const MODEL_DEPRECATED_EOL_TIME_DURATION = 'now+30d';
+export function isModelDeprecated(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!metadata) return false;
+  const eolDate = getModelEOLDate(metadata);
+  if (eolDate && dateMath.parse(MODEL_DEPRECATED_EOL_TIME_DURATION)?.isSameOrAfter(eolDate)) {
+    // if the EOL date is within the next 30 days, treat is as deprecated.
+    return true;
+  }
+  if (metadata.heuristics?.status?.toLowerCase() === EisModelStatus.Deprecated) return true;
+  return false;
+}
+
+export function isModelEndOfLifeReached(metadata: EisInferenceEndpointMetadata | undefined) {
+  const eolDate = getModelEOLDate(metadata);
+  if (!eolDate) return false;
+  return dateMath.parse('now')?.isSameOrAfter(eolDate) ?? false;
+}
+
+export function getModelReleaseDate(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!metadata) return undefined;
+  if (!metadata.heuristics?.release_date) return undefined;
+  const releaseMoment = dateMath.parse(metadata.heuristics.release_date);
+  if (releaseMoment?.isValid()) {
+    return releaseMoment;
+  }
+  return undefined;
+}
+
+export function getModelEOLDate(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!metadata) return undefined;
+  if (!metadata.heuristics?.end_of_life_date) return undefined;
+  const eolMoment = dateMath.parse(metadata.heuristics.end_of_life_date);
+  if (eolMoment?.isValid()) {
+    return eolMoment;
+  }
+  return undefined;
+}
+
+export function getModelEOLMessage(eolFormattedDate: string | null) {
+  return eolFormattedDate
+    ? i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.content',
+        {
+          defaultMessage:
+            "This model's end of life date is {eolFormattedDate}. It is no longer available.",
+          values: { eolFormattedDate },
+        }
+      )
+    : i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.contentNoDate',
+        {
+          defaultMessage: 'This model has reached end of life and is no longer available.',
+        }
+      );
+}
+
+export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null) {
+  return deprecatedFormattedDate
+    ? i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.content',
+        {
+          defaultMessage:
+            'This model will be deprecated on {deprecatedFormattedDate}. We recommend a newer model for optimal results.',
+          values: { deprecatedFormattedDate },
+        }
+      )
+    : i18n.translate(
+        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.contentNoDate',
+        {
+          defaultMessage:
+            'This model is deprecated. We recommend a newer model for optimal results.',
+        }
+      );
+}
