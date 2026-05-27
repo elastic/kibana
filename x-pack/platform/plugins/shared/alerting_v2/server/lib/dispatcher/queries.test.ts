@@ -79,9 +79,7 @@ describe('getDispatchableAlertEventsQuery', () => {
   it('aggregates severity using LAST by timestamp scoped to rule-event rows', () => {
     const req = getDispatchableAlertEventsQuery();
 
-    expect(req.query).toContain(
-      'severity = LAST(severity, @timestamp) WHERE type IS NOT NULL'
-    );
+    expect(req.query).toContain('severity = LAST(severity, @timestamp) WHERE type IS NOT NULL');
   });
 
   it('keeps the expected output columns and renames episode_status', () => {

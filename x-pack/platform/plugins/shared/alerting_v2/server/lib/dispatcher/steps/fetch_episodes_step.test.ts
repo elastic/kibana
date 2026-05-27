@@ -9,7 +9,7 @@ import { FetchEpisodesStep, parseDataJson, parseAlertEpisodes } from './fetch_ep
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
 import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
-import { AlertEventSeverity } from '@kbn/alerting-v2-plugin/server/resources/datastreams/alert_events';
+import type { AlertEventSeverity } from '../../../resources/datastreams/alert_events';
 
 describe('FetchEpisodesStep', () => {
   it('returns episodes and continues when episodes are found', async () => {

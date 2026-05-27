@@ -23,7 +23,7 @@ export interface AlertEpisode {
   rule_id: RuleId;
   group_hash: string;
   episode_id: string;
-  episode_status: 'inactive' | 'pending' | 'active' | 'recovering';  
+  episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
   severity?: AlertEventSeverity;
   data?: AlertEpisodeData;
 }
