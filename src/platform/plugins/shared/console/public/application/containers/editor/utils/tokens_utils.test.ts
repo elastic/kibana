@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseBody, removeTrailingWhitespaces, parseUrl, parseLine } from './tokens_utils';
+import {
+  parseBody,
+  removeTrailingWhitespaces,
+  parseUrl,
+  parseLine,
+  isRequestLineStart,
+} from './tokens_utils';
 
 describe('tokens_utils', () => {
   describe('removeTrailingWhitespaces', () => {
@@ -21,6 +27,11 @@ describe('tokens_utils', () => {
       const result = removeTrailingWhitespaces(url);
       expect(result).toBe(url);
     });
+    it(`doesn't strip if the first character is whitespace`, () => {
+      const url = ' _search trailing';
+      const result = removeTrailingWhitespaces(url);
+      expect(result).toBe(url);
+    });
     it(`removes any text after the first whitespace`, () => {
       const url = '_search some_text';
       const result = removeTrailingWhitespaces(url);
@@ -30,6 +41,49 @@ describe('tokens_utils', () => {
       const url = '_search?q="with whitespace"';
       const result = removeTrailingWhitespaces(url);
       expect(result).toBe(url);
+    });
+    it(`doesn't treat a question mark inside quotes as query string start`, () => {
+      const url = '_search/"?literal" trailing_text';
+      const result = removeTrailingWhitespaces(url);
+      expect(result).toBe('_search/"?literal"');
+    });
+    it(`does not strip unquoted spaces inside query values`, () => {
+      const url = 'myindex/_search?q=type:organisation AND elastic';
+      const result = removeTrailingWhitespaces(url);
+      expect(result).toBe(url);
+    });
+    it.each([
+      [
+        'keeps slashes inside query values',
+        'myindex/_search?q=http://example.com/path AND elastic',
+      ],
+      ['keeps hashes inside query values', 'myindex/_search?q=tag#1 AND elastic'],
+      [
+        'keeps comment markers inside quoted query values',
+        'myindex/_search?q="organisation // elastic" AND kibana',
+      ],
+      [
+        'uses the first question mark outside quotes as query string start',
+        'myindex/"?literal"/_search?q=type:organisation AND elastic',
+      ],
+    ])('%s', (_, url) => {
+      const result = removeTrailingWhitespaces(url);
+      expect(result).toBe(url);
+    });
+    it(`strips inline comment after unquoted query spaces`, () => {
+      const url = 'myindex/_search?q=type:organisation AND elastic // filter orgs';
+      const result = removeTrailingWhitespaces(url);
+      expect(result).toBe('myindex/_search?q=type:organisation AND elastic');
+    });
+    it(`strips inline comment after mixed whitespace in query values`, () => {
+      const url = 'myindex/_search?q=type:organisation AND elastic \t// filter orgs';
+      const result = removeTrailingWhitespaces(url);
+      expect(result).toBe('myindex/_search?q=type:organisation AND elastic');
+    });
+    it(`strips hash comment after unquoted query spaces`, () => {
+      const url = 'myindex/_search?q=type:organisation AND elastic # filter orgs';
+      const result = removeTrailingWhitespaces(url);
+      expect(result).toBe('myindex/_search?q=type:organisation AND elastic');
     });
   });
 
@@ -47,6 +101,24 @@ describe('tokens_utils', () => {
       expect(url).toBe('_search?query="test1 test2 test3"');
       expect(urlPathTokens).toEqual(['_search']);
       expect(urlParamsTokens[0]).toEqual(['query', '"test1 test2 test3"']);
+    });
+    it('preserves unquoted spaces inside query values', () => {
+      const { method, url, urlPathTokens, urlParamsTokens } = parseLine(
+        'GET myindex/_search?q=type:organisation AND elastic'
+      );
+      expect(method).toBe('GET');
+      expect(url).toBe('myindex/_search?q=type:organisation AND elastic');
+      expect(urlPathTokens).toEqual(['myindex', '_search']);
+      expect(urlParamsTokens[0]).toEqual(['q', 'type:organisation AND elastic']);
+    });
+    it('uses the first question mark outside quotes to parse url params', () => {
+      const { method, url, urlPathTokens, urlParamsTokens } = parseLine(
+        'GET myindex/"?literal"/_search?q=type:organisation AND elastic'
+      );
+      expect(method).toBe('GET');
+      expect(url).toBe('myindex/"?literal"/_search?q=type:organisation AND elastic');
+      expect(urlPathTokens).toEqual(['myindex', '"?literal"', '_search']);
+      expect(urlParamsTokens[0]).toEqual(['q', 'type:organisation AND elastic']);
     });
     it('works with multiple whitespaces', () => {
       const { method, url, urlPathTokens, urlParamsTokens } = parseLine(
@@ -196,6 +268,40 @@ describe('tokens_utils', () => {
       const url = '/_search/test/';
       const result = parseUrl(url);
       expect(result.urlPathTokens).toEqual(['_search', 'test']);
+    });
+
+    it('uses the first question mark outside quotes for url params', () => {
+      const url = 'myindex/"?literal"/_search?q=type:organisation AND elastic';
+      const result = parseUrl(url);
+      expect(result.urlPathTokens).toEqual(['myindex', '"?literal"', '_search']);
+      expect(result.urlParamsTokens[0]).toEqual(['q', 'type:organisation AND elastic']);
+    });
+  });
+
+  describe('isRequestLineStart', () => {
+    it('returns true for an empty line', () => {
+      expect(isRequestLineStart('')).toBe(true);
+    });
+    it('returns true for whitespace-only content', () => {
+      expect(isRequestLineStart('   ')).toBe(true);
+    });
+    it('returns true for partial method letters', () => {
+      expect(isRequestLineStart('G')).toBe(true);
+      expect(isRequestLineStart('  ge')).toBe(true);
+      expect(isRequestLineStart('POS')).toBe(true);
+    });
+    it('returns false for lines starting with a double quote', () => {
+      expect(isRequestLineStart('"')).toBe(false);
+      expect(isRequestLineStart('  "')).toBe(false);
+      expect(isRequestLineStart('"key"')).toBe(false);
+    });
+    it('returns false for body-like tokens', () => {
+      expect(isRequestLineStart('{')).toBe(false);
+      expect(isRequestLineStart('  [')).toBe(false);
+      expect(isRequestLineStart('}')).toBe(false);
+      expect(isRequestLineStart('  ]')).toBe(false);
+      expect(isRequestLineStart(',')).toBe(false);
+      expect(isRequestLineStart(':')).toBe(false);
     });
   });
 });
