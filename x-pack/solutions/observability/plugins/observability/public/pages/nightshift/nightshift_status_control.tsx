@@ -50,6 +50,13 @@ const STATUS_OPTIONS: StatusOption[] = [
     color: 'success',
   },
   {
+    id: 'morning',
+    label: i18n.translate('xpack.observability.nightshift.statusControl.morning', {
+      defaultMessage: 'Morning',
+    }),
+    color: 'success',
+  },
+  {
     id: 'critical',
     label: i18n.translate('xpack.observability.nightshift.statusControl.critical', {
       defaultMessage: 'Critical',

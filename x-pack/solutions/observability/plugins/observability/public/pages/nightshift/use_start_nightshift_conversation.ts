@@ -12,12 +12,12 @@ import type { NightshiftStatus } from './nightshift_state';
 import {
   NIGHTSHIFT_AGENT_BRIEF_TYPE,
   type NightshiftAgentBriefData,
-} from './agent_brief/nightshift_agent_brief_definition';
+} from './agent_brief/nightshift_agent_brief_constants';
 import {
   NIGHTSHIFT_SIGNIFICANT_EVENT_TYPE,
   type NightshiftSignificantEventData,
 } from './agent_brief/nightshift_significant_event_definition';
-import { SIGNIFICANT_EVENTS } from './nightshift_critical_events';
+import { FIXED_SIGNIFICANT_EVENTS, SIGNIFICANT_EVENTS } from './nightshift_critical_events';
 
 /** Kibana app id of the Agent Builder application. */
 const AGENT_BUILDER_APP_ID = 'agent_builder';
@@ -50,7 +50,7 @@ interface StartNightshiftConversationOptions {
    * Nightshift status to capture as an "Agent brief" attachment on the
    * new conversation. When provided, the new conversation lands with a
    * pre-staged `nightshift.agentBrief` attachment whose canvas renders
-   * the corresponding Nightshift panel (loading / healthy / critical).
+   * the corresponding Nightshift panel (loading / healthy / morning / critical).
    * Omit to navigate without attaching a brief.
    */
   briefMode?: NightshiftStatus;
@@ -106,20 +106,26 @@ export function useStartNightshiftConversation() {
        * Build the `initialAttachments` payload Agent Builder will
        * consume in `RoutedConversationsProvider`.
        *
-       *  - `loading` / `healthy` → one `nightshift.agentBrief`
-       *    attachment carrying the current mode. The registered UI
-       *    definition renders the matching Nightshift panel inside the
-       *    canvas flyout.
-       *  - `critical` → one `nightshift.significantEvent` attachment
-       *    per critical-state significant event (no single "brief"
-       *    attachment). This lets the user — and the agent — work
-       *    through each event as its own first-class attachment.
+       *  - `loading` / `healthy` → one `nightshift.agentBrief` attachment
+       *    carrying the current mode. The registered UI definition
+       *    renders the matching Nightshift panel inside the canvas flyout.
+       *  - `critical` / `morning` → one `nightshift.significantEvent`
+       *    attachment per event (active critical fixtures vs overnight
+       *    fixed fixtures). No single "brief" attachment — each event is
+       *    first-class, same as the Critical Remediate flow.
        *  - omitted → no attachments pre-staged.
        */
       const initialAttachments = (() => {
         if (!briefMode) return undefined;
         if (briefMode === 'critical') {
           return SIGNIFICANT_EVENTS.map((event) => ({
+            id: `nightshift-significant-event-${event.id}`,
+            type: NIGHTSHIFT_SIGNIFICANT_EVENT_TYPE,
+            data: event satisfies NightshiftSignificantEventData,
+          }));
+        }
+        if (briefMode === 'morning') {
+          return FIXED_SIGNIFICANT_EVENTS.map((event) => ({
             id: `nightshift-significant-event-${event.id}`,
             type: NIGHTSHIFT_SIGNIFICANT_EVENT_TYPE,
             data: event satisfies NightshiftSignificantEventData,

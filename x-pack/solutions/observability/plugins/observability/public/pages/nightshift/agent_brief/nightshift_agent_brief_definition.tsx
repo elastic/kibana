@@ -29,25 +29,16 @@ import { getNightshiftIconDataUrl } from '@kbn/spaces-plugin/common';
 
 import { NightshiftLoading } from '../nightshift_loading';
 import { NightshiftHealthy } from '../nightshift_healthy';
+import { NightshiftMorning } from '../nightshift_morning';
 import { NightshiftCritical } from '../nightshift_critical';
 import type { NightshiftStatus } from '../nightshift_state';
 
-/**
- * Attachment type identifier registered with the Agent Builder
- * attachments service. Used as the discriminant for
- * `Attachment<'nightshift.agentBrief', NightshiftAgentBriefData>`.
- */
-export const NIGHTSHIFT_AGENT_BRIEF_TYPE = 'nightshift.agentBrief' as const;
+import {
+  NIGHTSHIFT_AGENT_BRIEF_TYPE,
+  type NightshiftAgentBriefData,
+} from './nightshift_agent_brief_constants';
 
-/**
- * Payload carried by a Nightshift Agent Brief attachment. The `mode`
- * decides which Nightshift panel renders inside the canvas — the brief
- * is essentially "the Nightshift screen the user was looking at when
- * they handed off to Agent Builder".
- */
-export interface NightshiftAgentBriefData extends Record<string, unknown> {
-  mode: NightshiftStatus;
-}
+export { NIGHTSHIFT_AGENT_BRIEF_TYPE, type NightshiftAgentBriefData };
 
 export type NightshiftAgentBriefAttachment = Attachment<
   typeof NIGHTSHIFT_AGENT_BRIEF_TYPE,
@@ -76,6 +67,10 @@ const InlinePreview: React.FC<{ mode: NightshiftStatus }> = ({ mode }) => {
         return i18n.translate('xpack.observability.nightshift.agentBrief.inline.healthy', {
           defaultMessage: 'System healthy — no critical events detected.',
         });
+      case 'morning':
+        return i18n.translate('xpack.observability.nightshift.agentBrief.inline.morning', {
+          defaultMessage: 'Overnight fixes are ready for your review.',
+        });
       case 'critical':
         return i18n.translate('xpack.observability.nightshift.agentBrief.inline.critical', {
           defaultMessage: 'Significant events require escalation.',
@@ -101,8 +96,7 @@ const InlinePreview: React.FC<{ mode: NightshiftStatus }> = ({ mode }) => {
            * The leading glyph swaps with the mode:
            *   loading  → ShellSpinner (terminal-style braille loader,
            *              signals "still analysing")
-           *   healthy  → static moon icon (Nightshift brand)
-           *   critical → static moon icon (Nightshift brand)
+           *   healthy / morning / critical → static moon icon (Nightshift brand)
            */}
           {mode === 'loading' ? (
             <ShellSpinner size={24} aria-label="Nightshift analysing" />
@@ -136,7 +130,7 @@ const InlinePreview: React.FC<{ mode: NightshiftStatus }> = ({ mode }) => {
 /**
  * Canvas (right-side flyout) renderer. Renders the same Nightshift
  * panel the user was looking at when they handed off — `loading`,
- * `healthy`, or `critical` — so the agent and the user share an
+ * `healthy`, `morning`, or `critical` — so the agent and the user share an
  * identical view of the system state.
  *
  * The panels are designed for a centered 753px column on the main
@@ -149,6 +143,8 @@ const CanvasContent: React.FC<{ mode: NightshiftStatus }> = ({ mode }) => {
     switch (mode) {
       case 'healthy':
         return NightshiftHealthy;
+      case 'morning':
+        return NightshiftMorning;
       case 'critical':
         return NightshiftCritical;
       case 'loading':
@@ -230,16 +226,6 @@ export const createNightshiftAgentBriefDefinition = (): AttachmentUIDefinition<
   // Nightshift Critical panel (753px content + side padding) renders
   // without a horizontal scrollbar.
   canvasWidth: '50vw',
-
-  /*
-   * Auto-render the brief as an inline widget below every agent
-   * response in the conversation. The brief is ambient session
-   * context (the Nightshift snapshot the user handed off) — keeping
-   * it visible and interactive on every reply lets the user re-open
-   * the canvas or skim the snapshot without scrolling back to the
-   * first message.
-   */
-  showInResponse: true,
 
   renderInlineContent: ({ attachment }) => <InlinePreview mode={attachment.data.mode} />,
   renderCanvasContent: ({ attachment }) => <CanvasContent mode={attachment.data.mode} />,

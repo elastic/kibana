@@ -24,7 +24,31 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 
+import { NightshiftFixedEventsSummary } from './nightshift_fixed_events_summary';
 import { useStartNightshiftConversation } from './use_start_nightshift_conversation';
+import type { NightshiftStatus } from './nightshift_state';
+
+const HEALTHY_DESCRIPTION = i18n.translate(
+  'xpack.observability.nightshift.healthy.description',
+  {
+    defaultMessage:
+      'Currently your systems seems stable and there are no underlying significant events detected.',
+  }
+);
+
+export type NightshiftHealthySummarySection = 'default' | 'fixedEvents';
+
+export interface NightshiftHealthyProps {
+  dataTestSubj?: string;
+  description?: string;
+  /** Passed to Agent Builder as the agent-brief attachment mode. */
+  briefMode?: Extract<NightshiftStatus, 'healthy' | 'morning'>;
+  /**
+   * `default` — entity discovery copy with Explore / Review actions.
+   * `fixedEvents` — accordion of resolved significant events + Summarise.
+   */
+  summarySection?: NightshiftHealthySummarySection;
+}
 
 const STAT_GLYPH_BG_SIZE = 24;
 
@@ -92,6 +116,11 @@ const REVIEW_PROMPT = i18n.translate('xpack.observability.nightshift.healthy.rev
     'Summarise the results of the last detection run and the entities that were identified.',
 });
 
+const SUMMARISE_PROMPT = i18n.translate('xpack.observability.nightshift.morning.summarisePrompt', {
+  defaultMessage:
+    'Summarise the significant events that were fixed overnight and what happened in the last 8 hours.',
+});
+
 /**
  * Resolve the background + foreground colour pair for a stat glyph,
  * based on the stat's `variant`. We map onto EUI semantic background
@@ -129,7 +158,12 @@ const getStatGlyphColors = (
  * title + description) + Overview panel with a 2×4 stat grid + summary
  * section with Explore / Review results actions.
  */
-export const NightshiftHealthy: React.FC = () => {
+export const NightshiftHealthy: React.FC<NightshiftHealthyProps> = ({
+  dataTestSubj = 'nightshiftHealthyPage',
+  description = HEALTHY_DESCRIPTION,
+  briefMode = 'healthy',
+  summarySection = 'default',
+}) => {
   const { euiTheme } = useEuiTheme();
   const { isExiting, start, exitDurationMs } = useStartNightshiftConversation();
 
@@ -139,7 +173,7 @@ export const NightshiftHealthy: React.FC = () => {
       alignItems="center"
       gutterSize="l"
       responsive={false}
-      data-test-subj="nightshiftHealthyPage"
+      data-test-subj={dataTestSubj}
       aria-hidden={isExiting ? 'true' : undefined}
       css={css`
         width: 100%;
@@ -192,10 +226,7 @@ export const NightshiftHealthy: React.FC = () => {
               `}
             >
               <p>
-                {i18n.translate('xpack.observability.nightshift.healthy.description', {
-                  defaultMessage:
-                    'Currently your systems seems stable and there are no underlying significant events detected.',
-                })}
+                {description}
               </p>
             </EuiText>
           </EuiFlexItem>
@@ -296,47 +327,56 @@ export const NightshiftHealthy: React.FC = () => {
               padding: ${euiTheme.size.base} ${euiTheme.size.l};
             `}
           >
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.observability.nightshift.healthy.summary"
-                  defaultMessage="Last detection run identified <bold>6 new entities</bold>, start exploring them with Agent Builder."
-                  values={{
-                    bold: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
-                  }}
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-              <EuiFlexItem grow={false}>
-                <AiButton
-                  variant="base"
-                  size="s"
-                  iconType="productAgent"
-                  data-test-subj="nightshiftHealthyExplore"
-                  isDisabled={isExiting}
-                  onClick={() => start({ initialMessage: EXPLORE_PROMPT, briefMode: 'healthy' })}
-                >
-                  {i18n.translate('xpack.observability.nightshift.healthy.explore', {
-                    defaultMessage: 'Explore',
-                  })}
-                </AiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <AiButton
-                  variant="empty"
-                  size="s"
-                  data-test-subj="nightshiftHealthyReview"
-                  isDisabled={isExiting}
-                  onClick={() => start({ initialMessage: REVIEW_PROMPT, briefMode: 'healthy' })}
-                >
-                  {i18n.translate('xpack.observability.nightshift.healthy.reviewResults', {
-                    defaultMessage: 'Review results',
-                  })}
-                </AiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            {summarySection === 'fixedEvents' ? (
+              <NightshiftFixedEventsSummary
+                isExiting={isExiting}
+                onSummarise={() => start({ initialMessage: SUMMARISE_PROMPT, briefMode })}
+              />
+            ) : (
+              <>
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.observability.nightshift.healthy.summary"
+                      defaultMessage="Last detection run identified <bold>6 new entities</bold>, start exploring them with Agent Builder."
+                      values={{
+                        bold: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+                      }}
+                    />
+                  </p>
+                </EuiText>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <AiButton
+                      variant="base"
+                      size="s"
+                      iconType="productAgent"
+                      data-test-subj="nightshiftHealthyExplore"
+                      isDisabled={isExiting}
+                      onClick={() => start({ initialMessage: EXPLORE_PROMPT, briefMode })}
+                    >
+                      {i18n.translate('xpack.observability.nightshift.healthy.explore', {
+                        defaultMessage: 'Explore',
+                      })}
+                    </AiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <AiButton
+                      variant="empty"
+                      size="s"
+                      data-test-subj="nightshiftHealthyReview"
+                      isDisabled={isExiting}
+                      onClick={() => start({ initialMessage: REVIEW_PROMPT, briefMode })}
+                    >
+                      {i18n.translate('xpack.observability.nightshift.healthy.reviewResults', {
+                        defaultMessage: 'Review results',
+                      })}
+                    </AiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
           </div>
         </EuiPanel>
       </EuiFlexItem>

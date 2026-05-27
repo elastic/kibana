@@ -13,6 +13,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { NightshiftWelcome } from './nightshift_welcome';
 import { NightshiftLoading } from './nightshift_loading';
 import { NightshiftHealthy } from './nightshift_healthy';
+import { NightshiftMorning } from './nightshift_morning';
 import { NightshiftCritical } from './nightshift_critical';
 import { NightshiftInput } from './nightshift_input';
 import { useStartNightshiftConversation } from './use_start_nightshift_conversation';
@@ -102,11 +103,13 @@ const analyzingTopStyles = css`
  *
  *   loading  → NightshiftLoading   ("We are still analysing your data …")
  *   healthy  → NightshiftHealthy   ("You have no critical significant events")
- *   critical → NightshiftCritical  (TODO — populated in a follow-up)
+ *   morning  → NightshiftMorning   (healthy layout, overnight summary copy)
+ *   critical → NightshiftCritical
  */
 const STATUS_PAGES: Record<NightshiftStatus, React.FC> = {
   loading: NightshiftLoading,
   healthy: NightshiftHealthy,
+  morning: NightshiftMorning,
   critical: NightshiftCritical,
 };
 
@@ -123,7 +126,7 @@ const STATUS_PAGES: Record<NightshiftStatus, React.FC> = {
  *
  *  2. **Analyzing** — centered content driven directly by the chrome
  *     status dropdown (`nightshiftStatus$`). Picking `loading` /
- *     `healthy` / `critical` swaps the centered panel via `STATUS_PAGES`.
+ *     `healthy` / `morning` / `critical` swaps the centered panel via `STATUS_PAGES`.
  *     The bottom textbox stays mounted across status changes so the
  *     visual layout is stable.
  *

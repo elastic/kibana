@@ -210,13 +210,6 @@ export const createNightshiftSignificantEventDefinition = (): AttachmentUIDefini
   getIcon: () => 'sun',
   canvasWidth: '40vw',
 
-  /*
-   * Same opt-in as the Agent Brief — the significant event panel
-   * stays visible and clickable under every agent reply, not just the
-   * first user message round.
-   */
-  showInResponse: true,
-
   renderCanvasContent: ({ attachment }) => <CanvasContent data={attachment.data} />,
 
   getActionButtons: ({ isCanvas, openCanvas }) => {

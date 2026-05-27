@@ -10,7 +10,6 @@ import { css } from '@emotion/react';
 
 import {
   EuiAvatar,
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -30,13 +29,12 @@ import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 
-import { addNightshiftAttachment } from './nightshift_attachments';
 import {
   IN_PROGRESS_EVENTS,
   SIGNIFICANT_EVENTS,
-  type EventSeverity,
   type SignificantEvent,
 } from './nightshift_critical_events';
+import { SignificantEventRow } from './nightshift_significant_event_row';
 import { ShellSpinner } from './shell_spinner';
 import { useStartNightshiftConversation } from './use_start_nightshift_conversation';
 
@@ -229,140 +227,6 @@ const RiskStat: React.FC<{ stat: RiskSummaryStat }> = ({ stat }) => {
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-};
-
-/**
- * Mapping from a `SignificantEvent.severity` to the visual props EUI's
- * `EuiBadge` needs (colour + i18n label). Kept close to the row component
- * because no other code reads it.
- */
-const SEVERITY_BADGE: Record<
-  EventSeverity,
-  { color: 'danger' | 'warning' | 'hollow'; label: string }
-> = {
-  critical: {
-    color: 'danger',
-    label: i18n.translate('xpack.observability.nightshift.critical.severity.critical', {
-      defaultMessage: 'Critical',
-    }),
-  },
-  medium: {
-    color: 'warning',
-    label: i18n.translate('xpack.observability.nightshift.critical.severity.medium', {
-      defaultMessage: 'Medium',
-    }),
-  },
-  low: {
-    color: 'hollow',
-    label: i18n.translate('xpack.observability.nightshift.critical.severity.low', {
-      defaultMessage: 'Low',
-    }),
-  },
-};
-
-/** Compact accordion-style event row with right-side action icons. */
-const SignificantEventRow: React.FC<{ event: SignificantEvent; isLast: boolean }> = ({
-  event,
-  isLast,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const severity = SEVERITY_BADGE[event.severity];
-  return (
-    <div
-      css={css`
-        padding: 12px;
-        background: ${euiTheme.colors.backgroundBasePlain};
-        border-bottom: ${isLast ? 'none' : euiTheme.border.thin};
-      `}
-      data-test-subj={`nightshiftCriticalEvent-${event.id}`}
-    >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="expand" size="s" color={euiTheme.colors.textPrimary} />
-        </EuiFlexItem>
-        <EuiFlexItem
-          css={css`
-            min-width: 0;
-          `}
-        >
-          <EuiText
-            size="xs"
-            css={css`
-              color: ${euiTheme.colors.textPrimary};
-              font-weight: ${euiTheme.font.weight.semiBold};
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            `}
-            title={event.title}
-          >
-            {event.title}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color={severity.color}
-                data-test-subj={`nightshiftCriticalEvent-${event.id}-badge`}
-              >
-                {severity.label}
-              </EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="paperClip"
-                color="text"
-                size="xs"
-                aria-label={i18n.translate(
-                  'xpack.observability.nightshift.critical.attachAriaLabel',
-                  {
-                    defaultMessage: 'Attach "{title}" to the input',
-                    values: { title: event.title },
-                  }
-                )}
-                data-test-subj={`nightshiftCriticalEvent-${event.id}-attach`}
-                onClick={() =>
-                  addNightshiftAttachment({
-                    // Prefix the event id so attachments coming from
-                    // different sources never collide (e.g. event ids
-                    // are short slugs like "password-reset").
-                    id: `significantEvent:${event.id}`,
-                    label: event.title,
-                    iconType: 'alert',
-                  })
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="productAgent"
-                color="text"
-                size="xs"
-                aria-label={i18n.translate(
-                  'xpack.observability.nightshift.critical.askAgentAriaLabel',
-                  { defaultMessage: 'Ask Agent about this event' }
-                )}
-                onClick={() => {}}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="boxesHorizontal"
-                color="text"
-                size="xs"
-                aria-label={i18n.translate(
-                  'xpack.observability.nightshift.critical.moreAriaLabel',
-                  { defaultMessage: 'More actions' }
-                )}
-                onClick={() => {}}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
   );
 };
 
@@ -751,7 +615,7 @@ export const NightshiftCritical: React.FC = () => {
                     >
                       {i18n.translate(
                         'xpack.observability.nightshift.critical.remediateAll',
-                        { defaultMessage: 'Remediate all' }
+                        { defaultMessage: 'Investigate' }
                       )}
                     </AiButton>
                   </EuiFlexItem>

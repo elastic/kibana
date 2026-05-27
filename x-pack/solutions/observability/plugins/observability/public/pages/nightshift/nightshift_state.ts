@@ -15,9 +15,10 @@ import { BehaviorSubject } from 'rxjs';
  *
  *  - `loading`  — workflows are still discovering / analysing data.
  *  - `healthy`  — workflows have settled, no significant events.
+ *  - `morning`  — overnight remediation summary (prototype: mirrors healthy UI).
  *  - `critical` — significant events in critical state require action.
  */
-export type NightshiftStatus = 'loading' | 'healthy' | 'critical';
+export type NightshiftStatus = 'loading' | 'healthy' | 'morning' | 'critical';
 
 /**
  * Module-singleton BehaviorSubject keeping the current Nightshift state.

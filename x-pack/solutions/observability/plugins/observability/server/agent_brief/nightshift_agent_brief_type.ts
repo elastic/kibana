@@ -24,7 +24,7 @@ export const NIGHTSHIFT_AGENT_BRIEF_TYPE = 'nightshift.agentBrief' as const;
  * client module.
  */
 const nightshiftAgentBriefDataSchema = z.object({
-  mode: z.enum(['loading', 'healthy', 'critical']),
+  mode: z.enum(['loading', 'healthy', 'morning', 'critical']),
 });
 
 export type NightshiftAgentBriefData = z.infer<typeof nightshiftAgentBriefDataSchema>;
@@ -63,7 +63,7 @@ export const nightshiftAgentBriefAttachmentType: AttachmentTypeDefinition<
    * not as a tool target.
    */
   getAgentDescription: () =>
-    'A Nightshift agent brief — a UI snapshot of the Nightshift overview page (loading / healthy / critical mode). Treat this as background context that the user is referencing; do not call tools against it.',
+    'A Nightshift agent brief — a UI snapshot of the Nightshift overview page (loading / healthy / morning / critical mode). Treat this as background context that the user is referencing; do not call tools against it.',
 
   format: (attachment) => ({
     getRepresentation: () => ({

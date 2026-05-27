@@ -53,6 +53,13 @@ export const SIGNIFICANT_EVENTS: SignificantEvent[] = [
 ];
 
 /**
+ * Events shown on the Morning page as overnight fixes. Uses the same
+ * prototype fixtures as the Critical Active list; rows render with a
+ * Resolved status badge instead of Critical / Medium / Low.
+ */
+export const FIXED_SIGNIFICANT_EVENTS: SignificantEvent[] = SIGNIFICANT_EVENTS;
+
+/**
  * Mock list of significant events currently being worked on by an
  * agent / on-call engineer. Matches Figma node 902:77309.
  */

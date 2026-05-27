@@ -70,7 +70,7 @@ export const NightshiftWelcome: React.FC<NightshiftWelcomeProps> = ({ onEnable, 
           <p>
             {i18n.translate('xpack.observability.nightshift.welcomeBody', {
               defaultMessage:
-                'Autonomous mode \u2014 Kibana runs your observability while you sleep. This experience is still being built.',
+                'AI-driven Observability — a fully self-configuring, self-optimizing platform that automates operations reliably and cost-effectively, with zero manual configuration.',
             })}
           </p>
         }
