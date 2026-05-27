@@ -286,7 +286,7 @@ function getStepTypeAtYamlPath(pathToStep: PropertyKey[], yamlDocument: Document
 // every connector registered in Kibana (~200 options).
 const MAX_UNION_OPTIONS_RENDERED = 10;
 
-function analyzeUnionSchema(unionSchema: z.ZodUnion<any>): string[] {
+function analyzeUnionSchema(unionSchema: z.ZodUnion<[z.ZodType, ...z.ZodType[]]>): string[] {
   const { options } = unionSchema;
   const rendered = options
     .slice(0, MAX_UNION_OPTIONS_RENDERED)
@@ -376,7 +376,10 @@ function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): strin
     const unwrappedSchema = unwrapSchema(schema);
 
     if (unwrappedSchema instanceof z.ZodUnion) {
-      return generateUnionErrorMessage(fieldName, unwrappedSchema);
+      return generateUnionErrorMessage(
+        fieldName,
+        unwrappedSchema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>
+      );
     }
 
     if (unwrappedSchema instanceof z.ZodObject) {
@@ -384,7 +387,7 @@ function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): strin
     }
 
     if (unwrappedSchema instanceof z.ZodArray) {
-      return generateArrayErrorMessage(fieldName, unwrappedSchema);
+      return generateArrayErrorMessage(fieldName, unwrappedSchema as z.ZodArray<z.ZodType>);
     }
 
     const expectedType = getTypeDescriptionForError(unwrappedSchema);
@@ -394,7 +397,10 @@ function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): strin
   }
 }
 
-function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion<any>): string | null {
+function generateUnionErrorMessage(
+  fieldName: string,
+  unionSchema: z.ZodUnion<[z.ZodType, ...z.ZodType[]]>
+): string | null {
   const optionDescriptions = analyzeUnionSchema(unionSchema);
   if (optionDescriptions.length === 0) {
     return null;
@@ -404,7 +410,7 @@ function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion<an
   return `${fieldName} must be one of:\n${optionsList}`;
 }
 
-function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray<any>): string {
+function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray<z.ZodType>): string {
   const elementSchema = unwrapSchema(arraySchema.element);
 
   if (elementSchema instanceof z.ZodObject) {
@@ -412,7 +418,10 @@ function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray<an
   }
 
   if (elementSchema instanceof z.ZodUnion) {
-    const unionMsg = generateUnionErrorMessage('each item', elementSchema);
+    const unionMsg = generateUnionErrorMessage(
+      'each item',
+      elementSchema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>
+    );
     if (unionMsg) {
       return `${fieldName} expects a list, ${unionMsg}`;
     }

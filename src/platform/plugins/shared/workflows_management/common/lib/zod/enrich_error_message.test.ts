@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { performance } from 'perf_hooks';
 import { z } from '@kbn/zod/v4';
 import { clearEnrichmentCache, enrichErrorMessage } from './enrich_error_message';
 import { clearDescriptionCache } from './zod_type_description';
