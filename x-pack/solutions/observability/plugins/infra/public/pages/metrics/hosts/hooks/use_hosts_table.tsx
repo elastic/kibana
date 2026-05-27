@@ -42,6 +42,7 @@ import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 import { AddDataTroubleshootingPopover } from '../components/table/add_data_troubleshooting_popover';
+import { NOT_AVAILABLE_LABEL } from '../../../../components/asset_details/translations';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { DEFAULT_PAGE_SIZE } from '../constants';
 
@@ -67,19 +68,7 @@ export type HostNodeRow = HostMetadata &
 /**
  * Helper functions
  */
-// Render real metric values through the inventory formatter, but never
-// coerce a missing value to `0` — historically `value ?? 0` produced
-// fake "0%" / "0 B" cells whenever Phase A had landed but Phase B
-// hadn't, masking the loading state and confusing reviewers. The hostNodes
-// memo in `useHostsView` now holds rows until Phase B is in, so this null
-// branch is mostly defensive; we still keep the explicit `–` so any
-// future code path that surfaces a null metric stays visually honest.
-const NULL_METRIC_PLACEHOLDER = '–';
-
-const formatMetric = (type: InfraEntityMetricType, value: number | undefined | null) => {
-  if (value === null || value === undefined) {
-    return NULL_METRIC_PLACEHOLDER;
-  }
+const formatMetric = (type: InfraEntityMetricType, value: number) => {
   return createInventoryMetricFormatter({ type })(value);
 };
 
@@ -88,8 +77,11 @@ const buildMetricCell = (
   formatType: InfraEntityMetricType,
   hasSystemMetrics?: boolean
 ) => {
-  if (!hasSystemMetrics && value === null) {
-    return <AddDataTroubleshootingPopover />;
+  if (value === null) {
+    if (!hasSystemMetrics) {
+      return <AddDataTroubleshootingPopover />;
+    }
+    return NOT_AVAILABLE_LABEL;
   }
 
   return formatMetric(formatType, value);

@@ -27,13 +27,13 @@ const sortFieldSchema = z
 const tagFilterItemSchema = z.string().min(1).max(128);
 
 const listActionPoliciesQuerySchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return.'),
+  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
   perPage: z.coerce
     .number()
     .min(1)
     .max(100)
     .optional()
-    .describe('The number of action policies to return per page.'),
+    .describe('The number of action policies to return per page. Defaults to 20.'),
   search: z
     .string()
     .min(1)

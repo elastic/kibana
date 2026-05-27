@@ -15,11 +15,18 @@
 
 import React, { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { LensConfig } from '@kbn/lens-embeddable-utils';
+import type {
+  InfraEntityMetricType,
+  InfraEntityMetricsItem,
+} from '../../../../../../common/http_api';
 import { useReloadRequestTimeContext } from '../../../../../hooks/use_reload_request_time';
 import { Kpi } from '../../../../../components/asset_details/components/kpis/kpi';
 import { useHostKpiCharts } from '../../../../../components/asset_details/hooks/use_host_metrics_charts';
+import { ChartPlaceholder } from '../../../../../components/lens/chart_placeholder';
+import { KPI_CHART_HEIGHT } from '../../../../../common/visualizations/constants';
 import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -34,6 +41,25 @@ import {
 } from '../../../../../components/asset_details/constants';
 import { isSupportedEsqlKpi, toEsqlKpiChartConfig } from './esql_kpi_chart';
 import { HostKpiTiles } from './host_kpi_tiles';
+
+const HOST_KPI_METRICS: Record<string, InfraEntityMetricType> = {
+  cpuUsage: 'cpuV2',
+  normalizedLoad1m: 'normalizedLoad1m',
+  memoryUsage: 'memory',
+  diskUsage: 'diskSpaceUsage',
+};
+
+export const getMetricDataAvailability = (
+  hostNodes: InfraEntityMetricsItem[]
+): Record<string, boolean> =>
+  Object.fromEntries(
+    Object.entries(HOST_KPI_METRICS).map(([chartId, metricName]) => [
+      chartId,
+      hostNodes.some((hostNode) =>
+        hostNode.metrics?.some((metric) => metric.name === metricName && metric.value !== null)
+      ),
+    ])
+  );
 
 export const getSubtitle = ({
   formulaValue,
@@ -103,13 +129,15 @@ export const KpiCharts = () => {
 const LensKpiCharts = () => {
   const { searchCriteria, parsedDateRange } = useUnifiedSearchContext();
   const { reloadRequestTime } = useReloadRequestTimeContext();
-  const { hostNodes, loading: hostsLoading } = useHostsViewContext();
+  const { hostNodes, loading: hostsLoading, error } = useHostsViewContext();
   const { loading: hostCountLoading, count: hostCount } = useHostCountContext();
   const { metricsView } = useMetricsDataViewContext();
   const { useLensEsqlKpiCharts, kpiTrendline } = usePocSettingsContext();
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
   const loading = hostsLoading || hostCountLoading;
+  const hasData = hostNodes.length > 0;
+  const metricDataAvailability = useMemo(() => getMetricDataAvailability(hostNodes), [hostNodes]);
 
   const filters = shouldUseSearchCriteria
     ? [...searchCriteria.filters, ...(searchCriteria.panelFilters ?? [])]
@@ -173,6 +201,35 @@ const LensKpiCharts = () => {
     charts: chartsForRender,
   });
 
+  // Mirror the upstream `<HostKpiCharts>` neutral-empty / error fallback:
+  // when the page has loaded but no hosts matched (or the list endpoint
+  // erroed), render four placeholder panels in place of the embeddables
+  // so reviewers see the same UX on every toggle path.
+  if (!loading && (!hasData || error)) {
+    return (
+      <>
+        {afterLoadedState.charts.map((chartProps: KpiLensConfig) => (
+          <EuiFlexItem key={chartProps.id}>
+            <EuiPanel
+              hasBorder
+              borderRadius="m"
+              hasShadow={false}
+              paddingSize="m"
+              css={css`
+                min-height: ${KPI_CHART_HEIGHT}px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              `}
+            >
+              <ChartPlaceholder error={error} isEmpty={!hasData} />
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
+      </>
+    );
+  }
+
   return (
     <>
       {afterLoadedState.charts.map((chartProps: KpiLensConfig) => (
@@ -185,6 +242,7 @@ const LensKpiCharts = () => {
             lastReloadRequestTime={afterLoadedState.reloadRequestTime}
             loading={loading}
             perfEnabled={useLensEsqlKpiCharts}
+            valueOverride={metricDataAvailability?.[chartProps.id] === false ? NaN : undefined}
           />
         </EuiFlexItem>
       ))}
@@ -205,7 +263,17 @@ const KpiCell: React.FC<{
   lastReloadRequestTime?: number;
   loading: boolean;
   perfEnabled: boolean;
-}> = ({ chart, dateRange, query, filters, lastReloadRequestTime, loading, perfEnabled }) => {
+  valueOverride?: number;
+}> = ({
+  chart,
+  dateRange,
+  query,
+  filters,
+  lastReloadRequestTime,
+  loading,
+  perfEnabled,
+  valueOverride,
+}) => {
   // Track the most recent mount-start so we can attribute a wall-time to
   // each `loaded` event. Using a ref (not state) keeps this off the React
   // render path — the perf overlay subscribes to `perfTracker` directly.
@@ -239,6 +307,7 @@ const KpiCell: React.FC<{
       lastReloadRequestTime={lastReloadRequestTime}
       loading={loading}
       onLoad={perfEnabled ? handleOnLoad : undefined}
+      valueOverride={valueOverride}
     />
   );
 };
