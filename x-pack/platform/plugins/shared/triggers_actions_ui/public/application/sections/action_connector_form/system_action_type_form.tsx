@@ -31,7 +31,6 @@ import { isEmpty, partition, some } from 'lodash';
 import type { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
-import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type {
   IErrorObject,
@@ -195,16 +194,11 @@ export const SystemActionTypeForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem, disableErrorMessages, actionConnector]);
 
-  const { actionTypeModel: actionTypeRegistered, isLoading: isLoadingActionTypeModel } =
-    useActionTypeModel({
-      actionTypeRegistry,
-      actionTypeId:
-        actionTypesIndex[actionConnector.actionTypeId]?.id ?? actionConnector.actionTypeId,
-      http,
-      uiSettings,
-    });
+  const actionTypeRegistered = actionTypeRegistry.has(actionConnector.actionTypeId)
+    ? actionTypeRegistry.get(actionConnector.actionTypeId)
+    : null;
 
-  if (isLoadingActionTypeModel || !actionTypeRegistered) return null;
+  if (!actionTypeRegistered) return null;
 
   const showActionGroupErrorIcon = (): boolean => {
     return !isOpen && some(actionParamsErrors.errors, (error) => !isEmpty(error));
