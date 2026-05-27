@@ -550,9 +550,7 @@ const esSourceToSmlDocument = (
   if (!validated) return undefined;
 
   if (validated.source.content === undefined) {
-    logger.warn(
-      `SML: skipping document missing 'content' (id='${validated.base.id}')`
-    );
+    logger.warn(`SML: skipping document missing 'content' (id='${validated.base.id}')`);
     return undefined;
   }
 

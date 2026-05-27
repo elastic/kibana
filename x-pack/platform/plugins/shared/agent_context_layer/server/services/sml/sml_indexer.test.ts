@@ -105,10 +105,7 @@ describe('createSmlIndexer', () => {
         allow_no_indices: true,
         query: {
           bool: {
-            filter: [
-              { term: { origin_id: 'att-1' } },
-              { term: { ingestion_method: 'crawled' } },
-            ],
+            filter: [{ term: { origin_id: 'att-1' } }, { term: { ingestion_method: 'crawled' } }],
           },
         },
         refresh: false,
