@@ -140,6 +140,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
           <CloudConnectorNameField
             value={connectorName}
             onChange={(name) => setConnectorName(name)}
+            data-test-subj="awsIdentityFederationSetup-connectorName"
           />
           <EuiSpacer size="m" />
           <EuiAccordion

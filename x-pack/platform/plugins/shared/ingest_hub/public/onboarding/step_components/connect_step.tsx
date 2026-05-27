@@ -22,17 +22,19 @@ export function ConnectStep({ onNext }: ConnectStepProps) {
   const { connectStep, setConnectorId, setStaticKeys, setTemporaryKeys } = useOnboardingFlow();
 
   return (
-    <Suspense fallback={<EuiLoadingSpinner data-test-subj="onboardingStep-connect-loading" />}>
-      <LazyAwsConnectSetup
-        cloud={services.cloud as any}
-        initialConnectorId={connectStep.connectorId}
-        initialStaticKeys={connectStep.staticKeys}
-        initialTemporaryKeys={connectStep.temporaryKeys}
-        onNext={onNext}
-        onConnectorIdChange={setConnectorId}
-        onStaticKeysChange={setStaticKeys}
-        onTemporaryKeysChange={setTemporaryKeys}
-      />
-    </Suspense>
+    <div data-test-subj="onboardingStep-connect">
+      <Suspense fallback={<EuiLoadingSpinner data-test-subj="onboardingStep-connect-loading" />}>
+        <LazyAwsConnectSetup
+          cloud={services.cloud as any}
+          initialConnectorId={connectStep.connectorId}
+          initialStaticKeys={connectStep.staticKeys}
+          initialTemporaryKeys={connectStep.temporaryKeys}
+          onNext={onNext}
+          onConnectorIdChange={setConnectorId}
+          onStaticKeysChange={setStaticKeys}
+          onTemporaryKeysChange={setTemporaryKeys}
+        />
+      </Suspense>
+    </div>
   );
 }
