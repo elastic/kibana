@@ -79,7 +79,7 @@ export const VerdictFlyout = ({
         title: i18n.translate('xpack.streams.verdictFlyout.confidence', {
           defaultMessage: 'Confidence',
         }),
-        description: verdict.confidence != null ? String(verdict.confidence) : '-',
+        description: verdict.confidence != null ? `${verdict.confidence}%` : '-',
       },
       ...(streams.length > 0
         ? [

@@ -112,13 +112,13 @@ export class EventClient {
     return { ...result, hits: result.hits.map(enrichFromEvidences) };
   }
 
-  async findById(discoverySlug: string): Promise<{ hits: SigEvent[] }> {
+  async findById(id: string): Promise<{ hits: SigEvent[] }> {
     return runFindByIdEsqlQuery<SigEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: EVENTS_DATA_STREAM,
       idField: FIELD_EVENT_ID,
-      idValue: eventId,
+      idValue: id,
     });
   }
 

@@ -49,13 +49,6 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
       formatTimestamp(discoveredAt ?? discovery['@timestamp']),
   },
   {
-    field: 'title',
-    name: i18n.translate('xpack.streams.discoveriesTab.titleColumn', {
-      defaultMessage: 'Title',
-    }),
-    truncateText: true,
-  },
-  {
     field: 'kind',
     name: i18n.translate('xpack.streams.discoveriesTab.statusColumn', {
       defaultMessage: 'Status',
@@ -66,20 +59,11 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
     ),
   },
   {
-    field: 'criticality',
-    name: i18n.translate('xpack.streams.discoveriesTab.criticalityColumn', {
-      defaultMessage: 'Criticality',
+    field: 'title',
+    name: i18n.translate('xpack.streams.discoveriesTab.titleColumn', {
+      defaultMessage: 'Title',
     }),
-    width: '100px',
-    render: (value: number | undefined) => (value != null ? String(value) : '-'),
-  },
-  {
-    field: 'confidence',
-    name: i18n.translate('xpack.streams.discoveriesTab.confidenceColumn', {
-      defaultMessage: 'Confidence',
-    }),
-    width: '100px',
-    render: (value: number | undefined) => (value != null ? String(value) : '-'),
+    truncateText: true,
   },
   {
     name: i18n.translate('xpack.streams.discoveriesTab.streamsColumn', {
@@ -107,6 +91,22 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
         </EuiFlexGroup>
       );
     },
+  },
+  {
+    field: 'criticality',
+    name: i18n.translate('xpack.streams.discoveriesTab.criticalityColumn', {
+      defaultMessage: 'Criticality',
+    }),
+    width: '100px',
+    render: (value: number | undefined) => (value != null ? String(value) : '-'),
+  },
+  {
+    field: 'confidence',
+    name: i18n.translate('xpack.streams.discoveriesTab.confidenceColumn', {
+      defaultMessage: 'Confidence',
+    }),
+    width: '100px',
+    render: (value: number | undefined) => (value != null ? `${value}%` : '-'),
   },
 ];
 

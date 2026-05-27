@@ -50,6 +50,7 @@ export interface DetectionsPaginatedSearchOptions extends PaginatedSearchOptions
 
 const KIND_HANDLED = 'handled' satisfies Detection['kind'];
 const KIND_QUIET = 'quiet' satisfies Detection['kind'];
+const PROCESSED_IDS_CHUNK_SIZE = 250;
 
 export class DetectionClient {
   constructor(
