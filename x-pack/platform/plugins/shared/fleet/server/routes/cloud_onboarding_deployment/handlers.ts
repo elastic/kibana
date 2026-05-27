@@ -94,7 +94,7 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
-  const esClient = (await context.core).elasticsearch.client.asInternalUser;
+  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
   try {
     const deployment = await cloudOnboardingDeploymentService.update(
@@ -138,7 +138,7 @@ export const prepareCloudOnboardingDeploymentHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
-  const esClient = (await context.core).elasticsearch.client.asInternalUser;
+  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
   try {
     const result = await cloudOnboardingDeploymentService.prepare(
