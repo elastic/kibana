@@ -9,12 +9,16 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { ToolingLog } from '@kbn/tooling-log';
+import { expandWithImplicitConsumers } from './scout_implicit_consumers';
 import {
   getAffectedPackages,
   listChangedFiles,
   touchedCriticalFiles,
   CRITICAL_FILES_SCOUT,
 } from '#pipeline-utils';
+
+const log = new ToolingLog({ level: 'info', writeTo: process.stderr });
 
 const mergeBase = process.env.AFFECTED_MERGE_BASE;
 const outPath = process.env.AFFECTED_MODULES_FILE;
@@ -34,11 +38,17 @@ if (!outPath) {
   const changedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
 
   // Write affected modules JSON (replaces the list_affected binary call).
-  const affectedPackages = await getAffectedPackages(mergeBase, {
-    strategy: 'git',
-    includeDownstream: true,
-    ignoreUncategorizedChanges: true,
-  });
+  // TEMP: overlay implicit runtime-registry consumers — see scout_implicit_consumers.ts.
+  const affectedPackages = expandWithImplicitConsumers(
+    await getAffectedPackages(mergeBase, {
+      strategy: 'git',
+      includeDownstream: true,
+      ignoreUncategorizedChanges: true,
+    }),
+    changedFiles,
+    log
+  );
+
   const resolvedOutPath = path.resolve(outPath);
   fs.mkdirSync(path.dirname(resolvedOutPath), { recursive: true });
   fs.writeFileSync(resolvedOutPath, JSON.stringify(Array.from(affectedPackages).sort(), null, 2));

@@ -757,9 +757,10 @@ describe('Alerts Client', () => {
         });
 
         test('should not index new alerts if the activeCount is less than the rule alertDelay', async () => {
+          const alertDelay = 3;
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
             ...alertsClientParams,
-            rule: { ...alertsClientParams.rule, alertDelay: 3 },
+            rule: { ...alertsClientParams.rule, alertDelay },
           });
 
           await alertsClient.initializeExecution(defaultExecutionOpts);
@@ -770,12 +771,13 @@ describe('Alerts Client', () => {
 
           await alertsClient.processAlerts();
           alertsClient.determineFlappingAlerts();
-          alertsClient.determineDelayedAlerts(determineDelayedAlertsOpts);
+          alertsClient.determineDelayedAlerts({ ...determineDelayedAlertsOpts, alertDelay });
           alertsClient.logAlerts(logAlertsOpts);
 
           await alertsClient.persistAlerts();
 
           expect(clusterClient.bulk).not.toHaveBeenCalled();
+          expect(logger.error).not.toHaveBeenCalled();
           expect(maintenanceWindowsService.getMaintenanceWindows).toHaveBeenCalledWith({
             eventLogger: alertingEventLogger,
             request: fakeRequest,

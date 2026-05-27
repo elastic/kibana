@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverServices } from '../../../../../build_services';
 import { DEFAULT_TAB_STATE } from '../constants';
-import type { RecentlyClosedTabState, TabState } from '../types';
+import type { DiscoverAppState, RecentlyClosedTabState, TabState } from '../types';
+import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
+import { getInitialAppState } from '../../utils/get_initial_app_state';
 
 export const getTabStateMock = (partial: Partial<TabState> & Pick<TabState, 'id'>): TabState => ({
   ...DEFAULT_TAB_STATE,
@@ -19,3 +23,48 @@ export const getTabStateMock = (partial: Partial<TabState> & Pick<TabState, 'id'
 export const getRecentlyClosedTabStateMock = (
   partial: Partial<RecentlyClosedTabState> & Pick<RecentlyClosedTabState, 'id' | 'closedAt'>
 ): RecentlyClosedTabState => ({ ...getTabStateMock(partial), closedAt: partial.closedAt });
+
+export const getPersistedTabMock = ({
+  tabId = 'test-tab',
+  dataView,
+  appStateOverrides = {},
+  globalStateOverrides = {},
+  initialInternalStateOverrides = {},
+  overridenTimeRestore,
+  services,
+}: {
+  tabId?: string;
+  dataView: DataView;
+  appStateOverrides?: Partial<DiscoverAppState>;
+  globalStateOverrides?: Partial<TabState['globalState']>;
+  initialInternalStateOverrides?: Partial<TabState['initialInternalState']>;
+  overridenTimeRestore?: boolean;
+  services: DiscoverServices;
+}) => {
+  const appState = {
+    ...getInitialAppState({
+      initialUrlState: undefined,
+      persistedTab: undefined,
+      dataView,
+      services,
+    }),
+    ...appStateOverrides,
+  };
+
+  return fromTabStateToSavedObjectTab({
+    tab: getTabStateMock({
+      id: tabId,
+      initialInternalState: {
+        serializedSearchSource: {
+          index: dataView.id,
+          query: appState.query,
+        },
+        ...initialInternalStateOverrides,
+      },
+      appState,
+      globalState: globalStateOverrides,
+    }),
+    timeRestore: overridenTimeRestore ?? false,
+    services,
+  });
+};

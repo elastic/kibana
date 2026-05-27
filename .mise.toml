@@ -1,0 +1,5 @@
+[settings]
+idiomatic_version_file_enable_tools = ["node"]
+
+[tools]
+yarn = "1.22.21"

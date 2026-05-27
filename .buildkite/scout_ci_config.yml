@@ -10,6 +10,7 @@ plugins:
     - exploratory_view
     - index_management
     - infra
+    - lens
     - logstash
     - maps
     - observability

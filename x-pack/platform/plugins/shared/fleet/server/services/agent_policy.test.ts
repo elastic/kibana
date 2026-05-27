@@ -516,6 +516,20 @@ describe('Agent policy', () => {
       );
     });
 
+    it('should throw FleetError when given an invalid id', async () => {
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        agentPolicyService.create(
+          soClient,
+          esClient,
+          { name: 'test', namespace: 'default' },
+          { id: '../bad-id' }
+        )
+      ).rejects.toThrow('id is not valid');
+    });
+
     it('should throw error when attempting to create policy with supports_agentless true on serverless environment that does not support the agentless feature', async () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
@@ -2176,7 +2190,7 @@ describe('Agent policy', () => {
           expect.objectContaining({
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 1000,
-            sortField: 'created_at',
+            sortField: 'updated_at',
             sortOrder: 'asc',
             fields: ['id', 'name'],
             filter: undefined,
@@ -2196,7 +2210,7 @@ describe('Agent policy', () => {
           expect.objectContaining({
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 13,
-            sortField: 'created_at',
+            sortField: 'updated_at',
             sortOrder: 'asc',
             fields: ['id', 'name'],
             filter: 'one=two',
@@ -2240,7 +2254,7 @@ describe('Agent policy', () => {
           expect.objectContaining({
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 1000,
-            sortField: 'created_at',
+            sortField: 'updated_at',
             sortOrder: 'asc',
             fields: [],
             filter: undefined,
@@ -2258,7 +2272,7 @@ describe('Agent policy', () => {
           expect.objectContaining({
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
             perPage: 1000,
-            sortField: 'created_at',
+            sortField: 'updated_at',
             sortOrder: 'asc',
             fields: [],
             filter: undefined,

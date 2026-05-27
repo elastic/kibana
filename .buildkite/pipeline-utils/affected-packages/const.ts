@@ -9,8 +9,6 @@
 
 export const UNCATEGORIZED_MODULE_ID = '[uncategorized]';
 
-export const SELECTIVE_TESTS_LABEL = 'ci:use-selective-testing';
-
 // Changes here skip affected-package filtering for Jest (full run).
 // Keep narrow: global test harness, transforms, CI selection.
 export const CRITICAL_FILES_JEST_UNIT_TESTS = [

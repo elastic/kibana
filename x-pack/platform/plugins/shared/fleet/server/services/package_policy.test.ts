@@ -596,6 +596,17 @@ describe('Package policy service', () => {
 
       expect(result.supports_cloud_connector).toBe(false);
     });
+
+    it('should throw FleetError when given an invalid id', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      await expect(
+        packagePolicyService.create(soClient, esClient, { name: 'test', inputs: [] } as any, {
+          id: '../bad-id',
+        })
+      ).rejects.toThrow('id is not valid');
+    });
   });
   describe('createCloudConnectorForPackagePolicy', () => {
     it('should create cloud connector when all conditions are met', async () => {

@@ -107,6 +107,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         <EuiIcon
           type="popout"
           size="s"
+          aria-hidden={true}
           css={{
             marginLeft: '10px',
           }}

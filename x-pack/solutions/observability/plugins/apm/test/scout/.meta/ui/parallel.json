@@ -1,5 +1,5 @@
 {
-  "sha1": "482999dc8b7a0a0b85972915e8d11c1234ef495d",
+  "sha1": "021c2f7bfe4b3ff76145c45267090327691a9c9e",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 19,
+        "line": 20,
         "column": 1
       }
     },
@@ -461,7 +461,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 23,
+        "line": 24,
         "column": 9
       }
     },
@@ -477,7 +477,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 9
       }
     },
@@ -493,7 +493,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 49,
+        "line": 50,
         "column": 9
       }
     },
@@ -509,7 +509,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 58,
+        "line": 59,
         "column": 9
       }
     },
@@ -542,6 +542,22 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
         "line": 49,
+        "column": 9
+      }
+    },
+    {
+      "id": "e2b5cbd964753d1-a075ca8194c0ad2",
+      "title": "Service Overview - AWS Lambda displays cold start rate chart and not transaction breakdown chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_aws_lambda.spec.ts",
+        "line": 20,
         "column": 9
       }
     },

@@ -1,32 +1,61 @@
 {
-  "lastModified": "2026-02-12T10:42:22.867Z",
-  "sha1": "6ae9f3e6a691d6b01c99e2c9e15e8ea0b015e473",
+  "sha1": "0e9db9ceb460b14ec0a66ed7eb35d3de8222dff0",
   "tests": [
     {
-      "id": "405beff6794306f-a54347ac1e57e7e",
-      "title": "Profiling is not setup and no data is loaded Admin users",
+      "id": "bd41f0240dfdfcb-9b0e8252d0034ea",
+      "title": "Reset profiling state after API tests",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.teardown.ts",
+        "line": 13,
+        "column": 1
+      }
+    },
+    {
+      "id": "1219f91050e9ce3-f2cd2d3cdc77643",
+      "title": "Ingest data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.setup.ts",
+        "line": 13,
+        "column": 1
+      }
+    },
+    {
+      "id": "405beff6794306f-a54347ac1e57e7e",
+      "title": "Profiling is not setup and no data is loaded Admin users",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 12
       }
     },
     {
       "id": "405beff6794306f-429a339166c2e77",
       "title": "Profiling is not setup and no data is loaded Viewer users",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
-        "line": 42,
+        "line": 43,
         "column": 12
       }
     },
@@ -40,7 +69,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 28,
+        "line": 33,
         "column": 12
       }
     },
@@ -54,7 +83,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 43,
+        "line": 48,
         "column": 12
       }
     },
@@ -68,7 +97,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 23,
+        "line": 32,
         "column": 10
       }
     },
@@ -82,7 +111,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 37,
+        "line": 46,
         "column": 10
       }
     },

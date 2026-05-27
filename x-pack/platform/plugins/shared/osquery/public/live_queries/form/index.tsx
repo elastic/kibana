@@ -26,6 +26,7 @@ import { usePacks } from '../../packs/use_packs';
 import { useCreateLiveQuery } from '../use_create_live_query_action';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { AgentSelection } from '../../agents/types';
+import type { AddToTimelineHandler } from '../../types';
 import LiveQueryQueryField from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
@@ -63,6 +64,7 @@ interface LiveQueryFormProps {
   formType?: FormType;
   enabled?: boolean;
   hideAgentsField?: boolean;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -72,6 +74,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   formType = 'steps',
   enabled = true,
   hideAgentsField = false,
+  addToTimeline,
 }) => {
   const alertAttachmentContext = useContext(AlertAttachmentContext);
 
@@ -228,9 +231,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           endDate={singleQueryDetails?.expiration}
           agentIds={singleQueryDetails?.agents}
           liveQueryActionId={liveQueryActionId}
+          addToTimeline={addToTimeline}
         />
       ) : null,
     [
+      addToTimeline,
       singleQueryDetails?.action_id,
       singleQueryDetails?.expiration,
       singleQueryDetails?.agents,
@@ -316,6 +321,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               liveQueryDetails={liveQueryDetails}
               submitButtonContent={submitButtonContent}
               showResultsHeader
+              addToTimeline={addToTimeline}
             />
           ) : (
             <>
