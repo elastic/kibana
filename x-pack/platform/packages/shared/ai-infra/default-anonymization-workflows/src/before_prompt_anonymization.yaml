@@ -1,13 +1,13 @@
 # Default workflow: anonymize PII in the prompt before it is sent to the LLM.
 #
-# Trigger:  inference.beforePromptSend
-# Outputs:  { system?, messages[] }
+# Trigger:  inference.beforeCompletion
+# Outputs:  { system?, messages[], tokenMap }
 #
 # The ai.pii step replaces PII matches with deterministic HMAC tokens of the form
-# `<ENTITY_CLASS>_<32 hex chars>` (e.g. `IP_a1b2c3...`).  The salt and token map
-# are managed internally via the AnonymizationContext capability — neither appears
-# in this YAML.  The same value within the same session always produces the same
-# token (cross-turn determinism).
+# `<ENTITY_CLASS>_<32 hex chars>` (e.g. `IP_a1b2c3...`).  The salt comes from the
+# trigger event (derived from the sessionId by the inference plugin) and the
+# accumulated token map is emitted as workflow output so it can be passed to the
+# afterCompletion workflow for deanonymization.
 #
 # Usage: import this YAML via the Workflow Management UI → "Import workflow".
 
@@ -24,6 +24,7 @@ steps:
     if: 'event.system'
     with:
       input: '{{ event.system }}'
+      salt: '{{ event.salt }}'
       entities:
         - IP
         - EMAIL
@@ -35,6 +36,11 @@ steps:
       # ${{ }} calls evalValueSync which preserves the array type.
       # {{ }} calls renderSync which coerces arrays to a string.
       input: '${{ event.messages }}'
+      salt: '{{ event.salt }}'
+      # Chain the token map from the system step so all tokens from both steps
+      # are merged into a single map. When anonymize_system was skipped its
+      # tokenMap is null; the step treats null the same as an absent tokenMap.
+      tokenMap: '${{ steps.anonymize_system.output.tokenMap }}'
       entities:
         - IP
         - EMAIL
@@ -47,3 +53,4 @@ steps:
       # so invoke_before_completion.ts can fall back to the original system via `?? system`.
       system: '${{ steps.anonymize_system.output.output }}'
       messages: '${{ steps.anonymize_messages.output.output }}'
+      tokenMap: '${{ steps.anonymize_messages.output.tokenMap }}'

@@ -265,123 +265,121 @@ function createChatCompletePipeline({
             anonymization,
           })
         ).pipe(
-          switchMap(
-            ({ hookSystem, hookMessages, sessionId, anonymizationContext: beforeContext }) => {
-              const proceedFn = async (
-                input: Record<string, unknown>
-              ): Promise<Record<string, unknown>> => {
-                const pSystem = typeof input.system === 'string' ? input.system : hookSystem;
-                const pMessages = Array.isArray(input.messages)
-                  ? (input.messages as ChatCompleteOptions['messages'])
-                  : hookMessages;
+          switchMap(({ hookSystem, hookMessages, sessionId, tokenMap: beforeTokenMap }) => {
+            const proceedFn = async (
+              input: Record<string, unknown>
+            ): Promise<Record<string, unknown>> => {
+              const pSystem = typeof input.system === 'string' ? input.system : hookSystem;
+              const pMessages = Array.isArray(input.messages)
+                ? (input.messages as ChatCompleteOptions['messages'])
+                : hookMessages;
 
-                const assembled = await lastValueFrom(
-                  chatComplete({
-                    system: pSystem,
-                    messages: pMessages,
-                    toolChoice,
-                    tools,
-                    temperature,
-                    logger,
-                    functionCalling,
-                    modelName,
-                    abortSignal,
-                    metadata,
-                    timeout,
-                    stream: false,
-                  }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
-                );
-                const msg = assembled as ChatCompletionMessageEvent;
-                return { response: msg.content ?? '' };
-              };
-
-              return from(
-                invokeAroundCompletion({
-                  anonymizationHookInvoker: anonymizationHookInvoker!,
-                  config: config!,
+              const assembled = await lastValueFrom(
+                chatComplete({
+                  system: pSystem,
+                  messages: pMessages,
+                  toolChoice,
+                  tools,
+                  temperature,
                   logger,
+                  functionCalling,
+                  modelName,
+                  abortSignal,
                   metadata,
-                  system: hookSystem,
-                  messages: hookMessages,
-                  sessionId,
-                  anonymization,
-                  proceedFn,
-                })
-              ).pipe(
-                switchMap((aroundResult) => {
-                  if (aroundResult.kind === 'buffered') {
-                    const { finalResponse, anonymizationContext: aroundContext } = aroundResult;
+                  timeout,
+                  stream: false,
+                }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
+              );
+              const msg = assembled as ChatCompletionMessageEvent;
+              return { response: msg.content ?? '' };
+            };
 
-                    const syntheticChunk: ChatCompletionEvent = {
-                      type: ChatCompletionEventType.ChatCompletionChunk,
-                      content: finalResponse,
-                      tool_calls: [],
-                    };
-                    const syntheticMessage: ChatCompletionMessageEvent = {
-                      type: ChatCompletionEventType.ChatCompletionMessage,
-                      content: finalResponse,
-                      toolCalls: [],
-                    };
+            return from(
+              invokeAroundCompletion({
+                anonymizationHookInvoker: anonymizationHookInvoker!,
+                config: config!,
+                logger,
+                metadata,
+                system: hookSystem,
+                messages: hookMessages,
+                sessionId,
+                anonymization,
+                proceedFn,
+              })
+            ).pipe(
+              switchMap((aroundResult) => {
+                if (aroundResult.kind === 'buffered') {
+                  const { finalResponse, anonymizationContext: aroundContext } = aroundResult;
 
-                    return of(syntheticChunk, syntheticMessage).pipe(
-                      restoreTokensOperator(aroundContext.tokenMap),
-                      applyAfterCompletionHook({
-                        anonymizationHookInvoker: anonymizationHookInvoker!,
-                        config: config!,
-                        logger,
-                        sessionId,
-                        anonymizationContext: beforeContext,
-                      })
-                    );
-                  }
+                  const syntheticChunk: ChatCompletionEvent = {
+                    type: ChatCompletionEventType.ChatCompletionChunk,
+                    content: finalResponse,
+                    tool_calls: [],
+                  };
+                  const syntheticMessage: ChatCompletionMessageEvent = {
+                    type: ChatCompletionEventType.ChatCompletionMessage,
+                    content: finalResponse,
+                    toolCalls: [],
+                  };
 
-                  // Streaming path
-                  const {
-                    anonymizedSystem,
-                    anonymizedMessages,
-                    anonymizationContext: aroundContext,
-                  } = aroundResult;
-
-                  const spanModel = getSpanModel(modelName);
-
-                  return withChatCompleteSpan(
-                    {
-                      system: anonymizedSystem,
-                      messages: anonymizedMessages,
-                      tools,
-                      toolChoice,
-                      ...(spanModel ? { model: spanModel } : {}),
-                      ...metadata?.attributes,
-                    },
-                    () =>
-                      chatComplete({
-                        system: anonymizedSystem,
-                        messages: anonymizedMessages,
-                        toolChoice,
-                        tools,
-                        temperature,
-                        logger,
-                        functionCalling,
-                        modelName,
-                        abortSignal,
-                        metadata,
-                        timeout,
-                        stream,
-                      }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
-                  ).pipe(
+                  return of(syntheticChunk, syntheticMessage).pipe(
                     restoreTokensOperator(aroundContext.tokenMap),
                     applyAfterCompletionHook({
                       anonymizationHookInvoker: anonymizationHookInvoker!,
                       config: config!,
                       logger,
                       sessionId,
-                      anonymizationContext: beforeContext,
+                      tokenMap: beforeTokenMap,
                     })
                   );
-                })
-              );
-            }
-          ),
+                }
+
+                // Streaming path
+                const {
+                  anonymizedSystem,
+                  anonymizedMessages,
+                  anonymizationContext: aroundContext,
+                } = aroundResult;
+
+                const spanModel = getSpanModel(modelName);
+
+                return withChatCompleteSpan(
+                  {
+                    system: anonymizedSystem,
+                    messages: anonymizedMessages,
+                    tools,
+                    toolChoice,
+                    ...(spanModel ? { model: spanModel } : {}),
+                    ...metadata?.attributes,
+                  },
+                  () =>
+                    chatComplete({
+                      system: anonymizedSystem,
+                      messages: anonymizedMessages,
+                      toolChoice,
+                      tools,
+                      temperature,
+                      logger,
+                      functionCalling,
+                      modelName,
+                      abortSignal,
+                      metadata,
+                      timeout,
+                      stream,
+                    }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }))
+                ).pipe(
+                  restoreTokensOperator(aroundContext.tokenMap),
+                  applyAfterCompletionHook({
+                    anonymizationHookInvoker: anonymizationHookInvoker!,
+                    config: config!,
+                    logger,
+                    sessionId,
+                    tokenMap: beforeTokenMap,
+                  })
+                );
+              })
+            );
+          }),
           buildTokenUsagePipe({
             tokenUsageLogger,
             isTokenUsageTrackingEnabled,

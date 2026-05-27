@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ChatCompleteOptions } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import { BeforeCompletionOutputSchema } from '../anonymization/trigger_schemas';
-import { AnonymizationContext } from '../anonymization/context';
 import { deriveSalt } from '../anonymization/derive_salt';
 import { InferenceAnonymizationUnavailableError } from '../anonymization/errors';
 import type { InvokeHookFn } from '../types';
@@ -31,8 +30,8 @@ export interface BeforeCompletionResult {
   hookMessages: ChatCompleteOptions['messages'];
   /** Resolved sessionId — pass to applyAfterCompletionHook to avoid a second uuidv4() call. */
   sessionId: string;
-  /** Context produced during anonymization; pass to the afterCompletion hook. */
-  anonymizationContext: AnonymizationContext;
+  /** Token map produced by the beforeCompletion workflow run; pass to applyAfterCompletionHook. */
+  tokenMap: Record<string, { original: string; entityClass: string }>;
 }
 
 const resolveSessionId = (metadata: ChatCompleteOptions['metadata']): string =>
@@ -44,14 +43,6 @@ const resolveSalt = async (
 ): Promise<string> => {
   const encryptionKey = await anonymization?.replacements?.encryptionKeyPromise;
   return encryptionKey ? deriveSalt(sessionId, encryptionKey) : sessionId;
-};
-
-const createAnonymizationContext = async (
-  sessionId: string,
-  anonymization?: InferenceAnonymizationOptions
-): Promise<AnonymizationContext> => {
-  const salt = await resolveSalt(sessionId, anonymization);
-  return new AnonymizationContext(salt);
 };
 
 /** Rough token approximation: 1 token ≈ 4 chars. Used only as a pre-flight guard. */
@@ -73,11 +64,12 @@ export const estimatePromptTokens = (
  * lists only the entity types present — keeping it minimal and accurate.
  */
 export const buildAnonymizationInstruction = (
-  tokenMap: AnonymizationContext['tokenMap']
+  tokenMap: Record<string, { original: string; entityClass: string }>
 ): string => {
-  if (tokenMap.size === 0) return '';
+  const entries = Object.values(tokenMap);
+  if (entries.length === 0) return '';
 
-  const entityTypes = [...new Set([...tokenMap.values()].map((e) => e.entityClass))];
+  const entityTypes = [...new Set(entries.map((e) => e.entityClass))];
 
   return [
     '[Anonymization context]',
@@ -96,22 +88,23 @@ const MAX_TOKEN_KEYS_LOGGED = 20;
 const logDebugDone = (
   logger: Logger,
   sessionId: string,
-  ctx: AnonymizationContext,
+  tokenMap: Record<string, { original: string; entityClass: string }>,
   outcome: string
 ): void => {
-  const tokenKeys = [...ctx.tokenMap.keys()].slice(0, MAX_TOKEN_KEYS_LOGGED);
+  const tokenKeys = Object.keys(tokenMap).slice(0, MAX_TOKEN_KEYS_LOGGED);
   logger.debug(
     () =>
       `[hook-anon-debug] beforeCompletion done (${outcome}) sessionId=${sessionId} ` +
-      `tokenMapSize=${ctx.tokenMap.size}` +
+      `tokenMapSize=${Object.keys(tokenMap).length}` +
       (tokenKeys.length > 0 ? ` tokenKeys=${JSON.stringify(tokenKeys)}` : '')
   );
 };
 
 /**
  * Invokes the `inference.beforeCompletion` hook.
- * Creates an `AnonymizationContext` (salt + token map) and passes it via `capabilities` —
- * the YAML workflow event never sees the salt or tokenMap.
+ * Derives a salt from the sessionId and passes it in the event payload so
+ * ai.pii steps can generate deterministic tokens without a capability side-channel.
+ * The resulting tokenMap is read from the hook's workflow output.
  *
  * Failure behaviour is controlled by `config.anonymization.failureMode`:
  *   - `'block'`: throws `InferenceAnonymizationUnavailableError`
@@ -127,6 +120,7 @@ export const invokeBeforeCompletion = async ({
   anonymization,
 }: BeforeCompletionArgs): Promise<BeforeCompletionResult> => {
   const sessionId = resolveSessionId(metadata);
+  const salt = await resolveSalt(sessionId, anonymization);
 
   const estimatedTokens = estimatePromptTokens(system, messages);
   if (estimatedTokens > config.anonymization.maxTokensPerCall) {
@@ -139,20 +133,16 @@ export const invokeBeforeCompletion = async ({
       );
     }
     logger.warn(`${msg} Passing prompt unredacted (failureMode: allow_unsafe).`);
-    const anonymizationContext = await createAnonymizationContext(sessionId, anonymization);
-    logDebugDone(logger, sessionId, anonymizationContext, 'max_tokens_allow_unsafe');
-    return { sessionId, hookSystem: system, hookMessages: messages, anonymizationContext };
+    logDebugDone(logger, sessionId, {}, 'max_tokens_allow_unsafe');
+    return { sessionId, hookSystem: system, hookMessages: messages, tokenMap: {} };
   }
-
-  const anonymizationContext = await createAnonymizationContext(sessionId, anonymization);
-  const capabilities: Record<string, unknown> = { anonymizationContext };
 
   logger.debug(`[hook-anon] invoking inference.beforeCompletion sessionId=${sessionId}`);
 
   const result = await anonymizationHookInvoker(
     'inference.beforeCompletion',
-    { sessionId, system, messages },
-    capabilities
+    { sessionId, salt, system, messages },
+    {}
   );
 
   if (result.status === 'failed') {
@@ -164,13 +154,13 @@ export const invokeBeforeCompletion = async ({
         result.error ?? 'unknown error'
       }. Passing raw prompt to LLM.`
     );
-    logDebugDone(logger, sessionId, anonymizationContext, 'hook_failed_allow_unsafe');
-    return { sessionId, hookSystem: system, hookMessages: messages, anonymizationContext };
+    logDebugDone(logger, sessionId, {}, 'hook_failed_allow_unsafe');
+    return { sessionId, hookSystem: system, hookMessages: messages, tokenMap: {} };
   }
 
   if (result.status === 'pass_through') {
-    logDebugDone(logger, sessionId, anonymizationContext, 'pass_through');
-    return { sessionId, hookSystem: system, hookMessages: messages, anonymizationContext };
+    logDebugDone(logger, sessionId, {}, 'pass_through');
+    return { sessionId, hookSystem: system, hookMessages: messages, tokenMap: {} };
   }
 
   const parsed = BeforeCompletionOutputSchema.safeParse(result.output);
@@ -180,19 +170,17 @@ export const invokeBeforeCompletion = async ({
       throw new InferenceAnonymizationUnavailableError(errorMsg);
     }
     logger.warn(`[hook-anon] ${errorMsg}. Passing raw prompt to LLM.`);
-    logDebugDone(logger, sessionId, anonymizationContext, 'invalid_hook_output_allow_unsafe');
-    return { sessionId, hookSystem: system, hookMessages: messages, anonymizationContext };
+    logDebugDone(logger, sessionId, {}, 'invalid_hook_output_allow_unsafe');
+    return { sessionId, hookSystem: system, hookMessages: messages, tokenMap: {} };
   }
 
-  logDebugDone(logger, sessionId, anonymizationContext, 'success');
+  const tokenMap = parsed.data.tokenMap ?? {};
+  logDebugDone(logger, sessionId, tokenMap, 'success');
 
   const anonymizedSystem = parsed.data.system ?? system;
-  // Only inject an instruction when tokens were actually produced; an empty tokenMap
-  // means no PII was found and the LLM needs no guidance about anonymization tokens.
   const instruction =
-    anonymizationContext.tokenMap.size > 0
-      ? parsed.data.systemPromptInstruction ??
-        buildAnonymizationInstruction(anonymizationContext.tokenMap)
+    Object.keys(tokenMap).length > 0
+      ? parsed.data.systemPromptInstruction ?? buildAnonymizationInstruction(tokenMap)
       : '';
   if (instruction) {
     logger.debug(
@@ -212,9 +200,7 @@ export const invokeBeforeCompletion = async ({
   return {
     sessionId,
     hookSystem,
-    // The schema uses passthrough() so messages preserve all original fields.
-    // The cast is correct: the hook returns the same message shape it received.
     hookMessages: parsed.data.messages as ChatCompleteOptions['messages'],
-    anonymizationContext,
+    tokenMap,
   };
 };

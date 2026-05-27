@@ -20,14 +20,20 @@ import { InferenceAnonymizationUnavailableError } from '../anonymization/errors'
 import type { InvokeHookFn } from '../types';
 import type { InferenceConfig } from '../config';
 
+/** Plain-object token entry used by the by-value token map flow. */
+interface TokenEntry {
+  original: string;
+  entityClass: string;
+}
+
 export interface AfterCompletionHookArgs {
   anonymizationHookInvoker: InvokeHookFn;
   config: InferenceConfig;
   logger: Logger;
   /** Must be the exact sessionId resolved by invokeBeforeCompletion. */
   sessionId: string;
-  /** Context from the beforeCompletion hook — carries the token map for restoration. */
-  anonymizationContext: AnonymizationContext;
+  /** Token map produced by the beforeCompletion workflow run. */
+  tokenMap: Record<string, TokenEntry>;
 }
 
 /**
@@ -39,31 +45,20 @@ const TOKEN_RESTORE_REGEX = /\b([A-Z][A-Z0-9_]*)_([0-9a-f]{32})\b/g;
 /**
  * Matches the start of a potential token at the END of a buffered string.
  * Used by the sliding hold-buffer to avoid emitting a partial token that spans a chunk boundary.
- * Matches: "HOST", "HOST_NAME", "HOST_NAME_", "HOST_NAME_d985"
- * Does NOT match a complete token followed by more text.
  */
 const PARTIAL_TOKEN_END_RE = /[A-Z][A-Z0-9_]*(?:_[0-9a-f]*)?$/;
 
-export const restoreInString = (
-  text: string,
-  tokenMap: AnonymizationContext['tokenMap']
-): string => {
+export const restoreInString = (text: string, tokenMap: Record<string, TokenEntry>): string => {
   const re = new RegExp(TOKEN_RESTORE_REGEX.source, TOKEN_RESTORE_REGEX.flags);
-  return text.replace(re, (fullMatch) => tokenMap.get(fullMatch)?.original ?? fullMatch);
+  return text.replace(re, (fullMatch) => tokenMap[fullMatch]?.original ?? fullMatch);
 };
 
 /**
  * Recursively restores anonymization tokens in an arbitrary value.
  * Strings are restored via `restoreInString`; arrays and objects are walked recursively.
  * All other values pass through unchanged.
- *
- * The return type is `unknown` because the function handles arbitrary nesting.
- * Callers restoring a known-typed value (e.g. tool arguments) should assert the type at the call site.
  */
-export const restoreInValue = (
-  value: unknown,
-  tokenMap: AnonymizationContext['tokenMap']
-): unknown => {
+export const restoreInValue = (value: unknown, tokenMap: Record<string, TokenEntry>): unknown => {
   if (typeof value === 'string') return restoreInString(value, tokenMap);
   if (Array.isArray(value)) return value.map((item) => restoreInValue(item, tokenMap));
   if (value !== null && typeof value === 'object') {
@@ -87,20 +82,16 @@ const safeStringify = (value: unknown): string => {
 
 /**
  * RxJS operator that progressively restores anonymization tokens in a chat completion
- * stream using the same sliding hold-buffer algorithm as applyAfterCompletionHook.
+ * stream. Used by the around hook path to restore tokens before the stream reaches
+ * applyAfterCompletionHook.
  *
- * - Chunk events: content is buffered; safe prefixes (that cannot start a partial token)
- *   are restored and emitted; the rest is held until the next chunk or message.
- * - Message event: held buffer is flushed; content and tool-call arguments are fully
- *   restored; a flush chunk (carrying tool calls in streaming format) is emitted,
- *   followed by the restored message event.
- *
- * This operator does NOT invoke any hook — it is used by the around hook path to restore
- * aroundContext tokens before the stream reaches applyAfterCompletionHook.
+ * This operator accepts the legacy Map-based tokenMap from AnonymizationContext
+ * (around-hook path, Commit D will migrate it to the plain-Record form).
  */
 export const restoreTokensOperator = (
   tokenMap: AnonymizationContext['tokenMap']
 ): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> => {
+  const tokenRecord = Object.fromEntries(tokenMap.entries());
   return (source$) => {
     let holdBuffer = '';
 
@@ -126,7 +117,7 @@ export const restoreTokensOperator = (
 
           const restoredChunk: ChatCompletionChunkEvent = {
             ...event,
-            content: restoreInString(safe, tokenMap),
+            content: restoreInString(safe, tokenRecord),
             tool_calls: [],
           };
           return of(restoredChunk);
@@ -142,14 +133,14 @@ export const restoreTokensOperator = (
               ...tc.function,
               arguments: restoreInValue(
                 tc.function.arguments,
-                tokenMap
+                tokenRecord
               ) as typeof tc.function.arguments,
             },
           }));
 
           const flushChunk: ChatCompletionChunkEvent = {
             type: ChatCompletionEventType.ChatCompletionChunk,
-            content: restoreInString(flushed, tokenMap),
+            content: restoreInString(flushed, tokenRecord),
             tool_calls: (restoredToolCalls ?? []).map((tc, idx) => {
               let args = '';
               try {
@@ -167,7 +158,7 @@ export const restoreTokensOperator = (
 
           const restoredMessage: ChatCompletionMessageEvent = {
             ...event,
-            content: restoreInString(event.content ?? '', tokenMap),
+            content: restoreInString(event.content ?? '', tokenRecord),
             ...(restoredToolCalls !== undefined ? { toolCalls: restoredToolCalls } : {}),
           };
 
@@ -198,13 +189,13 @@ const logDebugToolCallRestore = ({
   toolCallId: string;
   argsBefore: unknown;
   argsAfter: unknown;
-  tokenMap: AnonymizationContext['tokenMap'];
+  tokenMap: Record<string, TokenEntry>;
 }): void => {
   const beforeStr = safeStringify(argsBefore);
   const afterStr = safeStringify(argsAfter);
   const patternsBefore = collectTokenPatterns(beforeStr);
   const patternsAfter = collectTokenPatterns(afterStr);
-  const patternsNotInMap = patternsBefore.filter((t) => !tokenMap.has(t));
+  const patternsNotInMap = patternsBefore.filter((t) => !(t in tokenMap));
 
   if (patternsBefore.length === 0 && beforeStr === afterStr) return;
 
@@ -219,7 +210,8 @@ const logDebugToolCallRestore = ({
 
 /**
  * Resolves the deanonymized response text from the afterCompletion hook result.
- * Returns the original `responseText` on failure, applying `failureMode` policy.
+ * Passes the tokenMap in the event payload so the workflow can route it to
+ * transform.pii_restore without a capabilities side-channel.
  */
 const resolveRestoredText = async ({
   anonymizationHookInvoker,
@@ -227,19 +219,19 @@ const resolveRestoredText = async ({
   logger,
   sessionId,
   responseText,
-  capabilities,
+  tokenMap,
 }: {
   anonymizationHookInvoker: InvokeHookFn;
   config: InferenceConfig;
   logger: Logger;
   sessionId: string;
   responseText: string;
-  capabilities: Record<string, unknown>;
+  tokenMap: Record<string, TokenEntry>;
 }): Promise<string> => {
   const result = await anonymizationHookInvoker(
     'inference.afterCompletion',
-    { sessionId, response: responseText },
-    capabilities
+    { sessionId, response: responseText, tokenMap },
+    {}
   );
 
   if (result.status === 'failed') {
@@ -276,34 +268,19 @@ const resolveRestoredText = async ({
  * anonymization tokens spanning a chunk boundary are never emitted raw, then
  * calls the `inference.afterCompletion` hook on the assembled `ChatCompletionMessage`
  * to restore any remaining tokens in the full response text.
- *
- * Algorithm (RFC §4.6):
- * - Per chunk: accumulate content into `holdBuffer`; find the longest safe prefix
- *   (the part that cannot start a partial token) using `PARTIAL_TOKEN_END_RE`;
- *   restore and emit that prefix; keep the rest in the buffer.
- * - Tool-call delta chunks are dropped — tool calls are restored from the fully
- *   assembled `ChatCompletionMessage` at the end.
- * - On `ChatCompletionMessage`: flush the hold buffer + call the hook + restore
- *   tool-call arguments; emit a flush chunk followed by the restored message.
- *
- * On hook failure: `failureMode: 'block'` throws; `'allow_unsafe'` logs and passes through.
  */
 export const applyAfterCompletionHook = ({
   anonymizationHookInvoker,
   config,
   logger,
   sessionId,
-  anonymizationContext,
+  tokenMap,
 }: AfterCompletionHookArgs): OperatorFunction<ChatCompletionEvent, ChatCompletionEvent> => {
-  const capabilities = { anonymizationContext };
-
   return (source$) => {
     let holdBuffer = '';
 
     return source$.pipe(
       mergeMap((event) => {
-        const { tokenMap } = anonymizationContext;
-
         if (event.type === ChatCompletionEventType.ChatCompletionChunk) {
           const content = event.content ?? '';
           if (!content) return EMPTY;
@@ -340,8 +317,9 @@ export const applyAfterCompletionHook = ({
 
         logger.debug(
           () =>
-            `[hook-anon-debug] llmMessage sessionId=${sessionId} tokenMapSize=${tokenMap.size} ` +
-            `toolCallCount=${event.toolCalls?.length ?? 0} contentLen=${responseText.length}`
+            `[hook-anon-debug] llmMessage sessionId=${sessionId} tokenMapSize=${
+              Object.keys(tokenMap).length
+            } ` + `toolCallCount=${event.toolCalls?.length ?? 0} contentLen=${responseText.length}`
         );
 
         return from(
@@ -351,7 +329,7 @@ export const applyAfterCompletionHook = ({
             logger,
             sessionId,
             responseText,
-            capabilities,
+            tokenMap,
           })
         ).pipe(
           mergeMap((restoredText) => {
@@ -359,7 +337,6 @@ export const applyAfterCompletionHook = ({
               ...tc,
               function: {
                 ...tc.function,
-                // restoreInValue preserves structure; the type is the same as the input.
                 arguments: restoreInValue(
                   tc.function.arguments,
                   tokenMap

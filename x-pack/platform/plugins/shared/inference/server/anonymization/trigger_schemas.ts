@@ -18,6 +18,14 @@ export const MessageSchema = z
   })
   .passthrough();
 
+const TokenEntrySchema = z.object({
+  original: z.string(),
+  entityClass: z.string(),
+});
+
+/** Plain-object token map as it flows through YAML event/output data. */
+export const TokenMapSchema = z.record(z.string(), TokenEntrySchema);
+
 /**
  * Event schema for the `inference.beforeCompletion` trigger.
  * Workflows subscribed to this trigger receive the prompt before it is sent to the LLM.
@@ -25,6 +33,7 @@ export const MessageSchema = z
 export const BeforeCompletionEventSchema = z
   .object({
     sessionId: z.string().describe('Session/conversation identifier for cross-turn determinism'),
+    salt: z.string().describe('Per-session salt for deterministic token generation'),
     system: z.string().optional().describe('System prompt, if any'),
     messages: z.array(MessageSchema).describe('Chat messages to be sent to the LLM'),
   })
@@ -32,7 +41,7 @@ export const BeforeCompletionEventSchema = z
 
 /**
  * Output schema for the `inference.beforeCompletion` trigger.
- * The hook chain must return a (possibly modified) system prompt and messages.
+ * The hook chain must return a (possibly modified) system prompt, messages, and tokenMap.
  */
 export const BeforeCompletionOutputSchema = z
   .object({
@@ -40,9 +49,8 @@ export const BeforeCompletionOutputSchema = z
     // for a path like `steps.anonymize_system.output.output` when that step was skipped.
     system: z.string().nullish().describe('Potentially anonymized system prompt'),
     messages: z.array(MessageSchema).describe('Potentially anonymized messages'),
+    tokenMap: TokenMapSchema.describe('Merged token map from all ai.pii steps in this run'),
     // Optional override for the [Anonymization context] system-prompt instruction.
-    // Set via systemPromptInstruction on the ai.pii step and echoed through emit_output.
-    // When present, replaces the auto-generated instruction in invoke_before_completion.ts.
     systemPromptInstruction: z.string().optional(),
   })
   .passthrough();
@@ -54,6 +62,7 @@ export const AfterCompletionEventSchema = z
   .object({
     sessionId: z.string().describe('Session/conversation identifier'),
     response: z.string().describe('LLM response text to be deanonymized'),
+    tokenMap: TokenMapSchema.describe('Token map produced by the beforeCompletion workflow run'),
   })
   .passthrough();
 

@@ -26,8 +26,4 @@ export const capabilitySchemas: {
   proceedFn: z.custom<KnownCapabilities['proceedFn']>((v) => typeof v === 'function', {
     message: 'proceedFn must be a callable function',
   }),
-  anonymizationContext: z.custom<KnownCapabilities['anonymizationContext']>(
-    (v) => v != null && typeof v === 'object' && 'tokenMap' in v,
-    { message: 'anonymizationContext must be an object with a tokenMap field' }
-  ),
 };

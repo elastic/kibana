@@ -170,7 +170,7 @@ export const invokeAroundCompletion = async ({
 
   const instruction =
     anonymizationContext.tokenMap.size > 0
-      ? buildAnonymizationInstruction(anonymizationContext.tokenMap)
+      ? buildAnonymizationInstruction(Object.fromEntries(anonymizationContext.tokenMap.entries()))
       : '';
 
   const finalSystem = instruction

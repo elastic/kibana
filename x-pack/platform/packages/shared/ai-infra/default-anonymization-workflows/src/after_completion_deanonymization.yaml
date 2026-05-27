@@ -4,8 +4,9 @@
 # Outputs:  { response } — the deanonymized response text.
 #
 # The transform.pii_restore step replaces `<ENTITY_CLASS>_<32 hex chars>` tokens
-# with their original values.  The token map is managed internally via the
-# AnonymizationContext capability — it is never in this YAML.
+# with their original values.  The token map is passed as event data from the
+# inference plugin (which held it from the beforeCompletion run) — it is never
+# stored in a capability side-channel.
 #
 # Usage: import this YAML via the Workflow Management UI → "Import workflow".
 
@@ -19,6 +20,7 @@ steps:
     type: transform.pii_restore
     with:
       input: '{{ event.response }}'
+      tokenMap: '${{ event.tokenMap }}'
 
   - name: emit_output
     type: workflow.output

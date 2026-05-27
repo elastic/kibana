@@ -8,19 +8,6 @@
  */
 
 /**
- * Minimal shape for the anonymizationContext capability value.
- * Structurally satisfied by AnonymizationContextHandle (inference_workflows).
- * This entry will be removed in the next commit once the token map flows as
- * event/output data instead of a side-channel capability.
- */
-interface AnonymizationContextCapability {
-  readonly salt: string;
-  readonly tokenMap: Map<string, { original: string; entityClass: string }>;
-  setField(key: string, value: unknown): void;
-  getField(key: string): unknown;
-}
-
-/**
  * Closed registry of all capabilities the workflow engine recognises.
  *
  * Triggers declare which keys they provide via `providesCapabilities`.
@@ -35,11 +22,6 @@ interface AnonymizationContextCapability {
 export interface KnownCapabilities {
   /** Around-hook proceed function — provided only by the aroundCompletion trigger. */
   proceedFn: (input: Record<string, unknown>) => Promise<Record<string, unknown>>;
-  /**
-   * Anonymization context — removed in the next commit once the token map
-   * flows as event/output data instead of a side-channel capability.
-   */
-  anonymizationContext: AnonymizationContextCapability;
 }
 
 export type CapabilityKey = keyof KnownCapabilities;

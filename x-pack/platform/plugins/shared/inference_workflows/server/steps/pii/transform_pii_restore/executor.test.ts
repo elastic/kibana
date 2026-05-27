@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import type { TokenEntry } from '../../../anonymization/context_handle';
 import { restoreTokens } from './executor';
 
 const TOKEN_IP = 'IP_aabbccddeeff00112233445566778899';
 const TOKEN_EMAIL = 'EMAIL_00112233445566778899aabbccddeeff';
 
-const makeMap = (entries: Record<string, TokenEntry>): Map<string, TokenEntry> =>
-  new Map(Object.entries(entries));
-
 describe('restoreTokens', () => {
-  const tokenMap = makeMap({
+  const tokenMap = {
     [TOKEN_IP]: { original: '192.168.1.50', entityClass: 'IP' },
     [TOKEN_EMAIL]: { original: 'admin@example.com', entityClass: 'EMAIL' },
-  });
+  };
 
   it('replaces a token with its original value', () => {
     const text = `Alert from ${TOKEN_IP}.`;
@@ -40,7 +36,7 @@ describe('restoreTokens', () => {
 
   it('returns the original text unchanged when the tokenMap is empty', () => {
     const text = 'No tokens here.';
-    expect(restoreTokens(text, new Map())).toBe(text);
+    expect(restoreTokens(text, {})).toBe(text);
   });
 
   it('handles text with no tokens gracefully', () => {

@@ -14,9 +14,10 @@ import {
 
 describe('inference trigger schemas', () => {
   describe('BeforeCompletionEventSchema', () => {
-    it('accepts a valid event with system prompt and messages', () => {
+    it('accepts a valid event with system prompt, salt, and messages', () => {
       const result = BeforeCompletionEventSchema.safeParse({
         sessionId: 'session-1',
+        salt: 'derived-salt-hex',
         system: 'You are a helpful assistant.',
         messages: [{ role: 'user', content: 'Hello' }],
       });
@@ -26,6 +27,7 @@ describe('inference trigger schemas', () => {
     it('accepts an event without a system prompt (optional)', () => {
       const result = BeforeCompletionEventSchema.safeParse({
         sessionId: 'session-2',
+        salt: 'derived-salt-hex',
         messages: [],
       });
       expect(result.success).toBe(true);
@@ -33,6 +35,15 @@ describe('inference trigger schemas', () => {
 
     it('rejects an event missing sessionId', () => {
       const result = BeforeCompletionEventSchema.safeParse({
+        salt: 'derived-salt-hex',
+        messages: [{ role: 'user', content: 'Hi' }],
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an event missing salt', () => {
+      const result = BeforeCompletionEventSchema.safeParse({
+        sessionId: 'session-1',
         messages: [{ role: 'user', content: 'Hi' }],
       });
       expect(result.success).toBe(false);
@@ -40,27 +51,39 @@ describe('inference trigger schemas', () => {
   });
 
   describe('BeforeCompletionOutputSchema', () => {
-    it('accepts valid output with system and messages', () => {
+    it('accepts valid output with system, messages, and tokenMap', () => {
       const result = BeforeCompletionOutputSchema.safeParse({
         system: 'IP_abc123 connected.',
         messages: [{ role: 'user', content: 'Tell me about IP_abc123' }],
+        tokenMap: { ['IP_abc123']: { original: '192.168.1.1', entityClass: 'IP' } },
       });
       expect(result.success).toBe(true);
     });
 
-    it('accepts output without system (pass-through when no system prompt)', () => {
+    it('accepts output with an empty tokenMap (no PII found)', () => {
       const result = BeforeCompletionOutputSchema.safeParse({
         messages: [],
+        tokenMap: {},
       });
       expect(result.success).toBe(true);
     });
   });
 
   describe('AfterCompletionEventSchema', () => {
-    it('accepts a valid event', () => {
+    it('accepts a valid event with tokenMap', () => {
       const result = AfterCompletionEventSchema.safeParse({
         sessionId: 'session-3',
         response: 'The IP_abc123 address was involved.',
+        tokenMap: { ['IP_abc123']: { original: '192.168.1.1', entityClass: 'IP' } },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts a valid event with an empty tokenMap', () => {
+      const result = AfterCompletionEventSchema.safeParse({
+        sessionId: 'session-3',
+        response: 'The IP_abc123 address was involved.',
+        tokenMap: {},
       });
       expect(result.success).toBe(true);
     });
@@ -68,6 +91,15 @@ describe('inference trigger schemas', () => {
     it('rejects an event missing response', () => {
       const result = AfterCompletionEventSchema.safeParse({
         sessionId: 'session-3',
+        tokenMap: {},
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects an event missing tokenMap', () => {
+      const result = AfterCompletionEventSchema.safeParse({
+        sessionId: 'session-3',
+        response: 'The IP_abc123 address was involved.',
       });
       expect(result.success).toBe(false);
     });
