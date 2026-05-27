@@ -21,7 +21,7 @@ import {
   type PaginatedSearchOptions,
 } from './query_utils';
 
-const isIndexNotFoundError = (error: unknown): boolean => {
+export const isIndexNotFoundError = (error: unknown): boolean => {
   if (error instanceof Error) {
     return (
       error.message.includes('verification_exception') && error.message.includes('Unknown index')
@@ -125,6 +125,43 @@ export const inFilter = ({
   return andWhere(where, esql.exp`${esql.col(field)} IN (${values.map((v) => esql.str(v))})`);
 };
 
+// TODO: Remove `IS NULL` fallback once workflows write `kibana.space_ids` on every document.
+export const fromIndexForSpace = ({
+  index,
+  space,
+  columns,
+}: {
+  index: string;
+  space: string;
+  columns?: string[];
+}): ComposerQuery => {
+  const base = columns ? esql.from([index], columns) : esql.from([index]);
+  return base.where`${esql.col('kibana.space_ids')} == ${space} OR ${esql.col(
+    'kibana.space_ids'
+  )} IS NULL`;
+};
+
+export const applyTimeRange = ({
+  query,
+  from,
+  to,
+}: {
+  query: ComposerQuery;
+  from?: string;
+  to?: string;
+}): ComposerQuery => {
+  let q = query;
+  if (from !== undefined) {
+    const fromIso = from;
+    q = q.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
+  }
+  if (to !== undefined) {
+    const toIso = to;
+    q = q.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
+  }
+  return q;
+};
+
 interface BuildLatestSourceBaseQueryArgs {
   space: string;
   index: string;
@@ -140,20 +177,11 @@ const buildLatestSourceBaseQuery = ({
   where,
   groupBy,
 }: BuildLatestSourceBaseQueryArgs) => {
-  // TODO: Remove `IS NULL` fallback once workflows write `kibana.space_ids` on every document.
-  let query = esql.from([index], ['_id', '_source']).where`${esql.col(
-    'kibana.space_ids'
-  )} == ${space} OR ${esql.col('kibana.space_ids')} IS NULL`;
-
-  if (options.from !== undefined) {
-    const fromIso = options.from;
-    query = query.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
-  }
-
-  if (options.to !== undefined) {
-    const toIso = options.to;
-    query = query.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
-  }
+  let query = applyTimeRange({
+    query: fromIndexForSpace({ index, space, columns: ['_id', '_source'] }),
+    from: options.from,
+    to: options.to,
+  });
 
   if (where) {
     query = query.where`${where}`;
@@ -263,12 +291,39 @@ export const runFindByIdEsqlQuery = async <T>({
   idField,
   idValue,
 }: RunFindByIdEsqlQueryArgs): Promise<{ hits: T[] }> => {
-  // TODO: Remove `IS NULL` fallback once workflows write `kibana.space_ids` on every document.
-  let query = esql.from([index], ['_source']).where`${esql.col(
-    'kibana.space_ids'
-  )} == ${space} OR ${esql.col('kibana.space_ids')} IS NULL`;
+  let query = fromIndexForSpace({ index, space, columns: ['_source'] });
 
   query = query.where`${esql.col(idField)} == ${esql.str(idValue)}`;
+  query = query.sort(['@timestamp', 'ASC']);
+  query = query.keep('_source');
+
+  const hits = await executeEsqlQuery<T>({ esClient, query });
+  return { hits };
+};
+
+interface RunFindByIdsEsqlQueryArgs {
+  esClient: ElasticsearchClient;
+  space: string;
+  index: string;
+  idField: string;
+  idValues: string[];
+}
+
+export const runFindByIdsEsqlQuery = async <T>({
+  esClient,
+  space,
+  index,
+  idField,
+  idValues,
+}: RunFindByIdsEsqlQueryArgs): Promise<{ hits: T[] }> => {
+  if (idValues.length === 0) return { hits: [] };
+
+  const where = inFilter({ where: undefined, field: idField, values: idValues });
+  let query = fromIndexForSpace({ index, space, columns: ['_source'] });
+
+  if (where) {
+    query = query.where`${where}`;
+  }
   query = query.sort(['@timestamp', 'ASC']);
   query = query.keep('_source');
 

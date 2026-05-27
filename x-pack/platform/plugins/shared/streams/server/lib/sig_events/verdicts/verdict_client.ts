@@ -16,6 +16,7 @@ import {
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
+  runFindByIdsEsqlQuery,
 } from '../latest_source_query';
 import {
   VERDICTS_DATA_STREAM,
@@ -73,6 +74,16 @@ export class VerdictClient {
       index: VERDICTS_DATA_STREAM,
       idField: GROUP_BY_FIELD,
       idValue: discoveryId,
+    });
+  }
+
+  async findByDiscoveryIds(discoveryIds: string[]): Promise<{ hits: Verdict[] }> {
+    return runFindByIdsEsqlQuery<Verdict>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: VERDICTS_DATA_STREAM,
+      idField: GROUP_BY_FIELD,
+      idValues: discoveryIds,
     });
   }
 }

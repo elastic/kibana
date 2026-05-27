@@ -40,14 +40,9 @@ export const useFetchSigEvents = ({
 
   const [pagination, setPagination] = useState({ page: 1, perPage: 25 });
 
-  const verdictKey = verdict?.join(',') ?? '';
-  const streamKey = stream?.join(',') ?? '';
-  const impactKey = impact?.join(',') ?? '';
-  const searchKey = search ?? '';
-
   useEffect(() => {
     setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
-  }, [from, to, verdictKey, streamKey, impactKey, searchKey]);
+  }, [from, to, verdict, stream, impact, search]);
 
   const query = useQuery<PaginatedResponse<SigEvent>, Error>({
     queryKey: [
@@ -56,10 +51,10 @@ export const useFetchSigEvents = ({
       pagination.perPage,
       from,
       to,
-      verdictKey,
-      streamKey,
-      impactKey,
-      searchKey,
+      verdict,
+      stream,
+      impact,
+      search,
     ],
     queryFn: async ({ signal }: QueryFunctionContext): Promise<PaginatedResponse<SigEvent>> => {
       return streamsRepositoryClient.fetch('GET /internal/sig_events/events', {
@@ -72,7 +67,7 @@ export const useFetchSigEvents = ({
             ...(verdict?.length ? { verdict } : {}),
             ...(stream?.length ? { stream } : {}),
             ...(impact?.length ? { impact } : {}),
-            ...(searchKey ? { search: searchKey } : {}),
+            ...(search ? { search } : {}),
           },
         },
         signal: signal ?? null,

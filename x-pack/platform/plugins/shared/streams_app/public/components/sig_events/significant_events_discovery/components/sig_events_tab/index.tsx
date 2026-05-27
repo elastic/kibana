@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import {
   EuiBasicTable,
@@ -37,7 +37,6 @@ import {
   getVerdictColor,
   getImpactColor,
 } from './filter_constants';
-import type { Verdict, Impact } from './filter_constants';
 
 const MAX_VISIBLE_STREAMS = 3;
 
@@ -145,8 +144,8 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
   },
 ];
 
-const extractCheckedKeys = <T extends string>(options: EuiSelectableOption[]): T[] =>
-  options.filter((opt) => opt.checked === 'on').map((opt) => (opt.key ?? opt.label) as T);
+const extractCheckedKeys = (options: EuiSelectableOption[]): string[] =>
+  options.filter((opt) => opt.checked === 'on').map((opt) => opt.key ?? opt.label);
 
 const buildSelectableOptions = <T extends string>({
   values,
@@ -169,9 +168,9 @@ export const SigEventsTab = () => {
   const { updateTimeRange } = useTimeRangeUpdate();
   const { filteredStreams } = useKiGeneration();
 
-  const [verdictFilter, setVerdictFilter] = useState<Verdict[]>([]);
+  const [verdictFilter, setVerdictFilter] = useState<string[]>([]);
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
-  const [impactFilter, setImpactFilter] = useState<Impact[]>([]);
+  const [impactFilter, setImpactFilter] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
 
@@ -190,49 +189,72 @@ export const SigEventsTab = () => {
   });
   const [selectedEvent, setSelectedEvent] = useState<SigEvent | undefined>();
 
-  const filters = [
-    {
-      label: i18n.translate('xpack.streams.sigEventsTab.filter.verdict', {
-        defaultMessage: 'Verdict',
-      }),
-      ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.verdictAriaLabel', {
-        defaultMessage: 'Filter by verdict',
-      }),
-      options: buildSelectableOptions({ values: VERDICT_OPTIONS, selected: verdictFilter }),
-      numFilters: VERDICT_OPTIONS.length,
-      numActiveFilters: verdictFilter.length,
-      onChange: (opts: EuiSelectableOption[]) =>
-        setVerdictFilter(extractCheckedKeys<Verdict>(opts)),
-    },
-    {
-      label: i18n.translate('xpack.streams.sigEventsTab.filter.impact', {
-        defaultMessage: 'Impact',
-      }),
-      ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.impactAriaLabel', {
-        defaultMessage: 'Filter by impact',
-      }),
-      options: buildSelectableOptions({ values: IMPACT_OPTIONS, selected: impactFilter }),
-      numFilters: IMPACT_OPTIONS.length,
-      numActiveFilters: impactFilter.length,
-      onChange: (opts: EuiSelectableOption[]) => setImpactFilter(extractCheckedKeys<Impact>(opts)),
-    },
-    {
-      label: i18n.translate('xpack.streams.sigEventsTab.filter.stream', {
-        defaultMessage: 'Stream',
-      }),
-      ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.streamAriaLabel', {
-        defaultMessage: 'Filter by stream',
-      }),
-      options: buildSelectableOptions({
-        values: streamOptions,
-        selected: streamFilter,
-        getLabel: (s) => s,
-      }),
-      numFilters: streamOptions.length,
-      numActiveFilters: streamFilter.length,
-      onChange: (opts: EuiSelectableOption[]) => setStreamFilter(extractCheckedKeys(opts)),
-    },
-  ];
+  const onVerdictChange = useCallback(
+    (opts: EuiSelectableOption[]) => setVerdictFilter(extractCheckedKeys(opts)),
+    []
+  );
+  const onImpactChange = useCallback(
+    (opts: EuiSelectableOption[]) => setImpactFilter(extractCheckedKeys(opts)),
+    []
+  );
+  const onStreamChange = useCallback(
+    (opts: EuiSelectableOption[]) => setStreamFilter(extractCheckedKeys(opts)),
+    []
+  );
+
+  const filters = useMemo(
+    () => [
+      {
+        label: i18n.translate('xpack.streams.sigEventsTab.filter.verdict', {
+          defaultMessage: 'Verdict',
+        }),
+        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.verdictAriaLabel', {
+          defaultMessage: 'Filter by verdict',
+        }),
+        options: buildSelectableOptions({ values: VERDICT_OPTIONS, selected: verdictFilter }),
+        numFilters: VERDICT_OPTIONS.length,
+        numActiveFilters: verdictFilter.length,
+        onChange: onVerdictChange,
+      },
+      {
+        label: i18n.translate('xpack.streams.sigEventsTab.filter.impact', {
+          defaultMessage: 'Impact',
+        }),
+        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.impactAriaLabel', {
+          defaultMessage: 'Filter by impact',
+        }),
+        options: buildSelectableOptions({ values: IMPACT_OPTIONS, selected: impactFilter }),
+        numFilters: IMPACT_OPTIONS.length,
+        numActiveFilters: impactFilter.length,
+        onChange: onImpactChange,
+      },
+      {
+        label: i18n.translate('xpack.streams.sigEventsTab.filter.stream', {
+          defaultMessage: 'Stream',
+        }),
+        ariaLabel: i18n.translate('xpack.streams.sigEventsTab.filter.streamAriaLabel', {
+          defaultMessage: 'Filter by stream',
+        }),
+        options: buildSelectableOptions({
+          values: streamOptions,
+          selected: streamFilter,
+          getLabel: (s) => s,
+        }),
+        numFilters: streamOptions.length,
+        numActiveFilters: streamFilter.length,
+        onChange: onStreamChange,
+      },
+    ],
+    [
+      verdictFilter,
+      impactFilter,
+      streamFilter,
+      streamOptions,
+      onVerdictChange,
+      onImpactChange,
+      onStreamChange,
+    ]
+  );
 
   const onTableChange = ({ page }: { page?: { index: number; size: number } }) => {
     if (page) {

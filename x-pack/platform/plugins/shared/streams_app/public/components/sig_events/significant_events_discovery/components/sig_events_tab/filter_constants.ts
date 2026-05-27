@@ -24,8 +24,9 @@ export const IMPACT_COLORS: Record<Impact, string> = {
   low: 'hollow',
 };
 
-const isVerdict = (v: string): v is Verdict => v in VERDICT_COLORS;
-const isImpact = (v: string): v is Impact => v in IMPACT_COLORS;
+const isVerdict = (v: string): v is Verdict =>
+  (VERDICT_OPTIONS as ReadonlyArray<string>).includes(v);
+const isImpact = (v: string): v is Impact => (IMPACT_OPTIONS as ReadonlyArray<string>).includes(v);
 
 export const getVerdictColor = (verdict: string): string =>
   isVerdict(verdict) ? VERDICT_COLORS[verdict] : 'default';

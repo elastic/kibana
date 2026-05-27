@@ -17,6 +17,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiListGroup,
   EuiLoadingSpinner,
   EuiPanel,
   EuiText,
@@ -59,11 +60,17 @@ const LIFECYCLE_ERROR = i18n.translate('xpack.streams.sigEventsTab.flyout.lifecy
 const CLOSE_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.close', {
   defaultMessage: 'Close',
 });
+const CRITICALITY_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.criticalityLabel', {
+  defaultMessage: 'Criticality',
+});
+const CONFIDENCE_LABEL = i18n.translate('xpack.streams.sigEventsTab.flyout.confidenceLabel', {
+  defaultMessage: 'Confidence',
+});
 
 const BadgeRow = ({ items, color }: { items: string[]; color?: string }) => (
   <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-    {items.map((item) => (
-      <EuiFlexItem grow={false} key={item}>
+    {items.map((item, idx) => (
+      <EuiFlexItem grow={false} key={`${item}-${idx}`}>
         <EuiBadge color={color ?? 'default'}>{item}</EuiBadge>
       </EuiFlexItem>
     ))}
@@ -111,8 +118,8 @@ export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             {formatTimestamp(event['@timestamp'])}
-            {event.criticality != null && ` · Criticality: ${event.criticality}`}
-            {event.confidence != null && ` · Confidence: ${event.confidence}%`}
+            {event.criticality != null && ` · ${CRITICALITY_LABEL}: ${event.criticality}`}
+            {event.confidence != null && ` · ${CONFIDENCE_LABEL}: ${event.confidence}%`}
           </EuiText>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
@@ -144,13 +151,14 @@ export const SigEventFlyout = ({ event, onClose }: SigEventFlyoutProps) => {
                 <h3>{RECOMMENDATIONS_TITLE}</h3>
               </EuiTitle>
               <EuiPanel color="subdued" paddingSize="s" hasBorder={false}>
-                <EuiText size="s">
-                  <ol>
-                    {event.recommendations.map((rec, idx) => (
-                      <li key={idx}>{rec}</li>
-                    ))}
-                  </ol>
-                </EuiText>
+                <EuiListGroup
+                  listItems={event.recommendations.map((rec, idx) => ({
+                    label: `${idx + 1}. ${rec}`,
+                    size: 's' as const,
+                    wrapText: true,
+                  }))}
+                  bordered={false}
+                />
               </EuiPanel>
             </EuiFlexGroup>
           )}

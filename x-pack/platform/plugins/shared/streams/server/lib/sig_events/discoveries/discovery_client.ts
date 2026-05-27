@@ -16,6 +16,7 @@ import {
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
+  runFindByIdsEsqlQuery,
 } from '../latest_source_query';
 import {
   DISCOVERIES_DATA_STREAM,
@@ -76,6 +77,16 @@ export class DiscoveryClient {
       index: DISCOVERIES_DATA_STREAM,
       idField: GROUP_BY_FIELD,
       idValue: discoveryId,
+    });
+  }
+
+  async findByIds(discoveryIds: string[]): Promise<{ hits: Discovery[] }> {
+    return runFindByIdsEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DISCOVERIES_DATA_STREAM,
+      idField: GROUP_BY_FIELD,
+      idValues: discoveryIds,
     });
   }
 }

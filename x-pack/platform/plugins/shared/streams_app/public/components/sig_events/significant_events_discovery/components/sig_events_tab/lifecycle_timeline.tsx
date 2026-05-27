@@ -118,7 +118,7 @@ function buildTimelineEntries(data: EventLifecycleResponse): TimelineEntry[] {
   }));
 
   const sortedEvents = [...data.events].sort(
-    (a, b) => Date.parse(a['@timestamp']) - Date.parse(b['@timestamp'])
+    (a, b) => (Date.parse(a['@timestamp']) || 0) - (Date.parse(b['@timestamp']) || 0)
   );
   const events: TimelineEntry[] = sortedEvents.map((event, idx) => ({
     type: 'event' as const,
@@ -128,7 +128,7 @@ function buildTimelineEntries(data: EventLifecycleResponse): TimelineEntry[] {
   }));
 
   return [...detections, ...discoveries, ...verdicts, ...events].sort(
-    (a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp)
+    (a, b) => (Date.parse(a.timestamp) || 0) - (Date.parse(b.timestamp) || 0)
   );
 }
 

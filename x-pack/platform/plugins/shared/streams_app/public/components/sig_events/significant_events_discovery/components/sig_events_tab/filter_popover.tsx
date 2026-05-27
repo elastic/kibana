@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
+import { EuiFilterButton, EuiPanel, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useBoolean } from '@kbn/react-hooks';
+
+const selectableListCss = css`
+  width: 200px;
+`;
 
 interface FilterPopoverProps {
   label: string;
@@ -19,10 +24,6 @@ interface FilterPopoverProps {
   onChange: (options: EuiSelectableOption[]) => void;
 }
 
-const popoverContentCss = css`
-  width: 200px;
-`;
-
 export const FilterPopover = ({
   label,
   ariaLabel,
@@ -31,7 +32,7 @@ export const FilterPopover = ({
   numActiveFilters,
   onChange,
 }: FilterPopoverProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, { off: close, toggle }] = useBoolean(false);
 
   return (
     <EuiPopover
@@ -39,7 +40,7 @@ export const FilterPopover = ({
       button={
         <EuiFilterButton
           iconType="arrowDown"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={toggle}
           isSelected={isOpen}
           numFilters={numFilters}
           hasActiveFilters={numActiveFilters > 0}
@@ -49,11 +50,15 @@ export const FilterPopover = ({
         </EuiFilterButton>
       }
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={close}
       panelPaddingSize="none"
     >
       <EuiSelectable options={options} onChange={onChange}>
-        {(list) => <div css={popoverContentCss}>{list}</div>}
+        {(list) => (
+          <EuiPanel paddingSize="none" css={selectableListCss}>
+            {list}
+          </EuiPanel>
+        )}
       </EuiSelectable>
     </EuiPopover>
   );

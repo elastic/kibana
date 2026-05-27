@@ -16,7 +16,10 @@ import {
 import {
   type LatestSourceWhereCondition,
   andWhere,
+  applyTimeRange,
+  fromIndexForSpace,
   inFilter,
+  isIndexNotFoundError,
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
@@ -58,7 +61,7 @@ export class EventClient {
     where = inFilter({ where, field: 'impact', values: options.impact });
 
     if (options.search) {
-      const escaped = options.search.toLowerCase().replace(/[*?]/g, '\\$&');
+      const escaped = options.search.toLowerCase().replace(/\\/g, '\\\\').replace(/[*?]/g, '\\$&');
       where = andWhere(
         where,
         esql.exp`TO_LOWER(${esql.col('title')}) LIKE ${esql.str(`*${escaped}*`)}`
@@ -88,7 +91,10 @@ export class EventClient {
   async findLatestPaginated(
     options: EventsPaginatedSearchOptions = {}
   ): Promise<PaginatedResponse<SigEvent>> {
-    const supersededIds = await this.findSupersededEventIds();
+    const supersededIds = await this.findSupersededEventIds({
+      from: options.from,
+      to: options.to,
+    });
 
     let where = this.buildWhere(options);
     if (supersededIds.size > 0) {
@@ -116,14 +122,16 @@ export class EventClient {
     });
   }
 
-  async findSupersededEventIds(): Promise<Set<string>> {
+  async findSupersededEventIds(
+    timeRange: { from?: string; to?: string } = {}
+  ): Promise<Set<string>> {
     const { space } = this.clients;
     const prevId = esql.col('previous_event_id');
 
-    const query = esql.from([EVENTS_DATA_STREAM]).where`${esql.col(
-      'kibana.space_ids'
-    )} == ${space} OR ${esql.col('kibana.space_ids')} IS NULL`
-      .where`${prevId} IS NOT NULL AND ${prevId} != ${esql.str('')}`
+    const baseQuery = fromIndexForSpace({ index: EVENTS_DATA_STREAM, space })
+      .where`${prevId} IS NOT NULL AND ${prevId} != ${esql.str('')}`;
+
+    const query = applyTimeRange({ query: baseQuery, ...timeRange })
       .pipe`STATS ids = VALUES(${prevId})`.keep('ids');
 
     try {
@@ -140,8 +148,11 @@ export class EventClient {
       const rawValue = response.values[0][idsIdx];
       const ids = Array.isArray(rawValue) ? rawValue : [rawValue];
       return new Set(ids.filter((v): v is string => typeof v === 'string'));
-    } catch {
-      return new Set();
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return new Set();
+      }
+      throw error;
     }
   }
 }

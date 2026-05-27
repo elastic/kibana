@@ -99,10 +99,10 @@ const eventsSearchRoute = createServerRoute({
       to: z.iso.datetime().optional(),
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
-      verdict: z.union([z.string(), z.array(z.string())]).optional(),
-      stream: z.union([z.string(), z.array(z.string())]).optional(),
-      impact: z.union([z.string(), z.array(z.string())]).optional(),
-      search: z.string().optional(),
+      verdict: z.union([z.string().max(50), z.array(z.string().max(50)).max(50)]).optional(),
+      stream: z.union([z.string().max(255), z.array(z.string().max(255)).max(50)]).optional(),
+      impact: z.union([z.string().max(50), z.array(z.string().max(50)).max(50)]).optional(),
+      search: z.string().max(500).optional(),
     }),
   }),
   handler: async ({
@@ -141,7 +141,7 @@ const eventsHistoryRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      id: z.string().max(255),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<{ hits: SigEvent[] }> => {
@@ -192,7 +192,7 @@ const eventsLifecycleRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      id: z.string().max(255),
     }),
   }),
   handler: async ({
@@ -216,13 +216,10 @@ const eventsLifecycleRoute = createServerRoute({
       return { detections: [], discoveries: [], verdicts: [], events: [] };
     }
 
-    const [discoveryResults, verdictResults] = await Promise.all([
-      Promise.all(discoveryIds.map((id) => getDiscoveryClient().findById(id))),
-      Promise.all(discoveryIds.map((id) => getVerdictClient().findByDiscoveryId(id))),
+    const [{ hits: discoveries }, { hits: verdicts }] = await Promise.all([
+      getDiscoveryClient().findByIds(discoveryIds),
+      getVerdictClient().findByDiscoveryIds(discoveryIds),
     ]);
-
-    const discoveries = discoveryResults.flatMap((r) => r.hits);
-    const verdicts = verdictResults.flatMap((r) => r.hits);
 
     return {
       detections: collectDetections(discoveries),
