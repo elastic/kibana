@@ -342,7 +342,7 @@ describe('CreateRecoveryEventsStep', () => {
 
       internalEsClient.esql.query.mockResolvedValue(createActiveGroupHashesResponse(['hash-1']));
       scopedEsClient.esql.query.mockRejectedValue(
-        // ts-expect-error: Not all params are needed for the test.
+        // @ts-expect-error: Not all params are needed for the test.
         new errors.ResponseError({ statusCode: 400 })
       );
 
