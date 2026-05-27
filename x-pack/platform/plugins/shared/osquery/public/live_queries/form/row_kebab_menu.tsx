@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useContext, useState, useMemo } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AddToCaseContextProvider } from '../../cases/add_to_cases';
@@ -156,12 +162,14 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
       <>
         <EuiPopover
           button={
-            <EuiButtonIcon
-              iconType="boxesVertical"
-              aria-label={kebabLabel}
-              onClick={toggle}
-              data-test-subj={`packQueriesTableKebab-${row.id ?? row.action_id}`}
-            />
+            <EuiToolTip content={kebabLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="boxesVertical"
+                aria-label={kebabLabel}
+                onClick={toggle}
+                data-test-subj={`packQueriesTableKebab-${row.id ?? row.action_id}`}
+              />
+            </EuiToolTip>
           }
           isOpen={isOpen}
           closePopover={close}

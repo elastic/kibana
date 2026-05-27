@@ -254,18 +254,19 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
             </EuiFlexItem>
             {showHelpIcon && (
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="pencil"
-                  size="xs"
-                  onClick={handleOpenPopover}
-                  title={openLabel}
-                  aria-label={openLabel}
-                  data-test-subj={testId('openInputButton')}
-                  css={css`
-                    inline-size: auto;
-                    block-size: auto;
-                  `}
-                />
+                <EuiToolTip content={openLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    size="xs"
+                    onClick={handleOpenPopover}
+                    aria-label={openLabel}
+                    data-test-subj={testId('openInputButton')}
+                    css={css`
+                      inline-size: auto;
+                      block-size: auto;
+                    `}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -288,7 +289,6 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                       size="xs"
                       onClick={handleHelpOnClick}
                       isSelected={showHelpContent}
-                      title={helpIconLabel}
                       aria-label={helpIconLabel}
                       disabled={!helpContent}
                       data-test-subj={testId('helpButton')}
@@ -356,7 +356,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
       </EuiPopover>
     ) : (
       <EuiText size="s" color="subdued" data-test-subj={testId('noMultipleArgs')}>
-        <EuiIcon type="warning" size="s" color="subdued" />{' '}
+        <EuiIcon type="warning" size="s" color="subdued" aria-hidden={true} />{' '}
         <FormattedMessage
           id="xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.noMultipleArgs"
           defaultMessage="Argument is only supported once per command"
