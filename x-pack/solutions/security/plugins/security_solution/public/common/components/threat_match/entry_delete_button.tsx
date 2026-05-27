@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { ThreatMappingEntry } from '../../../../common/api/detection_engine/model/rule_schema';
@@ -36,15 +36,17 @@ export const EntryDeleteButtonComponent = React.memo<EntryDeleteButtonProps>(
     }, [onDelete, entryIndex]);
 
     const button = (
-      <EuiButtonIcon
-        color="danger"
-        iconType="trash"
-        onClick={handleDelete}
-        isDisabled={isDisabled}
-        aria-label="entryDeleteButton"
-        className="itemEntryDeleteButton"
-        data-test-subj="itemEntryDeleteButton"
-      />
+      <EuiToolTip content="entryDeleteButton" disableScreenReaderOutput>
+        <EuiButtonIcon
+          color="danger"
+          iconType="trash"
+          onClick={handleDelete}
+          isDisabled={isDisabled}
+          aria-label="entryDeleteButton"
+          className="itemEntryDeleteButton"
+          data-test-subj="itemEntryDeleteButton"
+        />
+      </EuiToolTip>
     );
 
     if (entryIndex === 0 && itemIndex === 0) {

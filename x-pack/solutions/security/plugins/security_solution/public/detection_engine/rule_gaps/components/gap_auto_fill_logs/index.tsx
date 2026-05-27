@@ -211,11 +211,13 @@ export const GapAutoFillLogsFlyout = ({ isOpen, onClose }: GapAutoFillLogsFlyout
               <EuiButtonEmpty size="s" color="primary" onClick={toggleViewLogs}>
                 {i18n.GAP_AUTO_FILL_LOGS_VIEW_LOGS_BUTTON}
               </EuiButtonEmpty>
-              <EuiButtonIcon
-                onClick={toggleViewLogs}
-                aria-label={isExpanded ? 'Collapse' : 'Expand'}
-                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-              />
+              <EuiToolTip content={isExpanded ? 'Collapse' : 'Expand'} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  onClick={toggleViewLogs}
+                  aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                  iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                />
+              </EuiToolTip>
             </EuiFlexGroup>
           );
         },

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
-import { EuiLink, EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RELATED_INTEGRATIONS_HELP_ARIA_LABEL } from './translations';
@@ -26,11 +26,13 @@ export function RelatedIntegrationsHelpInfo(): JSX.Element {
   const { docLinks } = useKibana().services;
 
   const button = (
-    <EuiButtonIcon
-      iconType="question"
-      onClick={togglePopover}
-      aria-label={RELATED_INTEGRATIONS_HELP_ARIA_LABEL}
-    />
+    <EuiToolTip content={RELATED_INTEGRATIONS_HELP_ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="question"
+        onClick={togglePopover}
+        aria-label={RELATED_INTEGRATIONS_HELP_ARIA_LABEL}
+      />
+    </EuiToolTip>
   );
 
   return (
