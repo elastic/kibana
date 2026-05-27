@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import type { SigEvent } from '@kbn/streams-schema';
+import type { SigEvent, EventLifecycleResponse } from '@kbn/streams-schema';
 import type { PaginatedResponse } from '@kbn/streams-plugin/common';
 import { useKibana } from '../use_kibana';
 import { useFetchErrorToast } from '../use_fetch_error_toast';
@@ -15,9 +15,20 @@ import { useFetchErrorToast } from '../use_fetch_error_toast';
 interface UseFetchSigEventsParams {
   from: string | number;
   to: string | number;
+  verdict?: string[];
+  stream?: string[];
+  impact?: string[];
+  search?: string;
 }
 
-export const useFetchSigEvents = ({ from, to }: UseFetchSigEventsParams) => {
+export const useFetchSigEvents = ({
+  from,
+  to,
+  verdict,
+  stream,
+  impact,
+  search,
+}: UseFetchSigEventsParams) => {
   const {
     dependencies: {
       start: {
@@ -29,12 +40,28 @@ export const useFetchSigEvents = ({ from, to }: UseFetchSigEventsParams) => {
 
   const [pagination, setPagination] = useState({ page: 1, perPage: 25 });
 
+  const verdictKey = verdict?.join(',') ?? '';
+  const streamKey = stream?.join(',') ?? '';
+  const impactKey = impact?.join(',') ?? '';
+  const searchKey = search ?? '';
+
   useEffect(() => {
     setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
-  }, [from, to]);
+  }, [from, to, verdictKey, streamKey, impactKey, searchKey]);
 
-  const fetchSigEvents = useCallback(
-    async ({ signal }: QueryFunctionContext): Promise<PaginatedResponse<SigEvent>> => {
+  const query = useQuery<PaginatedResponse<SigEvent>, Error>({
+    queryKey: [
+      'sigEvents',
+      pagination.page,
+      pagination.perPage,
+      from,
+      to,
+      verdictKey,
+      streamKey,
+      impactKey,
+      searchKey,
+    ],
+    queryFn: async ({ signal }: QueryFunctionContext): Promise<PaginatedResponse<SigEvent>> => {
       return streamsRepositoryClient.fetch('GET /internal/sig_events/events', {
         params: {
           query: {
@@ -42,24 +69,22 @@ export const useFetchSigEvents = ({ from, to }: UseFetchSigEventsParams) => {
             perPage: pagination.perPage,
             from: new Date(from).toISOString(),
             to: new Date(to).toISOString(),
+            ...(verdict?.length ? { verdict } : {}),
+            ...(stream?.length ? { stream } : {}),
+            ...(impact?.length ? { impact } : {}),
+            ...(searchKey ? { search: searchKey } : {}),
           },
         },
         signal: signal ?? null,
       });
     },
-    [streamsRepositoryClient, pagination, from, to]
-  );
-
-  const query = useQuery<PaginatedResponse<SigEvent>, Error>({
-    queryKey: ['sigEvents', pagination.page, pagination.perPage, from, to],
-    queryFn: fetchSigEvents,
     onError: showFetchErrorToast,
   });
 
   return { ...query, pagination, setPagination };
 };
 
-export const useFetchSigEventHistory = (eventId: string | undefined) => {
+export const useFetchEventLifecycle = (eventId: string | undefined) => {
   const {
     dependencies: {
       start: {
@@ -69,10 +94,10 @@ export const useFetchSigEventHistory = (eventId: string | undefined) => {
   } = useKibana();
   const showFetchErrorToast = useFetchErrorToast();
 
-  return useQuery<{ hits: SigEvent[] }, Error>({
-    queryKey: ['sigEventHistory', eventId],
+  return useQuery<EventLifecycleResponse, Error>({
+    queryKey: ['sigEventLifecycle', eventId],
     queryFn: async ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /internal/sig_events/events/{id}/history', {
+      return streamsRepositoryClient.fetch('GET /internal/sig_events/events/{id}/lifecycle', {
         params: { path: { id: eventId! } },
         signal: signal ?? null,
       });

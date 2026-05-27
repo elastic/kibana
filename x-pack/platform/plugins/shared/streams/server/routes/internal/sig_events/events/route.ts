@@ -5,12 +5,81 @@
  * 2.0.
  */
 
-import { sigEventSchema, type SigEvent } from '@kbn/streams-schema';
+import {
+  sigEventSchema,
+  type SigEvent,
+  type Discovery,
+  type LifecycleDetection,
+  type EventLifecycleResponse,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { PaginatedResponse } from '../../../../lib/sig_events/query_utils';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+
+const toArray = (val: string | string[] | undefined): string[] | undefined =>
+  val === undefined ? undefined : Array.isArray(val) ? val : [val];
+
+const MAX_CHAIN_DEPTH = 10;
+
+interface EventChain {
+  events: SigEvent[];
+  discoveryIds: string[];
+}
+
+const walkEventChain = async ({
+  eventId,
+  findById,
+}: {
+  eventId: string;
+  findById: (id: string) => Promise<{ hits: SigEvent[] }>;
+}): Promise<EventChain> => {
+  const visited = new Set<string>();
+  const events: SigEvent[] = [];
+  const discoveryIds = new Set<string>();
+
+  let currentId: string | undefined = eventId;
+
+  while (currentId && !visited.has(currentId) && visited.size < MAX_CHAIN_DEPTH) {
+    visited.add(currentId);
+
+    const { hits } = await findById(currentId);
+    if (hits.length === 0) break;
+
+    events.push(...hits);
+
+    const latest = hits[hits.length - 1];
+    if (latest.discovery_id) {
+      discoveryIds.add(latest.discovery_id);
+    }
+    currentId = latest.previous_event_id;
+  }
+
+  return { events, discoveryIds: [...discoveryIds] };
+};
+
+const collectDetections = (discoveries: Discovery[]): LifecycleDetection[] => {
+  const seen = new Set<string>();
+  const detections: LifecycleDetection[] = [];
+
+  for (const discovery of discoveries) {
+    for (const det of discovery.detections ?? []) {
+      const { detection_id, rule_name, stream_name, change_point_type, detected_at } = det;
+      if (!detection_id || !detected_at || seen.has(detection_id)) continue;
+      seen.add(detection_id);
+      detections.push({
+        detection_id,
+        rule_name,
+        stream_name,
+        change_point_type,
+        detected_at,
+      });
+    }
+  }
+
+  return detections;
+};
 
 const eventsSearchRoute = createServerRoute({
   endpoint: 'GET /internal/sig_events/events',
@@ -30,6 +99,10 @@ const eventsSearchRoute = createServerRoute({
       to: z.iso.datetime().optional(),
       page: z.coerce.number().int().min(1).optional(),
       perPage: z.coerce.number().int().min(1).max(1000).optional(),
+      verdict: z.union([z.string(), z.array(z.string())]).optional(),
+      stream: z.union([z.string(), z.array(z.string())]).optional(),
+      impact: z.union([z.string(), z.array(z.string())]).optional(),
+      search: z.string().optional(),
     }),
   }),
   handler: async ({
@@ -42,7 +115,15 @@ const eventsSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return getEventClient().findLatestPaginated(params.query);
+    const { verdict, stream, impact, search, ...rest } = params.query;
+
+    return getEventClient().findLatestPaginated({
+      ...rest,
+      verdict: toArray(verdict),
+      stream: toArray(stream),
+      impact: toArray(impact),
+      search: search || undefined,
+    });
   },
 });
 
@@ -96,8 +177,65 @@ const eventsBulkCreateRoute = createServerRoute({
   },
 });
 
+const eventsLifecycleRoute = createServerRoute({
+  endpoint: 'GET /internal/sig_events/events/{id}/lifecycle',
+  options: {
+    access: 'internal',
+    summary: 'Get event lifecycle',
+    description:
+      'Get the full lifecycle chain for a significant event: detections, discoveries, verdicts, and event versions.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string(),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<EventLifecycleResponse> => {
+    const { getEventClient, getDiscoveryClient, getVerdictClient, licensing, uiSettingsClient } =
+      await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const eventClient = getEventClient();
+    const { events, discoveryIds } = await walkEventChain({
+      eventId: params.path.id,
+      findById: (id) => eventClient.findById(id),
+    });
+
+    if (events.length === 0) {
+      return { detections: [], discoveries: [], verdicts: [], events: [] };
+    }
+
+    const [discoveryResults, verdictResults] = await Promise.all([
+      Promise.all(discoveryIds.map((id) => getDiscoveryClient().findById(id))),
+      Promise.all(discoveryIds.map((id) => getVerdictClient().findByDiscoveryId(id))),
+    ]);
+
+    const discoveries = discoveryResults.flatMap((r) => r.hits);
+    const verdicts = verdictResults.flatMap((r) => r.hits);
+
+    return {
+      detections: collectDetections(discoveries),
+      discoveries,
+      verdicts,
+      events,
+    };
+  },
+});
+
 export const internalSigEventsEventsRoutes = {
   ...eventsSearchRoute,
   ...eventsHistoryRoute,
+  ...eventsLifecycleRoute,
   ...eventsBulkCreateRoute,
 };

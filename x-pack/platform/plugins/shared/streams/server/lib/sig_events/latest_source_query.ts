@@ -37,7 +37,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 // Known typing gap in the ES client — centralized here to avoid scattered assertions.
 // Uses `toEsqlRequest` so named-parameter holes (`${{ name: value }}`) are bound
 // at the protocol level rather than inlined into the query string.
-const queryEsql = async ({
+export const queryEsql = async ({
   esClient,
   query,
 }: {
@@ -104,6 +104,26 @@ const executeCountQuery = async ({
 };
 
 export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHole;
+
+export const andWhere = (
+  current: LatestSourceWhereCondition | undefined,
+  next: LatestSourceWhereCondition
+): LatestSourceWhereCondition => {
+  return current ? esql.exp`${current} AND ${next}` : next;
+};
+
+export const inFilter = ({
+  where,
+  field,
+  values,
+}: {
+  where: LatestSourceWhereCondition | undefined;
+  field: string;
+  values: string[] | undefined;
+}): LatestSourceWhereCondition | undefined => {
+  if (!values?.length) return where;
+  return andWhere(where, esql.exp`${esql.col(field)} IN (${values.map((v) => esql.str(v))})`);
+};
 
 interface BuildLatestSourceBaseQueryArgs {
   space: string;
