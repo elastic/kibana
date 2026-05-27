@@ -27,6 +27,7 @@ const outputSchema = z.object({
 export const callSiteProceedStepDefinition = createServerStepDefinition({
   id: 'call_site.proceed',
   label: 'Proceed with LLM call',
+  requiresCapabilities: ['proceedFn'],
   description:
     'Suspends the workflow, performs the wrapped LLM call, and resumes with the response.',
   category: StepCategory.Ai,

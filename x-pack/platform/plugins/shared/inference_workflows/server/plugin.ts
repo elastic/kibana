@@ -56,6 +56,7 @@ export class InferenceWorkflowsServerPlugin
         chained: true,
         inlineExecution: true,
       },
+      providesCapabilities: ['anonymizationContext'],
     });
     workflowsExtensions.registerTriggerDefinition({
       id: AFTER_COMPLETION_TRIGGER_ID,
@@ -66,6 +67,7 @@ export class InferenceWorkflowsServerPlugin
         chained: true,
         inlineExecution: true,
       },
+      providesCapabilities: ['anonymizationContext'],
     });
     workflowsExtensions.registerTriggerDefinition({
       id: AROUND_COMPLETION_TRIGGER_ID,
@@ -76,6 +78,7 @@ export class InferenceWorkflowsServerPlugin
         chained: false,
         inlineExecution: true,
       },
+      providesCapabilities: ['proceedFn', 'anonymizationContext'],
     });
 
     // Register AI steps (require inference at start time via coreSetup.getStartServices())

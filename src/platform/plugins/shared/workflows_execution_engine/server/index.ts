@@ -33,3 +33,8 @@ export type {
 export type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
 export { resolveWorkflowEventsModeFromOn } from './trigger_events/lib/resolve_workflow_events_mode_from_on';
+
+export {
+  assertWorkflowLinearForSync,
+  SyncModeNotSupportedError,
+} from './execution_functions/assert_workflow_linear_for_sync';

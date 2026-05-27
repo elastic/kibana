@@ -13,6 +13,8 @@ export type {
   HookFailurePolicy,
   TriggerSyncBlock,
 } from './trigger_registry/types';
+export type { KnownCapabilities, CapabilityKey } from './capability_registry/types';
+export { capabilitySchemas } from './capability_registry/schemas';
 export { EVENT_FIELD_PREFIX } from './trigger_registry/constants';
 export { DataMapStepTypeId } from './steps/data';
 export {

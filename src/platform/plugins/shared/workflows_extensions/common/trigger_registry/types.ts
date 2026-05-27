@@ -8,6 +8,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import type { CapabilityKey } from '../capability_registry/types';
 
 /**
  * How the hook behaves when a subscribed handler returns an error.
@@ -70,4 +71,11 @@ export interface CommonTriggerDefinition<
    * via `WorkflowsClient.invokeHook` in addition to the normal async `emitEvent` path.
    */
   sync?: TriggerSyncBlock<OutputSchema>;
+  /**
+   * Capability keys this trigger makes available to step handlers at invocation time.
+   * Steps that declare a requiresCapabilities entry must be a subset of this list on
+   * the trigger they subscribe to; the engine validates set inclusion at registration.
+   * Defaults to empty (no capabilities provided).
+   */
+  providesCapabilities?: readonly CapabilityKey[];
 }

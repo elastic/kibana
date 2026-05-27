@@ -56,6 +56,7 @@ export const createAiPiiStepDefinition = () =>
   createServerStepDefinition({
     id: 'ai.pii',
     label: 'Anonymize PII',
+    requiresCapabilities: ['anonymizationContext'],
     description:
       'Detects and replaces PII in text or message arrays with deterministic HMAC tokens. ' +
       'Salt and token map are accessed via the AnonymizationContext capability — they never ' +

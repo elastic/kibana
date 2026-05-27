@@ -14,6 +14,7 @@ import type {
   EsWorkflow,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
+  WorkflowYaml,
 } from '@kbn/workflows';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
@@ -42,6 +43,7 @@ import {
   removeConflictingIds,
 } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
+import { validateWorkflowOnRegister } from '../lib/validate_workflow_on_register';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
@@ -175,6 +177,24 @@ export class WorkflowCrudService {
       spaceId,
       triggerDefinitions,
     });
+
+    if (definition) {
+      const registrationErrors = validateWorkflowOnRegister(
+        baseId,
+        definition,
+        triggerDefinitions,
+        (stepType) => this.deps.workflowsExtensions?.getStepDefinition(stepType)
+      );
+      if (registrationErrors.length > 0) {
+        workflowData.valid = false;
+        workflowData.definition = null;
+        this.deps.logger.warn(
+          `[createWorkflow] Workflow "${baseId}" failed registration validation: ${registrationErrors
+            .map((e) => e.message)
+            .join('; ')}`
+        );
+      }
+    }
 
     let id = baseId;
     if (workflow.id) {
@@ -406,6 +426,18 @@ export class WorkflowCrudService {
         validationErrors.push(...yamlResult.validationErrors);
         shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
 
+        const regResult = this.applyRegistrationChecks(
+          id,
+          yamlResult,
+          triggerDefinitions,
+          updatedData
+        );
+        if (regResult) {
+          validationErrors.push(...regResult.errors);
+          updatedData = regResult.updatedData;
+          shouldUpdateScheduler = true;
+        }
+
         if (
           yamlResult.validationErrors.length === 0 &&
           yamlResult.updatedDataPatch.valid &&
@@ -494,6 +526,39 @@ export class WorkflowCrudService {
       logger: this.deps.logger,
       spaceId,
     });
+  }
+
+  private applyRegistrationChecks(
+    workflowId: string,
+    yamlResult: ReturnType<typeof applyYamlUpdate>,
+    triggerDefinitions: ReturnType<
+      NonNullable<WorkflowCrudDeps['workflowsExtensions']>['getAllTriggerDefinitions']
+    >,
+    currentData: Partial<WorkflowProperties>
+  ): { errors: string[]; updatedData: Partial<WorkflowProperties> } | null {
+    if (!yamlResult.validationErrors.length && yamlResult.updatedDataPatch.valid) {
+      const parsedDefinition = yamlResult.updatedDataPatch.definition;
+      if (parsedDefinition) {
+        const registrationErrors = validateWorkflowOnRegister(
+          workflowId,
+          parsedDefinition as WorkflowYaml,
+          triggerDefinitions,
+          (stepType) => this.deps.workflowsExtensions?.getStepDefinition(stepType)
+        );
+        if (registrationErrors.length > 0) {
+          return {
+            errors: registrationErrors.map((e) => e.message),
+            updatedData: {
+              ...currentData,
+              ...yamlResult.updatedDataPatch,
+              valid: false,
+              definition: null,
+            },
+          };
+        }
+      }
+    }
+    return null;
   }
 
   private async getEsWorkflowForScheduler(id: string, spaceId: string): Promise<EsWorkflow | null> {

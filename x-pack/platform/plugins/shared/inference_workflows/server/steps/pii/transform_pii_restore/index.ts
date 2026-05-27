@@ -35,6 +35,7 @@ export const createTransformPiiRestoreStepDefinition = () =>
   createServerStepDefinition({
     id: 'transform.pii_restore',
     label: 'Restore PII Tokens',
+    requiresCapabilities: ['anonymizationContext'],
     description:
       'Replaces anonymization tokens in text or message arrays with their original values. ' +
       'The token map is accessed via the AnonymizationContext capability — it never appears ' +

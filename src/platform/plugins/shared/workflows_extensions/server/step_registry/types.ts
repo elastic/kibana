@@ -12,6 +12,7 @@ import type { OrStringRecursive } from '@kbn/utility-types';
 import type { StepContext } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../common';
+import type { CapabilityKey } from '../../common/capability_registry/types';
 
 /**
  * Definition of a server-side workflow step extension.
@@ -67,6 +68,16 @@ export interface ServerStepDefinition<
    * disrupt the cancellation flow.
    */
   onCancel?: OnCancelHandler<Input, Config>;
+
+  /**
+   * Capability keys this step requires at invocation time.
+   * At workflow registration the engine validates that every key listed here is
+   * present in the subscribing trigger's `providesCapabilities`. At dispatch time
+   * each listed key's value is parsed via its capabilitySchemas entry; a parse
+   * failure surfaces as step.failed with reason capability_validation.
+   * Defaults to empty (no capabilities required).
+   */
+  requiresCapabilities?: readonly CapabilityKey[];
 }
 
 /**
