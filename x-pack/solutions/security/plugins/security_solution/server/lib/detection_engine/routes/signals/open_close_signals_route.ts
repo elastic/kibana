@@ -253,7 +253,7 @@ const collectMatchingAlertIds = async (
   try {
     const ids: string[] = [];
     let searchAfter: estypes.SortResults | undefined;
-    let capReached = false;
+    const capReached = false;
 
     while (!capReached) {
       const remaining = MAX_ALERTS_TO_CLOSE_PER_REQUEST - ids.length;
