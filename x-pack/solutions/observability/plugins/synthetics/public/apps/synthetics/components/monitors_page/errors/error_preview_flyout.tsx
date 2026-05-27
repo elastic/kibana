@@ -111,13 +111,15 @@ export const ErrorPreviewFlyout = ({
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={error.errorMessage}>
                 {(copy) => (
-                  <EuiButtonIcon
-                    data-test-subj="syntheticsErrorPreviewFlyoutButton"
-                    iconType="copyClipboard"
-                    onClick={copy}
-                    aria-label={COPY_LABEL}
-                    size="xs"
-                  />
+                  <EuiToolTip content={COPY_LABEL} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      data-test-subj="syntheticsErrorPreviewFlyoutButton"
+                      iconType="copyClipboard"
+                      onClick={copy}
+                      aria-label={COPY_LABEL}
+                      size="xs"
+                    />
+                  </EuiToolTip>
                 )}
               </EuiCopy>
             </EuiFlexItem>

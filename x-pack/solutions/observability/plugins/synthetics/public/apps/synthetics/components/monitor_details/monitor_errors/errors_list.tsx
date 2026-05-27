@@ -301,27 +301,29 @@ export const ErrorsList = ({
       name: '',
       width: '40px',
       render: (item: PingState) => (
-        <EuiButtonIcon
-          data-test-subj={`syntheticsErrorPreview-${item.state?.id}`}
-          iconType="eye"
-          aria-label={PREVIEW_LABEL}
-          onClick={(evt: MouseEvent) => {
-            evt.stopPropagation();
-            setPreviewItem({
-              timestamp: item.state?.started_at ?? item['@timestamp'] ?? '',
-              monitorName: item.monitor?.name ?? '',
-              monitorType: item.monitor?.type ?? '',
-              configId: item.config_id ?? configId ?? '',
-              stateId: item.state?.id ?? '',
-              checkGroup: item.monitor?.check_group ?? '',
-              locationName: item.observer?.geo?.name ?? item.observer?.name ?? '',
-              locationId: item.observer?.name ?? '',
-              durationMs: Number(item.state?.duration_ms) || 0,
-              errorMessage: item.error?.message ?? '',
-            });
-          }}
-          size="xs"
-        />
+        <EuiToolTip content={PREVIEW_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj={`syntheticsErrorPreview-${item.state?.id}`}
+            iconType="eye"
+            aria-label={PREVIEW_LABEL}
+            onClick={(evt: MouseEvent) => {
+              evt.stopPropagation();
+              setPreviewItem({
+                timestamp: item.state?.started_at ?? item['@timestamp'] ?? '',
+                monitorName: item.monitor?.name ?? '',
+                monitorType: item.monitor?.type ?? '',
+                configId: item.config_id ?? configId ?? '',
+                stateId: item.state?.id ?? '',
+                checkGroup: item.monitor?.check_group ?? '',
+                locationName: item.observer?.geo?.name ?? item.observer?.name ?? '',
+                locationId: item.observer?.name ?? '',
+                durationMs: Number(item.state?.duration_ms) || 0,
+                errorMessage: item.error?.message ?? '',
+              });
+            }}
+            size="xs"
+          />
+        </EuiToolTip>
       ),
     },
   ];

@@ -78,12 +78,17 @@ export const ErrorGroupsList = ({
       width: '40px',
       isExpander: true,
       render: (item: ErrorGroup) => (
-        <EuiButtonIcon
-          data-test-subj={`syntheticsErrorGroupExpand-${item.name}`}
-          onClick={() => toggleRow(item.name)}
-          aria-label={expandedRows[item.name] ? COLLAPSE_LABEL : EXPAND_LABEL}
-          iconType={expandedRows[item.name] ? 'arrowDown' : 'arrowRight'}
-        />
+        <EuiToolTip
+          content={expandedRows[item.name] ? COLLAPSE_LABEL : EXPAND_LABEL}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj={`syntheticsErrorGroupExpand-${item.name}`}
+            onClick={() => toggleRow(item.name)}
+            aria-label={expandedRows[item.name] ? COLLAPSE_LABEL : EXPAND_LABEL}
+            iconType={expandedRows[item.name] ? 'arrowDown' : 'arrowRight'}
+          />
+        </EuiToolTip>
       ),
     },
     {
@@ -315,13 +320,15 @@ const ExpandedGroupRow = ({
       name: ACTIONS_LABEL,
       width: '40px',
       render: (item: ErrorGroupItem) => (
-        <EuiButtonIcon
-          data-test-subj={`syntheticsErrorPreview-${item.stateId}`}
-          iconType="eye"
-          aria-label={PREVIEW_LABEL}
-          onClick={() => onPreview(item)}
-          size="xs"
-        />
+        <EuiToolTip content={PREVIEW_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj={`syntheticsErrorPreview-${item.stateId}`}
+            iconType="eye"
+            aria-label={PREVIEW_LABEL}
+            onClick={() => onPreview(item)}
+            size="xs"
+          />
+        </EuiToolTip>
       ),
     },
   ];
