@@ -735,12 +735,17 @@ export const DatasetDetailPage: React.FC = () => {
                           </EuiButton>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            aria-label={i18n.DELETE_EXAMPLE_BUTTON}
-                            iconType="trash"
-                            color="danger"
-                            onClick={() => setDeletingExample(selectedExample)}
-                          />
+                          <EuiToolTip
+                            content={i18n.DELETE_EXAMPLE_BUTTON}
+                            disableScreenReaderOutput
+                          >
+                            <EuiButtonIcon
+                              aria-label={i18n.DELETE_EXAMPLE_BUTTON}
+                              iconType="trash"
+                              color="danger"
+                              onClick={() => setDeletingExample(selectedExample)}
+                            />
+                          </EuiToolTip>
                         </EuiFlexItem>
                       </>
                     ) : null}
