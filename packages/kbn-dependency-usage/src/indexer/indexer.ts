@@ -42,7 +42,7 @@ export function discoverPlugins(searchPaths: string[]): string[] {
 }
 
 // ---------------------------------------------------------------------------
-// Shared context (loaded once, reused by all parallel workers)
+// Shared context (loaded once, reused across all plugins in a run)
 // ---------------------------------------------------------------------------
 
 export interface SharedContext {
@@ -222,7 +222,7 @@ export const INDEX_TEMPLATE = {
 
 function buildHeaders(opts: IndexerOptions): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (opts.apiKey) headers['Authorization'] = `ApiKey ${opts.apiKey}`;
+  if (opts.apiKey) headers.Authorization = `ApiKey ${opts.apiKey}`;
   return headers;
 }
 
