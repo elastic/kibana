@@ -10,6 +10,7 @@ import {
   ENDPOINT_ARTIFACT_LISTS,
   EXCEPTION_LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
+import { recurse } from 'cypress-recurse';
 import { ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE } from '../../../../../common/endpoint/constants';
 import {
   APP_ALERTS_PATH,
@@ -28,7 +29,7 @@ import {
   removeAllArtifacts,
 } from '../../tasks/artifacts';
 import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_page';
-import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import type { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../types';
 import { performUserActions, type FormAction } from '../../tasks/perform_user_actions';
 import { getArtifactListEmptyStateAddButton } from '../../screens';
@@ -326,6 +327,19 @@ describe(
       });
 
       describe('on Alerts page', () => {
+        const clearPrefilledConditions = () =>
+          recurse(
+            () => {
+              cy.getByTestSubj('builderItemEntryDeleteButton').first().click();
+              return cy.getByTestSubj('builderItemEntryDeleteButton').first();
+            },
+
+            // recurse until first button is disabled
+            (firstDeleteButton) => firstDeleteButton.prop('disabled') === true,
+
+            { delay: 100 }
+          );
+
         it('should create 2 artifacts when using 1 OR operator during CREATE', () => {
           cy.intercept('POST', EXCEPTION_LIST_ITEM_URL).as('createExceptionItem');
 
@@ -335,7 +349,10 @@ describe(
           cy.getByTestSubj('timeline-context-menu-button').first().click();
           cy.getByTestSubj('add-endpoint-exception-menu-item').click();
 
+          clearPrefilledConditions();
+
           performUserActions(artifactNameActions);
+          performUserActions(firstConditionActions);
 
           addConditionWithOR('agent.type', 'endpoint');
 
@@ -352,8 +369,8 @@ describe(
             .should('have.length', 2)
             .each((card) => expect(card).to.have.text('Endpoint exception name'));
 
-          // only manually added conditions are checked, others come from the alert
-          shouldHaveConditionsOnScreen(['AND agent.typeIS endpoint']);
+          // and different conditions
+          shouldHaveConditionsOnScreen(['AND agent.versionIS 1234', 'AND agent.typeIS endpoint']);
         });
 
         it('should create 3 artifacts when using 2 OR operators during CREATE', () => {
@@ -365,7 +382,10 @@ describe(
           cy.getByTestSubj('timeline-context-menu-button').first().click();
           cy.getByTestSubj('add-endpoint-exception-menu-item').click();
 
+          clearPrefilledConditions();
+
           performUserActions(artifactNameActions);
+          performUserActions(firstConditionActions);
 
           addConditionWithOR('agent.type', 'endpoint');
           addConditionWithOR('host.user.email', 'cheese');
@@ -383,8 +403,9 @@ describe(
             .should('have.length', 3)
             .each((card) => expect(card).to.have.text('Endpoint exception name'));
 
-          // only manually added conditions are checked, others come from the alert
+          // and different conditions
           shouldHaveConditionsOnScreen([
+            'AND agent.versionIS 1234',
             'AND agent.typeIS endpoint',
             'AND host.user.emailIS cheese',
           ]);
