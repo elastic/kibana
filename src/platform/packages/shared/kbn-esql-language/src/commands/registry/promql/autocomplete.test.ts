@@ -525,9 +525,19 @@ describe('aggregation functions (by clause)', () => {
     await expectPromqlSuggestions('PROMQL sum ', {
       textsContain: [promqlByCompleteItem.text, ...numericFields.map((name) => `(${name})`)],
       labelsContain: ['avg', 'rate'],
+      labelsNotContain: [promqlLabelSelectorItem.label],
       textsNotContain: [pipeCompleteItem.text],
     });
   });
+
+  test.each(['sum', 'rate'])(
+    'does not suggest selector after function name %s without args',
+    async (functionName) => {
+      await expectPromqlSuggestions(`PROMQL ${functionName} `, {
+        labelsNotContain: [promqlLabelSelectorItem.label],
+      });
+    }
+  );
 
   test('suggests expression items in second paren of pre-grouping form', async () => {
     const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);

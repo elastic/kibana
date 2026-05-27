@@ -272,12 +272,18 @@ function resolveAfterQueryPosition(
     undefined,
     textBeforeCursorArg
   );
-  const expression = root.expression;
+  const { expression } = root;
+  const isBareMetricSelector =
+    expression?.type === 'selector' &&
+    expression.metric &&
+    !expression.labelMap &&
+    !expression.duration &&
+    !getPromqlFunctionDefinition(expression.metric.name);
 
   return {
     ...topLevelPosition,
     type: 'after_query',
-    ...(expression?.type === 'selector' ? { selector: expression } : {}),
+    ...(isBareMetricSelector ? { selector: expression } : {}),
   };
 }
 

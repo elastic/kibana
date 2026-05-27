@@ -67,9 +67,7 @@ function suggestAfterQuery(input: SuggestionContext): ISuggestionItem[] {
     canAddGrouping: !!position.canAddGrouping,
   });
 
-  return position.selector && !position.selector.labelMap && !position.selector.duration
-    ? [promqlLabelSelectorItem, ...suggestions]
-    : suggestions;
+  return position.selector ? [promqlLabelSelectorItem, ...suggestions] : suggestions;
 }
 
 /** Suggests next tokens while cursor is inside query text. */
