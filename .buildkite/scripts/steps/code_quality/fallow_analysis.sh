@@ -42,7 +42,6 @@ FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
   --format markdown \
   --quiet \
   2>&1)
-FALLOW_EXIT=$?
 set -e
 
 for owner in "${FALLOW_OWNERS[@]}"; do
