@@ -14,13 +14,13 @@ import type {
   RecoveryType,
   StepDefinition,
 } from '../types';
-import { getStepIds } from '../use_compose_discover_state';
+import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { ComposeFormValues } from '../compose_form_types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
+import { RULE_BUILDER_REGISTRY } from '../rule_builder';
 import { AlertConditionStep } from './alert_condition_step';
 import { RecoveryConditionStep } from './recovery_condition_step';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
-import { NotificationsStep } from './notifications_step';
 
 interface ComposeDiscoverFormProps {
   state: ComposeDiscoverState;
@@ -28,6 +28,9 @@ interface ComposeDiscoverFormProps {
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  builderType?: string;
+  builderState?: unknown;
+  onBuilderStateChange?: (state: unknown) => void;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -44,6 +47,14 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         onKindChange={props.onKindChange}
       />
     ),
+    validate: (_methods, s) => s.queryCommitted,
+  },
+  builderCondition: {
+    id: 'builderCondition',
+    title: i18n.translate('xpack.alertingV2.composeDiscover.step.builderCondition', {
+      defaultMessage: 'Alert Condition',
+    }),
+    render: () => null,
     validate: (_methods, s) => s.queryCommitted,
   },
   recoveryCondition: {
@@ -67,17 +78,37 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     render: () => <DetailsAndArtifactsStep />,
     validate: async (methods) => methods.trigger(['metadata.name']),
   },
-  notifications: {
-    id: 'notifications',
-    title: i18n.translate('xpack.alertingV2.composeDiscover.notifications.stepTitle', {
-      defaultMessage: 'Notifications',
-    }),
-    render: () => <NotificationsStep />,
-  },
 };
 
-export const getSteps = (isAlert: boolean): StepDefinition[] =>
-  getStepIds(isAlert).map((id) => STEP_REGISTRY[id]);
+export const getSteps = (isAlert: boolean, builderType?: string): StepDefinition[] => {
+  const ids = builderType ? getBuilderStepIds(isAlert) : getStepIds(isAlert);
+  return ids.map((id) => {
+    const base = STEP_REGISTRY[id];
+    if (id === 'builderCondition' && builderType) {
+      const definition = RULE_BUILDER_REGISTRY[builderType];
+      if (definition) {
+        return {
+          ...base,
+          title: definition.stepTitle,
+          render: (props) => {
+            if (!props.builderState || !props.onBuilderStateChange) return null;
+            return definition.renderStep({
+              state: props.state,
+              dispatch: props.dispatch,
+              services: props.services,
+              builderState: props.builderState,
+              onBuilderStateChange: props.onBuilderStateChange,
+            });
+          },
+          validate: definition.validate
+            ? (_methods, s, bs) => definition.validate!(s, bs)
+            : base.validate,
+        };
+      }
+    }
+    return base;
+  });
+};
 
 export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   state,
@@ -85,14 +116,19 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   services,
   onRecoveryTypeChange,
   onKindChange,
+  builderType,
+  builderState,
+  onBuilderStateChange,
 }) => {
   const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
-  const steps = getSteps(isAlert);
+  const steps = getSteps(isAlert, builderType);
   return steps[state.step].render({
     state,
     dispatch,
     services,
     onRecoveryTypeChange,
     onKindChange,
+    builderState,
+    onBuilderStateChange,
   });
 };
