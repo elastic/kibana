@@ -16,7 +16,7 @@ tags:
   - knowledge-indicators
   - onboarding
 settings:
-  timeout: "20m"
+  timeout: "30m"
   concurrency:
     key: "streams-ki-onboarding-{{ inputs.streamName }}"
     strategy: drop
@@ -95,6 +95,9 @@ steps:
       queriesTokensUsed: {}
       featuresConnectorUsed: ""
       queriesConnectorUsed: ""
+      memoryTriggered: false
+      memorySkipped: false
+      memoryReason: ""
 
   # -----------------------------------------------------------------------
   # Step 1: Recency check — auto-skip features if recently identified.
@@ -196,6 +199,12 @@ steps:
           body:
             features: "${{ variables.discoveredFeatures }}"
             queries: "${{ variables.generatedQueries }}"
+      - name: save_memory_output
+        type: data.set
+        with:
+          memoryTriggered: true
+          memorySkipped: "${{ steps.generate_memory.output.skipped }}"
+          memoryReason: "${{ steps.generate_memory.output.reason }}"
   # -----------------------------------------------------------------------
   # Step 5: Output summary
   # -----------------------------------------------------------------------
@@ -211,3 +220,6 @@ steps:
       queriesConnectorUsed: "${{ variables.queriesConnectorUsed }}"
       persistedQueries: "${{ variables.persistedQueries }}"
       queriesTokensUsed: "${{ variables.queriesTokensUsed }}"
+      memoryTriggered: "${{ variables.memoryTriggered }}"
+      memorySkipped: "${{ variables.memorySkipped }}"
+      memoryReason: "${{ variables.memoryReason }}"
