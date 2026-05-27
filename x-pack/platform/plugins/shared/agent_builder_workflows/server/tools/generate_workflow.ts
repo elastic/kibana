@@ -38,6 +38,14 @@ const generateWorkflowSchema = z.object({
     .string()
     .optional()
     .describe('(optional) Additional instructions to steer the generation (system-prompt extras).'),
+  workflowId: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) A unique workflow ID (lowercase alphanumeric and hyphens, 3-255 chars, matching /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/). ' +
+        'Only used on creation (when no `attachmentId` is provided). When set, this ID is stored with the attachment and used as the persisted workflow ID on save. ' +
+        'Use this when the workflow will be referenced by other resources (e.g. action policy destinations). On edits, the existing attachment workflowId is preserved.'
+    ),
 });
 
 export const generateWorkflowTool = ({
@@ -92,7 +100,7 @@ And you should **not**:
     `),
     schema: generateWorkflowSchema,
     handler: async (
-      { query, attachmentId, context: workflowContext, instructions },
+      { query, attachmentId, context: workflowContext, instructions, workflowId },
       toolContext
     ) => {
       const { modelProvider, logger, request, spaceId, attachments } = toolContext;
@@ -148,7 +156,7 @@ And you should **not**:
           beforeYaml,
           afterYaml,
           proposalId,
-          workflowId: sourceData?.workflowId,
+          workflowId: sourceData?.workflowId ?? workflowId,
           name: workflow.name,
           description: query,
           toolId: platformCoreTools.generateWorkflow,

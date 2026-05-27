@@ -88,12 +88,9 @@ describe('generateWorkflowTool', () => {
       context
     );
 
-    // diff attachment added first
     expect(context.attachments.add).toHaveBeenCalledWith(
       expect.objectContaining({ type: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE })
     );
-
-    // workflow.yaml attachment added second (creation path — no existing attachment)
     expect(context.attachments.add).toHaveBeenCalledWith(
       expect.objectContaining({
         type: WORKFLOW_YAML_ATTACHMENT_TYPE,
@@ -101,7 +98,6 @@ describe('generateWorkflowTool', () => {
       })
     );
 
-    // UI event sent
     expect(context.events.sendUiEvent).toHaveBeenCalledWith(
       WORKFLOW_YAML_CHANGED_EVENT,
       expect.objectContaining({
@@ -110,12 +106,10 @@ describe('generateWorkflowTool', () => {
       })
     );
 
-    // telemetry: creation success
     expect(aiTelemetryClient.reportEditResult).toHaveBeenCalledWith(
       expect.objectContaining({ editSuccess: true, isCreation: true })
     );
 
-    // result includes diff_attachment_id and proposal_id
     const result = (out as unknown as { results: Array<{ data: Record<string, unknown> }> })
       .results[0];
     expect(result.data.diff_attachment_id).toBe('diff-att');
@@ -152,11 +146,9 @@ describe('generateWorkflowTool', () => {
     const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
     const out = await tool.handler({ query: 'tweak it', attachmentId: 'src-att' } as any, context);
 
-    // diff attachment added
     expect(addMock).toHaveBeenCalledWith(
       expect.objectContaining({ type: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE })
     );
-    // workflow attachment updated (not added again)
     expect(update).toHaveBeenCalledWith(
       'src-att',
       expect.objectContaining({
@@ -166,14 +158,15 @@ describe('generateWorkflowTool', () => {
         }),
       })
     );
+    expect(addMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: WORKFLOW_YAML_ATTACHMENT_TYPE })
+    );
 
-    // UI event has the beforeYaml from the source attachment
     expect(sendUiEvent).toHaveBeenCalledWith(
       WORKFLOW_YAML_CHANGED_EVENT,
       expect.objectContaining({ beforeYaml: 'name: foo\n' })
     );
 
-    // telemetry: edit success
     expect(aiTelemetryClient.reportEditResult).toHaveBeenCalledWith(
       expect.objectContaining({ editSuccess: true, isCreation: false })
     );

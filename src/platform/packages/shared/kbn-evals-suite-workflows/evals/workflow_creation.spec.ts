@@ -117,7 +117,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 4,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'simple-creation' },
@@ -138,7 +138,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 4,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'simple-creation' },
@@ -172,7 +172,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 6,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'conditional-creation' },
@@ -206,7 +206,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 6,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'loop-creation' },
@@ -240,7 +240,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 6,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'error-handling-creation' },
@@ -276,7 +276,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 6,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'multi-step-creation' },
@@ -316,7 +316,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 6,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'es-search-creation' },
@@ -356,7 +356,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 8,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'es-index-management-creation' },
@@ -391,7 +391,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 6,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'esql-creation' },
@@ -437,7 +437,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 8,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'cases-creation' },
@@ -479,7 +479,7 @@ evaluate.describe(
                   expectedMaxToolCalls: 8,
                   expectedToolSequence: [
                     'platform.workflows.get_step_definitions',
-                    'platform.workflows.workflow_set_yaml',
+                    'platform.core.generate_workflow',
                   ],
                 },
                 metadata: { category: 'es-and-cases-creation' },
@@ -522,7 +522,7 @@ evaluate.describe(
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
                   'platform.workflows.get_connectors',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'slack-creation' },
@@ -559,7 +559,7 @@ evaluate.describe(
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
                   'platform.workflows.get_connectors',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'multi-channel-creation' },
@@ -598,7 +598,7 @@ evaluate.describe(
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
                   'platform.workflows.get_connectors',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'jira-creation' },
@@ -634,7 +634,7 @@ evaluate.describe(
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
                   'platform.workflows.get_connectors',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'pagerduty-creation' },
@@ -670,7 +670,7 @@ evaluate.describe(
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
                   'platform.workflows.get_connectors',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'teams-creation' },
@@ -711,7 +711,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 6,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'wait-creation' },
@@ -750,7 +750,7 @@ evaluate.describe(
                   expectedToolSequence: [
                     'platform.workflows.get_step_definitions',
                     'platform.workflows.get_connectors',
-                    'platform.workflows.workflow_set_yaml',
+                    'platform.core.generate_workflow',
                   ],
                 },
                 metadata: { category: 'switch-creation' },
@@ -792,7 +792,7 @@ evaluate.describe(
                 expectedMaxToolCalls: 6,
                 expectedToolSequence: [
                   'platform.workflows.get_step_definitions',
-                  'platform.workflows.workflow_set_yaml',
+                  'platform.core.generate_workflow',
                 ],
               },
               metadata: { category: 'es-index-cleanup-creation' },
