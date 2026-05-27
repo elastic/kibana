@@ -103,6 +103,7 @@ class SmlServiceImpl implements SmlServiceInstance {
         return filterResultsByPermissions({
           searchResult: rawResults,
           request,
+          esClient,
           securityAuthz: this.securityAuthz,
           logger,
         });
@@ -213,46 +214,117 @@ const getAuthorizedPermissions = async ({
 };
 
 /**
- * Filter search results by the current user's permissions.
+ * Batch-check which of the given concrete Elasticsearch index / alias /
+ * data stream names the current user has `read` privilege on, via the
+ * ES `_has_privileges` API. Returns the set of authorized names.
  *
- * 1. Collect all unique permission strings from the results.
- * 2. Batch-check them with the security plugin.
- * 3. Remove results whose required permissions are not fully authorized.
+ * Per `IndicesPermission.checkResourcePrivileges`, ES evaluates each
+ * requested name against the user's role grants by automaton subset
+ * check, so callers must pass **concrete names only** — not patterns.
+ * Patterns would under-authorize because a request like `logs-*` is
+ * only granted when the user's role covers the whole pattern, not when
+ * it grants `read` on a single matching index. SML chunks store
+ * concrete names by construction.
+ *
+ * Fails closed (empty Set) on error to avoid over-disclosure — a
+ * transient ES error must not silently bypass the index check.
+ */
+const getAuthorizedIndices = async ({
+  indices,
+  esClient,
+  logger,
+}: {
+  indices: string[];
+  esClient: IScopedClusterClient;
+  logger: Logger;
+}): Promise<Set<string>> => {
+  if (indices.length === 0) {
+    return new Set();
+  }
+
+  try {
+    const response = await esClient.asCurrentUser.security.hasPrivileges({
+      index: [{ names: indices, privileges: ['read'] }],
+    });
+
+    const authorized = new Set<string>();
+    for (const [name, privs] of Object.entries(response.index ?? {})) {
+      if (privs?.read === true) {
+        authorized.add(name);
+      }
+    }
+    return authorized;
+  } catch (error) {
+    logger.warn(
+      `SML hasPrivileges check failed; failing closed (no index access): ${
+        (error as Error).message
+      }`
+    );
+    return new Set();
+  }
+};
+
+/**
+ * Filter search results by the current user's privileges. Applies two
+ * stacked all-of checks per chunk:
+ *
+ *   1. Kibana `permissions[]` — every action string a chunk lists must
+ *      be authorized for the user (via Kibana `checkPrivileges`).
+ *   2. ES `target_indices[]` — every concrete index / alias / data
+ *      stream a chunk depends on must be authorized via the ES
+ *      `_has_privileges` API with `read`.
+ *
+ * Chunks with no `permissions[]` pass check 1 trivially; chunks with
+ * omitted or empty `target_indices` pass check 2 trivially.
+ *
+ * When the security plugin is absent (dev / test), the function is a
+ * no-op — both checks are skipped — to preserve open-access semantics.
  */
 const filterResultsByPermissions = async ({
   searchResult,
   request,
+  esClient,
   securityAuthz,
   logger,
 }: {
   searchResult: { results: SmlSearchResult[]; total: number };
   request: KibanaRequest;
+  esClient: IScopedClusterClient;
   securityAuthz?: AuthorizationServiceSetup;
   logger: Logger;
 }): Promise<{ results: SmlSearchResult[]; total: number }> => {
-  // When the security plugin is absent (e.g. development/testing with security
-  // disabled), all results are returned unfiltered. This follows the standard
-  // Kibana convention: no security plugin → open access.
   if (!securityAuthz || searchResult.results.length === 0) {
     return searchResult;
   }
 
   const allPermissions = [...new Set(searchResult.results.flatMap((hit) => hit.permissions))];
+  const allTargetIndices = [
+    ...new Set(searchResult.results.flatMap((hit) => hit.target_indices ?? [])),
+  ];
 
-  if (allPermissions.length === 0) {
+  if (allPermissions.length === 0 && allTargetIndices.length === 0) {
     return searchResult;
   }
 
-  const authorizedPerms = await getAuthorizedPermissions({
-    permissions: allPermissions,
-    request,
-    securityAuthz,
-    logger,
-  });
+  const [authorizedPerms, authorizedIndices] = await Promise.all([
+    allPermissions.length > 0
+      ? getAuthorizedPermissions({ permissions: allPermissions, request, securityAuthz, logger })
+      : Promise.resolve(new Set<string>()),
+    allTargetIndices.length > 0
+      ? getAuthorizedIndices({ indices: allTargetIndices, esClient, logger })
+      : Promise.resolve(new Set<string>()),
+  ]);
 
   const filteredResults = searchResult.results.filter((hit) => {
-    if (hit.permissions.length === 0) return true;
-    return hit.permissions.every((p) => authorizedPerms.has(p));
+    const permsOk =
+      hit.permissions.length === 0 || hit.permissions.every((p) => authorizedPerms.has(p));
+    if (!permsOk) return false;
+
+    const indicesOk =
+      !hit.target_indices ||
+      hit.target_indices.length === 0 ||
+      hit.target_indices.every((idx) => authorizedIndices.has(idx));
+    return indicesOk;
   });
 
   return { results: filteredResults, total: filteredResults.length };
@@ -260,7 +332,15 @@ const filterResultsByPermissions = async ({
 
 /**
  * Check whether the current user has access to specific SML items.
- * Looks up each item's permissions from the index and batch-checks them.
+ * For each id, the access verdict is the AND of:
+ *
+ *   - Kibana `permissions[]` — all listed action strings are authorized.
+ *   - ES `target_indices[]` — all listed concrete index/alias/data
+ *     stream names are `read`-authorized via `_has_privileges`.
+ *
+ * Chunks without any `permissions[]` and without any `target_indices`
+ * are visible to anyone in the space. When the security plugin is
+ * absent, all ids resolve to `true` (open access).
  */
 const checkItemsAccess = async ({
   ids,
@@ -279,7 +359,6 @@ const checkItemsAccess = async ({
 }): Promise<Map<string, boolean>> => {
   const accessMap = new Map<string, boolean>();
 
-  // When the security plugin is absent, grant access to all items.
   if (!securityAuthz) {
     for (const id of ids) {
       accessMap.set(id, true);
@@ -287,9 +366,16 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  let docPermissions: Map<string, string[]>;
+  interface DocAuthz {
+    permissions: string[];
+    target_indices: string[];
+  }
+
+  let docAuthz: Map<string, DocAuthz>;
   try {
-    const response = await esClient.asInternalUser.search<Pick<SmlDocument, 'id' | 'permissions'>>({
+    const response = await esClient.asInternalUser.search<
+      Pick<SmlDocument, 'id' | 'permissions' | 'target_indices'>
+    >({
       index: smlIndexName,
       size: ids.length,
       allow_no_indices: true,
@@ -307,15 +393,21 @@ const checkItemsAccess = async ({
           ],
         },
       },
-      _source: ['id', 'permissions'],
+      _source: ['id', 'permissions', 'target_indices'],
     });
 
-    docPermissions = new Map(
+    docAuthz = new Map(
       response.hits.hits
         .filter((hit) => hit._source != null)
         .map((hit) => {
           const source = hit._source!;
-          return [source.id ?? '', source.permissions ?? []] as [string, string[]];
+          return [
+            source.id ?? '',
+            {
+              permissions: source.permissions ?? [],
+              target_indices: source.target_indices ?? [],
+            },
+          ] as [string, DocAuthz];
         })
     );
   } catch (error) {
@@ -332,29 +424,32 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  const allPermissions = [...new Set([...docPermissions.values()].flat())];
+  const allPermissions = [...new Set([...docAuthz.values()].flatMap((doc) => doc.permissions))];
+  const allTargetIndices = [
+    ...new Set([...docAuthz.values()].flatMap((doc) => doc.target_indices)),
+  ];
 
-  const authorizedPerms = await getAuthorizedPermissions({
-    permissions: allPermissions,
-    request,
-    securityAuthz,
-    logger,
-  });
+  const [authorizedPerms, authorizedIndices] = await Promise.all([
+    allPermissions.length > 0
+      ? getAuthorizedPermissions({ permissions: allPermissions, request, securityAuthz, logger })
+      : Promise.resolve(new Set<string>()),
+    allTargetIndices.length > 0
+      ? getAuthorizedIndices({ indices: allTargetIndices, esClient, logger })
+      : Promise.resolve(new Set<string>()),
+  ]);
 
   for (const id of ids) {
-    const perms = docPermissions.get(id);
-    if (!perms) {
+    const doc = docAuthz.get(id);
+    if (!doc) {
       accessMap.set(id, false);
       continue;
     }
-    if (perms.length === 0) {
-      accessMap.set(id, true);
-      continue;
-    }
-    accessMap.set(
-      id,
-      perms.every((p) => authorizedPerms.has(p))
-    );
+    const permsOk =
+      doc.permissions.length === 0 || doc.permissions.every((p) => authorizedPerms.has(p));
+    const indicesOk =
+      doc.target_indices.length === 0 ||
+      doc.target_indices.every((idx) => authorizedIndices.has(idx));
+    accessMap.set(id, permsOk && indicesOk);
   }
 
   return accessMap;
@@ -534,6 +629,7 @@ const searchSml = async ({
           updated_at: source.updated_at ?? '',
           spaces: source.spaces ?? [],
           permissions: source.permissions ?? [],
+          target_indices: source.target_indices,
           user_id: source.user_id,
           score: hit._score ?? 0,
         };
@@ -613,6 +709,9 @@ const getDocumentsByIds = async ({
       if (source.references !== undefined) {
         doc.references = source.references;
       }
+      if (source.target_indices !== undefined) {
+        doc.target_indices = source.target_indices;
+      }
       docMap.set(doc.id, doc);
     }
   } catch (error) {
@@ -664,7 +763,7 @@ const getDocumentById = async ({
     if (!hit?._source) return undefined;
 
     const source = hit._source;
-    return {
+    const doc: SmlDocument = {
       id: source.id ?? '',
       type: source.type ?? '',
       title: source.title ?? '',
@@ -675,6 +774,10 @@ const getDocumentById = async ({
       spaces: source.spaces ?? [],
       permissions: source.permissions ?? [],
     };
+    if (source.target_indices !== undefined) {
+      doc.target_indices = source.target_indices;
+    }
+    return doc;
   } catch (error) {
     if (isNotFoundError(error)) {
       return undefined;
@@ -747,7 +850,7 @@ const listDocuments = async ({
       .filter((hit) => hit._source != null)
       .map((hit) => {
         const source = hit._source!;
-        return {
+        const doc: SmlDocument = {
           id: source.id ?? '',
           type: source.type ?? '',
           title: source.title ?? '',
@@ -758,6 +861,10 @@ const listDocuments = async ({
           spaces: source.spaces ?? [],
           permissions: source.permissions ?? [],
         };
+        if (source.target_indices !== undefined) {
+          doc.target_indices = source.target_indices;
+        }
+        return doc;
       });
 
     return { total, results };
@@ -846,6 +953,14 @@ const upsertDocument = async ({
     spaces: existing?.spaces ?? [spaceId],
     permissions: document.permissions ?? [],
   };
+  // Persist `target_indices` only when the caller supplied at least one
+  // concrete name. Both `undefined` and `[]` collapse to "no dependency"
+  // (the field is omitted from the stored doc), matching the absent-vs-empty
+  // semantics on `SmlDocument.target_indices` and the post-filter's no-op
+  // path when the array is missing or empty.
+  if (document.target_indices !== undefined && document.target_indices.length > 0) {
+    fullDocument.target_indices = document.target_indices;
+  }
 
   await smlClient.index({ id, document: fullDocument });
 

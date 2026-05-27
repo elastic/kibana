@@ -144,6 +144,9 @@ class SmlIndexerImpl implements SmlIndexer {
       if (chunk.references !== undefined) {
         document.references = chunk.references;
       }
+      if (chunk.target_indices !== undefined) {
+        document.target_indices = chunk.target_indices;
+      }
       return {
         index: {
           _id: chunkId,

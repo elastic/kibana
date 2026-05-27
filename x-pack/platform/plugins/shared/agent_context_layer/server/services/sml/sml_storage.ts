@@ -33,6 +33,7 @@ const smlStorageSchemaProperties = {
   updated_at: types.date({}),
   spaces: types.keyword({}),
   permissions: types.keyword({}),
+  target_indices: types.keyword({}),
 };
 
 export const storageSettings = {

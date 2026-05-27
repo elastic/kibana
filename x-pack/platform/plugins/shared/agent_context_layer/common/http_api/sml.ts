@@ -56,6 +56,12 @@ export interface SmlHttpItem {
   updated_at: string;
   spaces: string[];
   permissions: string[];
+  /**
+   * Concrete Elasticsearch index / alias / data stream names whose data
+   * this chunk's content depends on. Absent (not `[]`) when the chunk
+   * has no underlying ES data dependency. See `SmlDocument.target_indices`.
+   */
+  target_indices?: string[];
 }
 
 /**

@@ -41,6 +41,9 @@ export const registerUpsertRoute = ({
           permissions: schema.maybe(
             schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 100 })
           ),
+          target_indices: schema.maybe(
+            schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 100 })
+          ),
         }),
       },
       options: { access: 'internal' },
@@ -65,6 +68,7 @@ export const registerUpsertRoute = ({
             origin_id: string;
             content: string;
             permissions?: string[];
+            target_indices?: string[];
           },
           esClient,
         });

@@ -31,11 +31,14 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
 
 const createMockScopedClient = (
   internalUser: jest.Mocked<ElasticsearchClient>
-): IScopedClusterClient =>
-  ({
+): IScopedClusterClient => {
+  const asCurrentUser = createMockEsClient() as unknown as Record<string, unknown>;
+  asCurrentUser.security = { hasPrivileges: jest.fn() };
+  return {
     asInternalUser: internalUser,
-    asCurrentUser: createMockEsClient(),
-  } as unknown as IScopedClusterClient);
+    asCurrentUser,
+  } as unknown as IScopedClusterClient;
+};
 
 const createMockLogger = () => {
   const log = loggerMock.create();
@@ -600,6 +603,194 @@ describe('SmlService', () => {
         })
       );
     });
+
+    describe('target_indices post-filter (hasPrivileges all-of)', () => {
+      const makeHit = (overrides: Partial<Record<string, unknown>> = {}) => ({
+        _source: {
+          id: 'chunk-x',
+          type: 'lens',
+          title: 'Viz',
+          origin_id: 'r1',
+          content: '',
+          created_at: '',
+          updated_at: '',
+          spaces: ['default'],
+          permissions: ['saved_object:lens/get'],
+          ...overrides,
+        },
+        _score: 1,
+      });
+
+      it('keeps chunks whose target_indices are all read-authorized', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger, securityAuthz });
+
+        esClient.search.mockResolvedValueOnce({
+          hits: {
+            total: 1,
+            hits: [makeHit({ id: 'ok-chunk', target_indices: ['logs-2024'] })],
+          },
+        } as any);
+        (
+          (scopedClient.asCurrentUser as any).security.hasPrivileges as jest.Mock
+        ).mockResolvedValueOnce({
+          index: { 'logs-2024': { read: true } },
+          has_all_requested: true,
+        });
+
+        const result = await smlService.search({
+          query: '*',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        expect(result.results.map((r) => r.id)).toEqual(['ok-chunk']);
+        expect((scopedClient.asCurrentUser as any).security.hasPrivileges).toHaveBeenCalledWith({
+          index: [{ names: ['logs-2024'], privileges: ['read'] }],
+        });
+      });
+
+      it('drops a chunk when the user lacks read on ANY of its target_indices (all-of rule)', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger, securityAuthz });
+
+        esClient.search.mockResolvedValueOnce({
+          hits: {
+            total: 2,
+            hits: [
+              makeHit({ id: 'single-ok', target_indices: ['logs-2024'] }),
+              makeHit({
+                id: 'multi-partial',
+                target_indices: ['logs-2024', 'super-secret'],
+              }),
+            ],
+          },
+        } as any);
+        (
+          (scopedClient.asCurrentUser as any).security.hasPrivileges as jest.Mock
+        ).mockResolvedValueOnce({
+          index: {
+            'logs-2024': { read: true },
+            'super-secret': { read: false },
+          },
+          has_all_requested: false,
+        });
+
+        const result = await smlService.search({
+          query: '*',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        expect(result.results.map((r) => r.id)).toEqual(['single-ok']);
+        expect(result.total).toBe(1);
+      });
+
+      it('chunks with omitted target_indices pass regardless of index privileges', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger, securityAuthz });
+
+        esClient.search.mockResolvedValueOnce({
+          hits: {
+            total: 1,
+            hits: [makeHit({ id: 'no-deps' })],
+          },
+        } as any);
+
+        const result = await smlService.search({
+          query: '*',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        expect(result.results.map((r) => r.id)).toEqual(['no-deps']);
+        // hasPrivileges is never called when no chunk in the page lists target_indices.
+        expect((scopedClient.asCurrentUser as any).security.hasPrivileges).not.toHaveBeenCalled();
+      });
+
+      it('fails closed when hasPrivileges throws — drops every chunk with target_indices', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger, securityAuthz });
+
+        esClient.search.mockResolvedValueOnce({
+          hits: {
+            total: 2,
+            hits: [
+              makeHit({ id: 'no-deps' }),
+              makeHit({ id: 'with-deps', target_indices: ['logs-2024'] }),
+            ],
+          },
+        } as any);
+        (
+          (scopedClient.asCurrentUser as any).security.hasPrivileges as jest.Mock
+        ).mockRejectedValueOnce(new Error('cluster unreachable'));
+
+        const result = await smlService.search({
+          query: '*',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        // 'no-deps' survives (no index check needed); 'with-deps' is dropped (failed closed).
+        expect(result.results.map((r) => r.id)).toEqual(['no-deps']);
+      });
+
+      it('batches the hasPrivileges call across all distinct target_indices in the page', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger, securityAuthz });
+
+        esClient.search.mockResolvedValueOnce({
+          hits: {
+            total: 3,
+            hits: [
+              makeHit({ id: 'a', target_indices: ['logs-2024'] }),
+              makeHit({ id: 'b', target_indices: ['logs-2024', 'metrics'] }),
+              makeHit({ id: 'c', target_indices: ['metrics'] }),
+            ],
+          },
+        } as any);
+        const hasPrivilegesMock = (scopedClient.asCurrentUser as any).security
+          .hasPrivileges as jest.Mock;
+        hasPrivilegesMock.mockResolvedValueOnce({
+          index: { 'logs-2024': { read: true }, metrics: { read: true } },
+          has_all_requested: true,
+        });
+
+        await smlService.search({
+          query: '*',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        expect(hasPrivilegesMock).toHaveBeenCalledTimes(1);
+        const call = hasPrivilegesMock.mock.calls[0][0] as {
+          index: Array<{ names: string[]; privileges: string[] }>;
+        };
+        expect(call.index).toHaveLength(1);
+        expect(call.index[0].privileges).toEqual(['read']);
+        expect(new Set(call.index[0].names)).toEqual(new Set(['logs-2024', 'metrics']));
+      });
+    });
   });
 
   describe('checkItemsAccess', () => {
@@ -788,12 +979,142 @@ describe('SmlService', () => {
               ],
             },
           },
-          _source: ['id', 'permissions'],
+          _source: ['id', 'permissions', 'target_indices'],
         })
       );
       expect(
         (scopedClient.asCurrentUser as jest.Mocked<ElasticsearchClient>).search
       ).not.toHaveBeenCalled();
+    });
+
+    describe('target_indices post-filter (hasPrivileges all-of)', () => {
+      const makeHit = (overrides: Partial<Record<string, unknown>> = {}) => ({
+        _source: {
+          id: 'id-x',
+          permissions: ['saved_object:lens/get'],
+          ...overrides,
+        },
+      });
+
+      it('grants access when all target_indices are read-authorized', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger, securityAuthz });
+
+        esClient.search.mockResolvedValueOnce({
+          hits: {
+            total: 1,
+            hits: [makeHit({ id: 'id-1', target_indices: ['logs-2024'] })],
+          },
+        } as any);
+        (
+          (scopedClient.asCurrentUser as any).security.hasPrivileges as jest.Mock
+        ).mockResolvedValueOnce({
+          index: { 'logs-2024': { read: true } },
+          has_all_requested: true,
+        });
+
+        const result = await smlService.checkItemsAccess({
+          ids: ['id-1'],
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        expect(result.get('id-1')).toBe(true);
+      });
+
+      it('denies access when the user lacks read on ANY target_indices value', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger, securityAuthz });
+
+        esClient.search.mockResolvedValueOnce({
+          hits: {
+            total: 1,
+            hits: [
+              makeHit({
+                id: 'id-1',
+                target_indices: ['logs-2024', 'super-secret'],
+              }),
+            ],
+          },
+        } as any);
+        (
+          (scopedClient.asCurrentUser as any).security.hasPrivileges as jest.Mock
+        ).mockResolvedValueOnce({
+          index: {
+            'logs-2024': { read: true },
+            'super-secret': { read: false },
+          },
+          has_all_requested: false,
+        });
+
+        const result = await smlService.checkItemsAccess({
+          ids: ['id-1'],
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        expect(result.get('id-1')).toBe(false);
+      });
+
+      it('grants access for items with permissions OK and no target_indices (omitted/empty)', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger, securityAuthz });
+
+        esClient.search.mockResolvedValueOnce({
+          hits: {
+            total: 1,
+            hits: [makeHit({ id: 'id-1' })],
+          },
+        } as any);
+
+        const result = await smlService.checkItemsAccess({
+          ids: ['id-1'],
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        expect(result.get('id-1')).toBe(true);
+        expect((scopedClient.asCurrentUser as any).security.hasPrivileges).not.toHaveBeenCalled();
+      });
+
+      it('fails closed when hasPrivileges throws — denies items with target_indices, keeps no-deps items', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger, securityAuthz });
+
+        esClient.search.mockResolvedValueOnce({
+          hits: {
+            total: 2,
+            hits: [
+              makeHit({ id: 'no-deps' }),
+              makeHit({ id: 'with-deps', target_indices: ['logs-2024'] }),
+            ],
+          },
+        } as any);
+        (
+          (scopedClient.asCurrentUser as any).security.hasPrivileges as jest.Mock
+        ).mockRejectedValueOnce(new Error('cluster unreachable'));
+
+        const result = await smlService.checkItemsAccess({
+          ids: ['no-deps', 'with-deps'],
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        expect(result.get('no-deps')).toBe(true);
+        expect(result.get('with-deps')).toBe(false);
+      });
     });
   });
 
@@ -1266,6 +1587,81 @@ describe('SmlService', () => {
       expect(result!.document.permissions).toEqual(['saved_object:lens/get']);
       // existing spaces are preserved — caller cannot widen or narrow membership
       expect(result!.document.spaces).toEqual(['default', 'engineering']);
+    });
+
+    it('persists target_indices when caller supplies concrete names', async () => {
+      smlClient.get.mockRejectedValue(createNotFoundError());
+
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      const result = await smlService.upsertDocument({
+        id: 'doc-1',
+        spaceId: 'default',
+        document: {
+          type: 'visualization',
+          title: 'Viz',
+          origin_id: 'ref-1',
+          content: 'c',
+          target_indices: ['logs-app-*', 'metrics-prod'],
+        },
+        esClient: scopedClient,
+      });
+
+      expect(result).not.toBeNull();
+      expect(result!.document.target_indices).toEqual(['logs-app-*', 'metrics-prod']);
+      expect(smlClient.index).toHaveBeenCalledWith({
+        id: 'doc-1',
+        document: expect.objectContaining({
+          target_indices: ['logs-app-*', 'metrics-prod'],
+        }),
+      });
+    });
+
+    it('omits target_indices from the stored document when not supplied or empty', async () => {
+      smlClient.get.mockRejectedValue(createNotFoundError());
+
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      // Undefined → omitted
+      const undefinedResult = await smlService.upsertDocument({
+        id: 'doc-1',
+        spaceId: 'default',
+        document: {
+          type: 'visualization',
+          title: 'Viz',
+          origin_id: 'ref-1',
+          content: 'c',
+        },
+        esClient: scopedClient,
+      });
+      expect(undefinedResult!.document.target_indices).toBeUndefined();
+      expect(smlClient.index).toHaveBeenLastCalledWith({
+        id: 'doc-1',
+        document: expect.not.objectContaining({ target_indices: expect.anything() }),
+      });
+
+      // Empty array → also omitted (canonical absent representation)
+      const emptyResult = await smlService.upsertDocument({
+        id: 'doc-2',
+        spaceId: 'default',
+        document: {
+          type: 'visualization',
+          title: 'Viz',
+          origin_id: 'ref-2',
+          content: 'c',
+          target_indices: [],
+        },
+        esClient: scopedClient,
+      });
+      expect(emptyResult!.document.target_indices).toBeUndefined();
+      expect(smlClient.index).toHaveBeenLastCalledWith({
+        id: 'doc-2',
+        document: expect.not.objectContaining({ target_indices: expect.anything() }),
+      });
     });
 
     it('returns null when an existing document is not visible in the caller space', async () => {

@@ -33,6 +33,14 @@ export interface SmlChunk {
   references?: string[];
   /** Permissions required to access the underlying element (e.g., 'saved_object:lens/get') */
   permissions?: string[];
+  /**
+   * Concrete Elasticsearch index / alias / data stream names whose data
+   * this chunk's content depends on. Used by the search-time post-filter
+   * to gate chunks behind the user's ES `read` privilege on each name.
+   * Omit when the chunk has no underlying ES data dependency (e.g. a
+   * workflow with no data-bound steps).
+   */
+  target_indices?: string[];
 }
 
 /**
@@ -139,6 +147,14 @@ export interface SmlDocument {
   spaces: string[];
   /** Permissions required to access the underlying element */
   permissions: string[];
+  /**
+   * Concrete Elasticsearch index / alias / data stream names whose data
+   * this chunk's content depends on. Used by the search-time post-filter
+   * to gate chunks behind the user's ES `read` privilege on each name.
+   * Field is absent (not `[]`) when the chunk has no underlying ES data
+   * dependency.
+   */
+  target_indices?: string[];
 }
 
 /**
@@ -200,6 +216,15 @@ export interface SmlDocumentInput {
   origin_id: string;
   content: string;
   permissions?: string[];
+  /**
+   * Concrete Elasticsearch index / alias / data stream names whose data
+   * this chunk's content depends on. Used by the search-time post-filter
+   * to gate chunks behind the user's ES `read` privilege on each name.
+   * Omit or pass an empty array when the chunk has no underlying ES
+   * data dependency — both forms persist as "no dependency" (the field
+   * is omitted from the stored document, not stored as `[]`).
+   */
+  target_indices?: string[];
 }
 
 /**
