@@ -26,7 +26,9 @@ function isDotPrefixedSource(sourceName: string): boolean {
   return sourceName.split(',').every((part) => {
     const cleaned = removeSourceNameQuotes(cleanIndex(part.trim()));
     // Strip optional CCS cluster prefix (cluster:indexName → indexName)
-    const localName = cleaned.includes(':') ? cleaned.slice(cleaned.indexOf(':') + 1) : cleaned;
+    let localName = cleaned.includes(':') ? cleaned.slice(cleaned.indexOf(':') + 1) : cleaned;
+    // Clean quotes that may appear after CCS prefix extraction
+    localName = removeSourceNameQuotes(localName);
     return localName.startsWith('.');
   });
 }
