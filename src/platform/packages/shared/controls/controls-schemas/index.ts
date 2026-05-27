@@ -8,6 +8,7 @@
  */
 
 export { getControlsGroupSchema } from './src/controls_group_schema';
+export { controlPanelsStateSchema } from './src/control_panels_state_schema';
 
 export type {
   ControlsGroupState,

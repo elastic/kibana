@@ -11,6 +11,7 @@ import { schema } from '@kbn/config-schema';
 import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
+  EsqlControlType,
   MAX_OPTIONS_LIST_REQUEST_SIZE,
 } from '@kbn/controls-constants';
 import { controlTitleSchema, dataControlSchema } from './control_schema';
@@ -142,7 +143,7 @@ export const optionsListDSLControlSchema = schema.object({
   sort: optionsListSortSchema,
 });
 
-const baseEsqlControl = {
+export const baseEsqlControlProps = {
   ...controlTitleSchema.getPropSchemas(),
   ...optionsListControlBaseParameters.getPropSchemas(),
   selected_options: schema.arrayOf(schema.string(), {
@@ -184,8 +185,8 @@ const baseEsqlControl = {
 export const optionsListESQLControlSchema = schema.discriminatedUnion('control_type', [
   schema.object(
     {
-      ...baseEsqlControl,
-      control_type: schema.literal('STATIC_VALUES'),
+      ...baseEsqlControlProps,
+      control_type: schema.literal(EsqlControlType.STATIC_VALUES),
       available_options: schema.arrayOf(schema.string(), {
         maxSize: MAX_OPTIONS_LIST_REQUEST_SIZE,
         meta: {
@@ -196,7 +197,7 @@ export const optionsListESQLControlSchema = schema.discriminatedUnion('control_t
     {
       meta: {
         id: 'kbn-controls-schemas-options-list-esql-control-schema-static-values',
-        title: 'STATIC_VALUES',
+        title: EsqlControlType.STATIC_VALUES,
         description:
           'An ES|QL variable control with a fixed list of selectable options defined directly in `available_options`.',
       },
@@ -204,8 +205,8 @@ export const optionsListESQLControlSchema = schema.discriminatedUnion('control_t
   ),
   schema.object(
     {
-      ...baseEsqlControl,
-      control_type: schema.literal('VALUES_FROM_QUERY'),
+      ...baseEsqlControlProps,
+      control_type: schema.literal(EsqlControlType.VALUES_FROM_QUERY),
       esql_query: schema.string({
         meta: {
           description:
@@ -216,7 +217,7 @@ export const optionsListESQLControlSchema = schema.discriminatedUnion('control_t
     {
       meta: {
         id: 'kbn-controls-schemas-options-list-esql-control-schema-values-from-query',
-        title: 'VALUES_FROM_QUERY',
+        title: EsqlControlType.VALUES_FROM_QUERY,
         description:
           'An ES|QL variable control whose selectable options are dynamically retrieved by running an ES|QL query.',
       },

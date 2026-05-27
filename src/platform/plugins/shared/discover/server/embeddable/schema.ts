@@ -9,19 +9,18 @@
 
 import type { ObjectType, Props, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { DataGridDensity } from '@kbn/discover-utils';
 import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
-import { esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
+import { dataViewSchema, esqlDataSourceSchema } from '@kbn/as-code-data-views-schema';
+import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
+import { DataGridDensity } from '@kbn/discover-utils';
 import {
   BY_REF_SCHEMA_META,
   BY_VALUE_SCHEMA_META,
   serializedTitlesSchema,
   serializedTimeRangeSchema,
 } from '@kbn/presentation-publishing-schemas';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
-import { dataViewSchema } from '@kbn/as-code-data-views-schema';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 const columnSettingsEntrySchema = schema.object({
@@ -64,7 +63,7 @@ export const viewModeSchema = schema.oneOf(
   }
 );
 
-const dataTableLimitsSchema = schema.object(
+export const dataTableLimitsSchema = schema.object(
   {
     rows_per_page: schema.maybe(
       schema.number({
@@ -89,10 +88,10 @@ const dataTableLimitsSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'discoverSessionEmbeddableDataTableLimitsSchema' } }
+  { meta: { id: 'discoverSessionDataTableLimitsSchema' } }
 );
 
-const dataTableSchema = schema.object(
+export const dataTableSchema = schema.object(
   {
     column_order: schema.maybe(
       schema.arrayOf(
@@ -179,10 +178,10 @@ const dataTableSchema = schema.object(
       )
     ),
   },
-  { meta: { id: 'discoverSessionEmbeddableDataTableSchema' } }
+  { meta: { id: 'discoverSessionDataTableSchema' } }
 );
 
-const panelOverridesSchema = schema.object(
+export const panelOverridesSchema = schema.object(
   {
     column_order: schema.maybe(
       schema.arrayOf(
@@ -297,38 +296,39 @@ const panelOverridesSchema = schema.object(
   { defaultValue: {} }
 );
 
-const classicTabSchema = schema.allOf([
-  dataTableSchema,
-  dataTableLimitsSchema,
-  schema.object({
-    query: schema.maybe(asCodeQuerySchema),
-    filters: schema.arrayOf(asCodeFilterSchema, {
-      maxSize: 100,
-      defaultValue: [],
-      meta: {
-        description: 'List of filters to apply to the data in the tab.',
-      },
-    }),
-    data_source: dataViewSchema,
-    view_mode: viewModeSchema,
-  }),
-]);
-
-const esqlTabSchema = schema.allOf([
-  dataTableSchema,
-  schema.object(
-    {
-      data_source: esqlDataSourceSchema,
+export const classicTabSchema = schema.object({
+  ...dataTableSchema.getPropSchemas(),
+  ...dataTableLimitsSchema.getPropSchemas(),
+  query: schema.maybe(asCodeQuerySchema),
+  filters: schema.arrayOf(asCodeFilterSchema, {
+    maxSize: 100,
+    defaultValue: [],
+    meta: {
+      description: 'List of filters to apply to the data in the tab.',
     },
-    {
-      meta: {
-        description: 'ES|QL (Elasticsearch Query Language) data source.',
-      },
-    }
-  ),
-]);
+  }),
+  data_source: dataViewSchema,
+  view_mode: viewModeSchema,
+});
 
-const tabSchema = schema.oneOf([classicTabSchema, esqlTabSchema]);
+export const esqlTabSchema = schema.object(
+  {
+    ...dataTableSchema.getPropSchemas(),
+    data_source: esqlDataSourceSchema,
+  },
+  {
+    meta: {
+      description: 'ES|QL (Elasticsearch Query Language) data source.',
+    },
+  }
+);
+
+export const tabSchema = schema.oneOf([classicTabSchema, esqlTabSchema]);
+
+export type DiscoverSessionClassicTab = TypeOf<typeof classicTabSchema>;
+export type DiscoverSessionEsqlTab = TypeOf<typeof esqlTabSchema>;
+export type DiscoverSessionTab = TypeOf<typeof tabSchema>;
+export type DiscoverSessionPanelOverrides = TypeOf<typeof panelOverridesSchema>;
 
 const DISCOVER_SUPPORTED_DRILLDOWN_TRIGGERS = [ON_OPEN_PANEL_MENU];
 
@@ -392,10 +392,6 @@ export const getDiscoverSessionEmbeddableSchema = (
     getDiscoverSessionByReferenceEmbeddableSchema(getDrilldownsSchema),
   ]);
 
-export type DiscoverSessionPanelOverrides = TypeOf<typeof panelOverridesSchema>;
-export type DiscoverSessionClassicTab = TypeOf<typeof classicTabSchema>;
-export type DiscoverSessionEsqlTab = TypeOf<typeof esqlTabSchema>;
-export type DiscoverSessionTab = TypeOf<typeof tabSchema>;
 export type DiscoverSessionEmbeddableByValueProps = TypeOf<
   typeof discoverSessionByValuePropsSchema
 >;

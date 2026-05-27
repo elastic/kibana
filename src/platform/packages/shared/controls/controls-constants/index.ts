@@ -18,6 +18,7 @@ export {
 
 export {
   ESQL_CONTROL,
+  EsqlControlType,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,

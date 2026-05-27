@@ -8,6 +8,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
+import { EsqlControlType } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 
 type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
@@ -24,16 +25,8 @@ export enum ESQLVariableType {
   MULTI_VALUES = 'multi_values',
   FUNCTIONS = 'functions',
 }
-/**
- * Types of ES|QL controls
- * - STATIC_VALUES: Static values that are not dependent on any query
- * - VALUES_FROM_QUERY: Values that are dependent on an ES|QL query
- */
 
-export enum EsqlControlType {
-  STATIC_VALUES = 'STATIC_VALUES',
-  VALUES_FROM_QUERY = 'VALUES_FROM_QUERY',
-}
+export { EsqlControlType };
 
 export type StaticESQLControl = Extract<
   OptionsListESQLControlState,

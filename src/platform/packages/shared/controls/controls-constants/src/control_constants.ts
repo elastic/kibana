@@ -13,6 +13,16 @@ export const OPTIONS_LIST_CONTROL = 'options_list_control';
 export const RANGE_SLIDER_CONTROL = 'range_slider_control';
 export const TIME_SLIDER_CONTROL = 'time_slider_control';
 
+/**
+ * Types of ES|QL controls
+ * - STATIC_VALUES: Static values that are not dependent on any query
+ * - VALUES_FROM_QUERY: Values that are dependent on an ES|QL query
+ */
+export enum EsqlControlType {
+  STATIC_VALUES = 'STATIC_VALUES',
+  VALUES_FROM_QUERY = 'VALUES_FROM_QUERY',
+}
+
 export const DEFAULT_DATA_CONTROL_STATE = {
   use_global_filters: true,
   ignore_validations: false,
