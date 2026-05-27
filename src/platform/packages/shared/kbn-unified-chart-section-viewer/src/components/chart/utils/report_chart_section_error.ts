@@ -28,6 +28,7 @@ export const CHART_SECTION_ERROR_TYPE_LABEL = 'ChartSectionNonRenderError';
 interface ChartSectionErrorLabels {
   profile_id: string;
   chart_id?: string;
+  page?: string;
 }
 
 interface ReportChartSectionErrorArgs {

@@ -121,10 +121,9 @@ export const getAppMenuItems = ({
 };
 
 export const processStaticItems = (staticItems?: AppMenuItemType[]): AppMenuItemType[] =>
-  sortByOrder(staticItems ?? []).map(({ separator, ...item }, index) => ({
+  sortByOrder(staticItems ?? []).map(({ separator, ...item }) => ({
     ...item,
     overflow: true,
-    ...(index === 0 ? { separator: 'above' as const } : {}),
   }));
 
 export const isDisabled = (disableButton: AppMenuItemCommon['disableButton']) =>
@@ -433,10 +432,13 @@ export const getPopoverPanels = ({
     const mainPanel = panels.find((panel) => panel.id === startPanelId);
 
     if (staticPanel && mainPanel) {
-      mainPanel.items = [
-        ...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]),
-        ...(staticPanel.items as EuiContextMenuPanelItemDescriptor[]),
-      ];
+      const mainItems = mainPanel.items as EuiContextMenuPanelItemDescriptor[];
+      const staticPanelItems = staticPanel.items as EuiContextMenuPanelItemDescriptor[];
+
+      // Only add a separator between regular and static items
+      const separator = mainItems.length > 0 ? [createSeparatorItem('static-items-separator')] : [];
+
+      mainPanel.items = [...mainItems, ...separator, ...staticPanelItems];
       panels.splice(panels.indexOf(staticPanel), 1);
     }
   }

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { render } from '@testing-library/react';
+import type { EuiDataGridSetCellProps } from '@elastic/eui';
+import { render, waitFor } from '@testing-library/react';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import {
   dataViewMock,
@@ -24,9 +25,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SourceDocument } from '../components/source_document';
+import type { CustomCellRenderer } from '../types';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -1090,6 +1092,113 @@ describe('Unified data table cell rendering', function () {
 
       expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
       formatFieldValueReactSpy.mockRestore();
+    });
+  });
+
+  describe('setCellProps handling', () => {
+    const customCellProps: EuiDataGridSetCellProps = {
+      className: 'custom-cell',
+      style: { backgroundColor: 'pink', color: 'white' },
+      'data-test-subj': 'custom-renderer-cell',
+    };
+
+    const highlightedCellProps: EuiDataGridSetCellProps = {
+      className: 'unifiedDataTable__cell--highlight',
+      style: {},
+    };
+
+    const mergedCellProps: EuiDataGridSetCellProps = {
+      ...customCellProps,
+      className: 'unifiedDataTable__cell--highlight custom-cell',
+    };
+
+    const customCellRenderers: CustomCellRenderer = {
+      bytes: function BytesRenderer({ setCellProps }) {
+        useEffect(() => {
+          setCellProps(customCellProps);
+        }, [setCellProps]);
+
+        return null;
+      },
+    };
+
+    const highlightedRows = rowsSource.map((hit) => ({ ...build(hit), isAnchor: true }));
+    const plainRows = rowsSource.map(build);
+
+    const getRenderCellValue = (
+      externalCustomRenderers?: CustomCellRenderer,
+      rows: DataTableRecord[] = highlightedRows
+    ) =>
+      getRenderCellValueFn({
+        dataView: dataViewMock,
+        rows,
+        shouldShowFieldHandler: () => false,
+        closePopover: jest.fn(),
+        fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+        maxEntries: 100,
+        externalCustomRenderers,
+        columnsMeta: undefined,
+      });
+
+    const getCellValue = (
+      RenderCellValue: ReturnType<typeof getRenderCellValueFn>,
+      setCellProps: jest.Mock
+    ) => (
+      <RenderCellValue
+        rowIndex={0}
+        colIndex={0}
+        columnId="bytes"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={setCellProps}
+      />
+    );
+
+    it('merges internal and custom cell props', async () => {
+      const setCellProps = jest.fn();
+
+      render(getCellValue(getRenderCellValue(customCellRenderers), setCellProps));
+
+      await waitFor(() => {
+        expect(setCellProps).toHaveBeenLastCalledWith(mergedCellProps);
+      });
+    });
+
+    it('clears custom cell props when the custom renderer is removed', async () => {
+      const setCellProps = jest.fn();
+      const initialRenderCellValue = getRenderCellValue(customCellRenderers);
+      const nextRenderCellValue = getRenderCellValue();
+
+      const { rerender } = render(getCellValue(initialRenderCellValue, setCellProps));
+
+      await waitFor(() => {
+        expect(setCellProps).toHaveBeenLastCalledWith(mergedCellProps);
+      });
+
+      rerender(getCellValue(nextRenderCellValue, setCellProps));
+
+      await waitFor(() => {
+        expect(setCellProps).toHaveBeenLastCalledWith(highlightedCellProps);
+      });
+    });
+
+    it('keeps custom cell props when the internal highlight is removed', async () => {
+      const setCellProps = jest.fn();
+      const initialRenderCellValue = getRenderCellValue(customCellRenderers);
+      const nextRenderCellValue = getRenderCellValue(customCellRenderers, plainRows);
+
+      const { rerender } = render(getCellValue(initialRenderCellValue, setCellProps));
+
+      await waitFor(() => {
+        expect(setCellProps).toHaveBeenLastCalledWith(mergedCellProps);
+      });
+
+      rerender(getCellValue(nextRenderCellValue, setCellProps));
+
+      await waitFor(() => {
+        expect(setCellProps).toHaveBeenLastCalledWith(customCellProps);
+      });
     });
   });
 });

@@ -15,12 +15,12 @@ import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { LineParseResult } from '@kbn/workflows-yaml';
+import { parseLineForCompletion } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { AutocompleteContext } from './autocomplete.types';
 import { getFocusedYamlPair } from './get_focused_yaml_pair';
 import { isInsideLiquidBlock } from './liquid_utils';
-import type { LineParseResult } from './parse_line_for_completion';
-import { parseLineForCompletion } from './parse_line_for_completion';
 import {
   getTriggerConditionBlockIndex,
   isInScheduledTriggerWithBlock,

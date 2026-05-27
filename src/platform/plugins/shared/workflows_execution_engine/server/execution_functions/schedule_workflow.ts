@@ -11,7 +11,7 @@ import { v4 as generateUuid } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, pickManagedWorkflowFields } from '@kbn/workflows';
 
 import { markExecutionFailedTaskRecovery, taskRecoveryMessages } from '../lib/task_recovery';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -105,11 +105,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
       id: generateUuid(),
       spaceId,
       workflowId: workflow.id,
-      ...(workflow.managed === true ? { managed: true } : {}),
-      ...(typeof workflow.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
-      ...(typeof workflow.originManagedWorkflowId === 'string'
-        ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
-        : {}),
+      ...pickManagedWorkflowFields(workflow),
       isTestRun: workflow.isTestRun,
       workflowDefinition: workflow.definition,
       yaml: workflow.yaml,

@@ -31,10 +31,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   agentBuilderDefaultAgentId,
   AgentVisibility,
+  AGENT_BUILDER_UI_EBT,
   VISIBILITY_ICON,
   canChangeAgentVisibility,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { Control, FormState } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
@@ -328,6 +330,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 onChange={(e) => onChange(e.target.checked)}
                 disabled={isFormDisabled}
                 data-test-subj="agentSettingsEnableElasticCapabilitiesSwitch"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.agentOverview.ELASTIC_CAPABILITIES_TOGGLE,
+                  detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                })}
               />
             )}
           />

@@ -123,7 +123,7 @@ export function reducer(
       return {
         ...state,
         yamlMode: action.enabled,
-        childOpen: true,
+        childOpen: action.enabled,
       };
     default:
       return state;

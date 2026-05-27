@@ -275,6 +275,9 @@ For an existing policy, pass the \`actionPolicyAttachmentId\` and only include t
    - For \`per_episode\` grouping: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
    - For \`all\` / \`per_field\` grouping: \`time_interval\`, \`every_time\`.
    - \`per_status_interval\` and \`time_interval\` require an \`interval\` value (e.g. \`"5m"\`, \`"1h"\`).
+6. **\`set_type\`** — set the policy type and optional \`ruleId\`:
+   - \`type: "single_rule"\` with \`ruleId\`: scopes the policy to a single rule. This is the **default** for new policies created alongside a rule. No matcher is needed for rule scoping.
+   - \`type: "global"\`: matches alerts from any rule in the space. Use when the user explicitly wants a cross-rule or shared policy.
 
 ### Throttle / Grouping Compatibility
 
@@ -400,10 +403,10 @@ Use ${alertingTools.manageActionPolicy} with these operations in order:
 1. \`set_metadata\`: name = \`"Notify on <rule-name>"\`, description = \`"Default notification for <rule-name>"\`
 2. \`set_destinations\`: \`[{ type: "workflow", id: "<workflowId-from-step-1>" }]\`
    - **IMPORTANT**: Use the \`workflowId\` field from the \`workflow_set_yaml\` tool result, NOT the \`attachmentId\`. The \`workflowId\` is the stable workflow ID used for persistence and cross-references. Using the attachment ID will cause a validation error.
-3. \`set_matcher\`: \`rule.id: "<ruleId>"\`
-   <!-- TODO(single_rule): When single_rule action policy type is available, replace set_matcher with set_type operation using type: 'single_rule' and ruleId. -->
+3. \`set_type\`: \`{ type: "single_rule", ruleId: "<ruleId>" }\`
    - Use the \`ruleId\` value from the \`manage_rule\` tool result. This ID is pre-assigned when the rule attachment is created and will become the saved-object ID when the user clicks "Create rule".
    - The \`ruleId\` is always available — even for unsaved/proposed rules — so you never need to ask the user to save the rule first.
+   - If the user explicitly requests a cross-rule or shared policy, use \`set_type: { type: "global" }\` with \`set_matcher\` instead.
 4. \`set_grouping\`: \`per_episode\`
 5. \`set_throttle\`: \`{ strategy: "on_status_change" }\`
 
@@ -416,6 +419,6 @@ where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`ver
 After creating the defaults, briefly mention:
 - They can use a different connector type (Slack, PagerDuty, etc.) — offer to use \`platform.workflows.get_connectors\` to explore.
 - They can change the throttle strategy — \`on_status_change\` (default) only notifies on transitions, \`every_time\` notifies on every evaluation cycle.
-- They can broaden the matcher to cover multiple rules by removing the \`rule.id\` filter.`,
+- They can switch to a global policy (\`set_type: { type: "global" }\`) with a matcher to cover multiple rules.`,
     getInlineTools: () => [manageRuleTool(), manageActionPolicyTool(deps)],
   });

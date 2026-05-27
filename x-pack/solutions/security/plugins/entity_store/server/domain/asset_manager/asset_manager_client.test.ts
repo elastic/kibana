@@ -14,6 +14,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AssetManagerClient } from './asset_manager_client';
+import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../saved_objects/global_state/constants';
 import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
@@ -191,7 +192,7 @@ describe('AssetManagerClient', () => {
             delay: '1m',
             frequency: '1m',
             docsLimit: 10000,
-            maxLogsPerPage: 40000,
+            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
             timeout: '59s',
           }),
         })
@@ -212,7 +213,7 @@ describe('AssetManagerClient', () => {
             fieldHistoryLength: 10,
             additionalIndexPatterns: [],
             docsLimit: 10000,
-            maxLogsPerPage: 40000,
+            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
           }),
         })
       );
@@ -261,7 +262,7 @@ describe('AssetManagerClient', () => {
             fieldHistoryLength: 10,
             additionalIndexPatterns: [],
             docsLimit: 10000,
-            maxLogsPerPage: 40000,
+            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
           }),
         })
       );

@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import React, { useState, useMemo } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -122,6 +124,11 @@ export const RoundThinkingPanel = ({
           css={css`
             cursor: pointer;
           `}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.THINKING_TOGGLE,
+            detail: 'conversation',
+          })}
         >
           <EuiFlexGroup responsive={false} gutterSize="m" direction="row" alignItems="center">
             <RoundIcon isLoading={isLoading} />
@@ -151,6 +158,11 @@ export const RoundThinkingPanel = ({
                       color="text"
                       iconSide="left"
                       onClick={addToDatasetAction?.onClick}
+                      {...getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.conversation.ROUND_ADD_TO_DATASET,
+                        detail: 'conversation',
+                      })}
                     >
                       {addToDatasetAction?.label}
                     </EuiButton>
@@ -163,13 +175,28 @@ export const RoundThinkingPanel = ({
                       color="text"
                       iconSide="left"
                       onClick={() => setShowTraceFlyout(true)}
+                      {...getEbtProps({
+                        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                        action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_TRACE,
+                        detail: 'conversation',
+                      })}
                     >
                       {viewTraceButtonLabel}
                     </EuiButton>
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiButton iconType="code" color="text" iconSide="left" onClick={toggleFlyout}>
+                  <EuiButton
+                    iconType="code"
+                    color="text"
+                    iconSide="left"
+                    onClick={toggleFlyout}
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_JSON,
+                      detail: 'conversation',
+                    })}
+                  >
                     {rawResponseButtonLabel}
                   </EuiButton>
                 </EuiFlexItem>

@@ -90,6 +90,7 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
               )}
               onClick={onCreateEsqlRule}
               icon={<EuiIcon type="productDiscover" color="text" size="l" aria-hidden={true} />}
+              data-test-subj="createEsqlRuleCard"
             />
           </EuiFlexItem>
           <EuiFlexItem>

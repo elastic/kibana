@@ -261,6 +261,7 @@ export interface AppMenuSwitch {
   labelProps: EuiSwitchProps['labelProps'];
   checked: boolean;
   onChange: (checked: boolean) => void;
+  disabled?: boolean;
   'data-test-subj'?: string;
 }
 

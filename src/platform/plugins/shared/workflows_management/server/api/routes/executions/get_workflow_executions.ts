@@ -97,12 +97,18 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
               ),
               finishedAfter: schema.maybe(
                 schema.string({
-                  meta: { description: 'Filter executions finished at or after this timestamp.' },
+                  meta: {
+                    description:
+                      'Datemath lower bound for filtering executions by finishedAt (inclusive when parsed).',
+                  },
                 })
               ),
               finishedBefore: schema.maybe(
                 schema.string({
-                  meta: { description: 'Filter executions finished at or before this timestamp.' },
+                  meta: {
+                    description:
+                      'Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).',
+                  },
                 })
               ),
               sortField: schema.maybe(
@@ -128,6 +134,22 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: { description: 'Number of results per page.' },
                 })
               ),
+              startedAfter: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Datemath lower bound for filtering executions by startedAt (inclusive when parsed).',
+                  },
+                })
+              ),
+              startedBefore: schema.maybe(
+                schema.string({
+                  meta: {
+                    description:
+                      'Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).',
+                  },
+                })
+              ),
             }),
           },
         },
@@ -150,6 +172,8 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             page: request.query.page,
             size: request.query.size,
             omitStepRuns: request.query.omitStepRuns,
+            startedAfter: request.query.startedAfter,
+            startedBefore: request.query.startedBefore,
             finishedAfter: request.query.finishedAfter,
             finishedBefore: request.query.finishedBefore,
             sortField: request.query.sortField,
