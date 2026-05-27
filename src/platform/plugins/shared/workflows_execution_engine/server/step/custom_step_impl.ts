@@ -104,6 +104,9 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
         getFakeRequest: () => {
           return this.stepExecutionRuntime.contextManager.getFakeRequest();
         },
+        callKibanaApi: (params) => {
+          return this.stepExecutionRuntime.contextManager.callKibanaApi(params);
+        },
       },
       logger: {
         debug: (message, meta) => this.workflowLogger.logDebug(message, meta),

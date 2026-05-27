@@ -89,6 +89,7 @@ describe('aiSummarizeStepDefinition', () => {
       getContext: jest.fn(),
       getScopedEsClient: jest.fn(),
       renderInputTemplate: jest.fn(),
+      callKibanaApi: jest.fn(),
     };
 
     // Mock step handler context
