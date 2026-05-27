@@ -10,17 +10,16 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
-// The structure of this styles file is slightly different from other style files in this folder/component — that's intentional, we're trying things out, I think this is better: each separate style is a function, instead of the function wrapping all styles e.g. `root`, `part`…
+const dateRangeValueDisplayStyles = ({ euiTheme }: UseEuiTheme) => ({
+  root: css`
+    white-space: nowrap;
+  `,
+  part: css`
+    &:hover {
+      color: ${euiTheme.colors.textPrimary};
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
+    }
+  `,
+});
 
-const root = () => css`
-  white-space: nowrap;
-`;
-
-const part = ({ euiTheme }: UseEuiTheme) => css`
-  &:hover {
-    color: ${euiTheme.colors.textPrimary};
-    background-color: ${euiTheme.colors.backgroundLightPrimary};
-  }
-`;
-
-export { root, part };
+export { dateRangeValueDisplayStyles };

@@ -8,10 +8,11 @@
  */
 
 import React, { Fragment, type ReactNode } from 'react';
+import { useEuiMemoizedStyles } from '@elastic/eui';
 
 import type { RangePart } from './parse/parse_range_parts';
 import { parseDisplayParts } from './parse/parse_range_parts';
-import * as styles from './date_range_value_display.styles';
+import { dateRangeValueDisplayStyles } from './date_range_value_display.styles';
 
 interface DateRangeValueDisplayProps {
   /** The full display text to render, e.g. "Last 15 minutes". */
@@ -30,6 +31,7 @@ export function DateRangeValueDisplay({
   onPartClick,
   disabled = false,
 }: DateRangeValueDisplayProps) {
+  const styles = useEuiMemoizedStyles(dateRangeValueDisplayStyles);
   const parts = parseDisplayParts(displayText);
   const chunks: ReactNode[] = [];
   let cursor = 0;
