@@ -14,3 +14,4 @@ export {
   type GraphAttachmentData,
 } from './graph';
 export { SKILL_ATTACHMENT_TYPE, type SkillAttachment, type SkillAttachmentData } from './skill';
+export { TOOL_ATTACHMENT_TYPE, type ToolAttachment, type ToolAttachmentData } from './tool';

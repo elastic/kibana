@@ -12,4 +12,5 @@ export {
   createProposeSkillTool,
   createPatchSkillTool,
 } from './skill_authoring';
+export { toolAuthoringSkill, createProposeToolTool, createPatchToolTool } from './tool_authoring';
 export { registerSkills } from './register_skills';

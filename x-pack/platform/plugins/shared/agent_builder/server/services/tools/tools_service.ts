@@ -12,18 +12,19 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { Runner } from '@kbn/agent-builder-server';
+import type { Runner, InternalToolDefinition } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { createBadRequestError, type ToolType } from '@kbn/agent-builder-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
   createBuiltinProviderFn,
   type BuiltinToolRegistry,
 } from './builtin';
-import type { ToolsServiceSetup, ToolsServiceStart } from './types';
+import type { ExecuteDraftParams, ToolsServiceSetup, ToolsServiceStart } from './types';
 import { getToolTypeDefinitions } from './tool_types';
 import { isEnabledDefinition } from './tool_types/definitions';
 import { createPersistedProviderFn } from './persisted';
@@ -146,10 +147,70 @@ export class ToolsService {
       });
     };
 
+    const executeDraft: ToolsServiceStart['executeDraft'] = async ({
+      request,
+      type,
+      configuration,
+      toolParams,
+      connectorId,
+    }: ExecuteDraftParams) => {
+      const typeDef = toolTypes.find(
+        (def): def is Extract<typeof def, { toolType: ToolType }> & { validateForCreate: any } =>
+          'toolType' in def && def.toolType === type && isEnabledDefinition(def)
+      );
+      if (!typeDef || !isEnabledDefinition(typeDef)) {
+        throw createBadRequestError(
+          `Unknown or unsupported tool type for chat authoring: ${String(type)}`
+        );
+      }
+
+      const spaceId = getCurrentSpaceId({ request, spaces });
+      const esClient = elasticsearch.client.asScoped(request).asCurrentUser;
+      const validatorContext = { request, spaceId, esClient };
+
+      const validatedConfig = await typeDef.validateForCreate({
+        config: configuration as Record<string, any>,
+        context: validatorContext,
+      });
+
+      const dynamic = await typeDef.getDynamicProps(validatedConfig as Record<string, any>, {
+        request,
+        spaceId,
+      });
+      const toolSchema = await dynamic.getSchema();
+      const validation = toolSchema.safeParse(toolParams);
+      if (!validation.success) {
+        throw createBadRequestError(`Invalid parameters: ${validation.error.message}`);
+      }
+
+      const transientTool: InternalToolDefinition = {
+        id: '__draft__',
+        type,
+        description: 'Draft tool execution',
+        readonly: true,
+        tags: [],
+        experimental: false,
+        configuration: validatedConfig as Record<string, unknown>,
+        isAvailable: async () => ({ status: 'available' }),
+        getSchema: () => toolSchema,
+        getHandler: async () => dynamic.getHandler(),
+        ...(dynamic.getLlmDescription ? { getLlmDescription: dynamic.getLlmDescription } : {}),
+      };
+
+      return getRunner().runInternalTool({
+        tool: transientTool,
+        toolParams: validation.data as Record<string, unknown>,
+        request,
+        source: 'user',
+        ...(connectorId ? { defaultConnectorId: connectorId } : {}),
+      });
+    };
+
     return {
       getRegistry,
       getToolDefinitions: () => toolTypes,
       getHealthClient,
+      executeDraft,
     };
   }
 }

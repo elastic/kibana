@@ -13,7 +13,12 @@ import {
   type ActionTypeExecutorResult,
   AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { ToolType, isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
+import {
+  ToolType,
+  editableToolTypes,
+  isMcpTool,
+  type McpToolDefinition,
+} from '@kbn/agent-builder-common/tools';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -759,6 +764,49 @@ export function registerInternalToolsRoutes({
 
       return response.ok<ListMcpToolsHealthResponse>({
         body: { results },
+      });
+    })
+  );
+
+  // Dry-run an un-persisted tool draft. Used by the chat tool-authoring
+  // attachment card's Test affordance. Same execution path as the persisted
+  // tool would take at agent runtime, scoped to the requesting user.
+  router.post(
+    {
+      path: `${internalApiPath}/tools/_execute_draft`,
+      validate: {
+        body: schema.object({
+          type: schema.oneOf(
+            // @ts-expect-error TS2769: editableToolTypes is a const array of literals
+            editableToolTypes.map((type) => schema.literal(type))
+          ),
+          configuration: schema.recordOf(schema.string(), schema.any()),
+          tool_params: schema.recordOf(schema.string(), schema.any()),
+          connector_id: schema.maybe(schema.string()),
+        }),
+      },
+      options: { access: 'internal' },
+      security: AGENT_BUILDER_READ_SECURITY,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const {
+        type,
+        configuration,
+        tool_params: toolParams,
+        connector_id: connectorId,
+      } = request.body;
+      const { tools: toolService } = getInternalServices();
+
+      const toolResult = await toolService.executeDraft({
+        request,
+        type,
+        configuration,
+        toolParams,
+        connectorId,
+      });
+
+      return response.ok({
+        body: { results: toolResult.results },
       });
     })
   );

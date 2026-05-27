@@ -7,7 +7,9 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ToolType } from '@kbn/agent-builder-common';
 import type { StaticToolRegistration, ToolRegistry } from '@kbn/agent-builder-server/tools';
+import type { RunToolReturn } from '@kbn/agent-builder-server';
 import type { AnyToolTypeDefinition } from './tool_types';
 import type { ToolHealthClient } from './health';
 
@@ -29,4 +31,20 @@ export interface ToolsServiceStart {
    * Used to track and query tool health state.
    */
   getHealthClient(opts: { request: KibanaRequest }): ToolHealthClient;
+  /**
+   * Execute an inline (un-persisted) tool draft using the same runtime path
+   * the agent would use at call time. Powers the chat tool-authoring dry-run.
+   * Validates the configuration via the matching tool type's `validateForCreate`,
+   * then runs the handler through the scoped runner. No persistence, no
+   * health tracking.
+   */
+  executeDraft(opts: ExecuteDraftParams): Promise<RunToolReturn>;
+}
+
+export interface ExecuteDraftParams {
+  request: KibanaRequest;
+  type: ToolType;
+  configuration: Record<string, unknown>;
+  toolParams: Record<string, unknown>;
+  connectorId?: string;
 }

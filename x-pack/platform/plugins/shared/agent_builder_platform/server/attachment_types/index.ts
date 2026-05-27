@@ -14,6 +14,7 @@ import { createVisualizationAttachmentType } from './visualization';
 import { createGraphAttachmentType } from './graph';
 import { createConnectorAttachmentType } from './connector';
 import { createSkillAttachmentType } from './skill';
+import { createToolAttachmentType } from './tool';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -37,6 +38,7 @@ export const registerAttachmentTypes = ({
     createGraphAttachmentType(),
     createConnectorAttachmentType(),
     createSkillAttachmentType(),
+    createToolAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {
