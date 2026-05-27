@@ -16,6 +16,7 @@ import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_c
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import type { DetectionEmulationGuardrails } from '../../../lib/detection_emulation/execution/shared_guardrails';
 import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
+import { createTracedLogger } from '../../../lib/detection_emulation/execution/traced_logger';
 import { withCommandGates } from './with_command_gates';
 import { buildEmulationConfirmation } from './build_emulation_confirmation';
 import { toolError } from './emulation_tool_errors';
@@ -92,10 +93,15 @@ export function createRunFamilyCommandTool(
     ) => {
       const { emulationId, agentType, command } = rawParams;
 
+      const log = createTracedLogger(logger, {
+        tool: `run-${family}-command`,
+        entityId: emulationId,
+      });
+
       const strictParseResult = RunEmulationCommandInputSchema.safeParse(rawParams);
       if (!strictParseResult.success) {
-        logger.warn(
-          `Emulation command [${command}] for emulation [${emulationId}] rejected: invalid parameters for command (${strictParseResult.error.message})`
+        log.warn(
+          `Command [${command}] rejected: invalid parameters (${strictParseResult.error.message})`
         );
         return toolError.invalidParameters({
           emulation_id: emulationId,
@@ -111,7 +117,7 @@ export function createRunFamilyCommandTool(
           core,
           endpointService,
           config,
-          logger,
+          logger: log,
           allowlist,
           rateLimiter,
           idempotencyCache,

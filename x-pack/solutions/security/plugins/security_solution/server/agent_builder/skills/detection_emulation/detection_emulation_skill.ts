@@ -140,6 +140,56 @@ Always include in your response to the user:
 - **Report ID** — for audit trail reference (\`report_id\`)
 - **Caveats** — surface any entries from the \`caveats\` array (scoring edge cases)
 `,
+    /**
+     * Referenced content for MITRE ATT&CK technique documentation.
+     *
+     * Inspired by andrew-goldstein's `referencedContent` pattern in the
+     * Skills PR (#260811), which attaches external reference documents to
+     * skill definitions so the LLM can ground its reasoning in canonical
+     * sources without relying on parametric knowledge.
+     *
+     * Each entry maps a content key (used in tool descriptions and
+     * `content` to cite via `{{ref:key}}`) to a markdown document. The
+     * Agent Builder framework injects referenced content into the LLM
+     * context when the skill is activated, giving the model access to
+     * technique descriptions, tactic mappings, and known emulation
+     * payloads without stuffing them into every tool's system prompt.
+     */
+    referencedContent: [
+      {
+        name: 'mitre-attack-overview',
+        relativePath: '.',
+        content: `# MITRE ATT&CK Technique Reference
+
+## Supported Technique Families
+
+The detection emulation library organises payloads by MITRE ATT&CK tactic/technique family:
+
+| Family       | Tactic            | Example Techniques                          |
+|------------- |------------------ |-------------------------------------------- |
+| Process      | Execution         | T1059 (Command and Scripting Interpreter)   |
+| File         | Defense Evasion   | T1070 (Indicator Removal), T1036 (Masquerading) |
+| Network      | Command & Control | T1071 (Application Layer Protocol)          |
+| Execution    | Execution         | T1053 (Scheduled Task/Job), T1569 (System Services) |
+
+## Interpreting Confidence Scores
+
+- **Coverage** = fraction of the rule's mapped techniques that the library has payloads for.
+- **Precision** = TP / (TP + FP) — how many alerts the rule raised were true positives.
+- **Confidence** = harmonic mean of coverage and precision, penalised by unmatched signals.
+
+A confidence of 1.0 means: every mapped technique was emulated, every expected signal fired,
+and no unexpected alerts were raised.
+
+## Modes
+
+- **log_injection** — Injects synthetic log documents that mimic attack telemetry.
+  Safe, fast, no real endpoints needed. Cannot test response-action–dependent rules.
+- **real_execution** — Dispatches response actions to real enrolled Elastic Agents.
+  Requires allowlist, RBAC, rate limits, concurrency gate, and HITL confirmation.
+`,
+      },
+    ],
     getInlineTools: () => [
       createValidateRuleTool(ctx),
       createGetEmulationHistoryTool(ctx),

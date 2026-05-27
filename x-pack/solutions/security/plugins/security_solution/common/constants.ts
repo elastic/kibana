@@ -355,10 +355,6 @@ export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
  * Detection emulation routes
  */
 export const DETECTION_ENGINE_EMULATION_URL = `${INTERNAL_DETECTION_ENGINE_URL}/emulation` as const;
-export const DETECTION_ENGINE_EMULATION_RUN_COMMAND_URL =
-  `${DETECTION_ENGINE_EMULATION_URL}/run_command` as const;
-export const DETECTION_ENGINE_EMULATION_VALIDATE_RULE_URL =
-  `${DETECTION_ENGINE_EMULATION_URL}/validate_rule` as const;
 /**
  * Operator-driven halt for in-flight emulation reservations. Pairs
  * with the runtime kill switch

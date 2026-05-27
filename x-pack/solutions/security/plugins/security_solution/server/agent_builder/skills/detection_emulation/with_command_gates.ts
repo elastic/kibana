@@ -35,6 +35,7 @@ import {
   acquireRateLimit,
   checkAuth,
 } from './gate_checks';
+import { runStep } from '../../../lib/detection_emulation/execution/pipeline_step_error';
 
 /**
  * Shared per-call dependencies the four per-family runEmulationCommand
@@ -150,7 +151,9 @@ export const withCommandGates = async (
     }
 
     // ── Gate 2: Per-command RBAC ────────────────────────────────────────────
-    const rbacResult = await checkRbac(endpointService, request, esClient.asCurrentUser, command);
+    const rbacResult = await runStep('rbac_check', 2, () =>
+      checkRbac(endpointService, request, esClient.asCurrentUser, command)
+    );
     if (!rbacResult.ok) {
       logger.warn(
         `Emulation command [${command}] for emulation [${emulationId}] blocked: ${rbacResult.message}`
@@ -166,12 +169,17 @@ export const withCommandGates = async (
     const [coreStart] = await core.getStartServices();
     const soClient = savedObjectsClient ?? coreStart.savedObjects.getScopedClient(request);
     const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-    const { effectiveAllowlist, effectiveRateLimiter } = await resolveEffectiveConfig({
-      uiSettingsClient,
-      config,
-      logger,
-      rateLimiterConfig: rateLimiter.getConfig(),
-    });
+    const { effectiveAllowlist, effectiveRateLimiter } = await runStep(
+      'resolve_guardrail_config',
+      3,
+      () =>
+        resolveEffectiveConfig({
+          uiSettingsClient,
+          config,
+          logger,
+          rateLimiterConfig: rateLimiter.getConfig(),
+        })
+    );
 
     // ── Gate 3: Host allowlist ──────────────────────────────────────────────
     const allowlistResult = checkAllowlist(allowlist, endpointIds, effectiveAllowlist);
@@ -262,11 +270,13 @@ export const withCommandGates = async (
       );
       casesClient = undefined;
     }
-    const authResult = await checkAuth(resolveCurrentUsername, {
-      request,
-      security: coreStart.security as any,
-      esClient: esClient.asCurrentUser,
-    });
+    const authResult = await runStep('auth_check', 5, () =>
+      checkAuth(resolveCurrentUsername, {
+        request,
+        security: coreStart.security as any,
+        esClient: esClient.asCurrentUser,
+      })
+    );
     if (!authResult.ok) {
       rateLimiter.release(rateLimitToken);
       logger.warn(
@@ -296,7 +306,7 @@ export const withCommandGates = async (
       actorContext,
     });
 
-    const result = await runner.run(cmd);
+    const result = await runStep('runner_dispatch', 6, () => runner.run(cmd));
 
     if (result.status === 'error') {
       rateLimiter.release(rateLimitToken);

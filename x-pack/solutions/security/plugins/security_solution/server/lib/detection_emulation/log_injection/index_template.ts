@@ -64,7 +64,7 @@ export const EMULATION_LOGS_INDEX_TEMPLATE = deepFreeze<IndicesPutIndexTemplateR
             parent: { properties: { name: { type: 'keyword' } } },
           },
         },
-        host: { properties: { id: { type: 'keyword' }, name: { type: 'keyword' } } },
+        host: { properties: { id: { type: 'keyword' }, name: { type: 'keyword' }, os: { properties: { type: { type: 'keyword' } } } } },
         user: { properties: { name: { type: 'keyword' } } },
         agent: { properties: { type: { type: 'keyword' } } },
         kibana: {

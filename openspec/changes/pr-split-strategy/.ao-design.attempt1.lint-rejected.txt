@@ -1,0 +1,101 @@
+# Design: Detection Emulation Vertical Slice Merge Strategy (v2)
+
+## Approach
+
+The central problem is that `validate_rule_tool.ts` statically imports all four advanced dependencies — `scoreConfidence`, `createEmulationHistory`, `EmulationRunner`, and `DetectionEmulationGuardrails` — at lines 35–43, making every module that touches the tool transitively depend on the entire feature surface. This forces all PRs to land together or not at all. The solution is an **optional enrichment pipeline**: convert the four hard imports into optional fields on the `ValidateRuleToolDeps` interface, provide default no-op behaviors when enrichments are absent, and then let each subsequent PR inject exactly the enrichments it introduces.
+
+In parallel, three registration-time feature-flag gaps must be closed before any slice is safe to merge. Research confirms that `createDetectionEmulationGuardrails()` is called unconditionally at `plugin.ts:659` inside `setup()`, both REST routes are registered unconditionally in `register_routes.ts:39–44` (individual handlers do check flags at request time via `getDetectionEmulationFeatureFlags(config)` but registration itself is unguarded), and `detection_emulation_skill.ts:37–157` registers all six tools regardless of `realExecution` flag state. The skill registration outer gate in `register_skills.ts:91–104` is already correct and requires no change. Fixing the three gaps before PR 1a ships ensures that merged code with both flags at `false` produces zero runtime impact.
+
+The four PRs form a strict dependency chain (1a → 2 → 3 → 4, with 1b feeding into 3 independently) where each PR delivers observable value on merge. PR 1a delivers a working `validate-rule` tool with raw pass/fail output; PR 2 enriches that output with scoring and persistence; PR 3 adds real-execution mode and per-family tools; PR 4 adds safety gates and UI surfaces. Because each PR's enrichments are injected rather than hard-coded, earlier PRs need no changes when later enrichments are wired in.
+
+---
+
+## Components
+
+- **`validate_rule_tool.ts` enrichment refactor**: Converts `ValidateRuleToolDeps` at `validate_rule_tool.ts:83` from requiring `guardrails: DetectionEmulationGuardrails` to accepting `ValidateRuleEnrichments` with all four enrichment fields optional. The handler body guards each enrichment call with a presence check and falls back to the degraded behavior defined per enrichment.
+
+- **`ValidateRuleEnrichments` interface**: New interface replacing the current hard-typed deps block. Fields: `scoreConfidence?`, `createEmulationHistory?`, `EmulationRunner?`, `guardrails?`. Absence of `scoreConfidence` causes the handler to return raw `tp`/`fp` counts instead of normalized scores. Absence of `createEmulationHistory` skips persistence and omits `report_id` from the response. Absence of `EmulationRunner` causes `real_execution` mode to return a `"feature not available"` error via `emulation_tool_errors.ts`. Absence of `guardrails` causes the handler to skip allowlist, rate-limiter, and concurrency-gate checks.
+
+- **`plugin.ts` guardrails guard**: Wraps the `createDetectionEmulationGuardrails()` call at `plugin.ts:659` in `if (logInjection || realExecution)`. The class property at `plugin.ts:219` becomes `detectionEmulationGuardrails?: DetectionEmulationGuardrails`. Both call sites — `initRoutes()` at `plugin.ts:680` and `registerAgentBuilderAttachmentsAndTools()` at `plugin.ts:274` — must propagate the optional type without null-asserting.
+
+- **`register_routes.ts` flag gates**: Wraps `validateRuleRoute(...)` call at `register_routes.ts:39–44` in `if (logInjection)` (PR 1a). Wraps `runEmulationCommandRoute(...)` in `if (realExecution)` (PR 3). Both wrappers read flags from the same `getDetectionEmulationFeatureFlags(config)` call already used in handler bodies, so no new config access path is introduced.
+
+- **`detection_emulation_skill.ts` conditional tool registration**: Modifies `getInlineTools()` at `detection_emulation_skill.ts:37–157` to return only `createValidateRuleTool` when `realExecution` is `false`, and add the four per-family run tools only when `realExecution` is `true`. `createGetEmulationHistoryTool` is added in PR 2 — its registration is gated behind `logInjection` (the same flag that gates the underlying history feature).
+
+- **Enrichment injection sites**: Each PR's `plugin.ts` or skill-registration path constructs the enrichment object for that PR's slice and passes it into the tool factory. PR 1a passes an empty enrichments object `{}`. PR 2 passes `{ scoreConfidence, createEmulationHistory }`. PR 3 additionally passes `{ EmulationRunner, guardrails }`.
+
+- **`emulation_tool_errors.ts`**: Already present in the working tree. PR 1a uses its error constructors for the `real_execution` "feature not available" path. No new error types needed for the degraded responses.
+
+- **`gate_checks.ts` (unchanged)**: `checkRealExecutionFeatureFlags()` at lines 64–77 and `checkModeFeatureFlags()` at lines 79–105 remain the call-time enforcement layer. The registration-time gates added above are defense-in-depth; `gate_checks.ts` continues to guard individual invocations.
+
+- **`kbn-evals-suite-detection-emulation/`**: The eval package at `evals/validate_rule.spec.ts` (680 lines) and `evals/validate_rule_dataset.ts` (328 lines) lands in PR 1a. Evals validate tool selection, schema compliance, and trajectory against the PR 1a response shape (raw `tp`/`fp`, no `confidence`, no `report_id`). PR 2 updates the dataset expectations to include scoring fields once enrichments are wired.
+
+---
+
+## Data Model
+
+### `ValidateRuleEnrichments` (new — PR 1a)
+
+```typescript
+interface ValidateRuleEnrichments {
+  scoreConfidence?: typeof import('../../../lib/detection_emulation/confidence_scorer').scoreConfidence;
+  createEmulationHistory?: typeof import('../../../lib/detection_emulation/emulation_history').createEmulationHistory;
+  EmulationRunner?: typeof import('../../../lib/detection_emulation/execution/runner').EmulationRunner;
+  guardrails?: DetectionEmulationGuardrails;
+}
+```
+
+The `typeof import(...)` form is used to avoid importing the modules at the interface definition site — the interface can be declared in a types file that carries no runtime cost. Concrete implementations import the types separately.
+
+### Tool response shape by PR
+
+| Field | PR 1a | PR 2 | PR 3+ |
+|---|---|---|---|
+| `success` | ✓ | ✓ | ✓ |
+| `scenario_id` | ✓ | ✓ | ✓ |
+| `rule_id` | ✓ | ✓ | ✓ |
+| `mode` | ✓ | ✓ | ✓ |
+| `tp` | ✓ (raw count) | ✓ | ✓ |
+| `fp` | ✓ (raw count) | ✓ | ✓ |
+| `matched_signals` | ✓ | ✓ | ✓ |
+| `unmatched_signals` | ✓ | ✓ | ✓ |
+| `poll_duration_ms` | ✓ | ✓ | ✓ |
+| `confidence` | absent | ✓ (0-1) | ✓ |
+| `coverage` | absent | ✓ | ✓ |
+| `precision` | absent | ✓ | ✓ |
+| `report_id` | absent | ✓ | ✓ |
+| `caveats` | absent | ✓ | ✓ |
+
+The PR 1a response schema in `common/detection_emulation/schemas/validate_rule_input.ts` must define `confidence`, `coverage`, `precision`, `report_id`, and `caveats` as optional (`z.optional(...)`) so PR 2's richer output is backward-compatible without a breaking schema change.
+
+### Feature flag read path
+
+Both flags are read via `getDetectionEmulationFeatureFlags(config)` at `feature_flag.ts:70–78`, which merges `experimental_features.ts:245,255` defaults with runtime overrides. All new guard sites — `plugin.ts`, `register_routes.ts`, `detection_emulation_skill.ts` — call the same function to avoid a second access pattern diverging from the existing convention.
+
+---
+
+## Failure Modes
+
+- **PR 1a type-check fails because `DetectionEmulationGuardrails` is still referenced**: Making `guardrails` optional on `ValidateRuleToolDeps` does not by itself remove the import of `DetectionEmulationGuardrails` at `validate_rule_tool.ts:35–43`. The type must be imported with `import type` (no runtime cost) or relocated to a shared types file that PR 3's concrete implementation also imports. Failure to do this causes PR 1a to carry a transitive build dependency on PR 3's guardrails module. **Mitigation**: Move `DetectionEmulationGuardrails` to a types file in `common/detection_emulation/schemas/` that all PRs can import without pulling in the implementation.
+
+- **Handler falls through to enrichment call site when enrichment is absent**: If the enrichment presence check is `if (enrichments.scoreConfidence)` but the call is not properly guarded, TypeScript's control-flow narrowing will flag it. The handler must use explicit early-return or typed-narrowing patterns at each enrichment call site (`validate_rule_tool.ts:508` for scoring, `validate_rule_tool.ts:548` for history). **Mitigation**: Use a local variable (`const scorer = enrichments.scoreConfidence`) narrowed before the call site; TypeScript's strict-null-checks will surface missing guards at compile time.
+
+- **`real_execution` mode returns misleading error in PR 1a**: The PR 1a tool accepts `mode: 'real_execution'` in the schema but the handler returns "feature not available". If the eval dataset includes a `real_execution` test case against the PR 1a tool, the eval will fail. **Mitigation**: The eval dataset in `validate_rule_dataset.ts` must only exercise `log_injection` mode until PR 3 ships. The eval spec at `validate_rule.spec.ts` should assert that `real_execution` calls return a structured error (not a crash), validating graceful degradation rather than success.
+
+- **Optional `guardrails` in `plugin.ts` propagates as `undefined` to a site that null-asserts**: `plugin.ts:274` and `plugin.ts:680` currently pass `this.detectionEmulationGuardrails` (currently non-optional) to callee functions. After the guard is added, those callees receive `undefined` when the flag is off. Any callee that internally null-asserts (`this.detectionEmulationGuardrails!`) will throw at runtime if the route or skill is somehow invoked with the flag off. **Mitigation**: Audit both call sites and update callee signatures to accept `DetectionEmulationGuardrails | undefined`; the registration-time flag gates prevent reachable code from ever receiving `undefined` in production, but type-safety must be preserved end-to-end.
+
+- **Skill registers per-family tools when `realExecution` is `false` if flag is toggled on then off**: The conditional in `detection_emulation_skill.ts` executes at skill-registration time (plugin setup), not at invocation time. If a server restarts with `realExecution: true`, then the flag is toggled off without restart, the tools remain registered for the lifetime of that process. **Mitigation**: Call-time enforcement via `gate_checks.ts:64–77` continues to block actual invocations; registration-time gating is defense-in-depth only and is documented as such. A server restart is required to change the registered tool set.
+
+- **PR 2 eval updates break PR 1a eval baseline**: When PR 2 is merged and `confidence`/`report_id` are added to the response, the existing eval dataset expectations from PR 1a (which expect their absence) will fail unless updated in the same PR. **Mitigation**: PR 2's `validate_rule_dataset.ts` update must be atomic with the enrichment wiring — dataset and wiring land in the same commit.
+
+---
+
+## Alternatives Considered
+
+- **Dynamic `require()` instead of optional enrichments**: Replacing static imports with `require()` calls inside the handler when enrichments are needed would eliminate the module-load coupling without an interface refactor. Rejected because (1) `require()` is synchronous and Kibana's module graph is async-capable, (2) it defeats tree-shaking and module boundary analysis, (3) it is explicitly prohibited by the `@kbn/eslint/no_sync_import_from_plugin` rule enforced on plugin server entry files (see `CLAUDE.md` notes on `server/index.ts`), and (4) the optional-enrichment interface is equally effective and is type-safe.
+
+- **Separate tool files per PR instead of one refactored `validate_rule_tool.ts`**: Each PR could introduce a new `validate_rule_tool_v2.ts`, `validate_rule_tool_v3.ts`, etc., with full implementations. Rejected because it would require the skill registration to switch which tool factory it calls across PRs, leaves dead code from earlier tool versions in the tree, and fragments the evolution history of a single logical tool into unrelated files.
+
+- **Feature-flag checks inside `createDetectionEmulationGuardrails()` rather than at the call site in `plugin.ts`**: Guardrails construction could self-guard by reading flags internally and returning a no-op object when disabled. Rejected because the JSDoc at `plugin.ts:217–218` explicitly explains the rationale for the shared bundle (single allowlist, shared rate-limit windows, shared concurrency gate); a no-op bundle silently changes that contract. A conditional at the `plugin.ts:659` call site makes the guard visible to code owners reviewing the plugin wiring.
+
+- **Single large PR behind a feature flag rather than vertical slices**: The entire feature ships behind `detectionEmulationLogInjection: false` and is toggled on after one large review. Rejected because code review of a ~19k-line diff is impractical, CI flakiness in any part blocks the whole feature, and the proposal's explicit design goal is that each merged PR delivers user-visible value. The enrichment-pipeline refactor enables the vertical split at the cost of ~50 lines of interface work in PR 1a.

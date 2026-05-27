@@ -26,9 +26,12 @@ export interface LogInjectionResult {
   injectedDocIds: string[];
 }
 
+/** Index name prefix shared with the telemetry collector for ancestor-based alert lookup. */
+export const EMULATION_INDEX_PREFIX = '.kibana-security-emulation-logs-';
+
 const buildIndexName = (spaceId: string): string => {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '.');
-  return `.kibana-security-emulation-logs-${spaceId}-${date}`;
+  return `${EMULATION_INDEX_PREFIX}${spaceId}-${date}`;
 };
 
 /**

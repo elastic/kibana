@@ -10,19 +10,10 @@ import type { Logger } from '@kbn/core/server';
 import { AgentExecutionMode, ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
-} from '../../../../common/endpoint/service/response_actions/constants';
 import type { RunEmulationCommandInput } from '../../../../common/detection_emulation/schemas';
 import type { ConfigType } from '../../../config';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import {
-  getDetectionEmulationFeatureFlags,
-  getRealExecutionDisableReason,
-  REAL_EXECUTION_DISABLE_REASON_TEXT,
-} from '../../../lib/detection_emulation/feature_flag';
 import {
   generateScenario,
 } from '../../../lib/detection_emulation/scenario_generator';
@@ -41,12 +32,22 @@ import {
 } from '../../../lib/detection_emulation/emulation_report_type';
 import { EmulationRunner } from '../../../lib/detection_emulation/execution/runner';
 import type { DetectionEmulationGuardrails } from '../../../lib/detection_emulation/execution/shared_guardrails';
-import {
-  resolveAllowlistConfig,
-  resolveRateLimiterConfig,
-} from '../../../lib/detection_emulation/runtime_config_resolver';
 import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
+import { createTracedLogger } from '../../../lib/detection_emulation/execution/traced_logger';
+import { PipelineStepError, runStep } from '../../../lib/detection_emulation/execution/pipeline_step_error';
+import type { ToolFactoryDeps } from '../../../lib/detection_emulation/execution/tool_factory_deps';
+import {
+  checkModeFeatureFlags,
+  checkAuth,
+  checkRbac,
+  checkAllowlist,
+  acquireRateLimit,
+  resolveEffectiveConfig,
+} from './gate_checks';
 import { resolveCurrentUsername } from '../../../lib/detection_emulation/resolve_current_user';
+import {
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import { validateRuleSchema } from './validate_rule_input';
 import { toolError, type EmulationErrorContext } from './emulation_tool_errors';
 
@@ -69,18 +70,17 @@ const computeScenarioFingerprint = (
 
 // ─── Tool ─────────────────────────────────────────────────────────────────────
 
-export interface ValidateRuleToolDeps {
-  core: SecuritySolutionPluginCoreSetupDependencies;
-  endpointService: EndpointAppContextService;
-  config: ConfigType;
-  logger: Logger;
-  /**
-   * Shared guardrails (allowlist + rate limiter + concurrency gate)
-   * constructed once in `plugin.ts`. See `shared_guardrails.ts` for why
-   * these MUST be shared with the routes and the four `run*Command`
-   * tools rather than built per-factory.
-   */
-  guardrails: DetectionEmulationGuardrails;
+/**
+ * Narrow dependency interface for the validateRule tool factory.
+ *
+ * Extends the shared `ToolFactoryDeps` pattern (inspired by
+ * andrew-goldstein's `WorkflowFetcher` DI in PR #260811) so unit tests
+ * can inject stubs for exactly the surface they need.
+ */
+export interface ValidateRuleToolDeps extends ToolFactoryDeps {
+  // ToolFactoryDeps provides: core, endpointService, config, logger, guardrails.
+  // No additional deps needed — the interface extension is the declaration
+  // that validateRule consumes exactly the shared shape.
 }
 
 /**
@@ -126,159 +126,95 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
       } = rawParams;
       const wallBudgetMs = Math.min(rawBudget ?? WALL_BUDGET_DEFAULT_MS, WALL_BUDGET_CEILING_MS);
 
+      // ── Execution-scoped traced logger (PR #260793 pattern) ─────────
+      const log = createTracedLogger(logger, {
+        tool: 'validate-rule',
+        entityId: ruleId,
+        mode,
+      });
+
       const actorContext = buildAgentBuilderActor(runContext, callContext.toolCallId);
       const errCtx: EmulationErrorContext = { rule_id: ruleId, mode };
 
       let rateLimitToken: ReturnType<typeof rateLimiter.acquire>['token'];
       let concurrencyToken: ReturnType<typeof concurrencyGate.acquire>['token'];
       try {
-        // Step 1: Feature flag gate
-        const featureFlags = getDetectionEmulationFeatureFlags(config);
-        if (mode === 'log_injection' && !featureFlags.logInjection) {
+        // Step 1: Feature flag gate (uses shared gate_checks)
+        const ffResult = checkModeFeatureFlags(config, mode);
+        if (!ffResult.ok) {
           return toolError.featureDisabled(errCtx, {
-            message: 'Detection emulation log injection is disabled.',
-            likelyCause: 'Feature flag detectionEmulationLogInjection is not enabled.',
-          });
-        }
-        if (
-          mode === 'real_execution' &&
-          (!featureFlags.realExecution || !featureFlags.realExecutionRuntimeEnabled)
-        ) {
-          const disableReason = getRealExecutionDisableReason(featureFlags);
-          return toolError.featureDisabled(errCtx, {
-            message: 'Detection emulation real execution is disabled.',
-            likelyCause: disableReason
-              ? REAL_EXECUTION_DISABLE_REASON_TEXT[disableReason]
-              : 'Real-execution dispatch is disabled.',
-            disableReason: disableReason ?? undefined,
+            message: ffResult.message,
+            likelyCause: (ffResult.extra?.likely_cause as string) ?? 'Feature disabled',
+            disableReason: ffResult.extra?.disable_reason as string | undefined,
           });
         }
 
         const [coreStart, startPlugins] = await core.getStartServices();
 
-        // Step 2: Authenticated caller required — emulation must be attributable.
-        //
-        // `coreStart.security?.authc.getCurrentUser(request)` reads
-        // `http.auth.get(request).state`, which is only populated by Kibana's
-        // HTTP auth middleware on real requests. When Agent Builder dispatches
-        // the agent run on Task Manager (the default async path), the runtime
-        // hands tools a fake `KibanaRequest` whose `.state` is empty, so
-        // `getCurrentUser` returns `null` even though the chat endpoint already
-        // authenticated the operator. The shared helper falls back to ES
-        // `_security/_authenticate` for that case, matching the canonical
-        // `getUserFromRequest` pattern in the agent_builder plugin.
-        const username = await resolveCurrentUsername({
+        // Step 2: Authenticated caller required (uses shared gate_checks)
+        const authResult = await checkAuth(resolveCurrentUsername, {
           request,
-          security: coreStart.security,
+          security: coreStart.security as any,
           esClient: esClient.asCurrentUser,
         });
-        if (!username) {
+        if (!authResult.ok) {
           return toolError.authenticationRequired(errCtx);
         }
+        const username = authResult.value.username;
 
-        // Step 3: RBAC — real_execution dispatches `execute` response actions;
-        // verify the caller holds the required endpoint privilege.
-        //
-        // We use `RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ` (yields
-        // `canWriteExecuteOperations`), NOT
-        // `RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL` (yields
-        // `writeExecuteOperations` — the Kibana feature-privilege string,
-        // which is *not* a property on `EndpointAuthz`). Mirrors the
-        // canonical lookup used by `validate_rule/route.ts` and
-        // `run_command/route.ts`.
+        // Step 3: RBAC — real_execution dispatches `execute` response actions.
         if (mode === 'real_execution') {
-          const consoleCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP.execute;
-          const requiredAuthzKey =
-            RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[consoleCommand];
-          if (requiredAuthzKey) {
-            // Pass the request-scoped ES client so `getEndpointAuthz` can fall
-            // back to ES `_security/_authenticate` for `roles` when the request
-            // is a Task-Manager-dispatched `fakeRequest` (whose HTTP auth state
-            // is empty so `getCurrentUser` returns null). Same fakeRequest
-            // mitigation as `resolve_current_user.ts`.
-            const endpointAuthz = await endpointService.getEndpointAuthz(
-              request,
-              esClient.asCurrentUser
-            );
-            const hasPrivilege = endpointAuthz[requiredAuthzKey];
-            if (!hasPrivilege) {
-              logger.warn(
-                `validate_rule tool blocked: user lacks required RBAC privilege [${requiredAuthzKey}]`
-              );
-              return toolError.authorizationError(errCtx, {
-                message: `Insufficient privileges: real_execution requires [${requiredAuthzKey}].`,
-                likelyCause: `User lacks required RBAC privilege [${requiredAuthzKey}].`,
-              });
-            }
+          const rbacResult = await checkRbac(
+            endpointService,
+            request,
+            esClient.asCurrentUser,
+            RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP.execute
+          );
+          if (!rbacResult.ok) {
+            log.warn(`RBAC blocked: ${rbacResult.message}`);
+            return toolError.authorizationError(errCtx, {
+              message: rbacResult.message,
+              likelyCause: (rbacResult.extra?.likely_cause as string) ?? 'RBAC check failed',
+            });
           }
         }
 
-        // Per-request resolution of operator-tunable guardrails. Reads
-        // the four `securitySolution:detectionEmulation:*` Advanced
-        // Settings for the current space and falls back to `kibana.yml`
-        // defaults. Only resolved on `real_execution` because the
-        // allowlist + rate limiter are real-execution-only gates.
-        let effectiveAllowlist: Awaited<ReturnType<typeof resolveAllowlistConfig>> | undefined;
-        let effectiveRateLimiter: Awaited<ReturnType<typeof resolveRateLimiterConfig>> | undefined;
+        // Per-request resolution of operator-tunable guardrails.
+        let effectiveAllowlist: Awaited<ReturnType<typeof resolveEffectiveConfig>>['effectiveAllowlist'] | undefined;
+        let effectiveRateLimiter: Awaited<ReturnType<typeof resolveEffectiveConfig>>['effectiveRateLimiter'] | undefined;
         if (mode === 'real_execution') {
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-          [effectiveAllowlist, effectiveRateLimiter] = await Promise.all([
-            resolveAllowlistConfig({ uiSettingsClient, config, logger }),
-            resolveRateLimiterConfig({
-              uiSettingsClient,
-              config,
-              logger,
-              constructorConfig: rateLimiter.getConfig(),
-            }),
-          ]);
+          const resolved = await resolveEffectiveConfig({
+            uiSettingsClient,
+            config,
+            logger,
+            rateLimiterConfig: rateLimiter.getConfig(),
+          });
+          effectiveAllowlist = resolved.effectiveAllowlist;
+          effectiveRateLimiter = resolved.effectiveRateLimiter;
         }
 
-        // Step 3a (real_execution only): host allowlist. Mirrors the
-        // run_emulation_command_tool.ts gate so the validateRule path
-        // cannot bypass the allowlist that runEmulationCommand enforces.
-        // Returns the *full* set of blocked endpoints so operators see
-        // every host that needs remediation in one error response.
+        // Step 3a (real_execution only): host allowlist (uses shared gate_checks).
         if (mode === 'real_execution') {
-          const allowlistResult = allowlist.validate(endpointIds, effectiveAllowlist);
-          if (!allowlistResult.allowed) {
-            logger.warn(
-              `validate_rule tool blocked by allowlist for rule [${ruleId}]: ${allowlistResult.error}`
-            );
+          const allowlistResult = checkAllowlist(allowlist, endpointIds, effectiveAllowlist!);
+          if (!allowlistResult.ok) {
+            log.warn(`Allowlist blocked: ${allowlistResult.message}`);
             return toolError.authorizationError(errCtx, {
-              message: allowlistResult.error ?? 'Endpoints not in allowlist.',
-              likelyCause: 'One or more endpoints are not in the emulation allowlist.',
-              blockedEndpoints: allowlistResult.blockedEndpoints,
+              message: allowlistResult.message,
+              likelyCause: (allowlistResult.extra?.likely_cause as string) ?? 'Allowlist check failed',
+              blockedEndpoints: allowlistResult.extra?.blocked_endpoints as string[] | undefined,
             });
           }
         }
 
         // Step 3a-bis (real_execution only): on-demand HITL prompt.
-        //
-        // Why here: the prompt fires AFTER feature flag + auth + RBAC +
-        // allowlist (an authoritative no shouldn't waste the user's
-        // attention) and BEFORE the rate-limit acquire (a declined run
-        // shouldn't burn a per-space slot).
-        //
-        // Why on-demand and not declarative: validateRule has TWO modes;
-        // log_injection is safe and must NOT prompt. A `confirmation:
-        // { askUser: 'always' }` block on the tool definition would fire
-        // on every call regardless of mode, hurting the safe path's UX.
-        // On-demand keeps the prompt scoped to the destructive mode.
-        //
-        // Why `executionMode === 'standalone'` skips the prompt: standalone
-        // runs (sub-agent forks, evals, A2A invocations) are non-interactive
-        // by design — there is no human at the other end to consent. The
-        // existing RBAC + allowlist gates remain in force; this just stops
-        // the run from deadlocking on a prompt nobody will answer.
         if (mode === 'real_execution' && executionMode !== AgentExecutionMode.standalone) {
           const promptId = `security.detection-emulation.validate-rule.${callContext.toolCallId}`;
           const status = prompts.checkConfirmationStatus(promptId);
 
           if (status.status === ConfirmationStatus.rejected) {
-            logger.info(
-              `validate_rule tool: user declined real_execution prompt for rule [${ruleId}]`
-            );
+            log.info('User declined real_execution prompt');
             return toolError.userDeclined(errCtx);
           }
 
@@ -314,47 +250,40 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
           // accepted → fall through to the rate-limit acquire below.
         }
 
-        // Step 3b (real_execution only): atomic rate-limit acquire. Burns
-        // ONE slot per validateRule call (using `ruleId` as the emulation
-        // key) regardless of how many payloads end up dispatched in
-        // Step 5 — a single rule validation must not consume N slots.
-        // The token is released on any post-acquire failure via the
-        // unified catch below.
-        //
-        // PROD-4: endpointIds is forwarded so the limiter also enforces
-        // the per-host bucket. If any host is over capacity the call is
-        // rejected with `blocked_endpoints` naming the saturated hosts
-        // so the LLM can suggest a different target set or a retry-after
-        // window.
+        // Step 3b (real_execution only): atomic rate-limit acquire (uses shared gate_checks).
         if (mode === 'real_execution') {
-          const acquireResult = rateLimiter.acquire(
+          const rlResult = acquireRateLimit(
+            rateLimiter,
             spaceId,
             ruleId,
             'validate-rule',
             endpointIds,
             effectiveRateLimiter
           );
-          if (!acquireResult.allowed) {
-            logger.warn(
-              `validate_rule tool blocked by rate limiter for rule [${ruleId}]: ${acquireResult.error}`
-            );
+          if (!rlResult.ok) {
+            log.warn(`Rate limiter blocked: ${rlResult.message}`);
             return toolError.rateLimitExceeded(errCtx, {
-              error: acquireResult.error,
-              currentCount: acquireResult.currentCount,
-              maxCommands: acquireResult.maxCommands,
-              resetMs: acquireResult.resetMs,
-              blockedEndpoints: acquireResult.blockedEndpoints,
+              error: rlResult.message,
+              currentCount: rlResult.extra?.current_count as number | undefined,
+              maxCommands: rlResult.extra?.max_commands as number | undefined,
+              resetMs: rlResult.extra?.reset_ms as number | undefined,
+              blockedEndpoints: rlResult.extra?.blocked_endpoints as string[] | undefined,
             });
           }
-          rateLimitToken = acquireResult.token;
+          rateLimitToken = rlResult.value.token;
         }
 
-        // Step 4: Scenario generator — derives payload set from the rule's MITRE tags.
+        // ── Pipeline steps 4–8 wrapped with runStep (PR #260793 pattern) ──
+
+        // Step 4: Scenario generation from MITRE ATT&CK tags.
         const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
-        const scenarioResult = await generateScenario(
-          { ruleId, endpointIds, agentType, mode },
-          { rulesClient }
-        );
+        const scenarioResult = await runStep('scenario_generation', 4, async () => {
+          const result = await generateScenario(
+            { ruleId, endpointIds, agentType, mode },
+            { rulesClient }
+          );
+          return result;
+        });
 
         if (!scenarioResult.ok) {
           rateLimiter.release(rateLimitToken);
@@ -369,13 +298,7 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
           agentType
         );
 
-        // PROD-5 concurrency gate (real_execution only). Sits AFTER the
-        // allowlist + rate limiter (cheap rejects already drained) and
-        // AFTER the scenario is generated (we need a fingerprint to
-        // attribute the in-flight slot), but BEFORE dispatch so we never
-        // saturate host-side queues with parallel scenarios. If the gate
-        // rejects, release the rate-limit slot so a re-try after the
-        // in-flight scenario completes isn't double-charged.
+        // PROD-5 concurrency gate (real_execution only).
         if (mode === 'real_execution') {
           const concurrencyResult = concurrencyGate.acquire(spaceId, scenarioFingerprint);
           if (!concurrencyResult.allowed) {
@@ -392,170 +315,169 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
         // Step 5: Dispatch.
         const dispatchedActions: EmulationReportAttributes['dispatchedActions'] = [];
 
-        if (mode === 'log_injection') {
-          const docs = generateDocs({
-            scenarioId: scenarioResult.scenarioId,
-            scenarioFingerprint,
-            payloads: scenarioResult.selectedPayloads,
-            hostId: endpointIds[0],
-            hostName: endpointIds[0],
-            userName: username,
-          });
-
-          await executeLogInjection(
-            {
+        await runStep('dispatch', 5, async () => {
+          if (mode === 'log_injection') {
+            const docs = generateDocs({
               scenarioId: scenarioResult.scenarioId,
-              docs,
-              spaceId,
-              logInjectionEnabled: featureFlags.logInjection,
-            },
-            { esClient: esClient.asCurrentUser, logger }
-          );
-
-          dispatchedActions.push({
-            actionId: scenarioResult.scenarioId,
-            command: 'log_injection',
-            status: 'dispatched',
-          });
-        } else {
-          // real_execution: dispatch one response action per selected payload.
-          let casesClient;
-          try {
-            casesClient = await endpointService.getCasesClient(request);
-          } catch (err) {
-            logger.debug(
-              `Cases client unavailable for validate_rule tool: ${(err as Error).message ?? err}`
-            );
-          }
-
-          // PROD-2: actorContext flows through to every dispatched
-          // response action's audit comment as `via=agent-builder ...`.
-          const runner = new EmulationRunner({
-            endpointService,
-            esClient: esClient.asCurrentUser,
-            spaceId,
-            casesClient,
-            username,
-            logger,
-            actorContext,
-          });
-
-          for (const payload of scenarioResult.selectedPayloads) {
-            const runInput = {
-              emulationId: scenarioResult.scenarioId,
-              agentType,
-              endpointIds,
-              command: payload.command,
-              parameters: payload.parameters ?? undefined,
-            } as unknown as RunEmulationCommandInput;
-
-            const result = await runner.run(runInput);
-            dispatchedActions.push({
-              actionId: result.actionId,
-              command: result.command,
-              status: result.status,
-              error: result.error,
+              scenarioFingerprint,
+              payloads: scenarioResult.selectedPayloads,
+              hostId: endpointIds[0],
+              hostName: endpointIds[0],
+              userName: username,
             });
+
+            await executeLogInjection(
+              {
+                scenarioId: scenarioResult.scenarioId,
+                docs,
+                spaceId,
+                logInjectionEnabled: featureFlags.logInjection,
+              },
+              { esClient: esClient.asCurrentUser, logger }
+            );
+
+            dispatchedActions.push({
+              actionId: scenarioResult.scenarioId,
+              command: 'log_injection',
+              status: 'dispatched',
+            });
+          } else {
+            // real_execution: dispatch one response action per selected payload.
+            let casesClient;
+            try {
+              casesClient = await endpointService.getCasesClient(request);
+            } catch (err) {
+              log.debug(
+                `Cases client unavailable: ${(err as Error).message ?? err}`
+              );
+            }
+
+            const runner = new EmulationRunner({
+              endpointService,
+              esClient: esClient.asCurrentUser,
+              spaceId,
+              casesClient,
+              username,
+              logger,
+              actorContext,
+            });
+
+            for (const payload of scenarioResult.selectedPayloads) {
+              const runInput = {
+                emulationId: scenarioResult.scenarioId,
+                agentType,
+                endpointIds,
+                command: payload.command,
+                parameters: payload.parameters ?? undefined,
+              } as unknown as RunEmulationCommandInput;
+
+              const result = await runner.run(runInput);
+              dispatchedActions.push({
+                actionId: result.actionId,
+                command: result.command,
+                status: result.status,
+                error: result.error,
+              });
+            }
           }
-        }
-
-        // Step 6: Telemetry collection, bounded by wallBudgetMs.
-        // The AbortController fires at the wall budget; collectTelemetry's internal
-        // MAX_POLL_DURATION_MS acts as a secondary bound.
-        const abortController = new AbortController();
-        const budgetTimer = setTimeout(() => abortController.abort(), wallBudgetMs);
-
-        let telemetry: TelemetryResult;
-        try {
-          telemetry = await collectTelemetry(
-            {
-              scenarioId: scenarioResult.scenarioId,
-              expectedSignals: scenarioResult.expectedSignals,
-              scenarioStartedAt: startedAt,
-              mode: 'poll',
-              signal: abortController.signal,
-            },
-            { esClient: esClient.asCurrentUser, logger }
-          );
-        } finally {
-          clearTimeout(budgetTimer);
-        }
-
-        // Step 7: Confidence scoring.
-        // TP alerts are those whose ruleName matches the technique's expected signals.
-        // Unclassified FP alerts are attributed to the first phase so the aggregate
-        // precision formula is correct.
-        const perPhaseRaw = scenarioResult.selectedPayloads.map((payload) => {
-          const phaseAlerts = telemetry.observedAlerts.filter((a) =>
-            payload.expectedSignals.includes(a.ruleName)
-          );
-          return {
-            techniqueId: payload.techniqueId,
-            tp: phaseAlerts.length,
-            fp: 0,
-            signals: [...new Set(phaseAlerts.map((a) => a.ruleName))],
-          };
         });
 
-        const totalTp = perPhaseRaw.reduce((s, p) => s + p.tp, 0);
-        const totalFp = telemetry.observedAlerts.length - totalTp;
+        // Step 6: Telemetry collection, bounded by wallBudgetMs.
+        const telemetry = await runStep('telemetry_collection', 6, async () => {
+          const abortController = new AbortController();
+          const budgetTimer = setTimeout(() => abortController.abort(), wallBudgetMs);
 
-        const perPhase: EmulationReportPhase[] =
-          perPhaseRaw.length > 0
-            ? [{ ...perPhaseRaw[0], fp: totalFp }, ...perPhaseRaw.slice(1)]
-            : [];
+          try {
+            return await collectTelemetry(
+              {
+                scenarioId: scenarioResult.scenarioId,
+                expectedSignals: scenarioResult.expectedSignals,
+                scenarioStartedAt: startedAt,
+                mode: 'poll',
+                signal: abortController.signal,
+              },
+              { esClient: esClient.asCurrentUser, logger }
+            );
+          } finally {
+            clearTimeout(budgetTimer);
+          }
+        });
 
-        const score = scoreConfidence({
-          expectedSignals: scenarioResult.expectedSignals,
-          perPhase,
+        // Step 7: Confidence scoring.
+        const { score, perPhase } = await runStep('confidence_scoring', 7, async () => {
+          const perPhaseRaw = scenarioResult.selectedPayloads.map((payload) => {
+            const phaseAlerts = telemetry.observedAlerts.filter((a) =>
+              payload.expectedSignals.includes(a.ruleName)
+            );
+            return {
+              techniqueId: payload.techniqueId,
+              tp: phaseAlerts.length,
+              fp: 0,
+              signals: [...new Set(phaseAlerts.map((a) => a.ruleName))],
+            };
+          });
+
+          const totalTp = perPhaseRaw.reduce((s, p) => s + p.tp, 0);
+          const totalFp = telemetry.observedAlerts.length - totalTp;
+
+          const phases: EmulationReportPhase[] =
+            perPhaseRaw.length > 0
+              ? [{ ...perPhaseRaw[0], fp: totalFp }, ...perPhaseRaw.slice(1)]
+              : [];
+
+          const scoreResult = scoreConfidence({
+            expectedSignals: scenarioResult.expectedSignals,
+            perPhase: phases,
+          });
+
+          return { score: scoreResult, perPhase: phases };
         });
 
         // Step 8: Persist history and return the validation report.
         const completedAt = new Date().toISOString();
 
-        const internalSoClient = coreStart.savedObjects.getScopedClient(request, {
-          includedHiddenTypes: [emulationReportTypeName],
+        const historyResult = await runStep('history_write', 8, async () => {
+          const internalSoClient = coreStart.savedObjects.getScopedClient(request, {
+            includedHiddenTypes: [emulationReportTypeName],
+          });
+
+          const attributes: EmulationReportAttributes = {
+            scenarioId: scenarioResult.scenarioId,
+            ruleId,
+            scenarioFingerprint,
+            mode,
+            endpointIds,
+            agentType,
+            startedAt,
+            completedAt,
+            payloadIds: scenarioResult.selectedPayloads.map((p) => p.techniqueId),
+            dispatchedActions,
+            score: {
+              confidence: score.confidence,
+              coverage: score.coverage,
+              precision: score.precision,
+              tp: score.tp,
+              fp: score.fp,
+            },
+            perPhase,
+            operator: username,
+            spaceId,
+            actor: actorContext,
+          };
+
+          return createEmulationHistory(
+            { attributes },
+            { soClient: internalSoClient }
+          );
         });
 
-        const attributes: EmulationReportAttributes = {
-          scenarioId: scenarioResult.scenarioId,
-          ruleId,
-          scenarioFingerprint,
-          mode,
-          endpointIds,
-          agentType,
-          startedAt,
-          completedAt,
-          payloadIds: scenarioResult.selectedPayloads.map((p) => p.techniqueId),
-          dispatchedActions,
-          score: {
-            confidence: score.confidence,
-            coverage: score.coverage,
-            precision: score.precision,
-            tp: score.tp,
-            fp: score.fp,
-          },
-          perPhase,
-          operator: username,
-          spaceId,
-          // PROD-2: persist the same attribution we put on the audit
-          // comment. Auditors can `actor.kind:"agent-builder"` filter
-          // the SO to find every tool-driven run, then pivot via
-          // `actor.conversationId` / `actor.runId`.
-          actor: actorContext,
-        };
-
-        const historyResult = await createEmulationHistory(
-          { attributes },
-          { soClient: internalSoClient }
-        );
-
-        // PROD-5: release the concurrency slot on the success path so the
-        // next real_execution scenario can proceed immediately. The
-        // rate-limit slot intentionally stays consumed for the full
-        // window — that gate counts attempts, not in-flight scenarios.
+        // PROD-5: release the concurrency slot on the success path.
         concurrencyGate.release(concurrencyToken);
         concurrencyToken = undefined;
+
+        log.info(
+          `Pipeline complete — confidence=${score.confidence}, tp=${score.tp}, fp=${score.fp}, report=${historyResult.id}`
+        );
 
         return {
           results: [
@@ -585,11 +507,24 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
       } catch (err) {
         rateLimiter.release(rateLimitToken);
         concurrencyGate.release(concurrencyToken);
-        const error = err as Error;
-        logger.error(`[validate_rule tool] Failed for rule [${ruleId}]: ${error.message}`, {
-          tags: ['detection-emulation'],
-          stack: error.stack,
-        } as Record<string, unknown>);
+
+        // PipelineStepError carries structured metadata — log it so
+        // operators can correlate failures to specific steps and see
+        // wall-clock duration at the point of failure (PR #260793).
+        if (err instanceof PipelineStepError) {
+          const meta = err.toMeta();
+          log.error(
+            `Step [${meta.step}] failed after ${meta.durationMs}ms: ${(err.cause as Error)?.message ?? err.message}`,
+            { tags: ['detection-emulation', 'pipeline-step-error'], ...meta } as Record<string, unknown>
+          );
+        } else {
+          const error = err as Error;
+          log.error(`Pipeline failed: ${error.message}`, {
+            tags: ['detection-emulation'],
+            stack: error.stack,
+          } as Record<string, unknown>);
+        }
+
         return toolError.executionError(errCtx, {
           message: 'Failed to validate the rule via detection emulation.',
           likelyCause: 'Internal error during the validation pipeline.',

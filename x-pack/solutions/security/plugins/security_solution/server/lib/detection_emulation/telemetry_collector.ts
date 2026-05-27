@@ -14,6 +14,10 @@ const ALERTS_INDEX = '.alerts-security.alerts-*';
 const POLL_INTERVAL_MS = 5_000;
 const MAX_POLL_DURATION_MS = 60_000;
 const ALERT_RULE_NAME_FIELD = 'kibana.alert.rule.name';
+/** The detection engine copies `event.module` from the source doc into this alert field. */
+const ALERT_ORIGINAL_EVENT_MODULE = 'kibana.alert.original_event.module';
+/** Value set by the log-injection generator on every emulation doc. */
+const EMULATION_EVENT_MODULE = 'emulation';
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -56,9 +60,19 @@ export interface TelemetryResult {
 const buildQuery = (scenarioId: string, scenarioStartedAt: string) => ({
   bool: {
     filter: [
-      { term: { [ALERT_EMULATION_ID]: scenarioId } },
       { range: { '@timestamp': { gte: scenarioStartedAt } } },
     ],
+    should: [
+      // Primary: alerts already tagged with the emulation ID (real_execution
+      // path or alerts backfilled by tagAlertsWithEmulation).
+      { term: { [ALERT_EMULATION_ID]: scenarioId } },
+      // Fallback: alerts whose source event came from the emulation module.
+      // The detection engine copies `event.module` from the source doc into
+      // `kibana.alert.original_event.module` — this lets the collector
+      // discover emulation-sourced alerts without requiring a tagging step.
+      { term: { [ALERT_ORIGINAL_EVENT_MODULE]: EMULATION_EVENT_MODULE } },
+    ],
+    minimum_should_match: 1,
   },
 });
 

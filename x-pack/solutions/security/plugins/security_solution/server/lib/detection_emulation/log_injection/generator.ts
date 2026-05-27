@@ -99,7 +99,7 @@ export interface EcsEmulationDocument {
     command_line: string;
     parent: { name: string };
   };
-  host: { id: string; name: string };
+  host: { id: string; name: string; os: { type: 'windows' | 'linux' | 'macos' } };
   user: { name: string };
   agent: { type: 'endpoint' };
   kibana: {
@@ -114,6 +114,12 @@ export interface EcsEmulationDocument {
 }
 
 // ─── Core ─────────────────────────────────────────────────────────────────────
+
+/** T1059.004 (Unix Shell) is the only Wave-1 technique that targets Linux/macOS. */
+const LINUX_TECHNIQUES = new Set(['T1059.004']);
+
+const resolveOsType = (techniqueId: string): 'windows' | 'linux' | 'macos' =>
+  LINUX_TECHNIQUES.has(techniqueId) ? 'linux' : 'windows';
 
 const resolveCommandLine = (payload: EmulationPayload): string => {
   const cmd = payload.parameters?.command;
@@ -149,7 +155,7 @@ export const generateDocs = (input: GenerateDocsInput): EcsEmulationDocument[] =
         command_line: resolveCommandLine(payload),
         parent: tpl.process.parent,
       },
-      host: { id: hostId, name: hostName },
+      host: { id: hostId, name: hostName, os: { type: resolveOsType(payload.techniqueId) } },
       user: { name: userName },
       agent: { type: 'endpoint' },
       kibana: {
