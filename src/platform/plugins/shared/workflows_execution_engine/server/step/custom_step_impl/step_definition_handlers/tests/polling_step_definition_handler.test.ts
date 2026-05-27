@@ -216,36 +216,120 @@ describe('PollPolicyStepHandler', () => {
       };
       const handler = buildPollHandler(stepDefinition, mocks);
 
-      await expect(handler.run({}, {}, pollNode.configuration)).rejects.toThrow(
-        /Step execution failed/
+      await expect(handler.run({}, {}, pollNode.configuration)).rejects.toMatchObject({
+        type: 'StepFailed',
+        message: 'The step did not complete within the allowed time.',
+      });
+      expect(mocks.workflowLogger.logWarn).toHaveBeenCalledWith(
+        'Poll step attempt ceiling exceeded',
+        expect.objectContaining({ attempt: 5, maxAttempts: 5 })
       );
       expect(mocks.stepExecutionRuntime.enterWaitUntil).not.toHaveBeenCalled();
     });
 
-    it('fails the step when maxWaitMs has already elapsed', async () => {
-      const pollHandler = jest.fn().mockResolvedValue({});
-      const startedAt = new Date(Date.now() - 61_000).toISOString();
+    it('caps next wake-up when policy delay exceeds maxWaitMs', async () => {
+      const pollHandler = jest.fn().mockResolvedValue({ state: {} });
+      const startedAt = new Date(Date.now() - 1_000).toISOString();
+      const before = Date.now();
       const initialState = {
         [DURABLE_STEP_STATE_KEY]: {
           startedAt,
-          pollState: {
-            attempt: 5,
-            nextPollAt: startedAt,
-            lastPollAt: new Date(Date.now() - 1_000).toISOString(),
-          },
+          pollState: { attempt: 0, nextPollAt: startedAt, lastPollAt: startedAt },
         },
       };
       const mocks = createHandlerTestMocks(initialState);
       const stepDefinition = {
         poll: pollHandler,
         policy: { strategy: 'fixed' as const, intervalMs: 10_000 },
-        ceilings: { maxAttempts: 100, maxWaitMs: 60_000 },
+        ceilings: { maxAttempts: 10, maxWaitMs: 3_000 },
       };
       const handler = buildPollHandler(stepDefinition, mocks);
 
-      await expect(handler.run({}, {}, pollNode.configuration)).rejects.toThrow(
-        /Step execution failed/
+      await handler.run({}, {}, pollNode.configuration);
+
+      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as jest.Mock).mock
+        .calls[0][0] as Date;
+      expect(resumeAt.getTime()).toBeGreaterThanOrEqual(before + 3_000);
+      expect(resumeAt.getTime()).toBeLessThanOrEqual(Date.now() + 3_000 + 50);
+    });
+
+    it('does not cap when policy delay is within maxWaitMs', async () => {
+      const pollHandler = jest.fn().mockResolvedValue({ state: {} });
+      const startedAt = new Date(Date.now() - 1_000).toISOString();
+      const before = Date.now();
+      const initialState = {
+        [DURABLE_STEP_STATE_KEY]: {
+          startedAt,
+          pollState: { attempt: 0, nextPollAt: startedAt, lastPollAt: startedAt },
+        },
+      };
+      const mocks = createHandlerTestMocks(initialState);
+      const stepDefinition = {
+        poll: pollHandler,
+        policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
+        ceilings: { maxAttempts: 10, maxWaitMs: 5_000 },
+      };
+      const handler = buildPollHandler(stepDefinition, mocks);
+
+      await handler.run({}, {}, pollNode.configuration);
+
+      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as jest.Mock).mock
+        .calls[0][0] as Date;
+      expect(resumeAt.getTime()).toBeGreaterThanOrEqual(before + 1_000);
+      expect(resumeAt.getTime()).toBeLessThanOrEqual(Date.now() + 1_000 + 50);
+    });
+
+    it('caps nextPollDelayMs override when it exceeds maxWaitMs', async () => {
+      const pollHandler = jest.fn().mockResolvedValue({ state: {}, nextPollDelayMs: 50_000 });
+      const startedAt = new Date(Date.now() - 1_000).toISOString();
+      const before = Date.now();
+      const initialState = {
+        [DURABLE_STEP_STATE_KEY]: {
+          startedAt,
+          pollState: { attempt: 0, nextPollAt: startedAt, lastPollAt: startedAt },
+        },
+      };
+      const mocks = createHandlerTestMocks(initialState);
+      const stepDefinition = {
+        poll: pollHandler,
+        policy: { strategy: 'fixed' as const, intervalMs: 60_000 },
+        ceilings: { maxAttempts: 10, maxWaitMs: 2_000 },
+      };
+      const handler = buildPollHandler(stepDefinition, mocks);
+
+      await handler.run({}, {}, pollNode.configuration);
+
+      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as jest.Mock).mock
+        .calls[0][0] as Date;
+      expect(resumeAt.getTime()).toBeGreaterThanOrEqual(before + 2_000);
+      expect(resumeAt.getTime()).toBeLessThanOrEqual(Date.now() + 2_000 + 50);
+    });
+
+    it('sets lastPollAt to when the poll phase completed', async () => {
+      const pollHandler = jest.fn().mockResolvedValue({ state: { n: 1 } });
+      const startedAt = new Date(Date.now() - 2_000).toISOString();
+      const before = Date.now();
+      const initialState = {
+        [DURABLE_STEP_STATE_KEY]: {
+          startedAt,
+          pollState: { attempt: 0, nextPollAt: startedAt, lastPollAt: startedAt },
+        },
+      };
+      const mocks = createHandlerTestMocks(initialState);
+      const stepDefinition = {
+        poll: pollHandler,
+        policy: { strategy: 'fixed' as const, intervalMs: 1_000 },
+        ceilings: { maxAttempts: 10, maxWaitMs: 60_000 },
+      };
+      const handler = buildPollHandler(stepDefinition, mocks);
+
+      await handler.run({}, {}, pollNode.configuration);
+
+      const lastPollAt = Date.parse(
+        getDurableState(mocks.persistedState.value).pollState!.lastPollAt
       );
+      expect(lastPollAt).toBeGreaterThanOrEqual(before);
+      expect(lastPollAt).toBeLessThanOrEqual(Date.now() + 50);
     });
 
     it('uses nextPollDelayMs override for the next wake-up when provided', async () => {

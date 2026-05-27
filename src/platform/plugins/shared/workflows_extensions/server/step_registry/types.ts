@@ -21,6 +21,8 @@ import type { CommonStepDefinition } from '../../common';
  * Default ceilings applied when a poll-based step omits {@link PollCeilings}.
  * Conservative values that prevent runaway polling but are loose enough for
  * most real-world async jobs (background ML tasks, Osquery actions, etc.).
+ *
+ * `maxWaitMs` caps each inter-poll sleep (from policy or `nextPollDelayMs`), not total step duration.
  */
 export const DEFAULT_POLL_CEILINGS: Required<PollCeilings> = {
   maxAttempts: 120,
@@ -158,14 +160,19 @@ export type PollPolicy =
 /**
  * Engine-enforced ceilings for a poll-based step. Both default to
  * {@link DEFAULT_POLL_CEILINGS} when omitted.
- *
- * When a ceiling is exceeded the step fails with an `ExecutionError` of type
- * `'PollCeilingExceeded'` whose `details` indicate which ceiling tripped.
  */
 export interface PollCeilings {
-  /** Maximum number of `poll` invocations before failing the step. */
+  /**
+   * Maximum number of `poll` invocations before the engine fails the step with a
+   * generic execution error. Prefer returning `{ error }` from `poll` for
+   * integration-specific failure messages when the upstream job fails or times out.
+   */
   maxAttempts?: number;
-  /** Maximum wall-clock time (ms) the step may spend in `WAITING` before failing. */
+  /**
+   * Maximum delay (ms) until the next poll wake-up (from **now**). When policy or
+   * `nextPollDelayMs` would schedule a longer sleep, the engine caps it to this value.
+   * Does not fail the step.
+   */
   maxWaitMs?: number;
 }
 

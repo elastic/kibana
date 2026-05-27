@@ -39,6 +39,7 @@ interface DurableStepState {
   pollState?: {
     attempt: number;
     nextPollAt: string;
+    /** ISO time when the poll/start phase last completed (not used for ceiling math). */
     lastPollAt: string;
   };
   /** Epoch ms when the step entered its poll loop (after `start`). */
@@ -47,8 +48,7 @@ interface DurableStepState {
 
 type PolicyCalculationResult =
   | { outcome: 'success'; nextPollAt: string }
-  | { outcome: 'maxAttemptReached' }
-  | { outcome: 'maxWaitMsExceeded' };
+  | { outcome: 'maxAttemptReached' };
 
 export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
   constructor(
@@ -164,7 +164,7 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
 
     let nextPollAt: string | undefined;
     const attempt = stepState?.pollState?.attempt ?? 0;
-    const lastPollAt = stepState?.pollState?.nextPollAt ?? stepState.startedAt;
+    const pollCompletedAt = new Date().toISOString();
     const nextAttempt = attempt + 1;
 
     if (nextPollAtOverride) {
@@ -177,15 +177,25 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
       });
     }
 
-    const data = await this.enforceCeilings({
+    const data = this.enforceCeilings({
       ceilings: this.stepDefinition.ceilings,
       attempt,
       nextPollAt,
-      startedAt: stepState.startedAt,
     });
 
-    if (data.outcome !== 'success') {
-      throw ExecutionError.fromError(new Error('Step execution failed.'));
+    if (data.outcome === 'maxAttemptReached') {
+      const maxAttempts =
+        this.stepDefinition.ceilings?.maxAttempts ?? DEFAULT_POLL_CEILINGS.maxAttempts;
+      this.workflowLogger.logWarn('Poll step attempt ceiling exceeded', {
+        stepType: this.node.stepType,
+        stepId: this.node.stepId,
+        attempt,
+        maxAttempts,
+      });
+      throw new ExecutionError({
+        type: 'StepFailed',
+        message: 'The step did not complete within the allowed time.',
+      });
     }
 
     nextPollAt = data.nextPollAt;
@@ -195,7 +205,7 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
       pollState: {
         attempt: nextAttempt,
         nextPollAt,
-        lastPollAt,
+        lastPollAt: pollCompletedAt,
       },
       customState,
     };
@@ -279,23 +289,27 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
     ceilings?: PollCeilings;
     attempt: number;
     nextPollAt: string;
-    startedAt: string;
   }): PolicyCalculationResult {
     const { ceilings, attempt, nextPollAt: currentNextPollAtString } = params;
     const maxWaitMs = ceilings?.maxWaitMs ?? DEFAULT_POLL_CEILINGS.maxWaitMs;
     const maxAttempts = ceilings?.maxAttempts ?? DEFAULT_POLL_CEILINGS.maxAttempts;
 
     if (attempt >= maxAttempts) {
-      // Max attempts exceeded, return undefined to indicate that the step should fail.
       return { outcome: 'maxAttemptReached' };
     }
 
     const now = new Date();
-    const nextPollAt = new Date(currentNextPollAtString);
-    const currentDuration = nextPollAt.getTime() - now.getTime();
+    const scheduledNextPollAt = new Date(currentNextPollAtString);
+    const scheduledDelayMs = scheduledNextPollAt.getTime() - now.getTime();
 
-    const remainingTime = maxWaitMs - (currentDuration ?? 0);
-    if (remainingTime <= 0) {
+    if (scheduledDelayMs < 0) {
+      return {
+        outcome: 'success',
+        nextPollAt: now.toISOString(),
+      };
+    }
+
+    if (scheduledDelayMs > maxWaitMs) {
       return {
         outcome: 'success',
         nextPollAt: new Date(now.getTime() + maxWaitMs).toISOString(),
@@ -304,7 +318,7 @@ export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
 
     return {
       outcome: 'success',
-      nextPollAt: nextPollAt.toISOString(),
+      nextPollAt: scheduledNextPollAt.toISOString(),
     };
   }
 }

@@ -66,5 +66,6 @@ export const durablePollStepDefinition = createPollServerStepDefinition({
     };
   },
   policy: { strategy: 'fixed', intervalMs: 2000 },
+  // maxWaitMs caps each inter-poll sleep, not total step duration
   ceilings: { maxAttempts: 12, maxWaitMs: 20_000 },
 });

@@ -59,5 +59,6 @@ export const pollOnlyJobStepDefinition = createPollServerStepDefinition({
     multiplier: 2,
     jitter: true,
   },
+  // maxWaitMs caps each inter-poll sleep, not total step duration
   ceilings: { maxAttempts: 12, maxWaitMs: 30_000 },
 });

@@ -996,7 +996,10 @@ Optional **`stateSchema`**: a `z.object({ ... })` describing author state passed
 - **`fixed`** — `{ strategy: 'fixed', intervalMs: number }` — same delay between every poll.
 - **`exponential`** — `{ strategy: 'exponential', initialMs, maxMs, multiplier?, jitter? }` — delay grows by `multiplier` (default `2`), capped at `maxMs`. With `jitter: true`, delay is randomized in `[computed/2, computed]` ms (same jitter helper as on-failure retry).
 
-**`ceilings`** (optional): `{ maxAttempts?, maxWaitMs? }`. When omitted, defaults are **120** attempts and **3_600_000** ms (1 hour). The step registry logs a **warning** at registration if you rely on defaults — declare explicit ceilings in production. Exceeding a ceiling fails the step with `ExecutionError` type `'PollCeilingExceeded'`.
+**`ceilings`** (optional): `{ maxAttempts?, maxWaitMs? }`. When omitted, defaults are **120** attempts and **3_600_000** ms (1 hour). The step registry logs a **warning** at registration if you rely on defaults — declare explicit ceilings in production.
+
+- **`maxAttempts`** — engine safety limit on how many times `poll` may run. When exceeded, the step fails with a generic execution error (workflow users see the same failure shape as any other step). Prefer returning `{ error }` from `poll` (or `start`) with an integration-specific message when the upstream job fails or times out.
+- **`maxWaitMs`** — upper bound on **one** sleep until the next wake-up (from **now**). Caps delays from `policy` or a per-poll `nextPollDelayMs` override when they would be longer; does **not** fail the step. Distinct from exponential policy `maxMs`, which caps backoff growth in the policy itself.
 
 ### Cancellation cleanup (`onCancel`) for start/poll steps
 
@@ -1057,7 +1060,7 @@ Run Kibana with `yarn start --run-examples`, open **Developer examples** → **W
 | `poll` advances `phase` until `simulatedRenderPolls` | GET job status from Elasticsearch or an upstream service |
 | `{ output: { documentDownloadPath, ... } }` | Final artifact URL and metadata |
 | `policy: { strategy: 'fixed', intervalMs: 2000 }` | Tune per integration SLA |
-| `ceilings: { maxAttempts: 12, maxWaitMs: 60_000 }` | Set explicitly for your job duration |
+| `ceilings: { maxAttempts: 12, maxWaitMs: 20_000 }` | Set explicitly: max poll invocations and max sleep between polls (e.g. 20s) |
 
 **Workflow YAML**
 
@@ -1088,7 +1091,7 @@ export const durablePollStepDefinition = createPollServerStepDefinition({
     return { output: { requestId: context.state!.requestId, documentDownloadPath: '…', totalHits: 42, generatedAt: new Date().toISOString() } };
   },
   policy: { strategy: 'fixed', intervalMs: 2000 },
-  ceilings: { maxAttempts: 12, maxWaitMs: 60_000 },
+  ceilings: { maxAttempts: 12, maxWaitMs: 20_000 },
 });
 ```
 
