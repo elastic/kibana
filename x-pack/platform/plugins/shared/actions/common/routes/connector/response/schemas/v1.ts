@@ -230,8 +230,7 @@ export const connectorExecuteResponseSchema = schema.object(
         },
       })
     ),
-  },
-  { meta: { id: 'connector_execute_response' } }
+  }
 );
 
 export const connectorAuthStatusResponseSchema = schema.recordOf(
@@ -312,7 +311,6 @@ export const getConnectorSpecResponseBodySchema = schema.object(
       },
       {
         meta: {
-          id: 'connector_spec_metadata',
           description: 'Connector spec metadata (snake_case HTTP shape).',
         },
       }
@@ -323,6 +321,5 @@ export const getConnectorSpecResponseBodySchema = schema.object(
           'JSON Schema envelope for the connector form (top-level `config` and `secrets` shapes)',
       },
     }),
-  },
-  { meta: { id: 'connector_spec_response' } }
+  }
 );
