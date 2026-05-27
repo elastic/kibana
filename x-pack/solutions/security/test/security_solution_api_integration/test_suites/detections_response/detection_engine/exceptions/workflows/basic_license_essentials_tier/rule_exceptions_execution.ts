@@ -46,6 +46,15 @@ import {
 } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
+const SYNTHETIC_INDEX = 'value-list-matrix-test';
+const SYNTHETIC_HOST = 'value-list-matrix-host';
+// WKT point in geo (lon, lat) order used for both geo_shape and shape tests.
+const GEO_WKT = 'POINT (-74.006 40.7128)';
+// Cartesian WKT point for the ES `shape` (non-geographic) type.
+const CARTESIAN_WKT = 'POINT (100.0 200.0)';
+// Geo coordinates stored as "lat,lon" (the lists plugin serialization format).
+const GEO_LAT_LON = '40.7128,-74.006';
+
 interface AuditbeatValueListSample {
   hostName: string;
   sourceIp: string;
@@ -53,7 +62,6 @@ interface AuditbeatValueListSample {
   timestampIso: string;
   containerized: string;
   riskScore?: number;
-  geoLatLon?: string;
 }
 
 const ipToSlash16 = (ip: string): string => {
@@ -495,7 +503,6 @@ export default ({ getService }: FtrProviderContext) => {
                     { exists: { field: '@timestamp' } },
                     { exists: { field: 'host.containerized' } },
                     { range: { 'source.port': { lte: SHORT_MAX } } },
-                    // { exists: { field: 'source.geo.location' } },
                   ],
                 },
               },
@@ -540,6 +547,38 @@ export default ({ getService }: FtrProviderContext) => {
                   ? (src as { event: { risk_score: number } }).event.risk_score
                   : undefined,
             };
+
+            // Create a synthetic index with controlled mappings for types that
+            // require fields not reliably present in the auditbeat fixture.
+            await es.indices.create({
+              index: SYNTHETIC_INDEX,
+              mappings: {
+                properties: {
+                  host: { properties: { name: { type: 'keyword' } } },
+                  '@timestamp': { type: 'date' },
+                  source: { properties: { port: { type: 'integer' } } },
+                  geo_location: { type: 'geo_point' },
+                  geo_shape_field: { type: 'geo_shape' },
+                  shape_field: { type: 'shape' },
+                },
+              },
+            });
+            await es.index({
+              index: SYNTHETIC_INDEX,
+              document: {
+                host: { name: SYNTHETIC_HOST },
+                '@timestamp': '2020-01-01T00:00:00.000Z',
+                source: { port: 100 },
+                geo_location: GEO_LAT_LON,
+                geo_shape_field: GEO_WKT,
+                shape_field: CARTESIAN_WKT,
+              },
+              refresh: 'wait_for',
+            });
+          });
+
+          after(async () => {
+            await es.indices.delete({ index: SYNTHETIC_INDEX });
           });
 
           const runValueListFilterCase = async ({
@@ -548,12 +587,14 @@ export default ({ getService }: FtrProviderContext) => {
             listLines,
             ruleQuery,
             testValues,
+            index = ['auditbeat-*'],
           }: {
             listType: Type;
             field: string;
             listLines: string[];
             ruleQuery: string;
             testValues?: string[];
+            index?: string[];
           }) => {
             const valueListId = `vl-${listType}-${uuidv4()}.txt`;
             await importFile(supertest, log, listType, listLines, valueListId, testValues);
@@ -564,7 +605,7 @@ export default ({ getService }: FtrProviderContext) => {
               risk_score: 1,
               rule_id: `rule-vl-${listType}-${uuidv4()}`,
               severity: 'high',
-              index: ['auditbeat-*'],
+              index,
               type: 'query',
               from: '1900-01-01T00:00:00.000Z',
               query: ruleQuery,
@@ -704,54 +745,104 @@ export default ({ getService }: FtrProviderContext) => {
             });
           });
 
-          // The following types are intentionally skipped: either the auditbeat
-          // fixture lacks a compatible mapped field, or the list type requires
-          // query-path support (range queries) that is not yet implemented in
-          // the small-list exception clause builder.
-          it.skip('geo_point', async () => {
-            expect(sample.geoLatLon).toBeDefined();
+          // The following tests use the synthetic index (SYNTHETIC_INDEX) rather
+          // than auditbeat-* because they require fields or data ranges not
+          // reliably present in the auditbeat fixture.
+
+          it('byte', async () => {
+            // source.port: 100 is within the signed byte range (-128..127).
             await runValueListFilterCase({
-              listType: 'geo_point',
-              field: 'source.geo.location',
-              listLines: [sample.geoLatLon!],
-              ruleQuery: `host.name: "${sample.hostName}" and _exists_: "source.geo.location"`,
+              listType: 'byte',
+              field: 'source.port',
+              listLines: ['100'],
+              ruleQuery: `source.port: 100`,
+              index: [SYNTHETIC_INDEX],
             });
           });
 
-          it.skip('byte — auditbeat fixture typically uses source.port outside signed byte range', async () => {
-            /* covered by short/integer/long */
+          it('geo_point', async () => {
+            await runValueListFilterCase({
+              listType: 'geo_point',
+              field: 'geo_location',
+              listLines: [GEO_LAT_LON],
+              ruleQuery: `host.name: "${SYNTHETIC_HOST}"`,
+              index: [SYNTHETIC_INDEX],
+            });
           });
 
-          it.skip('binary — list values are Base64; no compatible keyword/ip/port field pairing in this fixture', async () => {
-            /* requires a binary-mapped source field */
+          it('geo_shape', async () => {
+            await runValueListFilterCase({
+              listType: 'geo_shape',
+              field: 'geo_shape_field',
+              listLines: [GEO_WKT],
+              ruleQuery: `host.name: "${SYNTHETIC_HOST}"`,
+              index: [SYNTHETIC_INDEX],
+            });
           });
 
-          it.skip('geo_shape — requires WKT or lat,lon against a geo_shape mapped field not exercised here', async () => {
-            /* no geo_shape field in auditbeat hosts archive used by this suite */
+          it('shape', async () => {
+            await runValueListFilterCase({
+              listType: 'shape',
+              field: 'shape_field',
+              listLines: [CARTESIAN_WKT],
+              ruleQuery: `host.name: "${SYNTHETIC_HOST}"`,
+              index: [SYNTHETIC_INDEX],
+            });
           });
 
-          it.skip('shape — same as geo_shape for this fixture', async () => {
-            /* no cartesian shape field in auditbeat hosts archive used by this suite */
+          it('integer_range', async () => {
+            await runValueListFilterCase({
+              listType: 'integer_range',
+              field: 'source.port',
+              listLines: ['100-100'],
+              ruleQuery: `source.port: 100`,
+              index: [SYNTHETIC_INDEX],
+            });
           });
 
-          it.skip('integer_range — range serialization is not compatible with terms queries on numeric source.port in the small-list exception path', async () => {
-            /* would need dedicated range query support in buildListClause */
+          it('float_range', async () => {
+            await runValueListFilterCase({
+              listType: 'float_range',
+              field: 'source.port',
+              listLines: ['99-101'],
+              ruleQuery: `source.port: 100`,
+              index: [SYNTHETIC_INDEX],
+            });
           });
 
-          it.skip('float_range — same as integer_range for numeric fields in small-list exception path', async () => {
-            /* would need dedicated range query support in buildListClause */
+          it('long_range', async () => {
+            await runValueListFilterCase({
+              listType: 'long_range',
+              field: 'source.port',
+              listLines: ['100-100'],
+              ruleQuery: `source.port: 100`,
+              index: [SYNTHETIC_INDEX],
+            });
           });
 
-          it.skip('long_range — same as integer_range for numeric fields in small-list exception path', async () => {
-            /* would need dedicated range query support in buildListClause */
+          it('double_range', async () => {
+            await runValueListFilterCase({
+              listType: 'double_range',
+              field: 'source.port',
+              listLines: ['99-101'],
+              ruleQuery: `source.port: 100`,
+              index: [SYNTHETIC_INDEX],
+            });
           });
 
-          it.skip('double_range — same as integer_range for numeric fields in small-list exception path', async () => {
-            /* would need dedicated range query support in buildListClause */
+          it('date_range', async () => {
+            await runValueListFilterCase({
+              listType: 'date_range',
+              field: '@timestamp',
+              listLines: ['2019-01-01T00:00:00.000Z,2021-01-01T00:00:00.000Z'],
+              ruleQuery: `host.name: "${SYNTHETIC_HOST}"`,
+              index: [SYNTHETIC_INDEX],
+            });
           });
 
-          it.skip('date_range — range strings are not compatible with terms on @timestamp in small-list exception path', async () => {
-            /* would need dedicated range query support in buildListClause */
+          it.skip('binary — ES binary fields are not indexed and cannot be queried with term/terms', () => {
+            /* binary type stores base64-encoded data that is stored but never indexed;
+               no standard ES query can match against it */
           });
         });
 
