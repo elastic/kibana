@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { Frequency } from '@kbn/rrule';
 import {
   TaskCost,
   type TaskManagerSetupContract,
@@ -139,29 +140,47 @@ export async function scheduleHistorySnapshotTasks({
   namespace,
   request,
   frequency,
+  timezone,
 }: {
   logger: Logger;
   taskManager: TaskManagerStartContract;
   namespace: string;
   request: KibanaRequest;
   frequency: string;
+  timezone?: string;
 }): Promise<void> {
   try {
     const taskId = getHistorySnapshotTaskId(namespace);
-    // Delay the first run by the frequency interval (24h by default).
-    const firstRunAt = new Date(Date.now() + parseDurationToMs(frequency));
+    const useRrule = timezone !== undefined;
+    const schedule = useRrule
+      ? {
+          rrule: {
+            freq: Frequency.DAILY as const,
+            tzid: timezone,
+            interval: 1,
+            byhour: [0],
+            byminute: [0],
+          },
+        }
+      : { interval: frequency };
+    // For interval schedules, delay the first run by the full interval (24h by default).
+    // For rrule schedules, Task Manager computes the next occurrence from the rule itself.
+    const runAt = useRrule ? undefined : new Date(Date.now() + parseDurationToMs(frequency));
     await taskManager.ensureScheduled(
       {
         id: taskId,
         taskType: config.type,
-        runAt: firstRunAt,
-        schedule: { interval: frequency },
+        ...(runAt ? { runAt } : {}),
+        schedule,
         state: { namespace },
         params: {},
       },
       { request }
     );
-    logger.debug(`Scheduled history snapshot task ${taskId} with interval ${frequency}`);
+    const scheduleDescription = useRrule
+      ? `rrule daily at midnight in ${timezone}`
+      : `interval ${frequency}`;
+    logger.debug(`Scheduled history snapshot task ${taskId} with ${scheduleDescription}`);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     logger.error(`Failed to schedule history snapshot tasks: ${message}`);

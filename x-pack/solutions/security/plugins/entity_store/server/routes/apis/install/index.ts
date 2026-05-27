@@ -53,7 +53,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
           assetManagerClient: assetManager,
           entityMaintainersClient,
         } = entityStoreCtx;
-        const { entityTypes, logExtraction, historySnapshot } = req.body;
+        const { entityTypes, logExtraction, historySnapshot, timezone } = req.body;
         logger.debug('Install api called');
 
         const privileges = await assetManager.getPrivileges(
@@ -76,7 +76,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
           return res.ok({ body: { ok: true } });
         }
 
-        await assetManager.init(req, toInstall, logExtraction, historySnapshot);
+        await assetManager.init(req, toInstall, logExtraction, historySnapshot, timezone);
         await entityMaintainersClient.init(req);
 
         return res.created({ body: { ok: true } });

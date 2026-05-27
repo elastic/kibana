@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import type { Logger } from '@kbn/logging';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HttpFetchOptionsWithPath, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { useEffect } from 'react';
+import type { HistorySnapshotState } from '../../server/domain/saved_objects';
 import { EntityStoreStatus } from '../../common';
-import { ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
+import { API_VERSIONS, ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../common';
 import type { StatusRequestQuery } from '../../server/routes/apis/status';
 
 export interface Services {
@@ -37,16 +39,33 @@ const getStatusV1Request: HttpFetchOptionsWithPath = {
   path: '/api/entity_store/status',
 };
 
-const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
-  path: ENTITY_STORE_ROUTES.public.INSTALL,
-  body: JSON.stringify({}),
+const resolveTimezone = (uiSettings: IUiSettingsClient): string => {
+  const timeZone: string = uiSettings.get('dateFormat:tz');
+  return moment.tz.zone(timeZone)?.name ?? moment.tz.guess(true);
 };
+
+const buildInstallRequest = (uiSettings: IUiSettingsClient): HttpFetchOptionsWithPath => ({
+  path: ENTITY_STORE_ROUTES.public.INSTALL,
+  body: JSON.stringify({
+    timezone: resolveTimezone(uiSettings),
+  }),
+});
 
 const initEntityMaintainersRequest: HttpFetchOptionsWithPath = {
   path: ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_INIT,
   body: JSON.stringify({}),
   query: { apiVersion: '2' },
 };
+
+const buildUpdateHistorySnapshotCadenceRequest = (
+  uiSettings: IUiSettingsClient
+): HttpFetchOptionsWithPath => ({
+  path: ENTITY_STORE_ROUTES.internal.UPDATE_SNAPHOT_TASK,
+  body: JSON.stringify({
+    timezone: resolveTimezone(uiSettings),
+  }),
+  query: { apiVersion: API_VERSIONS.internal.v2 },
+});
 
 /**
  * Hook to install Entity Store V2. Should be called from the root Security Solution app component.
@@ -60,9 +79,11 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         if (!isEntityStoreV2Enabled) return;
 
         const space = await services.spaces.getActiveSpace();
-        const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
-          getStatusRequest
-        );
+        const statusResponse = await services.http.get<{
+          status: EntityStoreStatus;
+          historySnapshot: HistorySnapshotState;
+        }>(getStatusRequest);
+
         const isEntityStoreV2Installed = isEntityStoreInstalled(statusResponse.status);
         // In non-default spaces, only auto-install v2 where v1 existed. If v2 is already there,
         // skip the v1 check and still run (e.g. init entity maintainers for this space).
@@ -74,10 +95,18 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         // Entity store already installed → init entity maintainers only.
         if (isEntityStoreV2Installed) {
           await services.http.post(initEntityMaintainersRequest);
+
+          // Update history snapshot cadence to run at midnight in the current browser timezone
+          // when it is running with interval scheduling (no timezone).
+          // Skip if timezone is already set, even if it doesn't match the current timezone
+          // to avoid rescheduling every time a different user in timezone hits the app.
+          if (statusResponse.historySnapshot?.timezone == null) {
+            await services.http.put(buildUpdateHistorySnapshotCadenceRequest(services.uiSettings));
+          }
           return;
         }
         // Entity store not installed → install entity store (init entity maintainers is already done by the install API).
-        await services.http.post(installAllEntitiesRequest);
+        await services.http.post(buildInstallRequest(services.uiSettings));
       } catch (e) {
         services.logger.error('Failed to initialize Entity Store V2');
         services.logger.error(e);

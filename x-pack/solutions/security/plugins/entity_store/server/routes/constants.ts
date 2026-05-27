@@ -5,9 +5,24 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import type { AuthzEnabled } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
+import { parseDurationToMs } from '../infra/time';
+import { validateHistorySnapshotTimezone } from './apis/utils/history_snapshot_timezone_validator';
+
+const MIN_HISTORY_SNAPSHOT_FREQUENCY_MS = 60 * 60 * 1000; // 1h
+
+export const isValidHistorySnapshotFrequency = (frequency: string): boolean => {
+  try {
+    return parseDurationToMs(frequency) >= MIN_HISTORY_SNAPSHOT_FREQUENCY_MS;
+  } catch {
+    return false;
+  }
+};
+
+export const isValidTimezone = (timezone: string): boolean => moment.tz.zone(timezone) != null;
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
@@ -65,6 +80,11 @@ export const LogExtractionUpdateParams = z.object({
 export type LogExtractionBodyParams = LogExtractionInstallParams | LogExtractionUpdateParams;
 
 export type HistorySnapshotBodyParams = z.infer<typeof HistorySnapshotBodyParams>;
-export const HistorySnapshotBodyParams = HistorySnapshotState.pick({
-  frequency: true,
-}).partial();
+export const HistorySnapshotBodyParams = HistorySnapshotState.pick({ frequency: true }).partial();
+
+export type HistorySnapshotCadenceBodyParams = z.infer<typeof HistorySnapshotCadenceBodyParams>;
+export const HistorySnapshotCadenceBodyParams = z
+  .object({
+    timezone: z.string(),
+  })
+  .superRefine(validateHistorySnapshotTimezone({ isOptional: false }));

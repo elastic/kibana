@@ -46,6 +46,39 @@ responses:
                   timestampField: "@timestamp"
                   maxPageSearchSize: 10000
                   lastExecutionTimestamp: "2026-04-10T08:30:00.000Z"
+              historySnapshot:
+                status: started
+                frequency: "24h"
+                timezone: "America/New_York"
+                lastExecutionTimestamp: "2026-04-10T05:00:00.000Z"
+          runningIntervalStatusExample:
+            summary: "Entity Store running (interval schedule)"
+            description: "The Entity Store is running with a fixed-interval history snapshot schedule."
+            value:
+              status: running
+              engines:
+                - type: host
+                  status: started
+                  filter: ""
+                  delay: "1m"
+                  timeout: "25s"
+                  frequency: "30s"
+                  lookbackPeriod: "3h"
+                  fieldHistoryLength: 10
+                  maxLogsPerPage: 40000
+                  maxTimeWindowSize: "15m"
+                  maxLogsPerWindow: 500000
+                  maxLogsPerWindowCapBehavior: "defer"
+                  docsPerSecond: -1
+                  indexPattern: ""
+                  enrichPolicyExecutionInterval: null
+                  timestampField: "@timestamp"
+                  maxPageSearchSize: 10000
+                  lastExecutionTimestamp: "2026-04-10T08:30:00.000Z"
+              historySnapshot:
+                status: started
+                frequency: "24h"
+                lastExecutionTimestamp: "2026-04-10T08:00:00.000Z"
           notInstalledExample:
             summary: "Entity Store not installed"
             description: "The Entity Store has not been installed."

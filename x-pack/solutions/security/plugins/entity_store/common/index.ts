@@ -71,6 +71,7 @@ export const ENTITY_STORE_ROUTES = {
     ENTITY_MAINTAINERS_RUN: `${INTERNAL_BASE_ROUTE}/entity_maintainers/run/{id}`,
     ENTITY_MAINTAINERS_GET: `${INTERNAL_BASE_ROUTE}/entity_maintainers`,
     ENTITY_MAINTAINERS_INIT: `${INTERNAL_BASE_ROUTE}/entity_maintainers/init`,
+    UPDATE_SNAPHOT_TASK: `${INTERNAL_BASE_ROUTE}/update_history_snapshot_cadence`,
   },
 } as const satisfies Record<string, Record<string, string>>;
 

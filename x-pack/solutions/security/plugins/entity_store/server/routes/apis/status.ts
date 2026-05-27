@@ -49,6 +49,7 @@ type StatusEngine = Omit<
 export interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
   engines: StatusEngine[];
+  historySnapshot?: GetStatusSuccessResult['historySnapshot'];
 }
 
 const querySchema = z.object({
@@ -139,12 +140,13 @@ export function registerStatus(router: EntityStorePluginRouter) {
             });
           }
 
-          const { logsExtractionConfig } = rest as GetStatusSuccessResult;
+          const { logsExtractionConfig, historySnapshot } = rest as GetStatusSuccessResult;
 
           return res.ok({
             body: {
               status,
               engines: engines.map((engine) => toPublicEngine(engine, logsExtractionConfig)),
+              ...(historySnapshot && { historySnapshot }),
             },
           });
         }

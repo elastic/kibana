@@ -358,10 +358,12 @@ export class TaskScheduling {
       return await this.schedule(taskInstance, options);
     } catch (err) {
       if (err.statusCode === VERSION_CONFLICT_STATUS) {
-        // check if task specifies a schedule interval
-        // if so,try to update the just the schedule
-        // only works for interval schedule
-        if (taskInstance.schedule && taskInstance.schedule.interval) {
+        // check if task specifies a schedule (interval or rrule)
+        // if so, try to update just the schedule
+        if (
+          taskInstance.schedule &&
+          (taskInstance.schedule.interval || taskInstance.schedule.rrule)
+        ) {
           const result = await this.bulkUpdateSchedules(
             [taskInstance.id],
             taskInstance.schedule,

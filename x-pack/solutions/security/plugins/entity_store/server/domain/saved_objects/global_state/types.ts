@@ -22,7 +22,7 @@ export const EntityStoreGlobalStateTypeMappings: SavedObjectsType['mappings'] = 
   properties: {},
 };
 
-const historySnapshotSchema = schema.object({
+const historySnapshotSchemaV1 = schema.object({
   status: schema.oneOf([schema.literal('started'), schema.literal('stopped')]),
   frequency: schema.string(),
   lastExecutionTimestamp: schema.maybe(schema.string()),
@@ -32,6 +32,11 @@ const historySnapshotSchema = schema.object({
       timestamp: schema.maybe(schema.string()),
     })
   ),
+});
+
+const historySnapshotSchemaV2 = historySnapshotSchemaV1.extends({
+  frequency: schema.maybe(schema.string()),
+  timezone: schema.maybe(schema.string()),
 });
 
 const logExtractionSchemaV1 = schema.object({
@@ -48,7 +53,7 @@ const logExtractionSchemaV1 = schema.object({
 });
 
 const globalStateSchemaV1 = schema.object({
-  historySnapshot: historySnapshotSchema,
+  historySnapshot: historySnapshotSchemaV1,
   logsExtraction: logExtractionSchemaV1,
 });
 
@@ -120,11 +125,23 @@ const version3: SavedObjectsFullModelVersion = {
   },
 };
 
+const globalStateSchemaV4 = globalStateSchemaV3.extends({
+  historySnapshot: historySnapshotSchemaV2,
+});
+
+const version4: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: globalStateSchemaV4,
+    forwardCompatibility: globalStateSchemaV4.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EntityStoreGlobalStateType: SavedObjectsType = {
   name: EntityStoreGlobalStateTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EntityStoreGlobalStateTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4 },
   hiddenFromHttpApis: true,
 };

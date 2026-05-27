@@ -334,6 +334,46 @@ describe('TaskScheduling', () => {
     expect(result.id).toEqual('my-foo-id');
   });
 
+  test('updates rrule schedule when task already exists (version conflict)', async () => {
+    const rruleSchedule = {
+      rrule: { freq: 3, interval: 1, tzid: 'America/New_York' },
+    };
+    const task = getTask({ schedule: rruleSchedule });
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const bulkUpdateScheduleSpy = jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({ tasks: [task], errors: [] });
+    mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+
+    const result = await taskScheduling.ensureScheduled(task);
+
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], rruleSchedule, undefined);
+    expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('propagates error when trying to update rrule schedule for tasks that have already been scheduled', async () => {
+    const rruleSchedule = {
+      rrule: { freq: 3, interval: 1, tzid: 'America/New_York' },
+    };
+    const task = getTask({ schedule: rruleSchedule });
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    jest.spyOn(taskScheduling, 'bulkUpdateSchedules').mockResolvedValue({
+      tasks: [],
+      errors: [
+        {
+          id: 'my-foo-id',
+          type: 'task',
+          error: { error: 'error', message: 'Failed to update rrule schedule', statusCode: 500 },
+        },
+      ],
+    });
+    mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
+
+    await expect(taskScheduling.ensureScheduled(task)).rejects.toMatchInlineSnapshot(
+      `[Error: Tried to update schedule for existing task "my-foo-id" but failed with error: Failed to update rrule schedule]`
+    );
+  });
+
   test('doesnt ignore failure to scheduling existing tasks for reasons other than already being scheduled', async () => {
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     mockTaskStore.schedule.mockRejectedValueOnce({

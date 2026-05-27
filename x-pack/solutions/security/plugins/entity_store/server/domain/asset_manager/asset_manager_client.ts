@@ -31,7 +31,11 @@ import {
   HistorySnapshotState,
   LogExtractionConfig,
 } from '../saved_objects';
-import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
+import type {
+  HistorySnapshotBodyParams,
+  HistorySnapshotCadenceBodyParams,
+  LogExtractionInstallParams,
+} from '../../routes/constants';
 import {
   ENGINE_STATUS,
   ENTITY_STORE_CLUSTER_PRIVILEGES,
@@ -117,7 +121,8 @@ export class AssetManagerClient {
     request: KibanaRequest,
     entityTypes: EntityType[],
     logsExtractionParams?: LogExtractionInstallParams,
-    historySnapshotParams?: HistorySnapshotBodyParams
+    historySnapshotParams?: HistorySnapshotBodyParams,
+    timezone?: string
   ) {
     try {
       const existingState = await this.globalStateClient.find();
@@ -125,7 +130,8 @@ export class AssetManagerClient {
         existingState?.logsExtraction,
         logsExtractionParams
       );
-      const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
+      const historySnapshotBase = HistorySnapshotState.parse(historySnapshotParams ?? {});
+      const historySnapshot = timezone ? { ...historySnapshotBase, timezone } : historySnapshotBase;
 
       // Phase 1: Install shared ES assets/storage and run independent setup tasks.
       await Promise.all([
@@ -164,6 +170,7 @@ export class AssetManagerClient {
           namespace: this.namespace,
           request,
           frequency: historySnapshot.frequency,
+          timezone: historySnapshot.timezone,
         }),
 
         scheduleStatusReportTask({
@@ -313,6 +320,29 @@ export class AssetManagerClient {
   public async getLogExtractionConfig(): Promise<LogExtractionConfig> {
     const globalState = await this.globalStateClient.find();
     return globalState?.logsExtraction ?? LogExtractionConfig.parse({});
+  }
+
+  public async updateHistorySnapshotCadence(
+    request: KibanaRequest,
+    { timezone }: HistorySnapshotCadenceBodyParams
+  ): Promise<void> {
+    const { historySnapshot: current } = await this.globalStateClient.findOrThrow();
+
+    const updatedHistorySnapshot = {
+      ...current,
+      timezone,
+    };
+
+    await this.globalStateClient.update({ historySnapshot: updatedHistorySnapshot });
+
+    await scheduleHistorySnapshotTasks({
+      logger: this.logger,
+      taskManager: this.taskManager,
+      namespace: this.namespace,
+      request,
+      frequency: updatedHistorySnapshot.frequency,
+      timezone: updatedHistorySnapshot.timezone,
+    });
   }
 
   private async initEntity(

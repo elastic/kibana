@@ -29,6 +29,7 @@ import {
   registerResolutionGroup,
   registerUpdate,
   registerCheckPrivileges,
+  registerUpdateHistorySnapshotCadence,
 } from './apis';
 import type { EntityStorePluginRouter } from '../types';
 
@@ -56,4 +57,5 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerGetMaintainers(router);
   registerInitMaintainers(router);
   registerRunMaintainer(router);
+  registerUpdateHistorySnapshotCadence(router);
 }

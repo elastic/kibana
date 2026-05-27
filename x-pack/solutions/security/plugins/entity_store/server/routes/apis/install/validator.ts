@@ -10,14 +10,20 @@ import { EntityType, ALL_ENTITY_TYPES } from '../../../../common/domain/definiti
 import { HistorySnapshotBodyParams } from '../../constants';
 import { parseDurationToMs } from '../../../infra/time';
 import { LogExtractionInstallSchema } from '../utils/log_extraction_validator';
+import { validateHistorySnapshotTimezone } from '../utils/history_snapshot_timezone_validator';
 
 const MIN_HISTORY_SNAPSHOT_FREQUENCY_MS = 60 * 60 * 1000; // 1h
 
-export const BodySchema = z.object({
-  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
-  logExtraction: LogExtractionInstallSchema,
-  historySnapshot: HistorySnapshotBodyParams.optional().superRefine(validateHistorySnapshotParams),
-});
+export const BodySchema = z
+  .object({
+    entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
+    logExtraction: LogExtractionInstallSchema,
+    historySnapshot: HistorySnapshotBodyParams.optional().superRefine(
+      validateHistorySnapshotParams
+    ),
+    timezone: z.string().optional(),
+  })
+  .superRefine(validateHistorySnapshotTimezone({ isOptional: true }));
 
 function validateHistorySnapshotParams(
   data: z.infer<typeof HistorySnapshotBodyParams> | undefined,
