@@ -117,13 +117,15 @@ export const getBuildAgent = async ({
  * Route to rejection when the agent deliberately cannot build a rule, to end on
  * system errors, or continue to the next node otherwise.
  */
-const resolveRejectionRoute = (state: RuleCreationState): 'rejection' | 'end' | 'continue' => {
+export const resolveRejectionRoute = (
+  state: RuleCreationState
+): 'rejection' | 'end' | 'continue' => {
   if (state.rejectionReason) return 'rejection';
   if (state.errors.length > 0) return 'end';
   return 'continue';
 };
 
-const rejectionNode = async (state: RuleCreationState) => {
+export const rejectionNode = async (state: RuleCreationState) => {
   if (!state.rejectionReason) return {};
   const { code, details } = state.rejectionReason;
   const { userQuery } = state;
