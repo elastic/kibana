@@ -13,11 +13,16 @@ import usePrevious from 'react-use/lib/usePrevious';
 import type { Dimension } from '../../../../types';
 
 /**
- * Resets pagination to page 0 when the set of selected dimensions changes
- * meaningfully. Detects changes to every position in the array (primary
- * and secondary breakdowns alike), since the fetch query filters metrics
- * by ALL selected dimensions. The initial render is implicitly skipped
- * because `usePrevious` returns `undefined` until the effect first runs.
+ * Resets pagination to page 0 whenever the set of selected dimensions
+ * changes in any way: adding the first breakdown, clearing the last one,
+ * swapping the primary, or adding/removing a secondary. The fetch query
+ * filters metrics by ALL selected dimensions, so any change can shift
+ * the result set and invalidate the current page.
+ *
+ * The initial render is implicitly skipped because `usePrevious` returns
+ * `undefined` until the effect first runs, which preserves a restored
+ * `currentPage` on tab duplication where `useRestorableState` hydrates
+ * `selectedDimensions` synchronously in that same first render.
  */
 export function useResetPageOnDimensionsChange(
   selectedDimensions: Dimension[],
@@ -28,14 +33,7 @@ export function useResetPageOnDimensionsChange(
   useEffect(() => {
     if (previousSelectedDimensions === undefined) return;
 
-    const haveDimensionsChanged = !isEqual(previousSelectedDimensions, selectedDimensions);
-
-    const shouldResetPage =
-      haveDimensionsChanged &&
-      previousSelectedDimensions.length > 0 &&
-      selectedDimensions.length > 0;
-
-    if (shouldResetPage) {
+    if (!isEqual(previousSelectedDimensions, selectedDimensions)) {
       onPageChange(0);
     }
   }, [selectedDimensions, previousSelectedDimensions, onPageChange]);

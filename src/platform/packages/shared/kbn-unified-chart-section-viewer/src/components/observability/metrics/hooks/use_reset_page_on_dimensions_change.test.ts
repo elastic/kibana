@@ -73,7 +73,7 @@ describe('useResetPageOnDimensionsChange', () => {
     );
   });
 
-  it('does NOT call onPageChange when the selection is cleared (wipe path)', async () => {
+  it('calls onPageChange(0) when the last breakdown is cleared', async () => {
     const { rerender } = renderHook(
       ({ dims }: { dims: Dimension[] }) => useResetPageOnDimensionsChange(dims, mockOnPageChange),
       {
@@ -90,15 +90,12 @@ describe('useResetPageOnDimensionsChange', () => {
 
     rerender({ dims: [] });
 
-    await waitFor(
-      () => {
-        expect(mockOnPageChange).not.toHaveBeenCalled();
-      },
-      { timeout: 100 }
-    );
+    await waitFor(() => {
+      expect(mockOnPageChange).toHaveBeenCalledWith(0);
+    });
   });
 
-  it('does NOT call onPageChange when the selection settles after mount (empty -> populated)', async () => {
+  it('calls onPageChange(0) when the first breakdown is added', async () => {
     const { rerender } = renderHook(
       ({ dims }: { dims: Dimension[] }) => useResetPageOnDimensionsChange(dims, mockOnPageChange),
       {
@@ -115,12 +112,9 @@ describe('useResetPageOnDimensionsChange', () => {
 
     rerender({ dims: [HOST] });
 
-    await waitFor(
-      () => {
-        expect(mockOnPageChange).not.toHaveBeenCalled();
-      },
-      { timeout: 100 }
-    );
+    await waitFor(() => {
+      expect(mockOnPageChange).toHaveBeenCalledWith(0);
+    });
   });
 
   it('calls onPageChange(0) when a secondary dimension is added to the selection', async () => {
