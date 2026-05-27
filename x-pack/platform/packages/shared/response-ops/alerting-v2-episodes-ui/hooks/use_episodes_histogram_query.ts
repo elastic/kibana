@@ -61,7 +61,9 @@ export const useEpisodesHistogramQuery = ({
     // bucketInterval is used for client-side bucketing only — omitted from queryKey intentionally
     queryKey: queryKeys.histogram(spaceId, filterState, timeRange, breakdownField),
     queryFn: async ({ signal }) => {
-      const query = buildEpisodesHistogramQuery(spaceId, filterState, breakdownField);
+      const query = buildEpisodesHistogramQuery(spaceId, filterState, breakdownField).print(
+        'basic'
+      );
       return executeEsqlQuery<HistogramEpisodeRow>({
         expressions: services.expressions,
         query,
