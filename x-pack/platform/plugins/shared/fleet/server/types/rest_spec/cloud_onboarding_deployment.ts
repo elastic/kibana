@@ -38,7 +38,21 @@ const CloudOnboardingDeploymentStatusSchema = schema.oneOf(
   { meta: { description: 'Deployment status.' } }
 );
 
-const ServiceVarsEntrySchema = schema.arrayOf(schema.recordOf(schema.string(), schema.any()), {
+const ServiceVarsSourceSchema = schema.object(
+  {
+    regions: schema.maybe(schema.arrayOf(schema.string())),
+    aws_region: schema.maybe(schema.string()),
+    region: schema.maybe(schema.string()),
+    region_name: schema.maybe(schema.string()),
+    bucket_arn: schema.maybe(schema.string()),
+    log_group_arn: schema.maybe(schema.string()),
+    detector_id: schema.maybe(schema.string()),
+    metrics: schema.maybe(schema.arrayOf(schema.string())),
+  },
+  { unknowns: 'allow' }
+);
+
+const ServiceVarsEntrySchema = schema.arrayOf(ServiceVarsSourceSchema, {
   maxSize: 100,
 });
 

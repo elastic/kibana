@@ -17,7 +17,19 @@ export type CloudOnboardingDeploymentMechanism =
 
 export type CloudOnboardingDeploymentStatus = 'pending' | 'deploying' | 'succeeded' | 'failed';
 
-export type CloudOnboardingDeploymentServiceVars = Array<Record<string, unknown>>;
+export interface CloudOnboardingDeploymentServiceVarsEntry {
+  regions?: string[];
+  aws_region?: string;
+  region?: string;
+  region_name?: string;
+  bucket_arn?: string;
+  log_group_arn?: string;
+  detector_id?: string;
+  metrics?: string[];
+  [key: string]: string | string[] | undefined;
+}
+
+export type CloudOnboardingDeploymentServiceVars = CloudOnboardingDeploymentServiceVarsEntry[];
 
 export interface CloudOnboardingDeployment {
   id: string;

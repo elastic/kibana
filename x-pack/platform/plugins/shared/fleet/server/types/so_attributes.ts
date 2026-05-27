@@ -49,6 +49,7 @@ import type {
 } from '../../common/types/models/cloud_connector';
 import type {
   CloudOnboardingDeploymentMechanism,
+  CloudOnboardingDeploymentServiceVarsEntry,
   CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
 
@@ -363,7 +364,7 @@ export interface CloudOnboardingDeploymentSOAttributes {
   /** Number of deploy attempts — incremented on each retry. */
   attemptCount: number;
   /** Per-service config arrays — serviceVars[serviceId] is an array where each entry represents one data source (region + S3 bucket + service-specific fields). Multiple entries support multiple buckets/sources for the same service. */
-  serviceVars?: Record<string, Array<Record<string, unknown>>>;
+  serviceVars?: Record<string, CloudOnboardingDeploymentServiceVarsEntry[]>;
   /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present when agentless is in mechanisms. For agent_based, the package policies are attached to the user-managed agent policy tracked in agentPolicyId. */
   packagePolicyIds?: string[];
   /** Agent policy ID for agent_based mechanism — the user-managed agent policy the package policies are attached to. In agentless, agentPolicyId equals packagePolicyId and is not stored separately. */

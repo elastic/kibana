@@ -9,6 +9,10 @@
 // Source of truth for delivery mechanism, signal types, auth, and required config per AWS service.
 // Drives the Services UI badges and Deployment UI stack composition in the AWS onboarding flow.
 
+import type { CloudOnboardingDeploymentServiceVarsEntry } from '../../../../common/types/models/cloud_onboarding_deployment';
+
+export type AwsServiceVarsSource = CloudOnboardingDeploymentServiceVarsEntry;
+
 export type SignalType = 'logs' | 'metrics';
 
 export type DeliveryMethod = 'agentless' | 'firehose' | 'cloud_forwarder';
@@ -34,17 +38,6 @@ export type AwsConfigKey =
   | 'log_group_arn'
   | 'detector_id'
   | 'metrics';
-
-export interface AwsServiceVarsSource {
-  regions?: string[];
-  aws_region?: string;
-  region?: string;
-  region_name?: string;
-  bucket_arn?: string;
-  log_group_arn?: string;
-  detector_id?: string;
-  metrics?: string[];
-}
 
 export type ServiceCategory =
   | 'AI / ML'
