@@ -103,18 +103,28 @@ const AssetCriticalitySelectorComponent: React.FC<{
           </EuiFlexItem>
           {compressed && criticality.privileges.data?.has_write_permissions && (
             <EuiFlexItem>
-              <EuiButtonIcon
-                data-test-subj="asset-criticality-change-btn"
-                iconSize="s"
-                iconType={'pencil'}
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.securitySolution.entityAnalytics.assetCriticality.compressedButtonArialLabel',
                   {
                     defaultMessage: 'Change asset criticality',
                   }
                 )}
-                onClick={() => toggleModal(true)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="asset-criticality-change-btn"
+                  iconSize="s"
+                  iconType={'pencil'}
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.entityAnalytics.assetCriticality.compressedButtonArialLabel',
+                    {
+                      defaultMessage: 'Change asset criticality',
+                    }
+                  )}
+                  onClick={() => toggleModal(true)}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
 
