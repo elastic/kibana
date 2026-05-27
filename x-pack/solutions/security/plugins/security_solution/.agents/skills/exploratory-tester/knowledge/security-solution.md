@@ -1,7 +1,7 @@
 # Security Solution — Exploratory Testing Knowledge
 
-**Last updated:** 2026-05-26  
-**Session:** ECH, editor+t2_analyst role, PR #238549 (remove newDataViewPickerEnabled flag), 10 flows
+**Last updated:** 2026-05-27  
+**Sessions:** ECH, editor+t2_analyst role, PR #238549 (remove newDataViewPickerEnabled flag), 12 flows across 2 sessions
 
 ---
 
@@ -24,6 +24,8 @@
 - Test alerts can be ingested directly to `.alerts-security.alerts-default` via ES index API using API key auth
 - **Caveat**: Manually ingested alerts satisfy KPI aggregation queries but NOT the Alerts data grid query — the grid requires full signal schema fields (`kibana.alert.rule.uuid`, `kibana.alert.instance.id`, `kibana.alert.start`, etc.)
 - The Alerts table will show "No results" even when KPI panel shows alert counts, if test data lacks required schema fields
+- **Preferred approach**: Create a detection rule (`POST /api/detection_engine/rules`) against a test index, let it fire on rule interval. Rule-generated alerts have the full schema including `kibana.alert.*` fields and appear in the Alerts data grid.
+- Resolver/Analyzer tab requires `process.entity_id` field — only present on alerts from Elastic Defend (Endpoint) data. Custom query rule alerts on plain logs will NOT show the Analyzer tab. This is expected, not a regression.
 - Create rules via `POST /api/detection_engine/rules` — rule will appear in the Rules list
 
 ## Navigation patterns
@@ -67,16 +69,34 @@
 - `Security solution alerts` — alerts-specific (used in rule creation, timeline)
 - `Security solution attacks` — attack discovery scope
 
+## Cell actions in Alerts data grid
+
+- Cell actions (Filter for, Filter out, Add to Timeline) appear on hover, not click — use `browser_hover` on the cell first
+- Target specific row/column: `[role="gridcell"][data-gridcell-row-index="0"][data-gridcell-column-index="5"]`
+- Cell action test subjects: `dataGridColumnCellAction-security-default-cellActions-filterIn`, `…filterOut`, `…addToTimeline`
+- "Filter for" click adds a filter pill to the filter bar and encodes the filter in the URL `&filters=…` param
+- Delete filter via `[aria-label="Delete <field>: <value>"]` button
+- "Investigate in Timeline" bulk action opens Timeline with the selected alert's `_id` as a KQL filter; data view scope is not altered
+- Bulk actions menu opened via `[data-test-subj="selectedShowBulkActionsButton"]`; menu item: `[data-test-subj="investigate-bulk-in-timeline"]`
+
+## Data view scope isolation
+
+- Each Security Solution page uses a single fixed scope: Alerts→`default`, Explore→`explore`, Timeline→`timeline`, Attack Discovery→`attacks`
+- Changing the data view on one page/scope does NOT affect other scopes — URL-state-based, no server-side persistence
+- After navigating away and back without the `sourcerer=` URL param, the page resets to its default data view for that scope
+- The Alerts page picker is disabled for `editor+t2_analyst` role — you cannot test interactive Alerts scope changes with this role
+
 ## Known issues observed this session
 
 ### Open / needs investigation
-- **Lens KPI metric "field can not be used for filtering" TypeErrors**: Affects all Explore pages (Hosts/Network/Users). Fields: `source.ip`, `destination.ip`, `network.community_id`, `user.name`. From `expressionLegacyMetricVis` checking filter action compatibility. May indicate Data View Manager field metadata regression for explore scope.
-- **`/api/security_solution/initialize` called multiple times per navigation**: 4× on Alerts page, 2× on Hosts page. Possible React component re-mount issue from Data View Manager initialization.
+- **Lens KPI metric "field can not be used for filtering" TypeErrors** (F-L1-01): Observed in Session 1 across all Explore pages. **Not reproducible in Session 2** (41/41 KPI panels rendered cleanly). Intermittent or data-dependent. Check if it reproduces with a cold cache or different date range.
+- **`/api/security_solution/initialize` called multiple times per navigation**: 4× on Alerts page, 2× on Hosts page. Duplicate `data_views/fields` fetches (3×) on both pages. Possible React component re-mount issue from Data View Manager initialization.
 - **ES|QL tab in Timeline auto-executes empty query on mount**: Shows "1 error" immediately before user types anything. Error: `action_request_validation_exception: [query] is required`.
 
 ### Pre-existing (do not re-log)
 - Entity store disabled → `/internal/risk_score/engine/settings` → 500 (expected behavior when EA is off)
 - `/internal/alerting/rules/gaps/auto_fill_scheduler/...` → 404 (may be missing in some builds)
+- `/internal/osquery/fleet_wrapper/agents` → 404 (Osquery integration not installed on ECH)
 
 ## Timeline interaction notes
 
