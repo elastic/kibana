@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import type { UnifiedAttachmentTypeSetup } from '@kbn/cases-plugin/server';
 import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import { decodeObservabilityAlert } from '../../../common/cases/attachments/alert';
+import { ObservabilityAlertAttachmentPayloadSchema } from '../../../common/cases/attachments/alert';
 
-export const observabilityAlertAttachmentType = {
+export const observabilityAlertAttachmentType: UnifiedAttachmentTypeSetup = {
   id: OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
-  schemaValidator: (metadata: unknown) => {
-    decodeObservabilityAlert(metadata);
-  },
+  schema: ObservabilityAlertAttachmentPayloadSchema,
 };

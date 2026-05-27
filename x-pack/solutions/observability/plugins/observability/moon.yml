@@ -159,7 +159,6 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
-  - '@kbn/zod'
   - '@kbn/nightshift'
 tags:
   - plugin
