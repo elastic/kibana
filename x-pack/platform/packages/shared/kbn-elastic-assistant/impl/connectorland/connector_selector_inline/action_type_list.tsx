@@ -43,9 +43,7 @@ export const ActionTypeList: React.FC<ActionTypeListProps> = ({
     data-test-subj="action-type-list"
   >
     {actionTypes.map((actionType: ActionType) => {
-      const fullAction = actionTypeRegistry.has(actionType.id)
-        ? actionTypeRegistry.get(actionType.id)
-        : undefined;
+      const fullAction = actionTypeRegistry.get(actionType.id);
       const buttonIsDisabled = isMissingConnectorPrivileges || !actionType.enabled;
       const button = (
         <EuiKeyPadMenuItem
@@ -56,7 +54,7 @@ export const ActionTypeList: React.FC<ActionTypeListProps> = ({
           data-test-subj={`action-option-${actionType.name}`}
           onClick={() => onSelect(actionType)}
         >
-          <EuiIcon size="xl" type={fullAction?.iconClass ?? 'plugs'} />
+          <EuiIcon size="xl" type={fullAction.iconClass} />
         </EuiKeyPadMenuItem>
       );
       return (
