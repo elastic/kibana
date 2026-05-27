@@ -118,10 +118,9 @@ describe('Agents CRUD test', () => {
           query: expect.any(Object),
           index: '.fleet-agents',
           size: 0,
-          fields: ['status', 'signals'],
+          fields: ['status'],
           runtime_mappings: {
             status: expect.anything(),
-            signals: expect.anything(),
           },
         })
       );
@@ -164,10 +163,9 @@ describe('Agents CRUD test', () => {
           aggs: { tags: { terms: { field: 'tags', size: 10000 } } },
           index: '.fleet-agents',
           size: 0,
-          fields: ['status', 'signals'],
+          fields: ['status'],
           runtime_mappings: {
             status: expect.anything(),
-            signals: expect.anything(),
           },
         })
       );
