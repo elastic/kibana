@@ -3,6 +3,8 @@
 set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
+source .buildkite/scripts/steps/test/ftr_smart_retry.sh
+source .buildkite/scripts/steps/test/ftr_job_annotation.sh
 
 BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}
 FTR_CONFIG_GROUP_KEY=${FTR_CONFIG_GROUP_KEY:-}
@@ -26,8 +28,8 @@ retry_recovered=false
 
 configs="${FTR_CONFIG:-}"
 
-# The first retry should only run the configs that failed in the previous attempt
-# Any subsequent retries, which would generally only happen by someone clicking the button in the UI, will run everything
+# The first retry should only run the configs that failed in the previous attempt.
+# Any subsequent retries (generally triggered manually) will run everything.
 if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
   configs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '')
   if [[ "$configs" ]]; then
@@ -55,23 +57,6 @@ prevRunFailedConfigs=""
 if [[ "${BUILDKITE_RETRY_COUNT:-0}" -ge "1" ]]; then
   prevRunFailedConfigs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '' 2>/dev/null || true)
 fi
-
-# Diffs the JUnit XML directory against a pre-run snapshot and returns failing test names.
-collect_config_failures() {
-  local xml_before="$1"
-  local tmp_xml_after new_xmls tmp_junit
-  tmp_xml_after=$(mktemp)
-  find "target/junit/${JOB}" -maxdepth 1 -name "*.xml" 2>/dev/null | sort > "$tmp_xml_after" || true
-  new_xmls=$(comm -13 "$xml_before" "$tmp_xml_after" 2>/dev/null | grep -v '^[[:space:]]*$' || true)
-  rm -f "$tmp_xml_after"
-  [[ -z "$new_xmls" ]] && return
-  tmp_junit=$(mktemp -d)
-  while IFS= read -r f; do
-    [[ -n "$f" ]] && cp "$f" "$tmp_junit/" 2>/dev/null || true
-  done <<< "$new_xmls"
-  node scripts/ftr_check_retry_result list-failures "$tmp_junit" 2>/dev/null || true
-  rm -rf "$tmp_junit"
-}
 
 while read -r config; do
   if [[ ! "$config" ]]; then
@@ -197,89 +182,12 @@ if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
 
-# smart-retry is only active for attempt 1 (store) and attempt 2 (check).
-# On a manual third-or-later retry it is silently inactive; log that so CI debugging is easier.
-if [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" && \
-      "${BUILDKITE_RETRY_COUNT:-0}" -ge "2" && "$exitCode" != "0" ]]; then
-  echo "--- [smart-retry] inactive on attempt $((${BUILDKITE_RETRY_COUNT:-0} + 1)) — only applies to the first automatic retry"
-fi
-
-# Attempt 1: record the names of failing tests so the retry can evaluate whether they recovered.
-# On the first retry, the step is marked green if every previously-failing test passes — even if
-# a different (previously-passing) test happens to fail on retry.
-if [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" && \
-      "${BUILDKITE_RETRY_COUNT:-0}" == "0" && "$exitCode" != "0" ]]; then
-  junitDir="target/junit/$JOB"
-  if [ -d "$junitDir" ]; then
-    failedTestNames=$(node scripts/ftr_check_retry_result list-failures "$junitDir" 2>/dev/null || true)
-    if [[ "$failedTestNames" ]]; then
-      buildkite-agent meta-data set "$FAILED_TESTS_KEY" "$failedTestNames"
-      echo "Stored $(echo "$failedTestNames" | wc -l | tr -d ' ') previously-failing test name(s) for retry evaluation"
-    fi
-  fi
-fi
-
-# Attempt 2: check whether the failures from attempt 1 are still failing.
-# If every previously-failing test now passes, mark the step green.
-if [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" && \
-      "${BUILDKITE_RETRY_COUNT:-0}" == "1" && "$exitCode" != "0" ]]; then
-  prevFailedTests=$(buildkite-agent meta-data get "$FAILED_TESTS_KEY" --default '' 2>/dev/null || true)
-  if [[ "$prevFailedTests" ]]; then
-    junitDir="target/junit/$JOB"
-    tmpPrevFile=$(mktemp)
-    printf '%s' "$prevFailedTests" > "$tmpPrevFile"
-    set +e
-    node scripts/ftr_check_retry_result check-intersection \
-      --junit-dir "$junitDir" \
-      --prev-failures-file "$tmpPrevFile"
-    intersectionCode=$?
-    set -e
-    rm -f "$tmpPrevFile"
-    if [[ "$intersectionCode" == "0" ]]; then
-      echo "--- [retry-only-failed] All previously-failing tests recovered on retry — marking step green"
-      exitCode=0
-      failedConfigs=""
-      retry_recovered=true
-      buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "" 2>/dev/null || true
-    fi
-  fi
-fi
+store_failing_tests  # attempt 1: record what failed so the retry can verify recovery
+apply_smart_retry    # attempt 2: mark green if all previously-failing tests explicitly passed
 
 echo "--- FTR configs complete"
 printf "%s\n" "${results[@]}"
 echo ""
-
-write_job_annotation() {
-  local attempt_num style
-  attempt_num=$((${BUILDKITE_RETRY_COUNT:-0} + 1))
-  style=$([[ "$exitCode" == "0" ]] && echo "success" || echo "error")
-
-  {
-    echo "### FTR Configs — \`${JOB}\` (attempt ${attempt_num})"
-    echo ""
-
-    if [[ "$retry_recovered" == "true" ]]; then
-      echo "**Recovered on retry** — all originally-failing tests passed; step marked green."
-      echo ""
-      echo "> Configs shown as 'still failing' below introduced *new* failures on retry that were not part of the original failure set and are not counted against recovery."
-      echo ""
-    fi
-
-    if [[ ${#annotation_rows[@]} -gt 0 ]]; then
-      echo "| Config | Duration | Status |"
-      echo "| --- | --- | --- |"
-      printf "%s\n" "${annotation_rows[@]}"
-    fi
-
-    if [[ ${#failure_detail_lines[@]} -gt 0 ]]; then
-      echo ""
-      printf "%s\n" "${failure_detail_lines[@]}"
-    fi
-  } | buildkite-agent annotate \
-        --scope job \
-        --context "ftr-summary" \
-        --style "${style}" || true
-}
 
 write_job_annotation
 
