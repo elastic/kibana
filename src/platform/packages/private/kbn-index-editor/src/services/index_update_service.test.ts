@@ -74,17 +74,17 @@ describe('IndexUpdateService', () => {
       const query = await firstValueFrom(service.esqlQuery$);
 
       expect(query.toLowerCase()).toBe(
-        'from "my-index" metadata _id, _source | where qstr("*200* or 200") | limit 1000 | sort @timestamp desc'
+        'from "my-index" metadata _id, _source | where kql("200") | limit 1000 | sort @timestamp desc'
       );
     });
 
     it('emits Discover ESQL query without metadata', async () => {
       service.setIndexName('logs-*');
-      service.setQstr('ERROR');
+      service.setQstr('host.name: "test"');
 
       const query = await firstValueFrom(service.esqlDiscoverQuery$);
 
-      expect(query).toBe('FROM "logs-*" | WHERE QSTR("*ERROR* OR ERROR") | LIMIT 1000');
+      expect(query).toBe('FROM "logs-*" | WHERE KQL("host.name: \\"test\\"") | LIMIT 1000');
     });
   });
 
