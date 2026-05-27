@@ -43,6 +43,7 @@ describe('WorkflowsManagementApi', () => {
       deleteWorkflows: jest.fn(),
       bulkCreateWorkflows: jest.fn(),
       validateWorkflow: jest.fn(),
+      getWorkflowExecution: jest.fn(),
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
     } as any;
 
@@ -410,7 +411,13 @@ steps:
 
     describe('when testing with workflowId parameter', () => {
       it('should fetch workflow YAML by ID and execute it', async () => {
-        mockWorkflowsService.getWorkflow.mockResolvedValue(mockWorkflowDetailDto);
+        mockWorkflowsService.getWorkflow.mockResolvedValue({
+          ...mockWorkflowDetailDto,
+          managed: true,
+          managedBy: 'workflowsExtensionsExample',
+          originManagedWorkflowId: 'system-example-greeting',
+          managedVersion: 3,
+        });
 
         const result = await api.testWorkflow({
           workflowId: 'existing-workflow-id',
@@ -429,6 +436,41 @@ steps:
           expect.objectContaining({
             id: 'existing-workflow-id',
             yaml: mockWorkflowYaml,
+            managed: true,
+            managedBy: 'workflowsExtensionsExample',
+            originManagedWorkflowId: 'system-example-greeting',
+            managedVersion: 3,
+          }),
+          expect.any(Object),
+          mockRequest
+        );
+      });
+
+      it('should preserve managed metadata when testing provided YAML for a saved workflow', async () => {
+        mockWorkflowsService.getWorkflow.mockResolvedValue({
+          ...mockWorkflowDetailDto,
+          managed: true,
+          managedBy: 'workflowsExtensionsExample',
+          originManagedWorkflowId: 'system-example-greeting',
+          managedVersion: 3,
+        });
+
+        await api.testWorkflow({
+          workflowId: 'existing-workflow-id',
+          workflowYaml: mockWorkflowYaml,
+          inputs,
+          spaceId,
+          request: mockRequest,
+        });
+
+        const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
+        expect(engine.executeWorkflow).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'existing-workflow-id',
+            managed: true,
+            managedBy: 'workflowsExtensionsExample',
+            originManagedWorkflowId: 'system-example-greeting',
+            managedVersion: 3,
           }),
           expect.any(Object),
           mockRequest
@@ -573,6 +615,216 @@ steps:
           spaceId,
           mockRequest
         );
+      });
+    });
+  });
+
+  describe('executeWorkflow', () => {
+    const workflowDefinition = {
+      version: '1' as const,
+      name: 'Test Workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      steps: [],
+    };
+    const workflowExecution = {
+      id: 'test-exec-id',
+      workflowId: 'workflow-123',
+      status: 'completed',
+      isTestRun: false,
+      startedAt: '2025-01-01T00:00:00.000Z',
+      finishedAt: '2025-01-01T00:00:01.000Z',
+      workflowDefinition,
+      stepExecutions: [],
+      duration: 1000,
+      error: null,
+      yaml: 'name: Test Workflow',
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      mockWorkflowsService.getWorkflowExecution.mockResolvedValue(workflowExecution as any);
+      mockWorkflowsService.validateWorkflow.mockResolvedValue({
+        valid: true,
+        diagnostics: [],
+        parsedWorkflow: workflowDefinition as any,
+      });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const runWithTimers = async <T>(promise: Promise<T>): Promise<T> => {
+      await jest.advanceTimersByTimeAsync(10_000);
+      return promise;
+    };
+
+    it('executes a saved workflow by id and returns the execution document', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: workflowDefinition,
+      } as any);
+
+      const result = await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: { foo: 'bar' },
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: false,
+          metadata: { agent_id: 'agent-1' },
+        })
+      );
+
+      expect(result).toEqual({
+        workflowExecutionId: 'test-exec-id',
+        execution: workflowExecution,
+      });
+      expect(mockWorkflowsService.getWorkflow).toHaveBeenCalledWith('workflow-123', 'default');
+      const [workflowArg] = mockWorkflowsExecutionEngine.executeWorkflow.mock.calls[0];
+      expect(workflowArg).toEqual(
+        expect.objectContaining({
+          id: 'workflow-123',
+        })
+      );
+      expect(workflowArg).not.toHaveProperty('isEphemeral');
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        expect.any(Object),
+        {
+          event: undefined,
+          spaceId: 'default',
+          inputs: { foo: 'bar' },
+          triggeredBy: undefined,
+          metadata: { agent_id: 'agent-1' },
+        },
+        mockRequest
+      );
+      expect(mockWorkflowsService.getWorkflowExecution).toHaveBeenCalledWith(
+        'test-exec-id',
+        'default',
+        { includeOutput: true }
+      );
+    });
+
+    it('executes an inline workflow as ephemeral without forcing test-run semantics', async () => {
+      const result = await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'inline-workflow',
+          yaml: 'name: Test Workflow',
+          inputs: {},
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: false,
+          isTestRun: false,
+        })
+      );
+
+      expect(result.workflowExecutionId).toBe('test-exec-id');
+      expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
+      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+        'name: Test Workflow',
+        'default',
+        mockRequest
+      );
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'inline-workflow',
+          definition: workflowDefinition,
+          isEphemeral: true,
+          isTestRun: false,
+        }),
+        expect.any(Object),
+        mockRequest
+      );
+    });
+
+    it('allows inline ephemeral executions to opt into test-run semantics', async () => {
+      await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'inline-test-workflow',
+          yaml: 'name: Test Workflow',
+          inputs: {},
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: false,
+          isTestRun: true,
+        })
+      );
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'inline-test-workflow',
+          isEphemeral: true,
+          isTestRun: true,
+        }),
+        expect.any(Object),
+        mockRequest
+      );
+    });
+
+    it('polls until the execution reaches a final status when waiting for completion', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: workflowDefinition,
+      } as any);
+      mockWorkflowsService.getWorkflowExecution
+        .mockResolvedValueOnce({
+          ...workflowExecution,
+          status: 'running',
+        } as any)
+        .mockResolvedValueOnce(workflowExecution as any);
+
+      const result = await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: {},
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: true,
+        })
+      );
+
+      expect(mockWorkflowsService.getWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        workflowExecutionId: 'test-exec-id',
+        execution: workflowExecution,
+      });
+    });
+
+    it('reports timeout when the execution document is not visible before the deadline', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: workflowDefinition,
+      } as any);
+      mockWorkflowsService.getWorkflowExecution.mockResolvedValue(null);
+
+      const result = await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: {},
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: false,
+          completionTimeoutSec: 0,
+        })
+      );
+
+      expect(result).toEqual({
+        workflowExecutionId: 'test-exec-id',
+        timedOut: true,
       });
     });
   });
