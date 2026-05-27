@@ -142,9 +142,17 @@ const alignLegacyTypes: NormalizerConfig<PartitionAttributes> = {
       delete layer.emptySizeRatio;
     }
 
-    // strip undefined palette
-    if (viz.palette == null) {
+    // Drop viz.palette from the original whenever the runtime doesn't use it:
+    // - viz.palette is null
+    // - layer.colorMapping is defined
+    if (viz.palette == null || layer.colorMapping !== undefined) {
       delete viz.palette;
+    }
+
+    // `palettetemplate` doesn't appear anywhere in the partition visualization schema
+    // (appears only in one probably hand-edited SO)
+    if ('palettetemplate' in viz) {
+      delete (viz as Record<string, unknown>).palettetemplate;
     }
 
     // legendStats is not supported for non-waffle charts -> delete it
