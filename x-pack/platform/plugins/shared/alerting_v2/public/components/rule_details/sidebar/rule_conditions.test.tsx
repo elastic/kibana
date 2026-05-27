@@ -31,7 +31,10 @@ const baseRule: RuleApiResponse = {
   metadata: { name: 'Test Signal Rule' },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  query: { format: 'standalone', breach: 'FROM logs-* | STATS count() BY host.name' },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM logs-* | STATS count() BY host.name' },
+  },
   createdBy: 'alice@example.com',
   createdAt: '2026-03-01T12:00:00.000Z',
   updatedBy: 'bob@example.com',
@@ -45,8 +48,11 @@ const alertRule: RuleApiResponse = {
   metadata: { name: 'Test Alert Rule' },
   query: {
     format: 'standalone',
-    breach: 'FROM metrics-* | STATS avg(cpu) BY host.name',
-    recover: 'FROM metrics-* | WHERE avg(cpu) < 0.5',
+    breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+    recovery: {
+      strategy: 'query',
+      query: 'FROM metrics-* | WHERE avg(cpu) < 0.5',
+    },
   },
   grouping: { fields: ['host.name', 'service.name'] },
   state_transition: { pending_count: 3, pending_timeframe: '5m' },
@@ -187,7 +193,7 @@ describe('RuleConditions', () => {
   it('renders fallback values for missing optional fields', () => {
     renderConditions({
       ...baseRule,
-      query: { format: 'standalone', breach: 'FROM logs-*' },
+      query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
       grouping: undefined,
       schedule: { every: '5m' },
     });

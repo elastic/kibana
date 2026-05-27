@@ -16,31 +16,29 @@ import type { RuleKind } from '@kbn/alerting-v2-schemas';
 export interface ComposedQuery {
   format: 'composed';
   base: string;
-  blocks: {
-    breach: string;
-    recover?: string;
-  };
+  breach: { segment: string };
+  recovery?: { segment: string };
 }
 
 export interface StandaloneQuery {
   format: 'standalone';
-  breach: string;
-  recover?: string;
+  breach: { query: string };
+  recovery?: { query: string };
 }
 
 export type RuleQuery = ComposedQuery | StandaloneQuery;
 
 export function getBreachQuery(query: RuleQuery | undefined): string {
   if (!query) return '';
-  if (query.format === 'standalone') return query.breach;
-  return [query.base, query.blocks.breach].filter(Boolean).join('\n');
+  if (query.format === 'standalone') return query.breach.query;
+  return [query.base, query.breach.segment].filter(Boolean).join('\n| ');
 }
 
 export function getRecoverQuery(query: RuleQuery | undefined): string {
   if (!query) return '';
-  if (query.format === 'standalone') return query.recover ?? '';
-  if (!query.blocks.recover) return '';
-  return [query.base, query.blocks.recover].filter(Boolean).join('\n');
+  if (query.format === 'standalone') return query.recovery?.query ?? '';
+  if (!query.recovery?.segment) return '';
+  return [query.base, query.recovery.segment].filter(Boolean).join('\n| ');
 }
 
 // ---------------------------------------------------------------------------

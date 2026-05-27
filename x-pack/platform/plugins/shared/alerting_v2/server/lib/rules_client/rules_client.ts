@@ -14,7 +14,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
@@ -46,6 +46,7 @@ import {
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
 } from './utils';
+import { validateQuerySemantics } from './validate_query_semantics';
 
 const withApm = withApmDecorator('RulesClient');
 
@@ -81,6 +82,7 @@ interface RulesClientParams {
     taskManager: TaskManagerStartContract;
     userService: UserServiceContract;
     actionPolicyClient: ActionPolicyClient;
+    esClient: ElasticsearchClient;
   };
   options: {
     spaceId: string;
@@ -93,6 +95,7 @@ export class RulesClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly userService: UserServiceContract;
   private readonly actionPolicyClient: ActionPolicyClient;
+  private readonly esClient: ElasticsearchClient;
   private readonly spaceId: string;
 
   constructor({ services, options }: RulesClientParams) {
@@ -101,6 +104,7 @@ export class RulesClient {
     this.taskManager = services.taskManager;
     this.userService = services.userService;
     this.actionPolicyClient = services.actionPolicyClient;
+    this.esClient = services.esClient;
     this.spaceId = options.spaceId;
   }
 
@@ -180,6 +184,8 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
 
+    await validateQuerySemantics({ esClient: this.esClient, query: parsed.query });
+
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
     const nowIso = new Date().toISOString();
@@ -243,6 +249,10 @@ export class RulesClient {
       })
     ) {
       throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".');
+    }
+
+    if (parsed.query) {
+      await validateQuerySemantics({ esClient: this.esClient, query: parsed.query });
     }
 
     const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
@@ -714,6 +724,8 @@ export class RulesClient {
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
     assertImmutableUnchanged(parsed, existingAttrs);
+
+    await validateQuerySemantics({ esClient: this.esClient, query: parsed.query });
 
     const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: existingAttrs.enabled,

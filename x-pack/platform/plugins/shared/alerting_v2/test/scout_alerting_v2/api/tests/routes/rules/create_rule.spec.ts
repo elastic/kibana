@@ -170,8 +170,10 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
-  apiTest('validation: rejects body with empty query.breach', async ({ apiClient }) => {
-    const body = buildCreateRuleData({ query: { format: 'standalone', breach: '' } });
+  apiTest('validation: rejects body with empty query.breach.query', async ({ apiClient }) => {
+    const body = buildCreateRuleData({
+      query: { format: 'standalone', breach: { query: '' } },
+    });
     const response = await apiClient.post(testData.RULE_API_PATH, {
       headers: writerHeaders,
       body,
@@ -192,15 +194,15 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
-    'validation: rejects a signal rule with a recover query in standalone format',
+    'validation: rejects a signal rule with a recovery query in standalone format',
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         kind: 'signal',
         state_transition: undefined,
         query: {
           format: 'standalone',
-          breach: 'FROM logs-* | LIMIT 1',
-          recover: 'FROM logs-* | LIMIT 1',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          recovery: { strategy: 'query', query: 'FROM logs-* | LIMIT 1' },
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -208,6 +210,173 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
+    'validation: rejects a signal rule with a no_data query in standalone format',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        kind: 'signal',
+        state_transition: undefined,
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM logs-* | LIMIT 1', behavior: 'emit' },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
+    'validation: rejects recovery with strategy: "query" missing the leaf query field',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'invalid-recovery' },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          // @ts-expect-error — exercising runtime cross-field validation
+          recovery: { strategy: 'query' },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
+    'validation: rejects recovery with strategy: "no_breach" that also includes a query field',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'invalid-no-breach' },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          // @ts-expect-error — exercising runtime cross-field validation
+          recovery: { strategy: 'no_breach', query: 'FROM logs-* | LIMIT 1' },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
+    'validation: rejects a composed segment that starts with a leading pipe',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'leading-pipe-rule' },
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: '| WHERE cpu > 0.9' },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
+    'semantic validation: rejects a standalone breach.query that calls an unknown function',
+    async ({ apiClient }) => {
+      // Unknown-function errors are raised by Elasticsearch at semantic-analysis
+      // time regardless of the underlying indices, so this is a stable signal
+      // that Layer 2 validation reached ES.
+      const body = buildCreateRuleData({
+        metadata: { name: 'semantic-breach-unknown-fn' },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | EVAL x = __not_a_real_function__(1)' },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toContain('query.breach.query');
+    }
+  );
+
+  apiTest(
+    'semantic validation: rejects a composed segment that fails ES analysis once joined with base',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'semantic-segment-unknown-fn' },
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-* | STATS cpu = AVG(cpu) BY host',
+          breach: { segment: 'EVAL z = __not_a_real_function__(1)' },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toContain('query.breach.segment');
+    }
+  );
+
+  apiTest(
+    'semantic validation: rejects a recovery query that fails ES analysis',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'semantic-recovery-unknown-fn' },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          recovery: {
+            strategy: 'query',
+            query: 'FROM logs-* | EVAL x = __not_a_real_function__(1)',
+          },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toContain('query.recovery.query');
+    }
+  );
+
+  apiTest(
+    'semantic validation: rejects a no_data query that fails ES analysis',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'semantic-no-data-unknown-fn' },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: {
+            query: 'FROM logs-* | EVAL x = __not_a_real_function__(1)',
+            behavior: 'emit',
+          },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toContain('query.no_data.query');
     }
   );
 
@@ -247,7 +416,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         schedule: { every: '5m', lookback: '10m' },
         query: {
           format: 'standalone',
-          breach: 'FROM logs-* | LIMIT 10 | WHERE status == "error"',
+          breach: { query: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
         },
         state_transition: { pending_count: 3 },
         grouping: { fields: ['host.name'] },
@@ -269,16 +438,61 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'create: returns 201 with standalone format and a recover query',
+    'create: returns 201 with standalone format and a recovery query',
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: 'standalone-recover-rule' },
         query: {
           format: 'standalone',
-          breach:
-            'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
-          recover:
-            'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+          breach: {
+            query:
+              'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+          },
+          recovery: {
+            strategy: 'query',
+            query:
+              'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+          },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.query).toStrictEqual(body.query);
+    }
+  );
+
+  apiTest(
+    'create: returns 201 with standalone format and recovery strategy "no_breach"',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'standalone-no-breach-recovery' },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          recovery: { strategy: 'no_breach' },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.query).toStrictEqual(body.query);
+    }
+  );
+
+  apiTest(
+    'create: returns 201 with standalone format and a no_data query',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'standalone-no-data-rule' },
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0', behavior: 'emit' },
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -296,7 +510,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       query: {
         format: 'composed',
         base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
-        blocks: { breach: '| WHERE count >= 10' },
+        breach: { segment: 'WHERE count >= 10' },
       },
     });
     const response = await apiClient.post(testData.RULE_API_PATH, {
@@ -308,14 +522,36 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
-    'create: returns 201 with composed format including a recover block',
+    'create: returns 201 with composed format including a recovery segment',
     async ({ apiClient }) => {
       const body = buildCreateRuleData({
         metadata: { name: 'composed-recover-rule' },
         query: {
           format: 'composed',
           base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
-          blocks: { breach: '| WHERE max_val >= 10', recover: '| WHERE max_val < 5' },
+          breach: { segment: 'WHERE max_val >= 10' },
+          recovery: { strategy: 'query', segment: 'WHERE max_val < 5' },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.query).toStrictEqual(body.query);
+    }
+  );
+
+  apiTest(
+    'create: returns 201 with composed format and no_data with default behavior',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: { name: 'composed-no-data-rule' },
+        query: {
+          format: 'composed',
+          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+          breach: { segment: 'WHERE count >= 1' },
+          no_data: { segment: 'WHERE count == 0', behavior: 'last_status' },
         },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {

@@ -127,7 +127,7 @@ describe('useUpdateRule', () => {
       metadata: { name: 'Updated Rule', tags: ['tag1', 'tag2'] },
       time_field: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
-      query: { format: 'standalone', breach: 'FROM logs | LIMIT 10' },
+      query: { format: 'standalone', breach: { query: 'FROM logs | LIMIT 10' } },
       grouping: { fields: ['host.name'] },
       state_transition: null,
       artifacts: null,

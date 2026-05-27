@@ -37,7 +37,7 @@ const baseRule: RuleApiResponse = {
     every: '',
     lookback: 'now-1h',
   },
-  query: { format: 'standalone', breach: '' },
+  query: { format: 'standalone', breach: { query: '' } },
 };
 
 const createQueryClient = () =>

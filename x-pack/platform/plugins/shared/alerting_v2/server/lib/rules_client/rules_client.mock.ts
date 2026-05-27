@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -26,9 +27,18 @@ export function createRulesClient(): {
       .fn()
       .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
   } as unknown as ActionPolicyClient;
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  esClient.esql.query.mockResolvedValue({} as never);
 
   const rulesClient = new RulesClient({
-    services: { request, rulesSavedObjectService, taskManager, userService, actionPolicyClient },
+    services: {
+      request,
+      rulesSavedObjectService,
+      taskManager,
+      userService,
+      actionPolicyClient,
+      esClient,
+    },
     options: { spaceId: 'default' },
   });
 

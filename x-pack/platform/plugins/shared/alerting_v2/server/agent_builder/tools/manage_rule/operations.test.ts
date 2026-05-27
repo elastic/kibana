@@ -30,7 +30,10 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+          },
         },
       ];
 
@@ -41,7 +44,7 @@ describe('executeRuleOperations', () => {
         format: 'json',
       });
       expect(result.data.query).toEqual({
-        breach: 'FROM metrics-* | STATS avg(cpu) BY host.name',
+        breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
         format: 'standalone',
       });
       expect(result.queryColumns).toEqual([
@@ -59,7 +62,10 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: 'FROM nonexistent-* | STATS COUNT(*)' },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM nonexistent-* | STATS COUNT(*)' },
+          },
         },
       ];
 
@@ -72,14 +78,17 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: 'FROM metrics-* | STATS COUNT(*)' },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
+          },
         },
       ];
 
       const result = await executeRuleOperations({}, ops);
 
       expect(result.data.query).toEqual({
-        breach: 'FROM metrics-* | STATS COUNT(*)',
+        breach: { query: 'FROM metrics-* | STATS COUNT(*)' },
         format: 'standalone',
       });
       expect(result.queryColumns).toBeUndefined();
@@ -100,7 +109,10 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+          },
         },
         { operation: 'set_grouping', fields: ['host.name'] },
       ];
@@ -123,7 +135,10 @@ describe('executeRuleOperations', () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
+          },
         },
         { operation: 'set_grouping', fields: ['service.name'] },
       ];
@@ -184,7 +199,7 @@ describe('executeRuleOperations', () => {
           query: {
             format: 'composed',
             base: 'FROM logs-*',
-            blocks: { breach: '| WHERE error = true' },
+            breach: { segment: 'WHERE error == true' },
           },
         },
       ];
@@ -194,21 +209,21 @@ describe('executeRuleOperations', () => {
       );
     });
 
-    it('throws when signal rule sets a recover query', async () => {
+    it('throws when signal rule sets a recovery block', async () => {
       const ops: RuleOperation[] = [
         { operation: 'set_kind', kind: 'signal' },
         {
           operation: 'set_query',
           query: {
             format: 'standalone',
-            breach: 'FROM logs-* | WHERE error = true',
-            recover: 'FROM logs-* | WHERE error = false',
+            breach: { query: 'FROM logs-* | WHERE error == true' },
+            recovery: { strategy: 'query', query: 'FROM logs-* | WHERE error == false' },
           },
         },
       ];
 
       await expect(executeRuleOperations({}, ops)).rejects.toThrow(
-        'Signal rules cannot set recover or no_data queries'
+        'Signal rules cannot configure recovery or no_data queries'
       );
     });
   });
@@ -224,7 +239,12 @@ describe('executeRuleOperations', () => {
       await expectValidationError(
         executeRuleOperations(
           {},
-          [{ operation: 'set_query', query: { format: 'standalone', breach: 'FROM x' } }],
+          [
+            {
+              operation: 'set_query',
+              query: { format: 'standalone', breach: { query: 'FROM x' } },
+            },
+          ],
           esClient
         )
       );
@@ -240,7 +260,10 @@ describe('executeRuleOperations', () => {
         executeRuleOperations(
           {},
           [
-            { operation: 'set_query', query: { format: 'standalone', breach: 'FROM x' } },
+            {
+              operation: 'set_query',
+              query: { format: 'standalone', breach: { query: 'FROM x' } },
+            },
             { operation: 'set_grouping', fields: ['bar'] },
           ],
           esClient
@@ -274,14 +297,14 @@ describe('executeRuleOperations', () => {
             query: {
               format: 'composed',
               base: 'FROM logs-*',
-              blocks: { breach: '| WHERE error = true' },
+              breach: { segment: 'WHERE error == true' },
             },
           },
         ])
       );
     });
 
-    it('wraps recover query on signal kind', async () => {
+    it('wraps recovery on signal kind', async () => {
       await expectValidationError(
         executeRuleOperations({}, [
           { operation: 'set_kind', kind: 'signal' },
@@ -289,8 +312,8 @@ describe('executeRuleOperations', () => {
             operation: 'set_query',
             query: {
               format: 'standalone',
-              breach: 'FROM logs-* | WHERE error = true',
-              recover: 'FROM logs-* | WHERE error = false',
+              breach: { query: 'FROM logs-* | WHERE error == true' },
+              recovery: { strategy: 'query', query: 'FROM logs-* | WHERE error == false' },
             },
           },
         ])
@@ -303,7 +326,7 @@ describe('executeRuleOperations', () => {
       kind: 'alert',
       metadata: { name: 'Test Rule', description: 'A test rule' },
       schedule: { every: '5m', lookback: '10m' },
-      query: { format: 'standalone', breach: 'FROM metrics-* | STATS COUNT(*)' },
+      query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
       time_field: '@timestamp',
       state_transition: null,
     };
@@ -323,7 +346,7 @@ describe('executeRuleOperations', () => {
         { operation: 'set_schedule', every: '1m', lookback: '5m' },
         {
           operation: 'set_query',
-          query: { format: 'standalone', breach: 'FROM logs-* | STATS COUNT(*)' },
+          query: { format: 'standalone', breach: { query: 'FROM logs-* | STATS COUNT(*)' } },
         },
         { operation: 'validate' },
       ];

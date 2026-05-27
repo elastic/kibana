@@ -59,7 +59,7 @@ describe('yaml_form_utils', () => {
         },
         query: {
           format: 'standalone',
-          breach: 'FROM logs-* | LIMIT 10',
+          breach: { query: 'FROM logs-* | LIMIT 10' },
         },
         grouping: {
           fields: ['host.name', 'service.name'],
@@ -101,7 +101,7 @@ describe('yaml_form_utils', () => {
         },
         query: {
           format: 'standalone',
-          breach: 'FROM logs-*',
+          breach: { query: 'FROM logs-*' },
         },
       });
       expect(result).not.toHaveProperty('grouping');

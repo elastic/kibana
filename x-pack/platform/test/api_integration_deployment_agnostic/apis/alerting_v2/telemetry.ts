@@ -45,7 +45,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             metadata: { name: 'alert-rule-1' },
             time_field: '@timestamp',
             schedule: { every: '1m', lookback: '5m' },
-            query: { format: 'standalone', breach: 'FROM metrics-* | LIMIT 10' },
+            query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 10' } },
             grouping: { fields: ['host.name', 'service.name'] },
             no_data: { behavior: 'last_status', timeframe: '10m' },
           }),
@@ -59,7 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             metadata: { name: 'signal-rule-1' },
             time_field: '@timestamp',
             schedule: { every: '5m' },
-            query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
+            query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
           }),
         // Rule 3: alert kind, 5m schedule, disabled
         supertestWithoutAuth
@@ -71,7 +71,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             metadata: { name: 'alert-rule-2' },
             time_field: '@timestamp',
             schedule: { every: '5m', lookback: '10m' },
-            query: { format: 'standalone', breach: 'FROM metrics-* | LIMIT 5' },
+            query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 5' } },
           }),
       ]);
 

@@ -7,6 +7,8 @@
 
 export { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
 export { RulesClient } from './rules_client';
+export { validateQuerySemantics, collectQuerySemanticErrors } from './validate_query_semantics';
+export type { SemanticQueryValidationError } from './validate_query_semantics';
 export type {
   BulkOperationResponse,
   BulkRulesParams,

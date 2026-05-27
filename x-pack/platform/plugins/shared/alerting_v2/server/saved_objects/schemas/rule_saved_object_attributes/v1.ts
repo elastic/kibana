@@ -33,19 +33,46 @@ export const ruleSavedObjectAttributesSchema = schema.object({
   query: schema.oneOf([
     schema.object({
       format: schema.literal('composed'),
-      recovery_type: schema.maybe(schema.oneOf([schema.literal('skip')])),
       base: schema.string(),
-      blocks: schema.object({
-        breach: schema.string(),
-        recover: schema.maybe(schema.string()),
-      }),
+      breach: schema.object({ segment: schema.string() }),
+      recovery: schema.maybe(
+        schema.oneOf([
+          schema.object({
+            strategy: schema.literal('query'),
+            segment: schema.string(),
+          }),
+          schema.object({
+            strategy: schema.literal('no_breach'),
+          }),
+        ])
+      ),
+      no_data: schema.maybe(
+        schema.object({
+          segment: schema.string(),
+          behavior: schema.oneOf([schema.literal('emit'), schema.literal('last_status')]),
+        })
+      ),
     }),
     schema.object({
       format: schema.literal('standalone'),
-      recovery_type: schema.maybe(schema.oneOf([schema.literal('skip')])),
-      no_data: schema.maybe(schema.string()),
-      breach: schema.string(),
-      recover: schema.maybe(schema.string()),
+      breach: schema.object({ query: schema.string() }),
+      recovery: schema.maybe(
+        schema.oneOf([
+          schema.object({
+            strategy: schema.literal('query'),
+            query: schema.string(),
+          }),
+          schema.object({
+            strategy: schema.literal('no_breach'),
+          }),
+        ])
+      ),
+      no_data: schema.maybe(
+        schema.object({
+          query: schema.string(),
+          behavior: schema.oneOf([schema.literal('emit'), schema.literal('last_status')]),
+        })
+      ),
     }),
   ]),
   state_transition: schema.maybe(

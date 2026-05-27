@@ -72,19 +72,20 @@ export function validateEsqlQuery(query: string): string | void {
 }
 
 /**
- * Compose a base ES|QL query with a block fragment to avoiding fragile string concatenation.
- * The block query must start with a pipe operator (e.g. `| WHERE x > 0`).
+ * Compose a base ES|QL query with a pipe-less segment to avoid fragile string
+ * concatenation. The segment is a bare command (e.g. `WHERE x > 0`) without
+ * a leading pipe operator — the pipe is added internally.
  */
-export function composeEsqlQuery(base: string, block: string): string {
+export function composeEsqlQuery(base: string, segment: string): string {
   // validate the ES|QL queries
   const { root: baseRoot } = Parser.parse(base);
-  const { root: blockRoot } = Parser.parse('FROM _\n' + block);
+  const { root: segmentRoot } = Parser.parse('FROM _\n| ' + segment);
   // drop the "FROM _" from the validated block command
-  const blockCommands = blockRoot.commands.slice(1);
+  const segmentCommands = segmentRoot.commands.slice(1);
   // concatenate the queries
   const composedRoot = {
     ...baseRoot,
-    commands: [...baseRoot.commands, ...blockCommands],
+    commands: [...baseRoot.commands, ...segmentCommands],
   };
   return BasicPrettyPrinter.query(composedRoot);
 }

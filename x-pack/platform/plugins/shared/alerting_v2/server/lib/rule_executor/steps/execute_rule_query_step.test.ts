@@ -53,20 +53,22 @@ describe('ExecuteRuleQueryStep', () => {
 
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
+    const expectedQuery =
+      rule.query.format === 'standalone' ? rule.query.breach.query.trimEnd() : '';
     expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: (rule.query as { breach: string }).breach.trimEnd() }),
+      expect.objectContaining({ query: expectedQuery }),
       expect.objectContaining({ signal: abortController.signal })
     );
   });
 
-  it('concatenates base and breach block for composed format rules', async () => {
+  it('concatenates base and breach segment for composed format rules', async () => {
     mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
 
     const rule = createRuleResponse({
       query: {
         format: 'composed',
         base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
-        blocks: { breach: ' | WHERE avg(cpu) > 0.9' },
+        breach: { segment: 'WHERE avg(cpu) > 0.9' },
       },
     });
     const state = createRulePipelineState({ rule });

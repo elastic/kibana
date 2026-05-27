@@ -32,17 +32,27 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
     query: {
       properties: {
         format: { type: 'keyword' },
-        recovery_type: { type: 'keyword' },
         base: { type: 'text' },
-        blocks: {
+        breach: {
           properties: {
-            breach: { type: 'text' },
-            recover: { type: 'text' },
+            segment: { type: 'text' },
+            query: { type: 'text' },
           },
         },
-        no_data: { type: 'text' },
-        breach: { type: 'text' },
-        recover: { type: 'text' },
+        recovery: {
+          properties: {
+            strategy: { type: 'keyword' },
+            segment: { type: 'text' },
+            query: { type: 'text' },
+          },
+        },
+        no_data: {
+          properties: {
+            segment: { type: 'text' },
+            query: { type: 'text' },
+            behavior: { type: 'keyword' },
+          },
+        },
       },
     },
     grouping: {

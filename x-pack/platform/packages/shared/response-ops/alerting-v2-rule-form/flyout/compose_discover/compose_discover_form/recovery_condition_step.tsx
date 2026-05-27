@@ -150,7 +150,7 @@ export function RecoveryConditionStep({
 }: RecoveryConditionStepProps) {
   const query = useWatch<ComposeFormValues, 'query'>({ name: 'query' });
   const baseQuery = query?.format === 'composed' ? query.base : '';
-  const recoveryBlock = query?.format === 'composed' ? query.blocks.recover ?? '' : '';
+  const recoveryBlock = query?.format === 'composed' ? query.recovery?.segment ?? '' : '';
 
   return (
     <>

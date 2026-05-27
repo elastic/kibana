@@ -65,7 +65,7 @@ describe('useCreateRule', () => {
     schedule: { every: '5m', lookback: '1m' },
     query: {
       format: 'standalone',
-      breach: 'FROM logs | LIMIT 10',
+      breach: { query: 'FROM logs | LIMIT 10' },
     },
     grouping: { fields: ['host.name'] },
   };
@@ -359,7 +359,7 @@ describe('useCreateRule', () => {
       schedule: { every: '1m', lookback: '1m' },
       query: {
         format: 'standalone',
-        breach: 'FROM metrics | WHERE cpu > 90',
+        breach: { query: 'FROM metrics | WHERE cpu > 90' },
       },
       grouping: { fields: ['host.name', 'service.name'] },
     };

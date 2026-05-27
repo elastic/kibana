@@ -152,14 +152,16 @@ interface FormValues {
     lookback: string; // Duration string
   };
   query: {
-    format: 'standalone',
-    breach: string;   // The ES|QL query
+    breach: string;           // The breach ES|QL query
+    recover?: string;         // Optional custom recovery ES|QL query
   };
   grouping?: {
-    fields: string[]; // Columns to group alerts by
+    fields: string[];         // Columns to group alerts by
   };
 }
 ```
+
+> The form keeps a simple `{ breach, recover? }` shape internally. It is translated to the canonical API shape (`{ format: 'standalone', breach: { query }, recovery?: { strategy: 'query', query } }`) by `mapFormValuesToRuleRequest`. The form does not currently surface `no_data` or the `no_breach` recovery strategy; they are dropped on round-trip and need to be re-added through the canonical API or the Compose Discover flyout if required.
 
 ## Required Services
 

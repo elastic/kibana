@@ -156,8 +156,8 @@ const formValuesFromYamlToCompose = (parsed: FormValues): ComposeFormValues => (
   schedule: parsed.schedule,
   query: {
     format: 'standalone',
-    breach: parsed.query.breach,
-    ...(parsed.query.recover ? { recover: parsed.query.recover } : {}),
+    breach: { query: parsed.query.breach },
+    ...(parsed.query.recover ? { recovery: { query: parsed.query.recover } } : {}),
   },
   grouping: parsed.grouping,
   stateTransition: parsed.stateTransition,
@@ -190,7 +190,7 @@ const EMPTY_FORM_VALUES: ComposeFormValues = {
   metadata: { name: '', enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: '' },
+  query: { format: 'standalone', breach: { query: '' } },
   grouping: undefined,
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
@@ -220,7 +220,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'signal';
   const hasInitialCustomRecovery =
-    initialMapped?.query?.format === 'composed' && !!initialMapped.query.blocks.recover?.trim();
+    initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
   const [uiState, dispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
@@ -274,14 +274,18 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       const full = getBreachQuery(methods.getValues('query'));
       const { base, alertBlock } = splitQuery(full);
       setDraft((d) => ({ ...d, base, breach: alertBlock }));
-      methods.setValue('query', { format: 'composed', base, blocks: { breach: alertBlock } });
+      methods.setValue('query', {
+        format: 'composed',
+        base,
+        breach: { segment: alertBlock },
+      });
       dispatch({ type: 'ENABLE_TRACKING' });
     } else {
       // Assemble from the last committed RHF query — not from draft — so
       // any unapplied sandbox edits are discarded cleanly on tracking disable.
       const assembled = getBreachQuery(methods.getValues('query'));
       setDraft((d) => ({ ...d, base: '', breach: assembled, recover: '' }));
-      methods.setValue('query', { format: 'standalone', breach: assembled });
+      methods.setValue('query', { format: 'standalone', breach: { query: assembled } });
       dispatch({ type: 'DISABLE_TRACKING' });
     }
   }, [isAlert, uiState.tracking, uiState.yamlMode, methods, setDraft, dispatch]);
@@ -310,10 +314,12 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   useEffect(() => {
     if (!uiState.queryCommitted || uiState.recoveryType !== 'default') return;
     const current = methods.getValues('query');
-    if (current.format === 'composed' && current.blocks.recover) {
-      methods.setValue('query', { ...current, blocks: { breach: current.blocks.breach } });
-    } else if (current.format === 'standalone' && current.recover) {
-      methods.setValue('query', { format: 'standalone', breach: current.breach });
+    if (current.format === 'composed' && current.recovery) {
+      const { recovery: _recovery, ...rest } = current;
+      methods.setValue('query', rest);
+    } else if (current.format === 'standalone' && current.recovery) {
+      const { recovery: _recovery, ...rest } = current;
+      methods.setValue('query', rest);
     }
   }, [uiState.recoveryType, uiState.queryCommitted, methods]);
 

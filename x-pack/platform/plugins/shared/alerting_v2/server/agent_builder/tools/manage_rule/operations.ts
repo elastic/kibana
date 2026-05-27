@@ -245,7 +245,9 @@ export const executeRuleOperations = async (
   }
 
   if (!isSignalQueryBreachOnly(next)) {
-    throw new RuleOperationValidationError('Signal rules cannot set recover or no_data queries.');
+    throw new RuleOperationValidationError(
+      'Signal rules cannot configure recovery or no_data queries.'
+    );
   }
 
   return {

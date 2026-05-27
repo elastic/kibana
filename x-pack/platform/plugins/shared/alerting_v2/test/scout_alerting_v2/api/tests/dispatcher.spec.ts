@@ -172,7 +172,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           // fires before the bulkDisable below lands.
           query: {
             format: 'standalone',
-            breach: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"',
+            breach: { query: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
           },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })

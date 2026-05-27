@@ -11,7 +11,7 @@ See also: [Director](../director/README.md) and [Dispatcher](../dispatcher/READM
 - Running one rule execution from start to finish
 - Building the ES|QL request from rule configuration
 - Streaming result rows through the execution pipeline
-- Materializing breach / recovery / no-data rule events
+- Materializing breach / recovery rule events
 - Invoking the director for alert rules
 - Writing rule events to `.rule-events`
 
@@ -103,14 +103,27 @@ Rules are saved objects. Relevant attributes include:
 - `kind`
 - `metadata`
 - `schedule`
-- `evaluation`
+- `query` — the new nested shape (see below)
 - `grouping`
-- `recovery_policy`
 - `state_transition`
-- `no_data`
 - server-managed flags such as `enabled`
 
 The persisted shape lives in `saved_objects/schemas/rule_saved_object_attributes/`. API schemas live in `@kbn/alerting-v2-schemas`.
+
+### Query shape
+
+`query` is a discriminated union on `format`:
+
+- `format: 'composed'` — `base` ES\|QL plus pipe-less segments for each phase.
+- `format: 'standalone'` — independent ES\|QL queries for each phase.
+
+In both formats the same three sub-objects describe how the executor materializes events:
+
+| Sub-object | Required? | Behavior |
+| --- | --- | --- |
+| `breach` | Yes | The breach query (composed: `segment`; standalone: `query`). Produces breached events on matching rows. |
+| `recovery` | Optional | Controls recovery. Omitting it disables recovery entirely. Otherwise `strategy: 'no_breach' \| 'query'` selects the recovery mode; for `'query'` the leaf field is required. |
+| `no_data` | Optional | Accepted by the API schema for forward compatibility, but the executor does not yet act on it. The field is stored on the rule and validated like the other blocks; no-data event emission will be wired up in a future change. |
 
 ## Operational parameters
 
@@ -151,11 +164,11 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 
 Recovery is implemented in `CreateRecoveryEventsStep` after `CreateAlertEventsStep`, so the current batch already contains breach documents when recovery logic runs.
 
-Recovery only applies to `kind: alert` rules and is optional. A rule without a `recovery_policy` never emits recovery events.
+Recovery only applies to `kind: alert` rules and is optional. A rule without `query.recovery` never emits recovery events.
 
 ### `no_breach` recovery
 
-Selected when `recovery_policy.type` is `no_breach`. The executor:
+Selected when `query.recovery.strategy === 'no_breach'`. The executor:
 
 1. queries `.rule-events` for group hashes that still have non-inactive episode state
 2. compares that active set to the current breach batch
@@ -163,15 +176,15 @@ Selected when `recovery_policy.type` is `no_breach`. The executor:
 
 ### `query` recovery
 
-If `recovery_policy.type` is `query`, the executor runs the configured `recovery_policy.query.base` ES|QL query and only emits recovery events for rows whose computed `group_hash` matches the active set.
+If `query.recovery.strategy === 'query'`, the executor runs the configured recovery query (composed `recovery.segment` appended to `base`, or standalone `recovery.query`) and only emits recovery events for rows whose computed `group_hash` matches the active set.
 
 ### Summary
 
-| `recovery_policy` | Recovery is emitted when |
+| `query.recovery` | Recovery is emitted when |
 | --- | --- |
 | _absent_ | Never. The executor skips the active-group lookup entirely. |
-| `no_breach` | An active group is absent from the current breach batch. |
-| `query` | A recovery query row matches a currently active group. |
+| `strategy: 'no_breach'` | An active group is absent from the current breach batch. |
+| `strategy: 'query'` | A recovery query row matches a currently active group. |
 
 Recovered documents are appended to `alertEventsBatch` before `DirectorStep` and storage.
 
@@ -206,7 +219,7 @@ For each breached ES\|QL row, the executor:
 ### Important constraints
 
 - Severity is only considered for `breached` events.
-- `recovered` and `no_data` events do not carry severity.
+- `recovered` events do not carry severity.
 - The original ES\|QL row is still stored in `data`, so `data.severity`
   is preserved even when the top-level `severity` field is absent or normalized.
 - Unsupported values never fail the rule execution.

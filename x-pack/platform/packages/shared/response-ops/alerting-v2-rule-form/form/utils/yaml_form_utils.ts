@@ -46,7 +46,7 @@ interface YamlStateTransition {
 
 interface YamlQuery {
   format: 'standalone';
-  breach: string;
+  breach: { query: string };
 }
 
 interface YamlRuleObject {
@@ -59,6 +59,20 @@ interface YamlRuleObject {
   state_transition?: YamlStateTransition;
   artifacts?: Array<{ id: string; type: string; value: string }>;
 }
+
+/**
+ * Lenient extractor for the YAML `query.breach` field. Accepts the canonical
+ * nested object (`{ query: '…' }`) as well as legacy/handwritten strings so
+ * that pasting an older payload doesn't blow up the parser.
+ */
+const extractBreachQuery = (value: unknown): string => {
+  if (typeof value === 'string') return value;
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const { query } = value as { query?: unknown };
+    if (typeof query === 'string') return query;
+  }
+  return '';
+};
 
 const serializeStateTransition = (st?: StateTransition): YamlStateTransition | undefined => {
   if (!st) return undefined;
@@ -97,7 +111,7 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
     },
     query: {
       format: 'standalone',
-      breach: values.query.breach,
+      breach: { query: values.query.breach },
     },
     ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
     ...(st && { state_transition: st }),
@@ -192,7 +206,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         lookback: typeof schedule?.lookback === 'string' ? schedule.lookback : '1m',
       },
       query: {
-        breach: typeof queryObj?.breach === 'string' ? queryObj.breach : '',
+        breach: extractBreachQuery(queryObj?.breach),
       },
       grouping: Array.isArray(grouping?.fields)
         ? { fields: grouping.fields as string[] }

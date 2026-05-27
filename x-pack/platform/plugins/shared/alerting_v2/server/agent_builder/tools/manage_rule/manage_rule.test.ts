@@ -49,7 +49,7 @@ describe('manageRuleTool', () => {
               operation: 'set_query',
               query: {
                 format: 'standalone',
-                breach: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+                breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
               },
             },
           ],
@@ -89,7 +89,7 @@ describe('manageRuleTool', () => {
             { operation: 'set_metadata', name: 'Test' },
             {
               operation: 'set_query',
-              query: { format: 'standalone', breach: 'FROM logs-* | STATS COUNT(*)' },
+              query: { format: 'standalone', breach: { query: 'FROM logs-* | STATS COUNT(*)' } },
             },
           ],
         },
@@ -112,7 +112,10 @@ describe('manageRuleTool', () => {
             { operation: 'set_metadata', name: 'Bad Query Rule' },
             {
               operation: 'set_query',
-              query: { format: 'standalone', breach: 'FROM bad-index-* | STATS COUNT(*)' },
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM bad-index-* | STATS COUNT(*)' },
+              },
             },
           ],
         },
@@ -149,7 +152,7 @@ describe('manageRuleTool', () => {
             data: {
               metadata: { name: 'Persisted Rule' },
               kind: 'alert',
-              query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
+              query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
             },
           },
         ],

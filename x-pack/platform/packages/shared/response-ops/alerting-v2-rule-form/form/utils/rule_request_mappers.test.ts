@@ -41,7 +41,7 @@ describe('rule_request_mappers', () => {
         metadata: { name: 'Test Rule', owner: 'test-owner', tags: ['tag1', 'tag2'] },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
-        query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
+        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
         grouping: undefined,
         state_transition: undefined,
       });
@@ -446,7 +446,10 @@ describe('rule_request_mappers', () => {
       });
       expect(result.time_field).toBe('@timestamp');
       expect(result.schedule).toEqual({ every: '5m', lookback: '1m' });
-      expect(result.query).toEqual({ format: 'standalone', breach: 'FROM logs-* | LIMIT 10' });
+      expect(result.query).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | LIMIT 10' },
+      });
     });
 
     it('coerces empty artifacts array to null for explicit removal', () => {
@@ -478,7 +481,7 @@ describe('rule_request_mappers', () => {
       },
       query: {
         format: 'standalone',
-        breach: 'FROM logs-* | STATS count() BY host',
+        breach: { query: 'FROM logs-* | STATS count() BY host' },
       },
     } as RuleResponse;
 
@@ -692,7 +695,7 @@ describe('rule_request_mappers', () => {
       expect(createPayload.metadata.description).toBe('Roundtrip description');
       expect(createPayload.query).toEqual({
         format: 'standalone',
-        breach: 'FROM logs-* | STATS count() BY host',
+        breach: { query: 'FROM logs-* | STATS count() BY host' },
       });
       expect(createPayload.grouping).toEqual({ fields: ['host.name'] });
       expect(createPayload.state_transition).toEqual({

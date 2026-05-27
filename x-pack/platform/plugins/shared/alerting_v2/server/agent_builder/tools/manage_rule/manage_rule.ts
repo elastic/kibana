@@ -44,7 +44,10 @@ Use operations[] to:
 1. set_metadata — set name, description, and tags
 2. set_kind — set rule kind (alert | signal)
 3. set_schedule — set execution interval and lookback window
-4. set_query — set the rule's detection query (composed: shared base + appendable breach/recover blocks, or standalone: independent full queries for breach, recover, and no-data)
+4. set_query — set the rule's detection query. Two formats are supported:
+   - composed: shared "base" ES|QL query with appendable pipe-less segments — required "breach: { segment }", optional "recovery: { strategy: 'query'|'no_breach', segment? }" and "no_data: { segment, behavior: 'emit'|'last_status' }"
+   - standalone: independent full ES|QL queries — required "breach: { query }", optional "recovery: { strategy: 'query'|'no_breach', query? }" and "no_data: { query, behavior: 'emit'|'last_status' }"
+   Omitting "recovery" disables recovery entirely; signal rules must use standalone and cannot configure recovery or no_data.
 5. set_grouping — set fields to group alerts by
 6. set_state_transition — set consecutive breaches threshold
 7. validate — validate the accumulated rule against the API request schema; throws if not ready to save`,

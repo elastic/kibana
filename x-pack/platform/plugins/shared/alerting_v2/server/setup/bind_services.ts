@@ -103,6 +103,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
           userService: get(UserService),
           actionPolicyClient: get(ActionPolicyClient),
+          esClient: get(EsServiceScopedToken),
         },
         options: {
           spaceId: get(RequestSpaceIdToken),

@@ -113,7 +113,7 @@ const mockRules = [
     enabled: true,
     metadata: { name: 'Rule One', description: 'Monitors log errors', tags: ['prod'] },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 1' },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
   },
   {
     id: 'rule-2',
@@ -121,7 +121,7 @@ const mockRules = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
-    query: { format: 'standalone', breach: 'FROM metrics-*' },
+    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
   },
 ];
 

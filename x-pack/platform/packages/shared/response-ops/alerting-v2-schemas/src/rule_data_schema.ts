@@ -94,52 +94,134 @@ export const queryFormatSchema = z.enum(['composed', 'standalone']);
 export const queryFormat = queryFormatSchema.enum;
 export type QueryFormat = z.infer<typeof queryFormatSchema>;
 
-/** Interim field to make episode recovery optional */
-export const recoveryTypeSchema = z.enum(['skip']);
-export type RecoveryType = z.infer<typeof recoveryTypeSchema>;
+/** Strategy selector for the optional `recovery` block. */
+export const recoveryStrategySchema = z.enum(['query', 'no_breach']);
+export const recoveryStrategy = recoveryStrategySchema.enum;
+export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
+
+/** Behavior selector for the optional `no_data` block. */
+export const noDataBehaviorSchema = z.enum(['emit', 'last_status']);
+export const noDataBehavior = noDataBehaviorSchema.enum;
+export type NoDataBehavior = z.infer<typeof noDataBehaviorSchema>;
 
 /**
- * Appendable ES|QL fragment (e.g. `| WHERE …`). Not a complete program on its
- * own, so we only enforce length bounds here — full parser validation is
- * applied to the composed `base` it gets appended to.
+ * Appendable ES|QL segment (e.g. `WHERE …`) — a bare command without a
+ * leading pipe. Not a complete program on its own, so we only enforce
+ * structural bounds here (length, non-empty, no leading pipe). Full
+ * parser/semantic validation runs once the segment is composed with the
+ * surrounding `base` (see Layer 2 in the route handler).
  */
-export const esqlQueryBlockSchema = z
+export const esqlQuerySegmentSchema = z
   .string()
   .min(1)
   .max(10000)
-  .refine((s) => s.trim().length > 0, { message: 'Block query must not be whitespace-only' });
+  .refine((s) => s.trim().length > 0, { message: 'Segment must not be whitespace-only' })
+  .refine((s) => !s.trimStart().startsWith('|'), {
+    message: 'Segment must not start with a leading "|"; the pipe is prepended automatically.',
+  });
+
+/** Composed wrappers (segment-based, appended to `base`). */
+
+const composedBreachSchema = z
+  .object({
+    segment: esqlQuerySegmentSchema.describe(
+      'Appendable ES|QL segment for breach detection (required).'
+    ),
+  })
+  .strict();
+
+const composedRecoveryQuerySchema = z
+  .object({
+    strategy: z.literal(recoveryStrategy.query),
+    segment: esqlQuerySegmentSchema.describe('Appendable ES|QL segment for recovery detection.'),
+  })
+  .strict();
+
+const composedRecoveryNoBreachSchema = z
+  .object({
+    strategy: z.literal(recoveryStrategy.no_breach),
+  })
+  .strict();
+
+const composedRecoverySchema = z
+  .discriminatedUnion('strategy', [composedRecoveryQuerySchema, composedRecoveryNoBreachSchema])
+  .describe(
+    'Recovery configuration. `query` runs a custom recovery segment; `no_breach` uses the default no-breach recovery.'
+  );
+
+const composedNoDataSchema = z
+  .object({
+    segment: esqlQuerySegmentSchema.describe(
+      'Appendable ES|QL segment that selects no-data groups.'
+    ),
+    behavior: noDataBehaviorSchema
+      .default(noDataBehavior.emit)
+      .describe('How to handle no-data results: emit a no-data event or hold the last status.'),
+  })
+  .strict();
+
+/** Standalone wrappers (full queries). */
+
+const standaloneBreachSchema = z
+  .object({
+    query: esqlQuerySchema.describe('Full ES|QL query for breach detection (required).'),
+  })
+  .strict();
+
+const standaloneRecoveryQuerySchema = z
+  .object({
+    strategy: z.literal(recoveryStrategy.query),
+    query: esqlQuerySchema.describe('Full ES|QL query for recovery detection.'),
+  })
+  .strict();
+
+const standaloneRecoveryNoBreachSchema = z
+  .object({
+    strategy: z.literal(recoveryStrategy.no_breach),
+  })
+  .strict();
+
+const standaloneRecoverySchema = z
+  .discriminatedUnion('strategy', [standaloneRecoveryQuerySchema, standaloneRecoveryNoBreachSchema])
+  .describe(
+    'Recovery configuration. `query` runs a custom recovery query; `no_breach` uses the default no-breach recovery.'
+  );
+
+const standaloneNoDataSchema = z
+  .object({
+    query: esqlQuerySchema.describe('Full ES|QL query that selects no-data groups.'),
+    behavior: noDataBehaviorSchema
+      .default(noDataBehavior.emit)
+      .describe('How to handle no-data results: emit a no-data event or hold the last status.'),
+  })
+  .strict();
 
 export const composedQuerySchema = z
   .object({
     format: z.literal(queryFormat.composed),
-    recovery_type: recoveryTypeSchema.optional(),
     base: esqlQuerySchema.describe(
       'Base ES|QL query. Time filters are applied automatically via the lookback window.'
     ),
-    blocks: z
-      .object({
-        breach: esqlQueryBlockSchema.describe(
-          'Appendable ES|QL block for breach detection (required).'
-        ),
-        recover: esqlQueryBlockSchema
-          .optional()
-          .describe('Appendable ES|QL block for recovery detection.'),
-      })
-      .strict(),
+    breach: composedBreachSchema.describe('Breach detection configuration (required).'),
+    recovery: composedRecoverySchema
+      .optional()
+      .describe('Recovery configuration. When omitted, recovery is disabled.'),
+    no_data: composedNoDataSchema.optional().describe('No-data detection configuration.'),
   })
   .strict()
-  .describe('Composed query: a shared base with appendable breach/recover blocks.');
+  .describe('Composed query: a shared base with appendable breach/recovery/no_data segments.');
 
 export const standaloneQuerySchema = z
   .object({
     format: z.literal(queryFormat.standalone),
-    recovery_type: recoveryTypeSchema.optional(),
-    no_data: esqlQuerySchema.optional().describe('Full ES|QL query for no-data detection.'),
-    breach: esqlQuerySchema.describe('Full ES|QL query for breach detection (required).'),
-    recover: esqlQuerySchema.optional().describe('Full ES|QL query for recovery detection.'),
+    breach: standaloneBreachSchema.describe('Breach detection configuration (required).'),
+    recovery: standaloneRecoverySchema
+      .optional()
+      .describe('Recovery configuration. When omitted, recovery is disabled.'),
+    no_data: standaloneNoDataSchema.optional().describe('No-data detection configuration.'),
   })
   .strict()
-  .describe('Standalone queries: independent full queries for breach, recover, and no-data.');
+  .describe('Standalone queries: independent full queries for breach, recovery, and no_data.');
 
 export const querySchema = z
   .discriminatedUnion('format', [composedQuerySchema, standaloneQuerySchema])
@@ -150,31 +232,47 @@ export type Query = z.infer<typeof querySchema>;
 /**
  * Returns the effective breach ES|QL query — what the executor actually runs
  * to detect breaches. For composed queries this is `base` concatenated with
- * `blocks.breach`; for standalone it's `breach` verbatim.
+ * `breach.segment`; for standalone it's `breach.query` verbatim.
  */
 export const getBreachEsqlQuery = (query: Query): string =>
-  query.format === 'composed' ? composeEsqlQuery(query.base, query.blocks.breach) : query.breach;
+  query.format === 'composed'
+    ? composeEsqlQuery(query.base, query.breach.segment)
+    : query.breach.query;
 
 /**
- * Returns the recovery ES|QL query if the rule has one configured, otherwise
- * `undefined`. For composed queries this is `base` + `blocks.recover`; for
- * standalone it's `recover` verbatim.
+ * Returns the recovery ES|QL query if the rule has one configured with
+ * `recovery.strategy === 'query'`, otherwise `undefined`. For composed
+ * queries this is `base` + `recovery.segment`; for standalone it's
+ * `recovery.query` verbatim.
  */
 export const getRecoverEsqlQuery = (query: Query): string | undefined => {
-  if (query.format === 'composed' && query.blocks.recover) {
-    return composeEsqlQuery(query.base, query.blocks.recover);
-  } else if (query.format === 'standalone' && query.recover) {
-    return query.recover;
+  if (query.recovery?.strategy !== recoveryStrategy.query) return undefined;
+  if (query.format === 'composed') {
+    return composeEsqlQuery(query.base, query.recovery.segment);
   }
+  return query.recovery.query;
+};
+
+/**
+ * Returns the no-data ES|QL query if the rule has one configured, otherwise
+ * `undefined`. For composed queries this is `base` + `no_data.segment`; for
+ * standalone it's `no_data.query` verbatim.
+ */
+export const getNoDataEsqlQuery = (query: Query): string | undefined => {
+  if (!query.no_data) return undefined;
+  if (query.format === 'composed') {
+    return composeEsqlQuery(query.base, query.no_data.segment);
+  }
+  return query.no_data.query;
 };
 
 /**
  * Returns the "root" ES|QL query — the one containing the `FROM` clause and
  * therefore usable for index-pattern extraction. `base` for composed,
- * `breach` for standalone.
+ * `breach.query` for standalone.
  */
 export const getRootEsqlQuery = (query: Query): string =>
-  query.format === 'composed' ? query.base : query.breach;
+  query.format === 'composed' ? query.base : query.breach.query;
 
 /** State transition (optional, alert-only) */
 
@@ -289,7 +387,7 @@ export const isSignalUsingStandaloneFormat = (data: {
 /** Signal rules only run a breach query — no recovery or no-data behaviour. */
 export const isSignalQueryBreachOnly = (data: { kind?: string; query?: Query }): boolean => {
   if (data.kind !== 'signal' || data.query?.format !== queryFormat.standalone) return true;
-  return data.query.no_data == null && data.query.recover == null;
+  return data.query.recovery == null && data.query.no_data == null;
 };
 
 export const createRuleDataSchema = createRuleDataBaseSchema

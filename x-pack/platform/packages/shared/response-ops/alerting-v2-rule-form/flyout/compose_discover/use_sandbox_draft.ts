@@ -12,9 +12,13 @@ import type { SandboxDraft } from './types';
 
 function queryToDraftFields(query: RuleQuery): Pick<SandboxDraft, 'base' | 'breach' | 'recover'> {
   if (query.format === 'composed') {
-    return { base: query.base, breach: query.blocks.breach, recover: query.blocks.recover ?? '' };
+    return {
+      base: query.base,
+      breach: query.breach.segment,
+      recover: query.recovery?.segment ?? '',
+    };
   }
-  return { base: '', breach: query.breach, recover: query.recover ?? '' };
+  return { base: '', breach: query.breach.query, recover: query.recovery?.query ?? '' };
 }
 
 export function draftToRuleQuery(draft: SandboxDraft, tracking: boolean): RuleQuery {
@@ -22,15 +26,13 @@ export function draftToRuleQuery(draft: SandboxDraft, tracking: boolean): RuleQu
     return {
       format: 'composed',
       base: draft.base,
-      blocks: {
-        breach: draft.breach,
-        ...(draft.recover.trim() ? { recover: draft.recover } : {}),
-      },
+      breach: { segment: draft.breach },
+      ...(draft.recover.trim() ? { recovery: { segment: draft.recover } } : {}),
     };
   }
   // Non-tracking rules have no separate recovery state; draft.recover is always
   // empty in this branch (DISABLE_TRACKING clears it), so we drop it intentionally.
-  return { format: 'standalone', breach: draft.breach };
+  return { format: 'standalone', breach: { query: draft.breach } };
 }
 
 export const useSandboxDraft = (methods: UseFormReturn<ComposeFormValues>) => {

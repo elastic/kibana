@@ -59,7 +59,7 @@ const createAttachment = (
     metadata: { name: 'My Rule', tags: ['tag1'], description: 'A test rule' },
     schedule: { every: '5m' },
     time_field: '@timestamp',
-    query: { format: 'standalone', breach: 'FROM logs-*' },
+    query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
     state_transition: null,
     enabled: overrides.enabled,
     ...(overrides.dataId ? { id: overrides.dataId } : {}),

@@ -50,10 +50,10 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
-      // NOTE: This is an interim fix using recovery_type: skip until we work out the schema changes
-      if (rule.query.recovery_type && rule.query.recovery_type === 'skip') {
+      // Omitting `query.recovery` disables recovery entirely.
+      if (rule.query.recovery == null) {
         step.logger.debug({
-          message: `[${step.name}] Skipping recovery for rule ${input.ruleId}`,
+          message: `[${step.name}] Recovery disabled for rule ${input.ruleId}`,
         });
         yield { type: 'continue', state };
         return;

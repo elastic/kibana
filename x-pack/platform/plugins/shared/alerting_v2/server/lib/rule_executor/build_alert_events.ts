@@ -197,7 +197,6 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   esqlResponse: EsqlQueryResponse;
   scheduledTimestamp: string;
 }
-
 /**
  * Creates `recovered` alert events by running a custom recovery query.
  *

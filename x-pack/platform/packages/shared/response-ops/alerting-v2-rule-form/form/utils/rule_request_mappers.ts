@@ -33,13 +33,14 @@ const mapSchedule = (schedule: FormValues['schedule']) => ({
 
 /**
  * Builds the API `query` field from the form's query values. Emits
- * `standalone` format with an optional `recover` block when the compose
- * discover flow has configured a custom recovery condition.
+ * `standalone` format with an optional `recovery: { strategy: 'query' }`
+ * block when the compose discover flow has configured a custom recovery
+ * condition.
  */
 const mapQuery = (query: FormValues['query']): Query => ({
   format: 'standalone',
-  breach: query.breach,
-  ...(query.recover ? { recover: query.recover } : {}),
+  breach: { query: query.breach },
+  ...(query.recover ? { recovery: { strategy: 'query' as const, query: query.recover } } : {}),
 });
 
 const mapGrouping = (grouping: FormValues['grouping']) =>

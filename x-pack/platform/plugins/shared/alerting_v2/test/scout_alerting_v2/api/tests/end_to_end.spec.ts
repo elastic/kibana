@@ -102,7 +102,9 @@ apiTest.describe(
             metadata: { name: 'end-to-end-active' },
             query: {
               format: 'standalone',
-              breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+              breach: {
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+              },
             },
           })
         );
@@ -147,7 +149,9 @@ apiTest.describe(
             metadata: { name: 'end-to-end-recovery' },
             query: {
               format: 'standalone',
-              breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+              breach: {
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+              },
             },
           })
         );

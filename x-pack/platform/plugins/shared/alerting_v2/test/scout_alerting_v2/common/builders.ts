@@ -26,7 +26,7 @@ const DEFAULTS: CreateRuleData = {
   kind: 'alert',
   metadata: { name: 'scout-rule' },
   schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-  query: { format: 'standalone', breach: 'FROM logs-* | LIMIT 10' },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
   time_field: '@timestamp',
   grouping: { fields: ['host.name'] },
   state_transition: { pending_count: 0, recovering_count: 0 },

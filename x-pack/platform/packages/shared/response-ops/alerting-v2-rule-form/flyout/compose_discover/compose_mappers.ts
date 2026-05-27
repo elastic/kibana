@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse, CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse, CreateRuleData, UpdateRuleData, Query } from '@kbn/alerting-v2-schemas';
 import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { ComposeFormValues } from './compose_form_types';
 
@@ -80,6 +80,29 @@ const mapStateTransition = (formValues: ComposeFormValues) => {
   return Object.keys(out).length ? out : undefined;
 };
 
+/**
+ * The compose form stores recovery as an optional leaf (no strategy field) —
+ * presence means "custom recovery query". Translate to the canonical API
+ * `recovery` discriminated union here.
+ */
+const composeQueryToApiQuery = (q: ComposeFormValues['query']): Query => {
+  if (q.format === 'composed') {
+    return {
+      format: 'composed',
+      base: q.base,
+      breach: { segment: q.breach.segment },
+      ...(q.recovery
+        ? { recovery: { strategy: 'query' as const, segment: q.recovery.segment } }
+        : {}),
+    };
+  }
+  return {
+    format: 'standalone',
+    breach: { query: q.breach.query },
+    ...(q.recovery ? { recovery: { strategy: 'query' as const, query: q.recovery.query } } : {}),
+  };
+};
+
 export const composeFormToCreateRequest = (formValues: ComposeFormValues): CreateRuleData => {
   const artifacts = mapArtifacts(formValues.artifacts);
 
@@ -93,7 +116,7 @@ export const composeFormToCreateRequest = (formValues: ComposeFormValues): Creat
     },
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
-    query: formValues.query,
+    query: composeQueryToApiQuery(formValues.query),
     grouping: formValues.grouping?.fields?.length
       ? { fields: formValues.grouping.fields }
       : undefined,
@@ -117,11 +140,27 @@ export const composeFormToUpdateRequest = (formValues: ComposeFormValues): Updat
 // API response → ComposeFormValues
 // ---------------------------------------------------------------------------
 
-// The API's standalone query has an optional `no_data` field the compose form
-// doesn't use — strip it so the result matches ComposeFormValues['query'].
+/**
+ * Maps the API query shape to the compose form's narrower shape. The compose
+ * form does not surface `no_data` or `recovery.strategy === 'no_breach'` —
+ * `no_data` is dropped here, and a `no_breach` recovery becomes "no recovery
+ * configured" on the form (it will revert to disabled on save if the user
+ * doesn't change anything).
+ */
 const apiQueryToRuleQuery = (q: RuleResponse['query']): ComposeFormValues['query'] => {
-  if (q.format === 'composed') return q;
-  return { format: 'standalone', breach: q.breach, ...(q.recover ? { recover: q.recover } : {}) };
+  if (q.format === 'composed') {
+    return {
+      format: 'composed',
+      base: q.base,
+      breach: { segment: q.breach.segment },
+      ...(q.recovery?.strategy === 'query' ? { recovery: { segment: q.recovery.segment } } : {}),
+    };
+  }
+  return {
+    format: 'standalone',
+    breach: { query: q.breach.query },
+    ...(q.recovery?.strategy === 'query' ? { recovery: { query: q.recovery.query } } : {}),
+  };
 };
 
 const deriveAlertDelayMode = (
