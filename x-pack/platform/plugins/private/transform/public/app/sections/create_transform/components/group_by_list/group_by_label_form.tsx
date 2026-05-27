@@ -73,6 +73,10 @@ export const GroupByLabelForm: React.FC<Props> = ({
         <EuiPopover
           id="transformIntervalFormPopover"
           ownFocus
+          aria-label={i18n.translate(
+            'xpack.transform.groupByLabelForm.editIntervalPopoverAriaLabel',
+            { defaultMessage: 'Edit interval' }
+          )}
           button={
             <EuiButtonIcon
               aria-label={i18n.translate('xpack.transform.groupByLabelForm.editIntervalAriaLabel', {
