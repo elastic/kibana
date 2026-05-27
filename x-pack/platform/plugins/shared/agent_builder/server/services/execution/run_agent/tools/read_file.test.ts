@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IFileSystem } from 'just-bash';
 import { createReadFileTool } from './read_file';
 import { FilesystemService } from '../../../filesystem/filesystem_service';
 import { MemoryVolume } from '../../runner/store/filesystem/memory_volume';
@@ -24,32 +25,45 @@ const makeService = async () => {
   return service;
 };
 
+type StandardReturn = {
+  results: Array<{ type: string; data: { content?: string; path?: string; truncated?: boolean } }>;
+};
+
 describe('read_file', () => {
   it('reads workspace files', async () => {
     const service = await makeService();
-    await service.getFilesystem().writeFile('/workspace/note.txt', 'hi there');
+    await (service.getFilesystem() as IFileSystem).writeFile('/workspace/note.txt', 'hi there');
     const tool = createReadFileTool({ filesystemService: service });
-    const out = await tool.handler({ path: '/workspace/note.txt' }, {} as never);
-    const data = (out.results[0] as { data: { content: string; path: string; truncated?: true } })
-      .data;
-    expect(data.content).toBe('hi there');
-    expect(data.path).toBe('/workspace/note.txt');
-    expect(data.truncated).toBeUndefined();
+    const out = (await tool.handler(
+      { path: '/workspace/note.txt' },
+      {} as never
+    )) as StandardReturn;
+    expect(out.results[0].data.content).toBe('hi there');
+    expect(out.results[0].data.path).toBe('/workspace/note.txt');
+    expect(out.results[0].data.truncated).toBeUndefined();
   });
 
   it('returns an error result when the path is missing', async () => {
     const service = await makeService();
     const tool = createReadFileTool({ filesystemService: service });
-    const out = await tool.handler({ path: '/workspace/missing.txt' }, {} as never);
+    const out = (await tool.handler(
+      { path: '/workspace/missing.txt' },
+      {} as never
+    )) as StandardReturn;
     expect(out.results[0].type).toBe('error');
   });
 
   it('truncates very large file contents', async () => {
     const service = await makeService();
-    await service.getFilesystem().writeFile('/workspace/huge.txt', 'x'.repeat(200_000));
+    await (service.getFilesystem() as IFileSystem).writeFile(
+      '/workspace/huge.txt',
+      'x'.repeat(200_000)
+    );
     const tool = createReadFileTool({ filesystemService: service });
-    const out = await tool.handler({ path: '/workspace/huge.txt' }, {} as never);
-    const data = (out.results[0] as { data: { content: string; truncated?: true } }).data;
-    expect(data.truncated).toBe(true);
+    const out = (await tool.handler(
+      { path: '/workspace/huge.txt' },
+      {} as never
+    )) as StandardReturn;
+    expect(out.results[0].data.truncated).toBe(true);
   });
 });

@@ -16,9 +16,13 @@ import type {
 } from '@kbn/agent-builder-server';
 import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
+import type {
+  AttachmentsService,
+  SkillsService,
+  IBashService,
+  IFilesystemService,
+} from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
-import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
@@ -27,7 +31,8 @@ import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
 import { createTodoTool } from '../../../tools/builtin/todo';
-import { getStoreTools } from '../../runner/store';
+import { createReadFileTool } from '../tools/read_file';
+import { createBashTool } from '../tools/bash';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export interface SelectToolsResult {
@@ -44,7 +49,8 @@ export const selectTools = async ({
   toolProvider,
   agentConfiguration,
   attachmentsService,
-  filestore,
+  filesystemService,
+  bashService,
   spaceId,
   runner,
   experimentalFeatures,
@@ -57,7 +63,8 @@ export const selectTools = async ({
   request: KibanaRequest;
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
-  filestore: IFileStore;
+  filesystemService: IFilesystemService;
+  bashService?: IBashService;
   agentConfiguration: AgentConfiguration;
   spaceId: string;
   runner: ScopedRunner;
@@ -86,10 +93,13 @@ export const selectTools = async ({
     runner,
   });
 
-  // create tools for filesystem (only if feature is enabled)
-  const filestoreTools = experimentalFeatures.filestore
-    ? getStoreTools({ filestore }).map((tool) => builtinToolToExecutable({ tool, runner }))
-    : [];
+  // Filesystem tools — always include read_file; include bash when its FF is on.
+  const filesystemTools: ExecutableTool[] = [
+    builtinToolToExecutable({ tool: createReadFileTool({ filesystemService }), runner }),
+    ...(experimentalFeatures.bash && bashService
+      ? [builtinToolToExecutable({ tool: createBashTool({ bashService }), runner })]
+      : []),
+  ];
 
   const todoTools = experimentalFeatures.todos
     ? [builtinToolToExecutable({ tool: createTodoTool({ todoStateManager }), runner })]
@@ -112,7 +122,7 @@ export const selectTools = async ({
     ...withOrigin(versionedAttachmentBoundTools, ToolOrigin.inline),
     ...withOrigin(versionedAttachmentTools, ToolOrigin.internal),
     ...withOrigin(staticRegistryTools, ToolOrigin.registry),
-    ...withOrigin(filestoreTools, ToolOrigin.internal),
+    ...withOrigin(filesystemTools, ToolOrigin.internal),
     ...withOrigin(todoTools, ToolOrigin.internal),
   ];
 

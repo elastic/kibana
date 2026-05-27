@@ -97,6 +97,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     events,
     promptManager,
     filestore,
+    filesystemService,
+    bashService,
     skills,
     skillsStore,
     toolManager,
@@ -170,7 +172,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
-    filestore,
+    filesystemService,
+    bashService,
     request,
     experimentalFeatures,
     spaceId: context.spaceId,
@@ -335,6 +338,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       compactionResult,
       roundId,
       initialTodos,
+      getWorkspaceId: () => context.bashService?.getWorkspaceId(),
     }),
     evictInternalEvents(),
     shareReplay()
@@ -348,6 +352,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
+  // Persist workspace at end of round when bash was used. No-op otherwise.
+  await context.bashService?.flush();
   return {
     round,
   };

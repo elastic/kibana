@@ -46,6 +46,9 @@ export const createConversation$ = ({
         ...(roundCompletedEvent.data.attachments
           ? { attachments: roundCompletedEvent.data.attachments }
           : {}),
+        ...(roundCompletedEvent.data.workspace_id
+          ? { workspace_id: roundCompletedEvent.data.workspace_id }
+          : {}),
       });
     }),
     switchMap((createdConversation) => {
@@ -82,6 +85,13 @@ export const updateConversation$ = ({
         ? [...conversation.rounds.slice(0, -1), round]
         : [...conversation.rounds, round];
 
+      // Only set workspace_id if it's new (not already on the conversation).
+      // Idempotent: once set, subsequent rounds carry the same id.
+      const newWorkspaceId =
+        roundCompletedEvent.data.workspace_id && !conversation.workspace_id
+          ? roundCompletedEvent.data.workspace_id
+          : undefined;
+
       return conversationClient.update({
         id: conversation.id,
         title,
@@ -90,6 +100,7 @@ export const updateConversation$ = ({
         ...(roundCompletedEvent.data.attachments !== undefined
           ? { attachments: roundCompletedEvent.data.attachments }
           : {}),
+        ...(newWorkspaceId ? { workspace_id: newWorkspaceId } : {}),
       });
     }),
     switchMap((updatedConversation) => {

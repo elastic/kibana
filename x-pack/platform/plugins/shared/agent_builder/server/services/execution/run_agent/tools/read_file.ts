@@ -14,7 +14,8 @@ import {
   estimateTokens,
   truncateTokens,
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import type { FilesystemService } from '../../../filesystem/filesystem_service';
+import type { IFileSystem } from 'just-bash';
+import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
 
 const schema = z.object({
   path: z.string().describe('Absolute path of the file to read'),
@@ -25,7 +26,7 @@ const SAFEGUARD_TOKEN_COUNT = 10_000;
 export const createReadFileTool = ({
   filesystemService,
 }: {
-  filesystemService: FilesystemService;
+  filesystemService: IFilesystemService;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
     id: internalTools.readFile,
@@ -35,7 +36,7 @@ export const createReadFileTool = ({
     schema,
     tags: ['filesystem'],
     handler: async ({ path }) => {
-      const fs = filesystemService.getFilesystem();
+      const fs = filesystemService.getFilesystem() as IFileSystem;
       let content: string;
       try {
         content = await fs.readFile(path);

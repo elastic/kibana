@@ -237,6 +237,12 @@ export interface RoundCompleteEventData {
    * Updated conversation-level attachments after this round.
    **/
   attachments?: VersionedAttachment[];
+  /**
+   * Set when this round used the bash tool. Carries the workspace_id so the
+   * conversation document can be updated to reference it. Idempotent — once set
+   * on the conversation, subsequent rounds carry the same value.
+   */
+  workspace_id?: string;
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;

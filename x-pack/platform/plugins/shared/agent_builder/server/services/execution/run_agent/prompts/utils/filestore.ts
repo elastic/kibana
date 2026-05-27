@@ -5,54 +5,51 @@
  * 2.0.
  */
 
-import { filestoreTools } from '@kbn/agent-builder-common/tools';
+import { internalTools } from '@kbn/agent-builder-common/tools';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 
 const tools = {
-  read: sanitizeToolId(filestoreTools.read),
-  ls: sanitizeToolId(filestoreTools.ls),
-  glob: sanitizeToolId(filestoreTools.glob),
-  grep: sanitizeToolId(filestoreTools.grep),
+  readFile: sanitizeToolId(internalTools.readFile),
+  bash: sanitizeToolId(internalTools.bash),
 };
 
-export const getFileSystemInstructions = (): string => {
+/**
+ * Returns the FILESYSTEM section of the agent's system prompt.
+ *
+ * Describes the unified VFS layout (`/workspace`, `/tool_calls`, `/skills`,
+ * ephemeral paths) and which tools are available to interact with it. The
+ * `bash` tool mention is conditional on the bash FF being on.
+ */
+export const getFileSystemInstructions = ({
+  bashEnabled = false,
+}: {
+  bashEnabled?: boolean;
+} = {}): string => {
+  const bashSection = bashEnabled
+    ? `
+  - ${tools.bash}: run a bash command in a sandboxed shell. Use for composition, piping, and writing files. See the tool description for the full layout and capabilities.`
+    : '';
+
   return cleanPrompt(`
-  ## FILESTORE
+  ## FILESYSTEM
 
-  You have access to a file store, exposing a virtual filesystem containing files representing assets that you can use to perform your tasks.
+  You have access to a unified virtual filesystem with three areas:
+  - /workspace: persistent across rounds and conversation resumptions — anything you write here is saved.
+  - /tool_calls: read-only view of prior tool results in this conversation. Path convention: /tool_calls/{tool_id}/{tool_call_id}/{tool_result_id}.json
+  - /skills: read-only skill files (main file: SKILL.md, plus subfiles).
 
-  ### Tools
+  Other paths (/tmp, /home/user) exist but are ephemeral — gone after the current call.
 
-  You have access to the following tools to access and interact with the file store:
-  - ${tools.read}: access the content of a file
-  - ${tools.ls}: list the content of a directory
-  - ${tools.glob}: find files matching a glob pattern
-  - ${tools.grep}: search for a text pattern in files
+  Tools:
+  - ${tools.readFile}: read a single file's content (with a token safeguard, output may be truncated).${bashSection}
 
-  Please refer to each tool's description and schema for more information on how to use it.
+  Note: Results from tools called before the last user message will be excluded from the conversation. To access them, use ${tools.readFile} (or bash) against the appropriate /tool_calls/... path.
 
-  Note: Results from filestore tools called before the last user message will be excluded from the conversation.
-  When needing to access the same data again, you should call the filestore tool again with the same parameters.
+  ### File types in /tool_calls and /skills
 
-  ### Types of files
-
-  The filestore is used to store different types of files. Each of them represents a different concept in the system.
-
-  #### Tool results
-
-  File type: "${FileEntryType.toolResult}"
-
-  Those are the results from all prior tool calls you performed during the current conversation, exposed
-  so that you can access them later when required.
-
-  - They are all stored under the "/tool_calls" folder
-  - They follow this path convention: "/tool_calls/{tool_id}/{tool_call_id}/{tool_result_id}.json"
-
-  #### Skills
-
-  File type: "${FileEntryType.skill}" for main skill files (SKILL.md) and "${FileEntryType.skillReferenceContent}" for additional skill files.
-
-  Skills contained detailed instructions for a specific task. They are all stored under the "/skills" folder.`);
+  - "${FileEntryType.toolResult}": prior tool call results.
+  - "${FileEntryType.skill}" / "${FileEntryType.skillReferenceContent}": main and additional skill files.
+  `);
 };

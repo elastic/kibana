@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { createOtherResult } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
-import type { BashService } from '../bash/bash_service';
+import type { IBashService } from '@kbn/agent-builder-server/runner';
 
 const schema = z.object({
   command: z
@@ -49,7 +49,7 @@ const description = [
 export const createBashTool = ({
   bashService,
 }: {
-  bashService: BashService;
+  bashService: IBashService;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
     id: internalTools.bash,

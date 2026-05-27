@@ -37,6 +37,8 @@ import type {
   PluginsService,
   ToolManager,
   TodoStateManager,
+  IFilesystemService,
+  IBashService,
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
@@ -203,9 +205,21 @@ export interface AgentHandlerContext {
    */
   hooks: AgentBuilderHooks;
   /**
-   * File store to access data from the agent's virtual filesystem
+   * File store to access data from the agent's virtual filesystem.
+   * @deprecated Use `filesystemService` instead. Will be removed once the
+   * unified VFS migration completes.
    */
   filestore: IFileStore;
+  /**
+   * Unified virtual filesystem service. Owns the just-bash `IFileSystem`
+   * exposed at `/workspace`, `/tool_calls`, `/skills` and `/tmp`.
+   * Always available regardless of feature flags.
+   */
+  filesystemService: IFilesystemService;
+  /**
+   * Bash runtime service. Present only when `experimentalFeatures.bash` is on.
+   */
+  bashService?: IBashService;
   /**
    * Experimental features configuration for this agent execution.
    * Determined by the UI setting at the start of execution.

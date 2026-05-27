@@ -124,7 +124,7 @@ export class BashService {
       fs,
       cwd: DEFAULT_BASH_CWD,
       executionLimits: DEFAULT_EXECUTION_LIMITS,
-      commands: ALLOWED_BASH_COMMANDS,
+      commands: [...ALLOWED_BASH_COMMANDS],
       customCommands: [execToolCommand],
     });
 

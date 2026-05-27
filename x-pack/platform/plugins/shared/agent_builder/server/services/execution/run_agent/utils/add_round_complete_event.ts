@@ -83,6 +83,7 @@ export const addRoundCompleteEvent = ({
   compactionResult,
   roundId: providedRoundId,
   initialTodos,
+  getWorkspaceId,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -99,6 +100,12 @@ export const addRoundCompleteEvent = ({
   roundId?: string;
   /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
   initialTodos?: TodoItem[];
+  /**
+   * Returns the workspace_id used in this round, if any (set when the bash tool
+   * was invoked). The id is then propagated to the conversation document via
+   * the persistence pipeline.
+   */
+  getWorkspaceId?: () => string | undefined;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -135,6 +142,7 @@ export const addRoundCompleteEvent = ({
 
           round.state = buildRoundState({ round, events, stateManager });
 
+          const workspaceId = getWorkspaceId?.();
           const event: RoundCompleteEvent = {
             type: ChatEventType.roundComplete,
             data: {
@@ -142,6 +150,7 @@ export const addRoundCompleteEvent = ({
               resumed: pendingRound !== undefined,
               conversation_state: getConversationState(),
               attachments: attachmentStateManager.getAll(),
+              ...(workspaceId ? { workspace_id: workspaceId } : {}),
             },
           };
 

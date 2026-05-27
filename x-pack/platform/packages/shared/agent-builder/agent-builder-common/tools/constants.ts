@@ -81,12 +81,24 @@ export const internalTools = {
 export const isAttachmentTool = (toolName: string) =>
   Object.values(attachmentTools).includes(toolName);
 
-export const isFilestoreTool = (_toolName: string) => false;
+/**
+ * Recognises legacy filestore tool ids on persisted conversation documents.
+ * The tools themselves are removed (replaced by `read_file` and `bash`), but
+ * this predicate still classifies historical tool calls so they're inferred
+ * as `internal` origin on read.
+ */
+const LEGACY_FILESTORE_TOOL_IDS = new Set([
+  'filestore.read',
+  'filestore.ls',
+  'filestore.grep',
+  'filestore.glob',
+]);
+export const isFilestoreTool = (toolName: string) => LEGACY_FILESTORE_TOOL_IDS.has(toolName);
 
 const isInternalToolName = (toolName: string) => Object.values(internalTools).includes(toolName);
 
 export const isInternalTool = (toolName: string) =>
-  isAttachmentTool(toolName) || isInternalToolName(toolName);
+  isAttachmentTool(toolName) || isFilestoreTool(toolName) || isInternalToolName(toolName);
 
 export const isExcludedFromFilestore = (toolName: string) => isInternalTool(toolName);
 

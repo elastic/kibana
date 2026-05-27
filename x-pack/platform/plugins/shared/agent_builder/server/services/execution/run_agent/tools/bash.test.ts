@@ -18,11 +18,13 @@ describe('bash tool', () => {
     const bashService = { exec } as unknown as BashService;
     const tool = createBashTool({ bashService });
     const handler = tool.handler;
-    const result = await handler({ command: 'echo ok' }, {} as never);
+    const result = (await handler({ command: 'echo ok' }, {} as never)) as {
+      results: Array<{ type: string; data: BashExecResult }>;
+    };
     expect(exec).toHaveBeenCalledWith('echo ok');
     expect(result.results).toHaveLength(1);
     expect(result.results[0].type).toBe('other');
-    expect((result.results[0] as { data: BashExecResult }).data).toEqual({
+    expect(result.results[0].data).toEqual({
       stdout: 'ok\n',
       stderr: '',
       exit_code: 0,

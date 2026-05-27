@@ -6,4 +6,3 @@
  */
 
 export { createStore } from './create_store';
-export { getStoreTools } from './tools';

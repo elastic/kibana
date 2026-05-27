@@ -24,6 +24,13 @@ import {
 } from './utils';
 import { createPluginsService } from './utils/plugins';
 import type { RunnerManager } from './runner';
+import {
+  WorkspaceClient,
+  createWorkspaceStorage,
+} from '../../workspaces';
+import { FilesystemService } from '../../filesystem';
+import { BashService } from '../run_agent/bash';
+import type { Volume } from './store/filesystem/types';
 
 export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({
   agentExecutionParams,
@@ -74,6 +81,45 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     bash: isExperimentalEnabled,
   };
 
+  // Build the unified filesystem service (always present).
+  const workspaceStorage = createWorkspaceStorage({
+    logger,
+    esClient: elasticsearch.client.asScoped(request).asInternalUser,
+  });
+  const workspaceClient = new WorkspaceClient({ storage: workspaceStorage });
+  const conversation = agentExecutionParams.agentParams?.conversation;
+  // The concrete result/skills stores expose `getVolume()` which surfaces the
+  // underlying volume content; the upstream interfaces don't carry that method,
+  // so we narrow here.
+  const filesystemService = new FilesystemService({
+    toolResultsVolume: (resultStore as unknown as { getVolume: () => Volume }).getVolume(),
+    skillsVolume: (skillsStore as unknown as { getVolume: () => Volume }).getVolume(),
+    workspaceClient,
+    workspaceId: conversation?.workspace_id,
+  });
+  await filesystemService.init();
+
+  // BashService is created only when the bash FF is on.
+  let bashService: BashService | undefined;
+  if (experimentalFeatures.bash) {
+    const runner = manager.getRunner();
+    bashService = new BashService({
+      filesystemService,
+      workspaceClient,
+      execToolFn: async (toolId, args) => {
+        const result = await runner.runTool({
+          toolId,
+          toolParams: (args ?? {}) as Record<string, unknown>,
+          source: 'agent',
+        });
+        return result;
+      },
+      resolveToolId: (id) => toolManager.getToolIdMapping().get(id) ?? id,
+      abortSignal: manager.deps.abortSignal,
+      initialWorkspaceId: conversation?.workspace_id,
+    });
+  }
+
   return {
     request,
     spaceId,
@@ -119,6 +165,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     subAgentExecutor: manager.deps.subAgentExecutor,
     analyticsService,
     trackingService,
+    filesystemService,
+    bashService,
   };
 };
 

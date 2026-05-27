@@ -91,6 +91,14 @@ export const createToolRegistryMock = (): ToolRegistryMock => {
   };
 };
 
+const createEmptyVolumeMock = () => ({
+  id: 'mock',
+  get: jest.fn(),
+  list: jest.fn().mockResolvedValue([]),
+  glob: jest.fn().mockResolvedValue([]),
+  exists: jest.fn().mockResolvedValue(false),
+});
+
 export const createToolResultStoreMock = (): ToolResultStoreMock => {
   return {
     has: jest.fn(),
@@ -98,7 +106,8 @@ export const createToolResultStoreMock = (): ToolResultStoreMock => {
     add: jest.fn(),
     delete: jest.fn(),
     asReadonly: jest.fn(),
-  };
+    getVolume: jest.fn().mockReturnValue(createEmptyVolumeMock()),
+  } as unknown as ToolResultStoreMock;
 };
 
 export const createSkillsStoreMock = (): SkillsStoreMock => {
@@ -108,7 +117,8 @@ export const createSkillsStoreMock = (): SkillsStoreMock => {
     add: jest.fn(),
     delete: jest.fn(),
     asReadonly: jest.fn(),
-  };
+    getVolume: jest.fn().mockReturnValue(createEmptyVolumeMock()),
+  } as unknown as SkillsStoreMock;
 };
 
 export const createAttachmentsServiceStartMock = (): AttachmentsServiceStartMock => {
@@ -307,6 +317,11 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     stateManager: createStateManagerMock(),
     hooks: createHooksServiceStartMock(),
     filestore: createFileSystemStoreMock(),
+    filesystemService: {
+      getFilesystem: jest.fn(),
+      snapshotWorkspaceFiles: jest.fn().mockResolvedValue({}),
+    },
+    bashService: undefined,
     skills: createSkillsServiceMock(),
     plugins: createPluginsServiceMock(),
     toolManager: createToolManagerMock(),
@@ -315,6 +330,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       skills: false,
       subagents: false,
       todos: false,
+      bash: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),

@@ -85,7 +85,8 @@ describe('selectTools', () => {
         enable_elastic_capabilities: false,
       } as any,
       attachmentsService,
-      filestore: {} as any,
+      filesystemService: { getFilesystem: jest.fn(), snapshotWorkspaceFiles: jest.fn() } as any,
+      bashService: undefined,
       spaceId: 'default',
       runner: {
         runInternalTool: jest.fn(),
@@ -151,7 +152,8 @@ describe('selectTools', () => {
       toolProvider: { list: jest.fn().mockResolvedValue([]) } as any,
       agentConfiguration: { tools: [], enable_elastic_capabilities: false } as any,
       attachmentsService,
-      filestore: {} as any,
+      filesystemService: { getFilesystem: jest.fn(), snapshotWorkspaceFiles: jest.fn() } as any,
+      bashService: undefined,
       spaceId: 'default',
       runner: {
         runInternalTool: jest.fn(),

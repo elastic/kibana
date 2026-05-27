@@ -149,25 +149,25 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
   }
 
   // Mutating methods all throw EROFS.
-  async writeFile(path: string): Promise<void> {
+  async writeFile(path: string, _content?: unknown, _options?: unknown): Promise<void> {
     throw EROFS('writeFile', path);
   }
-  async appendFile(path: string): Promise<void> {
+  async appendFile(path: string, _content?: unknown, _options?: unknown): Promise<void> {
     throw EROFS('appendFile', path);
   }
-  async mkdir(path: string): Promise<void> {
+  async mkdir(path: string, _options?: unknown): Promise<void> {
     throw EROFS('mkdir', path);
   }
-  async rm(path: string): Promise<void> {
+  async rm(path: string, _options?: unknown): Promise<void> {
     throw EROFS('rm', path);
   }
-  async cp(src: string): Promise<void> {
+  async cp(src: string, _dest?: string, _options?: unknown): Promise<void> {
     throw EROFS('cp', src);
   }
-  async mv(src: string): Promise<void> {
+  async mv(src: string, _dest?: string): Promise<void> {
     throw EROFS('mv', src);
   }
-  async chmod(path: string): Promise<void> {
+  async chmod(path: string, _mode?: number): Promise<void> {
     throw EROFS('chmod', path);
   }
   async symlink(_target: string, linkPath: string): Promise<void> {
@@ -179,7 +179,7 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
   async readlink(path: string): Promise<string> {
     throw new Error(`EINVAL: invalid argument, readlink '${path}'`);
   }
-  async utimes(path: string): Promise<void> {
+  async utimes(path: string, _atime?: Date, _mtime?: Date): Promise<void> {
     throw EROFS('utimes', path);
   }
 }

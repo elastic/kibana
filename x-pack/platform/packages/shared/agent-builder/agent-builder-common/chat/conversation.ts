@@ -345,6 +345,12 @@ export interface Conversation {
    * Keeps track of which prompts have been answered and the response.
    */
   state?: ConversationInternalState;
+  /**
+   * Identifier of the bash workspace document for this conversation.
+   * Created on first bash use; persisted in `chatSystemIndex('workspaces')`.
+   * Undefined for conversations that have never used the bash tool.
+   */
+  workspace_id?: string;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
