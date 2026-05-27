@@ -84,7 +84,6 @@ export const useRunAlertWorkflowPanel = ({
         'aria-label': i18n.CONTEXT_MENU_RUN_WORKFLOW,
         'data-test-subj': 'run-workflow-action',
         key: 'run-workflow-action',
-        size: 's',
         name: i18n.CONTEXT_MENU_RUN_WORKFLOW,
         panel: RUN_WORKFLOW_PANEL_ID,
       },

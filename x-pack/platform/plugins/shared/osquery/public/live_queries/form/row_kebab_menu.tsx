@@ -21,7 +21,7 @@ import type { ExportFormat } from '../../results/use_export_results';
 import type { AddToTimelineHandler } from '../../types';
 
 interface RowKebabMenuProps {
-  row: { action_id?: string; id?: string };
+  row: { action_id?: string; id?: string; docs?: number };
   actionId: string | undefined;
   agentIds?: string[];
   addToTimeline?: AddToTimelineHandler;
@@ -169,7 +169,7 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
           anchorPosition="downLeft"
           aria-label={kebabLabel}
         >
-          <EuiContextMenuPanel size="s" items={menuItems} />
+          <EuiContextMenuPanel items={menuItems} />
         </EuiPopover>
 
         {isExportModalOpen && (
@@ -179,7 +179,7 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
             isExporting={isExporting}
             hasActiveFilters={hasActiveFilters}
             filteredTotal={exportFilters?.filteredTotal}
-            total={exportFilters?.total}
+            total={exportFilters?.total ?? row.docs}
           />
         )}
       </>

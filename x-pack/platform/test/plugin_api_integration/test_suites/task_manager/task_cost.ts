@@ -121,5 +121,22 @@ export default function ({ getService }: FtrProviderContext) {
         expect(docs.length).to.be.greaterThan(0);
       });
     });
+
+    it('ensure task with unknown TaskCost is run', async () => {
+      const task = await scheduleTask(supertest, {
+        taskType: 'sampleTask',
+        schedule: { interval: '1d' },
+        params: {},
+        cost: 'HUGE' as InstanceTaskCost,
+      });
+
+      expect(task.cost).to.eql('HUGE');
+
+      // check that the task ran
+      await retry.try(async () => {
+        const docs: RawDoc[] = await historyDocs({ es, index: testHistoryIndex, taskId: task.id });
+        expect(docs.length).to.be.greaterThan(0);
+      });
+    });
   });
 }

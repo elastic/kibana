@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiCard, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { LogoIcon } from '../shared/logo_icon';
-import type { IntegrationTileDefinition } from './tiles_config';
+import type { IntegrationTileData } from './integration_tiles';
 
 interface Props {
-  tile: IntegrationTileDefinition;
+  tile: IntegrationTileData;
 }
 
 export const IntegrationTile = ({ tile }: Props) => {
@@ -29,7 +29,7 @@ export const IntegrationTile = ({ tile }: Props) => {
           logo={resolvedLogo}
           isAvatar
           size="l"
-          type="space"
+          avatarType="space"
           hasBorder
           color={euiTheme.colors.backgroundBaseSubdued}
         />

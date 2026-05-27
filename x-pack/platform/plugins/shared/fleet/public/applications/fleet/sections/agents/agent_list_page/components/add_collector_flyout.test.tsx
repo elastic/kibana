@@ -137,6 +137,7 @@ describe('AddCollectorFlyout', () => {
         namespace: 'default',
         description: 'Agent policy for OpAMP collectors',
         is_managed: true,
+        inactivity_timeout: 86400,
       });
     });
 
@@ -191,6 +192,7 @@ describe('AddCollectorFlyout', () => {
         namespace: 'default',
         description: 'Agent policy for OpAMP collectors',
         is_managed: true,
+        inactivity_timeout: 86400,
       });
     });
 

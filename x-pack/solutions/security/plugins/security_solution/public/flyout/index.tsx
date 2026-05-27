@@ -34,15 +34,11 @@ import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network
 import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
   DocumentDetailsAnalyzerPanelKey,
-  DocumentDetailsIsolateHostPanelKey,
   DocumentDetailsLeftPanelKey,
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsRightPanelKey,
   DocumentDetailsSessionViewPanelKey,
 } from './document_details/shared/constants/panel_keys';
-import type { IsolateHostPanelProps } from './document_details/isolate_host';
-import { IsolateHostPanel } from './document_details/isolate_host';
-import { IsolateHostPanelProvider } from './document_details/isolate_host/context';
 import type { DocumentDetailsProps } from './document_details/shared/types';
 import { DocumentDetailsProvider } from './document_details/shared/context';
 import { RightPanel } from './document_details/right';
@@ -76,7 +72,6 @@ import {
   ATTACK_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_ANALYZER_PANEL_ARIA_LABEL,
-  DOCUMENT_DETAILS_ISOLATE_HOST_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_LEFT_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_RIGHT_PANEL_ARIA_LABEL,
@@ -189,15 +184,6 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
       <RulePanel {...(props as RulePanelExpandableFlyoutProps).params} isPreviewMode />
     ),
     'aria-label': RULE_PREVIEW_PANEL_ARIA_LABEL,
-  },
-  {
-    key: DocumentDetailsIsolateHostPanelKey,
-    component: (props) => (
-      <IsolateHostPanelProvider {...(props as IsolateHostPanelProps).params}>
-        <IsolateHostPanel path={props.path as IsolateHostPanelProps['path']} />
-      </IsolateHostPanelProvider>
-    ),
-    'aria-label': DOCUMENT_DETAILS_ISOLATE_HOST_PANEL_ARIA_LABEL,
   },
   {
     key: DocumentDetailsAnalyzerPanelKey,

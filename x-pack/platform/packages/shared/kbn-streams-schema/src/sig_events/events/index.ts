@@ -6,21 +6,38 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  dependencyEdgeSchema,
+  infraComponentSchema,
+  causeKiSchema,
+  evidenceSchema,
+} from '../common_schemas';
 
 export const sigEventSchema = z.object({
   '@timestamp': z.iso.datetime(),
-  verdict: z.string().optional(),
+  created_at: z.iso.datetime(),
   event_id: z.string(),
   discovery_id: z.string(),
   discovery_slug: z.string(),
+  previous_event_id: z.string().optional(),
+  verdict: z.string(),
+  verdict_id: z.string(),
+  workflow_execution_id: z.string(),
   rule_names: z.array(z.string()),
   stream_names: z.array(z.string()),
-  verdict_id: z.string(),
-  recommended_action: z.string().optional(),
-  title: z.string().optional(),
-  summary: z.string().optional(),
-  root_cause: z.string().optional(),
-  recommendations: z.string().optional(),
+  title: z.string(),
+  summary: z.string(),
+  root_cause: z.string(),
+  criticality: z.number(),
+  confidence: z.number(),
+  recommended_action: z.string(),
+  impact: z.string(),
+  recommendations: z.array(z.string()),
+  dependency_edges: z.array(dependencyEdgeSchema).optional(),
+  infra_components: z.array(infraComponentSchema).optional(),
+  cause_kis: z.array(causeKiSchema).optional(),
+  evidences: z.array(evidenceSchema).optional(),
+  grouped_into: z.string().optional(),
 });
 
 export type SigEvent = z.infer<typeof sigEventSchema>;

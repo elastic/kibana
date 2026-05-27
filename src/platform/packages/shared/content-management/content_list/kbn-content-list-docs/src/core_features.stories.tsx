@@ -123,9 +123,13 @@ const CoreFeaturesWrapper = ({
   const itemConfig = useMemo(
     () => ({
       getHref: (item: ContentListItem) => `#/dashboard/${item.id}`,
-      onEdit: (item: ContentListItem) => alert(`Edit: ${item.title}`),
-      onDelete: async (_items: ContentListItem[]) => {
-        await new Promise((resolve) => setTimeout(resolve, 300));
+      actions: {
+        edit: { onItemAction: (item: ContentListItem) => alert(`Edit: ${item.title}`) },
+        delete: {
+          onBulkAction: async (_items: ContentListItem[]) => {
+            await new Promise((resolve) => setTimeout(resolve, 300));
+          },
+        },
       },
     }),
     []

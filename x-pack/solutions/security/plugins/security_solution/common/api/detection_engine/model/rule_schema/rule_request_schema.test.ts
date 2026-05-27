@@ -31,7 +31,9 @@ describe('rules schema', () => {
 
     const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('strips any unknown values', () => {
@@ -52,7 +54,9 @@ describe('rules schema', () => {
 
     const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('[rule_id, description] does not validate', () => {
@@ -63,7 +67,9 @@ describe('rules schema', () => {
 
     const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('[rule_id, description, from] does not validate', () => {
@@ -75,7 +81,9 @@ describe('rules schema', () => {
 
     const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('[rule_id, description, from, to] does not validate', () => {
@@ -88,7 +96,9 @@ describe('rules schema', () => {
 
     const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('[rule_id, description, from, to, name] does not validate', () => {
@@ -102,7 +112,9 @@ describe('rules schema', () => {
 
     const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('[rule_id, description, from, to, name, severity] does not validate', () => {
@@ -117,7 +129,9 @@ describe('rules schema', () => {
 
     const result = RuleCreatePropsSchema.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('[rule_id, description, from, to, name, severity, type] does not validate', () => {

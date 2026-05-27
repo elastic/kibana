@@ -41,7 +41,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     riskEntity: EntityType;
   }
 > = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity, entityId }) => {
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const queryId = useMemo(
     () =>
       riskEntity === EntityType.host

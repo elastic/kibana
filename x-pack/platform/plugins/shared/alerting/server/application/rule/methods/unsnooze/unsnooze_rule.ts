@@ -19,7 +19,7 @@ import type { RulesClientContext } from '../../../../rules_client/types';
 import { getUnsnoozeAttributes } from '../../../../rules_client/common';
 import { updateRuleSo } from '../../../../data/rule';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 import { unsnoozeRuleParamsSchema } from './schemas';
 
 export interface UnsnoozeParams {
@@ -98,7 +98,7 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
     }),
   });
 
-  await logBulkRuleChanges({
+  await logRuleChanges({
     ruleSOs: [updatedRuleRaw] as Array<SavedObject<RawRule>>,
     rulesClientContext: context,
     changesContext: {

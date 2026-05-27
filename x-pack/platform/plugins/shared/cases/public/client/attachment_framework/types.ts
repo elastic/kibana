@@ -15,11 +15,9 @@ import type {
   UnifiedValueAttachmentPayload,
 } from '../../../common/types/domain';
 import type { CaseUI, CaseUser } from '../../containers/types';
+import { AttachmentActionType } from '../../../common/utils/attachment_actions';
 
-export enum AttachmentActionType {
-  BUTTON = 'button',
-  CUSTOM = 'custom',
-}
+export { AttachmentActionType };
 
 interface BaseAttachmentAction {
   type: AttachmentActionType;

@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/storage-adapter'
   - '@kbn/object-utils'
   - '@kbn/alerting-plugin'
+  - '@kbn/alerting-v2-plugin'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/rule-registry-plugin'
   - '@kbn/es-types'
@@ -97,6 +98,7 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/data-streams'
   - '@kbn/es-mappings'
+  - '@kbn/workflows-extensions'
 tags:
   - plugin
   - prod

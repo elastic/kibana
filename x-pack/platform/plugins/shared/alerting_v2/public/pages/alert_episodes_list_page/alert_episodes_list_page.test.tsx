@@ -15,6 +15,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable } from '@kbn/unified-data-table';
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
+import { createMockSpaces } from '../../../common/utils/test_utils';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 
 jest.mock('@kbn/unified-data-table', () => ({
@@ -41,6 +42,7 @@ jest.mock('react-use/lib/useObservable', () =>
 );
 
 const mockHttp = httpServiceMock.createStartContract();
+const mockSpaces = createMockSpaces();
 
 const mockServices = {
   http: mockHttp,
@@ -65,6 +67,7 @@ const mockServices = {
   share: {},
   uiSettings: {},
   uiActions: { getTriggerCompatibleActions: jest.fn().mockResolvedValue([]) },
+  spaces: mockSpaces,
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({

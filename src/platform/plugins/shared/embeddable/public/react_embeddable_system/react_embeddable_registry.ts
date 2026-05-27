@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DefaultEmbeddableApi, EmbeddableFactory } from './types';
+import type { DefaultEmbeddableApi, EmbeddablePublicDefinition } from './types';
 
-const registry: { [key: string]: () => Promise<EmbeddableFactory<any, any>> } = {};
+const registry: { [key: string]: () => Promise<EmbeddablePublicDefinition<any, any>> } = {};
 
 export const TYPE_REGEX = /^[a-z_]+$/; // lowercase letters and underscores
 
@@ -22,7 +22,7 @@ let isSetupComplete = false;
  *
  * @param type The key to register the embeddable public defintion. Part of public "dashboards as code" REST API.
  * Must be lower case, snake cased, and concise.
- * @param getFactory an async function that gets the factory definition for this key. This should always async import the
+ * @param getEmbeddable an async function that gets the factory definition for this key. This should always async import the
  * actual factory definition file to avoid polluting page load.
  */
 export const registerEmbeddablePublicDefinition = <
@@ -30,7 +30,7 @@ export const registerEmbeddablePublicDefinition = <
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 >(
   type: string,
-  getFactory: () => Promise<EmbeddableFactory<SerializedState, Api>>
+  getEmbeddableDefinition: () => Promise<EmbeddablePublicDefinition<SerializedState, Api>>
 ) => {
   if (isSetupComplete)
     throw new Error(
@@ -54,15 +54,15 @@ export const registerEmbeddablePublicDefinition = <
       })
     );
 
-  registry[type] = getFactory;
+  registry[type] = getEmbeddableDefinition;
 };
 
-export const getReactEmbeddableFactory = async <
+export const getEmbeddableDefinition = async <
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 >(
   key: string
-): Promise<EmbeddableFactory<SerializedState, Api> | undefined> => {
+): Promise<EmbeddablePublicDefinition<SerializedState, Api> | undefined> => {
   return registry[key]?.();
 };
 
