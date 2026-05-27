@@ -36,14 +36,13 @@ export function transformOut(
   );
   if (savedObjectRef) {
     return {
-      ...state,
       ref_id: savedObjectRef.id,
     };
   }
 
   // inject dashboard references when by-value
   return {
-    ...state,
+    layout: state.layout,
     links: injectReferences(state.links, references).map((link) => ({
       ...link,
       ...(link.options && { options: getOptions(link.type, link.options) }),
