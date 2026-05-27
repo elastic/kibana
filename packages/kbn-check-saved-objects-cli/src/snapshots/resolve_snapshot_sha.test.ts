@@ -141,9 +141,11 @@ describe('resolveSnapshotSha', () => {
   });
 
   it('attempts up to 4 SHAs with 3 tries each before failing', async () => {
-    const snapshotExistsFn = jest.fn(async (): Promise<SnapshotCheckResult> => ({
-      outcome: 'not_found',
-    }));
+    const snapshotExistsFn = jest.fn(
+      async (): Promise<SnapshotCheckResult> => ({
+        outcome: 'not_found',
+      })
+    );
     const getParentCommitShaFn = jest
       .fn<string, [string]>()
       .mockImplementationOnce(() => 'cccccccccccccccccccccccccccccccccccccccc')
