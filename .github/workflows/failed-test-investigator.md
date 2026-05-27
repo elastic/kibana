@@ -145,7 +145,14 @@ Post exactly one comment. Keep the visible portion very short and easy to read:
 2. **Diagnosis** (≤5 concise bullet points): what broke and where, the most likely root cause.
 3. **Next steps** (≤5 concise bullet points).
 
-Put the full `flaky-test-investigator` skill output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion). Use the skill's "Reporting" subsections:
+Put the full `flaky-test-investigator` skill output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion). Open the block with a `#### Findings` subsection containing exactly these four bullets in this order — downstream tooling parses them, so preserve keys, casing, and `` - `key`: value `` shape. These bullets must live **inside `<details>`**, never in the visible portion:
+
+- `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
+- `confidence`: `high` | `medium` | `low`
+- `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
+- `test.file`: repo-relative path, or `unknown`
+
+The skill's "Reporting" subsections should also be inside the collapsible section:
 
 - What the test does
 - What failed and when
