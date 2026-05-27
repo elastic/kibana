@@ -49,7 +49,7 @@ export const getToolCallThinkingItems = ({
   stepIndex: number;
   openFlyout: (results: ToolResult[]) => void;
 }): ItemFactoryEntry[] => {
-  if (step.tool_id === internalTools.subAgentTool) {
+  if (step.tool_id === internalTools.runSubagent) {
     return getSubAgentThinkingItems({ step, stepIndex });
   }
 

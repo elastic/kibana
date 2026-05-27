@@ -19,6 +19,7 @@ import {
   map,
   merge,
   mergeMap,
+  skip,
   startWith,
   tap,
   type Observable,
@@ -74,6 +75,7 @@ import {
   type DashboardPinnablePanel,
 } from './types';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
+import { anyChildrenChanges$ } from './any_children_changes';
 
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
@@ -496,6 +498,13 @@ export function initializeLayoutManager(
 
   return {
     internalApi: {
+      anyStateChange$: merge(
+        layout$.pipe(
+          skip(1),
+          map(() => undefined)
+        ),
+        anyChildrenChanges$(children$)
+      ),
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,

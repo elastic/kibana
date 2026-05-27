@@ -88,6 +88,7 @@ const createMockAutocompleteContext = (
     dynamicConnectorTypes: null,
     workflows: { workflows: {}, totalWorkflows: 0 },
     currentWorkflowId: null,
+    isCurrentWorkflowManaged: false,
     workflowDefinition: null,
     isInLiquidBlock: false,
     isInTriggerConditionField: false,

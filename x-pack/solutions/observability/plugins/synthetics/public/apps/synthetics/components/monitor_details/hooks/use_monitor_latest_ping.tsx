@@ -7,7 +7,14 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { ConfigKey } from '../../../../../../common/runtime_types';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import {
+  ConfigKey,
+  isRemoteSyntheticsMonitor,
+  type Ping,
+} from '../../../../../../common/runtime_types';
+import { useGetUrlParams } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { getMonitorLastRunAction, selectLastRunMetadata } from '../../../state';
 import { useSelectedLocation } from './use_selected_location';
@@ -20,6 +27,8 @@ interface UseMonitorLatestPingParams {
 export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const dispatch = useDispatch();
   const { lastRefresh } = useSyntheticsRefreshContext();
+  const { remoteName } = useGetUrlParams();
+  const isRemote = Boolean(remoteName);
 
   const { monitor } = useSelectedMonitor();
   const location = useSelectedLocation();
@@ -29,20 +38,38 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
 
   const { data: latestPing, loading, loaded } = useSelector(selectLastRunMetadata);
 
+  // Mirror of the SO-backed REST route but issued client-side via CCS so the
+  // remote branch never depends on Redux state populated by the local route.
+  // Called unconditionally to obey the rules of hooks; short-circuits inside
+  // when remoteName/monitorId are unavailable.
+  const remote = useRemoteMonitorLatestPing({ monitorId, locationLabel, remoteName });
+
   const latestPingId = latestPing?.monitor.id;
 
-  const isIdSame =
-    latestPingId === monitorId || latestPingId === monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID];
+  // CUSTOM_HEARTBEAT_ID is the project-monitor override on the local SO; remote
+  // monitors don't expose it (their `monitor.id` already equals the ping's
+  // monitor.id), so the equality check above is sufficient for remote.
+  const customHeartbeatId =
+    monitor && !isRemoteSyntheticsMonitor(monitor)
+      ? monitor[ConfigKey.CUSTOM_HEARTBEAT_ID]
+      : undefined;
+  const isIdSame = latestPingId === monitorId || latestPingId === customHeartbeatId;
 
   const isLocationSame = latestPing?.observer?.geo?.name === locationLabel;
 
   const isUpToDate = isIdSame && isLocationSame;
 
   useEffect(() => {
-    if (monitorId && locationLabel) {
+    // The local SO-backed route can't see remote heartbeat indices, so the
+    // dispatch would always come back empty for remote configIds. Skip it.
+    if (!isRemote && monitorId && locationLabel) {
       dispatch(getMonitorLastRunAction.get({ monitorId, locationLabel }));
     }
-  }, [dispatch, monitorId, locationLabel, isUpToDate, lastRefresh]);
+  }, [dispatch, monitorId, locationLabel, isUpToDate, lastRefresh, isRemote]);
+
+  if (isRemote) {
+    return remote;
+  }
 
   if (!monitorId || !locationLabel || !latestPing) {
     return { loading, latestPing: undefined, loaded };
@@ -53,4 +80,57 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   }
 
   return { loading, latestPing, loaded };
+};
+
+/**
+ * Client-side CCS variant of the SO-backed `getLatestTestRun` route. Mirrors
+ * the same filter set (monitor.id + optional locationLabel + summary exists)
+ * but targets `${remoteName}:${SYNTHETICS_INDEX_PATTERN}`. Used only by the
+ * remote branch of {@link useMonitorLatestPing}.
+ *
+ * Loading semantics: while we wait for `useSelectedMonitor` to resolve the
+ * remote monitor (and therefore `monitorId`), `loaded` stays `false` so the
+ * page wrapper keeps showing the loading spinner instead of flashing the
+ * "initial test run pending" empty state.
+ */
+const useRemoteMonitorLatestPing = ({
+  monitorId,
+  locationLabel,
+  remoteName,
+}: {
+  monitorId: string | undefined;
+  locationLabel: string | undefined;
+  remoteName: string | undefined;
+}): { latestPing: Ping | undefined; loading: boolean; loaded: boolean } => {
+  const { lastRefresh } = useSyntheticsRefreshContext();
+
+  const canQuery = Boolean(remoteName && monitorId);
+  const index = canQuery ? `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` : '';
+
+  const { data, loading } = useEsSearch(
+    {
+      index,
+      size: 1,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'monitor.id': monitorId } },
+            ...(locationLabel ? [{ term: { 'observer.geo.name': locationLabel } }] : []),
+            { exists: { field: 'summary' } },
+          ],
+        },
+      },
+      sort: [{ '@timestamp': 'desc' as const }],
+    },
+    [lastRefresh, monitorId, locationLabel, remoteName],
+    { name: 'getRemoteMonitorLatestPing' }
+  );
+
+  const latestPing = data?.hits?.hits?.[0]?._source as Ping | undefined;
+
+  return {
+    latestPing: canQuery ? latestPing : undefined,
+    loading: canQuery ? Boolean(loading) : Boolean(remoteName),
+    loaded: canQuery ? !loading : false,
+  };
 };

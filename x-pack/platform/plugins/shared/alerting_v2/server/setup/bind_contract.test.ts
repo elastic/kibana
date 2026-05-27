@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { Start } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import { RulesClient } from '../lib/rules_client';
-import { RulesClientSpaceIdToken } from '../lib/rules_client/tokens';
+import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import type { AlertingServerStart } from '../types';
 import { bindContract } from './bind_contract';
 
@@ -62,6 +62,6 @@ describe('bindContract', () => {
 
     expect(client).toBe(mockRulesClient);
     expect(scope.get(Request)).toBe(fakeRequest);
-    expect(scope.get(RulesClientSpaceIdToken)).toBe('my-space');
+    expect(scope.get(RequestSpaceIdToken)).toBe('my-space');
   });
 });

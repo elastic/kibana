@@ -35,6 +35,13 @@ export const readStreamRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'Stream definition and associated metadata.',
@@ -94,6 +101,13 @@ export const listStreamsRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'A list of all streams.',
@@ -219,6 +233,13 @@ export const deleteStreamRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'The stream was deleted successfully.',

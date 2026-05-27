@@ -11,6 +11,7 @@
 export type {
   ContentListFeatures,
   ContentListSupports,
+  ContentEditorFeatureConfig,
   FilterFacet,
   FilterFacetParams,
   FilterFacetConfig,

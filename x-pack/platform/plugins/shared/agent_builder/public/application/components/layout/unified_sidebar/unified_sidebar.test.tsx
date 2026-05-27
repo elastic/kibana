@@ -41,7 +41,7 @@ jest.mock('../../../hooks/use_conversation_list', () => ({
 
 jest.mock('../../../hooks/use_route_access_config', () => ({
   useRouteAccessConfig: () => ({
-    featureFlags: { experimental: false },
+    featureFlags: { experimental: false, uiamOAuthClientManagement: false },
     capabilities: { isUIAMEnabled: false },
   }),
 }));

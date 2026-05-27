@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { uniqBy } from 'lodash';
+
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 
@@ -41,6 +43,13 @@ export const createDashboardSavedObjectType = ({
         path: `/app/dashboards#/view/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'dashboard_v2.show',
       };
+    },
+    onExport: (ctx, objects) => {
+      // deduplicate references by name
+      return objects.map((obj) => ({
+        ...obj,
+        references: uniqBy(obj.references, 'name'),
+      }));
     },
   },
   modelVersions: {
