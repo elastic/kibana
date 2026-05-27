@@ -50,10 +50,26 @@ export interface SecondaryMenuItem {
 export interface SecondaryMenuSection {
   /** Unique identifier for this section. */
   id: string;
-  /** Array of menu items in this section. */
-  items: SecondaryMenuItem[];
+  /** Static menu items in this section. */
+  items?: SecondaryMenuItem[];
   /** Optional section header label (omit for unlabeled sections). */
   label?: string;
+  /** Named extension point rendered by a lazy component. */
+  extensionPointId?: string;
+  /** When true, the section is only shown in the hover popover. */
+  popoverOnly?: boolean;
+}
+
+/**
+ * Context passed to lazy extension point renderers.
+ */
+export interface SecondaryNavExtensionPointContext {
+  extensionPointId: string;
+  solutionId: string;
+  primaryItemId: string;
+  sectionId: string;
+  surface: 'popover' | 'sidePanel' | 'overflow';
+  activeItemId?: string;
 }
 
 /**
@@ -72,6 +88,8 @@ export interface MenuItem {
   'data-test-subj'?: string;
   /** Optional badge to display next to the label. */
   badgeType?: BadgeType;
+  /** When true, sections are only shown in the hover popover. */
+  popoverOnly?: boolean;
   /** Optional array of secondary menu sections for nested navigation. */
   sections?: SecondaryMenuSection[];
 }
@@ -126,6 +144,13 @@ export interface NavigationProps {
   sidePanelFooter?: ReactNode;
   /** Optional `data-test-subj` attribute for testing purposes. */
   'data-test-subj'?: string;
+  /** Active solution id, passed to extension point renderers. */
+  solutionId?: string;
+  /** Renders a lazy extension point section by id and surface context. */
+  renderExtensionPoint?: (
+    extensionPointId: string,
+    context: SecondaryNavExtensionPointContext
+  ) => ReactNode;
 }
 
 /** Alias for the external package. */

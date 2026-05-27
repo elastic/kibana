@@ -46,6 +46,15 @@ export interface SecondaryMenuItem {
  * A section grouping within a secondary menu.
  * Sections help organize related secondary menu items with optional headers.
  */
+export interface SecondaryNavExtensionPointContext {
+  extensionPointId: string;
+  solutionId: string;
+  primaryItemId: string;
+  sectionId: string;
+  surface: 'popover' | 'sidePanel' | 'overflow';
+  activeItemId?: string;
+}
+
 export interface SecondaryMenuSection {
   /**
    * The unique identifier of the secondary menu section.
@@ -63,6 +72,10 @@ export interface SecondaryMenuSection {
    * Named extension point rendered by a lazy component. Mutually exclusive with `items`.
    */
   extensionPointId?: string;
+  /**
+   * When true, the section is only shown in the hover popover and never in the side panel.
+   */
+  popoverOnly?: boolean;
 }
 
 /**

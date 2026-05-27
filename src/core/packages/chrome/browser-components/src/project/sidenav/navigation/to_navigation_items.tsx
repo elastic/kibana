@@ -179,15 +179,72 @@ export const toNavigationItems = (
       };
     };
 
+    const createExtensionPointSection = (
+      child: ChromeProjectNavigationNode
+    ): SecondaryMenuSection | null => {
+      if (!child.extensionPointId) {
+        warnOnce(
+          `Extension point node "${child.id}" is missing extensionPointId. Ignoring this section.`
+        );
+        return null;
+      }
+
+      return {
+        id: child.id,
+        label: child.title ? toSentenceCase(child.title) : undefined,
+        extensionPointId: child.extensionPointId,
+        popoverOnly: child.popoverOnly,
+      };
+    };
+
+    const mapPanelOpenerChildToSection = (
+      child: ChromeProjectNavigationNode
+    ): SecondaryMenuSection | null => {
+      if (child.sideNavStatus === 'hidden') return null;
+
+      if (child.renderAs === 'extensionPoint') {
+        return createExtensionPointSection(child);
+      }
+
+      if (child.href && !child.children?.length) {
+        return {
+          id: child.id,
+          items: [createSecondaryMenuItem(child)],
+        };
+      }
+
+      if (!child.children?.length) return null;
+
+      const validChildren = filterValidSecondaryChildren(child.children);
+      const secondaryItems = validChildren.map(createSecondaryMenuItem);
+
+      if (child.href) {
+        warnOnce(
+          `Secondary menu item node "${child.id}" has a href "${child.href}", but it should not. We're using it as a section title that doesn't have a link.`
+        );
+      }
+
+      return {
+        id: child.id,
+        label: child.title && toSentenceCase(child.title),
+        items: secondaryItems,
+      };
+    };
+
+    const sectionHasContent = (section: SecondaryMenuSection) =>
+      !!section.extensionPointId || !!(section.items && section.items.length > 0);
+
     if (navNode.renderAs === 'panelOpener') {
       if (!navNode.children?.length) {
         warnOnce(`Panel opener node "${navNode.id}" has no children. Ignoring it.`);
         return null;
       }
 
-      const noSubSections = navNode.children.every((l) => l.href);
+      const noSubSections = navNode.children.every(
+        (child) => child.renderAs === 'extensionPoint' || child.href
+      );
 
-      if (noSubSections) {
+      if (noSubSections && navNode.children.some((child) => child.renderAs !== 'extensionPoint')) {
         warnOnce(
           `Panel opener node "${
             navNode.id
@@ -196,37 +253,31 @@ export const toNavigationItems = (
             .join(', ')}" into secondary items and creating a placeholder section for these links.`
         );
 
-        // If all children have hrefs, we can treat them as secondary items
-        const validChildren = filterValidSecondaryChildren(navNode.children);
+        // If all children have hrefs (and/or extension points), flatten direct links
+        const validChildren = filterValidSecondaryChildren(
+          navNode.children.filter((child) => child.renderAs !== 'extensionPoint' && child.href)
+        );
+        const extensionPointSections = filterEmpty(
+          navNode.children
+            .filter((child) => child.renderAs === 'extensionPoint')
+            .map(createExtensionPointSection)
+        );
+
         secondarySections = [
-          {
-            id: `${navNode.id}-section`,
-            items: validChildren.map(createSecondaryMenuItem),
-          },
+          ...extensionPointSections,
+          ...(validChildren.length
+            ? [
+                {
+                  id: `${navNode.id}-section`,
+                  items: validChildren.map(createSecondaryMenuItem),
+                },
+              ]
+            : []),
         ];
       } else {
-        // Otherwise, we need to create sections for each child
-        secondarySections = filterEmpty(
-          navNode.children.map((child) => {
-            if (child.sideNavStatus === 'hidden') return null;
-            if (!child.children?.length) return null;
-
-            const validChildren = filterValidSecondaryChildren(child.children);
-            const secondaryItems = validChildren.map(createSecondaryMenuItem);
-
-            if (child.href) {
-              warnOnce(
-                `Secondary menu item node "${child.id}" has a href "${child.href}", but it should not. We're using it as a section title that doesn't have a link.`
-              );
-            }
-
-            return {
-              id: child.id,
-              label: child.title && toSentenceCase(child.title),
-              items: secondaryItems,
-            };
-          })
-        ).filter((section) => section.items.length > 0); // Filter out empty sections;
+        secondarySections = filterEmpty(navNode.children.map(mapPanelOpenerChildToSection)).filter(
+          sectionHasContent
+        );
       }
 
       // If after all filtering there are no sections, we skip this menu item
@@ -252,6 +303,9 @@ export const toNavigationItems = (
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
       badgeType: navNode.badgeType,
+      popoverOnly:
+        navNode.popoverOnly ||
+        (!!secondarySections?.length && secondarySections.every((section) => section.popoverOnly)),
     } as MenuItem;
   };
 
@@ -403,7 +457,7 @@ function warnAboutDuplicateIds(
       if (item.sections) {
         item.sections.forEach((section) => {
           allIds.push(section.id);
-          section.items.forEach((secondaryItem) => {
+          section.items?.forEach((secondaryItem) => {
             allIds.push(secondaryItem.id);
           });
         });
@@ -439,7 +493,7 @@ function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuIte
 
   allMenuItems.forEach((item) => {
     const isNewPrimaryItem = isNew(item);
-    const hasNewSecondaryItems = item.sections?.some((section) => section.items.some(isNew));
+    const hasNewSecondaryItems = item.sections?.some((section) => section.items?.some(isNew));
 
     if (isNewPrimaryItem || hasNewSecondaryItems) {
       newPrimaryItems.push(item);
@@ -456,7 +510,7 @@ function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuIte
 
   newPrimaryItems.slice(0, maxNewItemsPerLevel).forEach((item) => {
     const isNewPrimaryItem = isNew(item);
-    const hasNewSecondaryItems = item.sections?.some((section) => section.items.some(isNew));
+    const hasNewSecondaryItems = item.sections?.some((section) => section.items?.some(isNew));
 
     // Warn if primary is new AND has new secondary children items in submenu
     if (isNewPrimaryItem && hasNewSecondaryItems) {
@@ -467,7 +521,7 @@ function warnAboutTooManyNewItems(primaryItems: MenuItem[], footerItems: MenuIte
 
     // Warn if too many new secondary items per parent
     const newSecondaryItems =
-      item.sections?.flatMap((section) => section.items.filter(isNew)) ?? [];
+      item.sections?.flatMap((section) => section.items?.filter(isNew) ?? []) ?? [];
     if (newSecondaryItems.length > maxNewItemsPerLevel) {
       const hiddenItems = getHiddenItems(newSecondaryItems);
       warnOnce(
@@ -494,6 +548,7 @@ const findItemByLastActive = (
   if (!lastActiveItemId) return undefined;
 
   for (const section of sections) {
+    if (!section.items) continue;
     const foundItem = section.items.find((item) => item.id === lastActiveItemId);
     if (foundItem?.href) return foundItem.href;
   }
@@ -508,6 +563,7 @@ const findItemByLastActive = (
  */
 const findFirstAvailableHref = (sections: SecondaryMenuSection[]): string | undefined => {
   for (const section of sections) {
+    if (!section.items) continue;
     for (const item of section.items) {
       if (item.href && !item.isExternal) {
         return item.href;

@@ -144,6 +144,37 @@ describe('Navigation Plugin', () => {
 
       expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('oblt', navigationTree$);
     });
+
+    it('should store extension point renderers when registering solution navigation', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+      spaces.getActiveSpace$ = jest
+        .fn()
+        .mockReturnValue(of({ solution: 'security' } as Pick<Space, 'solution'>));
+
+      const navigationTree$ = of({ body: [] });
+      const extensionPointRenderers = {
+        'security.dashboards.recent': jest.fn(),
+      };
+      const { addSolutionNavigation } = plugin.start(coreStart, {
+        unifiedSearch,
+        cloud,
+        spaces,
+      });
+      await new Promise((resolve) => setTimeout(resolve));
+
+      addSolutionNavigation({
+        id: 'security' as const,
+        title: 'Security',
+        navigationTree$,
+        extensionPointRenderers: extensionPointRenderers as any,
+      });
+
+      expect(coreStart.chrome.project.setExtensionPointRenderers).toHaveBeenCalledWith(
+        'security',
+        extensionPointRenderers
+      );
+    });
   });
 
   describe('set Chrome style', () => {

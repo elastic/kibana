@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { map } from 'rxjs';
-import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
+import { Navigation as NavigationComponent, ExtensionPointRenderer } from '@kbn/ui-side-navigation';
+import type { SecondaryNavExtensionPointContext } from '@kbn/ui-side-navigation/types';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
@@ -30,6 +31,23 @@ export interface ChromeNavigationProps {
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems();
   const isNextChrome = useIsNextChrome();
+  const chrome = useChromeService();
+  const extensionPointRenderers = useObservable(
+    chrome.project.getActiveExtensionPointRenderers$(),
+    undefined
+  );
+
+  const renderExtensionPoint = useCallback(
+    (extensionPointId: string, context: SecondaryNavExtensionPointContext) => {
+      const LazyComponent = extensionPointRenderers?.[extensionPointId];
+      if (!LazyComponent) {
+        return null;
+      }
+
+      return <ExtensionPointRenderer LazyComponent={LazyComponent} context={context} />;
+    },
+    [extensionPointRenderers]
+  );
 
   if (!state) {
     return null;
@@ -47,6 +65,8 @@ export const Navigation = (props: ChromeNavigationProps) => {
         onToggleCollapsed={props.onToggleCollapsed}
         activeItemId={activeItemId}
         showTopSeparator={isNextChrome}
+        solutionId={solutionId}
+        renderExtensionPoint={renderExtensionPoint}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>
