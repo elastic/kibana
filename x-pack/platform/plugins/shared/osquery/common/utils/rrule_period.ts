@@ -16,6 +16,11 @@ const SEC = {
   MONTH_FLOOR: 28 * 86400,
 } as const;
 
+// Worst-case month length used for the BYMONTHDAY cyclic gap. February's 28
+// days is the tightest wrap any positive BYMONTHDAY=N can produce, so anchoring
+// the cycle at 28 keeps the derived period a conservative lower bound.
+const MONTH_FLOOR_DAYS = 28;
+
 /**
  * Compute the minimum cyclic gap (in days) between selected weekdays.
  *
@@ -31,6 +36,33 @@ const minCyclicGapDays = (weekdays: Weekday[]): number => {
     const current = sorted[i];
     const next = sorted[(i + 1) % sorted.length];
     const gap = next > current ? next - current : 7 - current + next;
+    if (gap < min) min = gap;
+  }
+
+  return min;
+};
+
+/**
+ * Compute the minimum cyclic gap (in days) between selected BYMONTHDAY values.
+ * The cycle is anchored at the worst-case month length (28 days), so the
+ * returned gap is a conservative lower bound across every calendar month.
+ *
+ * Example: BYMONTHDAY=1,15 → gaps [14, 14 (=28-15+1)] → min 14 days.
+ * Example: BYMONTHDAY=1 → single day → 28 (the month floor itself).
+ *
+ * Negative values (Nth-from-last-day) are not handled here: across variable
+ * month lengths they can collide with positive values on the same day. Callers
+ * fall back to the unconditional MONTH_FLOOR when any negative is present.
+ */
+const minCyclicGapDaysOnMonth = (monthdays: number[]): number => {
+  const sorted = [...monthdays].sort((a, b) => a - b);
+  if (sorted.length < 2) return MONTH_FLOOR_DAYS;
+
+  let min = Infinity;
+  for (let i = 0; i < sorted.length; i++) {
+    const current = sorted[i];
+    const next = sorted[(i + 1) % sorted.length];
+    const gap = next > current ? next - current : MONTH_FLOOR_DAYS - current + next;
     if (gap < min) min = gap;
   }
 
@@ -89,6 +121,14 @@ export const derivePeriodSeconds = (fields: ReturnType<typeof parseRRule>): numb
       return SEC.WEEK * interval;
 
     case Frequency.MONTHLY:
+      if (
+        fields.bymonthday &&
+        fields.bymonthday.length > 1 &&
+        fields.bymonthday.every((d) => d > 0)
+      ) {
+        return minCyclicGapDaysOnMonth(fields.bymonthday) * SEC.DAY;
+      }
+
       return SEC.MONTH_FLOOR * interval;
 
     case Frequency.YEARLY:

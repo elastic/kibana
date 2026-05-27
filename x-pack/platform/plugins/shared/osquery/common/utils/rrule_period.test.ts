@@ -96,12 +96,32 @@ describe('derivePeriodSeconds', () => {
       expect(derivePeriodSeconds(parseRRule('FREQ=MONTHLY'))).toBe(28 * 86400);
     });
 
-    test('FREQ=MONTHLY;BYMONTHDAY=1 → 28 × 86400s (BYMONTHDAY ignored)', () => {
+    test('FREQ=MONTHLY;BYMONTHDAY=1 → single day → 28 × 86400s', () => {
       expect(derivePeriodSeconds(parseRRule('FREQ=MONTHLY;BYMONTHDAY=1'))).toBe(28 * 86400);
     });
 
     test('FREQ=MONTHLY;INTERVAL=3 → 3 × 28 × 86400s', () => {
       expect(derivePeriodSeconds(parseRRule('FREQ=MONTHLY;INTERVAL=3'))).toBe(3 * 28 * 86400);
+    });
+
+    test('FREQ=MONTHLY;BYMONTHDAY=1,15 → min cyclic gap 14 days → 1209600s', () => {
+      expect(derivePeriodSeconds(parseRRule('FREQ=MONTHLY;BYMONTHDAY=1,15'))).toBe(14 * 86400);
+    });
+
+    test('FREQ=MONTHLY;BYMONTHDAY=1,15,28 → min cyclic gap 1 day (28→1 wraps) → 86400s', () => {
+      expect(derivePeriodSeconds(parseRRule('FREQ=MONTHLY;BYMONTHDAY=1,15,28'))).toBe(86400);
+    });
+
+    test('FREQ=MONTHLY;BYMONTHDAY=10,20 → min cyclic gap 10 days → 864000s', () => {
+      expect(derivePeriodSeconds(parseRRule('FREQ=MONTHLY;BYMONTHDAY=10,20'))).toBe(10 * 86400);
+    });
+
+    test('FREQ=MONTHLY;BYMONTHDAY=-1 → negative day → falls through to 28 × 86400s', () => {
+      expect(derivePeriodSeconds(parseRRule('FREQ=MONTHLY;BYMONTHDAY=-1'))).toBe(28 * 86400);
+    });
+
+    test('FREQ=MONTHLY;BYMONTHDAY=1,-1 → mixed sign → falls through to 28 × 86400s', () => {
+      expect(derivePeriodSeconds(parseRRule('FREQ=MONTHLY;BYMONTHDAY=1,-1'))).toBe(28 * 86400);
     });
   });
 
