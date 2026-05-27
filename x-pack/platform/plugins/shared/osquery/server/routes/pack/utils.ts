@@ -276,10 +276,12 @@ export interface ConvertSOQueriesToPackConfigOptions {
    * fall back to per-query `interval` if present. `default_space_id`
    * continues to emit regardless of the flag.
    *
-   * Default is `true` so existing tests retain semantics; production routes
-   * MUST be explicit (`osqueryContext.experimentalFeatures.rruleScheduling`).
+   * Required: callers must explicitly resolve this from
+   * `osqueryContext.experimentalFeatures.rruleScheduling`. Failing closed
+   * here prevents a missing wiring from silently shipping RRULE state to
+   * Fleet when the feature is off.
    */
-  isRruleFeatureEnabled?: boolean;
+  isRruleFeatureEnabled: boolean;
 }
 
 export interface PackConfigOutput {
@@ -308,9 +310,9 @@ export interface PackConfigOutput {
  */
 export const convertSOQueriesToPackConfig = (
   queries: SOPackQuery[] | Record<string, PackQueryInput>,
-  options: ConvertSOQueriesToPackConfigOptions = {}
+  options: ConvertSOQueriesToPackConfigOptions
 ): PackConfigOutput => {
-  const { spaceId, packSchedule, isRruleFeatureEnabled = true } = options;
+  const { spaceId, packSchedule, isRruleFeatureEnabled } = options;
 
   // Single source of truth for the wire-boundary rollback gate: when the flag
   // is off, `packSchedule` is ignored in full — no `default_rrule_schedule`

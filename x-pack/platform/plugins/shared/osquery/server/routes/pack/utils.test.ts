@@ -82,26 +82,31 @@ describe('Pack utils', () => {
 
   describe('convertSOQueriesToPackConfig (legacy / no packSchedule)', () => {
     test('converts to pack with converting query to single line', () => {
-      const { queries } = convertSOQueriesToPackConfig(getTestQueries());
+      const { queries } = convertSOQueriesToPackConfig(getTestQueries(), {
+        isRruleFeatureEnabled: true,
+      });
       expect(queries).toStrictEqual(getOneLiner({}));
     });
 
     test('snapshot true / removed true → result type omitted from output', () => {
       const { queries } = convertSOQueriesToPackConfig(
-        getTestQueries({ snapshot: true, removed: true })
+        getTestQueries({ snapshot: true, removed: true }),
+        { isRruleFeatureEnabled: true }
       );
       expect(queries).toStrictEqual(getOneLiner({}));
     });
     test('converts with results snapshot set false', () => {
       const { queries } = convertSOQueriesToPackConfig(
-        getTestQueries({ snapshot: false, removed: true })
+        getTestQueries({ snapshot: false, removed: true }),
+        { isRruleFeatureEnabled: true }
       );
       expect(queries).toStrictEqual(getOneLiner({ snapshot: false, removed: true }));
     });
 
     test('passes through schedule_id and start_date', () => {
       const { queries } = convertSOQueriesToPackConfig(
-        getTestQueries({ schedule_id: 'uuid-abc', start_date: '2024-01-01T00:00:00.000Z' })
+        getTestQueries({ schedule_id: 'uuid-abc', start_date: '2024-01-01T00:00:00.000Z' }),
+        { isRruleFeatureEnabled: true }
       );
       expect(queries).toStrictEqual(
         getOneLiner({ schedule_id: 'uuid-abc', start_date: '2024-01-01T00:00:00.000Z' })
@@ -109,7 +114,10 @@ describe('Pack utils', () => {
     });
 
     test('injects space_id at the pack level (not per-query) via default_space_id', () => {
-      const output = convertSOQueriesToPackConfig(getTestQueries(), { spaceId: 'my-space' });
+      const output = convertSOQueriesToPackConfig(getTestQueries(), {
+        spaceId: 'my-space',
+        isRruleFeatureEnabled: true,
+      });
       expect(output.default_space_id).toBe('my-space');
       expect(output.queries).toStrictEqual(getOneLiner({}));
     });
