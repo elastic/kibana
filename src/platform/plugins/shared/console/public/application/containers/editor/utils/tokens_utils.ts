@@ -12,7 +12,6 @@ import {
   digitRegex,
   equalsSignRegex,
   newLineRegex,
-  lettersRegex,
   numberStartRegex,
   questionMarkRegex,
   slashesRegex,
@@ -55,15 +54,15 @@ export const parseUrl = (
 } => {
   let urlPathTokens: ParsedLineTokens['urlPathTokens'] = [];
   let urlParamsTokens: ParsedLineTokens['urlParamsTokens'] = [];
-  const queryStringStart = getQueryStringStart(url);
+  const urlParts = url.split(questionMarkRegex);
   // 1st part is the url path
-  const urlPath = queryStringStart >= 0 ? url.slice(0, queryStringStart) : url;
+  const urlPath = urlParts[0];
   // try to parse into url path tokens (split on slashes, only keep non-empty tokens)
   if (urlPath) {
     urlPathTokens = urlPath.split(slashesRegex).filter(Boolean);
   }
   // 2nd part is the url params
-  const urlParams = queryStringStart >= 0 ? url.slice(queryStringStart + 1) : undefined;
+  const urlParams = urlParts[1];
   // try to parse into url param tokens
   if (urlParams) {
     urlParamsTokens = urlParams.split(ampersandRegex).map((urlParamsPart) => {
@@ -410,41 +409,28 @@ export const parseBody = (value: string): string[] => {
 };
 
 /*
- * This function removes trailing text after the request URL while preserving
- * spaces in query values.
- * For example:
+ * This functions removes any trailing inline comments, for example
  * "_search // comment" -> "_search"
- * "_search?q=foo AND bar // comment" -> "_search?q=foo AND bar"
- * Ideally the parser would do that, but currently inline comments are included in url.
+ * Ideally the parser would do that, but currently they are included in url.
  */
 export const removeTrailingWhitespaces = (url: string): string => {
-  if (url.startsWith(' ')) {
-    return url;
+  let index = 0;
+  let whitespaceIndex = -1;
+  let isQueryParam = false;
+  let char = url[index];
+  while (char) {
+    if (char === '"') {
+      isQueryParam = !isQueryParam;
+    } else if (char === ' ' && !isQueryParam) {
+      whitespaceIndex = index;
+      break;
+    }
+    index++;
+    char = url[index];
   }
-
-  const queryStringStart = getQueryStringStart(url);
-  let isInQuotes = false;
-
-  for (let index = 0; index < url.length; index++) {
-    const char = url[index];
-
-    if (isDoubleQuote(char)) {
-      isInQuotes = !isInQuotes;
-      continue;
-    }
-
-    if (isInQuotes || char !== ' ') {
-      continue;
-    }
-
-    const isOutsideQueryString = queryStringStart < 0 || index < queryStringStart;
-    const shouldTrimTrailingText =
-      index > 0 && (isOutsideQueryString || isInlineCommentStart(url, index));
-    if (shouldTrimTrailingText) {
-      return url.slice(0, index);
-    }
+  if (whitespaceIndex > 0) {
+    return url.slice(0, whitespaceIndex);
   }
-
   return url;
 };
 
@@ -460,21 +446,6 @@ export const getLineTokens = (lineContent: string): string[] => {
  */
 export const containsUrlParams = (lineContent: string): boolean => {
   return questionMarkRegex.test(lineContent);
-};
-
-/*
- * Whether the given line content could plausibly be the start of a request line.
- * A request line either is empty (so the user can begin typing a method) or
- * begins with letters (a potentially valid method like `g`, `GE`, `POST`). Lines
- * that start with non-letter, non-whitespace characters (e.g. `"`, `{`, `[`, `,`)
- * are body-like content and must not trigger method autocompletion.
- */
-export const isRequestLineStart = (lineContent: string): boolean => {
-  const trimmed = lineContent.trim();
-  if (trimmed === '') {
-    return true;
-  }
-  return lettersRegex.test(trimmed.charAt(0));
 };
 
 /*
@@ -504,30 +475,6 @@ const isHashChar = (char: string): boolean => {
 };
 const isSlash = (char: string): boolean => {
   return char === '/';
-};
-const isWhitespaceChar = (char: string | undefined): boolean => {
-  return Boolean(char && whitespacesRegex.test(char));
-};
-const getQueryStringStart = (url: string): number => {
-  let isInQuotes = false;
-
-  for (let index = 0; index < url.length; index++) {
-    const char = url[index];
-    if (isDoubleQuote(char)) {
-      isInQuotes = !isInQuotes;
-    } else if (char === '?' && !isInQuotes) {
-      return index;
-    }
-  }
-
-  return -1;
-};
-const isInlineCommentStart = (url: string, index: number): boolean => {
-  let commentIndex = index;
-  while (isWhitespaceChar(url[commentIndex])) {
-    commentIndex++;
-  }
-  return url.startsWith('#', commentIndex) || url.startsWith('//', commentIndex);
 };
 const isStar = (char: string): boolean => {
   return char === '*';

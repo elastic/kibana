@@ -23,6 +23,7 @@ export async function fillGapById(context: RulesClientContext, params: FillGapBy
   try {
     const rule = (await getRule(context, {
       id: params.ruleId,
+      includeLegacyId: true,
     })) as SanitizedRuleWithLegacyId;
     try {
       // Make sure user has access to this rule

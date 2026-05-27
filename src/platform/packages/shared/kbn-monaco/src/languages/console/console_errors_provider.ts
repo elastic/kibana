@@ -32,15 +32,13 @@ export const setupConsoleErrorsProvider = (workerProxyService: ConsoleWorkerProx
     monaco.editor.setModelMarkers(
       model,
       CONSOLE_LANG_ID,
-      errors.map(({ offset, endOffset, text }) => {
+      errors.map(({ offset, text }) => {
         const { column, lineNumber } = model.getPositionAt(offset);
-        const endPosition =
-          endOffset !== undefined ? model.getPositionAt(endOffset) : { column, lineNumber };
         return {
           startLineNumber: lineNumber,
           startColumn: column,
-          endLineNumber: endPosition.lineNumber,
-          endColumn: endPosition.column,
+          endLineNumber: lineNumber,
+          endColumn: column,
           message: text,
           severity: monaco.MarkerSeverity.Error,
         };

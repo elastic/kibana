@@ -43,7 +43,6 @@ dependsOn:
   - '@kbn/core-http-browser-internal'
   - '@kbn/core-http-browser'
   - '@kbn/discover-utils'
-  - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/logging-mocks'
 tags:
   - plugin

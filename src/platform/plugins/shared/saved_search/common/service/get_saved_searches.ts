@@ -14,11 +14,10 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Reference } from '@kbn/content-management-utils';
-import type { DiscoverSessionAttributes } from '../../server';
-import type { SavedSearch, SerializableSavedSearch } from '../types';
+import type { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
+import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
-import { fromDiscoverSessionAttributesToSavedSearch } from './saved_searches_utils';
 
 export interface GetSavedSearchDependencies {
   searchSourceCreate: ISearchStartSearchSource['create'];
@@ -73,7 +72,7 @@ export const convertToSavedSearch = async <
     managed,
   }: {
     savedSearchId: string | undefined;
-    attributes: DiscoverSessionAttributes;
+    attributes: SavedSearchAttributes;
     references: Reference[];
     sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
     managed: boolean | undefined;
@@ -100,15 +99,15 @@ export const convertToSavedSearch = async <
     ? searchSourceValues
     : await searchSourceCreate(searchSourceValues);
 
-  const returnVal = fromDiscoverSessionAttributesToSavedSearch(
+  const returnVal = fromSavedSearchAttributes(
     savedSearchId,
     attributes,
     tags,
+    references,
     searchSource,
-    Boolean(managed),
-    serialized,
     sharingSavedObjectProps,
-    references
+    Boolean(managed),
+    serialized
   );
 
   return returnVal as ReturnType;

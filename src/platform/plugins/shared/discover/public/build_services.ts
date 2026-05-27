@@ -26,7 +26,6 @@ import type {
   ThemeServiceStart,
   UserProfileService,
 } from '@kbn/core/public';
-import type { Logger } from '@kbn/logging';
 import type {
   FilterManager,
   TimefilterContract,
@@ -163,7 +162,6 @@ export interface DiscoverServices {
   logsDataAccess?: LogsDataAccessPluginStart;
   cps?: CPSPluginStart;
   embeddableEditor: EmbeddableEditorService;
-  logger: Logger;
 }
 
 export const buildServices = ({
@@ -273,6 +271,5 @@ export const buildServices = ({
       plugins.embeddable.getStateTransfer(),
       core.application
     ),
-    logger: context.logger.get(),
   };
 };

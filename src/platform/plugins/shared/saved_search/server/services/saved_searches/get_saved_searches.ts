@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
-import { fromDiscoverSessionAttributesToSavedSearch } from '../../../common/service/saved_searches_utils';
-import type { DiscoverSessionAttributes } from '../../saved_objects';
+import { fromSavedSearchAttributes } from '../../../common/saved_searches_utils';
+import type { SavedSearchAttributes } from '../../../common';
 
 interface GetSavedSearchDependencies {
   savedObjects: SavedObjectsClientContract;
@@ -19,26 +19,26 @@ interface GetSavedSearchDependencies {
 }
 
 export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearchDependencies) => {
-  const discoverSession = await deps.savedObjects.get<DiscoverSessionAttributes>(
+  const savedSearch: SavedObject<SavedSearchAttributes> = await deps.savedObjects.get(
     'search',
     savedSearchId
   );
 
-  const [{ attributes }] = discoverSession.attributes.tabs;
+  const [{ attributes }] = savedSearch.attributes.tabs;
   const parsedSearchSourceJSON = parseSearchSourceJSON(
     attributes.kibanaSavedObjectMeta?.searchSourceJSON ?? '{}'
   );
 
   const searchSourceValues = injectReferences(
     parsedSearchSourceJSON as Parameters<typeof injectReferences>[0],
-    discoverSession.references
+    savedSearch.references
   );
 
-  return fromDiscoverSessionAttributesToSavedSearch(
+  return fromSavedSearchAttributes(
     savedSearchId,
-    discoverSession.attributes,
+    savedSearch.attributes,
     undefined,
     await deps.searchSourceStart.create(searchSourceValues),
-    Boolean(discoverSession.managed)
+    Boolean(savedSearch.managed)
   );
 };

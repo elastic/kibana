@@ -456,7 +456,7 @@ const TakeActionComponent: React.FC<Props> = ({
   return (
     <>
       <EuiPopover
-        anchorPosition="upCenter"
+        anchorPosition="downCenter"
         button={button}
         closePopover={closePopover}
         data-test-subj="takeAction"

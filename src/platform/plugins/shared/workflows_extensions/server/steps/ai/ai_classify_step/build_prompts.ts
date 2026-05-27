@@ -8,19 +8,6 @@
  */
 
 import type { MessageFieldWithRole } from '@langchain/core/messages';
-import { type Category } from '../../../../common/steps/ai/ai_classify_step';
-
-function formatCategoryForPrompt(category: Category): string {
-  const consolidatedCategory =
-    typeof category === 'string'
-      ? { name: category, description: 'No description provided' }
-      : category;
-
-  return `
-**Category Name:** ${consolidatedCategory.name}
-**Category Description:** ${consolidatedCategory.description}
-`.trim();
-}
 
 export function buildSystemPart(): MessageFieldWithRole[] {
   return [
@@ -37,7 +24,6 @@ You are a specialized classification engine that categorizes data into predefine
 - The output must be a raw JSON string that can be parsed directly
 - Categories are case-sensitive and must match exactly as provided
 - Only use categories from the available categories list
-- The category/categories must be category name only
 `.trim(),
     },
   ];
@@ -79,9 +65,9 @@ ${instructions}
 }
 
 export function buildClassificationRequestPart(params: {
-  categories: Category[];
+  categories: string[];
   allowMultipleCategories: boolean;
-  fallbackCategory?: Category;
+  fallbackCategory?: string;
   includeRationale: boolean;
 }): MessageFieldWithRole[] {
   const { categories, allowMultipleCategories, fallbackCategory, includeRationale } = params;
@@ -90,10 +76,7 @@ export function buildClassificationRequestPart(params: {
 
   if (fallbackCategory) {
     classificationRules.push(
-      `
-If the input does not clearly match any defined category, use the fallback category:
-${formatCategoryForPrompt(fallbackCategory)}
-`
+      `If the input does not clearly match any defined category, use the fallback category: "${fallbackCategory}"`
     );
   }
 
@@ -117,7 +100,7 @@ ${formatCategoryForPrompt(fallbackCategory)}
       role: 'user',
       content: `
 AVAILABLE CATEGORIES:
-${categories.map((cat) => `- ${formatCategoryForPrompt(cat)}`).join('\n')}
+${categories.map((cat) => `- ${cat}`).join('\n')}
 
 CLASSIFICATION RULES:
 ${classificationRules.map((rule) => rule.trim()).join('\n- ')}

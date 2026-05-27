@@ -12,10 +12,11 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { Reference } from '@kbn/content-management-utils';
 import { extractReferences } from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
+import type { SortOrder } from '@kbn/discover-utils';
+import type { DataGridDensity } from '@kbn/unified-data-table';
 import { SAVED_SEARCH_TYPE } from './constants';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
-import type { DiscoverSession } from '../../common';
-import type { DiscoverSessionAttributes } from '../../server';
+import type { DiscoverSession, SavedSearchAttributes } from '../../common';
 
 export type SaveDiscoverSessionParams = Pick<
   DiscoverSession,
@@ -29,7 +30,7 @@ export interface SaveDiscoverSessionOptions {
 
 const saveDiscoverSessionSavedObject = async (
   id: string | undefined,
-  attributes: DiscoverSessionAttributes,
+  attributes: SavedSearchAttributes,
   references: Reference[] | undefined,
   contentManagement: ContentManagementPublicStart['client']
 ) => {
@@ -69,7 +70,8 @@ export const saveDiscoverSession = async (
 
   const tabReferences: SavedObjectReference[] = [];
 
-  const tabs: DiscoverSessionAttributes['tabs'] = discoverSession.tabs.map((tab) => {
+  // TODO: SavedSearchAttributes['tabs'] shouldn't be nullable soon
+  const tabs: NonNullable<SavedSearchAttributes['tabs']> = discoverSession.tabs.map((tab) => {
     const [serializedSearchSource, searchSourceReferences] = extractReferences(
       tab.serializedSearchSource,
       { refNamePrefix: `tab_${tab.id}` }
@@ -109,10 +111,17 @@ export const saveDiscoverSession = async (
     };
   });
 
-  const attributes: DiscoverSessionAttributes = {
+  const { chartInterval, ...firstTabAttributes } = tabs[0].attributes;
+
+  const attributes: SavedSearchAttributes = {
     title: discoverSession.title,
     description: discoverSession.description,
     tabs,
+    // TODO: Spreading the first tab attributes like this shouldn't be necessary soon
+    ...firstTabAttributes,
+    hideTable: firstTabAttributes.hideTable,
+    sort: firstTabAttributes.sort as SortOrder[],
+    density: firstTabAttributes.density as DataGridDensity,
   };
 
   const references = savedObjectsTagging

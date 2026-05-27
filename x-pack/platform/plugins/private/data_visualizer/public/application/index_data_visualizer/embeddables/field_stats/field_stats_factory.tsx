@@ -20,7 +20,7 @@ import {
   titleComparators,
   timeRangeComparators,
 } from '@kbn/presentation-publishing';
-import { initializeStateApi } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
@@ -191,14 +191,18 @@ export const getFieldStatsChartEmbeddableFactory = (
 
       const { toasts } = deps.notifications;
 
-      const stateApi = initializeStateApi<FieldStatisticsTableEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState: () => ({
+      const serializeState = () => {
+        return {
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...serializeFieldStatsChartState(),
-        }),
+        };
+      };
+
+      const unsavedChangesApi = initializeUnsavedChanges<FieldStatisticsTableEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -209,10 +213,10 @@ export const getFieldStatsChartEmbeddableFactory = (
           ...fieldStatsControlsComparators,
           ...timeRangeComparators,
         }),
-        applySerializedState: (nextState) => {
-          titleManager.reinitializeState(nextState);
-          timeRangeManager.reinitializeState(nextState);
-          fieldStatsStateManager.reinitializeState(nextState);
+        onReset: (lastSaved) => {
+          titleManager.reinitializeState(lastSaved);
+          timeRangeManager.reinitializeState(lastSaved);
+          fieldStatsStateManager.reinitializeState(lastSaved);
         },
       });
 
@@ -220,7 +224,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         ...timeRangeManager.api,
         ...titleManager.api,
         ...fieldStatsControlsApi,
-        ...stateApi,
+        ...unsavedChangesApi,
         // PublishesDataLoading
         dataLoading$,
         // PublishesBlockingError
@@ -258,6 +262,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           });
         },
         dataViews$,
+        serializeState,
       });
 
       const reload$ = fetch$(api).pipe(

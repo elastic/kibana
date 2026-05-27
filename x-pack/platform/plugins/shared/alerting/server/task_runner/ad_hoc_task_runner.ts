@@ -366,6 +366,7 @@ export class AdHocTaskRunner implements CancellableTask {
           adHocRunSO,
           isSystemAction: (connectorId: string) =>
             this.context.actionsPlugin.isSystemActionConnector(connectorId),
+          omitGeneratedActionValues: false,
         });
       } catch (err) {
         const errorSource = SavedObjectsErrorHelpers.isNotFoundError(err)

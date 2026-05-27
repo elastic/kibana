@@ -103,14 +103,14 @@ export const ONBOARDING_FAILURE_TITLE = i18n.translate(
 export const DISCOVER_INSIGHTS_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsButtonLabel',
   {
-    defaultMessage: 'Discover Insights',
+    defaultMessage: 'Discover Significant Events',
   }
 );
 
 export const INSIGHTS_SCHEDULING_FAILURE_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.insightsSchedulingErrorTitle',
   {
-    defaultMessage: 'Could not start Insights generation',
+    defaultMessage: 'Could not start Significant Events generation',
   }
 );
 
@@ -118,7 +118,8 @@ export function getInsightsCompleteToastTitle(count: number): string {
   return i18n.translate(
     'xpack.streams.significantEventsDiscovery.streamsView.insightsCompleteToastTitle',
     {
-      defaultMessage: '{count} {count, plural, one {Insight} other {Insights}} found',
+      defaultMessage:
+        '{count} {count, plural, one {Significant Event} other {Significant Events}} found',
       values: { count },
     }
   );
@@ -127,14 +128,14 @@ export function getInsightsCompleteToastTitle(count: number): string {
 export const INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.insightsCompleteToastViewButton',
   {
-    defaultMessage: 'View Insights',
+    defaultMessage: 'View Significant Events',
   }
 );
 
 export const NO_INSIGHTS_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.streamsView.noInsightsToastTitle',
   {
-    defaultMessage: 'No Insights found',
+    defaultMessage: 'No Significant Events found',
   }
 );
 

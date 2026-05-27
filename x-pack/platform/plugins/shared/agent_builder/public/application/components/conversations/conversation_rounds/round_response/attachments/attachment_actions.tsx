@@ -21,13 +21,9 @@ import { type ActionButton, ActionButtonType } from '@kbn/agent-builder-browser/
 
 interface AttachmentActionsProps {
   buttons: ActionButton[];
-  iconOnly?: boolean;
 }
 
-export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
-  buttons,
-  iconOnly = false,
-}) => {
+export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const secondaryButtons = buttons.filter((b) => b.type === ActionButtonType.SECONDARY);
@@ -54,78 +50,37 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
     );
   }, []);
 
-  // Derive the navigation/click props for an EUI button. When `href` is set we
-  // render an anchor (so middle-click / cmd-click / "Open in new tab" all work
-  // natively); `rel="noopener noreferrer"` is added automatically when
-  // `openInNewTab` is true.
-  const getNavProps = (button: ActionButton) => ({
-    href: button.href,
-    target: button.href && button.openInNewTab ? '_blank' : undefined,
-    rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
-    onClick: button.handler,
-  });
-
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
       {secondaryButtons.map((button) => (
         <EuiFlexItem grow={false} key={button.label}>
-          {iconOnly ? (
-            <EuiToolTip content={button.disabled ? button.disabledReason : button.label}>
-              <span tabIndex={button.disabled ? 0 : undefined}>
-                <EuiButtonIcon
-                  aria-label={button.label}
-                  color="text"
-                  size="s"
-                  iconType={button.icon ?? ''}
-                  isDisabled={button.disabled}
-                  {...getNavProps(button)}
-                />
-              </span>
-            </EuiToolTip>
-          ) : (
-            maybeWrapWithTooltip(
-              button,
-              <EuiButtonEmpty
-                color="text"
-                size="s"
-                iconType={button.icon}
-                isDisabled={button.disabled}
-                {...getNavProps(button)}
-              >
-                {button.label}
-              </EuiButtonEmpty>
-            )
+          {maybeWrapWithTooltip(
+            button,
+            <EuiButtonEmpty
+              color="text"
+              size="s"
+              iconType={button.icon}
+              onClick={button.handler}
+              isDisabled={button.disabled}
+            >
+              {button.label}
+            </EuiButtonEmpty>
           )}
         </EuiFlexItem>
       ))}
       {primaryButtons.map((button) => (
         <EuiFlexItem grow={false} key={button.label}>
-          {iconOnly ? (
-            <EuiToolTip content={button.disabled ? button.disabledReason : button.label}>
-              <span tabIndex={button.disabled ? 0 : undefined}>
-                <EuiButtonIcon
-                  aria-label={button.label}
-                  color="text"
-                  size="s"
-                  iconType={button.icon ?? ''}
-                  isDisabled={button.disabled}
-                  {...getNavProps(button)}
-                />
-              </span>
-            </EuiToolTip>
-          ) : (
-            maybeWrapWithTooltip(
-              button,
-              <EuiButton
-                color="text"
-                size="s"
-                iconType={button.icon}
-                isDisabled={button.disabled}
-                {...getNavProps(button)}
-              >
-                {button.label}
-              </EuiButton>
-            )
+          {maybeWrapWithTooltip(
+            button,
+            <EuiButton
+              color="text"
+              size="s"
+              iconType={button.icon}
+              onClick={button.handler}
+              isDisabled={button.disabled}
+            >
+              {button.label}
+            </EuiButton>
           )}
         </EuiFlexItem>
       ))}
@@ -161,9 +116,6 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                     icon: button.icon,
                     disabled: button.disabled,
                     toolTipContent: button.disabled ? button.disabledReason : undefined,
-                    href: button.href,
-                    target: button.href && button.openInNewTab ? '_blank' : undefined,
-                    rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
                     onClick: () => {
                       closePopover();
                       button.handler();

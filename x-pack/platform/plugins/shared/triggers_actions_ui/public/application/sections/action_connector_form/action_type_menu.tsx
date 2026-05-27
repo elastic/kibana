@@ -123,10 +123,7 @@ export const ActionTypeMenu = ({
   }, []);
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
     .filter(([id, details]) => {
-      if (!actionTypeRegistry.has(id)) {
-        return false;
-      }
-      const actionTypeModel = actionTypeRegistry.get(id);
+      const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
       const shouldHideInUi = actionTypeModel?.getHideInUi?.(
         actionTypesIndex ? Object.values(actionTypesIndex) : []
       );
@@ -193,7 +190,7 @@ export const ActionTypeMenu = ({
           role="listitem"
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
-          icon={<EuiIcon size="xl" type={item.iconClass} aria-hidden={true} />}
+          icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={item.name}
           description={description}
           isDisabled={!checkEnabledResult.isEnabled}

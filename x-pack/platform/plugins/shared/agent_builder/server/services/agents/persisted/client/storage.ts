@@ -8,12 +8,7 @@
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type {
-  AgentAcl,
-  AgentType,
-  AgentVisibility,
-  ToolSelection,
-} from '@kbn/agent-builder-common';
+import type { AgentType, AgentVisibility, ToolSelection } from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 
 export const agentsIndexName = chatSystemIndex('agents');
@@ -33,18 +28,6 @@ const storageSettings = {
       visibility: types.keyword({}),
       created_by_id: types.keyword({}),
       created_by_name: types.keyword({}),
-      acl: types.object({
-        properties: {
-          entries: types.nested({
-            properties: {
-              type: types.keyword({}),
-              name: types.keyword({}),
-              role: types.keyword({}),
-            },
-          }),
-        },
-        dynamic: false,
-      }),
       config: types.object({
         properties: {
           workflow_ids: types.keyword({}),
@@ -72,7 +55,6 @@ export interface AgentProperties {
   visibility?: AgentVisibility;
   created_by_id?: string;
   created_by_name?: string;
-  acl?: AgentAcl;
   config: AgentConfigurationProperties;
   created_at: string;
   updated_at: string;

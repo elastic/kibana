@@ -218,7 +218,10 @@ export class CaseUserActionService {
             rawFieldsDoc
           );
 
-        const res = transformToExternalModel(doc);
+        const res = transformToExternalModel(
+          doc,
+          this.context.persistableStateAttachmentTypeRegistry
+        );
 
         const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
 
@@ -279,7 +282,10 @@ export class CaseUserActionService {
         return;
       }
 
-      const res = transformToExternalModel(userActions.saved_objects[0]);
+      const res = transformToExternalModel(
+        userActions.saved_objects[0],
+        this.context.persistableStateAttachmentTypeRegistry
+      );
 
       const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
 
@@ -359,7 +365,10 @@ export class CaseUserActionService {
             rawFieldsDoc
           );
 
-        const res = transformToExternalModel(doc);
+        const res = transformToExternalModel(
+          doc,
+          this.context.persistableStateAttachmentTypeRegistry
+        );
 
         const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
 
@@ -403,7 +412,10 @@ export class CaseUserActionService {
           rawPushDoc
         );
 
-      const res = transformToExternalModel(doc);
+      const res = transformToExternalModel(
+        doc,
+        this.context.persistableStateAttachmentTypeRegistry
+      );
 
       const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
       return { ...res, attributes: decodeRes };
@@ -520,7 +532,10 @@ export class CaseUserActionService {
           sortOrder: 'asc',
         });
 
-      const transformedUserActions = legacyTransformFindResponseToExternalModel(userActions);
+      const transformedUserActions = legacyTransformFindResponseToExternalModel(
+        userActions,
+        this.context.persistableStateAttachmentTypeRegistry
+      );
 
       const validatedUserActions: Array<SavedObjectsFindResult<CaseUserActionDeprecatedResponse>> =
         [];

@@ -22,7 +22,7 @@ describe('PhraseFilterManager', function () {
     const fieldMock = {
       name: 'field1',
       format: {
-        convertToText: (value: any) => value,
+        convert: (value: any) => value,
       },
     };
     const indexPatternMock: DataView = {

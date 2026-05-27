@@ -10,8 +10,6 @@ import type {
   startOAuthFlowPathParamsSchema,
   startOAuthFlowRequestBodySchema,
   disconnectOAuthPathParamsSchema,
-  cancelOAuthPathParamsSchema,
-  cancelOAuthBodySchema,
 } from '../schemas/v1';
 
 export type StartOAuthFlowRequestBody = TypeOf<typeof startOAuthFlowRequestBodySchema>;
@@ -19,10 +17,6 @@ export type StartOAuthFlowPathParams = TypeOf<typeof startOAuthFlowPathParamsSch
 
 export interface StartOAuthFlowResponse {
   authorizationUrl: string;
-  state: string;
 }
 
 export type DisconnectOAuthPathParams = TypeOf<typeof disconnectOAuthPathParamsSchema>;
-
-export type CancelOAuthPathParams = TypeOf<typeof cancelOAuthPathParamsSchema>;
-export type CancelOAuthBody = TypeOf<typeof cancelOAuthBodySchema>;

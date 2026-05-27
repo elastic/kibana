@@ -42,6 +42,7 @@ import {
   externalReferenceAttachmentSO,
   persistableStateAttachment,
 } from '../../attachment_framework/mocks';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { transformFindResponseToExternalModel } from './transform';
 
 export const createUserActionFindSO = (
@@ -259,6 +260,7 @@ export const createUnifiedFileUserAction = () => {
 };
 
 export const testConnectorId = (
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry,
   userAction: SavedObject<CaseUserActionWithoutReferenceIds>,
   path: string,
   expectedConnectorId = '1'
@@ -266,7 +268,8 @@ export const testConnectorId = (
   it('does set payload.connector.id to none when it cannot find the reference', () => {
     const userActionWithEmptyRef = { ...userAction, references: [] };
     const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([createUserActionFindSO(userActionWithEmptyRef)])
+      createSOFindResponse([createUserActionFindSO(userActionWithEmptyRef)]),
+      persistableStateAttachmentTypeRegistry
     );
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBe('none');
@@ -280,7 +283,8 @@ export const testConnectorId = (
     const transformed = transformFindResponseToExternalModel(
       createSOFindResponse([
         createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionWithoutReferenceIds>),
-      ])
+      ]),
+      persistableStateAttachmentTypeRegistry
     );
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
@@ -294,7 +298,8 @@ export const testConnectorId = (
     const transformed = transformFindResponseToExternalModel(
       createSOFindResponse([
         createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionWithoutReferenceIds>),
-      ])
+      ]),
+      persistableStateAttachmentTypeRegistry
     ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toBeUndefined();
@@ -302,7 +307,8 @@ export const testConnectorId = (
 
   it('populates the payload.connector.id', () => {
     const transformed = transformFindResponseToExternalModel(
-      createSOFindResponse([createUserActionFindSO(userAction)])
+      createSOFindResponse([createUserActionFindSO(userAction)]),
+      persistableStateAttachmentTypeRegistry
     ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
     expect(get(transformed.saved_objects[0].attributes.payload, path)).toEqual(expectedConnectorId);

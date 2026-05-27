@@ -68,6 +68,8 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                     defaultMessage: 'Discover session',
                   }
                 ),
+                // ignore the saved searches that have text-based languages queries
+                includeFields: ['isTextBasedQuery', 'usesAdHocDataView'],
                 showSavedObject,
               },
               {

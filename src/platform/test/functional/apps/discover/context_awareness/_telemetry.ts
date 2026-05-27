@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const ebtUIHelper = getService('kibana_ebt_ui');
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const toasts = getService('toasts');
@@ -36,6 +37,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('telemetry', () => {
     describe('context', () => {
       before(async () => {
+        await esArchiver.loadIfNeeded(
+          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+        );
         await kibanaServer.importExport.load(
           'src/platform/test/functional/fixtures/kbn_archiver/discover'
         );
@@ -130,6 +134,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('contextual profiles', () => {
       before(async () => {
+        await esArchiver.loadIfNeeded(
+          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+        );
         await kibanaServer.importExport.load(
           'src/platform/test/functional/fixtures/kbn_archiver/discover'
         );

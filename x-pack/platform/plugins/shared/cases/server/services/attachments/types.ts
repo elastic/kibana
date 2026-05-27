@@ -21,6 +21,7 @@ import type {
   AttachmentAttributesV2,
   AttachmentPatchAttributesV2,
 } from '../../../common/types/domain';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { AttachmentPersistedAttributes } from '../../common/types/attachments_v1';
 import type { UnifiedAttachmentAttributes } from '../../common/types/attachments_v2';
 import type { PartialField } from '../../types';
@@ -34,6 +35,7 @@ export type MixSavedObjectResponse =
 
 export interface ServiceContext {
   log: Logger;
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   config: ConfigType;
 }

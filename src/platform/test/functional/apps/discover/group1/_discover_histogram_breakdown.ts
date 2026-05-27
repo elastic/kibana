@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
@@ -23,6 +24,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover unified histogram breakdown', function describeIndexTests() {
     before(async () => {
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );

@@ -5,4 +5,20 @@
  * 2.0.
  */
 
-export { type AmountAndUnit, amountAndUnitToObject, amountAndUnitToString } from '@kbn/apm-common';
+export interface AmountAndUnit {
+  amount: number;
+  unit: string;
+}
+
+export function amountAndUnitToObject(value: string): AmountAndUnit {
+  // matches any postive and negative number and its unit.
+  const [, amount = '', unit = ''] = value.match(/(^-?\d+)?(\w+)?/) || [];
+  return { amount: parseInt(amount, 10), unit };
+}
+
+export function amountAndUnitToString({
+  amount,
+  unit,
+}: Omit<AmountAndUnit, 'amount'> & { amount: string | number }) {
+  return `${amount}${unit}`;
+}

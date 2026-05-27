@@ -8,12 +8,13 @@
  */
 
 import type { SavedObjectCommon, FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
-import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
-import { isEsqlSavedSearch } from '@kbn/discover-utils';
 
-type DiscoverFinderAttributes = FinderAttributes & Partial<Pick<DiscoverSessionAttributes, 'tabs'>>;
+export interface SavedSearchesAttributes extends FinderAttributes {
+  isTextBasedQuery: boolean;
+  usesAdHocDataView?: boolean;
+}
 
-export const showSavedObject = (savedObject: SavedObjectCommon<DiscoverFinderAttributes>) => {
-  const firstTabAttributes = savedObject.attributes.tabs?.[0]?.attributes;
-  return !isEsqlSavedSearch(savedObject) && !firstTabAttributes?.usesAdHocDataView;
+export const showSavedObject = (savedObject: SavedObjectCommon) => {
+  const so = savedObject as SavedObjectCommon<SavedSearchesAttributes>;
+  return !so.attributes.isTextBasedQuery && !so.attributes.usesAdHocDataView;
 };

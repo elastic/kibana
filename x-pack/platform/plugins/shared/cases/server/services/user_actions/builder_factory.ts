@@ -17,6 +17,8 @@ import { TagsUserActionBuilder } from './builders/tags';
 import { SettingsUserActionBuilder } from './builders/settings';
 import type { UserActionBuilder } from './abstract_builder';
 import { SeverityUserActionBuilder } from './builders/severity';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { BuilderDeps } from './types';
 import { AssigneesUserActionBuilder } from './builders/assignees';
 import { NoopUserActionBuilder } from './builders/noop';
 import { CategoryUserActionBuilder } from './builders/category';
@@ -46,7 +48,15 @@ const builderMap = {
 };
 
 export class BuilderFactory {
+  private readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+
+  constructor(deps: BuilderDeps) {
+    this.persistableStateAttachmentTypeRegistry = deps.persistableStateAttachmentTypeRegistry;
+  }
+
   getBuilder<T extends UserActionType>(type: T): UserActionBuilder | undefined {
-    return new builderMap[type]();
+    return new builderMap[type]({
+      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+    });
   }
 }

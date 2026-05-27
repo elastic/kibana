@@ -507,7 +507,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = (props) => {
             id="aiops-histogram-bottom-axis"
             position={Position.Bottom}
             showOverlappingTicks={true}
-            tickFormat={(value) => xAxisFormatter.convertToText(value)}
+            tickFormat={(value) => xAxisFormatter.convert(value)}
             labelFormat={() => ''}
           />
           {adjustedChartPoints?.length && (

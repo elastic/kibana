@@ -22,7 +22,7 @@ import {
 } from '@kbn/esql-types';
 import {
   apiHasPinnedPanels,
-  initializeStateApi,
+  initializeUnsavedChanges,
   type StateComparators,
 } from '@kbn/presentation-publishing';
 
@@ -62,14 +62,17 @@ export const getESQLControlFactory = <
         'variableName'
       );
 
-      const stateApi = initializeStateApi<typeof initialState>({
+      function serializeState() {
+        return {
+          ...selections.getLatestState(),
+          ...labelManager.getLatestState(),
+        } as typeof initialState;
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<typeof initialState>({
         uuid,
         parentApi,
-        serializeState: () =>
-          ({
-            ...selections.getLatestState(),
-            ...labelManager.getLatestState(),
-          } as typeof initialState),
+        serializeState,
         anyStateChange$: merge(labelManager.anyStateChange$, selections.anyStateChange$),
         getComparators: () => {
           return {
@@ -78,17 +81,17 @@ export const getESQLControlFactory = <
             display_settings: 'skip',
           } as StateComparators<typeof initialState>;
         },
-        applySerializedState: (nextState) => {
+        onReset: (lastSaved) => {
           selections.reinitializeState({
             available_options: [],
-            ...nextState,
+            ...lastSaved,
           } as ESQLOptionsListRuntimeState);
-          labelManager.reinitializeState(nextState);
+          labelManager.reinitializeState(lastSaved);
         },
       });
 
       const api = finalizeApi({
-        ...stateApi,
+        ...unsavedChangesApi,
         ...selections.api,
         ...labelManager.api,
         dataLoading$,
@@ -133,6 +136,7 @@ export const getESQLControlFactory = <
             console.error('Error getting ESQL control trigger', e);
           }
         },
+        serializeState,
       }) as ESQLControlApi<State>;
 
       const componentApi: ESQLOptionsListComponentApi = {

@@ -23,18 +23,12 @@ const ActionIdSchema = schema.object({
 });
 
 const ActionIdOrMessageSchema = schema.oneOf([
-  schema.object(
-    {
-      actionId: schema.string(),
-    },
-    { meta: { id: 'action_id_response' } }
-  ),
-  schema.object(
-    {
-      message: schema.string(),
-    },
-    { meta: { id: 'action_message_response' } }
-  ),
+  schema.object({
+    actionId: schema.string(),
+  }),
+  schema.object({
+    message: schema.string(),
+  }),
 ]);
 
 export const GetAgentsRequestSchema = {
@@ -247,7 +241,6 @@ export const AgentResponseSchema = schema.object({
     )
   ),
   status: schema.maybe(AgentStatusSchema),
-  pipeline_config: schema.maybe(schema.string({ maxLength: 10000 })),
   last_known_status: schema.maybe(AgentStatusSchema),
   packages: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   sort: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 10 })), // ES can return many different types for `sort` array values, including unsafe numbers

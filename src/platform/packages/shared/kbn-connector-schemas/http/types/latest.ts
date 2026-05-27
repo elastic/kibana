@@ -12,5 +12,4 @@ export type {
   ConnectorTypeSecretsType,
   ActionParamsType,
   HttpMethod,
-  HttpFormDataField,
 } from './v1';

@@ -21,7 +21,7 @@ import {
   titleComparators,
   timeRangeComparators,
 } from '@kbn/presentation-publishing';
-import { initializeStateApi } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 
 import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
@@ -67,14 +67,18 @@ export const getChangePointChartEmbeddableFactory = (
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
-      const stateApi = initializeStateApi<ChangePointChartEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState: () => ({
+      function serializeState() {
+        return {
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...changePointManager.getLatestState(),
-        }),
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<ChangePointChartEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
@@ -87,10 +91,10 @@ export const getChangePointChartEmbeddableFactory = (
             ...changePointComparators,
           };
         },
-        applySerializedState: (nextState) => {
-          timeRangeManager.reinitializeState(nextState);
-          titleManager.reinitializeState(nextState);
-          changePointManager.reinitializeState(nextState);
+        onReset: (lastSaved) => {
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) changePointManager.reinitializeState(lastSaved);
         },
       });
 
@@ -98,7 +102,7 @@ export const getChangePointChartEmbeddableFactory = (
         ...timeRangeManager.api,
         ...titleManager.api,
         ...changePointManager.api,
-        ...stateApi,
+        ...unsavedChangesApi,
         getTypeDisplayName: () =>
           i18n.translate('xpack.aiops.changePointDetection.typeDisplayName', {
             defaultMessage: 'change point charts',
@@ -135,6 +139,7 @@ export const getChangePointChartEmbeddableFactory = (
         dataLoading$,
         blockingError$,
         dataViews$,
+        serializeState,
       });
 
       const ChangePointDetectionComponent = getChangePointDetectionComponent(

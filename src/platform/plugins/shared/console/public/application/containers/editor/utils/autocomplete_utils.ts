@@ -60,27 +60,21 @@ const filterTermsWithoutName = (terms: ResultTerm[]): ResultTerm[] =>
   terms.filter((term) => term.name !== undefined && term.name !== '');
 
 /*
- * This function returns an array of completion items for the request method.
- *
- * The order is deliberate: Monaco sorts completion items by `sortText` and
- * falls back to alphabetical label sorting, which would otherwise put DELETE
- * first (#259251). GET is the safest verb to accept by default and DELETE
- * the most destructive, so we pin GET first and DELETE last.
+ * This function returns an array of completion items for the request method
  */
-const autocompleteMethods = ['GET', 'POST', 'PUT', 'PATCH', 'HEAD', 'DELETE'];
+const autocompleteMethods = ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'PATCH'];
 export const getMethodCompletionItems = (
   model: monaco.editor.ITextModel,
   position: monaco.Position
 ): monaco.languages.CompletionItem[] => {
   // get the word before suggestions to replace when selecting a suggestion from the list
   const wordUntilPosition = model.getWordUntilPosition(position);
-  return autocompleteMethods.map((method, index) => ({
+  return autocompleteMethods.map((method) => ({
     label: method,
     insertText: method,
     detail: i18nTexts.method,
     // only used to configure the icon
     kind: monaco.languages.CompletionItemKind.Constant,
-    sortText: String(index),
     range: {
       // replace the whole word with the suggestion
       startColumn: wordUntilPosition.startColumn,

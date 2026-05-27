@@ -10,7 +10,9 @@
 import { sortBy } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { Tag, MatchedItem, ResolveIndexResponse } from '../types';
+import type { Tag } from '../types';
+import { INDEX_PATTERN_TYPE } from '../types';
+import type { MatchedItem, ResolveIndexResponse } from '../types';
 import { ResolveIndexResponseItemIndexAttrs } from '../types';
 
 const aliasLabel = i18n.translate('dataViews.aliasLabel', { defaultMessage: 'Alias' });
@@ -30,18 +32,16 @@ const rollupLabel = i18n.translate('dataViews.rollupLabel', {
   defaultMessage: 'Rollup (deprecated)',
 });
 
-const getIndexTags =
-  (isRollupIndex: (indexName: string) => boolean) =>
-  (indexName: string): Tag[] =>
-    isRollupIndex(indexName)
-      ? [
-          {
-            key: 'rollup',
-            name: rollupLabel,
-            color: 'warning',
-          },
-        ]
-      : [];
+const getIndexTags = (isRollupIndex: (indexName: string) => boolean) => (indexName: string) =>
+  isRollupIndex(indexName)
+    ? [
+        {
+          key: INDEX_PATTERN_TYPE.ROLLUP,
+          name: rollupLabel,
+          color: 'warning',
+        },
+      ]
+    : [];
 
 export const getIndicesViaResolve = async ({
   http,
@@ -147,7 +147,7 @@ export const responseToItemArray = (
     });
   });
   (response.aliases || []).forEach((alias) => {
-    const item: MatchedItem = {
+    const item = {
       name: alias.name,
       tags: [{ key: 'alias', name: aliasLabel, color: 'default' }],
       item: alias,

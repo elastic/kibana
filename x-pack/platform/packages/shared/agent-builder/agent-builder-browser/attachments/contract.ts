@@ -97,20 +97,7 @@ export interface ActionButton {
   disabled?: boolean;
   /** Optional explanation shown when a disabled action remains visible */
   disabledReason?: string;
-  /**
-   * Optional URL. When provided, the button renders as an anchor (`<a href>`)
-   * so it honors native browser behaviors like middle-click and cmd-click /
-   * "Open in new tab" from the context menu.
-   */
-  href?: string;
-  /**
-   * When true, the link opens in a new browser tab. Only applies when `href`
-   * is set; `rel="noopener noreferrer"` is added automatically.
-   */
-  openInNewTab?: boolean;
-  /**
-   * Handler function called when the button is clicked.
-   */
+  /** Handler function called when the button is clicked */
   handler: () => void | Promise<void>;
 }
 
@@ -127,39 +114,6 @@ export interface AttachmentLifecycleParams<
 }
 
 /**
- * Parameters passed to the `getHeader` resolver.
- */
-export interface GetHeaderParams<TAttachment extends UnknownAttachment = UnknownAttachment> {
-  /** The attachment being rendered in the header. */
-  attachment: TAttachment;
-}
-
-/**
- * Return value of the `getHeader` resolver.
- */
-export interface HeaderData {
-  /** Optional icon to display in the attachment header next to the title. */
-  icon?: IconType;
-  /** Optional secondary line rendered under the attachment title. */
-  subtitle?: string;
-  /** Optional badges rendered in the attachment header next to the title. */
-  badges?: HeaderBadge[];
-}
-
-/**
- * Badge definition for rendering in the attachment header next to the title.
- * Maps directly onto `EuiBadge`'s props.
- */
-export interface HeaderBadge {
-  /** Badge content. */
-  label: string;
-  /** Optional EUI badge color (e.g. 'hollow', 'success', 'warning', 'accent'). */
-  color?: string;
-  /** Optional icon to display alongside the label. */
-  iconType?: IconType;
-}
-
-/**
  * UI definition for rendering attachments of a specific type.
  */
 export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = UnknownAttachment> {
@@ -168,15 +122,9 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getLabel: (attachment: TAttachment) => string;
   /**
-   * Returns the icon type to display for the attachment pill (pre-send chip).
+   * Returns the icon type to display for the attachment.
    */
   getIcon?: () => IconType;
-  /**
-   * Returns header metadata (icon, subtitle, badges) for the attachment header
-   * (inline / canvas). Omitted fields fall back to their defaults (no icon, no
-   * subtitle, no badges).
-   */
-  getHeader?: (params: GetHeaderParams<TAttachment>) => HeaderData;
   /**
    * Optional custom click handler for attachment pills.
    * When provided, pills will invoke this instead of the default behavior.

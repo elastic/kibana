@@ -360,35 +360,17 @@ export interface MapKeySuggestionOptions {
   replacementRangeStrategy?: ISuggestionItem['replacementRangeStrategy'];
 }
 
-function buildSubqueryCompleteItem(sourceCommand: string): ISuggestionItem {
-  const commandName = sourceCommand.toUpperCase();
-
+export function buildSubqueryCompleteItem(): ISuggestionItem {
   return withAutoSuggest({
-    label: `(${commandName} ...)`,
-    text: `(${commandName} $0)`,
+    label: '(FROM ...)',
+    text: '(FROM $0)',
     asSnippet: true,
     kind: 'Method',
-    detail: i18n.translate('kbn-esql-language.esql.autocomplete.subquerySourceDoc', {
+    detail: i18n.translate('kbn-esql-language.esql.autocomplete.subqueryFromDoc', {
       defaultMessage: 'Adds a nested ES|QL query to your current query',
     }),
     category: SuggestionCategory.SUBQUERY,
   });
-}
-
-export function buildSubqueryCompleteItems(sourceCommands?: string[]): ISuggestionItem[] {
-  const allowedSourceCommands = sourceCommands
-    ? new Set(sourceCommands.map((command) => command.toLowerCase()))
-    : undefined;
-
-  return esqlCommandRegistry
-    .getAllCommands()
-    .filter(
-      ({ name, metadata }) =>
-        metadata.subquerySource === true &&
-        metadata.hidden !== true &&
-        (!allowedSourceCommands || allowedSourceCommands.has(name))
-    )
-    .map(({ name }) => buildSubqueryCompleteItem(name));
 }
 
 export const minMaxValueCompleteItem: ISuggestionItem = {

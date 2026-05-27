@@ -16,6 +16,11 @@ import type {
   AttachmentAttributesNoSO,
   AttachmentPatchAttributesV2,
 } from '../../common/types/domain';
+import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import {
+  injectPersistableReferencesToSO,
+  extractPersistableStateReferencesFromSO,
+} from '../attachment_framework/so_references';
 import { EXTERNAL_REFERENCE_REF_NAME, ATTACHMENT_ID_REF_NAME } from '../common/constants';
 import type {
   AttachmentPersistedAttributes,
@@ -111,10 +116,11 @@ export const buildUnifiedAttachmentSORefs = (
 /**
  * Read-side inject for `bulkGet` results where `attributes` may be undefined
  * when the SO was not found. Restores `externalReferenceId` (legacy) and, for
- * unified SO-backed payloads, `attachmentId`.
+ * unified SO-backed payloads, `attachmentId`; rehydrates persistable-state refs.
  */
 export const injectAttachmentAttributesAndHandleErrors = (
-  savedObject: OptionalAttributes<AttachmentPersistedAttributes>
+  savedObject: OptionalAttributes<AttachmentPersistedAttributes>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): OptionalAttributes<AttachmentTransformedAttributes> => {
   if (!hasAttributes(savedObject)) {
     // we don't actually have an attributes field here so the type doesn't matter, this cast is to get the types to stop
@@ -122,7 +128,7 @@ export const injectAttachmentAttributesAndHandleErrors = (
     return savedObject as OptionalAttributes<AttachmentTransformedAttributes>;
   }
 
-  return injectAttachmentSOAttributesFromRefs(savedObject);
+  return injectAttachmentSOAttributesFromRefs(savedObject, persistableStateAttachmentTypeRegistry);
 };
 
 const hasAttributes = <T>(savedObject: OptionalAttributes<T>): savedObject is SavedObject<T> => {
@@ -131,26 +137,46 @@ const hasAttributes = <T>(savedObject: OptionalAttributes<T>): savedObject is Sa
 
 /**
  * Read-side inject. Restores `externalReferenceId` (legacy) and `attachmentId`
- * (unified SO-backed payloads with `metadata.soType`). Safe to use for both
- * legacy and unified SOs.
+ * (unified SO-backed payloads with `metadata.soType`), then rehydrates
+ * persistable-state references. Safe to use for both legacy and unified SOs.
  */
 export const injectAttachmentSOAttributesFromRefs = (
-  savedObject: SavedObject<AttachmentPersistedAttributes>
+  savedObject: SavedObject<AttachmentPersistedAttributes>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): AttachmentSavedObjectTransformed => {
   const soExtractor = getAttachmentInjectSOExtractor(savedObject.attributes);
-  return soExtractor.populateFieldsFromReferences<AttachmentTransformedAttributes>(savedObject);
+  const so = soExtractor.populateFieldsFromReferences<AttachmentTransformedAttributes>(savedObject);
+  const injectedAttributes = injectPersistableReferencesToSO(so.attributes, so.references, {
+    persistableStateAttachmentTypeRegistry,
+  });
+
+  return { ...so, attributes: { ...so.attributes, ...injectedAttributes } };
 };
 
 /** Patch-flow variant of {@link injectAttachmentSOAttributesFromRefs}. */
 export const injectAttachmentSOAttributesFromRefsForPatch = (
   updatedAttributes: AttachmentPatchAttributesV2,
-  savedObject: SavedObjectsUpdateResponse<AttachmentPersistedAttributes>
+  savedObject: SavedObjectsUpdateResponse<AttachmentPersistedAttributes>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): SavedObjectsUpdateResponse<AttachmentTransformedAttributes> => {
   const soExtractor = getAttachmentInjectSOExtractor(savedObject.attributes);
-  return soExtractor.populateFieldsFromReferencesForPatch<AttachmentTransformedAttributes>({
+  const so = soExtractor.populateFieldsFromReferencesForPatch<AttachmentTransformedAttributes>({
     dataBeforeRequest: updatedAttributes,
     dataReturnedFromRequest: savedObject,
-  }) as SavedObjectsUpdateResponse<AttachmentTransformedAttributes>;
+  });
+
+  /**
+   *  We don't allow partial updates of attachments attributes.
+   * Consumers will always get state of the attachment.
+   */
+  const injectedAttributes = injectPersistableReferencesToSO(so.attributes, so.references ?? [], {
+    persistableStateAttachmentTypeRegistry,
+  });
+
+  return {
+    ...so,
+    attributes: { ...so.attributes, ...injectedAttributes },
+  } as SavedObjectsUpdateResponse<AttachmentTransformedAttributes>;
 };
 
 interface ExtractionResults {
@@ -161,7 +187,8 @@ interface ExtractionResults {
 
 export const extractAttachmentSORefsFromAttributes = (
   attributes: AttachmentAttributesV2 | AttachmentPatchAttributesV2,
-  references: SavedObjectReference[]
+  references: SavedObjectReference[],
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): ExtractionResults => {
   const soExtractor = getAttachmentSOExtractor(attributes);
 
@@ -174,13 +201,22 @@ export const extractAttachmentSORefsFromAttributes = (
     existingReferences: references,
   });
 
+  const { attributes: extractedAttributes, references: extractedReferences } =
+    extractPersistableStateReferencesFromSO(transformedFields, {
+      persistableStateAttachmentTypeRegistry,
+    });
+
   // Unified SO-backed payloads keep `attachmentId` on attributes; we only
   // mirror it into references so SO export/import sees the dependency.
   const unifiedReferences = buildUnifiedAttachmentSORefs(attributes);
 
   return {
-    attributes: transformedFields,
-    references: getUniqueReferences([...refsWithExternalRefId, ...unifiedReferences]),
+    attributes: { ...transformedFields, ...extractedAttributes },
+    references: getUniqueReferences([
+      ...refsWithExternalRefId,
+      ...extractedReferences,
+      ...unifiedReferences,
+    ]),
     didDeleteOperation,
   };
 };

@@ -39,7 +39,7 @@ import {
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
 import type { UnifiedMetricsGridProps } from '../../../types';
-import { useReportChartSectionError } from './use_report_chart_section_error';
+import { reportChartSectionError } from '../utils/report_chart_section_error';
 
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -84,7 +84,6 @@ export const useLensProps = ({
   profileId: string;
 } & Pick<UnifiedMetricsGridProps, 'services' | 'fetchParams'>) => {
   const { euiTheme } = useEuiTheme();
-  const reportError = useReportChartSectionError();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
   // Builder errors are folded into `effectiveError` so the same "no datasource" fallback applies.
@@ -201,7 +200,7 @@ export const useLensProps = ({
               return of(null);
             }
             lastBuildErrorKeyRef.current = errorKey;
-            reportError({
+            reportChartSectionError({
               error: buildErr,
               source: 'useLensProps',
               labels: {
@@ -241,7 +240,6 @@ export const useLensProps = ({
     euiTheme.size.base,
     profileIdRef,
     chartIdRef,
-    reportError,
   ]);
 
   return lensPropsContext;

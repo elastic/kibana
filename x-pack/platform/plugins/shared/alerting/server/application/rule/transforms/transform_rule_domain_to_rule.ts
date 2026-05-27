@@ -7,9 +7,17 @@
 
 import type { RuleDomain, Rule, RuleParams } from '../types';
 
+interface TransformRuleDomainToRuleOptions {
+  isPublic?: boolean;
+  includeLegacyId?: boolean;
+}
+
 export const transformRuleDomainToRule = <Params extends RuleParams = never>(
-  ruleDomain: RuleDomain<Params>
+  ruleDomain: RuleDomain<Params>,
+  options?: TransformRuleDomainToRuleOptions
 ): Rule<Params> => {
+  const { isPublic = false, includeLegacyId = false } = options || {};
+
   const rule: Rule<Params> = {
     id: ruleDomain.id,
     enabled: ruleDomain.enabled,
@@ -50,12 +58,25 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     artifacts: ruleDomain.artifacts,
   };
 
+  if (isPublic) {
+    delete rule.snoozedInstances;
+    delete rule.snoozeSchedule;
+    delete rule.activeSnoozes;
+    delete rule.isSnoozedUntil;
+    delete rule.monitoring;
+    delete rule.viewInAppRelativeUrl;
+  }
+
+  if (!includeLegacyId) {
+    delete rule.legacyId;
+  }
+
+  // Remove all undefined keys to clean up the object
   type RuleKeys = keyof Rule;
   for (const key in rule) {
     if (rule[key as RuleKeys] === undefined) {
       delete rule[key as RuleKeys];
     }
   }
-
   return rule;
 };

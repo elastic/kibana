@@ -97,6 +97,7 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
       );
 
       return displayAsLink ? (
+        // eslint-disable-next-line @elastic/eui/href-or-on-click
         <EuiLink
           href={toRouteUrl}
           onClick={clickHandler}
@@ -119,7 +120,7 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
             className="eui-textNoWrap"
             data-test-subj={testId('policyNotFoundMsg')}
           >
-            <EuiIcon size="m" type="warning" color="warning" aria-hidden={true} />
+            <EuiIcon size="m" type="warning" color="warning" />
             &nbsp;
             {POLICY_NOT_FOUND_MESSAGE}
           </EuiText>
@@ -184,13 +185,7 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
           {isOutdated && (
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="xs" className="eui-textTruncate">
-                <EuiIcon
-                  size="m"
-                  type="warning"
-                  color="warning"
-                  className="eui-alignTop"
-                  aria-hidden={true}
-                />
+                <EuiIcon size="m" type="warning" color="warning" className="eui-alignTop" />
                 <span className="eui-displayInlineBlock" data-test-subj={testId('outdatedMsg')}>
                   <FormattedMessage
                     id="xpack.securitySolution.endpointPolicyLink.outdatedMessage"

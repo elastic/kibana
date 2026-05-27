@@ -29,13 +29,12 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
-import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 
 type UnifiedGridProps = ChartSectionProps & {
   actions: ChartSectionConfigurationExtensionParams['actions'];
   breakdownField?: string;
   onBreakdownFieldChange?: (fieldName?: string) => void;
-  externalServices?: { discoverShared?: unknown; dataViews?: unknown; logger?: unknown };
+  externalServices?: { discoverShared?: unknown; dataViews?: unknown };
 };
 
 let unifiedGridProps: UnifiedGridProps | undefined;
@@ -58,14 +57,11 @@ jest.mock('../../../../../application/main/state_management/redux', () => ({
 
 const mockDiscoverShared = { __sentinel: 'discoverShared' };
 const mockDataViews = { __sentinel: 'dataViews' };
-const mockScopedLogger = { __sentinel: 'scopedLogger' };
-const mockLogger = { __sentinel: 'logger', get: jest.fn(() => mockScopedLogger) };
 
 jest.mock('../../../../../hooks/use_discover_services', () => ({
   useDiscoverServices: jest.fn(() => ({
     discoverShared: mockDiscoverShared,
     dataViews: mockDataViews,
-    logger: mockLogger,
   })),
 }));
 
@@ -156,14 +152,12 @@ describe('MetricsExperienceGridWrapper', () => {
     });
   });
 
-  it('forwards externalServices (discoverShared, dataViews, scoped logger) to the metrics grid', () => {
+  it('forwards externalServices (discoverShared, dataViews) to the metrics grid', () => {
     renderChartSection();
 
-    expect(mockLogger.get).toHaveBeenCalledWith(METRICS_DATA_SOURCE_PROFILE_ID);
     expect(unifiedGridProps?.externalServices).toEqual({
       discoverShared: mockDiscoverShared,
       dataViews: mockDataViews,
-      logger: mockScopedLogger,
     });
   });
 });

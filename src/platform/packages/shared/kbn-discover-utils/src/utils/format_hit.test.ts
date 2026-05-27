@@ -37,11 +37,11 @@ describe('formatHitReact', () => {
     };
     row = buildDataTableRecord(hit, dataViewMock);
     (dataViewMock.getFormatterForField as jest.Mock).mockReturnValue({
-      convertToReact: (value: unknown) => `formatted:${value}`,
+      reactConvert: (value: unknown) => `formatted:${value}`,
     });
   });
 
-  it('formats a document as expected using convertToReact', () => {
+  it('formats a document as expected using reactConvert', () => {
     const formatted = formatHitReact(
       row,
       dataViewMock,

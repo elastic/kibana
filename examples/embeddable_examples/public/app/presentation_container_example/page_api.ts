@@ -167,7 +167,7 @@ export function getPageApi() {
       const existsInNextLayout = nextLayout.some(({ id }) => id === uuid);
       if (existsInNextLayout) {
         const child = currentChildren[uuid];
-        if (apiHasSerializableState(child) && nextChildState[uuid]) {
+        if (apiHasSerializableState(child)) {
           void child.applySerializedState(nextChildState[uuid]);
         }
       } else {

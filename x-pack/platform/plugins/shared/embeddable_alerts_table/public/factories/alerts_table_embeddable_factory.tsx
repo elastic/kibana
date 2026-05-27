@@ -19,7 +19,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeStateApi } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/solutions';
 import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
@@ -51,7 +51,13 @@ export const getAlertsTableEmbeddableFactory = (
     const initialTableConfig = initialState.tableConfig;
     const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(initialTableConfig);
 
-    const stateApi = initializeStateApi<EmbeddableAlertsTableSerializedState>({
+    const serializeState = (): EmbeddableAlertsTableSerializedState => ({
+      ...titleManager.getLatestState(),
+      ...timeRangeManager.getLatestState(),
+      tableConfig: tableConfig$.getValue(),
+    });
+
+    const unsavedChangesApi = initializeUnsavedChanges<EmbeddableAlertsTableSerializedState>({
       uuid,
       parentApi,
       anyStateChange$: merge(
@@ -62,21 +68,17 @@ export const getAlertsTableEmbeddableFactory = (
           map(() => undefined)
         )
       ),
-      serializeState: (): EmbeddableAlertsTableSerializedState => ({
-        ...titleManager.getLatestState(),
-        ...timeRangeManager.getLatestState(),
-        tableConfig: tableConfig$.getValue(),
-      }),
+      serializeState,
       getComparators: () => ({
         ...titleComparators,
         ...timeRangeComparators,
         tableConfig: 'deepEquality',
       }),
-      applySerializedState: (nextState) => {
-        titleManager.reinitializeState(nextState);
-        timeRangeManager.reinitializeState(nextState);
-        if (nextState.tableConfig) {
-          tableConfig$.next(nextState.tableConfig);
+      onReset: (lastSaved) => {
+        titleManager.reinitializeState(lastSaved);
+        timeRangeManager.reinitializeState(lastSaved);
+        if (lastSaved?.tableConfig) {
+          tableConfig$.next(lastSaved.tableConfig);
         }
       },
     });
@@ -90,8 +92,9 @@ export const getAlertsTableEmbeddableFactory = (
     const api = finalizeApi({
       ...timeRangeManager.api,
       ...titleManager.api,
-      ...stateApi,
+      ...unsavedChangesApi,
       dataLoading$: queryLoading$,
+      serializeState,
       isEditingEnabled: () => {
         // Users cannot edit panels based on a solution they cannot access.
         // The first condition ensures panels are editable even if the table configuration is

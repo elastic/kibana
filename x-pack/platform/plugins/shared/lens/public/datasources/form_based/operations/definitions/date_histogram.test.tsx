@@ -62,7 +62,7 @@ const indexPattern1: IndexPattern = {
       searchable: true,
     },
   ]),
-  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
+  getFormatterForField: () => ({ convert: (v: unknown) => v }),
   isPersisted: true,
   spec: {},
 };
@@ -91,7 +91,7 @@ const indexPattern2: IndexPattern = {
       searchable: true,
     },
   ]),
-  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
+  getFormatterForField: () => ({ convert: (v: unknown) => v }),
   isPersisted: true,
   spec: {},
 };
@@ -274,7 +274,7 @@ describe('date_histogram', () => {
               },
             },
           ]),
-          getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
+          getFormatterForField: () => ({ convert: (v: unknown) => v }),
         },
         layer,
         uiSettingsMock,
@@ -736,7 +736,7 @@ describe('date_histogram', () => {
             },
           },
         ]),
-        getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
+        getFormatterForField: () => ({ convert: (v: unknown) => v }),
       };
 
       const instance = shallow(

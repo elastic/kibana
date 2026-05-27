@@ -72,8 +72,8 @@ const dataView = {
   },
   metaFields: ['_index', '_score'],
   getFormatterForField: jest.fn(() => ({
-    convertToText: (value: unknown) => value,
-    convertToReact: (value: unknown) => value,
+    convert: (value: unknown) => value,
+    reactConvert: (value: unknown) => value,
   })),
 } as unknown as DataView;
 

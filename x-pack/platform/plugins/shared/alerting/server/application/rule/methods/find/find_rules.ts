@@ -21,6 +21,7 @@ import type { SanitizedRule, Rule as DeprecatedRule, RawRule } from '../../../..
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   mapSortField,
+  validateOperationOnAttributes,
   buildKueryNodeFilter,
   includeFieldsRequiredForAuthentication,
 } from '../../../../rules_client/common';
@@ -52,7 +53,7 @@ export async function findRules<Params extends RuleParams = never>(
   context: RulesClientContext,
   params?: FindRulesParams
 ): Promise<FindResult<Params>> {
-  const { options } = params || {};
+  const { options, excludeFromPublicApi = false, includeSnoozeData = false } = params || {};
 
   const { fields, ruleTypeIds, consumers, ...restOptions } = options || {};
 
@@ -83,6 +84,19 @@ export async function findRules<Params extends RuleParams = never>(
   const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
   const filterKueryNode = buildKueryNodeFilter(restOptions.filter as string | KueryNode);
   let sortField = mapSortField(restOptions.sortField);
+
+  if (excludeFromPublicApi) {
+    try {
+      validateOperationOnAttributes(
+        filterKueryNode,
+        sortField,
+        restOptions.searchFields,
+        context.fieldsToExcludeFromPublicApi
+      );
+    } catch (error) {
+      throw Boom.badRequest(`Error find rules: ${error.message}`);
+    }
+  }
 
   sortField = mapSortField(getModifiedField(restOptions.sortField));
 
@@ -157,7 +171,10 @@ export async function findRules<Params extends RuleParams = never>(
     }
 
     const rule = getAlertFromRaw<Params>({
+      excludeFromPublicApi,
       id,
+      includeLegacyId: false,
+      includeSnoozeData,
       isSystemAction: context.isSystemAction,
       logger: context.logger,
       rawRule: (fields ? pick(attributes, fields) : attributes) as RawRule,

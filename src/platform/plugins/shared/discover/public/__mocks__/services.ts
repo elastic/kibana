@@ -22,7 +22,6 @@ import {
   scopedHistoryMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
@@ -328,7 +327,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
       DynamicRuleFormFlyout: jest.fn(() => null),
     },
     trackUiMetric: jest.fn(),
-    logger: { get: jest.fn(() => loggerMock.create()) },
   } as unknown as DiscoverServices;
 }
 

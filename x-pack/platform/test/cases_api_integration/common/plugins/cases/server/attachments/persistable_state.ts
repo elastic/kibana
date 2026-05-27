@@ -9,4 +9,19 @@ import type { PersistableStateAttachmentTypeSetup } from '@kbn/cases-plugin/serv
 
 export const getPersistableStateAttachment = (): PersistableStateAttachmentTypeSetup => ({
   id: '.test',
+  inject: (state, references) => ({
+    ...state,
+    persistableStateAttachmentState: {
+      ...state.persistableStateAttachmentState,
+      injectedId: 'testRef',
+    },
+  }),
+  extract: (state) => ({
+    state: {
+      ...state,
+      persistableStateAttachmentTypeId: '.test',
+      persistableStateAttachmentState: { foo: 'foo' },
+    },
+    references: [{ id: 'testRef', name: 'myTestReference', type: 'test-so' }],
+  }),
 });

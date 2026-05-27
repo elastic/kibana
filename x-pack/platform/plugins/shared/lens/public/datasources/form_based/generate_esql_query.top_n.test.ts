@@ -42,7 +42,7 @@ const mockIndexPattern = {
     if (field === 'records') return undefined;
     return { name: field };
   },
-  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
+  getFormatterForField: () => ({ convert: (v: unknown) => v }),
 } as unknown as IndexPattern;
 
 const mockLayer: FormBasedLayer = {

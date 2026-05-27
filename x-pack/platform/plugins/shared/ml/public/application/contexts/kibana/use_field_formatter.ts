@@ -30,7 +30,7 @@ export const getFieldFormatterProvider =
       id: fieldType,
       params: params ?? defaultParam[fieldType],
     });
-    return (v: unknown) => fieldFormatter.convertToText(v);
+    return fieldFormatter.convert.bind(fieldFormatter);
   };
 
 export function useFieldFormatter(fieldType: FIELD_FORMAT_IDS) {

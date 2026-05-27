@@ -35,7 +35,7 @@ const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';
 describe(
   'Entity Flyout',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

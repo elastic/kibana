@@ -7,17 +7,11 @@
 
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import {
-  type CommonSearchOptions,
-  type PaginatedResponse,
-  type PaginatedSearchOptions,
-} from '../query_utils';
+import { type CommonSearchOptions } from '../query_utils';
 import {
   executeAndDecodeSource,
   latestSourceFrom,
   pickLatestPerGroup,
-  runFindByIdEsqlQuery,
-  runPaginatedLatestSourceEsqlQuery,
   withTimeRange,
 } from '../latest_source_query';
 import {
@@ -31,8 +25,6 @@ export type DiscoveryDataStreamClient = IDataStreamClient<
   typeof discoveriesMappings,
   StoredDiscovery
 >;
-
-const GROUP_BY_FIELD = 'discovery_id';
 
 export class DiscoveryClient {
   constructor(
@@ -53,31 +45,9 @@ export class DiscoveryClient {
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: Discovery[] }> {
     let query = latestSourceFrom(DISCOVERIES_DATA_STREAM, this.clients.space);
     query = withTimeRange(query, options);
-    query = pickLatestPerGroup(query, GROUP_BY_FIELD);
+    query = pickLatestPerGroup(query, 'discovery_id');
     query = query.keep('_source');
 
     return executeAndDecodeSource<Discovery>(this.clients.esClient, query);
-  }
-
-  async findLatestPaginated(
-    options: PaginatedSearchOptions = {}
-  ): Promise<PaginatedResponse<Discovery>> {
-    return runPaginatedLatestSourceEsqlQuery<Discovery>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      options,
-      index: DISCOVERIES_DATA_STREAM,
-      groupBy: GROUP_BY_FIELD,
-    });
-  }
-
-  async findById(discoveryId: string): Promise<{ hits: Discovery[] }> {
-    return runFindByIdEsqlQuery<Discovery>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      index: DISCOVERIES_DATA_STREAM,
-      idField: GROUP_BY_FIELD,
-      idValue: discoveryId,
-    });
   }
 }

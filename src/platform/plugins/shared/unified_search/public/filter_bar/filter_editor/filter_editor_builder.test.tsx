@@ -199,36 +199,31 @@ const getBetweenParamsValue = () => {
     .join(',');
 };
 
-// EuiComboBox renders its dropdown asynchronously. Click the input to open it,
-// wait for the option to actually appear in the listbox, then click it and wait
-// for the listbox to close so subsequent assertions see fully-reconciled state.
-// The previous fully-synchronous implementation raced on slower environments
-// (CI under worker contention) and produced timeouts plus cascading "partial
-// state" failures in the test that ran next.
-const chooseOperator = async (operator: string) => {
+const chooseOperator = (operator: string) => {
   fireEvent.click(screen.getByRole('combobox', { name: /select operator/i }));
-  const option = await screen.findByRole('option', { name: operator });
-  fireEvent.click(option);
-  await waitFor(() => {
+  fireEvent.click(screen.getByRole('option', { name: operator }));
+};
+
+const waitForComboboxToBeClosed = () => {
+  waitFor(() => {
     expect(
       screen.queryByRole('listbox', { name: 'Choose from the following options' })
     ).not.toBeInTheDocument();
   });
 };
 
-// First render of `<FilterEditor>` in this suite is expensive (~3-4s locally on
-// Apple Silicon due to EUI + DnD + Suspense init). The default 5s timeout has
-// no headroom on CI under load, so bump it for the whole file.
-jest.setTimeout(15000);
-
 describe('Preserving or clearing value on operator change', () => {
   describe('preserves value with no change', () => {
+    afterEach(() => {
+      // close combobox to prevent "memory leak" warning
+      waitForComboboxToBeClosed();
+    });
     it('is <-> is not', async () => {
       await renderFilterEditor();
-      await chooseOperator('is not');
+      chooseOperator('is not');
       expect(getSingleParamValue()).toEqual('23');
       expect(getFilterBadgeTextContent()).toBe('NOT price: 23');
-      await chooseOperator('is');
+      chooseOperator('is');
       expect(getSingleParamValue()).toEqual('23');
       expect(getFilterBadgeTextContent()).toBe('price: 23');
     });
@@ -238,10 +233,10 @@ describe('Preserving or clearing value on operator change', () => {
       await renderFilterEditor({
         filter: filterIsOneOf(filterValues),
       });
-      await chooseOperator('is not one of');
+      chooseOperator('is not one of');
       expect(getMultiValuesParamsValue()).toEqual(filterValues);
       expect(getFilterBadgeTextContent()).toBe('NOT price: is one of 23, 48, 89');
-      await chooseOperator('is one of');
+      chooseOperator('is one of');
       expect(getMultiValuesParamsValue()).toEqual(filterValues);
       expect(getFilterBadgeTextContent()).toBe('price: is one of 23, 48, 89');
     });
@@ -249,10 +244,10 @@ describe('Preserving or clearing value on operator change', () => {
       await renderFilterEditor({
         filter: filterIsBetween({ gte: '20', lt: '30' }),
       });
-      await chooseOperator('is not between');
+      chooseOperator('is not between');
       expect(getBetweenParamsValue()).toEqual('20,30');
       expect(getFilterBadgeTextContent()).toBe('NOT price: 20 to 30');
-      await chooseOperator('is between');
+      chooseOperator('is between');
       expect(getBetweenParamsValue()).toEqual('20,30');
       expect(getFilterBadgeTextContent()).toBe('price: 20 to 30');
     });
@@ -261,7 +256,7 @@ describe('Preserving or clearing value on operator change', () => {
       await renderFilterEditor({
         filter: filterLessThan,
       });
-      await chooseOperator('is between');
+      chooseOperator('is between');
       expect(getBetweenParamsValue()).toEqual(',30');
       expect(getFilterBadgeTextContent()).toBe('price: < 30');
     });
@@ -269,7 +264,7 @@ describe('Preserving or clearing value on operator change', () => {
       await renderFilterEditor({
         filter: filterGreaterOrEqual,
       });
-      await chooseOperator('is between');
+      chooseOperator('is between');
       expect(getBetweenParamsValue()).toEqual('20,');
       expect(getFilterBadgeTextContent()).toBe('price: ≥ 20');
     });
@@ -278,9 +273,9 @@ describe('Preserving or clearing value on operator change', () => {
   describe('clears value', () => {
     it('is <-> exists', async () => {
       await renderFilterEditor();
-      await chooseOperator('exists');
+      chooseOperator('exists');
       expect(getFilterBadgeTextContent()).toBe('price: exists');
-      await chooseOperator('is');
+      chooseOperator('is');
       expect(getSingleParamValue()).toEqual('');
       expect(getFilterBadgeTextContent()).toBe('price: 0');
     });
@@ -288,7 +283,7 @@ describe('Preserving or clearing value on operator change', () => {
       await renderFilterEditor({
         filter: filterIsBetween({ gte: '20', lt: '30' }),
       });
-      await chooseOperator('is one of');
+      chooseOperator('is one of');
       expect(getMultiValuesParamsValue()).toEqual('');
       expect(screen.queryByTestId('filter-preview')).not.toBeInTheDocument();
     });
@@ -296,13 +291,13 @@ describe('Preserving or clearing value on operator change', () => {
       await renderFilterEditor({
         filter: filterIsBetween({ gte: '20', lt: '30' }),
       });
-      await chooseOperator('is');
+      chooseOperator('is');
       expect(getSingleParamValue()).toEqual('');
       expect(getFilterBadgeTextContent()).toBe('price: 0');
     });
     it('is -> is between', async () => {
       await renderFilterEditor();
-      await chooseOperator('is between');
+      chooseOperator('is between');
       expect(getBetweenParamsValue()).toEqual(',');
       expect(getFilterBadgeTextContent()).toBe('price: -');
     });
@@ -310,7 +305,7 @@ describe('Preserving or clearing value on operator change', () => {
       await renderFilterEditor({
         filter: filterIsBetween({ gte: '20', lt: '30' }),
       });
-      await chooseOperator('is one of');
+      chooseOperator('is one of');
       expect(getMultiValuesParamsValue()).toEqual('');
       expect(screen.queryByTestId('filter-preview')).not.toBeInTheDocument();
     });
@@ -319,13 +314,13 @@ describe('Preserving or clearing value on operator change', () => {
   describe('converts and partially preserves value', () => {
     it('is -> is one of', async () => {
       await renderFilterEditor();
-      await chooseOperator('is one of');
+      chooseOperator('is one of');
       expect(getMultiValuesParamsValue()).toEqual(['23']);
       expect(getFilterBadgeTextContent()).toBe('price: is one of 23');
     });
     it('is -> is not one of', async () => {
       await renderFilterEditor();
-      await chooseOperator('is not one of');
+      chooseOperator('is not one of');
       expect(getMultiValuesParamsValue()).toEqual(['23']);
       expect(getFilterBadgeTextContent()).toBe('NOT price: is one of 23');
     });
@@ -333,7 +328,7 @@ describe('Preserving or clearing value on operator change', () => {
       await renderFilterEditor({
         filter: filterIsOneOf(['23', '48', '89']),
       });
-      await chooseOperator('is');
+      chooseOperator('is');
       expect(getSingleParamValue()).toEqual('23');
       expect(getFilterBadgeTextContent()).toBe('price: 23');
     });
@@ -341,7 +336,7 @@ describe('Preserving or clearing value on operator change', () => {
       await renderFilterEditor({
         filter: filterIsOneOf(['23', '48', '89']),
       });
-      await chooseOperator('is not');
+      chooseOperator('is not');
       expect(getSingleParamValue()).toEqual('23');
       expect(getFilterBadgeTextContent()).toBe('NOT price: 23');
     });
@@ -349,7 +344,7 @@ describe('Preserving or clearing value on operator change', () => {
       await renderFilterEditor({
         filter: filterIsBetween({ gte: '20', lt: '30' }),
       });
-      await chooseOperator('less than');
+      chooseOperator('less than');
       expect(getSingleParamValue()).toEqual('30');
       expect(getFilterBadgeTextContent()).toBe('price: < 30');
     });
@@ -357,7 +352,7 @@ describe('Preserving or clearing value on operator change', () => {
       await renderFilterEditor({
         filter: filterIsBetween({ gte: '20', lt: '30' }),
       });
-      await chooseOperator('greater or equal');
+      chooseOperator('greater or equal');
       expect(getSingleParamValue()).toEqual('20');
       expect(getFilterBadgeTextContent()).toBe('price: ≥ 20');
     });

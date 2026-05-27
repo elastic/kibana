@@ -17,6 +17,7 @@ const SAVED_SEARCH_TRANSFORMATIONAL_INITIAL_COLUMNS = 'transformationalInitialCo
 const SAVED_SEARCH_TRANSFORMATIONAL_CUSTOM_COLUMNS = 'transformationalCustomColumns';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const dataGrid = getService('dataGrid');
@@ -41,6 +42,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await common.navigateToApp('discover');
@@ -72,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render custom columns for non-transformational commands correctly', async () => {
-      const columns = ['@timestamp', 'bytes', 'extension'];
+      const columns = ['bytes', 'extension'];
       await unifiedFieldList.clickFieldListItemAdd('bytes');
       await unifiedFieldList.clickFieldListItemAdd('extension');
       await header.waitUntilLoadingHasFinished();
@@ -109,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedFieldList.clickFieldListItemAdd('bytes');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes']);
+      expect(await dataGrid.getHeaderFields()).to.eql(['bytes']);
 
       // different index pattern => reset columns
       await monacoEditor.setCodeEditorValue('from logstash-* | limit 500');
@@ -121,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedFieldList.clickFieldListItemAdd('extension');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'extension']);
+      expect(await dataGrid.getHeaderFields()).to.eql(['extension']);
 
       // same index pattern => don't reset columns
       await monacoEditor.setCodeEditorValue(
@@ -130,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'extension']);
+      expect(await dataGrid.getHeaderFields()).to.eql(['extension']);
     });
 
     it('should render initial columns for a transformational command correctly', async () => {
@@ -243,7 +247,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.loadSavedSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS);
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'bytes', 'extension']);
+      expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension']);
 
       await discover.loadSavedSearch(SAVED_SEARCH_TRANSFORMATIONAL_INITIAL_COLUMNS);
       await header.waitUntilLoadingHasFinished();

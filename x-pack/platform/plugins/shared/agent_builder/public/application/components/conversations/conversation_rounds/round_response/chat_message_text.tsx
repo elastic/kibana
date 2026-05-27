@@ -52,7 +52,6 @@ interface Props {
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
-  isStreaming?: boolean;
 }
 
 /**
@@ -65,7 +64,6 @@ export function ChatMessageText({
   conversationAttachments,
   attachmentRefs,
   conversationId,
-  isStreaming = false,
 }: Props) {
   const { euiTheme } = useEuiTheme();
 
@@ -198,7 +196,6 @@ export function ChatMessageText({
         conversationId,
         isSidebar,
         attachmentsService,
-        isStreaming,
       }),
     };
 
@@ -221,7 +218,6 @@ export function ChatMessageText({
     conversationId,
     isSidebar,
     attachmentsService,
-    isStreaming,
     handleLinkClick,
   ]);
 

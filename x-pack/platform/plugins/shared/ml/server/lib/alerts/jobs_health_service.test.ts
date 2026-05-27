@@ -162,14 +162,14 @@ describe('JobsHealthService', () => {
       deserialize: jest.fn().mockImplementation(({ id }: { id: string }) => {
         if (id === 'date') {
           return {
-            convertToText: jest.fn().mockImplementation((v) => {
+            convert: jest.fn().mockImplementation((v) => {
               return new Date(v).toUTCString();
             }),
           };
         }
         if (id === 'bytes') {
           return {
-            convertToText: jest.fn().mockImplementation((v) => {
+            convert: jest.fn().mockImplementation((v) => {
               return `${Math.round(v / 1000)}KB`;
             }),
           };

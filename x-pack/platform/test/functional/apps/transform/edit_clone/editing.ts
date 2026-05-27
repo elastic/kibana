@@ -15,6 +15,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getLatestTransformConfig, getPivotTransformConfig } from '../helpers';
 
 export default function ({ getService }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('editing', function () {
@@ -25,6 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
       await transform.api.createAndRunTransform(

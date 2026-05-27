@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { transformBulkEnableResponseInternal } from './v1';
+import { transformBulkEnableResponse } from './v1';
 import type { RuleAction, RuleSystemAction } from '../../../../../../../common';
 
-describe('transformBulkEnableResponseInternal', () => {
+describe('transformBulkEnableResponse', () => {
   const defaultAction: RuleAction = {
     id: '1',
     uuid: '111',
@@ -66,7 +66,7 @@ describe('transformBulkEnableResponseInternal', () => {
   };
   it('should transform bulk enable result', () => {
     expect(
-      transformBulkEnableResponseInternal({
+      transformBulkEnableResponse({
         rules: [rule],
         errors: [
           {

@@ -60,13 +60,6 @@ describe('createInitialState', () => {
     });
     expect(withSignal.recoveryType).toBe('default');
   });
-
-  it('sets childOpen false in create mode when isBuilderMode is true', () => {
-    const state = createInitialState({ mode: 'create', isBuilderMode: true });
-
-    expect(state.childOpen).toBe(false);
-    expect(state.queryCommitted).toBe(false);
-  });
 });
 
 // ── reducer ───────────────────────────────────────────────────────────────────
@@ -92,12 +85,12 @@ describe('reducer', () => {
   });
 
   describe('COMMIT_QUERY', () => {
-    it('marks queryCommitted and preserves childOpen', () => {
+    it('marks queryCommitted and closes child (non-yaml mode)', () => {
       const state = createState({ queryCommitted: false, childOpen: true, yamlMode: false });
       const next = reducer(state, { type: 'COMMIT_QUERY' });
 
       expect(next.queryCommitted).toBe(true);
-      expect(next.childOpen).toBe(true);
+      expect(next.childOpen).toBe(false);
     });
 
     it('keeps childOpen when in yaml mode', () => {

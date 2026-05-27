@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  fromDiscoverSessionAttributesToSavedSearch,
-  toSavedSearchAttributes,
-} from './saved_searches_utils';
+import { fromSavedSearchAttributes, toSavedSearchAttributes } from './saved_searches_utils';
+
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import type { SavedSearch } from '../types';
-import type { DiscoverSessionAttributes, DiscoverSessionTab } from '../../server';
+
+import type { SavedSearch, SavedSearchAttributes } from '../types';
+import type { DiscoverSessionTab } from '../../server';
 
 describe('saved_searches_utils', () => {
-  describe('fromDiscoverSessionAttributesToSavedSearch', () => {
+  describe('fromSavedSearchAttributes', () => {
     test('should convert attributes into SavedSearch', () => {
       const tabs: DiscoverSessionTab[] = [
         {
@@ -38,18 +37,33 @@ describe('saved_searches_utils', () => {
           },
         },
       ];
-      const attributes: DiscoverSessionAttributes = {
+      const attributes: SavedSearchAttributes = {
+        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
         title: 'saved search',
+        sort: [],
+        columns: ['a', 'b'],
         description: 'foo',
+        grid: {},
+        hideChart: true,
+        hideTable: false,
+        isTextBasedQuery: false,
+        usesAdHocDataView: false,
+        rowsPerPage: 250,
+        sampleSize: 1000,
+        breakdownField: 'extension.keyword',
+        chartInterval: 'm',
+        controlGroupJson: undefined,
         tabs,
       };
 
       expect(
-        fromDiscoverSessionAttributesToSavedSearch(
+        fromSavedSearchAttributes(
           'id',
           attributes,
           ['tags-1', 'tags-2'],
+          [],
           createSearchSourceMock(),
+          {},
           false
         )
       ).toMatchInlineSnapshot(`
@@ -71,7 +85,7 @@ describe('saved_searches_utils', () => {
           "id": "id",
           "isTextBasedQuery": false,
           "managed": false,
-          "references": undefined,
+          "references": Array [],
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": 250,
@@ -100,7 +114,7 @@ describe('saved_searches_utils', () => {
             "requestStartHandlers": Array [],
             "shouldOverwriteDataViewType": false,
           },
-          "sharingSavedObjectProps": undefined,
+          "sharingSavedObjectProps": Object {},
           "sort": Array [],
           "tabs": Array [
             Object {

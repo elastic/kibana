@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { injectReferencesIntoActions } from '../../../rules_client/common';
 import type { RawRule } from '../../../types';
@@ -14,6 +15,7 @@ interface Args {
   ruleId: string;
   actions: RawRule['actions'];
   isSystemAction: (connectorId: string) => boolean;
+  omitGeneratedValues?: boolean;
   references?: SavedObjectReference[];
 }
 
@@ -21,6 +23,7 @@ export const transformRawActionsToDomainActions = ({
   actions,
   ruleId,
   references,
+  omitGeneratedValues = true,
   isSystemAction,
 }: Args): RuleDomain['actions'] => {
   const actionsWithInjectedRefs = actions
@@ -30,7 +33,7 @@ export const transformRawActionsToDomainActions = ({
   const ruleDomainActions = actionsWithInjectedRefs
     .filter((action) => !isSystemAction(action.id))
     .map((action) => {
-      return {
+      const defaultAction = {
         group: action.group ?? 'default',
         id: action.id,
         params: action.params,
@@ -42,6 +45,12 @@ export const transformRawActionsToDomainActions = ({
           ? { useAlertDataForTemplate: action.useAlertDataForTemplate }
           : {}),
       };
+
+      if (omitGeneratedValues) {
+        return omit(defaultAction, 'alertsFilter.query.dsl');
+      }
+
+      return defaultAction;
     });
 
   return ruleDomainActions as RuleDomain['actions'];
@@ -51,6 +60,7 @@ export const transformRawActionsToDomainSystemActions = ({
   actions,
   ruleId,
   references,
+  omitGeneratedValues = true,
   isSystemAction,
 }: Args): RuleDomain['systemActions'] => {
   const actionsWithInjectedRefs = actions

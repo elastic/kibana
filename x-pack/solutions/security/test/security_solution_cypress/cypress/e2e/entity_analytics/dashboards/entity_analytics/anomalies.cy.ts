@@ -26,7 +26,7 @@ import {
 describe(
   'Entity Analytics Dashboard',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

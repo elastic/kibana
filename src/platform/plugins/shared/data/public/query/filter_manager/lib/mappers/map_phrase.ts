@@ -28,8 +28,8 @@ export function getPhraseDisplayValue(
 ): string {
   const value = filter.meta.value ?? filter.meta.params?.query;
   const updatedValue = fieldType === 'number' && !value ? 0 : value;
-  if (formatter?.convertToText) {
-    return formatter.convertToText(updatedValue);
+  if (formatter?.convert) {
+    return formatter.convert(updatedValue);
   }
   return updatedValue === undefined ? '' : `${updatedValue}`;
 }

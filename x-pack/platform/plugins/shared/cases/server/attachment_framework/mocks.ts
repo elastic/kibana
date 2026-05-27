@@ -28,6 +28,21 @@ import { UnifiedAttachmentTypeRegistry } from './unified_attachment_registry';
 
 export const getPersistableAttachment = (): PersistableStateAttachmentTypeSetup => ({
   id: '.test',
+  inject: (state, references) => ({
+    ...state,
+    persistableStateAttachmentState: {
+      ...state.persistableStateAttachmentState,
+      injectedId: 'testRef',
+    },
+  }),
+  extract: (state) => ({
+    state: {
+      ...state,
+      persistableStateAttachmentTypeId: '.test',
+      persistableStateAttachmentState: { foo: 'foo' },
+    },
+    references: [{ id: 'testRef', name: 'myTestReference', type: 'test-so' }],
+  }),
 });
 
 export const getExternalReferenceAttachment = (): ExternalReferenceAttachmentType => ({
@@ -87,7 +102,7 @@ export const externalReferenceAttachmentESAttributes: ExternalReferenceNoSOAttac
 
 export const persistableStateAttachmentStateOnly: PersistableStateAttachmentState = {
   persistableStateAttachmentTypeId: '.test',
-  persistableStateAttachmentState: { foo: 'foo' },
+  persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
 };
 
 export const persistableStateAttachment: PersistableStateAttachmentPayload = {
@@ -111,6 +126,11 @@ export const persistableStateAttachmentAttributes: PersistableStateAttachmentAtt
   pushed_at: null,
   pushed_by: null,
 };
+
+export const persistableStateAttachmentAttributesWithoutInjectedId = omit(
+  persistableStateAttachmentAttributes,
+  'persistableStateAttachmentState.injectedId'
+);
 
 export const externalReferenceAttachmentSOAttributesWithoutRefs = omit(
   externalReferenceAttachmentSOAttributes,

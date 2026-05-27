@@ -22,7 +22,6 @@ interface SearchWorkflowExecutionsParams {
   workflowExecutionIndex: string;
   query: QueryDslQueryContainer;
   sort?: Sort;
-  collapse?: { field: string };
   size?: number;
   from?: number;
   page?: number;
@@ -34,7 +33,6 @@ export const searchWorkflowExecutions = async ({
   workflowExecutionIndex,
   query,
   sort = [{ createdAt: 'desc' }],
-  collapse,
   size = 100,
   from,
   page = 1,
@@ -47,7 +45,6 @@ export const searchWorkflowExecutions = async ({
       sort,
       size,
       from,
-      collapse,
       track_total_hits: true,
     });
 

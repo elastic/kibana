@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
 import { PageTitle } from '../../../../components/page_title';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import {
@@ -29,7 +28,7 @@ export interface PageProps {
 
 const RESULTS_PER_PAGE = 20;
 
-type SavedObject = SavedObjectCommon<FinderAttributes & DiscoverSessionFinderAttributes>;
+type SavedObject = SavedObjectCommon<FinderAttributes & { isTextBasedQuery?: boolean }>;
 
 export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
   const { contentManagement, uiSettings } = useMlKibana().services;
@@ -88,7 +87,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
                 ),
                 showSavedObject: (savedObject: SavedObject) =>
                   // ES|QL Based saved searches are not supported across ML, filter them out
-                  !isEsqlSavedSearch(savedObject),
+                  savedObject.attributes.isTextBasedQuery !== true,
               },
               {
                 type: 'index-pattern',

@@ -102,7 +102,7 @@ export const TopValues: FC<TopValuesProps> = ({
               <strong>
                 {fieldFormats
                   .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convertToText(stats.topValuesSampleSize)}
+                  .convert(stats.topValuesSampleSize)}
               </strong>
             ),
           }}
@@ -136,7 +136,7 @@ export const TopValues: FC<TopValuesProps> = ({
             <strong>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convertToText(sampleCount)}
+                .convert(sampleCount)}
             </strong>
           ),
         }}
@@ -152,7 +152,7 @@ export const TopValues: FC<TopValuesProps> = ({
             <strong>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convertToText(totalDocuments ?? 0)}
+                .convert(totalDocuments ?? 0)}
             </strong>
           ),
         }}

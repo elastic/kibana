@@ -35,9 +35,6 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     originManagedWorkflowId: {
       type: 'keyword',
     },
-    managedVersion: {
-      type: 'long',
-    },
     status: {
       type: 'keyword',
     },

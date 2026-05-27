@@ -67,11 +67,6 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
 }) => {
   const updateCustomIntegration = useUpdateCustomIntegration;
 
-  const isUploadedIntegration =
-    packageInfo != null &&
-    'installationInfo' in packageInfo &&
-    packageInfo.installationInfo?.install_source === 'upload';
-
   // Get all the possible categories
   const { data: categoriesData } = useGetCategoriesQuery({
     prerelease: false,
@@ -192,12 +187,10 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
             />
           }
           helpText={
-            !isUploadedIntegration && (
-              <FormattedMessage
-                id="xpack.fleet.epm.editIntegrationFlyout.categoriesHelpText"
-                defaultMessage="You can assign up to two categories to your integration."
-              />
-            )
+            <FormattedMessage
+              id="xpack.fleet.epm.editIntegrationFlyout.categoriesHelpText"
+              defaultMessage="You can assign up to two categories to your integration."
+            />
           }
         >
           <EuiComboBox
@@ -209,7 +202,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
             options={parentCategories?.map((category) => ({
               label: category.title,
               value: category.id,
-              disabled: !isUploadedIntegration && selectedCategories.length >= 2,
+              disabled: selectedCategories.length >= 2,
             }))}
             onChange={(selectedOptions) => {
               const selectedValues = selectedOptions as SelectOption[];

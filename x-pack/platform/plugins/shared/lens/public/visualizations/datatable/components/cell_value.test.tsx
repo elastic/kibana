@@ -47,8 +47,8 @@ describe('datatable cell renderer', () => {
   });
 
   const defaultFormatter = {
-    convertToText: (x: unknown) => `formatted ${x}`,
-    convertToReact: (x: unknown) => `formatted ${x}`,
+    convert: (x: unknown) => `formatted ${x}`,
+    reactConvert: (x: unknown) => `formatted ${x}`,
   } as FieldFormat;
   const defaultFormatters = { a: defaultFormatter } as Record<string, FieldFormat>;
 
@@ -207,12 +207,12 @@ describe('datatable cell renderer', () => {
         },
         formatters: {
           a: {
-            convertToText: (x) => `formatted ${x}`,
-            convertToReact: (x) => `formatted ${x}`,
+            convert: (x) => `formatted ${x}`,
+            reactConvert: (x) => `formatted ${x}`,
           } as FieldFormat,
           b: {
-            convertToText: (x) => `formatted ${x}`,
-            convertToReact: (x) => `formatted ${x}`,
+            convert: (x) => `formatted ${x}`,
+            reactConvert: (x) => `formatted ${x}`,
           } as FieldFormat,
         },
       });
@@ -369,8 +369,8 @@ describe('datatable cell renderer', () => {
           columnConfig,
           formatters: {
             a: {
-              convertToText: () => '(null)',
-              convertToReact: (x: unknown) => {
+              convert: () => '(null)',
+              reactConvert: (x: unknown) => {
                 if (x == null) {
                   return <span className="ffString__emptyValue">(null)</span>;
                 }
@@ -469,13 +469,13 @@ describe('datatable cell renderer', () => {
         columnConfig,
         formatters: {
           a: {
-            convertToText: (x: unknown) => {
+            convert: (x: unknown) => {
               if (typeof x === 'number' && Number.isNaN(x)) {
                 return '';
               }
               return `formatted ${x}`;
             },
-            convertToReact: (x: unknown) => {
+            reactConvert: (x: unknown) => {
               if (typeof x === 'number' && Number.isNaN(x)) {
                 return <span className="ffString__emptyValue">(null)</span>;
               }

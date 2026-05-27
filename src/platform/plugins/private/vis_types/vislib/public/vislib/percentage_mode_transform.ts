@@ -15,5 +15,5 @@ export function getValueForPercentageMode(value: string | number, percentageForm
     pattern: percentageFormatPattern,
   });
 
-  return percentFormatter.convertToText(value);
+  return percentFormatter.convert(value);
 }

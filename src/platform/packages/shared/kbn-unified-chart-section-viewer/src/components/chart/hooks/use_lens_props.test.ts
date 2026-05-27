@@ -24,10 +24,13 @@ import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 
 jest.mock('./use_chart_layers');
 jest.mock('@kbn/lens-embeddable-utils');
-const mockReportError = jest.fn();
-jest.mock('./use_report_chart_section_error', () => ({
-  useReportChartSectionError: jest.fn(() => mockReportError),
+jest.mock('../utils/report_chart_section_error', () => ({
+  reportChartSectionError: jest.fn(),
 }));
+
+const { reportChartSectionError: mockReportChartSectionError } = jest.requireMock(
+  '../utils/report_chart_section_error'
+) as { reportChartSectionError: jest.Mock };
 
 const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
 const useChartLayersMock = useChartLayers as jest.MockedFunction<typeof useChartLayers>;
@@ -352,10 +355,10 @@ describe('useLensProps', () => {
       );
 
       await waitFor(() => {
-        expect(mockReportError).toHaveBeenCalledTimes(1);
+        expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
       });
 
-      expect(mockReportError).toHaveBeenCalledWith({
+      expect(mockReportChartSectionError).toHaveBeenCalledWith({
         error: builderError,
         source: 'useLensProps',
         labels: {
@@ -397,7 +400,7 @@ describe('useLensProps', () => {
       );
 
       await waitFor(() => {
-        expect(mockReportError).toHaveBeenCalled();
+        expect(mockReportChartSectionError).toHaveBeenCalled();
       });
 
       await waitFor(() => {
@@ -442,7 +445,7 @@ describe('useLensProps', () => {
       );
 
       await waitFor(() => {
-        expect(mockReportError).toHaveBeenCalledTimes(1);
+        expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
       });
 
       for (let i = 0; i < 5; i++) {
@@ -451,7 +454,7 @@ describe('useLensProps', () => {
         });
       }
 
-      expect(mockReportError).toHaveBeenCalledTimes(1);
+      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
     });
 
     it('reports again after a recovery when the same failure resurfaces', async () => {
@@ -485,7 +488,7 @@ describe('useLensProps', () => {
       );
 
       await waitFor(() => {
-        expect(mockReportError).toHaveBeenCalledTimes(2);
+        expect(mockReportChartSectionError).toHaveBeenCalledTimes(2);
       });
     });
 
@@ -512,7 +515,7 @@ describe('useLensProps', () => {
       );
 
       await waitFor(() => {
-        expect(mockReportError).toHaveBeenCalled();
+        expect(mockReportChartSectionError).toHaveBeenCalled();
       });
 
       await act(async () => {

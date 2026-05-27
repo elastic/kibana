@@ -18,7 +18,7 @@ import { screen } from '@testing-library/react';
 const fieldType = 'number';
 
 const format = createFieldFormatMock({
-  convertToReact: jest.fn().mockImplementation(() => null),
+  reactConvert: jest.fn().mockImplementation(() => null),
 });
 
 const formatParams = {};
@@ -115,7 +115,7 @@ describe('DefaultFormatEditor', () => {
 
   it('should call prop onError() if converter throws an error', () => {
     const newFormat = createFieldFormatMock({
-      convertToReact: jest.fn().mockImplementation(() => {
+      reactConvert: jest.fn().mockImplementation(() => {
         throw new Error('Test error message');
       }),
     });

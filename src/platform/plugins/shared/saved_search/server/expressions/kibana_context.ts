@@ -11,7 +11,7 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import { getKibanaContextFn } from '../../common/expressions/kibana_context';
 import type { SavedSearchServerStartDeps } from '../plugin';
 import { getSavedSearch } from '../../common/service/get_saved_searches';
-import type { DiscoverSessionAttributes } from '../saved_objects';
+import type { SavedSearchAttributes } from '../../common/types';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
@@ -43,7 +43,7 @@ export function getKibanaContext(
         const getSavedSrch = async (searchId: string) => {
           const so = await savedObjects
             .getScopedClient(request)
-            .resolve<DiscoverSessionAttributes>('search', searchId);
+            .resolve<SavedSearchAttributes>('search', searchId);
 
           return {
             item: so.saved_object,

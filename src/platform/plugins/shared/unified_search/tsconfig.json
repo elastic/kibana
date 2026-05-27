@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["public/**/*", "public/**/*.json", "test/**/*", "../../../../../typings/**/*"],
+  "include": ["public/**/*", "public/**/*.json", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -45,7 +45,6 @@
     "@kbn/css-utils",
     "@kbn/kql",
     "@kbn/date-range-picker",
-    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }

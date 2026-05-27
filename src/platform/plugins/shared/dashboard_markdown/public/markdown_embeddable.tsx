@@ -14,7 +14,7 @@ import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
   apiIsPresentationContainer,
-  initializeStateApi,
+  initializeUnsavedChanges,
   getViewModeSubject,
   initializeTitleManager,
   titleComparators,
@@ -90,6 +90,9 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
       };
     };
 
+    const serializeState = () =>
+      isByReference ? serializeByReference(libraryId) : serializeByValue();
+
     const resetEditingState = () => {
       isEditing$.next(false);
       overrideHoverActions$.next(false);
@@ -99,10 +102,10 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
       }
     };
 
-    const stateApi = initializeStateApi<MarkdownEmbeddableState>({
+    const unsavedChangesApi = initializeUnsavedChanges<MarkdownEmbeddableState>({
       uuid,
       parentApi,
-      serializeState: () => (isByReference ? serializeByReference(libraryId) : serializeByValue()),
+      serializeState,
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         content$.pipe(
@@ -122,22 +125,23 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
           ref_id: 'skip',
         };
       },
-      applySerializedState: (nextState) => {
-        titleManager.reinitializeState(nextState);
+      onReset: (lastSaved) => {
+        titleManager.reinitializeState(lastSaved);
         // There are no unsaved changes to reset for
         // by reference 'content' or 'settings' since they are saved on apply.
         if (!isByReference) {
-          content$.next((nextState as MarkdownByValueState).content);
-          settings$.next((nextState as MarkdownByValueState).settings);
+          content$.next((initialState as MarkdownByValueState).content);
+          settings$.next((initialState as MarkdownByValueState).settings);
         }
       },
     });
 
     const api = finalizeApi({
-      ...stateApi,
+      ...unsavedChangesApi,
       ...titleManager.api,
       defaultTitle$,
       defaultDescription$,
+      serializeState,
       onEdit: async ({ isNewPanel = false } = {}) => {
         if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
         isEditing$.next(true);

@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
   const fieldEditor = getService('fieldEditor');
   const security = getService('security');
   const dataGrid = getService('dataGrid');
@@ -42,6 +43,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );

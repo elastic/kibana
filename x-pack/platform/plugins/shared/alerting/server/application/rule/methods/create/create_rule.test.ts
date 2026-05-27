@@ -448,7 +448,6 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -461,7 +460,6 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
-        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -964,7 +962,6 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -974,7 +971,6 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
-        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1165,7 +1161,6 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -1175,7 +1170,6 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
-        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1419,7 +1413,6 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -1429,7 +1422,6 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
-        "snoozeSchedule": Array [],
         "systemActions": Array [
           Object {
             "actionTypeId": "test",
@@ -1606,7 +1598,6 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -1615,7 +1606,6 @@ describe('create()', () => {
         "schedule": Object {
           "interval": 10000,
         },
-        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -1812,7 +1802,6 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -1823,7 +1812,6 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
-        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -2018,7 +2006,6 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -2029,7 +2016,6 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
-        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -2210,7 +2196,6 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -2223,7 +2208,6 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
-        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -2367,7 +2351,6 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -2380,7 +2363,6 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
-        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -2526,7 +2508,6 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -2539,7 +2520,6 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
-        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -2728,7 +2708,6 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "123",
-        "isSnoozedUntil": null,
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
@@ -2743,7 +2722,6 @@ describe('create()', () => {
           "interval": "10s",
         },
         "scheduledTaskId": "task-123",
-        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "tags": Array [
           "foo",
@@ -3911,7 +3889,6 @@ describe('create()', () => {
           "status": "pending",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": null,
         "params": Object {
           "bar": true,
@@ -3920,7 +3897,6 @@ describe('create()', () => {
           "interval": "1m",
         },
         "scheduledTaskId": "task-123",
-        "snoozeSchedule": Array [],
         "systemActions": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
@@ -4315,7 +4291,6 @@ describe('create()', () => {
             "status": "pending",
           },
           "id": "1",
-          "isSnoozedUntil": null,
           "notifyWhen": null,
           "params": Object {
             "bar": true,
@@ -4325,7 +4300,6 @@ describe('create()', () => {
             "interval": "1m",
           },
           "scheduledTaskId": "task-123",
-          "snoozeSchedule": Array [],
           "systemActions": Array [
             Object {
               "actionTypeId": "test",

@@ -7,15 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { existsSync, readdirSync } from 'fs';
-
-const dirHasPlaywrightConfig = (dir: string): boolean => {
-  try {
-    return readdirSync(dir).some((f) => f.endsWith('playwright.config.ts'));
-  } catch {
-    return false;
-  }
-};
+import { existsSync } from 'fs';
 import Path from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
@@ -150,7 +142,10 @@ const isTestFile = (filePath: string) => TEST_FILE_RE.test(filePath);
 const findJestUnitConfig = (filePath: string): string | undefined => {
   let dir = Path.dirname(Path.resolve(REPO_ROOT, filePath));
   while (true) {
-    if (existsSync(Path.join(dir, 'jest.integration.config.js')) || dirHasPlaywrightConfig(dir)) {
+    if (
+      existsSync(Path.join(dir, 'jest.integration.config.js')) ||
+      existsSync(Path.join(dir, 'playwright.config.ts'))
+    ) {
       return undefined;
     }
     for (const configName of JEST_CONFIG_NAMES) {

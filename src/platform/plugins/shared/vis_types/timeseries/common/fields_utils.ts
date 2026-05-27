@@ -133,7 +133,7 @@ export const createCachedTextFieldValueFormatter = (
       fieldFormatService,
       excludedFieldFormatsIds
     );
-    return formatter?.convertToText(value, options ? { timezone: options.timezone } : undefined);
+    return formatter?.convert(value, 'text', options ? { timezone: options.timezone } : undefined);
   };
 };
 
@@ -154,7 +154,7 @@ export const createCachedReactFieldValueFormatter = (
       fieldFormatService,
       excludedFieldFormatsIds
     );
-    return formatter?.convertToReact(value);
+    return formatter?.reactConvert(value);
   };
 };
 

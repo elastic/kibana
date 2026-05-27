@@ -35,7 +35,7 @@ import { createPartialObjectMock } from '../utils/test';
 export const mockFieldFormatsRegistry = {
   deserialize: jest.fn(() => ({
     id: 'string',
-    convertToText: jest.fn().mockImplementation(identity),
+    convert: jest.fn().mockImplementation(identity),
   })),
 } as unknown as FieldFormatsRegistry;
 

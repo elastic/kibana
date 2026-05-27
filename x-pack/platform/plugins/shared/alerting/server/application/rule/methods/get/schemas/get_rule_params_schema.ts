@@ -9,4 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 export const getRuleParamsSchema = schema.object({
   id: schema.string(),
+  includeLegacyId: schema.maybe(schema.boolean()),
+  includeSnoozeData: schema.maybe(schema.boolean()),
+  excludeFromPublicApi: schema.maybe(schema.boolean()),
 });

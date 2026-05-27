@@ -20,51 +20,48 @@ import {
   attachOpikDistributedTrace,
   type OpikDistributedTraceHeaders,
 } from './opik_distributed_tracing';
-import { withAgentBuilderContext } from './agent_builder_context';
+import { withAgentBuilderContext } from './with_agent_builder_context';
 
 interface WithConverseSpanOptions {
   agentId: string;
   conversationId: string | undefined;
-  spaceId: string;
   opikHeaders?: OpikDistributedTraceHeaders;
 }
 
 export function withConverseSpan(
-  { agentId, conversationId, spaceId, opikHeaders }: WithConverseSpanOptions,
+  { agentId, conversationId, opikHeaders }: WithConverseSpanOptions,
   cb: (span?: Span) => Observable<ChatEvent>
 ): Observable<ChatEvent> {
-  return withAgentBuilderContext(
-    () =>
-      withActiveInferenceSpan(
-        'Converse',
-        {
-          attributes: {
-            [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
-            [ElasticGenAIAttributes.AgentId]: agentId,
-            [ElasticGenAIAttributes.AgentConversationId]: conversationId,
-            [GenAISemanticConventions.GenAIConversationId]: conversationId,
-          },
+  return withAgentBuilderContext(() =>
+    withActiveInferenceSpan(
+      'Converse',
+      {
+        attributes: {
+          [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+          [ElasticGenAIAttributes.AgentId]: agentId,
+          [ElasticGenAIAttributes.AgentConversationId]: conversationId,
+          [GenAISemanticConventions.GenAIConversationId]: conversationId,
         },
-        (span) => {
-          if (!span) {
-            return cb();
-          }
-
-          if (opikHeaders) {
-            attachOpikDistributedTrace(span, opikHeaders);
-          }
-
-          return cb(span).pipe(
-            tap({
-              next: (event) => {
-                if (isRoundCompleteEvent(event)) {
-                  span.setAttribute('output.value', safeJsonStringify(event.data) ?? 'unknown');
-                }
-              },
-            })
-          );
+      },
+      (span) => {
+        if (!span) {
+          return cb();
         }
-      ),
-    { spaceId }
+
+        if (opikHeaders) {
+          attachOpikDistributedTrace(span, opikHeaders);
+        }
+
+        return cb(span).pipe(
+          tap({
+            next: (event) => {
+              if (isRoundCompleteEvent(event)) {
+                span.setAttribute('output.value', safeJsonStringify(event.data) ?? 'unknown');
+              }
+            },
+          })
+        );
+      }
+    )
   );
 }

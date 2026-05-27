@@ -8,6 +8,7 @@
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 
 import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
+import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
 import {
   isConnectorUserAction,
   isPushedUserAction,
@@ -32,6 +33,8 @@ import {
   isCommentRequestTypeExternalReferenceSO,
   isUnifiedAttachmentWithSoReference,
 } from '../type_guards';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
 import { findReferenceId } from '../../common/references';
 import type {
   UserActionPersistedAttributes,
@@ -41,25 +44,27 @@ import type {
 import type { UserActionAttributes } from '../../../common/types/domain';
 
 export function transformFindResponseToExternalModel(
-  userActions: SavedObjectsFindResponse<UserActionPersistedAttributes>
+  userActions: SavedObjectsFindResponse<UserActionPersistedAttributes>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): SavedObjectsFindResponse<UserActionTransformedAttributes> {
   return {
     ...userActions,
     saved_objects: userActions.saved_objects.map((so) => ({
       ...so,
-      ...transformToExternalModel(so),
+      ...transformToExternalModel(so, persistableStateAttachmentTypeRegistry),
     })),
   };
 }
 
 export function transformToExternalModel(
-  userAction: SavedObject<UserActionPersistedAttributes>
+  userAction: SavedObject<UserActionPersistedAttributes>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): UserActionSavedObjectTransformed {
   const { references } = userAction;
 
   const commentId =
     findReferenceId(COMMENT_REF_NAME, CASE_COMMENT_SAVED_OBJECT, references) ?? null;
-  const payload = addReferenceIdToPayload(userAction);
+  const payload = addReferenceIdToPayload(userAction, persistableStateAttachmentTypeRegistry);
 
   return {
     ...userAction,
@@ -78,13 +83,14 @@ export function transformToExternalModel(
  * @deprecated remove when the getAllRoute is removed
  */
 export function legacyTransformFindResponseToExternalModel(
-  userActions: SavedObjectsFindResponse<UserActionPersistedAttributes>
+  userActions: SavedObjectsFindResponse<UserActionPersistedAttributes>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): SavedObjectsFindResponse<CaseUserActionDeprecatedResponse> {
   return {
     ...userActions,
     saved_objects: userActions.saved_objects.map((so) => ({
       ...so,
-      ...legacyTransformToExternalModel(so),
+      ...legacyTransformToExternalModel(so, persistableStateAttachmentTypeRegistry),
     })),
   };
 }
@@ -93,14 +99,15 @@ export function legacyTransformFindResponseToExternalModel(
  * @deprecated remove when the getAll route is removed
  */
 function legacyTransformToExternalModel(
-  userAction: SavedObject<UserActionPersistedAttributes>
+  userAction: SavedObject<UserActionPersistedAttributes>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): SavedObject<CaseUserActionDeprecatedResponse> {
   const { references } = userAction;
 
   const caseId = findReferenceId(CASE_REF_NAME, CASE_SAVED_OBJECT, references) ?? '';
   const commentId =
     findReferenceId(COMMENT_REF_NAME, CASE_COMMENT_SAVED_OBJECT, references) ?? null;
-  const payload = addReferenceIdToPayload(userAction);
+  const payload = addReferenceIdToPayload(userAction, persistableStateAttachmentTypeRegistry);
 
   return {
     ...userAction,
@@ -115,7 +122,8 @@ function legacyTransformToExternalModel(
 }
 
 const addReferenceIdToPayload = (
-  userAction: SavedObject<UserActionPersistedAttributes>
+  userAction: SavedObject<UserActionPersistedAttributes>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): UserActionAttributes['payload'] => {
   const connectorId = getConnectorIdFromReferences(userAction);
   const userActionAttributes = userAction.attributes;
@@ -170,6 +178,24 @@ const addReferenceIdToPayload = (
         comment: {
           ...userActionAttributes.payload.comment,
           attachmentId: refId ?? '',
+        },
+      };
+    }
+
+    if (isCommentRequestTypePersistableState(userActionAttributes.payload.comment)) {
+      const injectedAttributes = injectPersistableReferencesToSO(
+        userActionAttributes.payload.comment,
+        userAction.references,
+        {
+          persistableStateAttachmentTypeRegistry,
+        }
+      );
+
+      return {
+        ...userAction.attributes.payload,
+        comment: {
+          ...userActionAttributes.payload.comment,
+          ...injectedAttributes,
         },
       };
     }

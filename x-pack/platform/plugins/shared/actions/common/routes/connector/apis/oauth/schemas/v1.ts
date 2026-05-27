@@ -18,11 +18,3 @@ export const startOAuthFlowPathParamsSchema = schema.object({
 export const disconnectOAuthPathParamsSchema = schema.object({
   connectorId: schema.string(),
 });
-
-export const cancelOAuthPathParamsSchema = schema.object({
-  connectorId: schema.string(),
-});
-
-export const cancelOAuthBodySchema = schema.object({
-  state: schema.string(),
-});

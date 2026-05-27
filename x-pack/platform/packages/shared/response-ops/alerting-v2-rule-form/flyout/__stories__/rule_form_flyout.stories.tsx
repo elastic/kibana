@@ -59,11 +59,6 @@ const mockServices = {
     EmbeddableComponent: () => null,
     stateHelperApi: () => ({}),
   } as any,
-  uiActions: {
-    getAction: async () => ({
-      execute: ({ onResults }: { onResults: (results: unknown[]) => void }) => onResults([]),
-    }),
-  } as any,
 };
 
 const mockFormServices: RuleFormServices = {
@@ -73,7 +68,6 @@ const mockFormServices: RuleFormServices = {
   application: mockServices.application,
   notifications: mockServices.notifications,
   lens: mockServices.lens,
-  uiActions: mockServices.uiActions,
 };
 
 // =============================================================================

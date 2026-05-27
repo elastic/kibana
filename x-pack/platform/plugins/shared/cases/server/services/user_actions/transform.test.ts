@@ -22,11 +22,14 @@ import {
   createUnifiedFileUserAction,
   testConnectorId,
 } from './test_utils';
+import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 import type { ConnectorUserAction } from '../../../common/types/domain';
 import { UserActionActions } from '../../../common/types/domain';
 
 describe('transform', () => {
+  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
+
   describe('action_id', () => {
     it('legacyTransformFindResponseToExternalModel sets action_id correctly to the saved object id', () => {
       const userAction = {
@@ -34,7 +37,8 @@ describe('transform', () => {
       };
 
       const transformed = legacyTransformFindResponseToExternalModel(
-        createSOFindResponse([createUserActionFindSO(userAction)])
+        createSOFindResponse([createUserActionFindSO(userAction)]),
+        persistableStateAttachmentTypeRegistry
       );
 
       expect(transformed.saved_objects[0].attributes.action_id).toEqual('100');
@@ -46,7 +50,8 @@ describe('transform', () => {
       };
 
       const transformed = transformFindResponseToExternalModel(
-        createSOFindResponse([createUserActionFindSO(userAction)])
+        createSOFindResponse([createUserActionFindSO(userAction)]),
+        persistableStateAttachmentTypeRegistry
       );
 
       expect(transformed.saved_objects[0].attributes).not.toHaveProperty('action_id');
@@ -59,7 +64,8 @@ describe('transform', () => {
         const userAction = createConnectorUserAction();
 
         const transformed = legacyTransformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.case_id).toEqual('1');
@@ -71,7 +77,8 @@ describe('transform', () => {
           references: [],
         };
         const transformed = legacyTransformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes.case_id).toEqual('');
@@ -83,7 +90,8 @@ describe('transform', () => {
         const userAction = createConnectorUserAction();
 
         const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes).not.toHaveProperty('case_id');
@@ -96,7 +104,8 @@ describe('transform', () => {
         };
 
         const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
         );
 
         expect(transformed.saved_objects[0].attributes).not.toHaveProperty('case_id');
@@ -109,7 +118,8 @@ describe('transform', () => {
     [legacyTransformFindResponseToExternalModel.name, legacyTransformFindResponseToExternalModel],
   ])('%s', (functionName, transformer) => {
     it('does not populate the ids when the response is an empty array', () => {
-      expect(transformer(createSOFindResponse([]))).toMatchInlineSnapshot(`
+      expect(transformer(createSOFindResponse([]), persistableStateAttachmentTypeRegistry))
+        .toMatchInlineSnapshot(`
         Object {
           "page": 1,
           "per_page": 0,
@@ -121,7 +131,8 @@ describe('transform', () => {
 
     it('preserves the saved object fields and attributes when inject the ids', () => {
       const transformed = transformer(
-        createSOFindResponse([createUserActionFindSO(createConnectorUserAction())])
+        createSOFindResponse([createUserActionFindSO(createConnectorUserAction())]),
+        persistableStateAttachmentTypeRegistry
       );
 
       expect(transformed).toMatchSnapshot();
@@ -132,7 +143,8 @@ describe('transform', () => {
         createSOFindResponse([
           createUserActionFindSO(createConnectorUserAction()),
           createUserActionFindSO(createConnectorUserAction()),
-        ])
+        ]),
+        persistableStateAttachmentTypeRegistry
       ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
       expect(transformed.saved_objects[0].attributes.payload.connector.id).toEqual('1');
@@ -145,7 +157,10 @@ describe('transform', () => {
           ...createUserActionSO({ action: UserActionActions.create, commentId: '5' }),
           references: [],
         };
-        const transformed = transformer(createSOFindResponse([createUserActionFindSO(userAction)]));
+        const transformed = transformer(
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
+        );
 
         expect(transformed.saved_objects[0].attributes.comment_id).toBeNull();
       });
@@ -156,7 +171,10 @@ describe('transform', () => {
           commentId: '5',
         });
 
-        const transformed = transformer(createSOFindResponse([createUserActionFindSO(userAction)]));
+        const transformed = transformer(
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
+        );
 
         expect(transformed.saved_objects[0].attributes.comment_id).toEqual('5');
       });
@@ -164,28 +182,34 @@ describe('transform', () => {
 
     describe('create connector', () => {
       const userAction = createConnectorUserAction();
-      testConnectorId(userAction, 'connector.id');
+      testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
     });
 
     describe('update connector', () => {
       const userAction = updateConnectorUserAction();
-      testConnectorId(userAction, 'connector.id');
+      testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
     });
 
     describe('push connector', () => {
       const userAction = pushConnectorUserAction();
-      testConnectorId(userAction, 'externalService.connector_id', '100');
+      testConnectorId(
+        persistableStateAttachmentTypeRegistry,
+        userAction,
+        'externalService.connector_id',
+        '100'
+      );
     });
 
     describe('create case', () => {
       const userAction = createCaseUserAction();
-      testConnectorId(userAction, 'connector.id');
+      testConnectorId(persistableStateAttachmentTypeRegistry, userAction, 'connector.id');
     });
 
     describe('persistable state attachments', () => {
-      it('passes the persistable state through unchanged', () => {
+      it('populates the persistable state', () => {
         const transformed = transformer(
-          createSOFindResponse([createUserActionFindSO(createPersistableStateUserAction())])
+          createSOFindResponse([createUserActionFindSO(createPersistableStateUserAction())]),
+          persistableStateAttachmentTypeRegistry
         ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
         expect(transformed).toMatchSnapshot();
@@ -195,7 +219,8 @@ describe('transform', () => {
     describe('external references', () => {
       it('populates the external references attributes', () => {
         const transformed = transformer(
-          createSOFindResponse([createUserActionFindSO(createExternalReferenceUserAction())])
+          createSOFindResponse([createUserActionFindSO(createExternalReferenceUserAction())]),
+          persistableStateAttachmentTypeRegistry
         ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
         expect(transformed).toMatchSnapshot();
@@ -205,7 +230,8 @@ describe('transform', () => {
     describe('unified SO-backed attachments', () => {
       it('passes attachmentId through from the persisted payload', () => {
         const transformed = transformer(
-          createSOFindResponse([createUserActionFindSO(createUnifiedFileUserAction())])
+          createSOFindResponse([createUserActionFindSO(createUnifiedFileUserAction())]),
+          persistableStateAttachmentTypeRegistry
         );
 
         const payload = transformed.saved_objects[0].attributes.payload as {
@@ -220,7 +246,10 @@ describe('transform', () => {
           references: [],
         };
 
-        const transformed = transformer(createSOFindResponse([createUserActionFindSO(userAction)]));
+        const transformed = transformer(
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
+        );
 
         const payload = transformed.saved_objects[0].attributes.payload as {
           comment: { attachmentId?: string };
@@ -243,7 +272,10 @@ describe('transform', () => {
           references: [],
         } as typeof base;
 
-        const transformed = transformer(createSOFindResponse([createUserActionFindSO(userAction)]));
+        const transformed = transformer(
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
+        );
 
         const payload = transformed.saved_objects[0].attributes.payload as {
           comment: { attachmentId?: string };

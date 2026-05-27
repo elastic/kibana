@@ -46,10 +46,9 @@ export const GetOneEnrollmentAPIKeyRequestSchema = {
   }),
 };
 
-export const EnrollmentAPIKeyResponseSchema = schema.object(
-  { item: EnrollmentAPIKeySchema },
-  { meta: { id: 'enrollment_api_key_response' } }
-);
+export const EnrollmentAPIKeyResponseSchema = schema.object({
+  item: EnrollmentAPIKeySchema,
+});
 
 export const DeleteEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
@@ -73,20 +72,16 @@ export const DeleteEnrollmentAPIKeyRequestSchema = {
   }),
 };
 
-export const DeleteEnrollmentAPIKeyResponseSchema = schema.object(
-  { action: schema.literal('deleted') },
-  { meta: { id: 'delete_enrollment_api_key_response' } }
-);
+export const DeleteEnrollmentAPIKeyResponseSchema = schema.object({
+  action: schema.literal('deleted'),
+});
 
 export const PostEnrollmentAPIKeyRequestSchema = {
-  body: schema.object(
-    {
-      name: schema.maybe(schema.string()),
-      policy_id: schema.string(),
-      expiration: schema.maybe(schema.string()),
-    },
-    { meta: { id: 'new_enrollment_api_key' } }
-  ),
+  body: schema.object({
+    name: schema.maybe(schema.string()),
+    policy_id: schema.string(),
+    expiration: schema.maybe(schema.string()),
+  }),
 };
 
 export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
@@ -130,7 +125,6 @@ export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
       }),
     },
     {
-      meta: { id: 'bulk_delete_enrollment_api_keys_request' },
       validate: (value) => {
         const hasTokenIds = value.tokenIds && value.tokenIds.length > 0;
         const hasKuery = value.kuery && value.kuery.trim() !== '';
@@ -142,12 +136,9 @@ export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
   ),
 };
 
-export const BulkDeleteEnrollmentAPIKeysResponseSchema = schema.object(
-  {
-    action: schema.string(),
-    count: schema.number(),
-    successCount: schema.number(),
-    errorCount: schema.number(),
-  },
-  { meta: { id: 'bulk_delete_enrollment_api_keys_response' } }
-);
+export const BulkDeleteEnrollmentAPIKeysResponseSchema = schema.object({
+  action: schema.string(),
+  count: schema.number(),
+  successCount: schema.number(),
+  errorCount: schema.number(),
+});

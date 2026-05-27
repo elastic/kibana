@@ -6,8 +6,4 @@
  */
 
 export { getWorkflowOutput } from './get_workflow_output';
-export {
-  getExecutionState,
-  toWorkflowExecutionState,
-  type WorkflowExecutionState,
-} from './get_execution_state';
+export { getExecutionState, type WorkflowExecutionState } from './get_execution_state';

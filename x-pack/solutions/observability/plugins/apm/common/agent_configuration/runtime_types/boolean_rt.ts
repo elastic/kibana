@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { booleanRt } from '@kbn/apm-common';
+import * as t from 'io-ts';
+
+export const booleanRt = t.union([t.literal('true'), t.literal('false')]);

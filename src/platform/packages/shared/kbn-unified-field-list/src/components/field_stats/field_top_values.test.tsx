@@ -50,11 +50,11 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
         },
       ],
       getFormatterForField: jest.fn(() => ({
-        convertToText: jest.fn((s: unknown) =>
+        convert: jest.fn((s: unknown) =>
           fieldFormatsServiceMock
             .createStartContract()
             .getDefaultInstance(KBN_FIELD_TYPES.STRING, [ES_FIELD_TYPES.STRING])
-            .convertToText(s)
+            .convert(s)
         ),
       })),
     } as unknown as DataView;

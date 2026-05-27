@@ -22,7 +22,7 @@ import {
   useBatchedPublishingSubjects,
   titleComparators,
   apiIsPresentationContainer,
-  initializeStateApi,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -86,10 +86,13 @@ export const getLinksEmbeddableFactory = () => {
         };
       }
 
-      const stateApi = initializeStateApi<LinksEmbeddableState>({
+      const serializeState = () =>
+        isByReference ? serializeByReference(refId) : serializeByValue();
+
+      const unsavedChangesApi = initializeUnsavedChanges<LinksEmbeddableState>({
         uuid,
         parentApi,
-        serializeState: () => (isByReference ? serializeByReference(refId) : serializeByValue()),
+        serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           layout$.pipe(
@@ -124,23 +127,24 @@ export const getLinksEmbeddableFactory = () => {
             ref_id: 'skip',
           };
         },
-        applySerializedState: async (nextState) => {
-          titleManager.reinitializeState(nextState);
+        onReset: async (lastSaved) => {
+          titleManager.reinitializeState(lastSaved);
           if (!refId) {
-            layout$.next((nextState as LinksByValueState).layout);
-            resolvedLinks$.next(await resolveLinks((nextState as LinksByValueState).links ?? []));
+            layout$.next((lastSaved as LinksByValueState)?.layout);
+            resolvedLinks$.next(await resolveLinks((lastSaved as LinksByValueState)?.links ?? []));
           }
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...stateApi,
+        ...unsavedChangesApi,
         blockingError$,
         defaultTitle$,
         defaultDescription$,
         isEditingEnabled: () => Boolean(blockingError$.value === undefined),
         getTypeDisplayName: () => DISPLAY_NAME,
+        serializeState,
         saveToLibrary: async (newTitle: string) => {
           defaultTitle$.next(newTitle);
           const {

@@ -20,7 +20,6 @@ export interface EvalsSuiteMetadataEntry {
   configPath?: string;
   serverConfigSet?: string;
   weeklyEisModelGroups?: string[];
-  defaultModelGroups?: string[];
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
@@ -236,17 +235,11 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
     .filter((value) => value !== WEEKLY_EIS_MODELS_ALIAS)
     .flatMap((value) => MODEL_GROUP_ALIASES[value] ?? [value]);
 
-  const hasGlobalModelSelection = explicitModelGroups.length > 0 || useWeeklyEisModels;
-
   const resolveModelGroups = (suite: EvalsSuiteMetadataEntry): string[] => {
     const weeklyModels = useWeeklyEisModels
       ? suite.weeklyEisModelGroups ?? DEFAULT_WEEKLY_EIS_MODELS
       : [];
-    const resolved = [...new Set([...explicitModelGroups, ...weeklyModels])];
-    if (resolved.length > 0) {
-      return resolved;
-    }
-    return suite.defaultModelGroups ?? [];
+    return [...new Set([...explicitModelGroups, ...weeklyModels])];
   };
 
   const hasEisJudge =
@@ -258,19 +251,12 @@ export function getEvalPipeline(githubPrLabels: string): string | null {
 
   // Require explicit model selection — without models:* labels, evals are skipped
   // to avoid accidentally running against all models (which is expensive).
-  // Suites with `defaultModelGroups` in evals.suites.json are exempt: they use
-  // their pinned defaults when no models:* labels are present.
-  const suitesWithDefaults = selectedEvalSuites.filter(
-    (suite) => suite.defaultModelGroups && suite.defaultModelGroups.length > 0
-  );
-  if (!hasGlobalModelSelection && suitesWithDefaults.length === 0) {
+  if (explicitModelGroups.length === 0 && !useWeeklyEisModels) {
     return null;
   }
 
-  const runnableSuites = hasGlobalModelSelection ? selectedEvalSuites : suitesWithDefaults;
-
   return buildEvalsYaml({
-    selectedSuites: runnableSuites,
+    selectedSuites: selectedEvalSuites,
     resolveModelGroups,
     evaluationConnectorId,
     hasEisJudge,

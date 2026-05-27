@@ -20,7 +20,7 @@ const format = createFieldFormatMock({
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { transform: 'upper' };
   }),
-  convertToReact: jest.fn().mockImplementation((input: string) => input.toUpperCase()),
+  reactConvert: jest.fn().mockImplementation((input: string) => input.toUpperCase()),
   type: {
     transformOptions: [
       {

@@ -30,6 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -47,6 +50,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.unsetTime();
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.savedObjects.cleanStandardList();
     });

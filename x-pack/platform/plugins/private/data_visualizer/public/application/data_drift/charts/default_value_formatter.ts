@@ -33,7 +33,8 @@ export const useFieldFormatter = (fieldType: FIELD_FORMAT_IDS) => {
 
   return useCallback(
     (v: unknown) => {
-      return fieldFormatter.convertToText(v);
+      const func = fieldFormatter.convert.bind(fieldFormatter);
+      return func(v);
     },
     [fieldFormatter]
   );

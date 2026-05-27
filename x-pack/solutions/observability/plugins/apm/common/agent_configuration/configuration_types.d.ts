@@ -5,4 +5,15 @@
  * 2.0.
  */
 
-export type { AgentConfigurationIntake, AgentConfiguration } from '@kbn/apm-common';
+import type t from 'io-ts';
+import type { agentConfigurationIntakeRt } from './runtime_types/agent_configuration_intake_rt';
+
+export type AgentConfigurationIntake = t.TypeOf<typeof agentConfigurationIntakeRt>;
+
+export type AgentConfiguration = {
+  '@timestamp': number;
+  applied_by_agent?: boolean;
+  etag: string;
+  agent_name?: string;
+  error?: string;
+} & AgentConfigurationIntake;

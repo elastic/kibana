@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiDataGridColumn, EuiThemeComputed } from '@elastic/eui';
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -278,22 +277,7 @@ export const AlertEpisodesListPage = () => {
         min-width: 0;
       `}
     >
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={i18n.EPISODES_LIST_PAGE_TITLE}
-        rightSideItems={[
-          <EuiButton
-            key="manage-rules"
-            color="text"
-            size="s"
-            iconType="gear"
-            href={services.http.basePath.prepend(paths.ruleList)}
-            data-test-subj="alertingV2EpisodesListManageRules"
-          >
-            {i18n.EPISODES_LIST_MANAGE_RULES}
-          </EuiButton>,
-        ]}
-      />
+      <EuiPageHeader bottomBorder pageTitle={i18n.EPISODES_LIST_PAGE_TITLE} />
       <EuiSpacer size="m" />
 
       <EuiFlexGroup

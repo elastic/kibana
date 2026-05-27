@@ -137,6 +137,7 @@ export async function bulkEditRules<Params extends RuleParams>(
         logger: context.logger,
         ruleType,
         references,
+        omitGeneratedValues: false,
       },
       (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );

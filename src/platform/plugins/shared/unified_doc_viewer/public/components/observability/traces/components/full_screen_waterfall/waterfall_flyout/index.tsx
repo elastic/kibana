@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiEmptyPrompt,
   EuiErrorBoundary,
   EuiFlyout,
   EuiFlyoutBody,
@@ -75,54 +74,11 @@ const FlyoutTabs = ({ onClick, selectedTabId }: FlyoutTabsProps) => {
   ));
 };
 
-const NotFoundPrompt = () => (
-  <EuiEmptyPrompt
-    data-test-subj="unifiedDocViewerWaterfallFlyoutNotFound"
-    iconType="search"
-    titleSize="s"
-    title={
-      <h2>
-        {i18n.translate(
-          'unifiedDocViewer.observability.traces.fullScreenWaterfall.flyout.notFound.title',
-          { defaultMessage: 'Document not found' }
-        )}
-      </h2>
-    }
-    body={
-      <p>
-        {i18n.translate(
-          'unifiedDocViewer.observability.traces.fullScreenWaterfall.flyout.notFound.body',
-          { defaultMessage: 'The document could not be found. It may no longer be available.' }
-        )}
-      </p>
-    }
-  />
-);
-
-const FetchErrorPrompt = ({ error }: { error: string }) => (
-  <EuiEmptyPrompt
-    data-test-subj="unifiedDocViewerWaterfallFlyoutFetchError"
-    iconType="warning"
-    iconColor="danger"
-    titleSize="s"
-    title={
-      <h2>
-        {i18n.translate(
-          'unifiedDocViewer.observability.traces.fullScreenWaterfall.flyout.fetchError.title',
-          { defaultMessage: 'Unable to load document' }
-        )}
-      </h2>
-    }
-    body={<p>{error}</p>}
-  />
-);
-
 export interface Props {
   title: string;
   onCloseFlyout: EuiFlyoutProps['onClose'];
   hit: DataTableRecord | null;
   loading: boolean;
-  error?: string | null;
   dataView: DocViewRenderProps['dataView'];
   dataTestSubj?: string;
   hasAnimation?: boolean;
@@ -137,7 +93,6 @@ export function WaterfallFlyout({
   dataView,
   hit,
   loading,
-  error,
   children,
   title,
   dataTestSubj,
@@ -185,27 +140,23 @@ export function WaterfallFlyout({
           }
         `}
       >
-        {loading ? (
+        {loading || !hit ? (
           <EuiSkeletonText lines={5} />
-        ) : !hit && error ? (
-          <FetchErrorPrompt error={error} />
-        ) : !hit ? (
-          <NotFoundPrompt />
         ) : (
           <>
             <EuiTabs size="s">
               <FlyoutTabs onClick={setSelectedTabId} selectedTabId={selectedTabId} />
             </EuiTabs>
             <EuiSkeletonText isLoading={loading}>
-              {selectedTabId === tabIds.OVERVIEW ? (
+              {selectedTabId === tabIds.OVERVIEW && hit ? (
                 <EuiErrorBoundary>{children}</EuiErrorBoundary>
               ) : null}
 
-              {selectedTabId === tabIds.TABLE ? (
+              {selectedTabId === tabIds.TABLE && hit ? (
                 <DocViewerTable hit={hit} dataView={dataView} />
               ) : null}
 
-              {selectedTabId === tabIds.JSON ? (
+              {selectedTabId === tabIds.JSON && hit ? (
                 <DocViewerSource
                   id={hit.id}
                   index={hit.raw._index}

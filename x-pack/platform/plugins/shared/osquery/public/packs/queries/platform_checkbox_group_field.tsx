@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { isEmpty, pickBy } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { EuiCheckboxGroupOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiCheckboxGroup } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { useController } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { FormFieldProps } from '../../form/types';
-import type { PlatformId } from './platforms';
-import { OS_OPTIONS, isPlatformId } from './platforms';
+import { PlatformIcon } from './platforms/platform_icon';
 
-type Props = Omit<FormFieldProps<string>, 'name' | 'label'>;
-
-const REQUIRED_ERROR_MESSAGE = i18n.translate(
-  'xpack.osquery.pack.queryFlyoutForm.osRequiredError',
-  {
-    defaultMessage: 'Select at least one operating system.',
-  }
-);
+type Props = Omit<FormFieldProps<string[]>, 'name' | 'label'>;
 
 export const PlatformCheckBoxGroupField = (props: Props) => {
   const { euiFieldProps = {}, idAria, helpText, ...rest } = props;
@@ -29,48 +24,108 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
   const {
     field: { onChange, value },
     fieldState: { error },
-  } = useController<{ platform: string }>({
+  } = useController({
     name: 'platform',
-    defaultValue: '',
-    rules: {
-      validate: (fieldValue) =>
-        typeof fieldValue === 'string' && fieldValue.trim().length > 0
-          ? true
-          : REQUIRED_ERROR_MESSAGE,
-    },
+    defaultValue: [],
   });
+  const options = useMemo(
+    () => [
+      {
+        id: 'linux',
+        label: (
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <PlatformIcon platform="linux" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FormattedMessage
+                id="xpack.osquery.pack.queryFlyoutForm.platformMacOSLabel"
+                defaultMessage="Linux"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
+      {
+        id: 'darwin',
+        label: (
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <PlatformIcon platform="darwin" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FormattedMessage
+                id="xpack.osquery.pack.queryFlyoutForm.platformLinusLabel"
+                defaultMessage="macOS"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
+      {
+        id: 'windows',
+        label: (
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <PlatformIcon platform="windows" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FormattedMessage
+                id="xpack.osquery.pack.queryFlyoutForm.platformWindowsLabel"
+                defaultMessage="Windows"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+      },
+    ],
+    []
+  );
 
-  const selectedOptions = useMemo(() => {
-    if (typeof value !== 'string' || value.length === 0) {
-      return [];
-    }
+  const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
+    () =>
+      (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
+        acc[option.id] = isEmpty(value) ? true : value?.includes(option.id) ?? false;
 
-    const ids = value
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    return OS_OPTIONS.filter((opt) => ids.includes(opt.key));
-  }, [value]);
+        return acc;
+      }, {} as Record<string, boolean>)
+  );
 
   const handleChange = useCallback(
-    (newOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const ids = newOptions
-        .map((opt) => opt.key)
-        .filter((key): key is PlatformId => key !== undefined && isPlatformId(key));
-      onChange(ids.join(','));
+    (optionId: string) => {
+      const newCheckboxIdToSelectedMap = {
+        ...checkboxIdToSelectedMap,
+        [optionId]: !checkboxIdToSelectedMap[optionId],
+      };
+      setCheckboxIdToSelectedMap(newCheckboxIdToSelectedMap);
+
+      onChange(
+        Object.keys(
+          pickBy(newCheckboxIdToSelectedMap, (checkboxValue) => checkboxValue === true)
+        ).join(',')
+      );
     },
-    [onChange]
+    [checkboxIdToSelectedMap, onChange]
   );
 
   const describedByIds = useMemo(() => (idAria ? [idAria] : []), [idAria]);
+
+  useEffect(() => {
+    setCheckboxIdToSelectedMap(() =>
+      (options as EuiCheckboxGroupOption[]).reduce((acc, option) => {
+        acc[option.id] = isEmpty(value) ? true : value?.includes(option.id) ?? false;
+
+        return acc;
+      }, {} as Record<string, boolean>)
+    );
+  }, [value, options]);
 
   const hasError = useMemo(() => !!error?.message, [error?.message]);
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.osFieldLabel', {
-        defaultMessage: 'Operating systems',
+      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.platformFieldLabel', {
+        defaultMessage: 'Platform',
       })}
       helpText={typeof helpText === 'function' ? helpText() : helpText}
       error={error?.message}
@@ -79,15 +134,12 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
       describedByIds={describedByIds}
       {...rest}
     >
-      <EuiComboBox
-        data-test-subj="osquery-platform-checkbox-group"
-        options={OS_OPTIONS}
-        selectedOptions={selectedOptions}
+      <EuiCheckboxGroup
+        idToSelectedMap={checkboxIdToSelectedMap}
+        options={options}
         onChange={handleChange}
-        isDisabled={!!isDisabled}
-        isInvalid={hasError}
-        fullWidth
-        isClearable={false}
+        data-test-subj="osquery-platform-checkbox-group"
+        disabled={!!isDisabled}
         {...restEuiFieldProps}
       />
     </EuiFormRow>

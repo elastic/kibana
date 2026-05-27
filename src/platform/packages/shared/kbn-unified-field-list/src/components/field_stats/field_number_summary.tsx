@@ -47,14 +47,14 @@ export const FieldNumberSummary: React.FC<FieldNumberSummaryProps> = ({
       label: i18n.translate('unifiedFieldList.fieldStats.numberSummary.minLabel', {
         defaultMessage: 'min',
       }),
-      value: formatter.convertToText(numberSummary.minValue),
+      value: formatter.convert(numberSummary.minValue, 'text'),
     },
     {
       key: 'max',
       label: i18n.translate('unifiedFieldList.fieldStats.numberSummary.maxLabel', {
         defaultMessage: 'max',
       }),
-      value: formatter.convertToText(numberSummary.maxValue),
+      value: formatter.convert(numberSummary.maxValue, 'text'),
     },
   ];
   const summaryTableColumns = [

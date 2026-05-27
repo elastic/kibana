@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/context-switcher-components",
-  "owner": "@elastic/appex-sharedux",
-  "group": "platform",
-  "visibility": "shared"
-}

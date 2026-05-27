@@ -36,7 +36,6 @@ export const CustomInstructionsSection: React.FC = () => {
             inputRef={ref}
             fullWidth
             rows={6}
-            aria-label={flyoutLabels.instructionsTitle}
             placeholder={flyoutLabels.instructionsPlaceholder}
             data-test-subj="editDetailsInstructionsInput"
           />

@@ -102,9 +102,6 @@ const PopoverItemsComponent = <T extends unknown>({
         ownFocus
         data-test-subj={`${dataTestPrefix}DisplayPopover`}
         aria-label={popoverTitle ?? popoverButtonTitle}
-        css={css`
-          display: inline-flex;
-        `}
         button={
           <EuiBadge
             iconType={popoverButtonIcon}
@@ -125,7 +122,7 @@ const PopoverItemsComponent = <T extends unknown>({
             {popoverTitle}
           </EuiPopoverTitle>
         ) : null}
-        <PopoverWrapper data-test-subj={`${dataTestPrefix}DisplayPopoverWrapper`} gutterSize="s">
+        <PopoverWrapper data-test-subj={`${dataTestPrefix}DisplayPopoverWrapper`}>
           <OverflowList items={items.slice(numberOfItemsToDisplay)} />
         </PopoverWrapper>
       </EuiPopover>

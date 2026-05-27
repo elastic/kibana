@@ -60,7 +60,6 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
   );
 
   const [isFirstLoad, setIsFirstLoad] = React.useState(true);
-  const [hasInvalidProxySearch, setHasInvalidProxySearch] = useState(false);
   const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
     'disabled'
   );
@@ -266,9 +265,6 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               data-test-subj="editDownloadSourcesFlyout.proxyIdInput"
               {...inputs.proxyIdInput.props}
               onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
-              onSearchChange={(value, hasMatchingOptions) => {
-                setHasInvalidProxySearch(!!value && !hasMatchingOptions);
-              }}
               selectedOptions={
                 inputs.proxyIdInput.value !== ''
                   ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
@@ -276,7 +272,6 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
               }
               options={proxiesOptions}
               singleSelection={{ asPlainText: true }}
-              isInvalid={hasInvalidProxySearch}
               isDisabled={inputs.proxyIdInput.props.disabled}
               isClearable={true}
               placeholder={i18n.translate(
@@ -330,7 +325,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             <EuiButton
               fill
               isLoading={form.isLoading}
-              isDisabled={form.isDisabled || hasInvalidProxySearch}
+              isDisabled={form.isDisabled}
               onClick={form.submit}
               data-test-subj="editDownloadSourcesFlyout.submitBtn"
             >

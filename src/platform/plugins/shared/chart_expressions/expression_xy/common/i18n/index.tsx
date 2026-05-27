@@ -332,7 +332,7 @@ export const strings = {
     }),
   getAxisTruncateHelp: () =>
     i18n.translate('expressionXY.axisConfig.truncate.help', {
-      defaultMessage: 'Maximum tick label width in pixels before truncating',
+      defaultMessage: 'The number of symbols before truncating',
     }),
   getReferenceLineNameHelp: () =>
     i18n.translate('expressionXY.referenceLine.name.help', {

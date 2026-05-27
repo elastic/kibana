@@ -40,16 +40,15 @@ export interface RunbookFieldProps {
 }
 
 export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) => {
-  const { control } = useFormContext<FormValues>();
+  const { control, setValue } = useFormContext<FormValues>();
   const {
-    field: { value: runbookArtifacts = [], onChange },
-  } = useController<FormValues, 'runbookArtifacts'>({
+    field: { value: artifactsValue },
+  } = useController<FormValues, 'artifacts'>({
     control,
-    name: 'runbookArtifacts',
+    name: 'artifacts',
   });
-  const runbookArtifact = runbookArtifacts.find(
-    (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
-  );
+  const artifacts = artifactsValue ?? [];
+  const runbookArtifact = artifacts.find((artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE);
   const runbookValue = runbookArtifact?.value ?? '';
   const [draftRunbook, setDraftRunbook] = useState(runbookValue);
   const trimmedLength = draftRunbook.trim().length;
@@ -66,17 +65,21 @@ export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) =
       return;
     }
     const trimmedRunbook = draftRunbook.trim();
+    const nonRunbookArtifacts = artifacts.filter(
+      (artifact) => artifact.type !== RUNBOOK_ARTIFACT_TYPE
+    );
     const nextArtifacts = trimmedRunbook
       ? [
+          ...nonRunbookArtifacts,
           {
             id: runbookArtifact?.id ?? createRunbookArtifactId(),
             type: RUNBOOK_ARTIFACT_TYPE,
             value: trimmedRunbook,
           },
         ]
-      : [];
+      : nonRunbookArtifacts;
 
-    onChange(nextArtifacts);
+    setValue('artifacts', nextArtifacts);
     onClose();
   };
 
@@ -92,7 +95,7 @@ export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) =
       style={{ width: '50vw' }}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={RUNBOOK_ROW_ID}>
+        <EuiModalHeaderTitle>
           {i18n.translate('xpack.alertingV2.ruleForm.runbookTitle', {
             defaultMessage: 'Add Runbook',
           })}

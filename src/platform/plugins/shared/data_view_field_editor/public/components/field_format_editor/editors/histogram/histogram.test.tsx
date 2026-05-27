@@ -19,7 +19,7 @@ const format = createFieldFormatMock({
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { id: 'number', params: {} };
   }),
-  convertToReact: jest
+  reactConvert: jest
     .fn()
     .mockImplementation((input: number | Record<string, number[]>) =>
       typeof input === 'number' ? input.toFixed(2) : JSON.stringify(input)

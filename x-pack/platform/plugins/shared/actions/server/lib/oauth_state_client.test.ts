@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { OAuthStateClient } from './oauth_state_client';
 import { OAUTH_STATE_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
@@ -259,22 +259,7 @@ describe('OAuthStateClient', () => {
       );
     });
 
-    it('is idempotent: succeeds silently when the state is already gone (concurrent delete)', async () => {
-      const client = createClient();
-      mockUnsecuredSavedObjectsClient.delete.mockRejectedValue(
-        SavedObjectsErrorHelpers.createGenericNotFoundError(
-          OAUTH_STATE_SAVED_OBJECT_TYPE,
-          'state-id-1'
-        )
-      );
-
-      await expect(client.delete('state-id-1')).resolves.toBeUndefined();
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('"state-id-1" was already deleted')
-      );
-    });
-
-    it('throws and logs error on non-NotFound deletion failure', async () => {
+    it('throws and logs error on deletion failure', async () => {
       const client = createClient();
       mockUnsecuredSavedObjectsClient.delete.mockRejectedValue(new Error('delete failed'));
 

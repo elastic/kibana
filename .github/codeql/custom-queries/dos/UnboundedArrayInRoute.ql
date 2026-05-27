@@ -14,7 +14,6 @@
  */
 
 import javascript
-import dos.KibanaDoSExclusions
 
 /**
  * Gets the local variable bound to 'schema' imported from '@kbn/config-schema'
@@ -23,11 +22,7 @@ LocalVariable schemaVariable() {
   exists(ImportDeclaration decl, ImportSpecifier spec |
     decl.getImportedPathExpr().getStringValue() = "@kbn/config-schema" and
     spec = decl.getASpecifier() and
-    (
-      spec.getImportedName() = "schema"
-      or
-      spec instanceof ImportNamespaceSpecifier
-    ) and
+    spec.getImportedName() = "schema" and
     result = spec.getLocal().getVariable()
   )
 }
@@ -59,10 +54,25 @@ class SchemaArrayOfCall extends CallExpr {
   }
 }
 
+/**
+ * Identifies files that should be excluded from analysis:
+ * - config.ts files (plugin configuration, not request validation)
+ * - index.ts files at plugin server root (typically re-exports)
+ */
+predicate isInExcludedFile(Expr e) {
+  e.getFile().getBaseName() = "config.ts"
+  or
+  // Exclude index.ts at plugin server root: plugins/*/server/index.ts or plugins/*/*/server/index.ts
+  (
+    e.getFile().getBaseName() = "index.ts" and
+    e.getFile().getRelativePath().regexpMatch(".*/plugins/[^/]+(/[^/]+)?/server/index\\.ts")
+  )
+}
+
 from SchemaArrayOfCall arrayCall
 where
   not arrayCall.hasMaxSize() and
-  not shouldExcludeFileFromDoSRules(arrayCall)
+  not isInExcludedFile(arrayCall)
 select arrayCall,
   "This schema.arrayOf() call does not specify a maxSize. Unbounded input can cause Denial of Service (DoS) vulnerabilities. Consider adding { maxSize: N } as the second argument."
 

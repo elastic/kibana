@@ -17,19 +17,17 @@ const SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP = 'searchWithSelectedColumnsAnd
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
-  const { common, discover, timePicker, dashboard, unifiedFieldList, header, share } =
-    getPageObjects([
-      'common',
-      'discover',
-      'timePicker',
-      'dashboard',
-      'unifiedFieldList',
-      'header',
-      'share',
-    ]);
+  const { common, discover, timePicker, dashboard, unifiedFieldList, header } = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'dashboard',
+    'unifiedFieldList',
+    'header',
+  ]);
+  const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const monacoEditor = getService('monacoEditor');
@@ -43,6 +41,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover time field column', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -51,6 +52,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
@@ -137,10 +141,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       hasTimeField,
       hideTimeFieldColumnSetting,
       savedSearchSuffix,
+      isEsqlMode,
     }: {
       hasTimeField: boolean;
       hideTimeFieldColumnSetting: boolean;
       savedSearchSuffix: string;
+      isEsqlMode?: boolean;
     }) {
       // check in Discover
       await unifiedFieldList.clickFieldListItemAdd('bytes');
@@ -148,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(
-          hideTimeFieldColumnSetting || !hasTimeField
+          hideTimeFieldColumnSetting || !hasTimeField || isEsqlMode
             ? ['bytes', 'extension']
             : ['@timestamp', 'bytes', 'extension']
         );
@@ -181,7 +187,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedFieldList.clickFieldListItemRemove('@timestamp');
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(
-          hideTimeFieldColumnSetting || !hasTimeField
+          hideTimeFieldColumnSetting || !hasTimeField || isEsqlMode
             ? ['bytes', 'extension']
             : ['@timestamp', 'bytes', 'extension']
         );
@@ -197,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(
-          hideTimeFieldColumnSetting || !hasTimeField
+          hideTimeFieldColumnSetting || !hasTimeField || isEsqlMode
             ? ['bytes', 'extension']
             : ['@timestamp', 'bytes', 'extension']
         );
@@ -316,56 +322,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               hasTimeField: true,
               hideTimeFieldColumnSetting,
               savedSearchSuffix: savedSearchSuffix + 'ESQL',
+              isEsqlMode: true,
             });
-          });
-
-          it('should not auto-prepend time column for transformational queries', async () => {
-            await discover.selectTextBaseLang();
-            await monacoEditor.setCodeEditorValue(
-              'from logstash-* | keep bytes, extension, @timestamp'
-            );
-            await testSubjects.click('querySubmitButton');
-            await discover.waitUntilTabIsLoaded();
-
-            await retry.try(async () => {
-              expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension', '@timestamp']);
-            });
-
-            await unifiedFieldList.clickFieldListItemRemove('@timestamp');
-            await retry.try(async () => {
-              expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension']);
-            });
-          });
-
-          it('should not include time field column in the Share URL', async () => {
-            await discover.selectTextBaseLang();
-            await discover.waitUntilTabIsLoaded();
-
-            await unifiedFieldList.clickFieldListItemAdd('bytes');
-            await discover.waitUntilTabIsLoaded();
-
-            await retry.try(async () => {
-              expect(await dataGrid.getHeaderFields()).to.eql(
-                hideTimeFieldColumnSetting ? ['bytes'] : ['@timestamp', 'bytes']
-              );
-            });
-
-            await share.clickShareTopNavButton();
-            const sharedUrl = await share.getSharedUrl();
-            await share.closeShareModal();
-
-            await browser.openNewTab();
-            await browser.get(sharedUrl);
-            await discover.waitUntilTabIsLoaded();
-
-            await retry.try(async () => {
-              expect(await dataGrid.getHeaderFields()).to.eql(
-                hideTimeFieldColumnSetting ? ['bytes'] : ['@timestamp', 'bytes']
-              );
-            });
-
-            const resolvedUrl = decodeURIComponent(await browser.getCurrentUrl());
-            expect(resolvedUrl).to.contain('columns:!(bytes)');
           });
         });
       });

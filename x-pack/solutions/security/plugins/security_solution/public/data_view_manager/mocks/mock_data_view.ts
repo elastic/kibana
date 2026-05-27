@@ -21,8 +21,7 @@ export const getMockDataView = (fieldFormats: FieldFormatsStartCommon = fieldFor
     },
     fieldFormats: {
       ...fieldFormats,
-      getDefaultInstance: () =>
-        ({ toJSON: () => {}, convertToText: () => {} } as unknown as FieldFormat),
+      getDefaultInstance: () => ({ toJSON: () => {}, convert: () => {} } as unknown as FieldFormat),
     },
   });
 

@@ -9,9 +9,8 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
+export default function ({ getPageObjects, loadTestFile }: FtrProviderContext) {
   const { spaceSettings } = getPageObjects(['common', 'spaceSettings']);
-  const esArchiver = getService('esArchiver');
 
   describe('discover/observability', () => {
     before(async () => {
@@ -19,9 +18,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         spaceName: 'default',
         solution: 'oblt',
       });
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
     });
 
     after(async () => {

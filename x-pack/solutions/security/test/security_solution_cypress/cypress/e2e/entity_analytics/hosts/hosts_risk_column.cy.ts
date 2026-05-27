@@ -15,7 +15,7 @@ import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 describe(
   'All hosts table',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

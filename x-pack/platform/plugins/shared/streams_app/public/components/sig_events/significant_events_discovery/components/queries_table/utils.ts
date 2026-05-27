@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { formatTimestamp } from '../../../../../util/formatters';
-
 export const DEFAULT_LAST_OCCURRED_AT = '--';
 
 interface OccurrencePoint {
@@ -23,5 +21,18 @@ export function formatLastOccurredAt(
     return fallbackValue;
   }
 
-  return formatTimestamp(lastOccurrence.x);
+  const date = new Date(lastOccurrence.x);
+  const formattedDate = date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  const formattedTime = date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+
+  return `${formattedDate} @ ${formattedTime}`;
 }

@@ -16,7 +16,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('discover/esql_1', function () {
     before(async function () {
       await browser.setWindowSize(1600, 1200);
-      await esArchiver.loadIfNeeded(
+    });
+
+    after(async function unloadMakelogs() {
+      await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
     });

@@ -17,7 +17,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
   apiPublishesSettings,
-  initializeStateApi,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
 import {
@@ -117,13 +117,15 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       return getByValueState(getLatestState(), savedMap.getAttributes());
     }
 
-    const stateApi = initializeStateApi<MapEmbeddableState>({
+    function serializeState() {
+      const savedObjectId = savedMap.getSavedObjectId();
+      return savedObjectId ? serializeByReference(savedObjectId) : serializeByValue();
+    }
+
+    const unsavedChangesApi = initializeUnsavedChanges<MapEmbeddableState>({
       uuid,
       parentApi,
-      serializeState: () => {
-        const savedObjectId = savedMap.getSavedObjectId();
-        return savedObjectId ? serializeByReference(savedObjectId) : serializeByValue();
-      },
+      serializeState,
       anyStateChange$: merge(
         drilldownsManager.anyStateChange$,
         crossPanelActions.anyStateChange$,
@@ -143,19 +145,21 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
           savedObjectId: 'skip',
         };
       },
-      applySerializedState: async (nextState) => {
-        drilldownsManager.reinitializeState(nextState);
-        timeRangeManager.reinitializeState(nextState);
-        titleManager.reinitializeState(nextState);
+      onReset: async (lastSaved) => {
+        drilldownsManager.reinitializeState(lastSaved ?? {});
+        timeRangeManager.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved);
 
-        await savedMap.reset(nextState);
+        if (lastSaved) {
+          await savedMap.reset(lastSaved);
+        }
       },
     });
 
     api = finalizeApi({
       defaultTitle$,
       defaultDescription$,
-      ...stateApi,
+      ...unsavedChangesApi,
       ...timeRangeManager.api,
       ...drilldownsManager.api,
       ...titleManager.api,
@@ -179,6 +183,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       ),
       ...initializeDataViews(savedMap.getStore()),
       ...projectRoutingManager.api,
+      serializeState,
       supportedTriggers: () => {
         return [ON_OPEN_PANEL_MENU, ON_APPLY_FILTER, ON_CLICK_VALUE];
       },

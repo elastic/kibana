@@ -54,6 +54,7 @@ function generateHeaders(apiKey: SecurityCreateApiKeyResponse, version?: string)
 }
 
 export default function ({ getService }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   const apiKeysForTransformUsers = new Map<USER, SecurityCreateApiKeyResponse>();
@@ -136,6 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         apiKeysForTransformUsers.set(user.name as USER, apiKey)
       );
 
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
       for (const testData of testDataList) {

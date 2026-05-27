@@ -16,7 +16,6 @@ import type {
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { TriggerType, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { pickManagedWorkflowFields } from '@kbn/workflows';
 import { validateWorkflowForExecution } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
 import { api } from './api';
@@ -106,7 +105,11 @@ function getWorkflowsConnectorTypeArgs(
         enabled: workflow.enabled,
         definition: workflow.definition,
         yaml: workflow.yaml,
-        ...pickManagedWorkflowFields(workflow),
+        ...(workflow.managed === true ? { managed: true } : {}),
+        ...(typeof workflow.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
+        ...(typeof workflow.originManagedWorkflowId === 'string'
+          ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
+          : {}),
       };
 
       // Run the workflow, @tb: maybe switch to scheduler?
@@ -136,7 +139,11 @@ function getWorkflowsConnectorTypeArgs(
         enabled: workflow.enabled,
         definition: workflow.definition,
         yaml: workflow.yaml,
-        ...pickManagedWorkflowFields(workflow),
+        ...(workflow.managed === true ? { managed: true } : {}),
+        ...(typeof workflow.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
+        ...(typeof workflow.originManagedWorkflowId === 'string'
+          ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
+          : {}),
       };
 
       return workflowsManagementApi.scheduleWorkflow(

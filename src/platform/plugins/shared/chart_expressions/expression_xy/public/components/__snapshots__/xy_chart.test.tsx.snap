@@ -4179,8 +4179,6 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             }
           }
           tickFormat={[Function]}
-          tickLabelMaxLength="40%"
-          tickLabelTruncate="middle"
           title="c"
         />
         <Component
@@ -10053,8 +10051,6 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             }
           }
           tickFormat={[Function]}
-          tickLabelMaxLength="40%"
-          tickLabelTruncate="middle"
           title="c"
         />
         <Component

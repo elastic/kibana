@@ -71,8 +71,7 @@ export function registerResolutionLink(router: EntityStorePluginRouter) {
           try {
             const result = await resolutionClient.linkEntities(
               req.body.target_id,
-              req.body.entity_ids,
-              { awaitVisibility: true }
+              req.body.entity_ids
             );
 
             return res.ok({ body: result });

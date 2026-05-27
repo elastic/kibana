@@ -265,7 +265,7 @@ export class ExplorerChartDistribution extends React.Component {
         .append('text')
         .text((d) => {
           if (fieldFormat !== undefined) {
-            return fieldFormat.convertToText(d);
+            return fieldFormat.convert(d, 'text');
           } else {
             if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
               return lineChartYScale.tickFormat()(d);
@@ -417,7 +417,7 @@ export class ExplorerChartDistribution extends React.Component {
         .tickFormat((d) => (d === SCHEDULE_EVENT_MARKER_ENTITY ? null : d));
 
       if (fieldFormat !== undefined) {
-        yAxis.tickFormat((d) => fieldFormat.convertToText(d));
+        yAxis.tickFormat((d) => fieldFormat.convert(d, 'text'));
       }
 
       const axes = lineChartGroup.append('g');

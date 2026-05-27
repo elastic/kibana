@@ -6,12 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands, ESQLAstField } from '@elastic/esql/types';
-import { suggestFieldsList } from '../../definitions/utils/autocomplete/fields_list';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
+import { getFunctionsSuggestions } from '../../definitions/utils';
+import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
+import {
+  pipeCompleteItem,
+  commaCompleteItem,
+  getNewUserDefinedColumnSuggestion,
+} from '../complete_items';
 import { Location } from '../types';
-import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
+import { isRestartingExpression } from '../../definitions/utils/shared';
+import { endsWithAssignment } from '../../definitions/utils/regex';
 
 export async function autocomplete(
   query: string,
@@ -20,24 +27,36 @@ export async function autocomplete(
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  const cursorPos = cursorPosition ?? query.length;
-  const rowCallbacks: ICommandCallbacks = { ...callbacks, getByType: async () => [] };
-  const suggestions = await suggestFieldsList(
-    query,
-    command,
-    command.args as ESQLAstField[],
-    Location.ROW,
-    rowCallbacks,
-    context,
-    cursorPos,
-    {
-      preferredExpressionType: 'any',
-    }
-  );
+  const innerText = query.substring(0, cursorPosition);
+  // ROW col0 = /
+  if (endsWithAssignment(innerText)) {
+    return getFunctionsSuggestions({
+      location: Location.ROW,
+      types: ['any'],
+      options: { ignored: [] },
+      context,
+      callbacks,
+    });
+  }
 
-  // ROW fields are expressions in the grammar, but in practice users usually continue
-  // a complete ROW expression with another column or command, not with expression operators.
-  return suggestions.filter((suggestion) => {
-    return suggestion.kind !== 'Operator' && suggestion.category !== SuggestionCategory.OPERATOR;
-  });
+  // ROW col0 = 23 /
+  else if (command.args.length > 0 && !isRestartingExpression(innerText)) {
+    return [
+      withAutoSuggest(pipeCompleteItem),
+      withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
+    ];
+  }
+
+  // ROW /
+  // ROW foo = "bar", /
+  return [
+    getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
+    ...getFunctionsSuggestions({
+      location: Location.ROW,
+      types: ['any'],
+      options: { ignored: [] },
+      context,
+      callbacks,
+    }),
+  ];
 }

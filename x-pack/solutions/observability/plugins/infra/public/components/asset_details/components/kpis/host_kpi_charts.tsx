@@ -27,7 +27,6 @@ export interface HostKpiChartsProps {
   loading?: boolean;
   error?: InfraHttpError;
   hasData?: boolean;
-  metricDataAvailability?: Record<string, boolean>;
   schema?: DataSchemaFormat | null;
 }
 
@@ -41,7 +40,6 @@ export const HostKpiCharts = ({
   loading = false,
   error,
   hasData = true,
-  metricDataAvailability,
   schema,
 }: HostKpiChartsProps) => {
   const charts = useHostKpiCharts({
@@ -86,7 +84,6 @@ export const HostKpiCharts = ({
             query={query}
             lastReloadRequestTime={lastReloadRequestTime}
             loading={loading}
-            valueOverride={metricDataAvailability?.[chartProps.id] === false ? NaN : undefined}
           />
         </EuiFlexItem>
       ))}

@@ -20,7 +20,7 @@ export function getReadResponseBodySchema(isDashboardAppRequest: boolean) {
           'The unique ID of the dashboard, as returned by the create or search endpoints.',
       },
     }),
-    data: getDashboardStateSchema(isDashboardAppRequest, true),
+    data: getDashboardStateSchema(isDashboardAppRequest),
     meta: asCodeMetaSchema,
     warnings: schema.maybe(warningsSchema),
   });

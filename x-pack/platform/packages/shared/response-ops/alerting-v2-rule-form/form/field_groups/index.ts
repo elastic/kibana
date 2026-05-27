@@ -8,5 +8,4 @@
 export { ConditionFieldGroup } from './condition_field_group';
 export { RuleDetailsFieldGroup } from './rule_details_field_group';
 export { RuleExecutionFieldGroup } from './rule_execution_field_group';
-export { RelatedDashboardSelector } from './related_dashboard_selector';
-export { RunbookArtifactField } from './runbook_artifact_field';
+export { AttachmentRunbookFieldGroup } from './attachment_runbook_field_group';

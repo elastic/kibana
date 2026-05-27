@@ -10,7 +10,7 @@
 import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
-import type { ManagedWorkflowTemplateValuesById, TemplatedManagedWorkflowId } from '.';
+import type { ManagedWorkflowTemplateValuesById } from '.';
 import { EXAMPLE_MANAGED_WORKFLOW_ID } from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
@@ -20,14 +20,7 @@ const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
 });
 
 type RegistryManagedWorkflowDefinition = (typeof managedWorkflowDefinitions)[number];
-type TemplateManagedWorkflowDefinition<TDefinition> = TDefinition extends {
-  yamlTemplate: (values: infer _TValues) => string;
-}
-  ? TDefinition
-  : never;
-type RegistryTemplateManagedWorkflowDefinition =
-  TemplateManagedWorkflowDefinition<RegistryManagedWorkflowDefinition>;
-type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
+type TemplateManagedWorkflowDefinition = RegistryManagedWorkflowDefinition & {
   yamlTemplate: (values: ManagedWorkflowTemplateValues) => string;
 };
 
@@ -44,15 +37,15 @@ const templateValuesLookup = templateRepresentativeValuesById as Record<
 
 const managedDefinitionsById: Array<[string, RegistryManagedWorkflowDefinition]> =
   managedWorkflowDefinitions.map((definition) => [definition.id, definition]);
-const managedTemplateDefinitionsById: Array<[string, RegistryTemplateManagedWorkflowDefinition]> =
+const managedTemplateDefinitionsById: Array<[string, TemplateManagedWorkflowDefinition]> =
   managedDefinitionsById.filter(
-    (definitionEntry): definitionEntry is [string, RegistryTemplateManagedWorkflowDefinition] =>
+    (definitionEntry): definitionEntry is [string, TemplateManagedWorkflowDefinition] =>
       hasYamlTemplate(definitionEntry[1])
   );
 
 function hasYamlTemplate(
   definition: ManagedWorkflowDefinition
-): definition is YamlTemplateManagedWorkflowDefinition {
+): definition is TemplateManagedWorkflowDefinition {
   return typeof definition.yamlTemplate === 'function';
 }
 
@@ -63,14 +56,12 @@ function hasYaml(
 }
 
 function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
-  const { id } = definition;
-
   if (hasYaml(definition)) {
     return definition.yaml;
   }
 
   if (!hasYamlTemplate(definition)) {
-    throw new Error(`Managed workflow '${id}' must define either yaml or yamlTemplate`);
+    throw new Error(`Managed workflow '${definition.id}' must define either yaml or yamlTemplate`);
   }
 
   const representativeValues = templateValuesLookup[definition.id];
@@ -156,9 +147,8 @@ describe('managedWorkflowDefinitions', () => {
   it.each(managedTemplateDefinitionsById)(
     '%s yamlTemplate renders cleanly with representative values',
     (id, definition) => {
-      const representativeValues =
-        templateRepresentativeValuesById[id as TemplatedManagedWorkflowId];
-      const renderedYaml = definition.yamlTemplate(representativeValues);
+      const representativeValues = templateValuesLookup[id];
+      const renderedYaml = definition.yamlTemplate(representativeValues!);
 
       expect(typeof renderedYaml).toBe('string');
       expect(renderedYaml.trim()).not.toHaveLength(0);

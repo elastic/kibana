@@ -16,8 +16,10 @@ import {
   externalReferenceAttachmentSO,
   externalReferenceAttachmentSOAttributes,
   externalReferenceAttachmentSOAttributesWithoutRefs,
+  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
   persistableStateAttachmentAttributes,
+  persistableStateAttachmentAttributesWithoutInjectedId,
 } from '../../attachment_framework/mocks';
 import { createAlertAttachment, createUserAttachment } from './test_utils';
 import { createErrorSO, createSOFindResponse } from '../test_utils';
@@ -34,12 +36,14 @@ const createAttachmentServiceConfig = (attachmentsEnabled = false): ConfigType =
 describe('AttachmentService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
+  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   let service: AttachmentService;
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new AttachmentService({
       log: mockLogger,
+      persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
       config: createAttachmentServiceConfig(),
     });
@@ -231,6 +235,7 @@ describe('AttachmentService', () => {
     it('when enabled, create writes to CASE_ATTACHMENT_SAVED_OBJECT with unified attributes', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -268,6 +273,7 @@ describe('AttachmentService', () => {
     it('when enabled, unified file create round-trips: extracts `attachmentId` to refs on write and re-injects it on the response', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -347,6 +353,7 @@ describe('AttachmentService', () => {
     it('when enabled, bulkCreate writes to CASE_ATTACHMENT_SAVED_OBJECT', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -386,6 +393,7 @@ describe('AttachmentService', () => {
     it('when enabled, bulkUpdate accepts partial attributes for push metadata only', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -442,6 +450,7 @@ describe('AttachmentService', () => {
     it('when enabled, bulkUpdate throws for typed patches without owner when requestWithoutType is false', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -627,7 +636,7 @@ describe('AttachmentService', () => {
   describe('update', () => {
     const soClientRes = {
       id: '1',
-      attributes: persistableStateAttachmentAttributes,
+      attributes: persistableStateAttachmentAttributesWithoutInjectedId,
       references: [],
       version: 'test',
       type: 'cases-comments',
@@ -760,7 +769,7 @@ describe('AttachmentService', () => {
   describe('bulkUpdate', () => {
     const soClientRes = {
       id: '1',
-      attributes: persistableStateAttachmentAttributes,
+      attributes: persistableStateAttachmentAttributesWithoutInjectedId,
       references: [],
       version: 'test',
       type: 'cases-comments',
@@ -946,6 +955,7 @@ describe('AttachmentService', () => {
     it('uses a single paginated find call when feature flag is enabled', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -988,6 +998,7 @@ describe('AttachmentService', () => {
     it('queries both legacy and unified comment SO types when feature flag is enabled', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -1007,6 +1018,7 @@ describe('AttachmentService', () => {
     it('transforms unified comment find results to legacy output', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });
@@ -1185,6 +1197,7 @@ describe('AttachmentService', () => {
     it('when enabled, sums legacy + unified counts and excludes `file` from the unified type filter', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
       });

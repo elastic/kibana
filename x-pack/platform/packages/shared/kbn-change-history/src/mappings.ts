@@ -56,7 +56,7 @@ export const changeHistoryMappings = {
           id: mappings.keyword(),
           type: mappings.keyword(),
           hash: mappings.keyword(),
-          sequence: mappings.long(),
+          sequence: mappings.integer(),
           fields: mappings.object({
             properties: {
               hashed: mappings.keyword(),

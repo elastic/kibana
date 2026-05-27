@@ -37,20 +37,10 @@ export const AppMenuPopoverActionButtons = ({
     setOpenPopoverId(null);
   };
 
-  const commonProps = {
-    isPopoverOpen: openPopoverId === primaryActionItem.id,
-    onPopoverToggle: () => handlePopoverToggle(primaryActionItem.id),
-    onPopoverClose: handleOnPopoverClose,
-    onCloseOverflowButton,
-    fullWidth: true as const,
-  };
-
   const containerCss = css`
     margin-top: ${euiTheme.size.m};
     margin-bottom: ${euiTheme.size.m};
   `;
-
-  const hasRun = 'run' in primaryActionItem && typeof primaryActionItem.run === 'function';
 
   return (
     <EuiFlexGroup
@@ -61,20 +51,24 @@ export const AppMenuPopoverActionButtons = ({
       css={containerCss}
       data-test-subj="app-menu-popover-action-buttons-container"
     >
-      <EuiFlexItem>
-        {hasRun ? (
+      {primaryActionItem && (
+        <EuiFlexItem>
           <AppMenuActionButton
             {...primaryActionItem}
-            {...commonProps}
             run={(params) => {
-              primaryActionItem.run?.(params);
+              primaryActionItem?.run?.(params);
               onCloseOverflowButton?.();
             }}
+            isPopoverOpen={openPopoverId === primaryActionItem.id}
+            onPopoverToggle={() => {
+              handlePopoverToggle(primaryActionItem.id);
+            }}
+            onPopoverClose={handleOnPopoverClose}
+            onCloseOverflowButton={onCloseOverflowButton}
+            fullWidth
           />
-        ) : (
-          <AppMenuActionButton {...primaryActionItem} {...commonProps} />
-        )}
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

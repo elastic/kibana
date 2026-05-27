@@ -18,11 +18,7 @@ import type { ShareActionIntents, SharingData } from '@kbn/share-plugin/public/t
 import type { IntlShape } from '@kbn/i18n-react';
 import type { ReportingCSVSharingData } from '@kbn/reporting-public/types';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
-import {
-  getColumnsWithTimeField,
-  getSharingData,
-  showPublicUrlSwitch,
-} from '../../../../../utils/get_sharing_data';
+import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
@@ -68,7 +64,12 @@ export const buildShareOptions = async ({
     services,
   });
 
-  const searchSourceSharingData = await getSharingData(searchSource, currentTab.appState, services);
+  const searchSourceSharingData = await getSharingData(
+    searchSource,
+    currentTab.appState,
+    services,
+    isEsqlMode
+  );
 
   const { locator } = services;
   const { timefilter } = services.data.query.timefilter;
@@ -121,8 +122,6 @@ export const buildShareOptions = async ({
     allowShortUrl: !!services.capabilities.discover_v2.createShortUrl,
     shareableUrl,
     shareableUrlForSavedObject,
-    // Share URL gets the unmodified `columns` array (without the automatically added time field)
-    // so it does not trigger the unsaved changes badge when user opens the link
     shareableUrlLocatorParams: { locator, params },
     objectId: persistedDiscoverSession?.id,
     objectType: 'search',
@@ -152,25 +151,7 @@ export const buildShareOptions = async ({
     },
     sharingData: {
       isTextBased: isEsqlMode,
-      locatorParams: [
-        {
-          id: locator.id,
-          version: services.metadata.version,
-          params: isEsqlMode
-            ? {
-                ...params,
-                // in ES|QL mode this `columns` array will be used when generating CSV on Discover page (CSV v2)
-                // this way the time field will be included only for CSV export and not for Share URL
-                columns: getColumnsWithTimeField({
-                  columns: (params.columns as string[]) || [],
-                  timeFieldName: dataView?.timeFieldName,
-                  uiSettings: services.uiSettings,
-                  query: currentTab.appState.query,
-                }),
-              }
-            : params,
-        },
-      ],
+      locatorParams: [{ id: locator.id, version: services.metadata.version, params }],
       ...searchSourceSharingData,
       // CSV reports can be generated without a saved search so we provide a fallback title
       title:

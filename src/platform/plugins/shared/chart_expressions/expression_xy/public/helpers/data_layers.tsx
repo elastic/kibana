@@ -143,7 +143,7 @@ export const getFormattedRow = (
         (id === xAccessor && xScaleType === 'ordinal') ||
         (id !== xAccessor && categoricalAccessors.includes(id))
       ) {
-        const formattedValue = columnsFormatters[id]?.convertToText(record) ?? '';
+        const formattedValue = columnsFormatters[id]?.convert(record) ?? '';
         invertedRawValueMap.get(id)?.set(formattedValue, record);
         return {
           row: { ...formattedInfo.row, [id]: formattedValue },
@@ -254,7 +254,7 @@ function getSplitValues(
       const splitFormatter = splitAccessorsFormats[splitColumnId].formatter;
       return [
         ...acc,
-        alreadyFormattedColumns[splitColumnId] ? value : splitFormatter.convertToText(value),
+        alreadyFormattedColumns[splitColumnId] ? value : splitFormatter.convert(value),
       ];
     }
 
@@ -535,7 +535,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     xAccessor: xColumnId || 'unifiedX',
     yAccessors: Array.isArray(accessor) ? accessor : [accessor],
     markSizeAccessor: markSizeColumnId,
-    markFormat: (value) => markFormatter.convertToText(value),
+    markFormat: (value) => markFormatter.convert(value),
     data: rows,
     xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
     yScaleType:

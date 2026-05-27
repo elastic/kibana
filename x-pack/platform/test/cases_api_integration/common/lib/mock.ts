@@ -170,7 +170,7 @@ export const persistableStateAttachment: PersistableStateAttachmentPayload = {
   type: AttachmentType.persistableState,
   owner: 'securitySolutionFixture',
   persistableStateAttachmentTypeId: '.test',
-  persistableStateAttachmentState: { foo: 'foo' },
+  persistableStateAttachmentState: { foo: 'foo', injectedId: 'testRef' },
 };
 
 export const postCaseResp = (

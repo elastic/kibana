@@ -264,7 +264,6 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
             },
           },
           snooze_schedule: [],
-          is_snoozed_until: response.body.is_snoozed_until,
         });
 
         // Ensure AAD isn't broken
@@ -350,7 +349,6 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
             },
           },
           snooze_schedule: [],
-          is_snoozed_until: response.body.is_snoozed_until,
         });
 
         // Ensure AAD isn't broken

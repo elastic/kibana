@@ -84,7 +84,6 @@ function createMockContext(
     dynamicConnectorTypes: null,
     workflows: { workflows: {}, totalWorkflows: 0 },
     currentWorkflowId: null,
-    isCurrentWorkflowManaged: false,
     workflowDefinition: null,
     model: {} as monaco.editor.ITextModel,
     position: new monaco.Position(1, 1),

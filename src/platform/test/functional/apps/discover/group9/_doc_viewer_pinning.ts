@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const esql = getService('esql');
   const kibanaServer = getService('kibanaServer');
   const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
@@ -107,6 +108,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover doc viewer pinning', function describeIndexTests() {
     before(async function () {
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
@@ -118,6 +122,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );

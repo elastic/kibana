@@ -34,7 +34,6 @@ export interface RemoveDataViewProps {
   namespaces?: string[] | undefined;
   name?: string;
   getName: () => string;
-  managed?: boolean;
 }
 
 interface RemoveDataViewDeps {
@@ -62,17 +61,15 @@ export const DeleteDataViewFlyout = ({
     onClose();
   };
 
-  const deletableDataViews = dataViewArray.filter((dv) => !dv.managed);
-
   const deleteDataViews = async () => {
-    asyncForEach(deletableDataViews, async ({ id }) => dataViews.delete(id))
+    asyncForEach(dataViewArray, async ({ id }) => dataViews.delete(id))
       .then(() => {
         onDelete();
         notifications.toasts.addSuccess(
           i18n.translate('indexPatternManagement.dataViewTable.deleteSuccessToast', {
             defaultMessage:
               'Successfully deleted {count, number} {count, plural, one {data view} other {data views}}.',
-            values: { count: deletableDataViews.length },
+            values: { count: dataViewArray.length },
           })
         );
       })
@@ -86,14 +83,11 @@ export const DeleteDataViewFlyout = ({
   });
 
   const disableDeleteButton = React.useMemo(() => {
-    if (deletableDataViews.length === 0) {
-      return true;
-    }
     return (
       reviewedItems.size !==
       Object.values(selectedRelationships).filter((relations) => relations.length > 0).length
     );
-  }, [reviewedItems, selectedRelationships, deletableDataViews.length]);
+  }, [reviewedItems, selectedRelationships]);
 
   return (
     <EuiFlyout

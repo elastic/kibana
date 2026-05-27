@@ -139,7 +139,7 @@ export const DocumentCountChart: FC<Props> = ({
             id="bottom"
             position={Position.Bottom}
             showOverlappingTicks={true}
-            tickFormat={(value) => xAxisFormatter.convertToText(value)}
+            tickFormat={(value) => xAxisFormatter.convert(value)}
           />
           <Axis id="left" position={Position.Left} />
           <HistogramBarSeries

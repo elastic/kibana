@@ -19,7 +19,6 @@ import {
   TerminalExecutionStatuses,
 } from '@kbn/workflows';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
-import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
@@ -27,7 +26,6 @@ import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
 describe('checkAndSkipIfExistingScheduledExecution', () => {
   let esClient: jest.Mocked<Client>;
   let workflowExecutionRepository: WorkflowExecutionRepository;
-  let stepExecutionRepository: StepExecutionRepository;
   let logger: Logger;
   let workflow: WorkflowExecutionEngineModel;
   let currentTaskInstance: ConcreteTaskInstance;
@@ -64,8 +62,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     esClient.indices.create = jest.fn().mockResolvedValue({}) as any;
     esClient.update = jest.fn().mockResolvedValue({} as any);
     workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-    stepExecutionRepository = new StepExecutionRepository(esClient);
-    jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
     logger = loggingSystemMock.create().get();
     workflow = {
       id: 'test-workflow-id',
@@ -106,7 +102,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflow,
         spaceId,
         workflowExecutionRepository,
-        stepExecutionRepository,
         currentTaskInstance,
         logger
       );
@@ -161,7 +156,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflow,
         spaceId,
         workflowExecutionRepository,
-        stepExecutionRepository,
         currentTaskInstance,
         logger
       );
@@ -236,7 +230,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           workflow,
           spaceId,
           workflowExecutionRepository,
-          stepExecutionRepository,
           currentTaskInstance,
           logger
         );
@@ -260,7 +253,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
           workflow,
           spaceId,
           workflowExecutionRepository,
-          stepExecutionRepository,
           currentTaskInstance,
           logger
         );
@@ -283,7 +275,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         { ...workflow, id: 'different-workflow-id' },
         spaceId,
         workflowExecutionRepository,
-        stepExecutionRepository,
         currentTaskInstance,
         logger
       );
@@ -304,7 +295,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflow,
         'different-space',
         workflowExecutionRepository,
-        stepExecutionRepository,
         currentTaskInstance,
         logger
       );
@@ -325,7 +315,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflow,
         spaceId,
         workflowExecutionRepository,
-        stepExecutionRepository,
         currentTaskInstance,
         logger
       );
@@ -358,7 +347,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflow,
         spaceId,
         workflowExecutionRepository,
-        stepExecutionRepository,
         currentTaskInstance,
         logger
       );
@@ -408,7 +396,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflow,
         spaceId,
         workflowExecutionRepository,
-        stepExecutionRepository,
         retryTaskInstance,
         logger
       );
@@ -458,7 +445,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflow,
         spaceId,
         workflowExecutionRepository,
-        stepExecutionRepository,
         retryTaskInstance,
         logger
       );
@@ -497,7 +483,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflow,
         spaceId,
         workflowExecutionRepository,
-        stepExecutionRepository,
         firstAttemptTaskInstance,
         logger
       );
@@ -539,7 +524,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflow,
         spaceId,
         workflowExecutionRepository,
-        stepExecutionRepository,
         currentTaskInstance,
         logger
       );
@@ -584,7 +568,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflow,
         spaceId,
         workflowExecutionRepository,
-        stepExecutionRepository,
         currentTaskInstance,
         logger
       );
@@ -627,7 +610,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflow,
         spaceId,
         workflowExecutionRepository,
-        stepExecutionRepository,
         taskInstanceWithoutRunAt,
         logger
       );
@@ -666,7 +648,6 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
         workflow,
         spaceId,
         workflowExecutionRepository,
-        stepExecutionRepository,
         retryTaskInstance,
         logger
       );

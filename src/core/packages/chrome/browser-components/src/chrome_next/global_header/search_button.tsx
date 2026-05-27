@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiIcon, useEuiBreakpoint, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -29,8 +29,6 @@ const ARIA_LABEL = i18n.translate('core.ui.chrome.globalHeader.searchButton.aria
 });
 
 const MODIFIER_KEY = isMac ? '⌘' : 'Ctrl';
-
-const SHORTCUT = { key: '/', meta: true };
 
 export const SearchButton = React.memo(() => {
   const config = useGlobalSearch();
@@ -70,11 +68,17 @@ export const SearchButton = React.memo(() => {
     whiteSpace: 'nowrap',
   });
 
-  const shortcutLabel = `${MODIFIER_KEY} ${SHORTCUT.key}`;
-
-  useKeyboardShortcut(SHORTCUT, config?.onClick);
+  const shortcut = useMemo(
+    () => (config?.shortcutKey ? { key: config.shortcutKey, meta: true } : undefined),
+    [config?.shortcutKey]
+  );
+  useKeyboardShortcut(shortcut, config?.onClick);
 
   if (!config) return null;
+
+  const shortcutLabel = config.shortcutKey
+    ? `${MODIFIER_KEY} ${config.shortcutKey.toUpperCase()}`
+    : undefined;
 
   return (
     <button
@@ -92,7 +96,9 @@ export const SearchButton = React.memo(() => {
     >
       <EuiIcon type="search" size="m" color={euiTheme.colors.textParagraph} aria-hidden />
       <span css={[placeholderStyles, collapsibleStyles]}>{PLACEHOLDER}</span>
-      <EuiBadge css={[shortcutBadgeStyles, collapsibleStyles]}>{shortcutLabel}</EuiBadge>
+      {shortcutLabel && (
+        <EuiBadge css={[shortcutBadgeStyles, collapsibleStyles]}>{shortcutLabel}</EuiBadge>
+      )}
     </button>
   );
 });

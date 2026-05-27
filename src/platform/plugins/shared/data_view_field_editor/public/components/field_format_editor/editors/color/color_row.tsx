@@ -18,7 +18,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSelect,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -123,10 +122,6 @@ export const ColorRow = ({
       <EuiFlexItem grow={false}>
         <EuiColorPicker
           color={text}
-          aria-label={i18n.translate('indexPatternFieldEditor.color.textColorAriaLabel', {
-            defaultMessage: 'Text color for item {index}',
-            values: { index },
-          })}
           data-test-subj={`colorEditorColorPicker ${index}`}
           onChange={(newColor) => {
             onColorChange(
@@ -164,10 +159,6 @@ export const ColorRow = ({
       <EuiFlexItem grow={false}>
         <EuiColorPicker
           color={background}
-          aria-label={i18n.translate('indexPatternFieldEditor.color.backgroundColorAriaLabel', {
-            defaultMessage: 'Background color for item {index}',
-            values: { index },
-          })}
           data-test-subj={`colorEditorBackgroundPicker ${index}`}
           onChange={(newColor: string) => {
             onColorChange(
@@ -204,24 +195,17 @@ export const ColorRow = ({
       </EuiFlexItem>
       {showDeleteButton && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('indexPatternFieldEditor.color.deleteTitle', {
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            onClick={() => {
+              onRemoveColor(index);
+            }}
+            aria-label={i18n.translate('indexPatternFieldEditor.color.deleteTitle', {
               defaultMessage: 'Delete color format',
             })}
-            disableScreenReaderOutput
-          >
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              onClick={() => {
-                onRemoveColor(index);
-              }}
-              aria-label={i18n.translate('indexPatternFieldEditor.color.deleteTitle', {
-                defaultMessage: 'Delete color format',
-              })}
-              data-test-subj="colorEditorRemoveColor"
-            />
-          </EuiToolTip>
+            data-test-subj="colorEditorRemoveColor"
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

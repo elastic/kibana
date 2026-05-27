@@ -1,4 +1,3 @@
-knip
 safe-stable-stringify
 ajv-draft-04
 ajv-formats

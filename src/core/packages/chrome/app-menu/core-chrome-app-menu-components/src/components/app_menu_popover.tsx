@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo, type ReactElement } from 'react';
-import { EuiContextMenu, EuiPopover, EuiToolTip, type PopoverAnchorPosition } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { getPopoverPanels, getTooltip } from '../utils';
 import type {
   AppMenuItemType,
@@ -29,7 +29,6 @@ interface AppMenuContextMenuProps {
   primaryActionItem?: AppMenuPrimaryActionItem;
   switchConfig?: AppMenuSwitch;
   popoverTestId?: string;
-  anchorPosition?: PopoverAnchorPosition;
   onClose: () => void;
   onCloseOverflowButton?: () => void;
 }
@@ -46,7 +45,6 @@ export const AppMenuPopover = ({
   primaryActionItem,
   switchConfig,
   popoverTestId = 'app-menu-popover',
-  anchorPosition = 'downLeft',
   onClose,
   onCloseOverflowButton,
 }: AppMenuContextMenuProps) => {
@@ -98,7 +96,7 @@ export const AppMenuPopover = ({
       closePopover={onClose}
       panelPaddingSize="none"
       hasArrow={false}
-      anchorPosition={anchorPosition}
+      anchorPosition="downLeft"
       aria-label={title || content}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} css={{ minWidth: 180 }} />

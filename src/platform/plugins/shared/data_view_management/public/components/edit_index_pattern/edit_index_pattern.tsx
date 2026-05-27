@@ -179,7 +179,9 @@ export const EditIndexPattern = withRouter(
               indexPattern={dataView}
               setDefault={() => dataViewMgmtService.setDefaultDataView()}
               editIndexPatternClick={editPattern}
-              deleteIndexPatternClick={dataView?.managed ? undefined : () => setFlyoutOpen(true)}
+              deleteIndexPatternClick={() => {
+                setFlyoutOpen(true);
+              }}
               defaultIndex={defaultIndex}
               canSave={userEditPermission}
             />

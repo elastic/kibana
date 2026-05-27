@@ -11,6 +11,7 @@ import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 interface CanvasState {
   attachment: UnknownAttachment;
   isSidebar: boolean;
+  version?: number;
 }
 
 export const getAttachmentPreviewKey = (attachmentId: string, version?: number) =>
@@ -19,7 +20,7 @@ export const getAttachmentPreviewKey = (attachmentId: string, version?: number) 
 interface CanvasContextValue {
   canvasState: CanvasState | null;
   previewedAttachmentKey: string | null;
-  openCanvas: (attachment: UnknownAttachment, isSidebar: boolean) => void;
+  openCanvas: (attachment: UnknownAttachment, isSidebar: boolean, version?: number) => void;
   closeCanvas: () => void;
   setCanvasAttachmentOrigin: (origin: string) => void;
   setPreviewedAttachmentKey: (attachmentKey: string | null) => void;
@@ -35,16 +36,19 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
   const [canvasState, setCanvasState] = useState<CanvasState | null>(null);
   const [previewedAttachmentKey, setPreviewedAttachmentKey] = useState<string | null>(null);
 
-  const openCanvas = useCallback((attachment: UnknownAttachment, isSidebar: boolean) => {
-    setCanvasState({ attachment, isSidebar });
-    setPreviewedAttachmentKey(getAttachmentPreviewKey(attachment.id, attachment.version));
-  }, []);
+  const openCanvas = useCallback(
+    (attachment: UnknownAttachment, isSidebar: boolean, version?: number) => {
+      setCanvasState({ attachment, isSidebar, version });
+      setPreviewedAttachmentKey(getAttachmentPreviewKey(attachment.id, version));
+    },
+    []
+  );
 
   const closeCanvas = useCallback(() => {
     if (canvasState) {
       const canvasPreviewKey = getAttachmentPreviewKey(
         canvasState.attachment.id,
-        canvasState.attachment.version
+        canvasState.version
       );
       if (previewedAttachmentKey === canvasPreviewKey) {
         setPreviewedAttachmentKey(null);

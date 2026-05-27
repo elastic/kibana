@@ -172,15 +172,7 @@ describe('TriggerEventHandler', () => {
     const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
     const deps = createDeps({
       scheduleWorkflow,
-      workflowRepository: createWorkflowRepositoryMock([
-        createMockWorkflow({
-          id: 'wf-1',
-          managed: true,
-          managedBy: 'workflowsExtensionsExample',
-          originManagedWorkflowId: 'system-example-greeting',
-          managedVersion: 3,
-        }),
-      ]),
+      workflowRepository: createWorkflowRepositoryMock([createMockWorkflow({ id: 'wf-1' })]),
     });
     const handler = new TriggerEventHandler(deps);
 
@@ -192,13 +184,7 @@ describe('TriggerEventHandler', () => {
 
     expect(scheduleWorkflow).toHaveBeenCalledTimes(1);
     const [workflowArg, contextArg, requestArg] = scheduleWorkflow.mock.calls[0];
-    expect(workflowArg).toMatchObject({
-      id: 'wf-1',
-      managed: true,
-      managedBy: 'workflowsExtensionsExample',
-      originManagedWorkflowId: 'system-example-greeting',
-      managedVersion: 3,
-    });
+    expect(workflowArg.id).toBe('wf-1');
     expect(requestArg).toBe(mockRequest);
     expect(contextArg.triggeredBy).toBe('cases.updated');
     expect(contextArg.event.caseId).toBe('case-123');

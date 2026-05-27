@@ -6,10 +6,13 @@
  */
 
 import { CustomFieldTypes, UserActionActions } from '../../../../common/types/domain';
+import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import type { UserActionParameters } from '../types';
 import { CustomFieldsUserActionBuilder } from './custom_fields';
 
 describe('CustomFieldsUserActionBuilder', () => {
+  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+
   const builderArgs: UserActionParameters<'customFields'> = {
     action: 'update' as const,
     caseId: 'test-id',
@@ -40,7 +43,7 @@ describe('CustomFieldsUserActionBuilder', () => {
   beforeEach(() => {
     jest.resetAllMocks();
 
-    builder = new CustomFieldsUserActionBuilder();
+    builder = new CustomFieldsUserActionBuilder({ persistableStateAttachmentTypeRegistry });
   });
 
   afterAll(() => {

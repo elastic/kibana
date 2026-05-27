@@ -68,7 +68,7 @@ describe('runAgent', () => {
     });
 
     expect(agentClient.get).toHaveBeenCalledTimes(1);
-    expect(agentClient.get).toHaveBeenCalledWith(params.agentId, { access: 'use' });
+    expect(agentClient.get).toHaveBeenCalledWith(params.agentId);
   });
 
   it('calls the agent handler with the expected parameters', async () => {

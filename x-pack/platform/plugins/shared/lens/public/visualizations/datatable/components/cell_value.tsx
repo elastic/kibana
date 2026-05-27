@@ -114,7 +114,7 @@ export const createGridCell = (
       case 'badge':
         return (
           <BadgeCell
-            label={formatter?.convertToText(rawValue) ?? fallbackText}
+            label={formatter?.convert(rawValue, 'text') ?? fallbackText}
             badgeColor={badgeColor}
             isClickable={isClickable}
             onClick={onFilter}
@@ -141,7 +141,7 @@ export const createGridCell = (
 
         return (
           <LinkCell
-            content={formatter?.convertToText(rawValue) ?? fallbackText}
+            content={formatter?.convert(rawValue, 'text') ?? fallbackText}
             linkColor={linkColor}
             onClick={onFilter}
             alignment={alignment}
@@ -154,7 +154,7 @@ export const createGridCell = (
       default:
         return (
           <FormattedCell
-            content={formatter?.convertToReact(rawValue) ?? fallbackText}
+            content={formatter?.reactConvert(rawValue) ?? fallbackText}
             alignment={alignment}
             fitRowToContent={fitRowToContent}
             isColored={Boolean(cellStyle)}

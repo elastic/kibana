@@ -42,7 +42,7 @@ const expectedIndexPatterns = {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
-    getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
   },

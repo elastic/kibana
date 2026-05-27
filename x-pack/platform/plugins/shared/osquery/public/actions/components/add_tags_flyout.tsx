@@ -148,7 +148,6 @@ const AddTagsFlyoutComponent: React.FC<AddTagsFlyoutProps> = ({
             onCreateOption={handleCreateOption}
             customOptionText={CUSTOM_OPTION_TEXT}
             isClearable
-            isInvalid={isAtMaxTags}
             fullWidth
             data-test-subj="add-tags-flyout-combo-box"
           />

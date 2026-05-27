@@ -22,7 +22,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
-import { initializeStateApi } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { rewriteFiltersForSloSummary } from '../../../../common/rewrite_slo_filters';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
@@ -100,33 +100,35 @@ export const getOverviewEmbeddableFactory = ({
     const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
     const reload$ = new Subject<boolean>();
 
-    const stateApi = initializeStateApi<OverviewEmbeddableState>({
+    function serializeState(): OverviewEmbeddableState {
+      const commonState = {
+        ...titleManager.getLatestState(),
+        ...drilldownsManager.getLatestState(),
+      };
+
+      if (overviewMode$.getValue() === 'single') {
+        return {
+          ...commonState,
+          overview_mode: 'single',
+          ...singleSloManager.getLatestState(),
+        };
+      }
+
+      if (overviewMode$.getValue() === 'groups') {
+        return {
+          ...commonState,
+          overview_mode: 'groups',
+          ...groupSloManager.getLatestState(),
+        };
+      }
+
+      throw new Error('overview_mode not provided');
+    }
+
+    const unsavedChangesApi = initializeUnsavedChanges<OverviewEmbeddableState>({
       uuid,
       parentApi,
-      serializeState: () => {
-        const commonState = {
-          ...titleManager.getLatestState(),
-          ...drilldownsManager.getLatestState(),
-        };
-
-        if (overviewMode$.getValue() === 'single') {
-          return {
-            ...commonState,
-            overview_mode: 'single',
-            ...singleSloManager.getLatestState(),
-          };
-        }
-
-        if (overviewMode$.getValue() === 'groups') {
-          return {
-            ...commonState,
-            overview_mode: 'groups',
-            ...groupSloManager.getLatestState(),
-          };
-        }
-
-        throw new Error('overview_mode not provided');
-      },
+      serializeState,
       anyStateChange$: merge(
         drilldownsManager.anyStateChange$,
         titleManager.anyStateChange$,
@@ -146,17 +148,17 @@ export const getOverviewEmbeddableFactory = ({
         ...titleComparators,
         ...drilldownsManager.comparators,
       }),
-      applySerializedState: (nextState) => {
-        drilldownsManager.reinitializeState(nextState);
-        titleManager.reinitializeState(nextState);
-        singleSloManager.reinitializeState(nextState as SingleOverviewCustomState);
-        groupSloManager.reinitializeState(nextState as GroupOverviewCustomState);
-        setOverviewMode(nextState.overview_mode);
+      onReset: (lastSaved) => {
+        drilldownsManager.reinitializeState(lastSaved ?? {});
+        titleManager.reinitializeState(lastSaved);
+        singleSloManager.reinitializeState(lastSaved as SingleOverviewCustomState);
+        groupSloManager.reinitializeState(lastSaved as GroupOverviewCustomState);
+        setOverviewMode(lastSaved?.overview_mode);
       },
     });
 
     const api = finalizeApi({
-      ...stateApi,
+      ...unsavedChangesApi,
       ...titleManager.api,
       ...drilldownsManager.api,
       defaultTitle$,
@@ -181,6 +183,7 @@ export const getOverviewEmbeddableFactory = ({
           return Promise.reject();
         }
       },
+      serializeState,
       getSloGroupOverviewConfig: (): GroupOverviewCustomState => {
         return {
           ...groupSloManager.getLatestState(),

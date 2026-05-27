@@ -11,10 +11,13 @@ import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
-import type { BulkEnableRulesRequestBodyV1 } from '../../../../../common/routes/rule/apis/bulk_enable';
+import type {
+  BulkEnableRulesRequestBodyV1,
+  BulkEnableRulesResponseV1,
+} from '../../../../../common/routes/rule/apis/bulk_enable';
 import { bulkEnableBodySchemaV1 } from '../../../../../common/routes/rule/apis/bulk_enable';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
-import { transformBulkEnableResponseInternalV1 } from './transforms';
+import { transformBulkEnableResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const bulkEnableRulesRoute = ({
@@ -46,7 +49,8 @@ export const bulkEnableRulesRoute = ({
               ids: body.ids,
             });
 
-            const response = transformBulkEnableResponseInternalV1<RuleParamsV1>(result);
+            const response: BulkEnableRulesResponseV1<RuleParamsV1>['body'] =
+              transformBulkEnableResponseV1<RuleParamsV1>(result);
             return res.ok({ body: response });
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {

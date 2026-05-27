@@ -135,7 +135,7 @@ export const TagCloudChart = ({
           : { value: row[tagColumn], tag: row[tagColumn] };
 
       return {
-        text: bucketFormatter ? bucketFormatter.convertToText(tag) : tag,
+        text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
         weight:
           tag === 'all' || visData.rows.length <= 1
             ? 1
@@ -207,7 +207,7 @@ export const TagCloudChart = ({
 
       const rowIndex = visData.rows.findIndex((row) => {
         const formattedValue = bucketFormatter
-          ? bucketFormatter.convertToText(row[termsBucketId])
+          ? bucketFormatter.convert(row[termsBucketId], 'text')
           : row[termsBucketId];
         return formattedValue === clickedValue;
       });

@@ -58,7 +58,6 @@ export function useFetchLog({ id, index }: UseFetchLogParams) {
 
   return {
     loading,
-    error,
     log: value?.fields ? unflattenObject(value.fields) : undefined,
     index: value?._index,
   };

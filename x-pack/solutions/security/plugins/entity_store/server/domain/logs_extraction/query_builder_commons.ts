@@ -33,8 +33,6 @@ import {
 } from '../../../common/domain/euid/esql';
 import { getFieldEvaluationsFromDefinition } from '../../../common/domain/euid/field_evaluations';
 
-export const MAX_COLLECTED_VALUES_PER_FIELD = 50;
-
 export const ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD =
   'entity.EngineMetadata.FirstSeenLogInPage';
 export const ENGINE_METADATA_UNTYPED_ID_FIELD = 'entity.EngineMetadata.UntypedId';
@@ -124,7 +122,7 @@ export function aggregationStats(fields: EntityField[], renameToRecent: boolean 
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${finalDest} = VALUES(${castedSrc})`;
+          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_newest_value':
           return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_oldest_value':

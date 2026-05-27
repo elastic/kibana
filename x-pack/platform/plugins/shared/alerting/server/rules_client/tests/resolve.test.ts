@@ -154,7 +154,6 @@ describe('resolve()', () => {
           "status": "ok",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
         "params": Object {
@@ -178,7 +177,7 @@ describe('resolve()', () => {
     `);
   });
 
-  test('always includes snooze data in result', async () => {
+  test('calls saved objects client with id and includeSnoozeData params', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.resolve.mockResolvedValueOnce({
       saved_object: {
@@ -231,7 +230,7 @@ describe('resolve()', () => {
       outcome: 'aliasMatch',
       alias_target_id: '2',
     });
-    const result = await rulesClient.resolve({ id: '1' });
+    const result = await rulesClient.resolve({ id: '1', includeSnoozeData: true });
     expect(result.isSnoozedUntil).toBeTruthy();
   });
 
@@ -345,7 +344,6 @@ describe('resolve()', () => {
           "status": "ok",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
         "params": Object {
@@ -547,7 +545,6 @@ describe('resolve()', () => {
           "status": "ok",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "outcome": "aliasMatch",
         "params": Object {

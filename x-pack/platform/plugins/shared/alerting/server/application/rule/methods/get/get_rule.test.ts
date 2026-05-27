@@ -148,7 +148,6 @@ describe('get()', () => {
           "status": "unknown",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -250,7 +249,6 @@ describe('get()', () => {
           "status": "unknown",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -341,7 +339,6 @@ describe('get()', () => {
           "status": "unknown",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -475,7 +472,6 @@ describe('get()', () => {
           "status": "unknown",
         },
         "id": "1",
-        "isSnoozedUntil": null,
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,

@@ -42,6 +42,7 @@ import {
   getBothSettingsUserActions,
 } from './mocks';
 import { CaseUserActionService } from '.';
+import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import {
   createUserActionFindSO,
@@ -58,6 +59,8 @@ import {
 } from '../../../common/types/domain';
 
 describe('CaseUserActionService', () => {
+  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
+
   beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2022-01-09T22:00:00.000Z'));
@@ -101,6 +104,7 @@ describe('CaseUserActionService', () => {
       service = new CaseUserActionService({
         unsecuredSavedObjectsClient,
         log: mockLogger,
+        persistableStateAttachmentTypeRegistry,
         auditLogger: mockAuditLogger,
         savedObjectsSerializer: soSerializerMock,
       });
@@ -209,6 +213,7 @@ describe('CaseUserActionService', () => {
         service = new CaseUserActionService({
           unsecuredSavedObjectsClient,
           log: mockLogger,
+          persistableStateAttachmentTypeRegistry,
           auditLogger: mockAuditLogger,
           savedObjectsSerializer: soSerializerMock,
           isCasesAttachmentsEnabled: true,

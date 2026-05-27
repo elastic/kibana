@@ -16,4 +16,3 @@ export * as TestFailures from './test-failures';
 export * from './utils';
 export * from './pr_labels';
 export * from './scout';
-export * from './version-bump/utils';

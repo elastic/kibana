@@ -17,7 +17,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from 'fs';
-import { parse, stringify } from 'yaml';
+import { dump, load } from 'js-yaml';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { MergerConfig } from '../../src/openapi_merger';
 import { merge } from '../../src/openapi_merger';
@@ -60,7 +60,7 @@ function dumpSpecs(folderPath: string, oasSpecs: Record<string, OpenAPIV3.Docume
   for (const [fileName, oasSpec] of Object.entries(oasSpecs)) {
     writeFileSync(
       join(folderPath, `${fileName}.schema.yaml`),
-      stringify(oasSpec, { strict: false })
+      dump(oasSpec, { skipInvalid: true })
     );
   }
 }
@@ -71,7 +71,7 @@ export function readMergedSpecs(folderPath: string): Record<string, OpenAPIV3.Do
   for (const fileName of readdirSync(folderPath)) {
     const yaml = readFileSync(join(folderPath, fileName), { encoding: 'utf8' });
 
-    mergedSpecs[fileName] = parse(yaml);
+    mergedSpecs[fileName] = load(yaml);
   }
 
   return mergedSpecs;

@@ -25,7 +25,7 @@ import {
   fetch$,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeStateApi } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { ClientPluginsStart } from '../../../plugin';
@@ -84,14 +84,18 @@ export const getStatsOverviewEmbeddableFactory = (
 
       const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
-      const stateApi = initializeStateApi<OverviewStatsEmbeddableState>({
-        parentApi,
-        uuid,
-        serializeState: () => ({
+      function serializeState(): OverviewStatsEmbeddableState {
+        return {
           ...titleManager.getLatestState(),
           filters: filters$.getValue(),
           ...drilldownsManager.getLatestState(),
-        }),
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<OverviewStatsEmbeddableState>({
+        parentApi,
+        uuid,
+        serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           filters$.pipe(
@@ -108,17 +112,17 @@ export const getStatsOverviewEmbeddableFactory = (
         defaultState: {
           filters: DEFAULT_FILTERS,
         },
-        applySerializedState: (nextState) => {
-          drilldownsManager.reinitializeState(nextState);
-          titleManager.reinitializeState(nextState);
-          filters$.next(nextState.filters ?? DEFAULT_FILTERS);
+        onReset: (lastSaved) => {
+          drilldownsManager.reinitializeState(lastSaved ?? {});
+          titleManager.reinitializeState(lastSaved);
+          filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
         ...drilldownsManager.api,
-        ...stateApi,
+        ...unsavedChangesApi,
         supportedTriggers: () => SYNTHETICS_STATS_SUPPORTED_TRIGGERS,
         defaultTitle$,
         getTypeDisplayName: () =>
@@ -145,6 +149,7 @@ export const getStatsOverviewEmbeddableFactory = (
             return Promise.reject();
           }
         },
+        serializeState,
       });
 
       const fetchSubscription = fetch$(api)

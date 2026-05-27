@@ -10,6 +10,7 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const config = getService('config');
   const isCcsTest = config.get('esTestCluster.ccs');
@@ -17,6 +18,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('discover/ccs_compatible', function () {
     before(async function () {
       await browser.setWindowSize(1300, 800);
+    });
+
+    after(async function unloadMakelogs() {
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     loadTestFile(require.resolve('./_data_view_editor'));

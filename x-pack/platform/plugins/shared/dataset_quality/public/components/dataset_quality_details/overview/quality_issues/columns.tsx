@@ -115,7 +115,7 @@ export const getQualityIssuesColumns = ({
     sortable: true,
     field: 'lastOccurrence',
     render: (lastOccurrence: number) => {
-      return dateFormatter.convertToText(lastOccurrence);
+      return dateFormatter.convert(lastOccurrence);
     },
   },
 ];

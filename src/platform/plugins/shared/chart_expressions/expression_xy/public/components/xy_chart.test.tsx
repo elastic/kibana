@@ -155,9 +155,9 @@ describe('XYChart component', () => {
 
     formatFactorySpy = jest.fn((mapping?: SerializedFieldFormat) => {
       const fieldFormat = fieldFormatsRegistry.deserialize(mapping);
-      const originalConvert = fieldFormat.convertToText?.bind(fieldFormat) ?? ((v: unknown) => v);
+      const originalConvert = fieldFormat.convert?.bind(fieldFormat) ?? ((v: unknown) => v);
       convertSpy = jest.fn((value) => originalConvert(value));
-      fieldFormat.convertToText = convertSpy as typeof fieldFormat.convertToText;
+      fieldFormat.convert = convertSpy as typeof fieldFormat.convert;
       return fieldFormat;
     });
 
@@ -2263,7 +2263,7 @@ describe('XYChart component', () => {
     const localConvertSpy = jest.fn((x) => x);
     const getFormatSpy = jest.fn();
     getFormatSpy.mockReturnValue({
-      convertToText: localConvertSpy,
+      convert: localConvertSpy,
       params: jest.fn(() => ({})),
     });
 
@@ -3062,7 +3062,7 @@ describe('XYChart component', () => {
 
     const getCustomFormatSpy = jest.fn();
     getCustomFormatSpy.mockReturnValue({
-      convertToText: jest.fn((x) => Boolean(x)),
+      convert: jest.fn((x) => Boolean(x)),
       params: jest.fn(() => ({})),
     });
 

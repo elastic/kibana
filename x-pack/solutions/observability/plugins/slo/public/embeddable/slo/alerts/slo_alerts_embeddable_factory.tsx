@@ -22,7 +22,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { initializeStateApi } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import {
@@ -85,14 +85,18 @@ export function getAlertsEmbeddableFactory({
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
 
-      const stateApi = initializeStateApi<SloAlertsEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState: () => ({
+      function serializeState(): SloAlertsEmbeddableState {
+        return {
           ...titleManager.getLatestState(),
           ...drilldownsManager.getLatestState(),
           ...sloAlertsStateManager.getLatestState(),
-        }),
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<SloAlertsEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState,
         anyStateChange$: merge(
           drilldownsManager.anyStateChange$,
           titleManager.anyStateChange$,
@@ -103,16 +107,16 @@ export function getAlertsEmbeddableFactory({
           ...drilldownsManager.comparators,
           slos: 'referenceEquality',
         }),
-        applySerializedState: (nextState) => {
-          drilldownsManager.reinitializeState(nextState);
-          titleManager.reinitializeState(nextState);
-          sloAlertsStateManager.reinitializeState(nextState);
+        onReset: (lastSaved) => {
+          drilldownsManager.reinitializeState(lastSaved ?? {});
+          titleManager.reinitializeState(lastSaved);
+          sloAlertsStateManager.reinitializeState(lastSaved);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...stateApi,
+        ...unsavedChangesApi,
         ...drilldownsManager.api,
         defaultTitle$,
         supportedTriggers: () => SLO_ALERTS_SUPPORTED_TRIGGERS,
@@ -124,6 +128,7 @@ export function getAlertsEmbeddableFactory({
         onEdit: async () => {
           onEdit();
         },
+        serializeState,
         getSloAlertsConfig: () => ({
           slos: sloAlertsStateManager.api.slos$.getValue(),
         }),

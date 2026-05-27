@@ -1,5 +1,5 @@
 {
-  "sha1": "6cfdc59a5d2ff184086605d09837519258f2f6eb",
+  "sha1": "999c476c4a308598b9d6e17b8d2416013a3a50a5",
   "tests": [
     {
       "id": "bd77233fbb28a70-b95459eaf733782",
@@ -131,7 +131,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_auto_detect.spec.ts",
-        "line": 50,
+        "line": 49,
         "column": 9
       }
     },
@@ -147,7 +147,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_auto_detect.spec.ts",
-        "line": 63,
+        "line": 61,
         "column": 9
       }
     },
@@ -179,7 +179,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_elastic_agent_kubernetes.spec.ts",
-        "line": 52,
+        "line": 51,
         "column": 9
       }
     },
@@ -211,7 +211,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_enable_modal.spec.ts",
-        "line": 61,
+        "line": 60,
         "column": 9
       }
     },
@@ -227,7 +227,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_enable_modal.spec.ts",
-        "line": 85,
+        "line": 83,
         "column": 9
       }
     },
@@ -243,7 +243,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_enable_modal.spec.ts",
-        "line": 118,
+        "line": 115,
         "column": 9
       }
     },
@@ -275,7 +275,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_otel_host.spec.ts",
-        "line": 53,
+        "line": 52,
         "column": 9
       }
     },

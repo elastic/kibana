@@ -50,7 +50,7 @@ const getFieldFormatter = (
 };
 
 /**
- * React equivalent of formatFieldValueText. Returns a ReactNode rendered via convertToReact,
+ * React equivalent of formatFieldValueText. Returns a ReactNode rendered via reactConvert,
  * which is safe to render directly without dangerouslySetInnerHTML.
  *
  * @returns A ReactNode that can be rendered directly
@@ -65,7 +65,7 @@ export const formatFieldValueReact = ({
 }: FormatFieldValueReactParams): ReactNode => {
   const converterOptions: ReactContextTypeOptions = { ...options, hit, field };
 
-  return getFieldFormatter(fieldFormats, dataView, field).convertToReact(value, converterOptions);
+  return getFieldFormatter(fieldFormats, dataView, field).reactConvert(value, converterOptions);
 };
 
 /**
@@ -84,7 +84,7 @@ export const formatFieldValueText = ({
   field,
   options,
 }: FormatFieldValueTextParams): string => {
-  return getFieldFormatter(fieldFormats, dataView, field).convertToText(value, options);
+  return getFieldFormatter(fieldFormats, dataView, field).convert(value, 'text', options);
 };
 
 export interface FormatFieldStringWithHighlightsParams {
@@ -127,7 +127,7 @@ export const formatFieldStringValueWithHighlights = ({
     ? dataView?.fields.getByName(fieldName) ?? { name: fieldName }
     : undefined;
 
-  return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING).convertToReact(value, {
+  return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING).reactConvert(value, {
     ...options,
     hit,
     field,

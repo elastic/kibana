@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
-  initializeStateApi,
+  initializeUnsavedChanges,
   initializeTimeRangeManager,
   initializeTitleManager,
   timeRangeComparators,
@@ -53,15 +53,17 @@ export const getDataTableFactory = (
       toastNotifications: core.notifications.toasts,
     };
 
-    const stateApi = initializeStateApi<DataTableSerializedState>({
+    const serializeState = () => {
+      return {
+        ...titleManager.getLatestState(),
+        ...timeRangeManager.getLatestState(),
+      };
+    };
+
+    const unsavedChangesApi = initializeUnsavedChanges<DataTableSerializedState>({
       uuid,
       parentApi,
-      serializeState: () => {
-        return {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-        };
-      },
+      serializeState,
       anyStateChange$: merge(titleManager.anyStateChange$, timeRangeManager.anyStateChange$),
       getComparators: () => {
         return {
@@ -69,17 +71,18 @@ export const getDataTableFactory = (
           ...timeRangeComparators,
         };
       },
-      applySerializedState: (nextState) => {
-        timeRangeManager.reinitializeState(nextState);
-        titleManager.reinitializeState(nextState);
+      onReset: (lastSaved) => {
+        timeRangeManager.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved);
       },
     });
 
     const api = finalizeApi({
       ...timeRangeManager.api,
       ...titleManager.api,
-      ...stateApi,
+      ...unsavedChangesApi,
       dataLoading$,
+      serializeState,
     });
 
     const queryService = await initializeDataTableQueries(services, api, dataLoading$);

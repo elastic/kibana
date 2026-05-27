@@ -348,7 +348,7 @@ export function DataTableDocumentToolbarBtn({
           isSelected={isFilterActive}
           badgeContent={fieldFormats
             .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-            .convertToText(selectedDocsCount)}
+            .convert(selectedDocsCount)}
           css={css`
             .euiButtonEmpty__content {
               flex-direction: row-reverse;
@@ -414,7 +414,7 @@ export function DataTableDocumentToolbarBtn({
               values={{
                 rowsCount: fieldFormats
                   .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convertToText(rows.length),
+                  .convert(rows.length),
               }}
             />
           </EuiDataGridToolbarControl>

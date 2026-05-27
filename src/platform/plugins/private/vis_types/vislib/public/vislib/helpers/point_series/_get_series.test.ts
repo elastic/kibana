@@ -18,7 +18,7 @@ describe('getSeries', function () {
   beforeAll(() => {
     setFormatService({
       deserialize: () => ({
-        convertToText: jest.fn((v) => v),
+        convert: jest.fn((v) => v),
       }),
     } as any);
   });

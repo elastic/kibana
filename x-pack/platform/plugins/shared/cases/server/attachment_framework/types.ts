@@ -20,18 +20,12 @@ export type PersistableStateAttachmentState = Pick<
 >;
 
 export interface PersistableStateAttachmentType
-  extends Omit<
-    PersistableState<PersistableStateAttachmentState>,
-    'migrations' | 'inject' | 'extract'
-  > {
+  extends Omit<PersistableState<PersistableStateAttachmentState>, 'migrations'> {
   id: string;
 }
 
 export interface PersistableStateAttachmentTypeSetup
-  extends Omit<
-    PersistableStateDefinition<PersistableStateAttachmentState>,
-    'migrations' | 'inject' | 'extract'
-  > {
+  extends Omit<PersistableStateDefinition<PersistableStateAttachmentState>, 'migrations'> {
   id: string;
 }
 
@@ -57,14 +51,14 @@ export type UnifiedAttachmentState = Pick<UnifiedAttachmentPayload, 'type' | 'me
 
 export interface UnifiedAttachmentType
   extends ExternalReferenceAttachmentType,
-    Omit<PersistableState<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
+    Omit<PersistableState<UnifiedAttachmentState>, 'migrations'> {
   /** Full-payload zod schema. Preferred over `schemaValidator` for new registrations. */
   schema?: z.ZodType;
 }
 
 export interface UnifiedAttachmentTypeSetup
   extends ExternalReferenceAttachmentType,
-    Omit<PersistableStateDefinition<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
+    Omit<PersistableStateDefinition<UnifiedAttachmentState>, 'migrations'> {
   /** Full-payload zod schema. Preferred over `schemaValidator` for new registrations. */
   schema?: z.ZodType;
 }

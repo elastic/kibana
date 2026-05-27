@@ -111,7 +111,7 @@ describe('CsvGenerator', () => {
   const mockFieldFormatsRegistry = {
     deserialize: jest.fn().mockImplementation(() => ({
       id: 'string',
-      convertToText: jest.fn().mockImplementation(identity),
+      convert: jest.fn().mockImplementation(identity),
     })),
   } as unknown as FieldFormatsRegistry;
 

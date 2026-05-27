@@ -24,7 +24,7 @@ import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagina
 describe(
   'Pagination',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

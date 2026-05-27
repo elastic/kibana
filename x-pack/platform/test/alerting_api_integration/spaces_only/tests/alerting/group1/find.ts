@@ -189,7 +189,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
-          '[request query.filter]: Filter is not supported on this field alert.attributes.monitoring.run.calculated_metrics.success_ratio>50'
+          'Error find rules: Filter is not supported on this field alert.attributes.monitoring.run.calculated_metrics.success_ratio'
         );
       });
 
@@ -202,7 +202,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
-          '[request query.sort_field]: Sort is not supported on this field monitoring.run.calculated_metrics.success_ratio'
+          'Error find rules: Sort is not supported on this field monitoring.run.calculated_metrics.success_ratio'
         );
       });
 
@@ -215,7 +215,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
-          '[request query.search_fields]: Search field monitoring.run.calculated_metrics.success_ratio is not supported'
+          'Error find rules: Search field monitoring.run.calculated_metrics.success_ratio not supported'
         );
       });
 
@@ -402,6 +402,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.status).to.eql(200);
         expect(response.body.total).to.equal(1);
         expect(response.body.data[0].params.risk_score).to.eql(40);
+
+        expect(response.body.data[0].mapped_params).to.eql(undefined);
       });
 
       it('should error if filtering on mapped parameters directly using the public API', async () => {
@@ -413,7 +415,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
         expect(response.body.message).to.eql(
-          '[request query.filter]: Filter is not supported on this field alert.attributes.mapped_params.risk_score:40'
+          'Error find rules: Filter is not supported on this field alert.attributes.mapped_params.risk_score'
         );
       });
 
@@ -463,14 +465,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
     });
 
     describe('artifacts', () => {
-      it('returns artifacts when present', async () => {
+      it('does not return artifacts when present', async () => {
         const expectedArtifacts = {
           artifacts: {
             investigation_guide: { blob: 'Sample investigation guide' },
             dashboards: [{ id: 'dashboard-1' }],
           },
         };
-
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
@@ -489,7 +490,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         const foundAlert = response.body.data.find((obj: any) => obj.id === id);
         expect(foundAlert).not.to.be(undefined);
-        expect(foundAlert.artifacts).to.eql(expectedArtifacts.artifacts);
+        expect(foundAlert.artifacts).to.be(undefined);
       });
     });
   });

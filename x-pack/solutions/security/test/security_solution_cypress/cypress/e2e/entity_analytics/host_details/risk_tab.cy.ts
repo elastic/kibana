@@ -17,7 +17,7 @@ import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 describe(
   'risk tab',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
         kbnServerArgs: [

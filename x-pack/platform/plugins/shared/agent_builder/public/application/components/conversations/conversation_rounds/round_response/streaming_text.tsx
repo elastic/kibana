@@ -79,7 +79,6 @@ export const StreamingText = ({
       conversationAttachments={conversationAttachments}
       attachmentRefs={attachmentRefs}
       conversationId={conversationId}
-      isStreaming
     />
   );
 };

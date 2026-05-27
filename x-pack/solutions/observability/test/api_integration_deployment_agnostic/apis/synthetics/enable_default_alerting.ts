@@ -120,7 +120,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         'lastRun',
         'snoozeSchedule',
         'viewInAppRelativeUrl',
-        'isSnoozedUntil',
       ];
 
       const statusRule = apiResponse.body.statusRule;

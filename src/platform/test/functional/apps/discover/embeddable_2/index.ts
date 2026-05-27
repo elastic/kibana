@@ -10,17 +10,17 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
 
   describe('discover/embeddable_2', function () {
     before(async function () {
       await browser.setWindowSize(1300, 800);
-      await esArchiver.loadIfNeeded(
+    });
+
+    after(async function unloadMakelogs() {
+      await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
       );
     });
 

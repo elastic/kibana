@@ -8,7 +8,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeStateApi } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import {
   fetch$,
   initializeStateManager,
@@ -65,14 +65,18 @@ export const getErrorBudgetEmbeddableFactory = ({
       });
       const reload$ = new Subject<boolean>();
 
-      const stateApi = initializeStateApi<ErrorBudgetEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState: () => ({
+      function serializeState(): ErrorBudgetEmbeddableState {
+        return {
           ...titleManager.getLatestState(),
           ...drilldownsManager.getLatestState(),
           ...sloErrorBudgetManager.getLatestState(),
-        }),
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<ErrorBudgetEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState,
         anyStateChange$: merge(
           drilldownsManager.anyStateChange$,
           titleManager.anyStateChange$,
@@ -84,19 +88,20 @@ export const getErrorBudgetEmbeddableFactory = ({
           slo_id: 'referenceEquality',
           slo_instance_id: 'referenceEquality',
         }),
-        applySerializedState: (nextState) => {
-          drilldownsManager.reinitializeState(nextState);
-          sloErrorBudgetManager.reinitializeState(nextState);
-          titleManager.reinitializeState(nextState);
+        onReset: (lastState) => {
+          drilldownsManager.reinitializeState(lastState ?? {});
+          sloErrorBudgetManager.reinitializeState(lastState);
+          titleManager.reinitializeState(lastState);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...stateApi,
+        ...unsavedChangesApi,
         ...drilldownsManager.api,
         defaultTitle$,
         supportedTriggers: () => SLO_ERROR_BUDGET_SUPPORTED_TRIGGERS,
+        serializeState,
       });
 
       const fetchSubscription = fetch$(api)

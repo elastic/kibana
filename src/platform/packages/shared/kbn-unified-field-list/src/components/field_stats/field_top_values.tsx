@@ -56,7 +56,7 @@ export const FieldTopValues: React.FC<FieldTopValuesProps> = ({
       <div data-test-subj={`${dataTestSubject}-topValues`}>
         {buckets.map((bucket, index) => {
           const fieldValue = bucket.key;
-          const formatted = formatter.convertToText(fieldValue);
+          const formatted = formatter.convert(fieldValue);
 
           return (
             <Fragment key={String(fieldValue)}>

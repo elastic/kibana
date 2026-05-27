@@ -35,8 +35,6 @@ import {
   selectYamlLineCounter,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useWorkflowEsqlCallbacks } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks';
-import { validateEsqlSteps } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps';
 import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import {
   BATCHED_CUSTOM_MARKER_OWNER,
@@ -87,23 +85,10 @@ export function useYamlValidation(
   const isWorkflowTab = useSelector(selectIsWorkflowTab);
   const connectors = useSelector(selectConnectors);
   const workflows = useSelector(selectWorkflows);
-  const { application, http, data, licensing } = useKibana().services;
-  const esqlCallbacks = useWorkflowEsqlCallbacks({
-    http,
-    application,
-    data,
-    licensing,
-  });
-  // Held in a ref so the effect below doesn't re-fire just because the
-  // memo identity rebuilt (it does on every render in tests where the kibana
-  // mock returns fresh service objects).
-  const esqlCallbacksRef = useRef(esqlCallbacks);
-  esqlCallbacksRef.current = esqlCallbacks;
+  const { application } = useKibana().services;
   const getPropertyHandler = useGetPropertyHandler();
 
   useEffect(() => {
-    const esqlAbortController = new AbortController();
-
     async function validateYaml() {
       if (!editor) {
         return;
@@ -156,21 +141,11 @@ export function useYamlValidation(
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
         ...(stepPropertyItems ? await validateStepProperties(stepPropertyItems) : []),
-        // Lookup-backed validators run sequentially (each await blocks the next).
-        // ES|QL runs after step-property validation so property errors surface first
-        // and we avoid overlapping cluster calls from validateQuery with property handlers.
         ...(workflowLookup && lineCounter
           ? [
               ...validateDeprecatedStepTypes(workflowLookup, lineCounter),
               ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
               ...validateIfConditions(workflowLookup, lineCounter),
-              ...(await validateEsqlSteps(
-                workflowLookup,
-                lineCounter,
-                model,
-                esqlCallbacksRef.current,
-                esqlAbortController.signal
-              ).catch(() => [])),
             ]
           : []),
       ];
@@ -209,10 +184,6 @@ export function useYamlValidation(
     }
 
     validateYaml();
-
-    return () => {
-      esqlAbortController.abort();
-    };
   }, [
     editor,
     lineCounter,

@@ -13,9 +13,8 @@ const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  async ({ log, apiServices }) => {
-    log.info('Running profiling API global setup...');
-    await apiServices.fleet.internal.setup();
-    log.info('Fleet infrastructure setup completed');
+  async ({ log }) => {
+    // It's required for globalteardown to work
+    log.info(`Global setup for profiling API tests`);
   }
 );

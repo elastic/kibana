@@ -62,8 +62,7 @@ export const getMetricFormatter = (
   const defaultFormat = type ? { id: type } : undefined;
   const serializedFieldFormat = getFormatByAccessor(accessor, columns, defaultFormat);
   const enhancedFieldFormat = enhanceFieldFormat(serializedFieldFormat, formatOverrides);
-  const fieldFormat = getFormatService().deserialize(enhancedFieldFormat);
-  return (v: unknown) => fieldFormat.convertToText(v);
+  return getFormatService().deserialize(enhancedFieldFormat).getConverterFor('text');
 };
 
 export const getColor = (

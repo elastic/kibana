@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import type { UserActionParameters } from '../types';
 import { TemplateUserActionBuilder } from './template';
 
 describe('TemplateUserActionBuilder', () => {
+  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+
   const baseArgs = {
     action: 'update' as const,
     caseId: 'test-id',
@@ -29,7 +32,7 @@ describe('TemplateUserActionBuilder', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    builder = new TemplateUserActionBuilder();
+    builder = new TemplateUserActionBuilder({ persistableStateAttachmentTypeRegistry });
   });
 
   afterAll(() => {

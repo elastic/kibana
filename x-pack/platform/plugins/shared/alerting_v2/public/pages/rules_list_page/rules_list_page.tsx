@@ -62,8 +62,7 @@ export const RulesListPage = () => {
   ] = useBoolean(false);
   const [isCreateMenuOpen, { off: closeCreateMenu, toggle: toggleCreateMenu }] = useBoolean(false);
   const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
-  const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
-    useComposeDiscoverFlyout();
+  const { flyout, openCreateFlyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
 
   const [page, setPage] = useState(1);
@@ -137,10 +136,6 @@ export const RulesListPage = () => {
   const onCreateWithAgentFromOptionsFlyout = () => {
     closeCreateOptionsFlyout();
     navigateToAgentBuilder();
-  };
-  const onCreateThresholdAlertFromOptionsFlyout = () => {
-    closeCreateOptionsFlyout();
-    openCreateBuilderFlyout('threshold');
   };
 
   return (
@@ -254,7 +249,6 @@ export const RulesListPage = () => {
         <RuleCreateOptionsPanel
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}
-          onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}
       {hasRules || hasActiveFilters ? (
@@ -307,7 +301,6 @@ export const RulesListPage = () => {
           onClose={closeCreateOptionsFlyout}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
-          onCreateThresholdAlert={onCreateThresholdAlertFromOptionsFlyout}
         />
       ) : null}
       {flyout}

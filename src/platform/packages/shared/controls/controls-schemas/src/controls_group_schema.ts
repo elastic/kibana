@@ -48,7 +48,7 @@ export const pinnedControlSchema = schema.object({
   }),
 });
 
-export const getControlsGroupSchema = (isInternalReadRequest: boolean = false) => {
+export const getControlsGroupSchema = () => {
   const pinnedControl = pinnedControlSchema.getPropSchemas();
   return schema.arrayOf(
     /**
@@ -119,7 +119,7 @@ export const getControlsGroupSchema = (isInternalReadRequest: boolean = false) =
     ]),
     {
       defaultValue: [],
-      maxSize: isInternalReadRequest ? Number.MAX_SAFE_INTEGER : 100,
+      maxSize: 100,
       meta: { description: 'An array of control panels and their state in the control group.' },
     }
   );

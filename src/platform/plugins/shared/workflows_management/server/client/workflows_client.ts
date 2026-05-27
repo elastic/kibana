@@ -53,15 +53,6 @@ export const createWorkflowsClientProvider = (
           }
           await workflowsService.uninstallManagedWorkflow(id, options, pluginId);
         },
-        getWorkflowStatus: async (pluginId, id, options) => {
-          if (!isWorkflowsAvailable) {
-            logger.debug(
-              'Workflows is not available in this environment. Managed status rejected.'
-            );
-            throw new Error('Workflows is not available in this environment');
-          }
-          return workflowsService.getManagedWorkflowStatus(id, options, pluginId);
-        },
         execute: async (pluginId, id, options) => {
           if (!isWorkflowsAvailable) {
             logger.debug(
@@ -103,13 +94,6 @@ export const createManagedWorkflowsSystemApiProvider = (
           return;
         }
         await workflowsService.uninstallManagedWorkflow(id, options, pluginId);
-      },
-      getWorkflowStatus: async (id, options) => {
-        if (!isWorkflowsAvailable) {
-          logger.debug('Workflows is not available in this environment. Managed status rejected.');
-          throw new Error('Workflows is not available in this environment');
-        }
-        return workflowsService.getManagedWorkflowStatus(id, options, pluginId);
       },
       ready: async () => {
         if (!isWorkflowsAvailable) {

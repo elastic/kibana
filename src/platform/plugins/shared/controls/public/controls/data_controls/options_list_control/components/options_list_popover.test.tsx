@@ -129,7 +129,9 @@ describe('Options list popover', () => {
       });
       stubDataView.getFormatterForField = jest.fn().mockImplementation(() => {
         return {
-          convertToText: (value: string) => `${value}:formatted`,
+          getConverterFor: () => {
+            return (value: string) => `${value}:formatted`;
+          },
           toJSON: (value: any) => JSON.stringify(value),
         };
       });

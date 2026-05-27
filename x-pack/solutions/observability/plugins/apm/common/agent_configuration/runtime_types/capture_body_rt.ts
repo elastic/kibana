@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { captureBodyRt } from '@kbn/apm-common';
+import * as t from 'io-ts';
+
+export const captureBodyRt = t.union([
+  t.literal('off'),
+  t.literal('errors'),
+  t.literal('transactions'),
+  t.literal('all'),
+]);

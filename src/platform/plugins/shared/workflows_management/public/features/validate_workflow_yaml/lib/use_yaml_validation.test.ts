@@ -11,21 +11,6 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { monaco } from '@kbn/monaco';
-
-const mockValidateEsqlSteps = jest.fn().mockResolvedValue([]);
-
-jest.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => ({
-  validateEsqlSteps: (...args: unknown[]) => mockValidateEsqlSteps(...args),
-}));
-
-jest.mock(
-  '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks',
-  () => ({
-    useWorkflowEsqlCallbacks: () => ({}),
-  })
-);
-
-import type { WorkflowLookup } from '@kbn/workflows-yaml';
 import { useYamlValidation } from './use_yaml_validation';
 import { WorkflowsContextProvider } from '../../../common/context';
 import { selectDetail } from '../../../entities/workflows/store';
@@ -34,14 +19,9 @@ import {
   setActiveTab,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
-import { useKibana } from '../../../hooks/use_kibana';
-import { createStartServicesMock, createUseKibanaMockValue } from '../../../mocks';
+import { createStartServicesMock } from '../../../mocks';
 
-const mockKibanaValue = createUseKibanaMockValue();
-
-jest.mock('../../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(() => mockKibanaValue),
-}));
+jest.mock('../../../hooks/use_kibana');
 
 // Mock Monaco editor
 const createMockEditor = (value: string) => {
@@ -67,20 +47,6 @@ const createMockEditor = (value: string) => {
 // Mock Monaco setModelMarkers
 const mockSetModelMarkers = jest.fn();
 (monaco.editor as any).setModelMarkers = mockSetModelMarkers;
-
-const getBatchedMarkerCalls = () =>
-  mockSetModelMarkers.mock.calls.filter((call) => call[1] === 'custom-yaml-validation');
-
-const waitForBatchedMarkers = async () => {
-  await waitFor(() => {
-    expect(getBatchedMarkerCalls().length).toBeGreaterThan(0);
-  });
-};
-
-const getLastBatchedMarkers = (): unknown[] => {
-  const batchedCalls = getBatchedMarkerCalls();
-  return batchedCalls[batchedCalls.length - 1][2];
-};
 
 // Mock schema functions
 jest.mock('../../../../common/schema', () => ({
@@ -138,7 +104,6 @@ describe('useYamlValidation - Step Name Uniqueness', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
-    jest.mocked(useKibana).mockReturnValue(mockKibanaValue);
   });
 
   afterEach(() => {
@@ -187,11 +152,19 @@ steps:
       expect(result.current.error).toBeNull();
     });
 
-    await waitForBatchedMarkers();
+    // Wait for Monaco markers to be set
+    await waitFor(() => {
+      expect(mockSetModelMarkers).toHaveBeenCalled();
+    });
 
-    const stepNameMarkers = getLastBatchedMarkers().filter(
-      (m: any) => m.source === 'step-name-validation'
+    // All custom markers are batched under 'custom-yaml-validation';
+    // filter the last batched call's markers by source
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
     );
+    expect(batchedCalls.length).toBeGreaterThan(0);
+    const allMarkers = batchedCalls[batchedCalls.length - 1][2];
+    const stepNameMarkers = allMarkers.filter((m: any) => m.source === 'step-name-validation');
     expect(stepNameMarkers).toEqual([]);
   });
 
@@ -218,12 +191,18 @@ steps:
     // Fast-forward through the debounced computation
     jest.advanceTimersByTime(500);
 
+    // Wait for validation to complete
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
     });
-    await waitForBatchedMarkers();
 
-    const markers = getLastBatchedMarkers().filter((m: any) => m.source === 'step-name-validation');
+    // All custom markers are batched; filter by source
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
+    );
+    expect(batchedCalls).toHaveLength(1);
+    const allMarkers = batchedCalls[0][2];
+    const markers = allMarkers.filter((m: any) => m.source === 'step-name-validation');
     expect(markers).toHaveLength(2); // Two errors for the duplicate "step1"
 
     markers.forEach((marker: any) => {
@@ -252,12 +231,16 @@ steps:
     // Fast-forward through the debounced computation
     jest.advanceTimersByTime(500);
 
+    // Wait for validation to complete
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
     });
-    await waitForBatchedMarkers();
 
-    const markers = getLastBatchedMarkers().filter((m: any) => m.source === 'step-name-validation');
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
+    );
+    expect(batchedCalls).toHaveLength(1);
+    const markers = batchedCalls[0][2].filter((m: any) => m.source === 'step-name-validation');
     expect(markers).toHaveLength(2); // Two errors for the duplicate "nested_step"
 
     markers.forEach((marker: any) => {
@@ -286,12 +269,16 @@ steps:
     // Fast-forward through the debounced computation
     jest.advanceTimersByTime(500);
 
+    // Wait for validation to complete
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
     });
-    await waitForBatchedMarkers();
 
-    const markers = getLastBatchedMarkers().filter((m: any) => m.source === 'step-name-validation');
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
+    );
+    expect(batchedCalls).toHaveLength(1);
+    const markers = batchedCalls[0][2].filter((m: any) => m.source === 'step-name-validation');
     expect(markers).toHaveLength(2); // Two errors for the duplicate "duplicate_name"
 
     markers.forEach((marker: any) => {
@@ -320,12 +307,16 @@ steps:
     // Fast-forward through the debounced computation
     jest.advanceTimersByTime(500);
 
+    // Wait for validation to complete
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
     });
-    await waitForBatchedMarkers();
 
-    const markers = getLastBatchedMarkers().filter((m: any) => m.source === 'step-name-validation');
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
+    );
+    expect(batchedCalls).toHaveLength(1);
+    const markers = batchedCalls[0][2].filter((m: any) => m.source === 'step-name-validation');
     expect(markers).toHaveLength(2); // Two errors for the duplicate "branch_step"
 
     markers.forEach((marker: any) => {
@@ -364,12 +355,16 @@ steps:
     // Fast-forward through the debounced computation
     jest.advanceTimersByTime(500);
 
+    // Wait for validation to complete
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
     });
-    await waitForBatchedMarkers();
 
-    const markers = getLastBatchedMarkers().filter((m: any) => m.source === 'step-name-validation');
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
+    );
+    expect(batchedCalls).toHaveLength(1);
+    const markers = batchedCalls[0][2].filter((m: any) => m.source === 'step-name-validation');
 
     // Should have 5 errors: 3 for "root_step", 2 for "inner_step"
     expect(markers).toHaveLength(5);
@@ -394,7 +389,6 @@ describe('useYamlValidation - Marker Batching', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
-    jest.mocked(useKibana).mockReturnValue(mockKibanaValue);
   });
 
   afterEach(() => {
@@ -428,12 +422,18 @@ steps:
     jest.advanceTimersByTime(500);
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
     });
-    await waitForBatchedMarkers();
 
-    // All custom validations should be batched into exactly one call per validation run
-    expect(getBatchedMarkerCalls()).toHaveLength(1);
+    await waitFor(() => {
+      expect(mockSetModelMarkers).toHaveBeenCalled();
+    });
+
+    // All custom validations should be batched into exactly one call
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
+    );
+    expect(batchedCalls).toHaveLength(1);
   });
 
   it('should include markers from all validation sources in the batched call', async () => {
@@ -457,83 +457,23 @@ steps:
     jest.advanceTimersByTime(500);
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeNull();
     });
-    await waitForBatchedMarkers();
 
-    expect(getBatchedMarkerCalls()).toHaveLength(1);
+    await waitFor(() => {
+      expect(mockSetModelMarkers).toHaveBeenCalled();
+    });
+
+    // The batched call's markers should carry individual source names
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
+    );
+    expect(batchedCalls).toHaveLength(1);
 
     // Verify no individual owner calls were made (only batched)
     const individualOwnerCalls = mockSetModelMarkers.mock.calls.filter(
       (call) => call[1] !== 'custom-yaml-validation'
     );
     expect(individualOwnerCalls).toHaveLength(0);
-  });
-});
-
-describe('useYamlValidation - ES|QL step wiring', () => {
-  beforeEach(() => {
-    jest.mocked(useKibana).mockReturnValue(mockKibanaValue);
-    mockValidateEsqlSteps.mockReset();
-    mockValidateEsqlSteps.mockResolvedValue([]);
-  });
-
-  it('calls validateEsqlSteps when the workflow has an elasticsearch.esql.query step', async () => {
-    const yamlContent = `
-version: "1"
-name: "ES|QL Workflow"
-enabled: true
-triggers:
-  - type: manual
-    enabled: true
-steps:
-  - name: esql_step
-    type: elasticsearch.esql.query
-    with:
-      query: |
-        FROM logs-* | LIMIT 10
-`;
-    const mockEditor = createMockEditor(yamlContent);
-    renderHookWithProviders(mockEditor as any, yamlContent);
-
-    await waitFor(
-      () => {
-        expect(mockValidateEsqlSteps).toHaveBeenCalled();
-      },
-      { timeout: 3000 }
-    );
-  });
-
-  it('validateEsqlSteps early-outs when no elasticsearch.esql.query step exists', async () => {
-    mockValidateEsqlSteps.mockImplementation(async (workflowLookup: WorkflowLookup) => {
-      const hasEsqlStep = Object.values(workflowLookup.steps).some(
-        (step) => step.stepType === 'elasticsearch.esql.query'
-      );
-      expect(hasEsqlStep).toBe(false);
-      return [];
-    });
-
-    const yamlContent = `
-version: "1"
-name: "No ES|QL Workflow"
-enabled: true
-triggers:
-  - type: manual
-    enabled: true
-steps:
-  - name: log_step
-    type: console
-    with:
-      message: "elasticsearch.esql.query is documented in the guide"
-`;
-    const mockEditor = createMockEditor(yamlContent);
-    renderHookWithProviders(mockEditor as any, yamlContent);
-
-    await waitFor(
-      () => {
-        expect(mockValidateEsqlSteps).toHaveBeenCalled();
-      },
-      { timeout: 3000 }
-    );
   });
 });

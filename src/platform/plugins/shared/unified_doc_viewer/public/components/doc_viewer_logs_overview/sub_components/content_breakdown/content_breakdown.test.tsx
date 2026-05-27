@@ -26,13 +26,13 @@ jest.mock('../hover_popover_action', () => ({
   HoverActionPopover: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-const mockConvertToReact = jest.fn((value: unknown) => value);
+const mockReactConvert = jest.fn((value: unknown) => value);
 
 jest.mock('../../../../plugin', () => ({
   getUnifiedDocViewerServices: () => ({
     fieldFormats: {
       getDefaultInstance: () => ({
-        convertToReact: mockConvertToReact,
+        reactConvert: mockReactConvert,
       }),
     },
   }),
@@ -43,7 +43,7 @@ const mockDataView = {
     getAll: () => [],
     getByName: () => undefined,
   },
-  getFormatterForField: jest.fn(() => ({ convertToText: (value: unknown) => value })),
+  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
 } as unknown as DataView;
 
 const buildHit = (fields: Record<string, unknown> = {}, highlight?: Record<string, string[]>) =>
@@ -60,7 +60,7 @@ const buildHit = (fields: Record<string, unknown> = {}, highlight?: Record<strin
 
 describe('ContentBreakdown', () => {
   beforeEach(() => {
-    mockConvertToReact.mockClear();
+    mockReactConvert.mockClear();
   });
 
   describe('Field ranking', () => {
@@ -116,7 +116,7 @@ describe('ContentBreakdown', () => {
       expect(container.querySelector('john')).toBeNull();
     });
 
-    it('renders pretty-printed JSON when message is valid JSON and skips convertToReact', () => {
+    it('renders pretty-printed JSON when message is valid JSON and skips reactConvert', () => {
       const json = { foo: { bar: true } };
       const message = JSON.stringify(json);
       const hit = buildHit({ message });
@@ -126,8 +126,8 @@ describe('ContentBreakdown', () => {
 
       const codeBlock = screen.getByTestId('codeBlock');
       expect(codeBlock.textContent).toBe(JSON.stringify(json, null, 2));
-      // The JSON path uses formattedValue directly — convertToReact should not be called
-      expect(mockConvertToReact).not.toHaveBeenCalled();
+      // The JSON path uses formattedValue directly — reactConvert should not be called
+      expect(mockReactConvert).not.toHaveBeenCalled();
     });
 
     it('applies highlights even when field is not in data view (e.g., OTel body.text)', () => {
@@ -140,7 +140,7 @@ describe('ContentBreakdown', () => {
       const formattedDoc = { message } as any;
 
       // Mock the formatter to return React nodes with highlighted content
-      mockConvertToReact.mockImplementationOnce(() => (
+      mockReactConvert.mockImplementationOnce(() => (
         <>
           OTel log message with <mark className="ffSearch__highlight">search</mark> term
         </>
@@ -152,7 +152,7 @@ describe('ContentBreakdown', () => {
 
       // Verify the formatter was called with field name for highlight lookup
       // even though the field is not in the data view (getByName returns undefined)
-      expect(mockConvertToReact).toHaveBeenCalledWith(
+      expect(mockReactConvert).toHaveBeenCalledWith(
         message,
         expect.objectContaining({
           field: { name: fieldName },
@@ -194,7 +194,7 @@ describe('ContentBreakdown', () => {
       } as unknown as DataView;
 
       // Mock the formatter to return React nodes with highlighted content
-      mockConvertToReact.mockImplementationOnce(() => (
+      mockReactConvert.mockImplementationOnce(() => (
         <>
           log message with <mark className="ffSearch__highlight">search</mark> term
         </>
@@ -205,7 +205,7 @@ describe('ContentBreakdown', () => {
       );
 
       // Verify the formatter was called with full DataViewField (not just { name })
-      expect(mockConvertToReact).toHaveBeenCalledWith(
+      expect(mockReactConvert).toHaveBeenCalledWith(
         message,
         expect.objectContaining({
           field: mockDataViewField,

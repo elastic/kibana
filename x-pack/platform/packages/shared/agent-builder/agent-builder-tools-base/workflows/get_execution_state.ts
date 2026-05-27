@@ -7,7 +7,7 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { WaitForInputStep, WorkflowExecutionDto } from '@kbn/workflows';
+import type { WaitForInputStep } from '@kbn/workflows';
 import { ExecutionStatus, getStepByNameFromNestedSteps } from '@kbn/workflows';
 import { getWorkflowOutput } from './get_workflow_output';
 
@@ -37,12 +37,24 @@ export interface WorkflowExecutionState {
 }
 
 /**
- * Converts a workflow execution DTO into the state shape exposed to agent tools.
+ * Returns the state of a workflow execution.
  */
-export const toWorkflowExecutionState = (
-  execution: WorkflowExecutionDto,
-  executionId: string = execution.id
-): WorkflowExecutionState => {
+export const getExecutionState = async ({
+  executionId,
+  spaceId,
+  workflowApi,
+}: {
+  executionId: string;
+  spaceId: string;
+  workflowApi: WorkflowApi;
+}): Promise<WorkflowExecutionState | null> => {
+  const execution = await workflowApi.getWorkflowExecution(executionId, spaceId, {
+    includeOutput: true,
+  });
+  if (!execution) {
+    return null;
+  }
+
   const state: WorkflowExecutionState = {
     execution_id: executionId,
     status: execution.status,
@@ -82,26 +94,4 @@ export const toWorkflowExecutionState = (
   }
 
   return state;
-};
-
-/**
- * Returns the state of a workflow execution.
- */
-export const getExecutionState = async ({
-  executionId,
-  spaceId,
-  workflowApi,
-}: {
-  executionId: string;
-  spaceId: string;
-  workflowApi: WorkflowApi;
-}): Promise<WorkflowExecutionState | null> => {
-  const execution = await workflowApi.getWorkflowExecution(executionId, spaceId, {
-    includeOutput: true,
-  });
-  if (!execution) {
-    return null;
-  }
-
-  return toWorkflowExecutionState(execution, executionId);
 };

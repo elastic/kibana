@@ -62,7 +62,7 @@ export const createTextFieldFormatter = (
       return DISPLAY_EMPTY_VALUE;
     }
     return fieldType !== 'number' || isNumber(value) || !shouldSkipFormatting
-      ? fieldFormat.convertToText(value)
+      ? fieldFormat.convert(value, 'text')
       : String(value);
   };
 };
@@ -85,7 +85,7 @@ export const createReactFieldFormatter = (
       return DISPLAY_EMPTY_VALUE;
     }
     return fieldType !== 'number' || isNumber(value) || !shouldSkipFormatting
-      ? fieldFormat.convertToReact(value)
+      ? fieldFormat.reactConvert(value)
       : String(value);
   };
 };

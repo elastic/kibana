@@ -47,7 +47,7 @@ const indexPattern1 = {
   hasRestrictions: false,
   isPersisted: () => true,
   toSpec: () => ({}),
-  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
+  getFormatterForField: () => ({ convert: (v: unknown) => v }),
   fields: [
     {
       name: 'timestamp',

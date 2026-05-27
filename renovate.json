@@ -40,6 +40,7 @@
         "autoprefixer",
         "clean-webpack-plugin",
         "css-loader",
+        "file-loader",
         "mini-css-extract-plugin",
         "sass-loader",
         "style-loader",
@@ -51,7 +52,9 @@
         "webpack-merge",
         "webpack-sources",
         "@statoscope/webpack-plugin",
+        "@types/webpack",
         "@types/webpack-bundle-analyzer",
+        "@types/webpack-env",
         "@types/webpack-sources"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -236,7 +239,7 @@
     },
     {
       "groupName": "base64-js dependencies",
-      "matchDepNames": ["base64-js"],
+      "matchDepNames": ["base64-js", "@types/base64-js"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -253,7 +256,7 @@
     },
     {
       "groupName": "classnames dependencies",
-      "matchDepNames": ["classnames"],
+      "matchDepNames": ["classnames", "@types/classnames"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -271,7 +274,7 @@
     },
     {
       "groupName": "lz-string dependencies",
-      "matchDepNames": ["lz-string"],
+      "matchDepNames": ["lz-string", "@types/lz-string"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -564,6 +567,7 @@
         "reflect-metadata",
         "type-detect",
         "utility-types",
+        "@types/fetch-mock",
         "@types/getos",
         "@types/mock-fs",
         "@types/node-fetch",
@@ -912,7 +916,7 @@
     },
     {
       "groupName": "micromatch/minimatch",
-      "matchDepNames": ["micromatch", "minimatch", "@types/micromatch"],
+      "matchDepNames": ["micromatch", "minimatch", "@types/micromatch", "@types/minimatch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -921,7 +925,7 @@
     },
     {
       "groupName": "nock",
-      "matchDepNames": ["nock"],
+      "matchDepNames": ["nock", "@types/nock"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1157,7 +1161,7 @@
     },
     {
       "groupName": "source-map",
-      "matchDepNames": ["source-map-support", "@types/source-map-support"],
+      "matchDepNames": ["source-map", "source-map-support", "@types/source-map-support"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1537,7 +1541,7 @@
     },
     {
       "groupName": "reporting dependencies",
-      "matchDepNames": ["@types/pdfmake", "extract-zip", "pdfmake"],
+      "matchDepNames": ["@types/extract-zip", "@types/pdfmake", "extract-zip", "pdfmake"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Reporting Services", "Team:ResponseOps"],
@@ -1868,6 +1872,7 @@
     {
       "groupName": "platform security modules",
       "matchDepNames": [
+        "dependency-check",
         "dependency-cruiser",
         "dompurify",
         "fast-deep-equal",
@@ -1876,7 +1881,6 @@
         "handlebars",
         "js-sha256",
         "js-yaml",
-        "knip",
         "magic-bytes.js",
         "minimist",
         "object-hash",
@@ -1889,7 +1893,8 @@
         "@types/lodash",
         "@types/minimist",
         "@types/node-forge",
-        "@types/object-hash"
+        "@types/object-hash",
+        "@types/tough-cookie"
       ],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
@@ -1958,6 +1963,7 @@
       "groupName": "minify",
       "matchDepNames": [
         "gulp-brotli",
+        "terser",
         "terser-webpack-plugin"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -1994,12 +2000,14 @@
         "expect",
         "jest",
         "jest-canvas-mock",
+        "jest-cli",
         "jest-config",
         "jest-diff",
         "jest-environment-jsdom",
         "jest-matcher-utils",
         "jest-mock",
         "jest-runtime",
+        "jest-specific-snapshot",
         "jest-snapshot",
         "jest-styled-components",
         "mutation-observer"

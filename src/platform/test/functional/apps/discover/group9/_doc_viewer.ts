@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const { common, discover, timePicker, header, unifiedFieldList } = getPageObjects([
     'common',
@@ -28,6 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover doc viewer', function describeIndexTests() {
     before(async function () {
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await browser.setWindowSize(1600, 1200);
     });
 
@@ -352,7 +356,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates after switching to show only selected', async () => {
           fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
           fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
-          return fieldNames.join(',') === '@timestamp,agent.raw,agent';
+          return fieldNames.join(',') === 'agent.raw,agent';
         });
 
         await dataGrid.togglePinActionInFlyout('agent');
@@ -360,7 +364,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates after pinning the last field', async () => {
           fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
           fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
-          return fieldNames.join(',') === 'agent,@timestamp,agent.raw';
+          return fieldNames.join(',') === 'agent,agent.raw';
         });
 
         await showOnlySelectedFieldsSwitch.click();

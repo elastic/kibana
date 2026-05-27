@@ -34,7 +34,7 @@ export function getSample(fieldFormats: FieldFormatsStart) {
 
   const pairs = [1000, 100000, 100000000].map((value) => ({
     raw: value,
-    formatted: fieldFormat.convertToText(value),
+    formatted: fieldFormat.convert(value),
   }));
 
   return pairs;

@@ -212,6 +212,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   } = props;
 
   const authz = useAuthz();
+
   const { getHref } = useLink();
   const latestAgentVersion = useAgentVersion();
 

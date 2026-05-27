@@ -292,7 +292,7 @@ export function Summary({ count }: { count: number }) {
             'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundDescription',
             {
               defaultMessage:
-                'Discover Insights from your logs, and understand what they mean with the power of AI and Elastic Observability.',
+                'Discover Significant Events from your logs, and understand what they mean with the power of AI and Elastic Observability.',
             }
           )}
         </p>
@@ -310,10 +310,10 @@ export function Summary({ count }: { count: number }) {
           >
             {task?.status === TaskStatus.InProgress
               ? i18n.translate('xpack.streams.insights.generatingButtonLabel', {
-                  defaultMessage: 'Discovering Insights',
+                  defaultMessage: 'Discovering Significant Events',
                 })
               : i18n.translate('xpack.streams.insights.generateButtonLabel', {
-                  defaultMessage: 'Discover Insights',
+                  defaultMessage: 'Discover Significant Events',
                 })}
           </EuiButton>
           {(task?.status === TaskStatus.InProgress || isCancellingTask) && (

@@ -58,5 +58,5 @@ export async function getRule<Params extends RuleParams = never>(
     })
   );
 
-  return transformToSanitizedRule(context, result);
+  return transformToSanitizedRule(context, result, params);
 }

@@ -10,6 +10,7 @@
 import moment from 'moment-timezone';
 import { DateNanosFormat, analysePatternForFract, formatWithNanos } from './date_nanos_shared';
 import type { FieldFormatsGetConfigFn } from '../types';
+import { TEXT_CONTEXT_TYPE } from '../content_types';
 import { expectReactElementWithNull, expectReactElementAsArray } from '../test_utils';
 
 describe('Date Nanos Format', () => {
@@ -30,7 +31,7 @@ describe('Date Nanos Format', () => {
     const getConfig: FieldFormatsGetConfigFn = (key: string) => mockConfig[key];
     date = new DateNanosFormat({}, getConfig);
 
-    convert = date.convertToText.bind(date);
+    convert = date.convert.bind(date);
   });
 
   test('should inject fractional seconds into formatted timestamp', () => {
@@ -74,10 +75,10 @@ describe('Date Nanos Format', () => {
   });
 
   test('decoding a missing value', () => {
-    expect(convert(null)).toBe('(null)');
-    expect(convert(undefined)).toBe('(null)');
-    expectReactElementWithNull(date.convertToReact(null));
-    expectReactElementWithNull(date.convertToReact(undefined));
+    expect(convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expectReactElementWithNull(date.reactConvert(null));
+    expectReactElementWithNull(date.reactConvert(undefined));
   });
 
   test('should clear the memoization cache after changing the date', () => {
@@ -89,19 +90,19 @@ describe('Date Nanos Format', () => {
 
     mockConfig['dateFormat:tz'] = 'America/Chicago';
     setDefaultTimezone();
-    const chicagoTime = convert(dateTime);
+    const chicagoTime = convert(dateTime, TEXT_CONTEXT_TYPE);
 
     mockConfig['dateFormat:tz'] = 'America/Phoenix';
     setDefaultTimezone();
-    const phoenixTime = convert(dateTime);
+    const phoenixTime = convert(dateTime, TEXT_CONTEXT_TYPE);
 
     expect(chicagoTime).not.toBe(phoenixTime);
   });
 
   test('should return the value itself when it cannot successfully be formatted', () => {
     const dateMath = 'now+1M/d';
-    expect(convert(dateMath)).toBe(dateMath);
-    expect(date.convertToReact(dateMath)).toBe(dateMath);
+    expect(convert(dateMath, TEXT_CONTEXT_TYPE)).toBe(dateMath);
+    expect(date.reactConvert(dateMath)).toBe(dateMath);
   });
 
   test('returns a plain string for a valid date', () => {
@@ -112,10 +113,10 @@ describe('Date Nanos Format', () => {
       }[key] as string);
     const formatter = new DateNanosFormat({}, getConfig);
 
-    expect(formatter.convertToText('2019-05-20T14:04:56.357001234Z')).toMatchInlineSnapshot(
-      `"May 20, 2019 @ 07:04:56.357001234"`
-    );
-    expect(formatter.convertToReact('2019-05-20T14:04:56.357001234Z')).toBe(
+    expect(
+      formatter.convert('2019-05-20T14:04:56.357001234Z', TEXT_CONTEXT_TYPE)
+    ).toMatchInlineSnapshot(`"May 20, 2019 @ 07:04:56.357001234"`);
+    expect(formatter.reactConvert('2019-05-20T14:04:56.357001234Z')).toBe(
       'May 20, 2019 @ 07:04:56.357001234'
     );
   });
@@ -129,15 +130,15 @@ describe('Date Nanos Format', () => {
     const formatter = new DateNanosFormat({}, getConfig);
 
     expect(
-      formatter.convertToText(['2019-05-20T14:04:56.357001234Z', '2020-01-01T00:00:00.000000000Z'])
+      formatter.convert(
+        ['2019-05-20T14:04:56.357001234Z', '2020-01-01T00:00:00.000000000Z'],
+        TEXT_CONTEXT_TYPE
+      )
     ).toMatchInlineSnapshot(
       `"[\\"May 20, 2019 @ 07:04:56.357001234\\",\\"Dec 31, 2019 @ 17:00:00.000000000\\"]"`
     );
     expectReactElementAsArray(
-      formatter.convertToReact([
-        '2019-05-20T14:04:56.357001234Z',
-        '2020-01-01T00:00:00.000000000Z',
-      ]),
+      formatter.reactConvert(['2019-05-20T14:04:56.357001234Z', '2020-01-01T00:00:00.000000000Z']),
       ['May 20, 2019 @ 07:04:56.357001234', 'Dec 31, 2019 @ 17:00:00.000000000']
     );
   });
@@ -150,15 +151,15 @@ describe('Date Nanos Format', () => {
       }[key] as string);
     const formatter = new DateNanosFormat({}, getConfig);
 
-    expect(formatter.convertToText(['2019-05-20T14:04:56.357001234Z'])).toMatchInlineSnapshot(
-      `"[\\"May 20, 2019 @ 07:04:56.357001234\\"]"`
-    );
-    expect(formatter.convertToReact(['2019-05-20T14:04:56.357001234Z'])).toBe(
+    expect(
+      formatter.convert(['2019-05-20T14:04:56.357001234Z'], TEXT_CONTEXT_TYPE)
+    ).toMatchInlineSnapshot(`"[\\"May 20, 2019 @ 07:04:56.357001234\\"]"`);
+    expect(formatter.reactConvert(['2019-05-20T14:04:56.357001234Z'])).toBe(
       'May 20, 2019 @ 07:04:56.357001234'
     );
   });
 
-  test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {
+  test('reactConvert returns raw string for unhighlighted content (React escapes at render)', () => {
     const dateNanos = new DateNanosFormat(
       {
         pattern: 'MMM D, YYYY @ HH:mm:ss.SSS',
@@ -166,7 +167,7 @@ describe('Date Nanos Format', () => {
       },
       jest.fn()
     );
-    expect(dateNanos.convertToReact('<script>alert("test")</script>')).toBe(
+    expect(dateNanos.reactConvert('<script>alert("test")</script>')).toBe(
       '<script>alert("test")</script>'
     );
   });

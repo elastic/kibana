@@ -19,7 +19,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { SplunkResourceType } from './vendor/common/splunk.gen';
 import { QradarResourceType } from './vendor/common/qradar.gen';
-import { SentinelResourceType } from './vendor/common/sentinel.gen';
 
 /**
  * The GenAI connector id to use.
@@ -285,13 +284,10 @@ export const MigrationTaskStats = lazySchema(() =>
 );
 export type MigrationTaskStats = z.infer<typeof MigrationTaskStats>;
 
-export const SiemMigrationResourceTypeInternal = lazySchema(() =>
-  z.union([SplunkResourceType, QradarResourceType, SentinelResourceType])
+export const SiemMigrationResourceType = lazySchema(() =>
+  z.union([SplunkResourceType, QradarResourceType])
 );
-
-export type SiemMigrationResourceType = z.infer<typeof SiemMigrationResourceTypeInternal>;
-export const SiemMigrationResourceType =
-  SiemMigrationResourceTypeInternal as z.ZodType<SiemMigrationResourceType>;
+export type SiemMigrationResourceType = z.infer<typeof SiemMigrationResourceType>;
 
 /**
  * A resource of a migration

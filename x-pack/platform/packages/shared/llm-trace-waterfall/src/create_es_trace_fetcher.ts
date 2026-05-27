@@ -34,7 +34,7 @@ interface TraceSearchResponse {
   };
 }
 
-const DEFAULT_TRACES_INDEX_PATTERN = 'traces-*';
+const TRACES_INDEX_PATTERN = 'traces-*';
 const MAX_SPANS_PER_TRACE = 10_000;
 
 const getDurationMs = (spans: Array<{ start_time: string; duration_ms: number }>): number => {
@@ -49,13 +49,12 @@ const getDurationMs = (spans: Array<{ start_time: string; duration_ms: number }>
 };
 
 export const createEsTraceFetcher = (
-  search: DataPublicPluginStart['search']['search'],
-  { index = DEFAULT_TRACES_INDEX_PATTERN }: { index?: string } = {}
+  search: DataPublicPluginStart['search']['search']
 ): TraceFetcher => {
   return async (traceId: string) => {
     const request: TraceSearchRequest = {
       params: {
-        index,
+        index: TRACES_INDEX_PATTERN,
         body: {
           query: { term: { trace_id: traceId } },
           sort: [{ '@timestamp': { order: 'asc' } }],

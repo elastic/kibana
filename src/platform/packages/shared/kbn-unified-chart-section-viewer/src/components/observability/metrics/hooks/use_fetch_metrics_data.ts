@@ -22,7 +22,7 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from '../utils/execution_context_enums';
-import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
+import { reportChartSectionError } from '../../../chart/utils/report_chart_section_error';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -46,7 +46,6 @@ export function useFetchMetricsData({
 }): MetricsInfo {
   const { trackMetricsInfo } = useTelemetry();
   const { trackRequest } = useChartSectionInspector();
-  const reportError = useReportChartSectionError();
   const esql = getEsqlQuery(fetchParams.query);
 
   const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
@@ -173,7 +172,7 @@ export function useFetchMetricsData({
     if (!error) {
       return;
     }
-    reportError({
+    reportChartSectionError({
       error,
       source: 'useFetchMetricsData',
       labels: {
@@ -181,7 +180,7 @@ export function useFetchMetricsData({
         profile_id: profileId,
       },
     });
-  }, [error, profileId, reportError]);
+  }, [error, profileId]);
 
   return {
     loading,

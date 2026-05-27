@@ -15,11 +15,6 @@ export const txV2: SchemaBasedAggregations = {
         field: 'host.network.egress.bytes',
       },
     },
-    tx_count: {
-      value_count: {
-        field: 'host.network.egress.bytes',
-      },
-    },
     min_timestamp: {
       min: {
         field: '@timestamp',
@@ -34,13 +29,11 @@ export const txV2: SchemaBasedAggregations = {
       bucket_script: {
         buckets_path: {
           value: 'tx_sum',
-          count: 'tx_count',
           minTime: 'min_timestamp',
           maxTime: 'max_timestamp',
         },
         script: {
-          source:
-            'params.count > 0 ? params.value / ((params.maxTime - params.minTime) / 1000) : null',
+          source: 'params.value / ((params.maxTime - params.minTime) / 1000)',
           lang: 'painless',
         },
         gap_policy: 'skip',

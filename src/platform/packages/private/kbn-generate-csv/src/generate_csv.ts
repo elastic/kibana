@@ -113,7 +113,7 @@ export class CsvGenerator {
       // check truthiness to guard against _score, _type, etc
       if (tableColumn && dataTableCell) {
         try {
-          cell = formatters[tableColumn].convertToText(dataTableCell);
+          cell = formatters[tableColumn].convert(dataTableCell);
         } catch (err) {
           this.logger.error(err, { tags: [this.jobId] });
           cell = '-';

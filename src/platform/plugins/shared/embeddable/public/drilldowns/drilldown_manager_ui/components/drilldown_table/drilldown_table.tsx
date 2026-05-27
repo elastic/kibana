@@ -18,7 +18,6 @@ import {
   txtEditDrilldown,
   txtCloneDrilldown,
   txtSelectDrilldown,
-  txtTableCaption,
   txtName,
   txtAction,
   txtTrigger,
@@ -145,7 +144,6 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
         itemId="id"
         columns={columns}
         responsiveBreakpoint={false}
-        tableCaption={txtTableCaption}
         selection={{
           onSelectionChange: (selection) => {
             setSelectedDrilldowns(selection.map((drilldown) => drilldown.id));

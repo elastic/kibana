@@ -7,7 +7,7 @@
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { initializeStateApi } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import {
   fetch$,
   initializeStateManager,
@@ -64,7 +64,15 @@ export const getBurnRateEmbeddableFactory = ({
       const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
       const reload$ = new Subject<boolean>();
 
-      const stateApi = initializeStateApi<BurnRateEmbeddableState>({
+      function serializeState(): BurnRateEmbeddableState {
+        return {
+          ...titleManager.getLatestState(),
+          ...sloBurnRateManager.getLatestState(),
+          ...drilldownsManager.getLatestState(),
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<BurnRateEmbeddableState>({
         uuid,
         parentApi,
         anyStateChange$: merge(
@@ -72,11 +80,7 @@ export const getBurnRateEmbeddableFactory = ({
           sloBurnRateManager.anyStateChange$,
           drilldownsManager.anyStateChange$
         ),
-        serializeState: () => ({
-          ...titleManager.getLatestState(),
-          ...sloBurnRateManager.getLatestState(),
-          ...drilldownsManager.getLatestState(),
-        }),
+        serializeState,
         getComparators: () => ({
           ...titleComparators,
           ...drilldownsManager.comparators,
@@ -84,18 +88,19 @@ export const getBurnRateEmbeddableFactory = ({
           slo_instance_id: 'referenceEquality',
           duration: 'referenceEquality',
         }),
-        applySerializedState: (nextState) => {
-          sloBurnRateManager.reinitializeState(nextState);
-          titleManager.reinitializeState(nextState);
-          drilldownsManager.reinitializeState(nextState);
+        onReset: (lastSaved) => {
+          sloBurnRateManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          drilldownsManager.reinitializeState(lastSaved ?? {});
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...stateApi,
+        ...unsavedChangesApi,
         ...drilldownsManager.api,
         defaultTitle$,
+        serializeState,
       });
 
       const fetchSubscription = fetch$(api)

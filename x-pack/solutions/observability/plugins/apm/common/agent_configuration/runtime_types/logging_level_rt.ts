@@ -5,4 +5,14 @@
  * 2.0.
  */
 
-export { loggingLevelRt } from '@kbn/apm-common';
+import * as t from 'io-ts';
+
+export const loggingLevelRt = t.union([
+  t.literal('trace'),
+  t.literal('debug'),
+  t.literal('info'),
+  t.literal('warn'),
+  t.literal('error'),
+  t.literal('fatal'),
+  t.literal('off'),
+]);

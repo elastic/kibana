@@ -108,7 +108,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       description: data.metadata.description,
       owner: data.metadata.owner,
       tags: data.metadata.tags,
-      builder_type: data.metadata.builder_type,
     },
     time_field: data.time_field,
     schedule: {
@@ -130,29 +129,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
 }
 
 /**
- * Resolves `metadata.builder_type` for an update. Auto-clears when the query
- * changes without an explicit `builder_type` in the same request.
- */
-function resolveBuilderType(
-  updateData: UpdateRuleData,
-  existingAttrs: RuleSavedObjectAttributes
-): string | undefined {
-  if (updateData.metadata?.builder_type !== undefined) {
-    return updateData.metadata.builder_type ?? undefined;
-  }
-
-  const queryChanged =
-    updateData.evaluation?.query?.base != null &&
-    updateData.evaluation.query.base !== existingAttrs.evaluation.query.base;
-
-  if (queryChanged) {
-    return undefined;
-  }
-
-  return existingAttrs.metadata.builder_type;
-}
-
-/**
  * Builds the complete next saved-object attributes for a rule update.
  *
  * The caller is expected to persist these with `mergeAttributes: false` so
@@ -170,11 +146,7 @@ export function buildUpdateRuleAttributes(
 ): RuleSavedObjectAttributes {
   return {
     ...existingAttrs,
-    metadata: {
-      ...existingAttrs.metadata,
-      ...updateData.metadata,
-      builder_type: resolveBuilderType(updateData, existingAttrs),
-    },
+    metadata: { ...existingAttrs.metadata, ...updateData.metadata },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
     evaluation: updateData.evaluation
@@ -222,7 +194,6 @@ export function transformRuleSoAttributesToRuleApiResponse(
       description: attrs.metadata.description,
       owner: attrs.metadata.owner,
       tags: attrs.metadata.tags,
-      builder_type: attrs.metadata.builder_type,
     },
     time_field: attrs.time_field,
     schedule: {

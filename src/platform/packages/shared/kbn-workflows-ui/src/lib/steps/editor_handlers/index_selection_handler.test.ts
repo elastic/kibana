@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IndexKind, MatchedItem } from '@kbn/data-views-plugin/public';
+import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import type { SelectionContext } from '@kbn/workflows/types/latest';
 import {
   getIndexSelectionHandler,
   type IndexSelectionHandlerServices,
 } from './index_selection_handler';
 
-type SelectableKind = Extract<IndexKind, 'index' | 'alias' | 'data_stream'>;
+type IndexKind = 'index' | 'alias' | 'data_stream';
 
-const TAG_LABELS: Record<SelectableKind, string> = {
+const TAG_LABELS: Record<IndexKind, string> = {
   index: 'Index',
   alias: 'Alias',
   data_stream: 'Data stream',
 };
 
-function buildMatchedItem(name: string, kind: SelectableKind = 'index'): MatchedItem {
+function buildMatchedItem(name: string, kind: IndexKind = 'index'): MatchedItem {
   return {
     name,
     tags: [{ key: kind, name: TAG_LABELS[kind], color: 'default' }],

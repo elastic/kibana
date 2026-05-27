@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isEmpty } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { migrateLegacyLastRunOutcomeMsg } from '../../../rules_client/lib';
@@ -117,6 +118,8 @@ interface TransformEsToRuleParams {
   logger: Logger;
   ruleType: UntypedNormalizedRuleType;
   references?: SavedObjectReference[];
+  includeSnoozeData?: boolean;
+  omitGeneratedValues?: boolean;
 }
 
 export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = never>(
@@ -126,7 +129,14 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
 ): RuleDomain<Params> => {
   const { scheduledTaskId, executionStatus, monitoring, snoozeSchedule, lastRun } = esRule;
 
-  const { id, logger, ruleType, references } = transformParams;
+  const {
+    id,
+    logger,
+    ruleType,
+    references,
+    includeSnoozeData = false,
+    omitGeneratedValues = true,
+  } = transformParams;
 
   const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
     ...s,
@@ -137,16 +147,20 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     },
   }));
 
-  const isSnoozedUntil = getRuleSnoozeEndTime({
-    muteAll: esRule.muteAll ?? false,
-    snoozeSchedule: snoozeSchedule as SanitizedRule<Params>['snoozeSchedule'],
-  });
+  const includeSnoozeSchedule = snoozeSchedule !== undefined && !isEmpty(snoozeSchedule);
+  const isSnoozedUntil = includeSnoozeSchedule
+    ? getRuleSnoozeEndTime({
+        muteAll: esRule.muteAll ?? false,
+        snoozeSchedule: snoozeSchedule as SanitizedRule<Params>['snoozeSchedule'],
+      })?.toISOString()
+    : null;
 
   const ruleDomainActions: RuleDomain['actions'] = transformRawActionsToDomainActions({
     ruleId: id,
     actions: esRule.actions,
     references,
     isSystemAction,
+    omitGeneratedValues,
   });
   const ruleDomainSystemActions: RuleDomain['systemActions'] =
     transformRawActionsToDomainSystemActions({
@@ -154,6 +168,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       actions: esRule.actions,
       references,
       isSystemAction,
+      omitGeneratedValues,
     });
 
   const ruleDomainArtifacts = transformRawArtifactsToDomainArtifacts(
@@ -204,8 +219,14 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       : {}),
     ...(monitoring ? { monitoring: transformEsMonitoring(logger, id, monitoring) } : {}),
     snoozeSchedule: snoozeScheduleDates ?? [],
-    activeSnoozes,
-    isSnoozedUntil,
+    ...(includeSnoozeData
+      ? {
+          activeSnoozes,
+          ...(isSnoozedUntil !== undefined
+            ? { isSnoozedUntil: isSnoozedUntil ? new Date(isSnoozedUntil) : null }
+            : {}),
+        }
+      : {}),
     ...(lastRun ? { lastRun: migrateLegacyLastRunOutcomeMsg(lastRun) } : {}),
     ...(esRule.nextRun ? { nextRun: new Date(esRule.nextRun) } : {}),
     ...(esRule.lastEnabledAt ? { lastEnabledAt: new Date(esRule.lastEnabledAt) } : {}),

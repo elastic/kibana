@@ -32,22 +32,22 @@ describe('Date Nanos Format: Server side edition', () => {
 
   test('should format according to the given timezone parameter', () => {
     const dateNy = new DateNanosFormat({ timezone: 'America/New_York' }, getConfig);
-    convert = dateNy.convertToText.bind(dateNy);
+    convert = dateNy.convert.bind(dateNy);
     expect(convert(dateTime)).toMatchInlineSnapshot(`"May 5th 2019, 10:04:56.201900001"`);
 
     const datePhx = new DateNanosFormat({ timezone: 'America/Phoenix' }, getConfig);
-    convert = datePhx.convertToText.bind(datePhx);
+    convert = datePhx.convert.bind(datePhx);
     expect(convert(dateTime)).toMatchInlineSnapshot(`"May 5th 2019, 07:04:56.201900001"`);
   });
 
   test('should format according to UTC if no timezone parameter is given or exists in settings', () => {
     const utcFormat = 'May 5th 2019, 14:04:56.201900001';
     const dateUtc = new DateNanosFormat({ timezone: 'UTC' }, getConfig);
-    convert = dateUtc.convertToText.bind(dateUtc);
+    convert = dateUtc.convert.bind(dateUtc);
     expect(convert(dateTime)).toBe(utcFormat);
 
     const dateDefault = new DateNanosFormat({}, getConfig);
-    convert = dateDefault.convertToText.bind(dateDefault);
+    convert = dateDefault.convert.bind(dateDefault);
     expect(convert(dateTime)).toBe(utcFormat);
   });
 
@@ -55,7 +55,7 @@ describe('Date Nanos Format: Server side edition', () => {
     mockConfig['dateFormat:tz'] = 'America/Phoenix';
 
     const date = new DateNanosFormat({}, getConfig);
-    convert = date.convertToText.bind(date);
+    convert = date.convert.bind(date);
     expect(convert(dateTime)).toMatchInlineSnapshot(`"May 5th 2019, 07:04:56.201900001"`);
   });
 
@@ -63,7 +63,7 @@ describe('Date Nanos Format: Server side edition', () => {
     mockConfig['dateFormat:tz'] = 'America/Phoenix';
 
     const date = new DateNanosFormat({ timezone: 'America/New_York' }, getConfig);
-    convert = date.convertToText.bind(date);
+    convert = date.convert.bind(date);
     expect(convert(dateTime)).toMatchInlineSnapshot(`"May 5th 2019, 10:04:56.201900001"`);
   });
 });

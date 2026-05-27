@@ -9,6 +9,6 @@
 
 export const getFormatService = () => ({
   deserialize: (target: any) => ({
-    convertToText: (text: string) => text,
+    convert: (text: string, format: string) => text,
   }),
 });

@@ -17,7 +17,7 @@ import {
   initializeTimeRangeManager,
   timeRangeComparators,
   useBatchedPublishingSubjects,
-  initializeStateApi,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, switchMap, tap } from 'rxjs';
@@ -47,14 +47,16 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         );
       }
 
-      const stateApi = initializeStateApi({
+      function serializeState() {
+        return {
+          ...timeRangeManager.getLatestState(),
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges({
         uuid,
         parentApi,
-        serializeState: () => {
-          return {
-            ...timeRangeManager.getLatestState(),
-          };
-        },
+        serializeState,
         anyStateChange$: timeRangeManager.anyStateChange$,
         getComparators: () => {
           /**
@@ -64,13 +66,13 @@ export const getSearchEmbeddableFactory = (services: Services) => {
            */
           return timeRangeComparators;
         },
-        applySerializedState: (nextState) => {
+        onReset: (lastSaved) => {
           /**
            * if this embeddable had a difference between its runtime and serialized state, we could run the 'deserializeState'
-           * function here before applying next state. Method can be async to support a potential async deserialize function.
+           * function here before resetting. onReset can be async so to support a potential async deserialize function.
            */
 
-          timeRangeManager.reinitializeState(nextState);
+          timeRangeManager.reinitializeState(lastSaved);
         },
       });
 
@@ -78,8 +80,9 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         blockingError$,
         dataViews$,
         dataLoading$,
-        ...stateApi,
+        ...unsavedChangesApi,
         ...timeRangeManager.api,
+        serializeState,
       });
 
       const count$ = new BehaviorSubject<number>(0);

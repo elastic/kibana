@@ -8,7 +8,7 @@
  */
 
 import { readFileSync } from 'fs';
-import { parse } from 'yaml';
+import { load } from 'js-yaml';
 import { join } from 'path';
 import { bundleFolder, readBundledSpecs } from './bundle_specs';
 
@@ -26,7 +26,7 @@ describe('OpenAPI Bundler - specs with multiple modifications', () => {
 
     const [bundledSpec] = Object.values(readBundledSpecs(outputFolderPath));
 
-    const expected = parse(
+    const expected = load(
       readFileSync(join(folderToBundlePath, 'expected.yaml'), { encoding: 'utf8' })
     );
 

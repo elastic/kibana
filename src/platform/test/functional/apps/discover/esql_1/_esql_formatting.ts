@@ -41,6 +41,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await esArchiver.load(
         'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
       );
@@ -154,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // 2. Add custom_bytes as a separate column and verify
         await unifiedFieldList.clickFieldListItemAdd('custom_bytes');
         await discover.waitUntilTabIsLoaded();
-        const bytes2ColumnCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+        const bytes2ColumnCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
         expect(await bytes2ColumnCell.getVisibleText()).to.be(expectedBytesValue2);
 
         // 3. Verify both values in doc viewer flyout

@@ -101,35 +101,27 @@ describe('aggregationStats', () => {
     );
   });
 
-  it('should emit collect_values aggregation using VALUES for CCS (no merge step)', () => {
+  it('should emit collect_values aggregation using TOP and MV_DEDUPE', () => {
     const field: EntityField = {
       source: 'tags',
       destination: 'tags',
       mapping: { type: 'keyword' },
-      retention: { operation: 'collect_values' },
+      retention: { operation: 'collect_values', maxLength: 10 },
     };
-    expect(aggregationStats([field], false)).toBe('tags = VALUES(TO_STRING(tags))');
+    expect(aggregationStats([field], false)).toBe(
+      'tags = MV_DEDUPE(TOP(TO_STRING(tags), 10)) WHERE TO_STRING(tags) IS NOT NULL'
+    );
   });
 
-  it('should emit collect_values aggregation using VALUES for main pipeline', () => {
-    const field: EntityField = {
-      source: 'tags',
-      destination: 'tags',
-      mapping: { type: 'keyword' },
-      retention: { operation: 'collect_values' },
-    };
-    expect(aggregationStats([field], true)).toBe('recent.tags = VALUES(TO_STRING(tags))');
-  });
-
-  it('should use VALUES for normalized entity.source aggregation', () => {
+  it('should use the standard not-null guard for normalized entity.source aggregation', () => {
     const field: EntityField = {
       source: 'entity.source',
       destination: 'entity.source',
       mapping: { type: 'keyword' },
-      retention: { operation: 'collect_values' },
+      retention: { operation: 'collect_values', maxLength: 50 },
     };
     expect(aggregationStats([field], false)).toBe(
-      'entity.source = VALUES(TO_STRING(entity.source))'
+      'entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE TO_STRING(entity.source) IS NOT NULL'
     );
   });
 

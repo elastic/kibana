@@ -14,7 +14,7 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
-  initializeStateApi,
+  initializeUnsavedChanges,
   initializeTitleManager,
   titleComparators,
 } from '@kbn/presentation-publishing';
@@ -47,14 +47,18 @@ export const getImageEmbeddableFactory = () => {
       const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.image_config);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
-      const stateApi = initializeStateApi<ImageEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState: () => ({
+      function serializeState() {
+        return {
           ...titleManager.getLatestState(),
           ...drilldownsManager.getLatestState(),
           image_config: imageConfig$.getValue(),
-        }),
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<ImageEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           imageConfig$.pipe(
@@ -70,17 +74,17 @@ export const getImageEmbeddableFactory = () => {
             image_config: 'deepEquality',
           };
         },
-        applySerializedState: (nextState) => {
-          titleManager.reinitializeState(nextState);
-          drilldownsManager.reinitializeState(nextState);
-          imageConfig$.next(nextState.image_config);
+        onReset: (lastSaved) => {
+          titleManager.reinitializeState(lastSaved);
+          drilldownsManager.reinitializeState(lastSaved ?? {});
+          if (lastSaved) imageConfig$.next(lastSaved.image_config);
         },
       });
 
       const embeddableApi = finalizeApi({
         ...titleManager.api,
         ...drilldownsManager.api,
-        ...stateApi,
+        ...unsavedChangesApi,
         dataLoading$,
         supportedTriggers: () => IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS,
 
@@ -108,6 +112,7 @@ export const getImageEmbeddableFactory = () => {
           i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName.edit', {
             defaultMessage: 'image',
           }),
+        serializeState,
       });
 
       const privateImageEmbeddableApi = {

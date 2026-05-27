@@ -13,21 +13,15 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
-  EuiCheckbox,
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiPageHeaderSection,
   EuiPageTemplate,
   EuiSkeletonLoading,
   EuiSkeletonRectangle,
   EuiSkeletonTitle,
   EuiSwitch,
-  EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -68,8 +62,6 @@ const executionsTabReadExecutionDisabledTooltip = i18n.translate(
   }
 );
 
-export const SkipUnsavedRunConfirmationStorageKey = 'workflows:skipUnsavedRunConfirmation';
-
 const Translations = {
   runWorkflow: i18n.translate('workflows.workflowDetailHeader.runWorkflow', {
     defaultMessage: 'Run workflow',
@@ -80,9 +72,6 @@ const Translations = {
   ),
   runWorkflowCancel: i18n.translate('workflows.workflowDetailHeader.runWorkflowCancel', {
     defaultMessage: 'Cancel',
-  }),
-  dontAskAgain: i18n.translate('workflows.workflowDetailHeader.dontAskAgain', {
-    defaultMessage: "Don't ask again",
   }),
   backLink: i18n.translate('workflows.workflowDetailHeader.backLink', {
     defaultMessage: 'Back to Workflows',
@@ -171,7 +160,6 @@ export const WorkflowDetailHeader = React.memo(
     }, [dispatch]);
 
     const [showRunConfirmation, setShowRunConfirmation] = useState(false);
-    const [dontAskAgain, setDontAskAgain] = useState(false);
 
     // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
     // workflow?.valid !== false covers the initial page load before Monaco validates.
@@ -183,9 +171,8 @@ export const WorkflowDetailHeader = React.memo(
         isExecutionsTab,
         isValid: isSyntaxValid,
         canRunWorkflow: canExecuteWorkflow,
-        isSaving,
       });
-    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab, isSaving]);
+    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab]);
 
     const saveWorkflowTooltipContent = useMemo(() => {
       const isCreate = !workflowId;
@@ -193,19 +180,15 @@ export const WorkflowDetailHeader = React.memo(
         isExecutionsTab,
         canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
         isCreate,
-        hasUnsavedChanges,
       });
-    }, [isExecutionsTab, workflowId, canCreateWorkflow, canUpdateWorkflow, hasUnsavedChanges]);
+    }, [isExecutionsTab, workflowId, canCreateWorkflow, canUpdateWorkflow]);
 
     const canSaveWorkflow = useMemo(() => {
       return workflowId ? canUpdateWorkflow : canCreateWorkflow;
     }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
 
     const handleRunClickWithUnsavedCheck = useCallback(() => {
-      const shouldSkipUnsavedRunConfirmation =
-        localStorage.getItem(SkipUnsavedRunConfirmationStorageKey) === 'true';
-      if (hasUnsavedChanges && !shouldSkipUnsavedRunConfirmation) {
-        setDontAskAgain(false);
+      if (hasUnsavedChanges) {
         setShowRunConfirmation(true);
       } else {
         openTestModal();
@@ -213,15 +196,11 @@ export const WorkflowDetailHeader = React.memo(
     }, [hasUnsavedChanges, openTestModal]);
 
     const handleConfirmRun = useCallback(() => {
-      if (dontAskAgain) {
-        localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
-      }
       setShowRunConfirmation(false);
       openTestModal();
-    }, [dontAskAgain, openTestModal]);
+    }, [openTestModal]);
 
     const handleCancelRun = useCallback(() => {
-      setDontAskAgain(false);
       setShowRunConfirmation(false);
     }, []);
 
@@ -345,13 +324,7 @@ export const WorkflowDetailHeader = React.memo(
                     iconType="play"
                     size="s"
                     onClick={handleRunClickWithUnsavedCheck}
-                    disabled={
-                      isExecutionsTab ||
-                      !canExecuteWorkflow ||
-                      isLoading ||
-                      isSaving ||
-                      !isSyntaxValid
-                    }
+                    disabled={isExecutionsTab || !canExecuteWorkflow || isLoading || !isSyntaxValid}
                     aria-label={Translations.runWorkflow}
                     data-test-subj="runWorkflowHeaderButton"
                   />
@@ -363,12 +336,7 @@ export const WorkflowDetailHeader = React.memo(
                     size="s"
                     onClick={handleSaveWorkflow}
                     disabled={
-                      isExecutionsTab ||
-                      !canSaveWorkflow ||
-                      isLoading ||
-                      isSaving ||
-                      !isYamlSynced ||
-                      !hasUnsavedChanges
+                      isExecutionsTab || !canSaveWorkflow || isLoading || isSaving || !isYamlSynced
                     }
                     isLoading={isSaving}
                     data-test-subj="saveWorkflowHeaderButton"
@@ -385,59 +353,24 @@ export const WorkflowDetailHeader = React.memo(
           </EuiPageTemplate.Header>
         </EuiPageTemplate>
         {showRunConfirmation && (
-          <EuiModal
-            className="euiModal--confirmation"
+          <EuiConfirmModal
             data-test-subj="runWorkflowWithUnsavedChangesConfirmationModal"
-            onClose={handleCancelRun}
-            role="alertdialog"
-            initialFocus="[data-test-subj='confirmModalConfirmButton']"
+            title={Translations.runWithUnsavedChangesQuestion}
+            onCancel={handleCancelRun}
+            onConfirm={handleConfirmRun}
+            cancelButtonText={Translations.runWorkflowCancel}
+            confirmButtonText={Translations.runWorkflow}
+            buttonColor="success"
+            defaultFocusedButton="confirm"
             aria-label={Translations.runWithUnsavedChangesQuestion}
           >
-            <EuiModalHeader>
-              <EuiModalHeaderTitle data-test-subj="confirmModalTitleText">
-                {Translations.runWithUnsavedChangesQuestion}
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
-              <EuiText data-test-subj="confirmModalBodyText">
-                <p>
-                  <FormattedMessage
-                    id="workflows.workflowDetailHeader.runWithUnsavedChanges.message"
-                    defaultMessage="You have unsaved changes. Running the workflow will not save your changes. Are you sure you want to continue?"
-                  />
-                </p>
-              </EuiText>
-            </EuiModalBody>
-            <EuiModalFooter css={styles.runConfirmationFooter}>
-              <EuiCheckbox
-                id="workflowsRunWithUnsavedChangesDontAskAgain"
-                data-test-subj="runWorkflowWithUnsavedChangesDontAskAgain"
-                label={Translations.dontAskAgain}
-                checked={dontAskAgain}
-                onChange={(event) => setDontAskAgain(event.target.checked)}
+            <p>
+              <FormattedMessage
+                id="workflows.workflowDetailHeader.runWithUnsavedChanges.message"
+                defaultMessage="You have unsaved changes. Running the workflow will not save your changes. Are you sure you want to continue?"
               />
-              <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="confirmModalCancelButton"
-                    onClick={handleCancelRun}
-                  >
-                    {Translations.runWorkflowCancel}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="confirmModalConfirmButton"
-                    onClick={handleConfirmRun}
-                    fill
-                    color="success"
-                  >
-                    {Translations.runWorkflow}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiModalFooter>
-          </EuiModal>
+            </p>
+          </EuiConfirmModal>
         )}
       </>
     );
@@ -474,10 +407,6 @@ const componentStyles = {
       backgroundColor: euiTheme.colors.borderBasePlain,
       alignSelf: 'stretch',
     }),
-  runConfirmationFooter: css({
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  }),
   skeletonTitle: css({
     minWidth: '250px',
     width: '100%',

@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { CurrentUser } from '@kbn/agent-builder-common';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import { apiPrivileges } from '../../common/features';
 
@@ -32,22 +32,17 @@ export const getUserFromRequest = async ({
   request: KibanaRequest;
   security: SecurityServiceStart;
   esClient: ElasticsearchClient;
-}): Promise<CurrentUser> => {
+}): Promise<UserIdAndName> => {
   if (!request.isFakeRequest) {
     const authUser = security.authc.getCurrentUser(request);
     if (authUser) {
-      return {
-        id: authUser.profile_uid!,
-        username: authUser.username,
-      };
+      return { id: authUser.profile_uid!, username: authUser.username };
     }
   }
 
   // Fallback for fake requests (e.g. Task Manager execution): call ES _security/_authenticate
   const authResponse = await esClient.security.authenticate();
-  return {
-    username: authResponse.username,
-  };
+  return { username: authResponse.username };
 };
 
 const ADMIN_PRIVILEGE = 'agent_builder:admin'; // intentionally unregistered privilege
@@ -89,10 +84,7 @@ export const getAgentApiAccessFromRequest = async ({
 }: {
   esClient: ElasticsearchClient;
   space: string;
-}): Promise<{
-  canReadAgents: boolean;
-  canManageAgents: boolean;
-}> => {
+}): Promise<{ canReadAgents: boolean; canManageAgents: boolean }> => {
   const resource = `space:${space}`;
   const response = await esClient.security.hasPrivileges({
     application: [

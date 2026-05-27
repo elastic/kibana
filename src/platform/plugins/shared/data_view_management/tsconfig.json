@@ -6,7 +6,6 @@
   "include": [
     "public/**/*",
     "server/**/*",
-    "test/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -53,7 +52,6 @@
     "@kbn/cps-utils",
     "@kbn/cps",
     "@kbn/discover-utils",
-    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",

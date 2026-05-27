@@ -11,57 +11,24 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
 import type { SavedSearch } from '..';
+import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '../saved_searches_utils';
 import type { SavedSearchAttributes, SerializableSavedSearch } from '../types';
 import { extractTabs } from './extract_tabs';
-import type { DiscoverSessionAttributes } from '../../server';
 
-export const fromDiscoverSessionAttributesToSavedSearch = <
-  Serialized extends boolean = false,
-  ReturnType = Serialized extends true ? SerializableSavedSearch : SavedSearch
->(
+export const fromSavedSearchAttributes = (
   id: string | undefined,
-  { title, description, tabs }: DiscoverSessionAttributes,
+  attributes: SavedSearchAttributes,
   tags: string[] | undefined,
+  references: SavedObjectReference[] | undefined,
   searchSource: SavedSearch['searchSource'] | SerializedSearchSourceFields,
+  sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'],
   managed: boolean,
-  serialized: Serialized = false as Serialized,
-  sharingSavedObjectProps?: SavedSearch['sharingSavedObjectProps'],
-  references?: SavedObjectReference[]
-) => {
-  const [{ attributes }] = tabs;
-  return {
-    id,
-    ...(serialized ? { serializedSearchSource: searchSource } : { searchSource }),
-    title,
-    sort: attributes.sort,
-    columns: attributes.columns,
-    description,
-    tags,
-    grid: attributes.grid,
-    hideChart: attributes.hideChart,
-    hideTable: attributes.hideTable ?? false,
-    viewMode: attributes.viewMode,
-    hideAggregatedPreview: attributes.hideAggregatedPreview,
-    rowHeight: attributes.rowHeight,
-    headerRowHeight: attributes.headerRowHeight,
-    isTextBasedQuery: attributes.isTextBasedQuery,
-    usesAdHocDataView: attributes.usesAdHocDataView,
-    timeRestore: attributes.timeRestore,
-    timeRange: attributes.timeRange,
-    refreshInterval: attributes.refreshInterval,
-    rowsPerPage: attributes.rowsPerPage,
-    sampleSize: attributes.sampleSize,
-    breakdownField: attributes.breakdownField,
-    chartInterval: attributes.chartInterval,
-    visContext: attributes.visContext,
-    controlGroupJson: attributes.controlGroupJson,
-    density: attributes.density,
-    tabs,
-    managed,
-    sharingSavedObjectProps,
-    references,
-  } as ReturnType;
-};
+  serialized: boolean = false
+): SavedSearch | SerializableSavedSearch => ({
+  ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource, managed, serialized),
+  sharingSavedObjectProps,
+  references,
+});
 
 export const toSavedSearchAttributes = (
   savedSearch: SavedSearch,

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { transformBulkEnableResponseInternal } from './transform_bulk_enable_response/latest';
+export { transformBulkEnableResponse } from './transform_bulk_enable_response/latest';
 
-export { transformBulkEnableResponseInternal as transformBulkEnableResponseInternalV1 } from './transform_bulk_enable_response/v1';
+export { transformBulkEnableResponse as transformBulkEnableResponseV1 } from './transform_bulk_enable_response/v1';

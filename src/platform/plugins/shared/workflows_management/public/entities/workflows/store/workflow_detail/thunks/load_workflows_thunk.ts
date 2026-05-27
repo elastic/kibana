@@ -28,56 +28,47 @@ export const loadWorkflowsThunk = createAsyncThunk<
   LoadWorkflowsResponse,
   LoadWorkflowsParams,
   { state: RootState; extra: { services: WorkflowsServices } }
->(
-  'detail/loadWorkflowsThunk',
-  async (_, { dispatch, getState, rejectWithValue, extra: { services } }) => {
-    const { http, notifications } = services;
-    try {
-      const isCurrentWorkflowManaged = getState().detail.workflow?.managed === true;
-      const api = new WorkflowApi(http);
-      const response = await api.getWorkflows({
-        size: MAX_WORKFLOWS_LOOKUP_SIZE,
-        page: 1,
-        managed: isCurrentWorkflowManaged ? 'all' : 'unmanaged',
-      });
+>('detail/loadWorkflowsThunk', async (_, { dispatch, rejectWithValue, extra: { services } }) => {
+  const { http, notifications } = services;
+  try {
+    const api = new WorkflowApi(http);
+    const response = await api.getWorkflows({ size: MAX_WORKFLOWS_LOOKUP_SIZE, page: 1 });
 
-      const workflowsMap: WorkflowsResponse['workflows'] = {};
-      response.results.forEach((workflow) => {
-        const inputsSchema = getInputsFromDefinition(workflow.definition);
+    const workflowsMap: WorkflowsResponse['workflows'] = {};
+    response.results.forEach((workflow) => {
+      const inputsSchema = getInputsFromDefinition(workflow.definition);
 
-        workflowsMap[workflow.id] = {
-          id: workflow.id,
-          name: workflow.name,
-          managed: workflow.managed,
-          inputsSchema,
-        };
-      });
-
-      const workflowsResponse: WorkflowsResponse = {
-        workflows: workflowsMap,
-        totalWorkflows: response.total || 0,
+      workflowsMap[workflow.id] = {
+        id: workflow.id,
+        name: workflow.name,
+        inputsSchema,
       };
+    });
 
-      dispatch(setWorkflows(workflowsResponse));
+    const workflowsResponse: WorkflowsResponse = {
+      workflows: workflowsMap,
+      totalWorkflows: response.total || 0,
+    };
 
-      return workflowsResponse;
-    } catch (error) {
-      const errorMessage =
-        error && typeof error === 'object' && 'body' in error
-          ? (error as { body?: { message?: string } }).body?.message
-          : undefined;
-      const message =
-        typeof errorMessage === 'string'
-          ? errorMessage
-          : error instanceof Error
-          ? error.message
-          : 'Failed to load workflows';
+    dispatch(setWorkflows(workflowsResponse));
 
-      notifications.toasts.addError(new Error(message), {
-        title: 'Failed to load workflows',
-      });
-      dispatch(setWorkflows(initialWorkflowsState));
-      return rejectWithValue(message);
-    }
+    return workflowsResponse;
+  } catch (error) {
+    const errorMessage =
+      error && typeof error === 'object' && 'body' in error
+        ? (error as { body?: { message?: string } }).body?.message
+        : undefined;
+    const message =
+      typeof errorMessage === 'string'
+        ? errorMessage
+        : error instanceof Error
+        ? error.message
+        : 'Failed to load workflows';
+
+    notifications.toasts.addError(new Error(message), {
+      title: 'Failed to load workflows',
+    });
+    dispatch(setWorkflows(initialWorkflowsState));
+    return rejectWithValue(message);
   }
-);
+});

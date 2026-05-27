@@ -42,7 +42,7 @@ const mockFormatter = fieldFormatsServiceMock.createStartContract().deserialize(
 describe('color mapping', () => {
   let defaultProps: ColorMappingProps;
 
-  mockFormatter.convertToText = jest.fn(
+  mockFormatter.convert = jest.fn(
     (v: any) => (typeof v === 'string' ? specialTokens.get(v) ?? v : JSON.stringify(v)) // simple way to check formatting is applied
   );
   const onModelUpdateFn = jest.fn();

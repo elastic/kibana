@@ -2,7 +2,7 @@
   "type": "index",
   "value": {
     "aliases": {
-      "entities-latest-default": {}
+      "entities-generic-latest": {}
     },
     "index": ".entities.v2.latest.security_entities-space-00001",
     "settings": {

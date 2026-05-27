@@ -113,7 +113,7 @@ const indexPattern = {
   hasRestrictions: false,
   fields: indexPatternFields,
   getFieldByName: getFieldByNameFactory([...indexPatternFields, documentField]),
-  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
+  getFormatterForField: () => ({ convert: (v: unknown) => v }),
   isPersisted: true,
   spec: {},
 };
@@ -2892,7 +2892,7 @@ describe('state_helpers', () => {
       title: '',
       hasRestrictions: true,
       getFieldByName: getFieldByNameFactory(fields),
-      getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
+      getFormatterForField: () => ({ convert: (v: unknown) => v }),
       fields,
       isPersisted: true,
       spec: {},

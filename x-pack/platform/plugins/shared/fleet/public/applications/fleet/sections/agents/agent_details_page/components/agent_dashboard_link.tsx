@@ -96,11 +96,11 @@ export const AgentDashboardLink: React.FunctionComponent<{
   const { isInstalled, link, isLoading } = useAgentDashboardLink(agent, packageName);
   const { getHref } = useLink();
 
-  const isMetricsEnabled =
-    agentPolicy?.monitoring_enabled?.includes('metrics') || agent.type === 'OPAMP';
+  const isLogAndMetricsEnabled =
+    (agentPolicy?.monitoring_enabled?.length ?? 0) > 0 || agent.type === 'OPAMP';
 
   const buttonArgs =
-    !isInstalled || isLoading || !isMetricsEnabled ? { disabled: true } : { href: link };
+    !isInstalled || isLoading || !isLogAndMetricsEnabled ? { disabled: true } : { href: link };
 
   const button = (
     <EuiButtonCompressed
@@ -117,26 +117,26 @@ export const AgentDashboardLink: React.FunctionComponent<{
     </EuiButtonCompressed>
   );
 
-  if (!isLoading && !isMetricsEnabled && agentPolicy) {
+  if (!isLoading && !isLogAndMetricsEnabled && agentPolicy) {
     return (
       <EuiToolTip
         content={
           <FormattedMessage
-            id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoMetricsTooltip"
-            defaultMessage="Metrics for agent are not enabled in the agent policy."
+            id="xpack.fleet.agentDetails.viewDashboardButton.disabledNoLogsAndMetricsTooltip"
+            defaultMessage="Logs and metrics for agent are not enabled in the agent policy."
           />
         }
       >
         <EuiButtonCompressed
-          data-test-subj="agentDetails.enableMetricsButton"
+          data-test-subj="agentDetails.enableLogsAndMetricsButton"
           isLoading={isLoading}
           color="primary"
           href={getHref('policy_details', { policyId: agentPolicy.id, tabId: 'settings' })}
           disabled={agentPolicy?.is_managed}
         >
           <FormattedMessage
-            id="xpack.fleet.agentDetails.enableMetricsLabel"
-            defaultMessage="Enable agent metrics"
+            id="xpack.fleet.agentDetails.enableLogsAndMetricsLabel"
+            defaultMessage="Enable logs and metrics"
           />
         </EuiButtonCompressed>
       </EuiToolTip>

@@ -6,10 +6,17 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFieldText,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { RuleDetailsFieldGroup } from '../../../form';
-import { RelatedDashboardSelector, RunbookArtifactField } from '../../../form/field_groups';
 
 export function DetailsAndArtifactsStep() {
   return (
@@ -29,9 +36,44 @@ export function DetailsAndArtifactsStep() {
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      <RunbookArtifactField />
+      {/* TODO (#268770): wire runbook URL and dashboard link to FormValues.artifacts */}
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.alertingV2.composeDiscover.detailsAndArtifacts.runbookUrlLabel',
+          { defaultMessage: 'Runbook URL' }
+        )}
+        fullWidth
+        labelAppend={
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.alertingV2.composeDiscover.detailsAndArtifacts.optionalLabel"
+              defaultMessage="Optional"
+            />
+          </EuiText>
+        }
+      >
+        <EuiFieldText fullWidth placeholder="https://..." disabled />
+      </EuiFormRow>
+
       <EuiSpacer size="m" />
-      <RelatedDashboardSelector />
+
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.alertingV2.composeDiscover.detailsAndArtifacts.dashboardLinkLabel',
+          { defaultMessage: 'Dashboard link' }
+        )}
+        fullWidth
+        labelAppend={
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.alertingV2.composeDiscover.detailsAndArtifacts.dashboardOptionalLabel"
+              defaultMessage="Optional"
+            />
+          </EuiText>
+        }
+      >
+        <EuiFieldText fullWidth placeholder="https://..." disabled />
+      </EuiFormRow>
     </>
   );
 }

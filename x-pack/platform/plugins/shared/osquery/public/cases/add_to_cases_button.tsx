@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { AttachmentType, OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -92,9 +92,13 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
     const attachments: CaseAttachmentsWithoutOwner = [
       ...alertAttachments,
       {
-        type: OSQUERY_ATTACHMENT_TYPE,
-        attachmentId: actionId,
-        metadata,
+        type: AttachmentType.externalReference,
+        externalReferenceId: actionId,
+        externalReferenceStorage: {
+          type: ExternalReferenceStorageType.elasticSearchDoc,
+        },
+        externalReferenceAttachmentTypeId: 'osquery',
+        externalReferenceMetadata: metadata,
       },
     ];
     if (hasCasesPermissions) {

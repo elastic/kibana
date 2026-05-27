@@ -79,7 +79,7 @@ const indexPattern = {
   hasRestrictions: false,
   fields: indexPatternFields,
   getFieldByName: getFieldByNameFactory([...indexPatternFields]),
-  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
+  getFormatterForField: () => ({ convert: (v: unknown) => v }),
   isPersisted: true,
   spec: {},
 };

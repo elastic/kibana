@@ -7,92 +7,64 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { IconType, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiImage,
   EuiPageTemplate,
-  EuiPanel,
   EuiText,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
+import useMountedState from 'react-use/lib/useMountedState';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { coreServices, uiActionsService } from '../../../services/kibana_services';
+import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
-
-interface EmptyStateAction {
-  actionId: string;
-  title: string;
-  description: string;
-  icon: IconType;
-  dataTestSubj: string;
-}
-
-const EMPTY_STATE_ACTIONS: readonly EmptyStateAction[] = [
-  {
-    actionId: 'addLensPanelAction',
-    title: i18n.translate('dashboard.emptyScreen.createVisualizationTitle', {
-      defaultMessage: 'Create visualization',
-    }),
-    description: i18n.translate('dashboard.emptyScreen.createVisualizationDescription', {
-      defaultMessage: 'Build charts, metrics, and tables with a point-and-click editor.',
-    }),
-    icon: 'visBarVertical',
-    dataTestSubj: 'emptyDashboardCreateVisualization',
-  },
-  {
-    actionId: 'ACTION_CREATE_ESQL_CHART',
-    title: i18n.translate('dashboard.emptyScreen.createEsqlVisualizationTitle', {
-      defaultMessage: 'Create visualization (query)',
-    }),
-    description: i18n.translate('dashboard.emptyScreen.createEsqlVisualizationDescription', {
-      defaultMessage: 'Build charts, metrics, and tables with ES|QL.',
-    }),
-    icon: 'editorCodeBlock',
-    dataTestSubj: 'emptyDashboardCreateEsqlVisualization',
-  },
-] as const;
+import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
     return getDashboardCapabilities();
   }, []);
 
+  const isMounted = useMountedState();
   const dashboardApi = useDashboardApi();
+  const [isLoading, setIsLoading] = useState(false);
   const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = viewMode === 'edit';
 
-  const executeAction = useCallback(
-    async (actionId: string) => {
-      try {
-        const action = await uiActionsService.getAction(actionId);
-        const { triggers } = await import('@kbn/ui-actions-plugin/public');
-        const { ADD_PANEL_TRIGGER } = await import('@kbn/ui-actions-plugin/common/trigger_ids');
-        action.execute({
-          embeddable: dashboardApi,
-          trigger: triggers[ADD_PANEL_TRIGGER],
-        } as ActionExecutionContext);
-      } catch (error) {
-        coreServices.notifications.toasts.addWarning(
-          i18n.translate('dashboard.addNewPanelError', {
-            defaultMessage: 'Unable to add new panel',
-          })
+  const openAddFromLibrary = useCallback(() => {
+    openLazyFlyout({
+      core: coreServices,
+      parentApi: dashboardApi,
+      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+        const { AddPanelFlyout } = await import(
+          '../../../dashboard_app/top_nav/add_panel_button/components/add_panel_flyout'
         );
-      }
-    },
-    [dashboardApi]
-  );
+        return (
+          <AddPanelFlyout
+            dashboardApi={dashboardApi}
+            ariaLabelledBy={ariaLabelledBy}
+            initialTab="library"
+          />
+        );
+      },
+      flyoutProps: {
+        'data-test-subj': 'dashboardAddPanel',
+        triggerId: 'dashboardAddTopNavButton',
+      },
+    });
+  }, [dashboardApi]);
 
   const styles = useMemoCss(emptyScreenStyles);
 
@@ -125,8 +97,11 @@ export function DashboardEmptyScreen() {
   })();
 
   const body = (() => {
-    if (showEditPrompt) return undefined;
-    const bodyString = showWriteControls
+    const bodyString = showEditPrompt
+      ? i18n.translate('dashboard.emptyScreen.editModeSubtitle', {
+          defaultMessage: 'Create a visualization of your data, or add one from the library.',
+        })
+      : showWriteControls
       ? i18n.translate('dashboard.emptyScreen.viewModeSubtitle', {
           defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
         })
@@ -143,32 +118,31 @@ export function DashboardEmptyScreen() {
   const actions = (() => {
     if (showEditPrompt) {
       return (
-        <EuiFlexGroup direction="column" gutterSize="s" css={styles.actionsWrapper}>
-          {EMPTY_STATE_ACTIONS.map((action) => (
-            <EuiFlexItem key={action.actionId} grow={false}>
-              <EuiPanel
-                hasBorder
-                paddingSize="none"
-                onClick={() => executeAction(action.actionId)}
-                css={styles.actionPanel}
-                data-test-subj={action.dataTestSubj}
-              >
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type={action.icon} size="m" aria-hidden={true} />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <strong>{action.title}</strong>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      {action.description}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
-          ))}
+        <EuiFlexGroup justifyContent="center" gutterSize="l" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              isLoading={isLoading}
+              iconType="lensApp"
+              onClick={async () => {
+                setIsLoading(true);
+                await executeAddLensPanelAction(dashboardApi);
+                if (isMounted()) {
+                  setIsLoading(false);
+                }
+              }}
+            >
+              {i18n.translate('dashboard.emptyScreen.createVisualization', {
+                defaultMessage: 'Create visualization',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty flush="left" iconType="folderOpen" onClick={openAddFromLibrary}>
+              {i18n.translate('dashboard.emptyScreen.addFromLibrary', {
+                defaultMessage: 'Add from library',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
       );
     }
@@ -216,16 +190,7 @@ const emptyScreenStyles = {
       paddingTop: '0 !important',
       borderRadius: euiTheme.border.radius.medium,
       '.euiEmptyPrompt__icon': {
-        marginBottom: euiTheme.size.l,
-        paddingRight: euiTheme.size.s,
+        marginBottom: 0,
       },
-    }),
-  actionsWrapper: css({
-    width: '100%',
-  }),
-  actionPanel: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
-      cursor: 'pointer',
     }),
 };

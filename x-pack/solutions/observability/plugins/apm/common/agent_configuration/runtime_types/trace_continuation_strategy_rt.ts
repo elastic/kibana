@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { traceContinuationStrategyRt } from '@kbn/apm-common';
+import * as t from 'io-ts';
+
+export const traceContinuationStrategyRt = t.union([
+  t.literal('continue'),
+  t.literal('restart'),
+  t.literal('restart_external'),
+]);

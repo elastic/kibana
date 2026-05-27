@@ -17,7 +17,6 @@ export interface WorkflowsMap {
   [workflowId: string]: {
     id: string;
     name: string;
-    managed?: boolean;
     inputsSchema?: JsonModelSchemaType;
   };
 }

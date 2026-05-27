@@ -12,20 +12,26 @@ import React from 'react';
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
-import { asPrettyString, formatReactArray, formatTextArray } from './utils';
+import { formatReactArray } from './utils';
 import type {
   FieldFormatsGetConfigFn,
+  FieldFormatsContentType,
   FieldFormatInstanceType,
+  FieldFormatConvert,
+  FieldFormatConvertFunction,
   TextContextTypeOptions,
   FieldFormatMetaParams,
   FieldFormatParams,
 } from './types';
+import { textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
 import { getHighlightReact } from './utils/highlight';
 import type {
   ReactContextTypeConvert,
-  ReactConvertFunction,
+  ReactContextTypeSingleConvert,
   TextContextTypeConvert,
 } from './types';
+
+const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 
 export abstract class FieldFormat {
   /**
@@ -60,40 +66,50 @@ export abstract class FieldFormat {
   static fieldType: string | string[];
 
   /**
-   * Single-value React converter. Override this in subclasses to customize React rendering
-   * for individual (non-array) values. The public `convertToReact` method handles array
-   * wrapping automatically and delegates here for scalar values.
-   *
-   * When defined, you are responsible for missing-value and highlight handling.
-   *
-   * @protected
+   * @property {FieldFormatConvert}
+   * @internal
+   * have to remove the private because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
    */
-  protected reactConvert: ReactConvertFunction | undefined;
+  convertObject: FieldFormatConvert | undefined;
 
   /**
-   * React-based converter. Handles arrays and delegates single values to `reactConvert`
+   * Single-value React converter. Override this in subclasses to customize React rendering
+   * for individual (non-array) values. The public `reactConvert` method handles array
+   * wrapping automatically and delegates here for scalar values.
+   *
+   * @property {reactConvertSingle}
+   * @protected
+   */
+  protected reactConvertSingle: ReactContextTypeSingleConvert | undefined;
+
+  /**
+   * React-based converter. Handles arrays and delegates single values to `reactConvertSingle`
    * (if overridden) or the default text/highlight logic.
    *
-   * Do NOT override this method in subclasses — override `reactConvert` instead so that
+   * Do NOT override this method in subclasses — override `reactConvertSingle` instead so that
    * array handling is always applied correctly.
    *
-   * @public
+   * @property {reactConvert}
+   * @protected
    */
-  convertToReact: ReactContextTypeConvert = (val, options) => {
+  reactConvert: ReactContextTypeConvert = (val, options) => {
     // Arrays: bracket/comma rendering with React nodes.
     // Single-element arrays and empty arrays are passed through without brackets.
     if (Array.isArray(val)) {
-      return formatReactArray(val, (v) => this.convertToReact(v, options));
+      return formatReactArray(val, (v) => this.reactConvert(v, options));
     }
 
-    if (this.reactConvert) {
-      return this.reactConvert(val, options);
+    if (this.reactConvertSingle) {
+      return this.reactConvertSingle(val, options);
     }
 
     const missing = this.checkForMissingValueReact(val);
     if (missing) return missing;
 
-    const formatted = this.convertToText(val, options);
+    const formatted = this.textConvert
+      ? this.textConvert(val, options)
+      : this.convert(val, TEXT_CONTEXT_TYPE, options);
     const fieldName = options?.field?.name;
     const highlights = fieldName ? options?.hit?.highlight?.[fieldName] : undefined;
     // getHighlightReact expects a string; guard against edge cases where convert() returns non-string
@@ -103,30 +119,10 @@ export abstract class FieldFormat {
   };
 
   /**
-   * Plain-text converter for a single scalar value. Override this in subclasses.
-   * Arrays are handled by the base class before this method is called.
-   *
+   * @property {textConvert}
    * @protected
    */
   protected textConvert: TextContextTypeConvert | undefined;
-
-  /**
-   * Convert a raw value to a formatted string.
-   * Handles arrays automatically (JSON-encodes them).
-   * @param  {unknown} value
-   * @param  {TextContextTypeOptions} [options]
-   * @return {string} - the formatted string
-   * @public
-   */
-  convertToText(value: unknown, options?: TextContextTypeOptions): string {
-    if (Array.isArray(value)) {
-      return formatTextArray(value, (v) => this.convertToText(v, options));
-    }
-    if (this.textConvert) {
-      return this.textConvert(value, options);
-    }
-    return asPrettyString(value, options);
-  }
 
   /**
    * @property {Function} - ref to child class
@@ -147,6 +143,38 @@ export abstract class FieldFormat {
     if (getConfig) {
       this.getConfig = getConfig;
     }
+  }
+
+  /**
+   * Convert a raw value to a formatted string
+   * @param  {unknown} value
+   * @param  {string} [contentType=text] - optional content type which helps
+   *                                formatters adjust to different contexts
+   * @return {string} - the formatted string
+   * @public
+   */
+  convert(
+    value: unknown,
+    contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE,
+    options?: TextContextTypeOptions
+  ): string {
+    return this.getConverterFor(contentType).call(this, value, options);
+  }
+
+  /**
+   * Get a convert function that is bound to a specific contentType
+   * @param  {string} [contentType=text]
+   * @return {function} - a bound converter function
+   * @public
+   */
+  getConverterFor(
+    contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE
+  ): FieldFormatConvertFunction {
+    if (!this.convertObject) {
+      this.convertObject = this.setupContentType();
+    }
+
+    return this.convertObject[contentType] ?? this.convertObject.text;
   }
 
   /**
@@ -214,17 +242,18 @@ export abstract class FieldFormat {
     };
   }
 
-  static from(convertFn: TextContextTypeConvert): FieldFormatInstanceType {
+  static from(convertFn: FieldFormatConvertFunction): FieldFormatInstanceType {
     return createCustomFieldFormat(convertFn);
   }
 
+  setupContentType(): FieldFormatConvert {
+    return {
+      text: textContentTypeSetup(this, this.textConvert),
+    };
+  }
+
   static isInstanceOfFieldFormat(fieldFormat: unknown): fieldFormat is FieldFormat {
-    return Boolean(
-      fieldFormat &&
-        typeof fieldFormat === 'object' &&
-        (typeof (fieldFormat as FieldFormat).convertToText === 'function' ||
-          typeof (fieldFormat as FieldFormat).convertToReact === 'function')
-    );
+    return Boolean(fieldFormat && typeof fieldFormat === 'object' && 'convert' in fieldFormat);
   }
 
   protected checkForMissingValueText(val: unknown): string | void {

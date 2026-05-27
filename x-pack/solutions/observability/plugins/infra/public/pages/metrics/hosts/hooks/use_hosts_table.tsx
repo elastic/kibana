@@ -42,7 +42,6 @@ import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 import { AddDataTroubleshootingPopover } from '../components/table/add_data_troubleshooting_popover';
-import { NOT_AVAILABLE_LABEL } from '../../../../components/asset_details/translations';
 import { useUnifiedSearchContext } from './use_unified_search';
 
 /**
@@ -67,8 +66,9 @@ export type HostNodeRow = HostMetadata &
 /**
  * Helper functions
  */
-const formatMetric = (type: InfraEntityMetricType, value: number) => {
-  return createInventoryMetricFormatter({ type })(value);
+const formatMetric = (type: InfraEntityMetricType, value: number | undefined | null) => {
+  const defaultValue = value ?? 0;
+  return createInventoryMetricFormatter({ type })(defaultValue);
 };
 
 const buildMetricCell = (
@@ -76,11 +76,8 @@ const buildMetricCell = (
   formatType: InfraEntityMetricType,
   hasSystemMetrics?: boolean
 ) => {
-  if (value === null) {
-    if (!hasSystemMetrics) {
-      return <AddDataTroubleshootingPopover />;
-    }
-    return NOT_AVAILABLE_LABEL;
+  if (!hasSystemMetrics && value === null) {
+    return <AddDataTroubleshootingPopover />;
   }
 
   return formatMetric(formatType, value);

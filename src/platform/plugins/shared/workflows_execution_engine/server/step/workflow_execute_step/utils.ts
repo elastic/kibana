@@ -8,7 +8,6 @@
  */
 
 import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { pickManagedWorkflowFields } from '@kbn/workflows';
 
 export function toExecutionModel(
   workflow: EsWorkflow,
@@ -20,7 +19,11 @@ export function toExecutionModel(
     enabled: workflow.enabled,
     definition: workflow.definition,
     yaml: workflow.yaml,
-    ...pickManagedWorkflowFields(workflow),
+    ...(workflow.managed === true ? { managed: true } : {}),
+    ...(typeof workflow.managedBy === 'string' ? { managedBy: workflow.managedBy } : {}),
+    ...(typeof workflow.originManagedWorkflowId === 'string'
+      ? { originManagedWorkflowId: workflow.originManagedWorkflowId }
+      : {}),
     isTestRun,
   };
 }

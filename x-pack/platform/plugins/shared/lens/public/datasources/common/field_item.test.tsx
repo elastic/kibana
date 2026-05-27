@@ -92,7 +92,7 @@ const indexPattern = {
 const dataView = {
   ...indexPattern,
   getFormatterForField: jest.fn(() => ({
-    convertToText: jest.fn((s: unknown) => JSON.stringify(s)),
+    convert: jest.fn((s: unknown) => JSON.stringify(s)),
   })),
 } as unknown as DataView;
 

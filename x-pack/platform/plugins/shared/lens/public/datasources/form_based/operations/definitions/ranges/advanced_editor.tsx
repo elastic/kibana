@@ -44,7 +44,7 @@ type LocalRangeType = RangeTypeLens & { id: string };
 
 const getBetterLabel = (range: RangeTypeLens, formatter: IFieldFormat) =>
   range.label ||
-  formatter.convertToText({
+  formatter.convert({
     gte: isValidNumber(range.from) ? range.from : -Infinity,
     lt: isValidNumber(range.to) ? range.to : Infinity,
   });

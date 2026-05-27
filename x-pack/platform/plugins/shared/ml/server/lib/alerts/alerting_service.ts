@@ -194,9 +194,9 @@ export function buildExplorerUrl(
 }
 
 export interface AnomalyDetectionAlertFieldFormatters {
-  numberFormatter: IFieldFormat['convertToText'];
+  numberFormatter: IFieldFormat['convert'];
   dateFormatter?: IFieldFormat;
-  fieldFormatters: Record<string, IFieldFormat['convertToText']>;
+  fieldFormatters: Record<string, IFieldFormat['convert']>;
 }
 
 export interface AnomalyDetectionRuleState {
@@ -239,14 +239,14 @@ export function alertingServiceProvider(
     const fieldFormatters = fieldFormatMap
       ? Object.entries(fieldFormatMap).reduce((acc, [fieldName, config]) => {
           const formatter = fieldFormatsRegistry.deserialize(config);
-          acc[fieldName] = (v: unknown) => formatter.convertToText(v);
+          acc[fieldName] = formatter.convert.bind(formatter);
           return acc;
-        }, {} as Record<string, IFieldFormat['convertToText']>)
+        }, {} as Record<string, IFieldFormat['convert']>)
       : {};
 
     // store formatters to pass to the executor state update
     contextFieldFormatters = {
-      numberFormatter: (v: unknown) => numberFormatter.convertToText(v),
+      numberFormatter: numberFormatter.convert.bind(numberFormatter),
       dateFormatter,
       fieldFormatters,
     };
@@ -462,7 +462,7 @@ export function alertingServiceProvider(
       // resolved moment instead of reusing the shorter display text.
       const { moment: resolvedMoment } = formatTimeValue(value, source.function, source, timezone);
       const formattedDayOfWeek = resolvedMoment.format('ddd');
-      const formattedDate = formatters.dateFormatter.convertToText(resolvedMoment.valueOf(), {
+      const formattedDate = formatters.dateFormatter.convert(resolvedMoment.valueOf(), 'text', {
         timezone,
       });
       return `${formattedDayOfWeek} ${formattedDate} UTC`;

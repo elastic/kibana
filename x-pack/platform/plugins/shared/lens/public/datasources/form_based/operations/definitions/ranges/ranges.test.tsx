@@ -59,7 +59,7 @@ const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
   return {
-    convertToText: ({ gte, lt }: { gte: string; lt: string }) => {
+    convert: ({ gte, lt }: { gte: string; lt: string }) => {
       if (params?.id === 'custom') {
         return `Custom format: ${gte} - ${lt}`;
       }
@@ -114,7 +114,7 @@ const defaultOptions = {
         aggregatable: true,
       },
     ]),
-    getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
+    getFormatterForField: () => ({ convert: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
   },

@@ -127,6 +127,7 @@ export const TagTable: FC<TagTableProps> = ({
         );
 
         return capabilities.viewConnections ? (
+          // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiLink
             data-test-subj="tagsTableRowConnectionsLink"
             href={getTagRelationUrl(tag)}

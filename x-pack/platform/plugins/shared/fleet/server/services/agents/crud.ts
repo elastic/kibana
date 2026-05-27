@@ -37,7 +37,6 @@ import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
-import { PIPELINE_CONFIG_RUNTIME_FIELD } from './build_pipeline_config_runtime_field';
 import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
@@ -177,12 +176,7 @@ export async function getAgentTags(
 
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-  const runtimeFields = {
-    ...(await buildAgentStatusRuntimeField(soClient)),
-    ...(appContextService.getExperimentalFeatures().enableOpAMP
-      ? PIPELINE_CONFIG_RUNTIME_FIELD
-      : {}),
-  };
+  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
   try {
     const result = await retryTransientEsErrors(() =>
       esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
@@ -289,9 +283,6 @@ export async function getAgentsByKuery(
   const runtimeFields = {
     ...(await buildAgentStatusRuntimeField(soClient)),
     ...SIGNALS_RUNTIME_FIELD,
-    ...(appContextService.getExperimentalFeatures().enableOpAMP
-      ? PIPELINE_CONFIG_RUNTIME_FIELD
-      : {}),
   };
 
   const sort = getSortConfig(sortField, sortOrder);
@@ -487,13 +478,10 @@ export async function fetchAllAgentsByKuery(
   }
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-  const runtimeFields = {
-    ...(await buildAgentStatusRuntimeField(soClient)),
-    ...(appContextService.getExperimentalFeatures().enableOpAMP
-      ? PIPELINE_CONFIG_RUNTIME_FIELD
-      : {}),
-    ...options.runtimeFields,
-  };
+  const runtimeFields = Object.assign(
+    await buildAgentStatusRuntimeField(soClient),
+    options.runtimeFields
+  );
 
   const sort = getSortConfig(sortField, sortOrder);
 
@@ -602,12 +590,7 @@ async function _filterAgents(
   perPage: number;
 }> {
   const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
-  const runtimeFields = {
-    ...(await buildAgentStatusRuntimeField(soClient)),
-    ...(appContextService.getExperimentalFeatures().enableOpAMP
-      ? PIPELINE_CONFIG_RUNTIME_FIELD
-      : {}),
-  };
+  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
   const currentSpaceId = getCurrentNamespace(soClient);
 
   let res;

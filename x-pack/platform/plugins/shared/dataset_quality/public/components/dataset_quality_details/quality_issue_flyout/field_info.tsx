@@ -75,7 +75,7 @@ export const QualityIssueFieldInfo = ({
               <Axis
                 id="doc_count_x_axis"
                 position={Position.Bottom}
-                tickFormat={(d) => dateFormatter.convertToText(d)}
+                tickFormat={(d) => dateFormatter.convert(d)}
               />
               <Axis id="doc_count_y_axis" position={Position.Left} />
               <BarSeries
@@ -106,7 +106,7 @@ export const QualityIssueFieldInfo = ({
           data-test-subj="datasetQualityDetailsDegradedFieldFlyoutFieldValue-lastOccurrence"
           grow={false}
         >
-          <span>{dateFormatter.convertToText(fieldList?.lastOccurrence)}</span>
+          <span>{dateFormatter.convert(fieldList?.lastOccurrence)}</span>
         </EuiFlexItem>
       </EuiFlexGroup>
       {children}

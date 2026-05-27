@@ -183,6 +183,7 @@ function getTransformConfigWithBoolFilterAgg(): TransformPivotConfig {
 }
 
 export default function ({ getService }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   // Failing: See https://github.com/elastic/kibana/issues/165883
@@ -194,6 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
     const transformConfigWithLatest = getLatestTransformConfig('cloning');
 
     before(async () => {
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await transform.api.createAndRunTransform(
         transformConfigWithPivot.id,

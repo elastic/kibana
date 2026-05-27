@@ -11,14 +11,13 @@ import type {
   CreateRuleData,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
+import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition } from '../types';
-import {
-  mapArtifacts,
-  mergeArtifactsByType,
-  splitArtifactsByType,
-  type RuleArtifactPayload,
-} from './artifact_mappers';
+
+const createRunbookArtifactId = () =>
+  `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
 
 // ---------------------------------------------------------------------------
 // FormValues → API request
@@ -154,13 +153,44 @@ export interface RuleRequestCommon {
   artifacts?: RuleArtifactPayload;
 }
 
+const mapArtifacts = (artifacts: FormValues['artifacts']): RuleRequestCommon['artifacts'] => {
+  const currentArtifacts = artifacts ?? [];
+  const runbookArtifact = currentArtifacts.find(
+    (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
+  );
+  const runbookValue = runbookArtifact?.value.trim();
+
+  if (runbookArtifact && !runbookValue) {
+    const artifactsWithoutRunbook = currentArtifacts.filter(
+      (artifact) => artifact.type !== RUNBOOK_ARTIFACT_TYPE
+    );
+    return artifactsWithoutRunbook.length ? artifactsWithoutRunbook : undefined;
+  }
+
+  if (runbookArtifact && runbookValue) {
+    const runbookId = runbookArtifact.id.trim() ? runbookArtifact.id : createRunbookArtifactId();
+    if (runbookArtifact.value === runbookValue && runbookArtifact.id === runbookId) {
+      return currentArtifacts.length ? currentArtifacts : undefined;
+    }
+
+    return currentArtifacts.map((artifact) =>
+      artifact.type === RUNBOOK_ARTIFACT_TYPE
+        ? { ...artifact, id: runbookId, value: runbookValue }
+        : artifact
+    );
+  }
+
+  return currentArtifacts.length ? currentArtifacts : undefined;
+};
+
 /**
  * Maps `FormValues` to the common API request shape (snake_case) shared by
  * both create and update endpoints. Does not include `kind`.
  */
 export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestCommon => {
-  const { metadata, timeField, schedule, evaluation, grouping, recoveryPolicy } = formValues;
-  const mappedArtifacts = mapArtifacts(mergeArtifactsByType(formValues));
+  const { metadata, timeField, schedule, evaluation, grouping, recoveryPolicy, artifacts } =
+    formValues;
+  const mappedArtifacts = mapArtifacts(artifacts);
 
   return {
     metadata: mapMetadata(metadata),
@@ -256,6 +286,6 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
     stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),
-    ...splitArtifactsByType(rule.artifacts),
+    ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
   };
 };

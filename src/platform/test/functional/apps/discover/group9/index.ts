@@ -16,7 +16,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('discover/group9', function () {
     before(async function () {
       await browser.setWindowSize(1300, 800);
-      await esArchiver.loadIfNeeded(
+    });
+
+    after(async function unloadMakelogs() {
+      await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
     });

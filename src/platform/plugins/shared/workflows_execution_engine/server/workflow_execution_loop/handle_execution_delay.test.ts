@@ -402,28 +402,22 @@ describe('handleExecutionDelay', () => {
 
   describe('exact 5s boundary', () => {
     it('diff exactly at SHORT_DURATION_THRESHOLD goes to TM path', async () => {
-      jest.useFakeTimers();
-      try {
-        jest.setSystemTime(new Date('2025-06-01T12:00:00.000Z'));
-        const params = makeParams();
-        const resumeAt = new Date(Date.now() + 5000).toISOString();
-        const stepRuntime = makeStepRuntime({
-          node: { stepType: 'wait' } as any,
-          stepExecution: {
-            status: ExecutionStatus.WAITING,
-            state: { resumeAt },
-          } as any,
-        });
-
-        await handleExecutionDelay(params, stepRuntime);
-
-        expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
-        expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+      const params = makeParams();
+      const resumeAt = new Date(Date.now() + 5000).toISOString();
+      const stepRuntime = makeStepRuntime({
+        node: { stepType: 'wait' } as any,
+        stepExecution: {
           status: ExecutionStatus.WAITING,
-        });
-      } finally {
-        jest.useRealTimers();
-      }
+          state: { resumeAt },
+        } as any,
+      });
+
+      await handleExecutionDelay(params, stepRuntime);
+
+      expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
+      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
+        status: ExecutionStatus.WAITING,
+      });
     });
   });
 

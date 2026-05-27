@@ -285,7 +285,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
-      it('@skipInServerlessMKI should have host and user risk score fields', async () => {
+      it('should have host and user risk score fields', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -299,7 +299,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
 
-      it('@skipInServerlessMKI should have host and user risk score fields when suppression enabled on interval', async () => {
+      it('should have host and user risk score fields when suppression enabled on interval', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -320,7 +320,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).toEqual(11);
       });
 
-      it('@skipInServerlessMKI should have host and user risk score fields when suppression enabled on rule execution only', async () => {
+      it('should have host and user risk score fields when suppression enabled on rule execution only', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -351,7 +351,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      it('@skipInServerlessMKI should be enriched alert with criticality_level', async () => {
+      it('should be enriched alert with criticality_level', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,
@@ -362,7 +362,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.['user.asset.criticality']).toEqual('extreme_impact');
       });
 
-      it('@skipInServerlessMKI should be enriched alert with criticality_level when suppression enabled', async () => {
+      it('should be enriched alert with criticality_level when suppression enabled', async () => {
         const rule: QueryRuleCreateProps = {
           ...getRuleForAlertTesting(['auditbeat-*']),
           query: `_id:${ID}`,

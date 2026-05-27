@@ -15,7 +15,6 @@ import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { type DataViewEditorService as DataViewEditorServiceSpec } from '@kbn/data-view-editor-plugin/public';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { createPath } from '../../routing/router';
 import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor';
@@ -24,7 +23,7 @@ import { MlPageHeader } from '../../components/page_header';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 import { PageTitle } from '../../components/page_title';
 
-type SavedObject = SavedObjectCommon<FinderAttributes & DiscoverSessionFinderAttributes>;
+type SavedObject = SavedObjectCommon<FinderAttributes & { isTextBasedQuery?: boolean }>;
 
 export const DataDriftIndexOrSearchRedirect: FC = () => {
   const navigateToPath = useNavigateToPath();
@@ -78,7 +77,7 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
                 ),
                 showSavedObject: (savedObject: SavedObject) =>
                   // ES|QL Based saved searches are not supported in Data Drift, filter them out
-                  !isEsqlSavedSearch(savedObject),
+                  savedObject.attributes.isTextBasedQuery !== true,
               },
               {
                 type: 'index-pattern',

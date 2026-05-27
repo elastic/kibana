@@ -11,10 +11,10 @@ import { setFormatService } from '../services';
 
 setFormatService({
   deserialize: () => ({
-    convertToText: (v) => v,
+    convert: (v) => v,
   }),
   getInstance: () => ({
-    convertToText: (v) => v,
+    convert: (v) => v,
   }),
 });
 

@@ -202,7 +202,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
     let authValid = true;
     if (authType === 'username_password') {
       // Username & password tab: require both username and password
-      const hasUsername = !!usernameInput.value.trim();
+      const hasUsername = !!usernameInput.value;
       const hasPassword = !!passwordInput.value || !!passwordSecretInput.value;
       if (!hasUsername) {
         usernameInput.setErrors([
@@ -279,7 +279,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
       let auth: PostDownloadSourceRequest['body']['auth'] | null;
 
       const filteredHeaders = headersInput.value.filter(
-        (header) => header.key.trim() !== '' || header.value.trim() !== ''
+        (header) => header.key !== '' || header.value !== ''
       );
       const hasHeaders = filteredHeaders.length > 0;
 
@@ -390,7 +390,7 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
   const authType = authTypeInput.value as AuthType;
   const isAuthMissing =
     (authType === 'username_password' &&
-      (!usernameInput.value.trim() || (!passwordInput.value && !passwordSecretInput.value))) ||
+      (!usernameInput.value || (!passwordInput.value && !passwordSecretInput.value))) ||
     (authType === 'api_key' && !apiKeyInput.value && !apiKeySecretInput.value);
 
   return {
@@ -458,8 +458,8 @@ export function validateDownloadSourceHeaders(
   pairs.forEach((pair, index) => {
     const { key, value } = pair;
 
-    const hasKey = key.trim() !== '';
-    const hasValue = value.trim() !== '';
+    const hasKey = !!key;
+    const hasValue = !!value;
 
     if (hasKey && !hasValue) {
       errors.push({

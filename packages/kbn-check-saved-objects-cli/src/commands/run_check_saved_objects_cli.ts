@@ -104,11 +104,9 @@ export function runCheckSavedObjectsCli() {
       globalTask = new Listr(
         [
           {
-            title: 'Start ES asynchronously',
+            title: 'Start ES',
             // we launch the ES server in the background and store a promise that resolves when the server is ready
-            task: (ctx) => {
-              ctx.esServer = startElasticsearch();
-            },
+            task: (ctx) => (ctx.esServer = startElasticsearch()),
             enabled: !client, // we skip this step if '--client' is passed
           },
           {
@@ -252,7 +250,6 @@ export function runCheckSavedObjectsCli() {
               removedTypes: context.newRemovedTypes,
               findings: collector.getFindings(),
               ...(Object.keys(typeChanges).length > 0 && { typeChanges }),
-              ...(context.test && { testMode: true }),
             };
             writeFileSync(reportPath, JSON.stringify(report, null, 2));
           } catch (writeErr) {

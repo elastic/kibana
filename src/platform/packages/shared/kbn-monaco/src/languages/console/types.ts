@@ -9,7 +9,6 @@
 
 export interface ErrorAnnotation {
   offset: number;
-  endOffset?: number;
   text: string;
 }
 

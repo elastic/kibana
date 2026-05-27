@@ -346,12 +346,8 @@ export class AssetManagerClient {
       'create'
     );
 
-    // _has_privileges treats a leading `-` as a literal index name, not an exclusion.
-    // Negative patterns are a query-time directive and have no meaning here.
     const sourceIndexPrivileges = Object.fromEntries(
-      sourceIndexPatterns
-        .filter((idx) => !idx.startsWith('-'))
-        .map((idx) => [idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES])
+      sourceIndexPatterns.map((idx) => [idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES])
     );
 
     const targetIndexPrivileges = {

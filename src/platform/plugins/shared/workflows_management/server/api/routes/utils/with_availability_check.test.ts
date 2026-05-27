@@ -47,7 +47,6 @@ function createWorkflowsContext({
       managedWorkflows: {
         install: jest.fn(),
         uninstall: jest.fn(),
-        getWorkflowStatus: jest.fn(),
         execute: jest.fn(),
       },
     }),

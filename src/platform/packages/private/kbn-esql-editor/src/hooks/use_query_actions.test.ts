@@ -52,6 +52,7 @@ const defaultParams = () => ({
     .fn()
     .mockResolvedValue(undefined) as unknown as ESQLEditorProps['onTextLangQuerySubmit'],
   onQueryUpdate: jest.fn(),
+  setCodeStateOnSubmission: jest.fn(),
   telemetryService: createMockTelemetryService(),
 });
 
@@ -80,6 +81,7 @@ describe('useQueryActions', () => {
         result.current.onQuerySubmit(QuerySource.MANUAL);
       });
 
+      expect(params.setCodeStateOnSubmission).toHaveBeenCalledWith('FROM logs');
       expect(params.telemetryService.trackQuerySubmitted).toHaveBeenCalledWith({
         source: QuerySource.MANUAL,
         query: 'FROM logs',

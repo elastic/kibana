@@ -109,7 +109,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
 
     let hmrPort: number | undefined;
     if (hmr) {
-      hmrServer = new HmrServer(options.basePath, log);
+      hmrServer = new HmrServer(options.basePath);
       hmrPort = await hmrServer.start();
     }
 

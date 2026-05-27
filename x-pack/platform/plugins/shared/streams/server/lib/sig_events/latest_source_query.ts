@@ -13,11 +13,7 @@ import {
 } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import {
-  type CommonSearchOptions,
-  type PaginatedResponse,
-  type PaginatedSearchOptions,
-} from './query_utils';
+import { type CommonSearchOptions } from './query_utils';
 import { runEsqlQuery } from './run_esql_query';
 
 export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHole;
@@ -132,88 +128,4 @@ export const executeAndDecodeSource = async <T>(
       return rest as T;
     }),
   };
-};
-
-const executeCount = async (
-  esClient: ElasticsearchClient,
-  query: ComposerQuery
-): Promise<number> => {
-  const countQuery = query.pipe`STATS total = COUNT(*)`.keep('total');
-  const response = await runEsqlQuery(esClient, countQuery.print());
-  if (!response) {
-    return 0;
-  }
-  const countIdx = response.columns.findIndex((c) => c.name === 'total');
-  if (countIdx === -1 || response.values.length === 0) {
-    return 0;
-  }
-  return (response.values[0][countIdx] as number) ?? 0;
-};
-
-const DEFAULT_PAGE = 1;
-const DEFAULT_PER_PAGE = 25;
-
-interface RunPaginatedLatestSourceEsqlQueryArgs {
-  esClient: ElasticsearchClient;
-  space: string;
-  options: PaginatedSearchOptions;
-  index: string;
-  where?: LatestSourceWhereCondition;
-  sort?: ComposerSortShorthand[];
-  groupBy: LatestSourceGroupBy;
-}
-
-export const runPaginatedLatestSourceEsqlQuery = async <T>({
-  esClient,
-  space,
-  options,
-  index,
-  where,
-  sort,
-  groupBy,
-}: RunPaginatedLatestSourceEsqlQueryArgs): Promise<PaginatedResponse<T>> => {
-  const page = options.page ?? DEFAULT_PAGE;
-  const perPage = options.perPage ?? DEFAULT_PER_PAGE;
-
-  const deduped = pickLatestPerGroup(
-    withWhere(withTimeRange(latestSourceFrom(index, space), options), where),
-    groupBy
-  );
-
-  const sortArgs: ComposerSortShorthand[] = sort ?? [['@timestamp', 'DESC']];
-  const dataQuery = withSort(deduped, sortArgs)
-    .limit(page * perPage)
-    .keep('_source');
-
-  const [total, result] = await Promise.all([
-    executeCount(esClient, deduped),
-    executeAndDecodeSource<T>(esClient, dataQuery),
-  ]);
-
-  const start = (page - 1) * perPage;
-  const hits = start >= result.hits.length ? [] : result.hits.slice(start, start + perPage);
-
-  return { hits, page, perPage, total };
-};
-
-interface RunFindByIdEsqlQueryArgs {
-  esClient: ElasticsearchClient;
-  space: string;
-  index: string;
-  idField: string;
-  idValue: string;
-}
-
-export const runFindByIdEsqlQuery = async <T>({
-  esClient,
-  space,
-  index,
-  idField,
-  idValue,
-}: RunFindByIdEsqlQueryArgs): Promise<{ hits: T[] }> => {
-  const query = latestSourceFrom(index, space).where`${esql.col(idField)} == ${esql.str(idValue)}`
-    .sort(['@timestamp', 'ASC'])
-    .keep('_source');
-
-  return executeAndDecodeSource<T>(esClient, query);
 };

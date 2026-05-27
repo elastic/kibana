@@ -61,9 +61,7 @@ export function registerResolutionUnlink(router: EntityStorePluginRouter) {
           logger.debug('Resolution Unlink API called');
 
           try {
-            const result = await resolutionClient.unlinkEntities(req.body.entity_ids, {
-              awaitVisibility: true,
-            });
+            const result = await resolutionClient.unlinkEntities(req.body.entity_ids);
 
             return res.ok({ body: result });
           } catch (error) {

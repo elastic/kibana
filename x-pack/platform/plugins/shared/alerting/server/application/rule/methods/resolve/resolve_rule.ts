@@ -22,11 +22,12 @@ import type { ResolvedSanitizedRule } from '../../../../types';
 
 export interface ResolveParams {
   id: string;
+  includeSnoozeData?: boolean;
 }
 
 export async function resolveRule<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { id }: ResolveParams
+  { id, includeSnoozeData = false }: ResolveParams
 ): // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 Promise<ResolvedSanitizedRule<Params>> {
   try {
@@ -72,6 +73,7 @@ Promise<ResolvedSanitizedRule<Params>> {
       logger: context.logger,
       ruleType: context.ruleTypeRegistry.get(result.attributes.alertTypeId),
       references: result.references,
+      includeSnoozeData,
     },
     context.isSystemAction
   );

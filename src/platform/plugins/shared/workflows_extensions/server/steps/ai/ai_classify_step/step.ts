@@ -15,7 +15,6 @@ import {
   buildInstructionsPart,
   buildSystemPart,
 } from './build_prompts';
-import { convertOutputToModelResponseSchema } from './schemas';
 import { validateModelResponse } from './validate_model_response';
 import {
   AiClassifyStepCommonDefinition,
@@ -58,9 +57,7 @@ export const aiClassifyStepDefinition = (
         fallbackCategory,
         includeRationale = false,
       } = context.input;
-      const responseZodSchema = convertOutputToModelResponseSchema(
-        buildStructuredOutputSchema(context.input)
-      );
+      const responseZodSchema = buildStructuredOutputSchema(context.input);
       const modelInput: MessageFieldWithRole[] = [
         ...buildSystemPart(),
         ...buildDataPart(input),

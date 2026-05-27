@@ -31,9 +31,6 @@ export interface SemconvHostMetricsDocument extends SemconvHostDocument {
   'metricset.name'?: string;
   state?: string;
   direction?: string;
-  'system.cpu.utilization'?: number;
-  'system.cpu.logical.count'?: number;
-  'system.cpu.load_average.1m'?: number;
   'metrics.system.cpu.utilization'?: number;
   'metrics.system.cpu.logical.count'?: number;
   'metrics.system.cpu.load_average.1m'?: number;
@@ -60,10 +57,6 @@ export class SemconvHost extends Entity<SemconvHostDocument> {
           ...this.fields,
           state,
           'metricset.name': 'cpu',
-          'system.cpu.utilization': utilization,
-          'system.cpu.logical.count': 4,
-          'system.cpu.load_average.1m': loadAvg1m,
-          // Lens formulas still target the OTel metrics-prefixed fields.
           'metrics.system.cpu.utilization': utilization,
           'metrics.system.cpu.logical.count': 4,
           'metrics.system.cpu.load_average.1m': loadAvg1m,

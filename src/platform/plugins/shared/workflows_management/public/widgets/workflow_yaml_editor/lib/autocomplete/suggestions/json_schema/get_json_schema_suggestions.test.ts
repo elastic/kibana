@@ -53,7 +53,6 @@ describe('getJsonSchemaSuggestions', () => {
       },
       workflowDefinition: null,
       currentWorkflowId: null,
-      isCurrentWorkflowManaged: false,
       model: {} as any,
       position: {
         lineNumber: 1,

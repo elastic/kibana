@@ -32,7 +32,7 @@ export const createFilterHistogram = (
       aggConfig.params.field,
       params,
       aggConfig.getIndexPattern(),
-      deserialize(aggConfig.toSerializedFieldFormat()).convertToText(key)
+      deserialize(aggConfig.toSerializedFieldFormat()).convert(key)
     );
   };
 };

@@ -81,7 +81,7 @@ const DefaultYAxis = () => (
 const renderYAxis = (series: Series[]) => {
   const yAxisOptions = extractAllYAxis(series);
   const defaultFormatter = (x: unknown) => {
-    return getFieldFormats().getInstance('number').convertToText(x);
+    return getFieldFormats().getInstance('number').convert(x);
   };
   const yAxis = yAxisOptions.map((option, index) => (
     <Axis

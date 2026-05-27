@@ -32,7 +32,6 @@ dependsOn:
   - '@kbn/core-mount-utils-browser'
   - '@kbn/core-plugins-browser'
   - '@kbn/config'
-  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -45,7 +44,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

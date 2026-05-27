@@ -29,7 +29,6 @@ export type {
   ExportShare,
   ExportShareConfig,
   ExportShareDerivatives,
-  ExportShareParameters,
   RegisterShareIntegrationArgs,
   ShareableLocatorParams,
   SharingData,

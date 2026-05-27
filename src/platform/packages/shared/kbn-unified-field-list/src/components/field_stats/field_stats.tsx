@@ -372,7 +372,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               sampledDocuments,
               sampledDocumentsFormatted: fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convertToText(sampledDocuments),
+                .convert(sampledDocuments),
             },
           })}
         />
@@ -526,7 +526,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               id="key"
               position={Position.Left}
               showOverlappingTicks={true}
-              tickFormat={(d) => formatter.convertToText(d)}
+              tickFormat={(d) => formatter.convert(d)}
             />
 
             <HistogramBarSeries
@@ -587,7 +587,7 @@ function getCountsElement(
             <strong data-test-subj={dataTestSubjDocsCount}>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convertToText(sampledDocuments)}
+                .convert(sampledDocuments)}
             </strong>
           ),
         }}
@@ -602,7 +602,7 @@ function getCountsElement(
             <strong data-test-subj={dataTestSubjDocsCount}>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convertToText(totalDocuments)}
+                .convert(totalDocuments)}
             </strong>
           ),
         }}

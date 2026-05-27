@@ -13,8 +13,9 @@ import { i18n } from '@kbn/i18n';
 
 import type {
   FieldFormatInstanceType,
+  FieldFormatsContentType,
   IFieldFormat,
-  ReactConvertFunction,
+  ReactContextTypeSingleConvert,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -75,8 +76,8 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
         const gte = '\u2265';
         const lt = '\u003c';
-        let fromValue = format.convertToText(range.gte);
-        let toValue = format.convertToText(range.lt);
+        let fromValue = format.convert(range.gte);
+        let toValue = format.convert(range.lt);
         // In case of identity formatter and a specific flag, replace Infinity values by specific strings
         if (params.replaceInfinity && nestedFormatter.id == null) {
           const FROM_PLACEHOLDER = '\u2212\u221E';
@@ -116,7 +117,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
         const nestedFormatter = this._params as SerializedFieldFormat;
         const format = this.getCachedFormat(nestedFormatter);
-        return convertDateRangeToString(range, (v) => format.convertToText(v));
+        return convertDateRangeToString(range, format.convert.bind(format));
       };
     },
     class AggsIpPrefixFieldFormat extends FieldFormatWithCache {
@@ -130,7 +131,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
         const nestedFormatter = this._params as SerializedFieldFormat;
         const format = this.getCachedFormat(nestedFormatter);
-        return convertIPPrefixToString(cidr, (v) => format.convertToText(v));
+        return convertIPPrefixToString(cidr, format.convert.bind(format));
       };
     },
     class AggsIpRangeFieldFormat extends FieldFormatWithCache {
@@ -144,7 +145,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
         const nestedFormatter = this._params as SerializedFieldFormat;
         const format = this.getCachedFormat(nestedFormatter);
-        return convertIPRangeToString(range, (v) => format.convertToText(v));
+        return convertIPRangeToString(range, format.convert.bind(format));
       };
     },
     class AggsTermsFieldFormat extends FieldFormatWithCache {
@@ -166,14 +167,14 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         return this.getCachedFormat(this._params as SerializedFieldFormat<{}, SerializableRecord>);
       }
 
-      textConvert = (val: unknown) => {
-        return this.getSpecialBucketLabel(val) ?? this.getNestedFormat().convertToText(val);
+      convert = (val: string, type: FieldFormatsContentType) => {
+        return this.getSpecialBucketLabel(val) ?? this.getNestedFormat().convert(val, type);
       };
 
-      reactConvert: ReactConvertFunction = (val, options) => {
-        return (
-          this.getSpecialBucketLabel(val) ?? this.getNestedFormat().convertToReact(val, options)
-        );
+      getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
+
+      reactConvertSingle: ReactContextTypeSingleConvert = (val, options) => {
+        return this.getSpecialBucketLabel(val) ?? this.getNestedFormat().reactConvert(val, options);
       };
     },
     class AggsMultiTermsFieldFormat extends FieldFormatWithCache {
@@ -198,7 +199,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         return String(this._params.separator ?? ' › ');
       }
 
-      textConvert = (val: unknown) => {
+      convert = (val: unknown, type: FieldFormatsContentType) => {
         const otherLabel = this.getSpecialBucketLabel(val);
         if (otherLabel) return otherLabel;
 
@@ -207,11 +208,13 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
         const formats = this.getNestedFormats();
         return keys
-          .map((valPart, i) => formats[i].convertToText(valPart))
+          .map((valPart, i) => formats[i].convert(valPart, type))
           .join(this.getSeparator());
       };
 
-      reactConvert: ReactConvertFunction = (val, options) => {
+      getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
+
+      reactConvertSingle: ReactContextTypeSingleConvert = (val, options) => {
         const otherLabel = this.getSpecialBucketLabel(val);
         if (otherLabel) return otherLabel;
 
@@ -226,7 +229,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
             {keys.map((valPart, i) => (
               <React.Fragment key={i}>
                 {i > 0 ? separator : null}
-                {formats[i].convertToReact(valPart, options)}
+                {formats[i].reactConvert(valPart, options)}
               </React.Fragment>
             ))}
           </>
