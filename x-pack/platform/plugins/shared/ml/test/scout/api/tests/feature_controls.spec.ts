@@ -9,7 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, COMMON_HEADERS, CUSTOM_ROLES } from '../fixtures';
+import { mlApiTest, COMMON_HEADERS } from '../fixtures';
 
 interface CapabilitiesResponse {
   navLinks: Record<string, boolean>;
@@ -21,25 +21,25 @@ const CAPABILITIES_API_PATH = 'api/core/capabilities';
 const ENABLED_SPACE_ID = 'ml_fc_api_enabled_space';
 const DISABLED_SPACE_ID = 'ml_fc_api_disabled_space';
 
-apiTest.describe('Machine Learning feature controls', { tag: tags.stateful.classic }, () => {
-  apiTest.beforeAll(async ({ apiServices }) => {
+mlApiTest.describe('Machine Learning feature controls', { tag: tags.stateful.classic }, () => {
+  mlApiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.spaces.create({ id: ENABLED_SPACE_ID, disabledFeatures: [] });
     await apiServices.spaces.create({ id: DISABLED_SPACE_ID, disabledFeatures: ['ml'] });
   });
 
-  apiTest.afterAll(async ({ apiServices }) => {
+  mlApiTest.afterAll(async ({ apiServices }) => {
     await apiServices.spaces.delete(ENABLED_SPACE_ID);
     await apiServices.spaces.delete(DISABLED_SPACE_ID);
   });
 
-  apiTest(
+  mlApiTest(
     'global:all sees Machine Learning navlink and ml management entry',
     async ({ apiClient, requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(CUSTOM_ROLES.global_all);
+      const { apiKeyHeader } = await requestAuth.getApiKeyForMlGlobalAll();
       const response = await apiClient.post(CAPABILITIES_API_PATH, {
         headers: { ...COMMON_HEADERS, ...apiKeyHeader },
         responseType: 'json',
-        body: { applications: [] },
+        body: { applications: ['ml'] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -49,14 +49,14 @@ apiTest.describe('Machine Learning feature controls', { tag: tags.stateful.class
     }
   );
 
-  apiTest(
+  mlApiTest(
     'ml:read sees Machine Learning navlink with read-only ML capabilities',
     async ({ apiClient, requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(CUSTOM_ROLES.ml_read);
+      const { apiKeyHeader } = await requestAuth.getApiKeyForMlRead();
       const response = await apiClient.post(CAPABILITIES_API_PATH, {
         headers: { ...COMMON_HEADERS, ...apiKeyHeader },
         responseType: 'json',
-        body: { applications: [] },
+        body: { applications: ['ml'] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -67,14 +67,14 @@ apiTest.describe('Machine Learning feature controls', { tag: tags.stateful.class
     }
   );
 
-  apiTest(
+  mlApiTest(
     'discover:read alone does NOT see Machine Learning navlink',
     async ({ apiClient, requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(CUSTOM_ROLES.ml_none);
+      const { apiKeyHeader } = await requestAuth.getApiKeyForMlNone();
       const response = await apiClient.post(CAPABILITIES_API_PATH, {
         headers: { ...COMMON_HEADERS, ...apiKeyHeader },
         responseType: 'json',
-        body: { applications: [] },
+        body: { applications: ['ml'] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -83,14 +83,14 @@ apiTest.describe('Machine Learning feature controls', { tag: tags.stateful.class
     }
   );
 
-  apiTest(
+  mlApiTest(
     'global:all sees Machine Learning navlink in a space where ML is enabled',
     async ({ apiClient, requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(CUSTOM_ROLES.global_all);
+      const { apiKeyHeader } = await requestAuth.getApiKeyForMlGlobalAll();
       const response = await apiClient.post(`s/${ENABLED_SPACE_ID}/${CAPABILITIES_API_PATH}`, {
         headers: { ...COMMON_HEADERS, ...apiKeyHeader },
         responseType: 'json',
-        body: { applications: [] },
+        body: { applications: ['ml'] },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -99,14 +99,14 @@ apiTest.describe('Machine Learning feature controls', { tag: tags.stateful.class
     }
   );
 
-  apiTest(
+  mlApiTest(
     'global:all does NOT see Machine Learning navlink in a space where ML is disabled',
     async ({ apiClient, requestAuth }) => {
-      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(CUSTOM_ROLES.global_all);
+      const { apiKeyHeader } = await requestAuth.getApiKeyForMlGlobalAll();
       const response = await apiClient.post(`s/${DISABLED_SPACE_ID}/${CAPABILITIES_API_PATH}`, {
         headers: { ...COMMON_HEADERS, ...apiKeyHeader },
         responseType: 'json',
-        body: { applications: [] },
+        body: { applications: ['ml'] },
       });
 
       expect(response).toHaveStatusCode(200);

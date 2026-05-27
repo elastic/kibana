@@ -6,10 +6,9 @@
  */
 
 import { apiTest } from '@kbn/scout';
-import type { RoleSessionCredentials, SamlAuth } from '@kbn/scout';
+import type { RoleApiCredentials, RoleSessionCredentials, RequestAuthFixture, SamlAuth } from '@kbn/scout';
 import { ML_USERS } from './constants';
-
-export { apiTest };
+import { CUSTOM_ROLES } from './custom_roles';
 
 export interface MlSamlAuthFixture extends SamlAuth {
   asMlPoweruser: () => Promise<RoleSessionCredentials>;
@@ -17,8 +16,15 @@ export interface MlSamlAuthFixture extends SamlAuth {
   asMlUnauthorized: () => Promise<RoleSessionCredentials>;
 }
 
+export interface MlRequestAuthFixture extends RequestAuthFixture {
+  getApiKeyForMlGlobalAll: () => Promise<RoleApiCredentials>;
+  getApiKeyForMlRead: () => Promise<RoleApiCredentials>;
+  getApiKeyForMlNone: () => Promise<RoleApiCredentials>;
+}
+
 export const mlApiTest = apiTest.extend<{
   samlAuth: MlSamlAuthFixture;
+  requestAuth: MlRequestAuthFixture;
 }>({
   samlAuth: async ({ samlAuth }, use) => {
     const extendedSamlAuth: MlSamlAuthFixture = {
@@ -28,6 +34,15 @@ export const mlApiTest = apiTest.extend<{
       asMlUnauthorized: () => samlAuth.asInteractiveUser(ML_USERS.mlUnauthorized),
     };
     await use(extendedSamlAuth);
+  },
+  requestAuth: async ({ requestAuth }, use) => {
+    const extendedRequestAuth: MlRequestAuthFixture = {
+      ...requestAuth,
+      getApiKeyForMlGlobalAll: () => requestAuth.getApiKeyForCustomRole(CUSTOM_ROLES.global_all),
+      getApiKeyForMlRead: () => requestAuth.getApiKeyForCustomRole(CUSTOM_ROLES.ml_read),
+      getApiKeyForMlNone: () => requestAuth.getApiKeyForCustomRole(CUSTOM_ROLES.ml_none),
+    };
+    await use(extendedRequestAuth);
   },
 });
 
