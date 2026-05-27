@@ -13,7 +13,7 @@ import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
-import { ACTION_INSPECT_PANEL } from '@kbn/embeddable-plugin/public';
+import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
@@ -34,9 +34,7 @@ import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { getEsqlQuery } from './utils/get_esql_query';
 
-// QuickActionIds is an 8-slot tuple; actions beyond position 8 fall back to the context-menu popover.
-// Order is product-driven (see PR #267302): Explore, Inspect, View details, Copy to dashboard.
-const METRICS_QUICK_ACTION_IDS: ReadonlyArray<string> = [
+const METRICS_QUICK_ACTION_IDS: QuickActionIds = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
   ACTION_INSPECT_PANEL,
   ACTION_VIEW_DETAILS,

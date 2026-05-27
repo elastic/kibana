@@ -11,7 +11,11 @@ import React, { useContext } from 'react';
 import '@testing-library/jest-dom';
 import { act, render } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { ACTION_INSPECT_PANEL, EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
+import {
+  ACTION_INSPECT_PANEL,
+  EmbeddableRendererContext,
+  type QuickActionIds,
+} from '@kbn/embeddable-plugin/public';
 import { LensWrapper } from './lens_wrapper';
 import type { LensWrapperProps } from './lens_wrapper';
 import { ESQLVariableType } from '@kbn/esql-types';
@@ -275,7 +279,7 @@ describe('LensWrapper', () => {
     });
 
     it('uses caller-provided quickActionIds verbatim', () => {
-      const ids = [
+      const ids: QuickActionIds = [
         ACTION_EXPLORE_IN_DISCOVER_TAB,
         ACTION_VIEW_DETAILS,
         ACTION_COPY_TO_DASHBOARD,
