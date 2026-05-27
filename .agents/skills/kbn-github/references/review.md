@@ -82,6 +82,10 @@ gh pr comment NUM -b "<text>"
 
 ## Example: Create a Pending Review
 
+Run payload creation and review creation as separate shell commands. The
+`strip-review-event` hook denies review-creation commands that appear together
+with heredocs because that shape is ambiguous without a shell parser.
+
 ```bash
 cat > /tmp/review-payload.json <<'JSON'
 {
@@ -93,7 +97,9 @@ cat > /tmp/review-payload.json <<'JSON'
   ]
 }
 JSON
+```
 
+```bash
 gh api repos/elastic/kibana/pulls/NUM/reviews -X POST --input /tmp/review-payload.json
 
 # Submit later (include body explicitly if you want a summary):

@@ -24,15 +24,18 @@
  *   gh api .../reviews --input -                           (stdin body —
  *                                                           opaque to the hook)
  *   gh api .../reviews --input <path-with-shell-expansion> (opaque to the hook)
+ *   gh api .../reviews with any heredoc in the command      (too ambiguous
+ *                                                           without a shell
+ *                                                           parser)
  *   gh pr review --approve | --request-changes | --comment (immediate publish)
  *
  * Known limitations (no real shell parser; layered defense via skill +
  * warn-github-mcp + human-in-the-loop covers the residual risk):
  *
- *   - Heredocs anywhere in the command bypass the deny: a `gh api .../reviews`
- *     fragment inside a heredoc body fed to `cat` is indistinguishable from
- *     the real call without a shell parser, so the analyzer bails on heredoc
- *     input rather than risk a false deny.
+ *   - Heredocs anywhere in a review-creation command are denied: a
+ *     `gh api .../reviews` fragment inside a heredoc body fed to `cat` is
+ *     indistinguishable from the real call without a shell parser, so the
+ *     analyzer requires creating the payload file in a separate command.
  *   - Nested shell evaluation (`bash -c '...gh api .../reviews ...'`,
  *     `sh -c "..."`, etc.) is not introspected: `apiInvocation` is anchored
  *     to segment start, and a nested invocation is one segment that starts
@@ -48,15 +51,16 @@ import { readFileSync, writeFileSync } from 'node:fs';
 /**
  * Detects an `event=` flag pair on `gh api .../reviews` regardless of how
  * the value is quoted. Only the prefix
- * `(-f|-F|--field|--raw-field …)['"]?event=` matters — the regex never
+ * `(-f|-F|--field|--raw-field …)['"]?event=` matters, including pflag's
+ * attached shorthand values (`-fevent=...`, `-f=event=...`) — the regex never
  * consumes the value, so every value-side shell-quoting and shell-expansion
  * shape is covered without alternation: bare, single-quoted, double-quoted,
- * whole-pair quoted, `$(…)`, backticks, `${VAR:-…}`. The match drives a
- * `deny` decision pointing the agent at the canonical `--input <file>`
- * path; quote-aware iteration in `hasEventFlagOutsideQuotes` ignores
- * literal `event=` text inside a `-f body="…"` argument.
+ * whole-pair quoted, `$(…)`, backticks, `${VAR:-…}`. The match drives a `deny`
+ * decision pointing the agent at the canonical `--input <file>` path;
+ * quote-aware iteration in `hasEventFlagOutsideQuotes` ignores literal
+ * `event=` text inside a `-f body="…"` argument.
  */
-const eventFlag = /\s(?:-[fF]\s+|--(?:raw-)?field(?:=|\s+))['"]?event=/g;
+const eventFlag = /\s(?:-[fF](?:=|\s+)?|--(?:raw-)?field(?:=|\s+))['"]?event=/g;
 
 /**
  * Captures the `--input` value (space- or `=`-separated, double-quoted,
@@ -97,9 +101,10 @@ const prReviewPublishFlag =
 /**
  * Heredoc opener: `<<EOF`, `<<-EOF`, `<<'EOF'`, `<<"EOF"`, `<<\EOF`. The
  * backslash form is valid shell syntax equivalent to `<<'EOF'`, so it must
- * trigger the bail the same way the other quoted forms do — otherwise the
+ * trigger the deny the same way the other quoted forms do — otherwise the
  * heredoc body can look like a stray `gh api .../reviews` segment and the
- * deny check would false-trigger on text that's only being fed to `cat`.
+ * analyzer can either false-trigger on text fed to `cat` or skip sanitizing a
+ * real review-creation call.
  */
 const heredoc = /<<-?\s*['"\\]?\w/;
 
@@ -308,10 +313,14 @@ export const analyzeReviewCommand = (raw) => {
 
   // Heredocs can embed text that looks like a `gh api` invocation. Without a
   // shell parser we can't tell whether the matched segment is the real call or
-  // a heredoc body, so bail rather than risk denying on heredoc content. This
-  // runs after the stdin/pr-review deny checks so heredoc-fed stdin payloads
-  // are denied instead of silently allowed.
-  if (heredoc.test(raw)) return null;
+  // a heredoc body, and a heredoc used to create a JSON payload can otherwise
+  // skip the `--input <file>` sanitizer below. Deny the ambiguous shape and ask
+  // the agent to create the payload file in a separate command.
+  if (heredoc.test(raw)) {
+    return {
+      deny: 'The `gh api .../reviews` command appears together with a heredoc. The hook cannot safely distinguish heredoc body text from the real review-creation call, and this shape can bypass the `--input <file>` sanitizer. Write the JSON payload file in a separate command, then run `gh api repos/{owner}/{repo}/pulls/{number}/reviews --input <file>`.',
+    };
+  }
 
   if (hasEventFlagOutsideQuotes(segment)) {
     return {
