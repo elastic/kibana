@@ -16,7 +16,8 @@ import {
   apiPublishesViewMode,
   fetch$,
   initializeRelatedPanels,
-  initializeUnsavedChanges,
+  initializeStateApi,
+  initializeStateApi,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';

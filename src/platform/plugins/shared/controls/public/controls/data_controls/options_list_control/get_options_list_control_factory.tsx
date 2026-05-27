@@ -28,7 +28,8 @@ import {
   apiHasPinnedPanels,
   apiHasSections,
   initializeRelatedPanels,
-  initializeUnsavedChanges,
+  initializeStateApi,
+  initializeStateApi,
   type PublishingSubject,
 } from '@kbn/presentation-publishing';
 

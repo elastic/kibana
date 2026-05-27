@@ -22,7 +22,8 @@ import {
 import {
   apiHasPinnedPanels,
   initializeRelatedPanels,
-  initializeUnsavedChanges,
+  initializeStateApi,
+  initializeStateApi,
   type StateComparators,
 } from '@kbn/presentation-publishing';
 
@@ -75,6 +76,7 @@ export const getESQLControlFactory = <
         )
         .subscribe((next) => tooltipLabel$.next(next));
 
+      const stateApi = initializeStateApi<typeof initialState>({
       function serializeState() {
         return {
           ...selections.getLatestState(),
