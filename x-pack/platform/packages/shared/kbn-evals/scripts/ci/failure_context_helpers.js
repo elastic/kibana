@@ -295,14 +295,20 @@ function connectorIdToLitellmModel(connectorId) {
 function buildLitellmConnectorFromVault(judgeConnectorId) {
   const config = parseVaultConfig();
   const litellm = config?.litellm;
-  if (!litellm || typeof litellm !== 'object') {
-    throw new Error('Vault config is missing litellm settings');
-  }
-
-  const baseUrl = typeof litellm.baseUrl === 'string' ? litellm.baseUrl : '';
-  const apiKey = typeof litellm.virtualKey === 'string' ? litellm.virtualKey : '';
+  const baseUrl =
+    process.env.LITELLM_BASE_URL ||
+    (litellm && typeof litellm === 'object' && typeof litellm.baseUrl === 'string'
+      ? litellm.baseUrl
+      : '');
+  const apiKey =
+    process.env.LITELLM_VIRTUAL_KEY ||
+    (litellm && typeof litellm === 'object' && typeof litellm.virtualKey === 'string'
+      ? litellm.virtualKey
+      : '');
   if (!baseUrl || !apiKey) {
-    throw new Error('Vault litellm config is missing baseUrl or virtualKey');
+    throw new Error(
+      'LiteLLM credentials are missing (set LITELLM_BASE_URL/LITELLM_VIRTUAL_KEY or KBN_EVALS_CONFIG_B64)'
+    );
   }
 
   return {
@@ -349,6 +355,22 @@ function resolveEvaluationConnectorId() {
 
   const config = parseVaultConfig();
   return typeof config?.evaluationConnectorId === 'string' ? config.evaluationConnectorId : '';
+}
+
+/**
+ * Prefer the vault judge for triage (stable LiteLLM) over per-step env overrides.
+ *
+ * @returns {string}
+ */
+function resolveTriageConnectorId() {
+  const config = parseVaultConfig();
+  const vaultId =
+    typeof config?.evaluationConnectorId === 'string' ? config.evaluationConnectorId : '';
+  if (vaultId) {
+    return vaultId;
+  }
+
+  return process.env.KBN_EVALS_EVALUATION_CONNECTOR_ID || process.env.EVALUATION_CONNECTOR_ID || '';
 }
 
 /**
@@ -458,6 +480,7 @@ module.exports = {
   buildLitellmConnectorFromVault,
   writeMinimalFailureContext,
   resolveEvaluationConnectorId,
+  resolveTriageConnectorId,
   buildEisChatRequest,
   parseEisStreamResponse,
   parseLitellmChatContent,

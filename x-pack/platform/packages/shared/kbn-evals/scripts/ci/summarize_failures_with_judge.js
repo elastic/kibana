@@ -11,27 +11,13 @@ const {
   buildTriageUserPrompt,
   buildLitellmChatRequest,
   buildLitellmConnectorFromVault,
-  resolveEvaluationConnectorId,
+  resolveTriageConnectorId,
   buildEisChatRequest,
   parseEisStreamResponse,
   parseLitellmChatContent,
 } = require('./failure_context_helpers');
 
-const contextPath = process.argv[2] || process.env.EVAL_FAILURE_CONTEXT_PATH || '';
 const maxOutputChars = Number(process.env.EVAL_TRIAGE_MAX_CHARS || '1500');
-
-if (!contextPath) {
-  console.error('Usage: summarize_failures_with_judge.js <failure-context.json>');
-  process.exit(1);
-}
-
-const evaluationConnectorId = resolveEvaluationConnectorId();
-if (!evaluationConnectorId) {
-  console.error(
-    'EVALUATION_CONNECTOR_ID (or vault evaluationConnectorId) is required for judge triage summary'
-  );
-  process.exit(0);
-}
 
 /**
  * @returns {Record<string, { config?: Record<string, unknown>; secrets?: Record<string, unknown> }>}
@@ -39,15 +25,15 @@ if (!evaluationConnectorId) {
 function decodeConnectors() {
   const b64 = process.env.KIBANA_TESTING_AI_CONNECTORS || '';
   if (!b64) {
-    throw new Error('KIBANA_TESTING_AI_CONNECTORS is not set');
+    return {};
   }
 
-  const parsed = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
-  if (!parsed || typeof parsed !== 'object') {
-    throw new Error('Failed to parse KIBANA_TESTING_AI_CONNECTORS');
+  try {
+    const parsed = JSON.parse(Buffer.from(b64, 'base64').toString('utf8'));
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
   }
-
-  return parsed;
 }
 
 /**
@@ -92,17 +78,23 @@ async function postForContent(url, headers, body, options = {}) {
   return parseLitellmChatContent(json);
 }
 
-async function main() {
+/**
+ * @param {string} contextPath
+ * @returns {Promise<{ summary: string; judgeId: string }>}
+ */
+async function summarizeFailuresWithJudge(contextPath) {
+  const evaluationConnectorId = resolveTriageConnectorId();
+  if (!evaluationConnectorId) {
+    throw new Error(
+      'evaluationConnectorId is required for judge triage (vault config or EVALUATION_CONNECTOR_ID)'
+    );
+  }
+
   const context = JSON.parse(readFileSync(contextPath, 'utf8'));
   const failingProjects = Array.isArray(context.failingProjects) ? context.failingProjects : [];
 
-  let connector;
-  try {
-    const connectors = decodeConnectors();
-    connector = connectors[evaluationConnectorId];
-  } catch {
-    connector = undefined;
-  }
+  const connectors = decodeConnectors();
+  let connector = connectors[evaluationConnectorId];
 
   if (!connector && evaluationConnectorId.startsWith('litellm-')) {
     connector = buildLitellmConnectorFromVault(evaluationConnectorId);
@@ -110,7 +102,7 @@ async function main() {
 
   if (!connector) {
     throw new Error(
-      `Judge connector ${evaluationConnectorId} is not available (set KIBANA_TESTING_AI_CONNECTORS or vault litellm config)`
+      `Judge connector ${evaluationConnectorId} is not available (set KIBANA_TESTING_AI_CONNECTORS or LiteLLM env/config)`
     );
   }
 
@@ -156,11 +148,26 @@ async function main() {
     summary = `${summary.slice(0, maxOutputChars - 1)}…`;
   }
 
+  return { summary: summary.trim(), judgeId: evaluationConnectorId };
+}
+
+async function main() {
+  const contextPath = process.argv[2] || process.env.EVAL_FAILURE_CONTEXT_PATH || '';
+  if (!contextPath) {
+    console.error('Usage: summarize_failures_with_judge.js <failure-context.json>');
+    process.exit(1);
+  }
+
+  const { summary } = await summarizeFailuresWithJudge(contextPath);
   process.stdout.write(`${summary}\n`);
 }
 
-main().catch((error) => {
-  const message = error instanceof Error ? error.message : String(error);
-  console.error(`Judge triage summary failed: ${message}`);
-  process.exit(0);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Judge triage summary failed: ${message}`);
+    process.exit(1);
+  });
+}
+
+module.exports = { summarizeFailuresWithJudge };

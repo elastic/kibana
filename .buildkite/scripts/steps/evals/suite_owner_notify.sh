@@ -50,95 +50,54 @@ if [[ -z "${EVAL_SUITE_SLACK_CHANNEL}" ]]; then
   )"
 fi
 
+cd "${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}"
+
+if [[ ! -d node_modules/@elastic/elasticsearch ]] || ! node -e "require('@elastic/elasticsearch')" 2>/dev/null; then
+  echo "--- Bootstrap (required for suite owner Slack message)"
+  .buildkite/scripts/bootstrap.sh
+fi
+
+echo "--- Preparing judge connector for triage summary"
+if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
+  source .buildkite/scripts/steps/evals/setup_triage_connectors.sh || {
+    echo "WARNING: setup_triage_connectors failed; build_suite_owner_slack_message will use vault LiteLLM fallback"
+  }
+else
+  echo "WARNING: KBN_EVALS_CONFIG_B64 is not set; build_suite_owner_slack_message requires vault LiteLLM env vars"
+fi
+
 SUMMARY_FILE="$(mktemp -t kbn-evals-suite-summary.XXXXXX.md)"
+FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"
 
-{
-  printf ':rotating_light: *%s* (`%s`) failed in LLM evals.\n\n' "$suite_name" "$EVAL_SUITE_ID"
-  printf '*Failing models:*\n'
-  for project in "${failing_projects[@]}"; do
-    printf -- '- `%s`\n' "${project}"
-  done
-  if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
-    printf '\n<%s|View build>\n' "${BUILDKITE_BUILD_URL}"
-  fi
-} >"$SUMMARY_FILE"
-
-if [[ "${KBN_EVALS:-}" == "1" ]]; then
-  cd "${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}"
-
-  if [[ ! -d node_modules/@elastic/elasticsearch ]] || ! node -e "require('@elastic/elasticsearch')" 2>/dev/null; then
-    echo "--- Bootstrap (required for judge triage)"
-    .buildkite/scripts/bootstrap.sh
-  fi
-
-  echo "--- Preparing judge connector for triage summary"
-  if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
-    if ! source .buildkite/scripts/steps/evals/setup_triage_connectors.sh; then
-      echo "WARNING: setup_triage_connectors failed; summarize will try vault LiteLLM fallback"
+echo "--- Building suite owner Slack message (static + judge triage)"
+if ! node x-pack/platform/packages/shared/kbn-evals/scripts/ci/build_suite_owner_slack_message.js \
+  "$EVAL_SUITE_ID" "$SUMMARY_FILE" "$FAILING_PROJECTS_CSV"; then
+  echo "--- build_suite_owner_slack_message crashed; writing static summary with triage error note"
+  {
+    printf ':rotating_light: *%s* (`%s`) failed in LLM evals.\n\n' "$suite_name" "$EVAL_SUITE_ID"
+    printf '*Failing models:*\n'
+    for project in "${failing_projects[@]}"; do
+      printf -- '- `%s`\n' "${project}"
+    done
+    if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
+      printf '\n<%s|View build>\n' "${BUILDKITE_BUILD_URL}"
     fi
-  else
-    echo "WARNING: KBN_EVALS_CONFIG_B64 is not set; summarize will try vault LiteLLM fallback if configured"
-  fi
-
-  CONTEXT_FILE="$(mktemp -t kbn-evals-failure-context.XXXXXX.json)"
-  TRIAGE_LOG="$(mktemp -t kbn-evals-triage-log.XXXXXX.log)"
-  FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"
-
-  if ! node x-pack/platform/packages/shared/kbn-evals/scripts/ci/collect_failure_context.js \
-    "$EVAL_SUITE_ID" "$CONTEXT_FILE" "$FAILING_PROJECTS_CSV"; then
-    echo "--- collect_failure_context failed; writing minimal context"
-    export EVAL_SUITE_ID EVAL_SUITE_NAME
-    node -e "
-      const { writeMinimalFailureContext } = require('./x-pack/platform/packages/shared/kbn-evals/scripts/ci/failure_context_helpers');
-      writeMinimalFailureContext(process.argv[1], {
-        suiteId: process.env.EVAL_SUITE_ID,
-        suiteName: process.env.EVAL_SUITE_NAME || process.env.EVAL_SUITE_ID,
-        buildId: process.env.BUILDKITE_BUILD_ID,
-        buildUrl: process.env.BUILDKITE_BUILD_URL,
-        failingProjects: process.argv[2].split(',').filter(Boolean),
-      });
-    " "$CONTEXT_FILE" "$FAILING_PROJECTS_CSV"
-  fi
-
-  echo "--- Generating judge triage summary"
-  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/summarize_failures_with_judge.js \
-    "$CONTEXT_FILE" >"${TRIAGE_LOG}" 2>&1 || true
-
-  TRIAGE_SUMMARY=""
-  if [[ -s "${TRIAGE_LOG}" ]] && ! grep -q '^Judge triage summary failed' "${TRIAGE_LOG}"; then
-    TRIAGE_SUMMARY="$(cat "${TRIAGE_LOG}")"
-  elif [[ -s "${TRIAGE_LOG}" ]]; then
-    echo "--- Judge triage summary failed (see log below; continuing with static summary)"
-    cat "${TRIAGE_LOG}" || true
-  fi
-
-  if [[ -n "${TRIAGE_SUMMARY}" ]]; then
-    {
-      printf '\n*Triage summary'
-      if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
-        printf ' (judge: `%s`)' "${EVALUATION_CONNECTOR_ID}"
-      fi
-      printf ':*\n%s\n' "${TRIAGE_SUMMARY}"
-    } >>"$SUMMARY_FILE"
-  else
-    echo "--- No judge triage summary produced"
-    if [[ -s "${TRIAGE_LOG}" ]]; then
-      cat "${TRIAGE_LOG}"
-    fi
-  fi
-
-  rm -f "$CONTEXT_FILE" "$TRIAGE_LOG"
+    printf '\n*Triage summary (judge unavailable):*\n'
+    printf '_Suite owner message builder failed. See the suite owner notify Buildkite step for details._\n'
+  } >"$SUMMARY_FILE"
 fi
 
 echo "--- Suite failure summary"
 cat "$SUMMARY_FILE"
 
+if ! grep -q 'Triage summary' "$SUMMARY_FILE"; then
+  echo "WARNING: Slack message is missing a triage section header"
+fi
+
 buildkite-agent meta-data set "kbn-evals:triage:${suite_key_safe}" "$(cat "$SUMMARY_FILE")" >/dev/null 2>&1 || true
 buildkite-agent annotate --context "kbn-evals-summary-${suite_key_safe}" --style 'error' "$(cat "$SUMMARY_FILE")" || true
 
 if [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
-  cd "${KIBANA_DIR:-${BUILDKITE_BUILD_CHECKOUT_PATH:-$(pwd)}}"
-
   if ! node -e "require('yaml')" 2>/dev/null; then
     echo "--- Bootstrap (required for generate_suite_notify_pipeline.js)"
     .buildkite/scripts/bootstrap.sh
@@ -158,6 +117,4 @@ if [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
 fi
 
 rm -f "$SUMMARY_FILE"
-# Exit 0 so Buildkite schedules dynamically uploaded Slack notify steps. Suite failure is
-# already reflected by failing model steps, metadata (kbn-evals:triage:*), and annotations.
 exit 0
