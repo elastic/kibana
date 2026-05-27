@@ -166,6 +166,10 @@ describe('GroupSelection', () => {
       tab: 'legacy',
     });
 
+    await waitFor(() => {
+      expect(screen.getByTestId('visType-aggbased')).toHaveTextContent('Aggregation-based');
+    });
+
     await userEvent.click(screen.getByRole('button', { name: /Aggregation-based/i }));
     expect(showMainDialog).toHaveBeenCalledWith(false);
   });
