@@ -82,7 +82,17 @@ export const fetchGranularFacetCounts = async ({
   }
 
   const prefixedIds = ruleIds.map((id) => `${RULE_SAVED_OBJECT_TYPE}:${id}`);
-  const aggs = buildAggregations({ categories });
+  // savedObjectsClient.search() bypasses the SO find() field-path translation layer
+  // that strips ".attributes" (alert.attributes.tags → alert.tags).
+  const aggs: Record<string, AggregationsAggregationContainer> = {};
+  for (const category of categories) {
+    aggs[`facet_${category}`] = {
+      terms: {
+        field: RULES_FACET_CATEGORY_TO_ATTRIBUTE[category].replace('.attributes', ''),
+        size: DEFAULT_AGGREGATION_MAX_SIZE,
+      },
+    };
+  }
 
   const searchResult = await savedObjectsClient.search<
     SavedObjectsRawDocSource,
