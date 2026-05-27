@@ -30,12 +30,13 @@ extract_owner_count() {
 }
 
 echo "--- Install fallow v${FALLOW_VERSION}"
-npx --yes "fallow@${FALLOW_VERSION}" --version
+npm ci --prefix .buildkite
+.buildkite/node_modules/.bin/fallow --version
 
 echo "--- Run fallow analysis"
 echo "Run locally: npx fallow@${FALLOW_VERSION} --group-by owner --production"
 set +e
-FALLOW_OUTPUT=$(npx "fallow@${FALLOW_VERSION}" \
+FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
   --group-by owner \
   --production \
   --format markdown \
