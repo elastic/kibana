@@ -54,7 +54,7 @@ const LONG_RELATIVE_RE = /^(last|past|next)\s+(\d+)\s+(\w+)$/i;
 const NATURAL_INSTANT_RE = /^(\d+)\s+(\w+)\s+(ago|from now)$/i;
 const INSTANT_FROM_NOW_RE = /^(in)\s+(\d+)\s+(\w+)$/i;
 const ABSOLUTE_TOKEN_RE = /([A-Za-z]+|\d+)/g;
-const MONTH_NAMES = new Set([
+const MONTH_NAMES: ReadonlySet<string> = new Set([
   'jan',
   'january',
   'feb',
