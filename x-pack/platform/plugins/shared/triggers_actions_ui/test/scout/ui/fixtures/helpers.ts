@@ -26,12 +26,18 @@ export const defineIndexThresholdRule = async (page: ScoutPage, name: string) =>
   await page.testSubj.click('selectIndexExpression');
   const indexCombo = page.testSubj.locator('thresholdIndexesComboBox');
   await indexCombo.waitFor({ state: 'visible' });
-  const indexInput = indexCombo.locator('input');
-  await indexInput.click();
-  await indexInput.pressSequentially('scout-threshold-rule');
-  const firstIndexOption = page.locator('[role="listbox"] [role="option"]:nth-of-type(1)');
-  await firstIndexOption.waitFor({ state: 'visible', timeout: 30000 });
-  await firstIndexOption.click();
+  // Follow EuiComboBoxWrapper pattern: click comboBoxInput to open, type into
+  // comboBoxSearchInput with a 50ms inter-key delay so the 250ms debounce fires
+  // reliably, then target the option by its EUI title attribute.
+  // getIndexOptions() always adds a "Choose…" entry for the typed text, so the
+  // option is present even if the API finds no matching indices.
+  await indexCombo.locator('[data-test-subj="comboBoxInput"]').click();
+  await indexCombo
+    .locator('[data-test-subj="comboBoxSearchInput"]')
+    .pressSequentially(THRESHOLD_TEST_INDEX, { delay: 50 });
+  const indexOption = page.locator(`.euiComboBoxOption[title="${THRESHOLD_TEST_INDEX}"]`);
+  await indexOption.waitFor({ state: 'visible', timeout: 30000 });
+  await indexOption.click();
 
   const timeFieldSelect = page.testSubj.locator('thresholdAlertTimeFieldSelect');
   await timeFieldSelect.waitFor({ state: 'visible' });
