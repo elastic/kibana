@@ -15,6 +15,8 @@ export const RULE_IDS = {
   EXISTING_TYPE_MAPPINGS_WITHOUT_NEW_MODEL_VERSION:
     'existing-type/mappings-changed-without-new-model-version',
   EXISTING_TYPE_MUTATED_MODEL_VERSION: 'existing-type/mutated-existing-model-version',
+  EXISTING_TYPE_REMOVED_MAPPED_PROPERTIES: 'existing-type/removed-mapped-properties',
+  EXISTING_TYPE_VIRTUAL_VERSION_DOWNGRADE: 'existing-type/virtual-version-downgrade',
   EXISTING_TYPE_SCHEMA_BREAKING_CHANGES: 'existing-type/schema-breaking-changes',
   EXISTING_TYPE_SCHEMA_UNDIFFABLE: 'existing-type/schema-undiffable-legacy-hash',
   EXISTING_TYPE_NEW_MAPPINGS_NOT_IN_MODEL_VERSION:
@@ -24,6 +26,8 @@ export const RULE_IDS = {
   // new types
   NEW_TYPE_LEGACY_MIGRATIONS: 'new-type/legacy-migrations',
   NEW_TYPE_MISSING_INITIAL_MODEL_VERSION: 'new-type/missing-initial-model-version',
+  NEW_TYPE_KEYWORD_MISSING_IGNORE_ABOVE: 'new-type/keyword-missing-ignore-above',
+  NEW_TYPE_INVALID_NAME_TITLE_FIELD_TYPE: 'new-type/invalid-name-title-field-type',
   // model versions (shared)
   INITIAL_MODEL_VERSION_HAS_CHANGES: 'model-version/initial-must-be-schema-only',
   MODEL_VERSION_NUMBERS_INVALID: 'model-version/numbers-must-be-consecutive',
@@ -33,6 +37,10 @@ export const RULE_IDS = {
   MODEL_VERSION_MAPPINGS_NOT_IN_SCHEMA: 'model-version/mappings-not-in-schema',
   MODEL_VERSION_MAPPING_INDEX_FALSE: 'model-version/mapping-index-false',
   MODEL_VERSION_MAPPING_ENABLED_FALSE: 'model-version/mapping-enabled-false',
+  MODEL_VERSION_FIXTURE_MISSING: 'model-version/fixture-missing',
+  MODEL_VERSION_FIXTURE_INVALID: 'model-version/fixture-invalid',
+  // documents
+  DOCUMENTS_FIXTURE_MISMATCH: 'documents/fixture-mismatch',
   // removed types
   REMOVED_TYPE_NAME_REUSED: 'removed-type/name-reused',
   REMOVED_TYPE_NEEDS_UPDATE: 'removed-type/registry-needs-update',
@@ -53,10 +61,22 @@ export interface SavedObjectsCheckFinding {
   /**
    * Path fragment appended to the Saved Objects docs base URL.
    * MUST start with `#` (anchor on the same page, e.g. `#defining-model-versions`)
-   * or `/` (relative path, e.g. `/validate#troubleshooting`).
+   * or `/` (relative path, e.g. `/troubleshooting#existing-type-mutated-migrations`).
    * A value without a leading `#` or `/` will produce a malformed URL.
    */
   docsAnchor?: string;
+  /** GCS URL of the regular (merge-base) baseline snapshot that triggered this finding. */
+  baselineUrl?: string;
+  /** GCS URL of the serverless baseline snapshot that triggered this finding. */
+  serverlessBaselineUrl?: string;
+}
+
+/** Per-type change details included in the report for updated SO types. */
+export interface TypeChangeDetails {
+  /** Model versions added since the baseline, formatted as `10.x.0`. */
+  newModelVersions: string[];
+  /** Existing model versions modified since the baseline, formatted as `10.x.0`. */
+  modifiedModelVersions: string[];
 }
 
 export interface SavedObjectsCheckReport {
@@ -67,4 +87,16 @@ export interface SavedObjectsCheckReport {
   updatedTypes: string[];
   removedTypes: string[];
   findings: SavedObjectsCheckFinding[];
+  /**
+   * Per-type model version change details for updated SO types.
+   * Only present when both `from` and `to` snapshots are available.
+   */
+  typeChanges?: Record<string, TypeChangeDetails>;
+  /**
+   * True when the check ran against synthetic test data (either via `--test`
+   * or the automatic fallback when no real SO types changed). In this mode the
+   * `newTypes` / `updatedTypes` / `removedTypes` lists reflect test fixtures,
+   * not actual contributor changes, so no PR comment should be posted.
+   */
+  testMode?: boolean;
 }
