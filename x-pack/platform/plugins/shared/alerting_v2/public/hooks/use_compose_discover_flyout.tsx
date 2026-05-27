@@ -14,13 +14,11 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   SingleStepWorkflowForm,
   type SingleStepWorkflowFormValue,
 } from '../components/single_step_workflow_form';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
-import type { ComposeDiscoverMode } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
