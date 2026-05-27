@@ -32,6 +32,7 @@ import {
   getStringMeta,
   getToolCallSteps,
 } from '@kbn/evals';
+import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
 import { extractSearchRetrievedDocs } from './rag_extractor';
 
@@ -149,14 +150,9 @@ function configureExperiment({
         const expectedOnlyToolId = getStringMeta(metadata, 'expectedOnlyToolId');
         if (!expectedOnlyToolId) return { score: 1 };
 
-        // Exclude infrastructure/framework tools that are always called regardless of user intent.
-        // filestore.read is the skill-file loader — it's not a domain tool choice.
-        const INFRA_TOOL_IDS = new Set(['filestore.read']);
-
+        // Exclude attachment/filestore/internal framework tools (see isInternalTool).
         const toolCalls = getToolCallSteps(output as TaskOutput);
-        const domainToolCalls = toolCalls.filter(
-          (t) => t.tool_id && !INFRA_TOOL_IDS.has(t.tool_id)
-        );
+        const domainToolCalls = toolCalls.filter((t) => t.tool_id && !isInternalTool(t.tool_id));
 
         if (domainToolCalls.length === 0) {
           return {
