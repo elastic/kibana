@@ -104,6 +104,8 @@ export interface ExperimentalFeatures {
   subagents: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
   todos: boolean;
+  /** Whether the bash tool (and the just-bash runtime) is enabled */
+  bash: boolean;
 }
 
 export interface AgentHandlerContext {
