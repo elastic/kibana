@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type { ESQLColumn } from '@elastic/esql/types';
 import { Parser, walk } from '@elastic/esql';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
@@ -25,6 +25,7 @@ import {
   fixESQLQueryWithVariables,
   getCategorizeColumns,
   getArgsFromRenameFunction,
+  replaceColumnNamesIfRenamed,
   getCategorizeField,
   findClosestColumn,
   getKqlSearchQueries,
@@ -919,6 +920,23 @@ describe('esql query helpers', () => {
       const esql = 'FROM index | STATS COUNT() BY field1';
       const expected: string[] = [];
       expect(getCategorizeColumns(esql)).toEqual(expected);
+    });
+  });
+
+  describe('replaceColumnNameIfRenamed', () => {
+    it('returns column names unchanged when there is no RENAME', () => {
+      const { root } = Parser.parse('FROM index | KEEP col');
+      expect(replaceColumnNamesIfRenamed(root, ['col'])).toEqual(['col']);
+    });
+
+    it('replaces matching column names using RENAME', () => {
+      const { root } = Parser.parse('FROM index | RENAME old AS new');
+      expect(replaceColumnNamesIfRenamed(root, ['old', 'other'])).toEqual(['new', 'other']);
+    });
+
+    it('applies multiple RENAME commands in order', () => {
+      const { root } = Parser.parse('FROM index | RENAME a AS b | RENAME b AS c');
+      expect(replaceColumnNamesIfRenamed(root, ['a'])).toEqual(['c']);
     });
   });
 

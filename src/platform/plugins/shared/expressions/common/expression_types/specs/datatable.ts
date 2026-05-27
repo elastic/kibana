@@ -103,10 +103,6 @@ export interface DatatableColumnMeta {
    * any extra parameters for the source that produced this column
    */
   sourceParams?: SerializableRecord;
-  /**
-   * True when column values includes highlitings parts.
-   */
-  hasHighlights?: boolean;
 }
 
 interface SourceParamsESQL extends Record<string, unknown> {

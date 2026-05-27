@@ -28,7 +28,6 @@ import {
   mapVariableToColumn,
   isComputedColumn,
   getQuerySummary,
-  getColumnsToHighlight,
   buildRenameSourceFieldMap,
 } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
@@ -370,7 +369,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
           // Get query summary to identify computed columns
           const querySummary = getQuerySummary(query);
-          const highlightColumnNames = getColumnsToHighlight(query);
 
           const renameSourceFieldMap: Map<string, string> | null = querySummary.renamedColumnsPairs
             ?.size
@@ -393,7 +391,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 meta: {
                   type: kibanaFieldType,
                   esType: type,
-                  hasHighlights: highlightColumnNames.has(name),
                   sourceParams:
                     type === 'date'
                       ? {

@@ -72,7 +72,7 @@ export {
   hasTimeseriesInfoCommand,
   isComputedColumn,
   getQuerySummary,
-  getColumnsToHighlight,
+  getColumnsWithHighlights,
   buildRenameSourceFieldMap,
   getEsqlControls,
   getAllEsqlControls,
@@ -80,6 +80,7 @@ export {
   convertQueryToESQLExpression,
   injectWhereClauseAfterSourceCommand,
   type ESQLStatsQueryMeta,
+  type EsqlColumnsWithHighlights,
 } from './src';
 
 export { ENABLE_ESQL, GROUP_NOT_SET_VALUE } from './constants';
