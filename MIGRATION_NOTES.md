@@ -2,6 +2,18 @@
 
 Branch: `migrate-to-typescript-6`. Plan lives in `~/.cursor/plans/kibana_typescript_6.0_migration_e52bef22.plan.md`.
 
+## Current state (2026-05-27)
+
+- Default CI: TypeScript 5.9.3 (unchanged).
+- Canary CI: TypeScript 6.0.3 via `KBN_TS_COMPILER_PACKAGE=typescript-6`, soft-fail Buildkite step, no shared GCS cache.
+- Phase A complete: A1 done (downlevelIteration removed); A2 reframed as no-op; A3 deferred and split into pre-PRs; A4 folded into Phase C2; A5 research done.
+- Phase B complete: canary lane wired end-to-end.
+- Phase C / D not started.
+- Open blockers for TS 7.0:
+  - A3: `moduleResolution: "bundler"` flip (~121 errors surveyed on a server-internal closure; needs 4 small fix-PRs first).
+  - `baseUrl` removal (gated by A3 + path normalization).
+  - Verdict on legacy decorators (alerting_v2 is the only meaningful user — freeze is the recommended path).
+
 ## Phase A — Harden on 5.9.3
 
 ### A1. Drop `downlevelIteration` from `tsconfig.base.json`
