@@ -109,7 +109,7 @@ describe('getLegendActions', () => {
   });
 
   describe('ES|QL computed column', () => {
-    it('renders the action button (does not return null) when the column is computed', () => {
+    it('renders the action button when the column is computed', () => {
       const Component = getLegendActions(
         undefined,
         makeGetFilterEventData(esqlVisDataWithComputedColumn),

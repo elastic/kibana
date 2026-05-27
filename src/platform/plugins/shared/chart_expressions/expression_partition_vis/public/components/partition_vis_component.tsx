@@ -441,9 +441,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const computedColumnWarningMessage = useMemo(
     () =>
       isEsqlMode
-        ? getComputedColumnWarningForColumns(bucketColumns, panelHasConfiguredDrilldowns ?? false)
+        ? getComputedColumnWarningForColumns(
+            bucketColumns.map((col) => visData.columns.find((c) => c.id === col.id)),
+            panelHasConfiguredDrilldowns ?? false
+          )
         : undefined,
-    [isEsqlMode, bucketColumns, panelHasConfiguredDrilldowns]
+    [isEsqlMode, bucketColumns, visData.columns, panelHasConfiguredDrilldowns]
   );
 
   const TooltipWarningFooter = useMemo<
