@@ -186,21 +186,23 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(bulkResult.attachments.length).to.be(2);
-        const byId = new Map<
-          string,
-          { type: string; externalReferenceAttachmentTypeId?: string; externalReferenceId?: string }
-        >(bulkResult.attachments.map((a: { id: string; type: string }) => [a.id, a]));
+        // The internal `bulkGetAttachments` route reads with `mode: 'unified'`
+        const byId = new Map<string, { type: string; attachmentId?: string }>(
+          bulkResult.attachments.map((a: { id: string; type: string; attachmentId?: string }) => [
+            a.id,
+            a,
+          ])
+        );
 
-        // Both rows surface as the legacy `externalReference + endpoint` projection
-        // for API consumers; the actions-origin row carries the synthetic sentinel id.
         const unifiedProjected = byId.get(unifiedId)!;
-        expect(unifiedProjected.type).to.be(AttachmentType.externalReference);
-        expect(unifiedProjected.externalReferenceAttachmentTypeId).to.be('endpoint');
+        expect(unifiedProjected.type).to.be(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
+        expect(unifiedProjected.attachmentId).to.be('mixed-endpoint-1');
 
+        // The actions-origin row carries the synthetic sentinel `attachmentId` so
+        // its origin stays discoverable to log readers and downstream consumers.
         const actionsProjected = byId.get(actionsId)!;
-        expect(actionsProjected.type).to.be(AttachmentType.externalReference);
-        expect(actionsProjected.externalReferenceAttachmentTypeId).to.be('endpoint');
-        expect(actionsProjected.externalReferenceId).to.be('legacy-actions');
+        expect(actionsProjected.type).to.be(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
+        expect(actionsProjected.attachmentId).to.be('legacy-actions');
       });
 
       it('bulk get retrieves osquery alongside a legacy user comment from both SO indices', async () => {
