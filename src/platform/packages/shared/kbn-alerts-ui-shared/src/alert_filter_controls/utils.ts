@@ -26,7 +26,10 @@ export const getFilterItemObjListFromControlState = (controlState: ControlGroupR
     return {
       field_name,
       selected_options,
-      title,
+      // Without this check, adding new field filters (that don't have a title) causes the "Filters
+      // changed" banner to show up indefinitely on every reload because rison strips `undefined`
+      // values, causing a mismatch with the localStorage-derived config under lodash `isEqual`.
+      ...(title !== undefined && { title }),
       exists_selected,
       exclude,
       display_settings: {
