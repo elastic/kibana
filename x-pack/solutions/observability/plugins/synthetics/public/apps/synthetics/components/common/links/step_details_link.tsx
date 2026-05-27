@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui/src/components/common';
 
 import { useSyntheticsSettingsContext } from '../../../contexts';
@@ -53,15 +53,16 @@ export const StepDetailsLinkIcon = ({
   }
 
   return (
-    <EuiButtonIcon
-      data-test-subj="syntheticsStepDetailsLinkIconButton"
-      {...commonProps}
-      title={VIEW_DETAILS(stepIndex)}
-      size="s"
-      href={stepDetailsLink}
-      target={target}
-      iconType="chartWaterfall"
-    />
+    <EuiToolTip content={VIEW_DETAILS(stepIndex)} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="syntheticsStepDetailsLinkIconButton"
+        {...commonProps}
+        size="s"
+        href={stepDetailsLink}
+        target={target}
+        iconType="chartWaterfall"
+      />
+    </EuiToolTip>
   );
 };
 

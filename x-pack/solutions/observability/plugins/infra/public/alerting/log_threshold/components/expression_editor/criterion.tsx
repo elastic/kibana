@@ -18,6 +18,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isFinite, isNumber } from 'lodash';
@@ -320,18 +321,25 @@ export const Criterion: React.FC<Props> = ({
       </EuiFlexItem>
       {canDelete && (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="infraCriterionButton"
-            aria-label={i18n.translate('xpack.infra.logs.alertFlyout.removeCondition', {
+          <EuiToolTip
+            content={i18n.translate('xpack.infra.logs.alertFlyout.removeCondition', {
               defaultMessage: 'Remove condition',
             })}
-            color={'danger'}
-            iconType={'trash'}
-            onClick={(e: React.MouseEvent) => {
-              e.stopPropagation();
-              removeCriterion(idx);
-            }}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="infraCriterionButton"
+              aria-label={i18n.translate('xpack.infra.logs.alertFlyout.removeCondition', {
+                defaultMessage: 'Remove condition',
+              })}
+              color={'danger'}
+              iconType={'trash'}
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                removeCriterion(idx);
+              }}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

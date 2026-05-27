@@ -9,7 +9,6 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiComboBox,
-  type EuiComboBoxOptionOption,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +16,8 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
+  type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -74,6 +75,7 @@ export function CompositeSloMembersSection() {
       <EuiFlexGroup direction="column" gutterSize="m">
         {atMax && (
           <EuiCallOut
+            announceOnMount
             color="warning"
             size="s"
             title={i18n.translate('xpack.slo.compositeSloEdit.members.maxWarning', {
@@ -268,16 +270,24 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          aria-label={i18n.translate('xpack.slo.compositeSloEdit.members.removeButton', {
+        <EuiToolTip
+          content={i18n.translate('xpack.slo.compositeSloEdit.members.removeButton', {
             defaultMessage: 'Remove {name}',
             values: { name: sloName },
           })}
-          onClick={onRemove}
-          data-test-subj={`compositeSloMemberRemoveButton-${index}`}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            aria-label={i18n.translate('xpack.slo.compositeSloEdit.members.removeButton', {
+              defaultMessage: 'Remove {name}',
+              values: { name: sloName },
+            })}
+            onClick={onRemove}
+            data-test-subj={`compositeSloMemberRemoveButton-${index}`}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
