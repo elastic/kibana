@@ -28,6 +28,7 @@ import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { ConfirmRuleClose } from '../confirm_rule_close';
 import { serializeFormToYaml, parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
+import { mergeArtifactsByType, splitArtifactsByType } from '../../form/utils/artifact_mappers';
 import type { ComposeFormValues, RuleQuery } from './compose_form_types';
 import { getBreachQuery } from './compose_form_types';
 import {
@@ -179,7 +180,7 @@ const formValuesFromYamlToCompose = (parsed: FormValues): ComposeFormValues => (
   stateTransition: parsed.stateTransition,
   stateTransitionAlertDelayMode: parsed.stateTransitionAlertDelayMode,
   stateTransitionRecoveryDelayMode: parsed.stateTransitionRecoveryDelayMode,
-  artifacts: parsed.artifacts,
+  ...splitArtifactsByType(parsed.artifacts),
 });
 
 /** Compose form → legacy FormValues for YAML serialization via yaml_form_utils. */
@@ -197,7 +198,7 @@ const composeFormValuesForYamlSerialize = (compose: ComposeFormValues): FormValu
     stateTransition: compose.stateTransition,
     stateTransitionAlertDelayMode: compose.stateTransitionAlertDelayMode,
     stateTransitionRecoveryDelayMode: compose.stateTransitionRecoveryDelayMode,
-    artifacts: compose.artifacts,
+    artifacts: mergeArtifactsByType(compose),
   };
 };
 
@@ -212,6 +213,8 @@ const EMPTY_FORM_VALUES: ComposeFormValues = {
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
+  runbookArtifacts: [],
+  dashboardArtifacts: [],
 };
 
 export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
