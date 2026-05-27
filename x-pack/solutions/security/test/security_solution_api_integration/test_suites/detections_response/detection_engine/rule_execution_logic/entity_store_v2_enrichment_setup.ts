@@ -42,6 +42,7 @@ export interface EnrichmentSetupConfig {
 export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['getService']) => {
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const log = getService('log');
 
   const setup = async (config: EnrichmentSetupConfig): Promise<void> => {
     const entityTypes: string[] = [];
