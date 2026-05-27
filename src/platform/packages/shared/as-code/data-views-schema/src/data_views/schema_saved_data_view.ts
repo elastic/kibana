@@ -68,7 +68,7 @@ export const savedDataViewSpecSchema = schema.object(
         meta: {
           title: 'Field filters',
           description:
-            'Field filters can be used to exclude one or more fields when fetching a document.',
+            "Field filters can be used to exclude one or more fields when fetching a document. They may contain wildcards, such as `user*` which filters fields starting with 'user'.",
         },
       })
     ),
