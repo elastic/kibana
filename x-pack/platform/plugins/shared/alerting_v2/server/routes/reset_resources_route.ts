@@ -66,6 +66,15 @@ export class ResetResourcesRoute extends BaseAlertingRoute {
     summary: 'Reset alerting v2 resources (temporary, pre-GA only)',
   } as const;
 
+  static validate = {
+    request: {},
+    response: {
+      204: {
+        description: 'Resources were reset successfully.',
+      },
+    },
+  } as const;
+
   protected readonly routeName = 'reset alerting v2 resources';
 
   constructor(

@@ -32,6 +32,7 @@ export const transformStorageDocumentToWorkflowDto = (
     managedBy: source.managedBy,
     definitionHash: source.definitionHash,
     originManagedWorkflowId: source.originManagedWorkflowId,
+    managedVersion: source.managedVersion,
     lifecycle: source.lifecycle,
     yaml: source.yaml,
     definition: source.definition,
@@ -72,6 +73,7 @@ export const transformStoragePartialToWorkflowDto = (
   if ('definitionHash' in source) dto.definitionHash = source.definitionHash;
   if ('originManagedWorkflowId' in source)
     dto.originManagedWorkflowId = source.originManagedWorkflowId;
+  if ('managedVersion' in source) dto.managedVersion = source.managedVersion;
   if ('lifecycle' in source) dto.lifecycle = source.lifecycle;
   if ('yaml' in source) dto.yaml = source.yaml;
   if ('definition' in source) dto.definition = source.definition;

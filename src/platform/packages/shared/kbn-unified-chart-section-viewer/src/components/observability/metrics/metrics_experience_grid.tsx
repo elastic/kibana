@@ -37,7 +37,6 @@ export const MetricsExperienceGrid = ({
   isTabSelected,
   breakdownField,
   onBreakdownFieldChange,
-  profileId,
 }: UnifiedMetricsGridProps) => {
   const {
     searchTerm,
@@ -46,6 +45,7 @@ export const MetricsExperienceGrid = ({
     onToggleFullscreen,
     selectedDimensions,
     onDimensionsChange,
+    profileId,
   } = useMetricsExperienceState();
 
   const {

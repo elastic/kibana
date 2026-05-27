@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { render, screen, waitFor } from '@testing-library/react';
+import { useForm, FormProvider, useFormContext } from 'react-hook-form';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createTestQueryClient, createMockServices } from '../../../test_utils';
@@ -30,6 +30,16 @@ jest.mock('../../../form/hooks/use_data_fields', () => ({
   useDataFields: jest.fn(() => ({ data: {} })),
 }));
 
+let getFormValues: (() => ComposeFormValues) | undefined;
+
+const CaptureFormGetValues = () => {
+  getFormValues = useFormContext<ComposeFormValues>().getValues;
+  return null;
+};
+
+const BASE_QUERY = 'FROM logs-*';
+const ALERT_BLOCK = '| WHERE count > 100';
+
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),
   ...overrides,
@@ -40,7 +50,11 @@ const BASE_COMPOSE_VALUES: ComposeFormValues = {
   metadata: { name: '', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: '' },
+  query: {
+    format: 'composed',
+    base: BASE_QUERY,
+    blocks: { breach: ALERT_BLOCK },
+  },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
 };
@@ -77,6 +91,7 @@ const renderAlertStep = (
   stateOverrides: Partial<ComposeDiscoverState> = {},
   formValueOverrides: Partial<ComposeFormValues> = {}
 ) => {
+  getFormValues = undefined;
   const state = createState({
     queryCommitted: true,
     ...stateOverrides,
@@ -86,12 +101,15 @@ const renderAlertStep = (
   const services = createMockServices();
 
   render(
-    <AlertConditionStep
-      state={state}
-      dispatch={dispatch}
-      services={services}
-      onKindChange={onKindChange}
-    />,
+    <>
+      <CaptureFormGetValues />
+      <AlertConditionStep
+        state={state}
+        dispatch={dispatch}
+        services={services}
+        onKindChange={onKindChange}
+      />
+    </>,
     { wrapper: createComposeFormWrapper(formValueOverrides, services) }
   );
 
@@ -99,6 +117,111 @@ const renderAlertStep = (
 };
 
 describe('AlertConditionStep', () => {
+  it('renders AlertDelayField when tracking is enabled', () => {
+    renderAlertStep({}, { kind: 'alert' });
+
+    expect(screen.getByTestId('alertDelayFormRow')).toBeTruthy();
+  });
+
+  it('does not render AlertDelayField when tracking is disabled', () => {
+    renderAlertStep(
+      {},
+      {
+        kind: 'signal',
+        query: { format: 'standalone', breach: `${BASE_QUERY}\n${ALERT_BLOCK}` },
+      }
+    );
+
+    expect(screen.queryByTestId('alertDelayFormRow')).toBeNull();
+  });
+
+  it('defaults to Immediate mode', () => {
+    renderAlertStep({}, { kind: 'alert', stateTransitionAlertDelayMode: 'immediate' });
+
+    expect(screen.getByTestId('stateTransitionImmediateDescription').textContent).toContain(
+      'No delay - Alerts on first breach'
+    );
+  });
+
+  it('renders Breaches controls when alert delay mode is breaches', () => {
+    renderAlertStep(
+      {},
+      {
+        stateTransitionAlertDelayMode: 'breaches',
+        stateTransition: { pendingCount: 5 },
+      }
+    );
+
+    expect(screen.getByTestId('stateTransitionCountInput')).toBeTruthy();
+  });
+
+  it('renders Duration controls when alert delay mode is duration', () => {
+    renderAlertStep(
+      {},
+      {
+        stateTransitionAlertDelayMode: 'duration',
+        stateTransition: { pendingTimeframe: '10m' },
+      }
+    );
+
+    expect(screen.getByTestId('stateTransitionTimeframeNumberInput')).toBeTruthy();
+  });
+
+  it('switches between Immediate, Breaches, Duration, and back to Immediate', () => {
+    renderAlertStep({}, { stateTransitionAlertDelayMode: 'immediate' });
+
+    const alertRow = screen.getByTestId('alertDelayFormRow');
+    fireEvent.click(within(alertRow).getByText('Breaches'));
+    expect(screen.getByTestId('stateTransitionCountInput')).toBeTruthy();
+
+    fireEvent.click(within(alertRow).getByText('Duration'));
+    expect(screen.getByTestId('stateTransitionTimeframeNumberInput')).toBeTruthy();
+
+    fireEvent.click(within(alertRow).getByText('Immediate'));
+    expect(screen.getByTestId('stateTransitionImmediateDescription')).toBeTruthy();
+    expect(screen.queryByTestId('stateTransitionCountInput')).toBeNull();
+    expect(screen.queryByTestId('stateTransitionTimeframeNumberInput')).toBeNull();
+  });
+
+  it('clears pending fields without affecting recovery fields when switching to Immediate', () => {
+    renderAlertStep(
+      {},
+      {
+        stateTransitionAlertDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'recoveries',
+        stateTransition: {
+          pendingCount: 2,
+          pendingTimeframe: null,
+          recoveringCount: 3,
+          recoveringTimeframe: null,
+        },
+      }
+    );
+
+    fireEvent.click(within(screen.getByTestId('alertDelayFormRow')).getByText('Immediate'));
+
+    const values = getFormValues!();
+    expect(values.stateTransition?.pendingCount).toBeNull();
+    expect(values.stateTransition?.pendingTimeframe).toBeNull();
+    expect(values.stateTransition?.recoveringCount).toBe(3);
+  });
+
+  it('uses default count when switching from immediate with pendingCount: 0 to breaches', () => {
+    renderAlertStep(
+      {},
+      {
+        stateTransitionAlertDelayMode: 'immediate',
+        stateTransition: { pendingCount: 0 },
+      }
+    );
+
+    fireEvent.click(within(screen.getByTestId('alertDelayFormRow')).getByText('Breaches'));
+
+    const values = getFormValues!();
+    expect(values.stateTransitionAlertDelayMode).toBe('breaches');
+    expect(values.stateTransition?.pendingCount).toBe(2);
+  });
+
   describe('group-by auto-population in tracking mode', () => {
     it('extracts BY columns from the base query (composed format)', async () => {
       renderAlertStep(

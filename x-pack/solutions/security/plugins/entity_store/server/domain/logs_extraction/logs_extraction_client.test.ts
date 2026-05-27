@@ -112,6 +112,7 @@ function createMockGlobalStateClient(
     lookbackPeriod: string;
     delay: string;
     maxTimeWindowSize: string;
+    maxLogsPerWindow: number;
     excludedIndexPatterns: string[];
     additionalIndexPatterns: string[];
   }>
@@ -125,6 +126,9 @@ function createMockGlobalStateClient(
     // Default to a very large cap so existing tests run as a single sub-window. The dedicated
     // sub-window cap describe block overrides this to exercise capping behavior.
     maxTimeWindowSize: logExtractionOverrides?.maxTimeWindowSize ?? '999d',
+    // Default to 0 (disabled) so volume-cap logic doesn't interfere with unrelated tests.
+    // The dedicated volume-cap describe block overrides this via setupVolCapTest.
+    maxLogsPerWindow: logExtractionOverrides?.maxLogsPerWindow ?? 0,
   });
   const state = { logsExtraction } as EntityStoreGlobalState;
   return {
@@ -975,9 +979,6 @@ describe('LogsExtractionClient', () => {
             ['2025-01-15T11:00:01.000Z', 'hash2', '2025-01-15T11:00:01.000Z', 'entity2'],
           ],
         };
-        // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1.
-        // Probe LIMIT 1 → total_logs = 1 → sliceLogCount = 1.
-        // totalLogs = 1 >= maxLogsPerWindow=1 → cap fires.
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
         mockExtractSuccessSequence(mainExtractionResponse, 1);
         mockIngestEntities.mockResolvedValue(undefined);
@@ -1014,9 +1015,6 @@ describe('LogsExtractionClient', () => {
             ['2025-01-15T11:00:01.000Z', 'hash2', '2025-01-15T11:00:01.000Z', 'entity2'],
           ],
         };
-        // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1.
-        // Probe LIMIT 1 → total_logs = 1 → sliceLogCount = 1.
-        // totalLogs = 1 >= maxLogsPerWindow=1 → cap fires.
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'drop' });
         mockExtractSuccessSequence(mainExtractionResponse, 1);
         mockIngestEntities.mockResolvedValue(undefined);
@@ -1108,7 +1106,6 @@ describe('LogsExtractionClient', () => {
         expect(result.success).toBe(true);
         if (!result.success) return;
         expect(result.logsCapApplied).toBe(true);
-        // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1 → sliceLogCount = 1
         expect(result.logsProcessed).toBe(1);
         // defer: lastSearchTimestamp is where the loop stopped, NOT the window end
         expect(result.lastSearchTimestamp).toBe(lastPageTimestamp);
@@ -1142,7 +1139,6 @@ describe('LogsExtractionClient', () => {
         expect(result.success).toBe(true);
         if (!result.success) return;
         expect(result.logsCapApplied).toBe(true);
-        // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1 → sliceLogCount = 1
         expect(result.logsProcessed).toBe(1);
         // drop: lastSearchTimestamp is advanced to the window end
         expect(result.lastSearchTimestamp).toBe(toDateISO);
