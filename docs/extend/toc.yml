@@ -31,6 +31,7 @@ toc:
           - file: saved-objects/create.md
           - file: saved-objects/update.md
           - file: saved-objects/validate.md
+          - file: saved-objects/troubleshooting.md
           - file: saved-objects/delete.md
           - file: saved-objects/use.md
           - file: saved-objects/export.md
