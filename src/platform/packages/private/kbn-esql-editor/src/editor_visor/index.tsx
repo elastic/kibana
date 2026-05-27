@@ -13,8 +13,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
-  useEuiTheme,
+  EuiToolTip,
   type EuiComboBoxOptionOption,
+  useEuiTheme,
 } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -360,16 +361,18 @@ export function QuickSearchVisor({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={styles.closeButtonWrapper}>
-        <EuiButtonIcon
-          color="text"
-          display="base"
-          size="s"
-          iconSize="m"
-          onClick={onToggleVisor}
-          iconType="cross"
-          aria-label={closeButtonAriaLabel}
-          css={styles.closeButton}
-        />
+        <EuiToolTip content={closeButtonAriaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            color="text"
+            display="base"
+            size="s"
+            iconSize="m"
+            onClick={onToggleVisor}
+            iconType="cross"
+            aria-label={closeButtonAriaLabel}
+            css={styles.closeButton}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
