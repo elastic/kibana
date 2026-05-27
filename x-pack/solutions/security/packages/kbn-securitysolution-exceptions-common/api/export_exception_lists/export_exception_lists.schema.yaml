@@ -17,6 +17,7 @@ paths:
           description: Filters the returned results according to the KQL query string
           schema:
             type: string
+            maxLength: 10000
         - name: include_expired_exceptions
           in: query
           required: true

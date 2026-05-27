@@ -23,7 +23,7 @@ export const ExportExceptionListsRequestQuery = lazySchema(() =>
     /**
      * Filters the returned results according to the KQL query string
      */
-    filter: z.string().optional(),
+    filter: z.string().max(10000).optional(),
     /**
      * Determines whether to include expired exceptions in the exported list. Expiration date defined by `expire_time`.
      */
