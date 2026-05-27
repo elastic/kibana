@@ -31,7 +31,11 @@ import {
   mockRenderingSetupDeps,
   mockRenderingStartDeps,
 } from './test_helpers/params';
-import type { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
+import type {
+  InternalRenderingServicePreboot,
+  InternalRenderingServiceSetup,
+  RenderingResponse,
+} from './types';
 import { RenderingService, DEFAULT_THEME_NAME_FEATURE_FLAG } from './rendering_service';
 import { AuthStatus } from '@kbn/core-http-server';
 import type { ThemeName } from '@kbn/core-ui-settings-common';
@@ -800,8 +804,8 @@ describe('RenderingService', () => {
   });
 
   describe('userStorage injection', () => {
-    const renderAndReadUserStorage = async (content: string) => {
-      const dom = load(content);
+    const renderAndReadUserStorage = async (content: RenderingResponse) => {
+      const dom = load(content.body);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
       return data.userStorage;
     };
