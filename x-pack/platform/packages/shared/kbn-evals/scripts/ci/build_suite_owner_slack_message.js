@@ -13,7 +13,7 @@ const { join } = require('path');
 const { fromRoot } = require('./repo_root');
 const {
   writeMinimalFailureContext,
-  resolveTriageConnectorId,
+  resolveEvaluationConnectorId,
 } = require('./failure_context_helpers');
 const { summarizeFailuresWithJudge } = require('./summarize_failures_with_judge');
 
@@ -96,7 +96,7 @@ async function collectFailureContext(contextPath) {
 }
 
 async function main() {
-  const judgeId = resolveTriageConnectorId() || 'unknown';
+  const judgeId = resolveEvaluationConnectorId() || 'unknown';
   const tempDir = mkdtempSync(join(tmpdir(), 'kbn-evals-slack-'));
   const contextPath = join(tempDir, 'failure-context.json');
 

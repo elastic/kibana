@@ -6,6 +6,7 @@
  * 2.0.
  */
 
+const { execFileSync } = require('child_process');
 const { writeFileSync } = require('fs');
 const { suiteKeySafe } = require('./suite_key_safe');
 
@@ -345,32 +346,57 @@ function writeMinimalFailureContext(outputPath, options) {
 }
 
 /**
+ * @param {string} suiteId
  * @returns {string}
  */
-function resolveEvaluationConnectorId() {
+function evaluationConnectorMetadataKey(suiteId) {
+  return `kbn-evals:evaluation-connector-id:${suiteKeySafe(suiteId)}`;
+}
+
+/**
+ * @param {string} metadataKey
+ * @returns {string}
+ */
+function readBuildkiteMetadata(metadataKey) {
+  try {
+    const stdout = execFileSync(
+      'buildkite-agent',
+      ['meta-data', 'get', metadataKey, '--default', ''],
+      {
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'ignore'],
+      }
+    );
+    return String(stdout).trim();
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Same resolution order as eval LLM-as-a-judge: env, build metadata, vault.
+ *
+ * @param {{ readMetadata?: (key: string) => string }} [options]
+ * @returns {string}
+ */
+function resolveEvaluationConnectorId(options = {}) {
+  const readMetadata = options.readMetadata ?? readBuildkiteMetadata;
+
   const fromEnv = process.env.EVALUATION_CONNECTOR_ID || '';
   if (fromEnv) {
     return fromEnv;
   }
 
-  const config = parseVaultConfig();
-  return typeof config?.evaluationConnectorId === 'string' ? config.evaluationConnectorId : '';
-}
-
-/**
- * Prefer the vault judge for triage (stable LiteLLM) over per-step env overrides.
- *
- * @returns {string}
- */
-function resolveTriageConnectorId() {
-  const config = parseVaultConfig();
-  const vaultId =
-    typeof config?.evaluationConnectorId === 'string' ? config.evaluationConnectorId : '';
-  if (vaultId) {
-    return vaultId;
+  const suiteId = process.env.EVAL_SUITE_ID || '';
+  if (suiteId) {
+    const fromMetadata = readMetadata(evaluationConnectorMetadataKey(suiteId));
+    if (fromMetadata) {
+      return fromMetadata;
+    }
   }
 
-  return process.env.KBN_EVALS_EVALUATION_CONNECTOR_ID || process.env.EVALUATION_CONNECTOR_ID || '';
+  const config = parseVaultConfig();
+  return typeof config?.evaluationConnectorId === 'string' ? config.evaluationConnectorId : '';
 }
 
 /**
@@ -479,8 +505,9 @@ module.exports = {
   connectorIdToLitellmModel,
   buildLitellmConnectorFromVault,
   writeMinimalFailureContext,
+  evaluationConnectorMetadataKey,
+  readBuildkiteMetadata,
   resolveEvaluationConnectorId,
-  resolveTriageConnectorId,
   buildEisChatRequest,
   parseEisStreamResponse,
   parseLitellmChatContent,

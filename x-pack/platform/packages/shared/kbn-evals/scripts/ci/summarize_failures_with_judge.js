@@ -11,7 +11,7 @@ const {
   buildTriageUserPrompt,
   buildLitellmChatRequest,
   buildLitellmConnectorFromVault,
-  resolveTriageConnectorId,
+  resolveEvaluationConnectorId,
   buildEisChatRequest,
   parseEisStreamResponse,
   parseLitellmChatContent,
@@ -83,7 +83,7 @@ async function postForContent(url, headers, body, options = {}) {
  * @returns {Promise<{ summary: string; judgeId: string }>}
  */
 async function summarizeFailuresWithJudge(contextPath) {
-  const evaluationConnectorId = resolveTriageConnectorId();
+  const evaluationConnectorId = resolveEvaluationConnectorId();
   if (!evaluationConnectorId) {
     throw new Error(
       'evaluationConnectorId is required for judge triage (vault config or EVALUATION_CONNECTOR_ID)'

@@ -166,6 +166,11 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
       # to avoid recursive fanout.
       group_key_safe="$(printf '%s' "$EVAL_SUITE_ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
 
+      if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]]; then
+        buildkite-agent meta-data set "kbn-evals:evaluation-connector-id:${group_key_safe}" \
+          "${EVALUATION_CONNECTOR_ID}" >/dev/null 2>&1 || true
+      fi
+
       # NOTE: Avoid building YAML via command substitution, because it strips trailing newlines.
       # That can accidentally concatenate lines (producing invalid YAML) when appending blocks.
       FANOUT_PIPELINE_FILE="$(mktemp -t kbn-evals-fanout.XXXXXX.yml)"
