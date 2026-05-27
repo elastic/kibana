@@ -166,6 +166,8 @@ describe('Features Plugin', () => {
                 "all": Array [
                   "one",
                   "telemetry",
+                  "user-storage",
+                  "user-storage-global",
                 ],
                 "read": Array [
                   "two",
@@ -191,6 +193,8 @@ describe('Features Plugin', () => {
                   "url",
                   "tag",
                   "cloud",
+                  "user-storage",
+                  "user-storage-global",
                 ],
               },
               "ui": Array [],

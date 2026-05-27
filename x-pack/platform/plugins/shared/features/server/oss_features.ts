@@ -231,31 +231,31 @@ export const buildOSSFeatures = ({
     {
       id: 'data_source_management',
       name: i18n.translate('xpack.features.dataSourceManagementFeatureName', {
-        defaultMessage: 'Data source management',
+        defaultMessage: 'External data sets',
       }),
       order: 1601,
       category: DEFAULT_APP_CATEGORIES.management,
       app: ['kibana'],
       catalogue: [],
       management: {
-        kibana: ['data_source_management'],
+        data: ['data_source_management'],
       },
       privileges: {
         all: {
           app: ['kibana'],
           management: {
-            kibana: ['data_source_management'],
+            data: ['data_source_management'],
           },
           savedObject: {
             all: [],
             read: [],
           },
-          ui: [],
+          ui: ['save'],
         },
         read: {
           app: ['kibana'],
           management: {
-            kibana: ['data_source_management'],
+            data: ['data_source_management'],
           },
           savedObject: {
             all: [],

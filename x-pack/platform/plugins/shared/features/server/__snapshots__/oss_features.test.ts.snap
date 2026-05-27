@@ -1384,7 +1384,7 @@ Array [
         "kibana",
       ],
       "management": Object {
-        "kibana": Array [
+        "data": Array [
           "data_source_management",
         ],
       },
@@ -1392,7 +1392,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "ui": Array [],
+      "ui": Array [
+        "save",
+      ],
     },
     "privilegeId": "all",
   },
@@ -1402,7 +1404,7 @@ Array [
         "kibana",
       ],
       "management": Object {
-        "kibana": Array [
+        "data": Array [
           "data_source_management",
         ],
       },
@@ -2584,7 +2586,7 @@ Array [
         "kibana",
       ],
       "management": Object {
-        "kibana": Array [
+        "data": Array [
           "data_source_management",
         ],
       },
@@ -2592,7 +2594,9 @@ Array [
         "all": Array [],
         "read": Array [],
       },
-      "ui": Array [],
+      "ui": Array [
+        "save",
+      ],
     },
     "privilegeId": "all",
   },
@@ -2602,7 +2606,7 @@ Array [
         "kibana",
       ],
       "management": Object {
-        "kibana": Array [
+        "data": Array [
           "data_source_management",
         ],
       },

@@ -13,7 +13,9 @@
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/management-plugin",
+    "@kbn/shared-ux-router",
     "@kbn/i18n",
+    "@kbn/i18n-react",
     "@elastic/eui"
   ],
   "exclude": [
