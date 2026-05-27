@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { mount, shallow, type ComponentType as EnzymeComponentType } from 'enzyme';
-import { act } from '@testing-library/react';
+import { render, screen, waitFor, within, fireEvent, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { StepAboutRule, StepAboutRuleReadOnly } from '.';
@@ -15,16 +15,13 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { mockAboutStepRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
-import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
 import type { AboutStepRule, DefineStepRule } from '../../../common/types';
 import { DataSourceType, AlertSuppressionDurationType } from '../../../common/types';
-import { fillEmptySeverityMappings } from '../../../common/helpers';
 import { TestProviders } from '../../../../common/mock';
 import { useRuleForms } from '../../pages/form';
 import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { defaultSchedule, stepDefineDefaultValue } from '../../../common/utils';
-import type { FormHook } from '../../../../shared_imports';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
@@ -91,16 +88,15 @@ export const stepDefineStepMLRule: DefineStepRule = {
   shouldLoadQueryDynamically: false,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/235182
-describe.skip('StepAboutRuleComponent', () => {
+describe('StepAboutRuleComponent', () => {
   let useGetInstalledJobMock: jest.Mock;
   let useSecurityJobsMock: jest.Mock;
   const TestComp = ({
-    setFormRef,
     defineStepDefaultOverride,
+    onSubmit,
   }: {
-    setFormRef: (form: FormHook<AboutStepRule, AboutStepRule>) => void;
     defineStepDefaultOverride?: DefineStepRule;
+    onSubmit?: (data: AboutStepRule, isValid: boolean) => void;
   }) => {
     const defineStepDefault = defineStepDefaultOverride ?? stepDefineDefaultValue;
     const aboutStepDefault = stepAboutDefaultValue;
@@ -111,18 +107,29 @@ describe.skip('StepAboutRuleComponent', () => {
       actionsStepDefault: stepActionsDefaultValue,
     });
 
-    setFormRef(aboutStepForm);
-
     return (
-      <StepAboutRule
-        ruleType={defineStepDefault.ruleType}
-        machineLearningJobId={defineStepDefault.machineLearningJobId}
-        index={defineStepDefault.index}
-        dataViewId={defineStepDefault.dataViewId}
-        timestampOverride={aboutStepDefault.timestampOverride}
-        isLoading={false}
-        form={aboutStepForm}
-      />
+      <>
+        <StepAboutRule
+          ruleType={defineStepDefault.ruleType}
+          machineLearningJobId={defineStepDefault.machineLearningJobId}
+          index={defineStepDefault.index}
+          dataViewId={defineStepDefault.dataViewId}
+          timestampOverride={aboutStepDefault.timestampOverride}
+          isLoading={false}
+          form={aboutStepForm}
+        />
+        <button
+          type="button"
+          onClick={async () => {
+            const result = await aboutStepForm.submit();
+            if (onSubmit && result) {
+              onSubmit(result.data, result.isValid);
+            }
+          }}
+        >
+          {'Submit'}
+        </button>
+      </>
     );
   };
 
@@ -152,16 +159,17 @@ describe.skip('StepAboutRuleComponent', () => {
     }));
   });
 
-  it('it renders StepRuleDescription if isReadOnlyView is true and "name" property exists', () => {
-    const wrapper = shallow(
+  it('renders StepRuleDescription if isReadOnlyView is true and "name" property exists', () => {
+    render(
       <StepAboutRuleReadOnly
         addPadding={false}
         defaultValues={mockAboutStepRule()}
         descriptionColumns="multi"
-      />
+      />,
+      { wrapper: TestProviders }
     );
 
-    expect(wrapper.find(StepRuleDescription).exists()).toBeTruthy();
+    expect(screen.getAllByTestId('listItemColumnStepRuleDescription').length).toBeGreaterThan(0);
   });
 
   it('shows endpoint exceptions for rule definition if they are not per-policy', async () => {
@@ -169,16 +177,11 @@ describe.skip('StepAboutRuleComponent', () => {
       data: { status: false },
     }));
 
-    const wrapper = mount(<TestComp setFormRef={() => {}} />, {
-      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-    });
-    await act(async () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="detectionEngineStepAboutRuleAssociatedToEndpointList"]')
-          .exists()
-      ).toBeTruthy();
-    });
+    render(<TestComp />, { wrapper: TestProviders });
+
+    expect(
+      screen.getByTestId('detectionEngineStepAboutRuleAssociatedToEndpointList')
+    ).toBeInTheDocument();
   });
 
   it('does not show endpoint exceptions for rule definition if they are per-policy', async () => {
@@ -186,322 +189,228 @@ describe.skip('StepAboutRuleComponent', () => {
       data: { status: true },
     }));
 
-    const wrapper = mount(<TestComp setFormRef={() => {}} />, {
-      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-    });
-    await act(async () => {
-      expect(
-        wrapper
-          .find('[data-test-subj="detectionEngineStepAboutRuleAssociatedToEndpointList"]')
-          .exists()
-      ).toBeFalsy();
-    });
+    render(<TestComp />, { wrapper: TestProviders });
+
+    expect(
+      screen.queryByTestId('detectionEngineStepAboutRuleAssociatedToEndpointList')
+    ).not.toBeInTheDocument();
   });
 
   it('is invalid if description is not present', async () => {
-    let form: FormHook<AboutStepRule, AboutStepRule>;
-    const wrapper = mount(
-      <TestComp
-        setFormRef={(newForm) => {
-          form = newForm;
-        }}
-      />,
-      {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-      }
+    render(<TestComp />, { wrapper: TestProviders });
+
+    await userEvent.type(
+      within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
+      'Test name text'
     );
 
-    await act(async () => {
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-        .first()
-        .simulate('change', { target: { value: 'Test name text' } });
+    await submitForm();
 
-      const result = await form.validate();
-      expect(result).toEqual(false);
+    await waitFor(() => {
+      expect(screen.getByText('A description is required.')).toBeInTheDocument();
     });
   });
 
   it('is invalid if threat match rule and threat_indicator_path is not present', async () => {
-    let form: FormHook<AboutStepRule, AboutStepRule>;
-    const wrapper = mount(
-      <TestComp
-        setFormRef={(newForm) => {
-          form = newForm;
-        }}
-        defineStepDefaultOverride={{ ruleType: 'threat_match' } as DefineStepRule}
-      />,
-      {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-      }
+    render(
+      <TestComp defineStepDefaultOverride={{ ruleType: 'threat_match' } as DefineStepRule} />,
+      { wrapper: TestProviders }
     );
 
-    await act(async () => {
-      wrapper
-        .find('[data-test-subj="ruleThreatMatchIndicatorPath"] input')
-        .first()
-        .simulate('change', { target: { value: '' } });
+    await userEvent.clear(
+      within(screen.getByTestId('ruleThreatMatchIndicatorPath')).getByRole('textbox')
+    );
 
-      const result = await form.validate();
-      expect(result).toEqual(false);
+    await submitForm();
+
+    await waitFor(() => {
+      expect(screen.getByText('Indicator prefix override must not be empty')).toBeInTheDocument();
     });
   });
 
   it('is valid if is not a threat match rule and threat_indicator_path is not present', async () => {
-    let form: FormHook<AboutStepRule, AboutStepRule>;
-    const wrapper = mount(
-      <TestComp
-        setFormRef={(newForm) => {
-          form = newForm;
-        }}
-      />,
-      {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-      }
+    render(<TestComp />, { wrapper: TestProviders });
+
+    await userEvent.type(
+      within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
+      'Test description text'
+    );
+    await userEvent.type(
+      within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
+      'Test name text'
     );
 
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-      .first()
-      .simulate('change', { target: { value: 'Test description text' } });
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-      .first()
-      .simulate('change', { target: { value: 'Test name text' } });
+    await submitForm();
 
-    await act(async () => {
-      const result = await form.validate();
-      expect(result).toEqual(true);
+    await waitFor(() => {
+      expect(
+        screen.queryByText('Indicator prefix override must not be empty')
+      ).not.toBeInTheDocument();
     });
   });
 
   it('is invalid if no "name" is present', async () => {
-    let form: FormHook<AboutStepRule, AboutStepRule>;
-    const wrapper = mount(
-      <TestComp
-        setFormRef={(newForm) => {
-          form = newForm;
-        }}
-      />,
-      {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-      }
+    render(<TestComp />, { wrapper: TestProviders });
+
+    await userEvent.type(
+      within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
+      'Test description text'
     );
 
-    await act(async () => {
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-        .first()
-        .simulate('change', { target: { value: 'Test description text' } });
-      const result = await form.validate();
-      expect(result).toEqual(false);
+    await submitForm();
+
+    await waitFor(() => {
+      expect(screen.getByText('A name is required.')).toBeInTheDocument();
     });
   });
 
   it('is valid if both "name" and "description" are present', async () => {
-    let form: FormHook<AboutStepRule, AboutStepRule>;
-    const wrapper = mount(
-      <TestComp
-        setFormRef={(newForm) => {
-          form = newForm;
-        }}
-      />,
-      {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-      }
+    const handleSubmit = jest.fn();
+
+    render(<TestComp onSubmit={handleSubmit} />, { wrapper: TestProviders });
+
+    await userEvent.type(
+      within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
+      'Test description text'
+    );
+    await userEvent.type(
+      within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
+      'Test name text'
     );
 
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-      .first()
-      .simulate('change', { target: { value: 'Test description text' } });
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-      .first()
-      .simulate('change', { target: { value: 'Test name text' } });
+    await submitForm();
 
-    const expected: AboutStepRule = {
-      author: [],
-      isAssociatedToEndpointList: false,
-      isBuildingBlock: false,
-      license: '',
-      ruleNameOverride: '',
-      timestampOverride: '',
-      description: 'Test description text',
-      falsePositives: [''],
-      name: 'Test name text',
-      note: '',
-      setup: '',
-      references: [''],
-      riskScore: { value: 21, mapping: [], isMappingChecked: false },
-      severity: {
-        value: 'low',
-        mapping: fillEmptySeverityMappings([]),
-        isMappingChecked: false,
-      },
-      tags: [],
-      threat: [
-        {
-          framework: 'MITRE ATT&CK',
-          tactic: { id: 'none', name: 'none', reference: 'none' },
-          technique: [],
-        },
-      ],
-      investigationFields: [],
-      maxSignals: 100,
-    };
-
-    await act(async () => {
-      const result = await form.submit();
-      expect(result?.isValid).toEqual(true);
-      expect(result?.data).toEqual(expected);
+    await waitFor(() => {
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Test name text',
+          description: 'Test description text',
+          riskScore: expect.objectContaining({ value: 21 }),
+          severity: expect.objectContaining({ value: 'low' }),
+        }),
+        true
+      );
     });
   });
 
   it('it allows user to set the risk score as a number (and not a string)', async () => {
-    let form: FormHook<AboutStepRule, AboutStepRule>;
-    const wrapper = mount(
-      <TestComp
-        setFormRef={(newForm) => {
-          form = newForm;
-        }}
-      />,
-      {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-      }
+    const handleSubmit = jest.fn();
+
+    render(<TestComp onSubmit={handleSubmit} />, { wrapper: TestProviders });
+
+    await userEvent.type(
+      within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
+      'Test name text'
+    );
+    await userEvent.type(
+      within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
+      'Test description text'
+    );
+    await userEvent.clear(
+      within(screen.getByTestId('detectionEngineStepAboutRuleRiskScore-defaultRisk')).getByRole(
+        'spinbutton'
+      )
+    );
+    await userEvent.type(
+      within(screen.getByTestId('detectionEngineStepAboutRuleRiskScore-defaultRisk')).getByRole(
+        'spinbutton'
+      ),
+      '80'
     );
 
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-      .first()
-      .simulate('change', { target: { value: 'Test name text' } });
+    await submitForm();
 
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-      .first()
-      .simulate('change', { target: { value: 'Test description text' } });
-
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRisk"] input')
-      .first()
-      .simulate('change', { target: { value: '80' } });
-
-    const expected: AboutStepRule = {
-      author: [],
-      isAssociatedToEndpointList: false,
-      isBuildingBlock: false,
-      license: '',
-      ruleNameOverride: '',
-      timestampOverride: '',
-      description: 'Test description text',
-      falsePositives: [''],
-      name: 'Test name text',
-      note: '',
-      setup: '',
-      references: [''],
-      riskScore: { value: 80, mapping: [], isMappingChecked: false },
-      severity: {
-        value: 'low',
-        mapping: fillEmptySeverityMappings([]),
-        isMappingChecked: false,
-      },
-      tags: [],
-      threat: [
-        {
-          framework: 'MITRE ATT&CK',
-          tactic: { id: 'none', name: 'none', reference: 'none' },
-          technique: [],
-        },
-      ],
-      investigationFields: [],
-      maxSignals: 100,
-    };
-
-    await act(async () => {
-      const result = await form.submit();
-      expect(result?.isValid).toEqual(true);
-      expect(result?.data).toEqual(expected);
+    await waitFor(() => {
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Test name text',
+          description: 'Test description text',
+          riskScore: expect.objectContaining({ value: 80 }),
+        }),
+        true
+      );
     });
   });
 
   it('does not modify the provided risk score until the user changes the severity', async () => {
-    let form: FormHook<AboutStepRule, AboutStepRule>;
-    const wrapper = mount(
-      <TestComp
-        setFormRef={(newForm) => {
-          form = newForm;
-        }}
-      />,
-      {
-        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
-      }
+    const handleSubmit = jest.fn();
+
+    render(<TestComp onSubmit={handleSubmit} />, { wrapper: TestProviders });
+
+    await userEvent.type(
+      within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
+      'Test name text'
+    );
+    await userEvent.type(
+      within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
+      'Test description text'
     );
 
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleName"] input')
-      .first()
-      .simulate('change', { target: { value: 'Test name text' } });
+    await submitForm();
 
-    wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleDescription"] textarea')
-      .first()
-      .simulate('change', { target: { value: 'Test description text' } });
+    await waitFor(() => {
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ riskScore: expect.objectContaining({ value: 21 }) }),
+        true
+      );
+    });
 
-    await act(async () => {
-      const result = await form.submit();
-      expect(result?.isValid).toEqual(true);
-      expect(result?.data?.riskScore.value).toEqual(21);
+    handleSubmit.mockClear();
 
-      wrapper
-        .find('[data-test-subj="detectionEngineStepAboutRuleSeverity"] [data-test-subj="select"]')
-        .last()
-        .simulate('click');
-      wrapper.find('button#medium').simulate('click');
+    await userEvent.click(
+      within(screen.getByTestId('detectionEngineStepAboutRuleSeverity')).getByTestId('select')
+    );
+    await userEvent.click(screen.getByRole('option', { name: /medium/i }));
 
-      const result2 = await form.submit();
-      expect(result2?.isValid).toEqual(true);
-      expect(result2?.data?.riskScore.value).toEqual(47);
+    await submitForm();
+
+    await waitFor(() => {
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ riskScore: expect.objectContaining({ value: 47 }) }),
+        true
+      );
     });
   });
 
   it('should use index based on ML jobs when creating/editing ML rule', async () => {
     (useFetchIndex as jest.Mock).mockClear();
-    useSecurityJobsMock.mockImplementation(() => {
-      return {
-        jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip_ea', isInstalled: true }],
-        loading: false,
-      };
-    });
+    useSecurityJobsMock.mockImplementation(() => ({
+      jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip_ea', isInstalled: true }],
+      loading: false,
+    }));
     useGetInstalledJobMock.mockImplementation((jobIds: string[]) => {
       expect(jobIds).toEqual(['auth_high_count_logon_events_for_a_source_ip_ea']);
       return { jobs: [{ results_index_name: 'shared' }] };
     });
 
-    mount(<TestComp setFormRef={() => {}} defineStepDefaultOverride={stepDefineStepMLRule} />, {
-      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+    render(<TestComp defineStepDefaultOverride={stepDefineStepMLRule} />, {
+      wrapper: TestProviders,
     });
 
-    const indexNames = ['.ml-anomalies-shared'];
-    expect(useFetchIndex).lastCalledWith(indexNames);
+    expect(useFetchIndex).toHaveBeenLastCalledWith(['.ml-anomalies-shared']);
   });
 
   it('should use default rule index if selected ML jobs are not installed when creating/editing ML rule', async () => {
     (useFetchIndex as jest.Mock).mockClear();
-    useSecurityJobsMock.mockImplementation(() => {
-      return {
-        jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip_ea', isInstalled: false }],
-        loading: false,
-      };
-    });
+    useSecurityJobsMock.mockImplementation(() => ({
+      jobs: [{ id: 'auth_high_count_logon_events_for_a_source_ip_ea', isInstalled: false }],
+      loading: false,
+    }));
     useGetInstalledJobMock.mockImplementation((jobIds: string[]) => {
       expect(jobIds).toEqual([]);
       return { jobs: [] };
     });
 
-    mount(<TestComp setFormRef={() => {}} defineStepDefaultOverride={stepDefineStepMLRule} />, {
-      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
+    render(<TestComp defineStepDefaultOverride={stepDefineStepMLRule} />, {
+      wrapper: TestProviders,
     });
 
-    expect(useFetchIndex).lastCalledWith(stepDefineStepMLRule.index);
+    expect(useFetchIndex).toHaveBeenLastCalledWith(stepDefineStepMLRule.index);
   });
 });
+
+function submitForm(): Promise<void> {
+  return act(async () => {
+    fireEvent.click(screen.getByText('Submit'));
+  });
+}
