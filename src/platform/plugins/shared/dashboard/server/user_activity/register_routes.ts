@@ -23,13 +23,13 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
       validate: {
         params: schema.object({
           type: schema.oneOf([schema.literal('view'), schema.literal('refresh')]),
-          id: schema.string(),
+          id: schema.string({ maxLength: 100 }),
         }),
         body: schema.object({
-          title: schema.string(),
+          title: schema.string({ maxLength: 100 }),
           start: schema.number(),
           end: schema.number(),
-          tags: schema.arrayOf(schema.string(), { maxSize: 100 }),
+          tags: schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 }),
           meta: schema.maybe(
             schema.object({
               time_range: schema.maybe(timeRangeSchema),
@@ -42,7 +42,10 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
               ),
               panel_count: schema.number(),
               errors: schema.arrayOf(
-                schema.object({ panel_id: schema.string(), error: schema.string() }),
+                schema.object({
+                  panel_id: schema.string({ maxLength: 100 }),
+                  error: schema.string(),
+                }),
                 {
                   maxSize: 100,
                 }
