@@ -10,29 +10,14 @@ import { z } from '@kbn/zod/v4';
 export const ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH =
   '/internal/security_solution/alert_analysis/related_alerts';
 
-export const RELATED_ALERT_ID_MAX_LENGTH = 512;
-export const RELATED_ALERT_ENTITY_VALUE_MAX_LENGTH = 256;
-export const RELATED_ALERT_IP_MAX_LENGTH = 45;
-export const RELATED_ALERT_ENTITY_LIST_MAX_LENGTH = 100;
-
-export const relatedAlertIdSchema = z.string().max(RELATED_ALERT_ID_MAX_LENGTH);
-export const relatedAlertEntityNameSchema = z.string().max(RELATED_ALERT_ENTITY_VALUE_MAX_LENGTH);
-export const relatedAlertIpSchema = z.string().max(RELATED_ALERT_IP_MAX_LENGTH);
-
 export const relatedAlertsRequestSchema = z.object({
-  alertId: relatedAlertIdSchema.describe('The _id of the alert to correlate'),
+  alertId: z.string().describe('The _id of the alert to correlate'),
   timeWindowHours: z.number().min(1).max(168).default(24),
   maxResults: z.number().min(1).max(100).default(25),
-  hostNames: z
-    .array(relatedAlertEntityNameSchema)
-    .max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH)
-    .optional(),
-  userNames: z
-    .array(relatedAlertEntityNameSchema)
-    .max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH)
-    .optional(),
-  sourceIps: z.array(relatedAlertIpSchema).max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH).optional(),
-  destIps: z.array(relatedAlertIpSchema).max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH).optional(),
+  hostNames: z.array(z.string()).optional(),
+  userNames: z.array(z.string()).optional(),
+  sourceIps: z.array(z.string()).optional(),
+  destIps: z.array(z.string()).optional(),
 });
 
 export type RelatedAlertsRequest = z.infer<typeof relatedAlertsRequestSchema>;

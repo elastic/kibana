@@ -16,18 +16,12 @@ import {
 } from '../../tools';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import {
-  RELATED_ALERT_ENTITY_LIST_MAX_LENGTH,
-  relatedAlertEntityNameSchema,
-  relatedAlertIdSchema,
-  relatedAlertIpSchema,
-} from '../../../../common/api/alert_analysis/related_alerts';
-import {
   findRelatedAlerts,
   RELATED_ALERTS_INLINE_MAX_RESULTS,
 } from '../../../lib/alert_analysis/services/find_related_alerts';
 
 const getRelatedAlertsSchema = z.object({
-  alertId: relatedAlertIdSchema.describe('The _id of the alert to find related alerts for'),
+  alertId: z.string().describe('The _id of the alert to find related alerts for'),
   timeWindowHours: z
     .number()
     .min(1)
@@ -35,29 +29,25 @@ const getRelatedAlertsSchema = z.object({
     .default(24)
     .describe('Time window in hours to search for related alerts (1-168, default 24)'),
   hostNames: z
-    .array(relatedAlertEntityNameSchema)
-    .max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH)
+    .array(z.string())
     .optional()
     .describe(
       'Optional: host.name values from the alert. If provided along with other entity fields, skips refetching the alert.'
     ),
   userNames: z
-    .array(relatedAlertEntityNameSchema)
-    .max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH)
+    .array(z.string())
     .optional()
     .describe(
       'Optional: user.name values from the alert. If provided along with other entity fields, skips refetching the alert.'
     ),
   sourceIps: z
-    .array(relatedAlertIpSchema)
-    .max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH)
+    .array(z.string())
     .optional()
     .describe(
       'Optional: source.ip values from the alert. If provided along with other entity fields, skips refetching the alert.'
     ),
   destIps: z
-    .array(relatedAlertIpSchema)
-    .max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH)
+    .array(z.string())
     .optional()
     .describe(
       'Optional: destination.ip values from the alert. If provided along with other entity fields, skips refetching the alert.'
