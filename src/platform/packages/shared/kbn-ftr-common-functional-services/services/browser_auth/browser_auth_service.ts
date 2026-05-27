@@ -104,6 +104,10 @@ export class BrowserAuthService extends FtrService {
 
     await this.cleanBrowserState();
 
+    // cleanBrowserState() wipes localStorage. Restore the flag that suppresses the
+    // welcome screen so it does not overlay the UI after the first navigation.
+    await this.browser.setLocalStorageItem('home:welcome:show', 'false');
+
     this.log.debug(`[browserAuth] injecting 'sid' cookie`);
     await this.browser.setCookie('sid', cookie.value);
 
