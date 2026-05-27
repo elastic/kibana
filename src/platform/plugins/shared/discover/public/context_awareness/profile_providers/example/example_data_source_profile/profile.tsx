@@ -35,9 +35,12 @@ import { CustomDocView } from './components/custom_doc_view';
 import { RestorableStateDocView } from './components/restorable_state_doc_view';
 import { COLOR_STATE_KEY, type ColorState } from '../../../profile_state';
 
-export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
-  formatRecord: (flattenedRecord: Record<string, unknown>) => string;
-}> => ({
+export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<
+  {
+    formatRecord: (flattenedRecord: Record<string, unknown>) => string;
+  },
+  ColorState
+> => ({
   profileId: 'example-data-source-profile',
   isExperimental: true,
   profile: {
@@ -390,6 +393,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       isMatch: true,
       context: {
         category: DataSourceCategory.Logs,
+        profileStateKey: COLOR_STATE_KEY,
         formatRecord: (record) => JSON.stringify(record, null, 2),
       },
     };

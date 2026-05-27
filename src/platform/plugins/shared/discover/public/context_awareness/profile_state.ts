@@ -11,7 +11,9 @@
 
 import type { Observable } from 'rxjs';
 
-export class ProfileStateKey<_TState extends object> {
+export class ProfileStateKey<TState extends object> {
+  private declare readonly __stateBrand: (_state: TState) => TState;
+
   private constructor(public readonly rawKey: string) {}
 
   static create<TState extends object>(rawKey: string): ProfileStateKey<TState> {
@@ -62,7 +64,10 @@ export class ProfileStateRegistry {
     if (this.stateDefinitions.has(definition.key.rawKey)) {
       throw new Error(`State with key ${definition.key.rawKey} is already registered.`);
     }
-    this.stateDefinitions.set(definition.key.rawKey, definition);
+    this.stateDefinitions.set(
+      definition.key.rawKey,
+      definition as ProfileStateDefinition<Record<string, unknown>>
+    );
   }
 
   public getDefinition<TState extends object>(
