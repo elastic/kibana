@@ -75,7 +75,7 @@ export const getXSeriesPoint = (
     if (xAccessor) {
       if (formattedDatatables[layer.layerId]?.formattedColumns[xAccessor]) {
         // stringify the value to compare with the chart value
-        return currentXFormatter.convert(row[xAccessor]) === value;
+        return currentXFormatter.convertToText(row[xAccessor]) === value;
       }
       return row[xAccessor] === value;
     }
@@ -142,7 +142,7 @@ export const getTooltipActions = (
               return i18n.translate('expressionXY.tooltipActions.filterForXSeries', {
                 defaultMessage: 'Filter for {value}',
                 values: {
-                  value: xAxisFormatter.convert(value) || value,
+                  value: xAxisFormatter.convertToText(value) || value,
                 },
               });
             },

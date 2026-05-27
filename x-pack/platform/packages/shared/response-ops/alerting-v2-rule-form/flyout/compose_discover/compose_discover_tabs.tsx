@@ -10,7 +10,7 @@ import { EuiTab, EuiTabs, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
-import type { QueryTab, SandboxTabConfig } from './types';
+import type { QueryTab } from './types';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LineNumbersType = monaco.editor.LineNumbersType;
@@ -24,7 +24,7 @@ interface ComposeDiscoverTabsProps {
   onRecoveryBlockChange: (val: string) => void;
   activeTab: QueryTab;
   onTabChange: (tab: QueryTab) => void;
-  tabConfig: SandboxTabConfig;
+  tabs: QueryTab[];
   onAlertEditorMount?: (editor: IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: IStandaloneCodeEditor) => void;
   /**
@@ -134,18 +134,6 @@ export const TAB_DEFINITIONS: Array<{ id: QueryTab; label: string }> = [
   },
 ];
 
-export function visibleTabIds(tabConfig: SandboxTabConfig): QueryTab[] {
-  switch (tabConfig.type) {
-    case 'base-alert':
-      return ['base', 'alert'];
-    case 'base-recovery':
-      return ['recovery'];
-    case 'single':
-    default:
-      return [];
-  }
-}
-
 export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   baseQuery,
   alertBlock,
@@ -155,17 +143,16 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
   onRecoveryBlockChange,
   activeTab,
   onTabChange,
-  tabConfig,
+  tabs,
   onAlertEditorMount,
   onRecoveryEditorMount,
   hideTabBar = false,
   readOnly = false,
 }) => {
-  const tabIds = visibleTabIds(tabConfig);
-  const visibleTabs = TAB_DEFINITIONS.filter((t) => tabIds.includes(t.id));
+  const visibleTabs = TAB_DEFINITIONS.filter((t) => tabs.includes(t.id));
 
   const safeActiveTab: QueryTab =
-    tabIds.length > 0 && tabIds.includes(activeTab) ? activeTab : tabIds[0] ?? 'alert';
+    tabs.length > 0 && tabs.includes(activeTab) ? activeTab : tabs[0] ?? 'alert';
 
   useEffect(() => {
     if (safeActiveTab !== activeTab) {

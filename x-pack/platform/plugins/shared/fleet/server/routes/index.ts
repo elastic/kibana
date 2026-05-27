@@ -32,6 +32,7 @@ import { registerRoutes as registerManagedOtlpApiKeyRoutes } from './managed_otl
 import { registerRoutes as registerDebugRoutes } from './debug';
 import { registerRoutes as registerRemoteSyncedIntegrations } from './remote_synced_integrations';
 import { registerRoutes as registerCloudConnectorRoutes } from './cloud_connector';
+import { registerRoutes as registerCloudOnboardingDeploymentRoutes } from './cloud_onboarding_deployment';
 import { registerRoutes as registerAgentlessPoliciesRoutes } from './agentless_policy'; //
 
 export function registerRoutes(
@@ -67,6 +68,9 @@ export function registerRoutes(
   registerRemoteSyncedIntegrations(fleetAuthzRouter, isServerless);
   registerDebugRoutes(fleetAuthzRouter);
   registerCloudConnectorRoutes(fleetAuthzRouter);
+  if (experimentalFeatures.enableCloudOnboardingDeployments) {
+    registerCloudOnboardingDeploymentRoutes(fleetAuthzRouter);
+  }
 
   registerAgentlessPoliciesRoutes(fleetAuthzRouter);
 
