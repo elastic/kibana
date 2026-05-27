@@ -40,7 +40,8 @@
     "@kbn/visualization-utils",
     "@kbn/expressions-plugin",
     "@kbn/code-editor",
-    "@kbn/esql-language"
+    "@kbn/esql-language",
+    "@kbn/ui-actions-plugin"
   ]
 }
 
