@@ -55,7 +55,7 @@ export const UPDATE_ATTACKS_TITLE = () => {
   return i18n.translate(
     'xpack.securitySolution.detections.hooks.attacks.bulkActions.updateAttacksModal.updateAttacksTitle',
     {
-      defaultMessage: 'Update alerts?',
+      defaultMessage: 'Update attacks?',
     }
   );
 };
@@ -101,30 +101,58 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
   }
 );
 
-export const ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.visualizationActions.addToNewCase',
+  {
+    defaultMessage: 'Add to new case',
+  }
+);
+
+export const ADD_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.visualizationActions.addToExistingCase',
+  {
+    defaultMessage: 'Add to existing case',
+  }
+);
+
+export const ATTACK_TAGS_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
   'xpack.securitySolution.detections.hooks.attacks.bulkActions.alertTagsContextMenuItemTitle',
   {
-    defaultMessage: 'Apply alert tags',
+    defaultMessage: 'Apply attack tags',
   }
 );
 
-export const ALERT_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO = i18n.translate(
+export const ATTACK_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO = i18n.translate(
   'xpack.securitySolution.detections.hooks.attacks.bulkActions.alertTagsContextMenuItemTooltip',
   {
-    defaultMessage: 'Change alert tag options in Kibana Advanced Settings.',
+    defaultMessage: 'Change attack tag options in Kibana Advanced Settings.',
   }
 );
 
-export const ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
+export const ATTACK_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
   'xpack.securitySolution.detections.hooks.attacks.bulkActions.alertAssigneesContextMenuItemTitle',
   {
-    defaultMessage: 'Assign alert',
+    defaultMessage: 'Assign attack',
   }
 );
 
-export const REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE = i18n.translate(
+export const REMOVE_ATTACK_ASSIGNEES_CONTEXT_MENU_TITLE = i18n.translate(
   'xpack.securitySolution.detections.hooks.attacks.bulkActions.removeAlertAssigneesContextMenuTitle',
   {
-    defaultMessage: 'Unassign alert',
+    defaultMessage: 'Unassign attack',
+  }
+);
+
+export const CLOSE_ATTACK_BUTTON_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detections.hooks.attacks.bulkActions.closeAttackButtonMessage',
+  {
+    defaultMessage: 'Close attack',
+  }
+);
+
+export const ATTACK_TAGS_MENU_EMPTY = i18n.translate(
+  'xpack.securitySolution.detections.hooks.attacks.bulkActions.attackTagsMenuEmpty',
+  {
+    defaultMessage: 'No attack tag options exist, add tag options in Kibana Advanced Settings.',
   }
 );

@@ -6,8 +6,7 @@
  */
 
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import type { GenericIndexPatternColumn, GeneralDatasourceStates } from '@kbn/lens-common';
-import { getStructuredDatasourceStates } from '../../../react_embeddable/helper';
+import type { GenericIndexPatternColumn, StructuredDatasourceStates } from '@kbn/lens-common';
 
 export interface ColumnMeta {
   fieldType?: string | 'multi_terms' | 'range';
@@ -15,15 +14,15 @@ export interface ColumnMeta {
 }
 
 export function getColumnMetaFn(
-  datasourceStates?: Readonly<GeneralDatasourceStates>
-): ((layerId: string, columnId: string) => ColumnMeta) | null {
-  const datasources = getStructuredDatasourceStates(datasourceStates);
-
-  if (datasources.formBased?.layers) {
-    const layers = datasources.formBased.layers;
-
-    return (layerId, columnId) => {
-      const column = layers[layerId]?.columns?.[columnId];
+  datasourceStates?: StructuredDatasourceStates
+): ((layerId: string, columnIds: string[]) => ColumnMeta) | null {
+  if (datasourceStates?.formBased?.layers) {
+    const layers = datasourceStates.formBased.layers;
+    return (layerId, columnIds) => {
+      // In formBased layers there is only one possible column associated with a split accessor
+      // we can pick the first
+      const columnId = columnIds.at(0);
+      const column = columnId ? layers[layerId]?.columns?.[columnId] : undefined;
       return {
         fieldType:
           column && 'params' in column
@@ -34,15 +33,13 @@ export function getColumnMetaFn(
     };
   }
 
-  if (datasources.textBased?.layers) {
-    const layers = datasources.textBased.layers;
-
-    return (layerId, columnId) => {
-      const column = layers[layerId]?.columns?.find((c) => c.columnId === columnId);
-
-      return {
-        dataType: column?.meta?.type,
-      };
+  if (datasourceStates?.textBased?.layers) {
+    const layers = datasourceStates.textBased.layers;
+    return (layerId, columnIds) => {
+      const column = layers[layerId]?.columns?.find((c) => c.columnId === columnIds.at(0));
+      // if we are using multiple split accessor we need to specify that all the columns are part of the same split, thus a multi-terms
+      // there is no need to specify the dataType in this case.
+      return columnIds.length > 1 ? { fieldType: 'multi-terms' } : { dataType: column?.meta?.type };
     };
   }
 

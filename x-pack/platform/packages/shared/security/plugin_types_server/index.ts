@@ -14,13 +14,21 @@ export type {
   AuditLogger,
 } from './src/audit';
 export type {
-  APIKeys,
   AuthenticationServiceStart,
+  NativeAPIKeysType,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
   UpdateCrossClusterAPIKeyParams,
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
+  GrantUiamAPIKeyParams,
+  InvalidateUiamAPIKeyParams,
+  ConvertUiamAPIKeyResult,
+  ConvertUiamAPIKeyResultSuccess,
+  ConvertUiamAPIKeyResultFailed,
+  ConvertUiamAPIKeysResponse,
+  UiamAPIKeysType,
+  ClientAuthentication,
 } from './src/authentication';
 export type {
   PrivilegeDeprecationsService,
@@ -70,7 +78,6 @@ export {
 export type {
   ElasticsearchPrivilegesType,
   KibanaPrivilegesType,
-  APIKeysService,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   InvalidateAPIKeyResult,
@@ -80,6 +87,8 @@ export type {
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   CreateCrossClusterAPIKeyParams,
   GrantAPIKeyResult,
+  CloneAPIKeyParams,
+  CloneAPIKeyResult,
 } from '@kbn/core-security-server';
 export { isCreateRestAPIKeyParams } from '@kbn/core-security-server';
 

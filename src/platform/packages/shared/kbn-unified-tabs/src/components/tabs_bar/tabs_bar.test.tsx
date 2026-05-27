@@ -21,6 +21,7 @@ const items = Array.from({ length: 5 }).map((_, i) => ({
 const recentlyClosedItems = Array.from({ length: 3 }).map((_, i) => ({
   id: `closed-tab-${i}`,
   label: `Closed Tab ${i}`,
+  closedAt: 0,
 }));
 
 const tabContentId = 'test-content-id';
@@ -28,6 +29,7 @@ const tabContentId = 'test-content-id';
 const onAdd = jest.fn();
 const onSelect = jest.fn();
 const onSelectRecentlyClosed = jest.fn();
+const onRestoreRecentlyClosedGroup = jest.fn();
 const onClearRecentlyClosed = jest.fn();
 const onLabelEdited = jest.fn();
 const onClose = jest.fn();
@@ -59,6 +61,7 @@ describe('TabsBar', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onSelectRecentlyClosed={onSelectRecentlyClosed}
+        onRestoreRecentlyClosedGroup={onRestoreRecentlyClosedGroup}
         onClearRecentlyClosed={onClearRecentlyClosed}
         onClose={onClose}
         onReorder={onReorder}
@@ -115,6 +118,7 @@ describe('TabsBar', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onSelectRecentlyClosed={onSelectRecentlyClosed}
+        onRestoreRecentlyClosedGroup={onRestoreRecentlyClosedGroup}
         onClearRecentlyClosed={onClearRecentlyClosed}
         onClose={onClose}
         onReorder={onReorder}
@@ -155,6 +159,7 @@ describe('TabsBar', () => {
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onSelectRecentlyClosed={onSelectRecentlyClosed}
+        onRestoreRecentlyClosedGroup={onRestoreRecentlyClosedGroup}
         onClearRecentlyClosed={onClearRecentlyClosed}
         onClose={onClose}
         onReorder={onReorder}

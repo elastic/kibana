@@ -17,6 +17,8 @@ import { PageScope } from '../../constants';
 import { selectDataViewAsync } from '../actions';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
 import { createExploreDataView } from '../../utils/create_explore_data_view';
+import { getSelectedDataViewStorageKey } from './storage_keys';
+import type { DataViewSpec } from '../types';
 
 /**
  * Creates a Redux listener for initializing the Data View Manager state.
@@ -33,7 +35,7 @@ import { createExploreDataView } from '../../utils/create_explore_data_view';
  * and that state is not reset for slices that already have selections.
  *
  * @param dependencies - Core and plugin services required for data view creation and retrieval.
- * @param attacksAlertsAlignmentEnabled - Prevent attacks dataview creation if feature flag is not enabled.
+ * @param enableAlertsAndAttacksAlignment - Prevent attacks dataview creation if feature flag is not enabled.
  * @returns An object with the actionCreator and effect for Redux listener middleware.
  */
 export const createInitListener = (
@@ -41,12 +43,13 @@ export const createInitListener = (
     http: CoreStart['http'];
     application: CoreStart['application'];
     uiSettings: CoreStart['uiSettings'];
+    notifications: CoreStart['notifications'];
     dataViews: DataViewsServicePublic;
     spaces: SpacesPluginStart;
     storage: Storage;
     logger: Logger;
   },
-  attacksAlertsAlignmentEnabled: boolean
+  enableAlertsAndAttacksAlignment: boolean
 ) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
@@ -56,21 +59,19 @@ export const createInitListener = (
     ) => {
       try {
         const logger = dependencies.logger;
+        const spaceId = (await dependencies.spaces.getActiveSpace()).id;
+
         // Initialize default data views first
         const { defaultDataView, alertDataView, attackDataView } = await createDefaultDataView({
-          dataViewService: dependencies.dataViews,
-          uiSettings: dependencies.uiSettings,
-          spaces: dependencies.spaces,
           application: dependencies.application,
           http: dependencies.http,
-          attacksAlertsAlignmentEnabled,
         });
 
-        logger.debug(`Default data views created: 
-          - Default Data View: ${defaultDataView.title} (ID: ${defaultDataView.id}) 
-          - Alert Data View: ${alertDataView.title} (ID: ${alertDataView.id}) 
+        logger.debug(`Default data views created:
+          - Default Data View: ${defaultDataView.title} (ID: ${defaultDataView.id})
+          - Alert Data View: ${alertDataView.title} (ID: ${alertDataView.id})
           ${
-            attacksAlertsAlignmentEnabled
+            enableAlertsAndAttacksAlignment
               ? `- Attack Data View: ${attackDataView.title} (ID: ${attackDataView.id})`
               : ''
           }`);
@@ -84,26 +85,31 @@ export const createInitListener = (
           alertDataView.title
         );
 
-        logger.debug(`Explore Data View created: 
+        logger.debug(`Explore Data View created:
           - Explore Data View: ${exploreDataView.title} (ID: ${exploreDataView.id})`);
 
         // Store the created data views in the Redux state
         listenerApi.dispatch(sharedDataViewManagerSlice.actions.addDataView(exploreDataView));
 
         // NOTE: This is later used in the data view manager drop-down selector
-        const dataViews = await dependencies.dataViews.getAllDataViewLazy();
+        // We're using getIdsWithTitle instead of getAllDataViewLazy because to avoid a bug that happens in the savedObject api where id conflicts can happen between documents
+        const dataViews = await dependencies.dataViews.getIdsWithTitle();
 
         logger.debug(
-          `Fetched ${
-            dataViews.length
-          } data views from the Data Views service. Data View Names: ${dataViews
-            .map((dv) => dv.getName())
+          `Fetched ${dataViews.length} data views from getIdsWithTitle. Data View Names: ${dataViews
+            .map((dv) => dv.name ?? dv.title)
             .join(', ')}`
         );
 
-        const dataViewSpecs = await Promise.all(dataViews.map((dataView) => dataView.toSpec()));
-
-        logger.debug(`Converted ${dataViewSpecs.length} data views to specs`);
+        const dataViewSpecs: DataViewSpec[] = dataViews.map((dataView) => ({
+          id: dataView.id,
+          title: dataView.title,
+          name: dataView.name,
+          managed: dataView.managed,
+          timeFieldName: dataView.timeFieldName,
+          type: dataView.type,
+          typeMeta: dataView.typeMeta,
+        }));
 
         listenerApi.dispatch(sharedDataViewManagerSlice.actions.setDataViews(dataViewSpecs));
 
@@ -158,7 +164,7 @@ export const createInitListener = (
               );
             }
             const storedDataViewId = dependencies.storage.get(
-              `securitySolution.dataViewManager.selectedDataView.${scope}`
+              getSelectedDataViewStorageKey(spaceId, scope)
             ) as string | null | undefined;
             const state = listenerApi.getState();
             if (
@@ -189,6 +195,10 @@ export const createInitListener = (
         });
       } catch (error: unknown) {
         dependencies.logger.error(`Error initializing Data View Manager: ${error}`);
+        dependencies.notifications.toasts.addDanger({
+          title: 'Error initializing data views',
+          text: `Error: ${error instanceof Error ? error.message : 'unknown'}`,
+        });
         listenerApi.dispatch(sharedDataViewManagerSlice.actions.error());
       }
     },

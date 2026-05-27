@@ -31,6 +31,7 @@ import {
   spacesService,
 } from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
+import { hasLibraryItemWithTitle } from '../../dashboard_client';
 
 interface DashboardSaveModalProps {
   onSave: ({
@@ -40,11 +41,10 @@ interface DashboardSaveModalProps {
     newTags,
     newTimeRestore,
     newProjectRoutingRestore,
-    isTitleDuplicateConfirmed,
     newAccessMode,
-    onTitleDuplicate,
   }: DashboardSaveOptions) => Promise<SaveResult>;
   onClose: () => void;
+  lastSavedTitle: string;
   title: string;
   description: string;
   tags?: string[];
@@ -55,15 +55,13 @@ interface DashboardSaveModalProps {
   showStoreProjectRoutingOnSave?: boolean;
   customModalTitle?: string;
   accessControl?: Partial<SavedObjectAccessControl>;
-  isDuplicateAction?: boolean;
+  showAccessContainer?: boolean;
 }
 
 type SaveDashboardHandler = (args: {
   newTitle: string;
   newDescription: string;
   newCopyOnSave: boolean;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
 }) => ReturnType<DashboardSaveModalProps['onSave']>;
 
 export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
@@ -75,11 +73,12 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   showStoreTimeOnSave = true,
   showStoreProjectRoutingOnSave = true,
   tags,
+  lastSavedTitle,
   title,
   timeRestore,
   projectRoutingRestore,
   accessControl,
-  isDuplicateAction,
+  showAccessContainer,
 }) => {
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
@@ -90,21 +89,13 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   );
 
   const saveDashboard = React.useCallback<SaveDashboardHandler>(
-    async ({
-      newTitle,
-      newDescription,
-      newCopyOnSave,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
-    }) =>
+    async ({ newTitle, newDescription, newCopyOnSave }) =>
       onSave({
         newTitle,
         newDescription,
         newCopyOnSave,
         newTimeRestore: persistSelectedTimeInterval,
         newProjectRoutingRestore: persistSelectedProjectRouting,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate,
         newTags: selectedTags,
         newAccessMode: selectedAccessMode,
       }),
@@ -177,7 +168,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
                   label={
                     <FormattedMessage
                       id="dashboard.topNav.saveModal.storeProjectRoutingWithDashboardFormRowLabel"
-                      defaultMessage="Store project routing with dashboard"
+                      defaultMessage="Store CPS scope with dashboard"
                     />
                   }
                 />
@@ -187,7 +178,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
                   content={
                     <FormattedMessage
                       id="dashboard.topNav.saveModal.storeProjectRoutingWithDashboardFormRowHelpText"
-                      defaultMessage="This changes the project routing to the currently selected project each time this dashboard is loaded."
+                      defaultMessage="Saves the current cross-project search (CPS) scope with the dashboard. Anyone who opens the dashboard will start with that scope."
                     />
                   }
                   position="top"
@@ -196,7 +187,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             </EuiFlexGroup>
           </EuiFormRow>
         ) : null}
-        {!isDuplicateAction && (
+        {showAccessContainer && (
           <>
             <EuiSpacer size="l" />
             <AccessModeContainer
@@ -218,13 +209,15 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
     showStoreTimeOnSave,
     showStoreProjectRoutingOnSave,
     accessControl,
-    isDuplicateAction,
+    showAccessContainer,
   ]);
 
   return (
     <SavedObjectSaveModalWithSaveResult
+      hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       onSave={saveDashboard}
       onClose={onClose}
+      lastSavedTitle={lastSavedTitle}
       title={title}
       description={description}
       showDescription

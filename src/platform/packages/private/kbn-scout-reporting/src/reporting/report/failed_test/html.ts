@@ -22,6 +22,7 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
     duration,
     error,
     stdout,
+    consoleErrors,
     attachments,
   } = testFailure;
 
@@ -149,6 +150,20 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
       .error-section pre {
         background-color: #fff5f5;
         border-color: #fecaca;
+      }
+
+      /* Console errors section */
+      .console-errors-section {
+        background-color: #fffbeb;
+      }
+
+      .console-errors-section pre {
+        background-color: #fffbeb;
+        border-color: #fcd34d;
+      }
+
+      .console-errors-section summary {
+        color: #92400e;
       }
 
       /* Details and summary */
@@ -375,16 +390,25 @@ export const buildFailureHtml = (testFailure: TestFailure): string => {
             <pre>${errorStackTrace}</pre>
         </div>
 
-        <div>
-          <details>
-            <summary>
-              <strong>Failures in tracked branches</strong>:
-              <span class="badge rounded-pill bg-danger" id="failure-count">0</span>
-            </summary>
-              <div id="github-issue-section" style="display: none;">
-                <a id="github-issue-link" href="" target="_blank"></a>
-              </div>
+        ${
+          consoleErrors
+            ? `<div class="section console-errors-section">
+          <h5>Browser Console Errors</h5>
+          <details open>
+            <summary>${consoleErrors.split('\n').length} error(s) captured during test</summary>
+            <pre>${consoleErrors
+              .split('\n')
+              .map((line) =>
+                line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+              )
+              .join('\n')}</pre>
           </details>
+        </div>`
+            : ''
+        }
+
+        <div class="section" id="tracked-branches-status">
+          <strong>No failures found in tracked branches</strong>
         </div>
 
         <div class="section">

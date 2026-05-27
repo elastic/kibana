@@ -9,22 +9,22 @@
 
 import React, { createContext, useMemo } from 'react';
 import { isUndefined, omitBy } from 'lodash';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { PanelIncompatibleError } from '@kbn/embeddable-plugin/public';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
   useBatchedPublishingSubjects,
   titleComparators,
+  apiIsPresentationContainer,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
-
-import { apiIsPresentationContainer, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { LinksState } from '../../server';
 import {
@@ -38,26 +38,26 @@ import type { LinksApi, LinksParentApi, ResolvedLink } from '../types';
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../../common';
 import { DISPLAY_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 
-import { checkForDuplicateTitle, linksClient } from '../content_management';
+import { hasLibraryItemWithTitle, linksClient } from '../content_management';
 import { resolveLinks, serializeResolvedLinks } from '../lib/resolve_links';
 import { isParentApiCompatible } from '../actions/add_links_panel_action';
 import { coreServices } from '../services/kibana_services';
 import { loadFromLibrary } from '../content_management/load_from_library';
+import { getPlacementHints } from './get_placement_hints';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 
 export const getLinksEmbeddableFactory = () => {
-  const linksEmbeddableFactory: EmbeddableFactory<LinksEmbeddableState, LinksApi> = {
+  const linksEmbeddableFactory: EmbeddablePublicDefinition<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
+    getPlacementHints,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const refId = (initialState as LinksByReferenceState).ref_id;
+      const intialLinksState = refId ? await loadFromLibrary(refId) : (initialState as LinksState);
 
-      const savedObjectId = (initialState.rawState as LinksByReferenceState).savedObjectId;
-      const intialLinksState = savedObjectId
-        ? await loadFromLibrary(savedObjectId)
-        : (initialState.rawState as LinksState);
+      const titleManager = initializeTitleManager(initialState);
 
-      const isByReference = savedObjectId !== undefined;
+      const isByReference = refId !== undefined;
 
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
       if (!isParentApiCompatible(parentApi)) blockingError$.next(new PanelIncompatibleError());
@@ -73,25 +73,21 @@ export const getLinksEmbeddableFactory = () => {
 
       function serializeByReference(libraryId: string) {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            savedObjectId: libraryId,
-          },
+          ...titleManager.getLatestState(),
+          ref_id: libraryId,
         };
       }
 
       function serializeByValue() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            layout: layout$.getValue(),
-            links: serializeResolvedLinks(resolvedLinks$.getValue()),
-          },
+          ...titleManager.getLatestState(),
+          layout: layout$.getValue(),
+          links: serializeResolvedLinks(resolvedLinks$.getValue()),
         };
       }
 
       const serializeState = () =>
-        isByReference ? serializeByReference(savedObjectId) : serializeByValue();
+        isByReference ? serializeByReference(refId) : serializeByValue();
 
       const unsavedChangesApi = initializeUnsavedChanges<LinksEmbeddableState>({
         uuid,
@@ -99,8 +95,14 @@ export const getLinksEmbeddableFactory = () => {
         serializeState,
         anyStateChange$: merge(
           titleManager.anyStateChange$,
-          layout$.pipe(map(() => undefined)),
-          resolvedLinks$.pipe(map(() => undefined))
+          layout$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          resolvedLinks$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => {
           return {
@@ -122,16 +124,14 @@ export const getLinksEmbeddableFactory = () => {
                   });
                   return !hasLinkDifference;
                 },
-            savedObjectId: 'skip',
+            ref_id: 'skip',
           };
         },
         onReset: async (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          if (!savedObjectId) {
-            layout$.next((lastSaved?.rawState as LinksByValueState)?.layout);
-            resolvedLinks$.next(
-              await resolveLinks((lastSaved?.rawState as LinksByValueState)?.links ?? [])
-            );
+          titleManager.reinitializeState(lastSaved);
+          if (!refId) {
+            layout$.next((lastSaved as LinksByValueState)?.layout);
+            resolvedLinks$.next(await resolveLinks((lastSaved as LinksByValueState)?.links ?? []));
           }
         },
       });
@@ -162,19 +162,7 @@ export const getLinksEmbeddableFactory = () => {
         getSerializedStateByReference: serializeByReference,
         canLinkToLibrary: async () => !isByReference,
         canUnlinkFromLibrary: async () => isByReference,
-        checkForDuplicateTitle: async (
-          newTitle: string,
-          isTitleDuplicateConfirmed: boolean,
-          onTitleDuplicate: () => void
-        ) => {
-          await checkForDuplicateTitle({
-            title: newTitle,
-            copyOnSave: false,
-            lastSavedTitle: '',
-            isTitleDuplicateConfirmed,
-            onTitleDuplicate,
-          });
-        },
+        hasLibraryItemWithTitle,
         onEdit: async () => {
           openLazyFlyout({
             core: coreServices,
@@ -188,23 +176,23 @@ export const getLinksEmbeddableFactory = () => {
                   layout: layout$.getValue(),
                   links: resolvedLinks$.getValue(),
                   title: titleManager.api.title$.getValue() ?? defaultTitle$.getValue(),
-                  savedObjectId,
+                  refId,
                 },
                 parentDashboard: parentApi,
                 onCompleteEdit: async (newState) => {
                   if (!newState) return;
 
                   // if the by reference state has changed during this edit, reinitialize the panel.
-                  const nextSavedObjectId = newState?.savedObjectId;
-                  const nextIsByReference = nextSavedObjectId !== undefined;
+                  const nextRefId = newState?.refId;
+                  const nextIsByReference = nextRefId !== undefined;
                   if (
                     nextIsByReference !== isByReference &&
                     apiIsPresentationContainer(api.parentApi)
                   ) {
                     const serializedState = nextIsByReference
-                      ? serializeByReference(nextSavedObjectId)
+                      ? serializeByReference(nextRefId)
                       : serializeByValue();
-                    (serializedState.rawState as SerializedTitles).title = newState.title;
+                    (serializedState as SerializedTitles).title = newState.title;
 
                     api.parentApi.replacePanel<LinksEmbeddableState>(api.uuid, {
                       serializedState,
@@ -260,7 +248,10 @@ export const getLinksEmbeddableFactory = () => {
         return (
           <EuiPanel
             className={layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'}
-            paddingSize="xs"
+            paddingSize="none"
+            color="transparent"
+            hasShadow={false}
+            hasBorder={false}
             data-shared-item
             data-rendering-count={1}
             data-test-subj="links--component"
@@ -288,17 +279,25 @@ export const getLinksEmbeddableFactory = () => {
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
+    padding: 0,
     '.linksPanelLink': {
       maxWidth: 'fit-content', // ensures that the error tooltip shows up **right beside** the link label
     },
     '&.verticalLayoutWrapper': {
       gap: euiTheme.size.xs,
+      paddingBlock: euiTheme.size.xs,
     },
     '&.horizontalLayoutWrapper': {
-      height: '100%',
+      inlineSize: 'max-content',
+      blockSize: '100%',
       display: 'flex',
       flexWrap: 'nowrap',
       alignItems: 'center',
       flexDirection: 'row',
+    },
+    // The internal list item wrapper has `width: 100%` which needs to be overridden
+    // for the horizontal layout to look as expected
+    '&.horizontalLayoutWrapper .euiListItemLayout__wrapper': {
+      inlineSize: 'auto',
     },
   });

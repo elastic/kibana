@@ -23,7 +23,6 @@ export default function ({ getPageObject, getService, loadTestFile }: FtrProvide
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData();
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await ml.testResources.disableKibanaAnnouncements();
       await browser.setWindowSize(1920, 1080);
     });
 
@@ -31,7 +30,6 @@ export default function ({ getPageObject, getService, loadTestFile }: FtrProvide
       await securityPage.forceLogout();
       await sampleData.testResources.removeAllKibanaSampleData();
       await ml.testResources.resetKibanaTimeZone();
-      await ml.testResources.resetKibanaAnnouncements();
     });
 
     loadTestFile(require.resolve('./anomaly_detection'));

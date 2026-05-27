@@ -10,17 +10,23 @@
 import { i18n } from '@kbn/i18n';
 
 export const OPEN_IN_DISCOVER_LABEL = i18n.translate(
-  'unifiedDocViewer.observability.traces.openInDiscoverLinkLabel',
+  'unifiedDocViewer.observability.traces.openInADiscoverTabLinkLabel',
   {
-    defaultMessage: 'Open in Discover',
+    defaultMessage: 'Open in a Discover tab',
   }
 );
 
-export const OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL = i18n.translate(
-  'unifiedDocViewer.observability.traces.openInDiscoverArialLabel',
-  { defaultMessage: 'Open in discover link' }
+export const OPEN_IN_DISCOVER_ARIA_LABEL = i18n.translate(
+  'unifiedDocViewer.observability.traces.openInADiscoverTabAriaLabel',
+  { defaultMessage: 'Open in a Discover tab' }
 );
 
 export const NOT_AVAILABLE_LABEL = i18n.translate('unifiedDocViewer.observability.traces.na', {
   defaultMessage: 'N/A',
 });
+
+export enum FlyoutContentId {
+  TRACE_TIMELINE = 'trace_timeline',
+  SPAN_DETAIL = 'span_detail',
+  LOG_DETAIL = 'log_detail',
+}

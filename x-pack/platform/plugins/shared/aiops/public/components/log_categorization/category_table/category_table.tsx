@@ -107,7 +107,7 @@ export const CategoryTable: FC<Props> = ({
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.key] ? 'arrowDown' : 'arrowRight'}
+          iconType={itemIdToExpandedRowMap[item.key] ? 'chevronSingleDown' : 'chevronSingleRight'}
         />
       ),
       'data-test-subj': 'aiopsLogPatternsExpandRowToggle',
@@ -152,7 +152,13 @@ export const CategoryTable: FC<Props> = ({
             {i18n.translate('xpack.aiops.logCategorization.column.tokens', {
               defaultMessage: 'Tokens',
             })}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              aria-hidden={true}
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+            />
           </>
         </EuiToolTip>
       ),
@@ -298,6 +304,9 @@ export const CategoryTable: FC<Props> = ({
               }
             : undefined;
         }}
+        tableCaption={i18n.translate('xpack.aiops.logCategorization.categoryTable.tableCaption', {
+          defaultMessage: 'Log pattern categories',
+        })}
       />
     </div>
   );

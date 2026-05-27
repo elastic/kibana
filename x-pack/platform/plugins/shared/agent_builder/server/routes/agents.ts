@@ -7,17 +7,21 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
+import { AgentAclRole, AgentVisibility } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
-import { apiPrivileges } from '../../common/features';
+import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from './route_security';
 import type {
   GetAgentResponse,
   CreateAgentResponse,
   UpdateAgentResponse,
   DeleteAgentResponse,
+  GetAgentAclResponse,
   ListAgentResponse,
+  UpdateAgentAclResponse,
 } from '../../common/http_api/agents';
+import { asError } from '../utils/as_error';
 
 const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   schema.object(
@@ -37,24 +41,56 @@ const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   )
 );
 
-export function registerAgentRoutes({ router, getInternalServices, logger }: RouteDependencies) {
+const SKILLS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Skill ID to be available to the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of skill IDs to be available to the agent.' },
+  }
+);
+
+const PLUGINS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Plugin ID to assign to the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of plugin IDs to assign to the agent.' },
+  }
+);
+
+const CONNECTORS_SCHEMA = schema.arrayOf(
+  schema.string({
+    meta: { description: 'Connector ID to associate with the agent.' },
+  }),
+  {
+    maxSize: 100,
+    meta: { description: 'Array of connector IDs to associate with the agent.' },
+  }
+);
+
+export function registerAgentRoutes({
+  router,
+  getInternalServices,
+  logger,
+  analyticsService,
+}: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   // List agents
   router.versioned
     .get({
       path: `${publicApiPath}/agents`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'List agents',
       description:
-        'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.',
+        'List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -79,17 +115,14 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   router.versioned
     .get({
       path: `${publicApiPath}/agents/{id}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'Get an agent by ID',
       description:
-        'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.',
+        'Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -123,17 +156,14 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   router.versioned
     .post({
       path: `${publicApiPath}/agents`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: 'Create an agent',
       description:
-        "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options.",
+        "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -175,6 +205,21 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
                   }
                 )
               ),
+              visibility: schema.maybe(
+                schema.oneOf(
+                  [
+                    schema.literal(AgentVisibility.Public),
+                    schema.literal(AgentVisibility.Shared),
+                    schema.literal(AgentVisibility.Private),
+                  ],
+                  {
+                    meta: {
+                      description:
+                        '**Technical Preview; added in 9.4.0.** Optional visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
+                    },
+                  }
+                )
+              ),
               configuration: schema.object(
                 {
                   instructions: schema.maybe(
@@ -185,6 +230,28 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
                     })
                   ),
                   tools: TOOL_SELECTION_SCHEMA,
+                  skill_ids: schema.maybe(SKILLS_SCHEMA),
+                  enable_elastic_capabilities: schema.maybe(
+                    schema.boolean({
+                      meta: {
+                        description:
+                          'When true, enables built-in Elastic capabilities for the agent.',
+                      },
+                    })
+                  ),
+                  workflow_ids: schema.maybe(
+                    schema.arrayOf(
+                      schema.string({
+                        meta: {
+                          description:
+                            'Optional list of workflow IDs. When set, these workflows run before every agent execution, in order.',
+                        },
+                      }),
+                      { maxSize: 100 }
+                    )
+                  ),
+                  plugin_ids: schema.maybe(PLUGINS_SCHEMA),
+                  connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -198,10 +265,28 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { agents } = getInternalServices();
+        const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const profile = await service.create(request.body);
-        return response.ok<CreateAgentResponse>({ body: profile });
+
+        try {
+          const profile = await service.create(request.body);
+          analyticsService?.reportAgentCreated({
+            agentId: request.body.id,
+            toolSelection: request.body.configuration.tools,
+          });
+          auditLogService.logAgentCreated(request, {
+            agentId: profile.id,
+            agentName: profile.name,
+          });
+          return response.ok<CreateAgentResponse>({ body: profile });
+        } catch (error) {
+          auditLogService.logAgentCreated(request, {
+            agentId: request.body.id,
+            agentName: request.body.name,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -209,17 +294,14 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   router.versioned
     .put({
       path: `${publicApiPath}/agents/{id}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: 'Update an agent',
       description:
-        "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.",
+        "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).",
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -265,6 +347,21 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
                   }
                 )
               ),
+              visibility: schema.maybe(
+                schema.oneOf(
+                  [
+                    schema.literal(AgentVisibility.Public),
+                    schema.literal(AgentVisibility.Shared),
+                    schema.literal(AgentVisibility.Private),
+                  ],
+                  {
+                    meta: {
+                      description:
+                        '**Technical Preview; added in 9.4.0.** Updated visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
+                    },
+                  }
+                )
+              ),
               configuration: schema.maybe(
                 schema.object(
                   {
@@ -277,6 +374,28 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
                       })
                     ),
                     tools: schema.maybe(TOOL_SELECTION_SCHEMA),
+                    skill_ids: schema.maybe(SKILLS_SCHEMA),
+                    enable_elastic_capabilities: schema.maybe(
+                      schema.boolean({
+                        meta: {
+                          description:
+                            'When true, enables built-in Elastic capabilities for the agent.',
+                        },
+                      })
+                    ),
+                    workflow_ids: schema.maybe(
+                      schema.arrayOf(
+                        schema.string({
+                          meta: {
+                            description:
+                              'Updated list of workflow IDs. When set, these workflows run every agent execution, in order.',
+                          },
+                        }),
+                        { maxSize: 100 }
+                      )
+                    ),
+                    plugin_ids: schema.maybe(PLUGINS_SCHEMA),
+                    connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },
@@ -291,10 +410,27 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { agents } = getInternalServices();
+        const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
-        const profile = await service.update(request.params.id, request.body);
-        return response.ok<UpdateAgentResponse>({ body: profile });
+
+        try {
+          const profile = await service.update(request.params.id, request.body);
+          analyticsService?.reportAgentUpdated({
+            agentId: profile.id,
+            toolSelection: profile.configuration.tools,
+          });
+          auditLogService.logAgentUpdated(request, {
+            agentId: profile.id,
+            agentName: profile.name,
+          });
+          return response.ok<UpdateAgentResponse>({ body: profile });
+        } catch (error) {
+          auditLogService.logAgentUpdated(request, {
+            agentId: request.params.id,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -302,16 +438,14 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
   router.versioned
     .delete({
       path: `${publicApiPath}/agents/{id}`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: 'Delete an agent',
-      description: 'Delete an agent by ID. This action cannot be undone.',
+      description:
+        'Delete an agent by ID. This action cannot be undone. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -333,15 +467,159 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { agents } = getInternalServices();
+        const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
 
-        const result = await service.delete({ id: request.params.id });
-        return response.ok<DeleteAgentResponse>({
-          body: {
-            success: result,
+        try {
+          const result = await service.delete({ id: request.params.id });
+          if (result) {
+            auditLogService.logAgentDeleted(request, { agentId: request.params.id });
+          } else {
+            auditLogService.logAgentDeleted(request, {
+              agentId: request.params.id,
+              error: new Error('Agent delete returned false'),
+            });
+          }
+          return response.ok<DeleteAgentResponse>({
+            body: {
+              success: result,
+            },
+          });
+        } catch (error) {
+          auditLogService.logAgentDeleted(request, {
+            agentId: request.params.id,
+            error: asError(error),
+          });
+          throw error;
+        }
+      })
+    );
+
+  // Get agent ACL
+  router.versioned
+    .get({
+      path: `${publicApiPath}/agents/{id}/acl`,
+      security: AGENT_BUILDER_READ_SECURITY,
+      access: 'public',
+      summary: "Get an agent's access control list",
+      description:
+        'Get the access control list (ACL) for a specific agent. Callers without permission to manage the ACL receive `can_manage: false` and an empty `entries` list — the principal list itself is sensitive. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+      options: {
+        tags: ['agent', 'oas-tag:agent builder'],
+        availability: { since: '9.5.0' },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string({
+                meta: { description: 'The unique identifier of the agent whose ACL to retrieve.' },
+              }),
+            }),
           },
-        });
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_acl_get.yaml'),
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { agents } = getInternalServices();
+        const service = await agents.getRegistry({ request });
+        const result = await service.getAcl(request.params.id);
+
+        const body: GetAgentAclResponse = {
+          can_manage: result.can_manage,
+          acl: result.can_manage ? result.acl : { entries: [] },
+        };
+        return response.ok<GetAgentAclResponse>({ body });
+      })
+    );
+
+  // Update agent ACL
+  router.versioned
+    .put({
+      path: `${publicApiPath}/agents/{id}/acl`,
+      security: AGENTS_WRITE_SECURITY,
+      access: 'public',
+      summary: "Update an agent's access control list",
+      description:
+        'Replace the per-agent access control list (ACL). The agent owner, cluster admins, and anyone the ACL grants Editor or higher can call this endpoint (or anyone with `manageAgents` on a Public agent). Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
+      options: {
+        tags: ['agent', 'oas-tag:agent builder'],
+        availability: { since: '9.5.0' },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string({
+                meta: { description: 'The unique identifier of the agent whose ACL to update.' },
+              }),
+            }),
+            body: schema.object({
+              entries: schema.arrayOf(
+                schema.object({
+                  type: schema.literal('user'),
+                  name: schema.string({
+                    minLength: 1,
+                    maxLength: 1024,
+                    meta: {
+                      description:
+                        'Case-sensitive Kibana username of the principal to grant access to.',
+                    },
+                  }),
+                  role: schema.oneOf(
+                    [
+                      schema.literal(AgentAclRole.User),
+                      schema.literal(AgentAclRole.Editor),
+                      schema.literal(AgentAclRole.Manager),
+                    ],
+                    {
+                      meta: {
+                        description:
+                          'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its ACL; `manager` adds deleting the agent and changing visibility.',
+                      },
+                    }
+                  ),
+                }),
+                {
+                  maxSize: 100,
+                  meta: {
+                    description:
+                      'Access control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported; role-based grants are planned for a future release), a `name` (the principal username), and a `role`. Submitting this field replaces the existing ACL entirely; submit an empty array to clear all grants.',
+                  },
+                }
+              ),
+            }),
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/agents_acl_update.yaml'),
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { agents, auditLogService } = getInternalServices();
+        const service = await agents.getRegistry({ request });
+
+        try {
+          const updatedAcl = await service.updateAcl(request.params.id, request.body);
+          auditLogService.logAgentUpdated(request, {
+            agentId: request.params.id,
+          });
+          return response.ok<UpdateAgentAclResponse>({ body: updatedAcl });
+        } catch (error) {
+          auditLogService.logAgentUpdated(request, {
+            agentId: request.params.id,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 }

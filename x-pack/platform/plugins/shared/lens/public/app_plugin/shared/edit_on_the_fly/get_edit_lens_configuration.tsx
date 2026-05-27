@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -16,14 +17,19 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import type { TypedLensSerializedState } from '@kbn/lens-common';
 import type {
+  TypedLensSerializedState,
   DatasourceMap,
   VisualizationMap,
+  LensAppServices,
   LensStoreDeps,
   LensDocument,
+  LensSerializedState,
+  LensByRefSerializedState,
+  LensByValueSerializedState,
 } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
+import { getActiveDatasourceIdFromDoc } from '../../../utils';
 import type { LensRootStore } from '../../../state_management';
 import { saveUserChartTypeToSessionStorage } from '../../../chart_type_session_storage';
 import {
@@ -37,8 +43,8 @@ import { generateId } from '../../../id_generator';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 import { LensDocumentService } from '../../../persistence';
-import { DOC_TYPE } from '../../../../common/constants';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
+import { ESQLEditorContext } from '../../../editor_frame_service/editor_frame/config_panel/esql_editor_context';
 
 export type EditLensConfigurationProps = Omit<
   EditConfigPanelProps,
@@ -139,120 +145,140 @@ const MaybeWrapper = ({
   );
 };
 
-export async function getEditLensConfiguration(
-  coreStart: CoreStart,
-  startDependencies: LensPluginStartDependencies,
-  visualizationMap?: VisualizationMap,
-  datasourceMap?: DatasourceMap
-) {
-  const { getLensServices, getLensAttributeService } = await import('../../../async_services');
-  const lensServices = await getLensServices(
-    coreStart,
-    startDependencies,
-    getLensAttributeService(coreStart.http)
+const EditLensConfiguration: FC<
+  EditLensConfigurationProps & {
+    coreStart: CoreStart;
+    startDependencies: LensPluginStartDependencies;
+    visualizationMap: VisualizationMap;
+    datasourceMap: DatasourceMap;
+    lensServices: LensAppServices;
+  }
+> = ({
+  coreStart,
+  startDependencies,
+  visualizationMap,
+  datasourceMap,
+  lensServices,
+  attributes,
+  updatePanelState,
+  updateSuggestion,
+  closeFlyout,
+  wrapInFlyout,
+  panelId,
+  savedObjectId,
+  dataLoading$,
+  lensAdapters,
+  updateByRefInput,
+  navigateToLensEditor,
+  displayFlyoutHeader,
+  isNewPanel,
+  hidesSuggestions,
+  onApply,
+  onCancel,
+  isReadOnly,
+  parentApi,
+  applyButtonLabel,
+  hideTextBasedEditor,
+}) => {
+  const [currentAttributes, setCurrentAttributes] =
+    useState<TypedLensSerializedState['attributes']>(attributes);
+
+  const editorHeightRef = useRef<number | undefined>(undefined);
+
+  /**
+   * During inline editing of a by reference panel, the panel is converted to a by value one.
+   * When the user applies the changes we save them to the Lens SO
+   */
+  const saveByRef = useCallback(
+    async (attrs: LensDocument) => {
+      const lensDocumentService = new LensDocumentService(lensServices.http);
+      await lensDocumentService.save({
+        ...attrs,
+        savedObjectId,
+      });
+    },
+    [lensServices.http, savedObjectId]
   );
 
-  return ({
-    attributes,
+  // Derive datasourceId from currentAttributes so it updates when attributes change
+  // (e.g., after converting from formBased to textBased)
+  const currentDatasourceId = getActiveDatasourceIdFromDoc(currentAttributes);
+
+  if (currentDatasourceId === null) {
+    return <LoadingSpinnerWithOverlay />;
+  }
+
+  const datasourceState = currentAttributes.state.datasourceStates[currentDatasourceId];
+
+  const storeDeps: LensStoreDeps = {
+    lensServices,
+    datasourceMap,
+    visualizationMap,
+    initialContext:
+      datasourceState && 'initialContext' in datasourceState
+        ? datasourceState.initialContext
+        : undefined,
+    visualizationType: attributes.visualizationType,
+  };
+  const lensStore: LensRootStore = makeConfigureStore(
+    storeDeps,
+    undefined,
+    updatingMiddleware(updatePanelState)
+  );
+
+  let initialInput: LensSerializedState;
+  const id = panelId ?? generateId();
+  if (savedObjectId) {
+    initialInput = {
+      id,
+      ref_id: savedObjectId,
+      // @ts-ignore: intentionally include attributes here to avoid triggering loadFromLibrary
+      attributes: currentAttributes,
+    } satisfies LensByRefSerializedState;
+  } else {
+    initialInput = {
+      id,
+      attributes: currentAttributes,
+    } satisfies LensByValueSerializedState;
+  }
+
+  lensStore.dispatch(
+    loadInitial({
+      initialInput,
+      inlineEditing: true,
+      hideTextBasedEditor,
+    })
+  );
+
+  const configPanelProps: EditConfigPanelProps = {
+    attributes: currentAttributes,
     updatePanelState,
     updateSuggestion,
     closeFlyout,
-    wrapInFlyout,
-    datasourceId,
-    panelId,
-    savedObjectId,
+    coreStart,
+    startDependencies,
     dataLoading$,
     lensAdapters,
+    saveByRef,
+    savedObjectId,
     updateByRefInput,
-    navigateToLensEditor,
+    navigateToLensEditor: currentDatasourceId === 'textBased' ? undefined : navigateToLensEditor,
     displayFlyoutHeader,
-    canEditTextBasedQuery,
-    isNewPanel,
     hidesSuggestions,
+    setCurrentAttributes,
+    isNewPanel,
     onApply,
     onCancel,
-    hideTimeFilterInfo,
     isReadOnly,
     parentApi,
+    panelId,
     applyButtonLabel,
-  }: EditLensConfigurationProps) => {
-    if (!lensServices || !datasourceMap || !visualizationMap) {
-      return <LoadingSpinnerWithOverlay />;
-    }
-    const [currentAttributes, setCurrentAttributes] =
-      useState<TypedLensSerializedState['attributes']>(attributes);
+    hideTextBasedEditor,
+  };
 
-    /**
-     * During inline editing of a by reference panel, the panel is converted to a by value one.
-     * When the user applies the changes we save them to the Lens SO
-     */
-    const saveByRef = useCallback(
-      async (attrs: LensDocument) => {
-        const lensDocumentService = new LensDocumentService(lensServices.http);
-        await lensDocumentService.save({
-          ...attrs,
-          savedObjectId,
-          type: DOC_TYPE,
-        });
-      },
-      [savedObjectId]
-    );
-    const datasourceState = currentAttributes.state.datasourceStates[datasourceId];
-    const storeDeps: LensStoreDeps = {
-      lensServices,
-      datasourceMap,
-      visualizationMap,
-      initialContext:
-        datasourceState && 'initialContext' in datasourceState
-          ? datasourceState.initialContext
-          : undefined,
-      visualizationType: attributes.visualizationType,
-    };
-    const lensStore: LensRootStore = makeConfigureStore(
-      storeDeps,
-      undefined,
-      updatingMiddleware(updatePanelState)
-    );
-    lensStore.dispatch(
-      loadInitial({
-        initialInput: {
-          attributes: currentAttributes,
-          id: panelId ?? generateId(),
-        },
-        inlineEditing: true,
-      })
-    );
-
-    const configPanelProps: EditConfigPanelProps = {
-      attributes: currentAttributes,
-      updatePanelState,
-      updateSuggestion,
-      closeFlyout,
-      datasourceId,
-      coreStart,
-      startDependencies,
-      dataLoading$,
-      lensAdapters,
-      saveByRef,
-      savedObjectId,
-      updateByRefInput,
-      navigateToLensEditor,
-      displayFlyoutHeader,
-      canEditTextBasedQuery,
-      hidesSuggestions,
-      setCurrentAttributes,
-      isNewPanel,
-      onApply,
-      onCancel,
-      hideTimeFilterInfo,
-      isReadOnly,
-      parentApi,
-      panelId,
-      applyButtonLabel,
-    };
-
-    return (
-      <MaybeWrapper wrapInFlyout={wrapInFlyout} closeFlyout={closeFlyout}>
+  return (
+    <MaybeWrapper wrapInFlyout={wrapInFlyout} closeFlyout={closeFlyout}>
+      <ESQLEditorContext.Provider value={{ editorHeightRef }}>
         <Provider store={lensStore}>
           <KibanaRenderContextProvider {...coreStart}>
             <KibanaContextProvider services={lensServices}>
@@ -269,7 +295,38 @@ export async function getEditLensConfiguration(
             </KibanaContextProvider>
           </KibanaRenderContextProvider>
         </Provider>
-      </MaybeWrapper>
+      </ESQLEditorContext.Provider>
+    </MaybeWrapper>
+  );
+};
+
+export async function getEditLensConfiguration(
+  coreStart: CoreStart,
+  startDependencies: LensPluginStartDependencies,
+  visualizationMap?: VisualizationMap,
+  datasourceMap?: DatasourceMap
+) {
+  const { getLensServices, getLensAttributeService } = await import('../../../async_services');
+  const lensServices = await getLensServices(
+    coreStart,
+    startDependencies,
+    getLensAttributeService(coreStart.http)
+  );
+
+  return (props: EditLensConfigurationProps) => {
+    if (!lensServices || !datasourceMap || !visualizationMap) {
+      return <LoadingSpinnerWithOverlay />;
+    }
+
+    return (
+      <EditLensConfiguration
+        coreStart={coreStart}
+        startDependencies={startDependencies}
+        visualizationMap={visualizationMap}
+        datasourceMap={datasourceMap}
+        lensServices={lensServices}
+        {...props}
+      />
     );
   };
 }

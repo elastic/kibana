@@ -207,7 +207,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             prevLeftOfCursor,
             prevRightOfCursor,
             prevParsedInput,
-            prevEnteredCommand
+            prevEnteredCommand,
+            key
           );
 
           inputText.addValue(processedValue ?? '', selection);
@@ -331,7 +332,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                   <EuiButtonIcon
                     data-test-subj={getTestId('inputTextSubmitButton')}
                     aria-label="submit-command"
-                    iconType="playFilled"
+                    iconType="play"
                     color="primary"
                     isDisabled={disableArrowButton}
                     onClick={handleSubmitButton}

@@ -7,29 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { SplitButtonWithNotification } from '@kbn/split-button';
+import React, { useRef, type MouseEvent } from 'react';
 import { upperFirst } from 'lodash';
-import type { EuiButtonColor, PopoverAnchorPosition } from '@elastic/eui';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  APP_MENU_NOTIFICATION_INDICATOR_LEFT,
-  APP_MENU_NOTIFICATION_INDICATOR_TOP,
-} from '../constants';
-import { getIsSelectedColor, getTooltip, isDisabled } from '../utils';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import { createReturnFocus, getIsSelectedColor, getTooltip, isDisabled } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
-import type {
-  AppMenuPrimaryActionItem,
-  AppMenuSecondaryActionItem,
-  AppMenuSplitButtonProps,
-} from '../types';
+import { SplitButtonWithNotification } from './split_button_with_notification';
+import type { AppMenuPrimaryActionItem, AppMenuSplitButtonProps } from '../types';
 
-type AppMenuActionButtonProps = (AppMenuPrimaryActionItem | AppMenuSecondaryActionItem) & {
+type AppMenuActionButtonProps = AppMenuPrimaryActionItem & {
   isPopoverOpen: boolean;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
-  popoverAnchorPosition?: PopoverAnchorPosition;
+  onCloseOverflowButton?: () => void;
+  fullWidth?: boolean;
 };
 
 export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
@@ -51,9 +44,11 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     isPopoverOpen,
     hidden,
     popoverWidth,
+    popoverTestId,
     onPopoverToggle,
     onPopoverClose,
-    popoverAnchorPosition,
+    onCloseOverflowButton,
+    fullWidth,
   } = props;
 
   const itemText = upperFirst(label);
@@ -61,9 +56,6 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const showTooltip = Boolean(content || title);
 
   const splitButtonProps = 'splitButtonProps' in props ? props.splitButtonProps : undefined;
-  const colorProp = 'color' in props ? props.color : undefined;
-  const isFilledProp = 'isFilled' in props ? props.isFilled : undefined;
-  const minWidthProp = 'minWidth' in props ? props.minWidth : undefined;
   const items = 'items' in props ? props.items : undefined;
 
   const {
@@ -74,8 +66,10 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
 
   const hasItems = items && items.length > 0;
   const hasSplitItems = splitButtonItems && splitButtonItems.length > 0;
+  const hasPopover = hasItems || hasSplitItems;
+  const anchorDomElementRef = useRef<HTMLElement | null>(null);
 
-  const handleClick = () => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(disableButton)) return;
 
     if (hasItems) {
@@ -83,52 +77,51 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       return;
     }
 
-    run?.();
+    const triggerElement = event.currentTarget;
+    run?.({
+      triggerElement,
+      returnFocus: createReturnFocus(triggerElement),
+    });
   };
 
-  const handleSecondaryButtonClick = () => {
+  const handleSecondaryButtonClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
     if (isDisabled(splitButtonProps?.isSecondaryButtonDisabled)) return;
 
     if (hasSplitItems) {
+      anchorDomElementRef.current = event.currentTarget;
       onPopoverToggle();
       return;
     }
 
-    splitButtonRun?.();
+    const triggerElement = event.currentTarget;
+    splitButtonRun?.({
+      triggerElement,
+      returnFocus: createReturnFocus(triggerElement),
+    });
   };
 
+  const routerLinkProps =
+    href && run ? getRouterLinkProps({ href, onClick: handleClick }) : { onClick: handleClick };
+
   const commonProps = {
-    onClick: href ? undefined : handleClick,
+    ...routerLinkProps,
     id: htmlId,
-    'data-test-subj': testId || `top-nav-menu-action-button-${id}`,
+    'data-test-subj': testId || `app-menu-action-button-${id}`,
     iconType,
     isDisabled: isDisabled(disableButton),
     href,
     target: href ? target : undefined,
     isLoading,
-    size: 's' as const,
-    iconSize: 'm' as const,
+    'aria-haspopup': (hasPopover ? 'menu' : undefined) as 'menu' | undefined,
+    fullWidth,
   };
-
-  // Target the split part of the button for popover behavior.
-  const splitButtonCss = css`
-    & + button {
-      background-color: ${isPopoverOpen
-        ? getIsSelectedColor({
-            color: 'text',
-            euiTheme,
-            isFilled: false,
-          })
-        : undefined};
-    }
-  `;
 
   const buttonCss = css`
     background-color: ${isPopoverOpen
       ? getIsSelectedColor({
-          color: colorProp as EuiButtonColor,
+          color: 'text',
           euiTheme,
-          isFilled: Boolean(isFilledProp),
+          isFilled: false,
         })
       : undefined};
   `;
@@ -138,33 +131,21 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       <SplitButtonWithNotification
         {...otherSplitButtonProps}
         {...commonProps}
-        secondaryButtonFill={false}
+        label={itemText}
         onSecondaryButtonClick={handleSecondaryButtonClick}
-        color="text"
-        aria-haspopup={hasSplitItems ? 'menu' : undefined}
         isSelected={isPopoverOpen}
-        css={splitButtonCss}
-        notificationIndicatorPosition={{
-          top: APP_MENU_NOTIFICATION_INDICATOR_TOP,
-          left: APP_MENU_NOTIFICATION_INDICATOR_LEFT,
-        }}
-        notificationIndicatorSize="m"
-        notificationIndicatorColor="primary"
-      >
-        {itemText}
-      </SplitButtonWithNotification>
+      />
     </EuiHideFor>
   ) : (
     <EuiHideFor sizes={hidden ?? 'none'}>
       <EuiButton
         {...commonProps}
+        size="s"
+        iconSize="m"
         iconSide="left"
-        aria-haspopup={hasItems ? 'menu' : undefined}
         isSelected={isPopoverOpen}
         css={buttonCss}
-        color={colorProp}
-        minWidth={minWidthProp}
-        fill={isFilledProp}
+        color="text"
       >
         {itemText}
       </EuiButton>
@@ -177,26 +158,45 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
    * So we only wrap in tooltip if there are no items (no popover).
    */
   const button =
-    showTooltip && !hasSplitItems && !hasItems ? (
-      <EuiToolTip content={content} title={title} delay="long">
+    showTooltip && !hasPopover ? (
+      <EuiToolTip content={content} title={title}>
         {buttonComponent}
       </EuiToolTip>
     ) : (
       buttonComponent
     );
 
-  if (hasItems || hasSplitItems) {
+  if (hasItems) {
     return (
       <AppMenuPopover
-        // For split button, only allow popover behavior on the split part of the split button.
-        items={hasSplitItems ? splitButtonItems : items ?? []}
+        items={items}
         tooltipContent={content}
         tooltipTitle={title}
         anchorElement={button}
         isOpen={isPopoverOpen}
         popoverWidth={popoverWidth}
+        popoverTestId={popoverTestId}
+        anchorPosition="downRight"
         onClose={onPopoverClose}
-        anchorPosition={popoverAnchorPosition}
+        onCloseOverflowButton={onCloseOverflowButton}
+      />
+    );
+  }
+
+  if (hasSplitItems) {
+    return (
+      <AppMenuPopover
+        items={splitButtonItems}
+        tooltipContent={content}
+        tooltipTitle={title}
+        anchorElement={button}
+        anchorDomElement={anchorDomElementRef.current ?? undefined}
+        isOpen={isPopoverOpen}
+        popoverWidth={popoverWidth}
+        popoverTestId={popoverTestId}
+        anchorPosition="downRight"
+        onClose={onPopoverClose}
+        onCloseOverflowButton={onCloseOverflowButton}
       />
     );
   }

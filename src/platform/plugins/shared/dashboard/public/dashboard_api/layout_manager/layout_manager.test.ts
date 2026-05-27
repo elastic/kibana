@@ -8,8 +8,12 @@
  */
 
 import { pick } from 'lodash';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
+import {
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+} from '@kbn/controls-constants';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasLibraryTransforms,
@@ -19,10 +23,10 @@ import type {
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 
 import type { DashboardState } from '../../../common';
+import { getSampleDashboardState } from '../../mocks';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
 import { initializeLayoutManager } from './layout_manager';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('54321'),
@@ -48,31 +52,31 @@ describe('layout manager', () => {
     grid: { w: 1, h: 1, x: 0, y: 0 },
     type: 'testPanelType',
     config: { title: 'Panel One' },
-    uid: PANEL_ONE_ID,
+    id: PANEL_ONE_ID,
   };
 
-  const pinnedControls: DashboardState['controlGroupInput'] = {
-    controls: [
-      {
-        uid: 'control1',
-        type: 'optionsListControl',
-        config: {
-          dataViewId: '',
-          fieldName: '',
-        },
+  const pinnedControls: DashboardState['pinned_panels'] = [
+    {
+      ...DEFAULT_PINNED_CONTROL_STATE,
+      id: 'control1',
+      type: 'options_list_control',
+      config: {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+        data_view_id: '',
+        field_name: '',
       },
-      {
-        uid: 'control2',
-        grow: true,
-        width: 'small',
-        type: 'optionsListControl',
-        config: {
-          dataViewId: '',
-          fieldName: '',
-        },
+    },
+    {
+      ...DEFAULT_PINNED_CONTROL_STATE,
+      id: 'control2',
+      type: 'options_list_control',
+      config: {
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+        data_view_id: '',
+        field_name: '',
       },
-    ],
-  };
+    },
+  ];
 
   const titleManager = initializeTitleManager(panel1.config);
   const panel1Api: DefaultEmbeddableApi = {
@@ -80,15 +84,15 @@ describe('layout manager', () => {
     uuid: PANEL_ONE_ID,
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
     ...titleManager.api,
-    serializeState: () => ({
-      rawState: titleManager.getLatestState(),
-    }),
+    anyStateChange$: of(),
+    serializeState: () => titleManager.getLatestState(),
+    applySerializedState: jest.fn(),
   };
 
   const section1 = {
     title: 'Section one',
     collapsed: false,
-    uid: 'section1',
+    id: 'section1',
     grid: {
       y: 1,
     },
@@ -100,12 +104,60 @@ describe('layout manager', () => {
       viewModeManagerMock,
       undefined,
       [panel1],
-      { controls: [] },
-      trackPanelMock,
-      () => []
+      [],
+      trackPanelMock
     );
     layoutManager.api.registerChildApi(panel1Api);
     expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBe(panel1Api);
+  });
+
+  test('should apply incoming serialized child state during reset when supported', async () => {
+    const layoutManager = initializeLayoutManager(
+      viewModeManagerMock,
+      undefined,
+      [panel1],
+      [],
+      trackPanelMock
+    );
+    const applySerializedState = jest.fn().mockResolvedValue(undefined);
+
+    layoutManager.api.registerChildApi({
+      ...panel1Api,
+      applySerializedState,
+      hasUnsavedChanges$: new BehaviorSubject(false),
+    } as DefaultEmbeddableApi);
+
+    layoutManager.internalApi.reset(
+      getSampleDashboardState({
+        panels: [{ ...panel1, config: { title: 'Updated title' } }],
+        pinned_panels: [],
+      })
+    );
+
+    expect(applySerializedState).toHaveBeenCalledWith({ title: 'Updated title' });
+  });
+
+  test('should ignore child state application when child does not support it', async () => {
+    const layoutManager = initializeLayoutManager(
+      viewModeManagerMock,
+      undefined,
+      [panel1],
+      [],
+      trackPanelMock
+    );
+    layoutManager.api.registerChildApi({
+      ...panel1Api,
+      hasUnsavedChanges$: new BehaviorSubject(false),
+    } as DefaultEmbeddableApi);
+
+    layoutManager.internalApi.reset(
+      getSampleDashboardState({
+        panels: [{ ...panel1, config: { title: 'Updated title' } }],
+        pinned_panels: [],
+      })
+    );
+
+    expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBeDefined();
   });
 
   test('should append incoming embeddables to existing panels', () => {
@@ -113,9 +165,7 @@ describe('layout manager', () => {
       {
         embeddableId: 'panelTwo',
         serializedState: {
-          rawState: {
-            title: 'Panel Two',
-          },
+          title: 'Panel Two',
         },
         size: {
           height: 1,
@@ -126,9 +176,7 @@ describe('layout manager', () => {
       {
         embeddableId: 'panelThree',
         serializedState: {
-          rawState: {
-            title: 'Panel Three',
-          },
+          title: 'Panel Three',
         },
         size: {
           height: 1,
@@ -141,9 +189,8 @@ describe('layout manager', () => {
       viewModeManagerMock,
       incomingEmbeddables,
       [panel1],
-      { controls: [] },
-      trackPanelMock,
-      () => []
+      [],
+      trackPanelMock
     );
 
     const layout = layoutManager.api.layout$.value;
@@ -170,10 +217,10 @@ describe('layout manager', () => {
       layoutManager.internalApi.getSerializedStateForPanel('panelTwo');
     const incomingPanelStatePanelThree =
       layoutManager.internalApi.getSerializedStateForPanel('panelThree');
-    expect(incomingPanelStatePanelTwo.rawState).toEqual({
+    expect(incomingPanelStatePanelTwo).toEqual({
       title: 'Panel Two',
     });
-    expect(incomingPanelStatePanelThree.rawState).toEqual({
+    expect(incomingPanelStatePanelThree).toEqual({
       title: 'Panel Three',
     });
   });
@@ -184,10 +231,10 @@ describe('layout manager', () => {
         viewModeManagerMock,
         undefined,
         [panel1],
-        { controls: [] },
-        trackPanelMock,
-        () => []
+        [],
+        trackPanelMock
       );
+
       layoutManager.api.registerChildApi(panel1Api);
 
       await layoutManager.api.duplicatePanel('panelOne');
@@ -204,7 +251,7 @@ describe('layout manager', () => {
         type: 'testPanelType',
       });
       const duplicatedPanelState = layoutManager.internalApi.getSerializedStateForPanel('54321');
-      expect(duplicatedPanelState.rawState).toEqual({
+      expect(duplicatedPanelState).toEqual({
         title: 'Panel One (copy)',
       });
     });
@@ -214,28 +261,25 @@ describe('layout manager', () => {
         viewModeManagerMock,
         undefined,
         [panel1],
-        { controls: [] },
-        trackPanelMock,
-        () => []
+        [],
+        trackPanelMock
       );
       layoutManager.api.registerChildApi({
         ...panel1Api,
-        checkForDuplicateTitle: jest.fn(),
+        hasLibraryItemWithTitle: jest.fn(),
         canLinkToLibrary: jest.fn(),
         canUnlinkFromLibrary: jest.fn(),
         saveToLibrary: jest.fn(),
         getSerializedStateByReference: jest.fn(),
         getSerializedStateByValue: () => ({
-          rawState: {
-            isByValue: true,
-          },
+          isByValue: true,
         }),
       } as DefaultEmbeddableApi & HasLibraryTransforms);
 
       await layoutManager.api.duplicatePanel('panelOne');
 
       const duplicatedPanelState = layoutManager.internalApi.getSerializedStateForPanel('54321');
-      expect(duplicatedPanelState.rawState).toEqual({
+      expect(duplicatedPanelState).toEqual({
         isByValue: true,
         title: 'Panel One (copy)',
       });
@@ -246,23 +290,20 @@ describe('layout manager', () => {
         viewModeManagerMock,
         undefined,
         [panel1],
-        { controls: [] },
-        trackPanelMock,
-        () => []
+        [],
+        trackPanelMock
       );
       const titleManagerOfClone = initializeTitleManager({ title: 'Panel One (copy)' });
       layoutManager.api.registerChildApi({
         ...panel1Api,
         ...titleManagerOfClone.api,
-        serializeState: () => ({
-          rawState: titleManagerOfClone.getLatestState(),
-        }),
+        serializeState: () => titleManagerOfClone.getLatestState(),
       });
 
       await layoutManager.api.duplicatePanel('panelOne');
 
       const duplicatedPanelState = layoutManager.internalApi.getSerializedStateForPanel('54321');
-      expect(duplicatedPanelState.rawState).toEqual({
+      expect(duplicatedPanelState).toEqual({
         title: 'Panel One (copy 1)',
       });
     });
@@ -270,32 +311,18 @@ describe('layout manager', () => {
 
   describe('canRemovePanels', () => {
     test('allows removing panels when there is no expanded panel', () => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        undefined,
-        [panel1],
-        { controls: [] },
-        {
-          ...trackPanelMock,
-          expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-        },
-        () => []
-      );
+      const layoutManager = initializeLayoutManager(viewModeManagerMock, undefined, [panel1], [], {
+        ...trackPanelMock,
+        expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
+      });
       expect(layoutManager.api.canRemovePanels()).toBe(true);
     });
 
     test('does not allow removing panels when there is an expanded panel', () => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        undefined,
-        [panel1],
-        { controls: [] },
-        {
-          ...trackPanelMock,
-          expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
-        },
-        () => []
-      );
+      const layoutManager = initializeLayoutManager(viewModeManagerMock, undefined, [panel1], [], {
+        ...trackPanelMock,
+        expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
+      });
       expect(layoutManager.api.canRemovePanels()).toBe(false);
     });
   });
@@ -306,9 +333,8 @@ describe('layout manager', () => {
         viewModeManagerMock,
         undefined,
         [panel1],
-        { controls: [] },
-        trackPanelMock,
-        () => []
+        [],
+        trackPanelMock
       );
 
       layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
@@ -329,9 +355,8 @@ describe('layout manager', () => {
             collapsed: false,
           },
         ],
-        { controls: [] },
-        trackPanelMock,
-        () => []
+        [],
+        trackPanelMock
       );
 
       layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
@@ -352,9 +377,8 @@ describe('layout manager', () => {
             collapsed: true,
           },
         ],
-        { controls: [] },
-        trackPanelMock,
-        () => []
+        [],
+        trackPanelMock
       );
 
       layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
@@ -375,8 +399,8 @@ describe('layout manager', () => {
         [
           panel1,
           {
-            uid: 'control3',
-            type: 'optionsListControl',
+            id: 'control3',
+            type: 'options_list_control',
             config: {},
             grid: { x: 0, y: 2, h: 1, w: 1 },
           },
@@ -385,29 +409,27 @@ describe('layout manager', () => {
         {
           ...trackPanelMock,
           expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-        },
-        () => []
+        }
       );
 
       layoutManager.api.pinPanel('control3');
-      expect(layoutManager.api.layout$.getValue().controls).toEqual({
+      expect(layoutManager.api.layout$.getValue().pinnedPanels).toEqual({
         ['control1']: {
-          ...pick(pinnedControls.controls[0], ['grow', 'width', 'type']),
+          ...pick(pinnedControls[0], ['grow', 'width', 'type']),
           order: 0,
         },
         ['control2']: {
-          ...pick(pinnedControls.controls[1], ['grow', 'width', 'type']),
+          ...pick(pinnedControls[1], ['grow', 'width', 'type']),
           order: 1,
         },
         ['control3']: {
-          type: 'optionsListControl',
-          grow: DEFAULT_CONTROL_GROW,
-          width: DEFAULT_CONTROL_WIDTH,
+          ...DEFAULT_PINNED_CONTROL_STATE,
+          type: 'options_list_control',
           order: 2,
         },
       });
       expect(layoutManager.api.layout$.getValue().panels).toEqual({
-        [panel1.uid]: pick(panel1, ['grid', 'type']),
+        [panel1.id]: pick(panel1, ['grid', 'type']),
         // control3 gets removed as a panel
       });
     });
@@ -421,34 +443,33 @@ describe('layout manager', () => {
         {
           ...trackPanelMock,
           expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-        },
-        () => []
+        }
       );
-      expect(layoutManager.api.layout$.getValue().controls).toEqual({
+      expect(layoutManager.api.layout$.getValue().pinnedPanels).toEqual({
         ['control1']: {
-          ...pick(pinnedControls.controls[0], ['grow', 'width', 'type']),
+          ...pick(pinnedControls[0], ['grow', 'width', 'type']),
           order: 0,
         },
         ['control2']: {
-          ...pick(pinnedControls.controls[1], ['grow', 'width', 'type']),
+          ...pick(pinnedControls[1], ['grow', 'width', 'type']),
           order: 1,
         },
       });
 
       layoutManager.api.unpinPanel('control1');
-      expect(layoutManager.api.layout$.getValue().controls).toEqual({
+      expect(layoutManager.api.layout$.getValue().pinnedPanels).toEqual({
         ['control2']: {
-          ...pick(pinnedControls.controls[1], ['grow', 'width', 'type']),
+          ...pick(pinnedControls[1], ['grow', 'width', 'type']),
           order: 0, // adjusted order
         },
       });
       expect(layoutManager.api.layout$.getValue().panels).toEqual({
-        [panel1.uid]: {
+        [panel1.id]: {
           type: 'testPanelType',
           grid: { ...panel1.grid, y: 2 }, // push panel 1 down,
         },
         ['control1']: {
-          type: 'optionsListControl',
+          type: 'options_list_control',
           grid: { x: 0, y: 0, w: 12, h: 2 },
         },
       });
@@ -461,18 +482,17 @@ describe('layout manager', () => {
         [
           panel1,
           {
-            ...pinnedControls.controls[1],
-            uid: 'control2',
+            ...pinnedControls[1],
+            id: 'control2',
             grid: { x: 0, y: 0, w: 12, h: 12 },
             config: { title: 'Control' },
           },
         ],
-        { controls: [pinnedControls.controls[0]] },
+        [pinnedControls[0]],
         {
           ...trackPanelMock,
           expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-        },
-        () => []
+        }
       );
       expect(layoutManager.api.panelIsPinned('control1')).toBe(true);
       expect(layoutManager.api.panelIsPinned('control2')).toBe(false);

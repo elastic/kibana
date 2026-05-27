@@ -11,6 +11,9 @@ import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
+// if config is executed on CI or locally
+const isRunOnCI = process.env.CI;
+
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
@@ -42,6 +45,12 @@ export default async function ({ readConfigFile }) {
 
         // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+        // disable tours globally for all tests
+        '--uiSettings.globalOverrides.hideAnnouncements=true',
+
+        // if the config is run locally, disable mock SAML IdP Kibana plugin, since Elasticsearch in stateful tests
+        // isn't configured with SAML.
+        ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=false']),
       ],
     },
 

@@ -52,10 +52,8 @@ import type {
   ObservabilityAIAssistantServerSetup,
   ObservabilityAIAssistantServerStart,
 } from '@kbn/observability-ai-assistant-plugin/server';
-import type {
-  AgentBuilderPluginSetup,
-  AgentBuilderPluginStart,
-} from '@kbn/agent-builder-plugin/server/types';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type {
   ObservabilityAgentBuilderPluginSetup,
   ObservabilityAgentBuilderPluginStart,
@@ -64,6 +62,7 @@ import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import type { SLOServerSetup, SLOServerStart } from '@kbn/slo-plugin/server';
 import type { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -81,6 +80,7 @@ export interface APMPluginSetupDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: {};
   share: SharePluginSetup;
+  embeddable: EmbeddableSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
   // optional dependencies
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginSetup;
@@ -93,6 +93,7 @@ export interface APMPluginSetupDependencies {
   home?: HomeServerPluginSetup;
   ml?: MlPluginSetup;
   security?: SecurityPluginSetup;
+  slo?: SLOServerSetup;
   spaces?: SpacesPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
@@ -110,6 +111,7 @@ export interface APMPluginStartDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: DataViewsServerPluginStart;
   share: undefined;
+  embeddable: undefined;
   logsDataAccess: LogsDataAccessPluginStart;
   // optional dependencies
   observabilityAgentBuilder?: ObservabilityAgentBuilderPluginStart;
@@ -122,6 +124,7 @@ export interface APMPluginStartDependencies {
   home?: HomeServerPluginStart;
   ml?: MlPluginStart;
   security?: SecurityPluginStart;
+  slo?: SLOServerStart;
   spaces?: SpacesPluginStart;
   taskManager?: TaskManagerStartContract;
   usageCollection?: undefined;

@@ -6,14 +6,122 @@
  */
 
 import * as t from 'io-ts';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
+import { i18n } from '@kbn/i18n';
+import { throwError } from 'rxjs';
+import { ServerSentEventError } from '@kbn/sse-utils';
+import { ServerSentEventErrorCode } from '@kbn/sse-utils/src/errors';
+import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
+import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get_request_aborted_signal';
+import { isIndexNotFoundError } from '@kbn/agent-builder-plugin/server/utils/is_index_not_found_error';
+import { isNoMatchingProjectError } from '@kbn/agent-builder-plugin/server/utils/is_no_matching_project_error';
+import { getSSEResponseHeaders } from '@kbn/agent-builder-plugin/server/routes/utils';
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 import { getLogAiInsights } from './get_log_ai_insights';
-import { getAlertAiInsight, type AlertDocForInsight } from './get_alert_ai_insights';
-import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
+import {
+  getAlertAiInsight,
+  type AlertDocForInsight,
+} from './alert_ai_insights/generate_alert_ai_insight';
+import { OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID } from '../../../common/constants';
+import { resolveConnectorForFeature } from '../../utils/resolve_connector_for_feature';
 
-export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
+function getRawErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
+}
+
+function aiInsightSseErrorResponse({
+  response,
+  message,
+  retryable,
+  isCloudEnabled,
+  logger,
+  request,
+}: {
+  response: KibanaResponseFactory;
+  message: string;
+  retryable: boolean;
+  isCloudEnabled: boolean;
+  logger: Pick<Logger, 'debug' | 'error'>;
+  request: KibanaRequest;
+}) {
+  const err$ = throwError(
+    () =>
+      new ServerSentEventError(ServerSentEventErrorCode.internalError, message, {
+        retryable,
+      })
+  );
+  return response.ok({
+    headers: getSSEResponseHeaders(isCloudEnabled),
+    body: observableIntoEventSourceStream(err$, {
+      logger,
+      signal: getRequestAbortedSignal(request),
+    }),
+  });
+}
+
+function routeAiInsightError({
+  error,
+  response,
+  isCloudEnabled,
+  logger,
+  request,
+}: {
+  error: unknown;
+  response: KibanaResponseFactory;
+  isCloudEnabled: boolean;
+  logger: Pick<Logger, 'debug' | 'error'>;
+  request: KibanaRequest;
+}) {
+  if (isNoMatchingProjectError(error)) {
+    return aiInsightSseErrorResponse({
+      response,
+      message: i18n.translate('xpack.observabilityAgentBuilder.aiInsight.error.noMatchingProject', {
+        defaultMessage: 'AI insights are not supported for data from linked projects.',
+      }),
+      retryable: false,
+      isCloudEnabled,
+      logger,
+      request,
+    });
+  }
+  if (isIndexNotFoundError(error)) {
+    return aiInsightSseErrorResponse({
+      response,
+      message: i18n.translate('xpack.observabilityAgentBuilder.aiInsight.error.indexUnavailable', {
+        defaultMessage: 'The source index for this data is unavailable.',
+      }),
+      retryable: false,
+      isCloudEnabled,
+      logger,
+      request,
+    });
+  }
+  return aiInsightSseErrorResponse({
+    response,
+    message: getRawErrorMessage(error),
+    retryable: true,
+    isCloudEnabled,
+    logger,
+    request,
+  });
+}
+
+export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerRouteRepository {
   const getAlertAiInsightRoute = createObservabilityAgentBuilderServerRoute({
     endpoint: 'POST /internal/observability_agent_builder/ai_insights/alert',
     options: {
@@ -29,37 +137,54 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         alertId: t.string,
       }),
     }),
-    handler: async ({
-      core,
-      dataRegistry,
-      logger,
-      request,
-      params,
-    }): Promise<{ summary: string; context: string }> => {
+    handler: async ({ core, plugins, dataRegistry, logger, request, params, response }) => {
       const { alertId } = params.body;
+      const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
+      const [, startDeps] = await core.getStartServices();
+      const { inference, ruleRegistry, searchInferenceEndpoints } = startDeps;
 
-      const [coreStart, startDeps] = await core.getStartServices();
-      const { inference, ruleRegistry } = startDeps;
+      try {
+        const { connectorId, connector } = await resolveConnectorForFeature({
+          searchInferenceEndpoints,
+          featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+          request,
+          logger,
+        });
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
-      const inferenceClient = inference.getClient({ request });
+        const inferenceClient = inference.getClient({ request });
 
-      const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-      const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
+        const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
+        const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
 
-      const { summary, context } = await getAlertAiInsight({
-        alertDoc,
-        inferenceClient,
-        connectorId,
-        dataRegistry,
-        request,
-        logger,
-      });
+        const result = await getAlertAiInsight({
+          core,
+          plugins,
+          alertDoc,
+          inferenceClient,
+          connectorId,
+          connector,
+          dataRegistry,
+          request,
+          logger,
+        });
 
-      return {
-        summary,
-        context,
-      };
+        return response.ok({
+          headers: getSSEResponseHeaders(isCloudEnabled),
+          body: observableIntoEventSourceStream(result.events$, {
+            logger,
+            signal: getRequestAbortedSignal(request),
+          }),
+        });
+      } catch (error) {
+        logger.error(error);
+        return routeAiInsightError({
+          error,
+          response,
+          isCloudEnabled,
+          logger,
+          request,
+        });
+      }
     },
   });
 
@@ -82,33 +207,55 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
         environment: t.union([t.string, t.undefined]),
       }),
     }),
-    handler: async ({ request, core, plugins, dataRegistry, params, logger }) => {
+    handler: async ({ request, core, plugins, dataRegistry, params, response, logger }) => {
       const { errorId, serviceName, start, end, environment = '' } = params.body;
+      const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
 
-      const [coreStart, startDeps] = await core.getStartServices();
-      const { inference } = startDeps;
+      const [, startDeps] = await core.getStartServices();
+      const { inference, searchInferenceEndpoints } = startDeps;
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
-      const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+      try {
+        const { connectorId, connector } = await resolveConnectorForFeature({
+          searchInferenceEndpoints,
+          featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+          request,
+          logger,
+        });
 
-      const { summary, context } = await generateErrorAiInsight({
-        core,
-        plugins,
-        errorId,
-        serviceName,
-        start,
-        end,
-        environment,
-        dataRegistry,
-        request,
-        inferenceClient,
-        logger,
-      });
+        const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
 
-      return {
-        context,
-        summary,
-      };
+        const result = await generateErrorAiInsight({
+          core,
+          plugins,
+          errorId,
+          serviceName,
+          start,
+          end,
+          environment,
+          connector,
+          dataRegistry,
+          request,
+          inferenceClient,
+          logger,
+        });
+
+        return response.ok({
+          headers: getSSEResponseHeaders(isCloudEnabled),
+          body: observableIntoEventSourceStream(result.events$, {
+            logger,
+            signal: getRequestAbortedSignal(request),
+          }),
+        });
+      } catch (error) {
+        logger.error(error);
+        return routeAiInsightError({
+          error,
+          response,
+          isCloudEnabled,
+          logger,
+          request,
+        });
+      }
     },
   });
 
@@ -123,32 +270,71 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository() {
       },
     },
     params: t.type({
-      body: t.type({
+      body: t.partial({
         index: t.string,
         id: t.string,
+        fields: t.record(t.string, t.unknown),
       }),
     }),
-    handler: async ({ request, core, dataRegistry, params }) => {
-      const { index, id } = params.body;
+    handler: async ({ request, core, params, response, logger, plugins }) => {
+      const { index, id, fields } = params.body;
+      const isCloudEnabled = Boolean(plugins.cloud?.isCloudEnabled);
 
-      const [coreStart, startDeps] = await core.getStartServices();
-      const { inference } = startDeps;
+      const hasDocIdentity = typeof index === 'string' && typeof id === 'string';
+      // if a user is in ESQL mode, there is currently no id or index metadata
+      // unless a user specifically queries for it, so pass fields directly
+      const hasFields = fields && Object.keys(fields).length > 0;
 
-      const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
-      const inferenceClient = inference.getClient({ request });
-      const esClient = coreStart.elasticsearch.client.asScoped(request);
+      if (!hasDocIdentity && !hasFields) {
+        return response.badRequest({
+          body: 'Must provide either {index, id} or {fields}',
+        });
+      }
 
-      const { summary, context } = await getLogAiInsights({
-        index,
-        id,
-        inferenceClient,
-        connectorId,
-        request,
-        esClient,
-        dataRegistry,
-      });
+      try {
+        const [coreStart, startDeps] = await core.getStartServices();
+        const { inference, searchInferenceEndpoints } = startDeps;
 
-      return { summary, context };
+        const { connectorId, connector } = await resolveConnectorForFeature({
+          searchInferenceEndpoints,
+          featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
+          request,
+          logger,
+        });
+
+        const inferenceClient = inference.getClient({ request });
+        const esClient = coreStart.elasticsearch.client.asScoped(request);
+
+        const result = await getLogAiInsights({
+          core,
+          plugins,
+          index,
+          id,
+          fields,
+          inferenceClient,
+          connectorId,
+          connector,
+          request,
+          esClient,
+          logger,
+        });
+        return response.ok({
+          headers: getSSEResponseHeaders(isCloudEnabled),
+          body: observableIntoEventSourceStream(result.events$, {
+            logger,
+            signal: getRequestAbortedSignal(request),
+          }),
+        });
+      } catch (error) {
+        logger.error(error);
+        return routeAiInsightError({
+          error,
+          response,
+          isCloudEnabled,
+          logger,
+          request,
+        });
+      }
     },
   });
 

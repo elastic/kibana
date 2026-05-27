@@ -15,4 +15,7 @@ module.exports = {
     '<rootDir>/x-pack/platform/plugins/shared/lens/{common,public,server}/**/*.{ts,tsx}',
   ],
   setupFiles: ['jest-canvas-mock'],
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/platform/plugins/shared/lens/jest_setup_mutation_observer.ts',
+  ],
 };

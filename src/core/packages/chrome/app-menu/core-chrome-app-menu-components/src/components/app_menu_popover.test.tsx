@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { AppMenuPopover } from './app_menu_popover';
 
 describe('AppMenuPopover', () => {
@@ -42,11 +42,13 @@ describe('AppMenuPopover', () => {
     expect(screen.getByTestId('anchor-button')).toBeInTheDocument();
   });
 
-  it('should render menu items when popover is open', () => {
+  it('should render menu items when popover is open', async () => {
     render(<AppMenuPopover {...defaultProps} isOpen={true} />);
 
-    expect(screen.getByText('Item 1')).toBeInTheDocument();
-    expect(screen.getByText('Item 2')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
+      expect(screen.getByText('Item 2')).toBeInTheDocument();
+    });
   });
 
   it('should not render menu items when popover is closed', () => {
@@ -90,12 +92,14 @@ describe('AppMenuPopover', () => {
     expect(anchorButton.closest('.euiToolTipAnchor')).not.toBeInTheDocument();
   });
 
-  it('should apply popoverWidth to the panel style', () => {
+  it('should apply popoverWidth to the context menu', async () => {
     const { baseElement } = render(
       <AppMenuPopover {...defaultProps} isOpen={true} popoverWidth={300} />
     );
 
-    const popoverPanel = baseElement.querySelector('.euiPanel');
-    expect(popoverPanel).toHaveStyle({ width: '300px' });
+    await waitFor(() => {
+      const contextMenu = baseElement.querySelector('.euiContextMenu');
+      expect(contextMenu).toHaveStyle({ width: '300px' });
+    });
   });
 });

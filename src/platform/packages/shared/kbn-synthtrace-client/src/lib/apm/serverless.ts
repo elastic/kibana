@@ -18,12 +18,14 @@ export class Serverless extends BaseSpan {
   private readonly metric: Metricset<ApmFields>;
 
   constructor(fields: ApmFields) {
+    const transactionId = generateShortId();
     const faasExection = generateLongId();
     const triggerType = 'other';
     super({
       ...fields,
       'processor.event': 'transaction',
-      'transaction.id': generateShortId(),
+      'transaction.id': transactionId,
+      'span.id': transactionId,
       'transaction.sampled': true,
       'faas.execution': faasExection,
       'faas.trigger.type': triggerType,

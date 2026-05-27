@@ -12,7 +12,13 @@ import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import type { InferenceConnectorType } from '@kbn/inference-common';
+import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import {
+  ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+  LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
+} from '@kbn/elastic-assistant-common';
 
 import { attackDiscoveryScheduleExecutor } from './executor';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
@@ -71,6 +77,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
   const date = '2025-05-20T15:18:21.000Z';
   const mockLogger = loggerMock.create();
   const mockTelemetry = analyticsServiceMock.createAnalyticsServiceSetup();
+  const mockInference = inferenceMock.createStartContract();
   const actionsClient = actionsClientMock.create();
   const ruleExecutorServices = alertsMock.createRuleExecutorServices();
   const services = {
@@ -156,6 +163,17 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     (services.alertsClient.report as jest.Mock).mockReturnValue({ uuid: 'fake-alert' });
 
+    // Mock inference.getConnectorByIdWithoutClientRequest to resolve the connector for the executor
+    mockInference.getConnectorByIdWithoutClientRequest.mockResolvedValue({
+      type: params.apiConfig.actionTypeId as InferenceConnectorType,
+      connectorId: params.apiConfig.connectorId,
+      name: params.apiConfig.name,
+      config: {},
+      capabilities: {},
+      isInferenceEndpoint: false,
+      isPreconfigured: false,
+    });
+
     (findDocuments as jest.Mock).mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit());
     (generateAttackDiscoveries as jest.Mock).mockResolvedValue({
       anonymizedAlerts: mockAnonymizedAlerts,
@@ -173,6 +191,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     } as unknown as RuleExecutorOptions;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -187,6 +206,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     } as unknown as RuleExecutorOptions;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -201,6 +221,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -220,6 +241,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -254,6 +276,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     await expect(async () => {
       await attackDiscoveryScheduleExecutor({
+        inference: mockInference,
         options,
         logger: mockLogger,
         publicBaseUrl: undefined,
@@ -273,6 +296,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -299,6 +323,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -317,6 +342,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -414,6 +440,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: 'http://fake-host.io/test',
@@ -437,6 +464,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     options.services.shouldStopExecution = () => true;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -451,6 +479,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -477,6 +506,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue([]);
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -493,6 +523,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     ]);
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -523,6 +554,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue(mockAttackDiscoveries);
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -552,6 +584,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -571,6 +604,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
 
     await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -593,6 +627,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     await expect(
       attackDiscoveryScheduleExecutor({
+        inference: mockInference,
         options,
         logger: mockLogger,
         publicBaseUrl: undefined,
@@ -603,5 +638,36 @@ describe('attackDiscoveryScheduleExecutor', () => {
     );
 
     expect(createTaskRunError).toHaveBeenCalledWith(error, TaskErrorSource.USER);
+  });
+
+  it('should resolve outdated connector ID to the new one before generating discoveries', async () => {
+    const options = {
+      ...executorOptions,
+      params: {
+        ...params,
+        apiConfig: {
+          ...params.apiConfig,
+          connectorId: ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+        },
+      },
+    } as unknown as RuleExecutorOptions;
+
+    await attackDiscoveryScheduleExecutor({
+      inference: mockInference,
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    expect(generateAttackDiscoveries).toHaveBeenCalledWith(
+      expect.objectContaining({
+        config: expect.objectContaining({
+          apiConfig: expect.objectContaining({
+            connectorId: LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
+          }),
+        }),
+      })
+    );
   });
 });

@@ -10,7 +10,7 @@
 import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatestWith, debounceTime, map } from 'rxjs';
+import { combineLatestWith, debounceTime, map, startWith } from 'rxjs';
 import type { DashboardState, DashboardOptions } from '../../server';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 
@@ -35,6 +35,7 @@ const comparators: StateComparators<DashboardSettings> = {
   title: 'referenceEquality',
   description: 'referenceEquality',
   hide_panel_titles: 'referenceEquality',
+  hide_panel_borders: 'referenceEquality',
   sync_colors: 'referenceEquality',
   sync_cursor: 'referenceEquality',
   sync_tooltips: 'referenceEquality',
@@ -84,26 +85,31 @@ export function initializeSettingsManager(initialState: DashboardState) {
           ...settings,
         });
       },
-      projectRoutingRestore$: stateManager.api.project_routing_restore$,
+      projectRoutingRestore$: stateManager.api.projectRoutingRestore$,
       title$: stateManager.api.title$,
       description$: stateManager.api.description$,
-      timeRestore$: stateManager.api.time_restore$,
-      hideTitle$: stateManager.api.hide_panel_titles$,
+      timeRestore$: stateManager.api.timeRestore$,
+      hideTitle$: stateManager.api.hidePanelTitles$,
+      hideBorder$: stateManager.api.hidePanelBorders$,
       settings: {
-        autoApplyFilters$: stateManager.api.auto_apply_filters$,
-        syncColors$: stateManager.api.sync_colors$,
-        syncCursor$: stateManager.api.sync_cursor$,
-        syncTooltips$: stateManager.api.sync_tooltips$,
-        useMargins$: stateManager.api.use_margins$,
+        autoApplyFilters$: stateManager.api.autoApplyFilters$,
+        syncColors$: stateManager.api.syncColors$,
+        syncCursor$: stateManager.api.syncCursor$,
+        syncTooltips$: stateManager.api.syncTooltips$,
+        useMargins$: stateManager.api.useMargins$,
       },
     },
     internalApi: {
+      anyStateChange$: stateManager.anyStateChange$,
       serializeSettings,
-      startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return stateManager.anyStateChange$.pipe(
+          // anyStateChange$ does not emit on subscribe
+          // use startWith to compare unsaved changes on subscribe
+          startWith(undefined),
           debounceTime(100),
           map(() => stateManager.getLatestState()),
-          combineLatestWith(lastSavedState$),
+          combineLatestWith(lastSavedState$.pipe(map((lastSaved) => deserializeState(lastSaved)))),
           map(([latestState, lastSavedState]) => {
             const {
               description,
@@ -114,12 +120,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
               project_routing_restore,
               title,
               ...optionDiffs
-            } = diffComparators(
-              comparators,
-              deserializeState(lastSavedState),
-              latestState,
-              DEFAULT_SETTINGS
-            );
+            } = diffComparators(comparators, lastSavedState, latestState, DEFAULT_SETTINGS);
             // options needs to contain all values and not just diffs since is spread into saved state
             const options = Object.keys(optionDiffs).length
               ? { ...serializeSettings().options, ...optionDiffs }

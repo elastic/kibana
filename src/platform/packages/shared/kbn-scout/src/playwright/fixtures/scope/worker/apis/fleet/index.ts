@@ -10,11 +10,12 @@
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 import type {
-  AgentPolicyCreateBody,
+  AgentPolicyCreateOptions,
+  AgentPolicyUpdateOptions,
   BulkGetBody,
   FleetOutputBody,
   FleetServerHostCreateBody,
-  AgentPolicyUpdateBody,
+  PackagePolicyCreateBody,
 } from './types';
 
 export interface FleetApiService {
@@ -23,29 +24,21 @@ export interface FleetApiService {
   };
   integration: {
     install: (name: string) => Promise<any>;
+    installPackage: (name: string, version: string, opts?: { force?: boolean }) => Promise<any>;
+    getPackage: (name: string) => Promise<any>;
     delete: (name: string) => Promise<any>;
   };
   package_policies: {
     get: (queryParams?: Record<string, any>) => Promise<any>;
     getById: (id: string) => Promise<any>;
+    create: (body: PackagePolicyCreateBody, queryParams?: Record<string, string>) => Promise<any>;
     delete: (id: string) => Promise<any>;
     bulkDelete: (ids: [string]) => Promise<any>;
   };
   agent_policies: {
     get: (queryParams?: Record<string, any>) => Promise<any>;
-    create: (
-      policyName: string,
-      policyNamespace: string,
-      sysMonitoring?: boolean,
-      params?: AgentPolicyCreateBody
-    ) => Promise<any>;
-    update: (
-      policyName: string,
-      policyNamespace: string,
-      agentPolicyId: string,
-      params?: AgentPolicyUpdateBody,
-      queryParams?: Record<string, string>
-    ) => Promise<any>;
+    create: (options: AgentPolicyCreateOptions) => Promise<any>;
+    update: (options: AgentPolicyUpdateOptions) => Promise<any>;
     bulkGet: (
       bulkGetIds: string[],
       params?: BulkGetBody,
@@ -116,6 +109,33 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
         );
       },
 
+      installPackage: async (name: string, version: string, opts?: { force?: boolean }) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.integration.installPackage [${name}@${version}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'POST',
+              path: `/api/fleet/epm/packages/${name}/${version}`,
+              body: { force: opts?.force ?? true },
+            });
+          }
+        );
+      },
+
+      getPackage: async (name: string) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.integration.getPackage [${name}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'GET',
+              path: `/api/fleet/epm/packages/${name}`,
+            });
+          }
+        );
+      },
+
       delete: async (name: string) => {
         return await measurePerformanceAsync(
           log,
@@ -132,7 +152,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
       },
     },
     package_policies: {
-      get: async () => {
+      get: async (queryParams?: Record<string, any>) => {
         return await measurePerformanceAsync(log, `fleetApi.package_policies.get`, async () => {
           return await kbnClient.request({
             method: 'GET',
@@ -140,6 +160,7 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
             headers: {
               'Content-Type': 'application/json',
             },
+            query: queryParams,
           });
         });
       },
@@ -151,6 +172,23 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
             return await kbnClient.request({
               method: 'GET',
               path: `/api/fleet/package_policies/${id}`,
+            });
+          }
+        );
+      },
+      create: async (body: PackagePolicyCreateBody, queryParams?: Record<string, string>) => {
+        return await measurePerformanceAsync(
+          log,
+          `fleetApi.package_policies.create [${body.name}]`,
+          async () => {
+            return await kbnClient.request({
+              method: 'POST',
+              path: `/api/fleet/package_policies`,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              query: queryParams,
+              body,
             });
           }
         );
@@ -193,12 +231,12 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
           });
         });
       },
-      create: async (
-        policyName: string,
-        policyNamespace: string,
-        sysMonitoring?: boolean,
-        params?: AgentPolicyCreateBody
-      ) => {
+      create: async ({
+        policyName,
+        policyNamespace,
+        sysMonitoring,
+        params,
+      }: AgentPolicyCreateOptions) => {
         return await measurePerformanceAsync(
           log,
           `fleetApi.agent_policies.create [${policyName}]`,
@@ -222,13 +260,13 @@ export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Fleet
         );
       },
 
-      update: async (
-        policyName: string,
-        policyNamespace: string,
-        agentPolicyId: string,
-        params?: AgentPolicyUpdateBody,
-        queryParams?: Record<string, string>
-      ) => {
+      update: async ({
+        policyName,
+        policyNamespace,
+        agentPolicyId,
+        params,
+        queryParams,
+      }: AgentPolicyUpdateOptions) => {
         return await measurePerformanceAsync(
           log,
           `fleetApi.agent_policies.update [${agentPolicyId}]`,

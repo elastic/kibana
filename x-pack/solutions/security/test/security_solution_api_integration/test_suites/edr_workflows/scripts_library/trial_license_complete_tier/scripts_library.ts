@@ -24,8 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   const rolesUsersProvider = getService('rolesUsersProvider');
   const log = getService('log');
 
-  // @skipInServerless: because tests use custom roles
-  describe('@ess @serverless @skipInServerless @skipInServerlessMKI Endpoint Scripts Library', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint Scripts Library', function () {
     const afterEachCleanupCallbacks: Array<() => void | Promise<unknown>> = [];
     let adminSupertest: TestAgent;
 
@@ -67,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
         .on('error', createSupertestErrorLogger(log))
         .on('response', addScriptToAfterEachCleanup)
         .field('name', 'test script')
+        .field('fileType', 'script')
         .field('platform', JSON.stringify(['linux']))
         .attach('file', buildFileBuffer(), 'script_file.sh')
         .expect(200);
@@ -84,37 +84,28 @@ export default function ({ getService }: FtrProviderContext) {
       let noAccessScriptsSuperTest: TestAgent;
 
       before(async () => {
-        await Promise.all([
-          rolesUsersProvider.loader.create(
-            rolesUsersProvider.buildRoleDefinition({
-              name: 'readScripts',
-              securityPrivileges: ['scripts_management_read'],
-            })
-          ),
-          rolesUsersProvider.loader.create(
-            rolesUsersProvider.buildRoleDefinition({
-              name: 'writeScripts',
-              securityPrivileges: ['scripts_management_all'],
-            })
-          ),
-          rolesUsersProvider.loader.create(
-            rolesUsersProvider.buildRoleDefinition({ name: 'noScriptsAccess' })
-          ),
-        ]);
+        readScriptsSuperTest = await utils.createSuperTestWithCustomRole({
+          name: 'readScripts',
+          privileges: rolesUsersProvider.buildRoleDefinition({
+            securityPrivileges: ['scripts_management_read'],
+          }),
+        });
 
-        readScriptsSuperTest = await utils.createSuperTest('readScripts');
-        writeScriptsSuperTest = await utils.createSuperTest('writeScripts');
-        noAccessScriptsSuperTest = await utils.createSuperTest('noScriptsAccess');
+        writeScriptsSuperTest = await utils.createSuperTestWithCustomRole({
+          name: 'writeScripts',
+          privileges: rolesUsersProvider.buildRoleDefinition({
+            securityPrivileges: ['scripts_management_all'],
+          }),
+        });
+
+        noAccessScriptsSuperTest = await utils.createSuperTestWithCustomRole({
+          name: 'noScriptsAccess',
+          privileges: rolesUsersProvider.buildRoleDefinition(),
+        });
       });
 
       after(async () => {
-        await Promise.all([
-          rolesUsersProvider.loader.delete('readScripts'),
-          rolesUsersProvider.loader.delete('writeScripts'),
-          rolesUsersProvider.loader.delete('noScriptsAccess'),
-        ]).catch((error) => {
-          log.warning(`after(): attempt to clear up roles/users failed:`, error);
-        });
+        await utils.cleanUpCustomRoles();
       });
 
       afterEach(async () => {
@@ -131,6 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
             .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
             .on('response', addScriptToAfterEachCleanup)
             .field('name', 'test script')
+            .field('fileType', 'script')
             .field('platform', JSON.stringify(['linux']))
             .attach('file', buildFileBuffer(), 'script_file.sh')
             .expect(403);
@@ -143,6 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
             .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
             .on('response', addScriptToAfterEachCleanup)
             .field('name', 'test script')
+            .field('fileType', 'script')
             .field('platform', JSON.stringify(['linux']))
             .attach('file', buildFileBuffer(), 'script_file.sh')
             .expect(403);
@@ -155,6 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
             .on('error', createSupertestErrorLogger(log))
             .on('response', addScriptToAfterEachCleanup)
             .field('name', 'test script')
+            .field('fileType', 'script')
             .field('platform', JSON.stringify(['linux']))
             .attach('file', buildFileBuffer(), 'script_file.sh')
             .expect(200);
@@ -228,7 +222,8 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(403);
         });
 
-        it('should delete script when user has WRITE privileges', async () => {
+        // https://github.com/elastic/security-team/issues/16593
+        it.skip('should delete script when user has WRITE privileges', async () => {
           await writeScriptsSuperTest
             .delete(SCRIPTS_LIBRARY_ROUTE_ITEM.replace('{script_id}', scriptId))
             .set('kbn-xsrf', 'true')

@@ -8,7 +8,7 @@
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasExecutionContext,
@@ -20,29 +20,34 @@ import {
   timeRangeComparators,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, merge, skip, skipWhile } from 'rxjs';
 import { getPatternAnalysisComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializePatternAnalysisControls } from './initialize_pattern_analysis_controls';
 import type { PatternAnalysisEmbeddableApi } from './types';
 import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
+import { canUseAiops } from '../../capabilities';
 
 export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_TYPE;
 
 export const getPatternAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  const factory: EmbeddableFactory<PatternAnalysisEmbeddableState, PatternAnalysisEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    PatternAnalysisEmbeddableState,
+    PatternAnalysisEmbeddableApi
+  > = {
     type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
-      const runtimeState = initialState.rawState;
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-      const titleManager = initializeTitleManager(initialState.rawState);
+      canUseAiops(coreStart, true);
+      const runtimeState = initialState;
+      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const titleManager = initializeTitleManager(initialState);
 
       const {
         patternAnalysisControlsApi,
@@ -63,12 +68,9 @@ export const getPatternAnalysisEmbeddableFactory = (
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...timeRangeManager.getLatestState(),
-            ...serializePatternAnalysisChartState(),
-          },
-          references: [],
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...serializePatternAnalysisChartState(),
         };
       }
 
@@ -79,22 +81,37 @@ export const getPatternAnalysisEmbeddableFactory = (
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
-          patternAnalysisControlsApi.dataViewId,
-          patternAnalysisControlsApi.fieldName,
-          patternAnalysisControlsApi.minimumTimeRangeOption,
-          patternAnalysisControlsApi.randomSamplerMode,
-          patternAnalysisControlsApi.randomSamplerProbability
-        ).pipe(map(() => undefined)),
+          patternAnalysisControlsApi.dataViewId.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.fieldName.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.minimumTimeRangeOption.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.randomSamplerMode.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          patternAnalysisControlsApi.randomSamplerProbability.pipe(
+            skip(1),
+            map(() => undefined)
+          )
+        ),
         getComparators: () => ({
           ...timeRangeComparators,
           ...titleComparators,
           ...patternAnalysisControlsComparators,
         }),
         onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
-          if (lastSaved?.rawState) {
-            patternAnalysisControlsApi.updateUserInput(lastSaved.rawState);
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) {
+            patternAnalysisControlsApi.updateUserInput(lastSaved);
           }
         },
       });

@@ -8,11 +8,13 @@
 import sinon from 'sinon';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AuthTypeRegistry, registerAuthTypes } from '../auth_types';
-import { getAxiosInstanceWithAuth } from './get_axios_instance';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import { buildUserAgent, getAxiosInstanceWithAuth } from './get_axios_instance';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
+import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
 import { PFX } from '@kbn/connector-specs/src/auth_types/pfx';
 import type { NormalizedAuthType } from '@kbn/connector-specs';
 
@@ -25,6 +27,10 @@ jest.mock('./get_custom_agents', () => ({
 
 jest.mock('./request_oauth_client_credentials_token', () => ({
   requestOAuthClientCredentialsToken: jest.fn(),
+}));
+
+jest.mock('./get_oauth_authorization_code_access_token', () => ({
+  getOAuthAuthorizationCodeAccessToken: jest.fn(),
 }));
 
 let clock: sinon.SinonFakeTimers;
@@ -59,6 +65,66 @@ describe('getAxiosInstance', () => {
 
     expect(result).not.toBeUndefined();
     expect(result!.defaults.auth).toBeUndefined();
+  });
+
+  test('uses caller-provided maxContentLength when specified', async () => {
+    const getAxios = getAxiosInstanceWithAuth({
+      authTypeRegistry,
+      configurationUtilities,
+      logger,
+    });
+    const result = await getAxios({
+      connectorId: '1',
+      secrets: {},
+      maxContentLength: 20 * 1024 * 1024,
+    });
+
+    expect(result.defaults.maxContentLength).toBe(20 * 1024 * 1024);
+  });
+
+  test('logs maxContentLength failures with available Axios response metadata', async () => {
+    const getAxios = getAxiosInstanceWithAuth({
+      authTypeRegistry,
+      configurationUtilities,
+      logger,
+    });
+    const result = await getAxios({
+      connectorId: '1',
+      secrets: {},
+      maxContentLength: 20 * 1024 * 1024,
+    });
+
+    const error = new Error('maxContentLength size of 20971520 exceeded') as Error & {
+      code?: string;
+      response?: { status?: number; headers?: Record<string, string> };
+      request?: { res?: { headers?: Record<string, string> } };
+    };
+    error.code = 'ERR_BAD_RESPONSE';
+    error.response = {
+      status: 200,
+      headers: {
+        'content-length': '104857600',
+        'content-type': 'application/octet-stream',
+        'set-cookie': 'secret-cookie',
+      },
+    };
+    error.request = {
+      res: {
+        headers: {
+          'Content-Length': '104857600',
+          server: 'test',
+          cookie: 'secret-cookie',
+        },
+      },
+    };
+
+    // @ts-expect-error accessing internal axios interceptor handlers
+    const rejectionHandler = result!.interceptors.response.handlers[0].rejected as Function;
+    await expect(rejectionHandler(error)).rejects.toBe(error);
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Actions Axios request exceeded maxContentLength: maxContentLength size of 20971520 exceeded; metadata: {"connectorId":"1","configuredMaxContentLength":20971520,"errorCode":"ERR_BAD_RESPONSE","responseStatus":200,"responseHeaders":{"content-length":"104857600","content-type":"application/octet-stream"},"requestResponseHeaders":{"Content-Length":"104857600"}}'
+    );
   });
 
   test('throws error when auth type is not supported', async () => {
@@ -251,7 +317,8 @@ describe('getAxiosInstance', () => {
       'https://test/oauth/token',
       logger,
       { clientId: 'my-client-id', clientSecret: 'my-client-secret', scope: 'grant' },
-      configurationUtilities
+      configurationUtilities,
+      'client_secret_post'
     );
 
     expect(result).not.toBeUndefined();
@@ -266,7 +333,7 @@ describe('getAxiosInstance', () => {
     expect(result!.interceptors.request.handlers.length).toBe(1);
 
     // @ts-expect-error
-    expect(result!.interceptors.response.handlers.length).toBe(0);
+    expect(result!.interceptors.response.handlers.length).toBe(1);
 
     // @ts-expect-error
     const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test5' });
@@ -316,7 +383,7 @@ describe('getAxiosInstance', () => {
     expect(result!.interceptors.request.handlers.length).toBe(1);
 
     // @ts-expect-error
-    expect(result!.interceptors.response.handlers.length).toBe(1);
+    expect(result!.interceptors.response.handlers.length).toBe(2);
 
     // @ts-expect-error
     const result2 = result!.interceptors.request.handlers[0].fulfilled({ url: 'http://test5' });
@@ -350,5 +417,98 @@ describe('getAxiosInstance', () => {
 
     // this interceptor was cleared and the auth type specific one was used
     expect(getCustomAgents).not.toHaveBeenCalled();
+  });
+
+  test('401 handler passes tokenResponseOptions to getOAuthAuthorizationCodeAccessToken', async () => {
+    const mockGetToken = getOAuthAuthorizationCodeAccessToken as jest.Mock;
+    mockGetToken.mockResolvedValue('bearer xoxp-refreshed-token');
+
+    const getAxios = getAxiosInstanceWithAuth({
+      authTypeRegistry,
+      configurationUtilities,
+      logger,
+    });
+
+    const result = await getAxios({
+      connectorId: 'slack-connector',
+      connectorTokenClient,
+      secrets: {
+        authType: 'oauth_authorization_code',
+        clientId: 'slack-client-id',
+        clientSecret: 'slack-client-secret',
+        tokenUrl: 'https://slack.com/api/oauth.v2.access',
+        scope: 'channels:read chat:write',
+        accessTokenPath: 'authed_user.access_token',
+        tokenType: 'bearer',
+      },
+    });
+
+    // The initial configure call fetches a token
+    expect(mockGetToken).toHaveBeenCalledTimes(1);
+    mockGetToken.mockClear();
+    mockGetToken.mockResolvedValue('bearer xoxp-refreshed-token');
+
+    // Access the 401 response interceptor
+    // @ts-expect-error accessing internal axios interceptor handlers
+    const rejectionHandler = result!.interceptors.response.handlers[0].rejected as Function;
+
+    // Mock the retry request so it doesn't make a real HTTP call
+    jest.spyOn(result!, 'request').mockResolvedValue({ status: 200, data: 'ok' });
+
+    const mock401Error = {
+      response: { status: 401 },
+      config: {
+        headers: { Authorization: 'bearer xoxp-expired-token' },
+        _retry: false,
+      },
+      message: 'Request failed with status code 401',
+    };
+
+    await rejectionHandler(mock401Error);
+
+    expect(mockGetToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'slack-connector',
+        forceRefresh: true,
+        tokenResponseOptions: {
+          accessTokenPath: 'authed_user.access_token',
+          tokenTypePath: undefined,
+          tokenType: 'bearer',
+        },
+      })
+    );
+  });
+});
+
+describe('buildUserAgent', () => {
+  test('includes axios version and deployment ID for ESS', () => {
+    const ua = buildUserAgent({ deploymentId: 'abc123', serverless: {} } as CloudSetup);
+    expect(ua).toContain('axios/');
+    expect(ua).toContain('elastic (deployment:abc123)');
+  });
+
+  test('includes axios version and project ID for serverless', () => {
+    const ua = buildUserAgent({ serverless: { projectId: 'my-project' } } as CloudSetup);
+    expect(ua).toContain('axios/');
+    expect(ua).toContain('elastic (project:my-project)');
+  });
+
+  test('prefers projectId over deploymentId when both are present', () => {
+    const ua = buildUserAgent({
+      deploymentId: 'abc123',
+      serverless: { projectId: 'my-project' },
+    } as CloudSetup);
+    expect(ua).toContain('elastic (project:my-project)');
+    expect(ua).not.toContain('deployment');
+  });
+
+  test('returns only axios version when no cloud context is provided', () => {
+    const ua = buildUserAgent(undefined);
+    expect(ua).toMatch(/^axios\/\d+\.\d+\.\d+$/);
+  });
+
+  test('returns only axios version when cloud context has no identifiers', () => {
+    const ua = buildUserAgent({ serverless: {} } as CloudSetup);
+    expect(ua).toMatch(/^axios\/\d+\.\d+\.\d+$/);
   });
 });

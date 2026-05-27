@@ -7,23 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isFunctionExpression, within } from '@elastic/esql';
 import { getExpressionType, getFunctionDefinition } from '../..';
-import { isFunctionExpression } from '../../../../../ast/is';
-import { within } from '../../../../../ast/location';
+import { buildMapValueCompleteItem } from '../../../../registry/complete_items';
 import type { ISuggestionItem } from '../../../../registry/types';
 import { inOperators, nullCheckOperators, patternMatchOperators } from '../../../all_operators';
 import { isExpressionComplete } from '../../expressions';
-import { getOverlapRange } from '../../shared';
 import { dispatchPartialOperators } from './operators/partial/dispatcher';
 import { detectIn, detectLike, detectNullCheck } from './operators/partial/utils';
 import { getPosition, type ExpressionPosition } from './position';
 import { dispatchStates } from './positions/dispatcher';
-import {
-  DOUBLE_QUOTED_STRING_REGEX,
-  getCommandMapExpressionSuggestions,
-  isInsideMapExpression,
-} from '../map_expression';
-import { SignatureAnalyzer } from './signature_analyzer';
+import type { MapParameters } from '../map_expression';
+import { DOUBLE_QUOTED_STRING_REGEX, getCommandMapExpressionSuggestions } from '../map_expression';
+import { extractSignatureMapParams } from '../../signatures';
 import type {
   ExpressionComputedMetadata,
   ExpressionContext,
@@ -31,10 +27,9 @@ import type {
   SuggestForExpressionParams,
   SuggestForExpressionResult,
 } from './types';
-import { isNullCheckOperator } from './utils';
+import { getKqlSuggestionsIfApplicable } from './utils';
+import { isInsideMapExpression, parseMapParams } from '../../maps';
 
-const WHITESPACE_REGEX = /\s/;
-const LAST_WORD_BOUNDARY_REGEX = /\b\w(?=\w*$)/;
 // Matches tokens like "foo(" to recover function names when the AST is missing
 const FUNCTION_CALL_REGEX = /\b([a-z_][a-z0-9_]*)\s*\(/gi;
 
@@ -45,28 +40,38 @@ export async function suggestForExpression(
   const baseCtx = buildContext(params);
   const computed = computeDerivedState(baseCtx);
 
-  const mapSuggestions = getMapExpressionSuggestions(baseCtx.innerText);
+  const kqlSuggestions = await getKqlSuggestionsIfApplicable(baseCtx);
 
-  if (mapSuggestions !== null) {
+  if (kqlSuggestions !== null) {
     return {
-      suggestions: attachRanges(baseCtx, mapSuggestions),
+      suggestions: kqlSuggestions,
       computed,
     };
   }
 
-  const partialSuggestions = await trySuggestForPartialOperators(baseCtx);
+  const mapSuggestions = getMapExpressionSuggestions(baseCtx.innerText);
+
+  if (mapSuggestions !== null) {
+    return {
+      suggestions: mapSuggestions,
+      computed,
+    };
+  }
+
+  const clonedCtx = { ...baseCtx };
+  const partialSuggestions = await trySuggestForPartialOperators(clonedCtx);
 
   if (partialSuggestions !== null) {
     return {
-      suggestions: attachRanges(baseCtx, partialSuggestions),
-      computed,
+      suggestions: partialSuggestions,
+      computed: computeDerivedState(clonedCtx),
     };
   }
 
   const suggestions = await dispatchStates(baseCtx, computed.position);
 
   return {
-    suggestions: attachRanges(baseCtx, suggestions),
+    suggestions,
     computed,
   };
 }
@@ -146,7 +151,11 @@ function buildContext(params: SuggestForExpressionParams): ExpressionContext {
 function computeDerivedState(ctx: ExpressionContext): ExpressionComputedMetadata {
   const { expressionRoot, innerText, cursorPosition, context } = ctx;
   const position: ExpressionPosition = getPosition(innerText, expressionRoot);
-  const expressionType = getExpressionType(expressionRoot, context?.columns);
+  const expressionType = getExpressionType(
+    expressionRoot,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
   const isComplete = isExpressionComplete(expressionType, innerText);
   const insideFunction =
     (expressionRoot &&
@@ -163,39 +172,6 @@ function computeDerivedState(ctx: ExpressionContext): ExpressionComputedMetadata
   };
 }
 
-/** Returns new suggestions array with range information */
-function attachRanges(ctx: ExpressionContext, suggestions: ISuggestionItem[]): ISuggestionItem[] {
-  const { innerText } = ctx;
-  const lastChar = innerText[innerText.length - 1];
-  const hasNonWhitespacePrefix = !WHITESPACE_REGEX.test(lastChar);
-
-  return suggestions.map((suggestion) => {
-    // Preserve existing rangeToReplace if already set (e.g., from map expression suggestions)
-    if (suggestion.rangeToReplace) {
-      return { ...suggestion };
-    }
-
-    if (isNullCheckOperator(suggestion.text)) {
-      return {
-        ...suggestion,
-        rangeToReplace: getOverlapRange(innerText, suggestion.text),
-      };
-    }
-
-    if (hasNonWhitespacePrefix) {
-      return {
-        ...suggestion,
-        rangeToReplace: {
-          start: innerText.search(LAST_WORD_BOUNDARY_REGEX),
-          end: innerText.length,
-        },
-      };
-    }
-
-    return { ...suggestion };
-  });
-}
-
 function getMapExpressionSuggestions(innerText: string): ISuggestionItem[] | null {
   if (!isInsideMapExpression(innerText)) {
     return null;
@@ -203,17 +179,27 @@ function getMapExpressionSuggestions(innerText: string): ISuggestionItem[] | nul
 
   const functionName = getLastFunctionName(innerText);
   const functionDef = functionName && getFunctionDefinition(functionName);
-  const mapParamsStr = functionDef && SignatureAnalyzer.extractMapParams(functionDef.signatures);
+  const mapParamsStr = functionDef && extractSignatureMapParams(functionDef.signatures);
 
   if (!mapParamsStr) {
     return null;
   }
 
-  const availableParameters = SignatureAnalyzer.parseMapParams(mapParamsStr);
-  if (Object.keys(availableParameters).length === 0) {
+  const parsedParameters = parseMapParams(mapParamsStr);
+  if (Object.keys(parsedParameters).length === 0) {
     return null;
   }
 
+  const availableParameters = Object.entries(parsedParameters).reduce<MapParameters>(
+    (acc, [paramName, paramDef]) => {
+      acc[paramName] = {
+        ...paramDef,
+        suggestions: paramDef.values.map((value) => buildMapValueCompleteItem(value)),
+      };
+      return acc;
+    },
+    {}
+  );
   const suggestions = getCommandMapExpressionSuggestions(innerText, availableParameters, true);
   return suggestions.length > 0 ? suggestions : [];
 }

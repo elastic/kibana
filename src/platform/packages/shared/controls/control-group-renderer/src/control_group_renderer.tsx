@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   BehaviorSubject,
   Subject,
@@ -22,7 +22,7 @@ import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  apiPublishesUnsavedChanges,
+  apiHasSerializableState,
   useSearchApi,
   type EmbeddableApiContext,
   type ViewMode,
@@ -88,6 +88,7 @@ export const ControlGroupRenderer = ({
 
   const { childrenApi, currentChildState$Ref } = useChildrenApi(initialState, lastSavedState$Ref);
   const layoutApi = useLayoutApi(initialState, childrenApi, lastSavedState$Ref);
+  const [controls, setControls] = useState(layoutApi?.layout$.getValue().controls);
 
   /** Props management */
   const searchApi = useSearchApi({
@@ -109,6 +110,7 @@ export const ControlGroupRenderer = ({
       ...searchApi,
       ...propsApi,
       reload$,
+      panelIsPinned: () => true,
       getEditorConfig: getEditorConfig.current,
       disabledActionIds$,
       setDisabledActionIds: (ids: string[] | undefined) => {
@@ -125,10 +127,11 @@ export const ControlGroupRenderer = ({
     ])
       .pipe(
         map(([currentChildState, currentLayout]) => {
+          setControls(currentLayout.controls);
           const combinedState: ControlPanelsState = {};
           Object.keys(currentLayout.controls).forEach((id) => {
             combinedState[id] = {
-              ...currentChildState[id].rawState,
+              ...currentChildState[id],
               ...currentLayout.controls[id],
             } as ControlPanelState;
           });
@@ -162,23 +165,22 @@ export const ControlGroupRenderer = ({
       esqlVariables$: parentApi.esqlVariables$.pipe(ignoreWhileLoading),
       appliedFilters$: parentApi.appliedFilters$.pipe(ignoreWhileLoading),
       appliedTimeslice$: parentApi.appliedTimeslice$.pipe(ignoreWhileLoading),
+      getControls: parentApi.layout$.getValue().controls ?? {},
       reload: () => {
         parentApi.reload$.next();
       },
       getInput$: () => input$,
       getInput: () => input$.value,
       updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
-        /** Set the last saved state to the new input and then reset each child to this state */
-        const newState = lastSavedState$Ref.current.getValue();
+        const newState = { ...lastSavedState$Ref.current.getValue() };
         Object.entries(newInput.initialChildControlState ?? {}).forEach(([id, control]) => {
           newState[id] = {
             ...lastSavedState$Ref.current.value[id],
             ...control,
           };
         });
-        lastSavedState$Ref.current.next(newState);
-        asyncForEach(Object.values(parentApi.children$.getValue()), async (child) => {
-          if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
+        asyncForEach(Object.entries(parentApi.children$.getValue()), async ([id, child]) => {
+          if (apiHasSerializableState(child)) child.applySerializedState(newState[id]);
         });
       },
     };
@@ -209,7 +211,13 @@ export const ControlGroupRenderer = ({
   }, [parentApi, input$, uiActions]);
 
   /** Wait for parent API, which relies on the async creation options, before rendering */
-  return !parentApi ? null : (
-    <ControlsRenderer parentApi={parentApi as ControlsRendererParentApi} />
+  return !parentApi || !controls ? null : (
+    <ControlsRenderer
+      parentApi={parentApi as ControlsRendererParentApi}
+      controls={{ controls }}
+      onControlsChanged={(newControls) => {
+        parentApi.layout$.next(newControls);
+      }}
+    />
   );
 };

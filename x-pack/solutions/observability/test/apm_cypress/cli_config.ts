@@ -13,8 +13,12 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('@kbn/test-suites-src/common/config')
   );
+
+  // This has been changed from the original config.base.ts
+  // to avoid the usage of the dockerized package registry
+  // problem is apmSynthtraceKibanaClient initialization happens before the
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.base.ts')
+    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
   );
 
   return {
@@ -40,6 +44,13 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
       ],
+    },
+    uiSettings: {
+      ...xpackFunctionalTestsConfig.get('uiSettings'),
+      globalDefaults: {
+        ...xpackFunctionalTestsConfig.get('uiSettings.globalDefaults'),
+        hideAnnouncements: true,
+      },
     },
     testRunner: cypressTestRunner,
   };

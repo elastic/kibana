@@ -8,7 +8,14 @@ import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 export default createPlaywrightEvalsConfig({
-  testDir: Path.join(__dirname, './evals'),
-  repetitions: 3,
-  timeout: 30 * 60_000, // 30 minutes timeout given large datasets in use
+  testDir: Path.resolve(__dirname, './evals'),
+  // The `esql-generation` suite (`esql.playwright.config.ts`) owns specs
+  // under `evals/esql/`. Excluding them here prevents the recursive
+  // `testDir` walk from picking them up and double-running them in the
+  // agent-builder weekly cycle.
+  testIgnore: ['**/esql/**'],
+  // CI job timeout is ~1h; keep default low and use EVALUATION_REPETITIONS
+  // for longer/higher-confidence runs.
+  repetitions: 1,
+  timeout: 4 * 60 * 60_000, // 4 hours timeout given large datasets in use
 });

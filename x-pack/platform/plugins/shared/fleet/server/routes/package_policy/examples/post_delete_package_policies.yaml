@@ -1,0 +1,34 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postDeletePackagePoliciesRequestExample:
+          description: 'Delete multiple package policies by ID'
+          value:
+            packagePolicyIds:
+              - 'package-policy-id-1'
+              - 'package-policy-id-2'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postDeletePackagePoliciesExample:
+            description: 'Results of the bulk delete operation'
+            value:
+              - id: 'package-policy-id-1'
+                success: true
+              - id: 'package-policy-id-2'
+                success: true
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

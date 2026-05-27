@@ -63,7 +63,7 @@ export const TakeAction = ({ kqlQuery, isDisabled }: TakeActionProps) => {
       isLoading={isLoading}
       isDisabled={isDisabled}
       fill
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={() => setPopoverOpen(!isPopoverOpen)}
     >
@@ -92,7 +92,7 @@ export const TakeAction = ({ kqlQuery, isDisabled }: TakeActionProps) => {
       anchorPosition="downLeft"
       data-test-subj="take-action-button"
     >
-      <EuiContextMenuPanel size="s" items={actionsItems} />
+      <EuiContextMenuPanel items={actionsItems} />
     </EuiPopover>
   );
 };

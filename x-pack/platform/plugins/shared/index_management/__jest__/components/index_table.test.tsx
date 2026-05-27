@@ -37,6 +37,14 @@ describe('index table', () => {
   });
 
   afterEach(async () => {
+    // Best-effort cleanup: ensure the actions popover doesn't remain open between tests.
+    if (
+      screen.queryByTestId('indexContextMenu') &&
+      screen.queryByTestId('indexActionsContextMenuButton')
+    ) {
+      fireEvent.click(screen.getByTestId('indexActionsContextMenuButton'));
+    }
+
     await runPendingTimers();
     jest.clearAllTimers();
     jest.useRealTimers();
@@ -262,7 +270,7 @@ describe('index table', () => {
 
     const menu = await screen.findByTestId('indexContextMenu');
     const items = within(menu)
-      .getAllByRole('button')
+      .getAllByRole('menuitem')
       .map((btn) => (btn.textContent || '').trim())
       .filter((t) => t.length > 0);
 
@@ -280,7 +288,7 @@ describe('index table', () => {
 
     const menu = await screen.findByTestId('indexContextMenu');
     const items = within(menu)
-      .getAllByRole('button')
+      .getAllByRole('menuitem')
       .map((btn) => (btn.textContent || '').trim())
       .filter((t) => t.length > 0);
 
@@ -307,7 +315,7 @@ describe('index table', () => {
 
     const menu = await screen.findByTestId('indexContextMenu');
     const items = within(menu)
-      .getAllByRole('button')
+      .getAllByRole('menuitem')
       .map((btn) => (btn.textContent || '').trim())
       .filter((t) => t.length > 0);
 

@@ -11,11 +11,10 @@
     "server": true,
     "requiredPlugins": [
       "presentationUtil",
-      "presentationPanel",
       "embeddable",
       "dataViews",
       "data",
-      "unifiedSearch",
+      "kql",
       "uiActions",
       "kibanaReact"
     ]

@@ -24,8 +24,8 @@ import {
   wiredStreamsStatusChangedEventType,
   streamsFeatureIdentificationSavedEventType,
   streamsFeatureIdentificationDeletedEventType,
-  streamsDescriptionGeneratedEventType,
   streamsTabVisitedEventType,
+  streamsInsightFeedbackEventType,
 } from './events';
 import { StreamsTelemetryClient } from './client';
 
@@ -53,8 +53,8 @@ export class StreamsTelemetryService {
     this.analytics.registerEventType(wiredStreamsStatusChangedEventType);
     this.analytics.registerEventType(streamsFeatureIdentificationSavedEventType);
     this.analytics.registerEventType(streamsFeatureIdentificationDeletedEventType);
-    this.analytics.registerEventType(streamsDescriptionGeneratedEventType);
     this.analytics.registerEventType(streamsTabVisitedEventType);
+    this.analytics.registerEventType(streamsInsightFeedbackEventType);
   }
 
   public getClient() {

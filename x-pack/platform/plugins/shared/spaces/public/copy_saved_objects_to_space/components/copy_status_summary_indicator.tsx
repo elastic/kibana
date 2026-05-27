@@ -47,7 +47,7 @@ const CopyStatusIcon = (props: Props) => {
   if (successful) {
     return (
       <EuiIconTip
-        type={'checkInCircleFilled'}
+        type={'checkCircleFill'}
         color={'success'}
         iconProps={{
           'data-test-subj': getDataTestSubj('success'),

@@ -10,7 +10,10 @@ import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
+import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 
 const labels = {
   copy: i18n.translate('xpack.agentBuilder.roundResponseActions.copy', {
@@ -19,18 +22,24 @@ const labels = {
   copySuccess: i18n.translate('xpack.agentBuilder.roundResponseActions.copySuccess', {
     defaultMessage: 'Response copied to clipboard',
   }),
+  regenerate: i18n.translate('xpack.agentBuilder.roundResponseActions.regenerate', {
+    defaultMessage: 'Regenerate response',
+  }),
 };
 
 interface RoundResponseActionsProps {
   content: string;
   isVisible: boolean;
+  isLastRound?: boolean;
 }
 
 export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   content,
   isVisible,
+  isLastRound,
 }) => {
   const { addSuccessToast } = useToasts();
+  const { regenerate, isRegenerating, isResponseLoading } = useConversationStream();
 
   const handleCopy = useCallback(() => {
     const isSuccess = copy(content);
@@ -39,10 +48,16 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     }
   }, [content, addSuccessToast]);
 
+  const handleResend = useCallback(() => {
+    regenerate();
+  }, [regenerate]);
+
+  // Disable regenerate button while any response is loading
+  const isRegenerateDisabled = isRegenerating || isResponseLoading;
+
   return (
     <EuiFlexGroup
       direction="row"
-      justifyContent="spaceBetween"
       gutterSize="xs"
       responsive={false}
       css={css`
@@ -52,13 +67,36 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
     >
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          iconType="copyClipboard"
+          iconType="copy"
           aria-label={labels.copy}
           onClick={handleCopy}
           color="text"
           data-test-subj="roundResponseCopyButton"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.COPY_RESPONSE,
+            detail: 'conversation',
+          })}
         />
       </EuiFlexItem>
+      {isLastRound && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="refresh"
+            aria-label={labels.regenerate}
+            onClick={handleResend}
+            color="text"
+            isDisabled={isRegenerateDisabled}
+            isLoading={isRegenerating}
+            data-test-subj="roundResponseRegenerateButton"
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.REGENERATE,
+              detail: 'conversation',
+            })}
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

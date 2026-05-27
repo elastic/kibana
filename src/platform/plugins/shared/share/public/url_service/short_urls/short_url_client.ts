@@ -76,19 +76,39 @@ export class BrowserShortUrlClient implements IShortUrlClient {
     isAbsoluteTime?: boolean
   ): Promise<ShortUrlCreateResponse<P>> {
     const getUpdatedParams = (inputParams: ShortUrlCreateParams<P>) => {
+      if (!isAbsoluteTime) return inputParams;
+
       const timeRange = inputParams.params?.timeRange as SerializableRecord;
-      if (isAbsoluteTime && timeRange?.from && timeRange?.to)
-        return {
-          ...inputParams,
-          params: {
-            ...inputParams.params,
-            timeRange: {
-              from: convertRelativeTimeStringToAbsoluteTimeString(timeRange.from as string),
-              to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to as string),
-            },
-          },
+      const timeRangeSnakeCase = inputParams.params?.time_range as SerializableRecord;
+
+      const timeRanges: {
+        timeRange?: { from: string | undefined; to: string | undefined };
+        time_range?: { from: string | undefined; to: string | undefined };
+      } = {};
+
+      if (timeRange?.from && timeRange?.to) {
+        timeRanges.timeRange = {
+          from: convertRelativeTimeStringToAbsoluteTimeString(timeRange.from as string),
+          to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to as string, {
+            roundUp: true,
+          }),
         };
-      return inputParams;
+      }
+      if (timeRangeSnakeCase?.from && timeRangeSnakeCase?.to) {
+        timeRanges.time_range = {
+          from: convertRelativeTimeStringToAbsoluteTimeString(timeRangeSnakeCase.from as string),
+          to: convertRelativeTimeStringToAbsoluteTimeString(timeRangeSnakeCase.to as string, {
+            roundUp: true,
+          }),
+        };
+      }
+      return {
+        ...inputParams,
+        params: {
+          ...inputParams.params,
+          ...timeRanges,
+        },
+      };
     };
 
     const result = await this.create(getUpdatedParams(params));

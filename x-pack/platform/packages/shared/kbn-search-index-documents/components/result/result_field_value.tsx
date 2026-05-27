@@ -64,7 +64,7 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
                 <EuiCopy textToCopy={fieldValue}>
                   {(copy) => (
                     <EuiIcon
-                      type="copyClipboard"
+                      type="copy"
                       onClick={copy}
                       data-test-subj="copyDenseVector"
                       aria-label={i18n.translate(

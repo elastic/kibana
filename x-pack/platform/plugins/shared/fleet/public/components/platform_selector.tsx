@@ -164,12 +164,15 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiPopover
               button={
                 <EuiFilterButton
-                  iconType="arrowDown"
+                  iconType="chevronSingleDown"
                   data-test-subj="platformSelectorExtended"
                   onClick={() => setShowExtendedPlatforms(!showExtendedPlatforms)}
                   isSelected={showExtendedPlatforms}
                   hasActiveFilters={extendedPlatforms.includes(platform)}
                   numActiveFilters={extendedPlatforms.includes(platform) ? 1 : 0}
+                  aria-label={i18n.translate('xpack.fleet.agentEnrollment.morePlatformsLabel', {
+                    defaultMessage: 'More platforms',
+                  })}
                   css={css`
                     .euiFilterButton__text {
                       min-inline-size: 0;
@@ -181,7 +184,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               }
               isOpen={showExtendedPlatforms}
               closePopover={() => setShowExtendedPlatforms(false)}
-              panelPaddingSize="none"
+              panelPaddingSize="s"
               repositionOnScroll={true}
             >
               <EuiSelectable
@@ -198,9 +201,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                   checked: platform === option.id ? 'on' : undefined,
                   'data-test-subj': option['data-test-subj'],
                 }))}
-                onChange={(_allOptions, _event, option) => setPlatform(option.key)}
+                onChange={(_allOptions, _event, option) => {
+                  setPlatform(option.key);
+                  setShowExtendedPlatforms(false);
+                }}
                 css={{ width: 150 }}
-                listProps={{ paddingSize: 'none', onFocusBadge: false }}
+                listProps={{ onFocusBadge: false }}
               >
                 {(list) => list}
               </EuiSelectable>
@@ -282,7 +288,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
                 {(copy) => (
                   <EuiButton
                     color="primary"
-                    iconType="copyClipboard"
+                    iconType="copy"
                     size="m"
                     onClick={() => onCopyButtonClick(copy)}
                   >

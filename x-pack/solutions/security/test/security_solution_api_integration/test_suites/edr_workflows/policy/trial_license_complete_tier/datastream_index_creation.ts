@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import {
   DEFAULT_DIAGNOSTIC_INDEX_PATTERN,
   ENDPOINT_ACTION_RESPONSES_DS,
-  ENDPOINT_HEARTBEAT_INDEX_PATTERN,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { buildIndexNameWithNamespace } from '@kbn/security-solution-plugin/common/endpoint/utils/index_name_utilities';
 import {
@@ -25,11 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
   const kbnClient = getService('kibanaServer');
   const log = getService('log');
   const retry = getService('retry');
-  const config = getService('config');
-  const isServerless = config.get('serverless');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/246341
-  describe.skip('@ess @serverless Creation of DOT indices for elastic defend policies', function () {
+  describe('@ess @serverless Creation of DOT indices for elastic defend policies', function () {
     let testData: PolicyTestResourceInfo;
 
     const getExpectedIndexList = (namespace: string): string[] => {
@@ -37,10 +33,6 @@ export default function ({ getService }: FtrProviderContext) {
         buildIndexNameWithNamespace(ENDPOINT_ACTION_RESPONSES_DS, namespace),
         buildIndexNameWithNamespace(DEFAULT_DIAGNOSTIC_INDEX_PATTERN, namespace),
       ];
-
-      if (isServerless) {
-        indexList.push(buildIndexNameWithNamespace(ENDPOINT_HEARTBEAT_INDEX_PATTERN, namespace));
-      }
 
       return indexList;
     };

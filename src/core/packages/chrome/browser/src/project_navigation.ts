@@ -35,10 +35,11 @@ import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deep
 import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
 import type { WorkplaceAIApp, DeepLinkId as WorkplaceAILink } from '@kbn/deeplinks-workplace-ai';
+import type { VectordbApp, DeepLinkId as VectordbLink } from '@kbn/deeplinks-vectordb';
 import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builder';
-import type { DeepLinkId as DataConnectorsLink } from '@kbn/deeplinks-data-connectors';
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
+import type { BadgeType } from '@kbn/ui-side-navigation';
 
 import type { ChromeNavLink } from './nav_links';
 
@@ -59,6 +60,7 @@ export type AppId =
   | FleetApp
   | SharedApp
   | WorkplaceAIApp
+  | VectordbApp
   | WorkflowsApp;
 
 /** @public */
@@ -73,8 +75,8 @@ export type AppDeepLinkId =
   | FleetLink
   | SharedLink
   | WorkplaceAILink
+  | VectordbLink
   | AgentBuilderLink
-  | DataConnectorsLink
   | WorkflowsLink;
 
 /** @public */
@@ -154,9 +156,9 @@ interface NodeDefinitionBase {
   renderAs?: RenderAs;
 
   /**
-   * Sidenav v2 for now supports only 2 types of badges:
+   * (optional) The type of badge shown next to the item (e.g. `beta`, `techPreview`, `new`).
    */
-  badgeType?: 'beta' | 'techPreview';
+  badgeType?: BadgeType;
 }
 
 /** @public */
@@ -272,10 +274,6 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
   /** Optional icon for the solution navigation to render in the select dropdown. */
   icon?: IconType;
-  /** The page to navigate to when clicking on the Kibana (or custom) logo. */
-  homePage?: LinkId;
-  /** data-test-subj attribute for the solution navigation. */
-  dataTestSubj?: string;
 }
 
 export type SolutionNavigationDefinitions = {

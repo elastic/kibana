@@ -47,10 +47,11 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           '--serverless=security',
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'bulkEditAlertSuppressionEnabled',
-            'doesNotMatchForIndicatorMatchRuleEnabled',
             'endpointExceptionsMovedUnderManagement',
+            'ruleChangesHistoryEnabled',
+            'disable:entityAnalyticsEntityStoreV2',
           ])}`,
+          '--xpack.alerting.ruleChangeTracking.enabled=true',
           ...(options.kbnTestServerArgs || []),
           `--plugin-path=${path.resolve(
             __dirname,

@@ -7,19 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isLiteral, isFunctionExpression } from '@elastic/esql';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { isParameterType } from '../../../../types';
 import { getTimeUnitLiterals } from '../../../literals';
 import type { ExpressionContext } from '../types';
-import { isLiteral, isFunctionExpression } from '../../../../../../ast/is';
 import { isNumericType, FunctionDefinitionTypes } from '../../../../types';
 import { commaCompleteItem } from '../../../../../registry/complete_items';
 import { getExpressionType } from '../../../expressions';
-import { SignatureAnalyzer } from '../signature_analyzer';
 import { getLogicalContinuationSuggestions } from '../operators/utils';
 import { shouldSuggestOperators } from './after_complete/should_suggest_operators';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { logicalOperators } from '../../../../all_operators';
+import {
+  hasArbitraryExpressionSignature,
+  isAmbiguousPosition,
+  canAcceptMoreArgs,
+  hasVariadicSignature,
+  isTypeAcceptedAtPosition,
+} from '../../../signatures';
 
 /**
  * Handler for autocomplete suggestions after complete expressions.
@@ -55,14 +61,12 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
       return suggestions;
     }
 
-    const analyzer = SignatureAnalyzer.from(functionParameterContext);
-
     // For repeating signatures (CASE): boolean at position 2,4,6... is a condition → suggest comma
-    if (analyzer?.isAmbiguousPosition) {
+    if (isAmbiguousPosition(functionParameterContext)) {
       return [...suggestions, commaCompleteItem];
     }
 
-    if (analyzer?.hasMoreParams) {
+    if (canAcceptMoreArgs(functionParameterContext)) {
       return [...suggestions, commaCompleteItem];
     }
 
@@ -70,15 +74,17 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
   }
 
   // Enrich context with expression type and signature analysis
-  const expressionType = getExpressionType(expressionRoot, context?.columns);
-  const signatureAnalysis = functionParameterContext
-    ? SignatureAnalyzer.from(functionParameterContext)
-    : null;
+  const expressionType = getExpressionType(
+    expressionRoot,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
+  const signatureState = functionParameterContext ?? null;
 
   const enrichedCtx = {
     ...ctx,
     expressionType,
-    signatureAnalysis,
+    signatureAnalysis: signatureState,
   };
 
   if (!isParameterType(expressionType) && !functionParameterContext) {
@@ -122,9 +128,14 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
     return timeUnitItems;
   }
 
-  // Use SignatureAnalyzer for parameter state analysis if available
-  const paramState = signatureAnalysis
-    ? signatureAnalysis.getParameterState(expressionType, isLiteral(expressionRoot))
+  const expressionIsLiteral = isLiteral(expressionRoot);
+  const paramState = signatureState
+    ? {
+        typeMatches: isTypeAcceptedAtPosition(signatureState, expressionType, expressionIsLiteral),
+        isLiteral: expressionIsLiteral,
+        hasMoreParams: canAcceptMoreArgs(signatureState),
+        isVariadic: hasVariadicSignature(signatureState.signatures),
+      }
     : {
         typeMatches: false,
         isLiteral: false,
@@ -178,8 +189,10 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
       isLiteral: paramState.isLiteral,
       hasMoreParams: paramState.hasMoreParams,
       isVariadic: paramState.isVariadic,
-      isAmbiguousPosition: signatureAnalysis?.isAmbiguousPosition,
-      functionSignatures: signatureAnalysis?.getValidSignatures(),
+      isAmbiguousPosition: signatureState ? isAmbiguousPosition(signatureState) : undefined,
+      isExpressionHeavy: hasArbitraryExpressionSignature(
+        functionParameterContext.functionDefinition?.signatures ?? []
+      ),
       expressionType,
       isCursorFollowedByComma: options.isCursorFollowedByComma,
     });

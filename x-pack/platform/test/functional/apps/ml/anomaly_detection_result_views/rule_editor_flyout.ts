@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // Test data: advanced job with partitioning fields so the Scope section is relevant.
@@ -134,8 +135,20 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('open scope filter selector popover');
       await ml.ruleEditorFlyout.openScopeFilterSelector();
 
+      await ml.ruleEditorFlyout.selectFilter('day_of_week');
       await ml.testExecution.logTestStep('save rule');
       await ml.ruleEditorFlyout.save();
+      await ml.ruleEditorFlyout.closeIfOpen();
+
+      // verify if rule flyout updated its state
+      await ml.anomaliesTable.ensureAnomalyActionsMenuOpen(0);
+      await ml.anomaliesTable.assertAnomalyActionConfigureRulesButtonExists(0);
+      await ml.anomaliesTable.clickConfigureRulesButton(0);
+
+      await ml.ruleEditorFlyout.assertEditRulesTitleIsVisible();
+
+      await ml.ruleEditorFlyout.deleteRule();
+      await ml.ruleEditorFlyout.confirmModalConfirmButton();
       await ml.ruleEditorFlyout.closeIfOpen();
 
       await ml.api.deleteFilter(filterId);

@@ -4,23 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/shared-ux-storybook-config'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/appex-sharedux'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/shared-ux-storybook-config'
+  title: '@kbn/shared-ux-storybook-config'
   description: Moon project for @kbn/shared-ux-storybook-config
   channel: ''
   owner: '@elastic/appex-sharedux'
-  metadata:
-    sourceRoot: src/platform/packages/private/shared-ux/storybook/config
+  sourceRoot: src/platform/packages/private/shared-ux/storybook/config
 dependsOn:
   - '@kbn/storybook'
-  - '@kbn/unified-tabs'
-  - '@kbn/core-chrome-app-menu-components'
 tags:
   - shared-common
   - package

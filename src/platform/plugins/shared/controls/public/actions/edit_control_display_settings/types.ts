@@ -6,46 +6,46 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { apiHasPrependWrapperRef, type HasPrependWrapperRef } from '@kbn/controls-renderer';
+
+import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
 import {
   type IsPinnable,
   type PresentationContainer,
   type CanPinPanels,
   apiCanBePinned,
   apiCanPinPanels,
-} from '@kbn/presentation-containers';
-import {
   apiHasParentApi,
   apiHasUniqueId,
   type HasParentApi,
   type HasType,
+  type HasUniqueId,
 } from '@kbn/presentation-publishing';
-import type { HasUniqueId } from '@kbn/presentation-publishing';
-import { apiPublishesControlsLayout, type PublishesControlsLayout } from '../types';
 
 export type PinnableControlApi = HasType &
   HasUniqueId &
   IsPinnable &
-  HasParentApi<PinnableControlParentApi> &
-  HasPrependWrapperRef;
+  HasParentApi<PinnableControlParentApi>;
 
 export type PinnableControlParentApi = PresentationContainer &
   HasType &
-  CanPinPanels &
-  PublishesControlsLayout;
+  CanPinPanels & {
+    getLayout: (id: string) => PinnedControlLayoutState;
+    setLayout: (id: string, layout: PinnedControlLayoutState) => void;
+  };
 
 // This check needs to be a separate function in order for typescript to type the parentApi correctly
 const apiIsPinnableControlParentApi = (
   parentApi: unknown | null
 ): parentApi is PinnableControlParentApi =>
-  Boolean(apiPublishesControlsLayout(parentApi) && apiCanPinPanels(parentApi));
+  apiCanPinPanels(parentApi) &&
+  typeof (parentApi as PinnableControlParentApi).getLayout === 'function' &&
+  typeof (parentApi as PinnableControlParentApi).setLayout === 'function';
 
 export const apiIsPinnableControlApi = (api: unknown | null): api is PinnableControlApi =>
   Boolean(
     apiHasUniqueId(api) &&
       apiCanBePinned(api) &&
       apiHasParentApi(api) &&
-      apiHasPrependWrapperRef(api) &&
       apiIsPinnableControlParentApi(api.parentApi) &&
       api.parentApi.panelIsPinned(api.uuid)
   );

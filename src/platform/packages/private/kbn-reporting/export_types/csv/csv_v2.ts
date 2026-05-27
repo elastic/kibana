@@ -125,15 +125,20 @@ export class CsvV2ExportType extends ExportType<
 
     if (query && 'esql' in query) {
       const columns = await locatorClient.columnsFromEsqlLocator(params);
+      const timeFieldName = await locatorClient.timeFieldNameFromLocator(params);
       const filters = await locatorClient.filtersFromLocator(params);
       const es = this.startDeps.esClient.asScoped(request);
 
       const clients = { uiSettings, data, es };
 
-      const jobCsvEsql = { ...job, columns, query, filters };
-
       const csv = new CsvESQLGenerator(
-        jobCsvEsql,
+        {
+          columns,
+          query,
+          filters,
+          timeFieldName,
+          ...job,
+        },
         csvConfig,
         taskInstanceFields,
         clients,

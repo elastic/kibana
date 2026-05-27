@@ -143,7 +143,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
         aria-label={MORE_ACTIONS}
         className={VISUALIZATION_ACTIONS_BUTTON_CLASS}
         data-test-subj={dataTestSubj}
-        iconType="boxesHorizontal"
+        iconType="boxesVertical"
         onClick={onButtonClick}
       />
     ),
@@ -162,7 +162,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
           panelClassName="withHoverActions__popover"
           data-test-subj="viz-actions-popover"
         >
-          <EuiContextMenu data-test-subj="viz-actions-panel" size="s" panels={panels.value} />
+          <EuiContextMenu data-test-subj="viz-actions-panel" panels={panels.value} />
         </EuiPopover>
       )}
       {isInspectModalOpen && request !== null && response !== null && (

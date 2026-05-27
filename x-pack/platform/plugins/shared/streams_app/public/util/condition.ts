@@ -17,9 +17,12 @@ import {
   getFilterOperator,
   getFilterValue,
   isAlwaysCondition,
+  isArrayOperator,
   isCondition,
   isFilterConditionObject,
 } from '@kbn/streamlang';
+
+export { isArrayOperator };
 
 import { cloneDeep, isEqual, isPlainObject } from 'lodash';
 
@@ -66,6 +69,7 @@ const UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES: Record<OperatorKeys, string[]> = {
   exists: ['boolean'],
 
   range: ['object'],
+  includes: ['string'],
 };
 
 function isOperatorUiSupported(
@@ -131,4 +135,16 @@ export const getFilterConditionField = (condition: Condition) => {
       ? condition.field
       : undefined
     : undefined;
+};
+
+/**
+ * Get the operator from a filter condition.
+ * @param condition condition to extract operator from
+ * @returns operator or undefined if not a filter condition
+ */
+export const getFilterConditionOperator = (condition: Condition): OperatorKeys | undefined => {
+  if (isCondition(condition) && isPlainObject(condition) && isFilterConditionObject(condition)) {
+    return getFilterOperator(condition as FilterCondition);
+  }
+  return undefined;
 };

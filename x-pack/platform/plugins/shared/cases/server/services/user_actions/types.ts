@@ -35,7 +35,7 @@ import type {
 import type { IndexRefresh } from '../types';
 import type { PatchCasesArgs } from '../cases/types';
 import type {
-  AttachmentRequest,
+  AttachmentRequestV2,
   CasePostRequest,
   UserActionFindRequest,
 } from '../../../common/types/api';
@@ -49,7 +49,14 @@ export interface BuilderParameters {
     parameters: { payload: { description: string } };
   };
   status: {
-    parameters: { payload: { status: CaseStatuses } };
+    parameters: {
+      payload: {
+        status: CaseStatuses;
+        closeReason?: string;
+        syncAlerts?: boolean;
+        syncedAlertCount?: number;
+      };
+    };
   };
   severity: {
     parameters: { payload: { severity: CaseSeverity } };
@@ -103,6 +110,12 @@ export interface BuilderParameters {
       };
     };
   };
+  extended_fields: {
+    parameters: { payload: { extended_fields: Record<string, string> } };
+  };
+  template: {
+    parameters: { payload: { template: { id: string; version: number } | null } };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {
@@ -117,7 +130,7 @@ export interface CommonArguments {
   user: User;
   caseId: string;
   owner: string;
-  attachmentId?: string;
+  savedObjectId?: string;
   connectorId?: string;
   action?: UserActionAction;
 }
@@ -166,6 +179,7 @@ export interface ServiceContext {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
+  isCasesAttachmentsEnabled?: boolean;
 }
 
 export interface PushTimeFrameInfo {
@@ -359,6 +373,11 @@ export interface BuildUserActionsDictParams {
 
 export type UserActionsDict = Record<string, UserActionEvent[]>;
 
+export interface AddSyncedAlertsCountToUserActionsParams {
+  userActionsDict: UserActionsDict;
+  syncedAlertCountCountByCaseId: Map<string, number>;
+}
+
 export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
   builtUserActions: UserActionEvent[];
 }
@@ -366,7 +385,7 @@ export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
 export interface BulkCreateAttachmentUserAction
   extends Omit<CommonUserActionArgs, 'owner'>,
     IndexRefresh {
-  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
+  attachments: Array<{ id: string; owner: string; attachment: AttachmentRequestV2 }>;
 }
 
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { ProvidedType } from '@kbn/test';
-import type { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { savedSearches, dashboards } from './test_resources_data';
 import { getCommonRequestHeader } from './common_api';
@@ -45,14 +45,6 @@ export function MachineLearningTestResourcesProvider(
 
     async resetKibanaTimeZone() {
       await kibanaServer.uiSettings.unset('dateFormat:tz');
-    },
-
-    async disableKibanaAnnouncements() {
-      await kibanaServer.uiSettings.update({ hideAnnouncements: true });
-    },
-
-    async resetKibanaAnnouncements() {
-      await kibanaServer.uiSettings.unset('hideAnnouncements');
     },
 
     async savedObjectExistsById(

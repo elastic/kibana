@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import apm from 'elastic-apm-node';
 import { ExecutionStatus } from '@kbn/workflows';
 import { executionFlowLoop } from './execution_flow_loop';
 import { flushState, persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
+import { isWorkflowTaskManagerAbortSignal } from '../workflow_task_shutdown';
+
+const TASK_MANAGER_ABORT_CANCELLATION_REASON = 'Cancelled because Task Manager aborted the task';
 
 /**
  * Executes the main workflow execution loop, processing nodes sequentially until completion.
@@ -33,24 +37,80 @@ import type { WorkflowExecutionLoopParams } from './types';
  * - Any other non-RUNNING status is reached
  */
 export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams) {
-  params.taskAbortController.signal.addEventListener('abort', () => {
+  // Create an abort controller to signal the persistence loop to exit immediately
+  // when execution completes (instead of waiting for the next 500ms flush cycle)
+  const persistenceAbortController = new AbortController();
+
+  const onTaskAbort = () => {
+    if (isWorkflowTaskManagerAbortSignal(params.taskAbortController.signal)) {
+      params.workflowExecutionState.updateWorkflowExecution({
+        cancelRequested: true,
+        status: ExecutionStatus.CANCELLED,
+        cancelledAt: new Date().toISOString(),
+        cancellationReason: TASK_MANAGER_ABORT_CANCELLATION_REASON,
+        cancelledBy: 'system',
+      });
+      persistenceAbortController.abort();
+      return;
+    }
+
     params.workflowExecutionState.updateWorkflowExecution({
       cancelRequested: true,
       cancelledAt: new Date().toISOString(),
       cancellationReason: 'Task aborted',
       status: ExecutionStatus.CANCELLED,
     });
-  });
+    // Also abort persistence loop when task is aborted
+    persistenceAbortController.abort();
+  };
+
+  params.taskAbortController.signal.addEventListener('abort', onTaskAbort, { once: true });
+  if (params.taskAbortController.signal.aborted) {
+    onTaskAbort();
+  }
 
   try {
-    await Promise.all([executionFlowLoop(params), persistenceLoop(params)]);
+    // Run execution and persistence loops in parallel
+    // When execution finishes, signal persistence loop to exit immediately
+    await Promise.all([
+      executionFlowLoop(params).finally(() => {
+        // Signal persistence loop to stop waiting and exit
+        persistenceAbortController.abort();
+      }),
+      persistenceLoop(params, persistenceAbortController.signal),
+    ]);
   } catch (error) {
-    params.workflowRuntime.setWorkflowError(error as Error);
+    params.workflowRuntime.setWorkflowError(
+      error instanceof Error ? error : new Error(String(error))
+    );
   } finally {
-    await flushState(params);
+    const finalFlushSpan = apm.startSpan('final flush state', 'workflow', 'persistence');
+    await flushState(params, {
+      workflowLogFlushSignal: params.taskAbortController.signal,
+    });
+    finalFlushSpan?.end();
   }
 
   // Final save to ensure workflow state is persisted after execution loop
+  const finalSaveSpan = apm.startSpan('final save state', 'workflow', 'persistence');
   await params.workflowRuntime.saveState();
-  await params.workflowLogger.flushEvents();
+  finalSaveSpan?.end();
+
+  // Flush the final state (including terminal status) to Elasticsearch
+  const finalStateFlushSpan = apm.startSpan('final state flush', 'workflow', 'persistence');
+  await params.stepIoService.flush();
+  finalStateFlushSpan?.end();
+
+  // Workflow-end cleanup for transiently-rehydrated outputs. The per-step
+  // release lives in `prepareForRead` (deferred-release pattern), so the
+  // last step's transient set is still resident when the loop exits — this
+  // call drops it. Idempotent and a no-op when nothing is transient.
+  params.stepIoService.releaseTransientlyRehydratedOutputs();
+
+  const finalLogFlushSpan = apm.startSpan('final flush logs', 'workflow', 'logging');
+  await params.workflowLogger.flushEvents({
+    signal: params.taskAbortController.signal,
+  });
+  finalLogFlushSpan?.end();
+  params.taskAbortController.signal.removeEventListener('abort', onTaskAbort);
 }

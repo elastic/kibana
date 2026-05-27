@@ -16,20 +16,18 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { ML_PAGES } from '../../../locator';
-import type { Dictionary } from '../../../../common/types/common';
-import { IdBadges } from './id_badges';
-
-import { BADGE_LIMIT } from './job_selector_flyout';
+import type { Dictionary } from '@kbn/ml-common-types/common';
 import type {
   MlJobWithTimeRange,
   MlSummaryJob,
-} from '../../../../common/types/anomaly_detection_jobs';
-import { FeedBackButton } from '../feedback_button';
+} from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { AnomalyResultsViewSelector } from '../anomaly_results_view_selector';
+import type { ExplorerJob } from '../../explorer/explorer_utils';
+import { IdBadges } from './id_badges';
+import { BADGE_LIMIT } from './job_selector_flyout';
 import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
 import { JobInfoFlyoutsManager } from '../../jobs/components/job_details_flyout/job_details_context_manager';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
@@ -94,7 +92,7 @@ export interface JobSelectorProps {
   }) => void;
   selectedJobIds?: string[];
   selectedGroups?: GroupObj[];
-  selectedJobs?: MlSummaryJob[];
+  selectedJobs?: MlSummaryJob[] | ExplorerJob[];
 }
 
 export interface JobSelectionMaps {
@@ -164,6 +162,12 @@ export function JobSelector({
       <>
         <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
+            <AnomalyResultsViewSelector
+              viewId={singleSelection ? 'timeseriesexplorer' : 'explorer'}
+              selectedJobs={selectedJobs}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             {selectedIds.length > 0 ? (
               <EuiFlexGroup
                 wrap
@@ -205,16 +209,12 @@ export function JobSelector({
               data-test-subj="mlButtonEditJobSelection"
             >
               {i18n.translate('xpack.ml.jobSelector.jobSelectionButton', {
-                defaultMessage: 'Edit job selection',
+                defaultMessage: 'Job selection',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
 
           <EuiFlexItem />
-
-          <EuiFlexItem grow={false}>
-            <FeedBackButton jobIds={selectedIds} />
-          </EuiFlexItem>
 
           {canGetJobs ? (
             <EuiFlexItem grow={false}>

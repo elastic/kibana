@@ -8,6 +8,8 @@
 import { performance } from 'perf_hooks';
 
 import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { Logger } from '@kbn/logging';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -15,7 +17,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
-import { HTTPAuthorizationHeader } from './http_authentication';
 import type {
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
@@ -42,6 +43,7 @@ import {
   SESSION_ERROR_REASON_HEADER,
 } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
+import { LogoutReason } from '../../common/types';
 import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
@@ -93,7 +95,7 @@ export interface AuthenticatorOptions {
   featureUsageService: SecurityFeatureUsageServiceStart;
   userProfileService: UserProfileServiceStartInternal;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  config: Pick<ConfigType, 'authc' | 'accessAgreement'>;
+  config: Pick<ConfigType, 'authc' | 'accessAgreement' | 'uiam'>;
   basePath: IBasePath;
   license: SecurityLicense;
   loggers: LoggerFactory;
@@ -103,6 +105,7 @@ export interface AuthenticatorOptions {
   getServerBaseURL: () => string;
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
+  userActivity: UserActivityServiceStart;
 }
 
 /** @internal */
@@ -122,7 +125,7 @@ const providerMap = new Map<
   new (
     options: AuthenticationProviderOptions,
     providerSpecificOptions?: AuthenticationProviderSpecificOptions
-  ) => BaseAuthenticationProvider
+  ) => BaseAuthenticationProvider<any>
 >([
   [BasicAuthenticationProvider.type, BasicAuthenticationProvider],
   [KerberosAuthenticationProvider.type, KerberosAuthenticationProvider],
@@ -349,7 +352,7 @@ export class Authenticator {
       const authenticationResult = await provider.login(
         request,
         attempt.value,
-        ownsSession ? existingSessionValue!.state : null
+        ownsSession ? existingSessionValue! : null
       );
 
       securityTelemetry.recordLoginDuration(performance.now() - startTime, {
@@ -439,7 +442,7 @@ export class Authenticator {
 
       let authenticationResult = await provider.authenticate(
         request,
-        ownsSession ? existingSession.value!.state : null
+        ownsSession ? existingSession.value! : null
       );
 
       if (!authenticationResult.notHandled()) {
@@ -562,7 +565,7 @@ export class Authenticator {
     // We can ignore `undefined` value here since it's ruled out on the previous step, if provider isn't
     // available then `getSessionValue` should have returned `null`.
     const provider = this.providers.get(existingSessionValue.provider.name)!;
-    const authenticationResult = await provider.authenticate(request, existingSessionValue.state);
+    const authenticationResult = await provider.authenticate(request, existingSessionValue);
     if (!authenticationResult.notHandled()) {
       const sessionUpdateResult = await this.updateSessionValue(request, {
         provider: existingSessionValue.provider,
@@ -595,7 +598,7 @@ export class Authenticator {
       // hence, we can't assume that this provider exists, so we have to check it.
       const provider = this.providers.get(suggestedProviderName);
       if (provider) {
-        return provider.logout(request, sessionValue?.state ?? null);
+        return provider.logout(request, sessionValue ?? null);
       }
     } else {
       // In case logout is called and we cannot figure out what provider is supposed to handle it,
@@ -754,6 +757,7 @@ export class Authenticator {
    * Updates, creates, extends or clears session value based on the received authentication result.
    * @param request Request instance.
    * @param provider Provider that produced provided authentication result.
+   * @param providerInstance Provider instance that produced provided authentication result.
    * @param authenticationResult Result of the authentication or login attempt.
    * @param existingSessionValue Value of the existing session if any.
    */
@@ -785,6 +789,14 @@ export class Authenticator {
           authenticationType: provider.type,
         })
       );
+    }
+
+    // Don't update session if request is "minimally" authenticated.
+    if (request.route.options.security?.authc?.enabled === 'minimal') {
+      this.logger.debug(
+        'Session should not be changed for requests that require minimal authentication, skipping session update.'
+      );
+      return null;
     }
 
     if (!existingSessionValue && !authenticationResult.shouldUpdateState()) {
@@ -908,12 +920,16 @@ export class Authenticator {
     if (!existingSessionValue) {
       const startTime = performance.now();
 
-      newSessionValue = await this.session.create(request, {
-        username: authenticationResult.user?.username,
-        userProfileId,
-        provider,
-        state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
-      });
+      newSessionValue = await this.session.create(
+        request,
+        {
+          username: authenticationResult.user?.username,
+          userProfileId,
+          provider,
+          state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
+        },
+        authenticationResult.stateCookieOptions
+      );
 
       const duration = performance.now() - startTime;
 
@@ -939,6 +955,21 @@ export class Authenticator {
             authenticationType: provider.type,
           })
         );
+        const { username } = authenticationResult.user;
+        this.options.userActivity.trackUserAction({
+          message: `User logged in via ${provider.type} provider "${provider.name}".`,
+          event: { action: 'log_in_user', type: 'start' },
+          object: {
+            id: userProfileId ?? username,
+            name: username,
+            type: 'user',
+            tags: [],
+          },
+          metadata: {
+            authenticationProvider: provider.name,
+            authenticationType: provider.type,
+          },
+        });
       }
     } else if (authenticationResult.shouldUpdateState()) {
       newSessionValue = await this.session.update(request, {
@@ -974,6 +1005,21 @@ export class Authenticator {
     if (isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
       const auditLogger = this.options.audit.asScoped(request);
       auditLogger.log(userLogoutEvent(sessionValue));
+
+      this.options.userActivity.trackUserAction({
+        message: `User logged out via ${sessionValue.provider.type} provider "${sessionValue.provider.name}".`,
+        event: { action: 'log_out_user', type: 'end' },
+        object: {
+          id: sessionValue.userProfileId ?? sessionValue.username,
+          name: sessionValue.username,
+          type: 'user',
+          tags: [],
+        },
+        metadata: {
+          authenticationProvider: sessionValue.provider.name,
+          authenticationType: sessionValue.provider.type,
+        },
+      });
     }
 
     await this.session.invalidate(request, { match: 'current' });
@@ -1094,7 +1140,16 @@ export class Authenticator {
    * provider in the chain (default) is assumed.
    */
   private getLoggedOutURL(request: KibanaRequest, providerType?: string) {
-    if (this.options.customLogoutURL) {
+    const sessionExpiredReasons: string[] = [
+      LogoutReason.SESSION_EXPIRED,
+      LogoutReason.SESSION_IDLE_TIMEOUT,
+      LogoutReason.SESSION_LIFESPAN_TIMEOUT,
+    ];
+    const sessionExpired = sessionExpiredReasons.includes(
+      request.url.searchParams.get(LOGOUT_REASON_QUERY_STRING_PARAMETER) ?? ''
+    );
+
+    if (this.options.customLogoutURL && !sessionExpired) {
       return this.options.customLogoutURL;
     }
 
@@ -1103,7 +1158,7 @@ export class Authenticator {
     const searchParams = new URLSearchParams();
     for (const [key, defaultValue] of [
       [NEXT_URL_QUERY_STRING_PARAMETER, null],
-      [LOGOUT_REASON_QUERY_STRING_PARAMETER, 'LOGGED_OUT'],
+      [LOGOUT_REASON_QUERY_STRING_PARAMETER, LogoutReason.LOGGED_OUT],
     ] as Array<[string, string | null]>) {
       const value = request.url.searchParams.get(key) || defaultValue;
       if (value) {

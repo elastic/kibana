@@ -12,10 +12,10 @@ import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import type { PinnedControlState } from '@kbn/controls-schemas';
+import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
+import type { PinnedControlLayoutState, PinnedControlState } from '@kbn/controls-schemas';
 import type { ControlsLayout } from '@kbn/controls-renderer/src/types';
-import type { PanelPackage } from '@kbn/presentation-containers';
+import type { PanelPackage } from '@kbn/presentation-publishing';
 
 import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
 import type { useChildrenApi } from './use_children_api';
@@ -60,6 +60,12 @@ export const useLayoutApi = (
 
     return {
       layout$: layout$Ref.current,
+      getLayout: (id: string) => layout$Ref.current.getValue().controls[id],
+      setLayout: (id: string, newLayout: PinnedControlLayoutState) => {
+        layout$Ref.current.next({
+          controls: { ...layout$Ref.current.getValue().controls, [id]: newLayout },
+        });
+      },
       addNewPanel: async <State extends PinnedControlState = PinnedControlState>(
         panelPackage: PanelPackage<State>
       ) => {
@@ -68,20 +74,17 @@ export const useLayoutApi = (
 
         if (serializedState) childrenApi?.setSerializedStateForChild(uuid, serializedState);
         const oldControls = layout$Ref.current.getValue().controls;
-        const { rawState } = {
-          rawState: {
-            width: DEFAULT_CONTROL_WIDTH as PinnedControlState['width'],
-            grow: DEFAULT_CONTROL_GROW as PinnedControlState['grow'],
-            ...serializedState?.rawState,
-          },
+        const controlState = {
+          ...DEFAULT_PINNED_CONTROL_STATE,
+          ...serializedState,
         };
         layout$Ref.current.next({
           controls: {
             ...oldControls,
             [uuid]: {
               order: Object.keys(oldControls).length,
-              width: rawState.width,
-              grow: rawState.grow,
+              width: controlState.width,
+              grow: controlState.grow,
               type: type as PinnedControlState['type'],
             },
           },
@@ -105,6 +108,7 @@ export const useLayoutApi = (
         }
         controls[uuid] = {
           type: type as PinnedControlState['type'],
+          ...DEFAULT_PINNED_CONTROL_STATE,
           ...serializedState,
           order: newOrder,
         };

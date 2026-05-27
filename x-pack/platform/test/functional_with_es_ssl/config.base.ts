@@ -66,6 +66,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       maintenanceWindows: {
         pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
       },
+      rules: {
+        pathname: '/app/rules',
+      },
     },
     esTestCluster: {
       ...xpackFunctionalConfig.get('esTestCluster'),

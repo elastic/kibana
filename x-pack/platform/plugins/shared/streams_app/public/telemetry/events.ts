@@ -23,8 +23,8 @@ import {
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
-  STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
   STREAMS_TAB_VISITED_EVENT_TYPE,
+  STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE,
 } from './constants';
 import {
   streamsAIGrokSuggestionAcceptedSchema,
@@ -43,8 +43,8 @@ import {
   wiredStreamsStatusChangedSchema,
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
-  streamsDescriptionGeneratedSchema,
   streamsTabVisitedSchema,
+  streamsInsightFeedbackSchema,
 } from './schemas';
 
 const streamsAttachmentCountEventType = {
@@ -127,11 +127,6 @@ const streamsFeatureIdentificationDeletedEventType = {
   schema: streamsFeatureIdentificationDeletedSchema,
 };
 
-const streamsDescriptionGeneratedEventType = {
-  eventType: STREAMS_DESCRIPTION_GENERATED_EVENT_TYPE,
-  schema: streamsDescriptionGeneratedSchema,
-};
-
 const wiredStreamsStatusChangedEventType = {
   eventType: STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
   schema: wiredStreamsStatusChangedSchema,
@@ -140,6 +135,11 @@ const wiredStreamsStatusChangedEventType = {
 const streamsTabVisitedEventType = {
   eventType: STREAMS_TAB_VISITED_EVENT_TYPE,
   schema: streamsTabVisitedSchema,
+};
+
+const streamsInsightFeedbackEventType = {
+  eventType: STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE,
+  schema: streamsInsightFeedbackSchema,
 };
 
 export {
@@ -160,6 +160,6 @@ export {
   wiredStreamsStatusChangedEventType,
   streamsFeatureIdentificationSavedEventType,
   streamsFeatureIdentificationDeletedEventType,
-  streamsDescriptionGeneratedEventType,
   streamsTabVisitedEventType,
+  streamsInsightFeedbackEventType,
 };

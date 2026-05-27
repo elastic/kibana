@@ -8,14 +8,21 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { extractCategorizeTokens, getCategorizeColumns, getCategorizeField } from '@kbn/esql-utils';
+import {
+  extractCategorizeTokens,
+  getCategorizeColumns,
+  getCategorizeField,
+  getSparklineColumns,
+} from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import { createElement } from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
+import { SparklineCellRenderer } from '../sparkline_data_source_profile/sparkline_cell_renderer';
 
 const DOC_LIMIT = 10000;
 
@@ -23,14 +30,15 @@ export const createPatternsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider<{
   patternColumns: string[];
+  sparklineColumns: string[];
 }> => ({
   profileId: 'patterns-data-source-profile',
   profile: {
     getCellRenderers:
       (prev, { context }) =>
       (params) => {
-        const { rowHeight } = params;
-        const { patternColumns } = context;
+        const { rowHeight, density } = params;
+        const { patternColumns, sparklineColumns } = context;
         if (!patternColumns || patternColumns.length === 0) {
           return prev(params);
         }
@@ -38,7 +46,20 @@ export const createPatternsDataSourceProfileProvider = (
           (acc, column) =>
             Object.assign(acc, {
               [column]: (props: DataGridCellValueElementProps) =>
-                getPatternCellRenderer(props.row, props.columnId, props.isDetails, rowHeight),
+                getPatternCellRenderer(
+                  props.row.flattened[props.columnId],
+                  props.isDetails,
+                  rowHeight
+                ),
+            }),
+          {}
+        );
+
+        const sparklineRenderers = sparklineColumns.reduce(
+          (acc, column) =>
+            Object.assign(acc, {
+              [column]: (props: DataGridCellValueElementProps) =>
+                createElement(SparklineCellRenderer, { ...props, services, density }),
             }),
           {}
         );
@@ -46,13 +67,14 @@ export const createPatternsDataSourceProfileProvider = (
         return {
           ...prev(params),
           ...patternRenderers,
+          ...sparklineRenderers,
         };
       },
     getAdditionalCellActions:
       (prev, { context }) =>
-      () => {
+      (params) => {
         return [
-          ...prev(),
+          ...prev(params),
           {
             id: 'patterns-action-view-docs-in-discover',
             getDisplayName: () =>
@@ -90,12 +112,19 @@ export const createPatternsDataSourceProfileProvider = (
                 esql: `FROM ${index}\n  | WHERE MATCH(${categoryField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
               };
 
-              const discoverLink = services.locator.getRedirectUrl({
-                query,
-                timeRange: executeContext.timeRange,
-                hideChart: false,
-              });
-              window.open(discoverLink, '_blank');
+              if (params.actions?.openInNewTab) {
+                params.actions.openInNewTab({
+                  query,
+                  timeRange: executeContext.timeRange,
+                });
+              } else {
+                const discoverLink = services.locator.getRedirectUrl({
+                  query,
+                  timeRange: executeContext.timeRange,
+                  hideChart: false,
+                });
+                window.open(discoverLink, '_blank');
+              }
             },
           },
         ];
@@ -105,6 +134,7 @@ export const createPatternsDataSourceProfileProvider = (
         ...prev(params),
         columns: [
           { name: 'Count', width: 150 },
+          { name: 'Sparkline', width: 150 },
           { name: 'Pattern', width: undefined },
         ],
       };
@@ -126,11 +156,14 @@ export const createPatternsDataSourceProfileProvider = (
       return { isMatch: false };
     }
 
+    const sparklineColumns = getSparklineColumns(query.esql);
+
     return {
       isMatch: true,
       context: {
         category: DataSourceCategory.Default,
         patternColumns,
+        sparklineColumns,
       },
     };
   },

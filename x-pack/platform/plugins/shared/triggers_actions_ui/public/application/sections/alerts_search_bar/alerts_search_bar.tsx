@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { compareFilters } from '@kbn/es-query';
-import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
+import type { SuggestionsAbstraction } from '@kbn/kql/public/components/typeahead/suggestions_component';
 import { isSiemRuleType } from '@kbn/rule-data-utils';
 import type {
   EuiContextMenuPanelDescriptor,
@@ -129,7 +129,7 @@ export function AlertsSearchBar({
           } as EuiContextMenuPanelDescriptor);
           return {
             name: qf.title,
-            icon: qf.icon ?? 'filterInCircle',
+            icon: qf.icon ?? 'filter',
             panel: panelId,
             'data-test-subj': `quick-filters-item-${qf.title}`,
           };
@@ -137,7 +137,7 @@ export function AlertsSearchBar({
           const { filter, ...menuItem } = qf;
           return {
             ...menuItem,
-            icon: qf.icon ?? 'filterInCircle',
+            icon: qf.icon ?? 'filter',
             onClick: () => {
               if (!filters?.some((f) => compareFilters(f, filter))) {
                 onFiltersUpdated?.([...(filters ?? []), filter]);

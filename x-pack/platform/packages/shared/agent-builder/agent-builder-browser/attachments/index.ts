@@ -5,4 +5,15 @@
  * 2.0.
  */
 
-export type { AttachmentUIDefinition, AttachmentServiceStartContract } from './contract';
+export type {
+  AttachmentUIDefinition,
+  AttachmentServiceStartContract,
+  AttachmentRenderProps,
+  CanvasRenderCallbacks,
+  InlineRenderCallbacks,
+  GetActionButtonsParams,
+  ActionButton,
+  AttachmentPreviewState,
+  AttachmentLifecycleParams,
+} from './contract';
+export { ActionButtonType } from './contract';

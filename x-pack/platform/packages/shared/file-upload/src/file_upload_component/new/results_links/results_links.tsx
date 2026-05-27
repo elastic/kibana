@@ -62,7 +62,7 @@ export const ResultsLinks: FC<Props> = ({
   const [discoverLink, setDiscoverLink] = useState('');
   const [indexManagementLink, setIndexManagementLink] = useState('');
   const [dataViewsManagementLink, setDataViewsManagementLink] = useState('');
-  const [playgroundLink, setPlaygroundLink] = useState('');
+  const [agentBuilderLink, setAgentBuilderLink] = useState('');
   const [asyncHrefCards, setAsyncHrefCards] = useState<LinkCardProps[]>();
 
   useEffect(() => {
@@ -115,10 +115,10 @@ export const ResultsLinks: FC<Props> = ({
     }
 
     if (!unmounted) {
-      const playgroundLocator = url.locators.get('PLAYGROUND_LOCATOR_ID');
+      const agentBuilderLocator = url.locators.get('AGENT_BUILDER_LOCATOR_ID');
 
-      if (playgroundLocator !== undefined) {
-        playgroundLocator.getUrl({ 'default-index': index }).then(setPlaygroundLink);
+      if (agentBuilderLocator !== undefined) {
+        setAgentBuilderLink(getUrlForApp('agent_builder'));
       }
 
       setIndexManagementLink(
@@ -181,7 +181,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`discoverApp`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`discoverApp`} />}
             title={
               <FormattedMessage
                 id="xpack.fileUpload.resultsLinks.viewIndexInDiscoverTitle"
@@ -197,7 +197,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`managementApp`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
                 id="xpack.fileUpload.resultsLinks.indexManagementTitle"
@@ -213,7 +213,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`managementApp`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
                 id="xpack.fileUpload.resultsLinks.dataViewManagementTitle"
@@ -229,7 +229,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`filebeatApp`} />}
             data-test-subj="fileDataVisFilebeatConfigLink"
             title={
               <FormattedMessage
@@ -243,20 +243,19 @@ export const ResultsLinks: FC<Props> = ({
         </EuiFlexItem>
       ) : null}
 
-      {playgroundLink ? (
+      {agentBuilderLink ? (
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`logoElasticsearch`} />}
-            data-test-subj="fileDataVisFilebeatConfigLink"
+            icon={<EuiIcon aria-hidden={true} size="xxl" type={`productRobot`} />}
             title={
               <FormattedMessage
-                id="xpack.fileUpload.resultsLinks.playground"
-                defaultMessage="Playground"
+                id="xpack.fileUpload.resultsLinks.agentBuilder"
+                defaultMessage="Agent Builder"
               />
             }
             description=""
-            href={playgroundLink}
+            href={agentBuilderLink}
           />
         </EuiFlexItem>
       ) : null}
@@ -266,7 +265,7 @@ export const ResultsLinks: FC<Props> = ({
           <EuiFlexItem key={link.title}>
             <EuiCard
               hasBorder
-              icon={<EuiIcon size="xxl" type={link.icon} />}
+              icon={<EuiIcon aria-hidden={true} size="xxl" type={link.icon} />}
               data-test-subj="fileDataVisLink"
               title={link.title}
               description={link.description}

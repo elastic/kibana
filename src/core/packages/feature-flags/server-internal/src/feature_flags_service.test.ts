@@ -167,19 +167,19 @@ describe('FeatureFlagsService Server', () => {
     test('get boolean flag', async () => {
       const value = false;
       await expect(startContract.getBooleanValue('my-flag', value)).resolves.toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
     });
 
     test('get string flag', async () => {
       const value = 'my-default';
       await expect(startContract.getStringValue('my-flag', value)).resolves.toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
     });
 
     test('get number flag', async () => {
       const value = 42;
       await expect(startContract.getNumberValue('my-flag', value)).resolves.toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
     });
 
     test('observe a boolean flag', async () => {
@@ -189,7 +189,7 @@ describe('FeatureFlagsService Server', () => {
       flag$.subscribe((v) => observedValues.push(v));
       // Initial emission
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
       expect(observedValues).toHaveLength(1);
 
       // Does not reevaluate and emit if the other flags are changed
@@ -201,6 +201,11 @@ describe('FeatureFlagsService Server', () => {
       addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(observedValues).toHaveLength(2);
+
+      // Reevaluates and emits when the context is changed
+      startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-2' } });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(value);
+      expect(observedValues).toHaveLength(3);
     });
 
     test('observe a string flag', async () => {
@@ -210,7 +215,7 @@ describe('FeatureFlagsService Server', () => {
       flag$.subscribe((v) => observedValues.push(v));
       // Initial emission
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
       expect(observedValues).toHaveLength(1);
 
       // Does not reevaluate and emit if the other flags are changed
@@ -222,6 +227,11 @@ describe('FeatureFlagsService Server', () => {
       addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(observedValues).toHaveLength(2);
+
+      // Reevaluates and emits when the context is changed
+      startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-2' } });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(value);
+      expect(observedValues).toHaveLength(3);
     });
 
     test('observe a number flag', async () => {
@@ -231,7 +241,7 @@ describe('FeatureFlagsService Server', () => {
       flag$.subscribe((v) => observedValues.push(v));
       // Initial emission
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value }, undefined);
       expect(observedValues).toHaveLength(1);
 
       // Does not reevaluate and emit if the other flags are changed
@@ -243,6 +253,11 @@ describe('FeatureFlagsService Server', () => {
       addHandlerSpy.mock.calls[0][1]({ flagsChanged: ['my-flag'] });
       await expect(firstValueFrom(flag$)).resolves.toEqual(value);
       expect(observedValues).toHaveLength(2);
+
+      // Reevaluates and emits when the context is changed
+      startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-2' } });
+      await expect(firstValueFrom(flag$)).resolves.toEqual(value);
+      expect(observedValues).toHaveLength(3);
     });
 
     test('with overrides', async () => {
@@ -250,7 +265,7 @@ describe('FeatureFlagsService Server', () => {
       await expect(startContract.getBooleanValue('my-overridden-flag', false)).resolves.toEqual(
         true
       );
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true }, undefined);
       expect(getBooleanValueSpy).not.toHaveBeenCalled();
 
       // Only to prove the spy works
@@ -265,7 +280,7 @@ describe('FeatureFlagsService Server', () => {
       flag$.subscribe((v) => observedValues.push(v));
       // Initial emission
       await expect(firstValueFrom(flag$)).resolves.toEqual(true);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true });
+      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true }, undefined);
       expect(observedValues).toHaveLength(1);
 
       // Does not reevaluate and emit if the other flags are changed

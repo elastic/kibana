@@ -7,10 +7,12 @@
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
+import { EngineDescriptorTypeName, EntityStoreGlobalStateTypeName } from '@kbn/entity-store/server';
 import {
   timelineSavedObjectTypes,
   notesSavedObjectTypes,
   savedObjectTypes,
+  exceptionsSavedObjectTypes,
 } from '../../saved_objects';
 import { noteType, pinnedEventType, timelineType } from '../timeline/saved_object_mappings';
 import { prebuiltRuleAssetType } from '../detection_engine/prebuilt_rules';
@@ -55,6 +57,9 @@ export const securityV5SavedObjects = [
   CLOUD_SECURITY_POSTURE_SETTINGS,
   CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+  // Entity Store v2 saved objects
+  EngineDescriptorTypeName,
+  EntityStoreGlobalStateTypeName,
   ...savedObjectTypes.filter(
     (type) =>
       ![
@@ -70,8 +75,9 @@ export const securityTimelineSavedObjects = timelineSavedObjectTypes;
 
 export const securityNotesSavedObjects = notesSavedObjectTypes;
 
-export const rulesSavedObjects = [
-  'exception-list',
-  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
-  prebuiltRuleAssetType.name,
-];
+export const rulesSavedObjects = ['exception-list', prebuiltRuleAssetType.name];
+export const rulesV2SavedObjects = [prebuiltRuleAssetType.name];
+export const rulesV3SavedObjects = [...rulesV2SavedObjects];
+export const rulesV4SavedObjects = [...rulesV3SavedObjects];
+
+export const securityExceptionsSavedObjects = exceptionsSavedObjectTypes;

@@ -6,24 +6,29 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { ISuggestionItem } from '../../../registry/types';
+import { type ISuggestionItem } from '../../../registry/types';
+import {
+  ReplacementRangeStrategyKind,
+  type ReplacementRangeStrategy,
+} from '../../../../language/autocomplete/utils/prefix_range';
 import {
   buildAddValuePlaceholder,
   buildMapKeySuggestion,
-  buildMapValueCompleteItem,
   type MapValueType,
 } from '../../../registry/complete_items';
-import { findFinalWord } from './helpers';
+import { getMapNestingLevel } from '../maps';
 
 // Strip quoted segments so foo(bar) inside strings doesn't get picked as a function
 export const DOUBLE_QUOTED_STRING_REGEX = /"([^"\\]|\\.)*"/g;
 // Extracts all object keys from "key": patterns in JSON-like syntax
 export const OBJECT_KEYS_REGEX = /"([^"]+)"\s*:/g;
+const EMPTY_MAP_VALUE_REGEX = /:\s*"?$/;
 
 export interface MapParameterValues {
   type: MapValueType;
+  rawType?: string;
   suggestions?: ISuggestionItem[];
+  description?: string;
 }
 
 export type MapParameters = Record<string, MapParameterValues>;
@@ -55,8 +60,6 @@ export function getCommandMapExpressionSuggestions(
   availableParameters: MapParameters,
   includePlaceholder = false
 ): ISuggestionItem[] {
-  const finalWord = findFinalWord(innerText);
-
   // Return no suggestions if we're inside a nested map (nesting level > 1)
   if (getMapNestingLevel(innerText) > 1) {
     return [];
@@ -68,15 +71,16 @@ export function getCommandMapExpressionSuggestions(
       (paramName) => !usedParams.has(paramName)
     );
 
-    return availableParamNames.map((paramName) =>
-      buildMapKeySuggestion(paramName, availableParameters[paramName].type, {
+    return availableParamNames.map((paramName) => {
+      const { type, description } = availableParameters[paramName];
+      return buildMapKeySuggestion(paramName, type, description, {
         filterText: `"${paramName}`,
-        rangeToReplace: {
-          start: innerText.length - finalWord.length,
-          end: innerText.length,
+        replacementRangeStrategy: {
+          kind: ReplacementRangeStrategyKind.SCOPED_PREFIX,
+          scopeText: innerText,
         },
-      })
-    );
+      });
+    });
   }
 
   // Suggest a parameter value if on the right side of a parameter entry, capture the parameter name
@@ -86,91 +90,36 @@ export function getCommandMapExpressionSuggestions(
     const paramConfig = paramName ? availableParameters[paramName] : undefined;
 
     if (paramConfig) {
-      const { type, suggestions = [] } = paramConfig;
-      const rangeToReplace = {
-        start: innerText.length - finalWord.length,
-        end: finalWord.startsWith('"') ? innerText.length + 2 : innerText.length,
+      const { type, suggestions = [], description } = paramConfig;
+      const replacementRangeStrategy: ReplacementRangeStrategy = {
+        kind: ReplacementRangeStrategyKind.QUOTED_VALUE,
+        scopeText: innerText,
       };
+      const isEmptyValue = EMPTY_MAP_VALUE_REGEX.test(innerText);
 
       const allSuggestions: ISuggestionItem[] = suggestions.map((suggestion) =>
         type === 'string'
           ? {
               ...suggestion,
+              detail: suggestion.detail || description,
               text: `"${suggestion.text}"`,
               filterText: `"${suggestion.text}"`,
-              rangeToReplace,
+              replacementRangeStrategy,
             }
           : suggestion
       );
 
-      const isEmptyValue = finalWord === '' || finalWord === '"';
       if (includePlaceholder && type !== 'boolean' && isEmptyValue) {
         const placeholderType = type === 'number' ? 'number' : 'value';
-        allSuggestions.push(buildAddValuePlaceholder(placeholderType, { rangeToReplace }));
+        allSuggestions.push(
+          buildAddValuePlaceholder(placeholderType, {
+            replacementRangeStrategy,
+          })
+        );
       }
 
       return allSuggestions;
     }
   }
   return [];
-}
-
-// ================================
-// Map Expression Utilities
-// ================================
-
-export function getMapNestingLevel(text: string): number {
-  // Ignore braces inside quoted strings and escaped braces
-  const sanitized = text
-    .replace(DOUBLE_QUOTED_STRING_REGEX, '')
-    .replace(/\\\{/g, '')
-    .replace(/\\\}/g, '');
-
-  const openBraces = (sanitized.match(/\{/g) || []).length;
-  const closeBraces = (sanitized.match(/\}/g) || []).length;
-
-  return openBraces - closeBraces;
-}
-
-/**
- * Checks if the cursor is inside an unclosed map expression.
- */
-export function isInsideMapExpression(text: string): boolean {
-  return getMapNestingLevel(text) > 0;
-}
-
-/**
- * Parses a comma-separated values string and infers the type.
- * Returns suggestions for each value.
- */
-export function parseMapValues(values: string[]): {
-  type: MapValueType;
-  suggestions: ISuggestionItem[];
-} {
-  if (values.length === 0) {
-    return { type: 'string', suggestions: [] };
-  }
-
-  const type = inferMapValueType(values);
-  const suggestions = values.map((value) => buildMapValueCompleteItem(value));
-
-  return { type, suggestions };
-}
-
-/**
- * Infers MapValueType from an array of value strings.
- */
-function inferMapValueType(values: string[]): MapValueType {
-  const isBoolean = (val: string) => val.toLowerCase() === 'true' || val.toLowerCase() === 'false';
-  const isNumber = (val: string) => /^-?\d+(\.\d+)?$/.test(val);
-
-  if (values.every(isBoolean)) {
-    return 'boolean';
-  }
-
-  if (values.every(isNumber)) {
-    return 'number';
-  }
-
-  return 'string';
 }

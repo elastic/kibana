@@ -24,8 +24,8 @@ import type {
   WiredStreamsStatusChangedProps,
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
-  StreamsDescriptionGeneratedProps,
   StreamsTabVisitedProps,
+  StreamsInsightFeedbackProps,
 } from './types';
 
 const attachmentTypeCountFields: Record<
@@ -410,33 +410,6 @@ const streamsFeatureIdentificationDeletedSchema: RootSchema<StreamsFeatureIdenti
     },
   };
 
-const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedProps> = {
-  stream_name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  stream_type: {
-    type: 'keyword',
-    _meta: {
-      description: 'The type of the stream: wired or classic',
-    },
-  },
-  input_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of input tokens used for the generation request',
-    },
-  },
-  output_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of output tokens used for the generation request',
-    },
-  },
-};
-
 const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
   stream_name: {
     type: 'keyword',
@@ -506,6 +479,39 @@ const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
           description: 'Whether the user can manage failure store',
         },
       },
+      create_snapshot_repository: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can create snapshot repositories',
+        },
+      },
+    },
+  },
+};
+
+const streamsInsightFeedbackSchema: RootSchema<StreamsInsightFeedbackProps> = {
+  feedback: {
+    type: 'keyword',
+    _meta: {
+      description: 'Whether the user found the insight helpful or not_helpful',
+    },
+  },
+  insight_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The unique ID of the insight being rated',
+    },
+  },
+  insight_title: {
+    type: 'text',
+    _meta: {
+      description: 'The title of the insight being rated',
+    },
+  },
+  insight_impact: {
+    type: 'keyword',
+    _meta: {
+      description: 'The severity/impact level of the insight: critical, high, medium, or low',
     },
   },
 };
@@ -527,6 +533,6 @@ export {
   wiredStreamsStatusChangedSchema,
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
-  streamsDescriptionGeneratedSchema,
   streamsTabVisitedSchema,
+  streamsInsightFeedbackSchema,
 };

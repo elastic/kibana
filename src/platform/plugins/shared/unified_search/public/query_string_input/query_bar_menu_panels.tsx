@@ -36,9 +36,8 @@ import {
 import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import { QueryLanguageSwitcher, fromUser } from '@kbn/kql/public';
 import type { IUnifiedSearchPluginServices } from '../types';
-import { fromUser } from './from_user';
-import { QueryLanguageSwitcher } from './language_switcher';
 import type { FilterPanelOption } from '../types';
 import { PanelTitle } from './panel_title';
 
@@ -59,10 +58,6 @@ export const strings = {
   getKqlLanguageName: () =>
     i18n.translate('unifiedSearch.query.queryBar.kqlLanguageName', {
       defaultMessage: 'KQL',
-    }),
-  getOptionsAddFilterButtonLabel: () =>
-    i18n.translate('unifiedSearch.filter.options.addFilterButtonLabel', {
-      defaultMessage: 'Add filter',
     }),
   getOptionsApplyAllFiltersButtonLabel: () =>
     i18n.translate('unifiedSearch.filter.options.applyAllFiltersButtonLabel', {
@@ -362,13 +357,6 @@ export function useQueryBarMenuPanels({
 
   const filtersRelatedPanels: EuiContextMenuPanelItemDescriptor[] = [
     {
-      name: strings.getOptionsAddFilterButtonLabel(),
-      icon: 'plus',
-      onClick: () => {
-        setRenderedComponent('addFilter');
-      },
-    },
-    {
       name: strings.getOptionsApplyAllFiltersButtonLabel(),
       icon: 'filter',
       panel: QueryBarMenuPanel.applyToAllFilters,
@@ -500,7 +488,7 @@ export function useQueryBarMenuPanels({
         {
           name: strings.getDisableAllFiltersButtonLabel(),
           'data-test-subj': 'filter-sets-disableAllFilters',
-          icon: 'eyeClosed',
+          icon: 'eyeSlash',
           onClick: () => {
             closePopover();
             onDisableAll();
@@ -509,7 +497,7 @@ export function useQueryBarMenuPanels({
         {
           name: strings.getInvertNegatedFiltersButtonLabel(),
           'data-test-subj': 'filter-sets-invertAllFilters',
-          icon: 'invert',
+          icon: 'contrast',
           onClick: () => {
             closePopover();
             onToggleAllNegated();

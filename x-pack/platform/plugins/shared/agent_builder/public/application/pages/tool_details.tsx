@@ -26,7 +26,7 @@ export const AgentBuilderToolDetailsPage = () => {
 
   useBreadcrumb([
     {
-      text: labels.tools.title,
+      text: labels.tools.libraryTitle,
       path: appPaths.tools.list,
     },
     {

@@ -60,6 +60,7 @@ const getOAuth2AxiosConfig = async ({
       configurationUtilities,
       oAuthScope: scope,
       credentials: {
+        type: 'client_secret',
         secrets: { clientSecret: clientSecret! },
         config: {
           clientId: clientId!,
@@ -109,7 +110,7 @@ const getDefaultAxiosConfig = async ({ config, secrets }: GetDefaultAxiosConfig)
     ca,
   });
 
-  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
+  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets?.secretHeaders);
   const headersWithAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
     password: basicAuth.auth?.password,

@@ -6,7 +6,12 @@
  */
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
-import { SERVICE_OTEL_SENDOTLP, OTEL_INSTANCE_ID, OTEL_TRANSACTION_NAME } from '../constants';
+import {
+  SERVICE_OTEL_SENDOTLP,
+  OTEL_INSTANCE_ID,
+  OTEL_TRANSACTION_NAME,
+  PRODUCTION_ENVIRONMENT,
+} from '../constants';
 
 export function otelSendotlp({
   from,
@@ -22,7 +27,7 @@ export function otelSendotlp({
   const otelService = apm
     .service({
       name: SERVICE_OTEL_SENDOTLP,
-      environment: 'production',
+      environment: PRODUCTION_ENVIRONMENT,
       agentName: 'go',
     })
     .instance(OTEL_INSTANCE_ID);
@@ -33,7 +38,7 @@ export function otelSendotlp({
     .generator((timestamp) => [
       otelService
         .transaction({ transactionName: OTEL_TRANSACTION_NAME })
-        .timestamp(timestamp)
+        .timestamp(timestamp + 1)
         .duration(15202)
         .success()
         .children(
@@ -46,7 +51,7 @@ export function otelSendotlp({
             .duration(1000)
             .success()
             .destination('foo_service-otel-native-synth')
-            .timestamp(timestamp)
+            .timestamp(timestamp + 1)
         ),
 
       otelService

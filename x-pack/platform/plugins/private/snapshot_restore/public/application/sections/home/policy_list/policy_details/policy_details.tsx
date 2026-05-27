@@ -201,12 +201,16 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                       return (
                         <EuiPopover
                           id="policyActionMenu"
+                          aria-label={i18n.translate(
+                            'xpack.snapshotRestore.policyDetails.policyActionMenuAriaLabel',
+                            { defaultMessage: 'Policy options' }
+                          )}
                           button={
                             <EuiButton
                               data-test-subj="policyActionMenuButton"
                               iconSide="right"
                               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                              iconType="arrowDown"
+                              iconType="chevronSingleDown"
                               fill
                             >
                               <FormattedMessage

@@ -35,8 +35,8 @@ export function makeFtrConfigProvider(
       ? 'x-pack/platform/test/serverless/shared/config.base.ts'
       : config.getFtrConfigPath();
     const defaultConfigPath = config.isXpack()
-      ? 'x-pack/platform/test/functional/config.base.ts'
-      : 'src/platform/test/functional/config.base.js';
+      ? 'x-pack/performance/configs/http2_config.ts'
+      : 'src/platform/test/functional/config.base.http2.ts';
     const ftrConfigPath = configPath ?? defaultConfigPath;
     const baseConfig = (await readConfigFile(Path.resolve(REPO_ROOT, ftrConfigPath))).getAll();
 
@@ -93,7 +93,15 @@ export function makeFtrConfigProvider(
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const packageRegistryConfig = path.join(__dirname, '../fixtures/package_registry_config.yml');
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+    // EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
+    // packages without `.sig` files, so opt out of upstream signature enforcement
+    // (added in elastic/package-registry#1646).
+    const dockerArgs: string[] = [
+      '-v',
+      `${packageRegistryConfig}:/package-registry/config.yml`,
+      '-e',
+      'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+    ];
 
     return {
       ...baseConfig,

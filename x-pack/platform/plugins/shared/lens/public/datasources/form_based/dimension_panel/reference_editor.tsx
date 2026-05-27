@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiFormRowProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiSpacer, EuiComboBox } from '@elastic/eui';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -25,6 +24,7 @@ import type {
   DateRange,
   FieldBasedIndexPatternColumn,
 } from '@kbn/lens-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { OperationSupportMatrix } from './operation_support';
 import type { OperationType } from '../form_based';
 import type { RequiredReference, GenericOperationDefinition } from '../operations';
@@ -103,7 +103,7 @@ export interface ReferenceEditorProps {
   http: HttpSetup;
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   dataViews: DataViewsPublicPluginStart;
 }
 

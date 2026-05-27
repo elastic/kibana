@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -22,6 +23,8 @@ import {
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import type { DashboardRedirect } from '../types';
 import { findService } from '../../dashboard_client';
+import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
+import { LANDING_PAGE_PATH } from '../../../common/page_bundle_constants';
 
 export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -36,6 +39,8 @@ export const DashboardListingPage = ({
   initialFilter,
   kbnUrlStateStorage,
 }: DashboardListingPageProps) => {
+  const { getListingTabs } = useDashboardMountContext();
+  const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
   const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
   useEffect(() => {
     let isMounted = true;
@@ -48,24 +53,42 @@ export const DashboardListingPage = ({
     };
   }, []);
 
+  const activeTabTitle = useMemo(() => {
+    if (!activeTabParam || activeTabParam === 'dashboards') return undefined;
+    return getListingTabs().find((tab) => tab.id === activeTabParam)?.title;
+  }, [activeTabParam, getListingTabs]);
+
   useEffect(() => {
-    coreServices.chrome.setBreadcrumbs(
-      [
-        {
-          text: getDashboardBreadcrumb(),
-        },
-      ],
-      {
-        project: { value: [] },
-      }
-    );
+    const dashboardCrumb = { text: getDashboardBreadcrumb() };
+
+    if (activeTabTitle) {
+      const tabCrumb = { text: activeTabTitle };
+      coreServices.chrome.setBreadcrumbs(
+        [
+          {
+            ...dashboardCrumb,
+            'data-test-subj': `dashboardListingBreadcrumb-${activeTabParam}`,
+            onClick: () =>
+              coreServices.application.navigateToUrl(
+                coreServices.application.getUrlForApp('dashboards', {
+                  path: `#${LANDING_PAGE_PATH}`,
+                })
+              ),
+          },
+          tabCrumb,
+        ],
+        { project: { value: [tabCrumb] } }
+      );
+    } else {
+      coreServices.chrome.setBreadcrumbs([dashboardCrumb], { project: { value: [] } });
+    }
 
     if (serverlessService) {
       // if serverless breadcrumbs available,
       // reset any deeper context breadcrumbs to only keep the main "dashboard" part that comes from the navigation config
-      serverlessService.setBreadcrumbs([]);
+      serverlessService.setBreadcrumbs(activeTabTitle ? [{ text: activeTabTitle }] : []);
     }
-  }, []);
+  }, [activeTabTitle, activeTabParam]);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
@@ -110,6 +133,7 @@ export const DashboardListingPage = ({
           getDashboardUrl={(id, timeRestore) => {
             return getDashboardListItemLink(kbnUrlStateStorage, id, timeRestore);
           }}
+          getTabs={getListingTabs}
         />
       )}
     </>

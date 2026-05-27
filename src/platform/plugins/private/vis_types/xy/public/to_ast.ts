@@ -18,6 +18,7 @@ import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import type { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
 import type { DateHistogramParams, HistogramParams } from '@kbn/chart-expressions-common';
 import { LegendSize } from '@kbn/chart-expressions-common';
+import { charsToPixels } from './utils/truncate';
 import type {
   Dimensions,
   Dimension,
@@ -123,7 +124,10 @@ const prepareLayers = (
       'date' in (xAccessor?.params || {}),
       'interval' in (xAccessor?.params || {})
     ),
-    splitAccessors: splitAccessors ? splitAccessors.map(prepareVisDimension) : undefined,
+    splitAccessors:
+      splitAccessors && splitAccessors.length > 0
+        ? splitAccessors.map(prepareVisDimension)
+        : undefined,
     markSizeAccessor:
       markSizeAccessor && !isBar ? prepareVisDimension(markSizeAccessor) : undefined,
     palette: palette ? preparePalette(palette) : undefined,
@@ -146,7 +150,8 @@ const prepareLayers = (
 
 const getLabelArgs = (data: CategoryAxis, isTimeChart?: boolean) => {
   return {
-    truncate: data.labels.truncate,
+    // axis expressions expect pixels, we approximate pixels from character count
+    truncate: charsToPixels(data.labels.truncate),
     labelsOrientation: -(data.labels.rotate ?? (isTimeChart ? 0 : 90)),
     showOverlappingLabels: data.labels.filter === false,
     showDuplicates: data.labels.filter === false,

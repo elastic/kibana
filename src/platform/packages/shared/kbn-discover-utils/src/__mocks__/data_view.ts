@@ -7,77 +7,71 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { fieldList } from '@kbn/data-views-plugin/common';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 
-export const shallowMockedFields = [
+const shallowMockedFields: FieldSpec[] = [
   {
     name: '_source',
     type: '_source',
     scripted: false,
-    filterable: false,
+    searchable: false,
     aggregatable: false,
   },
   {
     name: '_index',
     type: 'string',
     scripted: false,
-    filterable: true,
+    searchable: true,
     aggregatable: false,
   },
   {
     name: 'message',
     type: 'string',
-    displayName: 'message',
     scripted: false,
-    filterable: false,
+    searchable: false,
     aggregatable: false,
   },
   {
     name: 'extension',
     type: 'string',
-    displayName: 'extension',
     scripted: false,
-    filterable: true,
+    searchable: true,
     aggregatable: true,
   },
   {
     name: 'bytes',
     type: 'number',
-    displayName: 'bytesDisplayName',
+    customLabel: 'bytesDisplayName',
     scripted: false,
-    filterable: true,
+    searchable: true,
     aggregatable: true,
-    sortable: true,
   },
   {
     name: 'scripted',
     type: 'number',
-    displayName: 'scripted',
     scripted: true,
-    filterable: false,
+    searchable: false,
+    aggregatable: false,
   },
   {
     name: 'object.value',
     type: 'number',
-    displayName: 'object.value',
     scripted: false,
-    filterable: true,
+    searchable: true,
     aggregatable: true,
   },
   {
     name: '@timestamp',
     type: 'date',
-    displayName: '@timestamp',
     scripted: false,
-    filterable: true,
+    searchable: true,
     aggregatable: true,
   },
-] as DataView['fields'];
+];
 
-export const deepMockedFields = shallowMockedFields.map(
-  (field) => new DataViewField(field)
-) as DataView['fields'];
+export const deepMockedFields = fieldList(shallowMockedFields);
 
 export const buildDataViewMock = ({
   id,
@@ -131,7 +125,10 @@ export const buildDataViewMock = ({
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
     timeFieldName,
     docvalueFields: [],
-    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    getFormatterForField: jest.fn(() => ({
+      convertToText: (value: unknown) => value,
+      convertToReact: (value: unknown) => value,
+    })),
     isTimeBased: () => !!timeFieldName,
     isTimeNanosBased: () => false,
     isPersisted: () => isPersisted,
@@ -155,11 +152,11 @@ export const buildDataViewMock = ({
 
 export const dataViewMock = buildDataViewMock({
   name: 'the-data-view',
-  fields: shallowMockedFields,
+  fields: deepMockedFields,
 });
 
 export const dataViewMockWithTimeField = buildDataViewMock({
   name: 'the-data-view',
-  fields: shallowMockedFields,
+  fields: deepMockedFields,
   timeFieldName: '@timestamp',
 });

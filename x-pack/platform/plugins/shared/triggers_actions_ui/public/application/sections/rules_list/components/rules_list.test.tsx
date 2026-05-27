@@ -6,9 +6,11 @@
  */
 
 import { parseDuration } from '@kbn/alerting-plugin/common';
+import { fetchUiConfig } from '@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/maintenance-windows-plugin/common';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -23,6 +25,8 @@ import {
 } from '@testing-library/react';
 import * as React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
+import { BehaviorSubject } from 'rxjs';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import type {
@@ -32,12 +36,9 @@ import type {
 } from '../../../../types';
 import { Percentiles } from '../../../../types';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { getFormattedDuration } from '../../../lib/monitoring_utils';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
-import { CreateRuleButton } from './create_rule_button';
 import { RulesList, percentileFields } from './rules_list';
-import { RulesListDocLink } from './rules_list_doc_link';
 import {
   getDisabledByLicenseRuleTypeFromApi,
   mockedRulesData,
@@ -138,6 +139,18 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
 jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/cps-utils', () => ({
+  ...jest.requireActual('@kbn/cps-utils'),
+  useRouteBasedCpsPickerAccess: jest.fn(),
+}));
+
+const license$ = new BehaviorSubject(
+  licensingMock.createLicense({
+    license: { type: 'platinum', mode: 'platinum' },
+  })
+);
+
+const mockUseRouteBasedCpsPickerAccess = jest.mocked(useRouteBasedCpsPickerAccess);
 
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
@@ -368,6 +381,14 @@ describe('rules_list ', () => {
     cleanup();
   });
 
+  it('sets the CPS picker access to DISABLED', () => {
+    renderWithProviders(<RulesList />);
+    expect(mockUseRouteBasedCpsPickerAccess).toHaveBeenCalledWith(
+      ProjectRoutingAccess.DISABLED,
+      expect.any(Object)
+    );
+  });
+
   it('can filter by rule states', async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     const onStatusFilterChangeMock = jest.fn();
@@ -439,36 +460,6 @@ describe('rules_list ', () => {
       fireEvent.click(screen.getAllByTestId('actionTypetestFilterOption')[0]);
       // couldn't find better way, avoid using container! this is an exception
       expect(screen.getAllByRole('marquee', { name: '1 active filters' })).toHaveLength(1);
-    });
-  });
-
-  describe('setHeaderActions', () => {
-    it('should not render the Create Rule button', async () => {
-      renderWithProviders(<RulesList />);
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-
-      expect(screen.queryAllByTestId('createRuleButton')).toHaveLength(0);
-    });
-
-    it('should set header actions correctly when the user is authorized to create rules', async () => {
-      const setHeaderActionsMock = jest.fn();
-      renderWithProviders(<RulesList setHeaderActions={setHeaderActionsMock} />);
-
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-      expect(setHeaderActionsMock.mock.lastCall[0][0].type).toEqual(CreateRuleButton);
-      expect(setHeaderActionsMock.mock.lastCall[0][1].type).toEqual(RulesSettingsLink);
-      expect(setHeaderActionsMock.mock.lastCall[0][2].type).toEqual(RulesListDocLink);
-    });
-
-    it('should set header actions correctly when the user is not authorized to creat rules', async () => {
-      getRuleTypes.mockResolvedValueOnce([]);
-      const setHeaderActionsMock = jest.fn();
-      renderWithProviders(<RulesList setHeaderActions={setHeaderActionsMock} />);
-
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-      // Do not render the create rule button since the user is not authorized
-      expect(setHeaderActionsMock.mock.lastCall[0][0].type).toEqual(RulesSettingsLink);
-      expect(setHeaderActionsMock.mock.lastCall[0][1].type).toEqual(RulesListDocLink);
     });
   });
 
@@ -550,7 +541,7 @@ describe('rules_list ', () => {
       fireEvent.mouseOver(await within(durationColumnHeader).findByText('Info'));
 
       await waitFor(() =>
-        expect(screen.getByRole('tooltip')).toHaveTextContent(
+        expect(screen.getByRole('tooltip', { hidden: true })).toHaveTextContent(
           'The length of time it took for the rule to run (mm:ss).'
         )
       );
@@ -1473,6 +1464,7 @@ describe('MaintenanceWindowsMock', () => {
     };
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    useKibanaMock().services.licensing.license$ = license$;
   });
 
   afterEach(() => {
@@ -1521,5 +1513,101 @@ describe('MaintenanceWindowsMock', () => {
     ).toBeInTheDocument();
 
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('UIAM API Key Banner', () => {
+  beforeEach(() => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
+    loadRulesWithKueryFilter.mockResolvedValue({
+      page: 1,
+      perPage: 10000,
+      total: 0,
+      data: mockedRulesData,
+    });
+    loadActionTypes.mockResolvedValue([]);
+    getRuleTypes.mockResolvedValue([ruleTypeFromApi]);
+    loadAllActions.mockResolvedValue([]);
+    loadRuleAggregationsWithKueryFilter.mockResolvedValue({});
+    loadRuleTags.mockResolvedValue({
+      data: [],
+      page: 1,
+      perPage: 50,
+      total: 0,
+    });
+
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const ruleTypeRegistry = ruleTypeRegistryMock.create();
+
+    ruleTypeRegistry.list.mockReturnValue([ruleType]);
+    actionTypeRegistry.list.mockReturnValue([]);
+    useKibanaMock().services.application.capabilities = {
+      ...useKibanaMock().services.application.capabilities,
+      [MAINTENANCE_WINDOW_FEATURE_ID]: {
+        save: true,
+        show: true,
+      },
+    };
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
+  });
+
+  it('renders UIAM API key banner when isServerless is true and apiKeyType is uiam', async () => {
+    useKibanaMock().services.isServerless = true;
+    jest.mocked(fetchUiConfig).mockResolvedValue({
+      isUsingSecurity: true,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      apiKeyType: 'uiam',
+    });
+
+    renderWithProviders(<RulesList />);
+
+    expect(await screen.findByTestId('rulesListUiamApiKeyBanner')).toBeInTheDocument();
+  });
+
+  it('does not render UIAM API key banner when isServerless is false', async () => {
+    useKibanaMock().services.isServerless = false;
+    jest.mocked(fetchUiConfig).mockResolvedValue({
+      isUsingSecurity: true,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      apiKeyType: 'uiam',
+    });
+
+    renderWithProviders(<RulesList />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('rulesListUiamApiKeyBanner')).not.toBeInTheDocument();
+    });
+  });
+
+  it('does not render UIAM API key banner when apiKeyType is not uiam', async () => {
+    useKibanaMock().services.isServerless = true;
+
+    renderWithProviders(<RulesList />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('rulesListUiamApiKeyBanner')).not.toBeInTheDocument();
+    });
+  });
+
+  it('displays correct banner content when rendered', async () => {
+    useKibanaMock().services.isServerless = true;
+    jest.mocked(fetchUiConfig).mockResolvedValue({
+      isUsingSecurity: true,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      apiKeyType: 'uiam',
+    });
+
+    renderWithProviders(<RulesList />);
+
+    const banner = await screen.findByTestId('rulesListUiamApiKeyBanner');
+    expect(banner).toBeInTheDocument();
+    expect(screen.getByText('UIAM API key rollout for rules')).toBeInTheDocument();
   });
 });

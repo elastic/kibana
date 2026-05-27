@@ -11,9 +11,16 @@
  */
 export const internalNamespaces = {
   platformCore: 'platform.core',
-  observability: 'observability',
+  platformAlerting: 'platform.alerting',
   platformDashboard: 'platform.dashboard',
+  platformStreams: 'platform.streams',
+  filestore: 'filestore',
+  attachments: 'attachments',
+  observability: 'observability',
+  search: 'search',
   security: 'security',
+  streams: 'platform.streams',
+  workflows: 'platform.workflows',
 } as const;
 
 /**
@@ -21,9 +28,16 @@ export const internalNamespaces = {
  */
 export const protectedNamespaces: string[] = [
   internalNamespaces.platformCore,
+  internalNamespaces.platformAlerting,
+  internalNamespaces.attachments,
+  internalNamespaces.filestore,
   internalNamespaces.observability,
-  internalNamespaces.platformDashboard, // Owned by dashboard_agent plugin
+  internalNamespaces.platformDashboard, // Owned by agent_builder_dashboards plugin
+  internalNamespaces.platformStreams,
+  internalNamespaces.search,
   internalNamespaces.security,
+  internalNamespaces.streams,
+  internalNamespaces.workflows,
 ];
 
 /**

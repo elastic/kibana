@@ -8,16 +8,17 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
+import { OPTIONS_LIST_CONTROL, DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import {
-  registerReactEmbeddableFactory,
-  type EmbeddableFactory,
+  registerEmbeddablePublicDefinition,
+  type EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { render, waitFor } from '@testing-library/react';
 
-import type { ControlsRendererParentApi, ControlsLayout } from '../types';
+import type { ControlsRendererParentApi } from '../types';
 import { ControlPanel } from './control_panel';
 
 const mockServices = {
@@ -41,28 +42,21 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 const parentApi = {
-  getSerializedStateForChild: jest.fn().mockReturnValue({ type: 'optionsListControl' }),
+  getSerializedStateForChild: jest.fn().mockReturnValue({ type: OPTIONS_LIST_CONTROL }),
   viewMode$: new BehaviorSubject('view'),
-  layout$: new BehaviorSubject({
-    controls: {
-      control1: {
-        type: 'optionsListControl',
-      },
-    },
-  }),
   registerChildApi: jest.fn(),
 } as unknown as ControlsRendererParentApi;
 
-const mockOptionsListFactory: EmbeddableFactory<{ type: 'optionsListControl' }> = {
-  type: 'optionsListControl',
+const mockOptionsListFactory: EmbeddablePublicDefinition<{ type: typeof OPTIONS_LIST_CONTROL }> = {
+  type: OPTIONS_LIST_CONTROL,
   buildEmbeddable: async ({ initialState, finalizeApi }) => {
     const api = finalizeApi({
       parentApi,
       serializeState: () => ({
-        rawState: {
-          type: 'optionsListControl',
-        },
+        type: OPTIONS_LIST_CONTROL,
       }),
+      anyStateChange$: of(),
+      applySerializedState: () => undefined,
     });
     return {
       Component: () => <div data-test-subj="optionsListControl">Options list control</div>,
@@ -73,8 +67,8 @@ const mockOptionsListFactory: EmbeddableFactory<{ type: 'optionsListControl' }> 
 
 describe('render', () => {
   beforeAll(() => {
-    registerReactEmbeddableFactory(
-      'optionsListControl',
+    registerEmbeddablePublicDefinition(
+      'options_list_control',
       jest.fn().mockResolvedValue(mockOptionsListFactory)
     );
   });
@@ -84,11 +78,15 @@ describe('render', () => {
   });
 
   describe('control width', () => {
-    test('defaults to medium and grow disabled', async () => {
+    test('should use default medium class + default no flex grow', async () => {
       const controlPanel = render(
         <ControlPanel
-          uuid="control1"
-          type="optionsListControl"
+          control={{
+            ...DEFAULT_PINNED_CONTROL_STATE,
+            id: 'control1',
+            type: 'options_list_control',
+            order: 0,
+          }}
           parentApi={parentApi}
           setControlPanelRef={jest.fn()}
         />
@@ -100,20 +98,16 @@ describe('render', () => {
       });
     });
 
-    test('should use small class + no flex grow', async () => {
-      parentApi.layout$.next({
-        controls: {
-          control1: {
-            type: 'optionsListControl',
-            width: 'small',
-            grow: true,
-          },
-        },
-      } as unknown as ControlsLayout);
+    test('should use small class + flex grow', async () => {
       const controlPanel = render(
         <ControlPanel
-          uuid="control1"
-          type="optionsListControl"
+          control={{
+            id: 'control1',
+            type: 'options_list_control',
+            order: 0,
+            width: 'small',
+            grow: true,
+          }}
           parentApi={parentApi}
           setControlPanelRef={jest.fn()}
         />

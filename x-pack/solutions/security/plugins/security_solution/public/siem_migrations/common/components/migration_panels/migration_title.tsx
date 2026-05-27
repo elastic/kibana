@@ -136,6 +136,11 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
             onCancel={cancelEdit}
             onSave={saveName}
             startWithEditOpen
+            editModeProps={{
+              inputProps: {
+                autoFocus: true,
+              },
+            }}
           />
         </EuiFlexItem>
       ) : (
@@ -161,7 +166,7 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
               panelPaddingSize="none"
               anchorPosition="downCenter"
             >
-              <EuiContextMenuPanel size="s">
+              <EuiContextMenuPanel>
                 <EuiContextMenuItem
                   icon="pencil"
                   onClick={showRename}

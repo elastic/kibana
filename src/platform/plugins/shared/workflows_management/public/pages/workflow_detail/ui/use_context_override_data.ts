@@ -10,9 +10,11 @@
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { v4 as generateUuid } from 'uuid';
+import { extractNormalizedInputsFromYaml } from '@kbn/workflows/spec/lib/field_conversion';
 import {
   selectWorkflowDefinition,
   selectWorkflowGraph,
+  selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useSpaceId } from '../../../hooks/use_space_id';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
@@ -27,6 +29,7 @@ export function useContextOverrideData() {
   // Redux selectors, use only current workflow data, not execution data
   const workflowGraph = useSelector(selectWorkflowGraph);
   const workflowDefinition = useSelector(selectWorkflowDefinition);
+  const yamlString = useSelector(selectYamlString);
 
   const getContextOverrideData = useCallback(
     (stepId: string): ContextOverrideData | null => {
@@ -34,7 +37,10 @@ export function useContextOverrideData() {
         return null;
       }
 
+      const inputs = extractNormalizedInputsFromYaml(workflowDefinition, yamlString);
+
       const stepSubGraph = workflowGraph.getStepGraph(stepId);
+
       return buildContextOverride(stepSubGraph, {
         consts: workflowDefinition.consts,
         workflow: {
@@ -43,9 +49,10 @@ export function useContextOverrideData() {
           enabled: workflowDefinition.enabled || true,
           spaceId,
         },
+        inputsDefinition: inputs,
       });
     },
-    [workflowGraph, workflowDefinition, spaceId]
+    [workflowGraph, workflowDefinition, spaceId, yamlString]
   );
 
   return getContextOverrideData;

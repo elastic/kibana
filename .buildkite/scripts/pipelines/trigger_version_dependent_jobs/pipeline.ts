@@ -12,8 +12,7 @@ import type { BuildkiteTriggerStep } from '#pipeline-utils';
 import { getVersionsFile } from '#pipeline-utils';
 
 const pipelineSets = {
-  'es-forward': 'kibana-es-forward-compatibility-testing',
-  'es-forward-9-dot-1': 'kibana-es-forward-compatibility-testing-9-dot-1',
+  'es-forward-9-dot-3': 'kibana-es-forward-compatibility-testing-9-dot-3',
   'artifacts-snapshot': 'kibana-artifacts-snapshot',
   'artifacts-staging': 'kibana-artifacts-staging',
   'artifacts-trigger': 'kibana-artifacts-trigger',
@@ -38,12 +37,8 @@ async function main() {
   }
 
   switch (pipelineSetName) {
-    case 'es-forward': {
-      pipelineSteps.push(...getESForwardPipelineTriggers());
-      break;
-    }
-    case 'es-forward-9-dot-1': {
-      pipelineSteps.push(...getESForward9Dot1PipelineTriggers());
+    case 'es-forward-9-dot-3': {
+      pipelineSteps.push(...getESForward9Dot3PipelineTriggers());
       break;
     }
     case 'artifacts-snapshot': {
@@ -67,54 +62,28 @@ async function main() {
 }
 
 /**
- * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch.
- * Should be triggered for combinations of (Kibana@7.17 + ES@8.x {current open branches on the same major})
- */
-export function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
-  const versions = getVersionsFile();
-  const KIBANA_7_17 = versions.versions.find((v) => v.branch === '7.17');
-  if (!KIBANA_7_17) {
-    throw new Error('Update ES forward compatibility pipeline to remove 7.17 and add version 8');
-  }
-  const targetESVersions = versions.versions.filter((v) => v.branch.startsWith('8.'));
-
-  return targetESVersions.map(({ version }) => {
-    return {
-      trigger: pipelineSets['es-forward'],
-      async: true,
-      label: `Triggering Kibana ${KIBANA_7_17.version} + ES ${version} forward compatibility`,
-      build: {
-        message: process.env.MESSAGE || `ES forward-compatibility test for ES ${version}`,
-        branch: KIBANA_7_17.branch,
-        commit: 'HEAD',
-        env: {
-          ES_SNAPSHOT_MANIFEST: `https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${version}/manifest-latest-verified.json`,
-          DRY_RUN: process.env.DRY_RUN,
-        },
-      },
-    } as BuildkiteTriggerStep;
-  });
-}
-
-/**
- * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch for 9.1.
+ * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch for 9.3.
  * Should be triggered for combinations of (Kibana@8.19 + ES@9.x {current open branches on the same major})
  */
-export function getESForward9Dot1PipelineTriggers(): BuildkiteTriggerStep[] {
+export function getESForward9Dot3PipelineTriggers(): BuildkiteTriggerStep[] {
   const versions = getVersionsFile();
   const KIBANA_8_19 = versions.versions.find((v) => v.branch === '8.19');
   if (!KIBANA_8_19) {
-    throw new Error('Update ES forward compatibility 9.1 pipeline to 8.19');
+    throw new Error('Update ES forward compatibility 9.3 pipeline to 8.19');
   }
   const targetESVersions = versions.versions.filter(
     (v) =>
-      // 9.1+, 8.19 => 9.0 is not supported
-      (v.branch.startsWith('9.') && v.branch !== '9.0') || v.branch.includes('main')
+      // 9.3+, 8.19 => 9.0 is not supported
+      (v.branch.startsWith('9.') &&
+        v.branch !== '9.0' &&
+        v.branch !== '9.1' &&
+        v.branch !== '9.2') ||
+      v.branch.includes('main')
   );
 
   return targetESVersions.map(({ version }) => {
     return {
-      trigger: pipelineSets['es-forward-9-dot-1'],
+      trigger: pipelineSets['es-forward-9-dot-3'],
       async: true,
       label: `Triggering Kibana ${KIBANA_8_19.version} + ES ${version} forward compatibility`,
       build: {
@@ -193,9 +162,7 @@ export function getArtifactStagingPipelineTriggers() {
  */
 export function getArtifactBuildTriggers() {
   const versions = getVersionsFile();
-  const targetVersions = versions.versions.filter(
-    (version) => version.branch !== '7.17' && version.branch !== 'main'
-  );
+  const targetVersions = versions.versions.filter((version) => version.branch !== 'main');
 
   return targetVersions.map(
     ({ branch }) =>

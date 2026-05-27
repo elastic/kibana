@@ -19,12 +19,23 @@ export type LayoutComponent =
 export type ApplicationComponent = 'topBar' | 'bottomBar' | 'content';
 export type LayoutProperty = keyof Pick<
   React.CSSProperties,
-  'top' | 'bottom' | 'left' | 'right' | 'height' | 'width' | 'marginBottom' | 'marginRight'
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'height'
+  | 'width'
+  | 'marginBottom'
+  | 'marginRight'
+  | 'marginTop'
 >;
 
 export type LayoutVarName = `${LayoutComponent}.${LayoutProperty}`;
 export type ApplicationVarName = `application.${ApplicationComponent}.${LayoutProperty}`;
 export type CSSVarName = LayoutVarName | ApplicationVarName;
+
+/** Converts camelCase to kebab-case */
+const toKebabCase = (str: string) => str.replace(/([A-Z])/g, '-$1').toLowerCase();
 
 /**
  * Helper function to generate CSS custom property variables with type safety.
@@ -82,11 +93,12 @@ export const layoutVarName = (name: CSSVarName): string => {
     const parts = name.split('.');
     const component = parts[1]; // "topBar"
     const property = parts[2]; // "height"
-    const kebabComponent = component.replace(/([A-Z])/g, '-$1').toLowerCase();
-    return `--kbn-application--${kebabComponent}-${property}`;
+    const kebabComponent = toKebabCase(component);
+    return `--kbn-application--${kebabComponent}-${toKebabCase(property)}`;
   } else {
     // Convert "header.height" to "header-height"
-    const kebabName = name.replace('.', '-');
+    const [component, property] = name.split('.');
+    const kebabName = `${component}-${toKebabCase(property)}`;
     return `--kbn-layout--${kebabName}`;
   }
 };

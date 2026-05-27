@@ -17,14 +17,6 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
   const testSubjects = getService('testSubjects');
 
   return {
-    async navigateToElasticsearchOverviewPage(basePath?: string) {
-      await retry.tryForTime(60 * 1000, async () => {
-        await common.navigateToApp('enterpriseSearch', {
-          shouldLoginIfPrompted: false,
-          basePath,
-        });
-      });
-    },
     async navigateToElasticsearchSearchHomePage(basePath?: string) {
       await retry.tryForTime(60 * 1000, async () => {
         await common.navigateToApp('searchHomepage', {
@@ -54,7 +46,7 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
           return;
         }
       }
-      await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
+      await testSubjects.existOrFail('indexDetailsContent', { timeout: 2000 });
     },
     async navigateToInferenceManagementPage(expectRedirect: boolean = false) {
       await common.navigateToApp('searchInferenceEndpoints', {

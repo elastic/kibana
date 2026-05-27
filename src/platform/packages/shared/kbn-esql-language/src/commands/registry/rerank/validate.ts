@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ESQLAstAllCommands,
-  ESQLMessage,
-  ESQLAst,
-  ESQLAstRerankCommand,
-} from '../../../types';
+import type { ESQLAstAllCommands, ESQLAst, ESQLAstRerankCommand } from '@elastic/esql/types';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { errors } from '../../definitions/utils/errors';
+import type { ESQLMessage } from '../../definitions/types';
 
 const supportedQueryTypes = ['keyword', 'text', 'param'];
 
@@ -29,7 +25,11 @@ export const validate = (
   const messages: ESQLMessage[] = [];
 
   const { query, location, inferenceId } = command as ESQLAstRerankCommand;
-  const rerankExpressionType = getExpressionType(query, context?.columns);
+  const rerankExpressionType = getExpressionType(
+    query,
+    context?.columns,
+    context?.unmappedFieldsStrategy
+  );
 
   // check for supported query types
   if (!supportedQueryTypes.includes(rerankExpressionType)) {

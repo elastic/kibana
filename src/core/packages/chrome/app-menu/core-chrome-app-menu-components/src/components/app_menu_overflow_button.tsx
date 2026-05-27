@@ -13,32 +13,30 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getIsSelectedColor } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
-import type {
-  AppMenuItemType,
-  AppMenuPrimaryActionItem,
-  AppMenuSecondaryActionItem,
-} from '../types';
+import type { AppMenuItemType, AppMenuPrimaryActionItem, AppMenuSwitch } from '../types';
 
 interface AppMenuShowMoreButtonProps {
   items: AppMenuItemType[];
+  staticItems?: AppMenuItemType[];
   isPopoverOpen: boolean;
   primaryActionItem?: AppMenuPrimaryActionItem;
-  secondaryActionItem?: AppMenuSecondaryActionItem;
+  switchConfig?: AppMenuSwitch;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
 }
 
 export const AppMenuOverflowButton = ({
   items,
+  staticItems,
   isPopoverOpen,
   primaryActionItem,
-  secondaryActionItem,
+  switchConfig,
   onPopoverToggle,
   onPopoverClose,
 }: AppMenuShowMoreButtonProps) => {
   const { euiTheme } = useEuiTheme();
 
-  if (items.length === 0) {
+  if (items.length === 0 && (!staticItems || staticItems.length === 0) && !switchConfig) {
     return null;
   }
 
@@ -58,8 +56,8 @@ export const AppMenuOverflowButton = ({
 
   const button = (
     <EuiButtonIcon
-      iconType="boxesHorizontal" // TODO: Change to "ellipsis" when it's available in EUI.
-      size="xs"
+      iconType="ellipsis"
+      size="s"
       aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
         defaultMessage: 'More',
       })}
@@ -68,22 +66,23 @@ export const AppMenuOverflowButton = ({
       onClick={handleClick}
       isSelected={isPopoverOpen}
       css={buttonCss}
-      data-test-subj="top-nav-menu-overflow-button"
+      data-test-subj="app-menu-overflow-button"
     />
   );
 
   return (
     <AppMenuPopover
       items={items}
+      staticItems={staticItems}
       anchorElement={button}
       tooltipContent={i18n.translate('core.chrome.appMenu.showMoreButtonTooltip', {
         defaultMessage: 'More',
       })}
       isOpen={isPopoverOpen}
-      popoverWidth={200}
       primaryActionItem={primaryActionItem}
-      secondaryActionItem={secondaryActionItem}
+      switchConfig={switchConfig}
       onClose={onPopoverClose}
+      onCloseOverflowButton={onPopoverClose}
     />
   );
 };

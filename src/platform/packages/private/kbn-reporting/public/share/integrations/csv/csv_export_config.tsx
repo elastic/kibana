@@ -11,32 +11,56 @@ import React from 'react';
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ShareContext, ExportShare } from '@kbn/share-plugin/public';
 import type { LocatorParams } from '@kbn/reporting-common/types';
 import { EuiCallOut, EuiText } from '@elastic/eui';
-import type { ReportParamsGetter, ReportParamsGetterOptions } from '../../../types';
+import type { TimeRange } from '@kbn/es-query';
+import type { ExportGenerationOpts } from '@kbn/share-plugin/public/types';
+import type {
+  ReportingCSVSharingData,
+  ReportParamsGetter,
+  ReportParamsGetterOptions,
+} from '../../../types';
 import type { CsvSearchModeParams } from '../../shared/get_search_csv_job_params';
 import { getSearchCsvJobParams } from '../../shared/get_search_csv_job_params';
 import type { ExportModalShareOpts } from '../../share_context_menu';
 
+const toAbsoluteTimeRange = (
+  locatorParams: LocatorParams[],
+  absoluteTimeRange: TimeRange | undefined
+): LocatorParams[] => {
+  return locatorParams.map((lp) => {
+    if (!absoluteTimeRange) {
+      return lp;
+    }
+
+    return {
+      ...lp,
+      params: {
+        ...lp.params,
+        timeRange: absoluteTimeRange,
+      },
+    };
+  });
+};
+
 export const getCsvReportParams: ReportParamsGetter<
-  ReportParamsGetterOptions & { forShareUrl?: boolean },
+  ReportParamsGetterOptions<ReportingCSVSharingData> & {
+    forShareUrl?: boolean;
+    useAbsoluteTime?: boolean;
+  },
   CsvSearchModeParams
-> = ({ sharingData, forShareUrl = false }) => {
-  if (forShareUrl) {
-    /**
-     * FIXME: the timerange used in the locator params should be RELATIVE if
-     * `forShareUrl == true`.
-     *
-     * Automated reports created using the POST URL (non-ad-hoc) should use a
-     * relative time range so each report instance is generated relative to the
-     * time of its generation.
-     *
-     * Ad-hoc (non-automated) reports must be generated using the same absolute
-     * range of time as the search results being viewed.
-     */
+> = ({ sharingData, forShareUrl = false, useAbsoluteTime = false }) => {
+  if (sharingData.isTextBased) {
+    const locatorParams = sharingData.locatorParams;
+
+    return {
+      isEsqlMode: true,
+      locatorParams: useAbsoluteTime
+        ? toAbsoluteTimeRange(locatorParams, sharingData.absoluteTimeRange)
+        : locatorParams,
+    };
   }
   return {
     locatorParams: sharingData.locatorParams as LocatorParams[],
@@ -51,15 +75,28 @@ export const getShareMenuItems =
   ({
     objectType,
     sharingData,
-  }: ShareContext): ReturnType<ExportShare['config']> extends Promise<infer R> ? R : never => {
-    const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams =>
-      getCsvReportParams({ sharingData, forShareUrl });
+    shareableUrlLocatorParams,
+  }: ShareContext<ReportingCSVSharingData>): Awaited<
+    ReturnType<ExportShare<ReportingCSVSharingData>['config']>
+  > => {
+    const getSearchModeParams = ({
+      forShareUrl,
+      useAbsoluteTime,
+    }: {
+      forShareUrl?: boolean;
+      useAbsoluteTime?: boolean;
+    } = {}): CsvSearchModeParams =>
+      getCsvReportParams({
+        sharingData,
+        forShareUrl,
+        useAbsoluteTime,
+      });
 
-    const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
+    const generateReportingJobCSV = ({ intl }: ExportGenerationOpts) => {
       const { reportType, decoratedJobParams } = getSearchCsvJobParams({
         apiClient,
-        searchModeParams: getSearchModeParams(false),
-        title: sharingData.title as string,
+        searchModeParams: getSearchModeParams({ useAbsoluteTime: true }),
+        title: sharingData.title,
       });
 
       return firstValueFrom(startServices$).then(([startServices]) => {
@@ -118,21 +155,30 @@ export const getShareMenuItems =
       defaultMessage: 'Export',
     });
 
-    const { reportType, decoratedJobParams } = getSearchCsvJobParams({
+    const { reportType } = getSearchCsvJobParams({
       apiClient,
-      searchModeParams: getSearchModeParams(true),
-      title: sharingData.title as string,
+      searchModeParams: getSearchModeParams({ forShareUrl: true }),
+      title: sharingData.title,
     });
 
-    const relativePath = apiClient.getReportingPublicJobPath(reportType, decoratedJobParams);
-
-    const absoluteUrl = new URL(relativePath, window.location.href).toString();
+    const getAbsoluteUrl = () => {
+      const { reportType: _reportType, decoratedJobParams } = getSearchCsvJobParams({
+        apiClient,
+        searchModeParams: getSearchModeParams({
+          forShareUrl: true,
+        }),
+        title: sharingData.title,
+      });
+      const relativePath = apiClient.getReportingPublicJobPath(_reportType, decoratedJobParams);
+      return new URL(relativePath, window.location.href).toString();
+    };
 
     return {
       name: panelTitle,
       exportType: reportType,
       label: 'CSV',
-      icon: 'tableDensityNormal',
+      icon: 'table',
+      supportsAbsoluteTime: true,
       generateAssetExport: generateReportingJobCSV,
       helpText: (
         <FormattedMessage
@@ -157,13 +203,14 @@ export const getShareMenuItems =
             'Allows to generate selected file format programmatically outside Kibana or in Watcher.',
         }),
         contentType: 'text',
-        generateAssetURIValue: () => absoluteUrl,
+        generateAssetURIValue: getAbsoluteUrl,
       },
       renderTotalHitsSizeWarning: (totalHits: number = 0): React.ReactNode => {
         const maxRows = csvConfig?.maxRows || 0;
         if (totalHits >= maxRows) {
           return (
             <EuiCallOut
+              announceOnMount
               size="s"
               color="warning"
               title={i18n.translate('reporting.share.csv.reporting.totalHitsSizeWarning.title', {

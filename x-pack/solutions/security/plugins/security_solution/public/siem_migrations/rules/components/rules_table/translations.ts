@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const RULES_MIGRATION_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.caption',
+  {
+    defaultMessage: 'Rules migration status',
+  }
+);
+
 export const ALREADY_TRANSLATED_RULE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.alreadyTranslatedTooltip',
   {

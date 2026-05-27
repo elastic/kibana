@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Agent as SuperTestAgent } from 'supertest';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import {
@@ -15,6 +15,7 @@ import {
   getTestTitle,
 } from '../lib/saved_object_test_utils';
 import type { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export interface GetTestDefinition extends TestDefinition {
   request: { type: string; id: string };
@@ -25,7 +26,9 @@ export type GetTestCase = TestCase;
 const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
 export const TEST_CASES: Record<string, GetTestCase> = Object.freeze({ ...CASES, DOES_NOT_EXIST });
 
-export function getTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) {
+export function getTestSuiteFactory(context: FtrProviderContext) {
+  const testDataLoader = getTestDataLoader(context);
+  const supertest = context.getService('supertestWithoutAuth');
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('get');
   const expectResponseBody =
     (testCase: GetTestCase): ExpectResponseBody =>
@@ -65,16 +68,30 @@ export function getTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) 
       const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
       describeFn(description, () => {
-        before(() =>
-          esArchiver.load(
-            'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
-        after(() =>
-          esArchiver.unload(
-            'x-pack/platform/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
-          )
-        );
+        before(async () => {
+          await testDataLoader.createFtrSpaces();
+          await testDataLoader.createFtrSavedObjectsData([
+            {
+              spaceName: null,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+            },
+            {
+              spaceName: SPACE_1.id,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
+            },
+            {
+              spaceName: SPACE_2.id,
+              dataUrl:
+                'x-pack/platform/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
+            },
+          ]);
+        });
+        after(async () => {
+          await testDataLoader.deleteFtrSavedObjectsData();
+          await testDataLoader.deleteFtrSpaces();
+        });
 
         for (const test of tests) {
           it(`should return ${test.responseStatusCode} ${test.title}`, async () => {

@@ -9,67 +9,74 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import { DEFAULT_OBJECT_FIT, IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../common';
 
-const imageFileSrcSchema = schema.object({
-  type: schema.literal('file'),
-  fileId: schema.string(),
-  fileImageMeta: schema.maybe(
-    schema.object({
-      blurHash: schema.maybe(schema.string()),
-      width: schema.number({
-        meta: { description: 'Width of the image in pixels' },
-      }),
-      height: schema.number({
-        meta: { description: 'Height of the image in pixels' },
-      }),
-    })
-  ),
-});
-
-const imageUrlSrcSchema = schema.object({
-  type: schema.literal('url'),
-  url: schema.string({
-    meta: { description: 'URL of the image' },
-  }),
-});
-
-const imageConfigSchema = schema.object({
-  src: schema.oneOf([imageFileSrcSchema, imageUrlSrcSchema], {
-    meta: { description: 'Image source (file or URL)' },
-  }),
-  altText: schema.maybe(schema.string()),
-  sizing: schema.object({
-    objectFit: schema.oneOf(
-      [
-        schema.literal('fill'),
-        schema.literal('contain'),
-        schema.literal('cover'),
-        schema.literal('none'),
-      ],
-      {
-        meta: { description: 'How the image should be sized within its container' },
-      }
-    ),
-  }),
-  backgroundColor: schema.maybe(schema.string()),
-});
-
-export const imageEmbeddableSchema = schema.allOf(
-  [
-    schema.object({
-      imageConfig: imageConfigSchema,
-      enhancements: schema.maybe(schema.any()),
-    }),
-    serializedTitlesSchema,
-  ],
+const imageFileSrcSchema = schema.object(
+  {
+    type: schema.literal('file'),
+    file_id: schema.string(),
+  },
   {
     meta: {
-      description: 'Image embeddable schema',
+      title: 'file',
     },
   }
 );
 
+const imageUrlSrcSchema = schema.object(
+  {
+    type: schema.literal('url'),
+    url: schema.string({
+      meta: { description: 'URL of the image' },
+    }),
+  },
+  {
+    meta: {
+      title: 'url',
+    },
+  }
+);
+
+const imageConfigSchema = schema.object({
+  src: schema.oneOf([imageFileSrcSchema, imageUrlSrcSchema], {
+    meta: { description: 'Image source' },
+  }),
+  alt_text: schema.maybe(schema.string()),
+  object_fit: schema.oneOf(
+    [
+      schema.literal('fill'),
+      schema.literal('contain'),
+      schema.literal('cover'),
+      schema.literal('none'),
+    ],
+    {
+      meta: { description: 'How the image should be sized within its container' },
+      defaultValue: DEFAULT_OBJECT_FIT,
+    }
+  ),
+
+  background_color: schema.maybe(schema.string()),
+});
+
+export function getImageEmbeddableSchema(getDrilldownsSchemas: GetDrilldownsSchemaFnType) {
+  return schema.allOf(
+    [
+      getDrilldownsSchemas(IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS),
+      schema.object({
+        image_config: imageConfigSchema,
+      }),
+      serializedTitlesSchema,
+    ],
+    {
+      meta: {
+        description: 'Image embeddable schema',
+      },
+    }
+  );
+}
+
 export type ImageConfig = TypeOf<typeof imageConfigSchema>;
 export type ImageConfigState = TypeOf<typeof imageConfigSchema>;
-export type ImageEmbeddableState = TypeOf<typeof imageEmbeddableSchema>;
+export type ImageEmbeddableState = TypeOf<ReturnType<typeof getImageEmbeddableSchema>>;

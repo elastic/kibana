@@ -20,10 +20,10 @@ import { cloneDeep } from 'lodash';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
+import type { NodeDeploymentStatsResponse } from '@kbn/ml-common-types/trained_models';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { ModelsBarStats } from '../../components/stats_bar';
 import { StatsBar } from '../../components/stats_bar';
-import type { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
-import { ML_PAGES } from '../../../../common/constants/locator';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { ExpandedRow } from './expanded_row';
@@ -121,7 +121,7 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
+          iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleDown' : 'chevronSingleRight'}
         />
       ),
       'data-test-subj': 'mlNodesTableRowDetailsToggle',
@@ -219,6 +219,12 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
 
       <div data-test-subj="mlNodesTableContainer">
         <EuiInMemoryTable<NodeItem>
+          tableCaption={i18n.translate(
+            'xpack.ml.trainedModels.nodesList.nodesOverviewTableCaption',
+            {
+              defaultMessage: 'Machine learning nodes overview',
+            }
+          )}
           allowNeutralSort={false}
           columns={columns}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}

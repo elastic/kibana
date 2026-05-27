@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import type { StreamQuery } from '@kbn/streams-schema';
+import type { QueryLink } from '@kbn/streams-schema';
 
-export interface QueryLink {
-  'asset.uuid': string;
-  'asset.type': 'query';
-  'asset.id': string;
-  query: StreamQuery;
+export type { QueryLink };
+
+export const QUERY_STATUSES = ['active', 'draft'] as const;
+export type QueryStatus = (typeof QUERY_STATUSES)[number];
+
+export const SEARCH_MODES = ['keyword', 'semantic', 'hybrid'] as const;
+export type SearchMode = (typeof SEARCH_MODES)[number];
+
+const DEFAULT_SEARCH_MODE: SearchMode = 'hybrid';
+
+export function resolveSearchMode(searchMode?: SearchMode): SearchMode {
+  return searchMode ?? DEFAULT_SEARCH_MODE;
 }
 
-type OmitFrom<T, K> = T extends any ? (K extends keyof T ? Omit<T, K> : never) : never;
-
-export type QueryLinkRequest = OmitFrom<QueryLink, 'asset.uuid'>;
+export type QueryLinkRequest = Omit<QueryLink, 'asset.uuid' | 'stream_name'>;
 
 export type QueryUnlinkRequest = Pick<QueryLink, 'asset.type' | 'asset.id'>;
 
 export type Query = QueryLink & {
   title: string;
-  query: StreamQuery;
 };

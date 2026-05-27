@@ -19,6 +19,7 @@ import {
   createCaseUserAction,
   createPersistableStateUserAction,
   createExternalReferenceUserAction,
+  createUnifiedFileUserAction,
   testConnectorId,
 } from './test_utils';
 import { createPersistableStateAttachmentTypeRegistryMock } from '../../attachment_framework/mocks';
@@ -223,6 +224,63 @@ describe('transform', () => {
         ) as SavedObjectsFindResponse<ConnectorUserAction>;
 
         expect(transformed).toMatchSnapshot();
+      });
+    });
+
+    describe('unified SO-backed attachments', () => {
+      it('passes attachmentId through from the persisted payload', () => {
+        const transformed = transformer(
+          createSOFindResponse([createUserActionFindSO(createUnifiedFileUserAction())]),
+          persistableStateAttachmentTypeRegistry
+        );
+
+        const payload = transformed.saved_objects[0].attributes.payload as {
+          comment: { attachmentId?: string };
+        };
+        expect(payload.comment.attachmentId).toEqual('file-so-id');
+      });
+
+      it('still surfaces attachmentId even if the references entry is missing (no inject required)', () => {
+        const userAction = {
+          ...createUnifiedFileUserAction(),
+          references: [],
+        };
+
+        const transformed = transformer(
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
+        );
+
+        const payload = transformed.saved_objects[0].attributes.payload as {
+          comment: { attachmentId?: string };
+        };
+        expect(payload.comment.attachmentId).toEqual('file-so-id');
+      });
+
+      it('falls back to an empty attachmentId when both payload and references are missing it', () => {
+        const base = createUnifiedFileUserAction();
+        const basePayload = base.attributes.payload as { comment: { attachmentId?: string } };
+        const userAction = {
+          ...base,
+          attributes: {
+            ...base.attributes,
+            payload: {
+              ...basePayload,
+              comment: { ...basePayload.comment, attachmentId: '' },
+            },
+          },
+          references: [],
+        } as typeof base;
+
+        const transformed = transformer(
+          createSOFindResponse([createUserActionFindSO(userAction)]),
+          persistableStateAttachmentTypeRegistry
+        );
+
+        const payload = transformed.saved_objects[0].attributes.payload as {
+          comment: { attachmentId?: string };
+        };
+        expect(payload.comment.attachmentId).toEqual('');
       });
     });
   });

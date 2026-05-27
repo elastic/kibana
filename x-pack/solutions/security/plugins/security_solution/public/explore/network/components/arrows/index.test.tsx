@@ -28,7 +28,7 @@ describe('arrows', () => {
     test('it renders an arrow head icon', () => {
       render(
         <TestProviders>
-          <ArrowHead direction={'arrowLeft'} />
+          <ArrowHead direction={'chevronSingleLeft'} />
         </TestProviders>
       );
 

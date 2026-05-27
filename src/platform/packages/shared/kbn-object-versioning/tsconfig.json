@@ -17,6 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/config-schema",
+    "@kbn/zod",
     "@kbn/safer-lodash-set",
     "@kbn/object-versioning-utils",
   ]

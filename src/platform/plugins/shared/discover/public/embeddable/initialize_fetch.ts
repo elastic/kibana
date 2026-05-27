@@ -8,7 +8,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
+import { combineLatest, debounceTime, lastValueFrom, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
 import {
@@ -133,6 +133,7 @@ export function initializeFetch({
   stateManager,
   discoverServices,
   scopedProfilesManager,
+  refreshTrigger$,
   setDataLoading,
   setBlockingError,
 }: {
@@ -140,16 +141,18 @@ export function initializeFetch({
   stateManager: SearchEmbeddableStateManager;
   discoverServices: DiscoverServices;
   scopedProfilesManager: ScopedProfilesManager;
+  refreshTrigger$: BehaviorSubject<void>;
   setDataLoading: (dataLoading: boolean | undefined) => void;
   setBlockingError: (error: Error | undefined) => void;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
 
-  const observables = [fetch$(api), api.savedSearch$, api.dataViews$] as const;
+  const observables = [fetch$(api), api.savedSearch$, api.dataViews$, refreshTrigger$] as const;
 
   const fetchSubscription = combineLatest(observables)
     .pipe(
+      debounceTime(0), // debounce to batch updates in the same tick
       tap(() => {
         // abort any in-progress requests
         if (abortController) {
@@ -161,11 +164,7 @@ export function initializeFetch({
         const dataView = dataViews?.length ? dataViews[0] : undefined;
 
         setBlockingError(undefined);
-        if (
-          !dataView ||
-          !savedSearch.searchSource ||
-          isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings)
-        ) {
+        if (!dataView || !savedSearch.searchSource) {
           return;
         }
 
@@ -180,6 +179,11 @@ export function initializeFetch({
             sortDir: discoverServices.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
           }
         );
+        // Still update search source for field stats mode, but not necessarily fetch data
+        if (isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings)) {
+          api.fetchContext$.next(fetchContext);
+          return;
+        }
 
         const searchSessionId = fetchContext.searchSessionId;
         const searchSourceQuery = savedSearch.searchSource.getField('query');

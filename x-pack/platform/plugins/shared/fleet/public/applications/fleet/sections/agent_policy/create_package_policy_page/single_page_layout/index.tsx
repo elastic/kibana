@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState, Suspense } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, Suspense } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,6 +42,7 @@ import {
 } from '../../../../../../../common/services';
 import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
+import { getAgentlessRelease } from '../../../../../../../common/services/agentless_policy_helper';
 import {
   sendGetAgentStatus,
   useConfig,
@@ -52,6 +53,7 @@ import {
   useAuthz,
   useBulkGetAgentPoliciesQuery,
 } from '../../../../hooks';
+import { useIncompatibleAgentVersionStatus } from '../../../../hooks/use_incompatible_agent_version_status';
 import {
   DevtoolsRequestFlyoutButton,
   Error as ErrorComponent,
@@ -59,8 +61,12 @@ import {
   Loading,
 } from '../../../../components';
 
-import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
-import { pkgKeyFromPackageInfo } from '../../../../services';
+import {
+  agentPolicyFormValidation,
+  ConfirmDeployAgentPolicyModal,
+  IncompatibleAgentVersionCallout,
+} from '../../components';
+import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../services';
 
 import type { CreatePackagePolicyParams } from '../types';
 
@@ -71,6 +77,12 @@ import {
   StepDefinePackagePolicy,
   StepSelectHosts,
 } from '../components';
+
+import {
+  computeDefaultVarGroupSelections,
+  type VarGroupSelection,
+} from '../services/var_group_helpers';
+import { applyNamespaceCustomizationChange } from '../services/apply_namespace_customization';
 
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
@@ -92,6 +104,7 @@ import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
+    padding-top: ${(props) => props.theme.eui.euiSizeXS};
     padding-bottom: ${(props) => props.theme.eui.euiSizeM};
   }
 
@@ -115,13 +128,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   integration,
   pkgLabel,
   addIntegrationFlyoutProps,
+  defaultPolicyData,
+  noBreadcrumb,
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const fleetStatus = useFleetStatus();
-  const { docLinks } = useStartServices();
+  const { docLinks, notifications } = useStartServices();
   const spaceSettings = useSpaceSettingsContext();
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({
@@ -144,7 +159,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   });
 
   const [selectedPolicyTab, setSelectedPolicyTab] = useState<SelectedPolicyTab>(
-    queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
+    queryParamsPolicyId || (defaultPolicyData?.policy_ids?.length ?? 0) > 0
+      ? SelectedPolicyTab.EXISTING
+      : SelectedPolicyTab.NEW
   );
 
   const {
@@ -217,6 +234,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     setNewAgentPolicy,
     setSelectedPolicyTab,
     isAddIntegrationFlyout,
+    defaultPolicyData,
   });
 
   if (addIntegrationFlyoutProps?.agentPolicy) {
@@ -241,6 +259,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [setHasAgentPolicyError]
   );
 
+  // Derive var_group_selections from policy for StepConfigurePackagePolicy
+  // Note: StepDefinePackagePolicy handles its own initialization and state management
+  const { enableVarGroups } = ExperimentalFeaturesService.get();
+  const varGroups =
+    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroupSelections = useMemo((): VarGroupSelection => {
+    if (packagePolicy.var_group_selections) {
+      return packagePolicy.var_group_selections;
+    }
+    return computeDefaultVarGroupSelections(varGroups, isAgentlessSelected);
+  }, [packagePolicy.var_group_selections, varGroups, isAgentlessSelected]);
+
   const updateNewAgentPolicy = useCallback(
     (updatedFields: Partial<NewAgentPolicy>) => {
       const updatedAgentPolicy = {
@@ -260,6 +290,40 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
     [setSelectedPolicyTab, setPolicyValidation, newAgentPolicy]
   );
+
+  // Namespace-level customization. Toggle state lives inside StepDefinePackagePolicy's hook;
+  // the parent only tracks the latest value via ref for the deferred post-save update.
+  const installedNamespaceCustomizationEnabledFor = useMemo(() => {
+    if (packageInfo && 'installationInfo' in packageInfo) {
+      return packageInfo.installationInfo?.namespace_customization_enabled_for ?? [];
+    }
+    return [];
+  }, [packageInfo]);
+  const namespaceCustomizationEnabledRef = useRef<boolean>(false);
+  const namespaceCustomizationAppliedRef = useRef<string | undefined>(undefined);
+
+  // After policy save: sync the package's namespace_customization_enabled_for list (deferred update).
+  useEffect(() => {
+    if (!savedPackagePolicy || !packageInfo) {
+      return;
+    }
+    if (namespaceCustomizationAppliedRef.current === savedPackagePolicy.id) {
+      return;
+    }
+    namespaceCustomizationAppliedRef.current = savedPackagePolicy.id;
+    // Capture and reset the toggle value so stale state doesn't carry over if the form is reused.
+    const wasEnabled = namespaceCustomizationEnabledRef.current;
+    namespaceCustomizationEnabledRef.current = false;
+    void applyNamespaceCustomizationChange(
+      packageInfo.name,
+      packageInfo.version,
+      savedPackagePolicy.namespace,
+      wasEnabled,
+      installedNamespaceCustomizationEnabledFor,
+      notifications,
+      packageInfo.title ?? packageInfo.name
+    );
+  }, [savedPackagePolicy, packageInfo, installedNamespaceCustomizationEnabledFor, notifications]);
 
   // Retrieve agent count
   const agentPolicyIds = agentPolicies.map((policy) => policy.id);
@@ -298,6 +362,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
     return agentPolicyData.items.reduce((acc, item) => (acc += item.fips_agents || 0), 0);
   }, [agentPolicyData?.items]);
+
+  const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
+    packageInfo,
+    agentPolicyData?.items
+  );
 
   useEffect(() => {
     if (
@@ -361,8 +430,17 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       agentPolicies,
       packageInfo,
       integrationInfo,
+      defaultPolicyData,
     }),
-    [agentPolicies, cancelClickHandler, cancelUrl, from, integrationInfo, packageInfo]
+    [
+      agentPolicies,
+      cancelClickHandler,
+      cancelUrl,
+      from,
+      integrationInfo,
+      packageInfo,
+      defaultPolicyData,
+    ]
   );
 
   const stepSelectAgentPolicy = useMemo(
@@ -378,7 +456,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         packageInfo={packageInfo}
         setHasAgentPolicyError={setHasAgentPolicyError}
         updateSelectedTab={updateSelectedPolicyTab}
-        selectedAgentPolicyIds={queryParamsPolicyId ? [queryParamsPolicyId] : []}
+        selectedAgentPolicyIds={
+          queryParamsPolicyId
+            ? [queryParamsPolicyId]
+            : defaultPolicyData?.policy_ids
+            ? defaultPolicyData?.policy_ids
+            : []
+        }
       />
     ),
     [
@@ -392,6 +476,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       updateSelectedPolicyTab,
       queryParamsPolicyId,
       setHasAgentPolicyError,
+      defaultPolicyData,
     ]
   );
 
@@ -425,7 +510,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage } = useAgentless();
+  const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
+  const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
+
+  const useCheckableCardsForSetupTechnologySelector = useMemo(() => {
+    return !replaceDefineStepView && enableSimplifiedAgentlessUX && isDefaultDeploymentMode;
+  }, [replaceDefineStepView, enableSimplifiedAgentlessUX, isDefaultDeploymentMode]);
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -441,7 +532,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            isAgentlessEnabled={isAgentlessIntegration(packageInfo) && !addIntegrationFlyoutProps}
+            isAgentlessEnabled={isAgentless && !addIntegrationFlyoutProps}
             defaultSetupTechnology={defaultSetupTechnology}
             integrationToEnable={integrationToEnable}
             setIntegrationToEnable={setIntegrationToEnable}
@@ -449,6 +540,38 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         </ExtensionWrapper>
       )
     ) : undefined;
+
+  const setupTechnologySelector = useMemo(() => {
+    if (!addIntegrationFlyoutProps && isAgentless && packageInfo) {
+      const release = getAgentlessRelease(packageInfo, integrationToEnable);
+      const showBetaBadge = release !== undefined && release !== 'ga';
+      return (
+        <SetupTechnologySelector
+          disabled={false}
+          packageInfo={packageInfo}
+          allowedSetupTechnologies={allowedSetupTechnologies}
+          setupTechnology={selectedSetupTechnology}
+          onSetupTechnologyChange={handleSetupTechnologyChange}
+          isAgentlessDefault={isDefaultDeploymentMode}
+          showBetaBadge={showBetaBadge}
+          useDescribedFormGroup={!useCheckableCardsForSetupTechnologySelector}
+          useCheckableCards={useCheckableCardsForSetupTechnologySelector}
+          hideTitle={useCheckableCardsForSetupTechnologySelector}
+        />
+      );
+    }
+    return null;
+  }, [
+    useCheckableCardsForSetupTechnologySelector,
+    isAgentless,
+    isDefaultDeploymentMode,
+    integrationToEnable,
+    addIntegrationFlyoutProps,
+    allowedSetupTechnologies,
+    selectedSetupTechnology,
+    handleSetupTechnologyChange,
+    packageInfo,
+  ]);
 
   const stepConfigurePackagePolicy = useMemo(
     () =>
@@ -466,23 +589,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults}
             submitAttempted={formState === 'INVALID'}
+            isAgentlessSelected={isAgentlessSelected}
+            agentPolicies={agentPolicies}
+            onNamespaceCustomizationEnabledChange={(enabled) => {
+              namespaceCustomizationEnabledRef.current = enabled;
+            }}
           />
 
-          {/* Show SetupTechnologySelector for all agentless integrations, including extension views */}
-          {!isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
-            <SetupTechnologySelector
-              disabled={false}
-              allowedSetupTechnologies={allowedSetupTechnologies}
-              setupTechnology={selectedSetupTechnology}
-              onSetupTechnologyChange={(value: SetupTechnology) => {
-                handleSetupTechnologyChange(value);
-                // agentless doesn't need system integration
-                setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
-              }}
-              isAgentlessDefault={isAgentlessDefault}
-              showBetaBadge={!isAgentlessDefault}
-            />
-          )}
+          {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}
+          {!useCheckableCardsForSetupTechnologySelector && setupTechnologySelector}
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!extensionView && (
@@ -494,6 +609,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isAgentlessSelected={isAgentlessSelected}
+              varGroupSelections={varGroupSelections}
             />
           )}
 
@@ -521,15 +637,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       validationResults,
       formState,
       extensionView,
-      isAgentlessIntegration,
-      isAgentlessDefault,
-      selectedSetupTechnology,
       integrationToEnable,
       isAgentlessSelected,
       handleExtensionViewOnChange,
-      handleSetupTechnologyChange,
-      allowedSetupTechnologies,
-      isAddIntegrationFlyout,
+      varGroupSelections,
+      setupTechnologySelector,
+      useCheckableCardsForSetupTechnologySelector,
     ]
   );
 
@@ -558,6 +671,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       headingElement: 'h2',
       status: !pkgName ? 'disabled' : undefined,
     },
+    ...(useCheckableCardsForSetupTechnologySelector && setupTechnologySelector
+      ? [
+          {
+            title: i18n.translate(
+              'xpack.fleet.createPackagePolicy.stepSelectSetupTechnologyTitle',
+              {
+                defaultMessage: 'Deployment',
+              }
+            ),
+            children: setupTechnologySelector,
+            headingElement: 'h2',
+          },
+        ]
+      : []),
     ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS && !addIntegrationFlyoutProps
       ? [
           {
@@ -635,6 +762,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <EuiSpacer size="m" />
         </>
       )}
+
+      {incompatibleAgentVersion.status !== 'NONE' && (
+        <IncompatibleAgentVersionCallout
+          incompatibility={incompatibleAgentVersion.status}
+          versionCondition={incompatibleAgentVersion.versionCondition}
+        />
+      )}
+
       {showSecretsDisabledCallout && (
         <>
           <EuiCallOut
@@ -725,7 +860,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                   onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
               )}
-            {packageInfo && !addIntegrationFlyoutProps && (
+            {packageInfo && !addIntegrationFlyoutProps && !noBreadcrumb && (
               <IntegrationBreadcrumb
                 pkgTitle={integrationInfo?.title || packageInfo.title}
                 pkgkey={pkgKeyFromPackageInfo(packageInfo)}

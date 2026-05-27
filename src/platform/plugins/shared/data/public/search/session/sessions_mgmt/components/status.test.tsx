@@ -7,19 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiTextProps, EuiToolTipProps } from '@elastic/eui';
-import { mount } from 'enzyme';
-import React from 'react';
-import { SearchSessionStatus } from '../../../../../common';
 import type { UISession } from '../types';
+import React from 'react';
+import { act, render, screen } from '@testing-library/react';
 import { LocaleWrapper } from '../__mocks__';
-import { getStatusText, StatusIndicator } from './status';
+import { SearchSessionStatus } from '../../../../../common';
+import { StatusIndicator } from './status';
+import userEvent from '@testing-library/user-event';
 
 let tz: string;
 let session: UISession;
 
-const mockNowTime = new Date();
-mockNowTime.setTime(1607026176061);
+const MOCK_NOW_TIME = new Date(1607026176061);
+
+const TEST_CASES = [
+  { status: SearchSessionStatus.IN_PROGRESS, expectedText: 'In progress' },
+  { status: SearchSessionStatus.EXPIRED, expectedText: 'Expired' },
+  { status: SearchSessionStatus.CANCELLED, expectedText: 'Cancelled' },
+  { status: SearchSessionStatus.COMPLETE, expectedText: 'Complete' },
+  { status: SearchSessionStatus.ERROR, expectedText: 'Error' },
+];
 
 describe('Background Search Session management status labels', () => {
   beforeEach(() => {
@@ -41,126 +48,93 @@ describe('Background Search Session management status labels', () => {
     };
   });
 
-  describe('getStatusText', () => {
-    test('in progress', () => {
-      expect(getStatusText(SearchSessionStatus.IN_PROGRESS)).toBe('In progress');
-    });
-    test('expired', () => {
-      expect(getStatusText(SearchSessionStatus.EXPIRED)).toBe('Expired');
-    });
-    test('cancelled', () => {
-      expect(getStatusText(SearchSessionStatus.CANCELLED)).toBe('Cancelled');
-    });
-    test('complete', () => {
-      expect(getStatusText(SearchSessionStatus.COMPLETE)).toBe('Complete');
-    });
-    test('error', () => {
-      expect(getStatusText('error')).toBe('Error');
-    });
-  });
-
   describe('StatusIndicator', () => {
-    test('render in progress', () => {
-      const statusIndicator = mount(
+    test.each(TEST_CASES)('renders $status', ({ status, expectedText }) => {
+      session.status = status;
+
+      render(
         <LocaleWrapper>
           <StatusIndicator session={session} timezone={tz} />
         </LocaleWrapper>
       );
 
-      const label = statusIndicator
-        .find(
-          `.euiText[data-test-subj="sessionManagementStatusLabel"][data-test-status="in_progress"]`
-        )
-        .last();
-      expect(label.text()).toMatchInlineSnapshot(`"In progress"`);
+      expect(screen.getByText(expectedText)).toBeVisible();
     });
 
-    test('complete', () => {
-      session.status = SearchSessionStatus.COMPLETE;
+    describe('when the user hovers the indicator', () => {
+      beforeAll(() => {
+        jest.useFakeTimers();
+      });
 
-      const statusIndicator = mount(
-        <LocaleWrapper>
-          <StatusIndicator session={session} timezone={tz} />
-        </LocaleWrapper>
-      );
+      afterAll(() => {
+        jest.useRealTimers();
+      });
 
-      const label = statusIndicator
-        .find(`[data-test-subj="sessionManagementStatusLabel"][data-test-status="complete"]`)
-        .first();
-      expect((label.props() as EuiTextProps).color).toBe('success');
-      expect(label.text()).toBe('Complete');
-    });
+      const setupUser = () => userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
-    test('complete - expires soon', () => {
-      session.status = SearchSessionStatus.COMPLETE;
+      test('complete - expires soon', async () => {
+        const user = setupUser();
+        session.status = SearchSessionStatus.COMPLETE;
 
-      const statusIndicator = mount(
-        <LocaleWrapper>
-          <StatusIndicator session={session} now={mockNowTime.toISOString()} timezone={tz} />
-        </LocaleWrapper>
-      );
+        render(
+          <LocaleWrapper>
+            <StatusIndicator session={session} timezone={tz} />
+          </LocaleWrapper>
+        );
 
-      const tooltip = statusIndicator.find('EuiToolTip');
-      expect((tooltip.first().props() as EuiToolTipProps).content).toMatchInlineSnapshot(
-        `"Expires on 6 Dec, 2020, 19:19:32"`
-      );
-    });
+        await user.hover(screen.getByText('Complete'));
+        act(() => {
+          jest.advanceTimersByTime(300);
+        });
 
-    test('expired', () => {
-      session.status = SearchSessionStatus.EXPIRED;
+        expect(await screen.findByText(/Expires on/i)).toBeVisible();
+      });
 
-      const statusIndicator = mount(
-        <LocaleWrapper>
-          <StatusIndicator session={session} now={mockNowTime.toISOString()} timezone={tz} />
-        </LocaleWrapper>
-      );
+      test('error', async () => {
+        const user = setupUser();
+        session.status = SearchSessionStatus.ERROR;
 
-      const label = statusIndicator
-        .find(`[data-test-subj="sessionManagementStatusLabel"][data-test-status="expired"]`)
-        .first();
-      expect(label.text()).toBe('Expired');
-    });
+        render(
+          <LocaleWrapper>
+            <StatusIndicator
+              now={MOCK_NOW_TIME.toISOString()}
+              session={{ ...session, errors: ['an error'] }}
+              timezone={tz}
+            />
+          </LocaleWrapper>
+        );
 
-    test('error', () => {
-      session.status = SearchSessionStatus.ERROR;
+        await user.hover(screen.getByText('Error'));
+        act(() => {
+          jest.advanceTimersByTime(300);
+        });
 
-      const statusIndicator = mount(
-        <LocaleWrapper>
-          <StatusIndicator
-            session={{ ...session, errors: ['an error'] }}
-            now={mockNowTime.toISOString()}
-            timezone={tz}
-          />
-        </LocaleWrapper>
-      );
+        expect(
+          await screen.findByText(
+            /One or more searches failed to complete. Use the "Inspect" action to see the underlying errors./i
+          )
+        ).toBeVisible();
+      });
 
-      const label = statusIndicator
-        .find(`[data-test-subj="sessionManagementStatusLabel"][data-test-status="error"]`)
-        .first();
-      expect(label.text()).toBe('Error');
+      test('error handling', async () => {
+        const user = setupUser();
+        session.status = SearchSessionStatus.COMPLETE;
+        (session as any).created = null;
+        (session as any).expires = null;
 
-      const tooltip = statusIndicator.find('EuiToolTip');
-      expect((tooltip.first().props() as EuiToolTipProps).content).toMatchInlineSnapshot(
-        `"One or more searches failed to complete. Use the \\"Inspect\\" action to see the underlying errors."`
-      );
-    });
+        render(
+          <LocaleWrapper>
+            <StatusIndicator now={MOCK_NOW_TIME.toISOString()} session={session} timezone={tz} />
+          </LocaleWrapper>
+        );
 
-    test('error handling', () => {
-      session.status = SearchSessionStatus.COMPLETE;
-      (session as any).created = null;
-      (session as any).expires = null;
+        await user.hover(screen.getByText('Complete'));
+        act(() => {
+          jest.advanceTimersByTime(300);
+        });
 
-      const statusIndicator = mount(
-        <LocaleWrapper>
-          <StatusIndicator session={session} now={mockNowTime.toISOString()} timezone={tz} />
-        </LocaleWrapper>
-      );
-
-      // no unhandled errors
-      const tooltip = statusIndicator.find('EuiToolTip');
-      expect((tooltip.first().props() as EuiToolTipProps).content).toMatchInlineSnapshot(
-        `"Expires on unknown"`
-      );
+        expect(await screen.findByText(/Expires on unknown/i)).toBeVisible();
+      });
     });
   });
 });

@@ -13,9 +13,22 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { fireEvent, screen } from '@testing-library/react';
 import { EisPromotionalTour } from './eis_promotional_tour';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
-import { EIS_PROMO_TOUR_TITLE, EIS_TOUR_CTA } from '../translations';
+import { EIS_PROMO_TOUR_TITLE, TOUR_CTA } from '../translations';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
+
+const mockToursIsEnabled = jest.fn(() => true);
+jest.mock('../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: {
+        tours: {
+          isEnabled: mockToursIsEnabled,
+        },
+      },
+    },
+  }),
+}));
 
 describe('EisPromotionalTour', () => {
   const promoId = 'testPromo';
@@ -33,6 +46,7 @@ describe('EisPromotionalTour', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockToursIsEnabled.mockReturnValue(true);
   });
 
   it('renders children only when promo is not visible', () => {
@@ -40,6 +54,22 @@ describe('EisPromotionalTour', () => {
       isPromoVisible: false,
       onDismissPromo: jest.fn(),
     });
+
+    renderEisPromotionalTour();
+
+    // Child should render
+    expect(screen.getByTestId(childTestId)).toBeInTheDocument();
+
+    // Tour should not render
+    expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();
+  });
+
+  it('renders children and does not render the tour when tours is disabled', () => {
+    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+      isPromoVisible: true,
+      onDismissPromo: jest.fn(),
+    });
+    mockToursIsEnabled.mockReturnValue(false);
 
     renderEisPromotionalTour();
 
@@ -95,7 +125,7 @@ describe('EisPromotionalTour', () => {
     const ctaBtn = screen.getByTestId('eisPromoTourCtaBtn');
     expect(ctaBtn).toBeInTheDocument();
     expect(ctaBtn).toHaveAttribute('href', ctaLink);
-    expect(ctaBtn).toHaveTextContent(EIS_TOUR_CTA);
+    expect(ctaBtn).toHaveTextContent(TOUR_CTA);
   });
 
   it('does not render CTA button when ctaLink is undefined', () => {

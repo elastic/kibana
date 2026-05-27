@@ -12,10 +12,15 @@ import type { ArtifactListPageProps } from '../artifact_list_page';
 import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ArtifactListPageRenderingSetup } from '../mocks';
-import { getArtifactListPageRenderingSetup } from '../mocks';
+import {
+  getArtifactImportFlyoutUiMocks,
+  getArtifactImportExportUiMocks,
+  getArtifactListPageRenderingSetup,
+} from '../mocks';
 import { getDeferred } from '../../../mocks/utils';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 jest.mock('../../../services/policies/hooks', () => ({
   useGetEndpointSpecificPolicies: jest.fn(),
@@ -32,17 +37,26 @@ describe('When using the ArtifactListPage component', () => {
   let history: AppContextTestRender['history'];
   let mockedApi: ReturnType<typeof trustedAppsAllHttpMocks>;
   let getFirstCard: ArtifactListPageRenderingSetup['getFirstCard'];
+  let importExportUi: ReturnType<typeof getArtifactImportExportUiMocks>;
+  let importFlyoutUi: ReturnType<typeof getArtifactImportFlyoutUiMocks>;
+  let setExperimentalFlag: ArtifactListPageRenderingSetup['setExperimentalFlag'];
 
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, mockedApi, getFirstCard } = renderSetup);
+    ({ history, mockedApi, getFirstCard, setExperimentalFlag } = renderSetup);
 
     mockUseGetEndpointSpecificPolicies.mockReturnValue({
       data: mockedApi.responseProvider.endpointPackagePolicyList(),
     });
 
-    render = (props = {}) => (renderResult = renderSetup.renderArtifactListPage(props));
+    render = (props = {}) => {
+      renderResult = renderSetup.renderArtifactListPage(props);
+      importExportUi = getArtifactImportExportUiMocks(renderResult, 'testPage');
+      importFlyoutUi = getArtifactImportFlyoutUiMocks(renderResult);
+
+      return renderResult;
+    };
   });
 
   it('should display a loader while determining which view to show', async () => {
@@ -149,6 +163,89 @@ describe('When using the ArtifactListPage component', () => {
       expect(getAllByText('mock decorator')).toHaveLength(10);
     });
 
+    describe('Import and export', () => {
+      beforeEach(() => {
+        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+      });
+
+      it('should not show import and export actions with feature flag disabled', async () => {
+        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+
+        await renderWithListData();
+
+        expect(importExportUi.queryMenuButton()).not.toBeInTheDocument();
+      });
+
+      it('should show import and export actions', async () => {
+        await renderWithListData();
+
+        expect(importExportUi.getMenuButton()).toBeInTheDocument();
+
+        await userEvent.click(importExportUi.getMenuButton());
+        expect(importExportUi.getImportButton()).toBeInTheDocument();
+        expect(importExportUi.getExportButton()).toBeInTheDocument();
+      });
+
+      it('should enable import and export buttons when user can create artifacts', async () => {
+        await renderWithListData({ allowCardCreateAction: true });
+
+        await userEvent.click(importExportUi.getMenuButton());
+        expect(importExportUi.getImportButton()).toBeEnabled();
+        expect(importExportUi.getExportButton()).toBeEnabled();
+      });
+
+      it('should disable import button when user cannot create artifacts', async () => {
+        await renderWithListData({ allowCardCreateAction: false });
+
+        await userEvent.click(importExportUi.getMenuButton());
+        expect(importExportUi.getImportButton()).toBeDisabled();
+        expect(importExportUi.getExportButton()).toBeEnabled();
+      });
+
+      it('should display the import flyout when import is clicked', async () => {
+        await renderWithListData();
+
+        await userEvent.click(importExportUi.getMenuButton());
+        await userEvent.click(importExportUi.getImportButton());
+
+        expect(importFlyoutUi.queryImportFlyout()).toBeInTheDocument();
+      });
+
+      it('should display the import flyout if it is requested via URL param', async () => {
+        history.push('somepage?show=import');
+        await renderWithListData();
+
+        expect(importFlyoutUi.queryImportFlyout()).toBeInTheDocument();
+      });
+
+      it('should not display the import flyout if it is requested via URL param without FF enabled', async () => {
+        setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+        history.push('somepage?show=import');
+        await renderWithListData();
+
+        expect(importFlyoutUi.queryImportFlyout()).not.toBeInTheDocument();
+      });
+
+      it('should refetch list data after a successful import', async () => {
+        await renderWithListData();
+
+        await userEvent.click(importExportUi.getMenuButton());
+        await userEvent.click(importExportUi.getImportButton());
+
+        await importFlyoutUi.uploadFile([ENDPOINT_ARTIFACT_LISTS.trustedApps.id]);
+        const currentApiCallCount = mockedApi.responseProvider.trustedAppsList.mock.calls.length;
+
+        await userEvent.click(importFlyoutUi.getImportButton());
+        await userEvent.click(importFlyoutUi.getConfirmModalConfirmButton());
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalledTimes(
+            currentApiCallCount + 1
+          );
+        });
+      });
+    });
+
     describe('and interacting with card actions', () => {
       const clickCardAction = async (action: 'edit' | 'delete') => {
         await getFirstCard({ showActions: true });
@@ -198,16 +295,19 @@ describe('When using the ArtifactListPage component', () => {
       it.each([
         ['create', 'show=create'],
         ['edit', 'show=edit&itemId=123'],
+        ['import', 'show=import'],
       ])(
         'should NOT show flyout if url has a show param of %s but the action is not allowed',
         async (_, urlParam) => {
+          setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
           history.push(`somepage?${urlParam}`);
           const { queryByTestId } = await renderWithListData({
             allowCardCreateAction: false,
             allowCardEditAction: false,
           });
 
-          expect(queryByTestId('testPage-flyout')).toBeNull();
+          expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+          expect(importFlyoutUi.queryImportFlyout()).not.toBeInTheDocument();
         }
       );
     });

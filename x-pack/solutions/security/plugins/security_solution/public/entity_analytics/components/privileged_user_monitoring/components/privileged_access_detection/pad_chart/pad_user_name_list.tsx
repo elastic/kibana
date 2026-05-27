@@ -9,7 +9,7 @@ import React from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { padChartStyling } from './pad_chart_styling';
+import { anomalyChartStyling } from '../../../../recent_anomalies/anomaly_chart_styling';
 import { UserPanelKey } from '../../../../../../flyout/entity_details/shared/constants';
 
 const PRIVILEGED_ACCESS_DETECTION_TABLE_ID = 'PadAnomalies-table';
@@ -33,8 +33,8 @@ export const UserNameList: React.FC<{ userNames: string[] }> = ({ userNames }) =
   return (
     <EuiFlexItem
       css={css`
-        margin-top: ${padChartStyling.heightOfTopLegend}px;
-        height: ${padChartStyling.heightOfUserNamesList(userNames)}px;
+        margin-top: ${anomalyChartStyling.heightOfTopLegend}px;
+        height: ${anomalyChartStyling.heightOfEntityNamesList(userNames.length)}px;
       `}
       grow={false}
     >
@@ -44,7 +44,7 @@ export const UserNameList: React.FC<{ userNames: string[] }> = ({ userNames }) =
             key={userName}
             css={css`
               justify-content: center;
-              height: ${padChartStyling.heightOfEachCell}px;
+              height: ${anomalyChartStyling.heightOfEachCell}px;
             `}
             grow={false}
           >

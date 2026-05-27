@@ -11,21 +11,21 @@ import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AppMenuActionButton } from './app_menu_action_button';
-import type { AppMenuPrimaryActionItem, AppMenuSecondaryActionItem } from '../types';
+import type { AppMenuPrimaryActionItem } from '../types';
 
 interface AppMenuPopoverActionButtonsProps {
   primaryActionItem?: AppMenuPrimaryActionItem;
-  secondaryActionItem?: AppMenuSecondaryActionItem;
+  onCloseOverflowButton?: () => void;
 }
 
 export const AppMenuPopoverActionButtons = ({
   primaryActionItem,
-  secondaryActionItem,
+  onCloseOverflowButton,
 }: AppMenuPopoverActionButtonsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const { euiTheme } = useEuiTheme();
 
-  if (!primaryActionItem && !secondaryActionItem) {
+  if (!primaryActionItem) {
     return null;
   }
 
@@ -37,46 +37,44 @@ export const AppMenuPopoverActionButtons = ({
     setOpenPopoverId(null);
   };
 
+  const commonProps = {
+    isPopoverOpen: openPopoverId === primaryActionItem.id,
+    onPopoverToggle: () => handlePopoverToggle(primaryActionItem.id),
+    onPopoverClose: handleOnPopoverClose,
+    onCloseOverflowButton,
+    fullWidth: true as const,
+  };
+
   const containerCss = css`
     margin-top: ${euiTheme.size.m};
     margin-bottom: ${euiTheme.size.m};
   `;
+
+  const hasRun = 'run' in primaryActionItem && typeof primaryActionItem.run === 'function';
 
   return (
     <EuiFlexGroup
       direction="column"
       justifyContent="center"
       gutterSize="m"
-      alignItems="center"
+      alignItems="stretch"
       css={containerCss}
-      data-test-subj="top-nav-menu-popover-action-buttons-container"
+      data-test-subj="app-menu-popover-action-buttons-container"
     >
-      {secondaryActionItem && (
-        <EuiFlexItem grow={false}>
-          <AppMenuActionButton
-            {...secondaryActionItem}
-            isPopoverOpen={openPopoverId === secondaryActionItem.id}
-            onPopoverToggle={() => {
-              handlePopoverToggle(secondaryActionItem.id);
-            }}
-            onPopoverClose={handleOnPopoverClose}
-            popoverAnchorPosition="downLeft"
-          />
-        </EuiFlexItem>
-      )}
-      {primaryActionItem && (
-        <EuiFlexItem grow={false}>
+      <EuiFlexItem>
+        {hasRun ? (
           <AppMenuActionButton
             {...primaryActionItem}
-            isPopoverOpen={openPopoverId === primaryActionItem.id}
-            onPopoverToggle={() => {
-              handlePopoverToggle(primaryActionItem.id);
+            {...commonProps}
+            run={(params) => {
+              primaryActionItem.run?.(params);
+              onCloseOverflowButton?.();
             }}
-            onPopoverClose={handleOnPopoverClose}
-            popoverAnchorPosition="downLeft"
           />
-        </EuiFlexItem>
-      )}
+        ) : (
+          <AppMenuActionButton {...primaryActionItem} {...commonProps} />
+        )}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

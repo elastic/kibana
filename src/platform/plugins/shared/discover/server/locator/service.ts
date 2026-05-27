@@ -14,6 +14,7 @@ import { searchSourceFromLocatorFactory } from './searchsource_from_locator';
 import { titleFromLocatorFactory } from './title_from_locator';
 import { queryFromLocatorFactory } from './query_from_locator';
 import { filtersFromLocatorFactory } from './filters_from_locator';
+import { timeFieldNameFromLocatorFactory } from './time_field_name_from_locator';
 
 export const getScopedClient = (
   core: CoreStart,
@@ -41,6 +42,7 @@ export const getScopedClient = (
         titleFromLocator: titleFromLocatorFactory(services),
         queryFromLocator: queryFromLocatorFactory(services),
         filtersFromLocator: filtersFromLocatorFactory(services),
+        timeFieldNameFromLocator: timeFieldNameFromLocatorFactory(services),
       };
     },
   };

@@ -41,6 +41,10 @@ export const createLocatorServiceMock = (): DiscoverServerPluginLocatorService =
     .fn<Promise<Filter[]>, [DiscoverAppLocatorParams]>()
     .mockResolvedValue([]);
 
+  const timeFieldNameFromLocatorMock = jest
+    .fn<Promise<string | undefined>, [DiscoverAppLocatorParams]>()
+    .mockResolvedValue('@timestamp');
+
   return {
     asScopedClient: jest
       .fn<Promise<LocatorServiceScopedClient>, [req: KibanaRequest]>()
@@ -52,6 +56,7 @@ export const createLocatorServiceMock = (): DiscoverServerPluginLocatorService =
           titleFromLocator: titleFromLocatorMock,
           queryFromLocator: queryFromLocatorMock,
           filtersFromLocator: filtersFromLocatorMock,
+          timeFieldNameFromLocator: timeFieldNameFromLocatorMock,
         } as LocatorServiceScopedClient);
       }),
   };

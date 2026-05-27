@@ -10,7 +10,7 @@ import markdownTemplate from './markdown.viz.json';
 
 interface MarkdownPanelJSON {
   title?: string;
-  gridData?: { x: number; y: number; w: number; h: number; i: string };
+  gridData?: { x: number; y: number; w: number; h: number; i: string; sectionId?: string };
   panelIndex?: string;
   embeddableConfig?: {
     savedVis?: {
@@ -35,6 +35,7 @@ export const createMarkdownPanel = (message: string, parsedPanel: ParsedPanel) =
       w: parsedPanel.position.w,
       h: parsedPanel.position.h,
       i: parsedPanel.id,
+      sectionId: parsedPanel.section?.id,
     };
     panelJSON.panelIndex = parsedPanel.id;
   }

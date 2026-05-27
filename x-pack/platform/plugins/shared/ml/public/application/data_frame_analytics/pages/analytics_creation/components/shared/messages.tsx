@@ -25,7 +25,7 @@ export const Messages: FC<Props> = ({ messages }) => {
             data-test-subj={`analyticsWizardCreationCallout_${i}`}
             title={requestMessage.message}
             color={requestMessage.error !== undefined ? 'danger' : 'primary'}
-            iconType={requestMessage.error !== undefined ? 'error' : 'checkInCircleFilled'}
+            iconType={requestMessage.error !== undefined ? 'error' : 'checkCircleFill'}
             size="s"
           >
             {requestMessage.error !== undefined && (

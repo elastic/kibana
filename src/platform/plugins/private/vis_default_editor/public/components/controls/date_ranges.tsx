@@ -160,7 +160,7 @@ function DateRangesParamEditor({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="sortRight" color="subdued" />
+                  <EuiIcon type="sortRight" color="subdued" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFieldText
@@ -208,7 +208,7 @@ function DateRangesParamEditor({
         <EuiSpacer size="s" />
         <EuiFlexItem>
           <EuiButtonEmpty
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             onClick={onAddRange}
             size="xs"
             data-test-subj="visEditorAddDateRange"

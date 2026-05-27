@@ -41,6 +41,24 @@ export const selectIsFullscreenDatasource = (state: LensState) =>
   Boolean(state.lens.isFullscreenDatasource);
 export const selectSelectedLayerId = (state: LensState) => state.lens.visualization.selectedLayerId;
 
+/**
+ * Selector to check if the text-based (ES|QL) editor should be hidden.
+ * This is set to true when the parent application (e.g., Discover) explicitly
+ * requests hiding the editor. Used primarily for flyout structure decisions.
+ */
+export const selectHideTextBasedEditor = (state: LensState) => state.lens.hideTextBasedEditor;
+
+/**
+ * Selector to determine if the user can edit a text-based (ES|QL) query.
+ * Returns true only when:
+ * 1. The editor is not explicitly hidden (hideTextBasedEditor is false)
+ * 2. The current query is an aggregate/ES|QL query type
+ *
+ * Used by ESQLEditor and ConfigPanel to decide whether to render the ES|QL editor.
+ */
+export const selectCanEditTextBasedQuery = (state: LensState) =>
+  !state.lens.hideTextBasedEditor && isOfAggregateQueryType(state.lens.query);
+
 let applyChangesCounter: number | undefined;
 export const selectTriggerApplyChanges = (state: LensState) => {
   const shouldApply = state.lens.applyChangesCounter !== applyChangesCounter;

@@ -9,9 +9,9 @@
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { isEqual, uniqWith } from 'lodash';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
+import { walk } from '@elastic/esql';
 import type { ParameterHint } from '../../..';
-import { walk } from '../../..';
-import type { ESQLAstAllCommands } from '../../types';
 import { getFunctionDefinition } from '../../commands/definitions/utils';
 import { parametersFromHintsResolvers } from '../../commands/definitions/utils/autocomplete/parameters_from_hints';
 import type { ICommandContext } from '../../commands/registry/types';
@@ -52,9 +52,13 @@ export const getCommandContext = async (
         recommendedQueries: [],
         recommendedFields: [],
       };
+      const views = await callbacks?.getViews?.();
+      const datasets = await callbacks?.getDatasets?.();
       context = {
         sources: await getSources(),
         editorExtensions,
+        views: views?.views ?? [],
+        datasets: datasets?.datasets ?? [],
       };
       break;
     case 'join':
@@ -99,6 +103,12 @@ export const getCommandContext = async (
           recommendedQueries: [],
           recommendedFields: [],
         },
+      };
+      break;
+    case 'promql':
+      const promqlTimeseriesSources = await callbacks?.getTimeseriesIndices?.();
+      context = {
+        timeSeriesSources: promqlTimeseriesSources?.indices || [],
       };
       break;
     default:
@@ -147,6 +157,7 @@ export const enhanceWithFunctionsContext = async (
 
   // If the hint needs new data to build the suggestions, we add that data to the context
   for (const hint of uniqueHints) {
+    if (!hint.entityType) continue;
     const parameterHandler = parametersFromHintsResolvers[hint.entityType];
     if (parameterHandler?.contextResolver) {
       const resolvedContext = await parameterHandler.contextResolver(

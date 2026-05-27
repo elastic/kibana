@@ -6,9 +6,16 @@
  */
 
 import type { AgentBuilderEvent } from '../base/events';
+import type { ToolOrigin } from '../tools/definition';
 import type { ToolResult } from '../tools/tool_result';
-import type { ConversationInternalState, ConversationRound } from './conversation';
+import type {
+  ConversationInternalState,
+  ConversationRound,
+  BackgroundExecutionState,
+  TodoItem,
+} from './conversation';
 import type { PromptRequestSource, PromptRequest } from '../agents/prompts';
+import type { VersionedAttachment } from '../attachments';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
@@ -25,6 +32,9 @@ export enum ChatEventType {
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
   conversationIdSet = 'conversation_id_set',
+  compactionStarted = 'compaction_started',
+  compactionCompleted = 'compaction_completed',
+  backgroundAgentComplete = 'background_agent_complete',
 }
 
 export type ChatEventBase<
@@ -38,6 +48,8 @@ export interface ToolCallEventData {
   tool_call_id: string;
   tool_id: string;
   params: Record<string, unknown>;
+  tool_call_group_id?: string;
+  tool_origin?: ToolOrigin;
 }
 
 export type ToolCallEvent = ChatEventBase<ChatEventType.toolCall, ToolCallEventData>;
@@ -68,6 +80,7 @@ export const isBrowserToolCallEvent = (
 export interface ToolProgressEventData {
   tool_call_id: string;
   message: string;
+  metadata?: Record<string, string>;
 }
 
 export type ToolProgressEvent = ChatEventBase<ChatEventType.toolProgress, ToolProgressEventData>;
@@ -138,6 +151,10 @@ export const isPromptRequestEvent = (
 export interface ReasoningEventData {
   /** plain text reasoning content */
   reasoning: string;
+  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  tool_call_id?: string;
+  /** when reasoning is bound to a tool call, the corresponding tool call group */
+  tool_call_group_id?: string;
   /** if true, will not be persisted or displaying in the thinking panel, only displayed as "current thinking" **/
   transient?: boolean;
 }
@@ -216,6 +233,10 @@ export interface RoundCompleteEventData {
   resumed?: boolean;
   /** if the prompt state was updated during the round, contains the up-to-date version */
   conversation_state?: ConversationInternalState;
+  /**
+   * Updated conversation-level attachments after this round.
+   **/
+  attachments?: VersionedAttachment[];
 }
 
 export type RoundCompleteEvent = ChatEventBase<ChatEventType.roundComplete, RoundCompleteEventData>;
@@ -279,6 +300,72 @@ export const isConversationIdSetEvent = (
   return event.type === ChatEventType.conversationIdSet;
 };
 
+// Compaction started
+
+export interface CompactionStartedEventData {
+  /** Estimated token count before compaction */
+  token_count_before: number;
+}
+
+export type CompactionStartedEvent = ChatEventBase<
+  ChatEventType.compactionStarted,
+  CompactionStartedEventData
+>;
+
+export const isCompactionStartedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is CompactionStartedEvent => {
+  return event.type === ChatEventType.compactionStarted;
+};
+
+// Compaction completed
+
+export interface CompactionCompletedEventData {
+  /** Estimated token count after compaction */
+  token_count_after: number;
+  /** Number of rounds that were summarized */
+  summarized_round_count: number;
+}
+
+export type CompactionCompletedEvent = ChatEventBase<
+  ChatEventType.compactionCompleted,
+  CompactionCompletedEventData
+>;
+
+export const isCompactionCompletedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is CompactionCompletedEvent => {
+  return event.type === ChatEventType.compactionCompleted;
+};
+
+export interface BackgroundAgentCompleteEventData {
+  execution: BackgroundExecutionState;
+}
+
+export type BackgroundAgentCompleteEvent = ChatEventBase<
+  ChatEventType.backgroundAgentComplete,
+  BackgroundAgentCompleteEventData
+>;
+
+export const isBackgroundAgentCompleteEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is BackgroundAgentCompleteEvent => {
+  return event.type === ChatEventType.backgroundAgentComplete;
+};
+
+export const TODOS_UPDATED_UI_EVENT = 'todos_updated' as const;
+
+export interface TodosUpdatedUiEventData {
+  todos: TodoItem[];
+}
+
+export const isTodosUpdatedEvent = (event: AgentBuilderEvent<string, any>) => {
+  return isToolUiEvent<typeof TODOS_UPDATED_UI_EVENT, TodosUpdatedUiEventData>(
+    event,
+    TODOS_UPDATED_UI_EVENT
+  );
+};
+
 /**
  * All types of events that can be emitted from an agent execution.
  */
@@ -293,7 +380,10 @@ export type ChatAgentEvent =
   | MessageChunkEvent
   | MessageCompleteEvent
   | ThinkingCompleteEvent
-  | RoundCompleteEvent;
+  | RoundCompleteEvent
+  | CompactionStartedEvent
+  | CompactionCompletedEvent
+  | BackgroundAgentCompleteEvent;
 
 /**
  * All types of events that can be emitted from the chat API.

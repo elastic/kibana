@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 
 import { DetailsFlyout } from '.';
 
@@ -19,13 +19,15 @@ import { useUpdateAttackDiscoverySchedule } from '../logic/use_update_schedule';
 import { useGetAttackDiscoverySchedule } from '../logic/use_get_schedule';
 import { mockAttackDiscoverySchedule } from '../../../mock/mock_attack_discovery_schedule';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 
-jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors');
+jest.mock('@kbn/inference-connectors');
 jest.mock('../logic/use_update_schedule');
 jest.mock('../logic/use_get_schedule');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../sourcerer/containers');
+jest.mock('../utils/convert_form_data', () => ({
+  convertFormDataInBaseSchedule: jest.fn().mockReturnValue({}),
+}));
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
   useLocation: jest.fn().mockReturnValue({
@@ -228,6 +230,59 @@ describe('DetailsFlyout', () => {
     });
   });
 
+  describe('after a successful save', () => {
+    beforeEach(() => {
+      // Override connectors to include the connector that matches the mock schedule's connectorId
+      (useLoadConnectors as jest.Mock).mockReturnValue({
+        isLoading: false,
+        data: [
+          {
+            id: mockAttackDiscoverySchedule.params.apiConfig.connectorId,
+            name: mockAttackDiscoverySchedule.params.apiConfig.name,
+            actionTypeId: mockAttackDiscoverySchedule.params.apiConfig.actionTypeId,
+          },
+        ],
+      });
+    });
+
+    it('should clear unsaved changes so close does not prompt confirmation modal', async () => {
+      await renderComponent();
+
+      // Enter edit mode
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('edit'));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('attackDiscoveryScheduleForm')).toBeInTheDocument();
+      });
+
+      // Simulate unsaved changes
+      act(() => {
+        fireEvent.change(screen.getByTestId('alertsRange'), { target: { value: 'changed' } });
+      });
+
+      // Save changes
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('save'));
+      });
+
+      // Wait for save to complete — form disappears when setIsEditing(false) is called
+      await waitFor(() => {
+        expect(screen.queryByTestId('attackDiscoveryScheduleForm')).not.toBeInTheDocument();
+      });
+
+      // Close the flyout
+      act(() => {
+        fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      });
+
+      // Confirmation modal must NOT appear — unsaved changes flag should have been cleared on save
+      expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
+      expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+  });
+
   describe('update schedule kibana privilege', () => {
     it('should return enabled edit button if update schedule privilege is granted', async () => {
       setupUseKibana(true);
@@ -257,7 +312,6 @@ describe('DetailsFlyout', () => {
 
       const editButton = screen.getByTestId('edit');
       fireEvent.mouseOver(editButton.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');

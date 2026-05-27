@@ -25,7 +25,7 @@ jest.mock('@elastic/eui', () => {
 describe('AppMenu', () => {
   const defaultItems = [
     { id: 'item1', label: 'Item 1', run: jest.fn(), iconType: 'gear', order: 1 },
-    { id: 'item2', label: 'Item 2', run: jest.fn(), iconType: 'search', order: 2 },
+    { id: 'item2', label: 'Item 2', run: jest.fn(), iconType: 'magnify', order: 2 },
   ];
 
   const defaultConfig: AppMenuConfig = {
@@ -63,7 +63,7 @@ describe('AppMenu', () => {
     it('should render the top nav menu when config has items', () => {
       render(<AppMenuComponent config={defaultConfig} />);
 
-      expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+      expect(screen.getByTestId('app-menu')).toBeInTheDocument();
     });
 
     it('should render menu items at xl breakpoint', () => {
@@ -89,43 +89,6 @@ describe('AppMenu', () => {
 
       expect(screen.getByText('Save')).toBeInTheDocument();
     });
-
-    it('should render secondary action item', () => {
-      const configWithSecondary: AppMenuConfig = {
-        secondaryActionItem: {
-          id: 'cancel',
-          label: 'Cancel',
-          run: jest.fn(),
-          iconType: 'cross',
-        },
-      };
-
-      render(<AppMenuComponent config={configWithSecondary} />);
-
-      expect(screen.getByText('Cancel')).toBeInTheDocument();
-    });
-
-    it('should render both primary and secondary action items', () => {
-      const configWithBoth: AppMenuConfig = {
-        primaryActionItem: {
-          id: 'save',
-          label: 'Save',
-          run: jest.fn(),
-          iconType: 'save',
-        },
-        secondaryActionItem: {
-          id: 'cancel',
-          label: 'Cancel',
-          run: jest.fn(),
-          iconType: 'cross',
-        },
-      };
-
-      render(<AppMenuComponent config={configWithBoth} />);
-
-      expect(screen.getByText('Save')).toBeInTheDocument();
-      expect(screen.getByText('Cancel')).toBeInTheDocument();
-    });
   });
 
   describe('responsive behavior', () => {
@@ -137,7 +100,7 @@ describe('AppMenu', () => {
 
       render(<AppMenuComponent config={defaultConfig} />);
 
-      expect(screen.getByTestId('top-nav-menu-overflow-button')).toBeInTheDocument();
+      expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
     });
 
     it('should render overflow button with all items at small breakpoint', () => {
@@ -145,7 +108,7 @@ describe('AppMenu', () => {
 
       render(<AppMenuComponent config={defaultConfig} />);
 
-      expect(screen.getByTestId('top-nav-menu-overflow-button')).toBeInTheDocument();
+      expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
     });
 
     it('should render individual menu items at xl breakpoint', () => {
@@ -158,6 +121,77 @@ describe('AppMenu', () => {
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();
+    });
+
+    it('should render overflow button at xl breakpoint when item is marked as overflow', () => {
+      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
+        if (breakpoints.includes('xl')) return true;
+        return false;
+      });
+
+      const forcedOverflowConfig: AppMenuConfig = {
+        items: [
+          {
+            id: 'singleOverflowItem',
+            label: 'Single overflow item',
+            run: jest.fn(),
+            iconType: 'gear',
+            order: 1,
+            overflow: true,
+          },
+        ],
+      };
+
+      render(<AppMenuComponent config={forcedOverflowConfig} />);
+
+      expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
+      expect(screen.queryByText('Single overflow item')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('switch', () => {
+    const switchConfig: AppMenuConfig['switch'] = {
+      id: 'test-switch',
+      label: 'Test switch',
+      labelProps: {},
+      checked: false,
+      onChange: jest.fn(),
+      'data-test-subj': 'test-switch',
+    };
+
+    it('should render the app menu with only a switch (standalone)', () => {
+      render(<AppMenuComponent config={{ switch: switchConfig }} />);
+
+      expect(screen.getByTestId('app-menu')).toBeInTheDocument();
+      expect(screen.getByTestId('test-switch')).toBeInTheDocument();
+    });
+
+    it('should render the switch alongside menu items at xl breakpoint', () => {
+      render(<AppMenuComponent config={{ ...defaultConfig, switch: switchConfig }} />);
+
+      expect(screen.getByTestId('test-switch')).toBeInTheDocument();
+      expect(screen.getByText('Item 1')).toBeInTheDocument();
+      expect(screen.getByText('Item 2')).toBeInTheDocument();
+    });
+
+    it('should render the switch at m-l breakpoint', () => {
+      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
+        if (breakpoints.includes('m') && breakpoints.includes('l')) return true;
+        return false;
+      });
+
+      render(<AppMenuComponent config={{ ...defaultConfig, switch: switchConfig }} />);
+
+      expect(screen.getByTestId('test-switch')).toBeInTheDocument();
+    });
+
+    it('should not render standalone switch at collapsed breakpoint (only overflow)', () => {
+      mockUseIsWithinBreakpoints.mockReturnValue(false);
+
+      render(<AppMenuComponent config={{ switch: switchConfig }} />);
+
+      expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
+      expect(screen.queryByTestId('test-switch')).not.toBeInTheDocument();
     });
   });
 });

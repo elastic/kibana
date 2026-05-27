@@ -12,6 +12,9 @@ import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 export const Wrapper = styled.div`
   // Set the min height to the viewport size minus the height of any global Kibana headers
   min-height: var(--kbn-application--content-height);
+
+  // should be white
+  background-color: ${(props) => props.theme.eui.euiColorBackgroundBasePlain};
 `;
 
 export const Page = styled(EuiPage)`

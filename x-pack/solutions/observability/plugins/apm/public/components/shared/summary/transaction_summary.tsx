@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Summary } from '.';
 import { ErrorCountSummaryItemBadge } from './error_count_summary_item_badge';
 import { HttpInfoSummaryItem } from './http_info_summary_item';
 import { TransactionResultSummaryItem } from './transaction_result_summary_item';
 import { UserAgentSummaryItem } from './user_agent_summary_item';
-import { ColdStartBadge } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/badge/cold_start_badge';
+import { ColdStartBadge } from '../trace_waterfall/badges/cold_start_badge';
 import { buildUrl } from '../../../utils/build_url';
 
 interface Props {
@@ -44,7 +45,7 @@ function getTransactionResultSummaryItem(transaction: Transaction) {
 
 function TransactionSummary({ transaction, totalDuration, errorCount, coldStartBadge }: Props) {
   const items = [
-    <Timestamp timestamp={transaction.timestamp.us / 1000} renderMode="tooltip" />,
+    <Timestamp timestamp={getTimestampUs(transaction) / 1000} renderMode="tooltip" />,
     <Duration
       duration={transaction.transaction.duration.us}
       parent={{

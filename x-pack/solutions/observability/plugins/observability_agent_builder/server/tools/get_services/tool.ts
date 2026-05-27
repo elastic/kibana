@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import { z } from '@kbn/zod/v4';
+import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type {
+  ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
@@ -26,16 +26,26 @@ const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
 const getServicesSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  environment: z
-    .string()
-    .min(1)
-    .optional()
-    .describe('Optionally filter the services by the environments that they are running in.'),
-  healthStatus: z
-    .array(z.enum(['unknown', 'healthy', 'warning', 'critical']))
+  anomalySeverities: z
+    .array(
+      z.enum([
+        ML_ANOMALY_SEVERITY.CRITICAL,
+        ML_ANOMALY_SEVERITY.MAJOR,
+        ML_ANOMALY_SEVERITY.MINOR,
+        ML_ANOMALY_SEVERITY.WARNING,
+        ML_ANOMALY_SEVERITY.LOW,
+        ML_ANOMALY_SEVERITY.UNKNOWN,
+      ])
+    )
     .optional()
     .describe(
-      'Optional list of health statuses to filter services by (e.g., ["healthy", "warning"]). Valid values: "unknown", "healthy", "warning", "critical".'
+      'Filter APM services by ML anomaly severity derived from anomalyScore. Example: ["critical", "major"].'
+    ),
+  kqlFilter: z
+    .string()
+    .optional()
+    .describe(
+      'KQL filter to narrow down services. Examples: "host.name: web-server-01", "service.name: frontend".'
     ),
 });
 
@@ -45,10 +55,7 @@ export function createGetServicesTool({
   dataRegistry,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
@@ -58,11 +65,11 @@ export function createGetServicesTool({
     type: ToolType.builtin,
     description: `Retrieves a list of services from APM, logs, and metrics data sources.
     
-For APM services, includes health status, active alert counts, and key performance metrics (latency, transaction error rate, throughput).
+For APM services, includes anomaly severity, active alert counts, and key performance metrics (latency, transaction error rate, throughput).
 For services found only in logs or metrics, basic information like service name and environment is returned.
 
 When to use:
-- Getting a high-level overview of system health from a service perspective
+- Getting a high-level overview of system status from a service perspective
 - Identifying key metrics for services like latency, error rate, throughput, anomalies and alert counts
 - Answering "which services are having problems?"
 - Discovering services that may not be instrumented with APM but appear in logs or metrics`,
@@ -75,12 +82,7 @@ When to use:
       },
     },
     handler: async (toolParams, context) => {
-      const {
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-        environment,
-        healthStatus,
-      } = toolParams;
+      const { start, end, anomalySeverities, kqlFilter } = toolParams;
       const { request, esClient } = context;
 
       try {
@@ -93,8 +95,8 @@ When to use:
           logger,
           start,
           end,
-          environment,
-          healthStatus,
+          anomalySeverities,
+          kqlFilter,
         });
 
         return {

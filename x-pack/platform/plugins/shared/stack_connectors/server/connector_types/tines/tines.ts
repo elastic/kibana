@@ -73,6 +73,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
   constructor(params: ServiceParams<TinesConfig, TinesSecrets>) {
     super(params);
 
+    this.logger = params.logger.get('tines');
     this.urls = {
       stories: `${this.config.url}${API_PATH}/stories`,
       agents: `${this.config.url}${API_PATH}/agents`,
@@ -119,6 +120,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     reducer: (response: R) => T,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<T & { incompleteResponse: boolean }> {
+    this.logger.debug(`[tinesApiRequest]. URL: ${req.url}`);
     const response = await this.request<R>(
       {
         ...req,
@@ -136,9 +138,11 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     webhook: TinesWebhookObject,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<TinesWebhookApiResponse> {
+    const reqUrl = this.urls.getActionUrl(webhook.id);
+    this.logger.debug(`[getWebhookParameters] URL: ${reqUrl}`);
     const response = await this.request(
       {
-        url: this.urls.getActionUrl(webhook.id),
+        url: reqUrl,
         method: 'get',
         headers: this.getAuthHeaders(),
         responseSchema: TinesWebhookApiResponseSchema,
@@ -160,6 +164,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     params: unknown,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<TinesStoriesActionResponse> {
+    this.logger.debug(`[getStories] URL: ${this.urls.stories}`);
     return this.tinesApiRequest(
       {
         url: this.urls.stories,
@@ -175,6 +180,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     { storyId }: TinesWebhooksActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<TinesWebhooksActionResponse> {
+    this.logger.debug(`[getWebhooks] URL: ${this.urls.agents}, STORY_ID: ${storyId}`);
     return this.tinesApiRequest(
       {
         url: this.urls.agents,
@@ -215,9 +221,11 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
       webhookConfig = config.options as TinesWebhookActionConfig;
     }
 
+    const currentWebhookUrl = webhookUrl ? webhookUrl : this.urls.getRunWebhookURL(webhookConfig!);
+    this.logger.debug(`[runWebhook] URL: ${currentWebhookUrl}`);
     const response = await this.request(
       {
-        url: webhookUrl ? webhookUrl : this.urls.getRunWebhookURL(webhookConfig!),
+        url: currentWebhookUrl,
         method: 'post',
         responseSchema: TinesRunApiResponseSchema,
         data: body,

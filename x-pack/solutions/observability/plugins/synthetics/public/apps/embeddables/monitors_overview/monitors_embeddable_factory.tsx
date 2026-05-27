@@ -7,7 +7,10 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
 import type {
   PublishesWritableTitle,
   PublishesTitle,
@@ -20,15 +23,15 @@ import {
   fetch$,
   titleComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { BehaviorSubject, Subject, map, merge } from 'rxjs';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { StatusGridComponent } from './monitors_grid_component';
-import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../common/embeddables/monitors_overview/constants';
 import type { ClientPluginsStart } from '../../../plugin';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 import type { OverviewView } from '../../synthetics/state';
-import type { MonitorFilters } from '../../../../common/embeddables/stats_overview/types';
+import type { MonitorFilters } from '../../../../common/types';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.monitors.displayName', {
@@ -39,8 +42,8 @@ const DEFAULT_FILTERS: MonitorFilters = {
   projects: [],
   tags: [],
   locations: [],
-  monitorIds: [],
-  monitorTypes: [],
+  monitor_ids: [],
+  monitor_types: [],
 };
 
 export interface OverviewMonitorsEmbeddableCustomState {
@@ -59,24 +62,27 @@ export type StatusOverviewApi = DefaultEmbeddableApi<OverviewMonitorsEmbeddableS
 export const getMonitorsEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
-  const factory: EmbeddableFactory<OverviewMonitorsEmbeddableState, StatusOverviewApi> = {
+  const factory: EmbeddablePublicDefinition<OverviewMonitorsEmbeddableState, StatusOverviewApi> = {
     type: SYNTHETICS_MONITORS_EMBEDDABLE,
+    getPlacementHints: () => ({ width: 30, height: 12 }),
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(initialState.rawState.filters);
-      const view$ = new BehaviorSubject(initialState.rawState.view);
+      // Ensure filters have all required properties with defaults
+      const filters$ = new BehaviorSubject({
+        ...DEFAULT_FILTERS,
+        ...(initialState?.filters || {}),
+      });
+      const view$ = new BehaviorSubject(initialState.view);
 
       function serializeState() {
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            filters: filters$.getValue(),
-            view: view$.getValue(),
-          },
+          ...titleManager.getLatestState(),
+          filters: filters$.getValue(),
+          view: view$.getValue(),
         };
       }
 
@@ -84,8 +90,16 @@ export const getMonitorsEmbeddableFactory = (
         parentApi,
         uuid,
         serializeState,
-        anyStateChange$: merge(titleManager.anyStateChange$, filters$, view$).pipe(
-          map(() => undefined)
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          filters$.pipe(
+            skip(1),
+            map(() => undefined)
+          ),
+          view$.pipe(
+            skip(1),
+            map(() => undefined)
+          )
         ),
         getComparators: () => ({
           ...titleComparators,
@@ -96,9 +110,9 @@ export const getMonitorsEmbeddableFactory = (
           filters: DEFAULT_FILTERS,
         },
         onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved?.rawState);
-          filters$.next(lastSaved?.rawState.filters ?? DEFAULT_FILTERS);
-          if (lastSaved?.rawState) view$.next(lastSaved?.rawState.view);
+          titleManager.reinitializeState(lastSaved);
+          filters$.next(lastSaved?.filters ?? DEFAULT_FILTERS);
+          if (lastSaved) view$.next(lastSaved?.view);
         },
       });
 

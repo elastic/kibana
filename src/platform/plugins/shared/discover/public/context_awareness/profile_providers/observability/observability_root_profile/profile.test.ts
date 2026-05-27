@@ -93,6 +93,46 @@ describe('observabilityRootProfileProvider', () => {
     });
   });
 
+  describe('getDefaultEsqlQuery', () => {
+    it('should return an ES|QL query using the allLogsIndexPattern from the resolved context', async () => {
+      const result = await observabilityRootProfileProvider.resolve({
+        solutionNavId: SolutionType.Observability,
+      });
+      if (!result.isMatch) {
+        throw new Error('Expected result to match');
+      }
+      expect(result.context.allLogsIndexPattern).toEqual('logs-*');
+      const defaultEsqlQuery = observabilityRootProfileProvider.profile.getDefaultEsqlQuery?.(
+        () => ({ query: 'FROM prev-pattern' }),
+        { context: result.context }
+      )();
+      expect(defaultEsqlQuery).toEqual({ query: 'FROM logs-*' });
+    });
+
+    it('should fall back to the previous profile return value when allLogsIndexPattern is undefined', async () => {
+      jest
+        .spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern')
+        .mockReturnValueOnce(undefined);
+      const result = await observabilityRootProfileProvider.resolve({
+        solutionNavId: SolutionType.Observability,
+      });
+      if (!result.isMatch) {
+        throw new Error('Expected result to match');
+      }
+      expect(result.context.allLogsIndexPattern).toEqual(undefined);
+      const prevValue = { query: 'FROM prev-pattern' };
+      const prev = jest.fn().mockReturnValue(prevValue);
+      const defaultEsqlQuery = observabilityRootProfileProvider.profile.getDefaultEsqlQuery?.(
+        prev,
+        {
+          context: result.context,
+        }
+      )();
+      expect(prev).toHaveBeenCalled();
+      expect(defaultEsqlQuery).toEqual(prevValue);
+    });
+  });
+
   describe('getDocViewer', () => {
     it('does NOT add attributes doc viewer tab to the registry when the record has no attributes fields', () => {
       const getDocViewer = observabilityRootProfileProvider.profile.getDocViewer!(
@@ -158,7 +198,7 @@ describe('observabilityRootProfileProvider', () => {
           id: 'doc_view_obs_attributes_overview',
           title: 'Attributes',
           order: 9,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });
@@ -196,7 +236,7 @@ describe('observabilityRootProfileProvider', () => {
           id: 'doc_view_obs_attributes_overview',
           title: 'Attributes',
           order: 9,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });
@@ -234,7 +274,7 @@ describe('observabilityRootProfileProvider', () => {
           id: 'doc_view_obs_attributes_overview',
           title: 'Attributes',
           order: 9,
-          component: expect.any(Function),
+          render: expect.any(Function),
         })
       );
     });

@@ -8,15 +8,18 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type {
-  ConnectorStep,
-  ElasticsearchStep,
-  ForEachStep,
-  HttpStep,
-  IfStep,
-  KibanaStep,
-  WaitStep,
-  WorkflowYaml,
+import {
+  type ConnectorStep,
+  DEFAULT_LOOP_MAX_ITERATIONS,
+  type ElasticsearchStep,
+  type ForEachStep,
+  type IfStep,
+  type KibanaStep,
+  type LoopBreakStep,
+  type LoopContinueStep,
+  type WaitStep,
+  type WhileStep,
+  type WorkflowYaml,
 } from '../../../spec/schema';
 import type {
   AtomicGraphNode,
@@ -27,8 +30,9 @@ import type {
   ExitConditionBranchNode,
   ExitForeachNode,
   ExitIfNode,
-  HttpGraphNode,
   KibanaGraphNode,
+  LoopBreakNode,
+  LoopContinueNode,
   WaitGraphNode,
 } from '../../types';
 import { convertToWorkflowGraph } from '../build_execution_graph';
@@ -146,80 +150,6 @@ describe('convertToWorkflowGraph', () => {
           with: { duration: '1s' },
         },
       } as WaitGraphNode);
-    });
-  });
-
-  describe('http step', () => {
-    const workflowDefinition = {
-      steps: [
-        {
-          name: 'testAtomicStep1',
-          type: 'slack',
-          connectorId: 'slack',
-          with: {
-            message: 'Hello from atomic step 1',
-          },
-        } as ConnectorStep,
-        {
-          name: 'testHttpStep',
-          type: 'http',
-          with: {
-            url: 'https://api.example.com/test',
-            method: 'GET',
-            headers: {
-              Authorization: 'Bearer token',
-            },
-            timeout: '30s',
-          },
-        } as HttpStep,
-        {
-          name: 'testAtomicStep2',
-          type: 'slack',
-          connectorId: 'slack',
-          with: {
-            message: 'Hello from atomic step 2',
-          },
-        } as ConnectorStep,
-      ],
-    } as Partial<WorkflowYaml>;
-
-    it('should return nodes for http step in correct topological order', () => {
-      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-      const topSort = graphlib.alg.topsort(executionGraph);
-      expect(topSort).toHaveLength(3);
-      expect(topSort).toEqual(['testAtomicStep1', 'testHttpStep', 'testAtomicStep2']);
-    });
-
-    it('should return correct edges for http step graph', () => {
-      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-      const edges = executionGraph.edges();
-      expect(edges).toEqual([
-        { v: 'testAtomicStep1', w: 'testHttpStep' },
-        { v: 'testHttpStep', w: 'testAtomicStep2' },
-      ]);
-    });
-
-    it('should configure the http step correctly', () => {
-      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-      const node = executionGraph.node('testHttpStep');
-      expect(node).toEqual({
-        id: 'testHttpStep',
-        type: 'http',
-        stepId: 'testHttpStep',
-        stepType: 'http',
-        configuration: {
-          name: 'testHttpStep',
-          type: 'http',
-          with: {
-            url: 'https://api.example.com/test',
-            method: 'GET',
-            headers: {
-              Authorization: 'Bearer token',
-            },
-            timeout: '30s',
-          },
-        },
-      } as HttpGraphNode);
     });
   });
 
@@ -851,6 +781,8 @@ describe('convertToWorkflowGraph', () => {
           stepType: 'foreach',
           stepId: 'testForeachStep',
           startNodeId: 'enterForeach_testForeachStep',
+          maxIterations: DEFAULT_LOOP_MAX_ITERATIONS,
+          onLimit: 'continue',
         } as ExitForeachNode);
       });
 
@@ -1016,6 +948,8 @@ describe('convertToWorkflowGraph', () => {
           stepId: 'foreach_testForeachConnectorStep',
           stepType: 'foreach',
           startNodeId: 'enterForeach_foreach_testForeachConnectorStep',
+          maxIterations: DEFAULT_LOOP_MAX_ITERATIONS,
+          onLimit: 'continue',
         } as ExitForeachNode);
       });
     });
@@ -1254,6 +1188,157 @@ describe('convertToWorkflowGraph', () => {
         'exitTryBlock_testForeachConnectorStep',
         'exitContinue_testForeachConnectorStep',
       ]);
+    });
+  });
+
+  describe('loop.break and loop.continue', () => {
+    it('should create loop-break node inside a foreach loop', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'my_loop',
+            type: 'foreach',
+            foreach: '{{ items }}',
+            steps: [
+              { name: 'step_a', type: 'console' } as ConnectorStep,
+              { name: 'stop_early', type: 'loop.break' } as LoopBreakStep,
+            ],
+          } as ForEachStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const graph = convertToWorkflowGraph(workflowDefinition as any);
+      const breakNode = graph.node('stop_early') as LoopBreakNode;
+
+      expect(breakNode).toBeDefined();
+      expect(breakNode.type).toBe('loop-break');
+      expect(breakNode.loopExitNodeId).toBe('exitForeach_my_loop');
+      expect(breakNode.loopStepId).toBe('my_loop');
+    });
+
+    it('should create loop-continue node inside a foreach loop', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'my_loop',
+            type: 'foreach',
+            foreach: '{{ items }}',
+            steps: [
+              { name: 'skip_item', type: 'loop.continue' } as LoopContinueStep,
+              { name: 'step_a', type: 'console' } as ConnectorStep,
+            ],
+          } as ForEachStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const graph = convertToWorkflowGraph(workflowDefinition as any);
+      const continueNode = graph.node('skip_item') as LoopContinueNode;
+
+      expect(continueNode).toBeDefined();
+      expect(continueNode.type).toBe('loop-continue');
+      expect(continueNode.loopExitNodeId).toBe('exitForeach_my_loop');
+    });
+
+    it('should create loop-break node inside a while loop', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'my_while',
+            type: 'while',
+            condition: 'true',
+            steps: [{ name: 'stop_loop', type: 'loop.break' } as LoopBreakStep],
+          } as WhileStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const graph = convertToWorkflowGraph(workflowDefinition as any);
+      const breakNode = graph.node('stop_loop') as LoopBreakNode;
+
+      expect(breakNode).toBeDefined();
+      expect(breakNode.type).toBe('loop-break');
+      expect(breakNode.loopExitNodeId).toBe('exitWhile_my_while');
+      expect(breakNode.loopStepId).toBe('my_while');
+    });
+
+    it('should support conditional loop.break via the generic inline if mechanism', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'my_loop',
+            type: 'foreach',
+            foreach: '{{ items }}',
+            steps: [
+              {
+                name: 'conditional_break',
+                type: 'loop.break',
+                if: 'foreach.item.status : "done"',
+              } as LoopBreakStep,
+            ],
+          } as ForEachStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const graph = convertToWorkflowGraph(workflowDefinition as any);
+
+      const enterIfNode = graph.node('enterCondition_if_conditional_break') as EnterIfNode;
+      expect(enterIfNode).toBeDefined();
+      expect(enterIfNode.type).toBe('enter-if');
+      expect(enterIfNode.configuration).toEqual(
+        expect.objectContaining({ condition: 'foreach.item.status : "done"' })
+      );
+
+      const breakNode = graph.node('conditional_break') as LoopBreakNode;
+      expect(breakNode).toBeDefined();
+      expect(breakNode.type).toBe('loop-break');
+      expect(breakNode.loopExitNodeId).toBe('exitForeach_my_loop');
+    });
+
+    it('should throw when loop.break is used outside a loop', () => {
+      const workflowDefinition = {
+        steps: [{ name: 'break_outside', type: 'loop.break' } as LoopBreakStep],
+      } as Partial<WorkflowYaml>;
+
+      expect(() => convertToWorkflowGraph(workflowDefinition as any)).toThrow(
+        /loop\.break and loop\.continue are only valid inside a loop body/
+      );
+    });
+
+    it('should throw when loop.continue is used outside a loop', () => {
+      const workflowDefinition = {
+        steps: [{ name: 'continue_outside', type: 'loop.continue' } as LoopContinueStep],
+      } as Partial<WorkflowYaml>;
+
+      expect(() => convertToWorkflowGraph(workflowDefinition as any)).toThrow(
+        /loop\.break and loop\.continue are only valid inside a loop body/
+      );
+    });
+
+    it('should target the innermost loop in nested loops', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'outer_loop',
+            type: 'foreach',
+            foreach: '{{ outer_items }}',
+            steps: [
+              {
+                name: 'inner_loop',
+                type: 'foreach',
+                foreach: '{{ inner_items }}',
+                steps: [{ name: 'break_inner', type: 'loop.break' } as LoopBreakStep],
+              } as ForEachStep,
+            ],
+          } as ForEachStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const graph = convertToWorkflowGraph(workflowDefinition as any);
+      const breakNode = graph.node('break_inner') as LoopBreakNode;
+
+      expect(breakNode).toBeDefined();
+      expect(breakNode.type).toBe('loop-break');
+      expect(breakNode.loopExitNodeId).toBe('exitForeach_inner_loop');
+      expect(breakNode.loopStepId).toBe('inner_loop');
     });
   });
 });

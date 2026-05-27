@@ -55,7 +55,7 @@ export KIBANA_TESTING_AI_CONNECTORS='{"my-connector":{"name":"My Test Connector"
 Start Scout server:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 ### Start EDOT Collector
@@ -76,34 +76,35 @@ The EDOT Collector receives traces from Kibana via the HTTP exporter configured 
 The following options are available to load Knowledge bases:
 
 A. Restore the [snapshot](https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/ec-gcs-snapshotting) from gcs-bucket, credentials are stored in secret's vault. **Fastest, recommended when restoring snapshot is available, e.g. ECH**
-   
+
 B. Use the ETL pipeline from the workchat-solution-ds-experiments (internal) repo. **Recommended when restoring snapshot is not an option, e.g. serverless**. Estimated time: ~30 minutes (Serverless Cloud) or ~1 hour (local).
 
-C. Use Huggingface Loader in Kibana: Follow the steps below to load data into Elasticsearch using the HuggingFace dataset loader: 
-  
-  ```bash
-  # Load domain specific knowledge base
-  HUGGING_FACE_ACCESS_TOKEN=<your-token> \
-  node --require ./src/setup_node_env/index.js \
-    x-pack/platform/packages/shared/kbn-ai-tools-cli/scripts/hf_dataset_loader.ts \
-    --datasets "agent_builder/{REPLACE_WITH_A_KNOWLEDGE_BASE}/*" \
-    --clear \
-    --kibana-url http://elastic:changeme@localhost:5620
-  ```
+C. Use Huggingface Loader in Kibana: Follow the steps below to load data into Elasticsearch using the HuggingFace dataset loader:
 
-  KNOWLEDGE BASE OPTIONS
-  1. Airline loyalty domain: `airline_loyalty_program_kb`
-  2. Customer support domain: `customer_support_kb`
-  3. Retail domain: `global_electronics_retailer_kb`
-  4. Healthcare survey domain: `hcahps_patient_survey_kb`
-  5. Elasticsearch customer support knowledge articles: `elastic_customer_support_kb`
+```bash
+# Load domain specific knowledge base
+HUGGING_FACE_ACCESS_TOKEN=<your-token> \
+node --require ./src/setup_node_env/index.js \
+  x-pack/platform/packages/shared/kbn-ai-tools-cli/scripts/hf_dataset_loader.ts \
+  --datasets "agent_builder/{REPLACE_WITH_A_KNOWLEDGE_BASE}/*" \
+  --clear \
+  --kibana-url http://elastic:changeme@localhost:5620
+```
 
-  **Note**: You need to be a member of the Elastic organization on HuggingFace to access AgentBuilder datasets. Sign up   with your `@elastic.co` email address.
+KNOWLEDGE BASE OPTIONS
 
-  **Note**: First download of the datasets may take a while, because of the embedding generation for `semantic_text` fields in some of the datasets.
-  Once done, documents with embeddings will be cached and re-used on subsequent data loads.
+1. Airline loyalty domain: `airline_loyalty_program_kb`
+2. Customer support domain: `customer_support_kb`
+3. Retail domain: `global_electronics_retailer_kb`
+4. Healthcare survey domain: `hcahps_patient_survey_kb`
+5. Elasticsearch customer support knowledge articles: `elastic_customer_support_kb`
 
-  For more information about HuggingFace dataset loading, refer to the [HuggingFace Dataset Loader documentation](../../kbn-ai-tools-cli/src/hf_dataset_loader/README.md).
+**Note**: You need to be a member of the Elastic organization on HuggingFace to access AgentBuilder datasets. Sign up with your `@elastic.co` email address.
+
+**Note**: First download of the datasets may take a while, because of the embedding generation for `semantic_text` fields in some of the datasets.
+Once done, documents with embeddings will be cached and re-used on subsequent data loads.
+
+For more information about HuggingFace dataset loading, refer to the [HuggingFace Dataset Loader documentation](../../kbn-ai-tools-cli/src/hf_dataset_loader/README.md).
 
 ### Run Evaluations
 
@@ -128,60 +129,68 @@ SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright 
 # Override RAG evaluator K value (takes priority over config)
 RAG_EVAL_K=5 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
+# Run RAG evaluators with multiple K values using patterns (Precision@K matches Precision@5, Precision@10, etc.)
+SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality" RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+
+# Override RAG evaluator K value (supports comma-separated values for multi-K evaluation)
+RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+
 # Retrieve traces from another (monitoring) cluster
 TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 ```
 
+> **Tip:** When using preconfigured connectors, set `KBN_EVALS_SKIP_CONNECTOR_SETUP=true` to skip automatic connector setup/teardown, causing instability running evaluations.
 
-### Run Evaluation Comparisons
 
-You can compare evaluation results between different runs using the comparison functionality. This allows you to track performance changes across different model versions, configurations, or time periods.
+### External Phoenix dataset evaluations
+
+If you want to run evaluations against a dataset that exists in Phoenix and not in the code (for ad-hoc testing), set `DATASET_NAME` environment variable to match the name of your Phoenix dataset and run evals with the command:
 
 ```bash
-# Compare current run against a reference run
-EVALUATION_RUN_ID=<evaluation-run-id> REFERENCE_EVALUATION_RUN_ID=<reference-evaluation-run-id> \
-node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/reporting.playwright.config.ts
+DATASET_NAME="my-phoenix-dataset" \
+node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts evals/external/external_dataset.spec.ts
 ```
 
-#### Environment Variables
+Notes:
 
-- `EVALUATION_RUN_ID`: The run ID of the current evaluation you want to analyze
-- `REFERENCE_EVALUATION_RUN_ID`: The run ID of the baseline/reference evaluation to compare against
+- The external dataset **must already exist in Phoenix**. If it doesn't, the run will fail with a clear error.
+- In this mode, the suite **does not** create or upsert datasets/examples- Phoenix dataset is the source of truth.
+- Dataset examples must match the example schema already using in the eval suite (at minimum `input.question`, plus any `output.expected` / `output.groundTruth` needed by evaluators).
 
-#### Example Comparison Output
+### Evaluation comparisons
 
-When you run a comparison, you'll get detailed analysis showing:
+Use the evals CLI to compare two evaluation runs (persisted to the `.kibana-evaluations` data stream) using paired t-tests.
 
-```text
-📋 Run Metadata:
-Current Run: 161de0d567799670 (2025-08-28T14:17:07.396Z) - Model: us.anthropic.claude-3-7-sonnet-20250219-v1:0
-Reference Run: 026c5060fbfc7dcb (2025-08-28T14:21:35.886Z) - Model: us.anthropic.claude-3-7-sonnet-20250219-v1:0
+Run the suite twice and capture the two run IDs. Scout will generate a `TEST_RUN_ID` automatically, but it's easiest to set it explicitly. **Important:** run a **single** Playwright project (connector/model) per run (use `--project`), otherwise multiple models can collide under the same run id.
 
-📈 ambiguous-queries Performance Comparison:
+```bash
+# This must point at the cluster where eval scores were exported.
+# (The default Scout test ES is typically http://elastic:changeme@localhost:9220)
+export EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9220
 
-╔═══════════════════╤═════════╤═══════════╤════════════╤══════════╤═════════════╗
-║ Evaluator         │ Current │ Reference │ Difference │ % Change │ Status      ║
-╟───────────────────┼─────────┼───────────┼────────────┼──────────┼─────────────╢
-║ Factuality        │   0.318 │     0.139 │     +0.179 │  +129.3% │ 📈 IMPROVED ║
-╟───────────────────┼─────────┼───────────┼────────────┼──────────┼─────────────╢
-║ Relevance         │   0.622 │     0.660 │     -0.037 │    -5.6% │ 📉 DECLINED ║
-╟───────────────────┼─────────┼───────────┼────────────┼──────────┼─────────────╢
-║ Sequence Accuracy │   1.000 │     1.000 │      0.000 │     0.0% │ ➡️ SAME     ║
-╚═══════════════════╧═════════╧═══════════╧════════════╧══════════╧═════════════╝
+# LLM-as-a-judge connector (required by @kbn/evals)
+export EVALUATION_CONNECTOR_ID=<llm-judge-connector-id>
 
-🎯 Overall Performance Analysis:
-⚖️  Current run shows mixed results.
-  • Equal improvements and regressions
+# Run A
+TEST_RUN_ID=agent-builder-baseline \
+  node scripts/evals run --suite agent-builder --project <task-connector-id>
+
+# Run B
+TEST_RUN_ID=agent-builder-change \
+  node scripts/evals run --suite agent-builder --project <task-connector-id>
 ```
 
-#### Finding Run IDs
+Tip: the run id is also printed at the end of the run in the export message containing `run_id:"..."`.
 
-Run IDs are automatically generated and displayed in the evaluation logs. Look for entries like:
+Then compare:
 
-```text
-Successfully indexed evaluation results to a datastream: .kibana-evaluations
-Query filter: environment.hostname:"your-hostname" AND model.id:"model-id" AND run_id:"161de0d567799670"
+```bash
+export EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9220
+node scripts/evals compare agent-builder-baseline agent-builder-change
 ```
 
-You can also query the `.kibana-evaluations` datastream in Elasticsearch/Kibana to find historical run IDs for comparison.
+Notes:
+
+- The two runs must use the same executor/orchestrator (default in-Kibana vs `KBN_EVALS_EXECUTOR=phoenix`).
+- `compare` reads from `EVALUATIONS_ES_URL` (defaults to `http://elastic:changeme@localhost:9220`).

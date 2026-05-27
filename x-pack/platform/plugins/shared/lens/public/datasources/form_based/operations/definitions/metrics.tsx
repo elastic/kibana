@@ -23,7 +23,6 @@ import {
   SUM_ID,
   SUM_NAME,
 } from '@kbn/lens-formula-docs';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type {
   AvgIndexPatternColumn,
   BaseIndexPatternColumn,
@@ -34,6 +33,7 @@ import type {
   StandardDeviationIndexPatternColumn,
   SumIndexPatternColumn,
 } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -213,10 +213,12 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         },
       ];
     },
-    toESQL: (column, columnId, _indexPattern, layer) => {
+    toESQL: (column) => {
       if (column.timeShift) return;
       if (!typeToESQLFn[type]) return;
-      return `${typeToESQLFn[type]}(${sanitazeESQLInput(column.sourceField)})`;
+      return {
+        template: `${typeToESQLFn[type]}(${esql.col(column.sourceField)})`,
+      };
     },
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {

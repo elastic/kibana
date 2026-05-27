@@ -27,6 +27,7 @@ import type {
 import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type {
   CellValueContext,
+  EmbeddableEditorBreadcrumb,
   EmbeddableEditorState,
   EmbeddableStateTransfer,
 } from '@kbn/embeddable-plugin/public';
@@ -71,13 +72,14 @@ import type { NavigationPublicPluginStart, TopNavMenuData } from '@kbn/navigatio
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { HasLibraryTransforms } from '@kbn/presentation-publishing';
 import type { NavigateToLensContext } from './convert_to_lens_types';
 import type { LensAppLocator, MainHistoryLocationState } from './locator_types';
 import type { LensSavedObjectAttributes, StructuredDatasourceStates } from './embeddable/types';
@@ -100,22 +102,6 @@ export interface LensInspector {
   closeInspector: () => Promise<void | undefined>;
 }
 
-export interface CheckDuplicateTitleOptions {
-  id?: string;
-  title: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-  isTitleDuplicateConfirmed: boolean;
-}
-
-export type CheckDuplicateTitleProps = OnSaveProps & {
-  id?: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-};
-
 export interface LensSaveResult {
   savedObjectId: string;
 }
@@ -123,10 +109,7 @@ export interface LensSaveResult {
 export interface ILensDocumentService {
   save: (vis: LensDocument) => Promise<LensSaveResult>;
   load: (savedObjectId: string) => Promise<unknown>;
-  checkForDuplicateTitle: (
-    options: CheckDuplicateTitleOptions,
-    onTitleDuplicate: () => void
-  ) => Promise<boolean>;
+  hasLibraryItemWithTitle: HasLibraryTransforms['hasLibraryItemWithTitle'];
 }
 
 export interface LensAttributesService {
@@ -140,7 +123,7 @@ export interface LensAttributesService {
     references: Reference[],
     savedObjectId?: string
   ) => Promise<string>;
-  checkForDuplicateTitle: (props: CheckDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
+  hasLibraryItemWithTitle: HasLibraryTransforms['hasLibraryItemWithTitle'];
 }
 
 export interface LensAppServices extends StartServices {
@@ -177,6 +160,7 @@ export interface LensAppServices extends StartServices {
   lensDocumentService: ILensDocumentService;
   serverless?: ServerlessPluginStart;
   cps?: CPSPluginStart;
+  kql: KqlPluginStart;
 }
 
 export type StartServices = Pick<
@@ -422,8 +406,10 @@ export interface ValueFormatConfig {
 }
 
 export interface LensDocument {
+  /**
+   * savedObjectId must be required when the LensDocument is by ref
+   */
   savedObjectId?: string;
-  type?: string; // what is this type for? It's always 'lens'
   title: string;
   description?: string;
   visualizationType: string | null;
@@ -627,7 +613,10 @@ export type VisualizeEditorContext<T extends LensConfiguration = LensConfigurati
   savedObjectId?: string;
   embeddableId?: string;
   vizEditorOriginatingAppUrl?: string;
+  legacyEditorOriginatingApp?: string;
   originatingApp?: string;
+  originatingPath?: string;
+  breadcrumbs?: EmbeddableEditorBreadcrumb[];
   isVisualizeAction: boolean;
   searchQuery?: Query;
   searchFilters?: Filter[];
@@ -1192,6 +1181,11 @@ export interface SuggestionRequest<T = unknown> {
   activeData?: Record<string, Datatable>;
   allowMixed?: boolean;
   datasourceId?: string;
+  /**
+   * Optional query (e.g. ES|QL) passed when suggesting from context (e.g. Visualize Editor).
+   * Visualizations can use it to tailor suggestions (e.g. prefer line for time series).
+   */
+  query?: AggregateQuery;
 }
 
 /**
@@ -1337,7 +1331,7 @@ export type LensTopNavMenuEntryGenerator = (props: {
 
 export interface LensCellValueAction {
   id: string;
-  iconType: string;
+  iconType: IconType;
   type?: string;
   displayName: string;
   execute: (data: CellValueContext['data']) => void;
@@ -1393,6 +1387,9 @@ export interface LensAppState extends EditorFrameState {
 
   // Whether the current visualization is managed by the system
   managed: boolean;
+
+  /** If true, hides the ES|QL editor in the flyout, used by Discover */
+  hideTextBasedEditor?: boolean;
 }
 
 export interface LensState {

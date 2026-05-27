@@ -26,18 +26,19 @@ export const AddPrebuiltRulesHeaderButtons = () => {
     state: {
       selectedRules,
       isRefetching,
-      isUpgradingSecurityPackages,
+      isInitializingPrebuiltRulesPackage,
       isAnyRuleInstalling,
       hasRulesToInstall,
     },
     actions: { installAllRules, installSelectedRules },
   } = useAddPrebuiltRulesTableContext();
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
 
-  const isRequestInProgress = isAnyRuleInstalling || isRefetching || isUpgradingSecurityPackages;
+  const isRequestInProgress =
+    isAnyRuleInstalling || isRefetching || isInitializingPrebuiltRulesPackage;
 
   const [isOverflowPopoverOpen, setOverflowPopover] = useBoolean(false);
 
@@ -98,7 +99,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
               panelPaddingSize="s"
               anchorPosition="downRight"
             >
-              <EuiContextMenuPanel size="s" items={overflowItems} />
+              <EuiContextMenuPanel items={overflowItems} />
             </EuiPopover>
           </EuiFlexItem>
         </>
@@ -106,7 +107,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
       <EuiFlexItem grow={false}>
         <EuiButton
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="installAllRulesButton"
           onClick={installAllRules}
           disabled={!canEditRules || !hasRulesToInstall || isRequestInProgress}

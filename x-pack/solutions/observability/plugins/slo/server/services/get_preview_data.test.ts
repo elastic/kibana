@@ -11,14 +11,56 @@ import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 import type { GetPreviewDataParams } from '@kbn/slo-schema';
 import { GetPreviewData } from './get_preview_data';
 import { oneMinute } from './fixtures/duration';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
 describe('GetPreviewData', () => {
   let esClientMock: ElasticsearchClientMock;
   let service: GetPreviewData;
+  let mockDataViewsService: jest.Mocked<DataViewsService>;
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    service = new GetPreviewData(esClientMock, 'default', dataViewsService);
+    mockDataViewsService = {
+      ...dataViewsService,
+      get: jest.fn().mockImplementation((dataViewId: string) => {
+        if (dataViewId === 'e7744dbe-a7a4-457b-83aa-539e9c88764c') {
+          return Promise.resolve(
+            createStubDataView({
+              spec: {
+                id: dataViewId,
+                title: 'kbn-data-forge-fake_stack.admin-console-*',
+                timeFieldName: '@timestamp',
+                fields: {
+                  'http.response.status_code': {
+                    name: 'http.response.status_code',
+                    type: 'number',
+                    esTypes: ['long'],
+                    searchable: true,
+                    aggregatable: true,
+                    readFromDocValues: true,
+                  },
+                },
+              },
+            })
+          );
+        }
+        if (dataViewId === '593f894a-3378-42cc-bafc-61b4877b64b0') {
+          return Promise.resolve(
+            createStubDataView({
+              spec: {
+                id: dataViewId,
+                title: 'kbn-data-forge-fake_stack.message_processor-*',
+                timeFieldName: '@timestamp',
+                fields: {},
+              },
+            })
+          );
+        }
+        return Promise.reject(new Error('Data view not found'));
+      }),
+    } as any;
+    service = new GetPreviewData(esClientMock, 'default', mockDataViewsService);
   });
 
   describe("for 'Custom KQL' indicator type", () => {

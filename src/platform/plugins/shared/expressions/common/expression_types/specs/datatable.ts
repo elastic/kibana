@@ -54,6 +54,7 @@ export type DatatableColumnType =
   | 'object'
   | 'nested'
   | 'histogram'
+  | 'flattened'
   | 'null';
 
 /**
@@ -128,6 +129,8 @@ export interface DatatableColumn {
   name: string;
   meta: DatatableColumnMeta;
   isNull?: boolean;
+  // Whether the column is computed by the query (not from the index)
+  isComputedColumn?: boolean;
   variable?: string;
 }
 

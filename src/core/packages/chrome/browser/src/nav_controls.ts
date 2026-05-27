@@ -7,13 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 /** @public */
 export interface ChromeNavControl {
   order?: number;
-  mount: MountPoint;
+  /**
+   * The content to render for this nav control as a React node.
+   */
+  content?: ReactNode;
+  /**
+   * @deprecated Use {@link ChromeNavControl.content} instead.
+   */
+  mount?: MountPoint;
 }
 
 /** @public */
@@ -21,6 +29,7 @@ export interface ChromeHelpMenuLink {
   title: string;
   href?: string;
   onClick?: () => void;
+  iconType?: string;
   dataTestSubj?: string;
 }
 
@@ -28,13 +37,10 @@ export interface ChromeHelpMenuLink {
  * {@link ChromeNavControls | APIs} for registering new controls to be displayed in the navigation bar.
  *
  * @example
- * Register a left-side nav control rendered with React.
+ * Register a left-side nav control with a React element.
  * ```jsx
  * chrome.navControls.registerLeft({
- *   mount(targetDomElement) {
- *     ReactDOM.mount(<MyControl />, targetDomElement);
- *     return () => ReactDOM.unmountComponentAtNode(targetDomElement);
- *   }
+ *   content: <MyControl />
  * })
  * ```
  *
@@ -50,10 +56,10 @@ export interface ChromeNavControls {
   /** Register a nav control to be presented on the top-center side of the chrome header. */
   registerCenter(navControl: ChromeNavControl): void;
 
-  /** Register an extension to be presented to the left of the top-right side of the chrome header. */
-  registerExtension(navControl: ChromeNavControl): void;
-
-  /** Set the help menu links */
+  /**
+   * Set the help menu links
+   * @deprecated Use {@link ChromeStart.setHelpMenuLinks} instead
+   */
   setHelpMenuLinks(links: ChromeHelpMenuLink[]): void;
 
   /** @internal */
@@ -64,9 +70,6 @@ export interface ChromeNavControls {
 
   /** @internal */
   getCenter$(): Observable<ChromeNavControl[]>;
-
-  /** @internal */
-  getExtension$(): Observable<ChromeNavControl[]>;
 
   /** @internal */
   getHelpMenuLinks$(): Observable<ChromeHelpMenuLink[]>;

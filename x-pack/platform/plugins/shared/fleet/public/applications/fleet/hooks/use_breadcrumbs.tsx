@@ -40,6 +40,14 @@ const breadcrumbGetters: {
   [key in Page]?: (values: DynamicPagePathValues) => Breadcrumb[];
 } = {
   base: () => [BASE_BREADCRUMB],
+  collectors: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.collectorsPageTitle', {
+        defaultMessage: 'Collectors',
+      }),
+    },
+  ],
   policies: () => [
     BASE_BREADCRUMB,
     {
@@ -94,6 +102,24 @@ const breadcrumbGetters: {
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.editPackagePolicyPageTitle', {
         defaultMessage: 'Edit integration',
+      }),
+    },
+  ],
+  copy_integration: ({ policyName, policyId }) => [
+    BASE_BREADCRUMB,
+    {
+      href: pagePathGetters.policies()[1],
+      text: i18n.translate('xpack.fleet.breadcrumbs.policiesPageTitle', {
+        defaultMessage: 'Agent policies',
+      }),
+    },
+    {
+      href: pagePathGetters.policy_details({ policyId })[1],
+      text: policyName,
+    },
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.copyPackagePolicyPageTitle', {
+        defaultMessage: 'Copy integration',
       }),
     },
   ],

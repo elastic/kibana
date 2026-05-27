@@ -1,0 +1,8 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-attack-discovery",
+  "owner": "@elastic/security-threat-hunting",
+  "group": "security",
+  "visibility": "private"
+}
+

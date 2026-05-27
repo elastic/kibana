@@ -164,34 +164,32 @@ describe('ConcurrencyManager', () => {
         expect(result).toBeNull();
       });
 
-      it('should return key as-is when template evaluates to null', () => {
+      it('should return null when template evaluates to null', () => {
         const contextWithNull: WorkflowContext = {
           ...mockContext,
           inputs: {
-            serverName: null as any, // Testing null evaluation - inputs schema doesn't allow null, but template engine may return it
+            serverName: null as any,
           },
         };
         const settings: ConcurrencySettings = {
           key: '{{ inputs.serverName }}',
         };
         const result = concurrencyManager.evaluateConcurrencyKey(settings, contextWithNull);
-        // If template evaluates to null, treat as static string (user may have intended literal text)
-        expect(result).toBe('{{ inputs.serverName }}');
+        expect(result).toBeNull();
       });
 
-      it('should return key as-is when template evaluates to undefined', () => {
+      it('should return null when template evaluates to undefined', () => {
         const contextWithUndefined: WorkflowContext = {
           ...mockContext,
           inputs: {
-            serverName: undefined as any, // Testing undefined evaluation - inputs schema doesn't allow undefined, but template engine may return it
+            serverName: undefined as any,
           },
         };
         const settings: ConcurrencySettings = {
           key: '{{ inputs.serverName }}',
         };
         const result = concurrencyManager.evaluateConcurrencyKey(settings, contextWithUndefined);
-        // If template evaluates to undefined, treat as static string (user may have intended literal text)
-        expect(result).toBe('{{ inputs.serverName }}');
+        expect(result).toBeNull();
       });
 
       it('should return null when template evaluates to empty string', () => {
@@ -210,22 +208,20 @@ describe('ConcurrencyManager', () => {
     });
 
     describe('error handling', () => {
-      it('should return key as-is when template expression references non-existent field', () => {
+      it('should return null when template expression references non-existent field', () => {
         const settings: ConcurrencySettings = {
           key: '{{ inputs.nonexistent.field }}',
         };
         const result = concurrencyManager.evaluateConcurrencyKey(settings, mockContext);
-        // If template evaluates to null/undefined, treat as static string (user may have intended literal text)
-        expect(result).toBe('{{ inputs.nonexistent.field }}');
+        expect(result).toBeNull();
       });
 
-      it('should return key as-is when template syntax is malformed', () => {
+      it('should return null when template syntax is malformed', () => {
         const settings: ConcurrencySettings = {
           key: '{{ invalid syntax }}',
         };
         const result = concurrencyManager.evaluateConcurrencyKey(settings, mockContext);
-        // If template evaluation fails, treat as static string (user may have intended literal text)
-        expect(result).toBe('{{ invalid syntax }}');
+        expect(result).toBeNull();
       });
     });
 
@@ -266,7 +262,7 @@ describe('ConcurrencyManager', () => {
         expect(result).toBe('true');
       });
 
-      it('should trim template result', () => {
+      it('should preserve whitespace in template result', () => {
         const contextWithSpaces = {
           ...mockContext,
           inputs: {
@@ -277,7 +273,7 @@ describe('ConcurrencyManager', () => {
           key: '{{ inputs.serverName }}',
         };
         const result = concurrencyManager.evaluateConcurrencyKey(settings, contextWithSpaces);
-        expect(result).toBe('mamba');
+        expect(result).toBe('  mamba  ');
       });
     });
   });
@@ -442,7 +438,6 @@ describe('ConcurrencyManager', () => {
     it('should skip cancel-in-progress for other strategies', async () => {
       const settings: ConcurrencySettings = {
         key: 'server-1',
-        // strategy is undefined (queue strategy not implemented yet)
         max: 1,
       };
       mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([

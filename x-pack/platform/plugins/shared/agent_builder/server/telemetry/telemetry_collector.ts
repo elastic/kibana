@@ -26,15 +26,18 @@ interface TimingPercentiles {
   total_samples: number;
 }
 
-/**
- * Latency stats for a specific dimension (connector, agent type)
- */
-interface LatencyStats {
-  ttft_p50: number;
-  ttft_p95: number;
-  ttlt_p50: number;
-  ttlt_p95: number;
-  sample_count: number;
+interface ConversationMetrics {
+  total: number;
+  total_rounds: number;
+  avg_rounds_per_conversation: number;
+  rounds_distribution: Array<{
+    bucket: string;
+    count: number;
+  }>;
+  tokens_used: number;
+  tokens_input: number;
+  tokens_output: number;
+  average_tokens_per_conversation: number;
 }
 
 /**
@@ -51,17 +54,31 @@ export interface AgentBuilderTelemetry {
   custom_agents: {
     total: number;
   };
-  conversations: {
+  skills: {
     total: number;
-    total_rounds: number;
-    avg_rounds_per_conversation: number;
-    rounds_distribution: Array<{
-      bucket: string;
-      count: number;
-    }>;
-    tokens_used: number;
-    average_tokens_per_conversation: number;
+    custom: number;
+    plugin: number;
   };
+  plugins: {
+    total: number;
+  };
+  skill_invocations: {
+    total: number;
+    by_origin: {
+      builtin: number;
+      custom: number;
+      plugin: number;
+    };
+  };
+  plugin_imports: {
+    total: number;
+    by_source: {
+      url: number;
+      upload: number;
+    };
+  };
+  conversations: ConversationMetrics;
+  daily: ConversationMetrics;
   query_to_result_time: {
     p50: number;
     p75: number;
@@ -71,17 +88,6 @@ export interface AgentBuilderTelemetry {
     mean: number;
   };
   time_to_first_token: TimingPercentiles;
-  time_to_last_token: TimingPercentiles;
-  latency_by_model: Array<
-    {
-      model: string;
-    } & LatencyStats
-  >;
-  latency_by_agent_type: Array<
-    {
-      agent_id: string;
-    } & LatencyStats
-  >;
   /**
    * Token consumption grouped by model
    */
@@ -97,6 +103,15 @@ export interface AgentBuilderTelemetry {
   query_to_result_time_by_model: Array<
     {
       model: string;
+      sample_count: number;
+    } & TimingPercentiles
+  >;
+  /**
+   * Query-to-result timing (proxied by TTLT) grouped by agent
+   */
+  query_to_result_time_by_agent_type: Array<
+    {
+      agent_id: string;
       sample_count: number;
     } & TimingPercentiles
   >;
@@ -187,53 +202,168 @@ export function registerTelemetryCollector(
             },
           },
         },
-        conversations: {
+        skills: {
           total: {
             type: 'long',
             _meta: {
-              description: 'Total number of conversations',
+              description: 'Total number of persisted skills (custom + plugin-bundled)',
             },
+          },
+          custom: {
+            type: 'long',
+            _meta: {
+              description: 'Number of user-created custom skills',
+            },
+          },
+          plugin: {
+            type: 'long',
+            _meta: {
+              description: 'Number of plugin-bundled skills',
+            },
+          },
+        },
+        plugins: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'Total number of installed plugins',
+            },
+          },
+        },
+        skill_invocations: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'Total skill invocations across all origins',
+            },
+          },
+          by_origin: {
+            builtin: {
+              type: 'long',
+              _meta: {
+                description: 'Skill invocations from built-in skills',
+              },
+            },
+            custom: {
+              type: 'long',
+              _meta: {
+                description: 'Skill invocations from user-created skills',
+              },
+            },
+            plugin: {
+              type: 'long',
+              _meta: {
+                description: 'Skill invocations from plugin-bundled skills',
+              },
+            },
+          },
+        },
+        plugin_imports: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'Total plugin imports across all source types',
+            },
+          },
+          by_source: {
+            url: {
+              type: 'long',
+              _meta: {
+                description: 'Plugins imported via URL',
+              },
+            },
+            upload: {
+              type: 'long',
+              _meta: {
+                description: 'Plugins imported via file upload',
+              },
+            },
+          },
+        },
+        conversations: {
+          total: {
+            type: 'long',
+            _meta: { description: 'Total number of conversations (all-time)' },
           },
           total_rounds: {
             type: 'long',
-            _meta: {
-              description: 'Total conversation rounds across all conversations',
-            },
+            _meta: { description: 'Total conversation rounds across all conversations (all-time)' },
           },
           avg_rounds_per_conversation: {
             type: 'float',
-            _meta: {
-              description: 'Average rounds per conversation',
-            },
+            _meta: { description: 'Average rounds per conversation (all-time)' },
           },
           rounds_distribution: {
             type: 'array',
             items: {
               bucket: {
                 type: 'keyword',
-                _meta: {
-                  description: 'Round count bucket (1-5, 6-10, 11-20, 21-50, 51+)',
-                },
+                _meta: { description: 'Round count bucket (1-5, 6-10, 11-20, 21-50, 51+)' },
               },
               count: {
                 type: 'long',
-                _meta: {
-                  description: 'Number of conversations in this bucket',
-                },
+                _meta: { description: 'Number of conversations in this bucket' },
               },
             },
           },
           tokens_used: {
             type: 'long',
-            _meta: {
-              description: 'Total tokens used across all conversations (input + output)',
-            },
+            _meta: { description: 'Total tokens used (input + output) (all-time)' },
+          },
+          tokens_input: {
+            type: 'long',
+            _meta: { description: 'Total input tokens across all conversations (all-time)' },
+          },
+          tokens_output: {
+            type: 'long',
+            _meta: { description: 'Total output tokens across all conversations (all-time)' },
           },
           average_tokens_per_conversation: {
             type: 'float',
-            _meta: {
-              description: 'Average tokens per conversation',
+            _meta: { description: 'Average tokens per conversation (all-time)' },
+          },
+        },
+        daily: {
+          total: {
+            type: 'long',
+            _meta: { description: 'Total number of conversations (daily, last 24h)' },
+          },
+          total_rounds: {
+            type: 'long',
+            _meta: { description: 'Total conversation rounds (daily, last 24h)' },
+          },
+          avg_rounds_per_conversation: {
+            type: 'float',
+            _meta: { description: 'Average rounds per conversation (daily, last 24h)' },
+          },
+          rounds_distribution: {
+            type: 'array',
+            items: {
+              bucket: {
+                type: 'keyword',
+                _meta: { description: 'Round count bucket (1-5, 6-10, 11-20, 21-50, 51+)' },
+              },
+              count: {
+                type: 'long',
+                _meta: { description: 'Number of conversations in this bucket' },
+              },
             },
+          },
+          tokens_used: {
+            type: 'long',
+            _meta: { description: 'Total tokens used (input + output) (daily, last 24h)' },
+          },
+          tokens_input: {
+            type: 'long',
+            _meta: { description: 'Total input tokens (daily, last 24h)' },
+          },
+          tokens_output: {
+            type: 'long',
+            _meta: { description: 'Total output tokens (daily, last 24h)' },
+          },
+          average_tokens_per_conversation: {
+            type: 'float',
+            _meta: { description: 'Average tokens per conversation (daily, last 24h)' },
           },
         },
         query_to_result_time: {
@@ -318,92 +448,7 @@ export function registerTelemetryCollector(
             },
           },
         },
-        time_to_last_token: {
-          p50: {
-            type: 'long',
-            _meta: {
-              description: '50th percentile time-to-last-token in milliseconds',
-            },
-          },
-          p75: {
-            type: 'long',
-            _meta: {
-              description: '75th percentile time-to-last-token in milliseconds',
-            },
-          },
-          p90: {
-            type: 'long',
-            _meta: {
-              description: '90th percentile time-to-last-token in milliseconds',
-            },
-          },
-          p95: {
-            type: 'long',
-            _meta: {
-              description: '95th percentile time-to-last-token in milliseconds',
-            },
-          },
-          p99: {
-            type: 'long',
-            _meta: {
-              description: '99th percentile time-to-last-token in milliseconds',
-            },
-          },
-          mean: {
-            type: 'long',
-            _meta: {
-              description: 'Mean time-to-last-token in milliseconds',
-            },
-          },
-          total_samples: {
-            type: 'long',
-            _meta: {
-              description: 'Total number of TTLT samples',
-            },
-          },
-        },
-        latency_by_model: {
-          type: 'array',
-          items: {
-            model: {
-              type: 'keyword',
-              _meta: {
-                description: 'Model identifier (e.g., gpt-4o, claude-3-sonnet)',
-              },
-            },
-            ttft_p50: {
-              type: 'long',
-              _meta: {
-                description: '50th percentile TTFT for this model',
-              },
-            },
-            ttft_p95: {
-              type: 'long',
-              _meta: {
-                description: '95th percentile TTFT for this model',
-              },
-            },
-            ttlt_p50: {
-              type: 'long',
-              _meta: {
-                description: '50th percentile TTLT for this model',
-              },
-            },
-            ttlt_p95: {
-              type: 'long',
-              _meta: {
-                description: '95th percentile TTLT for this model',
-              },
-            },
-            sample_count: {
-              type: 'long',
-              _meta: {
-                description: 'Number of samples for this model',
-              },
-            },
-          },
-        },
-        latency_by_agent_type: {
+        query_to_result_time_by_agent_type: {
           type: 'array',
           items: {
             agent_id: {
@@ -412,30 +457,13 @@ export function registerTelemetryCollector(
                 description: 'Agent ID',
               },
             },
-            ttft_p50: {
-              type: 'long',
-              _meta: {
-                description: '50th percentile TTFT for this agent',
-              },
-            },
-            ttft_p95: {
-              type: 'long',
-              _meta: {
-                description: '95th percentile TTFT for this agent',
-              },
-            },
-            ttlt_p50: {
-              type: 'long',
-              _meta: {
-                description: '50th percentile TTLT for this agent',
-              },
-            },
-            ttlt_p95: {
-              type: 'long',
-              _meta: {
-                description: '95th percentile TTLT for this agent',
-              },
-            },
+            p50: { type: 'long' },
+            p75: { type: 'long' },
+            p90: { type: 'long' },
+            p95: { type: 'long' },
+            p99: { type: 'long' },
+            mean: { type: 'long' },
+            total_samples: { type: 'long' },
             sample_count: {
               type: 'long',
               _meta: {
@@ -632,25 +660,52 @@ export function registerTelemetryCollector(
 
           const customAgents = await queryUtils.getCustomAgentsMetrics();
 
+          const skillsMetrics = await queryUtils.getSkillsMetrics();
+          const pluginsCount = await queryUtils.getPluginsCount();
+
           const conversations = await queryUtils.getConversationMetrics();
 
-          const queryTimeCounters = await queryUtils.getCountersByPrefix(
-            AGENTBUILDER_USAGE_DOMAIN,
-            `${AGENTBUILDER_USAGE_DOMAIN}_query_to_result_time_`
-          );
-          const queryToResultTime = queryUtils.calculatePercentilesFromBuckets(
-            queryTimeCounters,
-            AGENTBUILDER_USAGE_DOMAIN
-          );
+          const dailyDateFilter = {
+            gte: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          };
+          const daily = await queryUtils.getConversationMetrics(dailyDateFilter);
 
-          // Fetch TTFT/TTLT metrics from conversation data
-          const timeToFirstToken = await queryUtils.getTTFTMetrics();
-          const timeToLastToken = await queryUtils.getTTLTMetrics();
-          const latencyByModel = await queryUtils.getLatencyByModel();
-          const latencyByAgentType = await queryUtils.getLatencyByAgentType();
-          const tokensByModel = await queryUtils.getTokensByModel();
-          const queryToResultTimeByModel = await queryUtils.getQueryToResultTimeByModel();
-          const toolCallsByModel = await queryUtils.getToolCallsByModel();
+          // Round-level metrics (daily — last 24h)
+          const roundMetrics = await queryUtils.getAllRoundMetrics(dailyDateFilter);
+
+          const timeToFirstToken = roundMetrics.ttft;
+          const queryToResultTime = {
+            p50: roundMetrics.ttlt.p50,
+            p75: roundMetrics.ttlt.p75,
+            p90: roundMetrics.ttlt.p90,
+            p95: roundMetrics.ttlt.p95,
+            p99: roundMetrics.ttlt.p99,
+            mean: roundMetrics.ttlt.mean,
+          };
+          const tokensByModel = roundMetrics.byModel.map((m) => ({
+            model: m.model,
+            total_tokens: m.total_tokens,
+            avg_tokens_per_round: m.avg_tokens_per_round,
+            sample_count: m.rounds,
+          }));
+          const queryToResultTimeByModel = roundMetrics.byModel.map((m) => ({
+            model: m.model,
+            p50: m.ttlt_p50,
+            p75: m.ttlt_p75,
+            p90: m.ttlt_p90,
+            p95: m.ttlt_p95,
+            p99: m.ttlt_p99,
+            mean: m.ttlt_mean,
+            total_samples: m.ttlt_samples,
+            sample_count: m.ttlt_samples,
+          }));
+          const queryToResultTimeByAgentType = roundMetrics.byAgent.map((a) => ({
+            ...a,
+            sample_count: a.total_samples,
+          }));
+          const toolCallsByModel = roundMetrics.byModel
+            .filter((m) => m.tool_calls > 0)
+            .map((m) => ({ model: m.model, count: m.tool_calls }));
 
           const toolCallCounters = await queryUtils.getCountersByPrefix(
             AGENTBUILDER_USAGE_DOMAIN,
@@ -667,6 +722,43 @@ export function registerTelemetryCollector(
             a2a: toolCallCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_tool_call_a2a`) || 0,
           };
           const totalToolCalls = Object.values(toolCallsBySource).reduce(
+            (sum, count) => sum + count,
+            0
+          );
+
+          const skillInvocationCounters = await queryUtils.getCountersByPrefix(
+            AGENTBUILDER_USAGE_DOMAIN,
+            `${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_`
+          );
+
+          const skillInvocationsByOrigin = {
+            builtin:
+              skillInvocationCounters.get(
+                `${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_builtin`
+              ) || 0,
+            custom:
+              skillInvocationCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_custom`) ||
+              0,
+            plugin:
+              skillInvocationCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_skill_invocation_plugin`) ||
+              0,
+          };
+          const totalSkillInvocations = Object.values(skillInvocationsByOrigin).reduce(
+            (sum, count) => sum + count,
+            0
+          );
+
+          const pluginImportCounters = await queryUtils.getCountersByPrefix(
+            AGENTBUILDER_USAGE_DOMAIN,
+            `${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_`
+          );
+
+          const pluginImportsBySource = {
+            url: pluginImportCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_url`) || 0,
+            upload:
+              pluginImportCounters.get(`${AGENTBUILDER_USAGE_DOMAIN}_plugin_import_upload`) || 0,
+          };
+          const totalPluginImports = Object.values(pluginImportsBySource).reduce(
             (sum, count) => sum + count,
             0
           );
@@ -730,14 +822,23 @@ export function registerTelemetryCollector(
           const telemetry: AgentBuilderTelemetry = {
             custom_tools: customTools,
             custom_agents: { total: customAgents },
+            skills: skillsMetrics,
+            plugins: { total: pluginsCount },
+            skill_invocations: {
+              total: totalSkillInvocations,
+              by_origin: skillInvocationsByOrigin,
+            },
+            plugin_imports: {
+              total: totalPluginImports,
+              by_source: pluginImportsBySource,
+            },
             conversations,
+            daily,
             query_to_result_time: queryToResultTime,
             time_to_first_token: timeToFirstToken,
-            time_to_last_token: timeToLastToken,
-            latency_by_model: latencyByModel,
-            latency_by_agent_type: latencyByAgentType,
             tokens_by_model: tokensByModel,
             query_to_result_time_by_model: queryToResultTimeByModel,
+            query_to_result_time_by_agent_type: queryToResultTimeByAgentType,
             tool_calls_by_model: toolCallsByModel,
             tool_calls: {
               total: totalToolCalls,
@@ -759,17 +860,38 @@ export function registerTelemetryCollector(
         } catch (error) {
           logger.error(`Failed to collect telemetry: ${error.message}`);
           // Return empty/default values on error
+          const emptyConversationMetrics: ConversationMetrics = {
+            total: 0,
+            total_rounds: 0,
+            avg_rounds_per_conversation: 0,
+            rounds_distribution: [],
+            tokens_used: 0,
+            tokens_input: 0,
+            tokens_output: 0,
+            average_tokens_per_conversation: 0,
+          };
           return {
             custom_tools: { total: 0, by_type: [] },
             custom_agents: { total: 0 },
-            conversations: {
+            skills: { total: 0, custom: 0, plugin: 0 },
+            plugins: { total: 0 },
+            skill_invocations: {
               total: 0,
-              total_rounds: 0,
-              avg_rounds_per_conversation: 0,
-              rounds_distribution: [],
-              tokens_used: 0,
-              average_tokens_per_conversation: 0,
+              by_origin: {
+                builtin: 0,
+                custom: 0,
+                plugin: 0,
+              },
             },
+            plugin_imports: {
+              total: 0,
+              by_source: {
+                url: 0,
+                upload: 0,
+              },
+            },
+            conversations: emptyConversationMetrics,
+            daily: emptyConversationMetrics,
             query_to_result_time: {
               p50: 0,
               p75: 0,
@@ -787,19 +909,9 @@ export function registerTelemetryCollector(
               mean: 0,
               total_samples: 0,
             },
-            time_to_last_token: {
-              p50: 0,
-              p75: 0,
-              p90: 0,
-              p95: 0,
-              p99: 0,
-              mean: 0,
-              total_samples: 0,
-            },
-            latency_by_model: [],
-            latency_by_agent_type: [],
             tokens_by_model: [],
             query_to_result_time_by_model: [],
+            query_to_result_time_by_agent_type: [],
             tool_calls_by_model: [],
             tool_calls: {
               total: 0,

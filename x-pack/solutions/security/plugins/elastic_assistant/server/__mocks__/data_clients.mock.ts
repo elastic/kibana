@@ -59,12 +59,11 @@ export const conversationsDataClientMock: {
 };
 
 const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock => {
-  const mockDataClient = {
+  const mockDataClient: AttackDiscoveryDataClientMock = {
     bulkUpdateAttackDiscoveryAlerts: jest.fn(),
     getAdHocAlertsIndexPattern: jest.fn(),
     getScheduledAndAdHocIndexPattern: jest.fn(),
     createAttackDiscoveryAlerts: jest.fn(),
-    getAlertConnectorNames: jest.fn(),
     findAttackDiscoveryAlerts: jest.fn(),
     findDocuments: jest.fn(),
     getAttackDiscoveryGenerations: jest.fn(),
@@ -97,7 +96,7 @@ const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock =>
     currentUser: null,
     writerCache: new Map(),
     initializeWriter: jest.fn(),
-  } as AttackDiscoveryDataClientMock;
+  };
 
   return mockDataClient;
 };
@@ -116,6 +115,9 @@ const createAttackDiscoveryScheduleDataClientMock = (): AttackDiscoveryScheduleD
   deleteSchedule: jest.fn(),
   enableSchedule: jest.fn(),
   disableSchedule: jest.fn(),
+  bulkDeleteSchedules: jest.fn(),
+  bulkEnableSchedules: jest.fn(),
+  bulkDisableSchedules: jest.fn(),
 });
 
 export const attackDiscoveryScheduleDataClientMock: {

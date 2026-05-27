@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import { CloudConnectedAppContextProvider } from './app_context';
 import { CloudConnectedAppMain } from './app';
-import type { CloudConnectedAppComponentProps } from '../types';
+import type { CloudConnectedAppComponentProps, CloudConnectedStartDeps } from '../types';
 import type { CloudConnectTelemetryService } from '../telemetry/client';
 import type { CloudConnectApiService } from '../lib/api';
 
@@ -24,7 +24,12 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
   cloudUrl,
   telemetryService,
   apiService,
+  licensing,
 }) => {
+  const [justConnected, setJustConnected] = useState(false);
+  const [autoEnablingEis, setAutoEnablingEis] = useState(false);
+  const hasConfigurePermission = application.capabilities.cloudConnect?.configure === true;
+
   return (
     <CloudConnectedAppContextProvider
       value={{
@@ -37,6 +42,12 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
         cloudUrl,
         telemetryService,
         apiService,
+        licensing,
+        justConnected,
+        setJustConnected,
+        autoEnablingEis,
+        setAutoEnablingEis,
+        hasConfigurePermission,
       }}
     >
       <CloudConnectedAppMain />
@@ -46,6 +57,7 @@ const CloudConnectedAppComponent: React.FC<CloudConnectedAppComponentProps> = ({
 
 export const CloudConnectedApp = (
   core: CoreStart,
+  plugins: CloudConnectedStartDeps,
   params: AppMountParameters,
   cloudUrl: string,
   telemetryService: CloudConnectTelemetryService,
@@ -63,6 +75,7 @@ export const CloudConnectedApp = (
         cloudUrl={cloudUrl}
         telemetryService={telemetryService}
         apiService={apiService}
+        licensing={plugins.licensing}
       />
     ),
     params.element

@@ -19,9 +19,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const POLICY_NAME = `policy-${Math.random()}`;
 
   describe('Create enrich policy', function () {
-    // TimeoutError:  Waiting for element to be located By(css selector, [data-test-subj="enrichPoliciesEmptyPromptCreateButton"])
-    this.tags(['failsOnMKI']);
-
     before(async () => {
       log.debug('Creating test index');
       try {
@@ -46,7 +43,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       log.debug('Navigating to the enrich policies tab');
       await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.indexManagement.navigateToIndexManagementTab('enrich_policies');
+      await pageObjects.header.waitUntilLoadingHasFinished();
       // Click create policy button
+      await testSubjects.existOrFail('enrichPoliciesEmptyPromptCreateButton');
       await testSubjects.click('enrichPoliciesEmptyPromptCreateButton');
     });
 

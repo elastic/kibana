@@ -15,9 +15,10 @@ import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
 interface UseFetchLogParams {
   id: string;
+  index?: string;
 }
 
-export function useFetchLog({ id }: UseFetchLogParams) {
+export function useFetchLog({ id, index }: UseFetchLogParams) {
   const { discoverShared, core } = getUnifiedDocViewerServices();
 
   const fetchLogDocumentByIdFeature = discoverShared.features.registry.getById(
@@ -33,17 +34,20 @@ export function useFetchLog({ id }: UseFetchLogParams) {
       return fetchLogDocumentByIdFeature.fetchLogDocumentById(
         {
           id,
+          ...(index ? { index } : {}),
         },
         signal
       );
     },
-    [fetchLogDocumentByIdFeature, id]
+    [fetchLogDocumentByIdFeature, id, index]
   );
 
   useEffect(() => {
     if (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      core.notifications.toasts.addDanger({
+      core.notifications.toasts.add({
+        color: 'danger',
+        iconType: 'error',
         title: i18n.translate('unifiedDocViewer.fullScreenWaterfall.logDocument.error', {
           defaultMessage: 'An error occurred while fetching the log document',
         }),

@@ -10,6 +10,8 @@ import type { EuiComboBoxOptionOption, UseEuiTheme } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiLink, euiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE } from '@kbn/connector-schemas/mcp/constants';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useListConnectors, useListMcpTools } from '../../../../hooks/tools/use_mcp_connectors';
@@ -26,7 +28,8 @@ const mcpActionLinkStyles = (euiThemeContext: UseEuiTheme) => css`
 
 export const SourceSection = () => {
   const euiThemeContext = useEuiTheme();
-  const { control, formState, setValue } = useFormContext<BulkImportMcpToolsFormData>();
+  const { control, formState, setValue, trigger, getFieldState } =
+    useFormContext<BulkImportMcpToolsFormData>();
   const { errors } = formState;
 
   const handleConnectorCreated = useCallback(
@@ -63,6 +66,7 @@ export const SourceSection = () => {
       connectors.map((connector) => ({
         label: connector.name,
         value: connector.id,
+        'data-test-subj': `bulkImportMcpConnectorOption-${connector.id}`,
       })),
     [connectors]
   );
@@ -79,7 +83,14 @@ export const SourceSection = () => {
           isInvalid={!!errors.connectorId}
           error={errors.connectorId?.message}
           labelAppend={
-            <EuiLink onClick={openCreateMcpServerFlyout} css={mcpActionLinkStyles(euiThemeContext)}>
+            <EuiLink
+              onClick={openCreateMcpServerFlyout}
+              css={mcpActionLinkStyles(euiThemeContext)}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.ADD_MCP_SERVER,
+              })}
+            >
               {labels.tools.bulkImportMcp.sourceSection.addMcpServerLink}
             </EuiLink>
           }
@@ -100,11 +111,15 @@ export const SourceSection = () => {
                   onBlur();
                   // Clear tool selection when connector changes
                   setValue('tools', []);
+                  if (getFieldState('namespace').isDirty) {
+                    trigger('namespace');
+                  }
                 }}
                 isLoading={isLoadingConnectors}
                 inputRef={ref}
                 isClearable={false}
                 onBlur={onBlur}
+                data-test-subj="bulkImportMcpConnectorSelect"
                 {...field}
               />
             )}

@@ -9,16 +9,10 @@ import type { StreamlangProcessorDefinition } from '../../../types/processors';
 import type { Condition } from '../../../types/conditions';
 import type { StreamlangStep } from '../../../types/streamlang';
 import { isConditionBlock } from '../../../types/streamlang';
-
-/**
- * Helper to combine two conditions as an "and" logical condition.
- * Accepts two condition objects and returns a new condition object.
- */
-function combineConditionsAsAnd(condA?: Condition, condB?: Condition) {
-  if (!condA) return condB;
-  if (!condB) return condA;
-  return { and: [condA, condB] };
-}
+import {
+  combineConditionsAsAnd,
+  combineConditionsForElseBranch,
+} from '../../conditions/combine_conditions';
 
 /**
  * Flattens Streamlang steps. Nested where blocks are recursively processed,
@@ -32,12 +26,17 @@ export function flattenSteps(
     // Handle condition blocks (conditional execution)
     if (isConditionBlock(step)) {
       const conditionWithSteps = step.condition;
-      // Strip steps for the resursive call, everything left is the condition.
-      const { steps: nestedSteps, ...rest } = conditionWithSteps;
+      // Strip steps and else for the recursive call, everything left is the condition.
+      const { steps: nestedSteps, else: elseSteps, ...rest } = conditionWithSteps;
       // Combine parent and current condition as an "and" condition if both exist
       const combinedCondition = combineConditionsAsAnd(parentCondition, rest);
       // Recursively transpile the steps under this where block, passing down the combined condition
-      return flattenSteps(nestedSteps, combinedCondition);
+      const ifResult = flattenSteps(nestedSteps, combinedCondition);
+      // Flatten else-branch steps with the negated condition
+      const elseResult = elseSteps?.length
+        ? flattenSteps(elseSteps, combineConditionsForElseBranch(parentCondition, rest))
+        : [];
+      return [...ifResult, ...elseResult];
     }
 
     // Handle processor steps

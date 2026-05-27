@@ -11,6 +11,7 @@ import type { ICommandMethods } from '../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../types';
 import { validate } from './validate';
+import { Commands } from '../../definitions/keywords';
 
 const whereCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
@@ -18,9 +19,10 @@ const whereCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const whereCommand = {
-  name: 'where',
+  name: Commands.WHERE,
   methods: whereCommandMethods,
   metadata: {
+    subquerySupport: process.env.NODE_ENV === 'test',
     description: i18n.translate('kbn-esql-language.esql.definitions.whereDoc', {
       defaultMessage:
         'Uses "predicate-expressions" to filter search results. A predicate expression, when evaluated, returns TRUE or FALSE. The where command only returns the results that evaluate to TRUE. For example, to filter results for a specific field value',

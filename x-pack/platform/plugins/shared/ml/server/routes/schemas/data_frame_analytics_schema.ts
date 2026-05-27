@@ -18,15 +18,15 @@ export const dataFrameAnalyticsJobConfigSchema = schema.object({
     results_field: schema.maybe(schema.string()),
   }),
   source: schema.object({
-    index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+    index: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 10000 })]),
     query: schema.maybe(schema.any()),
     runtime_mappings: runtimeMappingsSchema,
     _source: schema.maybe(
       schema.object({
         /** Fields to include in results */
-        includes: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
+        includes: schema.maybe(schema.arrayOf(schema.maybe(schema.string()), { maxSize: 10000 })),
         /** Fields to exclude from results */
-        excludes: schema.maybe(schema.arrayOf(schema.maybe(schema.string()))),
+        excludes: schema.maybe(schema.arrayOf(schema.maybe(schema.string()), { maxSize: 10000 })),
       })
     ),
   }),
@@ -54,7 +54,7 @@ export const dataFrameAnalyticsExplainSchema = schema.object({
   dest: schema.maybe(schema.any()),
   /** Source */
   source: schema.object({
-    index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+    index: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 10000 })]),
     query: schema.maybe(schema.any()),
     runtime_mappings: runtimeMappingsSchema,
   }),
@@ -93,7 +93,7 @@ export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({
 });
 
 export const dataFrameAnalyticsJobsExistSchema = schema.object({
-  analyticsIds: schema.arrayOf(schema.string()),
+  analyticsIds: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   allSpaces: schema.maybe(schema.boolean()),
 });
 

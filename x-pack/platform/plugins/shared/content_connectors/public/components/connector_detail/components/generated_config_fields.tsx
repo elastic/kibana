@@ -26,6 +26,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Connector } from '@kbn/search-connectors';
 
 import type { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
@@ -93,6 +94,9 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   generateApiKey,
   isGenerateLoading,
 }) => {
+  const {
+    services: { http },
+  } = useKibana();
   const generateButtonRef = useRef<HTMLButtonElement>(null);
   const refreshButtonRef = useRef<HTMLButtonElement>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -137,7 +141,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           <EuiFlexItem>
             <EuiFlexGroup responsive={false} gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="check" />
+                <EuiIcon type="check" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="s">
@@ -153,6 +157,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiLinkTo
+              data-test-subj="contentConnectorsGeneratedConfigFieldsConnectorNameLink"
               external
               target="_blank"
               to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
@@ -171,6 +176,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
             >
               <EuiFlexItem grow={false}>
                 <EuiLinkTo
+                  data-test-subj="contentConnectorsGeneratedConfigFieldsConnectorIdLink"
                   external
                   target="_blank"
                   to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
@@ -186,7 +192,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                     <EuiButtonIcon
                       size="xs"
                       data-test-subj="enterpriseSearchConnectorDeploymentButton"
-                      iconType="copyClipboard"
+                      iconType="copy"
                       onClick={copy}
                       aria-label={i18n.translate(
                         'xpack.contentConnectors.connectorDeployment.copyConnectorId',
@@ -201,7 +207,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           <EuiFlexItem>
             <EuiFlexGroup responsive={false} gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="check" />
+                <EuiIcon type="check" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 {i18n.translate(
@@ -222,7 +228,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
               <EuiFlexItem>
                 <EuiFlexGroup responsive={false} gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="check" />
+                    <EuiIcon type="check" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     {i18n.translate(
@@ -236,7 +242,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="enterpriseSearchConnectorDeploymentLink"
-                  href={generateEncodedPath(MANAGE_API_KEYS_URL, {})}
+                  href={http?.basePath.prepend(MANAGE_API_KEYS_URL)}
                   external
                   target="_blank"
                 >
@@ -279,7 +285,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                               <EuiButtonIcon
                                 size="xs"
                                 data-test-subj="enterpriseSearchConnectorDeploymentButton"
-                                iconType="copyClipboard"
+                                iconType="copy"
                                 onClick={copy}
                                 aria-label={i18n.translate(
                                   'xpack.contentConnectors.connectorDeployment.copyIndexName',

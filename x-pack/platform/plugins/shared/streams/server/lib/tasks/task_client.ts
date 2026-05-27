@@ -6,12 +6,17 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { TaskPriority, type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
+import { TaskStatus } from '@kbn/streams-schema';
+import type { TaskResult } from '@kbn/streams-schema';
 import type { TaskStorageClient } from './storage';
 import type { PersistedTask, TaskParams } from './types';
 import { CancellationInProgressError } from './cancellation_in_progress_error';
 import { AcknowledgingIncompleteError } from './acknowledging_incomplete_error';
+import { TaskNotFoundError } from '../streams/errors/task_not_found_error';
+import { isStale } from './is_stale';
 
 interface TaskRequest<TaskType, TParams extends {}> {
   task: Omit<PersistedTask & { type: TaskType }, 'status' | 'created_at' | 'task'>;
@@ -30,8 +35,6 @@ export class TaskClient<TaskType extends string> {
     id: string
   ): Promise<PersistedTask<TParams, TPayload>> {
     try {
-      this.logger.debug(`Getting task ${id}`);
-
       const response = await this.storageClient.get({
         id,
       });
@@ -46,10 +49,9 @@ export class TaskClient<TaskType extends string> {
       if (isNotFoundError(error)) {
         return {
           id,
-          status: 'not_started',
+          status: TaskStatus.NotStarted,
           created_at: '',
           space: '',
-          stream: '',
           type: '',
           task: {
             params: {} as TParams,
@@ -61,13 +63,42 @@ export class TaskClient<TaskType extends string> {
     }
   }
 
+  /**
+   * Gets the task status with stale detection for in-progress tasks.
+   * Returns a normalized TaskResult with the appropriate payload for completed tasks.
+   */
+  public async getStatus<TParams extends {} = {}, TPayload extends {} = {}>(
+    id: string
+  ): Promise<TaskResult<TPayload>> {
+    const task = await this.get<TParams, TPayload>(id);
+
+    if (task.status === TaskStatus.InProgress) {
+      return isStale(task.created_at) ? { status: TaskStatus.Stale } : { status: task.status };
+    } else if (task.status === TaskStatus.Failed) {
+      return {
+        status: TaskStatus.Failed,
+        error: task.task.error,
+        ...(task.task.payload ?? {}),
+      };
+    } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
+      return {
+        status: task.status,
+        ...task.task.payload,
+      };
+    }
+
+    return {
+      status: task.status,
+    };
+  }
+
   public async schedule<TParams extends {} = {}>({
     task,
     params,
     request,
   }: TaskRequest<TaskType, TParams>) {
     const storedTask = await this.get(task.id);
-    if (storedTask.status === 'being_canceled') {
+    if (storedTask.status === TaskStatus.BeingCanceled) {
       throw new CancellationInProgressError('Previous task run is still being canceled');
     }
 
@@ -76,8 +107,12 @@ export class TaskClient<TaskType extends string> {
       task: {
         params,
       },
-      status: 'in_progress',
+      status: TaskStatus.InProgress,
       created_at: new Date().toISOString(),
+      last_completed_at: storedTask.last_completed_at,
+      last_acknowledged_at: storedTask.last_acknowledged_at,
+      last_canceled_at: storedTask.last_canceled_at,
+      last_failed_at: storedTask.last_failed_at,
     };
 
     try {
@@ -115,20 +150,20 @@ export class TaskClient<TaskType extends string> {
     this.logger.debug(`Canceling task ${id}`);
 
     const task = await this.get(id);
-    if (task.status !== 'in_progress') {
+    if (task.status !== TaskStatus.InProgress) {
       return;
     }
 
     await this.update({
       ...task,
-      status: 'being_canceled',
+      status: TaskStatus.BeingCanceled,
     });
   }
 
   public async acknowledge<TParams extends {} = {}, TPayload extends {} = {}>(id: string) {
     const task = await this.get<TParams, TPayload>(id);
 
-    if (task.status !== 'completed') {
+    if (task.status !== TaskStatus.Completed) {
       throw new AcknowledgingIncompleteError('Only completed tasks can be acknowledged');
     }
 
@@ -136,8 +171,9 @@ export class TaskClient<TaskType extends string> {
 
     const taskDoc = {
       ...task,
-      status: 'acknowledged' as const,
-    };
+      status: TaskStatus.Acknowledged,
+      last_acknowledged_at: new Date().toISOString(),
+    } satisfies PersistedTask<TParams, TPayload>;
 
     await this.update(taskDoc);
 
@@ -147,13 +183,146 @@ export class TaskClient<TaskType extends string> {
   public async update<TParams extends {} = {}, TPayload extends {} = {}>(
     task: PersistedTask<TParams, TPayload>
   ) {
-    this.logger.debug(`Updating task ${task.id}`);
-
     await this.storageClient.index({
       id: task.id,
       document: task,
       // This might cause issues if there are many updates in a short time from multiple tasks running concurrently
       refresh: true,
     });
+  }
+
+  /**
+   * Completes a task by updating its status to Completed with the provided payload.
+   */
+  public async complete<TParams extends {} = {}, TPayload extends {} = {}>(
+    task: PersistedTask,
+    params: TParams,
+    payload: TPayload
+  ): Promise<void> {
+    this.logger.debug(`Completing task ${task.id}`);
+
+    await this.update<TParams, TPayload>({
+      ...task,
+      status: TaskStatus.Completed,
+      last_completed_at: new Date().toISOString(),
+      task: {
+        params,
+        payload,
+      },
+    });
+  }
+
+  /**
+   * Fails a task by updating its status to Failed with the provided error message.
+   */
+  public async fail<TParams extends {} = {}, TPayload extends {} = {}>(
+    task: PersistedTask,
+    params: TParams,
+    error: string,
+    payload?: TPayload
+  ): Promise<void> {
+    this.logger.debug(`Failing task ${task.id}`);
+
+    await this.update<TParams, TPayload>({
+      ...task,
+      status: TaskStatus.Failed,
+      last_failed_at: new Date().toISOString(),
+      task: {
+        params,
+        error,
+        ...(payload !== undefined ? { payload } : {}),
+      },
+    });
+  }
+
+  /**
+   * Marks a task as canceled after it has been aborted.
+   */
+  public async markCanceled(task: PersistedTask): Promise<void> {
+    this.logger.debug(`Marking task ${task.id} as canceled`);
+
+    await this.update({
+      ...task,
+      status: TaskStatus.Canceled,
+      last_canceled_at: new Date().toISOString(),
+    });
+  }
+
+  /**
+   * Finds all tasks of a given type from the task index.
+   * Returns up to 10,000 results; silently truncates beyond that.
+   */
+  public async findByType<TParams extends {} = {}, TPayload extends {} = {}>(
+    type: string,
+    options?: { sort?: estypes.Sort }
+  ): Promise<Array<PersistedTask<TParams, TPayload>>> {
+    this.logger.debug(`Finding tasks by type ${type}`);
+
+    const { hits } = await this.storageClient.search({
+      query: { term: { type } },
+      size: 10000,
+      track_total_hits: false,
+      sort: options?.sort,
+    });
+
+    return hits.hits.flatMap((hit) =>
+      hit._source !== undefined ? [hit._source as PersistedTask<TParams, TPayload>] : []
+    );
+  }
+
+  /**
+   * Lists all tasks from the task index.
+   * Returns up to 10,000 tasks with only id and created_at fields.
+   */
+  public async list(): Promise<Array<{ id: string; created_at: string }>> {
+    this.logger.debug('Listing all tasks');
+
+    const response = await this.storageClient.search({
+      query: { match_all: {} },
+      size: 10000,
+      track_total_hits: false,
+      _source: ['created_at'],
+    });
+
+    return response.hits.hits.map((hit) => ({
+      id: hit._id!,
+      created_at: hit._source.created_at,
+    }));
+  }
+
+  /**
+   * Deletes a single task by ID.
+   * @throws TaskNotFoundError if the task does not exist
+   */
+  public async deleteTask(id: string): Promise<void> {
+    this.logger.debug(`Deleting task ${id}`);
+    const { result } = await this.storageClient.delete({
+      id,
+      refresh: true,
+    });
+    if (result === 'not_found') {
+      throw new TaskNotFoundError(`Task ${id} not found`);
+    }
+    this.logger.debug(`Successfully deleted task ${id}`);
+  }
+
+  /**
+   * Requests cancellation for all in-progress tasks of a given type.
+   * Sets each to BeingCanceled; the cancellable-task wrapper handles actual abort.
+   * @returns the IDs of tasks that were set to BeingCanceled
+   */
+  public async cancelByType(type: string): Promise<string[]> {
+    const tasks = await this.findByType(type);
+    const inProgress = tasks.filter((t) => t.status === TaskStatus.InProgress);
+
+    if (inProgress.length === 0) {
+      return [];
+    }
+
+    this.logger.debug(`Canceling ${inProgress.length} in-progress task(s) of type ${type}`);
+
+    await Promise.all(inProgress.map((t) => this.cancel(t.id)));
+
+    return inProgress.map((t) => t.id);
   }
 }

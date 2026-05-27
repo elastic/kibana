@@ -41,6 +41,13 @@ export const RULE_MIGRATION_READY_MISSING_RESOURCES_QRADAR = i18n.translate(
   }
 );
 
+export const RULE_MIGRATION_READY_MISSING_RESOURCES_SENTINEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources.sentinel',
+  {
+    defaultMessage: 'You can also upload the missing watchlists for more accurate results.',
+  }
+);
+
 export const RULE_MIGRATION_COMPLETE_DESCRIPTION = (createdAt: string, finishedAt: string) =>
   i18n.translate('xpack.securitySolution.siemMigrations.rules.panel.result.description', {
     defaultMessage: 'Export uploaded on {createdAt} and translation finished {finishedAt}.',
@@ -82,9 +89,14 @@ export const RULE_MIGRATION_TABLE_COLUMN_RULES = i18n.translate(
   { defaultMessage: 'Rules' }
 );
 
-export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE = i18n.translate(
+export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_SPLUNK_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResources',
   { defaultMessage: 'Upload missing macros and lookup lists.' }
+);
+
+export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_QRADAR_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.panel.qradar.uploadMissingResources',
+  { defaultMessage: 'Upload missing reference sets and rule enhancements' }
 );
 
 export const RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION = i18n.translate(

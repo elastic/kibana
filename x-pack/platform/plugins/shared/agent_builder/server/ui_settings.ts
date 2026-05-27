@@ -9,45 +9,13 @@ import { schema } from '@kbn/config-schema';
 import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
 import {
-  AGENT_BUILDER_ENABLED_SETTING_ID,
-  AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
-  AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID,
+  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+  AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
   uiSettings.register({
-    [AGENT_BUILDER_ENABLED_SETTING_ID]: {
-      description: i18n.translate('xpack.agentBuilder.uiSettings.feature.description', {
-        defaultMessage: 'Enables Elastic Agent Builder.',
-      }),
-      name: i18n.translate('xpack.agentBuilder.uiSettings.feature.name', {
-        defaultMessage: 'Elastic Agent Builder',
-      }),
-      schema: schema.boolean(),
-      value: true,
-      technicalPreview: true,
-      requiresPageReload: true,
-      readonly: false,
-    },
-    [AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID]: {
-      description: i18n.translate(
-        'xpack.agentBuilder.uiSettings.createVisualizations.description',
-        {
-          defaultMessage:
-            'Enables the Dashboard Agent and related tools for Elastic Agent Builder.',
-        }
-      ),
-      name: i18n.translate('xpack.agentBuilder.uiSettings.createVisualizations.name', {
-        defaultMessage: 'Elastic Agent Builder: Dashboard Agent and tools',
-      }),
-      schema: schema.boolean(),
-      value: false,
-      technicalPreview: true,
-      requiresPageReload: true,
-      readonly: true,
-      readonlyMode: 'ui',
-    },
     [AGENT_BUILDER_NAV_ENABLED_SETTING_ID]: {
       description: i18n.translate('xpack.agentBuilder.uiSettings.nav.description', {
         defaultMessage: 'Enables the Elastic Agent Builder icon in the global navigation bar.',
@@ -62,19 +30,39 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       readonly: true,
       readonlyMode: 'ui',
     },
-    [AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID]: {
-      description: i18n.translate('xpack.agentBuilder.uiSettings.externalMcp.description', {
-        defaultMessage: 'Enables external MCP server support for Elastic Agent Builder.',
+    [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: {
+      description: i18n.translate(
+        'xpack.agentBuilder.uiSettings.experimentalFeatures.description',
+        {
+          defaultMessage: 'Enables experimental features for Elastic Agent Builder.',
+        }
+      ),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.experimentalFeatures.name', {
+        defaultMessage: 'Elastic Agent Builder: Experimental Features',
       }),
-      name: i18n.translate('xpack.agentBuilder.uiSettings.externalMcp.name', {
-        defaultMessage: 'Elastic Agent Builder: External MCP Server support',
+      schema: schema.boolean(),
+      value: false,
+      technicalPreview: true,
+      requiresPageReload: false,
+      readonly: false,
+    },
+    [AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID]: {
+      description: i18n.translate(
+        'xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.description',
+        {
+          defaultMessage:
+            'Internal gate for UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI. Not intended for end-user use.',
+        }
+      ),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.name', {
+        defaultMessage: 'UIAM OAuth client management',
       }),
       schema: schema.boolean(),
       value: false,
       technicalPreview: true,
       requiresPageReload: true,
       readonly: true,
-      readonlyMode: 'ui',
+      readonlyMode: 'strict',
     },
   });
 };

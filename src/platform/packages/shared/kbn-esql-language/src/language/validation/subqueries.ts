@@ -7,14 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder, isSubQuery } from '../../ast';
-import type { ESQLAstForkCommand, ESQLCommand } from '../../types';
+import { Builder, isBinaryExpression, isSubQuery, Walker } from '@elastic/esql';
+import type {
+  ESQLAstAllCommands,
+  ESQLAstForkCommand,
+  ESQLAstHeaderCommand,
+  ESQLAstQueryExpression,
+  ESQLCommand,
+} from '@elastic/esql/types';
+import { inOperators } from '../../commands/definitions/all_operators';
 import { expandEvals } from '../shared/expand_evals';
+
+const COMMANDS_WITH_SUBQUERIES = new Set(['from', 'where']);
+
 /**
  * Returns a list of subqueries to validate
  * @param rootCommands
  */
-export function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
+export function getSubqueriesToValidate(
+  rootCommands: ESQLCommand[],
+  headerCommands: ESQLAstHeaderCommand[]
+) {
   const subsequences = [];
   const expandedCommands = expandEvals(rootCommands);
   for (let i = 0; i < expandedCommands.length; i++) {
@@ -28,19 +41,18 @@ export function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
       }
     }
 
-    // every command within FROM's subqueries is its own subquery to be validated
-    if (command.name.toLowerCase() === 'from') {
-      const fromSubqueries = getFromSubqueries(command as ESQLCommand<'from'>);
-
-      for (const subquery of fromSubqueries) {
-        subsequences.push(subquery);
-      }
+    const commandName = command.name.toLowerCase();
+    if (COMMANDS_WITH_SUBQUERIES.has(commandName)) {
+      const subqueries = getSubqueries(command).flatMap(getCommandPrefixesForQuery);
+      subsequences.push(...subqueries);
     }
 
     subsequences.push(expandedCommands.slice(0, i + 1));
   }
 
-  return subsequences.map((subsequence) => Builder.expression.query(subsequence));
+  return subsequences.map((subsequence) =>
+    Builder.expression.query(subsequence, undefined, headerCommands)
+  );
 }
 
 /**
@@ -67,7 +79,7 @@ function getForkBranchSubqueries(command: ESQLAstForkCommand): ESQLCommand[][] {
 }
 
 /**
- * Expands a FROM command into flat subqueries for each command in each subquery.
+ * Expands a nested query into flat subqueries for each command in the query.
  *
  * E.g. FROM index1, (FROM index2 | WHERE x > 10), (FROM index3, (FROM index4) | KEEP a)
  *
@@ -79,25 +91,54 @@ function getForkBranchSubqueries(command: ESQLAstForkCommand): ESQLCommand[][] {
  *   [FROM index3, (FROM index4) | KEEP a]
  * ]
  *
- * @param command a FROM command
- * @returns an array of expanded subqueries
+ * WHERE IN subqueries use the same expansion.
  */
-function getFromSubqueries(command: ESQLCommand<'from'>): ESQLCommand[][] {
-  return command.args.filter(isSubQuery).flatMap((arg) => {
-    const subquery = arg.child;
+function getCommandPrefixesForQuery(subquery: ESQLAstQueryExpression): ESQLCommand[][] {
+  return subquery.commands.flatMap((currentCommand, k) => {
+    const results: ESQLCommand[][] = [];
+    const nestedSubqueries = getSubqueries(currentCommand).flatMap(getCommandPrefixesForQuery);
+    results.push(...nestedSubqueries);
 
-    return subquery.commands.flatMap((currentCommand, k) => {
-      const results: ESQLCommand[][] = [];
+    // Always add the partial query (includes current command and all previous ones)
+    results.push(subquery.commands.slice(0, k + 1));
 
-      // If this command is a FROM with nested subqueries, expand recursively first
-      if (currentCommand.name.toLowerCase() === 'from') {
-        results.push(...getFromSubqueries(currentCommand as ESQLCommand<'from'>));
+    return results;
+  });
+}
+
+function getSubqueries(command: ESQLAstAllCommands): ESQLAstQueryExpression[] {
+  return [...getFromSubqueries(command), ...getInSubqueries(command)];
+}
+
+function getFromSubqueries(command: ESQLAstAllCommands): ESQLAstQueryExpression[] {
+  if (command.name.toLowerCase() !== 'from') {
+    return [];
+  }
+
+  return (command as ESQLCommand<'from'>).args.filter(isSubQuery).map(({ child }) => child);
+}
+
+function getInSubqueries(command: ESQLAstAllCommands): ESQLAstQueryExpression[] {
+  const results: ESQLAstQueryExpression[] = [];
+
+  Walker.walk(command, {
+    visitFunction: (node) => {
+      if (!isBinaryExpression(node) || !inOperators.some(({ name }) => name === node.name)) {
+        return;
       }
 
-      // Always add the partial query (includes current command and all previous ones)
-      results.push(subquery.commands.slice(0, k + 1));
+      const rightArg = node.args[1];
 
-      return results;
-    });
+      if (!Array.isArray(rightArg) && isSubQuery(rightArg)) {
+        results.push(rightArg.child);
+      }
+    },
+    visitParens: (node, _parent, walker) => {
+      if (isSubQuery(node)) {
+        walker.skipChildren();
+      }
+    },
   });
+
+  return results;
 }

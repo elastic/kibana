@@ -195,6 +195,48 @@ function getCumulativeFiringRuleType() {
   return result;
 }
 
+function getConsumerMetricsRuleType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
+    id: 'test.consumer-metrics',
+    name: 'Test: Consumer metrics',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    autoRecoverAlerts: false,
+    async executor({ services, params }) {
+      services.ruleMonitoringService?.setMetrics({
+        alerts_candidate_count: 90357,
+        alerts_suppressed_count: 42,
+        total_indexing_duration_ms: 987,
+        total_enrichment_duration_ms: 654,
+        frozen_indices_queried_count: 3,
+      });
+      await services.scopedClusterClient.asCurrentUser.index({
+        index: params.index,
+        refresh: 'wait_for',
+        document: {
+          reference: params.reference,
+          source: 'alert:test.consumer-metrics',
+        },
+      });
+      return { state: {} };
+    },
+    validate: {
+      params: paramsSchema,
+    },
+  };
+  return result;
+}
+
 function getNeverFiringRuleType() {
   const paramsSchema = schema.object({
     index: schema.string(),
@@ -552,6 +594,10 @@ function getPatternFiringAlertsAsDataRuleType() {
       schema.string(),
       schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
     ),
+    // Tests that need an empty `cleanedPayload` on the run that recovers an
+    // alert (e.g. to assert the alert builder falls back to the predecessor
+    // doc) can opt out of the default recovery payload.
+    setRecoveryPayload: schema.maybe(schema.boolean()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   interface State extends RuleTypeState {
@@ -624,11 +670,13 @@ function getPatternFiringAlertsAsDataRuleType() {
       }
 
       // set recovery payload
-      for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
-        alertsClient.setAlertData({
-          id: recoveredAlert.alert.getId(),
-          payload: { patternIndex: -1, instancePattern: [] },
-        });
+      if (params.setRecoveryPayload !== false) {
+        for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
+          alertsClient.setAlertData({
+            id: recoveredAlert.alert.getId(),
+            payload: { patternIndex: -1, instancePattern: [] },
+          });
+        }
       }
 
       return {
@@ -1750,6 +1798,7 @@ export function defineRuleTypes(
 
   alerting.registerType(getAlwaysFiringRuleType());
   alerting.registerType(getCumulativeFiringRuleType());
+  alerting.registerType(getConsumerMetricsRuleType());
   alerting.registerType(getNeverFiringRuleType());
   alerting.registerType(getFailingRuleType());
   alerting.registerType(getValidationRuleType());

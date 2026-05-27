@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type TestAgent from 'supertest/lib/agent';
 import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import type { Role } from '@kbn/security-plugin-types-common';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
+import type { CustomRole } from '../../../../config/services/types';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 type ArtifactListsWithRequiredPrivileges = Array<{
@@ -20,53 +21,42 @@ type ArtifactListsWithRequiredPrivileges = Array<{
 
 export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');
-  const rolesUsersProvider = getService('rolesUsersProvider');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
   const formatPrivileges = (privileges: string[]) => privileges.map((p) => `'${p}'`).join(', ');
 
-  describe('@ess @skipInServerless, @skipInServerlessMKI Endpoint Artifacts role backwards compatibility', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint Artifacts role backwards compatibility', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
+    const config = getService('config');
+    const isServerless = config.get('serverless');
 
     const SIEM_VERSIONS = ['siem', 'siemV2', 'siemV3', 'siemV4'] as const;
-
-    let globalArtifactManagerRole: Role;
 
     const createUserWithSiemPrivileges = async (
       siemVersion: (typeof SIEM_VERSIONS)[number],
       siemPrivileges: string[]
     ): Promise<TestAgent> => {
-      globalArtifactManagerRole = Object.assign(
-        rolesUsersProvider.loader.getPreDefinedRole('t1_analyst'),
-        { name: 'globalArtifactManager' }
-      );
+      const customRole: CustomRole = {
+        name: `siem_privileges_role_${uuidv4()}`,
+        privileges: {
+          kibana: [
+            {
+              base: [],
+              feature: {
+                [siemVersion]: siemPrivileges,
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: { cluster: [], indices: [] },
+        },
+      };
 
-      // remove actual siem
-      const actualSiem = Object.keys(globalArtifactManagerRole.kibana[0].feature).find((feature) =>
-        feature.startsWith('siem')
-      );
-      delete globalArtifactManagerRole.kibana[0].feature[actualSiem!];
-
-      // add (deprecated) siem feature
-      globalArtifactManagerRole.kibana[0].feature[siemVersion] = siemPrivileges;
-
-      rolesUsersProvider.loader.create(globalArtifactManagerRole);
-      const globalArtifactManagerUser = await rolesUsersProvider.loader.create(
-        globalArtifactManagerRole
-      );
-
-      return utils.createSuperTest(
-        globalArtifactManagerUser.username,
-        globalArtifactManagerUser.password
-      );
+      return utils.createSuperTestWithCustomRole(customRole);
     };
 
     after(async () => {
-      if (globalArtifactManagerRole) {
-        await rolesUsersProvider.loader.delete(globalArtifactManagerRole.name);
-        // @ts-expect-error
-        globalArtifactManagerRole = undefined;
-      }
+      await utils.cleanUpCustomRoles();
     });
 
     afterEach(async () => {
@@ -173,7 +163,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         {
           listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
-          privileges: ['minimal_all', 'global_artifact_management_all'],
+          privileges: isServerless
+            ? // on serverless, Endpoint Exceptions subfeature privilege existed separately,
+              ['minimal_all', 'endpoint_exceptions_all', 'global_artifact_management_all']
+            : // while on ESS it was included in `minimal_all`
+              ['minimal_all', 'global_artifact_management_all'],
         },
         {
           listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
@@ -248,7 +242,11 @@ export default function ({ getService }: FtrProviderContext) {
 
             {
               listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
-              privileges: ['minimal_all'],
+              privileges: isServerless
+                ? // on serverless, Endpoint Exceptions subfeature privilege existed separately,
+                  ['minimal_all', 'endpoint_exceptions_all']
+                : // while on ESS it was included in `minimal_all`
+                  ['minimal_all'],
             },
             {
               listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,

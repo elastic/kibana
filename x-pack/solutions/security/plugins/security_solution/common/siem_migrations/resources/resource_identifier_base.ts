@@ -15,22 +15,31 @@ import {
 import type { ItemDocument, OriginalItem } from '../types';
 import type { SplunkResourceType } from '../model/vendor/common/splunk.gen';
 import type { QradarResourceType } from '../model/vendor/common/qradar.gen';
+import type { SentinelResourceType } from '../model/vendor/common/sentinel.gen';
 import { qradarResourceIdentifier } from './qradar';
+import { sentinelResourceIdentifier } from './sentinel';
+import type { ExperimentalFeatures } from '../../experimental_features';
 
 export interface SiemMigrationResourceTypeByVendor {
   splunk: SplunkResourceType;
   qradar: QradarResourceType;
+  'microsoft-sentinel': SentinelResourceType;
 }
 
-/** Currently resource identification is only needed for Splunk since this for Qradar we identify resources by LLM */
+export interface ResourceIdentifierDeps {
+  experimentalFeatures: ExperimentalFeatures;
+}
+
 const identifiers: Record<ResourceSupportedVendor, VendorResourceIdentifier> = {
   splunk: splResourceIdentifier,
   qradar: qradarResourceIdentifier,
+  'microsoft-sentinel': sentinelResourceIdentifier,
 };
 
 // Type for a class that extends the ResourceIdentifier abstract class
 export type ResourceIdentifierConstructor<I extends ItemDocument = ItemDocument> = new (
-  vendor: ResourceSupportedVendor
+  vendor: ResourceSupportedVendor,
+  deps: ResourceIdentifierDeps
 ) => ResourceIdentifier<I>;
 
 export abstract class ResourceIdentifier<I> {
@@ -38,7 +47,10 @@ export abstract class ResourceIdentifier<I> {
 
   protected identifier: VendorResourceIdentifier;
 
-  constructor(protected readonly vendor: ResourceSupportedVendor) {
+  constructor(
+    protected readonly vendor: ResourceSupportedVendor,
+    protected readonly deps: ResourceIdentifierDeps
+  ) {
     // The constructor may need query_language as an argument for other vendors
     if (!isResourceSupportedVendor(this.vendor)) {
       throw new Error(`Resource identification is not supported for vendor: ${this.vendor}`);

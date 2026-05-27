@@ -7,27 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validate as validateUuid } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+
+export interface ResolveConnectorIdOptions {
+  featureId?: string;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+}
 
 export async function resolveConnectorId(
   nameOrId: string | undefined,
   inferencePlugin: InferenceServerStart,
-  kibanaRequest: KibanaRequest
+  kibanaRequest: KibanaRequest,
+  options?: ResolveConnectorIdOptions
 ): Promise<string> {
   if (!nameOrId) {
+    if (options?.featureId && options?.searchInferenceEndpoints) {
+      const { endpoints } = await options.searchInferenceEndpoints.endpoints.getForFeature(
+        options.featureId,
+        kibanaRequest
+      );
+      if (endpoints.length > 0) {
+        return endpoints[0].connectorId;
+      }
+    }
+
     const defaultConnector = await inferencePlugin.getDefaultConnector(kibanaRequest);
 
     if (!defaultConnector) {
-      throw new Error('No default connector configured');
+      throw new Error('No default AI connector configured');
     }
 
     return defaultConnector.connectorId;
   }
 
-  if (validateUuid(nameOrId)) {
-    return nameOrId;
+  const connectorById = await inferencePlugin.getConnectorById(nameOrId, kibanaRequest);
+
+  if (connectorById) {
+    return connectorById.connectorId;
   }
 
   const allConnectors = await inferencePlugin.getConnectorList(kibanaRequest);
@@ -41,7 +59,7 @@ export async function resolveConnectorId(
   if (!connector) {
     throw new Error(
       `AI Connector '${nameOrId}' not found. Available AI connectors: ${allConnectors
-        .map((c) => c.name)
+        .map((c) => `${c.name} (ID: ${c.connectorId})`)
         .join(', ')}`
     );
   }

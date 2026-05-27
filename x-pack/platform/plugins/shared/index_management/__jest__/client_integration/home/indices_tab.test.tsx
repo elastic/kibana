@@ -10,13 +10,14 @@
  */
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { applicationServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import type { Index } from '../../../common';
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
 import { setupEnvironment } from '../helpers/setup_environment';
 import { renderHome } from '../helpers/render_home';
 import { httpService } from '../../../public/application/services/http';
+import { indexDataEnricher } from '../../../public/services';
 import {
   createIndexTableActions,
   createCreateIndexActions,
@@ -120,21 +121,15 @@ describe('<IndexManagementHome />', () => {
       createNonDataStreamIndex(indexName)
     );
 
-    const application = applicationServiceMock.createStartContract();
-    await renderHome(httpSetup, {
-      appServicesContext: {
-        core: { application },
-      },
-    });
+    await renderHome(httpSetup);
 
     await screen.findByTestId('indexTable');
 
     const tableActions = createIndexTableActions();
     await tableActions.clickIndexNameAt(0);
 
-    expect(application.navigateToUrl).toHaveBeenCalledWith(
-      '/app/management/data/index_management/indices/index_details?indexName=testIndex&includeHiddenIndices=true'
-    );
+    await screen.findByTestId('indexDetailsHeader');
+    expect(screen.getByTestId('indexDetailsHeader')).toBeInTheDocument();
   });
 
   it('index page works with % character in index name', async () => {
@@ -145,20 +140,18 @@ describe('<IndexManagementHome />', () => {
       createNonDataStreamIndex(indexName)
     );
 
-    const application = applicationServiceMock.createStartContract();
-    await renderHome(httpSetup, {
-      appServicesContext: {
-        core: { application },
-      },
-    });
+    await renderHome(httpSetup);
 
     await screen.findByTestId('indexTable');
 
     const tableActions = createIndexTableActions();
     await tableActions.clickIndexNameAt(0);
 
-    expect(application.navigateToUrl).toHaveBeenCalledWith(
-      '/app/management/data/index_management/indices/index_details?indexName=test%25&includeHiddenIndices=true'
+    await screen.findByTestId('indexDetailsHeader');
+    expect(screen.getByTestId('indexDetailsHeader')).toBeInTheDocument();
+    expect(httpSetup.get).toHaveBeenCalledWith(
+      `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}`,
+      expect.anything()
     );
   });
 
@@ -368,7 +361,7 @@ describe('<IndexManagementHome />', () => {
       expect(screen.getByTestId('indexTableCell-primary')).toHaveTextContent('1');
       expect(screen.getByTestId('indexTableCell-replica')).toHaveTextContent('1');
       expect(screen.getByTestId('indexTableCell-documents')).toBeInTheDocument();
-      expect(screen.getByTestId('indexTableCell-size')).toHaveTextContent('156kb');
+      expect(screen.getByTestId('indexTableCell-size')).toHaveTextContent('156.00 KB');
     });
 
     test('renders only size and docs count when enableIndexStats is false, enableSizeAndDocCount is true', async () => {
@@ -391,7 +384,7 @@ describe('<IndexManagementHome />', () => {
       expect(screen.getByTestId('indexTableCell-name')).toHaveTextContent('test');
       // Size and docs should be shown
       expect(screen.getByTestId('indexTableCell-documents')).toBeInTheDocument();
-      expect(screen.getByTestId('indexTableCell-size')).toHaveTextContent('156kb');
+      expect(screen.getByTestId('indexTableCell-size')).toHaveTextContent('156.00 KB');
       // Health, status, primary, replica should NOT be shown (enableIndexStats is false)
       expect(screen.queryByTestId('indexTableCell-health')).not.toBeInTheDocument();
       expect(screen.queryByTestId('indexTableCell-status')).not.toBeInTheDocument();
@@ -420,6 +413,29 @@ describe('<IndexManagementHome />', () => {
       expect(screen.queryByTestId('indexTableCell-status')).not.toBeInTheDocument();
       expect(screen.queryByTestId('indexTableCell-documents')).not.toBeInTheDocument();
       expect(screen.queryByTestId('indexTableCell-size')).not.toBeInTheDocument();
+    });
+
+    test('shows a warning callout when an index enricher fails', async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+      const originalEnrichers = [...indexDataEnricher.enrichers];
+      indexDataEnricher.add({
+        name: 'test enricher',
+        fn: async () => ({ source: 'test enricher', error: true }),
+      });
+
+      try {
+        await renderHome(httpSetup);
+
+        await screen.findByTestId('indexTable');
+        expect(screen.getByTestId('indexTableCell-name')).toHaveTextContent('test');
+
+        const callout = await screen.findByTestId('indicesEnrichmentErrorCallout');
+        expect(callout).toHaveTextContent('test enricher');
+      } finally {
+        // Restore enrichers to avoid polluting other tests.
+        (indexDataEnricher as any)._enrichers.length = 0;
+        originalEnrichers.forEach((enricher) => indexDataEnricher.add(enricher));
+      }
     });
   });
 
@@ -462,7 +478,11 @@ describe('<IndexManagementHome />', () => {
       const actions = createCreateIndexActions();
 
       expect(httpSetup.get).toHaveBeenCalledTimes(1);
-      expect(httpSetup.get).toHaveBeenNthCalledWith(1, '/api/index_management/indices');
+      expect(httpSetup.get).toHaveBeenNthCalledWith(
+        1,
+        '/api/index_management/indices_get',
+        expect.anything()
+      );
 
       await actions.clickCreateIndexButton();
 
@@ -482,7 +502,11 @@ describe('<IndexManagementHome />', () => {
       // It refreshes indices after saving; wait so the table's async state update settles (avoids act warnings).
       await waitFor(() => {
         expect(httpSetup.get).toHaveBeenCalledTimes(2);
-        expect(httpSetup.get).toHaveBeenNthCalledWith(2, '/api/index_management/indices');
+        expect(httpSetup.get).toHaveBeenNthCalledWith(
+          2,
+          '/api/index_management/indices_get',
+          expect.anything()
+        );
       });
 
       // Creating triggers modal state updates; wait for modal to close so updates don't land after test end.
@@ -556,40 +580,49 @@ describe('<IndexManagementHome />', () => {
       expect(screen.getByText('ILM managed')).toBeInTheDocument();
     });
 
-    it('renders to search_indices index details page', async () => {
-      const indexName = 'search-index';
-      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
-      httpRequestsMockHelpers.setLoadIndexDetailsResponse(
-        indexName,
-        createNonDataStreamIndex(indexName)
-      );
+    it('applies enricher updates to indices via alias when applyToAliases is true', async () => {
+      const indexName = 'concrete-index';
+      const aliasName = 'my-alias';
 
-      const navigateToUrl = jest.fn();
-      const url = `/app/elasticsearch/indices/index_details/${indexName}`;
-      await renderHome(httpSetup, {
-        appServicesContext: {
-          core: {
-            application: { navigateToUrl },
-          },
-          services: {
-            extensionsService: {
-              _indexDetailsPageRoute: {
-                renderRoute: () => {
-                  return url;
-                },
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        { ...createNonDataStreamIndex(indexName), aliases: [aliasName] },
+      ]);
+
+      const originalEnrichers = [...indexDataEnricher.enrichers];
+      indexDataEnricher.add({
+        name: 'alias enricher',
+        fn: async () => ({
+          source: 'alias enricher',
+          applyToAliases: true,
+          indices: [{ name: aliasName, isRollupIndex: true }],
+        }),
+      });
+
+      try {
+        await renderHome(httpSetup, {
+          appServicesContext: {
+            services: {
+              extensionsService: {
+                _columns: [
+                  {
+                    fieldName: 'isRollupIndex',
+                    label: 'Rollup flag',
+                    order: 999,
+                    render: (index: Index) => (index.isRollupIndex ? <div>ROLLUP</div> : null),
+                  },
+                ],
               },
             },
           },
-        },
-      });
+        });
 
-      await screen.findByTestId('indexTable');
-
-      const tableActions = createIndexTableActions();
-      await tableActions.clickIndexNameAt(0);
-
-      expect(navigateToUrl).toHaveBeenCalledTimes(1);
-      expect(navigateToUrl).toHaveBeenCalledWith(url);
+        await screen.findByTestId('indexTable');
+        expect(await screen.findByText('ROLLUP')).toBeInTheDocument();
+      } finally {
+        // Restore enrichers to avoid polluting other tests.
+        (indexDataEnricher as any)._enrichers.length = 0;
+        originalEnrichers.forEach((enricher) => indexDataEnricher.add(enricher));
+      }
     });
   });
 });

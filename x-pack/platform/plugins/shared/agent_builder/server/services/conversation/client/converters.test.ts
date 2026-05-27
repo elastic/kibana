@@ -6,7 +6,7 @@
  */
 
 import type { Conversation } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus, ToolOrigin } from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
   ConversationRoundStepType,
@@ -20,7 +20,7 @@ import {
   createRequestToEs,
   type Document as ConversationDocument,
 } from './converters';
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 jest.mock('@kbn/agent-builder-server/tools/utils');
 
@@ -35,6 +35,12 @@ const createTestState = () => ({
       },
     },
   },
+  dynamic_tool_ids: [
+    'security.security_labs_search',
+    'platform.core.cases',
+    'security.alert-analysis.get-related-alerts',
+    'security.alerts',
+  ],
 });
 
 describe('conversation model converters', () => {
@@ -150,6 +156,7 @@ describe('conversation model converters', () => {
           },
         },
       ];
+      serialized._source!.state = createTestState();
 
       const deserialized = fromEs(serialized);
 
@@ -185,6 +192,7 @@ describe('conversation model converters', () => {
             },
           },
         ],
+        state: createTestState(),
       });
     });
 
@@ -224,6 +232,7 @@ describe('conversation model converters', () => {
               data: { someData: 'someValue' },
             },
           ],
+          tool_origin: undefined,
         },
         {
           type: ConversationRoundStepType.reasoning,
@@ -260,6 +269,126 @@ describe('conversation model converters', () => {
       expect(results.map((result) => result.tool_result_id)).toEqual(['foo', 'some-result-id']);
     });
 
+    it('migrates legacy tabular_data type to esqlResults', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'tool_call_id',
+          tool_id: 'tool_id',
+          params: {},
+          results: JSON.stringify([
+            {
+              tool_result_id: 'result-1',
+              type: 'tabular_data',
+              data: {
+                source: 'esql',
+                query: 'FROM logs | LIMIT 10',
+                columns: [{ name: 'message', type: 'keyword' }],
+                values: [['test message']],
+              },
+            },
+            {
+              tool_result_id: 'result-2',
+              type: 'query',
+              data: { esql: 'FROM logs | LIMIT 10' },
+            },
+          ]),
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const results = deserialized.rounds[0].steps
+        .filter(isToolCallStep)
+        .flatMap((step) => step.results);
+
+      expect(results).toHaveLength(2);
+      // tabular_data should be migrated to esqlResults
+      expect(results[0].type).toBe(ToolResultType.esqlResults);
+      expect(results[0].data).toEqual({
+        source: 'esql',
+        query: 'FROM logs | LIMIT 10',
+        columns: [{ name: 'message', type: 'keyword' }],
+        values: [['test message']],
+      });
+      // other types should remain unchanged
+      expect(results[1].type).toBe(ToolResultType.query);
+    });
+
+    it('infers tool_origin as internal for attachment tools missing the field', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'attachments.read',
+          params: {},
+          results: '[]',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBe(ToolOrigin.internal);
+    });
+
+    it('infers tool_origin as internal for filestore tools missing the field', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'filestore.read',
+          params: {},
+          results: '[]',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBe(ToolOrigin.internal);
+    });
+
+    it('leaves tool_origin undefined for unknown tools missing the field', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'some.custom.tool',
+          params: {},
+          results: '[]',
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBeUndefined();
+    });
+
+    it('preserves existing tool_origin when already set', () => {
+      const serialized = documentBase();
+      serialized._source!.conversation_rounds[0].steps = [
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 'call-1',
+          tool_id: 'my.registry.tool',
+          params: {},
+          results: '[]',
+          tool_origin: ToolOrigin.registry,
+        },
+      ];
+
+      const deserialized = fromEs(serialized);
+
+      const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
+      expect(step.tool_origin).toBe(ToolOrigin.registry);
+    });
+
     it('deserializes conversation with attachments', () => {
       const serialized = documentBase();
       serialized._source!.attachments = [
@@ -278,6 +407,7 @@ describe('conversation model converters', () => {
           current_version: 1,
         },
       ];
+      serialized._source!.state = createTestState();
 
       const deserialized = fromEs(serialized);
 
@@ -297,6 +427,7 @@ describe('conversation model converters', () => {
           current_version: 1,
         },
       ]);
+      expect(deserialized.state).toEqual(createTestState());
     });
 
     it('deserializes conversation without attachments (old format)', () => {

@@ -13,6 +13,7 @@ import { columnsAfter } from './columns_after';
 import { validate } from './validate';
 import { summary } from './summary';
 import type { ICommandContext } from '../types';
+import { Commands } from '../../definitions/keywords';
 
 const forkCommandMethods: ICommandMethods<ICommandContext> = {
   validate,
@@ -22,11 +23,9 @@ const forkCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const forkCommand = {
-  name: 'fork',
+  name: Commands.FORK,
   methods: forkCommandMethods,
   metadata: {
-    hidden: false,
-    preview: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.forkDoc', {
       defaultMessage: 'Forks the stream.',
     }),

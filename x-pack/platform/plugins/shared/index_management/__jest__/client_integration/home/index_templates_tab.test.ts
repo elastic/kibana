@@ -308,6 +308,12 @@ describe('Index Templates tab', () => {
     });
 
     describe('table row actions', () => {
+      afterEach(async () => {
+        // Some tests open an actions popover only to assert menu items exist.
+        // Close it so it doesn't leak popover state across tests.
+        await actions.closeOpenActionMenu();
+      });
+
       describe('composable templates', () => {
         test('should have an option to delete', async () => {
           const [{ name: templateName }] = templates;

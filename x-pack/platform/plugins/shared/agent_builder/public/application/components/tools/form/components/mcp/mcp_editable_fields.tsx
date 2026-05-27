@@ -19,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE } from '@kbn/connector-schemas/mcp/constants';
 import type { Tool } from '@kbn/mcp-client';
 import React, { useCallback, useEffect, useMemo } from 'react';
@@ -126,6 +128,7 @@ export const McpEditableFields = ({
       connectors.map((connector) => ({
         label: connector.name,
         value: connector.id,
+        'data-test-subj': `mcpConnectorOption-${connector.id}`,
       })),
     [connectors]
   );
@@ -137,6 +140,7 @@ export const McpEditableFields = ({
         ...mcpTool,
         shortDescription: truncateAtSentence(mcpTool.description),
       },
+      'data-test-subj': `mcpToolOption-${mcpTool.name}`,
     }));
   }, [mcpTools]);
 
@@ -178,7 +182,14 @@ export const McpEditableFields = ({
           isInvalid={!!errors.connectorId}
           error={errors.connectorId?.message}
           labelAppend={
-            <EuiLink onClick={openCreateMcpServerFlyout} css={mcpActionLinkStyles(euiThemeContext)}>
+            <EuiLink
+              onClick={openCreateMcpServerFlyout}
+              css={mcpActionLinkStyles(euiThemeContext)}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.ADD_MCP_SERVER,
+              })}
+            >
               {i18nMessages.configuration.form.mcp.addMcpServerButtonLabel}
             </EuiLink>
           }
@@ -188,6 +199,7 @@ export const McpEditableFields = ({
             name="connectorId"
             render={({ field: { value, onChange, onBlur, ref, ...field } }) => (
               <EuiComboBox
+                data-test-subj="agentBuilderMcpConnectorSelect"
                 isInvalid={!!errors.connectorId}
                 fullWidth
                 singleSelection={{
@@ -214,7 +226,14 @@ export const McpEditableFields = ({
           isInvalid={!!errors.mcpToolName}
           error={errors.mcpToolName?.message}
           labelAppend={
-            <EuiLink onClick={handleBulkImportClick} css={mcpActionLinkStyles(euiThemeContext)}>
+            <EuiLink
+              onClick={handleBulkImportClick}
+              css={mcpActionLinkStyles(euiThemeContext)}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.BULK_IMPORT_MCP,
+              })}
+            >
               {i18nMessages.configuration.form.mcp.bulkImportMcpToolsButtonLabel}
             </EuiLink>
           }
@@ -224,6 +243,7 @@ export const McpEditableFields = ({
             name="mcpToolName"
             render={({ field: { value, onChange, onBlur, ref, ...field } }) => (
               <EuiComboBox
+                data-test-subj="agentBuilderMcpToolSelect"
                 isInvalid={!!errors.mcpToolName}
                 fullWidth
                 singleSelection={{

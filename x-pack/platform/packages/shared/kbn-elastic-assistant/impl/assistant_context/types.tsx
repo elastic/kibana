@@ -86,8 +86,6 @@ export interface AssistantAvailability {
   hasAgentBuilderPrivilege?: boolean;
   // When true, use has privilege to manage Agent Builder feature
   hasAgentBuilderManagePrivilege?: boolean;
-  // When true, user has  to access Agent Builder feature
-  isAiAgentsEnabled?: boolean;
 }
 
 export type GetAssistantMessages = (commentArgs: {

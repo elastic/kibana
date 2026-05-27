@@ -48,6 +48,12 @@ function DocumentationPopover({
       }}
     >
       <EuiPopover
+        aria-label={i18n.translate('languageDocumentation.popoverAriaLabel', {
+          defaultMessage: '{lang} reference',
+          values: {
+            lang: language,
+          },
+        })}
         panelClassName="documentation__docs--overlay"
         panelPaddingSize="none"
         isOpen={isHelpMenuOpen}

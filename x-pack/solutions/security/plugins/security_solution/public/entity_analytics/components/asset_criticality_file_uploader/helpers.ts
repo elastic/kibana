@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { EuiStepStatus } from '@elastic/eui';
 import type {
   FilePickerState,
   ValidationStepState,
@@ -14,7 +15,10 @@ import type {
 } from './reducer';
 import { FileUploaderSteps } from './types';
 
-export const getStepStatus = (step: FileUploaderSteps, currentStep: FileUploaderSteps) => {
+export const getStepStatus = (
+  step: FileUploaderSteps,
+  currentStep: FileUploaderSteps
+): EuiStepStatus => {
   if (step < FileUploaderSteps.RESULT && currentStep === FileUploaderSteps.RESULT) {
     return 'disabled';
   }

@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,6 +28,7 @@ import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { Space } from '@kbn/spaces-plugin/common';
 import type { GetUserProfileResponse } from '@kbn/security-plugin/common';
 import type { UserProfileData } from '@kbn/user-profile-components';
+import { css } from '@emotion/react';
 import type { AccessControlClient } from '../access_control_client';
 
 const selectOptions = [
@@ -54,6 +56,7 @@ const getSpaceIcon = (space: Space['solution']) => {
   switch (space) {
     case 'es':
     case 'workplaceai':
+    case 'vectordb':
       return 'logoElasticsearch';
     case 'security':
       return 'logoSecurity';
@@ -87,6 +90,7 @@ export const AccessModeContainer = ({
   accessControl,
   createdBy,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const [space, setSpace] = useState<Space>({} as Space);
   const [isUpdatingPermissions, setIsUpdatingPermissions] = useState(false);
   const [canManageAccessControl, setCanManageAccessControl] = useState(false);
@@ -172,7 +176,12 @@ export const AccessModeContainer = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBetaBadge
-              color="accent"
+              // TODO: use a proper EuiBetaBadge color variant once available https://github.com/elastic/eui/issues/9268
+              css={css`
+                background-color: ${euiTheme.colors.backgroundFilledPrimary};
+                color: ${euiTheme.colors.textInverse};
+                border: none;
+              `}
               label={i18n.translate(
                 'contentManagement.accessControl.accessMode.container.newBadgeLabel',
                 { defaultMessage: 'New' }

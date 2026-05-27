@@ -10,43 +10,33 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
-import { render } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import type { DashboardApi } from '../dashboard_api/types';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { buildMockDashboardApi } from '../mocks';
-import { dataService, navigationService, shareService } from '../services/kibana_services';
+import {
+  coreServices,
+  dataService,
+  shareService,
+  unifiedSearchService,
+} from '../services/kibana_services';
 import { InternalDashboardTopNav } from './internal_dashboard_top_nav';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 
 describe('Internal dashboard top nav', () => {
-  const mockTopNav = (badges: TopNavMenuProps['badges'] | undefined[]) => {
-    if (badges) {
-      return badges?.map((badge, index) => (
-        <div key={index} className="badge">
-          {badge?.badgeText}
-        </div>
-      ));
-    } else {
-      return <></>;
-    }
-  };
-
   beforeEach(() => {
     setMockedPresentationUtilServices();
     dataService.query.filterManager.getFilters = jest.fn().mockReturnValue([]);
-    // topNavMenu is mocked as a jest.fn() so we want to mock it with a component
-    // @ts-ignore type issue with the mockTopNav for this test suite
-    navigationService.ui.TopNavMenu = jest.fn(({ badges }: TopNavMenuProps) => mockTopNav(badges));
     shareService!.availableIntegrations = jest.fn().mockReturnValue([]);
+    jest.clearAllMocks();
   });
 
   it('should not render the managed badge by default', async () => {
     const { api, internalApi } = buildMockDashboardApi();
-    const component = render(
+    renderWithI18n(
       <DashboardContext.Provider value={api}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav redirectTo={jest.fn()} />
@@ -54,16 +44,19 @@ describe('Internal dashboard top nav', () => {
       </DashboardContext.Provider>
     );
 
-    expect(component.queryByText('Managed')).toBeNull();
+    // When not managed, setBreadcrumbsBadges should be called with an empty array
+    expect(coreServices.chrome.setBreadcrumbsBadges).toHaveBeenCalledWith([]);
   });
 
   it('should render the managed badge when the dashboard is managed', async () => {
-    const { api, internalApi } = buildMockDashboardApi();
+    const { api, internalApi } = buildMockDashboardApi({
+      savedObjectId: 'test-id',
+    });
     const dashboardApi = {
       ...api,
       isManaged: true,
     };
-    const component = render(
+    renderWithI18n(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav redirectTo={jest.fn()} />
@@ -71,7 +64,14 @@ describe('Internal dashboard top nav', () => {
       </DashboardContext.Provider>
     );
 
-    expect(component.getByText('Managed')).toBeInTheDocument();
+    // When managed, setBreadcrumbsBadges should be called with a badge containing 'Managed' text
+    expect(coreServices.chrome.setBreadcrumbsBadges).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          badgeText: 'Managed',
+        }),
+      ])
+    );
   });
 
   describe('embed mode', () => {
@@ -82,7 +82,7 @@ describe('Internal dashboard top nav', () => {
         viewMode$: new BehaviorSubject<ViewMode>('view'),
       };
 
-      render(
+      renderWithI18n(
         <DashboardContext.Provider value={dashboardApi}>
           <DashboardInternalContext.Provider value={internalApi}>
             <InternalDashboardTopNav
@@ -98,13 +98,12 @@ describe('Internal dashboard top nav', () => {
         </DashboardContext.Provider>
       );
 
-      expect(navigationService.ui.TopNavMenu).toHaveBeenCalledWith(
+      expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
         expect.objectContaining({
           showDatePicker: false,
           showFilterBar: true,
           showQueryInput: false,
           showSearchBar: true,
-          showTopNavMenu: false,
         }),
         {}
       );
@@ -118,7 +117,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    render(
+    renderWithI18n(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -134,16 +133,8 @@ describe('Internal dashboard top nav', () => {
       </DashboardContext.Provider>
     );
 
-    expect(navigationService.ui.TopNavMenu).toHaveBeenCalledWith(
-      expect.objectContaining({
-        showDatePicker: false,
-        showFilterBar: false,
-        showQueryInput: false,
-        showSearchBar: false,
-        showTopNavMenu: false,
-      }),
-      {}
-    );
+    // When forceHideFilterBar is true and all other settings are false, the search bar should not be shown
+    expect(unifiedSearchService.ui.SearchBar).not.toHaveBeenCalled();
   });
 
   it('should enable global time range date picker when forceShowDatePicker is true', async () => {
@@ -153,7 +144,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    render(
+    renderWithI18n(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -169,13 +160,12 @@ describe('Internal dashboard top nav', () => {
       </DashboardContext.Provider>
     );
 
-    expect(navigationService.ui.TopNavMenu).toHaveBeenCalledWith(
+    expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
       expect.objectContaining({
         showDatePicker: true,
         showFilterBar: true,
         showQueryInput: false,
         showSearchBar: true,
-        showTopNavMenu: false,
       }),
       {}
     );
@@ -188,7 +178,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    render(
+    renderWithI18n(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -204,13 +194,12 @@ describe('Internal dashboard top nav', () => {
       </DashboardContext.Provider>
     );
 
-    expect(navigationService.ui.TopNavMenu).toHaveBeenCalledWith(
+    expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
       expect.objectContaining({
         showDatePicker: false,
         showFilterBar: true,
         showQueryInput: true,
         showSearchBar: true,
-        showTopNavMenu: false,
       }),
       {}
     );
@@ -223,7 +212,7 @@ describe('Internal dashboard top nav', () => {
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
 
-    render(
+    renderWithI18n(
       <DashboardContext.Provider value={dashboardApi}>
         <DashboardInternalContext.Provider value={internalApi}>
           <InternalDashboardTopNav
@@ -239,13 +228,14 @@ describe('Internal dashboard top nav', () => {
       </DashboardContext.Provider>
     );
 
-    expect(navigationService.ui.TopNavMenu).toHaveBeenCalledWith(
+    // forceShowTopNavMenu controls the AppMenu visibility, not SearchBar
+    // The SearchBar should still be rendered with appropriate props
+    expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
       expect.objectContaining({
         showDatePicker: false,
         showFilterBar: true,
         showQueryInput: false,
         showSearchBar: true,
-        showTopNavMenu: true,
       }),
       {}
     );

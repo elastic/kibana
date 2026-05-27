@@ -18,8 +18,9 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import moment from 'moment';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -28,6 +29,26 @@ interface EsqlErrorResponse {
     message: string;
   };
   type: 'error';
+}
+
+export interface FetchEsqlParams {
+  query: Query | AggregateQuery;
+  inputQuery?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
+  dataView: DataView;
+  abortSignal?: AbortSignal;
+  inspectorAdapters: Adapters;
+  data: DataPublicPluginStart;
+  expressions: ExpressionsStart;
+  scopedProfilesManager: ScopedProfilesManager;
+  esqlVariables?: ESQLControlVariable[];
+  searchSessionId?: string;
+  projectRouting?: ProjectRouting;
+  inspectorConfig?: {
+    title: string;
+    description: string;
+  };
 }
 
 export function fetchEsql({
@@ -44,21 +65,8 @@ export function fetchEsql({
   esqlVariables,
   searchSessionId,
   projectRouting,
-}: {
-  query: Query | AggregateQuery;
-  inputQuery?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  dataView: DataView;
-  abortSignal?: AbortSignal;
-  inspectorAdapters: Adapters;
-  data: DataPublicPluginStart;
-  expressions: ExpressionsStart;
-  scopedProfilesManager: ScopedProfilesManager;
-  esqlVariables?: ESQLControlVariable[];
-  searchSessionId?: string;
-  projectRouting?: ProjectRouting;
-}): Promise<RecordsFetchResponse> {
+  inspectorConfig,
+}: FetchEsqlParams): Promise<RecordsFetchResponse> {
   const props = getTextBasedQueryStateToAstProps({
     query,
     inputQuery,
@@ -66,6 +74,7 @@ export function fetchEsql({
     timeRange,
     dataView,
     data,
+    inspectorConfig,
   });
   return textBasedQueryStateToAstWithValidation(props)
     .then((ast) => {
@@ -94,11 +103,12 @@ export function fetchEsql({
           } else {
             const table = response as Datatable;
             const rows = table?.rows ?? [];
+            const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
             esqlQueryColumns = table?.columns ?? undefined;
             esqlHeaderWarning = table.warning ?? undefined;
             finalData = rows.map((row, idx) => {
               const record: DataTableRecord = {
-                id: String(idx),
+                id: row._index && row._id ? getDocId(row) : `${idx + 1}@${responseTime}`,
                 raw: row,
                 flattened: row,
               };
@@ -146,6 +156,7 @@ export function getTextBasedQueryStateToAstProps({
   timeRange,
   dataView,
   data,
+  inspectorConfig,
 }: {
   query: Query | AggregateQuery;
   inputQuery?: Query;
@@ -153,6 +164,10 @@ export function getTextBasedQueryStateToAstProps({
   timeRange?: TimeRange;
   dataView: DataView;
   data: DataPublicPluginStart;
+  inspectorConfig?: {
+    title: string;
+    description: string;
+  };
 }) {
   return {
     filters,
@@ -160,11 +175,15 @@ export function getTextBasedQueryStateToAstProps({
     time: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
     timeFieldName: dataView.timeFieldName,
     inputQuery,
-    titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
-      defaultMessage: 'Table',
-    }),
-    descriptionForInspector: i18n.translate('discover.inspectorEsqlRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
-    }),
+    titleForInspector:
+      inspectorConfig?.title ??
+      i18n.translate('discover.inspectorEsqlRequestTitle', {
+        defaultMessage: 'Table',
+      }),
+    descriptionForInspector:
+      inspectorConfig?.description ??
+      i18n.translate('discover.inspectorEsqlRequestDescription', {
+        defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
+      }),
   };
 }

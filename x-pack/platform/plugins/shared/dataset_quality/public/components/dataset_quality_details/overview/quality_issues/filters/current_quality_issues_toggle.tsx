@@ -26,7 +26,7 @@ export function CurrentQualityIssuesToggle() {
         isToggle
       >
         {currentIssuesToggleSwitch}{' '}
-        <EuiIconTip content={currentIssuesToggleSwitchTooltip} position="top" />
+        <EuiIconTip content={currentIssuesToggleSwitchTooltip} position="top" type="info" />
       </EuiFilterButton>
     </EuiFlexGroup>
   );

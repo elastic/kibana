@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { type Observable } from 'rxjs';
+
 import type { FeatureFlagsStart as FeatureFlagsStartPublic } from '@kbn/core/public';
 import type { FeatureFlagsStart as FeatureFlagsStartServer } from '@kbn/core/server';
 
 type GetFlagTypes<T extends Record<string, LensFeatureFlag>> = {
   [k in keyof T]: T[k]['fallback'];
+} & {
+  [K in keyof T as `${K & string}$`]: Observable<T[K]['fallback']>;
 };
 
 interface FeatureFlagBase {
@@ -41,7 +45,25 @@ export const lensFeatureFlags = {
   apiFormat: {
     id: 'lens.apiFormat',
     type: 'boolean',
-    fallback: false,
+    fallback: false as boolean,
+  },
+  /**
+   * Enables ES|QL mode for form-based datasources, allowing Lens to generate
+   * ES|QL queries instead of traditional DSL aggregations.
+   */
+  enableEsql: {
+    id: 'lens.enable_esql',
+    type: 'boolean',
+    fallback: false as boolean,
+  },
+  /**
+   * Enables the "Convert to ES|QL" button in the Lens inline editing flyout,
+   * allowing users to convert form-based visualizations to ES|QL queries.
+   */
+  enableEsqlConversion: {
+    id: 'lens.enable_esql_conversion',
+    type: 'boolean',
+    fallback: false as boolean,
   },
 } satisfies Record<string, LensFeatureFlag>;
 
@@ -50,31 +72,42 @@ export type LensFeatureFlags = GetFlagTypes<typeof lensFeatureFlags>;
 export async function fetchLensFeatureFlags(
   service: FeatureFlagsStartPublic | FeatureFlagsStartServer
 ): Promise<LensFeatureFlags> {
-  const fetchFeatureFlag = fetchFeatureFlagFn(service);
-
-  const flags = await Promise.all(
-    Object.entries(lensFeatureFlags).map(async ([key, flag]) => {
-      const value = await fetchFeatureFlag(flag);
-      return [key, value];
-    })
-  );
+  const getFeatureFlag = getFeatureFlagFn(service);
+  const flags = (
+    await Promise.all(
+      Object.entries(lensFeatureFlags).map(async ([key, flag]) => {
+        const [value, value$] = await getFeatureFlag(flag);
+        return [
+          [key, value],
+          [`${key}$`, value$],
+        ];
+      })
+    )
+  ).flat(1);
 
   return Object.fromEntries(flags) as LensFeatureFlags;
 }
 
-function fetchFeatureFlagFn(service: FeatureFlagsStartPublic | FeatureFlagsStartServer) {
-  return function fetchFeatureFlag(
+function getFeatureFlagFn(service: FeatureFlagsStartPublic | FeatureFlagsStartServer) {
+  return async function getFeatureFlag(
     flag: LensFeatureFlag
-  ): boolean | number | string | Promise<boolean | number | string> {
+  ): Promise<[boolean | number | string, Observable<boolean | number | string>]> {
     switch (flag.type) {
-      case 'boolean':
-        return service.getBooleanValue(flag.id, flag.fallback);
-      case 'number':
-        return service.getNumberValue(flag.id, flag.fallback);
-      case 'string':
-        return service.getStringValue(flag.id, flag.fallback);
-      default:
+      case 'boolean': {
+        const value = await service.getBooleanValue(flag.id, flag.fallback);
+        return [value, service.getBooleanValue$(flag.id, value)];
+      }
+      case 'number': {
+        const value = await service.getNumberValue(flag.id, flag.fallback);
+        return [value, service.getNumberValue$(flag.id, value)];
+      }
+      case 'string': {
+        const value = await service.getStringValue(flag.id, flag.fallback);
+        return [value, service.getStringValue$(flag.id, value)];
+      }
+      default: {
         throw new Error('unsupported flag type');
+      }
     }
   };
 }

@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPopover,
@@ -39,9 +40,13 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
     <EuiPopover
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.sections.rulesList.typeFilterPopoverAriaLabel',
+        { defaultMessage: 'Filter by type' }
+      )}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           isSelected={isPopoverOpen}
           hasActiveFilters={filters.length > 0}
           numActiveFilters={filters.length}

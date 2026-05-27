@@ -16,8 +16,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('../../apis/infra'));
     loadTestFile(require.resolve('../../apis/alerting'));
     loadTestFile(require.resolve('../../apis/dataset_quality'));
-    loadTestFile(require.resolve('../../apis/slo'));
-    loadTestFile(require.resolve('../../apis/onboarding'));
     loadTestFile(require.resolve('../../apis/incident_management'));
   });
 }

@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Document, Scalar } from 'yaml';
+import { Document, LineCounter, Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
+import type { ForeachVariableLineParseResult, VariableLineParseResult } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { getVariableSuggestions } from './get_variable_suggestions';
 import type { StepPropInfo } from '../../../../../../entities/workflows/store';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
-import type {
-  ForeachVariableLineParseResult,
-  VariableLineParseResult,
-} from '../../context/parse_line_for_completion';
 
 describe('getVariableSuggestions', () => {
   const createMockRange = (): monaco.IRange => ({
@@ -54,15 +51,25 @@ describe('getVariableSuggestions', () => {
     contextScopedToPath: 'consts',
     focusedStepInfo: null,
     yamlDocument: new Document(),
+    yamlLineCounter: new LineCounter(),
     focusedYamlPair: null,
     scalarType: Scalar.QUOTE_DOUBLE,
     path: ['steps', 0, 'with', 'message'],
     absoluteOffset: 50,
     dynamicConnectorTypes: null,
+    workflows: {
+      workflows: {},
+      totalWorkflows: 0,
+    },
     isInLiquidBlock: false,
+    isInTriggerConditionField: false,
+    triggerConditionDefinition: undefined,
     isInScheduledTriggerWithBlock: false,
     isInStepsContext: false,
     isInTriggersContext: false,
+    isInWorkflowInputsContext: false,
+    workflowDefinition: null,
+    currentWorkflowId: null,
     ...overrides,
   });
 

@@ -5,57 +5,55 @@
  * 2.0.
  */
 
-export type TaskStatus =
-  | 'not_started'
-  | 'in_progress'
-  | 'completed'
-  | 'acknowledged'
-  | 'failed'
-  | 'being_canceled'
-  | 'canceled';
+import type { TaskStatus } from '@kbn/streams-schema';
 
 interface PersistedTaskBase<TParams extends {} = {}> {
   id: string;
   type: string;
-  status: TaskStatus;
-  stream: string;
+  status: Exclude<TaskStatus, TaskStatus.Stale>;
   space: string;
   created_at: string;
+  last_completed_at?: string;
+  last_acknowledged_at?: string;
+  last_canceled_at?: string;
+  last_failed_at?: string;
   task: {
     params: TParams;
   };
 }
 
 interface NotStartedTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
-  status: 'not_started';
+  status: TaskStatus.NotStarted;
 }
 interface InProgressTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
-  status: 'in_progress';
+  status: TaskStatus.InProgress;
 }
 interface BeingCanceledTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
-  status: 'being_canceled';
+  status: TaskStatus.BeingCanceled;
 }
 interface CanceledTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
-  status: 'canceled';
+  status: TaskStatus.Canceled;
 }
 interface CompletedTask<TParams extends {} = {}, TPayload extends {} = {}>
   extends PersistedTaskBase<TParams> {
-  status: 'completed';
+  status: TaskStatus.Completed;
   task: PersistedTaskBase<TParams>['task'] & {
     payload: TPayload;
   };
 }
 interface AcknowledgedTask<TParams extends {} = {}, TPayload extends {} = {}>
   extends PersistedTaskBase<TParams> {
-  status: 'acknowledged';
+  status: TaskStatus.Acknowledged;
   task: PersistedTaskBase<TParams>['task'] & {
     payload: TPayload;
   };
 }
-interface FailedTask<TParams extends {} = {}> extends PersistedTaskBase<TParams> {
-  status: 'failed';
+interface FailedTask<TParams extends {} = {}, TPayload extends {} = {}>
+  extends PersistedTaskBase<TParams> {
+  status: TaskStatus.Failed;
   task: PersistedTaskBase<TParams>['task'] & {
     error: string;
+    payload?: TPayload;
   };
 }
 
@@ -64,7 +62,7 @@ export type PersistedTask<TParams extends {} = {}, TPayload extends {} = {}> =
   | InProgressTask<TParams>
   | CompletedTask<TParams, TPayload>
   | AcknowledgedTask<TParams, TPayload>
-  | FailedTask<TParams>
+  | FailedTask<TParams, TPayload>
   | BeingCanceledTask<TParams>
   | CanceledTask<TParams>;
 

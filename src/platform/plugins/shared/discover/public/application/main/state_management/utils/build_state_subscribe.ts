@@ -10,14 +10,14 @@
 import { isEqual } from 'lodash';
 import {
   internalStateActions,
-  type InternalStateStore,
+  type InternalStateDispatch,
   type RuntimeStateManager,
+  selectTabRuntimeState,
   type TabState,
+  type DiscoverInternalState,
 } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
-import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
-import type { DiscoverStateContainer } from '../discover_state';
 import type { DiscoverAppState } from '../redux';
 import { isEqualState } from './state_comparators';
 import { addLog } from '../../../../utils/add_log';
@@ -32,35 +32,30 @@ import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
 
 /**
  * Builds a subscribe function for the app state, that is executed when the app state changes in URL
- * or programmatically. It's main purpose is to detect which changes should trigger a refetch of the data.
- * @param stateContainer
+ * or programmatically. Its main purpose is to detect which changes should trigger a refetch of the data.
  */
 export const buildStateSubscribe =
   ({
     dataState,
-    internalState,
+    dispatch,
+    getState,
     runtimeStateManager,
-    savedSearchState,
     services,
-    setDataView,
     getCurrentTab,
   }: {
     dataState: DiscoverDataStateContainer;
-    internalState: InternalStateStore;
+    dispatch: InternalStateDispatch;
+    getState: () => DiscoverInternalState;
     runtimeStateManager: RuntimeStateManager;
-    savedSearchState: DiscoverSavedSearchContainer;
     services: DiscoverServices;
-    setDataView: DiscoverStateContainer['actions']['setDataView'];
     getCurrentTab: () => TabState;
   }) =>
   async (nextState: DiscoverAppState) => {
     const prevState = getCurrentTab().previousAppState;
-    const savedSearch = savedSearchState.getState();
     const isEsqlMode = isDataSourceType(nextState.dataSource, DataSourceType.Esql);
     const queryChanged = !isEqual(nextState.query, prevState.query);
 
     if (isEsqlMode && prevState.viewMode !== nextState.viewMode && !queryChanged) {
-      savedSearchState.update({ nextState });
       addLog('[appstate] subscribe $fetch ignored for es|ql', { prevState, nextState });
       return;
     }
@@ -82,7 +77,6 @@ export const buildStateSubscribe =
     if (isEsqlMode) {
       const isEsqlModePrev = isDataSourceType(prevState.dataSource, DataSourceType.Esql);
       if (!isEsqlModePrev) {
-        savedSearchState.update({ nextState });
         dataState.reset();
       }
     }
@@ -94,8 +88,6 @@ export const buildStateSubscribe =
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
     const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
 
-    let savedSearchDataView;
-
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.dataSource && dataSourceChanged) {
       const dataViewId = isDataSourceType(nextState.dataSource, DataSourceType.DataView)
@@ -104,9 +96,12 @@ export const buildStateSubscribe =
 
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView({
         dataViewId,
-        savedSearch,
+        currentDataView: selectTabRuntimeState(
+          runtimeStateManager,
+          getCurrentTab().id
+        )?.currentDataView$.getValue(),
         isEsqlMode,
-        internalState,
+        savedDataViews: getState().savedDataViews,
         runtimeStateManager,
         services,
       });
@@ -114,7 +109,7 @@ export const buildStateSubscribe =
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
       if (fallback) {
-        await internalState.dispatch(
+        await dispatch(
           internalStateActions.updateAppStateAndReplaceUrl({
             tabId: getCurrentTab().id,
             appState: {
@@ -128,13 +123,14 @@ export const buildStateSubscribe =
         return;
       }
 
-      savedSearch.searchSource.setField('index', nextDataView);
       dataState.reset();
-      setDataView(nextDataView);
-      savedSearchDataView = nextDataView;
+      dispatch(
+        internalStateActions.assignNextDataView({
+          tabId: getCurrentTab().id,
+          dataView: nextDataView,
+        })
+      );
     }
-
-    savedSearchState.update({ nextDataView: savedSearchDataView, nextState });
 
     if (dataSourceChanged && dataState.getInitialFetchStatus() === FetchStatus.UNINITIALIZED) {
       // stop execution if given data view has changed, and it's not configured to initially start a search in Discover

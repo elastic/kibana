@@ -66,7 +66,7 @@ describe('projectRouting', () => {
     // initializes with _alias:_origin projectRouting if set in last saved state
     expect(manager!.api.projectRouting$.value).toBe('_alias:_origin');
 
-    manager!.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+    manager!.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
       // When projectRoutingRestore is true, changing to '_alias:*' is detected
       expect(changes).toEqual({
         project_routing: '_alias:*',
@@ -81,7 +81,7 @@ describe('projectRouting', () => {
     const { manager } = initManager(true);
     const lastSavedState$ = createLastSavedState();
 
-    manager!.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+    manager!.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
       // When projectRoutingRestore is true, setting to '_alias:*' should be detected as a change
       expect(changes).toEqual({
         project_routing: '_alias:*',
@@ -110,7 +110,7 @@ describe('projectRouting', () => {
     const { manager } = initManager(false, '_alias:_origin');
     const lastSavedState$ = createLastSavedState('_alias:_origin');
 
-    manager!.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+    manager!.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
       // Should not detect changes when projectRoutingRestore is false
       expect(changes).toEqual({});
       done();
@@ -166,7 +166,7 @@ describe('projectRouting', () => {
     const { manager } = initManager(true, '_alias:*');
     const lastSavedState$ = createLastSavedState('_alias:*');
 
-    manager!.internalApi.startComparing$(lastSavedState$).subscribe((changes) => {
+    manager!.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
       // When projectRouting is set to the same value as saved, no change detected
       expect(changes).toEqual({});
       done();

@@ -22,18 +22,22 @@ import {
   type CodeOwnersEntry,
 } from '@kbn/code-owners';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import path from 'node:path';
+import {
+  BROWSER_CONSOLE_ERRORS_ATTACHMENT,
+  SCOUT_REPORT_OUTPUT_ROOT,
+  ScoutTestTarget,
+} from '@kbn/scout-info';
 import {
   computeTestID,
   excapeHtmlCharacters,
   generateTestRunId,
   getKibanaModuleData,
-  getRunTarget,
+  getRunCommand,
+  getTestTargetFromProcessArguments,
   parseStdout,
   stripFilePath,
-  stripRunCommand,
 } from '../../../helpers';
 import type { TestFailure } from '../../report';
 import { ScoutFailureReport } from '../../report';
@@ -49,9 +53,8 @@ export class ScoutFailedTestReporter implements Reporter {
   private readonly codeOwnersEntries: CodeOwnersEntry[];
   private readonly report: ScoutFailureReport;
   private readonly command: string;
+  private readonly testTarget: string;
   private failureTracker?: ScoutFailureTracker;
-
-  private target = 'undefined'; // when '--grep' is not provided in the command line
   private kibanaModule: TestFailure['kibanaModule'];
 
   constructor(private readonly reporterOptions: ScoutPlaywrightReporterOptions = {}) {
@@ -63,7 +66,9 @@ export class ScoutFailedTestReporter implements Reporter {
     this.report = new ScoutFailureReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
     this.runId = this.reporterOptions.runId || generateTestRunId();
-    this.command = stripRunCommand(process.argv);
+    this.command = getRunCommand();
+    this.testTarget =
+      (ScoutTestTarget.tryFromEnv() || getTestTargetFromProcessArguments())?.tag || 'unknown';
   }
 
   private getFileOwners(filePath: string): string[] {
@@ -89,8 +94,6 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onBegin(config: FullConfig, suite: Suite) {
-    this.target = getRunTarget();
-
     // Get plugin or package metadata from kibana.jsonc
     if (config.configFile) {
       const metadata = getKibanaModuleData(config.configFile);
@@ -111,7 +114,13 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
-    if (result.status !== 'failed') {
+    // Playwright marks timeouts and interruptions as separate statuses, but we still
+    // want to generate a Scout failure report artifact for them (e.g. global.setup.ts timeouts).
+    if (
+      result.status !== 'failed' &&
+      result.status !== 'timedOut' &&
+      result.status !== 'interrupted'
+    ) {
       return;
     }
 
@@ -120,11 +129,16 @@ export class ScoutFailedTestReporter implements Reporter {
     const fullTestTitle = test.titlePath().slice(3).join(' ');
     const testFilePath = path.relative(REPO_ROOT, test.location.file);
 
+    const consoleErrorsAttachment = result.attachments.find(
+      (a) => a.name === BROWSER_CONSOLE_ERRORS_ATTACHMENT
+    );
+    const consoleErrors = consoleErrorsAttachment?.body?.toString('utf-8');
+
     const testFailure: TestFailure = {
       id: computeTestID(testFilePath, fullTestTitle),
       suite: test.parent.title,
       title: test.title,
-      target: this.target,
+      target: this.testTarget,
       command: this.command,
       location: stripFilePath(test.location.file),
       owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
@@ -132,11 +146,14 @@ export class ScoutFailedTestReporter implements Reporter {
       duration: result.duration,
       error: this.formatTestError(result),
       stdout: result.stdout ? parseStdout(result.stdout) : undefined,
-      attachments: result.attachments.map((attachment) => ({
-        name: attachment.name,
-        path: attachment.path,
-        contentType: attachment.contentType,
-      })),
+      consoleErrors,
+      attachments: result.attachments
+        .filter((a) => a.name !== BROWSER_CONSOLE_ERRORS_ATTACHMENT)
+        .map((attachment) => ({
+          name: attachment.name,
+          path: attachment.path,
+          contentType: attachment.contentType,
+        })),
     };
 
     this.report.logEvent(testFailure);

@@ -7,27 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, map, tap, type Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map } from 'rxjs';
 
-import type { HasLastSavedChildState } from '@kbn/presentation-containers';
-import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
+import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
 import type {
   PublishesSavedObjectId,
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { apiHasSerializableState } from '@kbn/presentation-publishing';
 
 import { of } from 'rxjs';
 import type { DashboardState } from '../../common';
-import {
-  getDashboardBackupService,
-  type DashboardBackupState,
-} from '../services/dashboard_backup_service';
+import { type DashboardBackupState } from '../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
+import type { PublishesOnSave } from './types';
 
 const DEBOUNCE_TIME = 100;
 
@@ -40,7 +37,8 @@ export function initializeUnsavedChangesManager({
   storeUnsavedChanges,
   unifiedSearchManager,
   projectRoutingManager,
-  forcePublishOnReset$,
+  setState,
+  onSave$,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -50,7 +48,8 @@ export function initializeUnsavedChangesManager({
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
-  forcePublishOnReset$: Subject<void>;
+  setState: (state: DashboardState) => void;
+  onSave$: PublishesOnSave['onSave$'];
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -59,48 +58,29 @@ export function initializeUnsavedChangesManager({
   cleanup: () => void;
   internalApi: {
     getLastSavedState: () => DashboardState;
-    onSave: (savedState: DashboardState) => void;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
-
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
-
-  const hasChildrenUnsavedChanges$ = childrenUnsavedChanges$(layoutManager.api.children$).pipe(
-    tap((childrenWithChanges) => {
-      // propagate the latest serialized state back to the layout manager.
-      for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
-        const childApi = layoutManager.api.children$.value[uuid];
-        if (!hasUnsavedChanges || !childApi || !apiHasSerializableState(childApi)) continue;
-        layoutManager.internalApi.setChildState(uuid, childApi.serializeState());
-      }
-    }),
-    map((childrenWithChanges) => {
-      return childrenWithChanges.some(({ hasUnsavedChanges }) => hasUnsavedChanges);
-    })
-  );
+  const onSaveSubscription = onSave$.subscribe(({ dashboardState }) => {
+    lastSavedState$.next(dashboardState);
+  });
 
   const dashboardStateChanges$ = combineLatest([
-    settingsManager.internalApi.startComparing$(lastSavedState$),
-    unifiedSearchManager.internalApi.startComparing$(lastSavedState$),
-    layoutManager.internalApi.startComparing$(lastSavedState$),
-    projectRoutingManager?.internalApi.startComparing$(lastSavedState$) ?? of({}),
+    settingsManager.internalApi.startComparing(lastSavedState$),
+    unifiedSearchManager.internalApi.startComparing(lastSavedState$),
+    layoutManager.internalApi.startComparing(lastSavedState$),
+    projectRoutingManager?.internalApi.startComparing(lastSavedState$) ?? of({}),
   ]).pipe(
-    map(([settings, unifiedSearch, panels, projectRouting]) => {
-      return { ...settings, ...unifiedSearch, ...panels, ...projectRouting };
+    map(([settings, unifiedSearch, layout, projectRouting]) => {
+      return { ...settings, ...unifiedSearch, ...layout, ...projectRouting };
     })
   );
 
-  const unsavedChangesSubscription = combineLatest([
-    viewMode$,
-    dashboardStateChanges$,
-    hasChildrenUnsavedChanges$,
-  ])
+  const unsavedChangesSubscription = combineLatest([viewMode$, dashboardStateChanges$])
     .pipe(debounceTime(DEBOUNCE_TIME))
-    .subscribe(([viewMode, dashboardChanges, hasChildrenUnsavedChanges]) => {
-      const hasDashboardChanges = Object.keys(dashboardChanges ?? {}).length > 0;
-      const hasLayoutChanges = dashboardChanges.panels;
-      const hasUnsavedChanges = hasDashboardChanges || hasChildrenUnsavedChanges;
+    .subscribe(([viewMode, dashboardChanges]) => {
+      const hasUnsavedChanges = Object.keys(dashboardChanges ?? {}).length > 0;
 
       if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
         hasUnsavedChanges$.next(hasUnsavedChanges);
@@ -113,20 +93,6 @@ export function initializeUnsavedChangesManager({
           viewMode,
           ...restOfDashboardChanges,
         };
-
-        // Backup latest state from children that have unsaved changes
-        if (hasChildrenUnsavedChanges || hasLayoutChanges) {
-          const { panels, controlGroupInput, references } =
-            layoutManager.internalApi.serializeLayout();
-          // dashboardStateToBackup.references will be used instead of savedObjectResult.references
-          // To avoid missing references, make sure references contains all references
-          // even if panels or control group does not have unsaved changes
-          dashboardBackupState.references = references ?? [];
-          if (hasChildrenUnsavedChanges) {
-            dashboardBackupState.panels = panels;
-            dashboardBackupState.controlGroupInput = controlGroupInput;
-          }
-        }
         getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }
     });
@@ -137,16 +103,7 @@ export function initializeUnsavedChangesManager({
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        const savedState = lastSavedState$.value;
-        layoutManager.internalApi.reset();
-        unifiedSearchManager.internalApi.reset(savedState);
-        projectRoutingManager?.internalApi.reset(savedState);
-        settingsManager.internalApi.reset(savedState);
-
-        // when auto-apply is `false`, wait for children to update their filters + time slice + variables, then publish
-        if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
-          forcePublishOnReset$.next();
-        }
+        setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>
@@ -155,12 +112,10 @@ export function initializeUnsavedChangesManager({
     },
     cleanup: () => {
       unsavedChangesSubscription.unsubscribe();
+      onSaveSubscription.unsubscribe();
     },
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
-      onSave: (savedState: DashboardState) => {
-        lastSavedState$.next(savedState);
-      },
     },
   };
 }

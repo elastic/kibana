@@ -8,45 +8,72 @@
  */
 
 import React, { useMemo, type ReactElement } from 'react';
-import type { PopoverAnchorPosition } from '@elastic/eui';
-import { EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover, EuiToolTip, type PopoverAnchorPosition } from '@elastic/eui';
 import { getPopoverPanels, getTooltip } from '../utils';
 import type {
+  AppMenuItemType,
   AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
-  AppMenuSecondaryActionItem,
+  AppMenuSwitch,
 } from '../types';
 
 interface AppMenuContextMenuProps {
   tooltipContent?: string | (() => string | undefined);
   tooltipTitle?: string | (() => string | undefined);
   anchorElement: ReactElement;
+  anchorDomElement?: HTMLElement;
   items: AppMenuPopoverItem[];
+  staticItems?: AppMenuItemType[];
   isOpen: boolean;
   popoverWidth?: number;
   primaryActionItem?: AppMenuPrimaryActionItem;
-  secondaryActionItem?: AppMenuSecondaryActionItem;
+  switchConfig?: AppMenuSwitch;
+  popoverTestId?: string;
   anchorPosition?: PopoverAnchorPosition;
-  testId?: string;
   onClose: () => void;
+  onCloseOverflowButton?: () => void;
 }
 
 export const AppMenuPopover = ({
   items,
+  staticItems,
   anchorElement,
+  anchorDomElement,
   tooltipContent,
   tooltipTitle,
   isOpen,
   popoverWidth,
   primaryActionItem,
-  secondaryActionItem,
-  anchorPosition,
-  testId,
+  switchConfig,
+  popoverTestId = 'app-menu-popover',
+  anchorPosition = 'downLeft',
   onClose,
+  onCloseOverflowButton,
 }: AppMenuContextMenuProps) => {
   const panels = useMemo(
-    () => getPopoverPanels({ items, primaryActionItem, secondaryActionItem }),
-    [items, primaryActionItem, secondaryActionItem]
+    () =>
+      getPopoverPanels({
+        items,
+        staticItems,
+        primaryActionItem,
+        switchConfig,
+        rootPanelWidth: popoverWidth,
+        rootPopoverTestId: popoverTestId,
+        onClose,
+        onCloseOverflowButton,
+        anchorDomElement,
+      }),
+    [
+      items,
+      staticItems,
+      primaryActionItem,
+      switchConfig,
+      popoverWidth,
+      popoverTestId,
+      onClose,
+      onCloseOverflowButton,
+      anchorDomElement,
+    ]
   );
 
   if (panels.length === 0) {
@@ -57,7 +84,7 @@ export const AppMenuPopover = ({
   const showTooltip = Boolean(content || title);
 
   const button = showTooltip ? (
-    <EuiToolTip delay="long" content={content} title={title}>
+    <EuiToolTip content={content} title={title}>
       {anchorElement}
     </EuiToolTip>
   ) : (
@@ -66,18 +93,15 @@ export const AppMenuPopover = ({
 
   return (
     <EuiPopover
-      data-test-subj={testId || 'top-nav-menu-popover'}
       button={button}
       isOpen={isOpen}
       closePopover={onClose}
       panelPaddingSize="none"
       hasArrow={false}
-      anchorPosition={anchorPosition || 'upLeft'}
-      panelStyle={{
-        width: popoverWidth,
-      }}
+      anchorPosition={anchorPosition}
+      aria-label={title || content}
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <EuiContextMenu initialPanelId={0} panels={panels} css={{ minWidth: 180 }} />
     </EuiPopover>
   );
 };

@@ -140,7 +140,7 @@ The data source state (`state.datasourceStates.formBased.layers`) contains the c
 
 ### Visualization state
 
-The visualization state (`state.visualization`) depends on the chosen visualization type (`visualizationType`). Layer ids and accessor properties in this state have to correspond to the layer ids and column ids of the datasource state. Types for individual visualizations are exported as standalone interfaces (e.g. `XYState` or `HeatmapVisualizationState`).
+The visualization state (`state.visualization`) depends on the chosen visualization type (`visualizationType`). Layer ids and accessor properties in this state have to correspond to the layer ids and column ids of the datasource state. Types for individual visualizations are exported as standalone interfaces (e.g. `XYVisualizationState` or `HeatmapVisualizationState`).
 
 ### Filters
 
@@ -253,7 +253,6 @@ Run all tests from the `x-pack` root directory
   - Run `node ../scripts/functional_test_runner.js --config ./test/api_integration/config.ts --grep=Lens`
 - Performance journeys:
   - Run `node scripts/run_performance --journey-path x-pack/performance/journeys_e2e/data_stress_test_lens`
-  - Run `node scripts/run_performance --journey-path x-pack/performance/journeys_e2e/data_stress_test_lens_http2`
 
 ## Developing tips
 

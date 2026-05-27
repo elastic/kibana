@@ -11,6 +11,7 @@ import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
+/** Configuration schema for the Dashboard plugin. */
 export const configSchema = schema.object({
   /**
    * this config is unused, but cannot be removed as removing a yml setting is a breaking change.
@@ -42,20 +43,20 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 export type { DashboardPluginSetup, DashboardPluginStart } from './types';
 export type {
   DashboardState,
-  DashboardControlsState,
   DashboardPanel,
+  DashboardPinnedPanelsState,
+  DashboardPinnedPanel,
   DashboardSection,
-  DashboardFilter,
   DashboardOptions,
-  DashboardQuery,
-  DashboardCreateRequestBody,
+  DashboardSanitizeResponseBody,
   DashboardCreateResponseBody,
   DashboardReadResponseBody,
-  DashboardSearchRequestBody,
+  DashboardSearchRequestParams,
   DashboardSearchResponseBody,
   DashboardUpdateResponseBody,
   GridData,
 } from './api';
+export type { DashboardDrilldownState } from './dashboard_drilldown/types';
 export type { DashboardSavedObjectAttributes, SavedDashboardPanel } from './dashboard_saved_object';
 export type { ScanDashboardsResult } from './scan_dashboards';
 

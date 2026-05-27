@@ -35,11 +35,10 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
       label: monitorUrl,
       href: monitorUrl,
       iconType: 'globe',
-      size: 's',
       target: '_blank',
       extraAction: {
         color: 'text',
-        iconType: 'popout',
+        iconType: 'external',
         iconSize: 's',
         alwaysShow: true,
         'aria-label': i18n.translate('xpack.synthetics.monitorList.redirects.openWindow', {
@@ -54,11 +53,10 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
       label: url,
       href: url,
       iconType: 'sortDown',
-      size: 's',
       target: '_blank',
       extraAction: {
         color: 'text',
-        iconType: 'popout',
+        iconType: 'external',
         iconSize: 's',
         'aria-label': i18n.translate('xpack.synthetics.monitorList.redirects.openWindow', {
           defaultMessage: 'Link will open in new window.',
@@ -93,7 +91,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
         </EuiText>
       }
       <EuiSpacer size="s" />
-      <ListGroup gutterSize={'none'} listItems={listOfRedirects} />
+      <ListGroup listItems={listOfRedirects} />
     </Panel>
   ) : null;
 };

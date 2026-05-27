@@ -39,8 +39,15 @@ jest.mock('../../../../../common/hooks/use_license', () => {
 });
 
 jest.mock('../../hooks/use_get_trusted_device_suggestions');
+jest.mock('../../../../../common/containers/source', () => ({
+  useFetchIndex: jest.fn(),
+}));
+
+import { useFetchIndex } from '../../../../../common/containers/source';
 
 describe('Trusted devices form', () => {
+  jest.setTimeout(10000);
+
   const formPrefix = 'trustedDevices-form';
   let resetHTMLElementOffsetWidth: ReturnType<typeof forceHTMLElementOffsetWidth>;
 
@@ -114,11 +121,9 @@ describe('Trusted devices form', () => {
     textField: HTMLInputElement | HTMLTextAreaElement,
     value: string
   ) => {
-    // For EuiComboBox (has role="combobox"), use userEvent.type
     if (textField.getAttribute('role') === 'combobox') {
       await userEvent.clear(textField);
-      await userEvent.type(textField, value);
-      // Press Enter to create the custom option
+      await userEvent.paste(value);
       await userEvent.keyboard('{Enter}');
     } else {
       // For regular text fields
@@ -176,7 +181,16 @@ describe('Trusted devices form', () => {
     mockedContext = createAppRootMockRenderer();
     latestUpdatedItem = createItem();
 
-    // Mock the useGetTrustedDeviceSuggestions hook
+    (useFetchIndex as jest.Mock).mockReturnValue([
+      false, // isLoading
+      {
+        indexPatterns: {
+          fields: [{ name: 'some.field', type: 'string' }],
+          title: 'logs-endpoint.events.device-*',
+        },
+      },
+    ]);
+
     (useGetTrustedDeviceSuggestions as jest.Mock).mockReturnValue({
       data: [],
       isLoading: false,
@@ -239,7 +253,7 @@ describe('Trusted devices form', () => {
       await openOsCombo();
 
       const options = Array.from(
-        renderResult.baseElement.querySelectorAll('button[role="option"]')
+        renderResult.baseElement.querySelectorAll('.euiComboBoxOption')
       ).map((el) => el.textContent?.trim());
 
       expect(options).toEqual([
@@ -531,6 +545,62 @@ describe('Trusted devices form', () => {
       renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
     ).toBeNull();
     expect(renderResult.queryByTestId('policy-id-0')).toBeNull();
+  });
+
+  describe('Suggestions API gating', () => {
+    it('should call suggestions hook with enabled=true when index has fields', async () => {
+      (useFetchIndex as jest.Mock).mockReturnValue([
+        false,
+        {
+          indexPatterns: {
+            fields: [{ name: 'device.id', type: 'string' }],
+            title: 'logs-endpoint.events.device-*',
+          },
+        },
+      ]);
+
+      await render();
+
+      expect(useGetTrustedDeviceSuggestions).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: true })
+      );
+    });
+
+    it('should call suggestions hook with enabled=false when index has no fields', async () => {
+      (useFetchIndex as jest.Mock).mockReturnValue([
+        false,
+        {
+          indexPatterns: {
+            fields: [],
+            title: '',
+          },
+        },
+      ]);
+
+      await render();
+
+      expect(useGetTrustedDeviceSuggestions).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    });
+
+    it('should call suggestions hook with enabled=false while index is loading', async () => {
+      (useFetchIndex as jest.Mock).mockReturnValue([
+        true, // isLoading = true
+        {
+          indexPatterns: {
+            fields: [],
+            title: '',
+          },
+        },
+      ]);
+
+      await render();
+
+      expect(useGetTrustedDeviceSuggestions).toHaveBeenCalledWith(
+        expect.objectContaining({ enabled: false })
+      );
+    });
   });
 
   describe('Assignment section visibility', () => {

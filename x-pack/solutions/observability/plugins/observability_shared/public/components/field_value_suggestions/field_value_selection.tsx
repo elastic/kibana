@@ -133,6 +133,7 @@ export function FieldValueSelection({
 
   const filterButton = (
     <EuiFilterButton
+      data-test-subj={`o11yFilterGroupButton-${label}`}
       aria-label={i18n.translate('xpack.observabilityShared.fieldValueSelection.label', {
         defaultMessage: 'expands filter group for {label} filter',
         values: { label },
@@ -194,6 +195,7 @@ export function FieldValueSelection({
           }}
           listProps={{
             onFocusBadge: false,
+            paddingSize: 's',
           }}
           options={options}
           onChange={onChange}

@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { BoolQuery } from '@kbn/es-query';
-import { getGroupingQuery, isNoneGroup, type NamedAggregation } from '@kbn/grouping';
+import {
+  getGroupingQuery,
+  isNoneGroup,
+  type NamedAggregation,
+  type GroupingSort,
+} from '@kbn/grouping';
 import type { RunTimeMappings } from '../../../../sourcerer/store/model';
 
 export interface AlertsGroupingQueryParams {
@@ -26,6 +32,14 @@ export interface AlertsGroupingQueryParams {
   uniqueValue: string;
   to: string;
   multiValueFieldsToFlatten?: string[];
+  /**
+   * Sort order for the grouping results.
+   */
+  sort?: GroupingSort;
+  /**
+   * Filter specifically for the unitsCount aggregation
+   */
+  unitsCountFilter?: estypes.QueryDslQueryContainer;
 }
 
 export const getAlertsGroupingQuery = ({
@@ -39,6 +53,8 @@ export const getAlertsGroupingQuery = ({
   uniqueValue,
   to,
   multiValueFieldsToFlatten,
+  sort = [{ unitsCount: { order: 'desc' } }],
+  unitsCountFilter,
 }: AlertsGroupingQueryParams) =>
   getGroupingQuery({
     additionalFilters,
@@ -52,6 +68,7 @@ export const getAlertsGroupingQuery = ({
     runtimeMappings,
     uniqueValue,
     size: pageSize,
-    sort: [{ unitsCount: { order: 'desc' } }],
+    sort,
     multiValueFieldsToFlatten,
+    unitsCountFilter,
   });

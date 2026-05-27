@@ -40,7 +40,7 @@ interface Props {
 const displayOptions = [
   {
     id: StackTracesDisplayOption.StackTraces,
-    iconType: 'visLine',
+    iconType: 'chartLine',
     label: i18n.translate('xpack.profiling.stackTracesView.stackTracesCountButton', {
       defaultMessage: 'Stack traces',
     }),

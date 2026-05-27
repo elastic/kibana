@@ -32,14 +32,14 @@ describe('transformEsqlFormData', () => {
       params: [
         {
           name: 'param1',
-          type: 'text',
+          type: 'string',
           description: 'A string parameter.',
           source: EsqlParamSource.Custom,
           optional: false,
         },
         {
           name: 'param2',
-          type: 'long',
+          type: 'integer',
           description: 'A number parameter.',
           source: EsqlParamSource.Custom,
           optional: false,
@@ -53,16 +53,17 @@ describe('transformEsqlFormData', () => {
       id: 'my-test-tool',
       description: 'A tool for testing.',
       readonly: false,
+      experimental: false,
       configuration: {
         query: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1 AND field2 == ?param2',
         params: {
           param1: {
-            type: 'text',
+            type: 'string',
             description: 'A string parameter.',
             optional: false,
           },
           param2: {
-            type: 'long',
+            type: 'integer',
             description: 'A number parameter.',
             optional: false,
           },
@@ -91,7 +92,7 @@ describe('transformEsqlFormData', () => {
       mockFormData.params.push({
         name: 'unusedParam',
         description: 'An unused parameter.',
-        type: 'text',
+        type: 'string',
         source: EsqlParamSource.Custom,
         optional: false,
       });
@@ -101,7 +102,7 @@ describe('transformEsqlFormData', () => {
       expectedTool.configuration.params = {
         param1: {
           description: 'A string parameter.',
-          type: 'text',
+          type: 'string',
           optional: false,
         },
       };
@@ -114,7 +115,7 @@ describe('transformEsqlFormData', () => {
 
   describe('transformEsqlFormDataForCreate', () => {
     it('should transform ES|QL form data to a create tool payload', () => {
-      const expectedPayload: CreateToolPayload = omit(mockTool, ['readonly']);
+      const expectedPayload: CreateToolPayload = omit(mockTool, ['readonly', 'experimental']);
 
       const result = transformEsqlFormDataForCreate(mockFormData);
       expect(result).toEqual(expectedPayload);
@@ -153,14 +154,14 @@ describe('transformEsqlFormData', () => {
         params: [
           {
             name: 'param1',
-            type: 'text',
+            type: 'string',
             description: 'A string parameter.',
             source: EsqlParamSource.Custom,
             optional: false,
           },
           {
             name: 'param2',
-            type: 'long',
+            type: 'integer',
             description: 'A number parameter.',
             source: EsqlParamSource.Custom,
             optional: false,
@@ -177,7 +178,7 @@ describe('transformEsqlFormData', () => {
           query: 'FROM my_index | LIMIT 10 | WHERE field1 == ?param1',
           params: {
             param1: {
-              type: 'text',
+              type: 'string',
               description: 'A string parameter.',
               optional: false,
             },
@@ -193,7 +194,7 @@ describe('transformEsqlFormData', () => {
   });
   describe('transformEsqlFormDataForUpdate', () => {
     it('should transform ES|QL form data to an update tool payload', () => {
-      const toolWithoutIdAndType = omit(mockTool, ['id', 'type', 'readonly']);
+      const toolWithoutIdAndType = omit(mockTool, ['id', 'type', 'readonly', 'experimental']);
 
       const result = transformEsqlFormDataForUpdate(mockFormData);
       expect(result).toEqual(toolWithoutIdAndType);

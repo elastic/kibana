@@ -13,12 +13,13 @@ import type {
   ConstructorDeclaration,
   MethodSignature,
   ConstructSignatureDeclaration,
+  CallSignatureDeclaration,
 } from 'ts-morph';
 
 import { buildApiDecsForParameters } from './build_parameter_decs';
 import type { ApiDeclaration } from '../types';
 import { TypeKind } from '../types';
-import { getJSDocReturnTagComment, getJSDocs } from './js_doc_utils';
+import { getJSDocReturnTagComment, getJSDocs, getPluginContextForNode } from './js_doc_utils';
 import { buildBasicApiDeclaration } from './build_basic_api_declaration';
 import type { BuildApiDecOpts } from './types';
 
@@ -31,14 +32,16 @@ export function buildFunctionDec(
     | FunctionDeclaration
     | MethodDeclaration
     | ConstructorDeclaration
-    | MethodSignature,
+    | MethodSignature
+    | CallSignatureDeclaration,
   opts: BuildApiDecOpts
 ): ApiDeclaration {
+  const pluginContext = getPluginContextForNode(node, opts);
   const fn = {
     ...buildBasicApiDeclaration(node, opts),
     type: TypeKind.FunctionKind,
     children: buildApiDecsForParameters(node.getParameters(), opts, getJSDocs(node)),
-    returnComment: getJSDocReturnTagComment(node),
+    returnComment: getJSDocReturnTagComment(node, pluginContext),
   };
   return fn;
 }

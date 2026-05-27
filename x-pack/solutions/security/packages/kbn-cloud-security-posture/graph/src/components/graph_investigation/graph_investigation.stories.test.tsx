@@ -23,6 +23,8 @@ import {
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../test_ids';
 import * as previewAnnotations from '../../../.storybook/preview';
 import { NOTIFICATIONS_ADD_ERROR_ACTION } from '../../../.storybook/constants';
@@ -283,6 +285,51 @@ describe('GraphInvestigation Component', () => {
         expect(tooltip).toHaveTextContent('Details not available');
       });
     });
+
+    it('shows the option `Show entity relationships` as enabled when entity node is enriched', async () => {
+      const { container, getByTestId } = renderStory();
+
+      await expandNode(container, 'projects/your-project-id/roles/customRole');
+
+      const showRelationshipsItem = getByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(showRelationshipsItem).toHaveTextContent('Show entity relationships');
+      expect(showRelationshipsItem).not.toHaveAttribute('disabled');
+    });
+
+    it('shows the option `Show entity relationships` as disabled when entity node is not enriched', async () => {
+      const { container, getByTestId, queryByTestId } = renderStory();
+
+      await expandNode(container, 'admin@example.com');
+      const showRelationshipsItem = getByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(showRelationshipsItem).toHaveTextContent('Show entity relationships');
+      expect(showRelationshipsItem).toHaveAttribute('disabled');
+
+      // can't use userEvent.hover since we get the following error:
+      // 'Unable to perform pointer interaction as the element has pointer-events: none:'
+      fireEvent.mouseOver(showRelationshipsItem);
+
+      // Wait for tooltip and execute validation
+      await waitAndExecute(() => {
+        const tooltip = queryByTestId(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID);
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveTextContent('Entity relationships not available');
+      });
+    });
+
+    it('does not show `Show entity relationships` option for grouped entities', async () => {
+      const { container, queryByTestId } = renderGroupedActorStory();
+
+      await expandNode(container, 'mixed-entities');
+
+      const showRelationshipsItem = queryByTestId(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID
+      );
+      expect(showRelationshipsItem).not.toBeInTheDocument();
+    });
   });
 
   describe('searchBar', () => {
@@ -358,7 +405,7 @@ describe('GraphInvestigation Component', () => {
       await expandNode(container, 'admin@example.com');
       getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID).click();
 
-      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('2');
     });
 
     it('hide filters counter when node filter is toggled off', async () => {
@@ -367,7 +414,7 @@ describe('GraphInvestigation Component', () => {
       });
       await showActionsByNode(container, 'admin@example.com');
 
-      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('2');
 
       await hideActionsByNode(container, 'admin@example.com');
 
@@ -385,7 +432,7 @@ describe('GraphInvestigation Component', () => {
       });
       await showActionsByNode(container, 'admin@example.com');
 
-      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('1');
+      expect(getByTestId(GRAPH_ACTIONS_TOGGLE_SEARCH_ID)).toHaveTextContent('2');
 
       disableFilter(container, 0);
 
@@ -395,6 +442,66 @@ describe('GraphInvestigation Component', () => {
       expect(getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toHaveTextContent(
         "Show this entity's actions"
       );
+    });
+  });
+
+  describe('dismisses external overlays on ReactFlow pane click', () => {
+    const openFilterDropdown = async (container: HTMLElement) => {
+      await showActionsByNode(container, 'admin@example.com');
+      await waitFor(() => {
+        expect(container.querySelector(`[data-test-subj*="filter-id-0"]`)).not.toBeNull();
+      });
+      (container.querySelector(`[data-test-subj*="filter-id-0"]`) as HTMLButtonElement).click();
+      await waitFor(() => {
+        expect(screen.getByTestId('disableFilter')).toBeInTheDocument();
+      });
+    };
+
+    it('dispatches synthetic mouse events on the container when pointer-down hits the graph pane', async () => {
+      // Asserts the synthesized signal is dispatched; jsdom doesn't fully run
+      // the focus trap, so the actual overlay close isn't observable here.
+      const { container } = renderStory({ showToggleSearch: true });
+      await openFilterDropdown(container);
+
+      const pane = container.querySelector('.react-flow__pane') as HTMLElement;
+      expect(pane).not.toBeNull();
+      const root = container.querySelector(
+        `[data-test-subj="${GRAPH_INVESTIGATION_TEST_ID}"]`
+      ) as HTMLElement;
+
+      const mouseupSpy = jest.fn();
+      root.addEventListener('mouseup', mouseupSpy);
+      try {
+        fireEvent.pointerDown(pane, { button: 0, isPrimary: true });
+      } finally {
+        root.removeEventListener('mouseup', mouseupSpy);
+      }
+
+      expect(mouseupSpy).toHaveBeenCalled();
+      expect(mouseupSpy.mock.calls[0][0].target).toBe(root);
+    });
+
+    it('does not dispatch synthetic mouse events when only a graph-internal popover is open', async () => {
+      const { container } = renderStory({ showToggleSearch: true });
+      await expandNode(container, 'admin@example.com');
+      await waitFor(() => {
+        expect(screen.getByTestId(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID)).toBeInTheDocument();
+      });
+
+      const pane = container.querySelector('.react-flow__pane') as HTMLElement;
+      const root = container.querySelector(
+        `[data-test-subj="${GRAPH_INVESTIGATION_TEST_ID}"]`
+      ) as HTMLElement;
+
+      const mouseupSpy = jest.fn();
+      root.addEventListener('mouseup', mouseupSpy);
+      try {
+        fireEvent.pointerDown(pane, { button: 0, isPrimary: true });
+      } finally {
+        root.removeEventListener('mouseup', mouseupSpy);
+      }
+
+      expect(mouseupSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -506,9 +613,9 @@ describe('GraphInvestigation Component', () => {
               {
                 meta: {
                   controlledBy: 'graph-investigation',
-                  field: 'user.entity.id',
+                  field: 'user.email',
                   index: '1235',
-                  key: 'user.entity.id',
+                  key: 'user.email',
                   negate: false,
                   params: {
                     query: entityIdFilter,
@@ -517,16 +624,34 @@ describe('GraphInvestigation Component', () => {
                 },
                 query: {
                   match_phrase: {
-                    'user.entity.id': entityIdFilter,
+                    'user.email': entityIdFilter,
+                  },
+                },
+              },
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.name',
+                  index: '1235',
+                  key: 'user.name',
+                  negate: false,
+                  params: {
+                    query: 'admin',
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.name': 'admin',
                   },
                 },
               },
               ...['1', '2'].map((eventId) => ({
                 meta: {
                   controlledBy: 'graph-investigation',
+                  disabled: false,
                   field: 'event.id',
-                  index: eventId === '1' ? '1235' : undefined,
-                  ...(eventId === '2' ? { disabled: false } : {}),
+                  index: '1235',
                   key: 'event.id',
                   negate: false,
                   params: {
@@ -587,9 +712,9 @@ describe('GraphInvestigation Component', () => {
               {
                 meta: {
                   controlledBy: 'graph-investigation',
-                  field: 'user.entity.id',
+                  field: 'user.email',
                   index: '1235',
-                  key: 'user.entity.id',
+                  key: 'user.email',
                   negate: false,
                   params: {
                     query: entityIdFilter,
@@ -598,16 +723,34 @@ describe('GraphInvestigation Component', () => {
                 },
                 query: {
                   match_phrase: {
-                    'user.entity.id': entityIdFilter,
+                    'user.email': entityIdFilter,
+                  },
+                },
+              },
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.name',
+                  index: '1235',
+                  key: 'user.name',
+                  negate: false,
+                  params: {
+                    query: 'admin',
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.name': 'admin',
                   },
                 },
               },
               ...['1', '2'].map((eventId) => ({
                 meta: {
                   controlledBy: 'graph-investigation',
+                  disabled: false,
                   field: 'event.id',
-                  index: eventId === '1' ? '1235' : undefined,
-                  ...(eventId === '2' ? { disabled: false } : {}),
+                  index: '1235',
                   key: 'event.id',
                   negate: false,
                   params: {
@@ -730,18 +873,47 @@ describe('GraphInvestigation Component', () => {
             index: '1235',
             negate: false,
             controlledBy: 'graph-investigation',
-            field: 'user.entity.id',
-            key: 'user.entity.id',
-            params: {
-              query: entityIdFilter,
-            },
-            type: 'phrase',
+            params: [
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.email',
+                  index: '1235',
+                  key: 'user.email',
+                  negate: false,
+                  params: {
+                    query: entityIdFilter,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.email': entityIdFilter,
+                  },
+                },
+              },
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.name',
+                  index: '1235',
+                  key: 'user.name',
+                  negate: false,
+                  params: {
+                    query: 'admin',
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.name': 'admin',
+                  },
+                },
+              },
+            ],
+            type: 'combined',
+            relation: 'OR',
           }),
-          query: {
-            match_phrase: {
-              'user.entity.id': entityIdFilter,
-            },
-          },
         },
       ]);
     });
@@ -788,18 +960,47 @@ describe('GraphInvestigation Component', () => {
             index: '1235',
             negate: false,
             controlledBy: 'graph-investigation',
-            field: 'user.entity.id',
-            key: 'user.entity.id',
-            params: {
-              query: entityIdFilter,
-            },
-            type: 'phrase',
+            params: [
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.email',
+                  index: '1235',
+                  key: 'user.email',
+                  negate: false,
+                  params: {
+                    query: entityIdFilter,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.email': entityIdFilter,
+                  },
+                },
+              },
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'user.name',
+                  index: '1235',
+                  key: 'user.name',
+                  negate: false,
+                  params: {
+                    query: 'admin',
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'user.name': 'admin',
+                  },
+                },
+              },
+            ],
+            type: 'combined',
+            relation: 'OR',
           }),
-          query: {
-            match_phrase: {
-              'user.entity.id': entityIdFilter,
-            },
-          },
         },
       ]);
     });
@@ -863,7 +1064,7 @@ describe('GraphInvestigation Component', () => {
       });
     });
 
-    it('single actor node with user namespace uses user.entity.id filter', async () => {
+    it('single actor node uses sourceFields for filters', async () => {
       const onInvestigateInTimeline = jest.fn();
       const { container, getByTestId } = renderGroupedTargetStory({
         onInvestigateInTimeline,
@@ -874,7 +1075,7 @@ describe('GraphInvestigation Component', () => {
       await showActionsByNode(container, 'single-actor');
       getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
 
-      // Assert - Should use user.entity.id since actor has user namespace
+      // Assert - Should use sourceFields (user.id, user.email, user.name) as OR combined filter
       expect(onInvestigateInTimeline).toHaveBeenCalled();
       expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
         {
@@ -889,12 +1090,23 @@ describe('GraphInvestigation Component', () => {
             params: expect.arrayContaining([
               expect.objectContaining({
                 meta: expect.objectContaining({
-                  field: 'user.entity.id',
-                  key: 'user.entity.id',
+                  field: 'user.id',
+                  key: 'user.id',
                 }),
                 query: {
                   match_phrase: {
-                    'user.entity.id': 'single-actor',
+                    'user.id': 'single-actor',
+                  },
+                },
+              }),
+              expect.objectContaining({
+                meta: expect.objectContaining({
+                  field: 'user.email',
+                  key: 'user.email',
+                }),
+                query: {
+                  match_phrase: {
+                    'user.email': 'actor@example.com',
                   },
                 },
               }),

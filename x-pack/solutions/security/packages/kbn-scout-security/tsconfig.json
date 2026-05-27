@@ -16,6 +16,5 @@
   "kbn_references": [
     "@kbn/scout",
     "@kbn/es",
-    "@kbn/cloud-security-posture-common",
   ]
 }

@@ -6,15 +6,15 @@
  */
 
 import type { Logger, RequestHandler } from '@kbn/core/server';
-import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
+import { isInferenceError } from '@kbn/inference-common';
 import { isValidLicense } from '../../common/license';
 import type { AgentBuilderHandlerContext } from '../request_handler_context';
 
 export interface RouteWrapConfig {
   /**
    * The feature flag to gate this route behind.
-   * Defaults to {AGENT_BUILDER_ENABLED_SETTING_ID}
+   * Defaults to false (no feature flag gating).
    */
   featureFlag?: string | false;
   /**
@@ -27,7 +27,7 @@ export const getHandlerWrapper =
   ({ logger }: { logger: Logger }) =>
   <P, Q, B, Context extends AgentBuilderHandlerContext>(
     handler: RequestHandler<P, Q, B, Context>,
-    { featureFlag = AGENT_BUILDER_ENABLED_SETTING_ID, ignoreLicense = false }: RouteWrapConfig = {}
+    { featureFlag = false, ignoreLicense = false }: RouteWrapConfig = {}
   ): RequestHandler<P, Q, B, Context> => {
     return async (ctx, req, res) => {
       if (featureFlag !== false) {
@@ -53,6 +53,20 @@ export const getHandlerWrapper =
       try {
         return await handler(ctx, req, res);
       } catch (e) {
+        // Inference errors must be checked before agent builder errors:
+        // both share the same `ServerSentEventError` base class, so `isAgentBuilderError`
+        // also matches inference errors. Inference errors carry `meta.status` (not
+        // `meta.statusCode`), so we propagate that status when present.
+        if (isInferenceError(e)) {
+          const status = e.meta?.status;
+          if (typeof status === 'number' && status >= 400 && status < 600) {
+            logger.error(e);
+            return res.customError({
+              body: { message: e.message },
+              statusCode: status,
+            });
+          }
+        }
         if (isAgentBuilderError(e)) {
           logger.error(e);
           return res.customError({
@@ -64,15 +78,14 @@ export const getHandlerWrapper =
             },
             statusCode: e.meta?.statusCode ?? 500,
           });
-        } else {
-          logger.error(`Unexpected error in handler: ${e.stack ?? e.message}`);
-          return res.customError({
-            body: {
-              message: e.message ?? 'An unexpected error occurred',
-            },
-            statusCode: 500,
-          });
         }
+        logger.error(`Unexpected error in handler: ${e.stack ?? e.message}`);
+        return res.customError({
+          body: {
+            message: e.message ?? 'An unexpected error occurred',
+          },
+          statusCode: 500,
+        });
       }
     };
   };

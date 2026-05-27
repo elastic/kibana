@@ -28,7 +28,9 @@ export interface DocLinks {
   readonly aiAssistantSettings: string;
   readonly elasticStackGetStarted: string;
   readonly apiReference: string;
+  readonly releaseNotes: string;
   readonly serverlessReleaseNotes: string;
+  readonly hostedCloudReleaseNotes: string;
   readonly upgrade: {
     readonly upgradingStackOnPrem: string;
     readonly upgradingStackOnCloud: string;
@@ -36,6 +38,7 @@ export interface DocLinks {
   readonly apm: {
     readonly kibanaSettings: string;
     readonly supportedServiceMaps: string;
+    readonly supportedServiceMapsLegend: string;
     readonly customLinks: string;
     readonly droppedTransactionSpans: string;
     readonly upgrading: string;
@@ -47,6 +50,7 @@ export interface DocLinks {
     readonly spanCompression: string;
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
+    readonly metricsUi: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -58,6 +62,7 @@ export interface DocLinks {
     readonly cloudConnect: string;
     readonly connectToAutoops: string;
     readonly deploymentSignup: string;
+    readonly cloudPricing: string;
   };
   readonly console: {
     readonly guide: string;
@@ -327,6 +332,7 @@ export interface DocLinks {
     readonly avcResults: string;
     readonly bidirectionalIntegrations: string;
     readonly thirdPartyLlmProviders: string;
+    readonly endpointExceptions: string;
     readonly trustedApps: string;
     readonly trustedDevices: string;
     readonly elasticAiFeatures: string;
@@ -334,6 +340,8 @@ export interface DocLinks {
     readonly eventMerging: string;
     readonly blocklist: string;
     readonly endpointArtifacts: string;
+    readonly endpointArtifactsNoEscaping: string;
+    readonly scriptLibrary: string;
     readonly policyResponseTroubleshooting: {
       full_disk_access: string;
       macos_system_ext: string;
@@ -357,6 +365,7 @@ export interface DocLinks {
     readonly createEsqlRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
+      readonly api: string;
       readonly riskScorePrerequisites: string;
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;
@@ -378,6 +387,7 @@ export interface DocLinks {
     readonly queryESQL: string;
     readonly queryESQLExamples: string;
     readonly queryESQLMultiValueControls: string;
+    readonly queryESQLMvIntersects: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -452,6 +462,7 @@ export interface DocLinks {
     elasticManagedLlm: string;
     elasticManagedLlmUsageCost: string;
     elasticServerlessSearchManagedLlmUsageCost: string;
+    downsamplingConcepts: string;
   }>;
   readonly alerting: Readonly<{
     authorization: string;
@@ -479,6 +490,7 @@ export interface DocLinks {
     slackAction: string;
     slackApiAction: string;
     teamsAction: string;
+    casesWebhookAction: string;
     connectors: string;
   }>;
   readonly taskManager: Readonly<{
@@ -581,6 +593,12 @@ export interface DocLinks {
     agentReleaseProcess: string;
     fipsIngest: string;
     edotCollector: string;
+    agentPolicyLimitCpu: string;
+    agentDownloadTimeout: string;
+    elasticAgentStandaloneDownload: string;
+    elasticAgentStandaloneLoggingConfig: string;
+    agentPolicyLogLevel: string;
+    elasticAgentLogFileRetention: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -693,6 +711,8 @@ export interface DocLinks {
   };
   readonly inferenceManagement: {
     readonly inferenceAPIDocumentation: string;
+    readonly featureSettings: string;
+    readonly externalInference: string;
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
@@ -709,7 +729,11 @@ export interface DocLinks {
     readonly models: string;
     readonly chat: string;
     readonly agentBuilderAgents: string;
-    readonly tools: string;
+    readonly agentBuilderSkills: string;
+    readonly agentBuilderPlugins: string;
+    readonly agentBuilderConnectors: string;
+    readonly agentBuilderTools: string;
+    readonly elasticCapabilities: string;
     readonly programmaticAccess: string;
     readonly kibanaApi: string;
     readonly mcpServer: string;
@@ -724,6 +748,7 @@ export interface DocLinks {
   readonly subscriptions: string;
   readonly cases: {
     readonly casesPermissions: string;
+    readonly configureCaseSettings: string;
   };
 }
 

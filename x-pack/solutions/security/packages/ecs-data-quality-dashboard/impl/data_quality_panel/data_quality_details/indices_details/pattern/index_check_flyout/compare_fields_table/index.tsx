@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { EuiTableFieldDataColumnType, Search } from '@elastic/eui';
 import { EuiInMemoryTable, EuiTitle, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -46,6 +47,9 @@ const CompareFieldsTableComponent = <T extends EnrichedFieldMetadata>({
         search={search}
         sorting={true}
         pagination={true}
+        tableCaption={i18n.translate('securitySolutionPackages.compareFieldsTable.caption', {
+          defaultMessage: 'Compare fields',
+        })}
       />
     </>
   );

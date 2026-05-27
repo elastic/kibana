@@ -21,6 +21,7 @@ import {
   NONE_CONNECTOR_ID,
 } from '../../../common/constants';
 import {
+  ATTACHMENT_ID_REF_NAME,
   CASE_REF_NAME,
   COMMENT_REF_NAME,
   CONNECTOR_ID_REFERENCE_NAME,
@@ -28,7 +29,10 @@ import {
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
-import { isCommentRequestTypeExternalReferenceSO } from '../type_guards';
+import {
+  isCommentRequestTypeExternalReferenceSO,
+  isUnifiedAttachmentWithSoReference,
+} from '../type_guards';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { injectPersistableReferencesToSO } from '../../attachment_framework/so_references';
 import { findReferenceId } from '../../common/references';
@@ -153,6 +157,27 @@ const addReferenceIdToPayload = (
         comment: {
           ...userActionAttributes.payload.comment,
           externalReferenceId: externalReferenceId ?? '',
+        },
+      };
+    }
+    if (isUnifiedAttachmentWithSoReference(userActionAttributes.payload.comment)) {
+      const { attachmentId } = userActionAttributes.payload.comment;
+
+      if (typeof attachmentId === 'string' && attachmentId.length > 0) {
+        return userAction.attributes.payload;
+      }
+
+      const refId = findReferenceId(
+        ATTACHMENT_ID_REF_NAME,
+        userActionAttributes.payload.comment.metadata.soType,
+        userAction.references
+      );
+
+      return {
+        ...userAction.attributes.payload,
+        comment: {
+          ...userActionAttributes.payload.comment,
+          attachmentId: refId ?? '',
         },
       };
     }

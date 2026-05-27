@@ -37,6 +37,32 @@ export const ConfigRecordSchema = schema.recordOf(
   }
 );
 
+export const VarGroupSelectionsSchema = schema.maybe(
+  schema.recordOf(schema.string(), schema.string(), {
+    meta: {
+      description:
+        'Variable group selections. Maps var_group name to the selected option name within that group.',
+    },
+  })
+);
+
+export const DeprecationInfoSchema = schema.object({
+  description: schema.string(),
+  since: schema.maybe(schema.string()),
+  replaced_by: schema.maybe(
+    schema.recordOf(
+      schema.oneOf([
+        schema.literal('package'),
+        schema.literal('policyTemplate'),
+        schema.literal('input'),
+        schema.literal('dataStream'),
+        schema.literal('variable'),
+      ]),
+      schema.string()
+    )
+  ),
+});
+
 const PackagePolicyStreamsSchema = {
   id: schema.maybe(schema.string()), // BWC < 7.11
   enabled: schema.boolean(),
@@ -46,7 +72,7 @@ const PackagePolicyStreamsSchema = {
   ),
   data_stream: schema.object({
     dataset: schema.string(),
-    type: schema.string(),
+    type: schema.maybe(schema.string()),
     elasticsearch: schema.maybe(
       schema.object({
         privileges: schema.maybe(
@@ -60,19 +86,42 @@ const PackagePolicyStreamsSchema = {
     ),
   }),
   vars: schema.maybe(ConfigRecordSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   compiled_stream: schema.maybe(schema.any()),
+  condition: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          '**Experimental.** Agent condition expression to evaluate whether to apply this stream.',
+      },
+    })
+  ),
+  deprecated: schema.maybe(DeprecationInfoSchema),
+  migrate_from: schema.maybe(schema.string()),
 };
 
 export const PackagePolicyInputsSchema = {
   id: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string()),
   type: schema.string(),
   policy_template: schema.maybe(schema.string()),
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
   vars: schema.maybe(ConfigRecordSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
-  streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 }),
+  streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 }),
+  condition: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          '**Experimental.** Agent condition expression to evaluate whether to apply this input.',
+      },
+    })
+  ),
+  deprecated: schema.maybe(DeprecationInfoSchema),
+  migrate_from: schema.maybe(schema.string()),
 };
 
 export const ExperimentalDataStreamFeaturesSchema = schema.arrayOf(
@@ -169,6 +218,7 @@ export const PackagePolicyBaseSchema = {
 
   inputs: schema.arrayOf(schema.object(PackagePolicyInputsSchema), { maxSize: 1000 }),
   vars: schema.maybe(ConfigRecordSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   overrides: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -230,6 +280,33 @@ export const PackagePolicyBaseSchema = {
       }),
     ])
   ),
+  package_agent_version_condition: schema.maybe(schema.string()),
+  condition: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.',
+      },
+    })
+  ),
+  // Only available for agentless integration policies.
+  // On standard package policies this field is rejected by server-side validation.
+  global_data_tags: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(
+        schema.object({
+          name: schema.string({
+            meta: { description: 'The name of the custom field. Cannot contain spaces.' },
+          }),
+          value: schema.oneOf([schema.string(), schema.number()], {
+            meta: { description: 'The value of the custom field.' },
+          }),
+        }),
+        { maxSize: 100 }
+      ),
+    ])
+  ),
 };
 
 export const NewPackagePolicySchema = schema.object({
@@ -237,6 +314,48 @@ export const NewPackagePolicySchema = schema.object({
   id: schema.maybe(schema.string()),
   force: schema.maybe(schema.boolean()),
 });
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.22.0.
+ * Permissive on enabled, inputs, and package so the SO layer can store
+ * internal shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema
+ * gains new fields, create PackagePolicySchemaV{next} that extends this one.
+ */
+export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
+  {
+    enabled: schema.maybe(schema.boolean()),
+    inputs: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
+    package: schema.maybe(schema.any()),
+    global_data_tags: undefined,
+    condition: undefined,
+  },
+  { unknowns: 'ignore' }
+);
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.23.0.
+ * Permissive on enabled, inputs, and package so the SO layer can store
+ * internal shapes (e.g. compiled_input, minimal fixtures). If NewPackagePolicySchema
+ * gains new fields, create PackagePolicySchemaV{next} that extends this one.
+ */
+export const PackagePolicySchemaV23 = PackagePolicySchemaV22.extends(
+  {
+    global_data_tags: NewPackagePolicySchema.getPropSchemas().global_data_tags,
+  },
+  { unknowns: 'ignore' }
+);
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.24.0.
+ * Re-introduces the `condition` field at the integration level — V22/V23 excluded it
+ * to preserve their hashes when `condition` was added to PackagePolicyBaseSchema.
+ */
+export const PackagePolicySchemaV24 = PackagePolicySchemaV23.extends(
+  {
+    condition: NewPackagePolicySchema.getPropSchemas().condition,
+  },
+  { unknowns: 'ignore' }
+);
 
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
@@ -246,7 +365,7 @@ const CreatePackagePolicyProps = {
     schema.object({
       ...PackagePolicyInputsSchema,
       streams: schema.maybe(
-        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 })
+        schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
       ),
     }),
     { maxSize: 1000 }
@@ -290,9 +409,9 @@ export const SimplifiedVarsSchema = schema.recordOf(
   schema.string(),
   schema.nullable(
     schema.oneOf([
-      schema.boolean(),
       schema.string(),
       schema.number(),
+      schema.boolean(),
       schema.arrayOf(schema.string(), { maxSize: 100 }),
       schema.arrayOf(schema.number(), { maxSize: 100 }),
       // Secrets
@@ -321,7 +440,16 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
           },
         })
       ),
+      deprecated: schema.maybe(DeprecationInfoSchema),
       vars: schema.maybe(SimplifiedVarsSchema),
+      condition: schema.maybe(
+        schema.string({
+          meta: {
+            description:
+              '**Experimental.** Agent condition expression to evaluate whether to apply this input.',
+          },
+        })
+      ),
       streams: schema.maybe(
         schema.recordOf(
           schema.string(),
@@ -334,6 +462,16 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
               })
             ),
             vars: schema.maybe(SimplifiedVarsSchema),
+            var_group_selections: VarGroupSelectionsSchema,
+            deprecated: schema.maybe(DeprecationInfoSchema),
+            condition: schema.maybe(
+              schema.string({
+                meta: {
+                  description:
+                    '**Experimental.** Agent condition expression to evaluate whether to apply this stream.',
+                },
+              })
+            ),
           }),
           {
             meta: {
@@ -394,6 +532,7 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
   ),
   output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   vars: schema.maybe(SimplifiedVarsSchema),
+  var_group_selections: VarGroupSelectionsSchema,
   inputs: SimplifiedPackagePolicyInputsSchema,
   supports_agentless: schema.maybe(
     schema.nullable(
@@ -416,6 +555,14 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
         maxSize: 100,
       }),
     ])
+  ),
+  condition: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.',
+      },
+    })
   ),
 });
 
@@ -478,10 +625,10 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object({
       schema.object({
         ...PackagePolicyInputsSchema,
         streams: schema.maybe(
-          schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 100 })
+          schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
         ),
       }),
-      { maxSize: 100 }
+      { maxSize: 1000 }
     )
   ),
   version: schema.maybe(schema.string()),
@@ -541,7 +688,7 @@ export const PackagePolicySchema = schema.object({
       schema.object({
         id: schema.string(),
       }),
-      { maxSize: 100 }
+      { maxSize: 1000 }
     )
   ),
 });

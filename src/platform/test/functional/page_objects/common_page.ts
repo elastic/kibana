@@ -271,6 +271,7 @@ export class CommonPageObject extends FtrService {
       disableWelcomePrompt = true,
       insertTimestamp = true,
       retryOnFatalError = true,
+      skipUrlValidation = false,
     } = {}
   ) {
     let appUrl: string;
@@ -308,7 +309,8 @@ export class CommonPageObject extends FtrService {
         // accept alert if it pops up
         const alert = await this.browser.getAlert();
         await alert?.accept();
-        await this.sleep(700);
+        // browser.get() waits for document.readyState==='complete' before returning,
+        // so no sleep is needed here; the refresh below starts from a fully loaded page.
         this.log.debug('returned from get, calling refresh');
         await this.browser.refresh();
         let currentUrl = shouldLoginIfPrompted
@@ -334,6 +336,9 @@ export class CommonPageObject extends FtrService {
         }
 
         currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+        if (skipUrlValidation) {
+          return currentUrl;
+        }
         const decodedAppUrl = decodeURIComponent(appUrl);
         const decodedCurrentUrl = decodeURIComponent(currentUrl);
 
@@ -360,15 +365,19 @@ export class CommonPageObject extends FtrService {
         return currentUrl;
       });
 
-      await this.retry.tryForTime(this.defaultFindTimeout, async () => {
-        await this.sleep(501);
-        const currentUrl = await this.browser.getCurrentUrl();
-        this.log.debug('in navigateTo url = ' + currentUrl);
-        if (lastUrl !== currentUrl) {
-          lastUrl = currentUrl;
-          throw new Error('URL changed, waiting for it to settle');
-        }
-      });
+      if (!skipUrlValidation) {
+        // Poll until the URL stops changing. No upfront sleep: if the URL has
+        // already settled we return immediately; the retry service's built-in
+        // 502ms delay provides spacing between checks when it is still moving.
+        await this.retry.tryForTime(this.defaultFindTimeout, async () => {
+          const currentUrl = await this.browser.getCurrentUrl();
+          this.log.debug('in navigateTo url = ' + currentUrl);
+          if (lastUrl !== currentUrl) {
+            lastUrl = currentUrl;
+            throw new Error('URL changed, waiting for it to settle');
+          }
+        });
+      }
     });
   }
 
@@ -475,7 +484,8 @@ export class CommonPageObject extends FtrService {
 
   async waitForTopNavToBeVisible() {
     await this.retry.try(async () => {
-      const isNavVisible = await this.testSubjects.exists('top-nav');
+      const isNavVisible =
+        (await this.testSubjects.exists('top-nav')) || (await this.testSubjects.exists('app-menu'));
       if (!isNavVisible) {
         throw new Error('Local nav not visible yet');
       }
@@ -504,10 +514,8 @@ export class CommonPageObject extends FtrService {
 
   async waitForSaveModalToClose() {
     this.log.debug('Waiting for save modal to close');
-    await this.retry.try(async () => {
-      if (await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 })) {
-        throw new Error('save modal still open');
-      }
+    await this.testSubjects.missingOrFail('savedObjectSaveModal', {
+      timeout: this.testSubjects.TRY_TIME,
     });
   }
 

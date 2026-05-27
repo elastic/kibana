@@ -27,6 +27,31 @@ export const CreateAgentlessPolicyRequestSchema = {
     policy_ids: undefined,
     supports_agentless: undefined,
     output_id: undefined,
+    policy_template: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'The policy template to use for the agentless package policy. If not provided, the default policy template will be used.',
+        },
+      })
+    ),
+    // Only available for agentless integration policies.
+    // On standard package policies this field is rejected by server-side validation.
+    global_data_tags: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string({
+            meta: { description: 'The name of the custom field. Cannot contain spaces.' },
+          }),
+          value: schema.oneOf([schema.string(), schema.number()], {
+            meta: { description: 'The value of the custom field.' },
+          }),
+        }),
+        {
+          maxSize: 100,
+        }
+      )
+    ),
     // Cloud connector configuration - all connector settings go here
     cloud_connector: schema.maybe(
       schema.object({
@@ -49,6 +74,14 @@ export const CreateAgentlessPolicyRequestSchema = {
             meta: {
               description:
                 'Optional name for the cloud connector. If not provided, will be auto-generated from credentials.',
+            },
+          })
+        ),
+        target_csp: schema.maybe(
+          schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')], {
+            meta: {
+              description:
+                'Target cloud service provider. If not provided, will be auto-detected from inputs.',
             },
           })
         ),

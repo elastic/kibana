@@ -13,6 +13,7 @@ import { columnsAfter } from './columns_after';
 import { validate } from './validate';
 import { summary } from './summary';
 import type { ICommandContext } from '../types';
+import { Commands } from '../../definitions/keywords';
 
 const changePointCommandMethods: ICommandMethods<ICommandContext> = {
   validate,
@@ -22,18 +23,19 @@ const changePointCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const changePointCommand: ICommand = {
-  name: 'change_point',
+  name: Commands.CHANGE_POINT,
   methods: changePointCommandMethods,
   metadata: {
     preview: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.changePointDoc', {
       defaultMessage: 'Detect change point in the query results',
     }),
-    declaration: `CHANGE_POINT <value> ON <field_name> AS <type>, <pvalue>`,
+    declaration: `CHANGE_POINT <value> ON <field_name> AS <type>, <pvalue> BY <grouping>`,
     examples: [
       '… | CHANGE_POINT value',
       '… | CHANGE_POINT value ON timestamp',
       '… | CHANGE_POINT value ON timestamp AS type, pvalue',
+      '… | CHANGE_POINT value ON timestamp AS type, pvalue BY host',
     ],
   },
 };
