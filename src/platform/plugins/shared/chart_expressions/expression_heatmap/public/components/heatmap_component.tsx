@@ -10,7 +10,8 @@
 import type { FC } from 'react';
 import React, { memo, useMemo, useState, useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import moment from 'moment';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type {
@@ -287,18 +288,20 @@ export function getDateFormatPattern(
   return uiSettings.get('dateFormat');
 }
 
+const computedColumnWarningStyles = {
+  message: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      color: ${euiTheme.colors.textSubdued};
+      font-size: ${euiTheme.size.m};
+      font-weight: ${euiTheme.font.weight.regular};
+    `,
+};
+
 /** Renders the computed-column filter warning inside the chart tooltip footer. */
 const ComputedColumnWarning: React.FC<{ message: string }> = ({ message }) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(computedColumnWarningStyles);
   return (
-    <div
-      css={css`
-        color: ${euiTheme.colors.textSubdued};
-        font-size: ${euiTheme.size.m};
-        font-weight: ${euiTheme.font.weight.regular};
-      `}
-      data-test-subj="heatmapChartComputedColumnWarning"
-    >
+    <div css={styles.message} data-test-subj="heatmapChartComputedColumnWarning">
       {message}
     </div>
   );
