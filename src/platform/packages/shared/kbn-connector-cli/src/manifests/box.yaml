@@ -11,8 +11,8 @@ secrets:
   scope:
     value: "root_readwrite ai.readwrite docgen.readwrite"
   clientId:
-    vault: secret/ent-search-team/workplace-ai-oauth/dev/box
+    vault: secret/ent-search-team/connectors-sources/box
     field: client_id
   clientSecret:
-    vault: secret/ent-search-team/workplace-ai-oauth/dev/box
+    vault: secret/ent-search-team/connectors-sources/box
     field: client_secret
