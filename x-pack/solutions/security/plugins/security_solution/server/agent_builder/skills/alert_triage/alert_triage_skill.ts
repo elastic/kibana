@@ -91,10 +91,13 @@ Present results as ranked groups:
 **Group 1 — [entity or context]** (score: N)
 - Alerts: N alerts | Top rule: [rule name] | Severity: critical/high
 - Score drivers: base risk [N], MITRE tactic boost [+N for tactic name]
+- Top alert ID: [_id value from the highest-scored alert in this group]
 - Recommended next step: Investigate with alert-analysis
 
 **Group 2 — [entity or context]** (score: N)
 ...
+
+Always include the top alert ID for each group so analysts can reference it directly when escalating to alert-analysis or filing a case.
 
 End with a brief summary of total alerts assessed and how many groups were identified.`,
 

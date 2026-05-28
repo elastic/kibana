@@ -24,6 +24,7 @@ import {
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  containsAllTerms,
   extractAllStrings,
   extractMaxSemver,
   extractReleaseDateNearVersion,
@@ -175,6 +176,30 @@ function configureExperiment({
           metadata: {
             extracted: { maxVersion, releaseDate },
             answerPreview: answer.slice(0, 500),
+          },
+        };
+      },
+    },
+    {
+      name: 'RequiredAlertIdsInResponse',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        const raw = metadata?.requiredAlertIds;
+        const requiredIds = Array.isArray(raw)
+          ? (raw as unknown[]).filter((id): id is string => typeof id === 'string')
+          : [];
+        if (requiredIds.length === 0) return { score: 1 };
+
+        const answer = getFinalAssistantMessage(output as TaskOutput);
+        const allPresent = containsAllTerms(answer, requiredIds);
+        const missing = requiredIds.filter((id) => !answer.includes(id));
+
+        return {
+          score: allPresent ? 1 : 0,
+          metadata: {
+            requiredAlertIds: requiredIds,
+            missing,
+            answerPreview: answer.slice(0, 600),
           },
         };
       },
