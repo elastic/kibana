@@ -302,14 +302,14 @@ export class OnboardingWorkflowClient {
   /**
    * Returns the latest onboarding execution per stream, collapsed by
    * concurrency group key. At most {@link MAX_STREAMS_PER_QUERY} streams
-   * are returned (one execution each), sorted by creation date descending.
+   * are returned (one execution each), sorted by finishedAt date descending.
    */
   async getRecentExecutions(): Promise<WorkflowExecutionListItemDto[]> {
     const { results } = await this.managementApi.getWorkflowExecutions(
       {
         workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
         size: MAX_STREAMS_PER_QUERY,
-        sortField: 'createdAt',
+        sortField: 'finishedAt',
         sortOrder: 'desc',
         collapse: 'concurrencyGroupKey',
       },
