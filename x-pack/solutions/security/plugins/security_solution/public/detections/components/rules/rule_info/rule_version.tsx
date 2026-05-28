@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, ReactElement } from 'react';
+import React, { memo, type ReactElement } from 'react';
 import { EuiBadge, EuiHorizontalRule, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
@@ -51,5 +51,5 @@ function RuleVersionToolTip({ children }: RuleVersionToolTipProps): JSX.Element 
     </>
   );
 
-  return <EuiToolTip content={content} children={children} />;
+  return <EuiToolTip content={content}>{children}</EuiToolTip>;
 }

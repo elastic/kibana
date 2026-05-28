@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
+import React, { type PropsWithChildren } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import * as i18n from './translations';
@@ -26,9 +26,9 @@ export function RuleActionItemWrapper({
   return (
     <EuiPanel
       hasBorder={false}
-      paddingSize="s"
       css={css`
         background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        padding: ${euiTheme.size.xxs} ${euiTheme.size.s};
       `}
     >
       <EuiFlexGroup
@@ -41,12 +41,13 @@ export function RuleActionItemWrapper({
         <EuiFlexItem>{children}</EuiFlexItem>
         {onOpenDetails && (
           <EuiFlexItem grow={false}>
-            <EuiLink
+            <EuiButtonEmpty
+              size="s"
               onClick={() => onOpenDetails(item)}
               data-test-subj={`ruleChangeHistoryViewDetails-${item.id}`}
             >
               <i18n.VIEW_DETAILS_LINK />
-            </EuiLink>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

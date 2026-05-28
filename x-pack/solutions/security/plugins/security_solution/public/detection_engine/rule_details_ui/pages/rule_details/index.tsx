@@ -678,6 +678,7 @@ export const RuleDetailsPage = connector(
         {isDeleteConfirmationVisible && (
           <EuiConfirmModal
             title={ruleI18n.SINGLE_DELETE_CONFIRMATION_TITLE}
+            aria-label={ruleI18n.SINGLE_DELETE_CONFIRMATION_TITLE}
             onCancel={handleDeletionCancel}
             onConfirm={() => handleDeletionConfirm()}
             confirmButtonText={ruleI18n.DELETE_CONFIRMATION_CONFIRM}

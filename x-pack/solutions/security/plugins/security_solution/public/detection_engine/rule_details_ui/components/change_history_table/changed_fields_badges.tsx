@@ -37,15 +37,15 @@ export const ChangedFieldsBadges = memo(function ChangedFieldsBadges({
 
   return (
     <>
-      {visible.map((field) => (
-        <EuiBadge key={field} color="hollow">
+      {visible.map((field, i) => (
+        <EuiBadge key={field} color="hollow" tabIndex={i}>
           {convertFieldToDisplayName(field)}
         </EuiBadge>
       ))}
       &nbsp;
       {overflowFieldNames.length > 0 && (
         <EuiToolTip content={`${overflowFieldNames.join(', ')}${isLargeOverflow ? ', +' : ''}`}>
-          <EuiBadge color="hollow">{`+${overflowFieldNames.length}${
+          <EuiBadge color="hollow" tabIndex={inlineLimit}>{`+${overflowFieldNames.length}${
             isLargeOverflow ? '+' : ''
           }`}</EuiBadge>
         </EuiToolTip>

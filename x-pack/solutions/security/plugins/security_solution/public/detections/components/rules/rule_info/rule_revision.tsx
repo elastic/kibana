@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, ReactElement } from 'react';
+import React, { memo, type ReactElement } from 'react';
 import { EuiBadge, EuiHorizontalRule, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
@@ -22,7 +22,7 @@ export const RuleRevision = memo(function RuleRevision({
   return (
     <div data-test-subj={dataTestSubj}>
       <FormattedMessage
-        id="xpack.securitySolution.detectionEngine.ruleDetails.version"
+        id="xpack.securitySolution.detectionEngine.ruleDetails.revision"
         defaultMessage="Revision: {revision}"
         values={{
           revision: (
@@ -51,5 +51,5 @@ function RuleRevisionToolTip({ children }: RuleRevisionToolTipProps): JSX.Elemen
     </>
   );
 
-  return <EuiToolTip content={content} children={children} />;
+  return <EuiToolTip content={content}>{children}</EuiToolTip>;
 }
