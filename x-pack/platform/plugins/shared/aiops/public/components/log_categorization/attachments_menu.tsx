@@ -17,6 +17,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

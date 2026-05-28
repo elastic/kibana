@@ -26,10 +26,12 @@ export const patternAnalysisEmbeddableStateSchema = schema.object(
     ...serializedTimeRangeSchema.getPropSchemas(),
     data_view_id: schema.string({
       minLength: 1,
+      maxLength: 1000,
       meta: { description: 'The data view ID used for pattern analysis.' },
     }),
     field_name: schema.string({
       minLength: 1,
+      maxLength: 1000,
       meta: { description: 'The text field on which to run pattern analysis.' },
     }),
     minimum_time_range: schema.oneOf(
