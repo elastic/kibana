@@ -9,7 +9,7 @@
 
 import type { AggregateQuery, Filter } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '../../..';
 import { BehaviorSubject, type Observable } from 'rxjs';
 
 import { initializeRelatedPanels } from './initialize_related_panels';

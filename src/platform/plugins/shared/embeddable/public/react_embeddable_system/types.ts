@@ -12,7 +12,6 @@ import type {
   HasSerializableState,
   HasType,
   PublishesPhaseEvents,
-  PublishesRelatedPanels,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
 import type { MaybePromise } from '@kbn/utility-types';

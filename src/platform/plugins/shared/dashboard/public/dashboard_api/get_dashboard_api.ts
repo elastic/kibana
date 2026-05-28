@@ -8,7 +8,7 @@
  */
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, concatMap, merge, of, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 import type { EuiFlyoutProps } from '@elastic/eui';
