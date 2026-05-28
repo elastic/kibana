@@ -48,5 +48,4 @@ export interface KnowledgeIndicatorClientDeps {
   rulesClient: RulesClient;
   soClient: SavedObjectsClientContract;
   logger: Logger;
-  space: string;
 }

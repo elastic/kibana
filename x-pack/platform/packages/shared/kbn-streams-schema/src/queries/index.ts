@@ -116,13 +116,6 @@ export interface QueriesOccurrencesGetResponse {
   total_occurrences: number;
 }
 
-/**
- * Wire shape for a query knowledge indicator. Identity is `(stream_name, query.id)`.
- *
- * Note: as part of the unified KI data stream migration, the legacy
- * `asset.uuid` / `asset.id` / `asset.type` fields have been removed —
- * the document `_id` is server-generated per revision and not surfaced.
- */
 export interface QueryLink {
   query: StreamQuery;
   stream_name: string;

@@ -217,7 +217,6 @@ export class StreamsPlugin
             esClient: scopedClusterClient.asCurrentUser,
             soClient,
             rulesClient,
-            space,
             config: tuningConfig,
           });
         })();
@@ -443,8 +442,6 @@ export class StreamsPlugin
 
             const attachmentClient = await attachmentService.getClient({ soClient, rulesClient });
 
-            // featureClient and queryClient are not needed for enableStreams()
-            // and bulkUpsert() during preconfiguration, so we don't create them here.
             const streamsClient = await streamsService.getClient({
               attachmentClient,
               esClient,

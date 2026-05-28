@@ -372,10 +372,6 @@ export class StreamsClient {
       );
 
       const { attachmentClient, storageClient } = this.dependencies;
-      // Note: knowledge indicators are stored in an append-only data stream that
-      // is not per-stream-scoped — we do not perform a global clean here. KI for
-      // individual streams is tombstoned via `deleteIndicators` per stream during
-      // the `delete` state attempt above (see DeleteFeatureBlock / query removal).
       await Promise.all([attachmentClient.clean(), storageClient.clean()]);
     }
 

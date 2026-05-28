@@ -117,7 +117,6 @@ export function reconcileInferredFeatures({
 
   const { nonExcluded, codeIgnoredCount } = filterExcluded(rawFeatures, excludedFeatures, logger);
 
-  // Identity is now (stream_name, id) — features keyed by id.
   const discoveredSet = new Set(discoveredFeatures.map((f) => f.id));
   const byLowerId = new Map<string, Feature>();
   for (const f of allKnownFeatures) {

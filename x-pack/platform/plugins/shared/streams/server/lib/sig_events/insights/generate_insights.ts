@@ -161,7 +161,7 @@ async function generateStreamInsights({
   memoryTools?: InsightsMemoryTools;
 }): Promise<GenerateInsightsResult> {
   // Insights are only meaningful for rule-backed queries (they need ruleId to
-  // look up alerts). The legacy `getAssets` returned both backed and unbacked.
+  // look up alerts).
   const queryLinks = await kiClient.getQueryLinks([stream.name], { ruleUnbacked: 'exclude' });
 
   const queryDataResults = await Promise.all(

@@ -323,9 +323,6 @@ export class ExecutionPlan {
       );
     }
     const kiClient = await getKnowledgeIndicatorClient();
-    // Uninstall backing alerting rules and tombstone all KIs for the stream.
-    // deleteAllQueries handles rule uninstall + query tombstoning; deleteIndicators
-    // then tombstones the remaining features. Both are idempotent on repeat.
     return Promise.all(
       actions.map(async (action) => {
         await kiClient.deleteAllQueries(action.request.name);
