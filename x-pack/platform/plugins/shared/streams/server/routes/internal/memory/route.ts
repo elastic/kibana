@@ -19,7 +19,6 @@ import type {
   MemorySearchResult,
   MemoryVersionRecord,
 } from '../../../lib/memory';
-import type { StreamsServer } from '../../../types';
 import { taskActionSchema } from '../../../lib/tasks/task_action_schema';
 import { handleTaskAction } from '../../utils/task_helpers';
 import {
@@ -425,7 +424,6 @@ const recentChangesRoute = createServerRoute({
     return { changes };
   },
 });
-
 
 const SCRAPER_TASK_ID = 'streams_conversation_scraper_singleton';
 const CONSOLIDATION_TASK_ID = 'streams_memory_consolidation_singleton';
