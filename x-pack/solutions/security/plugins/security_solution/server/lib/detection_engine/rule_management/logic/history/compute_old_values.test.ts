@@ -35,6 +35,17 @@ describe('computeOldValues', () => {
     expect(patch).toEqual({ note: { blob: 'old' } });
   });
 
+  it('omits arrays of objects when their contents are deep-equal', () => {
+    const threat = [{ framework: 'MITRE', tactic: { id: 'TA0003', name: 'Persistence' } }];
+    const patch = computeOldValues(
+      asRule({ threat: [{ framework: 'MITRE', tactic: { id: 'TA0003', name: 'Persistence' } }] }),
+      asRule({ threat: [{ framework: 'MITRE', tactic: { id: 'TA0003', name: 'Persistence' } }] })
+    );
+    expect(patch).toEqual({});
+    // Verify array reference inequality did not cause a false positive
+    expect(threat).not.toBe(patch);
+  });
+
   it('emits the entire previous array when arrays differ', () => {
     const patch = computeOldValues(asRule({ tags: ['x', 'z'] }), asRule({ tags: ['x', 'y'] }));
     expect(patch).toEqual({ tags: ['x', 'y'] });

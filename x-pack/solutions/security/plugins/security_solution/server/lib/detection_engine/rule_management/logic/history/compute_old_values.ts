@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPlainObject } from 'lodash';
+import { isEqual, isPlainObject } from 'lodash';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 /**
@@ -77,10 +77,7 @@ const mergePatchFromTo = (current: unknown, previous: unknown): unknown | undefi
   }
 
   if (Array.isArray(current) && Array.isArray(previous)) {
-    if (
-      current.length === previous.length &&
-      current.every((value, index) => Object.is(value, previous[index]))
-    ) {
+    if (isEqual(current, previous)) {
       return undefined;
     }
     return previous;
