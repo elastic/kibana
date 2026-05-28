@@ -44,6 +44,7 @@
     "@kbn/share-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/react-kibana-mount",
+    "@kbn/core-http-browser",
   ]
 }
 

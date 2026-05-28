@@ -19,6 +19,8 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+// Static EUI token values for assertions
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { DataType, MetricVisualizationState } from '@kbn/lens-common';
@@ -1011,12 +1013,21 @@ describe('dimension editor', () => {
         />
       );
 
-      const supportingVisOptions = {
-        none: screen.queryByTitle(/none/i),
-        // in eui when bar or line become disabled they change from input to button so we have to do this weird check
-        bar: screen.queryByTitle(/bar/i) || screen.queryByRole('button', { name: /bar/i }),
-        trendline: screen.queryByTitle(/line/i) || screen.queryByRole('button', { name: /line/i }),
-      };
+      const supportingVisButtonGroup = screen.queryByTestId(
+        'lnsMetric_supporting_visualization_buttons'
+      );
+      const supportingVisOptions = supportingVisButtonGroup
+        ? {
+            none: within(supportingVisButtonGroup).queryByTitle(/none/i),
+            // in eui when bar or line become disabled they change from input to button so we have to do this weird check
+            bar:
+              within(supportingVisButtonGroup).queryByTitle(/bar/i) ||
+              within(supportingVisButtonGroup).queryByRole('button', { name: /bar/i }),
+            trendline:
+              within(supportingVisButtonGroup).queryByTitle(/line/i) ||
+              within(supportingVisButtonGroup).queryByRole('button', { name: /line/i }),
+          }
+        : { none: null, bar: null, trendline: null };
 
       const clickOnSupportingVis = async (type: SupportingVisType) => {
         const supportingVis = supportingVisOptions[type];
@@ -1026,20 +1037,28 @@ describe('dimension editor', () => {
         await userEvent.click(supportingVis);
       };
 
+      const applyColorToBtnGroup = screen.queryByTestId('lnsMetric_apply_color_to_buttons');
       const applyColorToOptions = {
-        background: screen.queryByTitle(/background/i),
-        value: screen.queryByTitle(/value/i),
+        none: applyColorToBtnGroup
+          ? within(applyColorToBtnGroup as HTMLElement).queryByTitle(/none/i)
+          : null,
+        background: applyColorToBtnGroup
+          ? within(applyColorToBtnGroup as HTMLElement).queryByTitle(/panel/i)
+          : null,
+        value: applyColorToBtnGroup
+          ? within(applyColorToBtnGroup as HTMLElement).queryByTitle(/value/i)
+          : null,
       };
 
       const clickOnApplyColorToOption = async (option: ApplyColor) => {
-        const applyColorTo = applyColorToOptions[option];
-        if (!applyColorTo) {
-          throw new Error(`Supporting visualization ${option} not found`);
+        const el = applyColorToOptions[option];
+        if (!el) {
+          throw new Error(`Apply color to option ${option} not found`);
         }
-        await userEvent.click(applyColorTo);
+        await userEvent.click(el);
       };
 
-      const colorModeGroup = screen.queryByRole('group', { name: /Color mode/i });
+      const colorModeGroup = screen.queryByRole('group', { name: /Mode/i });
       const staticColorPicker = screen.queryByTestId(SELECTORS.COLOR_PICKER);
 
       const typeColor = async (color: string) => {
@@ -1065,7 +1084,8 @@ describe('dimension editor', () => {
         },
         supportingVisOptions,
         clickOnSupportingVis,
-        applyColorToBtnGroup: screen.queryByTestId('lnsMetric_apply_color_to_buttons'),
+        applyColorToBtnGroup,
+        colorControls: screen.queryByTestId('lnsMetric_dimensionEditor_colorControls'),
         applyColorToOptions,
         clickOnApplyColorToOption,
         colorModeGroup,
@@ -1279,6 +1299,38 @@ describe('dimension editor', () => {
           expect(applyColorToOptions.background).toHaveAttribute('aria-pressed', 'true');
         });
 
+        it('should select the apply color to `None` when `applyColorTo` is unset and no color or palette is set', () => {
+          const { applyColorToOptions, colorModeGroup, colorControls } =
+            renderAdditionalSectionEditor({
+              state: {
+                ...stateWOTrend,
+                showBar: false,
+                maxAccessor: undefined,
+                applyColorTo: undefined,
+                color: undefined,
+                palette: undefined,
+              },
+            });
+          expect(applyColorToOptions.none).toHaveAttribute('aria-pressed', 'true');
+          expect(colorModeGroup).not.toBeInTheDocument();
+          expect(colorControls).not.toBeInTheDocument();
+        });
+
+        it('should show mode and color controls when apply color to `background`', () => {
+          const { colorModeGroup, colorControls, applyColorToOptions } =
+            renderAdditionalSectionEditor({
+              state: {
+                ...stateWOTrend,
+                showBar: false,
+                maxAccessor: undefined,
+                applyColorTo: 'background',
+              },
+            });
+          expect(applyColorToOptions.background).toHaveAttribute('aria-pressed', 'true');
+          expect(colorModeGroup).toBeInTheDocument();
+          expect(colorControls).toBeInTheDocument();
+        });
+
         it('should not show `apply color to` button group when `Line` option is selected', () => {
           const { applyColorToBtnGroup } = renderAdditionalSectionEditor({
             state: { ...stateWOTrend, showBar: true },
@@ -1302,6 +1354,24 @@ describe('dimension editor', () => {
 
           await clickOnApplyColorToOption('background');
           expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: 'background' });
+        });
+
+        it('should set `applyColorTo` to `undefined` when the apply color `None` is selected', async () => {
+          const mockState = {
+            ...stateWOTrend,
+            showBar: false,
+            maxAccessor: undefined,
+            applyColorTo: 'value' as const,
+          };
+          const { clickOnApplyColorToOption } = renderAdditionalSectionEditor({ state: mockState });
+          mockSetState.mockClear();
+          await clickOnApplyColorToOption('none');
+          expect(mockSetState).toHaveBeenCalledWith({
+            ...mockState,
+            color: undefined,
+            palette: undefined,
+            applyColorTo: undefined,
+          });
         });
 
         it('should show help message when color mode static, supporting visualization is none, apply color to value', () => {

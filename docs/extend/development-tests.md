@@ -86,15 +86,15 @@ We recommend writing new functional tests with [Scout](/extend/scout.md), Kibana
 The `FunctionalTestRunner` (FTR) is very bare bones and gets most of its functionality from its config file. The {{kib}} repo contains many FTR config files which use slightly different configurations for the {{kib}} server or {{es}}, have different test files, and potentially other config differences. FTR config files are organised in manifest files, based on testing area and type of distribution:
 
 - serverless:
-  - `ftr_base_serverless_configs.yml`
-  - `ftr_oblt_serverless_configs.yml`
-  - `ftr_security_serverless_configs.yml`
-  - `ftr_search_serverless_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_base_serverless_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_oblt_serverless_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_security_serverless_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_search_serverless_configs.yml`
 - stateful:
-  - `ftr_platform_stateful_configs.yml`
-  - `ftr_oblt_stateful_configs.yml`
-  - `ftr_security_stateful_configs.yml`
-  - `ftr_search_stateful_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_platform_stateful_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_oblt_stateful_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_security_stateful_configs.yml`
+  - `.buildkite/ftr-manifests/ftr_search_stateful_configs.yml`
 
 If you’re writing a plugin outside the {{kib}} repo, you will have your own config file. See [Functional Tests for Plugins outside the {{kib}} repo](/extend/external-plugin-functional-tests.md) for more info.
 

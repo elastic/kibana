@@ -9,7 +9,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { QuerySource } from '@kbn/esql-types';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import { useQueryActions } from './use_query_actions';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import type { ESQLEditorProps } from '../types';
@@ -52,7 +52,6 @@ const defaultParams = () => ({
     .fn()
     .mockResolvedValue(undefined) as unknown as ESQLEditorProps['onTextLangQuerySubmit'],
   onQueryUpdate: jest.fn(),
-  setCodeStateOnSubmission: jest.fn(),
   telemetryService: createMockTelemetryService(),
 });
 
@@ -81,7 +80,6 @@ describe('useQueryActions', () => {
         result.current.onQuerySubmit(QuerySource.MANUAL);
       });
 
-      expect(params.setCodeStateOnSubmission).toHaveBeenCalledWith('FROM logs');
       expect(params.telemetryService.trackQuerySubmitted).toHaveBeenCalledWith({
         source: QuerySource.MANUAL,
         query: 'FROM logs',

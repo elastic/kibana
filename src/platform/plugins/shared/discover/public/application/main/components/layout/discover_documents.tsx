@@ -40,7 +40,6 @@ import {
   getRowHeight,
 } from '@kbn/unified-data-table';
 import {
-  DOC_HIDE_TIME_COLUMN_SETTING,
   MAX_DOC_FIELDS_DISPLAYED,
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
@@ -69,6 +68,7 @@ import {
 } from '../../../../utils/get_allowed_sample_size';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
+import { showTimeFieldColumn } from '../../../../utils/show_time_field_column';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type {
   CellRenderersExtensionParams,
@@ -324,8 +324,8 @@ function DiscoverDocumentsComponent({
 
   // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
-    () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
-    [uiSettings]
+    () => showTimeFieldColumn({ uiSettings, query }),
+    [uiSettings, query]
   );
 
   const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
@@ -491,9 +491,11 @@ function DiscoverDocumentsComponent({
   const latestCascadedDocumentsDataGridsUiState = useLatest(
     useCurrentTabSelector((tab) => tab.uiState.cascadedDocumentsDataGridMap)
   );
-  const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
-    (tab) => tab.cascadedDocumentsState
-  );
+  const {
+    availableCascadeGroups,
+    selectedCascadeGroups,
+    columnsMeta: cascadedColumnsMeta,
+  } = useCurrentTabSelector((tab) => tab.cascadedDocumentsState);
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
   );
@@ -514,6 +516,7 @@ function DiscoverDocumentsComponent({
       cascadedDocumentsFetcher,
       availableCascadeGroups,
       selectedCascadeGroups,
+      cascadedColumnsMeta,
       esqlQuery: query,
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
@@ -537,6 +540,7 @@ function DiscoverDocumentsComponent({
   }, [
     availableCascadeGroups,
     cascadedDocumentsFetcher,
+    cascadedColumnsMeta,
     dispatch,
     esqlVariables,
     expandedDoc$,
@@ -554,6 +558,13 @@ function DiscoverDocumentsComponent({
     setSelectedCascadeGroups,
     viewModeToggle,
   ]);
+
+  const flyoutColumnsMeta = useMemo(() => {
+    if (!expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER) {
+      return columnsMeta;
+    }
+    return cascadedColumnsMeta;
+  }, [expandedDocOwner, columnsMeta, cascadedColumnsMeta]);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -650,7 +661,7 @@ function DiscoverDocumentsComponent({
           hits={renderDocumentViewMeta.displayedRows}
           // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
           columns={renderDocumentViewMeta.displayedColumns}
-          columnsMeta={columnsMeta}
+          columnsMeta={flyoutColumnsMeta}
           savedSearchId={persistedDiscoverSession?.id!}
           query={query}
           initialTabId={initialDocViewerTabId}

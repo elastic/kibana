@@ -35,7 +35,7 @@ export interface ResolvedColumn {
  * Default columns when no children are provided.
  *
  * Provides Name, Last updated, and Actions columns out of the box.
- * The Actions column auto-hides when the provider has no edit/delete handlers
+ * The Actions column auto-hides when the provider has no action handlers
  * configured, and individual actions are shown/hidden based on the item config.
  * Any explicit `<Column.*>` child replaces **all** defaults.
  */
@@ -90,7 +90,7 @@ const parseColumnParts = (children: ReactNode): ParsedPart[] => {
  * 4. Fall back to the default columns if none are found.
  *
  * @param children - React children containing `Column` declarative components.
- * @param onDelete - Optional callback invoked by the default Delete action.
+ * @param onDelete - Optional callback invoked by the default Delete action to open the modal.
  * @returns Array of {@link ResolvedColumn} entries — each pairing an
  *   `EuiBasicTableColumn` (for the real table) with a `SkeletonOutput`
  *   (for the loading skeleton).
@@ -99,7 +99,7 @@ export const useColumns = (
   children: ReactNode,
   onDelete?: (items: ContentListItem[]) => void
 ): ResolvedColumn[] => {
-  const { item: itemConfig, isReadOnly, labels, supports } = useContentListConfig();
+  const { item: itemConfig, isReadOnly, labels, supports, features } = useContentListConfig();
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
@@ -109,6 +109,7 @@ export const useColumns = (
       isReadOnly,
       entityName: labels.entity,
       supports,
+      features,
       actions: { onDelete },
       euiTheme,
     };
@@ -135,5 +136,5 @@ export const useColumns = (
     // parent render, so including them would defeat memoization. Re-running when context
     // deps change is sufficient.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemConfig, isReadOnly, labels.entity, supports, onDelete, euiTheme]);
+  }, [itemConfig, isReadOnly, labels.entity, supports, features, onDelete, euiTheme]);
 };

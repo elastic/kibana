@@ -210,9 +210,9 @@ export const useCaseAttachmentTabs = ({
     caseId: caseData.id,
     searchTerm,
   });
-  const showEventsTab = useMemo(() => {
-    return features.events.enabled;
-  }, [features.events.enabled]);
+
+  const showAlertsTab = features.alerts.enabled;
+  const showEventsTab = features.events.enabled;
 
   const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData, searchTerm);
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
@@ -260,7 +260,7 @@ export const useCaseAttachmentTabs = ({
 
   const tabsConfig = useMemo(
     () => [
-      ...(features.alerts.enabled
+      ...(showAlertsTab
         ? [
             {
               id: CASE_VIEW_PAGE_TABS.ALERTS,
@@ -326,14 +326,14 @@ export const useCaseAttachmentTabs = ({
       stats.totalAlerts,
       stats.totalEvents,
       euiTheme,
-      features.alerts.enabled,
+      showAlertsTab,
+      showEventsTab,
       features.alerts.isExperimental,
       fileStatsData,
       isLoadingFiles,
       isLoadingObservables,
       isObservablesFeatureEnabled,
       observables.length,
-      showEventsTab,
     ]
   );
 

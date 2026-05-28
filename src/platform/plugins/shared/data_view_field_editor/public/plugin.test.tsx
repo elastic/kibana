@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart, OverlayRef } from '@kbn/core/public';
+import type { DataView } from './shared_imports';
 import React from 'react';
-import { registerTestBed } from '@kbn/test-jest-helpers';
+import userEvent from '@testing-library/user-event';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { IndexPatternFieldEditorPlugin } from './plugin';
+import { render, screen, waitFor } from '@testing-library/react';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+
+jest.mock('@kbn/esql-language', () => ({}));
 
 jest.mock('@kbn/react-kibana-mount', () => {
   const original = jest.requireActual('@kbn/react-kibana-mount');
@@ -19,26 +29,26 @@ jest.mock('@kbn/react-kibana-mount', () => {
   };
 });
 
-import type { CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+jest.mock('./components/field_editor_loader', () => {
+  return {
+    FieldEditorLoader: ({ onSave }: { onSave: (fields: unknown[]) => void }) => (
+      <button type="button" onClick={() => onSave([])}>
+        Save field
+      </button>
+    ),
+  };
+});
 
-import { FieldEditorLoader } from './components/field_editor_loader';
-import { IndexPatternFieldEditorPlugin } from './plugin';
-import { DeleteFieldModal } from './components/confirm_modals/delete_field_modal';
-import type { DataView } from './shared_imports';
-
-const noop = () => {};
+const renderMountPoint = (mountPoint: unknown) => render(mountPoint as React.ReactElement);
 
 describe('DataViewFieldEditorPlugin', () => {
   const coreStart: CoreStart = coreMock.createStart();
+
   const pluginStart = {
     data: dataPluginMock.createStartContract(),
-    usageCollection: usageCollectionPluginMock.createSetupContract(),
     dataViews: dataPluginMock.createStartContract().dataViews,
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    usageCollection: usageCollectionPluginMock.createSetupContract(),
   };
 
   let plugin: IndexPatternFieldEditorPlugin;
@@ -47,134 +57,168 @@ describe('DataViewFieldEditorPlugin', () => {
     plugin = new IndexPatternFieldEditorPlugin();
   });
 
-  test('should expose a handler to open the indexpattern field editor', async () => {
+  const createCoreStart = (overlays: Partial<CoreStart['overlays']>): CoreStart => ({
+    ...coreStart,
+    overlays: {
+      ...coreStart.overlays,
+      ...overlays,
+    },
+  });
+
+  const createOverlayRef = () => {
+    const close = jest.fn().mockResolvedValue(undefined);
+    const overlayRef: OverlayRef = { close, onClose: Promise.resolve() };
+
+    return { close, overlayRef };
+  };
+
+  const createFlyoutMock = () => {
+    const { close, overlayRef } = createOverlayRef();
+    const openFlyout = jest.fn<
+      ReturnType<CoreStart['overlays']['openFlyout']>,
+      Parameters<CoreStart['overlays']['openFlyout']>
+    >(() => overlayRef);
+
+    return { closeFlyout: close, openFlyout };
+  };
+
+  const createModalMock = () => {
+    const { close, overlayRef } = createOverlayRef();
+    const openModal = jest.fn<
+      ReturnType<CoreStart['overlays']['openModal']>,
+      Parameters<CoreStart['overlays']['openModal']>
+    >(() => overlayRef);
+
+    return { closeModal: close, openModal };
+  };
+
+  it('should expose a handler to open the indexpattern field editor', () => {
     const startApi = plugin.start(coreStart, pluginStart);
+
     expect(startApi.openEditor).toBeDefined();
   });
 
-  test('should call core.overlays.openFlyout when opening the editor', async () => {
-    const openFlyout = jest.fn();
+  it('should call core.overlays.openFlyout when opening the editor', async () => {
+    const user = userEvent.setup();
+    const { closeFlyout, openFlyout } = createFlyoutMock();
     const onSaveSpy = jest.fn();
 
-    const coreStartMocked = {
-      ...coreStart,
-      overlays: {
-        ...coreStart.overlays,
-        openFlyout,
-      },
-    };
-    const { openEditor } = plugin.start(coreStartMocked, pluginStart);
+    const { openEditor } = plugin.start(createCoreStart({ openFlyout }), pluginStart);
 
-    await openEditor({ onSave: onSaveSpy, ctx: { dataView: {} as any } });
+    await openEditor({ onSave: onSaveSpy, ctx: { dataView: {} as DataView } });
 
     expect(openFlyout).toHaveBeenCalled();
 
-    const [[__reactMount__]] = openFlyout.mock.calls;
-    expect(__reactMount__.props.children.type).toBe(FieldEditorLoader);
+    const [[flyoutMountPoint]] = openFlyout.mock.calls;
+    renderMountPoint(flyoutMountPoint);
 
-    // We force call the "onSave" prop from the <RuntimeFieldEditorFlyoutContent /> component
-    // and make sure that the the spy is being called.
-    // Note: we are testing implementation details, if we change or rename the "onSave" prop on
-    // the component, we will need to update this test accordingly.
-    expect(__reactMount__.props.children.props.onSave).toBeDefined();
-    __reactMount__.props.children.props.onSave();
-    expect(onSaveSpy).toHaveBeenCalled();
+    await user.click(screen.getByText('Save field'));
+
+    expect(closeFlyout).toHaveBeenCalled();
+    expect(onSaveSpy).toHaveBeenCalledWith([]);
   });
 
-  test('should return a handler to close the flyout', async () => {
+  it('should return a handler to close the flyout', async () => {
     const { openEditor } = plugin.start(coreStart, pluginStart);
 
-    const closeEditorHandler = await openEditor({ onSave: noop, ctx: { dataView: {} as any } });
+    const closeEditorHandler = await openEditor({
+      onSave: jest.fn(),
+      ctx: { dataView: {} as DataView },
+    });
     expect(typeof closeEditorHandler).toBe('function');
   });
 
-  test('should expose a handler to open field deletion modal', async () => {
+  it('should expose a handler to open field deletion modal', () => {
     const startApi = plugin.start(coreStart, pluginStart);
+
     expect(startApi.openDeleteModal).toBeDefined();
   });
 
-  test('should call correct services when opening the deletion modal', async () => {
-    const openModal = jest.fn();
+  it('should call correct services when opening the deletion modal', async () => {
+    const user = userEvent.setup();
+    const { closeModal, openModal } = createModalMock();
     const onDeleteSpy = jest.fn();
     const removeFieldSpy = jest.fn();
+    const updateSavedObject = jest.fn();
+    const fieldNames = ['a', 'b', 'c'];
+    const dataViews = {
+      ...pluginStart.dataViews,
+      updateSavedObject,
+    };
 
-    const coreStartMocked = {
-      ...coreStart,
-      overlays: {
-        ...coreStart.overlays,
-        openModal,
-      },
-    };
-    const pluginStartMocked = {
+    const { openDeleteModal } = plugin.start(createCoreStart({ openModal }), {
       ...pluginStart,
-      data: pluginStart.data,
-      dataViews: {
-        ...pluginStart.dataViews,
-        updateSavedObject: jest.fn(),
-      },
-    };
-    const { openDeleteModal } = plugin.start(coreStartMocked, pluginStartMocked);
+      dataViews,
+    });
 
     const indexPatternMock = {
-      removeRuntimeField: removeFieldSpy,
       isPersisted: () => true,
+      removeRuntimeField: removeFieldSpy,
     } as unknown as DataView;
 
     await openDeleteModal({
-      onDelete: onDeleteSpy,
       ctx: { dataView: indexPatternMock },
-      fieldName: ['a', 'b', 'c'],
+      fieldName: fieldNames,
+      onDelete: onDeleteSpy,
     });
 
     expect(openModal).toHaveBeenCalled();
 
-    const [[arg]] = openModal.mock.calls;
-    expect(arg.type).toBe(DeleteFieldModal);
+    const [[modalMountPoint]] = openModal.mock.calls;
+    renderMountPoint(modalMountPoint);
 
-    // simulate user confirming deletion
-    await arg.props.confirmDelete();
+    expect(screen.getByTestId('runtimeFieldDeleteConfirmModal')).toBeVisible();
+    expect(screen.getByText('Remove 3 fields')).toBeVisible();
+    expect(screen.getByText('You are about to remove these runtime fields:')).toBeVisible();
+    fieldNames.forEach((fieldName) => {
+      expect(screen.getByText(fieldName)).toBeVisible();
+    });
 
-    // consumer should be notified
-    expect(onDeleteSpy).toHaveBeenCalled();
+    const confirmButton = screen.getByRole('button', { name: 'Remove fields' });
+    expect(confirmButton).toBeDisabled();
 
-    // fields should be removed on index pattern and changes persisted
-    expect(removeFieldSpy).toHaveBeenCalledWith('a');
-    expect(removeFieldSpy).toHaveBeenCalledWith('b');
-    expect(removeFieldSpy).toHaveBeenCalledWith('c');
-    expect(pluginStartMocked.dataViews.updateSavedObject).toHaveBeenLastCalledWith(
-      indexPatternMock
-    );
+    await user.type(screen.getByTestId('deleteModalConfirmText'), 'REMOVE');
+    expect(confirmButton).toBeEnabled();
+
+    await user.click(confirmButton);
+
+    await waitFor(() => {
+      expect(onDeleteSpy).toHaveBeenCalledWith(fieldNames);
+    });
+    expect(closeModal).toHaveBeenCalled();
+
+    fieldNames.forEach((fieldName) => {
+      expect(removeFieldSpy).toHaveBeenCalledWith(fieldName);
+    });
+    expect(updateSavedObject).toHaveBeenLastCalledWith(indexPatternMock);
   });
 
-  test('should return a handler to close the modal', async () => {
+  it('should return a handler to close the modal', async () => {
     const { openDeleteModal } = plugin.start(coreStart, pluginStart);
 
-    const closeModal = await openDeleteModal({ fieldName: ['a'], ctx: { dataView: {} as any } });
+    const closeModal = await openDeleteModal({
+      fieldName: ['a'],
+      ctx: { dataView: {} as DataView },
+    });
+
     expect(typeof closeModal).toBe('function');
   });
 
-  test('should expose a render props component to delete runtime fields', async () => {
+  it('should expose a render props component to delete runtime fields', () => {
     const { DeleteRuntimeFieldProvider } = plugin.start(coreStart, pluginStart);
 
-    const TestComponent = ({ callback }: { callback: (...args: any[]) => void }) => {
-      return (
-        <DeleteRuntimeFieldProvider dataView={{} as any}>
-          {(...args) => {
-            // Forward arguments passed down to children to our spy callback
-            callback(args);
-            return null;
-          }}
-        </DeleteRuntimeFieldProvider>
-      );
-    };
-
-    const setup = registerTestBed(TestComponent, {
-      memoryRouter: { wrapComponent: false },
-    });
+    const TestComponent = ({ callback }: { callback: (...args: any[]) => void }) => (
+      <DeleteRuntimeFieldProvider dataView={{} as DataView}>
+        {(...args) => {
+          // Forward arguments passed down to children to our spy callback
+          callback(args);
+          return null;
+        }}
+      </DeleteRuntimeFieldProvider>
+    );
 
     const spy = jest.fn();
-    // Mount our dummy component and pass it the spy
-    setup({ callback: spy });
+    render(<TestComponent callback={spy} />);
 
     expect(spy).toHaveBeenCalled();
     const argumentsFromRenderProps = spy.mock.calls[0][0];

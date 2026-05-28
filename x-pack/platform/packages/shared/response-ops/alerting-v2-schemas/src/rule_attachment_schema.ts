@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
+import { optionalWithDescription as opt } from './common';
 import { ruleResponseSchema } from './rule_data_schema';
 
 export const RULE_ATTACHMENT_TYPE = 'rule' as const;
@@ -19,13 +20,15 @@ export const RULE_SML_TYPE = 'alerting_v2_rule' as const;
  *   - proposed rules (by-value, not yet saved — no id or audit fields)
  *   - saved rules    (by-reference, linked via attachment.origin = rule saved object id)
  */
+const { shape } = ruleResponseSchema;
+
 export const ruleAttachmentDataSchema = ruleResponseSchema.extend({
-  id: z.string().optional(),
-  enabled: z.boolean().optional(),
-  createdBy: z.string().nullable().optional(),
-  createdAt: z.string().optional(),
-  updatedBy: z.string().nullable().optional(),
-  updatedAt: z.string().optional(),
+  id: opt(shape.id),
+  enabled: opt(shape.enabled),
+  createdBy: opt(shape.createdBy),
+  createdAt: opt(shape.createdAt),
+  updatedBy: opt(shape.updatedBy),
+  updatedAt: opt(shape.updatedAt),
 });
 
 export type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;

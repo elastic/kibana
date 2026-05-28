@@ -18,7 +18,7 @@ jest.mock('./tools_flyout_title', () => ({
   ),
 }));
 
-jest.mock('../../document/components/severity', () => ({
+jest.mock('../../document/main/components/severity', () => ({
   DocumentSeverity: () => <div data-test-subj="mockDocumentSeverity" />,
 }));
 

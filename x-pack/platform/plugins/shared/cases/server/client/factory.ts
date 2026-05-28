@@ -48,6 +48,7 @@ import {
   AttachmentService,
   AlertService,
   TemplatesService,
+  FieldDefinitionsService,
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
@@ -223,7 +224,6 @@ export class CasesClientFactory {
 
     const attachmentService = new AttachmentService({
       log: this.logger,
-      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
       config: this.options.config,
     });
@@ -237,6 +237,10 @@ export class CasesClientFactory {
       savedObjectsSerializer,
       esClient,
       namespace,
+    });
+
+    const fieldDefinitionsService = new FieldDefinitionsService({
+      unsecuredSavedObjectsClient,
     });
 
     const caseService = new CasesService({
@@ -266,13 +270,13 @@ export class CasesClientFactory {
 
     return {
       templatesService,
+      fieldDefinitionsService,
       alertsService: new AlertService(esClient, this.logger, alertsClient),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
       userActionService: new CaseUserActionService({
         log: this.logger,
-        persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         savedObjectsSerializer,
         auditLogger,

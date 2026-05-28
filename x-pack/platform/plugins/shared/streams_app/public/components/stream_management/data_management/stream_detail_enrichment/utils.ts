@@ -27,6 +27,7 @@ import type {
   StreamlangStepWithUIAttributes,
   TrimProcessor,
   EnrichProcessor,
+  RegisteredDomainProcessor,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
@@ -77,6 +78,7 @@ import type {
   TrimFormState,
   UppercaseFormState,
   EnrichFormState,
+  RegisteredDomainFormState,
 } from './types';
 
 /**
@@ -102,6 +104,7 @@ export const SPECIALISED_TYPES = [
   'json_extract',
   'network_direction',
   'enrich',
+  'registered_domain',
 ];
 
 interface FormStateDependencies {
@@ -335,6 +338,15 @@ const defaultEnrichProcessorFormState = (): EnrichFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultRegisteredDomainProcessorFormState = (): RegisteredDomainFormState => ({
+  action: 'registered_domain' as const,
+  prefix: 'domain',
+  expression: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -366,6 +378,7 @@ const defaultProcessorFormStateByType: Record<
   json_extract: defaultJsonExtractProcessorFormState,
   network_direction: defaultNetworkDirectionProcessorFormState,
   enrich: defaultEnrichProcessorFormState,
+  registered_domain: defaultRegisteredDomainProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -435,7 +448,8 @@ export const getFormStateFromActionStep = (
     step.action === 'sort' ||
     step.action === 'concat' ||
     step.action === 'json_extract' ||
-    step.action === 'enrich'
+    step.action === 'enrich' ||
+    step.action === 'registered_domain'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -837,6 +851,21 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as EnrichProcessor,
+      };
+    }
+
+    if (formState.action === 'registered_domain') {
+      const { expression, prefix, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'registered_domain',
+          expression,
+          prefix,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as RegisteredDomainProcessor,
       };
     }
 

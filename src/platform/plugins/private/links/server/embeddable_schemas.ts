@@ -32,25 +32,18 @@ const linksByReferenceStateSchema = schema.object({
   }),
 });
 
-// Links by-value embeddable schema (by-value state + titles)
-const linksByValueEmbeddableSchema = schema.allOf(
-  [linksByValueStateSchema, serializedTitlesSchema],
-  {
-    meta: BY_VALUE_SCHEMA_META,
-  }
-);
-
-// Links by-reference embeddable schema (by-reference state + titles)
-const linksByReferenceEmbeddableSchema = schema.allOf(
-  [linksByReferenceStateSchema, serializedTitlesSchema],
-  {
-    meta: BY_REF_SCHEMA_META,
-  }
-);
-
 // Complete links embeddable schema (union of by-value and by-reference embeddables)
 export const linksEmbeddableSchema = schema.oneOf(
-  [linksByValueEmbeddableSchema, linksByReferenceEmbeddableSchema],
+  [
+    // Links by-value embeddable schema (by-value state + titles)
+    schema.allOf([linksByValueStateSchema, serializedTitlesSchema], {
+      meta: BY_VALUE_SCHEMA_META,
+    }),
+    // Links by-reference embeddable schema (by-reference state + titles)
+    schema.allOf([linksByReferenceStateSchema, serializedTitlesSchema], {
+      meta: BY_REF_SCHEMA_META,
+    }),
+  ],
   {
     meta: {
       description: 'Links embeddable schema',

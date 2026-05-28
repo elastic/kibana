@@ -21,7 +21,7 @@ import { tags } from '@kbn/scout';
 import type { AlertEvent } from '../../../../server/resources/datastreams/alert_events';
 import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
-const { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } = testData;
+const { SCHEDULE_INTERVAL } = testData;
 
 /**
  * Index a list of alert events by their `data['host.name']` value.
@@ -45,7 +45,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
    * a disabled or deleted rule, where there is no positive condition to poll
    * for (the executor is no longer scheduled, so no `task-run` events will
    * appear). All other negative assertions wait for executor ticks via
-   * `taskExecutions.waitForExecutorRuns`. This buffer covers ~2 task manager
+   * `ruleExecutions.waitForRuns`. This buffer covers ~2 task manager
    * ticks (SCHEDULE_INTERVAL is 5s) so a regression that incorrectly executed
    * disabled rules would have time to manifest.
    */
@@ -91,16 +91,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'executor-shape-one-event-per-row' },
-        time_field: '@timestamp',
-        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-breach-1", "host-breach-2") | STATS count = COUNT(*) BY host.name`,
           },
         },
-        recovery_policy: { type: 'no_breach' },
-        grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 0, recovering_count: 0 },
       })
     );
 
@@ -137,16 +132,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-shape-data-field' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-data-1", "host-data-2") | STATS count = COUNT(*) BY host.name`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -188,16 +178,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-shape-rule-fields' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-shape-fields" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -250,16 +235,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'executor-grouping-one-per-group' },
-        time_field: '@timestamp',
-        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-a", "host-grouping-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
-        recovery_policy: { type: 'no_breach' },
-        grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 0, recovering_count: 0 },
       })
     );
 
@@ -312,16 +292,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'executor-grouping-multiple-docs-per-group' },
-        time_field: '@timestamp',
-        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-1", "host-multi-2") | STATS count = COUNT(*) BY host.name`,
           },
         },
-        recovery_policy: { type: 'no_breach' },
-        grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 0, recovering_count: 0 },
       })
     );
 
@@ -364,16 +339,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-grouping-stable-hash' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-grouping-stable" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -429,15 +399,12 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-grouping-fallback' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-grouping-fallback-a", "host-grouping-fallback-b") | KEEP host.name, severity, value`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          state_transition: { pending_count: 0, recovering_count: 0 },
+          grouping: undefined,
         })
       );
 
@@ -465,6 +432,90 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
+    'extracts severity from the ES|QL row onto breached events as a top-level field',
+    async ({ apiServices }) => {
+      /**
+       * Three breached groups exercise the three branches of the
+       * `severity` extraction:
+       *
+       * - `host-severity-supported` — the ES|QL value is one of the
+       *   supported severities (`critical`) and is copied onto the
+       *   event as a top-level field.
+       * - `host-severity-uppercase` — the ES|QL value is `HIGH`. The
+       *   executor lowercases the value before matching, so the
+       *   top-level field is `high` while the original casing is
+       *   preserved in `data.severity`.
+       * - `host-severity-unknown` — the ES|QL value (`SEV1`) is not
+       *   in the supported set, so no top-level severity is written.
+       *   The original value still shows up in `data.severity` because
+       *   the executor never mutates the row payload.
+       */
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-severity-supported',
+            severity: 'critical',
+            value: 1,
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-severity-uppercase',
+            severity: 'HIGH',
+            value: 1,
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-severity-unknown',
+            severity: 'SEV1',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'executor-severity-extraction' },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-severity-supported", "host-severity-uppercase", "host-severity-unknown") | KEEP host.name, severity, value`,
+            },
+          },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 3, { status: 'breached' });
+
+      const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'breached',
+      });
+
+      expect(breachEvents).toHaveLength(3);
+
+      const eventsByHost = groupEventsByHost(breachEvents);
+
+      expect(eventsByHost['host-severity-supported'].severity).toBe('critical');
+      expect(eventsByHost['host-severity-supported'].data).toMatchObject({
+        'host.name': 'host-severity-supported',
+        severity: 'critical',
+      });
+
+      expect(eventsByHost['host-severity-uppercase'].severity).toBe('high');
+      expect(eventsByHost['host-severity-uppercase'].data).toMatchObject({
+        'host.name': 'host-severity-uppercase',
+        severity: 'HIGH',
+      });
+
+      expect(eventsByHost['host-severity-unknown'].severity).toBeUndefined();
+      expect(eventsByHost['host-severity-unknown'].data).toMatchObject({
+        'host.name': 'host-severity-unknown',
+        severity: 'SEV1',
+      });
+    }
+  );
+
+  apiTest(
     'includes data within the lookback window even when older than schedule.every',
     async ({ apiServices }) => {
       // 30s in the past — within the 1m lookback but well outside the 5s schedule
@@ -486,16 +537,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-lookback-included' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-included" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -529,20 +575,15 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'executor-lookback-excluded' },
-        time_field: '@timestamp',
-        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-excluded" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
-        recovery_policy: { type: 'no_breach' },
-        grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 0, recovering_count: 0 },
       })
     );
 
-    await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+    await apiServices.alertingV2.ruleExecutions.waitForRuns({
       ruleId: rule.id,
       runs: 2,
     });
@@ -574,20 +615,16 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-lookback-default' },
-          time_field: '@timestamp',
           schedule: { every: SCHEDULE_INTERVAL },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-lookback-default" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -631,21 +668,17 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         buildCreateRuleData({
           metadata: { name: 'executor-time-field-custom' },
           time_field: 'event.created',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-time-field-in", "host-time-field-out") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -681,16 +714,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-esql-reserved-params' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-esql-reserved-params" AND @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -726,16 +754,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-recovery-no-breach' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-no-breach" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -782,8 +805,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         buildCreateRuleData({
           kind: 'signal',
           metadata: { name: 'executor-signal-no-recovery' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-signal-no-recovery" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
@@ -791,8 +812,8 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
           },
           // Even with a recovery policy configured, signal-kind rules must
           // never emit recovery events.
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
+          // state_transition is forbidden by the schema when kind is "signal".
+          state_transition: undefined,
         })
       );
 
@@ -803,7 +824,58 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         query: { term: { 'host.name': 'host-signal-no-recovery' } },
       });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+        ruleId: rule.id,
+        runs: 2,
+      });
+
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+
+      expect(recoveredEvents).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'does not emit recovery events for alert rules created without a recovery_policy',
+    async ({ apiServices }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-alert-no-recovery-policy',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'alert',
+          metadata: { name: 'executor-alert-no-recovery-policy' },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-alert-no-recovery-policy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          // Recovery is opt-in: an alert rule without `recovery_policy`
+          // must never produce recovery events even after a previously
+          // breaching group stops breaching.
+          recovery_policy: undefined,
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': 'host-alert-no-recovery-policy' } },
+      });
+
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -836,8 +908,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'executor-recovery-query' },
-        time_field: '@timestamp',
-        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
@@ -849,8 +919,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
-        grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 0, recovering_count: 0 },
       })
     );
 
@@ -922,8 +990,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-recovery-query-multi' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-recovery-query-multi-a", "host-recovery-query-multi-b") AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
@@ -935,8 +1001,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-recovery-query-multi-a", "host-recovery-query-multi-b") AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -1017,8 +1081,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-recovery-query-no-match' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-no-match" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
@@ -1030,8 +1092,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-other-host" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -1061,7 +1121,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         ],
       });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -1095,8 +1155,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-recovery-query-empty' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-empty" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
@@ -1108,8 +1166,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query-empty" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -1130,7 +1186,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         },
       });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -1168,16 +1224,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-partial-recovery' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-partial-recovery-a", "host-partial-recovery-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -1277,16 +1328,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-mixed-execution' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-mixed-execution-a", "host-mixed-execution-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -1349,20 +1395,15 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'executor-no-breach-empty-query' },
-        time_field: '@timestamp',
-        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-no-breach-never-indexed" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
-        recovery_policy: { type: 'no_breach' },
-        grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 0, recovering_count: 0 },
       })
     );
 
-    await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+    await apiServices.alertingV2.ruleExecutions.waitForRuns({
       ruleId: rule.id,
       runs: 2,
     });
@@ -1387,16 +1428,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'executor-halt-disabled' },
-        time_field: '@timestamp',
-        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-halt-disabled" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
-        recovery_policy: { type: 'no_breach' },
-        grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 0, recovering_count: 0 },
       })
     );
 
@@ -1405,7 +1441,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     await apiServices.alertingV2.rules.bulkDisable({ ids: [rule.id] });
 
     await apiServices.alertingV2.rules.waitForEnabledState({ id: rule.id, enabled: false });
-    await apiServices.alertingV2.taskExecutions.waitForExecutorTaskDrained({ ruleId: rule.id });
+    await apiServices.alertingV2.ruleExecutions.waitForTaskDrained({ ruleId: rule.id });
 
     await apiServices.alertingV2.sourceIndex.indexDocs({
       index: SOURCE_INDEX,
@@ -1451,16 +1487,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           metadata: { name: 'executor-resume-reenabled' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
           evaluation: {
             query: {
               base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-reenabled" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
 
@@ -1480,11 +1511,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
        * We wait on two independent signals:
        *   1. `waitForEnabledState({ enabled: false })` — the rule SO has the
        *      disabled state visible to the API layer.
-       *   2. `waitForExecutorTaskDrained` — no executor run is in flight, so
+       *   2. `waitForTaskDrained` — no executor run is in flight, so
        *      the baseline event snapshot below is stable.
        */
       await apiServices.alertingV2.rules.waitForEnabledState({ id: rule.id, enabled: false });
-      await apiServices.alertingV2.taskExecutions.waitForExecutorTaskDrained({ ruleId: rule.id });
+      await apiServices.alertingV2.ruleExecutions.waitForTaskDrained({ ruleId: rule.id });
       const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
       await apiServices.alertingV2.rules.bulkEnable({ ids: [rule.id] });
@@ -1530,16 +1561,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'executor-halt-deleted' },
-        time_field: '@timestamp',
-        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
             base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-halt-deleted" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
-        recovery_policy: { type: 'no_breach' },
-        grouping: { fields: ['host.name'] },
-        state_transition: { pending_count: 0, recovering_count: 0 },
       })
     );
 
@@ -1547,7 +1573,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
     await apiServices.alertingV2.rules.delete(rule.id);
 
-    await apiServices.alertingV2.taskExecutions.waitForExecutorTaskDrained({ ruleId: rule.id });
+    await apiServices.alertingV2.ruleExecutions.waitForTaskDrained({ ruleId: rule.id });
 
     await apiServices.alertingV2.sourceIndex.indexDocs({
       index: SOURCE_INDEX,
@@ -1582,19 +1608,15 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     const rule = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({
         metadata: { name: 'executor-invalid-query' },
-        time_field: '@timestamp',
-        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
         evaluation: {
           query: {
             base: 'FROM nonexistent-index-rule-executor-spec-zzz | STATS count = COUNT(*) | WHERE count >= 1',
           },
         },
-        recovery_policy: { type: 'no_breach' },
-        state_transition: { pending_count: 0, recovering_count: 0 },
       })
     );
 
-    await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+    await apiServices.alertingV2.ruleExecutions.waitForRuns({
       ruleId: rule.id,
       runs: 2,
     });

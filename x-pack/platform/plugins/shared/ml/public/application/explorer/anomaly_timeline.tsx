@@ -270,7 +270,6 @@ export const AnomalyTimeline: FC = () => {
 
       panels.push({
         id: 'addToDashboardPanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.addToDashboardLabel', {
           defaultMessage: 'Add to dashboard',
         }),
@@ -446,6 +445,9 @@ export const AnomalyTimeline: FC = () => {
               css={{ marginLeft: 'auto !important', alignSelf: 'baseline' }}
             >
               <EuiPopover
+                aria-label={i18n.translate('xpack.ml.explorer.swimlane.actionsPopoverAriaLabel', {
+                  defaultMessage: 'Anomaly swim lane actions menu',
+                })}
                 button={
                   <EuiButtonIcon
                     size="s"

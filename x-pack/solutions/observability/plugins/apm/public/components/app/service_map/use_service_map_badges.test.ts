@@ -34,8 +34,6 @@ const mockedRefetch = jest.fn();
 
 const platinumLicense = { isActive: true, hasAtLeast: () => true };
 
-// ── Test nodes ──────────────────────────────────────────────────────────────
-
 const serviceNodeA: ServiceMapNode = {
   id: 'service-a',
   position: { x: 0, y: 0 },
@@ -48,14 +46,11 @@ const serviceNodeB: ServiceMapNode = {
   data: { id: 'service-b', label: 'service-b', isService: true as const },
 };
 
-// Dependency nodes have isService !== true and must not be touched by merge logic.
 const dependencyNode: ServiceMapNode = {
   id: 'dep-x',
   position: { x: 200, y: 0 },
   data: { id: '>dep-x', label: 'dep-x', isService: false as const },
 };
-
-// ── Badge API response shapes ────────────────────────────────────────────────
 
 const alertsOnlyResponse: ServiceMapBadgesApiResponse = {
   alerts: [{ serviceName: 'service-a', alertsCount: 3 }],
@@ -77,8 +72,6 @@ const emptyResponse: ServiceMapBadgesApiResponse = {
   slos: [],
 };
 
-// ── Default hook params (all conditions for enabled = true) ──────────────────
-
 const defaultParams: Parameters<typeof useServiceMapBadges>[0] = {
   nodes: [serviceNodeA, serviceNodeB],
   environment: ENVIRONMENT_ALL.value,
@@ -87,8 +80,6 @@ const defaultParams: Parameters<typeof useServiceMapBadges>[0] = {
   kuery: '',
   nodesStatus: FETCH_STATUS.SUCCESS,
 };
-
-// ────────────────────────────────────────────────────────────────────────────
 
 describe('useServiceMapBadges()', () => {
   beforeEach(() => {
@@ -101,15 +92,12 @@ describe('useServiceMapBadges()', () => {
       config: { serviceMapEnabled: true },
     } as ReturnType<typeof useApmPluginContext>);
 
-    // Default: fetcher not yet initiated (badges not loaded)
     mockedUseFetcher.mockReturnValue({
       data: undefined,
       status: FETCH_STATUS.NOT_INITIATED,
       refetch: mockedRefetch,
     });
   });
-
-  // ── Disabled guard scenarios ───────────────────────────────────────────────
 
   describe('returns the original nodes unchanged when badges are disabled', () => {
     it('license is not available', () => {
@@ -172,8 +160,6 @@ describe('useServiceMapBadges()', () => {
     });
   });
 
-  // ── Enabled: badge fetch in progress ──────────────────────────────────────
-
   describe('when badges are enabled but still loading', () => {
     it('returns the original nodes and propagates the LOADING status', () => {
       mockedUseFetcher.mockReturnValue({
@@ -188,8 +174,6 @@ describe('useServiceMapBadges()', () => {
       expect(result.current.status).toBe(FETCH_STATUS.LOADING);
     });
   });
-
-  // ── Enabled: successful fetch ──────────────────────────────────────────────
 
   describe('when the badge fetch succeeds', () => {
     it('merges alert counts into matching service nodes', () => {
@@ -276,7 +260,6 @@ describe('useServiceMapBadges()', () => {
 
       const { result } = renderHook(() => useServiceMapBadges(defaultParams));
 
-      // service-b has no matching alert in alertsOnlyResponse
       const nodeB = result.current.nodes.find((n) => n.id === 'service-b');
       expect(nodeB?.data).not.toHaveProperty('alertsCount');
       expect(nodeB?.data).toMatchObject({ id: 'service-b', label: 'service-b' });
@@ -292,6 +275,73 @@ describe('useServiceMapBadges()', () => {
       const { result } = renderHook(() => useServiceMapBadges(defaultParams));
 
       expect(result.current.status).toBe(FETCH_STATUS.SUCCESS);
+    });
+  });
+
+  describe('when the caller passes an empty kuery (badges decoupled from the map filter)', () => {
+    function invokeLastFetcherCallback(callApmApi: jest.Mock) {
+      const calls = mockedUseFetcher.mock.calls;
+      const cb = calls[calls.length - 1][0] as (
+        callApmApiArg: unknown,
+        signal: AbortSignal
+      ) => unknown;
+      const signal = new AbortController().signal;
+      return cb(callApmApi, signal);
+    }
+
+    it('does not forward `kuery` to the badges endpoint', () => {
+      const callApmApi = jest.fn();
+
+      renderHook(() => useServiceMapBadges({ ...defaultParams, kuery: '' }));
+      invokeLastFetcherCallback(callApmApi);
+
+      expect(callApmApi).toHaveBeenCalledWith(
+        'POST /internal/apm/service-map/service_badges',
+        expect.anything()
+      );
+      const [, requestArgs] = callApmApi.mock.calls[0];
+      expect(requestArgs.params.query).not.toHaveProperty('kuery');
+    });
+
+    it('still forwards `environment` to the badges endpoint', () => {
+      const callApmApi = jest.fn();
+
+      renderHook(() =>
+        useServiceMapBadges({ ...defaultParams, kuery: '', environment: 'production' })
+      );
+      invokeLastFetcherCallback(callApmApi);
+
+      const [, requestArgs] = callApmApi.mock.calls[0];
+      expect(requestArgs.params.query).toMatchObject({ environment: 'production' });
+    });
+
+    it('changing `environment` re-fires the badges fetcher (new fnDeps array)', () => {
+      const { rerender } = renderHook(
+        (props: Parameters<typeof useServiceMapBadges>[0]) => useServiceMapBadges(props),
+        { initialProps: { ...defaultParams, kuery: '', environment: 'production' } }
+      );
+
+      const initialDeps = mockedUseFetcher.mock.calls.at(-1)?.[1];
+
+      rerender({ ...defaultParams, kuery: '', environment: 'staging' });
+
+      const nextDeps = mockedUseFetcher.mock.calls.at(-1)?.[1];
+      expect(nextDeps).not.toBe(initialDeps);
+      expect(nextDeps).toEqual(expect.arrayContaining(['staging']));
+    });
+
+    it('changing `kuery` (when caller keeps using it for the topology) still flows through fnDeps', () => {
+      const { rerender } = renderHook(
+        (props: Parameters<typeof useServiceMapBadges>[0]) => useServiceMapBadges(props),
+        { initialProps: { ...defaultParams, kuery: 'service.name: "a"' } }
+      );
+
+      const initialDeps = mockedUseFetcher.mock.calls.at(-1)?.[1];
+
+      rerender({ ...defaultParams, kuery: 'service.name: "b"' });
+
+      const nextDeps = mockedUseFetcher.mock.calls.at(-1)?.[1];
+      expect(nextDeps).not.toBe(initialDeps);
     });
   });
 });

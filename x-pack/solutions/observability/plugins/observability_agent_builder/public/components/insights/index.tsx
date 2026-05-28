@@ -74,19 +74,18 @@ export function createLogAIInsight(
   core: CoreStart,
   plugins: ObservabilityAgentBuilderPluginStartDependencies
 ) {
-  return (props: LogAiInsightProps) => {
-    const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
-      ...core,
-      ...plugins,
-    });
-    return (
-      <QueryClientProvider client={queryClient}>
-        <KibanaReactContextProvider>
-          <LogAiInsightLazy {...props} />
-        </KibanaReactContextProvider>
-      </QueryClientProvider>
-    );
-  };
+  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+    ...core,
+    ...plugins,
+  });
+
+  return (props: LogAiInsightProps) => (
+    <QueryClientProvider client={queryClient}>
+      <KibanaReactContextProvider>
+        <LogAiInsightLazy {...props} />
+      </KibanaReactContextProvider>
+    </QueryClientProvider>
+  );
 }
 
 export const createLogsAIInsightRenderer =

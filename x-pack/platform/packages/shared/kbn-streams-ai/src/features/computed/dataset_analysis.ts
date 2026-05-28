@@ -29,6 +29,7 @@ This is useful for understanding what fields are available for querying and what
     const formattedAnalysis = formatDocumentAnalysis(analysis, {
       dropEmpty: true,
       dropUnmapped: false,
+      limit: 150,
     });
 
     return {

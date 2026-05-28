@@ -40,7 +40,7 @@ describe('accumulateMetricsRowTelemetry', () => {
       total_number_of_dimensions: 0,
       metrics_by_type: { gauge: 1 },
       units: { percent: 1 },
-      multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
+      multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0, units: 0 },
     });
   });
 
@@ -59,7 +59,7 @@ describe('accumulateMetricsRowTelemetry', () => {
       total_number_of_dimensions: 0,
       metrics_by_type: { gauge: 1 },
       units: { none: 2, percent: 1 },
-      multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
+      multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0, units: 1 },
     });
   });
 
@@ -85,7 +85,7 @@ describe('accumulateMetricsRowTelemetry', () => {
       total_number_of_dimensions: 0,
       metrics_by_type: { gauge: 2, counter: 1, summary: 1 },
       units: { percent: 2, bytes: 1 },
-      multi_value_counts: { data_streams: 1, field_types: 1, metric_types: 1 },
+      multi_value_counts: { data_streams: 1, field_types: 1, metric_types: 1, units: 1 },
     });
   });
 });

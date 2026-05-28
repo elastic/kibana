@@ -117,11 +117,23 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
+  workerRunId: [
+    async ({}, use) => {
+      await use({ current: undefined as string | undefined });
+    },
+    { scope: 'worker' },
+  ],
   fetch: [
-    async ({ kbnClient, log }, use) => {
-      // add a HttpHandler as a fixture, so consumers can use
-      // modules that depend on it (like the inference client)
-      const fetch = httpHandlerFromKbnClient({ kbnClient, log });
+    async ({ kbnClient, log, workerRunId }, use) => {
+      // Add a HttpHandler as a fixture, so consumers can use
+      // modules that depend on it (like the inference client).
+      // workerRunId.current is set by executorClient after connector resolution so
+      // inference requests carry the per-model run ID in OTel baggage.
+      const fetch = httpHandlerFromKbnClient({
+        kbnClient,
+        log,
+        getRunId: () => workerRunId.current,
+      });
       await use(fetch);
     },
     { scope: 'worker' },
@@ -239,6 +251,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         log,
         evaluationsKbnClient,
         evaluationsPluginEnabled,
+        workerRunId,
         connector,
         evaluationConnector,
         repetitions,
@@ -274,10 +287,15 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
 
-      const currentRunId = process.env.TEST_RUN_ID;
-      if (!currentRunId) {
+      const baseRunId = process.env.TEST_RUN_ID;
+      if (!baseRunId) {
         throw new Error('runId must be provided via TEST_RUN_ID environment variable');
       }
+
+      const currentRunId = `${baseRunId}-${connector.id}`;
+      log.info(`Run ID for this worker: ${currentRunId}`);
+
+      workerRunId.current = currentRunId;
 
       const shouldPreflightExport =
         process.env.KBN_EVALS_SKIP_PREFLIGHT_EXPORT !== 'true' &&
@@ -356,12 +374,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       });
 
       await use(executorClient);
-
-      if (!currentRunId) {
-        throw new Error(
-          'runId must be provided via TEST_RUN_ID environment variable before exporting scores'
-        );
-      }
 
       const experiments = await executorClient.getRanExperiments();
       const documents = await mapToEvaluationScoreDocuments({

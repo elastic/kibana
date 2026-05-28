@@ -1,5 +1,5 @@
 {
-  "sha1": "734f411a601467f34fa28f14715349a6218fa22f",
+  "sha1": "74acf6f6733efdc6b4665ae8b5292122e1b413bb",
   "tests": [
     {
       "id": "343791488d016cc-1054e603e578b92",
@@ -41,6 +41,22 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_flyout.spec.ts",
         "line": 59,
+        "column": 14
+      }
+    },
+    {
+      "id": "d8e9d8aa0b28c46-e974817e68b0832",
+      "title": "Attacks UI manual execution smoke successfully triggers generation via UI without error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attacks_execution_ui.spec.ts",
+        "line": 39,
         "column": 14
       }
     },

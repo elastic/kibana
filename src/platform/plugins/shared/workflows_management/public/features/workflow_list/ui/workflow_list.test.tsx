@@ -13,7 +13,7 @@ import type { WorkflowListDto, WorkflowListItemDto, WorkflowsSearchParams } from
 import { createMockWorkflowsCapabilities as mockCreateMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowList } from './workflow_list';
 import { createUseKibanaMockValue } from '../../../mocks';
-import { TestWrapper } from '../../../shared/test_utils';
+import { TestProvider } from '../../../shared/mocks/test_providers';
 
 // --- Mocks ---
 
@@ -179,9 +179,9 @@ describe('WorkflowList', () => {
 
   const renderComponent = (overrides: Partial<typeof defaultProps> = {}) => {
     return render(
-      <TestWrapper>
+      <TestProvider>
         <WorkflowList {...defaultProps} {...overrides} />
-      </TestWrapper>
+      </TestProvider>
     );
   };
 
@@ -248,6 +248,23 @@ describe('WorkflowList', () => {
   });
 
   describe('with workflow data', () => {
+    it('normalizes string enabled filters to booleans before querying workflows', () => {
+      const searchWithStringEnabled = {
+        ...defaultSearch,
+        enabled: ['false'],
+      } as unknown as WorkflowsSearchParams;
+
+      renderComponent({
+        search: searchWithStringEnabled,
+      });
+
+      expect(mockUseWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          enabled: [false],
+        })
+      );
+    });
+
     it('renders the workflows table', () => {
       renderComponent();
       expect(screen.getByTestId('workflowListTable')).toBeInTheDocument();

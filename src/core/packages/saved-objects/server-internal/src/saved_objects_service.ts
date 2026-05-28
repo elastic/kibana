@@ -69,7 +69,9 @@ import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import { getAllIndices } from './utils';
-import { MIGRATION_CLIENT_OPTIONS, REMOVED_TYPES } from './constants';
+import { MIGRATION_CLIENT_OPTIONS } from './constants';
+import removedTypes from '../removed_types.json';
+import wipTypes from '../wip_types.json';
 
 /**
  * @internal
@@ -130,7 +132,7 @@ export class SavedObjectsService
   private migrator$ = new Subject<IKibanaMigrator>();
 
   private typeRegistry = new SavedObjectTypeRegistry({
-    legacyTypes: REMOVED_TYPES,
+    legacyTypes: removedTypes,
   });
 
   private started = false;
@@ -258,6 +260,8 @@ export class SavedObjectsService
     }
 
     this.logger.debug('Starting SavedObjects service');
+
+    this.assertNoUnallowedWipTypes();
 
     const client = elasticsearch.client;
 
@@ -480,6 +484,30 @@ export class SavedObjectsService
   }
 
   public async stop() {}
+
+  private assertNoUnallowedWipTypes() {
+    const wipTypeNames = new Set<string>(wipTypes);
+    const allowedWipTypes = new Set<string>(this.config!.migration.allowWipTypes ?? []);
+    const registeredWipTypes = this.typeRegistry
+      .getAllTypes()
+      .filter((t) => wipTypeNames.has(t.name))
+      .map((t) => t.name);
+
+    const notAllowed = registeredWipTypes.filter((name) => !allowedWipTypes.has(name));
+    if (notAllowed.length > 0) {
+      throw new Error(
+        `Kibana cannot start because the following WIP saved object types are registered ` +
+          `but not listed in 'migrations.allowWipTypes': [${notAllowed.join(', ')}]. ` +
+          `Add each type name to 'migrations.allowWipTypes' to acknowledge the risk.`
+      );
+    }
+    if (registeredWipTypes.length > 0) {
+      this.logger.warn(
+        `Starting with WIP saved object types: [${registeredWipTypes.join(', ')}]. ` +
+          `These types may have breaking changes and are not production-ready.`
+      );
+    }
+  }
 
   private createMigrator(
     soMigrationsConfig: SavedObjectsMigrationConfigType,

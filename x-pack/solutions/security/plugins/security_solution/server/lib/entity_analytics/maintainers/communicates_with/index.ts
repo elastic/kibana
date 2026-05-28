@@ -7,26 +7,27 @@
 
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 
-import { MAINTAINER_ID } from './constants';
-import { runMaintainer } from './run_maintainer';
+import { runRelationshipMaintainer } from '../engine/run_relationship_maintainer';
+import { COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS } from './configs';
 
 export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
-  id: MAINTAINER_ID,
+  id: 'communicates_with',
   description: 'Computes communicates_with relationships from cloud API and MDM activity events',
   interval: '1d',
   initialState: {},
   run: async ({ esClient, logger, status, crudClient, abortController }) => {
     const namespace = status.metadata.namespace;
     logger.info('Starting communicates_with maintainer run');
-    const result = await runMaintainer({
+    const result = await runRelationshipMaintainer({
       esClient,
       logger,
       namespace,
       crudClient,
+      integrations: COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS,
       abortController,
     });
     logger.info(
-      `Completed run: ${result.totalBuckets} user buckets, ${result.totalCommunicationRecords} communication records, ${result.totalUpdated} entities updated`
+      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written`
     );
     return result;
   },

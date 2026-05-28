@@ -8,8 +8,10 @@
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NO_DEFAULT_MODEL } from '../../common/constants';
-import { useConnectorExists } from './use_connector_exists';
+import { useConnectors } from './use_connectors';
 import type { DefaultModelSettingsState } from './use_default_model_settings';
+import { getModelEOLDate, getModelEOLMessage, getModelStatus } from '../utils/eis_utils';
+import { EisModelStatus } from '../types';
 
 export interface DefaultModelValidationResult {
   errors: readonly string[];
@@ -23,9 +25,7 @@ export interface DefaultModelValidationResult {
 export const useDefaultModelValidation = (
   state: DefaultModelSettingsState
 ): DefaultModelValidationResult => {
-  const { exists: connectorExists, loading: connectorExistsLoading } = useConnectorExists(
-    state.defaultModelId
-  );
+  const { data: connectors, isLoading: connectorsLoading } = useConnectors();
 
   return useMemo(() => {
     if (!state.enableAi) {
@@ -35,6 +35,9 @@ export const useDefaultModelValidation = (
     const errors: string[] = [];
 
     const requiresGlobalDefaultModel = !state.featureSpecificModels;
+    const connectorExists =
+      connectors?.some((c) => c.connectorId === state.defaultModelId) ?? false;
+    const selectedConnector = connectors?.find((c) => c.connectorId === state.defaultModelId);
 
     if (requiresGlobalDefaultModel && state.defaultModelId === NO_DEFAULT_MODEL) {
       errors.push(
@@ -48,7 +51,7 @@ export const useDefaultModelValidation = (
     } else if (
       state.defaultModelId !== NO_DEFAULT_MODEL &&
       !connectorExists &&
-      !connectorExistsLoading
+      !connectorsLoading
     ) {
       errors.push(
         i18n.translate(
@@ -59,6 +62,12 @@ export const useDefaultModelValidation = (
           }
         )
       );
+    } else if (selectedConnector && selectedConnector.metadata) {
+      const modelStatus = getModelStatus(selectedConnector.metadata);
+      if (modelStatus === EisModelStatus.DeprecatedEOL) {
+        const eolDate = getModelEOLDate(selectedConnector.metadata)?.format('l') ?? null;
+        errors.push(getModelEOLMessage(eolDate));
+      }
     }
 
     return {
@@ -69,7 +78,7 @@ export const useDefaultModelValidation = (
     state.enableAi,
     state.featureSpecificModels,
     state.defaultModelId,
-    connectorExists,
-    connectorExistsLoading,
+    connectors,
+    connectorsLoading,
   ]);
 };

@@ -190,7 +190,6 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         listProps={{
           rowHeight: 70,
           showIcons: false,
-          paddingSize: 'none',
           textWrap: 'wrap',
         }}
         loadingMessage={i18n.LOADING_VARIABLES}

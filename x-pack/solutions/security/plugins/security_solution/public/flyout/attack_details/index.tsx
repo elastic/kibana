@@ -23,7 +23,7 @@ import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_att
 import { useAttackDetailsContext } from './context';
 import { PanelHeader } from './header';
 import { AttackHeaderActions } from './components/header_actions';
-import { RemoteDocumentCallout } from '../../flyout_v2/document/components/remote_document_callout';
+import { RemoteDocumentCallout } from '../../flyout_v2/document/main/components/remote_document_callout';
 
 export type AttackDetailsPanelPaths = 'overview' | 'table' | 'json';
 export { ATTACK_PREVIEW_BANNER } from './context';

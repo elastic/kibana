@@ -84,7 +84,6 @@ export const EpisodeActionsBar = ({ actions, episodes, onSuccess }: EpisodeActio
           }
         >
           <EuiContextMenuPanel
-            size="s"
             items={overflowActions.map((action) => (
               <EuiContextMenuItem
                 key={action.id}
