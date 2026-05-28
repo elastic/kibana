@@ -23,6 +23,7 @@ interface LifecyclePhaseButtonProps {
   size?: string;
   testSubjPrefix?: string;
   isEditLifecycleFlyoutOpen?: boolean;
+  showWarningIcon?: boolean;
 }
 
 export const LifecyclePhaseButton = ({
@@ -36,6 +37,7 @@ export const LifecyclePhaseButton = ({
   size,
   testSubjPrefix,
   isEditLifecycleFlyoutOpen = false,
+  showWarningIcon = false,
 }: LifecyclePhaseButtonProps) => {
   const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
 
@@ -96,39 +98,61 @@ export const LifecyclePhaseButton = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-          <EuiText
-            size="xs"
-            color={euiTheme.colors.plainDark}
-            data-test-subj={`${prefix}lifecyclePhase-${label}-name`}
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: '100%',
-              fontWeight: euiTheme.font.weight.semiBold,
-            }}
-          >
-            {capitalize(label)}
-          </EuiText>
-          <EuiText
-            size="xs"
-            color={euiTheme.colors.plainDark}
-            data-test-subj={
-              size && !isEditLifecycleFlyoutOpen
-                ? `${prefix}lifecyclePhase-${label}-size`
-                : undefined
-            }
-            title={size && !isEditLifecycleFlyoutOpen ? size : undefined}
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              maxWidth: '100%',
-            }}
-          >
-            {size && !isEditLifecycleFlyoutOpen ? size : null}
-          </EuiText>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          {showWarningIcon && (
+            <EuiFlexItem grow={false}>
+              <EuiIcon
+                type="warning"
+                size="m"
+                color="text"
+                data-test-subj={`${prefix}lifecyclePhase-${label}-warningIcon`}
+                aria-label={i18n.translate(
+                  'xpack.streams.streamDetailLifecycle.phaseWarningIconAriaLabel',
+                  {
+                    defaultMessage: '{phase} phase requires attention',
+                    values: { phase: capitalize(label) },
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          )}
+
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+              <EuiText
+                size="xs"
+                color={euiTheme.colors.plainDark}
+                data-test-subj={`${prefix}lifecyclePhase-${label}-name`}
+                style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '100%',
+                  fontWeight: euiTheme.font.weight.semiBold,
+                }}
+              >
+                {capitalize(label)}
+              </EuiText>
+              <EuiText
+                size="xs"
+                color={euiTheme.colors.plainDark}
+                data-test-subj={
+                  size && !isEditLifecycleFlyoutOpen
+                    ? `${prefix}lifecyclePhase-${label}-size`
+                    : undefined
+                }
+                title={size && !isEditLifecycleFlyoutOpen ? size : undefined}
+                style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '100%',
+                }}
+              >
+                {size && !isEditLifecycleFlyoutOpen ? size : null}
+              </EuiText>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
     </EuiPanel>
