@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
+import { esql, BasicPrettyPrinter } from '@elastic/esql';
 import type { LatestSourceWhereCondition } from '../../sig_events/latest_source_query';
 export const andWhere = (
   current: LatestSourceWhereCondition | undefined,
@@ -19,8 +19,11 @@ export const combineWhere = (
 ): LatestSourceWhereCondition | undefined => {
   const defined = conditions.filter((c): c is LatestSourceWhereCondition => c !== undefined);
   if (defined.length === 0) return undefined;
-  const [first, ...rest] = defined;
-  return rest.reduce<LatestSourceWhereCondition>((acc, cond) => andWhere(acc, cond), first);
+  if (defined.length === 1) return defined[0];
+  // Each condition is wrapped in parens before joining so that top-level OR
+  // inside a sub-expression doesn't break AND precedence after composition.
+  const text = defined.map((c) => `(${BasicPrettyPrinter.expression(c)})`).join(' AND ');
+  return esql.exp(text);
 };
 
 export const inPredicate = <T extends string>(
