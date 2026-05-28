@@ -20,15 +20,21 @@ Many UI tests should be rewritten as API or component tests (see [Pick the right
 
 ::::::::{step} Can your tests reuse Scout's _default_ servers config?
 
-Scout's `default` server configuration is shared across many suites in CI. A **custom server config** spins up a dedicated Kibana process for your suite, which adds CI cost and only runs in our local pipelines (no Elastic Cloud support).
+Scout's [`default` server configuration](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/default) mirrors the Cloud (MKI/ECH) setup and is shared across many suites in CI.
 
+**Don't modify it:** changes apply only to local CI servers and are silently ignored when provisioning Cloud projects or deployments (your test will behave differently in the two environments).
+
+A **[custom server config](./feature-flags.md#scout-feature-flags-custom-servers)** is the alternative: it boots test servers with custom settings for your suite alone, overriding Kibana's server args. It adds CI cost and only runs in local pipelines (no Elastic Cloud support), so **stick with the default config whenever possible**.
+
+::::::{tip}
 Most FTR-era setups don't need a custom config in Scout:
 
-- **To enable a feature conditionally**: use runtime [feature flags](./feature-flags.md#scout-feature-flags-runtime) via `apiServices.core.settings()` (this works locally and on Cloud, no test servers restart needed).
-- **To ingest data**: load via `apiServices`, `kbnClient`, or `esArchiver` in `beforeAll` or a [global setup hook](./global-setup-hook.md).
-- **To set UI and advanced settings**: use the `uiSettings` [fixture](./fixtures.md).
+- **To enable a feature conditionally** (no Kibana restart needed): use [runtime feature flags](./feature-flags.md#scout-feature-flags-runtime) via `apiServices.core.settings()` in a test spec or [global setup hook](./global-setup-hook.md). Works locally and on Cloud.
+- **To ingest data**: load via `apiServices`, `kbnClient`, or `esArchiver` in `beforeAll`, or in a [global setup hook](./global-setup-hook.md).
+- **To set UI or advanced settings**: use the `uiSettings` [fixture](./fixtures.md).
 
-Reach for a [custom server config](./feature-flags.md#scout-feature-flags-custom-servers) only when a setting must be present at boot (for example, plugin-`setup`-time HTTP route registration).
+  Reach for a custom server config only when a setting must be present at Kibana boot (for example, registering HTTP routes at plugin-`setup` time).
+  ::::::
 
 ::::::::
 
