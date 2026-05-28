@@ -21,6 +21,8 @@ import { times } from 'lodash';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import {
+  BENCH_ECS_INTERVAL,
+  BENCH_SEMCONV_INTERVAL,
   configureTsdsOtelTemplate,
   formatHostName,
   generateEcsHostMetricsAtTimestamp,
@@ -38,8 +40,12 @@ const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts, from, t
       configureTsdsOtelTemplate(infraEsClient, from, to);
     },
     generate: ({ range, clients: { infraEsClient } }) => {
+      // See hosts_semconv_tsds.ts for the worker-isolation rationale.
+      configureTsdsOtelTemplate(infraEsClient, from, to);
+
+      // Bench-friendly intervals — see helpers/hosts_benchmark.ts.
       const semconvMetrics = range
-        .interval('1m')
+        .interval(BENCH_SEMCONV_INTERVAL)
         .rate(1)
         .generator((timestamp) =>
           times(numHosts)
@@ -56,7 +62,7 @@ const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts, from, t
         );
 
       const ecsMetrics = range
-        .interval('30s')
+        .interval(BENCH_ECS_INTERVAL)
         .rate(1)
         .generator((timestamp) =>
           times(numHosts)

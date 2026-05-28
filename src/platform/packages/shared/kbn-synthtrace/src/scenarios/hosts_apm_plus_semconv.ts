@@ -30,6 +30,7 @@ import {
   getDeterministicApmDurationMs,
   getDeterministicApmThroughput,
   getHostCount,
+  BENCH_SEMCONV_INTERVAL,
 } from './helpers/hosts_benchmark';
 
 const SCENARIO_NAME = 'hosts_apm_plus_semconv';
@@ -51,8 +52,12 @@ const scenario: Scenario<InfraDocument | Fields | ApmOtelFields> = async ({
       configureTsdsOtelTemplate(infraEsClient, from, to);
     },
     generate: ({ range, clients: { infraEsClient, apmEsClient } }) => {
+      // See hosts_semconv_tsds.ts for the worker-isolation rationale.
+      configureTsdsOtelTemplate(infraEsClient, from, to);
+
+      // Bench-friendly interval — see helpers/hosts_benchmark.ts.
       const semconvMetrics = range
-        .interval('1m')
+        .interval(BENCH_SEMCONV_INTERVAL)
         .rate(1)
         .generator((timestamp) =>
           times(numSemconvHosts).flatMap((hostIndex) =>

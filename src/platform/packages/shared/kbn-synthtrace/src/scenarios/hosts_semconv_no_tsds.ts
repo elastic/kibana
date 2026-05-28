@@ -27,6 +27,7 @@ import {
   formatHostName,
   generateSemconvHostMetricsAtTimestamp,
   getHostCount,
+  BENCH_SEMCONV_INTERVAL,
 } from './helpers/hosts_benchmark';
 
 const SCENARIO_NAME = 'hosts_semconv_no_tsds';
@@ -39,8 +40,15 @@ const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts }) => {
       configureNonTsdsOtelTemplate(infraEsClient);
     },
     generate: ({ range, clients: { infraEsClient } }) => {
+      // See hosts_semconv_tsds.ts for the worker-isolation rationale.
+      // For the non-TSDS variant the practical consequence is the
+      // worker would PUT the TSDS-on template by default; we want the
+      // non-TSDS shape here.
+      configureNonTsdsOtelTemplate(infraEsClient);
+
+      // Bench-friendly interval — see helpers/hosts_benchmark.ts.
       const metrics = range
-        .interval('1m')
+        .interval(BENCH_SEMCONV_INTERVAL)
         .rate(1)
         .generator((timestamp) =>
           times(numHosts).flatMap((hostIndex) =>

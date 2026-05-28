@@ -19,7 +19,11 @@ import type { InfraDocument } from '@kbn/synthtrace-client';
 import { times } from 'lodash';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
-import { generateEcsHostMetricsAtTimestamp, getHostCount } from './helpers/hosts_benchmark';
+import {
+  BENCH_ECS_INTERVAL,
+  generateEcsHostMetricsAtTimestamp,
+  getHostCount,
+} from './helpers/hosts_benchmark';
 
 const SCENARIO_NAME = 'hosts_ecs_only';
 
@@ -28,10 +32,11 @@ const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts }) => {
 
   return {
     generate: ({ range, clients: { infraEsClient } }) => {
-      // Metricbeat system module default collection period is 10s; synthtrace
-      // scenarios conventionally sample every 30s.
+      // Bench-friendly interval — see helpers/hosts_benchmark.ts.
+      // (Metricbeat-system collects every 10s in production; we
+      // coarsen here for the bench fixture.)
       const metrics = range
-        .interval('30s')
+        .interval(BENCH_ECS_INTERVAL)
         .rate(1)
         .generator((timestamp) =>
           times(numHosts).flatMap((hostIndex) =>

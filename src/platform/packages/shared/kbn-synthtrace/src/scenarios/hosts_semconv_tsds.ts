@@ -21,6 +21,7 @@ import { times } from 'lodash';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import {
+  BENCH_SEMCONV_INTERVAL,
   configureTsdsOtelTemplate,
   formatHostName,
   generateSemconvHostMetricsAtTimestamp,
@@ -37,9 +38,22 @@ const scenario: Scenario<InfraDocument> = async ({ logger, scenarioOpts, from, t
       configureTsdsOtelTemplate(infraEsClient, from, to);
     },
     generate: ({ range, clients: { infraEsClient } }) => {
-      // OTel hostmetricsreceiver collectors typically scrape once per minute.
+      // `bootstrap` runs on the main-thread client; this `generate`
+      // function executes on a worker thread that owns a *different*
+      // `InfraSynthtraceEsClient` instance. The bootstrap-side
+      // `setOtelDataStreamTemplateOptions` call therefore does not
+      // reach the worker's client, and the worker's lazy
+      // `ensureOtelDataStreamTemplate` would PUT the template with
+      // default options (no `look_back_time`), letting the TSDS reject
+      // backdated docs. Re-configure here so the worker's first index
+      // call PUTs the template with the correct look-back window.
+      configureTsdsOtelTemplate(infraEsClient, from, to);
+
+      // OTel hostmetricsreceiver scrapes every 1m in production; we
+      // ingest at `BENCH_SEMCONV_INTERVAL` for the benchmark fixture
+      // (see helpers/hosts_benchmark.ts for the tradeoff).
       const metrics = range
-        .interval('1m')
+        .interval(BENCH_SEMCONV_INTERVAL)
         .rate(1)
         .generator((timestamp) =>
           times(numHosts).flatMap((hostIndex) =>
