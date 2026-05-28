@@ -63,6 +63,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       tailSamplingPolicies: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
       elasticAgent: `${ELASTIC_DOCS}solutions/observability/apm/switch-to-elastic-apm-integration`,
       storageExplorer: `${ELASTIC_DOCS}solutions/observability/apm/storage-explorer`,
+      infrastructureTab: `${ELASTIC_DOCS}solutions/observability/apm/infrastructure#observability-apm-infrastructure-elastic-apm`,
       spanCompression: `${ELASTIC_DOCS}solutions/observability/apm/spans`,
       transactionSampling: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
       indexLifecycleManagement: `${ELASTIC_DOCS}solutions/observability/apm/index-lifecycle-management`,
