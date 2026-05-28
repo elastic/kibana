@@ -178,7 +178,7 @@ export const createEventFormKibanaMocks = () => {
     },
     fieldFormats: {
       getDefaultInstance: jest.fn().mockReturnValue({
-        convert: jest.fn((date) => date.toISOString()),
+        convertToText: jest.fn((date) => date.toISOString()),
       }),
     },
   };
@@ -246,7 +246,7 @@ export const createIndexFormKibanaMocks = () => {
     },
     fieldFormats: {
       getDefaultInstance: jest.fn().mockReturnValue({
-        convert: jest.fn((value: unknown) => {
+        convertToText: jest.fn((value: unknown) => {
           if (value instanceof Date) {
             return value.toISOString();
           }

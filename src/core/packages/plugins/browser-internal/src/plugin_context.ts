@@ -106,6 +106,7 @@ export function createPluginSetupContext<
       registerUserProfileDelegate: (delegate) =>
         deps.userProfile.registerUserProfileDelegate(delegate),
     },
+    userStorage: deps.userStorage,
     plugins: {
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
@@ -178,6 +179,7 @@ export function createPluginStartContext<
       authc: deps.security.authc,
     },
     userProfile: deps.userProfile,
+    userStorage: deps.userStorage,
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },

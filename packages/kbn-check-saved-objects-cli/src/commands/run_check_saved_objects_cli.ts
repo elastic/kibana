@@ -11,10 +11,46 @@ import { writeFileSync } from 'fs';
 import { Listr, PRESET_TIMER } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
 import { getKibanaServer, startElasticsearch, stopElasticsearch } from '../util';
-import { FindingsCollector, type SavedObjectsCheckReport } from '../findings';
-import { getNewTypes, getUpdatedTypes } from '../snapshots';
+import {
+  FindingsCollector,
+  type SavedObjectsCheckReport,
+  type TypeChangeDetails,
+} from '../findings';
+import { classifyUpdatedTypes, getNewTypes } from '../snapshots';
+import type { MigrationSnapshot } from '../types';
 import type { MigrationAlgorithm, TaskContext } from './types';
 import { automatedRollbackTests, getSnapshots, validateSOChanges, validateTestFlow } from './tasks';
+
+/**
+ * Computes model version change details for a single SO type by diffing the
+ * `from` and `to` snapshots. Returns `undefined` when there is nothing to report.
+ */
+const computeTypeChanges = (
+  typeName: string,
+  from: MigrationSnapshot | undefined,
+  to: MigrationSnapshot
+): TypeChangeDetails | undefined => {
+  const toInfo = to.typeDefinitions[typeName];
+  if (!toInfo) return undefined;
+
+  const fromVersionMap = new Map(
+    (from?.typeDefinitions[typeName]?.modelVersions ?? []).map((v) => [v.version, v])
+  );
+
+  const newModelVersions = toInfo.modelVersions
+    .filter((v) => !fromVersionMap.has(v.version))
+    .map((v) => `10.${v.version}.0`);
+
+  const modifiedModelVersions = toInfo.modelVersions
+    .filter((v) => {
+      const fromVersion = fromVersionMap.get(v.version);
+      return fromVersion !== undefined && fromVersion.modelVersionHash !== v.modelVersionHash;
+    })
+    .map((v) => `10.${v.version}.0`);
+
+  if (newModelVersions.length === 0 && modifiedModelVersions.length === 0) return undefined;
+  return { newModelVersions, modifiedModelVersions };
+};
 
 export function runCheckSavedObjectsCli() {
   let globalTask: Listr<TaskContext, 'default', 'simple'>;
@@ -68,9 +104,11 @@ export function runCheckSavedObjectsCli() {
       globalTask = new Listr(
         [
           {
-            title: 'Start ES',
+            title: 'Start ES asynchronously',
             // we launch the ES server in the background and store a promise that resolves when the server is ready
-            task: (ctx) => (ctx.esServer = startElasticsearch()),
+            task: (ctx) => {
+              ctx.esServer = startElasticsearch();
+            },
             enabled: !client, // we skip this step if '--client' is passed
           },
           {
@@ -189,20 +227,32 @@ export function runCheckSavedObjectsCli() {
           try {
             const collector = new FindingsCollector();
             collector.ingestErrors(globalTask?.errors ?? []);
+
+            const newTypes =
+              context.from && context.to ? getNewTypes({ from: context.from, to: context.to }) : [];
+            const { updatedTypes } =
+              context.from && context.to
+                ? classifyUpdatedTypes({ from: context.from, to: context.to })
+                : { updatedTypes: context.updatedTypes.map(({ name }) => name) };
+
+            const typeChanges: Record<string, TypeChangeDetails> = {};
+            if (context.to) {
+              for (const typeName of updatedTypes) {
+                const details = computeTypeChanges(typeName, context.from, context.to);
+                if (details) typeChanges[typeName] = details;
+              }
+            }
+
             const report: SavedObjectsCheckReport = {
               status: exitCode === 0 ? 'pass' : 'fail',
               baseline: gitRev,
               serverlessBaseline: serverlessGitRev,
-              newTypes:
-                context.from && context.to
-                  ? getNewTypes({ from: context.from, to: context.to })
-                  : [],
-              updatedTypes:
-                context.from && context.to
-                  ? getUpdatedTypes({ from: context.from, to: context.to })
-                  : context.updatedTypes.map(({ name }) => name),
+              newTypes,
+              updatedTypes,
               removedTypes: context.newRemovedTypes,
               findings: collector.getFindings(),
+              ...(Object.keys(typeChanges).length > 0 && { typeChanges }),
+              ...(context.test && { testMode: true }),
             };
             writeFileSync(reportPath, JSON.stringify(report, null, 2));
           } catch (writeErr) {
@@ -214,7 +264,7 @@ export function runCheckSavedObjectsCli() {
       }
       if (exitCode) {
         log.warning(
-          'Validation Failed. Please refer to our troubleshooting guide for more information: https://www.elastic.co/docs/extend/kibana/saved-objects/validate#troubleshooting'
+          'Validation Failed. Please refer to our troubleshooting guide for more information: https://www.elastic.co/docs/extend/kibana/saved-objects/troubleshooting'
         );
       }
       process.exit(exitCode);
