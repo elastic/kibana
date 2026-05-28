@@ -353,10 +353,10 @@ export const CaseViewActivity = ({
             onSubmit={onSubmitCustomField}
           />
           {isTemplatesV2Enabled && (
-            <>
+            <div>
               <TemplateFields caseData={caseData} onUpdateField={onUpdateField} />
               <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
-            </>
+            </div>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
