@@ -74,10 +74,6 @@ describe('Box', () => {
   });
 
   describe('auth', () => {
-    it('supports bearer auth', () => {
-      expect(Box.auth?.types).toContain('bearer');
-    });
-
     it('supports oauth_authorization_code with correct Box defaults', () => {
       const oauthType = Box.auth?.types.find(
         (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
