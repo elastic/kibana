@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
+
 import { errors as esErrors } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -21,8 +23,11 @@ import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_di
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import { writeEntityIds, type WriteEntityIdsResult } from './update_entities';
+import { writeRelationshipObservations } from './write_relationship_observations';
 import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
+
+const MAINTAINER_KIND = 'accesses_frequently_and_infrequently';
 
 interface CompositeAggregations {
   users: {
@@ -158,7 +163,8 @@ async function runIntegration(
   logger: Logger,
   namespace: string,
   crudClient: EntityUpdateClient,
-  abortController: AbortController | undefined
+  abortController: AbortController | undefined,
+  observationContext: { scanId: string; observedAt: string }
 ): Promise<{ buckets: number; recordsCount: number; write: WriteEntityIdsResult }> {
   let afterKey: CompositeAfterKey | undefined;
   let iterations = 0;
@@ -220,6 +226,13 @@ async function runIntegration(
   // Stream per-integration: write this integration's records before
   // returning so memory does not accumulate across the outer loop.
   const write = await writeEntityIds(crudClient, logger, records);
+  await writeRelationshipObservations(crudClient, logger, records, {
+    scanId: observationContext.scanId,
+    maintainerKind: MAINTAINER_KIND,
+    lookbackWindow: LOOKBACK_WINDOW,
+    entitySource: config.id,
+    observedAt: observationContext.observedAt,
+  });
   return { buckets: totalBuckets, recordsCount: records.length, write };
 }
 
@@ -277,6 +290,14 @@ export const runRelationshipMaintainer = async ({
 
   const readClient = cpsEsClient ?? esClient;
 
+  // One scan_id + observedAt for the whole maintainer pass. Every observation
+  // doc emitted across all integrations in this run carries the same values
+  // so a reader can group records by maintainer-run.
+  const observationContext = {
+    scanId: randomUUID(),
+    observedAt: new Date().toISOString(),
+  };
+
   let totalBuckets = 0;
   let totalRecords = 0;
   let totalWritten = 0;
@@ -295,7 +316,8 @@ export const runRelationshipMaintainer = async ({
       logger,
       namespace,
       crudClient,
-      abortController
+      abortController,
+      observationContext
     );
     totalBuckets += buckets;
     totalRecords += recordsCount;

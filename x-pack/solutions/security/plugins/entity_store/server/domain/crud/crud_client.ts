@@ -18,8 +18,10 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
+import type { RelationshipObservationDoc } from '../../../common/domain/entity_metadata/relationship_observation';
 import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
+import { getMetadataEntitiesDataStreamName } from '../asset_manager/metadata_data_stream';
 import {
   BadCRUDRequestError,
   EntityNotFoundError,
@@ -162,6 +164,27 @@ export class CRUDClient {
 
     Object.defineProperty(this, 'bulkUpdateEntity', {
       value: tracedBulkUpdateEntity,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseBulkAppendRelationshipObservations =
+      this.bulkAppendRelationshipObservations.bind(this);
+    const tracedBulkAppendRelationshipObservations = (
+      docs: RelationshipObservationDoc[]
+    ): Promise<BulkObjectResponse[]> =>
+      runWithSpan({
+        name: 'entityStore.crud.bulk_append_relationship_observations',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'bulk_append_relationship_observations',
+          'entity_store.objects.count': docs.length,
+        },
+        cb: () => baseBulkAppendRelationshipObservations(docs),
+      });
+
+    Object.defineProperty(this, 'bulkAppendRelationshipObservations', {
+      value: tracedBulkAppendRelationshipObservations,
       configurable: true,
       writable: true,
     });
@@ -321,6 +344,43 @@ export class CRUDClient {
       return [];
     }
     this.logger.debug(`Bulk updated ${objects.length} entities with errors`);
+    return resp.items
+      .map((item) => Object.entries(item)[0][1])
+      .filter((value) => value.error !== undefined || value.status >= 400)
+      .map((value) => {
+        return {
+          _id: value._id,
+          status: value.status,
+          type: value.error?.type,
+          reason: value.error?.reason,
+        } as BulkObjectResponse;
+      });
+  }
+
+  // Appends RelationshipObservationDoc records to the metadata datastream.
+  // Datastream is append-only, so the bulk op is `create` rather than `update`.
+  // Mirrors `bulkUpdateEntity`'s contract: does not throw on partial bulk
+  // failure — returns one BulkObjectResponse per failed item. Transport-level
+  // exceptions from esClient.bulk propagate to the maintainer's task boundary.
+  public async bulkAppendRelationshipObservations(
+    docs: RelationshipObservationDoc[]
+  ): Promise<BulkObjectResponse[]> {
+    if (docs.length === 0) return [];
+    const operations: Array<BulkOperationContainer | RelationshipObservationDoc> = [];
+    for (const doc of docs) {
+      operations.push({ create: {} }, doc);
+    }
+    const resp = await this.esClient.bulk({
+      index: getMetadataEntitiesDataStreamName(this.namespace),
+      operations,
+      refresh: 'wait_for',
+    });
+
+    if (!resp.errors) {
+      this.logger.debug(`Successfully appended ${docs.length} relationship observations`);
+      return [];
+    }
+    this.logger.debug(`Appended ${docs.length} relationship observations with errors`);
     return resp.items
       .map((item) => Object.entries(item)[0][1])
       .filter((value) => value.error !== undefined || value.status >= 400)
