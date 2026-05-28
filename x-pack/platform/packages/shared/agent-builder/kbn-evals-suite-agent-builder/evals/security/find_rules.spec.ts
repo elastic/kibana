@@ -271,6 +271,128 @@ evaluate.describe(
 );
 
 evaluate.describe(
+  'Security Skills - Find Rules MITRE Routing',
+  { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
+  () => {
+    let teardown: (() => Promise<void>) | undefined;
+
+    evaluate.beforeAll(async ({ kbnClient, esClient, log }) => {
+      const seeded = await seedFindRulesFixtures({ kbnClient, esClient, log });
+      teardown = seeded.cleanup;
+    });
+
+    evaluate.afterAll(async () => {
+      if (teardown) await teardown();
+    });
+
+    evaluate(
+      'mitre routing queries use structured parameters not tags',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'agent builder: security-find-rules-mitre-routing',
+            description:
+              'Validates that MITRE queries route to structured rule fields (mitreTechnique/mitreTactic), ' +
+              'not tags. Covers multiple tactics to test generalization, including tactics whose rules ' +
+              'have structured threat data but no "Tactic: X" tag — those are findable only via the ' +
+              'structured field, not via tags.',
+            examples: [
+              {
+                input: {
+                  question: 'Show me detection rules covering MITRE technique T1059.',
+                },
+                output: {
+                  expected:
+                    'Found 2 detection rules covering MITRE technique T1059 (Command and Scripting Interpreter). ' +
+                    '"Suspicious PowerShell Execution" is a critical severity query rule with risk score 99 and is enabled. ' +
+                    '"PowerShell Encoded Command" is a high severity query rule with risk score 73 and is enabled. ' +
+                    'The find_rules tool was called with mitreTechnique set to T1059.',
+                },
+                metadata: {
+                  query_intent: 'MITRE Technique ID Query',
+                  expectedSkill: 'find-security-rules',
+                  expectedOnlyToolId: 'security.find_rules',
+                },
+              },
+              {
+                input: {
+                  question: 'Show me detection rules covering the Initial Access tactic.',
+                },
+                output: {
+                  expected:
+                    'Found 2 detection rules covering the Initial Access tactic (TA0001). ' +
+                    '"Phishing URL Indicators" is a low severity threat_match rule with risk score 25 and is disabled. ' +
+                    '"Spear Phishing Email Detection" is a medium severity query rule with risk score 50 and is enabled. ' +
+                    'The find_rules tool was called with mitreTactic set to "TA0001" to query the structured threat field, ' +
+                    'which finds rules whose tactic is recorded in threat metadata even when no tactic tag is present.',
+                },
+                metadata: {
+                  query_intent: 'MITRE Tactic Name Query',
+                  expectedSkill: 'find-security-rules',
+                  expectedOnlyToolId: 'security.find_rules',
+                },
+              },
+              {
+                input: {
+                  question: 'Show me detection rules for the Execution tactic.',
+                },
+                output: {
+                  expected:
+                    'Found 2 detection rules covering the Execution tactic (TA0002). ' +
+                    '"Suspicious PowerShell Execution" is a critical severity query rule with risk score 99 and is enabled. ' +
+                    '"PowerShell Encoded Command" is a high severity query rule with risk score 73 and is enabled. ' +
+                    'The find_rules tool was called with mitreTactic set to "TA0002".',
+                },
+                metadata: {
+                  query_intent: 'MITRE Tactic Name Query',
+                  expectedSkill: 'find-security-rules',
+                  expectedOnlyToolId: 'security.find_rules',
+                },
+              },
+              {
+                input: {
+                  question: 'Show me detection rules for the Credential Access tactic.',
+                },
+                output: {
+                  expected:
+                    'Found 2 detection rules covering the Credential Access tactic (TA0006). ' +
+                    '"Credential Access via LSASS" is a critical severity query rule with risk score 95 and is enabled. ' +
+                    '"Suspicious Mimikatz Behavior" is a high severity eql rule with risk score 73 and is enabled. ' +
+                    'The find_rules tool was called with mitreTactic set to "TA0006" to find rules whose ' +
+                    'tactic is in threat metadata, including rules with no "Tactic: Credential Access" tag.',
+                },
+                metadata: {
+                  query_intent: 'MITRE Tactic Name Query',
+                  expectedSkill: 'find-security-rules',
+                  expectedOnlyToolId: 'security.find_rules',
+                },
+              },
+              {
+                input: {
+                  question: 'Show me detection rules for tactic TA0005.',
+                },
+                output: {
+                  expected:
+                    'Found 2 detection rules covering tactic TA0005 (Defense Evasion). ' +
+                    '"Process Injection T1055" is a critical severity eql rule with risk score 95 and is enabled. ' +
+                    '"Process Hollowing Detection" is a high severity query rule with risk score 70 and is enabled. ' +
+                    'The find_rules tool was called with mitreTactic set to "TA0005".',
+                },
+                metadata: {
+                  query_intent: 'MITRE Tactic ID Query',
+                  expectedSkill: 'find-security-rules',
+                  expectedOnlyToolId: 'security.find_rules',
+                },
+              },
+            ],
+          },
+        });
+      }
+    );
+  }
+);
+
+evaluate.describe(
   'Security Skills - Find Rules Boundaries',
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {

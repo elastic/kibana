@@ -144,7 +144,52 @@ describe('findRulesSkill', () => {
     const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
     expect(skill.content).toContain('security.discover_rule_tags');
     expect(skill.content).toMatch(/Tag Discovery/i);
-    expect(skill.content).toMatch(/structured MITRE IDs/i);
+  });
+
+  it('content routes MITRE queries through structured parameters with a tactic ID map', () => {
+    const { getStartServices, mockLogger } = createMockDeps();
+    const skill = createFindRulesSkill({ getStartServices, logger: mockLogger });
+    expect(skill.content).toMatch(/MITRE ATT&CK Routing/);
+    expect(skill.content).toContain('mitreTechnique');
+    expect(skill.content).toContain('mitreTactic');
+    expect(skill.content).toMatch(/Priority order/i);
+    for (const tactic of [
+      'TA0001',
+      'TA0002',
+      'TA0003',
+      'TA0004',
+      'TA0005',
+      'TA0006',
+      'TA0007',
+      'TA0008',
+      'TA0009',
+      'TA0010',
+      'TA0011',
+      'TA0040',
+      'TA0042',
+      'TA0043',
+    ]) {
+      expect(skill.content).toContain(tactic);
+    }
+    for (const name of [
+      'Initial Access',
+      'Execution',
+      'Persistence',
+      'Privilege Escalation',
+      'Defense Evasion',
+      'Credential Access',
+      'Discovery',
+      'Lateral Movement',
+      'Collection',
+      'Exfiltration',
+      'Command and Control',
+      'Impact',
+      'Resource Development',
+      'Reconnaissance',
+    ]) {
+      expect(skill.content).toContain(name);
+    }
+    expect(skill.content).toMatch(/searchTerm/);
   });
 
   it('content documents the two-tool split with a tool table', () => {
@@ -294,6 +339,18 @@ describe('buildToolFilter', () => {
   it('builds mitreTechnique clause for subtechnique ID', () => {
     expect(buildToolFilter({ mitreTechnique: 'T1059.001' })).toContain(
       'alert.attributes.params.threat.technique.subtechnique.id: "T1059.001"'
+    );
+  });
+
+  it('builds mitreTactic clause for tactic ID', () => {
+    expect(buildToolFilter({ mitreTactic: 'TA0001' })).toContain(
+      'alert.attributes.params.threat.tactic.id: "TA0001"'
+    );
+  });
+
+  it('builds mitreTactic clause for tactic display name', () => {
+    expect(buildToolFilter({ mitreTactic: 'Initial Access' })).toContain(
+      'alert.attributes.params.threat.tactic.name: "Initial Access"'
     );
   });
 

@@ -191,6 +191,59 @@ export const SEEDED_RULES: SeededRule[] = [
       techniqueName: 'Remote System Discovery',
     },
   },
+  {
+    // Intentionally has NO "Tactic: Initial Access" tag — only structured threat data.
+    // Used to discriminate tag-based vs structured-field MITRE queries in evals:
+    // tags find 1 Initial Access rule, structured field finds 2.
+    name: 'Spear Phishing Email Detection',
+    description: 'Detects spear phishing email indicators without tactic tag',
+    tags: ['MITRE', 'Domain: Endpoint'],
+    type: 'query',
+    enabled: true,
+    severity: 'medium',
+    riskScore: 50,
+    indexPattern: NETWORK_INDEX,
+    threat: {
+      tacticId: 'TA0001',
+      tacticName: 'Initial Access',
+      techniqueId: 'T1598',
+      techniqueName: 'Phishing for Information',
+    },
+  },
+  {
+    // Intentionally has NO "Tactic: Credential Access" tag — only structured threat data.
+    name: 'Suspicious Mimikatz Behavior',
+    description: 'Detects Mimikatz-like credential dumping behavior without tactic tag',
+    tags: ['MITRE', 'Domain: Endpoint', 'OS: Windows'],
+    type: 'eql',
+    enabled: true,
+    severity: 'high',
+    riskScore: 73,
+    indexPattern: ENDPOINT_INDEX,
+    threat: {
+      tacticId: 'TA0006',
+      tacticName: 'Credential Access',
+      techniqueId: 'T1003',
+      techniqueName: 'OS Credential Dumping',
+    },
+  },
+  {
+    // Intentionally has NO "Tactic: Defense Evasion" tag — only structured threat data.
+    name: 'Process Hollowing Detection',
+    description: 'Detects process hollowing attempts without tactic tag',
+    tags: ['MITRE', 'Domain: Endpoint', 'OS: Windows'],
+    type: 'query',
+    enabled: true,
+    severity: 'high',
+    riskScore: 70,
+    indexPattern: ENDPOINT_INDEX,
+    threat: {
+      tacticId: 'TA0005',
+      tacticName: 'Defense Evasion',
+      techniqueId: 'T1055',
+      techniqueName: 'Process Injection',
+    },
+  },
 ];
 
 function buildThreat(t: ThreatMapping): Array<Record<string, unknown>> {

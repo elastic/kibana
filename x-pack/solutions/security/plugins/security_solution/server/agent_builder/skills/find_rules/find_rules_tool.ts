@@ -79,6 +79,15 @@ export const findRulesSchema = z
       .regex(/^T\d{4}(\.\d{3})?$/i)
       .optional()
       .describe('MITRE technique ID, e.g. "T1059" or "T1059.001".'),
+    mitreTactic: z
+      .string()
+      .min(1)
+      .optional()
+      .describe(
+        'MITRE tactic, either ID (e.g. "TA0001") or display name (e.g. "Initial Access"). ' +
+          'Queries the structured `threat.tactic` field so it finds rules whose tactic is in ' +
+          'rule metadata even when no "Tactic: X" tag is present. Prefer over tags for tactic queries.'
+      ),
     ruleId: z
       .string()
       .min(1)
@@ -123,6 +132,7 @@ interface FilterInput {
   tags?: string[];
   excludeTags?: string[];
   mitreTechnique?: string;
+  mitreTactic?: string;
   ruleId?: string;
 }
 
@@ -154,6 +164,13 @@ export function buildToolFilter(params: FilterInput): string | undefined {
       ? RULE_PARAMS_FIELDS.SUBTECHNIQUE_ID
       : RULE_PARAMS_FIELDS.TECHNIQUE_ID;
     extra.push(`${field}: ${prepareKQLStringParam(params.mitreTechnique)}`);
+  }
+
+  if (params.mitreTactic) {
+    const field = /^TA\d{4}$/i.test(params.mitreTactic)
+      ? RULE_PARAMS_FIELDS.TACTIC_ID
+      : RULE_PARAMS_FIELDS.TACTIC_NAME;
+    extra.push(`${field}: ${prepareKQLStringParam(params.mitreTactic)}`);
   }
 
   if (params.ruleId) {
@@ -211,8 +228,9 @@ export const createFindRulesInlineTool = ({
   description:
     'Find, list, and sort Security detection rules using structured filters. ' +
     'Returns rule names, metadata, and total count. ' +
-    'Always call `security.discover_rule_tags` before calling this tool for the first time in a conversation. ' +
-    'Use the discovered tag list to decide which tag values (if any) to include in the filter. ' +
+    'Always call `security.discover_rule_tags` in the same turn immediately before calling this tool — every turn, not just the first. ' +
+    'Do NOT call this tool without a preceding `security.discover_rule_tags` call in the same response. ' +
+    'Use the freshly discovered tag list to decide which tag values (if any) to include in the filter. ' +
     'Read-only: never suggest enabling, disabling, editing, or deleting rules.',
   schema: findRulesSchema,
   handler: async (input, { request }) => {

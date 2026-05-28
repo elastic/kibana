@@ -12,12 +12,11 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { TAGS_FIELD } from '../../../../common/detection_engine/rule_management/rule_fields';
+import { EXPECTED_MAX_TAGS } from '../../../lib/detection_engine/rule_management/constants';
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 
 export const DISCOVER_RULE_TAGS_INLINE_TOOL_ID = 'security.discover_rule_tags';
-
-const GROUP_BY_TERMS_SIZE = 1000;
 
 export const discoverRuleTagsSchema = z.object({}).strict();
 
@@ -52,7 +51,7 @@ export const createDiscoverRuleTagsInlineTool = ({
         sortOrder: undefined,
         fields: undefined,
         aggregations: {
-          by_field: { terms: { field: TAGS_FIELD, size: GROUP_BY_TERMS_SIZE } },
+          by_field: { terms: { field: TAGS_FIELD, size: EXPECTED_MAX_TAGS } },
         },
       });
 
