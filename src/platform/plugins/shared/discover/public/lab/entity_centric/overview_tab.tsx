@@ -53,7 +53,7 @@ export const OverviewTab = ({ overview }: OverviewTabProps) => {
             title={i18n.translate('discover.entityCentricLab.flyout.overview.entitySummaryTitle', {
               defaultMessage: 'Entity Summary',
             })}
-            adornment={<EuiIcon type="sparkles" color="accent" aria-hidden={true} />}
+            adornment={<EuiIcon type="sparkles" color="accentSecondary" aria-hidden={true} />}
           />
         }
         extraAction={<SectionMenuButton sectionLabel="entitySummary" />}
@@ -170,8 +170,8 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
       // section adornment and the `accent`-colored refresh affordance below
       // (canonical EUI signal for AI-generated content).
       css={css`
-        background-color: ${euiTheme.colors.backgroundLightAccent};
-        border-color: ${euiTheme.colors.borderBaseAccent};
+        background-color: ${euiTheme.colors.backgroundLightAccentSecondary};
+        border-color: ${euiTheme.colors.borderBaseAccentSecondary};
       `}
       data-test-subj="entityCentricLabEntitySummaryCard"
     >
@@ -191,7 +191,7 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType="refresh"
-            color="accent"
+            color="accentSecondary"
             size="xs"
             aria-label={i18n.translate(
               'discover.entityCentricLab.flyout.overview.regenerateSummaryAriaLabel',
