@@ -16,6 +16,7 @@
 import type { FieldConstraint } from './eql_parser/constraint_extractor';
 import { extractEqlConstraints } from './eql_parser';
 import { extractKqlConstraints } from './kql_inverter';
+import { extractEsqlConstraints } from './esql_inverter';
 
 export type { FieldConstraint };
 
@@ -63,7 +64,11 @@ export function invertRuleQuery(rule: {
     return invertKql(rule.id, rule.name, ruleType, query);
   }
 
-  // Lucene / ES|QL — return empty constraints, rely on template fallback
+  if (language === 'esql' || ruleType === 'esql') {
+    return invertEsql(rule.id, rule.name, ruleType, query);
+  }
+
+  // Lucene — return empty constraints, rely on template fallback
   return {
     ruleId: rule.id,
     ruleName: rule.name,
@@ -126,4 +131,25 @@ function detectEventCategory(constraints: FieldConstraint[]): string {
     (c) => c.field === 'event.category' && c.operator === '==' && typeof c.value === 'string'
   );
   return (cat?.value as string) ?? 'any';
+}
+
+function invertEsql(
+  ruleId: string,
+  ruleName: string,
+  ruleType: InvertedRule['ruleType'],
+  query: string
+): InvertedRule {
+  const result = extractEsqlConstraints(query);
+  return {
+    ruleId,
+    ruleName,
+    ruleType,
+    language: 'esql',
+    events: [{
+      eventCategory: detectEventCategory(result.constraints),
+      constraints: result.constraints,
+      joinKeys: [],
+    }],
+    sequenceJoinKeys: [],
+  };
 }
