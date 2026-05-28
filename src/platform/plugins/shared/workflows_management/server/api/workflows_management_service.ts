@@ -337,11 +337,13 @@ export class WorkflowsService {
   private async scheduleWorkflowTriggers(
     workflowId: string,
     definition: WorkflowYaml | undefined,
+    enabled: boolean,
+    valid: boolean,
     spaceId: string,
     request: KibanaRequest
   ): Promise<void> {
     const { taskScheduler } = this;
-    if (!taskScheduler || !definition?.triggers) {
+    if (!taskScheduler || !definition?.triggers || !enabled || !valid) {
       return;
     }
 
@@ -419,7 +421,14 @@ export class WorkflowsService {
       document: workflowData,
     });
 
-    await this.scheduleWorkflowTriggers(id, definition, spaceId, request);
+    await this.scheduleWorkflowTriggers(
+      id,
+      definition,
+      workflowData.enabled,
+      workflowData.valid,
+      spaceId,
+      request
+    );
 
     return this.transformStorageDocumentToWorkflowDto(id, workflowData);
   }
@@ -562,7 +571,14 @@ export class WorkflowsService {
 
     await Promise.allSettled(
       workflowsToSchedule.map((vw) =>
-        this.scheduleWorkflowTriggers(vw.id, vw.definition, spaceId, request)
+        this.scheduleWorkflowTriggers(
+          vw.id,
+          vw.definition,
+          vw.workflowData.enabled,
+          vw.workflowData.valid,
+          spaceId,
+          request
+        )
       )
     );
 
