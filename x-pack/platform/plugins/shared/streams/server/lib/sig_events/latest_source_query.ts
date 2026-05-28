@@ -155,7 +155,7 @@ export const executeAndDecodeSource = async <T>(
   esClient: ElasticsearchClient,
   query: ComposerQuery
 ): Promise<{ hits: T[] }> => {
-  const response = await runEsqlQuery(esClient, query.print());
+  const response = await runEsqlQuery(esClient, query.print('basic'));
   if (!response) {
     return { hits: [] };
   }
