@@ -60,7 +60,8 @@ export function VisualizeESQL({
       hasShadow={false}
       hasBorder={true}
       css={[
-        visualizationWrapperStyles({ width }),
+        visualizationWrapperStyles,
+        width !== undefined ? css({ maxWidth: width }) : undefined,
         ({ euiTheme }: UseEuiTheme) =>
           css({
             marginBlockEnd: euiTheme.size.m,

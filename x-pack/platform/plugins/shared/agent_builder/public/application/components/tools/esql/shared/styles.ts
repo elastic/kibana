@@ -12,30 +12,27 @@ export const visualizationActionsClassName = 'agentBuilderVisualizationActions';
 export const visualizationTimePickerContainerClassName =
   'agentBuilderVisualizationTimePickerContainer';
 
-export const visualizationWrapperStyles =
-  (dimensions?: { width?: number }) =>
-  ({ euiTheme }: UseEuiTheme) =>
-    css({
-      position: 'relative',
-      overflow: 'visible',
-      display: 'flex',
-      flexDirection: 'column',
-      ...(dimensions?.width !== undefined ? { maxWidth: dimensions.width } : {}),
-      [`.${visualizationActionsClassName} + .${visualizationTimePickerContainerClassName}`]: {
-        width: `calc(100% - ${euiTheme.base * 4}px)`,
-      },
-      '.echChart ul': {
-        marginInlineStart: 0,
-      },
+export const visualizationWrapperStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    position: 'relative',
+    overflow: 'visible',
+    display: 'flex',
+    flexDirection: 'column',
+    [`.${visualizationActionsClassName} + .${visualizationTimePickerContainerClassName}`]: {
+      width: `calc(100% - ${euiTheme.base * 4}px)`,
+    },
+    '.echChart ul': {
+      marginInlineStart: 0,
+    },
 
-      p: {
-        margin: 0,
-      },
+    p: {
+      margin: 0,
+    },
 
-      '.expExpressionRenderer__expression': {
-        padding: `${euiTheme.size.s} 0`,
-      },
-    });
+    '.expExpressionRenderer__expression': {
+      padding: `${euiTheme.size.s} 0`,
+    },
+  });
 
 export const visualizationHeaderStyles = ({ euiTheme }: UseEuiTheme) =>
   css({
