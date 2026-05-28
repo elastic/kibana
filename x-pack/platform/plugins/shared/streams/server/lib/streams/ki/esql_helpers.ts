@@ -21,7 +21,7 @@ export const combineWhere = (
   if (defined.length === 0) return undefined;
   if (defined.length === 1) return defined[0];
   const text = defined.map((c) => `(${BasicPrettyPrinter.expression(c)})`).join(' AND ');
-  return esql.exp([text] as unknown as TemplateStringsArray);
+  return esql.exp(text);
 };
 
 export const inPredicate = <T extends string>(
