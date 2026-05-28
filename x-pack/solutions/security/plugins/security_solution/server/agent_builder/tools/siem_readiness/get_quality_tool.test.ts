@@ -48,7 +48,6 @@ const mockSharedContext = {
     mlRules: [],
   },
   categoriesResult: mockCategories,
-  packageToPlatform: new Map(),
   indexToPlatform: new Map(),
 };
 

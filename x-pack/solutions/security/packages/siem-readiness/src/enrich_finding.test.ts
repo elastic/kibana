@@ -14,7 +14,6 @@ const createMockRule = (overrides: Partial<RuleIndexEntry> = {}): RuleIndexEntry
   id: 'rule-1',
   name: 'Test Rule',
   tactics: [],
-  platform: undefined,
   enabled: true,
   ...overrides,
 });
@@ -113,30 +112,8 @@ describe('enrichFinding', () => {
       expect(result.severity).toBe('CRITICAL');
     });
 
-    it('should derive platform from rules when indexToPlatform has no match', () => {
-      const rule1 = createMockRule({ platform: 'AWS' });
-      const rule2 = createMockRule({ platform: 'AWS' });
-      const rule3 = createMockRule({ platform: 'Azure' });
-
-      const indexToRules = new Map([['logs-cloud', [rule1, rule2, rule3]]]);
-
+    it('should derive platform from indexToPlatform when resource matches directly', () => {
       const ctx = createMockContext({
-        indexToRules,
-        dimension: 'quality',
-      });
-
-      const finding = createMockFinding({ resource: 'logs-cloud' });
-      const result = enrichFinding(finding, ctx);
-
-      expect(result.affectedPlatform).toBe('AWS');
-    });
-
-    it('should use indexToPlatform over rule-derived platform (data-first)', () => {
-      const rule = createMockRule({ platform: 'Azure' });
-      const indexToRules = new Map([['logs-aws.cloudtrail-default', [rule]]]);
-
-      const ctx = createMockContext({
-        indexToRules,
         indexToPlatform: new Map([['logs-aws.cloudtrail-default', 'AWS account 123456']]),
         dimension: 'quality',
       });
@@ -144,7 +121,6 @@ describe('enrichFinding', () => {
       const finding = createMockFinding({ resource: 'logs-aws.cloudtrail-default' });
       const result = enrichFinding(finding, ctx);
 
-      // indexToPlatform wins over rule-derived platform
       expect(result.affectedPlatform).toBe('AWS account 123456');
     });
 
@@ -163,12 +139,8 @@ describe('enrichFinding', () => {
       expect(result.affectedPlatform).toBe('AWS account 789012');
     });
 
-    it('should fall back to rule-derived platform when neither direct nor backing-index lookup matches', () => {
-      const rule = createMockRule({ platform: 'Endpoint Security' });
-      const indexToRules = new Map([['logs-endpoint.events-default', [rule]]]);
-
+    it('should return undefined for affectedPlatform when no indexToPlatform match exists', () => {
       const ctx = createMockContext({
-        indexToRules,
         indexToPlatform: new Map([['logs-aws.cloudtrail-default', 'AWS account 123456']]),
         dimension: 'quality',
       });
@@ -176,8 +148,7 @@ describe('enrichFinding', () => {
       const finding = createMockFinding({ resource: 'logs-endpoint.events-default' });
       const result = enrichFinding(finding, ctx);
 
-      // No match in indexToPlatform, falls back to rule-derived
-      expect(result.affectedPlatform).toBe('Endpoint Security');
+      expect(result.affectedPlatform).toBeUndefined();
     });
   });
 

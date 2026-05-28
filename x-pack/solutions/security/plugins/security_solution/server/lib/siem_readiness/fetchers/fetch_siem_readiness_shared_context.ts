@@ -12,14 +12,13 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { CategoriesResponse, ReverseMapResult } from '@kbn/siem-readiness';
 
 import { fetchCategories } from './fetch_categories';
-import { fetchRulesReverseMap, buildPackageToPlatform } from './fetch_rules_reverse_map';
+import { fetchRulesReverseMap } from './fetch_rules_reverse_map';
 import { fetchIndexPlatforms } from './fetch_index_platforms';
 
 export interface SiemReadinessSharedContext {
   reverseMapResult: ReverseMapResult;
   categoriesResult: CategoriesResponse;
-  packageToPlatform: Map<string, string>;
-  /** Map of data stream name → platform label, derived from ECS fields in the actual data */
+  /** Map of index/data stream name → platform label, derived from ECS fields in the actual data */
   indexToPlatform: Map<string, string>;
 }
 
@@ -27,14 +26,6 @@ export interface FetchSiemReadinessSharedContextDeps {
   rulesClient: RulesClient;
   esClient: ElasticsearchClient;
   dataViewsService: DataViewsService;
-  /** Optional Fleet plugin start — used for dynamic package→platform mapping */
-  fleet?: {
-    packageService: {
-      asInternalUser: {
-        getPackages: () => Promise<Array<{ name: string; title: string }>>;
-      };
-    };
-  };
   logger: Logger;
 }
 
@@ -65,30 +56,19 @@ export const getSiemReadinessSharedContext = (
 
 /**
  * Fetches all context shared across SIEM readiness dimensions:
- * - Fleet package→platform map (graceful fallback to rule tags if Fleet is unavailable)
  * - SIEM categories (single ES aggregation over event.category)
+ * - Index platform map (ECS field aggregation — cloud.provider, host.os.family, etc.)
  * - Rules reverse map (index/pipeline/category → enabled rules)
  *
- * Categories are fetched first and passed into fetchRulesReverseMap to eliminate the
- * duplicate fetchCategories call that previously occurred inside that function.
+ * Categories are fetched first and passed into fetchRulesReverseMap to eliminate a
+ * duplicate fetchCategories call inside that function.
  */
 export const fetchSiemReadinessSharedContext = async ({
   rulesClient,
   esClient,
   dataViewsService,
-  fleet,
   logger,
 }: FetchSiemReadinessSharedContextDeps): Promise<SiemReadinessSharedContext> => {
-  let packageToPlatform = new Map<string, string>();
-  try {
-    if (fleet) {
-      const pkgs = await fleet.packageService.asInternalUser.getPackages();
-      packageToPlatform = buildPackageToPlatform(pkgs);
-    }
-  } catch {
-    logger.warn('Failed to fetch Fleet packages, platform mapping will use tag fallback');
-  }
-
   // Fetch categories and index platforms in parallel, then pass categories into
   // fetchRulesReverseMap to avoid a duplicate fetchCategories call inside that function.
   const [categoriesResult, indexToPlatform] = await Promise.all([
@@ -101,9 +81,8 @@ export const fetchSiemReadinessSharedContext = async ({
     esClient,
     dataViewsService,
     logger,
-    packageToPlatform,
     categoriesData: categoriesResult,
   });
 
-  return { reverseMapResult, categoriesResult, packageToPlatform, indexToPlatform };
+  return { reverseMapResult, categoriesResult, indexToPlatform };
 };

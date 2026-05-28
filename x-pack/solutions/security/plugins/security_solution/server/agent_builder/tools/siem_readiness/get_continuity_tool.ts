@@ -62,7 +62,6 @@ export const getContinuityTool = (
             rulesClient,
             esClient: esClient.asCurrentUser,
             dataViewsService,
-            fleet: startPlugins.fleet,
             logger: handlerLogger,
           });
         }

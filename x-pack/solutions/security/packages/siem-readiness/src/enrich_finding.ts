@@ -97,31 +97,6 @@ const getRulesForFinding = (
 };
 
 /**
- * Derives the affected platform from the set of impacted rules using a
- * majority-vote approach:
- * - If one platform accounts for >50% of rules → return it alone (clear owner)
- * - Otherwise → return all unique platforms joined by comma, sorted by rule count descending
- */
-const derivePlatformFromRules = (rules: RuleIndexEntry[]): string | undefined => {
-  const platforms = rules.map((r) => r.platform).filter((p): p is string => p !== undefined);
-
-  if (platforms.length === 0) return undefined;
-
-  const counts = new Map<string, number>();
-  for (const p of platforms) {
-    counts.set(p, (counts.get(p) ?? 0) + 1);
-  }
-
-  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
-
-  if (sorted[0][1] > rules.length / 2) {
-    return sorted[0][0];
-  }
-
-  return sorted.map(([p]) => p).join(', ');
-};
-
-/**
  * Extracts the parent data stream name from a backing index name.
  * Backing indices follow the pattern: .ds-{data_stream_name}-YYYY.MM.DD-NNNNNN
  *
@@ -208,7 +183,7 @@ export const enrichFinding = (
   // 1. Resolve which detection rules are affected by this finding
   const rules = getRulesForFinding(finding, ctx);
 
-  // 2. Collect rule id + name (strip internal fields like platform/tactics)
+  // 2. Collect rule id + name (strip internal fields like tactics)
   const affectedRules: AffectedRule[] = rules.map((r) => ({ id: r.id, name: r.name }));
 
   // 3. Count how many affected rules cover each MITRE tactic
@@ -229,15 +204,13 @@ export const enrichFinding = (
     };
   });
 
-  // 4. Derive platform: data-first (index ECS fields), then rule metadata as fallback.
+  // 4. Derive platform from the actual index data (ECS fields).
   //    Two-step lookup handles both data stream names and backing index names:
   //      Step 1: direct lookup by finding.resource (data stream name)
   //      Step 2: parse backing index → data stream name, then look up
-  //      Step 3: fall back to rule metadata / tags via majority vote
   const affectedPlatform =
     ctx.indexToPlatform.get(finding.resource) ??
-    ctx.indexToPlatform.get(extractDataStreamName(finding.resource) ?? '') ??
-    derivePlatformFromRules(rules);
+    ctx.indexToPlatform.get(extractDataStreamName(finding.resource) ?? '');
 
   // 5. Build dimension-specific recommended actions
   const recommendedActions = buildRecommendedActionsForFinding(finding, ctx.dimension);

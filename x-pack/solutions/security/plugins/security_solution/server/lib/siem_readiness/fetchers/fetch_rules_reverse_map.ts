@@ -30,35 +30,12 @@ export interface FetchRulesReverseMapDeps {
   esClient: ElasticsearchClient;
   dataViewsService: DataViewsService;
   logger: Logger;
-  /** Map of Fleet package names to display titles, populated via buildPackageToPlatform(fleetPackages) */
-  packageToPlatform?: Map<string, string>;
   /**
    * Pre-fetched categories result. When provided, the internal fetchCategories call is skipped,
    * eliminating the duplicate ES aggregation that occurs when callers already hold this data.
    */
   categoriesData?: CategoriesResponse;
 }
-
-/**
- * Creates a lookup map from Fleet package names to their display titles.
- * Used for deriving the affected platform from a rule's related_integrations.
- *
- * @param packages - Fleet packages from packageService.asInternalUser.getPackages()
- * @returns Map where key is package name (e.g., "aws") and value is title (e.g., "AWS")
- *
- * @example
- * // Input: [{ name: "aws", title: "AWS" }, { name: "endpoint", title: "Endpoint Security" }]
- * // Output: Map { "aws" => "AWS", "endpoint" => "Endpoint Security" }
- */
-export const buildPackageToPlatform = (
-  packages: Array<{ name: string; title: string }>
-): Map<string, string> => {
-  const map = new Map<string, string>();
-  for (const pkg of packages) {
-    map.set(pkg.name, pkg.title);
-  }
-  return map;
-};
 
 interface ThreatTactic {
   id?: string;
@@ -82,12 +59,6 @@ const extractTactics = (params: RuleParams): Array<{ id: string; name: string }>
   return tactics;
 };
 
-interface RelatedIntegration {
-  package?: string;
-  version?: string;
-  integration?: string;
-}
-
 interface AlertingRule {
   id: string;
   name: string;
@@ -96,52 +67,12 @@ interface AlertingRule {
   params: RuleParams;
 }
 
-/**
- * Builds a rule entry with platform derivation for blast radius enrichment.
- *
- * Platform derivation strategy (in order of precedence):
- * 1. Fleet package lookup: Uses relatedIntegrations[0].package to look up the
- *    display title from packageToPlatform map (e.g., "aws" → "AWS")
- * 2. Domain tag fallback: Extracts platform from "Domain: <platform>" tag
- *    (e.g., "Domain: Cloud" → "Cloud")
- * 3. OS tag fallback: Extracts platform from "OS: <platform>" tag
- *    (e.g., "OS: Windows" → "Windows")
- * 4. Default: undefined if none of the above match
- */
-const buildRuleEntry = (
-  rule: AlertingRule,
-  packageToPlatform: Map<string, string>
-): RuleIndexEntry => {
-  // 1. Try Fleet package lookup via related_integrations
-  const relatedIntegrations = (rule.params as { relatedIntegrations?: RelatedIntegration[] })
-    .relatedIntegrations;
-  const pkg = relatedIntegrations?.[0]?.package;
-  let platform = pkg ? packageToPlatform.get(pkg) : undefined;
-
-  // 2. Fallback to rule tags if Fleet lookup didn't yield a platform
-  if (!platform) {
-    const { tags } = rule;
-    if (tags) {
-      const domainTag = tags.find((t) => t.startsWith('Domain: '));
-      if (domainTag) {
-        platform = domainTag.replace('Domain: ', '');
-      } else {
-        const osTag = tags.find((t) => t.startsWith('OS: '));
-        if (osTag) {
-          platform = osTag.replace('OS: ', '');
-        }
-      }
-    }
-  }
-
-  return {
-    id: rule.id,
-    name: rule.name,
-    tactics: extractTactics(rule.params),
-    platform,
-    enabled: rule.enabled,
-  };
-};
+const buildRuleEntry = (rule: AlertingRule): RuleIndexEntry => ({
+  id: rule.id,
+  name: rule.name,
+  tactics: extractTactics(rule.params),
+  enabled: rule.enabled,
+});
 
 const resolvePatterns = async (
   patterns: string[],
@@ -197,7 +128,6 @@ export const fetchRulesReverseMap = async ({
   esClient,
   dataViewsService,
   logger,
-  packageToPlatform = new Map(),
   categoriesData,
 }: FetchRulesReverseMapDeps): Promise<ReverseMapResult> => {
   const indexToRules: IndexToRulesMap = new Map();
@@ -261,7 +191,7 @@ export const fetchRulesReverseMap = async ({
 
     for (const ruleData of result.data) {
       const rule = ruleData as unknown as AlertingRule;
-      const entry = buildRuleEntry(rule, packageToPlatform);
+      const entry = buildRuleEntry(rule);
 
       for (const tactic of entry.tactics) {
         const existing = tacticTotals.get(tactic.id);

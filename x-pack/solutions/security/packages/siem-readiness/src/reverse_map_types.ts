@@ -9,7 +9,6 @@ export interface RuleIndexEntry {
   id: string;
   name: string;
   tactics: Array<{ id: string; name: string }>;
-  platform?: string;
   enabled: boolean;
 }
 

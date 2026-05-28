@@ -54,7 +54,6 @@ export const getCoverageTool = (
             rulesClient,
             esClient: esClient.asCurrentUser,
             dataViewsService,
-            fleet: startPlugins.fleet,
             logger: handlerLogger,
           });
         });
