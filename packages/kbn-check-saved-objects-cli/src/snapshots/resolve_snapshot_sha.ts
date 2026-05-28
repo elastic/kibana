@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import https from 'https';
-import { expandGitRev } from '../util';
+import { assertCommitSha, expandGitRev } from '../util';
 import { gcsSnapshotUrl } from './fetch_snapshot';
 
 export const ATTEMPTS_PER_SHA = 3;
@@ -25,7 +25,10 @@ export interface ResolvedSnapshotSha {
 export type SnapshotCheckResult =
   | { outcome: 'exists' }
   | { outcome: 'not_found' }
-  | { outcome: 'network_error' };
+  | { outcome: 'transient_error' }
+  | { outcome: 'terminal_error'; statusCode?: number };
+
+const TRANSIENT_HTTP_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
 
 const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => {
@@ -53,10 +56,15 @@ export const snapshotExists = (sha: string): Promise<SnapshotCheckResult> => {
         return;
       }
 
-      resolve({ outcome: 'network_error' });
+      if (TRANSIENT_HTTP_STATUS_CODES.has(statusCode)) {
+        resolve({ outcome: 'transient_error' });
+        return;
+      }
+
+      resolve({ outcome: 'terminal_error', statusCode });
     });
 
-    request.on('error', () => resolve({ outcome: 'network_error' }));
+    request.on('error', () => resolve({ outcome: 'transient_error' }));
     request.end();
   });
 };
@@ -66,14 +74,17 @@ export const snapshotExists = (sha: string): Promise<SnapshotCheckResult> => {
  * Tries local git first, then falls back to the GitHub API.
  */
 export const getParentCommitSha = (sha: string): string => {
+  assertCommitSha(sha);
+
   try {
-    return execSync(`git rev-parse ${sha}^`, { stdio: ['pipe', 'pipe', null] })
+    return execFileSync('git', ['rev-parse', `${sha}^`], { stdio: ['pipe', 'pipe', null] })
       .toString()
       .trim();
   } catch {
     try {
-      const parentSha = execSync(
-        `gh api "repos/elastic/kibana/commits/${sha}" --jq '.parents[0].sha'`,
+      const parentSha = execFileSync(
+        'gh',
+        ['api', `repos/elastic/kibana/commits/${sha}`, '--jq', '.parents[0].sha'],
         {
           stdio: ['pipe', 'pipe', null],
         }
@@ -108,8 +119,8 @@ export interface ResolveSnapshotShaOptions {
  * Resolves a commit SHA to the nearest available GCS snapshot SHA.
  * Retries fetching the requested SHA before walking up to {@link MAX_ANCESTOR_DEPTH}
  * parent commits, giving recently uploaded snapshots time to appear in GCS.
- * 404 responses are retried up to {@link ATTEMPTS_PER_SHA} times per SHA; network
- * errors are retried indefinitely on the same SHA.
+ * 404 responses are retried up to {@link ATTEMPTS_PER_SHA} times per SHA; transient
+ * HTTP and socket errors are retried indefinitely on the same SHA.
  */
 export const resolveSnapshotSha = async (
   requestedSha: string,
@@ -138,7 +149,15 @@ export const resolveSnapshotSha = async (
         };
       }
 
-      if (result.outcome === 'network_error') {
+      if (result.outcome === 'terminal_error') {
+        throw new Error(
+          `Failed to check snapshot for '${currentSha}': unexpected HTTP ${
+            result.statusCode ?? 'response'
+          }`
+        );
+      }
+
+      if (result.outcome === 'transient_error') {
         await sleep(retryDelayMs);
         continue;
       }

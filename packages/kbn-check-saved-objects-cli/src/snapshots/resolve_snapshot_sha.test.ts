@@ -68,12 +68,12 @@ describe('resolveSnapshotSha', () => {
     expect(getParentCommitShaFn).toHaveBeenCalledTimes(1);
   });
 
-  it('retries network errors indefinitely without walking to a parent commit', async () => {
+  it('retries transient errors indefinitely without walking to a parent commit', async () => {
     let callCount = 0;
     const snapshotExistsFn = jest.fn(async (): Promise<SnapshotCheckResult> => {
       callCount++;
       if (callCount < 4) {
-        return { outcome: 'network_error' };
+        return { outcome: 'transient_error' };
       }
       return { outcome: 'exists' };
     });
@@ -97,13 +97,36 @@ describe('resolveSnapshotSha', () => {
     expect(getParentCommitShaFn).not.toHaveBeenCalled();
   });
 
-  it('does not count network errors toward the not-found retry limit', async () => {
+  it('throws on terminal HTTP errors without walking to a parent commit', async () => {
+    const snapshotExistsFn = jest.fn(
+      async (): Promise<SnapshotCheckResult> => ({
+        outcome: 'terminal_error',
+        statusCode: 403,
+      })
+    );
+    const getParentCommitShaFn = jest.fn(() => parentSha);
+
+    await expect(
+      resolveSnapshotSha(requestedSha, {
+        attemptsPerSha: 3,
+        maxAncestorDepth: 3,
+        retryDelayMs: 0,
+        snapshotExistsFn,
+        getParentCommitShaFn,
+      })
+    ).rejects.toThrow(`Failed to check snapshot for '${requestedSha}': unexpected HTTP 403`);
+
+    expect(snapshotExistsFn).toHaveBeenCalledTimes(1);
+    expect(getParentCommitShaFn).not.toHaveBeenCalled();
+  });
+
+  it('does not count transient errors toward the not-found retry limit', async () => {
     const resultsByCall: SnapshotCheckResult[] = [
-      { outcome: 'network_error' },
+      { outcome: 'transient_error' },
       { outcome: 'not_found' },
-      { outcome: 'network_error' },
+      { outcome: 'transient_error' },
       { outcome: 'not_found' },
-      { outcome: 'network_error' },
+      { outcome: 'transient_error' },
       { outcome: 'not_found' },
       { outcome: 'exists' },
     ];
