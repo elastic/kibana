@@ -395,12 +395,17 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
             {traceIds.map((traceId) => (
               <EuiFlexItem key={traceId} grow={false}>
-                <EuiButtonIcon
-                  size="s"
-                  iconType="apmTrace"
-                  onClick={() => onTraceClick(traceId, row.exampleId)}
-                  aria-label={i18n.getTraceButtonAriaLabel(traceId)}
-                />
+                <EuiToolTip
+                  content={i18n.getTraceButtonAriaLabel(traceId)}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    size="s"
+                    iconType="apmTrace"
+                    onClick={() => onTraceClick(traceId, row.exampleId)}
+                    aria-label={i18n.getTraceButtonAriaLabel(traceId)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
