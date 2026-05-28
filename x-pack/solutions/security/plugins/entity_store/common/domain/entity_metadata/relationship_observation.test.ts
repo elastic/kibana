@@ -9,10 +9,8 @@
 import type { RelationshipObservationDoc } from './relationship_observation';
 import { getMetadataComponentTemplate } from '../../../server/domain/asset_manager/metadata_component_templates';
 
-type AssertAssignable<T, U extends T> = U;
-
 describe('EMH Phase 2 — RelationshipObservationDoc type', () => {
-  const minimalRequired: RelationshipObservationDoc = {
+  const minimalRequired = {
     '@timestamp': '2026-05-15T10:30:00.000Z',
     'event.kind': 'event',
     'event.action': 'relationship_observed',
@@ -23,10 +21,9 @@ describe('EMH Phase 2 — RelationshipObservationDoc type', () => {
       scan_id: 'a3f2e1',
       lookback_window: '24h',
     },
-  };
+  } satisfies RelationshipObservationDoc;
 
   it('accepts a minimal document with only the required fields', () => {
-    type _Check = AssertAssignable<RelationshipObservationDoc, typeof minimalRequired>;
     expect(minimalRequired['@timestamp']).toBe('2026-05-15T10:30:00.000Z');
     expect(minimalRequired['event.kind']).toBe('event');
     expect(minimalRequired['event.action']).toBe('relationship_observed');
