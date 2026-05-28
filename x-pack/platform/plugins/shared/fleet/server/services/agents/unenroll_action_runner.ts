@@ -137,6 +137,13 @@ export async function unenrollBatch(
 
     if (!options.skipActionCreation) {
       await updateActionsForForceUnenroll(esClient, soClient, agentIds, actionId, total);
+    } else {
+      // The scheduled UNENROLL action doc already exists; write results so the action
+      // flips to COMPLETE in the activity flyout instead of staying IN_PROGRESS.
+      await bulkCreateAgentActionResults(
+        esClient,
+        agentIds.map((agentId) => ({ agentId, actionId }))
+      );
     }
   } else {
     // Create unenroll action for each agent

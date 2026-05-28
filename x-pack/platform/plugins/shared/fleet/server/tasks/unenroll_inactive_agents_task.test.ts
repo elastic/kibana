@@ -17,7 +17,7 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import { agentPolicyService } from '../services';
 import { createAgentPolicyMock } from '../../common/mocks';
 import { createAppContextStartContractMock } from '../mocks';
-import { getAgentsByKuery } from '../services/agents';
+import { getAgentsById, getAgentsByKuery } from '../services/agents';
 
 import { appContextService } from '../services';
 
@@ -54,6 +54,7 @@ const MOCK_TASK_INSTANCE = {
 
 const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
+const mockedGetAgentsById = getAgentsById as jest.MockedFunction<typeof getAgentsById>;
 
 describe('UnenrollInactiveAgentsTask', () => {
   const { createSetup: coreSetupMock } = coreMock;
@@ -176,14 +177,16 @@ describe('UnenrollInactiveAgentsTask', () => {
 
     it('Should skip agents that are already scheduled for unenrollment', async () => {
       mockedUnenrollBatch.mockResolvedValue({ actionId: 'actionid-01' });
-      // esClient.search returns agent-1 as already scheduled
       esClient.search
+        // executeDueUnenrollments: find due UNENROLL actions — none
+        .mockResolvedValueOnce({ hits: { hits: [] } } as any)
+        // scheduleUnenrollments: getAlreadyScheduledAgentIds — agent-1 already scheduled
         .mockResolvedValueOnce({
           hits: {
-            hits: [{ _source: { agents: ['agent-1'] } }],
+            hits: [{ _source: { agents: ['agent-1'], action_id: 'existing-action' } }],
           },
         } as any)
-        // second call for executeDueUnenrollments — no due actions
+        // fallback
         .mockResolvedValue({ hits: { hits: [] } } as any);
 
       await runTask();
@@ -222,14 +225,14 @@ describe('UnenrollInactiveAgentsTask', () => {
         // executeDueUnenrollments: fetch all CANCEL actions (none)
         .mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
-      // getAgentsByKuery for re-validation returns the agents still inactive
-      mockedGetAgentsByKuery.mockResolvedValueOnce({ agents } as any);
+      // getAgentsById for re-validation returns the agents still inactive
+      mockedGetAgentsById.mockResolvedValueOnce(agents as any);
 
       await runTask();
       expect(mockedUnenrollBatch).toHaveBeenCalledWith(
         undefined,
         expect.anything(),
-        agents,
+        agents.filter((a) => a.status === 'inactive'),
         expect.objectContaining({
           revoke: true,
           force: true,
@@ -307,8 +310,8 @@ describe('UnenrollInactiveAgentsTask', () => {
         // executeDueUnenrollments: fetch all CANCEL actions (none)
         .mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
-      // agent is no longer inactive (getAgentsByKuery returns empty for re-validation)
-      mockedGetAgentsByKuery.mockResolvedValueOnce({ agents: [] } as any);
+      // agent is no longer inactive (getAgentsById returns agent with active status)
+      mockedGetAgentsById.mockResolvedValueOnce([{ id: 'agent-1', status: 'active' }] as any);
 
       await runTask();
       expect(mockedUnenrollBatch).not.toHaveBeenCalled();
