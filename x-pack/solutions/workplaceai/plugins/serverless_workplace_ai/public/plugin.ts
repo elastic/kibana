@@ -8,13 +8,14 @@
 import { of } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
+import { recentDashboardsNavExtension } from '@kbn/navigation-plugin/public';
 import type {
   WorkplaceAIServerlessPluginSetup,
   WorkplaceAIServerlessPluginStart,
   WorkplaceAIServerlessPluginSetupDeps,
   WorkplaceAIServerlessPluginStartDeps,
 } from './types';
-import { createNavigationTree } from './navigation_tree';
+import { createNavigationTree, RECENT_DASHBOARDS_EXTENSION_POINT_ID } from './navigation_tree';
 
 export class WorkplaceAIServerlessPlugin
   implements
@@ -40,7 +41,9 @@ export class WorkplaceAIServerlessPlugin
   ): WorkplaceAIServerlessPluginStart {
     const navigationTree$ = of(createNavigationTree());
 
-    serverless.initNavigation('workplaceai', navigationTree$);
+    serverless.initNavigation('workplaceai', navigationTree$, {
+      [RECENT_DASHBOARDS_EXTENSION_POINT_ID]: recentDashboardsNavExtension,
+    });
 
     return {};
   }
