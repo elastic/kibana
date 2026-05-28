@@ -39,6 +39,7 @@ import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_uti
 import { visualizationsClient } from '../content_management';
 import type { VisualizationSavedObjectAttributes } from '../../common';
 import { urlFor } from './url_utils';
+import { getEmbeddable } from '../services';
 
 export const SAVED_VIS_TYPE = 'visualization';
 
@@ -160,39 +161,41 @@ export async function findListItems(
   const searchOption = (field: string, ...defaults: string[]) =>
     _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
 
-  const {
-    hits: savedObjects,
-    pagination: { total },
-  } = await visualizationsClient.search(
-    {
-      text: search ? `${search}*` : undefined,
-      limit: size,
+  const embeddableService = getEmbeddable();
+
+  const { hits: savedObjects, total } = await embeddableService.getSavedObjects({
+    type: searchOption('docTypes', 'visualization'),
+    limit: size,
+    ...(search.length && { search: `${search}*` }),
+    ...(references?.length && {
       tags: {
         included: references?.map((r) => r.id),
         excluded: referencesToExclude?.map((r) => r.id),
       },
-    },
-    {
-      types: searchOption('docTypes', 'visualization'),
-      searchFields: searchOption('searchFields', 'title^3', 'description'),
-    }
-  );
+    }),
+  });
 
   return {
     total,
-    hits: await asyncMap(savedObjects, async (savedObject: VisualizationSavedObject) => {
+    hits: await asyncMap(savedObjects, async (savedObject: any) => {
       const config = extensionByType[savedObject.type];
+      const { updated_at, updated_by, created_at, created_by, ...rest } = savedObject;
+      const visObject = {
+        ...rest,
+        updatedAt: updated_at,
+        createdAt: created_at,
+      } as VisualizationSavedObject;
 
       if (config) {
         return {
           // TODO: understand why this SO can take any shape based on type?
           // This conflicts with the type of `savedObject` value as `VisualizationSavedObject`.
           // See test case titled 'uses type-specific toListItem function, if available'
-          ...config.toListItem(savedObject),
+          ...config.toListItem(visObject),
           references: savedObject.references,
         };
       } else {
-        return await mapHitSource(visTypes, savedObject);
+        return await mapHitSource(visTypes, visObject);
       }
     }),
   };
