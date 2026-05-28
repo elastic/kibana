@@ -99,8 +99,6 @@ enabled:
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
   - src/platform/test/functional/apps/kibana_overview/config.ts
-  - src/platform/test/functional/apps/management/config.ts
-  - src/platform/test/functional/apps/saved_objects_management/config.ts
   - src/platform/test/functional/apps/sharing/config.ts
   - src/platform/test/functional/apps/status_page/config.ts
   - src/platform/test/functional/apps/visualize/group1/config.ts
@@ -262,7 +260,6 @@ enabled:
   - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
-  - x-pack/platform/test/functional/apps/saved_objects_management/config.ts
   - x-pack/platform/test/functional/apps/saved_query_management/group1/config.ts
   - x-pack/platform/test/functional/apps/saved_query_management/group2/config.ts
   - x-pack/platform/test/functional/apps/saved_query_management/config.v2.ts
