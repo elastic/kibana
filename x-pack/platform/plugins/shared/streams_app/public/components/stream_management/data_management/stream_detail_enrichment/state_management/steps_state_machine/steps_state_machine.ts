@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isEqual, isUndefined, omitBy } from 'lodash';
 import type { ActorRefFrom, SnapshotFrom } from 'xstate';
 import { and, assign, forwardTo, sendTo, setup } from 'xstate';
 import type {
@@ -18,20 +19,14 @@ import type { StepContext, StepEvent, StepInput } from './types';
 export type StepActorRef = ActorRefFrom<typeof stepMachine>;
 export type StepActorSnapshot = SnapshotFrom<typeof stepMachine>;
 
-const isDescriptionChanged = (
-  step: StreamlangStepWithUIAttributes,
-  originalStep: StreamlangStepWithUIAttributes
-): boolean => {
-  if (!isActionBlock(step) || !isActionBlock(originalStep)) {
-    return false;
-  }
-  return step.description !== originalStep.description;
-};
+// Strips customIdentifier and undefined values from a step
+const sanitiseStep = ({ customIdentifier, ...restOfStep }: StreamlangStepWithUIAttributes) =>
+  omitBy(restOfStep, isUndefined);
 
-const isParentOrBranchChanged = (
+const isStepUpdated = (
   step: StreamlangStepWithUIAttributes,
   originalStep: StreamlangStepWithUIAttributes
-): boolean => step.parentId !== originalStep.parentId || step.branch !== originalStep.branch;
+): boolean => !isEqual(sanitiseStep(step), sanitiseStep(originalStep));
 
 export const stepMachine = setup({
   types: {
@@ -88,9 +83,7 @@ export const stepMachine = setup({
       return {
         step: updatedStep,
         previousStep: updatedStep,
-        isUpdated:
-          isDescriptionChanged(updatedStep, context.originalStep) ||
-          isParentOrBranchChanged(updatedStep, context.originalStep),
+        isUpdated: isStepUpdated(updatedStep, context.originalStep),
       };
     }),
     changeParent: assign(
@@ -107,9 +100,7 @@ export const stepMachine = setup({
         return {
           step: updatedStep,
           previousStep: updatedStep,
-          isUpdated:
-            isDescriptionChanged(updatedStep, context.originalStep) ||
-            isParentOrBranchChanged(updatedStep, context.originalStep),
+          isUpdated: isStepUpdated(updatedStep, context.originalStep),
         };
       }
     ),
@@ -118,7 +109,7 @@ export const stepMachine = setup({
     })),
     markAsUpdated: assign(({ context }) => ({
       previousStep: context.step,
-      isUpdated: true,
+      isUpdated: isStepUpdated(context.step, context.originalStep),
     })),
     forwardEventToParent: forwardTo(({ context }) => context.parentRef),
     notifyStepSave: sendTo(

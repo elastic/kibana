@@ -293,52 +293,38 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
             ) : (
               <EuiToolTip
                 content={
-                  <>
-                    <p>
-                      <i>{stepDescription}</i>
-                    </p>
-                    <p>
-                      {i18n.translate(
+                  isEditable
+                    ? i18n.translate(
                         'xpack.streams.actionBlockListItem.tooltip.editProcessorDescriptionLabel',
-                        {
-                          defaultMessage: 'Edit {stepAction} processor description',
-                          values: {
-                            stepAction: step.action,
-                          },
-                        }
-                      )}
-                    </p>
-                  </>
+                        { defaultMessage: 'Edit processor description' }
+                      )
+                    : undefined
                 }
                 display="block"
               >
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  tabIndex={0}
-                  data-test-subj="streamsAppProcessorDescription"
-                  css={css`
-                    font-family: ${euiTheme.font.familyCode};
-                    ${euiTextTruncate()}
-                    ${isEditable
-                      ? `cursor: pointer;
-                      &:hover {
-                        text-decoration: underline;
-                      }`
-                      : ''}
-                  `}
+                <EuiButtonEmpty
                   onClick={handleDescriptionClick}
-                  onKeyDown={(e: React.KeyboardEvent) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleDescriptionClick();
-                    }
-                  }}
-                  role={isEditable ? 'button' : undefined}
-                  style={{ fontStyle: 'italic' }}
+                  color="text"
+                  size="xs"
+                  css={css`
+                    width: 100%;
+                  `}
+                  isDisabled={!isEditable}
+                  contentProps={{ style: { justifyContent: 'flex-start' } }}
                 >
-                  {stepDescription}
-                </EuiText>
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    data-test-subj="streamsAppProcessorDescription"
+                    component="span"
+                    style={{ fontStyle: 'italic', fontFamily: euiTheme.font.familyCode }}
+                    css={css`
+                      ${euiTextTruncate()}
+                    `}
+                  >
+                    {stepDescription}
+                  </EuiText>
+                </EuiButtonEmpty>
               </EuiToolTip>
             )}
           </EuiPanel>
