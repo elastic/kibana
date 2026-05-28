@@ -35,6 +35,18 @@ node scripts/evals init --skip-discovery
 |------|-------------|
 | `--skip-discovery` | Skip EIS model discovery (reuse existing `target/eis_models.json`) |
 
+#### `init config` -- Create a config profile
+
+Creates a config profile (`config.json` or `config.<profile>.json`) by prompting for an infrastructure target -- **golden cluster**, **local**, or **custom** -- and the associated secrets (API keys, LiteLLM key, GCS credentials).
+
+`--profile local` pre-selects the local target; otherwise golden cluster is the default.
+
+```bash
+node scripts/evals init config                   # default profile (golden cluster pre-selected)
+node scripts/evals init config --profile local   # local profile (local target pre-selected)
+node scripts/evals init config --profile <name>  # named profile
+```
+
 ### `start` -- Start stack and run a suite
 
 The main command. On first run, auto-detects missing config and connectors and prompts for setup. Then starts EDOT + Scout as background daemons, enables EIS CCM if needed, and runs a Playwright eval suite.
@@ -72,12 +84,11 @@ Traces are exported by EDOT to the export cluster (controlled by `--export-profi
 
 Use profiles to fetch datasets from the golden cluster while exporting results and traces to your local Elasticsearch/Kibana (default: `http://localhost:9200` / `http://localhost:5601`).
 
-Create the profiles explicitly, or let `start --profile <name>` prompt you when the config is missing:
+Create the profiles explicitly (see [`init config`](#init-config----create-a-config-profile) above), or let `start --profile <name>` prompt you when the config is missing:
 
 ```bash
-# explicit setup (optional -- start prompts if missing)
-node scripts/evals init config                   # golden cluster config (datasets)
-node scripts/evals init config --profile local   # local export profile (results + traces to localhost:9200)
+node scripts/evals init config                   # default profile (golden cluster pre-selected)
+node scripts/evals init config --profile local   # local profile (local target pre-selected)
 ```
 
 Run:

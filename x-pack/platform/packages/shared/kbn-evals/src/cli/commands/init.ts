@@ -290,11 +290,7 @@ export const runConfigInit = async (
           for (const field of API_KEY_FIELDS) {
             set(example, field, trimmed);
           }
-          set(
-            example,
-            'tracingExporters[0].http.headers.Authorization',
-            `ApiKey ${trimmed}`
-          );
+          set(example, 'tracingExporters[0].http.headers.Authorization', `ApiKey ${trimmed}`);
           log.info(
             'API key applied to evaluationsEs, tracingEs, evaluationsKbn, and tracingExporters.'
           );

@@ -143,12 +143,15 @@ The Evals CLI supports this via **vault config profiles** in:
 - `config.json` (default)
 - `config.<profile>.json` (e.g. `config.local.json`)
 
+`init config` is an interactive wizard that prompts for an infrastructure target -- **golden cluster** (shared `kbn-evals-serverless`), **local** (localhost), or **custom** (any URLs you provide) -- and then fills in the associated secrets. `--profile local` pre-selects the local target, but you can override interactively.
+
 Create the profiles explicitly, or let `start` prompt you when a profile config is missing:
 
 ```bash
 # Explicit setup (optional -- start --profile <name> will prompt if the config is missing)
-node scripts/evals init config                   # golden cluster config (datasets + keys)
-node scripts/evals init config --profile local   # local export profile (results + traces to localhost:9200)
+node scripts/evals init config                   # default profile (golden cluster pre-selected)
+node scripts/evals init config --profile local   # local profile (local target pre-selected)
+node scripts/evals init config --profile <name>  # named profile
 ```
 
 Run a suite using golden datasets but exporting locally:
