@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   EuiAccordion,
   EuiButton,
@@ -72,11 +72,15 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     initialConnectorId
   );
 
+  const hasSetInitialTab = useRef(false);
   useEffect(() => {
+    if (hasSetInitialTab.current) return;
     if (isEditPage) {
       setSelectedTabId(TABS.EXISTING_CONNECTION);
-    } else {
-      setSelectedTabId(cloudConnectors.length > 0 ? TABS.EXISTING_CONNECTION : TABS.NEW_CONNECTION);
+      hasSetInitialTab.current = true;
+    } else if (cloudConnectors.length > 0) {
+      setSelectedTabId(TABS.EXISTING_CONNECTION);
+      hasSetInitialTab.current = true;
     }
   }, [cloudConnectors.length, isEditPage]);
 
