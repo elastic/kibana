@@ -80,7 +80,7 @@ export const DefaultPipelineItem: React.FC<{
                 )}
                 id="ingestPipelinesCurlAccordion"
                 forceState={accordionOpen ? 'open' : 'closed'}
-                onClick={() => setAccordionOpen(!accordionOpen)}
+                onToggle={(isOpen) => setAccordionOpen(isOpen)}
               >
                 <CurlRequest
                   document={{ body: 'body', title: 'Title' }}
