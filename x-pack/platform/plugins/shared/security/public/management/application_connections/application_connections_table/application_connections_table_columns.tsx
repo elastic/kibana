@@ -77,16 +77,25 @@ export const useApplicationConnectionsTableColumns = ({
       render: ({ client }) => {
         const isOpen = expandedRows.has(client.id);
         return (
-          <EuiButtonIcon
-            data-test-subj={`expandRow-${client.id}`}
-            aria-label={
+          <EuiToolTip
+            content={
               isOpen
                 ? labels.groupedColumns.collapseRowAriaLabel
                 : labels.groupedColumns.expandRowAriaLabel
             }
-            iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-            onClick={() => onToggleExpand(client.id)}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj={`expandRow-${client.id}`}
+              aria-label={
+                isOpen
+                  ? labels.groupedColumns.collapseRowAriaLabel
+                  : labels.groupedColumns.expandRowAriaLabel
+              }
+              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+              onClick={() => onToggleExpand(client.id)}
+            />
+          </EuiToolTip>
         );
       },
     };

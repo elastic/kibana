@@ -62,12 +62,14 @@ export const McpClientDetailsContent = ({
         actions={[
           <EuiCopy textToCopy={id}>
             {(copy) => (
-              <EuiButtonIcon
-                iconType="copy"
-                color="text"
-                aria-label={labels.details.copyClientId}
-                onClick={copy}
-              />
+              <EuiToolTip content={labels.details.copyClientId} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="copy"
+                  color="text"
+                  aria-label={labels.details.copyClientId}
+                  onClick={copy}
+                />
+              </EuiToolTip>
             )}
           </EuiCopy>,
         ]}
@@ -79,12 +81,14 @@ export const McpClientDetailsContent = ({
         actions={[
           <EuiCopy textToCopy={mcpServerUrl}>
             {(copy) => (
-              <EuiButtonIcon
-                iconType="copy"
-                color="text"
-                aria-label={labels.details.copyServerUrl}
-                onClick={copy}
-              />
+              <EuiToolTip content={labels.details.copyServerUrl} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="copy"
+                  color="text"
+                  aria-label={labels.details.copyServerUrl}
+                  onClick={copy}
+                />
+              </EuiToolTip>
             )}
           </EuiCopy>,
         ]}
@@ -95,26 +99,35 @@ export const McpClientDetailsContent = ({
         <McpClientDetailsField
           label={labels.details.modal.clientSecretLabel}
           actions={[
-            <EuiButtonIcon
-              iconType="download"
-              color="text"
-              aria-label={labels.details.modal.downloadSecret}
-              onClick={handleDownloadSecret}
-            />,
-            <EuiButtonIcon
-              iconType={isSecretVisible ? 'eyeClosed' : 'eye'}
-              color="text"
-              aria-label={labels.details.modal.toggleSecretVisibility}
-              onClick={toggleSecretVisibility}
-            />,
+            <EuiToolTip content={labels.details.modal.downloadSecret} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="download"
+                color="text"
+                aria-label={labels.details.modal.downloadSecret}
+                onClick={handleDownloadSecret}
+              />
+            </EuiToolTip>,
+            <EuiToolTip
+              content={labels.details.modal.toggleSecretVisibility}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType={isSecretVisible ? 'eyeClosed' : 'eye'}
+                color="text"
+                aria-label={labels.details.modal.toggleSecretVisibility}
+                onClick={toggleSecretVisibility}
+              />
+            </EuiToolTip>,
             <EuiCopy textToCopy={clientDetails.client_secret}>
               {(copy) => (
-                <EuiButtonIcon
-                  iconType="copy"
-                  color="text"
-                  aria-label={labels.details.modal.copySecret}
-                  onClick={copy}
-                />
+                <EuiToolTip content={labels.details.modal.copySecret} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="copy"
+                    color="text"
+                    aria-label={labels.details.modal.copySecret}
+                    onClick={copy}
+                  />
+                </EuiToolTip>
               )}
             </EuiCopy>,
           ]}
