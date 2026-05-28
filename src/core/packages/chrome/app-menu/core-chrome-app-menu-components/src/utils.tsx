@@ -126,6 +126,9 @@ export const processStaticItems = (staticItems?: AppMenuItemType[]): AppMenuItem
     overflow: true,
   }));
 
+export const hasNonGlobalStaticItems = (staticItems?: Array<{ global?: boolean }>): boolean =>
+  !!staticItems?.some((item) => !item.global);
+
 export const isDisabled = (disableButton: AppMenuItemCommon['disableButton']) =>
   Boolean(isFunction(disableButton) ? disableButton() : disableButton);
 
