@@ -8,8 +8,8 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { API_VERSIONS } from '../../../../common';
-import { registerListRelationships } from './list_relationships';
+import { API_VERSIONS, ListEntityRelationshipsRequestQuery } from '../../../../common';
+import { paramsSchema, registerListRelationships } from './list_relationships';
 import type { RelationshipObservationDoc } from '../../../../common/domain/entity_metadata/relationship_observation';
 
 const makeDoc = (overrides: Partial<RelationshipObservationDoc> = {}): RelationshipObservationDoc =>
@@ -75,47 +75,30 @@ describe('registerListRelationships route', () => {
     expect(versionConfig.version).toBe(API_VERSIONS.public.v1);
   });
 
-  it('rejects an empty entityId path param', async () => {
-    registerListRelationships(router);
-    const route = (router.versioned.get as jest.Mock).mock.results[0].value;
-    const [versionConfig] = (route.addVersion as jest.Mock).mock.calls[0];
-    const paramsValidate = versionConfig.validate?.request?.params;
-    expect(paramsValidate).toBeDefined();
-    // The validation runner must throw / produce an error for empty string.
-    expect(() => paramsValidate.validate({ entityId: '' })).toThrow();
+  it('rejects an empty entityId path param', () => {
+    // Schema is the contract; the route wrapper (buildRouteValidationWithZod)
+    // is plumbing. Test the schema directly.
+    expect(paramsSchema.safeParse({ entityId: '' }).success).toBe(false);
   });
 
-  it('accepts a non-empty entityId path param', async () => {
-    registerListRelationships(router);
-    const route = (router.versioned.get as jest.Mock).mock.results[0].value;
-    const [versionConfig] = (route.addVersion as jest.Mock).mock.calls[0];
-    const paramsValidate = versionConfig.validate?.request?.params;
-    expect(() => paramsValidate.validate({ entityId: 'user:alice@corp' })).not.toThrow();
+  it('accepts a non-empty entityId path param', () => {
+    expect(paramsSchema.safeParse({ entityId: 'user:alice@corp' }).success).toBe(true);
   });
 
   it('validates the query schema and rejects invalid sort_order', () => {
-    registerListRelationships(router);
-    const route = (router.versioned.get as jest.Mock).mock.results[0].value;
-    const [versionConfig] = (route.addVersion as jest.Mock).mock.calls[0];
-    const queryValidate = versionConfig.validate?.request?.query;
-    expect(queryValidate).toBeDefined();
-    expect(() => queryValidate.validate({ sort_order: 'sideways' })).toThrow();
+    expect(
+      ListEntityRelationshipsRequestQuery.safeParse({ sort_order: 'sideways' }).success
+    ).toBe(false);
   });
 
   it('rejects an invalid ISO-8601 `from` query param', () => {
-    registerListRelationships(router);
-    const route = (router.versioned.get as jest.Mock).mock.results[0].value;
-    const [versionConfig] = (route.addVersion as jest.Mock).mock.calls[0];
-    const queryValidate = versionConfig.validate?.request?.query;
-    expect(() => queryValidate.validate({ from: 'not-a-date' })).toThrow();
+    expect(
+      ListEntityRelationshipsRequestQuery.safeParse({ from: 'not-a-date' }).success
+    ).toBe(false);
   });
 
   it('accepts an empty query object (all params optional)', () => {
-    registerListRelationships(router);
-    const route = (router.versioned.get as jest.Mock).mock.results[0].value;
-    const [versionConfig] = (route.addVersion as jest.Mock).mock.calls[0];
-    const queryValidate = versionConfig.validate?.request?.query;
-    expect(() => queryValidate.validate({})).not.toThrow();
+    expect(ListEntityRelationshipsRequestQuery.safeParse({}).success).toBe(true);
   });
 
   it('forwards entityId + query params to crudClient.listRelationshipObservations', async () => {
