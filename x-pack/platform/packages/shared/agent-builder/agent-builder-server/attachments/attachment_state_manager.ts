@@ -180,13 +180,6 @@ const descriptionFromAttachmentLabel = (data: unknown): string | undefined => {
   return trimmed || undefined;
 };
 
-const normalizeDescription = (description: string | undefined): string | undefined => {
-  if (description === undefined) {
-    return undefined;
-  }
-  const trimmed = description.trim();
-  return trimmed || undefined;
-};
 
 /**
  * Private implementation of AttachmentStateManager.
@@ -373,22 +366,20 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       estimated_tokens: tokens,
     };
 
-    const resolvedDescription =
-      normalizeDescription(input.description) ?? descriptionFromAttachmentLabel(validatedData);
-
     const attachment: VersionedAttachment = {
       id,
       type: input.type,
       versions: [version],
       current_version: 1,
       active: true,
-      ...(resolvedDescription !== undefined ? { description: resolvedDescription } : {}),
+      ...(input.description !== undefined && { description: input.description }),
       ...(input.hidden !== undefined && { hidden: input.hidden }),
       readonly: input.readonly ?? this.getDefaultReadonly(input.type),
       ...(input.origin !== undefined && { origin: input.origin }),
       // When created with origin (by-reference), record snapshot time for isStale comparison.
       // By-value attachments leave this undefined.
       ...(input.origin !== undefined && { origin_snapshot_at: now }),
+      ...(input.group_id !== undefined && { group_id: input.group_id }),
     };
 
     this.attachments.set(id, attachment);

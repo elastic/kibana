@@ -26,6 +26,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.4.2 [kibana-9.4.2-release-notes]
 
+:::{important}
+The 9.4.2 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
 ### Features and enhancements [kibana-9.4.2-features-enhancements]
 
 **Search**:
@@ -625,6 +629,10 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Strips system-managed date fields from ingest pipelines before PUT [#252579]({{kib-pull}}252579).
 
 ## 9.3.5 [kibana-9.3.5-release-notes]
+
+:::{important}
+The 9.3.5 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
 
 ### Fixes [kibana-9.3.5-fixes]
 
