@@ -6,6 +6,10 @@
  */
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type {
+  InfraEntityMetricType,
+  InfraEntityMetricsItem,
+} from '../../../../../../common/http_api';
 import { useReloadRequestTimeContext } from '../../../../../hooks/use_reload_request_time';
 import { HostKpiCharts } from '../../../../../components/asset_details';
 import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
@@ -18,6 +22,25 @@ import {
   MAX_AS_FIRST_FUNCTION_PATTERN,
   AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
 } from '../../../../../components/asset_details/constants';
+
+const HOST_KPI_METRICS: Record<string, InfraEntityMetricType> = {
+  cpuUsage: 'cpuV2',
+  normalizedLoad1m: 'normalizedLoad1m',
+  memoryUsage: 'memory',
+  diskUsage: 'diskSpaceUsage',
+};
+
+export const getMetricDataAvailability = (
+  hostNodes: InfraEntityMetricsItem[]
+): Record<string, boolean> =>
+  Object.fromEntries(
+    Object.entries(HOST_KPI_METRICS).map(([chartId, metricName]) => [
+      chartId,
+      hostNodes.some((hostNode) =>
+        hostNode.metrics?.some((metric) => metric.name === metricName && metric.value !== null)
+      ),
+    ])
+  );
 
 export const getSubtitle = ({
   formulaValue,
@@ -73,6 +96,7 @@ export const KpiCharts = () => {
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
   const loading = hostsLoading || hostCountLoading;
+  const metricDataAvailability = useMemo(() => getMetricDataAvailability(hostNodes), [hostNodes]);
 
   const filters = shouldUseSearchCriteria
     ? [...searchCriteria.filters, ...(searchCriteria.panelFilters ?? [])]
@@ -121,6 +145,7 @@ export const KpiCharts = () => {
       loading={loading}
       error={error}
       hasData={!!hostNodes.length}
+      metricDataAvailability={metricDataAvailability}
       schema={searchCriteria.preferredSchema}
     />
   );

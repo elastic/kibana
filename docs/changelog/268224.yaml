@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/268224
+issues:
+- https://github.com/elastic/kibana/issues/241683
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- Search and data
+title: Use `event.ingested` instead of `@timestamp` for incoming Fleet data checks
+description: Fixes a bug where the agent enrollment "Confirm incoming data" step would time out for integrations ingesting backdated data, even though data was being received correctly.

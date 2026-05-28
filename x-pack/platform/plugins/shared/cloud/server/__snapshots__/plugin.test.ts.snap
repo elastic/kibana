@@ -20,6 +20,9 @@ Object {
   "isInTrial": [Function],
   "isServerlessEnabled": false,
   "kibanaUrl": undefined,
+  "managedOtlp": Object {
+    "url": undefined,
+  },
   "onboarding": Object {
     "defaultSolution": undefined,
   },

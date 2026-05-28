@@ -63,6 +63,10 @@ export const runLegacyTypeCheckCli = () => {
           !project.isTypeCheckDisabled() && (!projectFilter || project.path === projectFilter)
       );
 
+      if (projectFilter && projects.length === 0) {
+        throw createFailError(`Could not find a TypeScript project at '${projectFilter}'.`);
+      }
+
       const createdConfigs = await createTypeCheckConfigs(log, projects, TS_PROJECTS);
       let tscFailed = false;
       try {
@@ -98,7 +102,7 @@ export const runLegacyTypeCheckCli = () => {
         const localChanges = shouldUploadArchive ? await detectLocalChanges() : [];
         const hasLocalChanges = localChanges.length > 0;
 
-        if (shouldUploadArchive) {
+        if (shouldUploadArchive && !tscFailed) {
           if (hasLocalChanges) {
             const changedFiles = localChanges.join('\n');
             const message = `uncommitted changes were detected after the TypeScript build. TypeScript cache artifacts must be generated from a clean working tree.\nChanged files:\n${changedFiles}`;

@@ -36,6 +36,8 @@ import type { SearchBar } from '../../shared/search_bar/search_bar';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceDashboards } from '../../app/service_dashboards';
 import { ErrorGroupDetails } from '../../app/error_group_details';
+import { ServiceMapSearchBar } from '../../app/service_map/service_map_search_bar';
+import { ServiceMapSearchProvider } from '../../app/service_map/service_map_search_context';
 
 const ErrorGroupOverview = dynamic(() =>
   import('../../app/error_group_overview').then((mod) => ({ default: mod.ErrorGroupOverview }))
@@ -79,30 +81,36 @@ function page({
   tab,
   element,
   searchBarOptions,
+  customSearchBar,
   bottomHeaderContent,
   contentWrapper,
+  contextWrapper: ContextWrapper,
 }: {
   title: string;
   tab: React.ComponentProps<typeof ApmServiceTemplate>['selectedTab'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
+  customSearchBar?: React.ReactNode;
   bottomHeaderContent?: React.ComponentType;
   contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
+  contextWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }): {
   element: React.ReactElement<any, any>;
 } {
+  const template = (
+    <ApmServiceTemplate
+      title={title}
+      selectedTab={tab}
+      searchBarOptions={searchBarOptions}
+      customSearchBar={customSearchBar}
+      bottomHeaderContent={bottomHeaderContent}
+      contentWrapper={contentWrapper}
+    >
+      {element}
+    </ApmServiceTemplate>
+  );
   return {
-    element: (
-      <ApmServiceTemplate
-        title={title}
-        selectedTab={tab}
-        searchBarOptions={searchBarOptions}
-        bottomHeaderContent={bottomHeaderContent}
-        contentWrapper={contentWrapper}
-      >
-        {element}
-      </ApmServiceTemplate>
-    ),
+    element: ContextWrapper ? <ContextWrapper>{template}</ContextWrapper> : template,
   };
 }
 
@@ -348,8 +356,11 @@ export const serviceDetailRoute = {
           defaultMessage: 'Service map',
         }),
         element: <ServiceMapServiceDetail />,
+        customSearchBar: <ServiceMapSearchBar />,
+        contextWrapper: ServiceMapSearchProvider,
         searchBarOptions: {
           showTimeComparison: true,
+          showFilterBar: true,
         },
       }),
       '/services/{serviceName}/logs': page({
