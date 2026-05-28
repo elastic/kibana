@@ -39,7 +39,8 @@ jobs:
             paths: >-
               x-pack/platform/plugins/shared
               x-pack/platform/plugins/private
-              x-pack/platform/packages
+              x-pack/platform/packages/shared
+              x-pack/platform/packages/private
 
           - group: security
             paths: >-
@@ -59,11 +60,6 @@ jobs:
               x-pack/solutions/vectordb/plugins
               x-pack/solutions/vectordb/packages
               x-pack/solutions/workplaceai/plugins
-
-          - group: plugins-and-packages
-            paths: >-
-              x-pack/plugins
-              x-pack/packages
 
     steps:
       - name: Checkout kibana
@@ -100,3 +96,4 @@ jobs:
           bash scripts/index_dependency_usage.sh \
             --paths ${{ matrix.paths }} \
             --setup-template
+

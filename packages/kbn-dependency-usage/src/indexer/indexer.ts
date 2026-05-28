@@ -19,30 +19,60 @@ import { buildRenovateMatcher, type RenovateMatch } from './renovate.ts';
 import type { PathWithOwners } from '../lib/code_owners.ts';
 
 // ---------------------------------------------------------------------------
-// Plugin discovery
+// kibana.jsonc reader
 // ---------------------------------------------------------------------------
 
+interface KibanaJsonc {
+  id?: string;
+  type?: string;
+  group?: string;
+  visibility?: string;
+}
+
 /**
- * Expand `searchPaths` to plugin directories by listing immediate subdirectories.
- * Pass the direct parent of your plugins:
- *   x-pack/platform/plugins/shared   → 65 plugins (one per subdir)
- *   x-pack/solutions/security/plugins → 13 plugins
- *
- * Cruiser scans whatever directory it receives, so no kibana.jsonc validation
- * is needed — each subdir is a valid scan root regardless.
+ * Read the kibana.jsonc manifest for a package path.
+ * Returns null if the file is absent or unparseable.
  */
-export function discoverPlugins(searchPaths: string[]): string[] {
-  return searchPaths.flatMap((searchPath) => {
-    const abs = nodePath.join(REPO_ROOT, searchPath);
-    if (!existsSync(abs)) return [];
-    return readdirSync(abs, { withFileTypes: true })
-      .filter((e) => e.isDirectory() && !e.name.startsWith('.') && e.name !== 'node_modules')
-      .map((e) => `${searchPath}/${e.name}`);
-  });
+function readKibanaJsonc(packagePath: string): KibanaJsonc | null {
+  const filePath = nodePath.join(REPO_ROOT, packagePath, 'kibana.jsonc');
+  try {
+    // Strip single-line // comments before parsing (JSONC extension).
+    const raw = readFileSync(filePath, 'utf8').replace(/\/\/[^\n]*/g, '');
+    return JSON.parse(raw) as KibanaJsonc;
+  } catch {
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
-// Shared context (loaded once, reused across all plugins in a run)
+// Package discovery
+// ---------------------------------------------------------------------------
+
+/**
+ * Recursively discover all package paths under a search path.
+ *
+ * A directory is a package if it contains a `kibana.jsonc` — return it directly.
+ * Otherwise it is a grouping directory (e.g. x-pack/platform/packages/shared/security)
+ * — recurse into its children until actual packages are found.
+ *
+ * `maxDepth` limits how many grouping levels we'll traverse (default 3) to
+ * avoid accidentally walking deep trees that don't follow the expected structure.
+ */
+export function discoverPackages(searchPath: string, maxDepth = 3, _depth = 0): string[] {
+  const abs = nodePath.join(REPO_ROOT, searchPath);
+  if (!existsSync(abs)) return [];
+
+  if (existsSync(nodePath.join(abs, 'kibana.jsonc'))) return [searchPath];
+
+  if (_depth >= maxDepth) return [];
+
+  return readdirSync(abs, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && !e.name.startsWith('.') && e.name !== 'node_modules')
+    .flatMap((e) => discoverPackages(`${searchPath}/${e.name}`, maxDepth, _depth + 1));
+}
+
+// ---------------------------------------------------------------------------
+// Shared context (loaded once, reused across all search paths in a run)
 // ---------------------------------------------------------------------------
 
 export interface SharedContext {
@@ -79,7 +109,7 @@ export function buildSharedContext(
 }
 
 // ---------------------------------------------------------------------------
-// Per-plugin doc building
+// Doc building
 // ---------------------------------------------------------------------------
 
 const TEST_PATH_PATTERNS = [
@@ -107,7 +137,7 @@ function isTestFile(filePath: string): boolean {
  * React-ecosystem packages like react-redux, react-router-dom, @testing-library/react
  * are intentionally still indexed).
  */
-export const DEFAULT_EXCLUDED_DEPS = ['@elastic/', '@kbn/', 'react', 'react-dom'];
+export const DEFAULT_EXCLUDED_DEPS = ['@elastic/', '@kbn/', '@testing-library/', 'react', 'react-dom'];
 
 export function isExcludedDep(dep: string, patterns: string[]): boolean {
   return patterns.some((p) => (p.endsWith('/') ? dep.startsWith(p) : dep === p));
@@ -116,64 +146,77 @@ export function isExcludedDep(dep: string, patterns: string[]): boolean {
 export interface DepUsageDoc {
   '@timestamp': string;
   snapshot_id: string;
-  plugin_path: string;
-  plugin_name: string;
+  /** Package path relative to repo root */
+  'package.path': string;
+  /** Package id from kibana.jsonc, e.g. @kbn/security-solution-plugin */
+  'package.name': string;
+  /** Type from kibana.jsonc: plugin | shared-common | shared-browser | shared-server | … */
+  'package.type': string | null;
+  /** Group from kibana.jsonc: platform | security | observability | search | … */
+  'package.group': string | null;
+  /** Visibility from kibana.jsonc: private | shared */
+  'package.visibility': string | null;
   code_owners: string[];
-  dep: string;
-  dep_declared_version: string | null;
-  dependent_file_count: number;
-  dependent_test_file_count: number;
-  dependent_prod_file_count: number;
-  dependent_files: string[];
-  renovate_match_team: string | null;
-  renovate_match_group: string | null;
-  renovate_orphan: boolean;
+  'dependency.name': string;
+  'dependency.declared_version': string | null;
+  'dependent.file_count': number;
+  'dependent.test_file_count': number;
+  'dependent.prod_file_count': number;
+  'dependent.files': string[];
+  'renovate.team': string | null;
+  'renovate.group': string | null;
+  'renovate.orphan': boolean;
 }
 
-/** Run cruiser against a single plugin and return ready-to-index docs. */
-export async function buildDocsForPlugin(
-  pluginPath: string,
+/**
+ * Run cruise() on a single package directory and emit one doc per external
+ * dependency it imports. Reads kibana.jsonc once for package metadata.
+ */
+export async function buildDocsForPackage(
+  pkgPath: string,
   ctx: SharedContext
 ): Promise<DepUsageDoc[]> {
-  const result = await cruiseExternalDeps([pluginPath]);
+  const abs = nodePath.join(REPO_ROOT, pkgPath);
+  if (!existsSync(abs)) return [];
 
+  const result = await cruiseExternalDeps([pkgPath]);
   if (typeof result.output === 'string') {
     throw new Error('Unexpected string output from cruise');
   }
 
-  const pluginName = pluginPath.split('/').pop() ?? pluginPath;
-  const codeOwners = getCodeOwnersForFile(pluginPath, ctx.reversedCodeowners);
+  const manifest = readKibanaJsonc(pkgPath);
   const docs: DepUsageDoc[] = [];
 
   for (const mod of result.output.modules) {
     if (typeof mod.source !== 'string' || !mod.source.startsWith('node_modules/')) continue;
 
-    const dep = mod.source.replace(/^node_modules\//, '');
-    if (isExcludedDep(dep, ctx.excludedDepPatterns)) continue;
+    const depName = mod.source.replace(/^node_modules\//, '');
+    if (isExcludedDep(depName, ctx.excludedDepPatterns)) continue;
 
-    const dependents = Array.from(
-      new Set((mod.dependents ?? []).filter((f: string) => f.startsWith(pluginPath)))
-    ).sort() as string[];
-
+    const dependents = [...new Set((mod.dependents ?? []) as string[])].sort();
     if (dependents.length === 0) continue;
+
     const testFiles = dependents.filter(isTestFile);
-    const renovate = ctx.matchRenovate(dep);
+    const renovate = ctx.matchRenovate(depName);
 
     docs.push({
       '@timestamp': ctx.timestamp,
       snapshot_id: ctx.snapshotId,
-      plugin_path: pluginPath,
-      plugin_name: pluginName,
-      code_owners: codeOwners,
-      dep,
-      dep_declared_version: ctx.declaredVersions.get(dep) ?? null,
-      dependent_file_count: dependents.length,
-      dependent_test_file_count: testFiles.length,
-      dependent_prod_file_count: dependents.length - testFiles.length,
-      dependent_files: dependents,
-      renovate_match_team: renovate.team,
-      renovate_match_group: renovate.group,
-      renovate_orphan: renovate.orphan,
+      'package.path': pkgPath,
+      'package.name': manifest?.id ?? pkgPath.split('/').pop() ?? pkgPath,
+      'package.type': manifest?.type ?? null,
+      'package.group': manifest?.group ?? null,
+      'package.visibility': manifest?.visibility ?? null,
+      code_owners: getCodeOwnersForFile(pkgPath, ctx.reversedCodeowners),
+      'dependency.name': depName,
+      'dependency.declared_version': ctx.declaredVersions.get(depName) ?? null,
+      'dependent.file_count': dependents.length,
+      'dependent.test_file_count': testFiles.length,
+      'dependent.prod_file_count': dependents.length - testFiles.length,
+      'dependent.files': dependents,
+      'renovate.team': renovate.team,
+      'renovate.group': renovate.group,
+      'renovate.orphan': renovate.orphan,
     });
   }
 
@@ -203,18 +246,37 @@ export const INDEX_TEMPLATE = {
       properties: {
         '@timestamp': { type: 'date' },
         snapshot_id: { type: 'keyword' },
-        plugin_path: { type: 'keyword' },
-        plugin_name: { type: 'keyword' },
+        package: {
+          properties: {
+            path: { type: 'keyword' },
+            name: { type: 'keyword' },
+            type: { type: 'keyword' },
+            group: { type: 'keyword' },
+            visibility: { type: 'keyword' },
+          },
+        },
         code_owners: { type: 'keyword' },
-        dep: { type: 'keyword' },
-        dep_declared_version: { type: 'keyword' },
-        dependent_file_count: { type: 'integer' },
-        dependent_test_file_count: { type: 'integer' },
-        dependent_prod_file_count: { type: 'integer' },
-        dependent_files: { type: 'keyword' },
-        renovate_match_team: { type: 'keyword' },
-        renovate_match_group: { type: 'keyword' },
-        renovate_orphan: { type: 'boolean' },
+        dependency: {
+          properties: {
+            name: { type: 'keyword' },
+            declared_version: { type: 'keyword' },
+          },
+        },
+        dependent: {
+          properties: {
+            file_count: { type: 'integer' },
+            test_file_count: { type: 'integer' },
+            prod_file_count: { type: 'integer' },
+            files: { type: 'keyword' },
+          },
+        },
+        renovate: {
+          properties: {
+            team: { type: 'keyword' },
+            group: { type: 'keyword' },
+            orphan: { type: 'boolean' },
+          },
+        },
       },
     },
   },
@@ -230,7 +292,11 @@ function buildBulkBody(docs: DepUsageDoc[]): string {
   return (
     docs
       .flatMap((doc) => [
-        JSON.stringify({ index: { _id: `${doc.snapshot_id}::${doc.plugin_path}::${doc.dep}` } }),
+        JSON.stringify({
+          index: {
+            _id: `${doc.snapshot_id}::${doc['package.path']}::${doc['dependency.name']}`,
+          },
+        }),
         JSON.stringify(doc),
       ])
       .join('\n') + '\n'

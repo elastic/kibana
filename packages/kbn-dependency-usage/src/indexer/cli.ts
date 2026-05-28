@@ -13,9 +13,9 @@ import yargs from 'yargs';
 import chalk from 'chalk';
 
 import {
-  discoverPlugins,
+  discoverPackages,
   buildSharedContext,
-  buildDocsForPlugin,
+  buildDocsForPackage,
   ensureIndexTemplate,
   indexDocs,
   DEFAULT_EXCLUDED_DEPS,
@@ -31,14 +31,15 @@ const today = new Date().toISOString().slice(0, 10);
 yargs(process.argv.slice(2))
   .command(
     '*',
-    chalk.green('Index per-(plugin, dep) dependency usage docs into Elasticsearch'),
+    chalk.green('Index per-(package, dependency) usage docs into Elasticsearch'),
     (y) =>
       y
         .version(false)
         .option('paths', {
           alias: 'p',
           describe: chalk.cyan(
-            'Paths to analyse — individual plugin dirs or parent dirs to auto-discover plugins within'
+            'Search paths to analyse. Each path is scanned recursively for packages ' +
+              '(directories containing kibana.jsonc); cruise runs once per discovered package.'
           ),
           type: 'string',
           array: true,
@@ -80,10 +81,10 @@ yargs(process.argv.slice(2))
         .option('batch-size', {
           alias: 'b',
           describe: chalk.cyan(
-            'Number of plugins to cruise before flushing a single bulk request to ES'
+            'Number of packages to cruise before flushing a single bulk request to ES'
           ),
           type: 'number',
-          default: 10,
+          default: 20,
         })
         .option('exclude-deps', {
           alias: 'x',
@@ -104,22 +105,14 @@ yargs(process.argv.slice(2))
       };
 
       try {
-        // 1. Discover plugins from the supplied paths
-        const plugins = discoverPlugins(argv.paths);
-        if (plugins.length === 0) {
-          console.error(chalk.red('No plugins found under the given paths.'));
-          process.exit(1);
-        }
-        console.error(chalk.cyan(`Discovered ${plugins.length} plugin(s)`));
-
-        // 2. Optionally set up the ES index template
+        // 1. Optionally set up the ES index template
         if (!opts.dryRun && argv['setup-template']) {
           console.error(chalk.cyan('Putting index template…'));
           await ensureIndexTemplate(opts);
           console.error(chalk.green('Index template OK'));
         }
 
-        // 3. Build shared context once (reads CODEOWNERS, renovate.json, package.json)
+        // 2. Build shared context once (reads CODEOWNERS, renovate.json, package.json)
         const excludePatterns = (argv['exclude-deps'] as string)
           .split(',')
           .map((s) => s.trim())
@@ -129,8 +122,16 @@ yargs(process.argv.slice(2))
           console.error(chalk.gray(`Excluding deps matching: ${excludePatterns.join(', ')}`));
         }
 
-        // 4. Cruise each plugin sequentially, accumulate docs, and flush a bulk
-        //    request to ES every `batchSize` plugins.
+        // 3. Discover all packages under the supplied search paths, then
+        //    cruise each package individually, accumulating docs and flushing
+        //    a single bulk request to ES every `batchSize` packages.
+        const packages = (argv.paths as string[]).flatMap(discoverPackages);
+        if (packages.length === 0) {
+          console.error(chalk.red('No packages found under the given paths.'));
+          process.exit(1);
+        }
+        console.error(chalk.cyan(`Discovered ${packages.length} package(s)`));
+
         const batchSize = argv['batch-size'] as number;
         let totalDocs = 0;
         let failed = 0;
@@ -143,32 +144,36 @@ yargs(process.argv.slice(2))
           pending = [];
         };
 
-        for (let i = 0; i < plugins.length; i++) {
-          const pluginPath = plugins[i];
-          const progress = `[${i + 1}/${plugins.length}]`;
+        for (let i = 0; i < packages.length; i++) {
+          const pkgPath = packages[i];
+          const progress = `[${i + 1}/${packages.length}]`;
 
           try {
-            const docs = await buildDocsForPlugin(pluginPath, ctx);
+            const docs = await buildDocsForPackage(pkgPath, ctx);
             pending.push(...docs);
             console.error(
-              chalk.green(`${progress} ✓ ${pluginPath}`) + chalk.gray(` (${docs.length} deps)`)
+              chalk.green(`${progress} ✓ ${pkgPath}`) + chalk.gray(` (${docs.length} deps)`)
             );
           } catch (err) {
             failed++;
-            console.error(chalk.red(`${progress} FAILED ${pluginPath}: ${(err as Error).message}`));
+            console.error(chalk.red(`${progress} FAILED ${pkgPath}: ${(err as Error).message}`));
           }
 
-          // Flush after every batchSize plugins, and always on the last one
-          const isLast = i === plugins.length - 1;
+          // Flush to ES after every batchSize packages, and always on the last one.
+          // In dry-run mode skip intermediate flushes — accumulate everything and
+          // write a single contiguous NDJSON stream at the end.
+          const isLast = i === packages.length - 1;
           if (!opts.dryRun && ((i + 1) % batchSize === 0 || isLast)) {
             await flush();
           }
         }
 
-        // 5. Summary
-        const summary = `${totalDocs} docs across ${plugins.length - failed} plugin(s)`;
+        if (opts.dryRun) await flush();
+
+        // 4. Summary
+        const summary = `${totalDocs} docs across ${packages.length - failed} package(s)`;
         if (failed > 0) {
-          console.error(chalk.yellow(`Done — ${summary} (${failed} plugin(s) failed)`));
+          console.error(chalk.yellow(`Done — ${summary} (${failed} package(s) failed)`));
         } else {
           console.error(
             opts.dryRun
