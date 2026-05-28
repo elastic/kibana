@@ -48,6 +48,7 @@ export const WorkflowCards = ({ onPick, onCancel }: WorkflowCardsProps) => (
       {WORKFLOW_FORM_CARDS.map((card) => (
         <EuiFlexItem key={card.kind}>
           <EuiCard
+            paddingSize="s"
             layout="horizontal"
             display="plain"
             hasBorder

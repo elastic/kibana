@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { WorkflowCards } from './components/workflow_cards';
 import { WorkflowItemRow } from './components/workflow_item_row';
@@ -37,41 +37,32 @@ export const SingleStepWorkflowForm = ({
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-  const addItem = useCallback(
-    (kind: SingleStepWorkflowKind) => {
-      const id = uuidv4();
-      let newItem: SingleStepWorkflowItem;
-      if (kind === 'workflow') {
-        newItem = { id, kind: 'workflow', workflowId: null };
-      } else {
-        const type = getSingleStepWorkflowType(kind);
-        newItem = { id, kind, connectorId: null, params: type?.paramsTemplate ?? '' };
-      }
-      onChange([...value, newItem]);
-      setExpandedId(id);
-      setIsPickerOpen(false);
-    },
-    [value, onChange]
-  );
+  const addItem = (kind: SingleStepWorkflowKind) => {
+    const id = uuidv4();
+    let newItem: SingleStepWorkflowItem;
+    if (kind === 'workflow') {
+      newItem = { id, kind: 'workflow', workflowId: null };
+    } else {
+      const type = getSingleStepWorkflowType(kind);
+      newItem = { id, kind, connectorId: null, params: type?.paramsTemplate ?? '' };
+    }
+    onChange([...value, newItem]);
+    setExpandedId(id);
+    setIsPickerOpen(false);
+  };
 
-  const removeItem = useCallback(
-    (id: string) => {
-      onChange(value.filter((item) => item.id !== id));
-      setExpandedId((prev) => (prev === id ? null : prev));
-    },
-    [value, onChange]
-  );
+  const removeItem = (id: string) => {
+    onChange(value.filter((item) => item.id !== id));
+    setExpandedId((prev) => (prev === id ? null : prev));
+  };
 
-  const updateItem = useCallback(
-    (updated: SingleStepWorkflowItem) => {
-      onChange(value.map((item) => (item.id === updated.id ? updated : item)));
-    },
-    [value, onChange]
-  );
+  const updateItem = (updated: SingleStepWorkflowItem) => {
+    onChange(value.map((item) => (item.id === updated.id ? updated : item)));
+  };
 
-  const toggleExpand = useCallback((id: string) => {
+  const toggleExpand = (id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
-  }, []);
+  };
 
   if (value.length === 0) {
     return (
