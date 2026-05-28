@@ -10,5 +10,5 @@ export const CONNECTORS_APP_PATH = 'management/insightsAndAlerting/triggersActio
 export const TIMEOUT = 10000 as const;
 
 export const CONNECTORS_LIST_SELECTORS = {
-  TABLE_LOADED: '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)',
+  TABLE_LOADED: '.euiBasicTable[data-test-subj="actionsTable"]',
 } as const;
