@@ -243,6 +243,7 @@ describe('WorkflowRepository.getWorkflow', () => {
                 managed: true,
                 managedBy: 'workflowsExtensionsExample',
                 originManagedWorkflowId: 'system-parent',
+                managedVersion: 4,
                 created_at: '2024-01-02T03:04:05.000Z',
                 updated_at: '2024-06-07T08:09:10.000Z',
               },
@@ -262,6 +263,7 @@ describe('WorkflowRepository.getWorkflow', () => {
       managed: true,
       managedBy: 'workflowsExtensionsExample',
       originManagedWorkflowId: 'system-parent',
+      managedVersion: 4,
     });
   });
 
