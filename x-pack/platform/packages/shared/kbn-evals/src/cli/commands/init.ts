@@ -11,6 +11,7 @@ import Os from 'os';
 import Path from 'path';
 import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { set } from '@kbn/safer-lodash-set';
 import { isTTY, parseConnectorsFromEnv, parseConnectorsFromKibanaDevYml } from '../prompts';
 import { safeExec, getVaultAddr, VAULT_SECRET_PATH } from '../utils';
@@ -22,9 +23,15 @@ const EIS_MODELS_PATH = 'target/eis_models.json';
 const CONFIG_FILENAME = 'config.json';
 const CONFIG_EXAMPLE_FILENAME = 'config.example.json';
 
+const GOLDEN_CLUSTER_ES_URL =
+  'https://kbn-evals-serverless-ed035a.es.us-central1.gcp.elastic.cloud';
 const GOLDEN_CLUSTER_KBN_URL =
   'https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud';
+const GOLDEN_CLUSTER_INGEST_URL =
+  'https://kbn-evals-serverless-ed035a.ingest.us-central1.gcp.elastic.cloud:443/v1/traces';
 const GOLDEN_CLUSTER_DEV_TOOLS_URL = `${GOLDEN_CLUSTER_KBN_URL}/app/dev_tools#/console`;
+
+type InfraTarget = 'golden-cluster' | 'local' | 'custom';
 
 const resolveUserIdentifier = (): string => {
   try {
@@ -56,10 +63,6 @@ const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => 
     }
     return undefined;
   }, obj);
-};
-
-const setNestedValue = (obj: Record<string, unknown>, path: string, value: unknown): void => {
-  set(obj, path, value);
 };
 
 const openBrowser = (url: string): boolean => {
@@ -104,7 +107,7 @@ const copyToClipboard = (text: string): boolean => {
  */
 const runBrowserApiKeyFlow = async (
   config: Record<string, unknown>,
-  log: { info: (msg: string) => void; warning: (msg: string) => void }
+  log: ToolingLog
 ): Promise<string | null> => {
   const userIdentifier = resolveUserIdentifier();
   const payload = buildApiKeyPayload(userIdentifier);
@@ -149,10 +152,10 @@ const runBrowserApiKeyFlow = async (
   }
 
   for (const field of API_KEY_FIELDS) {
-    setNestedValue(config, field, trimmed);
+    set(config, field, trimmed);
   }
 
-  setNestedValue(config, 'tracingExporters[0].http.headers.Authorization', `ApiKey ${trimmed}`);
+  set(config, 'tracingExporters[0].http.headers.Authorization', `ApiKey ${trimmed}`);
 
   log.info('API key applied to evaluationsEs, tracingEs, evaluationsKbn, and tracingExporters.');
   return trimmed;
@@ -177,7 +180,7 @@ const getExistingApiKey = (configPath: string): string | null => {
 
 export const runConfigInit = async (
   repoRoot: string,
-  log: { info: (msg: string) => void; warning: (msg: string) => void },
+  log: ToolingLog,
   options?: { profile?: string }
 ): Promise<boolean> => {
   const configDir = Path.resolve(repoRoot, VAULT_CONFIG_DIR);
@@ -215,127 +218,205 @@ export const runConfigInit = async (
   example.owner = userIdentifier;
 
   const profile = options?.profile;
-  const isLocalProfile = profile === 'local';
-  if (isLocalProfile) {
-    // Local profile is intended for exporting results/traces to a local ES/Kibana.
-    setNestedValue(example, 'evaluationsEs.url', 'http://elastic:changeme@localhost:9200');
-    setNestedValue(example, 'evaluationsEs.apiKey', '');
-    setNestedValue(example, 'tracingEs.url', 'http://elastic:changeme@localhost:9200');
-    setNestedValue(example, 'tracingEs.apiKey', '');
-    example.tracingExporters = [{ http: { url: 'http://localhost:4318/v1/traces' } }];
-
-    // Local profile points evaluationsKbn at local Kibana; no golden-cluster GCS settings needed.
-    setNestedValue(example, 'evaluationsKbn.url', 'http://elastic:changeme@localhost:5601/dev');
-    setNestedValue(example, 'evaluationsKbn.apiKey', '');
-    delete example.gcsDatasetAccessCredentials;
-
-    // Avoid prompting for unrelated secrets in the local export profile.
-    setNestedValue(example, 'litellm.virtualKey', '');
-    setNestedValue(example, 'litellm.teamId', '');
-    setNestedValue(example, 'evaluationConnectorId', '');
-  }
+  const defaultTarget: InfraTarget = profile === 'local' ? 'local' : 'golden-cluster';
 
   log.info('');
-  log.info('The config has sensible URL defaults. You only need to fill in secret values.');
+
+  const { target } = await inquirer.prompt<{ target: InfraTarget }>({
+    type: 'list',
+    name: 'target',
+    message: 'Where should evals infrastructure point to?',
+    choices: [
+      { name: 'Golden cluster (kbn-evals-serverless)', value: 'golden-cluster' },
+      { name: 'Local (localhost)', value: 'local' },
+      { name: 'Custom', value: 'custom' },
+    ],
+    default: defaultTarget,
+  });
+
   log.info('');
 
-  // --- Local Kibana URL ---
-  if (isLocalProfile) {
-    const defaultKbnUrl = 'http://elastic:changeme@localhost:5601/dev';
-    const { kbnUrl } = await inquirer.prompt<{ kbnUrl: string }>({
-      type: 'input',
-      name: 'kbnUrl',
-      message: 'Local Kibana URL:',
-      default: defaultKbnUrl,
-    });
-    if (kbnUrl.trim()) {
-      setNestedValue(example, 'evaluationsKbn.url', kbnUrl.trim());
-    }
-    log.info('');
-  }
+  if (target === 'golden-cluster') {
+    set(example, 'evaluationsEs.url', GOLDEN_CLUSTER_ES_URL);
+    set(example, 'evaluationsKbn.url', GOLDEN_CLUSTER_KBN_URL);
+    set(example, 'tracingEs.url', GOLDEN_CLUSTER_ES_URL);
+    example.tracingExporters = [
+      { http: { url: GOLDEN_CLUSTER_INGEST_URL, headers: { Authorization: 'ApiKey REPLACE_ME' } } },
+    ];
 
-  // --- Golden cluster API key ---
-  if (isLocalProfile) {
-    log.info('Skipping golden cluster API key setup for local profile.');
-    log.info('');
-  }
-  let reusingKey = false;
-  if (!isLocalProfile && existingApiKey) {
-    const { reuseKey } = await inquirer.prompt<{ reuseKey: boolean }>({
-      type: 'confirm',
-      name: 'reuseKey',
-      message: 'Existing API key found in previous config. Reuse it?',
-      default: true,
-    });
-    if (reuseKey) {
-      reusingKey = true;
-      for (const field of API_KEY_FIELDS) {
-        setNestedValue(example, field, existingApiKey);
+    let reusingKey = false;
+    if (existingApiKey) {
+      const { reuseKey } = await inquirer.prompt<{ reuseKey: boolean }>({
+        type: 'confirm',
+        name: 'reuseKey',
+        message: 'Existing API key found in previous config. Reuse it?',
+        default: true,
+      });
+      if (reuseKey) {
+        reusingKey = true;
+        for (const field of API_KEY_FIELDS) {
+          set(example, field, existingApiKey);
+        }
+        set(example, 'tracingExporters[0].http.headers.Authorization', `ApiKey ${existingApiKey}`);
+        log.info('Reusing existing API key for all golden cluster fields.');
+        log.info('');
       }
-      setNestedValue(
-        example,
-        'tracingExporters[0].http.headers.Authorization',
-        `ApiKey ${existingApiKey}`
-      );
-      log.info('Reusing existing API key for all golden cluster fields.');
     }
-  }
 
-  if (!isLocalProfile && !reusingKey) {
-    const { useAutoKey } = await inquirer.prompt<{ useAutoKey: boolean }>({
+    if (!reusingKey) {
+      const { useAutoKey } = await inquirer.prompt<{ useAutoKey: boolean }>({
+        type: 'confirm',
+        name: 'useAutoKey',
+        message: 'Create a golden cluster API key automatically via Dev Tools? (opens browser)',
+        default: true,
+      });
+
+      if (useAutoKey) {
+        await runBrowserApiKeyFlow(example, log);
+      } else {
+        log.info('');
+        log.info('Enter the API key manually. Press Enter to skip and fill in config.json later.');
+        log.info('');
+
+        const { value } = await inquirer.prompt<{ value: string }>({
+          type: 'password',
+          name: 'value',
+          message: 'Golden cluster API key:',
+          mask: '*',
+        });
+
+        const trimmed = value.trim();
+        if (trimmed) {
+          for (const field of API_KEY_FIELDS) {
+            set(example, field, trimmed);
+          }
+          set(
+            example,
+            'tracingExporters[0].http.headers.Authorization',
+            `ApiKey ${trimmed}`
+          );
+          log.info(
+            'API key applied to evaluationsEs, tracingEs, evaluationsKbn, and tracingExporters.'
+          );
+        }
+      }
+    }
+
+    const { wantOverride } = await inquirer.prompt<{ wantOverride: boolean }>({
       type: 'confirm',
-      name: 'useAutoKey',
-      message: 'Create a golden cluster API key automatically via Dev Tools? (opens browser)',
-      default: true,
+      name: 'wantOverride',
+      message: 'Override individual API keys?',
+      default: false,
     });
 
-    if (useAutoKey) {
-      await runBrowserApiKeyFlow(example, log);
-    } else {
-      log.info('');
-      log.info('Enter API keys manually. Press Enter to skip and fill in config.json later.');
-      log.info('');
-
-      const manualFields = [
+    if (wantOverride) {
+      const overrideFields = [
         { jsonPath: 'evaluationsEs.apiKey', label: 'Evaluations ES API key' },
-        { jsonPath: 'tracingEs.apiKey', label: 'Tracing ES API key (same cluster)' },
+        { jsonPath: 'evaluationsKbn.apiKey', label: 'Evaluations Kibana API key' },
+        { jsonPath: 'tracingEs.apiKey', label: 'Tracing ES API key' },
         {
           jsonPath: 'tracingExporters[0].http.headers.Authorization',
           label: 'Tracing exporter Authorization header (e.g. ApiKey ...)',
         },
-        {
-          jsonPath: 'evaluationsKbn.apiKey',
-          label: 'Golden cluster Kibana API key (for datasets)',
-        },
       ];
-      for (const field of manualFields) {
+
+      for (const field of overrideFields) {
         const currentValue = getNestedValue(example, field.jsonPath);
-        if (typeof currentValue === 'string' && currentValue.includes('REPLACE_ME')) {
-          const { value } = await inquirer.prompt<{ value: string }>({
-            type: 'input',
-            name: 'value',
-            message: `${field.label}:`,
-            default: '',
-          });
-          if (value.trim()) {
-            setNestedValue(example, field.jsonPath, value.trim());
-          }
+        const defaultValue = typeof currentValue === 'string' ? currentValue : '';
+        const { value } = await inquirer.prompt<{ value: string }>({
+          type: 'password',
+          name: 'value',
+          message: `${field.label}:`,
+          mask: '*',
+          default: defaultValue,
+        });
+        if (value.trim()) {
+          set(example, field.jsonPath, value.trim());
         }
       }
     }
+  } else if (target === 'local') {
+    const { basePath } = await inquirer.prompt<{ basePath: string }>({
+      type: 'input',
+      name: 'basePath',
+      message: 'Kibana base path:',
+      default: '/dev',
+    });
+
+    const normalizedBasePath = basePath.trim() || '/dev';
+
+    set(example, 'evaluationsEs.url', 'http://elastic:changeme@localhost:9200');
+    set(example, 'evaluationsEs.apiKey', '');
+    set(
+      example,
+      'evaluationsKbn.url',
+      `http://elastic:changeme@localhost:5601${normalizedBasePath}`
+    );
+    set(example, 'evaluationsKbn.apiKey', '');
+    set(example, 'tracingEs.url', 'http://elastic:changeme@localhost:9200');
+    set(example, 'tracingEs.apiKey', '');
+    example.tracingExporters = [{ http: { url: 'http://localhost:4318/v1/traces' } }];
+  } else {
+    const urlFields = [
+      { jsonPath: 'evaluationsEs.url', label: 'Evaluations ES URL' },
+      { jsonPath: 'evaluationsKbn.url', label: 'Evaluations Kibana URL' },
+      { jsonPath: 'tracingEs.url', label: 'Tracing ES URL' },
+    ];
+
+    for (const field of urlFields) {
+      const { value } = await inquirer.prompt<{ value: string }>({
+        type: 'input',
+        name: 'value',
+        message: `${field.label}:`,
+      });
+      if (value.trim()) {
+        set(example, field.jsonPath, value.trim());
+      }
+    }
+
+    const { tracingExporterUrl } = await inquirer.prompt<{ tracingExporterUrl: string }>({
+      type: 'input',
+      name: 'tracingExporterUrl',
+      message: 'Tracing exporter URL:',
+    });
+
+    if (tracingExporterUrl.trim()) {
+      example.tracingExporters = [{ http: { url: tracingExporterUrl.trim() } }];
+    }
+
+    log.info('');
+
+    const apiKeyFields = [
+      { jsonPath: 'evaluationsEs.apiKey', label: 'Evaluations ES API key' },
+      { jsonPath: 'evaluationsKbn.apiKey', label: 'Evaluations Kibana API key' },
+      { jsonPath: 'tracingEs.apiKey', label: 'Tracing ES API key' },
+      {
+        jsonPath: 'tracingExporters[0].http.headers.Authorization',
+        label: 'Tracing exporter Authorization header (e.g. ApiKey ...)',
+      },
+    ];
+
+    for (const field of apiKeyFields) {
+      const { value } = await inquirer.prompt<{ value: string }>({
+        type: 'password',
+        name: 'value',
+        message: `${field.label}:`,
+        mask: '*',
+      });
+      set(example, field.jsonPath, value.trim() || '');
+    }
   }
 
-  // --- LiteLLM ---
   const litellmVirtualKey = getNestedValue(example, 'litellm.virtualKey');
   if (typeof litellmVirtualKey === 'string' && litellmVirtualKey.includes('REPLACE_ME')) {
     const { value } = await inquirer.prompt<{ value: string }>({
-      type: 'input',
+      type: 'password',
       name: 'value',
       message: 'LiteLLM virtual key (sk-...):',
-      default: '',
+      mask: '*',
     });
     if (value.trim()) {
-      setNestedValue(example, 'litellm.virtualKey', value.trim());
+      set(example, 'litellm.virtualKey', value.trim());
     }
   }
 
@@ -348,36 +429,33 @@ export const runConfigInit = async (
       default: '',
     });
     if (value.trim()) {
-      setNestedValue(example, 'litellm.teamId', value.trim());
+      set(example, 'litellm.teamId', value.trim());
     }
   }
 
-  // --- GCS credentials ---
-  if (!isLocalProfile) {
-    const { wantGcs } = await inquirer.prompt<{ wantGcs: boolean }>({
-      type: 'confirm',
-      name: 'wantGcs',
-      message: 'Do you have GCS service account credentials for snapshot datasets?',
-      default: false,
-    });
+  const { wantGcs } = await inquirer.prompt<{ wantGcs: boolean }>({
+    type: 'confirm',
+    name: 'wantGcs',
+    message: 'Do you have GCS service account credentials for snapshot datasets?',
+    default: false,
+  });
 
-    if (!wantGcs) {
-      delete example.gcsDatasetAccessCredentials;
-    } else {
-      const { gcsPath } = await inquirer.prompt<{ gcsPath: string }>({
-        type: 'input',
-        name: 'gcsPath',
-        message: 'Path to GCS service account JSON file (leave empty to fill later):',
-        default: '',
-      });
-      if (gcsPath.trim() && Fs.existsSync(gcsPath.trim())) {
-        try {
-          const gcsCreds = JSON.parse(Fs.readFileSync(gcsPath.trim(), 'utf-8'));
-          example.gcsDatasetAccessCredentials = gcsCreds;
-          log.info('GCS credentials loaded from file.');
-        } catch {
-          log.warning('Failed to parse GCS credentials file. Fill in config.json manually.');
-        }
+  if (!wantGcs) {
+    delete example.gcsDatasetAccessCredentials;
+  } else {
+    const { gcsPath } = await inquirer.prompt<{ gcsPath: string }>({
+      type: 'input',
+      name: 'gcsPath',
+      message: 'Path to GCS service account JSON file (leave empty to fill later):',
+      default: '',
+    });
+    if (gcsPath.trim() && Fs.existsSync(gcsPath.trim())) {
+      try {
+        const gcsCreds = JSON.parse(Fs.readFileSync(gcsPath.trim(), 'utf-8'));
+        example.gcsDatasetAccessCredentials = gcsCreds;
+        log.info('GCS credentials loaded from file.');
+      } catch {
+        log.warning('Failed to parse GCS credentials file. Fill in config.json manually.');
       }
     }
   }
@@ -396,10 +474,7 @@ const checkVaultAuth = (): boolean => {
   return safeExec('vault', ['token', 'lookup', '-format=json']) !== null;
 };
 
-const vaultLogin = async (log: {
-  info: (msg: string) => void;
-  error: (msg: string) => void;
-}): Promise<void> => {
+const vaultLogin = async (log: ToolingLog): Promise<void> => {
   const vaultAddr = getVaultAddr();
   log.info(`Launching Vault OIDC login against ${vaultAddr}...`);
   log.info('A browser window should open. If it does not, follow the URL printed below.');
@@ -425,10 +500,7 @@ const vaultLogin = async (log: {
   }
 };
 
-const ensureVaultAuth = async (log: {
-  info: (msg: string) => void;
-  error: (msg: string) => void;
-}): Promise<void> => {
+const ensureVaultAuth = async (log: ToolingLog): Promise<void> => {
   if (checkVaultAuth()) {
     return;
   }
@@ -439,7 +511,7 @@ const ensureVaultAuth = async (log: {
   }
 };
 
-const fetchCcmApiKey = (log: { info: (msg: string) => void }): string => {
+const fetchCcmApiKey = (log: ToolingLog): string => {
   log.info('Fetching EIS CCM API key from Vault...');
   const result = safeExec('vault', ['read', '-field=key', VAULT_SECRET_PATH]);
   if (!result) {
@@ -502,11 +574,7 @@ const listConnectorIds = (base64Payload: string): Array<{ id: string; name: stri
 
 export const runConnectorSetup = async (
   repoRoot: string,
-  log: {
-    info: (msg: string) => void;
-    warning: (msg: string) => void;
-    error: (msg: string) => void;
-  },
+  log: ToolingLog,
   options?: { skipDiscovery?: boolean }
 ): Promise<void> => {
   if (!isTTY()) {
@@ -571,21 +639,17 @@ export const runConnectorSetup = async (
     return;
   }
 
-  // --- EIS path ---
   log.info('');
 
   const vaultAddr = getVaultAddr();
 
-  // 1. Check Vault auth (auto-login if not authenticated)
   log.info(`Checking Vault auth (VAULT_ADDR=${vaultAddr})...`);
   await ensureVaultAuth(log);
   log.info('Vault auth OK');
 
-  // 2. Fetch CCM API key
   const apiKey = fetchCcmApiKey(log);
   log.info('CCM API key retrieved');
 
-  // 3. Discover EIS models (starts temp ES)
   if (!(options?.skipDiscovery ?? false)) {
     log.info('');
     log.info('Discovering available EIS models (this starts a temporary ES cluster)...');
@@ -593,7 +657,6 @@ export const runConnectorSetup = async (
     runDiscoverEisModels(repoRoot, apiKey);
   }
 
-  // 4. Check models file exists
   const modelsPath = Path.resolve(repoRoot, EIS_MODELS_PATH);
   if (!Fs.existsSync(modelsPath)) {
     throw new Error(`EIS models file not found at ${modelsPath}. Run without --skip-discovery.`);
@@ -612,7 +675,6 @@ export const runConnectorSetup = async (
   log.info(`Found ${modelsJson.models.length} EIS model(s):`);
   modelsJson.models.forEach((m) => log.info(`  - ${m.modelId} (${m.inferenceId})`));
 
-  // 5. Generate connectors payload
   log.info('');
   log.info('Generating connector payload...');
   const base64Payload = runGenerateEisConnectors(repoRoot);
@@ -624,7 +686,6 @@ export const runConnectorSetup = async (
 
   log.info(`Generated ${connectors.length} connector(s)`);
 
-  // 6. Output the export command
   log.info('');
   log.info('Done! Run the following to export connectors to your shell:');
   log.info('');
