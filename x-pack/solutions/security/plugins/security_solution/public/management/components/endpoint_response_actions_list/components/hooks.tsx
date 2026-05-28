@@ -10,7 +10,6 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAgentTypeName } from '../../../../common/translations';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import {
@@ -272,9 +271,6 @@ export const useActionsLogFilter = ({
     searchString,
     selectedAgentIds: selectedAgentIdsFromUrl,
   });
-  const isEndpointCancelFeatureEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsEndpointCancel'
-  );
 
   // track the state of selected hosts via URL
   //  when the page is loaded via selected hosts on URL
@@ -297,13 +293,7 @@ export const useActionsLogFilter = ({
     isTypesFilter
       ? typesFilterInitialState
       : isStatusesFilter
-      ? RESPONSE_ACTION_STATUS.filter((actionStatus) => {
-          if (isEndpointCancelFeatureEnabled) {
-            return true;
-          }
-
-          return actionStatus !== 'canceled';
-        }).map((statusName) => ({
+      ? RESPONSE_ACTION_STATUS.map((statusName) => ({
           key: statusName,
           label: (<ResponseActionStatusBadge status={statusName} />) as unknown as string,
           searchableLabel: statusName,
