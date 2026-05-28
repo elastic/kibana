@@ -93,6 +93,7 @@ export class AgentBuilderPlugin
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
+  private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
@@ -109,6 +110,7 @@ export class AgentBuilderPlugin
 
     this.setupServices = { navigationService, usageCollection: deps.usageCollection };
     this.isEarsEnabled = deps.actions.isEarsEnabled;
+    this.isEarsExperimentalEnabled = deps.actions.isEarsExperimentalEnabled;
 
     registerApp({
       core,
@@ -234,6 +236,7 @@ export class AgentBuilderPlugin
       accessChecker,
       eventsService,
       isEarsEnabled: this.isEarsEnabled,
+      isEarsExperimentalEnabled: this.isEarsExperimentalEnabled,
       openSidebarConversation: (options?: OpenSidebarInternalOptions) => {
         return openSidebarInternal(options);
       },
