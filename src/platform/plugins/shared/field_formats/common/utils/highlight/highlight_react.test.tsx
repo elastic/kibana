@@ -11,7 +11,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/server';
 import { highlightTags } from './highlight_tags';
 import { getHighlightReact } from './highlight_react';
-import { type ESQLHighlightTags } from '@kbn/esql-utils';
 
 /** Render the ReactNode to a plain HTML string for easy assertion.
  * &quot; is decoded back to " since both are valid HTML and the difference is
@@ -124,7 +123,7 @@ describe('getHighlightReact', () => {
   });
 
   describe('Highlight with ES|QL inline tags', () => {
-    const defaultTags: ESQLHighlightTags = {
+    const defaultTags = {
       preTag: `<em>`,
       postTag: '</em>',
     };

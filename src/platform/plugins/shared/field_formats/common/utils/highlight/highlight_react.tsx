@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import type { EsHitRecord } from '@kbn/discover-utils';
-import type { ESQLHighlightTags } from '@kbn/esql-utils';
 import { highlightTags } from './highlight_tags';
+import type { FieldFormatHighlightTags, ReactContextTypeHit } from '../../types';
 
 /**
  * Resolves the applicable highlight method for a field value.
@@ -32,7 +31,7 @@ import { highlightTags } from './highlight_tags';
 export function getHighlightReact(
   fieldValue: string,
   fieldName: string | undefined,
-  hit: EsHitRecord | undefined
+  hit: ReactContextTypeHit | undefined
 ): React.ReactNode {
   if (!fieldName || !hit) {
     return fieldValue;
@@ -130,7 +129,7 @@ function highlightWithSubstrings(
  */
 function highlightWithInlineTags(
   fieldValue: string,
-  tags: ESQLHighlightTags | undefined | null
+  tags: FieldFormatHighlightTags | undefined | null
 ): React.ReactNode {
   if (!tags?.preTag || !tags?.postTag) {
     return fieldValue;
