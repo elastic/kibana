@@ -12,15 +12,9 @@ Treat migration as a chance to revisit your tests and make them more robust, not
 
 :::::::::{stepper}
 
-::::::::{step} Do your tests _really_ need to be UI tests?
+::::::::{step} Do your UI tests _really_ need to be UI tests?
 
 Many UI tests should be rewritten as API or component tests (see [Pick the right test type](./best-practices.md#pick-the-right-test-type)). <br><br>Whenever possible, prefer an **API test** over asserting on a rendered element. UI tests (the slowest, most expensive, and most brittle kind) should be reserved for full end-to-end user flows. Tests that only verify a component renders correctly belong as **RTL component tests**.
-
-::::::::
-
-::::::::{step} Where should your tests run?
-
-[Deployment tags](./deployment-tags.md) control where your tests run (e.g., local and Elastic Cloud pipelines, and serverless project tiers for serverless tests). Decide up front by [choosing the right deployment tags](./deployment-tags.md#scout-deployment-tags-pick).
 
 ::::::::
 
@@ -32,9 +26,15 @@ Most FTR-era setups don't need a custom config in Scout:
 
 - **To enable a feature conditionally**: use runtime [feature flags](./feature-flags.md#scout-feature-flags-runtime) via `apiServices.core.settings()` (this works locally and on Cloud, no test servers restart needed).
 - **To ingest data**: load via `apiServices`, `kbnClient`, or `esArchiver` in `beforeAll` or a [global setup hook](./global-setup-hook.md).
-- **To set UI and advanced settings**: use the `uiSettings` fixture.
+- **To set UI and advanced settings**: use the `uiSettings` [fixture](./fixtures.md).
 
 Reach for a [custom server config](./feature-flags.md#scout-feature-flags-custom-servers) only when a setting must be present at boot (for example, plugin-`setup`-time HTTP route registration).
+
+::::::::
+
+::::::::{step} Where should your tests run?
+
+[Deployment tags](./deployment-tags.md) control where your tests run (e.g., local and Elastic Cloud pipelines, and serverless project tiers for serverless tests). Decide up front by [choosing the right deployment tags](./deployment-tags.md#scout-deployment-tags-pick).
 
 ::::::::
 
@@ -51,10 +51,6 @@ The [`scout-migrate-from-ftr`](https://github.com/elastic/kibana/blob/main/.agen
 ### Cypress → Scout
 
 The [`cypress-to-scout-migration`](https://github.com/elastic/kibana/blob/main/.agents/skills/cypress-to-scout-migration/SKILL.md) skill, maintained by the Security Engineering Productivity team, ports Cypress tests to Scout.
-
-::::::{warning}
-Cypress gives each spec a clean environment, so many Cypress tests never clean up after themselves. Scout shares the deployment across specs, so leftover state leaks between tests. Audit every resource the source test creates — saved objects, indices, agents, UI settings — and clean it up explicitly.
-::::::
 
 ### Best practices review
 
