@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { INLINE_ACTION_STEP_DEFINITIONS } from '../registry';
@@ -67,8 +75,16 @@ export const ActionTemplateCards = ({ onPick, onCancel }: ActionTemplateCardsPro
             hasBorder
             titleSize="xs"
             icon={<EuiIcon type={card.iconType} size="l" aria-hidden={true} />}
-            title={card.label}
-            description={card.description}
+            title={
+              <EuiText size="s">
+                <p>{card.label}</p>
+              </EuiText>
+            }
+            description={
+              <EuiText size="s" color="subdued">
+                <p>{card.description}</p>
+              </EuiText>
+            }
             onClick={() => onPick(card.id)}
             data-test-subj={`actionTemplateCard-${card.id}`}
           />

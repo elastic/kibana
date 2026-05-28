@@ -119,9 +119,7 @@ export const ActionRow = ({
                 isInvalid
                   ? i18n.translate(
                       'xpack.responseOps.alertingV2RuleForm.actionForm.list.workflowRequiredError',
-                      {
-                        defaultMessage: 'A workflow must be selected.',
-                      }
+                      { defaultMessage: 'A workflow must be selected.' }
                     )
                   : undefined
               }

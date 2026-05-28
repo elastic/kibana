@@ -81,6 +81,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
       >
         <EuiComboBox
           fullWidth
+          compressed
           singleSelection={{ asPlainText: true }}
           data-test-subj="singleStepWorkflowConnectorSelect"
           isLoading={isLoading}
