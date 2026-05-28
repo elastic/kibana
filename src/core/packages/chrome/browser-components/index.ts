@@ -21,4 +21,4 @@ export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_side
 export { Sidebar } from './src/sidebar';
 export { AppMenuBar } from './src/project/app_menu';
 export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';
-export { useHasAppMenu, useHasInlineAppHeader } from './src/shared/chrome_hooks';
+export { useHasAppMenu, useHasInlineAppHeader, useIsNextChrome } from './src/shared/chrome_hooks';

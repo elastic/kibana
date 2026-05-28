@@ -26,6 +26,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
+import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { useChromeComponentsDeps } from '../context';
 
 /**
@@ -292,9 +293,39 @@ export function useGlobalSearch(): GlobalSearchConfig | undefined {
   return useObservable(config$, undefined);
 }
 
+/** Returns whether the next-chrome experience is enabled via feature flag. */
+export function useIsNextChrome(): boolean {
+  const { featureFlags } = useChromeComponentsDeps();
+  return isNextChrome(featureFlags);
+}
+
 /** Whether an inline `AppHeader` is currently mounted by the active app. */
 export function useHasInlineAppHeader(): boolean {
   const chrome = useChromeService();
   const inlineAppHeader$ = useMemo(() => chrome.next.inlineAppHeader.get$(), [chrome]);
   return useObservable(inlineAppHeader$, false);
+}
+
+export function useInternalBasePath(): IBasePath {
+  return useChromeService().componentDeps.basePath;
+}
+
+export function useInternalLegacyActionMenu(): MountPoint | undefined {
+  const { legacyActionMenu$ } = useChromeService().componentDeps;
+  return useObservable(legacyActionMenu$, undefined);
+}
+
+export function useInternalHasLegacyActionMenu(): boolean {
+  return !!useInternalLegacyActionMenu();
+}
+
+/**
+ * Like {@link useHasAppMenu} but legacy menu reads {@link useChromeService}.componentDeps
+ * instead of {@link useChromeComponentsDeps}. Safe where only ChromeServiceProvider exists
+ * (e.g. management apps rendering AppHeader inline).
+ */
+export function useInternalHasAppMenu(): boolean {
+  const hasLegacy = useInternalHasLegacyActionMenu();
+  const hasConfig = useHasAppMenuConfig();
+  return hasLegacy || hasConfig;
 }
