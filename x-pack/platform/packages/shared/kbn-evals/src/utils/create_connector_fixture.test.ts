@@ -6,7 +6,6 @@
  */
 
 import { v5 } from 'uuid';
-import { KbnClientRequesterError } from '@kbn/kbn-client';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {

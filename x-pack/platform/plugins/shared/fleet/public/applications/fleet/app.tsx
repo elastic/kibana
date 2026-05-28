@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, Suspense, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
@@ -61,7 +61,7 @@ import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
-import { CollectorsApp } from './sections/collectors';
+import { LazyCollectorsApp } from './sections/collectors';
 import { ExperimentalFeaturesService } from './services';
 import { DebugPage } from './sections/debug';
 
@@ -452,7 +452,9 @@ export const AppRoutes = memo(
                   setHeaderActionMenu={setHeaderActionMenu}
                   isReadOnly={!authz.fleet.allAgents}
                 >
-                  <CollectorsApp />
+                  <Suspense fallback={<Loading />}>
+                    <LazyCollectorsApp />
+                  </Suspense>
                 </AppLayout>
               ) : (
                 <AppLayout setHeaderActionMenu={setHeaderActionMenu}>

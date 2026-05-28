@@ -1,0 +1,107 @@
+// Configuration for `knip` (https://knip.dev).
+//
+// Kibana uses a single root `package.json` and links packages via `link:` rather than yarn workspaces,
+// so this file is the source of truth for what knip should analyze. Add more workspaces here as
+// additional areas of the monorepo are brought under knip-managed lint coverage.
+//
+// Usage:
+//   node scripts/knip [...args]
+//
+// Check for unused root dependencies (ignores @kbn/* and @elastic/*):
+//   node scripts/knip --workspace . --include dependencies,devDependencies
+//
+// Scope to a single workspace:
+//   node scripts/knip --workspace src/platform/packages/shared/kbn-safer-lodash-set --include unlisted
+{
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
+  // @kbn/* and @elastic/* are internal linked packages managed outside of knip.
+  // @babel/plugin-* and babel-plugin-* are consumed via require.resolve() in
+  // packages/kbn-babel-preset/ which knip cannot trace (it only detects require/import).
+  "ignoreDependencies": [
+    "^@kbn/",
+    "^@elastic/",
+    "^@babel/plugin-",
+    "^babel-plugin-",
+    "^eslint-plugin-",
+    // This is required transitively via EUI's testing utilities; knip can't trace this.
+    "@testing-library/react-hooks",
+    // @types/d3-color is used by @elastic/kibana-d3-color; knip can't trace this.
+    "@types/d3-color",
+    // used by our FTR; knip can't trace this.
+    "geckodriver",
+    // these are used as Cypress reporters via reporter_config.json; knip can't trace the
+    // cypress-multi-reporters -> configFile -> reporterEnabled chain.
+    "buildkite-test-collector",
+    "cypress-multi-reporters",
+    "marge",
+    "mocha-junit-reporter",
+    "mocha-multi-reporters",
+    "mochawesome",
+    "mochawesome-merge",
+    // nyc is invoked from shell scripts (.buildkite/scripts/steps/code_coverage/)
+    // and osquery's package.json scripts; knip can't trace shell usage.
+    "nyc",
+    // oxlint is invoked as a binary via procRunner in @kbn/lint-cli;
+    // knip can't trace dynamic cmd invocations.
+    "oxlint"
+  ],
+  "workspaces": {
+    ".": {
+      "entry": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "x-pack/**/*.{ts,tsx,js,jsx}",
+        "packages/**/*.{ts,tsx,js,jsx}",
+        "examples/**/*.{ts,tsx,js,jsx}",
+        "plugins/**/*.{ts,tsx,js,jsx}"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "x-pack/**/*.{ts,tsx,js,jsx}",
+        "packages/**/*.{ts,tsx,js,jsx}",
+        "examples/**/*.{ts,tsx,js,jsx}",
+        "plugins/**/*.{ts,tsx,js,jsx}"
+      ],
+      "ignore": [
+        "**/node_modules/**",
+        "**/target/**",
+        "**/build/**"
+      ],
+      "storybook": {
+        "config": [
+          "src/platform/packages/shared/kbn-storybook/src/lib/default_config.ts",
+          "**/.storybook/main.{js,ts}"
+        ]
+      },
+      "eslint": {
+        "config": [".eslintrc.js", "**/.eslintrc.{js,json}"]
+      },
+      "babel": {
+        "config": [
+          "packages/kbn-babel-preset/common_preset.js",
+          "packages/kbn-babel-preset/webpack_preset.js",
+          "packages/kbn-babel-preset/node_preset.js",
+          "packages/kbn-babel-preset/istanbul_preset.js"
+        ]
+      },
+      "nyc": {
+        "config": [
+          "src/dev/code_coverage/nyc_config/nyc.jest.config.js",
+          "x-pack/platform/plugins/shared/osquery/.nycrc"
+        ]
+      },
+      "webpack": {
+        "config": [
+          "packages/kbn-optimizer/src/worker/webpack.config.ts",
+          "src/platform/plugins/shared/console/packaging/webpack.config.js",
+          "src/platform/packages/private/kbn-ui-shared-deps-npm/webpack.config.js",
+          "src/platform/packages/private/kbn-ui-shared-deps-src/webpack.config.js",
+          "src/platform/packages/shared/kbn-monaco/webpack.config.js",
+          "src/platform/kbn-ui/side-navigation/packaging/webpack.config.js"
+        ]
+      }
+    },
+    "src/platform/packages/shared/kbn-safer-lodash-set": {
+      "entry": ["set.js", "setWith.js", "fp/*.js"]
+    }
+  }
+}
