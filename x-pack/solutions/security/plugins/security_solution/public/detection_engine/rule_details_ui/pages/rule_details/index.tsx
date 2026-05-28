@@ -407,17 +407,19 @@ export const RuleDetailsPage = connector(
       () =>
         rule ? (
           [
-            <CreatedBy createdBy={rule?.created_by} createdAt={rule?.created_at} />,
-            rule?.updated_by != null ? (
-              <UpdatedBy updatedBy={rule?.updated_by} updatedAt={rule?.updated_at} />
+            <CreatedBy createdBy={rule.created_by} createdAt={rule.created_at} />,
+            rule.updated_by != null ? (
+              <UpdatedBy updatedBy={rule.updated_by} updatedAt={rule.updated_at} />
             ) : (
               ''
             ),
-            ...(rule && rule.rule_source.type === 'external'
-              ? [<RuleVersion version={rule.version} />]
-              : []),
-            rule && <RuleRevision revision={rule.revision} />,
-          ]
+            isRuleChangesHistoryEnabled && rule.rule_source.type === 'external' ? (
+              <RuleVersion version={rule.version} />
+            ) : (
+              ''
+            ),
+            isRuleChangesHistoryEnabled ? <RuleRevision revision={rule.revision} /> : '',
+          ].filter(Boolean)
         ) : ruleLoading ? (
           <EuiLoadingSpinner size="m" />
         ) : null,
