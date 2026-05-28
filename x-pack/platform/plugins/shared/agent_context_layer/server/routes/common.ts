@@ -13,7 +13,7 @@ import type { SmlDocument } from '../services/sml/types';
 import { apiPrivileges } from '../../common/features';
 
 export const toSmlHttpItem = (doc: SmlDocument): SmlHttpItem => {
-  const item: SmlHttpItem = {
+  return {
     id: doc.id,
     type: doc.type,
     title: doc.title,
@@ -24,10 +24,6 @@ export const toSmlHttpItem = (doc: SmlDocument): SmlHttpItem => {
     spaces: doc.spaces,
     permissions: doc.permissions,
   };
-  if (doc.target_indices !== undefined) {
-    item.target_indices = doc.target_indices;
-  }
-  return item;
 };
 
 export const READ_SECURITY: RouteSecurity = {

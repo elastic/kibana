@@ -62,7 +62,7 @@ describe('registerSearchRoute', () => {
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
         spaces: ['test-space'],
-        permissions: [],
+        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
         score: 1.5,
       },
     ];
@@ -96,7 +96,7 @@ describe('registerSearchRoute', () => {
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
         spaces: ['test-space'],
-        permissions: [],
+        permissions: { kibana: { privileges: [] }, elasticsearch: { indices: [] } },
         score: 1.5,
       },
     ];

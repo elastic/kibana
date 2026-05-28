@@ -103,7 +103,6 @@ class SmlServiceImpl implements SmlServiceInstance {
         return filterResultsByPermissions({
           searchResult: rawResults,
           request,
-          esClient,
           securityAuthz: this.securityAuthz,
           logger,
         });
@@ -162,6 +161,16 @@ export const isNotFoundError = (error: unknown): boolean => {
   return error instanceof errors.ResponseError && error.statusCode === 404;
 };
 
+/**
+ * Empty-but-fully-shaped permissions object. Used as a fallback when
+ * `_source.permissions` is somehow missing (legacy / test docs) and as
+ * the input default in `upsertDocument`.
+ */
+const emptyPermissions = (): SmlDocument['permissions'] => ({
+  kibana: { privileges: [] },
+  elasticsearch: { indices: [] },
+});
+
 const isResultWindowExceededError = (error: unknown): boolean => {
   if (!(error instanceof errors.ResponseError) || error.statusCode !== 400) return false;
   const body = error.body as
@@ -184,98 +193,86 @@ const isResultWindowExceededError = (error: unknown): boolean => {
 };
 
 /**
- * Batch-check which of the given Kibana privilege strings the current user holds.
- * Returns the set of authorized privilege strings.
+ * Combined privilege check for SML chunks. In a single ES `_has_privileges`
+ * call (via Kibana's `checkPrivileges` wrapper), batch-checks:
+ *
+ *   - Which of the given Kibana action strings are authorized for the user
+ *     in the current space.
+ *   - Which of the given concrete Elasticsearch index / alias / data stream
+ *     names the user has `read` on.
+ *
+ * Kibana's `checkPrivilegesDynamicallyWithRequest` packs both the
+ * `application:` (Kibana feature privs) and `index:` (raw ES grants)
+ * sections into the same `_has_privileges` POST, so this is one HTTP
+ * round-trip — not two.
+ *
+ * Per `IndicesPermission.checkResourcePrivileges`, ES evaluates each
+ * requested index name against the user's role grants by automaton
+ * subset check, so callers must pass **concrete names only** — not
+ * patterns. SML chunks store concrete names by construction.
+ *
+ * Fails closed (empty Sets) on error to avoid over-disclosure — a
+ * transient ES error must not silently bypass either check.
  */
-const getAuthorizedPermissions = async ({
+const getAuthorizedPrivileges = async ({
   permissions,
+  indices,
   request,
   securityAuthz,
   logger,
 }: {
   permissions: string[];
+  indices: string[];
   request: KibanaRequest;
   securityAuthz: AuthorizationServiceSetup;
   logger: Logger;
-}): Promise<Set<string>> => {
-  if (permissions.length === 0) {
-    return new Set();
+}): Promise<{ authorizedPerms: Set<string>; authorizedIndices: Set<string> }> => {
+  if (permissions.length === 0 && indices.length === 0) {
+    return { authorizedPerms: new Set(), authorizedIndices: new Set() };
   }
 
   try {
     const checkPrivileges = securityAuthz.checkPrivilegesDynamicallyWithRequest(request);
-    const response = await checkPrivileges({ kibana: permissions });
-
-    return new Set(response.privileges.kibana.filter((p) => p.authorized).map((p) => p.privilege));
-  } catch (error) {
-    logger.warn(`SML permission check failed: ${(error as Error).message}`);
-    return new Set();
-  }
-};
-
-/**
- * Batch-check which of the given concrete Elasticsearch index / alias /
- * data stream names the current user has `read` privilege on, via the
- * ES `_has_privileges` API. Returns the set of authorized names.
- *
- * Per `IndicesPermission.checkResourcePrivileges`, ES evaluates each
- * requested name against the user's role grants by automaton subset
- * check, so callers must pass **concrete names only** — not patterns.
- * Patterns would under-authorize because a request like `logs-*` is
- * only granted when the user's role covers the whole pattern, not when
- * it grants `read` on a single matching index. SML chunks store
- * concrete names by construction.
- *
- * Fails closed (empty Set) on error to avoid over-disclosure — a
- * transient ES error must not silently bypass the index check.
- */
-const getAuthorizedIndices = async ({
-  indices,
-  esClient,
-  logger,
-}: {
-  indices: string[];
-  esClient: IScopedClusterClient;
-  logger: Logger;
-}): Promise<Set<string>> => {
-  if (indices.length === 0) {
-    return new Set();
-  }
-
-  try {
-    const response = await esClient.asCurrentUser.security.hasPrivileges({
-      index: [{ names: indices, privileges: ['read'] }],
+    const response = await checkPrivileges({
+      ...(permissions.length > 0 ? { kibana: permissions } : {}),
+      ...(indices.length > 0
+        ? {
+            elasticsearch: {
+              cluster: [],
+              index: Object.fromEntries(indices.map((i) => [i, ['read']])),
+            },
+          }
+        : {}),
     });
 
-    const authorized = new Set<string>();
-    for (const [name, privs] of Object.entries(response.index ?? {})) {
-      if (privs?.read === true) {
-        authorized.add(name);
+    const authorizedPerms = new Set(
+      response.privileges.kibana.filter((p) => p.authorized).map((p) => p.privilege)
+    );
+    const authorizedIndices = new Set<string>();
+    for (const [name, privs] of Object.entries(response.privileges.elasticsearch.index ?? {})) {
+      if (privs.some((p) => p.privilege === 'read' && p.authorized)) {
+        authorizedIndices.add(name);
       }
     }
-    return authorized;
+    return { authorizedPerms, authorizedIndices };
   } catch (error) {
-    logger.warn(
-      `SML hasPrivileges check failed; failing closed (no index access): ${
-        (error as Error).message
-      }`
-    );
-    return new Set();
+    logger.warn(`SML privilege check failed; failing closed: ${(error as Error).message}`);
+    return { authorizedPerms: new Set(), authorizedIndices: new Set() };
   }
 };
 
 /**
  * Filter search results by the current user's privileges. Applies two
- * stacked all-of checks per chunk:
+ * stacked all-of checks per chunk in a single `_has_privileges` call:
  *
- *   1. Kibana `permissions[]` — every action string a chunk lists must
- *      be authorized for the user (via Kibana `checkPrivileges`).
- *   2. ES `target_indices[]` — every concrete index / alias / data
- *      stream a chunk depends on must be authorized via the ES
- *      `_has_privileges` API with `read`.
+ *   1. Kibana `permissions.kibana.privileges[].name` — every action
+ *      string a chunk lists must be authorized for the user.
+ *   2. ES `permissions.elasticsearch.indices[].name` — every concrete
+ *      index / alias / data stream a chunk depends on must be `read`-
+ *      authorized.
  *
- * Chunks with no `permissions[]` pass check 1 trivially; chunks with
- * omitted or empty `target_indices` pass check 2 trivially.
+ * Chunks with no `kibana.privileges` pass check 1 trivially; chunks
+ * with no `elasticsearch.indices` pass check 2 trivially.
  *
  * When the security plugin is absent (dev / test), the function is a
  * no-op — both checks are skipped — to preserve open-access semantics.
@@ -283,13 +280,11 @@ const getAuthorizedIndices = async ({
 const filterResultsByPermissions = async ({
   searchResult,
   request,
-  esClient,
   securityAuthz,
   logger,
 }: {
   searchResult: { results: SmlSearchResult[]; total: number };
   request: KibanaRequest;
-  esClient: IScopedClusterClient;
   securityAuthz?: AuthorizationServiceSetup;
   logger: Logger;
 }): Promise<{ results: SmlSearchResult[]; total: number }> => {
@@ -297,33 +292,39 @@ const filterResultsByPermissions = async ({
     return searchResult;
   }
 
-  const allPermissions = [...new Set(searchResult.results.flatMap((hit) => hit.permissions))];
+  const allPermissions = [
+    ...new Set(
+      searchResult.results.flatMap((hit) => hit.permissions.kibana.privileges.map((p) => p.name))
+    ),
+  ];
   const allTargetIndices = [
-    ...new Set(searchResult.results.flatMap((hit) => hit.target_indices ?? [])),
+    ...new Set(
+      searchResult.results.flatMap((hit) =>
+        hit.permissions.elasticsearch.indices.map((i) => i.name)
+      )
+    ),
   ];
 
   if (allPermissions.length === 0 && allTargetIndices.length === 0) {
     return searchResult;
   }
 
-  const [authorizedPerms, authorizedIndices] = await Promise.all([
-    allPermissions.length > 0
-      ? getAuthorizedPermissions({ permissions: allPermissions, request, securityAuthz, logger })
-      : Promise.resolve(new Set<string>()),
-    allTargetIndices.length > 0
-      ? getAuthorizedIndices({ indices: allTargetIndices, esClient, logger })
-      : Promise.resolve(new Set<string>()),
-  ]);
+  const { authorizedPerms, authorizedIndices } = await getAuthorizedPrivileges({
+    permissions: allPermissions,
+    indices: allTargetIndices,
+    request,
+    securityAuthz,
+    logger,
+  });
 
   const filteredResults = searchResult.results.filter((hit) => {
-    const permsOk =
-      hit.permissions.length === 0 || hit.permissions.every((p) => authorizedPerms.has(p));
+    const kbnPrivs = hit.permissions.kibana.privileges.map((p) => p.name);
+    const esIdx = hit.permissions.elasticsearch.indices.map((i) => i.name);
+
+    const permsOk = kbnPrivs.length === 0 || kbnPrivs.every((p) => authorizedPerms.has(p));
     if (!permsOk) return false;
 
-    const indicesOk =
-      !hit.target_indices ||
-      hit.target_indices.length === 0 ||
-      hit.target_indices.every((idx) => authorizedIndices.has(idx));
+    const indicesOk = esIdx.length === 0 || esIdx.every((idx) => authorizedIndices.has(idx));
     return indicesOk;
   });
 
@@ -334,13 +335,15 @@ const filterResultsByPermissions = async ({
  * Check whether the current user has access to specific SML items.
  * For each id, the access verdict is the AND of:
  *
- *   - Kibana `permissions[]` — all listed action strings are authorized.
- *   - ES `target_indices[]` — all listed concrete index/alias/data
- *     stream names are `read`-authorized via `_has_privileges`.
+ *   - Kibana `permissions.kibana.privileges[].name` — all listed action
+ *     strings are authorized.
+ *   - ES `permissions.elasticsearch.indices[].name` — all listed
+ *     concrete index/alias/data stream names are `read`-authorized via
+ *     `_has_privileges`.
  *
- * Chunks without any `permissions[]` and without any `target_indices`
- * are visible to anyone in the space. When the security plugin is
- * absent, all ids resolve to `true` (open access).
+ * Chunks without any kibana privileges and without any elasticsearch
+ * indices are visible to anyone in the space. When the security plugin
+ * is absent, all ids resolve to `true` (open access).
  */
 const checkItemsAccess = async ({
   ids,
@@ -368,15 +371,13 @@ const checkItemsAccess = async ({
   }
 
   interface DocAuthz {
-    permissions: string[];
-    target_indices: string[];
+    kbnPrivs: string[];
+    esIdx: string[];
   }
 
   let docAuthz: Map<string, DocAuthz>;
   try {
-    const response = await esClient.asInternalUser.search<
-      Pick<SmlDocument, 'id' | 'permissions' | 'target_indices'>
-    >({
+    const response = await esClient.asInternalUser.search<Pick<SmlDocument, 'id' | 'permissions'>>({
       index: smlIndexName,
       size: ids.length,
       allow_no_indices: true,
@@ -394,7 +395,7 @@ const checkItemsAccess = async ({
           ],
         },
       },
-      _source: ['id', 'permissions', 'target_indices'],
+      _source: ['id', 'permissions'],
     });
 
     docAuthz = new Map(
@@ -405,8 +406,8 @@ const checkItemsAccess = async ({
           return [
             source.id ?? '',
             {
-              permissions: source.permissions ?? [],
-              target_indices: source.target_indices ?? [],
+              kbnPrivs: source.permissions?.kibana?.privileges?.map((p) => p.name) ?? [],
+              esIdx: source.permissions?.elasticsearch?.indices?.map((i) => i.name) ?? [],
             },
           ] as [string, DocAuthz];
         })
@@ -425,19 +426,16 @@ const checkItemsAccess = async ({
     return accessMap;
   }
 
-  const allPermissions = [...new Set([...docAuthz.values()].flatMap((doc) => doc.permissions))];
-  const allTargetIndices = [
-    ...new Set([...docAuthz.values()].flatMap((doc) => doc.target_indices)),
-  ];
+  const allPermissions = [...new Set([...docAuthz.values()].flatMap((doc) => doc.kbnPrivs))];
+  const allTargetIndices = [...new Set([...docAuthz.values()].flatMap((doc) => doc.esIdx))];
 
-  const [authorizedPerms, authorizedIndices] = await Promise.all([
-    allPermissions.length > 0
-      ? getAuthorizedPermissions({ permissions: allPermissions, request, securityAuthz, logger })
-      : Promise.resolve(new Set<string>()),
-    allTargetIndices.length > 0
-      ? getAuthorizedIndices({ indices: allTargetIndices, esClient, logger })
-      : Promise.resolve(new Set<string>()),
-  ]);
+  const { authorizedPerms, authorizedIndices } = await getAuthorizedPrivileges({
+    permissions: allPermissions,
+    indices: allTargetIndices,
+    request,
+    securityAuthz,
+    logger,
+  });
 
   for (const id of ids) {
     const doc = docAuthz.get(id);
@@ -445,11 +443,9 @@ const checkItemsAccess = async ({
       accessMap.set(id, false);
       continue;
     }
-    const permsOk =
-      doc.permissions.length === 0 || doc.permissions.every((p) => authorizedPerms.has(p));
+    const permsOk = doc.kbnPrivs.length === 0 || doc.kbnPrivs.every((p) => authorizedPerms.has(p));
     const indicesOk =
-      doc.target_indices.length === 0 ||
-      doc.target_indices.every((idx) => authorizedIndices.has(idx));
+      doc.esIdx.length === 0 || doc.esIdx.every((idx) => authorizedIndices.has(idx));
     accessMap.set(id, permsOk && indicesOk);
   }
 
@@ -629,8 +625,7 @@ const searchSml = async ({
           created_at: source.created_at ?? '',
           updated_at: source.updated_at ?? '',
           spaces: source.spaces ?? [],
-          permissions: source.permissions ?? [],
-          target_indices: source.target_indices,
+          permissions: source.permissions ?? emptyPermissions(),
           user_id: source.user_id,
           score: hit._score ?? 0,
         };
@@ -699,7 +694,7 @@ const getDocumentsByIds = async ({
         created_at: source.created_at ?? '',
         updated_at: source.updated_at ?? '',
         spaces: source.spaces ?? [],
-        permissions: source.permissions ?? [],
+        permissions: source.permissions ?? emptyPermissions(),
       };
       if (source.description !== undefined) {
         doc.description = source.description;
@@ -709,9 +704,6 @@ const getDocumentsByIds = async ({
       }
       if (source.references !== undefined) {
         doc.references = source.references;
-      }
-      if (source.target_indices !== undefined) {
-        doc.target_indices = source.target_indices;
       }
       docMap.set(doc.id, doc);
     }
@@ -773,11 +765,8 @@ const getDocumentById = async ({
       created_at: source.created_at ?? '',
       updated_at: source.updated_at ?? '',
       spaces: source.spaces ?? [],
-      permissions: source.permissions ?? [],
+      permissions: source.permissions ?? emptyPermissions(),
     };
-    if (source.target_indices !== undefined) {
-      doc.target_indices = source.target_indices;
-    }
     return doc;
   } catch (error) {
     if (isNotFoundError(error)) {
@@ -860,11 +849,8 @@ const listDocuments = async ({
           created_at: source.created_at ?? '',
           updated_at: source.updated_at ?? '',
           spaces: source.spaces ?? [],
-          permissions: source.permissions ?? [],
+          permissions: source.permissions ?? emptyPermissions(),
         };
-        if (source.target_indices !== undefined) {
-          doc.target_indices = source.target_indices;
-        }
         return doc;
       });
 
@@ -952,16 +938,11 @@ const upsertDocument = async ({
     created_at: existing?.created_at ?? now,
     updated_at: now,
     spaces: existing?.spaces ?? [spaceId],
-    permissions: document.permissions ?? [],
+    permissions: {
+      kibana: { privileges: document.permissions?.kibana?.privileges ?? [] },
+      elasticsearch: { indices: document.permissions?.elasticsearch?.indices ?? [] },
+    },
   };
-  // Persist `target_indices` only when the caller supplied at least one
-  // concrete name. Both `undefined` and `[]` collapse to "no dependency"
-  // (the field is omitted from the stored doc), matching the absent-vs-empty
-  // semantics on `SmlDocument.target_indices` and the post-filter's no-op
-  // path when the array is missing or empty.
-  if (document.target_indices !== undefined && document.target_indices.length > 0) {
-    fullDocument.target_indices = document.target_indices;
-  }
 
   await smlClient.index({ id, document: fullDocument });
 

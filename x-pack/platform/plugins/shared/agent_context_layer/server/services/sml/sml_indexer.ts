@@ -133,7 +133,10 @@ class SmlIndexerImpl implements SmlIndexer {
         created_at: now,
         updated_at: now,
         spaces,
-        permissions: chunk.permissions ?? [],
+        permissions: {
+          kibana: { privileges: chunk.permissions?.kibana?.privileges ?? [] },
+          elasticsearch: { indices: chunk.permissions?.elasticsearch?.indices ?? [] },
+        },
       };
       if (chunk.description !== undefined) {
         document.description = chunk.description;
@@ -143,9 +146,6 @@ class SmlIndexerImpl implements SmlIndexer {
       }
       if (chunk.references !== undefined) {
         document.references = chunk.references;
-      }
-      if (chunk.target_indices !== undefined) {
-        document.target_indices = chunk.target_indices;
       }
       return {
         index: {

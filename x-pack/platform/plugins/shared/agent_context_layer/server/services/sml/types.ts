@@ -16,6 +16,34 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { SmlSearchFilters } from '../../../common/http_api/sml';
 
 /**
+ * A single Kibana feature privilege required to access a chunk
+ * (e.g., `saved_object:lens/get`, `action:execute`).
+ */
+export interface SmlKibanaPrivilege {
+  name: string;
+}
+
+/**
+ * A single concrete Elasticsearch index / alias / data stream name whose
+ * data a chunk's content depends on. Used by the search-time post-filter
+ * to gate chunks behind the user's ES `read` privilege on each name.
+ */
+export interface SmlElasticsearchIndex {
+  name: string;
+}
+
+/**
+ * Permissions required to access a chunk, split by access boundary.
+ *
+ * Both sub-objects are always present (with possibly-empty arrays) on
+ * stored documents to keep the schema rigid and predictable.
+ */
+export interface SmlPermissions {
+  kibana: { privileges: SmlKibanaPrivilege[] };
+  elasticsearch: { indices: SmlElasticsearchIndex[] };
+}
+
+/**
  * A single SML chunk to be indexed.
  */
 export interface SmlChunk {
@@ -31,16 +59,8 @@ export interface SmlChunk {
   user_id?: string;
   /** Other SML chunk ids this item references */
   references?: string[];
-  /** Permissions required to access the underlying element (e.g., 'saved_object:lens/get') */
-  permissions?: string[];
-  /**
-   * Concrete Elasticsearch index / alias / data stream names whose data
-   * this chunk's content depends on. Used by the search-time post-filter
-   * to gate chunks behind the user's ES `read` privilege on each name.
-   * Omit when the chunk has no underlying ES data dependency (e.g. a
-   * workflow with no data-bound steps).
-   */
-  target_indices?: string[];
+  /** Permissions required to access the underlying element. */
+  permissions: SmlPermissions;
 }
 
 /**
@@ -145,16 +165,11 @@ export interface SmlDocument {
   updated_at: string;
   /** Space IDs this item belongs to */
   spaces: string[];
-  /** Permissions required to access the underlying element */
-  permissions: string[];
   /**
-   * Concrete Elasticsearch index / alias / data stream names whose data
-   * this chunk's content depends on. Used by the search-time post-filter
-   * to gate chunks behind the user's ES `read` privilege on each name.
-   * Field is absent (not `[]`) when the chunk has no underlying ES data
-   * dependency.
+   * Permissions required to access the underlying element. Always present
+   * on stored documents; inner arrays may be empty.
    */
-  target_indices?: string[];
+  permissions: SmlPermissions;
 }
 
 /**
@@ -215,16 +230,12 @@ export interface SmlDocumentInput {
   title: string;
   origin_id: string;
   content: string;
-  permissions?: string[];
   /**
-   * Concrete Elasticsearch index / alias / data stream names whose data
-   * this chunk's content depends on. Used by the search-time post-filter
-   * to gate chunks behind the user's ES `read` privilege on each name.
-   * Omit or pass an empty array when the chunk has no underlying ES
-   * data dependency — both forms persist as "no dependency" (the field
-   * is omitted from the stored document, not stored as `[]`).
+   * Permissions required to access the underlying element. Optional on
+   * input — when omitted, the upsert handler normalizes to an empty
+   * `{ kibana: { privileges: [] }, elasticsearch: { indices: [] } }`.
    */
-  target_indices?: string[];
+  permissions?: SmlPermissions;
 }
 
 /**

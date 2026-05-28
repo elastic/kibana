@@ -45,7 +45,10 @@ const createSmlDocument = (overrides: Partial<SmlDocument> = {}): SmlDocument =>
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z',
   spaces: ['default'],
-  permissions: [],
+  permissions: {
+    kibana: { privileges: [] },
+    elasticsearch: { indices: [] },
+  },
   ...overrides,
 });
 
@@ -280,7 +283,10 @@ describe('workflowSmlType', () => {
             type: 'workflow',
             title: 'Alert Triage',
             content: expect.any(String),
-            permissions: ['api:workflowsManagement:read'],
+            permissions: {
+              kibana: { privileges: [{ name: 'api:workflowsManagement:read' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       });
@@ -359,7 +365,10 @@ describe('workflowSmlType', () => {
             type: 'workflow',
             title: 'Minimal Workflow',
             content: 'Minimal Workflow\nenabled: false',
-            permissions: ['api:workflowsManagement:read'],
+            permissions: {
+              kibana: { privileges: [{ name: 'api:workflowsManagement:read' }] },
+              elasticsearch: { indices: [] },
+            },
           },
         ],
       });

@@ -172,7 +172,10 @@ describe('dashboardSmlType', () => {
         expect.objectContaining({
           type: 'dashboard',
           title: 'System Overview',
-          permissions: ['saved_object:dashboard/get'],
+          permissions: {
+            kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+            elasticsearch: { indices: [] },
+          },
         }),
       ],
     });
@@ -201,7 +204,10 @@ describe('dashboardSmlType', () => {
         created_at: '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
         spaces: ['default'],
-        permissions: ['saved_object:dashboard/get'],
+        permissions: {
+          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+          elasticsearch: { indices: [] },
+        },
       },
       {
         request: {} as never,
@@ -258,7 +264,10 @@ describe('dashboardSmlType', () => {
         created_at: '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
         spaces: ['default'],
-        permissions: ['saved_object:dashboard/get'],
+        permissions: {
+          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+          elasticsearch: { indices: [] },
+        },
       },
       {
         request: {} as never,

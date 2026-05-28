@@ -55,13 +55,14 @@ export interface SmlHttpItem {
   created_at: string;
   updated_at: string;
   spaces: string[];
-  permissions: string[];
   /**
-   * Concrete Elasticsearch index / alias / data stream names whose data
-   * this chunk's content depends on. Absent (not `[]`) when the chunk
-   * has no underlying ES data dependency. See `SmlDocument.target_indices`.
+   * Permissions required to access the underlying element. Always
+   * present; inner arrays may be empty.
    */
-  target_indices?: string[];
+  permissions: {
+    kibana: { privileges: Array<{ name: string }> };
+    elasticsearch: { indices: Array<{ name: string }> };
+  };
 }
 
 /**

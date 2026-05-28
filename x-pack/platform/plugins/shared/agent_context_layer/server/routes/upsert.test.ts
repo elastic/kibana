@@ -78,17 +78,22 @@ describe('registerUpsertRoute', () => {
     });
   });
 
-  it('forwards target_indices to sml.upsertDocument when provided', async () => {
+  it('forwards permissions to sml.upsertDocument when provided', async () => {
     mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
-    const bodyWithTargetIndices = {
+    const bodyWithPermissions = {
       ...validBody,
-      target_indices: ['logs-app-*', 'metrics-prod'],
+      permissions: {
+        kibana: { privileges: [{ name: 'saved_object:lens/get' }] },
+        elasticsearch: {
+          indices: [{ name: 'logs-app-*' }, { name: 'metrics-prod' }],
+        },
+      },
     };
-    await callHandler({ params: { id: 'chunk-1' }, body: bodyWithTargetIndices });
+    await callHandler({ params: { id: 'chunk-1' }, body: bodyWithPermissions });
     expect(mockSmlService.upsertDocument).toHaveBeenCalledWith({
       id: 'chunk-1',
       spaceId: 'test-space',
-      document: bodyWithTargetIndices,
+      document: bodyWithPermissions,
       esClient: expect.any(Object),
     });
   });

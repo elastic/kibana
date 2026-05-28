@@ -32,11 +32,9 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
 const createMockScopedClient = (
   internalUser: jest.Mocked<ElasticsearchClient>
 ): IScopedClusterClient => {
-  const asCurrentUser = createMockEsClient() as unknown as Record<string, unknown>;
-  asCurrentUser.security = { hasPrivileges: jest.fn() };
   return {
     asInternalUser: internalUser,
-    asCurrentUser,
+    asCurrentUser: createMockEsClient(),
   } as unknown as IScopedClusterClient;
 };
 
@@ -46,15 +44,45 @@ const createMockLogger = () => {
   return log;
 };
 
-const createMockSecurityAuthz = (authorizedPrivileges: string[]): AuthorizationServiceSetup => {
-  const checkPrivileges = jest.fn().mockImplementation(async (req: { kibana: string[] }) => ({
-    privileges: {
-      kibana: req.kibana.map((privilege) => ({
-        privilege,
-        authorized: authorizedPrivileges.includes(privilege),
-      })),
-    },
-  }));
+/**
+ * Build a `checkPrivileges` mock that handles both `kibana` and
+ * `elasticsearch.index` inputs (mirroring Kibana's real wrapper which
+ * bundles both into a single `_has_privileges` POST).
+ */
+const buildCheckPrivilegesMock = (authorizedKibana: Set<string>, authorizedIndices: Set<string>) =>
+  jest
+    .fn()
+    .mockImplementation(
+      async (req: { kibana?: string[]; elasticsearch?: { index?: Record<string, string[]> } }) => ({
+        privileges: {
+          kibana: (req.kibana ?? []).map((privilege) => ({
+            privilege,
+            authorized: authorizedKibana.has(privilege),
+          })),
+          elasticsearch: {
+            cluster: [],
+            index: Object.fromEntries(
+              Object.entries(req.elasticsearch?.index ?? {}).map(([name, perms]) => [
+                name,
+                perms.map((privilege) => ({
+                  privilege,
+                  authorized: privilege === 'read' && authorizedIndices.has(name),
+                })),
+              ])
+            ),
+          },
+        },
+      })
+    );
+
+const createMockSecurityAuthz = (
+  authorizedPrivileges: string[],
+  authorizedIndices: string[] = []
+): AuthorizationServiceSetup => {
+  const checkPrivileges = buildCheckPrivilegesMock(
+    new Set(authorizedPrivileges),
+    new Set(authorizedIndices)
+  );
   return {
     checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
   } as unknown as AuthorizationServiceSetup;
@@ -64,15 +92,10 @@ const createMockSecurityAuthzPartial = (
   authorized: string[],
   unauthorized: string[]
 ): AuthorizationServiceSetup => {
-  const authorizedSet = new Set(authorized);
-  const checkPrivileges = jest.fn().mockImplementation(async (req: { kibana: string[] }) => ({
-    privileges: {
-      kibana: req.kibana.map((privilege) => ({
-        privilege,
-        authorized: authorizedSet.has(privilege),
-      })),
-    },
-  }));
+  // `unauthorized` is retained as a documentation aid for the test author —
+  // the mock simply treats any privilege not in `authorized` as denied.
+  void unauthorized;
+  const checkPrivileges = buildCheckPrivilegesMock(new Set(authorized), new Set());
   return {
     checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(checkPrivileges),
   } as unknown as AuthorizationServiceSetup;
@@ -96,6 +119,16 @@ const createNotFoundError = () =>
     headers: {},
     meta: {} as any,
   });
+
+/**
+ * Build a fully-shaped `permissions` object for fixtures and assertions.
+ * Both inner arrays are always present; pass `[]` (the default) for
+ * "no privileges of this kind".
+ */
+const makePermissions = (kibanaPrivs: string[] = [], esIndices: string[] = []) => ({
+  kibana: { privileges: kibanaPrivs.map((name) => ({ name })) },
+  elasticsearch: { indices: esIndices.map((name) => ({ name })) },
+});
 
 describe('createSmlService', () => {
   describe('lifecycle', () => {
@@ -339,7 +372,7 @@ describe('SmlService', () => {
                 created_at: '2024-01-01',
                 updated_at: '2024-01-02',
                 spaces: ['default'],
-                permissions: ['saved_object:lens/get'],
+                permissions: makePermissions(['saved_object:lens/get']),
               },
               _score: 1.5,
             },
@@ -368,7 +401,7 @@ describe('SmlService', () => {
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
         spaces: ['default'],
-        permissions: ['saved_object:lens/get'],
+        permissions: makePermissions(['saved_object:lens/get']),
         score: 1.5,
       });
       expect(result.total).toBe(1);
@@ -393,7 +426,7 @@ describe('SmlService', () => {
                 created_at: '',
                 updated_at: '',
                 spaces: [],
-                permissions: [],
+                permissions: makePermissions(),
               },
               _score: 1,
             },
@@ -407,7 +440,7 @@ describe('SmlService', () => {
                 created_at: '',
                 updated_at: '',
                 spaces: [],
-                permissions: [],
+                permissions: makePermissions(),
               },
               _score: 1,
             },
@@ -492,7 +525,7 @@ describe('SmlService', () => {
                 created_at: '',
                 updated_at: '',
                 spaces: ['default'],
-                permissions: ['saved_object:lens/get'],
+                permissions: makePermissions(['saved_object:lens/get']),
               },
               _score: 1,
             },
@@ -506,7 +539,7 @@ describe('SmlService', () => {
                 created_at: '',
                 updated_at: '',
                 spaces: ['default'],
-                permissions: ['saved_object:dashboard/get'],
+                permissions: makePermissions(['saved_object:dashboard/get']),
               },
               _score: 1,
             },
@@ -547,7 +580,7 @@ describe('SmlService', () => {
                 created_at: '',
                 updated_at: '',
                 spaces: ['default'],
-                permissions: ['saved_object:lens/get'],
+                permissions: makePermissions(['saved_object:lens/get']),
               },
               _score: 1,
             },
@@ -561,7 +594,7 @@ describe('SmlService', () => {
                 created_at: '',
                 updated_at: '',
                 spaces: ['default'],
-                permissions: ['saved_object:dashboard/get'],
+                permissions: makePermissions(['saved_object:dashboard/get']),
               },
               _score: 1,
             },
@@ -604,10 +637,10 @@ describe('SmlService', () => {
       );
     });
 
-    describe('target_indices post-filter (hasPrivileges all-of)', () => {
-      const makeHit = (overrides: Partial<Record<string, unknown>> = {}) => ({
+    describe('elasticsearch.indices post-filter (combined checkPrivileges all-of)', () => {
+      const makeHit = (overrides: { id?: string; indices?: string[] } = {}) => ({
         _source: {
-          id: 'chunk-x',
+          id: overrides.id ?? 'chunk-x',
           type: 'lens',
           title: 'Viz',
           origin_id: 'r1',
@@ -615,14 +648,13 @@ describe('SmlService', () => {
           created_at: '',
           updated_at: '',
           spaces: ['default'],
-          permissions: ['saved_object:lens/get'],
-          ...overrides,
+          permissions: makePermissions(['saved_object:lens/get'], overrides.indices ?? []),
         },
         _score: 1,
       });
 
-      it('keeps chunks whose target_indices are all read-authorized', async () => {
-        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+      it('keeps chunks whose elasticsearch.indices are all read-authorized', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get'], ['logs-2024']);
         const service = createSmlService();
         service.setup({ logger });
         const smlService = service.start({ logger, securityAuthz });
@@ -630,15 +662,9 @@ describe('SmlService', () => {
         esClient.search.mockResolvedValueOnce({
           hits: {
             total: 1,
-            hits: [makeHit({ id: 'ok-chunk', target_indices: ['logs-2024'] })],
+            hits: [makeHit({ id: 'ok-chunk', indices: ['logs-2024'] })],
           },
         } as any);
-        (
-          (scopedClient.asCurrentUser as any).security.hasPrivileges as jest.Mock
-        ).mockResolvedValueOnce({
-          index: { 'logs-2024': { read: true } },
-          has_all_requested: true,
-        });
 
         const result = await smlService.search({
           query: '*',
@@ -649,13 +675,17 @@ describe('SmlService', () => {
         });
 
         expect(result.results.map((r) => r.id)).toEqual(['ok-chunk']);
-        expect((scopedClient.asCurrentUser as any).security.hasPrivileges).toHaveBeenCalledWith({
-          index: [{ names: ['logs-2024'], privileges: ['read'] }],
-        });
+        const checkPrivileges = (securityAuthz.checkPrivilegesDynamicallyWithRequest as jest.Mock)
+          .mock.results[0].value as jest.Mock;
+        expect(checkPrivileges).toHaveBeenCalledWith(
+          expect.objectContaining({
+            elasticsearch: { cluster: [], index: { 'logs-2024': ['read'] } },
+          })
+        );
       });
 
-      it('drops a chunk when the user lacks read on ANY of its target_indices (all-of rule)', async () => {
-        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+      it('drops a chunk when the user lacks read on ANY of its elasticsearch.indices (all-of rule)', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get'], ['logs-2024']);
         const service = createSmlService();
         service.setup({ logger });
         const smlService = service.start({ logger, securityAuthz });
@@ -664,23 +694,14 @@ describe('SmlService', () => {
           hits: {
             total: 2,
             hits: [
-              makeHit({ id: 'single-ok', target_indices: ['logs-2024'] }),
+              makeHit({ id: 'single-ok', indices: ['logs-2024'] }),
               makeHit({
                 id: 'multi-partial',
-                target_indices: ['logs-2024', 'super-secret'],
+                indices: ['logs-2024', 'super-secret'],
               }),
             ],
           },
         } as any);
-        (
-          (scopedClient.asCurrentUser as any).security.hasPrivileges as jest.Mock
-        ).mockResolvedValueOnce({
-          index: {
-            'logs-2024': { read: true },
-            'super-secret': { read: false },
-          },
-          has_all_requested: false,
-        });
 
         const result = await smlService.search({
           query: '*',
@@ -694,7 +715,7 @@ describe('SmlService', () => {
         expect(result.total).toBe(1);
       });
 
-      it('chunks with omitted target_indices pass regardless of index privileges', async () => {
+      it('chunks with empty elasticsearch.indices pass regardless of index privileges', async () => {
         const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
         const service = createSmlService();
         service.setup({ logger });
@@ -716,12 +737,20 @@ describe('SmlService', () => {
         });
 
         expect(result.results.map((r) => r.id)).toEqual(['no-deps']);
-        // hasPrivileges is never called when no chunk in the page lists target_indices.
-        expect((scopedClient.asCurrentUser as any).security.hasPrivileges).not.toHaveBeenCalled();
+        // When no chunk in the page lists indices, the combined check is invoked
+        // only for the kibana privileges — no `elasticsearch.index` payload.
+        const checkPrivileges = (securityAuthz.checkPrivilegesDynamicallyWithRequest as jest.Mock)
+          .mock.results[0].value as jest.Mock;
+        const lastCall = checkPrivileges.mock.calls[0]?.[0] as
+          | {
+              elasticsearch?: unknown;
+            }
+          | undefined;
+        expect(lastCall?.elasticsearch).toBeUndefined();
       });
 
-      it('fails closed when hasPrivileges throws — drops every chunk with target_indices', async () => {
-        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+      it('fails closed when checkPrivileges throws — drops every chunk with elasticsearch.indices', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get'], ['logs-2024']);
         const service = createSmlService();
         service.setup({ logger });
         const smlService = service.start({ logger, securityAuthz });
@@ -731,13 +760,17 @@ describe('SmlService', () => {
             total: 2,
             hits: [
               makeHit({ id: 'no-deps' }),
-              makeHit({ id: 'with-deps', target_indices: ['logs-2024'] }),
+              makeHit({ id: 'with-deps', indices: ['logs-2024'] }),
             ],
           },
         } as any);
-        (
-          (scopedClient.asCurrentUser as any).security.hasPrivileges as jest.Mock
-        ).mockRejectedValueOnce(new Error('cluster unreachable'));
+        // Grab the inner mock returned by the curried setup, regardless of
+        // whether it has been invoked yet (mockReturnValue always returns
+        // the same instance).
+        const checkPrivileges = (
+          securityAuthz.checkPrivilegesDynamicallyWithRequest as jest.Mock
+        )() as jest.Mock;
+        checkPrivileges.mockRejectedValueOnce(new Error('cluster unreachable'));
 
         const result = await smlService.search({
           query: '*',
@@ -747,12 +780,17 @@ describe('SmlService', () => {
           request,
         });
 
-        // 'no-deps' survives (no index check needed); 'with-deps' is dropped (failed closed).
-        expect(result.results.map((r) => r.id)).toEqual(['no-deps']);
+        // Failing closed drops every chunk (including no-deps) because the
+        // combined check covered both kibana + index gates in a single call,
+        // and neither permission set is granted on error.
+        expect(result.results.map((r) => r.id)).toEqual([]);
       });
 
-      it('batches the hasPrivileges call across all distinct target_indices in the page', async () => {
-        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+      it('batches the checkPrivileges call across all distinct elasticsearch.indices in the page', async () => {
+        const securityAuthz = createMockSecurityAuthz(
+          ['saved_object:lens/get'],
+          ['logs-2024', 'metrics']
+        );
         const service = createSmlService();
         service.setup({ logger });
         const smlService = service.start({ logger, securityAuthz });
@@ -761,18 +799,12 @@ describe('SmlService', () => {
           hits: {
             total: 3,
             hits: [
-              makeHit({ id: 'a', target_indices: ['logs-2024'] }),
-              makeHit({ id: 'b', target_indices: ['logs-2024', 'metrics'] }),
-              makeHit({ id: 'c', target_indices: ['metrics'] }),
+              makeHit({ id: 'a', indices: ['logs-2024'] }),
+              makeHit({ id: 'b', indices: ['logs-2024', 'metrics'] }),
+              makeHit({ id: 'c', indices: ['metrics'] }),
             ],
           },
         } as any);
-        const hasPrivilegesMock = (scopedClient.asCurrentUser as any).security
-          .hasPrivileges as jest.Mock;
-        hasPrivilegesMock.mockResolvedValueOnce({
-          index: { 'logs-2024': { read: true }, metrics: { read: true } },
-          has_all_requested: true,
-        });
 
         await smlService.search({
           query: '*',
@@ -782,13 +814,23 @@ describe('SmlService', () => {
           request,
         });
 
-        expect(hasPrivilegesMock).toHaveBeenCalledTimes(1);
-        const call = hasPrivilegesMock.mock.calls[0][0] as {
-          index: Array<{ names: string[]; privileges: string[] }>;
+        const checkPrivileges = (securityAuthz.checkPrivilegesDynamicallyWithRequest as jest.Mock)
+          .mock.results[0].value as jest.Mock;
+        expect(checkPrivileges).toHaveBeenCalledTimes(1);
+        const call = checkPrivileges.mock.calls[0][0] as {
+          kibana?: string[];
+          elasticsearch?: { index: Record<string, string[]> };
         };
-        expect(call.index).toHaveLength(1);
-        expect(call.index[0].privileges).toEqual(['read']);
-        expect(new Set(call.index[0].names)).toEqual(new Set(['logs-2024', 'metrics']));
+        expect(call.kibana).toEqual(['saved_object:lens/get']);
+        expect(call.elasticsearch).toBeDefined();
+        const indexEntries = Object.entries(call.elasticsearch!.index);
+        expect(indexEntries).toHaveLength(2);
+        for (const [, perms] of indexEntries) {
+          expect(perms).toEqual(['read']);
+        }
+        expect(new Set(Object.keys(call.elasticsearch!.index))).toEqual(
+          new Set(['logs-2024', 'metrics'])
+        );
       });
     });
   });
@@ -847,7 +889,7 @@ describe('SmlService', () => {
             {
               _source: {
                 id: 'item-1',
-                permissions: ['saved_object:lens/get'],
+                permissions: makePermissions(['saved_object:lens/get']),
               },
             },
           ],
@@ -877,7 +919,7 @@ describe('SmlService', () => {
             {
               _source: {
                 id: 'item-1',
-                permissions: ['saved_object:dashboard/get'],
+                permissions: makePermissions(['saved_object:dashboard/get']),
               },
             },
           ],
@@ -907,7 +949,7 @@ describe('SmlService', () => {
             {
               _source: {
                 id: 'item-1',
-                permissions: [],
+                permissions: makePermissions(),
               },
             },
           ],
@@ -979,7 +1021,7 @@ describe('SmlService', () => {
               ],
             },
           },
-          _source: ['id', 'permissions', 'target_indices'],
+          _source: ['id', 'permissions'],
         })
       );
       expect(
@@ -987,17 +1029,25 @@ describe('SmlService', () => {
       ).not.toHaveBeenCalled();
     });
 
-    describe('target_indices post-filter (hasPrivileges all-of)', () => {
-      const makeHit = (overrides: Partial<Record<string, unknown>> = {}) => ({
+    describe('elasticsearch.indices post-filter (combined checkPrivileges all-of)', () => {
+      const makeHit = (
+        overrides: {
+          id?: string;
+          indices?: string[];
+          kbnPrivs?: string[];
+        } = {}
+      ) => ({
         _source: {
-          id: 'id-x',
-          permissions: ['saved_object:lens/get'],
-          ...overrides,
+          id: overrides.id ?? 'id-x',
+          permissions: makePermissions(
+            overrides.kbnPrivs ?? ['saved_object:lens/get'],
+            overrides.indices ?? []
+          ),
         },
       });
 
-      it('grants access when all target_indices are read-authorized', async () => {
-        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+      it('grants access when all elasticsearch.indices are read-authorized', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get'], ['logs-2024']);
         const service = createSmlService();
         service.setup({ logger });
         const smlService = service.start({ logger, securityAuthz });
@@ -1005,15 +1055,9 @@ describe('SmlService', () => {
         esClient.search.mockResolvedValueOnce({
           hits: {
             total: 1,
-            hits: [makeHit({ id: 'id-1', target_indices: ['logs-2024'] })],
+            hits: [makeHit({ id: 'id-1', indices: ['logs-2024'] })],
           },
         } as any);
-        (
-          (scopedClient.asCurrentUser as any).security.hasPrivileges as jest.Mock
-        ).mockResolvedValueOnce({
-          index: { 'logs-2024': { read: true } },
-          has_all_requested: true,
-        });
 
         const result = await smlService.checkItemsAccess({
           ids: ['id-1'],
@@ -1023,10 +1067,17 @@ describe('SmlService', () => {
         });
 
         expect(result.get('id-1')).toBe(true);
+        const checkPrivileges = (securityAuthz.checkPrivilegesDynamicallyWithRequest as jest.Mock)
+          .mock.results[0].value as jest.Mock;
+        expect(checkPrivileges).toHaveBeenCalledWith(
+          expect.objectContaining({
+            elasticsearch: { cluster: [], index: { 'logs-2024': ['read'] } },
+          })
+        );
       });
 
-      it('denies access when the user lacks read on ANY target_indices value', async () => {
-        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+      it('denies access when the user lacks read on ANY elasticsearch.indices value', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get'], ['logs-2024']);
         const service = createSmlService();
         service.setup({ logger });
         const smlService = service.start({ logger, securityAuthz });
@@ -1037,20 +1088,11 @@ describe('SmlService', () => {
             hits: [
               makeHit({
                 id: 'id-1',
-                target_indices: ['logs-2024', 'super-secret'],
+                indices: ['logs-2024', 'super-secret'],
               }),
             ],
           },
         } as any);
-        (
-          (scopedClient.asCurrentUser as any).security.hasPrivileges as jest.Mock
-        ).mockResolvedValueOnce({
-          index: {
-            'logs-2024': { read: true },
-            'super-secret': { read: false },
-          },
-          has_all_requested: false,
-        });
 
         const result = await smlService.checkItemsAccess({
           ids: ['id-1'],
@@ -1062,7 +1104,7 @@ describe('SmlService', () => {
         expect(result.get('id-1')).toBe(false);
       });
 
-      it('grants access for items with permissions OK and no target_indices (omitted/empty)', async () => {
+      it('grants access for items with kibana privileges OK and no elasticsearch.indices', async () => {
         const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
         const service = createSmlService();
         service.setup({ logger });
@@ -1083,11 +1125,18 @@ describe('SmlService', () => {
         });
 
         expect(result.get('id-1')).toBe(true);
-        expect((scopedClient.asCurrentUser as any).security.hasPrivileges).not.toHaveBeenCalled();
+        const checkPrivileges = (securityAuthz.checkPrivilegesDynamicallyWithRequest as jest.Mock)
+          .mock.results[0].value as jest.Mock;
+        const lastCall = checkPrivileges.mock.calls[0]?.[0] as
+          | {
+              elasticsearch?: unknown;
+            }
+          | undefined;
+        expect(lastCall?.elasticsearch).toBeUndefined();
       });
 
-      it('fails closed when hasPrivileges throws — denies items with target_indices, keeps no-deps items', async () => {
-        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
+      it('fails closed when checkPrivileges throws — denies items with deps, keeps trivial items', async () => {
+        const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get'], ['logs-2024']);
         const service = createSmlService();
         service.setup({ logger });
         const smlService = service.start({ logger, securityAuthz });
@@ -1096,23 +1145,26 @@ describe('SmlService', () => {
           hits: {
             total: 2,
             hits: [
-              makeHit({ id: 'no-deps' }),
-              makeHit({ id: 'with-deps', target_indices: ['logs-2024'] }),
+              // Truly trivial item — no kibana privs and no indices —
+              // passes both per-item checks regardless of authz state.
+              makeHit({ id: 'trivial', kbnPrivs: [], indices: [] }),
+              makeHit({ id: 'with-deps', indices: ['logs-2024'] }),
             ],
           },
         } as any);
-        (
-          (scopedClient.asCurrentUser as any).security.hasPrivileges as jest.Mock
-        ).mockRejectedValueOnce(new Error('cluster unreachable'));
+        const checkPrivileges = (
+          securityAuthz.checkPrivilegesDynamicallyWithRequest as jest.Mock
+        )() as jest.Mock;
+        checkPrivileges.mockRejectedValueOnce(new Error('cluster unreachable'));
 
         const result = await smlService.checkItemsAccess({
-          ids: ['no-deps', 'with-deps'],
+          ids: ['trivial', 'with-deps'],
           spaceId: 'default',
           esClient: scopedClient,
           request,
         });
 
-        expect(result.get('no-deps')).toBe(true);
+        expect(result.get('trivial')).toBe(true);
         expect(result.get('with-deps')).toBe(false);
       });
     });
@@ -1138,7 +1190,7 @@ describe('SmlService', () => {
                 created_at: '2024-01-01',
                 updated_at: '2024-01-02',
                 spaces: ['default'],
-                permissions: [],
+                permissions: makePermissions(),
               },
             },
             {
@@ -1154,7 +1206,7 @@ describe('SmlService', () => {
                 created_at: '2024-01-01',
                 updated_at: '2024-01-02',
                 spaces: ['default'],
-                permissions: [],
+                permissions: makePermissions(),
               },
             },
           ],
@@ -1177,7 +1229,7 @@ describe('SmlService', () => {
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
         spaces: ['default'],
-        permissions: [],
+        permissions: makePermissions(),
       });
       expect(result.get('doc-2')).toEqual({
         id: 'doc-2',
@@ -1191,7 +1243,7 @@ describe('SmlService', () => {
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
         spaces: ['default'],
-        permissions: [],
+        permissions: makePermissions(),
       });
     });
 
@@ -1296,7 +1348,7 @@ describe('SmlService', () => {
         created_at: '2024-01-01',
         updated_at: '2024-01-02',
         spaces: ['default'],
-        permissions: [],
+        permissions: makePermissions(),
       },
     };
 
@@ -1539,7 +1591,7 @@ describe('SmlService', () => {
       expect(result!.document.spaces).toEqual(['default']);
       expect(result!.document.created_at).toBeDefined();
       expect(result!.document.created_at).toBe(result!.document.updated_at);
-      expect(result!.document.permissions).toEqual([]);
+      expect(result!.document.permissions).toEqual(makePermissions());
       expect(smlClient.index).toHaveBeenCalledWith({
         id: 'doc-1',
         document: result!.document,
@@ -1558,7 +1610,7 @@ describe('SmlService', () => {
           created_at: '2023-01-01T00:00:00.000Z',
           updated_at: '2023-06-01T00:00:00.000Z',
           spaces: ['default', 'engineering'],
-          permissions: [],
+          permissions: makePermissions(),
         },
       });
 
@@ -1574,7 +1626,7 @@ describe('SmlService', () => {
           title: 'New',
           origin_id: 'ref-1',
           content: 'new',
-          permissions: ['saved_object:lens/get'],
+          permissions: makePermissions(['saved_object:lens/get']),
         },
         esClient: scopedClient,
       });
@@ -1584,12 +1636,12 @@ describe('SmlService', () => {
       expect(result!.document.created_at).toBe('2023-01-01T00:00:00.000Z');
       expect(result!.document.updated_at).not.toBe('2023-06-01T00:00:00.000Z');
       expect(result!.document.title).toBe('New');
-      expect(result!.document.permissions).toEqual(['saved_object:lens/get']);
+      expect(result!.document.permissions).toEqual(makePermissions(['saved_object:lens/get']));
       // existing spaces are preserved — caller cannot widen or narrow membership
       expect(result!.document.spaces).toEqual(['default', 'engineering']);
     });
 
-    it('persists target_indices when caller supplies concrete names', async () => {
+    it('persists permissions.elasticsearch.indices when caller supplies concrete names', async () => {
       smlClient.get.mockRejectedValue(createNotFoundError());
 
       const service = createSmlService();
@@ -1604,29 +1656,31 @@ describe('SmlService', () => {
           title: 'Viz',
           origin_id: 'ref-1',
           content: 'c',
-          target_indices: ['logs-app-*', 'metrics-prod'],
+          permissions: makePermissions([], ['logs-app-*', 'metrics-prod']),
         },
         esClient: scopedClient,
       });
 
       expect(result).not.toBeNull();
-      expect(result!.document.target_indices).toEqual(['logs-app-*', 'metrics-prod']);
+      expect(result!.document.permissions).toEqual(
+        makePermissions([], ['logs-app-*', 'metrics-prod'])
+      );
       expect(smlClient.index).toHaveBeenCalledWith({
         id: 'doc-1',
         document: expect.objectContaining({
-          target_indices: ['logs-app-*', 'metrics-prod'],
+          permissions: makePermissions([], ['logs-app-*', 'metrics-prod']),
         }),
       });
     });
 
-    it('omits target_indices from the stored document when not supplied or empty', async () => {
+    it('normalizes permissions to empty inner arrays when input omits them', async () => {
       smlClient.get.mockRejectedValue(createNotFoundError());
 
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      // Undefined → omitted
+      // Permissions absent on input → stored as `{ kibana: { privileges: [] }, elasticsearch: { indices: [] } }`.
       const undefinedResult = await smlService.upsertDocument({
         id: 'doc-1',
         spaceId: 'default',
@@ -1638,13 +1692,14 @@ describe('SmlService', () => {
         },
         esClient: scopedClient,
       });
-      expect(undefinedResult!.document.target_indices).toBeUndefined();
+      expect(undefinedResult!.document.permissions).toEqual(makePermissions());
       expect(smlClient.index).toHaveBeenLastCalledWith({
         id: 'doc-1',
-        document: expect.not.objectContaining({ target_indices: expect.anything() }),
+        document: expect.objectContaining({ permissions: makePermissions() }),
       });
 
-      // Empty array → also omitted (canonical absent representation)
+      // Explicit `permissions: undefined` and partial inputs both collapse to the
+      // empty-but-fully-shaped default.
       const emptyResult = await smlService.upsertDocument({
         id: 'doc-2',
         spaceId: 'default',
@@ -1653,14 +1708,14 @@ describe('SmlService', () => {
           title: 'Viz',
           origin_id: 'ref-2',
           content: 'c',
-          target_indices: [],
+          permissions: makePermissions(),
         },
         esClient: scopedClient,
       });
-      expect(emptyResult!.document.target_indices).toBeUndefined();
+      expect(emptyResult!.document.permissions).toEqual(makePermissions());
       expect(smlClient.index).toHaveBeenLastCalledWith({
         id: 'doc-2',
-        document: expect.not.objectContaining({ target_indices: expect.anything() }),
+        document: expect.objectContaining({ permissions: makePermissions() }),
       });
     });
 
@@ -1676,7 +1731,7 @@ describe('SmlService', () => {
           created_at: '2023-01-01T00:00:00.000Z',
           updated_at: '2023-06-01T00:00:00.000Z',
           spaces: ['other-space'],
-          permissions: [],
+          permissions: makePermissions(),
         },
       });
 
@@ -1712,7 +1767,7 @@ describe('SmlService', () => {
           created_at: '2023-01-01T00:00:00.000Z',
           updated_at: '2023-06-01T00:00:00.000Z',
           spaces: ['*'],
-          permissions: [],
+          permissions: makePermissions(),
         },
       });
 
@@ -1807,7 +1862,7 @@ describe('SmlService', () => {
                 created_at: '',
                 updated_at: '',
                 spaces: ['default'],
-                permissions: [],
+                permissions: makePermissions(),
               },
             },
           ],
@@ -1844,7 +1899,7 @@ describe('SmlService', () => {
                 created_at: '',
                 updated_at: '',
                 spaces: ['default'],
-                permissions: [],
+                permissions: makePermissions(),
               },
             },
           ],
@@ -1880,7 +1935,7 @@ describe('SmlService', () => {
                 created_at: '',
                 updated_at: '',
                 spaces: ['default'],
-                permissions: [],
+                permissions: makePermissions(),
               },
             },
           ],
@@ -1916,7 +1971,7 @@ describe('SmlService', () => {
                 created_at: '',
                 updated_at: '',
                 spaces: ['default'],
-                permissions: [],
+                permissions: makePermissions(),
               },
             },
           ],

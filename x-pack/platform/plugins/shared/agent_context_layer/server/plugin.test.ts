@@ -51,7 +51,10 @@ describe('AgentContextLayerPlugin', () => {
       created_at: '2024-01-01T00:00:00Z',
       updated_at: '2024-01-01T00:00:00Z',
       spaces: ['default'],
-      permissions: ['saved_object:dashboard/get'],
+      permissions: {
+        kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+        elasticsearch: { indices: [] },
+      },
     });
 
     const setupPlugin = ({

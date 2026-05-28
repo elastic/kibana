@@ -32,8 +32,28 @@ const smlStorageSchemaProperties = {
   created_at: types.date({}),
   updated_at: types.date({}),
   spaces: types.keyword({}),
-  permissions: types.keyword({}),
-  target_indices: types.keyword({}),
+  permissions: types.object({
+    properties: {
+      kibana: types.object({
+        properties: {
+          privileges: types.object({
+            properties: {
+              name: types.keyword({}),
+            },
+          }),
+        },
+      }),
+      elasticsearch: types.object({
+        properties: {
+          indices: types.object({
+            properties: {
+              name: types.keyword({}),
+            },
+          }),
+        },
+      }),
+    },
+  }),
 };
 
 export const storageSettings = {

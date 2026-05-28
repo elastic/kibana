@@ -113,7 +113,17 @@ describe('createSmlIndexer', () => {
       (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
 
       const smlData = {
-        chunks: [{ type: 'lens', title: 'My Viz', content: 'content', permissions: ['perm1'] }],
+        chunks: [
+          {
+            type: 'lens',
+            title: 'My Viz',
+            content: 'content',
+            permissions: {
+              kibana: { privileges: [{ name: 'perm1' }] },
+              elasticsearch: { indices: [] },
+            },
+          },
+        ],
       };
       const getSmlData = jest.fn().mockResolvedValue(smlData);
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlData }));
@@ -161,7 +171,10 @@ describe('createSmlIndexer', () => {
         created_at: expect.any(String),
         updated_at: expect.any(String),
         spaces: ['default', 'space-2'],
-        permissions: ['perm1'],
+        permissions: {
+          kibana: { privileges: [{ name: 'perm1' }] },
+          elasticsearch: { indices: [] },
+        },
       });
     });
 
@@ -379,7 +392,7 @@ describe('createSmlIndexer', () => {
       );
     });
 
-    it('permissions default to empty array when not provided', async () => {
+    it('permissions default to fully-shaped empty object when not provided', async () => {
       const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
       const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
       (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -403,7 +416,10 @@ describe('createSmlIndexer', () => {
       );
 
       const bulkCall = bulkMock.mock.calls[0][0];
-      expect(bulkCall.operations[0].index.document.permissions).toEqual([]);
+      expect(bulkCall.operations[0].index.document.permissions).toEqual({
+        kibana: { privileges: [] },
+        elasticsearch: { indices: [] },
+      });
     });
   });
 });
