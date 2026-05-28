@@ -128,6 +128,7 @@ while read -r config; do
     exitCode=10
     echo "FTR exited with code $lastCode"
     echo "^^^ +++"
+
     if [[ "$failedConfigs" ]]; then
       failedConfigs="${failedConfigs}"$'\n'"$config"
     else
