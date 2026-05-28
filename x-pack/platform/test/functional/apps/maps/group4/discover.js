@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 /**
  * Purpose: "visualize" geo fields smoke test
- * 
+ *
  * Migration: migrate to scout
  */
 export default function ({ getService, getPageObjects }) {

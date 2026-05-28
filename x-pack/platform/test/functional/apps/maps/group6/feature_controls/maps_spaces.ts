@@ -11,7 +11,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 /**
  * Purpose: Maps spaces smoke test
- * 
+ *
  * Migration: migrate to scout
  */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

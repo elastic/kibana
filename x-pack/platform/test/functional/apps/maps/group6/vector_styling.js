@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 /**
  * Purpose: Verifies category suggestions are populated from values
- * 
+ *
  * Migration: migrate to unit test
  */
 export default function ({ getService, getPageObjects }) {

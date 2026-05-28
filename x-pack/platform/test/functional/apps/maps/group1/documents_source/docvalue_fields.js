@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 /**
  * Purpose: Verify geojson layer only fetches required fields
- * 
+ *
  * Migration: Migrate to Scout.
  */
 export default function ({ getPageObjects, getService }) {

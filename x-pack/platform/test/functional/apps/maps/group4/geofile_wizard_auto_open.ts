@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 /**
  * Purpose: Verify maps app auto opens layer wizard with URL parameter 'openLayerWizard''
- * 
+ *
  * Migration: Replace with unit test
  */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

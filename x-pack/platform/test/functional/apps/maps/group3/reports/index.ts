@@ -10,10 +10,9 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const REPORTS_FOLDER = __dirname;
 
-
 /**
  * Purpose: Reporting smoke test
- * 
+ *
  * Migration: migrate to scout
  */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

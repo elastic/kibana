@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 /**
  * Purpose: Verify disabled layers do not fetch data
- * 
+ *
  * Migration: migrate to scout
  */
 export default function ({ getPageObjects, getService }) {

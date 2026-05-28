@@ -10,7 +10,7 @@ import path from 'path';
 
 /**
  * Purpose: Verifies file upload wizard
- * 
+ *
  * Migration: Duplicate of geojson.js tests. Remove
  */
 export default function ({ getPageObjects, getService }) {

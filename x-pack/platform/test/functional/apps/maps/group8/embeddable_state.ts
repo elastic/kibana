@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 /**
  * Purpose: Verifies map loads view from embeddable state
- * 
+ *
  * Migration: migrate to unit test
  */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

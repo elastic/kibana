@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Purpose: geojson file upload smoke test
- * 
+ *
  * Migration: migrate to scout
  */
 export default function ({ getPageObjects, getService }) {

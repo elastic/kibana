@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 /**
  * Purpose: Verify map loads unified search from saved object
- * 
+ *
  * Migration: migrate to unit tests for x-pack/platform/plugins/shared/maps/public/routes/map_page/map_app/map_app.tsx
  */
 export default function ({ getPageObjects, getService }) {

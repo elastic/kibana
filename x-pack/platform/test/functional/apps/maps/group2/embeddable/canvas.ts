@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 /**
  * Purpose: Canvas embeddable smoke test
- * 
+ *
  * Migration: Migrate to scout. Remove "should not show draw controls" test case
  */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

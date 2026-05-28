@@ -10,10 +10,10 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 /**
  * Purpose: Sample data map screen shot comarsion tests
- * 
+ *
  * Migration: Remove. Reporting smoke tests compares map screen shots
  */
-expor
+expor;
 export default function ({ getPageObjects, getService, updateBaselines }) {
   const { common, maps, header, home, timePicker } = getPageObjects([
     'common',

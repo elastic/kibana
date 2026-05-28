@@ -11,8 +11,8 @@ const VECTOR_SOURCE_ID = 'z52lq';
 
 /**
  * Purpose: Verify top hits geojson layer interacts with unified search
- * 
- * Migration: Duplicates search_hits.js test functionallity. Replace FTR test with unit test. Verify `getGeoJsonWithMeta` in 
+ *
+ * Migration: Duplicates search_hits.js test functionallity. Replace FTR test with unit test. Verify `getGeoJsonWithMeta` in
  * x-pack/platform/plugins/shared/maps/public/classes/sources/es_search_source/es_search_source.tsx
  */
 export default function ({ getPageObjects, getService }) {

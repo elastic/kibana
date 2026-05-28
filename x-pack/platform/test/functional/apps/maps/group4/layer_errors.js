@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 /**
  * Purpose: Verify layer errors are displayed to user and map still renders
- * 
+ *
  * Migration: Replace with unit tests
  */
 export default function ({ getPageObjects, getService }) {

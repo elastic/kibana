@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 /**
  * Purpose: Lens choropleth map smoke test
- * 
+ *
  * Migration: migrate to scout
  */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

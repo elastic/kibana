@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 /**
  * Purpose: Verify map renders with adhoc data view
- * 
+ *
  * Migration: Replace with unit test. Verify that adhoc data views are created by `whenReady` in
  * x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/saved_map.ts
  */

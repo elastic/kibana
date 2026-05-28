@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 /**
  * Purpose: Add layer smoke test
- * 
+ *
  * Migration: migrate to scout
  */
 export default function ({ getService, getPageObjects }) {

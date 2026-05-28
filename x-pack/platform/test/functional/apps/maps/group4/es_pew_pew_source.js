@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 /**
  * Purpose: Pew pew layer smoke test
- * 
+ *
  * Migration: migrate to scout
  */
 export default function ({ getPageObjects, getService }) {

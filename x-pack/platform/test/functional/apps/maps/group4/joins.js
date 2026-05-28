@@ -19,7 +19,7 @@ const VECTOR_SOURCE_ID = 'n1t6f';
 
 /**
  * Purpose: Join layer smoke test
- * 
+ *
  * Migration: migrate to scout
  */
 export default function ({ getPageObjects, getService }) {

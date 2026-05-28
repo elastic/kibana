@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 /**
  * Purpose: Permissions smoke test
- * 
+ *
  * Migration: migrate to scout
  */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
