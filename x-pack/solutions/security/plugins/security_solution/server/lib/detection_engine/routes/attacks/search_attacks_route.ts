@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 
+import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';
 import { DETECTION_ENGINE_ATTACKS_SEARCH_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { attacksRouteNotImplemented } from './attacks_route_not_implemented';
+import { searchAlertsHandler } from '../common/search_alerts_handler';
+
+const ADHOC_ATTACK_DISCOVERY_ALERTS_INDEX_PREFIX =
+  '.adhoc.alerts-security.attack.discovery.alerts' as const;
 
 export const searchAttacksRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -25,8 +31,22 @@ export const searchAttacksRoute = (router: SecuritySolutionPluginRouter) => {
     .addVersion(
       {
         version: '2023-10-31',
-        validate: false,
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(SearchAlertsRequestBody),
+          },
+        },
       },
-      attacksRouteNotImplemented
+      async (context, request, response) => {
+        const getIndexPattern = async () => {
+          const spaceId = (await context.securitySolution).getSpaceId();
+          return [
+            `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, // scheduled attack index
+            `${ADHOC_ATTACK_DISCOVERY_ALERTS_INDEX_PREFIX}-${spaceId}`, // adhoc attack index
+          ];
+        };
+
+        return searchAlertsHandler({ context, request, response, getIndexPattern });
+      }
     );
 };
