@@ -164,6 +164,10 @@ export interface ServiceMapOptionsPanelProps {
   onAnomalySeverityFilterChange: (next: ML_ANOMALY_SEVERITY[]) => void;
   mapOrientation: ServiceMapOrientation;
   onMapOrientationChange: (next: ServiceMapOrientation) => void;
+  /** Pass-through to ServiceMapFindInPage for controlled search query. */
+  searchQuery?: string;
+  /** Pass-through to ServiceMapFindInPage; called whenever the user edits the search field. */
+  onSearchQueryChange?: (next: string) => void;
 }
 
 /** Same hit target as map zoom / fit controls in graph.tsx (2 × base size). */
@@ -245,6 +249,8 @@ export function ServiceMapOptionsPanel({
   onAnomalySeverityFilterChange,
   mapOrientation,
   onMapOrientationChange,
+  searchQuery,
+  onSearchQueryChange,
 }: ServiceMapOptionsPanelProps) {
   const connectionCounts = filterOptionCounts.connection;
   const alertCounts = filterOptionCounts.alerts;
@@ -378,7 +384,11 @@ export function ServiceMapOptionsPanel({
       grow={false}
       css={panelSizingCss}
     >
-      <ServiceMapFindInPage nodes={nodes} />
+      <ServiceMapFindInPage
+        nodes={nodes}
+        searchQuery={searchQuery}
+        onSearchQueryChange={onSearchQueryChange}
+      />
 
       <EuiHorizontalRule margin="m" />
 

@@ -58,6 +58,7 @@ export const serviceMapCustomStateSchema = schema.object({
       ])
     )
   ),
+  find_query: schema.maybe(schema.string()),
 });
 
 export type ServiceMapCustomState = TypeOf<typeof serviceMapCustomStateSchema>;
