@@ -76,16 +76,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await rowActions[1].click();
       await context.waitUntilContextLoadingHasFinished();
 
+      const columnNames = await dataGrid.getHeaderFields();
+      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
+
       await dataGrid.clickRowToggle({ isAnchorRow: true });
       await dataGrid.isShowingDocViewer();
       const anchorTimestamp = await testSubjects.getVisibleText('tableDocViewRow-@timestamp-value');
 
       expect(anchorTimestamp).to.be(firstTimestamp);
-    });
-
-    it('should open the context view with the same columns', async () => {
-      const columnNames = await dataGrid.getHeaderFields();
-      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
     });
 
     it('should open the context view with the filters disabled', async () => {
