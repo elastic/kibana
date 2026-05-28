@@ -9,7 +9,10 @@
 
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
-import { getAccessorByDimension } from '@kbn/chart-expressions-common';
+import {
+  getAccessorByDimension,
+  getComputedColumnWarningForColumns,
+} from '@kbn/chart-expressions-common';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { LayerCellValueActions, FilterEvent } from '../types';
@@ -84,18 +87,15 @@ export const getLegendAction = (
       return null;
     }
 
-    const noFilterableEsqlComputedColumn =
-      isEsqlMode &&
-      filterActionData.some((data) => {
-        const column = data.table.columns[data.column];
-        return (
-          column?.isComputedColumn === true &&
-          column.name === column.meta?.sourceParams?.sourceField
-        );
-      });
+    const warningMessage = isEsqlMode
+      ? getComputedColumnWarningForColumns(
+          filterActionData.map((data) => data.table.columns[data.column]),
+          panelHasConfiguredDrilldowns ?? false
+        )
+      : undefined;
 
     const filterHandler = ({ negate }: { negate?: boolean } = {}) => {
-      if (!noFilterableEsqlComputedColumn) {
+      if (!warningMessage) {
         onFilter({ data: filterActionData, negate });
       }
     };
@@ -126,8 +126,8 @@ export const getLegendAction = (
         label={label}
         onFilter={filterHandler}
         legendCellValueActions={legendCellValueActions}
-        hasComputedColumn={noFilterableEsqlComputedColumn}
-        panelHasConfiguredDrilldowns={panelHasConfiguredDrilldowns}
+        showDisabledFilterActions={!!warningMessage}
+        footerMessage={warningMessage}
       />
     );
   });

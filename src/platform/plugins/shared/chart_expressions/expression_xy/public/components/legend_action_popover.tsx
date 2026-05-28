@@ -20,22 +20,8 @@ import type { CellValueAction } from '../types';
 const hasFilterCellAction = (actions: CellValueAction[]) =>
   actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
 
-const getEsqlComputedColumnFilterDisabledMessage = (
-  panelHasConfiguredDrilldowns: boolean = false
-) => {
-  return panelHasConfiguredDrilldowns
-    ? i18n.translate('expressionXY.legend.esqlComputedColumnFilterDrilldownDisabledDescription', {
-        defaultMessage:
-          "You can't apply a filter or drill down from this value because it relies on a field created at query time.",
-      })
-    : i18n.translate('expressionXY.legend.esqlComputedColumnFilterDisabledDescription', {
-        defaultMessage:
-          "You can't apply a filter from this value because it relies on a field created at query time.",
-      });
-};
-
-const legendActionPopoverStyles = {
-  message: ({ euiTheme }: UseEuiTheme) =>
+const footerMessageStyles = {
+  root: ({ euiTheme }: UseEuiTheme) =>
     css`
       padding: ${euiTheme.size.m};
       color: ${euiTheme.colors.textSubdued};
@@ -45,10 +31,10 @@ const legendActionPopoverStyles = {
     `,
 };
 
-const LegendFilterDisabledMessage = ({ message }: { message: string }) => {
-  const styles = useMemoCss(legendActionPopoverStyles);
+const PopoverFooterMessage = ({ message }: { message: string }) => {
+  const styles = useMemoCss(footerMessageStyles);
   return (
-    <div css={styles.message} data-test-subj="legendFilterDisabledMessage">
+    <div css={styles.root} data-test-subj="legendFilterFooterMessage">
       {message}
     </div>
   );
@@ -65,16 +51,16 @@ export const LegendActionPopover: React.FunctionComponent<{
   onFilter: (param?: { negate?: boolean }) => void;
   /** Compatible actions to be added to the popover actions. */
   legendCellValueActions?: LegendCellValueActions;
-  /** When true, built-in Filter for / Filter out items are shown disabled. */
-  hasComputedColumn?: boolean;
-  /** When true, the disabled filter message also mentions that drill downs are unavailable. */
-  panelHasConfiguredDrilldowns?: boolean;
+  /** When true, built-in Filter for / Filter out items are shown as disabled. */
+  showDisabledFilterActions?: boolean;
+  /** Warning message rendered below the disabled filter actions. */
+  footerMessage?: string;
 }> = ({
   label,
   onFilter,
   legendCellValueActions = [],
-  hasComputedColumn = false,
-  panelHasConfiguredDrilldowns = false,
+  showDisabledFilterActions = false,
+  footerMessage,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ref, onClose] = useLegendAction<HTMLDivElement>();
@@ -110,15 +96,14 @@ export const LegendActionPopover: React.FunctionComponent<{
       },
     });
 
-    // Always show the built-in filter actions when the column is computed (so the user
-    // can see they exist but are disabled). Otherwise, only show them when no cell value
-    // action already provides a filter — to avoid duplicating it in the menu.
+    // Always show the built-in filter actions when filtering is disabled, so the user
+    // can see they exist but are disabled
     const showDefaultFilterActions =
-      hasComputedColumn || !hasFilterCellAction(legendCellValueActions);
+      !hasFilterCellAction(legendCellValueActions) || showDisabledFilterActions;
 
     const filterPanelItems = (
       showDefaultFilterActions
-        ? hasComputedColumn
+        ? showDisabledFilterActions
           ? defaultFilterActions.map((action) => ({ ...action, disabled: true, execute: () => {} }))
           : defaultFilterActions
         : []
@@ -126,14 +111,10 @@ export const LegendActionPopover: React.FunctionComponent<{
 
     const cellValuePanelItems = legendCellValueActions.map(toMenuItem);
 
-    const filterDisabledMessageItem = hasComputedColumn
+    const footerMessageItem = footerMessage
       ? [
           {
-            renderItem: () => (
-              <LegendFilterDisabledMessage
-                message={getEsqlComputedColumnFilterDisabledMessage(panelHasConfiguredDrilldowns)}
-              />
-            ),
+            renderItem: () => <PopoverFooterMessage message={footerMessage} />,
           },
         ]
       : [];
@@ -142,10 +123,10 @@ export const LegendActionPopover: React.FunctionComponent<{
       {
         id: 'main',
         title: label,
-        items: [...filterPanelItems, ...filterDisabledMessageItem, ...cellValuePanelItems],
+        items: [...filterPanelItems, ...footerMessageItem, ...cellValuePanelItems],
       },
     ];
-  }, [label, legendCellValueActions, onFilter, hasComputedColumn, panelHasConfiguredDrilldowns]);
+  }, [label, legendCellValueActions, onFilter, showDisabledFilterActions, footerMessage]);
 
   const Button = (
     <div

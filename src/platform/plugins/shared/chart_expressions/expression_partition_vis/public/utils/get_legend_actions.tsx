@@ -30,8 +30,8 @@ const hasFilterCellAction = (actions: CellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
 };
 
-const legendActionPopoverStyles = {
-  message: ({ euiTheme }: UseEuiTheme) =>
+const footerMessageStyles = {
+  root: ({ euiTheme }: UseEuiTheme) =>
     css`
       padding: ${euiTheme.size.m};
       color: ${euiTheme.colors.textSubdued};
@@ -41,10 +41,10 @@ const legendActionPopoverStyles = {
     `,
 };
 
-const LegendFilterDisabledMessage = ({ message }: { message: string }) => {
-  const styles = useMemoCss(legendActionPopoverStyles);
+const PopoverFooterMessage = ({ message }: { message: string }) => {
+  const styles = useMemoCss(footerMessageStyles);
   return (
-    <div css={styles.message} data-test-subj="legendFilterDisabledMessage">
+    <div css={styles.root} data-test-subj="legendFilterFooterMessage">
       {message}
     </div>
   );
@@ -70,25 +70,24 @@ export const getLegendActions = (
     );
     const [ref, onClose] = useLegendAction<HTMLDivElement>();
 
+    if (columnIndex === -1) {
+      return null;
+    }
+
     const isEsqlMode = visData.meta?.type === ESQL_TABLE_TYPE;
-    const column = columnIndex !== -1 ? visData.columns[columnIndex] : undefined;
-    const hasComputedNonFilterableColumn =
-      isEsqlMode &&
-      column?.isComputedColumn === true &&
-      column.name === column.meta?.sourceParams?.sourceField;
+    const column = visData.columns[columnIndex];
+    const warningMessage: string | undefined = isEsqlMode
+      ? getComputedColumnWarningForColumns([column], panelHasConfiguredDrilldowns ?? false)
+      : undefined;
 
     useEffect(() => {
-      if (!canFilter || !filterData || hasComputedNonFilterableColumn) {
+      if (!canFilter || !filterData || warningMessage) {
         setIsFilterable(false);
         return;
       }
 
       (async () => setIsFilterable(await canFilter(filterData)))();
-    }, [filterData, hasComputedNonFilterableColumn]);
-
-    if (columnIndex === -1) {
-      return null;
-    }
+    }, [filterData, warningMessage]);
 
     const title = getFilterPopoverTitle(
       visParams,
@@ -101,13 +100,9 @@ export const getLegendActions = (
 
     const compatibleCellActions = columnCellValueActions[columnIndex] ?? [];
 
-    const computedColumnWarningMessage = hasComputedNonFilterableColumn
-      ? getComputedColumnWarningForColumns([column], panelHasConfiguredDrilldowns ?? false)
-      : undefined;
-
     const panelItems: EuiContextMenuPanelDescriptor['items'] = [];
 
-    if (hasComputedNonFilterableColumn) {
+    if (warningMessage) {
       // Show disabled filter items with a warning message for ES|QL computed columns
       panelItems.push(
         {
@@ -129,12 +124,10 @@ export const getLegendActions = (
           onClick: () => {},
         }
       );
-
-      if (computedColumnWarningMessage) {
-        panelItems.push({
-          renderItem: () => <LegendFilterDisabledMessage message={computedColumnWarningMessage} />,
-        });
-      }
+      // Show warning message
+      panelItems.push({
+        renderItem: () => <PopoverFooterMessage message={warningMessage} />,
+      });
     } else if (!hasFilterCellAction(compatibleCellActions) && isFilterable && filterData) {
       panelItems.push(
         {
@@ -162,14 +155,13 @@ export const getLegendActions = (
       );
     }
 
-    const columnMeta = visData.columns[columnIndex].meta;
     compatibleCellActions.forEach((action) => {
       panelItems.push({
         name: action.displayName,
         'data-test-subj': `legend-${title}-${action.id}`,
         icon: <EuiIcon type={action.iconType} size="m" aria-hidden={true} />,
         onClick: () => {
-          action.execute([{ columnMeta, value: pieSeries.key }]);
+          action.execute([{ columnMeta: column.meta, value: pieSeries.key }]);
           setPopoverOpen(false);
         },
       });

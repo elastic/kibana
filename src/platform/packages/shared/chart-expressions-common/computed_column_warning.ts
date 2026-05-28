@@ -52,6 +52,13 @@ const getComputedColumnFilterDisabledMessage = ({
       });
 };
 
+export function isComputedColumnNonFilterable(column: DatatableColumn): boolean {
+  // A computed column may be filterable when its name differs from the source field,
+  // and the underlying index field is still addressable.
+  const isRenamed = column.name !== column.meta?.sourceParams?.sourceField;
+  return column.isComputedColumn === true && !isRenamed;
+}
+
 /**
  * Returns the warning message to show when filterable chart columns are computed ES|QL
  * fields that cannot be used for filtering. Returns `undefined` when there is nothing
@@ -67,7 +74,7 @@ export const getComputedColumnWarningForColumns = (
   }
 
   const nonFilterableComputedColumnNames = defined
-    .filter((col) => col.isComputedColumn && col.name === col.meta?.sourceParams?.sourceField)
+    .filter((col) => isComputedColumnNonFilterable(col))
     .map((col) => col.name);
 
   if (nonFilterableComputedColumnNames.length === 0) {

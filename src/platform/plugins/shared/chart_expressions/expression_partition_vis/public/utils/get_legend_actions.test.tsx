@@ -19,7 +19,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getLegendActions } from './get_legend_actions';
 import { createMockVisData, createMockPieParams } from '../mocks';
 import { getFilterEventData } from './filter_helpers';
-import type { CellValueAction, FilterEvent } from '../types';
+import type { FilterEvent } from '../types';
 
 const visData = createMockVisData();
 const visParams = createMockPieParams();
@@ -61,7 +61,39 @@ const esqlVisDataWithComputedColumn: Datatable = {
   ...visData,
   meta: { type: ESQL_TABLE_TYPE },
   columns: visData.columns.map((col) =>
-    col.id === 'col-0-2' ? { ...col, isComputedColumn: true } : col
+    col.id === 'col-0-2'
+      ? {
+          ...col,
+          isComputedColumn: true,
+          meta: {
+            ...col.meta,
+            sourceParams: { ...col.meta.sourceParams, sourceField: col.name },
+          },
+        }
+      : col
+  ),
+};
+
+/**
+ * ES|QL vis data where col-0-2 is a computed column produced by RENAME — the column
+ * name differs from the source field name, so the underlying index field is still
+ * addressable and filtering should be allowed (no warning, no disabled actions).
+ */
+const esqlVisDataWithRenamedComputedColumn: Datatable = {
+  ...visData,
+  meta: { type: ESQL_TABLE_TYPE },
+  columns: visData.columns.map((col) =>
+    col.id === 'col-0-2'
+      ? {
+          ...col,
+          isComputedColumn: true,
+          meta: {
+            ...col.meta,
+            // sourceField ('Carrier') differs from col.name ('Carrier: Descending') → filterable
+            sourceParams: { ...col.meta.sourceParams, sourceField: 'Carrier' },
+          },
+        }
+      : col
   ),
 };
 
@@ -123,7 +155,7 @@ describe('getLegendActions', () => {
       expect(screen.getByRole('button', { name: /legend actions/i })).toBeInTheDocument();
     });
 
-    it('shows disabled Filter for and Filter out actions when the column is computed', async () => {
+    it('shows disabled Filter for and Filter out actions when the column is computed and cannot be filtered', async () => {
       const Component = getLegendActions(
         undefined,
         makeGetFilterEventData(esqlVisDataWithComputedColumn),
@@ -140,7 +172,7 @@ describe('getLegendActions', () => {
       });
     });
 
-    it('shows a warning message when the column is computed', async () => {
+    it('shows a warning message when the column is computed and cannot be filtered', async () => {
       const Component = getLegendActions(
         undefined,
         makeGetFilterEventData(esqlVisDataWithComputedColumn),
@@ -151,7 +183,7 @@ describe('getLegendActions', () => {
         fieldFormatsMock as unknown as FieldFormatsStart
       );
       await renderAndOpen(Component);
-      expect(await screen.findByTestId('legendFilterDisabledMessage')).toBeInTheDocument();
+      expect(await screen.findByTestId('legendFilterFooterMessage')).toBeInTheDocument();
     });
 
     it('mentions drill down in the warning when the panel has configured drilldowns', async () => {
@@ -166,7 +198,7 @@ describe('getLegendActions', () => {
         true // panelHasConfiguredDrilldowns
       );
       await renderAndOpen(Component);
-      const warning = await screen.findByTestId('legendFilterDisabledMessage');
+      const warning = await screen.findByTestId('legendFilterFooterMessage');
       expect(warning).toHaveTextContent(/drill down/i);
     });
 
@@ -182,29 +214,28 @@ describe('getLegendActions', () => {
         false // panelHasConfiguredDrilldowns
       );
       await renderAndOpen(Component);
-      const warning = await screen.findByTestId('legendFilterDisabledMessage');
+      const warning = await screen.findByTestId('legendFilterFooterMessage');
       expect(warning).not.toHaveTextContent(/drill down/i);
     });
 
-    it('still shows compatible cell value actions alongside the disabled filter actions', async () => {
-      const cellValueAction: CellValueAction = {
-        id: 'test_action',
-        displayName: 'Test Action',
-        iconType: 'gear',
-        execute: jest.fn(),
-      };
-      // columnCellValueActions[0] targets the 'col-0-2' column (index 0)
+    it('does not disable filter actions or show a warning for a renamed computed column', async () => {
+      // A RENAME column has isComputedColumn=true but a different sourceField, meaning the
+      // underlying index field is still addressable — filtering should work normally.
       const Component = getLegendActions(
-        undefined,
-        makeGetFilterEventData(esqlVisDataWithComputedColumn),
+        jest.fn().mockResolvedValue(true),
+        makeGetFilterEventData(esqlVisDataWithRenamedComputedColumn),
         jest.fn(),
-        [[cellValueAction]],
+        [],
         visParams,
-        esqlVisDataWithComputedColumn,
+        esqlVisDataWithRenamedComputedColumn,
         fieldFormatsMock as unknown as FieldFormatsStart
       );
       await renderAndOpen(Component);
-      expect(await screen.findByText('Test Action')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole('menuitem', { name: 'Filter for' })).toBeEnabled();
+        expect(screen.getByRole('menuitem', { name: 'Filter out' })).toBeEnabled();
+      });
+      expect(screen.queryByTestId('legendFilterFooterMessage')).not.toBeInTheDocument();
     });
   });
 
@@ -220,7 +251,7 @@ describe('getLegendActions', () => {
         fieldFormatsMock as unknown as FieldFormatsStart
       );
       await renderAndOpen(Component);
-      expect(screen.queryByTestId('legendFilterDisabledMessage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('legendFilterFooterMessage')).not.toBeInTheDocument();
     });
   });
 
@@ -242,7 +273,7 @@ describe('getLegendActions', () => {
         fieldFormatsMock as unknown as FieldFormatsStart
       );
       await renderAndOpen(Component);
-      expect(screen.queryByTestId('legendFilterDisabledMessage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('legendFilterFooterMessage')).not.toBeInTheDocument();
     });
   });
 });
