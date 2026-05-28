@@ -67,7 +67,7 @@ export async function bulkEditRules<Params extends RuleParams>(
     auditAction,
     requiredAuthOperation,
     shouldInvalidateApiKeys,
-    changeTrackingAction: RuleChangeTrackingAction.ruleUpdate,
+    changeTracking: { action: RuleChangeTrackingAction.ruleUpdate, ...options.changeTracking },
     shouldValidateSchedule: options.operations.some((operation) => operation.field === 'schedule'),
     updateFn: (opts: UpdateOperationOpts) =>
       updateRuleAttributesAndParamsInMemory<Params>({

@@ -14,6 +14,7 @@ import type { PresentationContainer } from '@kbn/presentation-publishing';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { getAllEsqlControls, getEsqlControls } from './get_esql_controls';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { of } from 'rxjs';
 
 const createPresentationContainer = (children: unknown[]) =>
   ({
@@ -40,6 +41,7 @@ const createControlApi = (
 ) => ({
   uuid,
   type,
+  anyStateChange$: of(),
   serializeState: () => state,
   applySerializedState: () => undefined,
 });

@@ -76,11 +76,17 @@ describe('getDispatchableAlertEventsQuery', () => {
     expect(req.query).toContain('data_json = LAST(data_json, @timestamp)');
   });
 
+  it('aggregates severity using LAST by timestamp scoped to rule-event rows', () => {
+    const req = getDispatchableAlertEventsQuery();
+
+    expect(req.query).toContain('severity = LAST(severity, @timestamp) WHERE type IS NOT NULL');
+  });
+
   it('keeps the expected output columns and renames episode_status', () => {
     const req = getDispatchableAlertEventsQuery();
 
     expect(req.query).toContain(
-      'KEEP last_event_timestamp, rule_id, group_hash, episode_id, last_episode_status, data_json'
+      'KEEP last_event_timestamp, rule_id, group_hash, episode_id, last_episode_status, data_json, severity'
     );
     expect(req.query).toContain('RENAME last_episode_status AS episode_status');
   });

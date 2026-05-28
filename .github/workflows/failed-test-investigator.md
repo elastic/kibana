@@ -25,6 +25,9 @@ concurrency:
   group: 'failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}'
   cancel-in-progress: true
 
+env:
+  ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
+
 engine:
   id: claude
   version: '2.1.111'
@@ -64,12 +67,12 @@ safe-outputs:
   report-failure-as-issue: false
   add-comment:
     max: 1
-    target: '*'
+    target: *issue_number
     hide-older-comments: true
   add-labels:
     allowed: [ai:auto-flaky-fix]
     max: 1
-    target: 'triggering'
+    target: *issue_number
 
 strict: false
 timeout-minutes: 20
@@ -84,20 +87,9 @@ Investigate a failed-test issue, classify the failure, and propose a fix when ap
 - **`issues` trigger**: use the triggering issue (non-PR, labeled `failed-test`).
 - **`workflow_dispatch`**: use issue `${{ github.event.inputs.issue_number }}`. Fetch it explicitly before analysis, and post the final comment there.
 
-## Where did the test run?
-
-The test's **target** (e.g. `local-stateful-classic`, `cloud-serverless-security_complete`) tells you where it ran:
-
-- **`cloud-*`** — ran against a real Elastic Cloud project (serverless) or deployment (stateful). Pipeline names: `appex-qa-{serverless|stateful}-kibana-{ftr|scout}-tests`.
-- **`local-*`** — ran on the agent's local machine. `kibana-on-merge` and `kibana-pull-request` are local (no Elastic Cloud API calls), so the environment is more stable and less prone to network/env flakiness.
-
 ## Investigate
 
-1. Read the issue title, body, labels, and all comments.
-2. Parse test metadata if present: location (test file path), config path, code owners, target.
-3. Look at all the failures reported in the issue. The very same test could have been failing with different error messages, for different reasons, on different pipelines, and on different branches.
-4. Inspect the relevant test file and nearby helpers/fixtures. For Scout, start from the reported location; otherwise infer from the title.
-5. Check recent git history and blame on the test file and related product code.
+Investigate the test failure(s) using the `flaky-test-investigator` skill.
 
 Every conclusion must cite specific evidence. Do not guess.
 
@@ -147,53 +139,32 @@ No other side-effects beyond posting the comment and updating the label.
 
 ## Comment format
 
-Post exactly one comment with two main parts:
+Post exactly one comment. Keep the visible portion very short and easy to read:
 
-- **Visible section**: a very concise summary that would inform a developer with a quick glance. Highlight main findings. Keep it high-signal and to the point.
-- **Collapsed `<details>` section**: full long-form context for the downstream auto-fix agent (and any human who wants to audit the call).
+1. **One-line bold headline** stating the result kind and one identifying detail.
+2. **Diagnosis** (≤5 concise bullet points): what broke and where, the most likely root cause.
+3. **Next steps** (≤5 concise bullet points).
 
-The visible section is a _distillation_ of the collapsed one. Do not repeat content verbatim across both: the visible bullets summarize, the collapsed block holds the full evidence the summary was derived from.
+Put the full `flaky-test-investigator` skill output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion). Open the block with a `#### Findings` subsection containing exactly these four bullets in this order — downstream tooling parses them, so preserve keys, casing, and `` - `key`: value `` shape. These bullets must live **inside `<details>`**, never in the visible portion:
 
-### Visible (top), in this order:
+- `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
+- `confidence`: `high` | `medium` | `low`
+- `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
+- `test.file`: repo-relative path, or `unknown`
 
-1. **One-line bold headline** stating the result kind and one identifying detail. Consistent with `classification` but not templated. Example: `**Likely test-design fix** — missing waitForAlertsToPopulate() in building_block_alerts.spec.ts`.
+The skill's "Reporting" subsections should also be inside the collapsible section:
 
-2. **A 3–5 sentence prose paragraph** (no headings, no bullets) covering: what broke and where (name the test file/name), the most likely root cause, and any evidence-backed author attribution with `@username` so they get notified on first read.
+- What the test does
+- What failed and when
+- Where it ran
+- Root cause hypothesis
+- Evidence
+- Failure screenshot
+- Recommended next step
+- Open questions
 
-3. **One-line action hint**: the proposed fix, recommended action, or missing evidence. Skip if the paragraph already covers it.
+Blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
 
-4. **Findings bullets** — exactly these four, in this order, with one concrete value each. Downstream tooling parses these directly; preserve keys, casing, and `` - `key`: value `` shape:
+End the comment with this footer line (verbatim, on its own line after the `</details>` block):
 
-   - `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
-   - `confidence`: `high` | `medium` | `low`
-   - `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
-   - `test.file`: repo-relative path, or `unknown`
-
-5. **Suspected root cause** — 2–4 short bullets, each tied to a specific piece of evidence. Skip the section entirely when `classification` is `external` or `inconclusive` and there is nothing concrete to assert.
-
-6. **Key references** — at most 3 Markdown links: the failing test file, the failing CI run, and the implicated commit (when one exists). Skip any of the three that are not applicable; skip the section entirely when none apply.
-
-### Collapsed (`<details>`):
-
-This section is the full context for agents and humans to dive deep into the findings. Verify all information. Wrap it in a single `<details>` block. The blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
-
-```
-<details>
-<summary>See full details</summary>
-
-#### Full root-cause analysis
-
-The long-form version of the visible "Suspected root cause" bullets. Walk through the evidence chain step by step. Cite the specific log lines, stack frames, blame results, or related PRs that led to the conclusion.
-
-#### Evidence used
-
-A complete list of the evidence consulted: issue comments, file paths, commits, CI runs, blame output, related PRs. Each item should be a Markdown link, not a bare path or SHA.
-
-#### Suggested patch
-
-Only when justified by the evidence: a small diff-style snippet showing the suggested edit. Include the exact file, function, assertion, wait condition, fixture, selector, API, or behavior to change. Omit this section entirely when no defensible patch can be proposed.
-
-</details>
-```
-
-Use `####` headings inside the details block (not `###`) so they nest below the comment's own structure. Any of the three subsections may be omitted when there is nothing meaningful to put in it.
+`<sup>AI-generated, share feedback in [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3)</sup>`

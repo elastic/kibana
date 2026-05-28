@@ -11,6 +11,7 @@ import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { QueryClient } from '@kbn/react-query';
+import { createMockSpaces } from '../hooks/test_utils';
 import { openTagsFlyout } from './tags_flyout';
 
 jest.mock('@kbn/react-kibana-mount', () => ({
@@ -49,6 +50,7 @@ const mockOverlays = overlayServiceMock.createStartContract();
 const mockRendering = renderingServiceMock.create();
 const mockHttp = httpServiceMock.createStartContract();
 const mockExpressions = {} as any;
+const mockSpaces = createMockSpaces();
 const mockQueryClient = new QueryClient();
 
 beforeEach(() => {
@@ -75,6 +77,7 @@ describe('openTagsFlyout', () => {
     const promise = openTagsFlyout(mockOverlays, mockRendering, ['initial-tag'], {
       http: mockHttp,
       expressions: mockExpressions,
+      spaces: mockSpaces,
       queryClient: mockQueryClient,
     });
 
@@ -91,6 +94,7 @@ describe('openTagsFlyout', () => {
     const promise = openTagsFlyout(mockOverlays, mockRendering, ['initial-tag'], {
       http: mockHttp,
       expressions: mockExpressions,
+      spaces: mockSpaces,
       queryClient: mockQueryClient,
     });
 
@@ -107,6 +111,7 @@ describe('openTagsFlyout', () => {
     openTagsFlyout(mockOverlays, mockRendering, ['foo', 'bar'], {
       http: mockHttp,
       expressions: mockExpressions,
+      spaces: mockSpaces,
       queryClient: mockQueryClient,
     });
 

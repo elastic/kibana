@@ -24,6 +24,7 @@ export const GraphNodeSchema = z.object({
   type: z.string(),
   stepId: z.string(),
   stepType: z.string(),
+  templateDependencies: z.array(z.unknown()).optional(),
 });
 
 export const AtomicGraphNodeSchema = GraphNodeSchema.extend({
