@@ -71,6 +71,7 @@ export const createNavigationTree = async (
       {
         link: 'workflows',
       },
+      // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
       ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
       {
         id: SecurityPageName.attackDiscovery,
