@@ -24,7 +24,7 @@
 // deploy bench that saves ~40 s on first paint.
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import type {
   GetHostsKpisRequestBodyPayloadClient,
@@ -33,7 +33,7 @@ import type {
 } from '../../../../../common/http_api';
 import { GetHostsKpisResponsePayloadRT } from '../../../../../common/http_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
-import { PERF_KEYS, perfTracker } from '../utils/perf_tracker';
+import { markOnce, measureSince, PERF_KEYS, perfTracker } from '../utils/perf_tracker';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsPageReady } from './use_hosts_page_ready';
 
@@ -97,10 +97,23 @@ export const useHostsKpis = (): UseHostsKpisResult => {
     [isReady, payload]
   );
 
+  const loading = isPending(status);
+  const hasMarkedKpiReadyRef = useRef(false);
+  const prevLoadingRef = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (prevLoadingRef.current === true && !loading && !hasMarkedKpiReadyRef.current) {
+      markOnce('infra.hosts.kpiReady');
+      measureSince('infra.hosts.kpiReadyDuration', 'infra.hosts.navigationStart');
+      hasMarkedKpiReadyRef.current = true;
+    }
+    prevLoadingRef.current = loading;
+  }, [loading]);
+
   return {
     kpis: data?.kpis ?? EMPTY_KPIS,
     hostCount: data?.hostCount ?? 0,
-    loading: isPending(status),
+    loading,
     error,
   };
 };

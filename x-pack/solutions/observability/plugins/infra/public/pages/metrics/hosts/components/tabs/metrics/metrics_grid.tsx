@@ -16,7 +16,7 @@ import { useMetricsCharts } from '../../../hooks/use_metrics_charts';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { usePocSettingsContext } from '../../../hooks/use_poc_settings';
-import { PERF_KEYS, perfTracker } from '../../../utils/perf_tracker';
+import { markOnce, measureSince, PERF_KEYS, perfTracker } from '../../../utils/perf_tracker';
 import { autoBucketSpan, bucketSpanSeconds } from '../../../utils/bucket_span';
 import { isSupportedEsqlMetric, toEsqlMetricsChartConfig } from './esql_metrics_chart';
 
@@ -73,6 +73,25 @@ export const MetricsGrid = () => {
     });
   }, [useLensEsqlMetricsCharts, baseCharts, names, span, spanSeconds]);
 
+  // Per-tile `onLoad(false)` counter — stable "Metrics tab ready" signal
+  // because it tracks the slowest Lens embeddable, not a parent fetch flag.
+  // `useMetricsCharts` resolves async (length 0 → 11), so skip until tiles exist.
+  const loadedTileCountRef = useRef(0);
+  const metricsTabReadyFiredRef = useRef(false);
+
+  const handleChartLoadComplete = useCallback(() => {
+    if (metricsTabReadyFiredRef.current || charts.length === 0) {
+      return;
+    }
+
+    loadedTileCountRef.current += 1;
+    if (loadedTileCountRef.current >= charts.length) {
+      markOnce('infra.hosts.metricsTabReady');
+      measureSince('infra.hosts.metricsTabReadyDuration', 'infra.hosts.navigationStart');
+      metricsTabReadyFiredRef.current = true;
+    }
+  }, [charts.length]);
+
   return (
     <>
       <MetricsGridHeader />
@@ -86,6 +105,7 @@ export const MetricsGrid = () => {
               perfEnabled={useLensEsqlMetricsCharts}
               span={span}
               hostsInScope={names.length}
+              onChartLoadComplete={handleChartLoadComplete}
             />
           </EuiFlexItem>
         ))}
@@ -100,6 +120,7 @@ interface MetricsGridItemProps {
   perfEnabled: boolean;
   span: string;
   hostsInScope: number;
+  onChartLoadComplete: () => void;
 }
 
 // One Lens chart with optional per-load perf tracking. The `onLoad` cycle
@@ -113,20 +134,27 @@ const MetricsGridItem = ({
   perfEnabled,
   span,
   hostsInScope,
+  onChartLoadComplete,
 }: MetricsGridItemProps) => {
   const loadStartRef = useRef<number | null>(null);
   const id = (chart as { id?: string }).id ?? 'unknown';
 
   const handleOnLoad = useCallback(
     (isLoading: boolean) => {
+      if (isLoading) {
+        if (perfEnabled) {
+          loadStartRef.current = performance.now();
+        }
+        return;
+      }
+
+      onChartLoadComplete();
+
       if (!perfEnabled) {
         loadStartRef.current = null;
         return;
       }
-      if (isLoading) {
-        loadStartRef.current = performance.now();
-        return;
-      }
+
       if (loadStartRef.current !== null) {
         const duration = performance.now() - loadStartRef.current;
         loadStartRef.current = null;
@@ -137,7 +165,7 @@ const MetricsGridItem = ({
         });
       }
     },
-    [perfEnabled, id, hostsInScope, span]
+    [perfEnabled, id, hostsInScope, span, onChartLoadComplete]
   );
 
   return <Chart {...chart} dataView={dataView} onLoad={handleOnLoad} />;

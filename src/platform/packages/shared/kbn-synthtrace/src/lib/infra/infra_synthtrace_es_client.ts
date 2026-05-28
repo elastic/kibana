@@ -25,9 +25,16 @@ import type { PackageManagement } from '../shared/types';
 
 export type InfraSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
+export interface OtelDataStreamTemplateOptions {
+  tsds?: boolean;
+  lookBackTime?: string;
+}
+
 export interface InfraSynthtraceEsClient
   extends SynthtraceEsClient<InfraDocument>,
-    PackageManagement {}
+    PackageManagement {
+  setOtelDataStreamTemplateOptions(options: OtelDataStreamTemplateOptions): void;
+}
 
 export class InfraSynthtraceEsClientImpl
   extends SynthtraceEsClientBase<InfraDocument>
@@ -57,6 +64,11 @@ export class InfraSynthtraceEsClientImpl
   }
 
   private otelTemplateCreated = false;
+  private otelTemplateOptions: OtelDataStreamTemplateOptions = { tsds: true };
+
+  setOtelDataStreamTemplateOptions(options: OtelDataStreamTemplateOptions): void {
+    this.otelTemplateOptions = { ...this.otelTemplateOptions, ...options };
+  }
 
   override async index(
     streamOrGenerator:
@@ -73,6 +85,26 @@ export class InfraSynthtraceEsClientImpl
 
   private async ensureOtelDataStreamTemplate() {
     const templateName = 'metrics-hostmetricsreceiver.otel';
+    const { tsds = true, lookBackTime } = this.otelTemplateOptions;
+    const keywordMapping = tsds
+      ? { type: 'keyword' as const, time_series_dimension: true as const }
+      : { type: 'keyword' as const };
+    const gaugeMapping = tsds
+      ? { type: 'double' as const, time_series_metric: 'gauge' as const }
+      : { type: 'double' as const };
+    const longGaugeMapping = tsds
+      ? { type: 'long' as const, time_series_metric: 'gauge' as const }
+      : { type: 'long' as const };
+
+    const indexSettings: Record<string, unknown> = {};
+    if (tsds) {
+      indexSettings.mode = 'time_series';
+      indexSettings.routing_path = ['host.name', 'metricset.name'];
+      if (lookBackTime) {
+        indexSettings.look_back_time = lookBackTime;
+      }
+    }
+
     try {
       await this.client.indices.putIndexTemplate({
         name: templateName,
@@ -97,12 +129,11 @@ export class InfraSynthtraceEsClientImpl
           // discriminate within each partition and are declared below but
           // intentionally omitted from `routing_path` to keep shard
           // routing predictable.
-          settings: {
-            index: {
-              mode: 'time_series',
-              routing_path: ['host.name', 'metricset.name'],
-            },
-          },
+          //
+          // `look_back_time` is set per scenario via
+          // `setOtelDataStreamTemplateOptions` so backdated `--from`/`--to`
+          // windows ingest without TSDS rejection.
+          ...(Object.keys(indexSettings).length > 0 ? { settings: { index: indexSettings } } : {}),
           mappings: {
             dynamic: true,
             dynamic_templates: [
@@ -118,13 +149,13 @@ export class InfraSynthtraceEsClientImpl
               agent: {
                 properties: {
                   // Dimension: distinguishes per-collector time series.
-                  id: { type: 'keyword', time_series_dimension: true },
+                  id: keywordMapping,
                 },
               },
               host: {
                 properties: {
-                  name: { type: 'keyword', time_series_dimension: true },
-                  hostname: { type: 'keyword', time_series_dimension: true },
+                  name: keywordMapping,
+                  hostname: keywordMapping,
                   // `ip` can be a dimension on recent ES versions but the
                   // synthtrace fixture uses one IP per fleet, so the
                   // discriminator value is constant — keep as plain `ip`
@@ -132,35 +163,35 @@ export class InfraSynthtraceEsClientImpl
                   ip: { type: 'ip' },
                   os: {
                     properties: {
-                      name: { type: 'keyword', time_series_dimension: true },
+                      name: keywordMapping,
                     },
                   },
                 },
               },
               cloud: {
                 properties: {
-                  provider: { type: 'keyword', time_series_dimension: true },
-                  region: { type: 'keyword', time_series_dimension: true },
+                  provider: keywordMapping,
+                  region: keywordMapping,
                 },
               },
               data_stream: {
                 properties: {
-                  dataset: { type: 'keyword', time_series_dimension: true },
-                  type: { type: 'keyword', time_series_dimension: true },
-                  namespace: { type: 'keyword', time_series_dimension: true },
+                  dataset: keywordMapping,
+                  type: keywordMapping,
+                  namespace: keywordMapping,
                 },
               },
               metricset: {
                 properties: {
-                  name: { type: 'keyword', time_series_dimension: true },
+                  name: keywordMapping,
                 },
               },
               // Top-level discriminators across metricset variants.
-              state: { type: 'keyword', time_series_dimension: true },
-              direction: { type: 'keyword', time_series_dimension: true },
+              state: keywordMapping,
+              direction: keywordMapping,
               device: {
                 properties: {
-                  keyword: { type: 'keyword', time_series_dimension: true },
+                  keyword: keywordMapping,
                 },
               },
               // Metric fields — explicit so the dynamic_templates
@@ -177,22 +208,22 @@ export class InfraSynthtraceEsClientImpl
                     properties: {
                       cpu: {
                         properties: {
-                          utilization: { type: 'double', time_series_metric: 'gauge' },
+                          utilization: gaugeMapping,
                           logical: {
                             properties: {
-                              count: { type: 'long', time_series_metric: 'gauge' },
+                              count: longGaugeMapping,
                             },
                           },
                           load_average: {
                             properties: {
-                              '1m': { type: 'double', time_series_metric: 'gauge' },
+                              '1m': gaugeMapping,
                             },
                           },
                         },
                       },
                       filesystem: {
                         properties: {
-                          usage: { type: 'double', time_series_metric: 'gauge' },
+                          usage: gaugeMapping,
                         },
                       },
                       network: {
@@ -215,7 +246,7 @@ export class InfraSynthtraceEsClientImpl
                           // production rxV2/txV2 on a separate `TS …
                           // RATE(...)` round-trip when synthtrace is
                           // upgraded to emit true cumulative counters.
-                          io: { type: 'long', time_series_metric: 'gauge' },
+                          io: longGaugeMapping,
                         },
                       },
                     },
@@ -226,8 +257,8 @@ export class InfraSynthtraceEsClientImpl
                 properties: {
                   memory: {
                     properties: {
-                      utilization: { type: 'double', time_series_metric: 'gauge' },
-                      usage: { type: 'double', time_series_metric: 'gauge' },
+                      utilization: gaugeMapping,
+                      usage: gaugeMapping,
                     },
                   },
                 },
@@ -236,7 +267,11 @@ export class InfraSynthtraceEsClientImpl
           },
         },
       });
-      this.logger.info(`Created index template "${templateName}" (TSDS)`);
+      this.logger.info(
+        `Created index template "${templateName}" (${tsds ? 'TSDS' : 'non-TSDS'})${
+          lookBackTime ? ` look_back_time=${lookBackTime}` : ''
+        }`
+      );
     } catch (error) {
       this.logger.warning(`Failed to create index template "${templateName}": ${error}`);
     }

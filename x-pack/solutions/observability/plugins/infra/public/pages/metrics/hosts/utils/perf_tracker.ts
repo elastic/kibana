@@ -130,3 +130,38 @@ export async function recordPerf<T>(
     perfTracker.record(key, performance.now() - start, meta);
   }
 }
+
+// Benchmark journey helpers — emit User Timing marks/measures that a
+// Playwright runner can read via `performance.getEntriesByType('measure')`.
+// `markOnce` is critical: hooks re-render on every state change and Lens
+// tiles can fire `onLoad` multiple times; we only want one mark per mount.
+
+export function markOnce(name: string): void {
+  if (typeof performance === 'undefined' || typeof performance.mark !== 'function') {
+    return;
+  }
+
+  try {
+    if (performance.getEntriesByName(name, 'mark').length > 0) {
+      return;
+    }
+    performance.mark(name);
+  } catch {
+    // User Timing can throw on duplicate names in some browsers.
+  }
+}
+
+export function measureSince(measureName: string, startMark: string): void {
+  if (typeof performance === 'undefined' || typeof performance.measure !== 'function') {
+    return;
+  }
+
+  try {
+    if (performance.getEntriesByName(startMark, 'mark').length === 0) {
+      return;
+    }
+    performance.measure(measureName, startMark);
+  } catch {
+    // Missing/invalid marks or duplicate measure names.
+  }
+}

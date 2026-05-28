@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import createContainer from 'constate';
 import type { BoolQuery } from '@kbn/es-query';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
@@ -24,6 +24,7 @@ import { useUnifiedSearchContext } from './use_unified_search';
 // `useHostCount` and `useHostsKpis` so all three fetchers fire once
 // after the unified search context settles instead of twice.
 import { useHostsPageReady } from './use_hosts_page_ready';
+import { markOnce, measureSince } from '../utils/perf_tracker';
 import type {
   GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
@@ -88,8 +89,21 @@ export const useHostsView = () => {
     [isReady, payload, searchCriteria.limit, telemetry]
   );
 
+  const loading = isPending(status);
+  const hasMarkedTableReadyRef = useRef(false);
+  const prevLoadingRef = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (prevLoadingRef.current === true && !loading && !hasMarkedTableReadyRef.current) {
+      markOnce('infra.hosts.tableReady');
+      measureSince('infra.hosts.tableReadyDuration', 'infra.hosts.navigationStart');
+      hasMarkedTableReadyRef.current = true;
+    }
+    prevLoadingRef.current = loading;
+  }, [loading]);
+
   return {
-    loading: isPending(status),
+    loading,
     error,
     hostNodes: data?.nodes ?? [],
   };

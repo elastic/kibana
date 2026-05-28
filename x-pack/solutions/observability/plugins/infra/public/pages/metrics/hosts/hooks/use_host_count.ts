@@ -7,7 +7,7 @@
 
 import createContainer from 'constate';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { useMemo, useEffect } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
@@ -16,6 +16,7 @@ import { GetInfraEntityCountResponsePayloadRT } from '../../../../../common/http
 import { FETCH_STATUS, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { useHostsPageReady } from './use_hosts_page_ready';
+import { markOnce, measureSince } from '../utils/perf_tracker';
 
 export const useHostCount = () => {
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
@@ -75,9 +76,22 @@ export const useHostCount = () => {
     }
   }, [data, error, payload, searchCriteria, telemetry, timeRangeMetadataStatus, schemas]);
 
+  const loading = isPending(status);
+  const hasMarkedHostCountReadyRef = useRef(false);
+  const prevLoadingRef = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (prevLoadingRef.current === true && !loading && !hasMarkedHostCountReadyRef.current) {
+      markOnce('infra.hosts.hostCountReady');
+      measureSince('infra.hosts.hostCountReadyDuration', 'infra.hosts.navigationStart');
+      hasMarkedHostCountReadyRef.current = true;
+    }
+    prevLoadingRef.current = loading;
+  }, [loading]);
+
   return {
     errors: error,
-    loading: isPending(status),
+    loading,
     count: data?.count ?? 0,
   };
 };
