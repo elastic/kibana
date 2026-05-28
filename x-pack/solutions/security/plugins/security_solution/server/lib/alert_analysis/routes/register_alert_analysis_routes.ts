@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import {
@@ -14,7 +15,10 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { findRelatedAlerts } from '../services/find_related_alerts';
 
-export const registerAlertAnalysisRoutes = (router: SecuritySolutionPluginRouter) => {
+export const registerAlertAnalysisRoutes = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .post({
       path: ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH,
@@ -51,11 +55,13 @@ export const registerAlertAnalysisRoutes = (router: SecuritySolutionPluginRouter
           userNames: request.body.userNames,
           sourceIps: request.body.sourceIps,
           destIps: request.body.destIps,
+          logger,
         });
 
         if (!result.ok) {
+          const statusCode = result.reason === 'alert_not_found' ? 404 : 500;
           return response.customError({
-            statusCode: 400,
+            statusCode,
             body: { message: result.message },
           });
         }
