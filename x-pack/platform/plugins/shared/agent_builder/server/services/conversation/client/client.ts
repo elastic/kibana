@@ -86,8 +86,8 @@ class ConversationClientImpl implements ConversationClient {
         'title',
         'created_at',
         'updated_at',
-        'read',
         'status',
+        'read',
       ],
       query: {
         bool: {
