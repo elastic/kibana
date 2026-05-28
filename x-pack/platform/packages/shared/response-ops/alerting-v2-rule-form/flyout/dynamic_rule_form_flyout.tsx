@@ -90,6 +90,7 @@ const DynamicRuleFormFlyoutInner = ({
   };
 
   const handleRequestClose = useCallback(() => {
+    // Prevent re-entry when the confirm modal's ESC bubbles to the flyout's onClose
     if (confirmCloseRef.current) return;
     if (isFormDirty) {
       setIsConfirmCloseModalVisible(true);
@@ -103,9 +104,9 @@ const DynamicRuleFormFlyoutInner = ({
     onClose?.();
   }, [onClose]);
 
-  const handleCancelDiscard = () => {
+  const handleCancelDiscard = useCallback(() => {
     setIsConfirmCloseModalVisible(false);
-  };
+  }, []);
 
   const hasValidationErrors = allErrors.length > 0;
 

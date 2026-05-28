@@ -290,6 +290,13 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
 
   const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
   const [isConfirmCloseVisible, setIsConfirmCloseVisible] = useState(false);
+  // EuiFlyout with session="start" uses EUI's managed flyout system, which
+  // calls closeAllFlyouts() synchronously (via flushSync) *before* invoking
+  // our onClose callback. By the time handleRequestClose runs, the flyout is
+  // already unregistered from the manager and unmounted. Incrementing the key
+  // forces React to re-mount the EuiFlyout, which re-registers it with the
+  // manager and restores the session. Form state is preserved because
+  // FormProvider sits above the flyout in the tree.
   const [flyoutKey, setFlyoutKey] = useState(0);
   const isDirtyRef = useRef(false);
   isDirtyRef.current = methods.formState.isDirty;
@@ -396,9 +403,17 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
         if (uiState.queryCommitted) {
           const current = methods.getValues('query');
           if (current.format === 'composed' && current.blocks.recover) {
-            methods.setValue('query', { ...current, blocks: { breach: current.blocks.breach } }, { shouldDirty: true });
+            methods.setValue(
+              'query',
+              { ...current, blocks: { breach: current.blocks.breach } },
+              { shouldDirty: true }
+            );
           } else if (current.format === 'standalone' && current.recover) {
-            methods.setValue('query', { format: 'standalone', breach: current.breach }, { shouldDirty: true });
+            methods.setValue(
+              'query',
+              { format: 'standalone', breach: current.breach },
+              { shouldDirty: true }
+            );
           }
         }
         // (b) Close sandbox in non-YAML mode — prevents a pending Apply from
@@ -645,7 +660,10 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
             ) : (
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={handleRequestClose} data-test-subj="composeDiscoverCancel">
+                  <EuiButtonEmpty
+                    onClick={handleRequestClose}
+                    data-test-subj="composeDiscoverCancel"
+                  >
                     {CANCEL_BUTTON_LABEL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>

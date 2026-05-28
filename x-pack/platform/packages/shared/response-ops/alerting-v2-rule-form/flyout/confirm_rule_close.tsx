@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { EuiFlyoutResizableProps } from '@elastic/eui';
 import { EuiConfirmModal, EuiText } from '@elastic/eui';
 import {
   RULE_FORM_CANCEL_MODAL_TITLE,
@@ -18,25 +17,19 @@ import {
 export interface ConfirmRuleCloseProps {
   onCancel: () => void;
   onConfirm: () => void;
-  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
-export const ConfirmRuleClose = ({
-  onCancel,
-  onConfirm,
-  focusTrapProps,
-}: ConfirmRuleCloseProps) => (
+export const ConfirmRuleClose = ({ onCancel, onConfirm }: ConfirmRuleCloseProps) => (
   <EuiConfirmModal
     onCancel={onCancel}
     onConfirm={onConfirm}
     data-test-subj="alertingV2ConfirmRuleCloseModal"
     buttonColor="danger"
-    defaultFocusedButton="confirm"
+    defaultFocusedButton="cancel"
     title={RULE_FORM_CANCEL_MODAL_TITLE}
     confirmButtonText={RULE_FORM_CANCEL_MODAL_CONFIRM}
     cancelButtonText={RULE_FORM_CANCEL_MODAL_CANCEL}
     aria-label={RULE_FORM_CANCEL_MODAL_TITLE}
-    focusTrapProps={focusTrapProps}
   >
     <EuiText>
       <p>{RULE_FORM_CANCEL_MODAL_DESCRIPTION}</p>
