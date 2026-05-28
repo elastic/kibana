@@ -13,6 +13,7 @@ import { generateWorkflow, type GenerateWorkflowEdit } from '@kbn/agent-builder-
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { workflowIdSchema } from '@kbn/workflows-management-plugin/common/lib/workflow_id_schema';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
@@ -38,8 +39,7 @@ const generateWorkflowSchema = z.object({
     .string()
     .optional()
     .describe('(optional) Additional instructions to steer the generation (system-prompt extras).'),
-  workflowId: z
-    .string()
+  workflowId: workflowIdSchema
     .optional()
     .describe(
       '(optional) A unique workflow ID (lowercase alphanumeric and hyphens, 3-255 chars, matching /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/). ' +
