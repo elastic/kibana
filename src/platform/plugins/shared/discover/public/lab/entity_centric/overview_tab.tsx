@@ -166,12 +166,16 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
       hasBorder
       hasShadow={false}
       paddingSize="m"
+      // Accent-tinted backdrop ties the AI summary card to the `sparkles`
+      // section adornment and the `accent`-colored refresh affordance below
+      // (canonical EUI signal for AI-generated content).
       css={css`
         background: linear-gradient(
           135deg,
-          ${euiTheme.colors.lightShade} 0%,
-          ${euiTheme.colors.body} 100%
+          ${euiTheme.colors.backgroundBaseAccent} 0%,
+          ${euiTheme.colors.backgroundLightAccent} 100%
         );
+        border-color: ${euiTheme.colors.borderBaseAccent};
       `}
       data-test-subj="entityCentricLabEntitySummaryCard"
     >
@@ -191,7 +195,7 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType="refresh"
-            color="text"
+            color="accent"
             size="xs"
             aria-label={i18n.translate(
               'discover.entityCentricLab.flyout.overview.regenerateSummaryAriaLabel',
