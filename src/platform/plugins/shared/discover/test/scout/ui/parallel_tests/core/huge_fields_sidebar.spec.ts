@@ -46,7 +46,7 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
     await pageObjects.discover.waitUntilSearchingHasFinished();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace, apiServices, esArchiver }) => {
+  spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
     await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
 
     if (hugeFieldsDataViewId) {
@@ -54,7 +54,6 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
     }
 
     await scoutSpace.savedObjects.cleanStandardList();
-    await esArchiver.unload(HUGE_FIELDS_ARCHIVE_PATH);
   });
 
   spaceTest(
