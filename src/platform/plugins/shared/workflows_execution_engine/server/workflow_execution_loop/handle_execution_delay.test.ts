@@ -88,10 +88,10 @@ describe('handleExecutionDelay', () => {
     });
   });
 
-  describe('long wait (>= 5s) schedules TM resume task', () => {
-    it('flushes state before scheduling resume task', async () => {
+  describe('short wait (< 5s) in-process delay', () => {
+    it('flushes state during short waits for live progress', async () => {
       const params = makeParams();
-      const resumeAt = new Date(Date.now() + 8000).toISOString();
+      const resumeAt = new Date(Date.now() + 2000).toISOString();
       const stepRuntime = makeStepRuntime({
         stepExecution: {
           status: ExecutionStatus.WAITING,
@@ -99,13 +99,33 @@ describe('handleExecutionDelay', () => {
         } as any,
       });
 
-      await handleExecutionDelay(params, stepRuntime);
+      const delayPromise = handleExecutionDelay(params, stepRuntime);
+      await Promise.resolve();
+      stepRuntime.abortController.abort();
+      await delayPromise;
 
       expect(params.workflowExecutionState.flush).toHaveBeenCalled();
       expect(params.workflowLogger.flushEvents).toHaveBeenCalled();
-      expect(params.workflowTaskManager.scheduleResumeTask).toHaveBeenCalledTimes(1);
-      expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        status: ExecutionStatus.WAITING,
+      expect(params.workflowTaskManager.scheduleResumeTask).not.toHaveBeenCalled();
+    });
+
+    it('does not reset workflow status to RUNNING when delay is aborted', async () => {
+      const params = makeParams();
+      const resumeAt = new Date(Date.now() + 2000).toISOString();
+      const stepRuntime = makeStepRuntime({
+        stepExecution: {
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt },
+        } as any,
+      });
+
+      const delayPromise = handleExecutionDelay(params, stepRuntime);
+      await Promise.resolve();
+      stepRuntime.abortController.abort();
+      await delayPromise;
+
+      expect(params.workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith({
+        status: ExecutionStatus.RUNNING,
       });
     });
   });
