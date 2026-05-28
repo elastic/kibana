@@ -1689,11 +1689,12 @@ describe('Response actions history', () => {
       await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(3);
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(4);
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
         'Failed',
         'Pending',
         'Successful',
+        'Canceled',
       ]);
     });
 
