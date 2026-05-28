@@ -12,7 +12,7 @@ import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
+import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
@@ -24,7 +24,7 @@ describe('cancelWorkflowIfRequested', () => {
   let workflowExecutionState: jest.Mocked<WorkflowExecutionState>;
   let monitoredStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
   let workflowLogger: jest.Mocked<IWorkflowEventLogger>;
-  let workflowExecutionDriver: ReturnType<typeof createMockWorkflowExecutionDriver>;
+  let workflowExecutionCursor: ReturnType<typeof createMockWorkflowExecutionCursor>;
   let monitorAbortController: AbortController;
   let workflowExecution: EsWorkflowExecution;
 
@@ -68,7 +68,7 @@ describe('cancelWorkflowIfRequested', () => {
       abortController: new AbortController(),
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
-    workflowExecutionDriver = createMockWorkflowExecutionDriver();
+    workflowExecutionCursor = createMockWorkflowExecutionCursor();
   });
 
   describe('error handling', () => {
@@ -83,7 +83,7 @@ describe('cancelWorkflowIfRequested', () => {
         workflowExecutionState,
         monitoredStepExecutionRuntime,
         workflowLogger,
-        workflowExecutionDriver,
+        workflowExecutionCursor,
         monitorAbortController
       );
 
@@ -114,7 +114,7 @@ describe('cancelWorkflowIfRequested', () => {
         workflowExecutionState,
         monitoredStepExecutionRuntime,
         workflowLogger,
-        workflowExecutionDriver,
+        workflowExecutionCursor,
         monitorAbortController
       );
 
@@ -136,7 +136,7 @@ describe('cancelWorkflowIfRequested', () => {
         workflowExecutionState,
         monitoredStepExecutionRuntime,
         workflowLogger,
-        workflowExecutionDriver,
+        workflowExecutionCursor,
         monitorAbortController
       );
 
@@ -160,7 +160,7 @@ describe('cancelWorkflowIfRequested', () => {
         workflowExecutionState,
         monitoredStepExecutionRuntime,
         workflowLogger,
-        workflowExecutionDriver,
+        workflowExecutionCursor,
         monitorAbortController
       );
 
@@ -186,7 +186,7 @@ describe('cancelWorkflowIfRequested', () => {
         workflowExecutionState,
         monitoredStepExecutionRuntime,
         workflowLogger,
-        workflowExecutionDriver,
+        workflowExecutionCursor,
         monitorAbortController
       );
 
@@ -220,7 +220,7 @@ describe('cancelWorkflowIfRequested', () => {
         workflowExecutionState,
         monitoredStepExecutionRuntime,
         workflowLogger,
-        workflowExecutionDriver,
+        workflowExecutionCursor,
         monitorAbortController
       );
 
@@ -242,7 +242,7 @@ describe('cancelWorkflowIfRequested', () => {
         workflowExecutionState,
         monitoredStepExecutionRuntime,
         workflowLogger,
-        workflowExecutionDriver,
+        workflowExecutionCursor,
         monitorAbortController
       );
 

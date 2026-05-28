@@ -28,9 +28,9 @@ export async function executionFlowLoop(params: WorkflowExecutionLoopParams) {
   let counter = 0;
   let currentNodeId: string | undefined;
 
-  while (params.workflowExecutionDriver.isExecuting) {
-    if (currentNodeId !== params.workflowExecutionDriver.currentNode?.id) {
-      currentNodeId = params.workflowExecutionDriver.currentNode?.id;
+  while (params.workflowExecutionCursor.isExecuting) {
+    if (currentNodeId !== params.workflowExecutionCursor.currentNode?.id) {
+      currentNodeId = params.workflowExecutionCursor.currentNode?.id;
       counter = 0;
     }
 
@@ -43,10 +43,10 @@ export async function executionFlowLoop(params: WorkflowExecutionLoopParams) {
     counter++;
 
     await runNode(params);
-    params.workflowExecutionDriver.commitPendingNavigation();
+    params.workflowExecutionCursor.commitPendingNavigation();
     await params.workflowRuntime.saveState();
-    if (!params.workflowExecutionDriver.currentNode) {
-      params.workflowExecutionDriver.stop();
+    if (!params.workflowExecutionCursor.currentNode) {
+      params.workflowExecutionCursor.stop();
     }
   }
 }

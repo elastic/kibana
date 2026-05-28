@@ -21,9 +21,9 @@ import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { buildWorkflowContext } from '../build_workflow_context';
 import {
-  createWorkflowExecutionDriverTestHarness,
-  type WorkflowExecutionDriverTestHarness,
-} from '../mocks/workflow_execution_driver.mock';
+  createWorkflowExecutionCursorTestHarness,
+  type WorkflowExecutionCursorTestHarness,
+} from '../mocks/workflow_execution_cursor.mock';
 import type { StepIoService } from '../step_io_service';
 import type { ContextDependencies } from '../types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
@@ -39,7 +39,7 @@ const buildWorkflowContextMock = buildWorkflowContext as jest.MockedFunction<
 >;
 describe('WorkflowExecutionRuntimeManager', () => {
   let underTest: WorkflowExecutionRuntimeManager;
-  let workflowExecutionDriver: WorkflowExecutionDriverTestHarness;
+  let workflowExecutionCursor: WorkflowExecutionCursorTestHarness;
   let workflowExecution: EsWorkflowExecution;
   let workflowExecutionGraph: WorkflowGraph;
   let stepIoService: StepIoService;
@@ -129,7 +129,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     fakeCoreStart = {} as unknown as jest.Mocked<CoreStart>;
     fakeContextDependencies = {} as unknown as jest.Mocked<ContextDependencies>;
 
-    workflowExecutionDriver = createWorkflowExecutionDriverTestHarness({
+    workflowExecutionCursor = createWorkflowExecutionCursorTestHarness({
       nodeId: 'node1',
       stackFrames: workflowExecution.scopeStack,
       workflowExecutionGraph,
@@ -149,7 +149,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     underTest = new WorkflowExecutionRuntimeManager({
       workflowExecution,
       workflowExecutionGraph,
-      workflowExecutionDriver,
+      workflowExecutionCursor,
       workflowLogger,
       workflowExecutionState,
       stepIoService,
@@ -160,14 +160,14 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
   describe('nodes navigation', () => {
     beforeEach(() => {
-      workflowExecutionDriver = createWorkflowExecutionDriverTestHarness({
+      workflowExecutionCursor = createWorkflowExecutionCursorTestHarness({
         nodeId: 'node1',
         workflowExecutionGraph,
       });
       underTest = new WorkflowExecutionRuntimeManager({
         workflowExecution,
         workflowExecutionGraph,
-        workflowExecutionDriver,
+        workflowExecutionCursor,
         workflowLogger,
         workflowExecutionState,
         stepIoService,
@@ -204,14 +204,14 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
 
       it('should persist undefined currentNodeId when there is no next node after commit', async () => {
-        workflowExecutionDriver = createWorkflowExecutionDriverTestHarness({
+        workflowExecutionCursor = createWorkflowExecutionCursorTestHarness({
           nodeId: 'node3',
           workflowExecutionGraph,
         });
         underTest = new WorkflowExecutionRuntimeManager({
           workflowExecution,
           workflowExecutionGraph,
-          workflowExecutionDriver,
+          workflowExecutionCursor,
           workflowLogger,
           workflowExecutionState,
           stepIoService,
@@ -219,7 +219,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
           dependencies: fakeContextDependencies,
         });
         underTest.navigateToNextNode();
-        underTest.executionDriver.commitPendingNavigation();
+        underTest.executionCursor.commitPendingNavigation();
         await underTest.saveState();
         expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -346,14 +346,14 @@ describe('WorkflowExecutionRuntimeManager', () => {
         status: ExecutionStatus.WAITING_FOR_INPUT,
         currentNodeId: 'node2',
       } as Partial<EsWorkflowExecution>);
-      workflowExecutionDriver = createWorkflowExecutionDriverTestHarness({
+      workflowExecutionCursor = createWorkflowExecutionCursorTestHarness({
         nodeId: 'node1',
         workflowExecutionGraph,
       });
       underTest = new WorkflowExecutionRuntimeManager({
         workflowExecution,
         workflowExecutionGraph,
-        workflowExecutionDriver,
+        workflowExecutionCursor,
         workflowLogger,
         workflowExecutionState,
         stepIoService,
@@ -421,13 +421,13 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should update local currentNodeId after pending navigation is committed', async () => {
-      underTest.executionDriver.commitPendingNavigation();
+      underTest.executionCursor.commitPendingNavigation();
       await underTest.saveState();
       expect(underTest.getCurrentNode()).toEqual(expect.objectContaining({ id: 'node3' }));
     });
 
-    it('should persist scope stack from the execution driver', async () => {
-      underTest.executionDriver.commitPendingNavigation();
+    it('should persist scope stack from the execution cursor', async () => {
+      underTest.executionCursor.commitPendingNavigation();
       await underTest.saveState();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -437,7 +437,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should complete workflow execution if no nodes to process', async () => {
-      workflowExecutionDriver.setCurrentNodeId(undefined);
+      workflowExecutionCursor.setCurrentNodeId(undefined);
 
       await underTest.saveState();
 
@@ -451,7 +451,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should log workflow completion', async () => {
-      workflowExecutionDriver.setCurrentNodeId(undefined);
+      workflowExecutionCursor.setCurrentNodeId(undefined);
 
       await underTest.saveState();
       expect(workflowLogger.logInfo).toHaveBeenCalledWith(
@@ -486,7 +486,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     it('should save the current nodeId in workflow execution state', async () => {
       underTest.navigateToNode('node2');
-      underTest.executionDriver.commitPendingNavigation();
+      underTest.executionCursor.commitPendingNavigation();
       await underTest.saveState();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -571,7 +571,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     const navigateToEnterNode = (nodeMock: GraphNodeUnion) => {
       workflowExecutionGraph.getNode = jest.fn().mockReturnValue(nodeMock);
       underTest.navigateToNode('node3');
-      underTest.executionDriver.commitPendingNavigation();
+      underTest.executionCursor.commitPendingNavigation();
     };
 
     it('should enter a new scope with step id when node type is enter-* and no name is provided', async () => {
@@ -653,8 +653,8 @@ describe('WorkflowExecutionRuntimeManager', () => {
   });
 
   describe('getCurrentNode', () => {
-    it('should return null when the execution driver has no current node', () => {
-      workflowExecutionDriver.setCurrentNodeId(undefined);
+    it('should return null when the execution cursor has no current node', () => {
+      workflowExecutionCursor.setCurrentNodeId(undefined);
       expect(underTest.getCurrentNode()).toBeNull();
     });
   });
@@ -671,7 +671,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
   describe('navigateToAfterNode', () => {
     it('should set next node to the one after the given nodeId', async () => {
       underTest.navigateToAfterNode('node1');
-      underTest.executionDriver.commitPendingNavigation();
+      underTest.executionCursor.commitPendingNavigation();
       await underTest.saveState();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({ currentNodeId: 'node2' })
@@ -679,14 +679,14 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should set next node to undefined when given the last node', async () => {
-      workflowExecutionDriver = createWorkflowExecutionDriverTestHarness({
+      workflowExecutionCursor = createWorkflowExecutionCursorTestHarness({
         nodeId: 'node3',
         workflowExecutionGraph,
       });
       underTest = new WorkflowExecutionRuntimeManager({
         workflowExecution,
         workflowExecutionGraph,
-        workflowExecutionDriver,
+        workflowExecutionCursor,
         workflowLogger,
         workflowExecutionState,
         stepIoService,
@@ -694,7 +694,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         dependencies: fakeContextDependencies,
       });
       underTest.navigateToAfterNode('node3');
-      underTest.executionDriver.commitPendingNavigation();
+      underTest.executionCursor.commitPendingNavigation();
       await underTest.saveState();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({ currentNodeId: undefined, status: ExecutionStatus.COMPLETED })
@@ -733,9 +733,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
   });
 
   describe('setWorkflowError', () => {
-    it('should serialize and set error on the execution driver', () => {
+    it('should serialize and set error on the execution cursor', () => {
       underTest.setWorkflowError(new Error('something broke'));
-      expect(underTest.executionDriver.error).toEqual(
+      expect(underTest.executionCursor.error).toEqual(
         expect.objectContaining({ message: 'something broke' })
       );
     });
@@ -743,7 +743,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should clear driver error when passed undefined', () => {
       underTest.setWorkflowError(new Error('something broke'));
       underTest.setWorkflowError(undefined);
-      expect(underTest.executionDriver.error).toBeUndefined();
+      expect(underTest.executionCursor.error).toBeUndefined();
     });
   });
 
@@ -855,7 +855,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         outcome: 'success',
         end: mockEnd,
       };
-      workflowExecutionDriver.setCurrentNodeId(undefined);
+      workflowExecutionCursor.setCurrentNodeId(undefined);
 
       await underTest.saveState();
 
@@ -869,7 +869,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         outcome: 'success',
         end: mockEnd,
       };
-      workflowExecutionDriver.setCurrentNodeId(undefined);
+      workflowExecutionCursor.setCurrentNodeId(undefined);
 
       await underTest.saveState();
 
@@ -882,7 +882,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       const mockReport = jest.fn();
       const telemetryClient = { reportWorkflowExecutionTerminated: mockReport };
       (underTest as any).telemetryClient = telemetryClient;
-      workflowExecutionDriver.setCurrentNodeId(undefined);
+      workflowExecutionCursor.setCurrentNodeId(undefined);
 
       (workflowExecutionState as any).getAllStepExecutions = jest.fn().mockReturnValue([]);
 
@@ -899,7 +899,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       const mockReport = jest.fn();
       const telemetryClient = { reportWorkflowExecutionTerminated: mockReport };
       (underTest as any).telemetryClient = telemetryClient;
-      workflowExecutionDriver.setCurrentNodeId(undefined);
+      workflowExecutionCursor.setCurrentNodeId(undefined);
       (workflowExecutionState as any).getAllStepExecutions = jest.fn().mockReturnValue([]);
 
       await underTest.saveState();

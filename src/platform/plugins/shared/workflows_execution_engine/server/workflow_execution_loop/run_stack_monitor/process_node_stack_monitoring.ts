@@ -55,7 +55,7 @@ export async function processNodeStackMonitoring(
     params.workflowExecutionState,
     monitoredStepExecutionRuntime,
     params.workflowLogger,
-    params.workflowExecutionDriver,
+    params.workflowExecutionCursor,
     monitoredStepExecutionRuntime.abortController
   );
 }

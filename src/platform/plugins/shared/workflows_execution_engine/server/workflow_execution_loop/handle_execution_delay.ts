@@ -83,7 +83,7 @@ export async function handleExecutionDelay(
           );
         });
 
-      params.workflowExecutionDriver.stop();
+      params.workflowExecutionCursor.stop();
     }
     return;
   }
@@ -130,6 +130,6 @@ export async function handleExecutionDelay(
       fakeRequest: params.fakeRequest,
     });
     // Execution loop should stop here so the workflow can be resumed later
-    params.workflowExecutionDriver.stop();
+    params.workflowExecutionCursor.stop();
   }
 }

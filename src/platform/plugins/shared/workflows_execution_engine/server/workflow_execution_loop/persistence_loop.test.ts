@@ -9,7 +9,7 @@
 
 import { persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
-import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
+import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 
 const makeParams = (
   overrides: Partial<{
@@ -18,11 +18,11 @@ const makeParams = (
   }> = {}
 ): jest.Mocked<WorkflowExecutionLoopParams> => {
   const { isExecuting = true, flushDelay = 0 } = overrides;
-  const workflowExecutionDriver = createMockWorkflowExecutionDriver({ isExecuting });
+  const workflowExecutionCursor = createMockWorkflowExecutionCursor({ isExecuting });
   return {
-    workflowExecutionDriver,
+    workflowExecutionCursor,
     workflowRuntime: {
-      executionDriver: workflowExecutionDriver,
+      executionCursor: workflowExecutionCursor,
     },
     stepIoService: {
       flush: jest
@@ -45,7 +45,7 @@ describe('persistenceLoop', () => {
     jest.useRealTimers();
   });
 
-  it('exits immediately when the execution driver is not executing', async () => {
+  it('exits immediately when the execution cursor is not executing', async () => {
     const params = makeParams({ isExecuting: false });
     await persistenceLoop(params);
     expect(params.stepIoService.flush).not.toHaveBeenCalled();

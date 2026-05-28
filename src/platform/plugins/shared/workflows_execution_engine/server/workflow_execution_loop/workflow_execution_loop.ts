@@ -35,10 +35,10 @@ const TASK_MANAGER_ABORT_CANCELLATION_REASON = 'Cancelled because Task Manager a
  * - Workflow fails due to an error (ExecutionStatus.FAILED)
  * - Workflow is cancelled (ExecutionStatus.CANCELLED)
  * - Any other non-RUNNING status is reached
- * - The execution driver's `stop()` is called while the workflow remains RUNNING
+ * - The execution cursor's `stop()` is called while the workflow remains RUNNING
  */
 export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams) {
-  const { workflowExecutionDriver, workflowRuntime } = params;
+  const { workflowExecutionCursor, workflowRuntime } = params;
   // Create an abort controller to signal the persistence loop to exit immediately
   // when execution completes (instead of waiting for the next 500ms flush cycle)
   const persistenceAbortController = new AbortController();
@@ -64,7 +64,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     });
     // Also abort persistence loop when task is aborted
     persistenceAbortController.abort();
-    workflowExecutionDriver.stop();
+    workflowExecutionCursor.stop();
   };
 
   params.taskAbortController.signal.addEventListener('abort', onTaskAbort, { once: true });
@@ -73,7 +73,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   }
 
   try {
-    workflowExecutionDriver.start();
+    workflowExecutionCursor.start();
     // Run execution and persistence loops in parallel
     // When execution finishes, signal persistence loop to exit immediately
     await Promise.all([

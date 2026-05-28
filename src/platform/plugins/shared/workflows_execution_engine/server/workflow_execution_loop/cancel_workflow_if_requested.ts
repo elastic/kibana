@@ -11,7 +11,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { buildStepExecutionId } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionDriverApi } from '../workflow_context_manager/workflow_execution_driver';
+import type { WorkflowExecutionCursorApi } from '../workflow_context_manager/workflow_execution_cursor';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
@@ -30,7 +30,7 @@ export async function cancelWorkflowIfRequested(
   workflowExecutionState: WorkflowExecutionState,
   monitoredStepExecutionRuntime: StepExecutionRuntime,
   workflowLogger: IWorkflowEventLogger,
-  workflowExecutionDriver: WorkflowExecutionDriverApi,
+  workflowExecutionCursor: WorkflowExecutionCursorApi,
   monitorAbortController?: AbortController
 ): Promise<void> {
   if (!workflowExecutionState.getWorkflowExecution().cancelRequested) {
@@ -88,5 +88,5 @@ export async function cancelWorkflowIfRequested(
   workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.CANCELLED,
   });
-  workflowExecutionDriver.stop();
+  workflowExecutionCursor.stop();
 }

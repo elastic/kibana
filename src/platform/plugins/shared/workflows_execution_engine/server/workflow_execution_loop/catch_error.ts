@@ -59,7 +59,7 @@ export async function catchError(
   params: WorkflowExecutionLoopParams,
   failedStepExecutionRuntime: StepExecutionRuntime
 ) {
-  const { workflowExecutionDriver, workflowLogger, stepExecutionRuntimeFactory, nodesFactory } =
+  const { workflowExecutionCursor, workflowLogger, stepExecutionRuntimeFactory, nodesFactory } =
     params;
 
   try {
@@ -70,37 +70,37 @@ export async function catchError(
     // 3. The top stack entry has nested scopes to process
     // This allows error handling to bubble up through the scope hierarchy.
     if (failedStepExecutionRuntime.stepExecutionExists() && failedStepExecutionRuntime.error) {
-      workflowExecutionDriver.error = failedStepExecutionRuntime.error;
+      workflowExecutionCursor.error = failedStepExecutionRuntime.error;
     } else if (failedStepExecutionRuntime.stepExecutionExists()) {
       const stepExecution = failedStepExecutionRuntime.stepExecution;
       // A step may already be COMPLETED if workflow.output/workflow.fail finished
       // it successfully before setting the workflow-level error (e.g., status: 'failed')
-      if (workflowExecutionDriver.error && stepExecution?.status !== ExecutionStatus.COMPLETED) {
+      if (workflowExecutionCursor.error && stepExecution?.status !== ExecutionStatus.COMPLETED) {
         failedStepExecutionRuntime.failStep(
-          workflowExecutionDriver.error
-            ? ExecutionError.fromError(workflowExecutionDriver.error)
+          workflowExecutionCursor.error
+            ? ExecutionError.fromError(workflowExecutionCursor.error)
             : new Error('Step failed with unknown error')
         );
       }
     }
 
-    if (!workflowExecutionDriver.error) {
+    if (!workflowExecutionCursor.error) {
       return;
     }
 
     let workflowScopeStack = WorkflowScopeStack.fromStackFrames(
-      workflowExecutionDriver.currentStackFrames
+      workflowExecutionCursor.currentStackFrames
     );
-    while (workflowExecutionDriver.error && !workflowScopeStack.isEmpty()) {
+    while (workflowExecutionCursor.error && !workflowScopeStack.isEmpty()) {
       const scopeEntry = workflowScopeStack.getCurrentScope();
       const newWorkflowScopeStack = workflowScopeStack.exitScope();
-      const currentNode = workflowExecutionDriver.currentNode;
+      const currentNode = workflowExecutionCursor.currentNode;
 
       if (!currentNode) {
         throw new Error('No current node ID in workflow execution state. This should not happen.');
       }
 
-      workflowExecutionDriver.navigateToNode(scopeEntry.nodeId);
+      workflowExecutionCursor.navigateToNode(scopeEntry.nodeId);
 
       const stepExecutionRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
         nodeId: scopeEntry.nodeId,
@@ -118,30 +118,30 @@ export async function catchError(
         try {
           await Promise.resolve(stepErrorCatcher.catchError(failedContext));
         } catch (error) {
-          workflowExecutionDriver.error = error;
+          workflowExecutionCursor.error = error;
         }
       }
 
-      workflowExecutionDriver.commitPendingNavigation();
+      workflowExecutionCursor.commitPendingNavigation();
 
       workflowScopeStack = WorkflowScopeStack.fromStackFrames(
-        workflowExecutionDriver.currentStackFrames
+        workflowExecutionCursor.currentStackFrames
       );
 
-      if (workflowExecutionDriver.error) {
+      if (workflowExecutionCursor.error) {
         if (stepExecutionRuntime.stepExecutionExists()) {
-          stepExecutionRuntime.failStep(ExecutionError.fromError(workflowExecutionDriver.error));
+          stepExecutionRuntime.failStep(ExecutionError.fromError(workflowExecutionCursor.error));
         }
       }
     }
   } catch (error) {
-    workflowExecutionDriver.error = error;
+    workflowExecutionCursor.error = error;
     workflowLogger.logError(
       `Error in catchError: ${error.message}. Workflow execution may be in an inconsistent state.`
     );
   }
 
-  if (workflowExecutionDriver.error) {
-    workflowExecutionDriver.stop();
+  if (workflowExecutionCursor.error) {
+    workflowExecutionCursor.stop();
   }
 }

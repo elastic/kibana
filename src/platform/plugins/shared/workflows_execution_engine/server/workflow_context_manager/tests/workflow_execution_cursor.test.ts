@@ -8,10 +8,10 @@
  */
 
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import { WorkflowExecutionDriver } from '../workflow_execution_driver';
+import { WorkflowExecutionCursor } from '../workflow_execution_cursor';
 
-describe('WorkflowExecutionDriver', () => {
-  let driver: WorkflowExecutionDriver;
+describe('WorkflowExecutionCursor', () => {
+  let workflowExecutionCursor: WorkflowExecutionCursor;
   let workflowExecutionGraph: WorkflowGraph;
 
   beforeEach(() => {
@@ -32,62 +32,62 @@ describe('WorkflowExecutionDriver', () => {
       getNodeStack: jest.fn().mockImplementation((nodeId: string) => [nodeId]),
     } as unknown as WorkflowGraph;
 
-    driver = new WorkflowExecutionDriver({
+    workflowExecutionCursor = new WorkflowExecutionCursor({
       nodeId: 'node1',
       workflowExecutionGraph,
     });
   });
 
   it('starts with isExecuting true before start/stop', () => {
-    expect(driver.isExecuting).toBe(true);
+    expect(workflowExecutionCursor.isExecuting).toBe(true);
   });
 
   it('start sets isExecuting true', () => {
-    driver.stop();
-    driver.start();
-    expect(driver.isExecuting).toBe(true);
+    workflowExecutionCursor.stop();
+    workflowExecutionCursor.start();
+    expect(workflowExecutionCursor.isExecuting).toBe(true);
   });
 
   it('stop clears isExecuting', () => {
-    driver.stop();
-    expect(driver.isExecuting).toBe(false);
+    workflowExecutionCursor.stop();
+    expect(workflowExecutionCursor.isExecuting).toBe(false);
   });
 
   it('currentNode returns graph node for current node id', () => {
-    expect(driver.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
+    expect(workflowExecutionCursor.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
   });
 
   it('navigateToNode sets pending next node', () => {
-    driver.navigateToNode('node3');
-    expect(driver.nextNode).toEqual(expect.objectContaining({ id: 'node3' }));
-    expect(driver.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
+    workflowExecutionCursor.navigateToNode('node3');
+    expect(workflowExecutionCursor.nextNode).toEqual(expect.objectContaining({ id: 'node3' }));
+    expect(workflowExecutionCursor.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
   });
 
   it('navigateToNode throws when node is missing', () => {
     (workflowExecutionGraph.getNode as jest.Mock).mockReturnValueOnce(undefined);
-    expect(() => driver.navigateToNode('missing')).toThrow(
+    expect(() => workflowExecutionCursor.navigateToNode('missing')).toThrow(
       'Node with ID missing is not part of the workflow graph'
     );
   });
 
   it('navigateToNextNode advances from current node', () => {
-    driver.navigateToNextNode();
-    expect(driver.nextNode).toEqual(expect.objectContaining({ id: 'node2' }));
+    workflowExecutionCursor.navigateToNextNode();
+    expect(workflowExecutionCursor.nextNode).toEqual(expect.objectContaining({ id: 'node2' }));
   });
 
   it('navigateToAfterNode sets next after given id', () => {
-    driver.navigateToAfterNode('node1');
-    expect(driver.nextNode).toEqual(expect.objectContaining({ id: 'node2' }));
+    workflowExecutionCursor.navigateToAfterNode('node1');
+    expect(workflowExecutionCursor.nextNode).toEqual(expect.objectContaining({ id: 'node2' }));
   });
 
   it('commitPendingNavigation promotes next to current', () => {
-    driver.navigateToNode('node3');
-    driver.commitPendingNavigation();
-    expect(driver.currentNode).toEqual(expect.objectContaining({ id: 'node3' }));
+    workflowExecutionCursor.navigateToNode('node3');
+    workflowExecutionCursor.commitPendingNavigation();
+    expect(workflowExecutionCursor.currentNode).toEqual(expect.objectContaining({ id: 'node3' }));
   });
 
   it('defaults to first topological node when nodeId is omitted', () => {
-    const entryDriver = new WorkflowExecutionDriver({ workflowExecutionGraph });
-    expect(entryDriver.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
+    const entryCursor = new WorkflowExecutionCursor({ workflowExecutionGraph });
+    expect(entryCursor.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
   });
 });

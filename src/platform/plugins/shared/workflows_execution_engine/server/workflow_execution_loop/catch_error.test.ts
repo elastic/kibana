@@ -10,7 +10,7 @@
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { catchError } from './catch_error';
-import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
+import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 
 const createParams = (error?: Error) => {
   const scopeStack = [
@@ -20,7 +20,7 @@ const createParams = (error?: Error) => {
     },
   ];
 
-  const workflowExecutionDriver = createMockWorkflowExecutionDriver({
+  const workflowExecutionCursor = createMockWorkflowExecutionCursor({
     error: error ? ExecutionError.fromError(error) : undefined,
     currentStackFrames: scopeStack,
     currentNode: { id: 'current-node' } as GraphNodeUnion,
@@ -36,12 +36,12 @@ const createParams = (error?: Error) => {
 
   const stepErrorCatcher = {
     catchError: jest.fn(() => {
-      workflowExecutionDriver.setMockError(undefined);
+      workflowExecutionCursor.setMockError(undefined);
     }),
   };
 
   const params = {
-    workflowExecutionDriver,
+    workflowExecutionCursor,
     workflowExecutionState: {
       getWorkflowExecution: jest.fn(),
       updateWorkflowExecution: jest.fn(),
@@ -67,7 +67,7 @@ const createParams = (error?: Error) => {
     },
   };
 
-  return { params, stepRuntime, workflowExecutionDriver, stepErrorCatcher };
+  return { params, stepRuntime, workflowExecutionCursor, stepErrorCatcher };
 };
 
 describe('catchError', () => {
@@ -77,24 +77,24 @@ describe('catchError', () => {
     await catchError(params as any, stepRuntime as any);
 
     expect(stepRuntime.failStep).not.toHaveBeenCalled();
-    expect(params.workflowExecutionDriver.stop).not.toHaveBeenCalled();
+    expect(params.workflowExecutionCursor.stop).not.toHaveBeenCalled();
   });
 
   it('fails the step and delegates error handling to catcher nodes', async () => {
     const initialError = new Error('boom');
-    const { params, stepRuntime, stepErrorCatcher, workflowExecutionDriver } =
+    const { params, stepRuntime, stepErrorCatcher, workflowExecutionCursor } =
       createParams(initialError);
 
     await catchError(params as any, stepRuntime as any);
 
-    expect(workflowExecutionDriver.navigateToNode).toHaveBeenCalledWith('scope-node');
+    expect(workflowExecutionCursor.navigateToNode).toHaveBeenCalledWith('scope-node');
     expect(stepErrorCatcher.catchError).toHaveBeenCalledTimes(1);
-    expect(workflowExecutionDriver.commitPendingNavigation).toHaveBeenCalled();
+    expect(workflowExecutionCursor.commitPendingNavigation).toHaveBeenCalled();
   });
 
   it('stores workflow error on the driver and logs when catchError itself throws', async () => {
     const initialError = new Error('boom');
-    const { params, stepRuntime, workflowExecutionDriver } = createParams(initialError);
+    const { params, stepRuntime, workflowExecutionCursor } = createParams(initialError);
     params.nodesFactory.create = jest.fn(() => ({
       catchError: jest.fn(() => {
         throw new Error('handler failed');
@@ -103,10 +103,10 @@ describe('catchError', () => {
 
     await catchError(params as any, stepRuntime as any);
 
-    expect(workflowExecutionDriver.error).toBeDefined();
+    expect(workflowExecutionCursor.error).toBeDefined();
     expect(params.workflowLogger.logError).toHaveBeenCalledWith(
       expect.stringContaining('Error in catchError:')
     );
-    expect(workflowExecutionDriver.stop).toHaveBeenCalled();
+    expect(workflowExecutionCursor.stop).toHaveBeenCalled();
   });
 });

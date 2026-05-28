@@ -11,14 +11,14 @@ import type { StackFrame } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 
-export interface WorkflowExecutionDriverInit {
+export interface WorkflowExecutionCursorInit {
   nodeId?: string;
   stackFrames?: StackFrame[];
   workflowExecutionGraph: WorkflowGraph;
 }
 
-/** Public surface of {@link WorkflowExecutionDriver} for typing mocks and loop params. */
-export interface WorkflowExecutionDriverApi {
+/** Public surface of {@link WorkflowExecutionCursor} for typing mocks and loop params. */
+export interface WorkflowExecutionCursorApi {
   readonly isExecuting: boolean;
   error: Error | undefined;
   start(): void;
@@ -35,18 +35,18 @@ export interface WorkflowExecutionDriverApi {
 }
 
 /**
- * Drives in-memory workflow step iteration: pending node navigation (`nextNodeId`),
+ * In-memory cursor for workflow graph iteration: pending node navigation (`nextNodeId`),
  * whether the execution and persistence loops keep running (`isExecuting`), controlled with
- * {@link WorkflowExecutionDriver.start} and {@link WorkflowExecutionDriver.stop}.
+ * {@link WorkflowExecutionCursor.start} and {@link WorkflowExecutionCursor.stop}.
  */
-export class WorkflowExecutionDriver implements WorkflowExecutionDriverApi {
+export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   private readonly workflowGraph: WorkflowGraph;
   private currentNodeId: string | undefined;
   private nextNodeId: string | undefined;
   private executing = true;
   private stackFrames: StackFrame[];
 
-  constructor(init: WorkflowExecutionDriverInit) {
+  constructor(init: WorkflowExecutionCursorInit) {
     this.workflowGraph = init.workflowExecutionGraph;
     this.currentNodeId = init.nodeId || this.workflowGraph.topologicalOrder[0];
     this.stackFrames = init.stackFrames ?? [];
@@ -59,7 +59,7 @@ export class WorkflowExecutionDriver implements WorkflowExecutionDriverApi {
   public error: Error | undefined;
 
   /**
-   * Starts the execution driver: execution and persistence loops run while `isExecuting` is true.
+   * Starts the execution cursor: execution and persistence loops run while `isExecuting` is true.
    * Called when the top-level workflow execution loop begins.
    */
   public start(): void {

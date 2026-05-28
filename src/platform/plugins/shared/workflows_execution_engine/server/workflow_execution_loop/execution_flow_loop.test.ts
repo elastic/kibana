@@ -9,7 +9,7 @@
 
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { executionFlowLoop } from './execution_flow_loop';
-import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
+import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 
 jest.mock('./run_node', () => ({
   runNode: jest.fn().mockResolvedValue(undefined),
@@ -23,23 +23,23 @@ describe('executionFlowLoop', () => {
     jest.clearAllMocks();
   });
 
-  it('calls runNode while the execution driver is executing', async () => {
+  it('calls runNode while the execution cursor is executing', async () => {
     let iterations = 0;
-    const workflowExecutionDriver = createMockWorkflowExecutionDriver({
+    const workflowExecutionCursor = createMockWorkflowExecutionCursor({
       currentNode: { id: 'node1' } as GraphNodeUnion,
     });
-    workflowExecutionDriver.commitPendingNavigation.mockImplementation(() => {
+    workflowExecutionCursor.commitPendingNavigation.mockImplementation(() => {
       iterations += 1;
       if (iterations >= 3) {
-        workflowExecutionDriver.setMockCurrentNode(null);
-        workflowExecutionDriver.setMockIsExecuting(false);
+        workflowExecutionCursor.setMockCurrentNode(null);
+        workflowExecutionCursor.setMockIsExecuting(false);
       }
     });
 
     const params = {
-      workflowExecutionDriver,
+      workflowExecutionCursor,
       workflowRuntime: {
-        executionDriver: workflowExecutionDriver,
+        executionCursor: workflowExecutionCursor,
         saveState: jest.fn().mockResolvedValue(undefined),
       },
     } as any;
@@ -47,18 +47,18 @@ describe('executionFlowLoop', () => {
     await executionFlowLoop(params);
 
     expect(runNode).toHaveBeenCalledTimes(3);
-    expect(workflowExecutionDriver.commitPendingNavigation).toHaveBeenCalledTimes(3);
+    expect(workflowExecutionCursor.commitPendingNavigation).toHaveBeenCalledTimes(3);
   });
 
   it('stops the driver when there is no current node after navigation commit', async () => {
-    const workflowExecutionDriver = createMockWorkflowExecutionDriver({
+    const workflowExecutionCursor = createMockWorkflowExecutionCursor({
       currentNode: null,
     });
 
     const params = {
-      workflowExecutionDriver,
+      workflowExecutionCursor,
       workflowRuntime: {
-        executionDriver: workflowExecutionDriver,
+        executionCursor: workflowExecutionCursor,
         saveState: jest.fn().mockResolvedValue(undefined),
       },
     } as any;
@@ -66,19 +66,19 @@ describe('executionFlowLoop', () => {
     await executionFlowLoop(params);
 
     expect(runNode).toHaveBeenCalledTimes(1);
-    expect(workflowExecutionDriver.stop).toHaveBeenCalled();
+    expect(workflowExecutionCursor.stop).toHaveBeenCalled();
   });
 
-  it('does not call runNode when execution driver is not executing', async () => {
-    const workflowExecutionDriver = createMockWorkflowExecutionDriver({
+  it('does not call runNode when execution cursor is not executing', async () => {
+    const workflowExecutionCursor = createMockWorkflowExecutionCursor({
       currentNode: { id: 'node1' } as GraphNodeUnion,
       isExecuting: false,
     });
 
     const params = {
-      workflowExecutionDriver,
+      workflowExecutionCursor,
       workflowRuntime: {
-        executionDriver: workflowExecutionDriver,
+        executionCursor: workflowExecutionCursor,
         saveState: jest.fn().mockResolvedValue(undefined),
       },
     } as any;

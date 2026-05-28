@@ -29,7 +29,7 @@ import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import { StepIoService } from '../workflow_context_manager/step_io_service';
 import type { ContextDependencies } from '../workflow_context_manager/types';
-import { WorkflowExecutionDriver } from '../workflow_context_manager/workflow_execution_driver';
+import { WorkflowExecutionCursor } from '../workflow_context_manager/workflow_execution_cursor';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 
@@ -132,7 +132,7 @@ export async function setupDependencies(
   // Create telemetry client
   const telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, logger);
 
-  const workflowExecutionDriver = new WorkflowExecutionDriver({
+  const workflowExecutionCursor = new WorkflowExecutionCursor({
     workflowExecutionGraph,
     nodeId: workflowExecution.currentNodeId,
     stackFrames: workflowExecution.scopeStack,
@@ -142,7 +142,7 @@ export async function setupDependencies(
   const workflowRuntime = new WorkflowExecutionRuntimeManager({
     workflowExecution: workflowExecution as EsWorkflowExecution,
     workflowExecutionGraph,
-    workflowExecutionDriver,
+    workflowExecutionCursor,
     workflowLogger,
     workflowExecutionState,
     stepIoService,

@@ -9,7 +9,7 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import { workflowExecutionLoop } from './workflow_execution_loop';
-import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
+import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
 jest.mock('elastic-apm-node', () => ({
@@ -30,7 +30,7 @@ jest.mock('./persistence_loop', () => ({
 
 describe('workflowExecutionLoop', () => {
   const createParams = () => ({
-    workflowExecutionDriver: createMockWorkflowExecutionDriver(),
+    workflowExecutionCursor: createMockWorkflowExecutionCursor(),
     workflowRuntime: {
       saveState: jest.fn().mockResolvedValue(undefined),
       setWorkflowError: jest.fn(),
@@ -66,7 +66,7 @@ describe('workflowExecutionLoop', () => {
     expect(executionFlowLoop).toHaveBeenCalledWith(params);
     expect(persistenceLoop).toHaveBeenCalled();
     expect(flushState).toHaveBeenCalled();
-    expect(params.workflowExecutionDriver.start).toHaveBeenCalled();
+    expect(params.workflowExecutionCursor.start).toHaveBeenCalled();
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
     expect(params.stepIoService.flush).toHaveBeenCalled();
     // Workflow-end cleanup for transient rehydrations (deferred-release pattern).
@@ -99,7 +99,7 @@ describe('workflowExecutionLoop', () => {
         status: ExecutionStatus.CANCELLED,
       })
     );
-    expect(params.workflowExecutionDriver.stop).toHaveBeenCalled();
+    expect(params.workflowExecutionCursor.stop).toHaveBeenCalled();
   });
 
   it('marks Task Manager abort as system cancellation and suppresses workflow log errors', async () => {

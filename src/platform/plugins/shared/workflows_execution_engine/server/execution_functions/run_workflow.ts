@@ -136,7 +136,7 @@ export async function runWorkflow({
   try {
     await workflowExecutionLoop({
       workflowRuntime,
-      workflowExecutionDriver: workflowRuntime.executionDriver,
+      workflowExecutionCursor: workflowRuntime.executionCursor,
       stepExecutionRuntimeFactory,
       workflowExecutionState,
       stepIoService,

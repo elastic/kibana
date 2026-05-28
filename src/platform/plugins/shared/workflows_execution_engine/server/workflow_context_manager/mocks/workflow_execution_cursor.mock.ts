@@ -10,12 +10,12 @@
 import type { StackFrame } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import type {
-  WorkflowExecutionDriverApi,
-  WorkflowExecutionDriverInit,
-} from '../workflow_execution_driver';
-import { WorkflowExecutionDriver } from '../workflow_execution_driver';
+  WorkflowExecutionCursorApi,
+  WorkflowExecutionCursorInit,
+} from '../workflow_execution_cursor';
+import { WorkflowExecutionCursor } from '../workflow_execution_cursor';
 
-export interface MockWorkflowExecutionDriverOptions {
+export interface MockWorkflowExecutionCursorOptions {
   currentNode?: GraphNodeUnion | null;
   nextNode?: GraphNodeUnion | null;
   currentStackFrames?: StackFrame[];
@@ -23,30 +23,30 @@ export interface MockWorkflowExecutionDriverOptions {
   isExecuting?: boolean;
 }
 
-export type MockWorkflowExecutionDriver = jest.Mocked<WorkflowExecutionDriverApi> & {
+export type MockWorkflowExecutionCursor = jest.Mocked<WorkflowExecutionCursorApi> & {
   setMockCurrentNode: (node: GraphNodeUnion | null) => void;
   setMockIsExecuting: (executing: boolean) => void;
   setMockError: (error: Error | undefined) => void;
   setMockCurrentStackFrames: (stackFrames: StackFrame[]) => void;
 };
 
-export interface WorkflowExecutionDriverTestApi extends WorkflowExecutionDriverApi {
+export interface WorkflowExecutionCursorTestApi extends WorkflowExecutionCursorApi {
   setCurrentNodeId(nodeId: string | undefined): void;
 }
 
 /**
- * Jest-based {@link WorkflowExecutionDriver} stand-in for execution-loop unit tests.
+ * Jest-based {@link WorkflowExecutionCursor} stand-in for execution-loop unit tests.
  */
-export const createMockWorkflowExecutionDriver = (
-  options: MockWorkflowExecutionDriverOptions = {}
-): MockWorkflowExecutionDriver => {
+export const createMockWorkflowExecutionCursor = (
+  options: MockWorkflowExecutionCursorOptions = {}
+): MockWorkflowExecutionCursor => {
   let isExecuting = options.isExecuting ?? true;
   let error = options.error;
   let currentNode = options.currentNode ?? null;
   const nextNode = options.nextNode ?? null;
   let currentStackFrames = options.currentStackFrames ?? [];
 
-  const driver = {
+  const workflowExecutionCursor = {
     get isExecuting() {
       return isExecuting;
     },
@@ -91,29 +91,29 @@ export const createMockWorkflowExecutionDriver = (
     },
   };
 
-  return driver as MockWorkflowExecutionDriver;
+  return workflowExecutionCursor as MockWorkflowExecutionCursor;
 };
 
 /**
- * Real driver with typed test helpers (graph navigation, scope stack). Prefer
- * {@link createMockWorkflowExecutionDriver} when only the public API surface is needed.
+ * Real cursor with typed test helpers (graph navigation, scope stack). Prefer
+ * {@link createMockWorkflowExecutionCursor} when only the public API surface is needed.
  */
-export class WorkflowExecutionDriverTestHarness
-  extends WorkflowExecutionDriver
-  implements WorkflowExecutionDriverTestApi
+export class WorkflowExecutionCursorTestHarness
+  extends WorkflowExecutionCursor
+  implements WorkflowExecutionCursorTestApi
 {
   public setCurrentNodeId(nodeId: string | undefined): void {
-    const internalDriver = this as unknown as {
+    const internalCursor = this as unknown as {
       currentNodeId: string | undefined;
       nextNodeId: string | undefined;
     };
-    internalDriver.currentNodeId = nodeId;
+    internalCursor.currentNodeId = nodeId;
     if (nodeId === undefined) {
-      internalDriver.nextNodeId = undefined;
+      internalCursor.nextNodeId = undefined;
     }
   }
 }
 
-export const createWorkflowExecutionDriverTestHarness = (
-  init: WorkflowExecutionDriverInit
-): WorkflowExecutionDriverTestHarness => new WorkflowExecutionDriverTestHarness(init);
+export const createWorkflowExecutionCursorTestHarness = (
+  init: WorkflowExecutionCursorInit
+): WorkflowExecutionCursorTestHarness => new WorkflowExecutionCursorTestHarness(init);

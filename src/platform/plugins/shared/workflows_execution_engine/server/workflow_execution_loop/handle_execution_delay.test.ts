@@ -14,7 +14,7 @@ import {
 } from '@kbn/workflows';
 import { handleExecutionDelay } from './handle_execution_delay';
 import type { WorkflowExecutionLoopParams } from './types';
-import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
+import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
   ({
@@ -25,7 +25,7 @@ const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
         scopeStack: [],
       }),
     },
-    workflowExecutionDriver: createMockWorkflowExecutionDriver(),
+    workflowExecutionCursor: createMockWorkflowExecutionCursor(),
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
       getLatestStepExecution: jest.fn().mockReturnValue(undefined),

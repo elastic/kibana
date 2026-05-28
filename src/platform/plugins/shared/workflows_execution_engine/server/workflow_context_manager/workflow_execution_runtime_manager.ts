@@ -23,7 +23,7 @@ import { buildWorkflowContext } from './build_workflow_context';
 import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
-import type { WorkflowExecutionDriver } from './workflow_execution_driver';
+import type { WorkflowExecutionCursor } from './workflow_execution_cursor';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -35,7 +35,7 @@ interface WorkflowExecutionRuntimeManagerInit {
   stepIoService: StepIoService;
   workflowExecution: EsWorkflowExecution;
   workflowExecutionGraph: WorkflowGraph;
-  workflowExecutionDriver: WorkflowExecutionDriver;
+  workflowExecutionCursor: WorkflowExecutionCursor;
   workflowLogger: IWorkflowEventLogger;
   coreStart?: CoreStart;
   dependencies?: ContextDependencies;
@@ -66,7 +66,7 @@ export class WorkflowExecutionRuntimeManager {
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;
-  private readonly workflowExecutionDriver: WorkflowExecutionDriver;
+  private readonly workflowExecutionCursor: WorkflowExecutionCursor;
   private stepIoService: StepIoService;
   private entryTransactionId?: string;
   private workflowTransaction?: agent.Transaction; // APM transaction instance
@@ -78,7 +78,7 @@ export class WorkflowExecutionRuntimeManager {
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
     this.workflowGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
-    this.workflowExecutionDriver = workflowExecutionRuntimeManagerInit.workflowExecutionDriver;
+    this.workflowExecutionCursor = workflowExecutionRuntimeManagerInit.workflowExecutionCursor;
 
     // Use workflow execution ID as traceId for APM compatibility
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
@@ -89,8 +89,8 @@ export class WorkflowExecutionRuntimeManager {
     this.telemetryClient = workflowExecutionRuntimeManagerInit.telemetryClient;
   }
 
-  public get executionDriver(): WorkflowExecutionDriver {
-    return this.workflowExecutionDriver;
+  public get executionCursor(): WorkflowExecutionCursor {
+    return this.workflowExecutionCursor;
   }
 
   public get workflowExecution() {
@@ -120,23 +120,23 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getCurrentNode(): GraphNodeUnion | null {
-    return this.workflowExecutionDriver.currentNode;
+    return this.workflowExecutionCursor.currentNode;
   }
 
   public navigateToNode(nodeId: string): void {
-    this.workflowExecutionDriver.navigateToNode(nodeId);
+    this.workflowExecutionCursor.navigateToNode(nodeId);
   }
 
   public navigateToNextNode(): void {
-    this.workflowExecutionDriver.navigateToNextNode();
+    this.workflowExecutionCursor.navigateToNextNode();
   }
 
   public navigateToAfterNode(nodeId: string): void {
-    this.workflowExecutionDriver.navigateToAfterNode(nodeId);
+    this.workflowExecutionCursor.navigateToAfterNode(nodeId);
   }
 
   public getCurrentNodeScope(): StackFrame[] {
-    return this.executionDriver.currentStackFrames;
+    return this.executionCursor.currentStackFrames;
   }
 
   /**
@@ -157,7 +157,7 @@ export class WorkflowExecutionRuntimeManager {
    * maintaining the integrity of the execution context hierarchy.
    */
   public enterScope(subScopeId?: string): void {
-    this.workflowExecutionDriver.setCurrentScopeId(subScopeId);
+    this.workflowExecutionCursor.setCurrentScopeId(subScopeId);
   }
 
   public setWorkflowOutputs(outputs: Record<string, unknown>): void {
@@ -185,7 +185,7 @@ export class WorkflowExecutionRuntimeManager {
       cancelledAt,
       cancelledBy: 'workflow',
     });
-    this.workflowExecutionDriver.stop();
+    this.workflowExecutionCursor.stop();
   }
 
   /**
@@ -237,7 +237,7 @@ export class WorkflowExecutionRuntimeManager {
 
   public setWorkflowError(error: Error | undefined): void {
     const executionError = error ? ExecutionError.fromError(error) : undefined;
-    this.workflowExecutionDriver.error = executionError;
+    this.workflowExecutionCursor.error = executionError;
   }
 
   public markWorkflowTimeouted(): void {
@@ -381,7 +381,7 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
-      currentNodeId: this.workflowExecutionDriver.currentNode?.id,
+      currentNodeId: this.workflowExecutionCursor.currentNode?.id,
       scopeStack: [],
       status: ExecutionStatus.RUNNING,
       startedAt: new Date().toISOString(),
@@ -399,8 +399,8 @@ export class WorkflowExecutionRuntimeManager {
     }
     await this.stepIoService.load();
     this.stepIoService.evictCompletedLoopsOnResume(this.workflowGraph);
-    this.workflowExecutionDriver.navigateToNode(this.workflowExecution.currentNodeId);
-    this.workflowExecutionDriver.commitPendingNavigation();
+    this.workflowExecutionCursor.navigateToNode(this.workflowExecution.currentNodeId);
+    this.workflowExecutionCursor.commitPendingNavigation();
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
     };
@@ -410,18 +410,18 @@ export class WorkflowExecutionRuntimeManager {
   public async saveState(): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
-      currentNodeId: this.workflowExecutionDriver.currentNode?.id,
-      scopeStack: this.workflowExecutionDriver.currentStackFrames,
+      currentNodeId: this.workflowExecutionCursor.currentNode?.id,
+      scopeStack: this.workflowExecutionCursor.currentStackFrames,
     };
 
     if (isTerminalStatus(workflowExecution.status)) {
       workflowExecutionUpdate.status = workflowExecution.status;
-    } else if (this.workflowExecutionDriver.error) {
+    } else if (this.workflowExecutionCursor.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
       workflowExecutionUpdate.error = ExecutionError.fromError(
-        this.workflowExecutionDriver.error
+        this.workflowExecutionCursor.error
       ).toSerializableObject();
-    } else if (!this.workflowExecutionDriver.currentNode) {
+    } else if (!this.workflowExecutionCursor.currentNode) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
 

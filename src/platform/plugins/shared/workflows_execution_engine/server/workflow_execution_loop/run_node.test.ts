@@ -18,9 +18,9 @@ import * as runStackMonitorModule from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { CancellableNode, NodeImplementation } from '../step/node_implementation';
 import {
-  createMockWorkflowExecutionDriver,
-  type MockWorkflowExecutionDriver,
-} from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
+  createMockWorkflowExecutionCursor,
+  type MockWorkflowExecutionCursor,
+} from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
@@ -37,9 +37,9 @@ const mockRunStackMonitor = runStackMonitorModule.runStackMonitor as jest.Mock;
 
 type RunNodeTestParams = Omit<
   jest.Mocked<WorkflowExecutionLoopParams>,
-  'workflowExecutionDriver'
+  'workflowExecutionCursor'
 > & {
-  workflowExecutionDriver: MockWorkflowExecutionDriver;
+  workflowExecutionCursor: MockWorkflowExecutionCursor;
 };
 
 describe('runNode', () => {
@@ -101,7 +101,7 @@ describe('runNode', () => {
       run: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<NodeImplementation>;
 
-    const workflowExecutionDriver = createMockWorkflowExecutionDriver({
+    const workflowExecutionCursor = createMockWorkflowExecutionCursor({
       currentNode: mockNode,
       currentStackFrames: emptyStackFrames,
       isExecuting: true,
@@ -109,14 +109,14 @@ describe('runNode', () => {
 
     mockParams = {
       workflowRuntime: {
-        executionDriver: workflowExecutionDriver,
+        executionCursor: workflowExecutionCursor,
         enterScope: jest.fn(),
         getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
         getCurrentNodeScope: jest.fn().mockReturnValue(emptyStackFrames),
         setWorkflowError: jest.fn(),
         saveState: jest.fn().mockResolvedValue(undefined),
       },
-      workflowExecutionDriver,
+      workflowExecutionCursor,
       stepExecutionRuntimeFactory: {
         createStepExecutionRuntime: jest.fn().mockReturnValue(mockStepExecutionRuntime),
       },
@@ -332,7 +332,7 @@ describe('runNode', () => {
 
   describe('when there is no current node', () => {
     it('should return early without executing step', async () => {
-      mockParams.workflowExecutionDriver.setMockCurrentNode(null);
+      mockParams.workflowExecutionCursor.setMockCurrentNode(null);
 
       await runNode(mockParams);
 
@@ -340,9 +340,9 @@ describe('runNode', () => {
     });
   });
 
-  describe('when execution driver is stopped', () => {
+  describe('when execution cursor is stopped', () => {
     it('should return early without executing step', async () => {
-      mockParams.workflowExecutionDriver.setMockIsExecuting(false);
+      mockParams.workflowExecutionCursor.setMockIsExecuting(false);
 
       await runNode(mockParams);
 
@@ -357,7 +357,7 @@ describe('runNode', () => {
 
       await runNode(mockParams);
 
-      expect(mockParams.workflowExecutionDriver.error).toBe(error);
+      expect(mockParams.workflowExecutionCursor.error).toBe(error);
       expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledTimes(1);
     });
 
