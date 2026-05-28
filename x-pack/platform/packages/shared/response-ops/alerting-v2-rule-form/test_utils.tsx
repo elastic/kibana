@@ -15,6 +15,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { DELAY_MODE } from './form/types';
 import type { FormValues } from './form/types';
 import { RuleFormProvider, type RuleFormServices, type RuleFormMeta } from './form/contexts';
@@ -45,6 +46,11 @@ export const createMockServices = (): RuleFormServices => ({
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
   lens: lensPluginMock.createStartContract(),
+  workflowForm: {
+    Component: () => null,
+    defaultValue: () => ({}),
+  },
+  uiActions: uiActionsPluginMock.createStartContract(),
 });
 
 /**

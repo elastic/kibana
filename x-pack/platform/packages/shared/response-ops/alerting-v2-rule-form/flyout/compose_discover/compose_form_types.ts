@@ -6,6 +6,7 @@
  */
 
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
+import type { RuleNotificationsValue } from '../../form/types';
 
 // ---------------------------------------------------------------------------
 // RuleQuery — the composed/standalone query schema.
@@ -22,6 +23,8 @@ export interface ComposedQuery {
 
 export interface StandaloneQuery {
   format: 'standalone';
+  /** Corollary of `base` in `ComposedQuery` — the "no data" base query. Maps to `query.no_data` in the API schema. */
+  no_data?: { query: string };
   breach: { query: string };
   recovery?: { query: string };
 }
@@ -44,6 +47,12 @@ export function getRecoverQuery(query: RuleQuery | undefined): string {
 // ---------------------------------------------------------------------------
 // ComposeFormValues — the form shape used by the Compose Discover flyout.
 // ---------------------------------------------------------------------------
+
+export interface ComposeRuleArtifact {
+  id: string;
+  type: string;
+  value: string;
+}
 
 export interface ComposeFormValues {
   kind: RuleKind;
@@ -69,7 +78,10 @@ export interface ComposeFormValues {
   };
   stateTransitionAlertDelayMode: 'immediate' | 'breaches' | 'recoveries' | 'duration';
   stateTransitionRecoveryDelayMode: 'immediate' | 'breaches' | 'recoveries' | 'duration';
-  artifacts?: Array<{ id: string; type: string; value: string }>;
+  notifications?: RuleNotificationsValue;
+  artifacts?: ComposeRuleArtifact[];
+  runbookArtifacts?: ComposeRuleArtifact[];
+  dashboardArtifacts?: ComposeRuleArtifact[];
 }
 
 // Re-export for use by compose mappers

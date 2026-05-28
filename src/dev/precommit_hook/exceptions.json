@@ -23,7 +23,7 @@
     "x-pack/platform/packages/shared/agent-builder": "'agent-builder' should be snake_case",
     "x-pack/platform/packages/shared/ai-assistant": "'ai-assistant' should be snake_case",
     "x-pack/platform/packages/shared/ai-infra": "'ai-infra' should be snake_case",
-    "x-pack/platform/packages/shared/dashboard-agent": "'dashboard-agent' should be snake_case",
+    "x-pack/platform/packages/shared/agent-builder-dashboards": "'agent-builder-dashboards' should be snake_case",
     "x-pack/platform/packages/shared/index-lifecycle-management": "'index-lifecycle-management' should be snake_case",
     "x-pack/platform/packages/shared/index-management": "'index-management' should be snake_case",
     "x-pack/platform/packages/shared/response-ops": "'response-ops' should be snake_case",
@@ -310,7 +310,7 @@
   },
   "@elastic/ml-ui": {
     "x-pack/platform/packages/private/ml/agg_utils": "'agg_utils' should be kebab-case",
-    "x-pack/platform/packages/private/ml/aiops_change_point_detection": "'aiops_change_point_detection' should be kebab-case",
+    "x-pack/platform/packages/shared/ml/aiops_change_point_detection": "'aiops_change_point_detection' should be kebab-case",
     "x-pack/platform/packages/private/ml/aiops_components": "'aiops_components' should be kebab-case",
     "x-pack/platform/packages/private/ml/aiops_test_utils": "'aiops_test_utils' should be kebab-case",
     "x-pack/platform/packages/private/ml/cancellable_search": "'cancellable_search' should be kebab-case",

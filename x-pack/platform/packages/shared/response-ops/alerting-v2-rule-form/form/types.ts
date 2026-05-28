@@ -53,6 +53,17 @@ export interface RuleArtifact {
   value: string;
 }
 
+export interface WorkflowFormComponentProps<TWorkflow extends object = object> {
+  value: TWorkflow;
+  onChange: (next: TWorkflow) => void;
+  isInvalid?: boolean;
+  errorMessage?: string;
+}
+
+export interface RuleNotificationsValue<TWorkflow extends object = object> {
+  workflow: TWorkflow;
+}
+
 /**
  * State transition configuration for alert-type rules.
  */
@@ -79,4 +90,7 @@ export interface FormValues {
   stateTransitionAlertDelayMode: StateTransitionDelayMode;
   stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
+  notifications?: RuleNotificationsValue;
+  runbookArtifacts?: RuleArtifact[];
+  dashboardArtifacts?: RuleArtifact[];
 }

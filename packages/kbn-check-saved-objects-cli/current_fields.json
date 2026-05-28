@@ -695,7 +695,9 @@
     "verification_started_at",
     "verification_status"
   ],
-  "fleet-cloud-onboarding-deployment": [],
+  "fleet-cloud-onboarding-deployment": [
+    "connectorId"
+  ],
   "fleet-fleet-server-host": [
     "host_urls",
     "is_default",
@@ -1066,6 +1068,7 @@
     "created_by_profile_uid",
     "description",
     "enabled",
+    "interval",
     "name",
     "queries",
     "queries.ecs_mapping",
@@ -1075,6 +1078,8 @@
     "queries.query",
     "queries.timeout",
     "queries.version",
+    "rrule_schedule",
+    "schedule_type",
     "shards",
     "updated_at",
     "updated_by",

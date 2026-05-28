@@ -2336,6 +2336,15 @@
       }
     }
   },
+  "fleet-cloud-onboarding-deployment": {
+    "dynamic": false,
+    "properties": {
+      "connectorId": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      }
+    }
+  },
   "fleet-fleet-server-host": {
     "dynamic": false,
     "properties": {
@@ -3551,6 +3560,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "interval": {
+        "type": "integer"
+      },
       "name": {
         "type": "text"
       },
@@ -3580,6 +3592,14 @@
             "type": "keyword"
           }
         }
+      },
+      "rrule_schedule": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "schedule_type": {
+        "ignore_above": 1024,
+        "type": "keyword"
       },
       "shards": {
         "dynamic": false,
@@ -4828,6 +4848,10 @@
     "properties": {}
   },
   "synthetics-privates-locations": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "synthetics-settings-multi-space": {
     "dynamic": false,
     "properties": {}
   },

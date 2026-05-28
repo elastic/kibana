@@ -6,42 +6,12 @@
  */
 
 import type { RuleResponse, CreateRuleData, UpdateRuleData, Query } from '@kbn/alerting-v2-schemas';
-import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import {
+  mapArtifacts,
+  mergeArtifactsByType,
+  splitArtifactsByType,
+} from '../../form/utils/artifact_mappers';
 import type { ComposeFormValues } from './compose_form_types';
-
-// ---------------------------------------------------------------------------
-// ComposeFormValues → API request
-// ---------------------------------------------------------------------------
-
-type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
-
-const createRunbookArtifactId = () =>
-  `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-
-const mapArtifacts = (
-  artifacts: ComposeFormValues['artifacts']
-): RuleArtifactPayload | undefined => {
-  const currentArtifacts = artifacts ?? [];
-  const runbookArtifact = currentArtifacts.find(
-    (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
-  );
-  const runbookValue = runbookArtifact?.value.trim();
-
-  if (runbookArtifact && !runbookValue) {
-    const filtered = currentArtifacts.filter((a) => a.type !== RUNBOOK_ARTIFACT_TYPE);
-    return filtered.length ? filtered : undefined;
-  }
-  if (runbookArtifact && runbookValue) {
-    const runbookId = runbookArtifact.id.trim() ? runbookArtifact.id : createRunbookArtifactId();
-    if (runbookArtifact.value === runbookValue && runbookArtifact.id === runbookId) {
-      return currentArtifacts.length ? currentArtifacts : undefined;
-    }
-    return currentArtifacts.map((a) =>
-      a.type === RUNBOOK_ARTIFACT_TYPE ? { ...a, id: runbookId, value: runbookValue } : a
-    );
-  }
-  return currentArtifacts.length ? currentArtifacts : undefined;
-};
 
 const DELAY_IMMEDIATE = 'immediate';
 const DELAY_BREACHES = 'breaches';
@@ -103,8 +73,11 @@ const composeQueryToApiQuery = (q: ComposeFormValues['query']): Query => {
   };
 };
 
-export const composeFormToCreateRequest = (formValues: ComposeFormValues): CreateRuleData => {
-  const artifacts = mapArtifacts(formValues.artifacts);
+export const composeFormToCreateRequest = (
+  formValues: ComposeFormValues,
+  builderType?: string
+): CreateRuleData => {
+  const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
 
   return {
     kind: formValues.kind,
@@ -113,6 +86,7 @@ export const composeFormToCreateRequest = (formValues: ComposeFormValues): Creat
       description: formValues.metadata.description,
       owner: formValues.metadata.owner,
       ...(formValues.metadata.tags?.length ? { tags: formValues.metadata.tags } : {}),
+      ...(builderType ? { builder_type: builderType } : {}),
     },
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
@@ -125,11 +99,18 @@ export const composeFormToCreateRequest = (formValues: ComposeFormValues): Creat
   };
 };
 
-export const composeFormToUpdateRequest = (formValues: ComposeFormValues): UpdateRuleData => {
-  const { kind, ...request } = composeFormToCreateRequest(formValues);
-  const { grouping, state_transition, artifacts, ...rest } = request;
+export const composeFormToUpdateRequest = (
+  formValues: ComposeFormValues,
+  builderType?: string
+): UpdateRuleData => {
+  const { kind, ...request } = composeFormToCreateRequest(formValues, builderType);
+  const { grouping, state_transition, artifacts, metadata, ...rest } = request;
   return {
     ...rest,
+    metadata: {
+      ...metadata,
+      builder_type: metadata.builder_type ?? null,
+    },
     grouping: grouping ?? null,
     state_transition: state_transition ?? null,
     artifacts: artifacts ?? null,
@@ -208,6 +189,6 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValue
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayMode(stateTransition),
     stateTransitionRecoveryDelayMode: deriveRecoveryDelayMode(stateTransition),
-    ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
+    ...splitArtifactsByType(rule.artifacts),
   };
 };
