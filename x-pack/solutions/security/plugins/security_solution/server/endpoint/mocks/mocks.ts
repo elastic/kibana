@@ -171,6 +171,7 @@ export const createMockEndpointAppContextService = (
     getServerConfigValue: jest.fn(),
     getScriptsLibraryClient: jest.fn().mockReturnValue(scriptsClient),
     getAgentBuilder: jest.fn(),
+    getScopedEndpointArtifactClient: jest.fn(),
     isEndpointExceptionsPerPolicyEnabled: jest.fn().mockResolvedValue(true),
   } as Omit<
     jest.Mocked<EndpointAppContextService>,
@@ -288,6 +289,7 @@ export const createMockEndpointAppContextServiceStartContract =
       telemetryConfigProvider: createTelemetryConfigProviderMock(),
       spacesService,
       agentBuilder: agentBuilderMocks.createStart(),
+      getExceptionListClient: jest.fn().mockReturnValue(listMock.getExceptionListClient()),
     };
 
     return startContract;

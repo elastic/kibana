@@ -18,6 +18,9 @@ project:
   sourceRoot: src/platform/plugins/shared/workflows_management
 dependsOn:
   - '@kbn/core'
+  - '@kbn/esql-language'
+  - '@kbn/esql-types'
+  - '@kbn/esql-utils'
   - '@kbn/kibana-react-plugin'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
@@ -102,10 +105,12 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/std'
   - '@kbn/core-saved-objects-common'
-  - '@kbn/datemath'
-  - '@kbn/inbox-common'
-  - '@kbn/core-saved-objects-common'
+  - '@kbn/esql-types'
+  - '@kbn/esql-language'
+  - '@kbn/esql-utils'
   - '@kbn/inbox-plugin'
+  - '@kbn/inbox-common'
+  - '@kbn/datemath'
 tags:
   - plugin
   - prod

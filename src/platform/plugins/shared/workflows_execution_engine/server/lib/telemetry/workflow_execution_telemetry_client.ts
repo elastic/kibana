@@ -17,6 +17,7 @@ import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
   isWellKnownWorkflowTriggerSource,
+  toManagedWorkflowTelemetryFields,
 } from '@kbn/workflows';
 import {
   workflowExecutionEventNames,
@@ -167,6 +168,7 @@ function buildBaseExecutionTelemetryFields(
   const { triggerType, eventTriggerId } = resolveExecutionTriggerTelemetry(
     workflowExecution.triggeredBy
   );
+  const managedWorkflowFields = toManagedWorkflowTelemetryFields(workflowExecution);
   return {
     workflowExecutionId: workflowExecution.id,
     workflowId: workflowExecution.workflowId,
@@ -174,16 +176,7 @@ function buildBaseExecutionTelemetryFields(
     triggerType,
     ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
     isTestRun: workflowExecution.isTestRun || false,
-    isManaged: workflowExecution.managed === true,
-    ...(typeof workflowExecution.managedBy === 'string' && {
-      managedBy: workflowExecution.managedBy,
-    }),
-    ...(typeof workflowExecution.originManagedWorkflowId === 'string' && {
-      originManagedWorkflowId: workflowExecution.originManagedWorkflowId,
-    }),
-    ...(typeof workflowExecution.managedVersion === 'number' && {
-      managedVersion: workflowExecution.managedVersion,
-    }),
+    ...managedWorkflowFields,
     ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
     ...(executionMetadata.compositionDepth !== undefined && {
       compositionDepth: executionMetadata.compositionDepth,
@@ -404,6 +397,7 @@ export class WorkflowExecutionTelemetryClient {
     const { triggerType, eventTriggerId } = resolveExecutionTriggerTelemetry(
       workflowExecution.triggeredBy
     );
+    const managedWorkflowFields = toManagedWorkflowTelemetryFields(workflowExecution);
 
     const eventData: EventDrivenExecutionSuppressedParams = {
       eventName:
@@ -416,16 +410,7 @@ export class WorkflowExecutionTelemetryClient {
       triggerType,
       ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
       isTestRun: workflowExecution.isTestRun || false,
-      isManaged: workflowExecution.managed === true,
-      ...(typeof workflowExecution.managedBy === 'string' && {
-        managedBy: workflowExecution.managedBy,
-      }),
-      ...(typeof workflowExecution.originManagedWorkflowId === 'string' && {
-        originManagedWorkflowId: workflowExecution.originManagedWorkflowId,
-      }),
-      ...(typeof workflowExecution.managedVersion === 'number' && {
-        managedVersion: workflowExecution.managedVersion,
-      }),
+      ...managedWorkflowFields,
       ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
       ...(executionMetadata.eventChainDepth !== undefined && {
         eventChainDepth: executionMetadata.eventChainDepth,
