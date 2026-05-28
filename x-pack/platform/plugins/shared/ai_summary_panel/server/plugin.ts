@@ -17,6 +17,7 @@ import { aiSummaryPanelEmbeddableSchema } from './embeddable/schemas';
 import { registerGenerateRoute } from './routes/generate_route';
 import { registerDefaultConnectorRoute } from './routes/default_connector_route';
 import { registerPreviewEsqlRoute } from './routes/preview_esql_route';
+import { registerEsqlDataRoute } from './routes/esql_data_route';
 import { CACHE_SO_TYPE, CACHE_INDEX, cleanupExpired } from './cache/html_cache';
 
 const CLEANUP_TASK_TYPE = 'ai_panel:cache_cleanup';
@@ -71,6 +72,7 @@ export class AiSummaryPanelPlugin implements Plugin<void, void, SetupDeps, Start
     registerGenerateRoute(router, core.getStartServices);
     registerDefaultConnectorRoute(router, core.getStartServices);
     registerPreviewEsqlRoute(router);
+    registerEsqlDataRoute(router);
   }
 
   start(core: CoreStart, { taskManager }: StartDeps) {

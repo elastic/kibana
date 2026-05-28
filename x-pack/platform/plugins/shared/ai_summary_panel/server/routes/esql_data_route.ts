@@ -9,10 +9,12 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { runEsqlQuery } from '../utils/esql_query';
 
-export function registerPreviewEsqlRoute(router: IRouter) {
+const MAX_ROWS = 1_000;
+
+export function registerEsqlDataRoute(router: IRouter) {
   router.post(
     {
-      path: '/internal/ai_summary_panel/preview_esql',
+      path: '/internal/ai_summary_panel/esql_data',
       security: {
         authz: { enabled: false, reason: 'Scoped to current user via esClient' },
       },
@@ -29,7 +31,7 @@ export function registerPreviewEsqlRoute(router: IRouter) {
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       try {
         const { columns, rows } = await runEsqlQuery(esClient, esqlQuery, timeRange);
-        return response.ok({ body: { columns, rows: rows.slice(0, 10) } });
+        return response.ok({ body: { columns, rows: rows.slice(0, MAX_ROWS) } });
       } catch (err) {
         return response.badRequest({ body: err instanceof Error ? err.message : String(err) });
       }

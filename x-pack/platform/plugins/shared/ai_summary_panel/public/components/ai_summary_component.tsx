@@ -19,6 +19,13 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef, useState } from 'react';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
+import {
+  isTemplate,
+  fillTemplate,
+  readSessionTemplate,
+  writeSessionTemplate,
+} from '../utils/template_fill';
+import type { TemplateColumn } from '../utils/template_fill';
 
 interface AiSummaryComponentProps {
   embeddableId: string;
@@ -30,6 +37,11 @@ interface AiSummaryComponentProps {
   generationVersion: number;
 }
 
+interface EsqlDataResult {
+  columns: TemplateColumn[];
+  rows: unknown[][];
+}
+
 const L1_TTL_MS = 30 * 60 * 1000;
 
 interface L1Entry {
@@ -38,15 +50,22 @@ interface L1Entry {
 }
 
 function l1Hash(str: string): string {
-  let h = 0;
+  let h = 5381;
   for (let i = 0; i < str.length; i++) {
-    h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+    h = (h * 33 + str.charCodeAt(i)) % 2147483647;
   }
-  return (h >>> 0).toString(36);
+  return h.toString(36);
 }
 
-function l1Key(embeddableId: string, prompt: string, esqlQuery: string | undefined, timeRange: { from: string; to: string } | undefined): string {
-  return `ai_panel:${l1Hash(embeddableId + prompt + (esqlQuery ?? '') + (timeRange?.from ?? '') + (timeRange?.to ?? ''))}`;
+function l1Key(
+  embeddableId: string,
+  prompt: string,
+  esqlQuery: string | undefined,
+  timeRange: { from: string; to: string } | undefined
+): string {
+  return `ai_panel:${l1Hash(
+    embeddableId + prompt + (esqlQuery ?? '') + (timeRange?.from ?? '') + (timeRange?.to ?? '')
+  )}`;
 }
 
 function readL1(key: string): string | null {
@@ -100,8 +119,6 @@ export const AiSummaryComponent = ({
   const accRef = useRef('');
   const htmlRef = useRef('');
   htmlRef.current = html;
-  // Tracks whether this is the very first render — L1 cache only applies on initial mount,
-  // not when time range / prompt changes mid-session (user expects fresh data then).
   const mountedRef = useRef(false);
 
   useEffect(() => {
@@ -128,10 +145,44 @@ export const AiSummaryComponent = ({
     setIsLoading(true);
     setError(undefined);
 
-    let failed = false;
-    let failedMessage = '';
-    let intervalRef: ReturnType<typeof setInterval> | undefined;
+    const http = getServices().http;
 
+    // Fast path: a template is cached in sessionStorage from an earlier generation this session.
+    // Only run the ES|QL query — no LLM call needed.
+    const sessionTemplate = esqlQuery ? readSessionTemplate(prompt, esqlQuery) : null;
+
+    if (sessionTemplate && esqlQuery) {
+      http
+        .post<EsqlDataResult>('/internal/ai_summary_panel/esql_data', {
+          body: JSON.stringify({ esqlQuery, timeRange }),
+          signal: controller.signal,
+        })
+        .then(({ columns, rows }) => {
+          if (controller.signal.aborted) return;
+          const filled = fillTemplate(sessionTemplate, columns, rows);
+          setHtml(filled);
+          writeL1(key, filled);
+          setIsLoading(false);
+        })
+        .catch((err: Error) => {
+          if (controller.signal.aborted || err.name === 'AbortError') return;
+          setError(err.message || 'Failed to fetch data');
+          setIsLoading(false);
+        });
+
+      return () => controller.abort();
+    }
+
+    // Slow path: LLM generates the template. For esqlQuery panels, data is fetched in parallel
+    // so both finish as close together as possible. For static panels (no esqlQuery), only the
+    // LLM runs and partial HTML is streamed live into the iframe.
+    let esqlData: EsqlDataResult | null = null;
+    let staleTemplate: string | null = null;
+    let templateDone = false;
+    let dataDone = !esqlQuery;
+    let hasFailed = false;
+
+    let intervalRef: ReturnType<typeof setInterval> | undefined;
     const stopInterval = () => {
       if (intervalRef) {
         clearInterval(intervalRef);
@@ -139,46 +190,94 @@ export const AiSummaryComponent = ({
       }
     };
 
-    // Stream partial updates only on first load (no existing html) and not stale-while-revalidate.
-    // On regeneration / SWR the old html stays visible while the progress bar runs at the top.
+    // For static panels, stream partial HTML into the iframe every 300ms as it builds up.
+    // Skip for template panels — partial template HTML with {{placeholders}} looks broken.
     const hasExistingHtml = Boolean(htmlRef.current);
-    if (!hasExistingHtml) {
+    if (!hasExistingHtml && !esqlQuery) {
       intervalRef = setInterval(() => {
         if (accRef.current) setHtml(accRef.current);
       }, 300);
     }
 
+    const tryFinish = () => {
+      if (!templateDone || !dataDone || hasFailed || controller.signal.aborted) return;
+      stopInterval();
+
+      let rendered: string;
+      if (esqlQuery && esqlData) {
+        rendered = fillTemplate(accRef.current, esqlData.columns, esqlData.rows);
+        writeSessionTemplate(prompt, esqlQuery, accRef.current);
+      } else if (!esqlQuery) {
+        rendered = accRef.current; // static panel: full HTML already has CSP from route
+      } else {
+        return; // esqlQuery present but data fetch failed — error already set
+      }
+
+      setHtml(rendered);
+      writeL1(key, rendered);
+      setIsLoading(false);
+    };
+
+    // Fetch ES|QL data in parallel with the LLM call (template panels only)
+    if (esqlQuery) {
+      http
+        .post<EsqlDataResult>('/internal/ai_summary_panel/esql_data', {
+          body: JSON.stringify({ esqlQuery, timeRange }),
+          signal: controller.signal,
+        })
+        .then((data) => {
+          if (controller.signal.aborted) return;
+          esqlData = data;
+          dataDone = true;
+          // SWR: if a stale template arrived before data did, fill and show it immediately
+          // while the fresh LLM template finishes in the background.
+          if (staleTemplate && !templateDone) {
+            setHtml(fillTemplate(staleTemplate, data.columns, data.rows));
+          }
+          tryFinish();
+        })
+        .catch((err: Error) => {
+          if (controller.signal.aborted || err.name === 'AbortError') return;
+          hasFailed = true;
+          setError(err.message || 'Failed to fetch data');
+          setIsLoading(false);
+        });
+    }
+
     streamGenerate(
-      getServices().http,
+      http,
       { prompt, esqlQuery, timeRange },
       (token) => {
         accRef.current += token;
       },
       controller.signal,
       (staleHtml) => {
-        stopInterval();
-        setHtml(staleHtml);
+        if (esqlQuery && isTemplate(staleHtml)) {
+          // SWR for template panels: store the stale template and fill immediately if data
+          // has already arrived, otherwise it will be used when the data fetch completes.
+          staleTemplate = staleHtml;
+          if (esqlData) {
+            setHtml(fillTemplate(staleHtml, esqlData.columns, esqlData.rows));
+          }
+        } else if (!esqlQuery && !isTemplate(staleHtml)) {
+          // Static panel: show stale full HTML while LLM regenerates
+          stopInterval();
+          setHtml(staleHtml);
+        }
       }
     )
-      .catch((err) => {
+      .catch((err: Error) => {
         if (err.name !== 'AbortError') {
-          failed = true;
-          failedMessage = err instanceof Error ? err.message : String(err);
+          hasFailed = true;
+          stopInterval();
+          setError(err instanceof Error ? err.message : String(err));
+          setIsLoading(false);
         }
       })
       .finally(() => {
-        stopInterval();
-        if (controller.signal.aborted) return;
-        setIsLoading(false);
-        if (failed) {
-          setError(failedMessage || 'Failed to generate panel content');
-        } else {
-          const finalHtml = accRef.current;
-          if (finalHtml) {
-            setHtml(finalHtml);
-            writeL1(key, finalHtml);
-          }
-        }
+        if (hasFailed || controller.signal.aborted) return;
+        templateDone = true;
+        tryFinish();
       });
 
     return () => {
