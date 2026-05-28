@@ -41,7 +41,7 @@ Five concepts, each named for its call-site role:
 | `State`   | discriminated union, one variant per state | `state.ts`, `steps/*.ts` | The migration's current control point plus the data it carries.            |
 | `IO`      | interface of async functions      | `io.ts`                 | The side-effecting operations the machine can perform (ES calls).          |
 | `Step`    | `{ action, transition }`          | `types.ts`, `steps/*.ts` | A recipe: which IO call to run, and how to interpret the response.         |
-| `next`    | `(state, io) => Promise<State>`   | `next.ts`               | Dispatches on `state.name`, builds the step, runs it.                      |
+| `next`    | `(state, io) => Promise<State>`   | `next.ts`               | Dispatches on `state.name` and runs the step. The switch + `assertNever` is the single point of compile-time enforcement that every non-terminal state has a wired-up step factory. |
 | `runStep` | `(step) => Promise<State>`        | `types.ts`              | Awaits `action()`, feeds the response to `transition()`.                   |
 
 The loop, in pseudocode:
