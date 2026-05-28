@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-// EMH Phase 2: file does not exist yet. Implementer generates it from a
-// `relationship_observations.schema.yaml` via `yarn openapi:generate`.
 import { ListEntityRelationshipsRequestQuery } from './list_entity_relationships.gen';
+import { RELATIONSHIP_KINDS } from './relationship_observation';
 
 describe('EMH Phase 2 — ListEntityRelationshipsRequestQuery (request-side Zod)', () => {
   describe('happy path — accepts every supported parameter', () => {
@@ -84,6 +83,38 @@ describe('EMH Phase 2 — ListEntityRelationshipsRequestQuery (request-side Zod)
     it('rejects a per_page value below 1', () => {
       const result = ListEntityRelationshipsRequestQuery.safeParse({ per_page: '0' });
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('TS RELATIONSHIP_KINDS ↔ YAML kind enum drift guard', () => {
+    // The Zod `kind` field is generated from the YAML enum. Reach into the
+    // generated schema and read the enum's values so that any drift between
+    // the TS const and the YAML source surfaces here.
+    const kindField = ListEntityRelationshipsRequestQuery.shape.kind;
+    // `kind` is `z.enum([...]).optional()`. ZodOptional → unwrap() → ZodEnum.
+    const kindEnumOptions = (
+      kindField as unknown as { unwrap: () => { options: readonly string[] } }
+    ).unwrap().options;
+
+    it('the YAML-sourced kind enum equals RELATIONSHIP_KINDS (same values, same order)', () => {
+      expect(kindEnumOptions).toEqual([...RELATIONSHIP_KINDS]);
+    });
+
+    it('the YAML-sourced kind enum has the same length as RELATIONSHIP_KINDS', () => {
+      expect(kindEnumOptions).toHaveLength(RELATIONSHIP_KINDS.length);
+    });
+
+    it.each([...RELATIONSHIP_KINDS])(
+      'YAML-sourced kind enum contains TS RELATIONSHIP_KINDS member %s',
+      (kind) => {
+        expect(kindEnumOptions).toContain(kind);
+      }
+    );
+
+    it('TS RELATIONSHIP_KINDS contains every YAML-sourced kind enum member', () => {
+      for (const kind of kindEnumOptions) {
+        expect((RELATIONSHIP_KINDS as readonly string[]).includes(kind)).toBe(true);
+      }
     });
   });
 });
