@@ -10,7 +10,10 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import {
+  WORKFLOWS_UI_SETTING_ID,
+  WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+} from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../common';
 
@@ -48,6 +51,19 @@ export const registerUISettings = (
       readonly: false,
       requiresPageReload: true,
       category: ['general'],
+    },
+    [WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID]: {
+      name: i18n.translate('workflowsManagement.uiSettings.visualEditor.name', {
+        defaultMessage: 'Workflow graph editor',
+      }),
+      description: i18n.translate('workflowsManagement.uiSettings.visualEditor.description', {
+        defaultMessage:
+          'Enables the read-only workflow graph editor. Configure via `uiSettings.overrides` in kibana.yml only.',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      readonly: true,
+      requiresPageReload: true,
     },
   });
 };
