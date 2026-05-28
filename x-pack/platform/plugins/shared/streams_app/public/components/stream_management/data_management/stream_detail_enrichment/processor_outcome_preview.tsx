@@ -49,8 +49,9 @@ import { selectDraftProcessor } from './state_management/interactive_mode_machin
 import type { PreviewDocsFilterOption } from './state_management/simulation_state_machine';
 import {
   getAllFieldsInOrder,
+  getDestinationField,
   getOriginalSampleDocument,
-  getSourceField,
+  getSourceFields,
   getTableColumns,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
@@ -310,11 +311,16 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     selectHasSimulatedRecords(snapshot.context)
   );
 
-  const { currentProcessorSourceField, currentStepId, stepIds } = useStreamEnrichmentSelector(
-    (state) => {
+  const { currentProcessorSourceFields, currentProcessorDestinationField, currentStepId, stepIds } =
+    useStreamEnrichmentSelector((state) => {
       const isInteractiveMode = selectIsInteractiveMode(state);
       if (!isInteractiveMode || !state.context.interactiveModeRef) {
-        return { currentProcessorSourceField: undefined, currentStepId: undefined, stepIds: [] };
+        return {
+          currentProcessorSourceFields: [] as string[],
+          currentProcessorDestinationField: undefined,
+          currentStepId: undefined,
+          stepIds: [],
+        };
       }
 
       const stepRefs = state.context.interactiveModeRef.getSnapshot().context.stepRefs;
@@ -326,7 +332,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
         if (isActionBlock(step) && isStepUnderEdit(snapshot)) {
           return {
-            currentProcessorSourceField: getSourceField(step),
+            currentProcessorSourceFields: getSourceFields(step),
+            currentProcessorDestinationField: getDestinationField(step),
             currentStepId: stepRef.id,
             stepIds: allStepIds,
           };
@@ -334,12 +341,12 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       }
 
       return {
-        currentProcessorSourceField: undefined,
+        currentProcessorSourceFields: [] as string[],
+        currentProcessorDestinationField: undefined,
         currentStepId: undefined,
         stepIds: allStepIds,
       };
-    }
-  );
+    });
 
   const processorsMetrics = useSimulatorSelector(
     (snapshot) => snapshot.context.simulation?.processors_metrics
@@ -432,20 +439,30 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const validGrokField = grokMode ? validGrokSourceField : undefined;
 
-  const validCurrentProcessorSourceField =
-    currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
-      ? currentProcessorSourceField
+  const validCurrentProcessorSourceFields = useMemo(
+    () => currentProcessorSourceFields.filter((f) => allColumns.includes(f)),
+    [currentProcessorSourceFields, allColumns]
+  );
+
+  const validCurrentProcessorDestinationField =
+    currentProcessorDestinationField && allColumns.includes(currentProcessorDestinationField)
+      ? currentProcessorDestinationField
       : undefined;
 
   // Calculate if view mode should be forced to 'columns'
-  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
+  const isViewModeForced = Boolean(
+    validGrokField ||
+      validCurrentProcessorSourceFields.length > 0 ||
+      validCurrentProcessorDestinationField
+  );
 
   // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
   const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode ?? 'summary';
 
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({
-      currentProcessorSourceField: validCurrentProcessorSourceField,
+      currentProcessorSourceFields: validCurrentProcessorSourceFields,
+      currentProcessorDestinationField: validCurrentProcessorDestinationField,
       detectedFields,
       previewDocsFilter,
     });
@@ -470,7 +487,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     explicitlyDisabledPreviewColumns,
     explicitlyEnabledPreviewColumns,
     previewDocsFilter,
-    validCurrentProcessorSourceField,
+    validCurrentProcessorSourceFields,
+    validCurrentProcessorDestinationField,
   ]);
 
   /**
