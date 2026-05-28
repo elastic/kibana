@@ -6851,10 +6851,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eui-provider-dev-warning@link:src/platform/test/plugin_functional/plugins/eui_provider_dev_warning":
-  version "0.0.0"
-  uid ""
-
 "@kbn/eval-kql@link:src/platform/packages/shared/kbn-eval-kql":
   version "0.0.0"
   uid ""
