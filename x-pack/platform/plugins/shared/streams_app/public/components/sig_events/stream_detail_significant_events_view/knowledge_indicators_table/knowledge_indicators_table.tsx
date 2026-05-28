@@ -9,12 +9,13 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   type CriteriaWithPagination,
   EuiBadge,
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiInMemoryTable,
+  EuiLink,
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
@@ -152,9 +153,7 @@ export function KnowledgeIndicatorsTable({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButtonEmpty flush="left" onClick={() => onViewDetails(knowledgeIndicator)}>
-                  {title}
-                </EuiButtonEmpty>
+                <EuiLink onClick={() => onViewDetails(knowledgeIndicator)}>{title}</EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
           );

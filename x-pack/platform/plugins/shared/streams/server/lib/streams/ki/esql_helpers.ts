@@ -20,9 +20,7 @@ export const combineWhere = (
   const defined = conditions.filter((c): c is LatestSourceWhereCondition => c !== undefined);
   if (defined.length === 0) return undefined;
   if (defined.length === 1) return defined[0];
-  const text = defined
-    .map((c) => `(${BasicPrettyPrinter.expression(c)})`)
-    .join(' AND ');
+  const text = defined.map((c) => `(${BasicPrettyPrinter.expression(c)})`).join(' AND ');
   return esql.exp([text] as unknown as TemplateStringsArray);
 };
 
@@ -35,11 +33,8 @@ export const inPredicate = <T extends string>(
   return esql.exp`${esql.col(column)} IN (${literals})`;
 };
 
-export const IS_NOT_DELETED: LatestSourceWhereCondition =
-  esql.exp`deleted IS NULL OR deleted == false`;
+export const IS_NOT_DELETED: LatestSourceWhereCondition = esql.exp`deleted IS NULL OR deleted == false`;
 
-export const IS_NOT_EXCLUDED: LatestSourceWhereCondition =
-  esql.exp`excluded IS NULL OR excluded == false`;
+export const IS_NOT_EXCLUDED: LatestSourceWhereCondition = esql.exp`excluded IS NULL OR excluded == false`;
 
-export const IS_NOT_EXPIRED: LatestSourceWhereCondition =
-  esql.exp`expires_at IS NULL OR expires_at >= NOW()`;
+export const IS_NOT_EXPIRED: LatestSourceWhereCondition = esql.exp`expires_at IS NULL OR expires_at >= NOW()`;
