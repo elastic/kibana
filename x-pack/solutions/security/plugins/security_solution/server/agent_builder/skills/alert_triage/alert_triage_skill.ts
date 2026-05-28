@@ -9,7 +9,6 @@ import { ToolType } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { z } from '@kbn/zod/v4';
-import { SECURITY_ALERTS_TOOL_ID, SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../../tools';
 import { prioritizeAlerts } from './services/alert_triage_service';
 
 export const alertTriageSkill = defineSkillType({
@@ -49,14 +48,7 @@ For each group returned, explain:
 - Whether any alerts are acknowledged or already in a case (with score penalty noted)
 - The top alert rule names in the group
 
-### 3. Optionally Enrich Top Entities
-- For the top 1–2 entity groups, optionally call \`security.entity_risk_score\` to surface
-  the entity's current risk level — a critical-risk host with medium alerts outweighs a
-  low-risk host with high alerts
-- Use \`security.alerts\` for supplemental queries if the user wants to filter by a specific
-  rule name, IP, or other criteria not in the default triage window
-
-### 4. Communicate Scope
+### 3. Communicate Scope
 - Always be explicit that this is a starting point, not an investigation
 - For each top group, recommend: "Investigate further with alert-analysis"
 - Do not enumerate every alert in the response — summarize groups and highlight the top 2–3
@@ -64,15 +56,24 @@ For each group returned, explain:
 ## Examples
 
 **Query**: "What should I focus on right now?"
-- Tool: \`security.alert-triage.prioritize-alerts\`
+- Tool: \`security.alert-triage.prioritize-alerts\` (only)
 - Params: \`{ timeWindowHours: 24, workflowStatus: "open" }\`
 
 **Query**: "Prioritize alerts from the last 8 hours"
-- Tool: \`security.alert-triage.prioritize-alerts\`
+- Tool: \`security.alert-triage.prioritize-alerts\` (only)
 - Params: \`{ timeWindowHours: 8, workflowStatus: "open" }\`
 
+**Query**: "Which alerts from the last 8 hours are most urgent? Give me a prioritized view."
+- Tool: \`security.alert-triage.prioritize-alerts\` (only)
+- Params: \`{ timeWindowHours: 8, workflowStatus: "open" }\`
+
+**Query**: "Prioritize the alert queue for the last 24 hours and list the top alert IDs I should investigate."
+- Tool: \`security.alert-triage.prioritize-alerts\` (only)
+- Params: \`{ timeWindowHours: 24, workflowStatus: "open" }\`
+- Note: The tool already returns alert _ids in its output — do NOT call \`security.alerts\` to look them up separately
+
 **Query**: "Which of these alerts should I look at first?" (with alert attachment)
-- Tool: \`security.alert-triage.prioritize-alerts\`
+- Tool: \`security.alert-triage.prioritize-alerts\` (only)
 - Params: \`{ alertIds: ["<id1>", "<id2>", ...], timeWindowHours: 24 }\`
 
 ## Guardrails
@@ -83,25 +84,26 @@ For each group returned, explain:
 - Building-block alerts are excluded automatically (they are sub-components of parent alerts)
 - This skill does NOT require alerts to form a multi-rule chain — any actionable alert qualifies
 - If the tool returns 0 alerts, tell the user no open alerts match the criteria and suggest widening the window
+- **ALWAYS call ONLY \`security.alert-triage.prioritize-alerts\`** — never call \`security.alerts\`, \`security.entity_risk_score\`, or any other tool. The prioritize-alerts tool handles all time-window filtering, severity filtering, scoring, and returns alert _ids in its output. There are no exceptions to this rule.
 
 ## Response Format
 
-Present results as ranked groups:
+Present results as ranked groups. **You MUST include the top alert _id for every group — this is mandatory, not optional.**
 
 **Group 1 — [entity or context]** (score: N)
 - Alerts: N alerts | Top rule: [rule name] | Severity: critical/high
 - Score drivers: base risk [N], MITRE tactic boost [+N for tactic name]
-- Top alert ID: [_id value from the highest-scored alert in this group]
+- **Top alert ID: [exact _id string from the tool result]** ← always emit verbatim
 - Recommended next step: Investigate with alert-analysis
 
 **Group 2 — [entity or context]** (score: N)
 ...
 
-Always include the top alert ID for each group so analysts can reference it directly when escalating to alert-analysis or filing a case.
+The top alert _id for each group is required in every response — even brief summaries. Analysts use it to escalate directly to alert-analysis or file a case. Copy the _id verbatim from the tool result; do not paraphrase or abbreviate it.
 
 End with a brief summary of total alerts assessed and how many groups were identified.`,
 
-  getRegistryTools: () => [SECURITY_ALERTS_TOOL_ID, SECURITY_ENTITY_RISK_SCORE_TOOL_ID],
+  getRegistryTools: () => [],
 
   getInlineTools: () => [
     {

@@ -112,9 +112,9 @@ describe('Security Skills', () => {
       expect(alertTriageSkill.description.length).toBeLessThanOrEqual(1024);
     });
 
-    it('returns 2 registry tools', () => {
+    it('returns 0 registry tools (all access is via the inline tool)', () => {
       const tools = alertTriageSkill.getRegistryTools!();
-      expect(tools).toHaveLength(2);
+      expect(tools).toHaveLength(0);
     });
 
     it('returns 1 inline tool (prioritize-alerts)', async () => {
