@@ -22,9 +22,9 @@ import scoreReference from './references/score_reference.md.text';
 
 export const createAnomalyDetectionSkill = () =>
   defineSkillType({
-    id: 'observability.anomaly-detection',
+    id: 'ml.anomaly-detection',
     name: 'anomaly-detection',
-    basePath: 'skills/observability/anomaly_detection',
+    basePath: 'skills/ml/anomaly_detection',
     description,
     content: skillContent,
     referencedContent: [

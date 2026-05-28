@@ -104,8 +104,6 @@ export class MlServerPlugin
   };
   private compatibleModuleType: CompatibleModule | null = null;
   private serverless: ServerlessInfo;
-  private anomalyDetectionSkillEnabled: boolean = false;
-
   constructor(ctx: PluginInitializerContext<ConfigSchema>) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
@@ -121,8 +119,6 @@ export class MlServerPlugin
     initEnabledFeatures(this.enabledFeatures, config);
     this.compatibleModuleType = config.compatibleModuleType ?? null;
     this.enabledFeatures = Object.freeze(this.enabledFeatures);
-    this.anomalyDetectionSkillEnabled =
-      config.experimental?.anomalyDetectionSkill?.enabled === true;
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
@@ -317,7 +313,7 @@ export class MlServerPlugin
       registerCollector(plugins.usageCollection, getIndexForType);
     }
 
-    if (this.anomalyDetectionSkillEnabled && plugins.agentBuilder) {
+    if (plugins.agentBuilder) {
       registerAnomalyDetectionAgentBuilder({ agentBuilder: plugins.agentBuilder });
     }
 

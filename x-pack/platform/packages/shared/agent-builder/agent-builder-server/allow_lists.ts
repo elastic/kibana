@@ -151,7 +151,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.rca',
   'observability.investigation',
   'observability.service-map',
-  'observability.anomaly-detection',
+
+  // ML
+  'ml.anomaly-detection',
 
   // Search
   `${internalNamespaces.search}.keyword-search`,

@@ -259,6 +259,10 @@ export {
   type ReferencedContentRefineIssueCode,
   type ReferencedContentRefineIssue,
   collectReferencedContentRefineIssues,
+  elasticCapabilitiesExcludedBuiltinSkillIds,
+  type ElasticCapabilitiesExcludedBuiltinSkillId,
+  isElasticCapabilitiesExcludedBuiltinSkill,
+  isBuiltinSkillAutoIncludedForElasticCapabilities,
 } from './skills';
 export * from './telemetry';
 export {

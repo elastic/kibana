@@ -16,13 +16,13 @@ import {
 describe('createAnomalyDetectionSkill', () => {
   it('returns a skill definition with the correct id and name', () => {
     const skill = createAnomalyDetectionSkill();
-    expect(skill.id).toBe('observability.anomaly-detection');
+    expect(skill.id).toBe('ml.anomaly-detection');
     expect(skill.name).toBe('anomaly-detection');
   });
 
   it('uses the correct basePath for the anomaly_detection subdirectory', () => {
     const skill = createAnomalyDetectionSkill();
-    expect(skill.basePath).toBe('skills/observability/anomaly_detection');
+    expect(skill.basePath).toBe('skills/ml/anomaly_detection');
   });
 
   it('has a non-empty description within the 1024 character limit', () => {

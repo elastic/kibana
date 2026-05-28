@@ -44,7 +44,7 @@ describe('registerAnomalyDetectionAgentBuilder', () => {
 
     expect(agentBuilder.skills.register).toHaveBeenCalledTimes(1);
     const skillArg = agentBuilder.skills.register.mock.calls[0][0];
-    expect(skillArg.id).toBe('observability.anomaly-detection');
+    expect(skillArg.id).toBe('ml.anomaly-detection');
   });
 
   it('each registered tool has a description and a schema', () => {
