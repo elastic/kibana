@@ -15,6 +15,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import { significantEventsDeepLinkIds, type SigEventsLinkId } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY } from '@kbn/management-settings-ids';
 import { DataStreamsStatsService } from '@kbn/dataset-quality-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -38,15 +39,6 @@ import {
 } from './discover_features';
 import { StreamsTelemetryService } from './telemetry/service';
 import { StreamsAppLocatorDefinition } from '../common/locators';
-
-const significantEventsDeepLinkIds = [
-  'significantEventsDiscovery',
-  'significantEventsKnowledgeIndicators',
-  'significantEventsEvents',
-  'significantEventsRules',
-] as const;
-
-type SigEventsDeepLinkId = (typeof significantEventsDeepLinkIds)[number];
 
 const StreamsApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.StreamsApplication }))
@@ -122,7 +114,7 @@ export class StreamsAppPlugin
       order: 10000,
       deepLinks: [
         {
-          id: 'significantEventsDiscovery' satisfies SigEventsDeepLinkId,
+          id: 'significantEventsDiscovery' satisfies SigEventsLinkId,
           title: i18n.translate('xpack.streams.significantEventsDiscovery.deepLinkTitle', {
             defaultMessage: 'Significant Events',
           }),
@@ -131,7 +123,7 @@ export class StreamsAppPlugin
           keywords: ['significant events', 'sig events', 'discovery'],
         },
         {
-          id: 'significantEventsKnowledgeIndicators' satisfies SigEventsDeepLinkId,
+          id: 'significantEventsKnowledgeIndicators' satisfies SigEventsLinkId,
           title: i18n.translate('xpack.streams.significantEventsDiscovery.kiDeepLinkTitle', {
             defaultMessage: 'Significant Events / KIs',
           }),
@@ -147,7 +139,7 @@ export class StreamsAppPlugin
           ],
         },
         {
-          id: 'significantEventsEvents' satisfies SigEventsDeepLinkId,
+          id: 'significantEventsEvents' satisfies SigEventsLinkId,
           title: i18n.translate('xpack.streams.significantEventsDiscovery.eventsDeepLinkTitle', {
             defaultMessage: 'Significant Events / Events',
           }),
@@ -156,7 +148,7 @@ export class StreamsAppPlugin
           keywords: ['events', 'significant events', 'sig events', 'sig events events'],
         },
         {
-          id: 'significantEventsRules' satisfies SigEventsDeepLinkId,
+          id: 'significantEventsRules' satisfies SigEventsLinkId,
           title: i18n.translate('xpack.streams.significantEventsDiscovery.rulesDeepLinkTitle', {
             defaultMessage: 'Significant Events / Rules',
           }),
@@ -183,7 +175,7 @@ export class StreamsAppPlugin
                 return {
                   visibleIn: ['sideNav', 'globalSearch'],
                   deepLinks: (app.deepLinks ?? []).map((link) => {
-                    if (significantEventsDeepLinkIds.includes(link.id as SigEventsDeepLinkId)) {
+                    if (significantEventsDeepLinkIds.includes(link.id as SigEventsLinkId)) {
                       return {
                         ...link,
                         visibleIn: isSignificantEventsDiscoveryEnabled ? ['globalSearch'] : [],
