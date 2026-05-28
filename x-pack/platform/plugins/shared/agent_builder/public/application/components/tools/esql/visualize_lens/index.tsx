@@ -20,6 +20,7 @@ import { useLensInput } from './use_lens_input';
 import { BaseVisualization } from '../shared/base_visualization';
 import { FallbackVisualizationActions } from '../shared/visualization_actions';
 import { visualizationWrapperStyles } from '../shared/styles';
+import { getVisualizationDimensionsFromLensConfig } from '../shared/get_visualization_dimensions';
 
 export function VisualizeLens({
   lens,
@@ -42,6 +43,11 @@ export function VisualizeLens({
     lensConfig,
     timeRange,
   });
+  const { height, width } = getVisualizationDimensionsFromLensConfig(
+    lensConfig as Record<string, unknown>
+  );
+  // eslint-disable-next-line no-console
+  console.log('[VisualizeLens] chart type:', (lensConfig as any).type, '→', { height, width });
   const [localActionButtons, setLocalActionButtons] = useState<ActionButton[]>([]);
   const registerLocalActionButtons = useCallback((buttons: ActionButton[]) => {
     setLocalActionButtons(buttons);
@@ -65,7 +71,7 @@ export function VisualizeLens({
   }
 
   return (
-    <div data-test-subj="lensVisualization" css={visualizationWrapperStyles}>
+    <div data-test-subj="lensVisualization" css={visualizationWrapperStyles({ width })}>
       {shouldRenderLocalActionButtons && (
         <FallbackVisualizationActions buttons={localActionButtons} />
       )}
@@ -76,6 +82,7 @@ export function VisualizeLens({
         setLensInput={setLensInput}
         isLoading={isLoading}
         registerActionButtons={registerActionButtons ?? registerLocalActionButtons}
+        height={height}
       />
     </div>
   );

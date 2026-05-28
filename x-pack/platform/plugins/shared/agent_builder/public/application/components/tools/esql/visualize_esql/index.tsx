@@ -20,6 +20,7 @@ import { useLensInput } from './use_lens_input';
 import { BaseVisualization } from '../shared/base_visualization';
 import { FallbackVisualizationActions } from '../shared/visualization_actions';
 import { visualizationWrapperStyles } from '../shared/styles';
+import { getVisualizationDimensionsFromChartType } from '../shared/get_visualization_dimensions';
 
 export function VisualizeESQL({
   lens,
@@ -47,6 +48,7 @@ export function VisualizeESQL({
     preferredChartType,
     timeRange,
   });
+  const { height, width } = getVisualizationDimensionsFromChartType(preferredChartType);
   const [actionButtons, setActionButtons] = useState<ActionButton[]>([]);
   const registerActionButtons = useCallback((buttons: ActionButton[]) => {
     setActionButtons(buttons);
@@ -58,7 +60,7 @@ export function VisualizeESQL({
       hasShadow={false}
       hasBorder={true}
       css={[
-        visualizationWrapperStyles,
+        visualizationWrapperStyles({ width }),
         ({ euiTheme }: UseEuiTheme) =>
           css({
             marginBlockEnd: euiTheme.size.m,
@@ -73,6 +75,7 @@ export function VisualizeESQL({
         setLensInput={setLensInput}
         isLoading={isLoading}
         registerActionButtons={registerActionButtons}
+        height={height}
       />
     </EuiSplitPanel.Outer>
   );
