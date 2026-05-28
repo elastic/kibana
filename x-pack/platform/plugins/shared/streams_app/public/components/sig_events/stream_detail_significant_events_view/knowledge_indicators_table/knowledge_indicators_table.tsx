@@ -15,8 +15,8 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiInMemoryTable,
-  EuiLink,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type Streams, QUERY_TYPE_STATS } from '@kbn/streams-schema';
@@ -152,7 +152,9 @@ export function KnowledgeIndicatorsTable({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiLink onClick={() => onViewDetails(knowledgeIndicator)}>{title}</EuiLink>
+                <EuiButtonEmpty flush="left" onClick={() => onViewDetails(knowledgeIndicator)}>
+                  {title}
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           );

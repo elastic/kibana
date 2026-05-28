@@ -14,8 +14,8 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiInMemoryTable,
-  EuiLink,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
@@ -128,9 +128,9 @@ export function RulesTable({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiLink onClick={() => onViewDetails(item)}>
+                <EuiButtonEmpty flush="left" onClick={() => onViewDetails(item)}>
                   {item.query.title || item.query.id}
-                </EuiLink>
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           );
