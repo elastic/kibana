@@ -59,8 +59,8 @@ const convertBaseFromEs = (document: Document) => {
     title: document._source.title,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
-    ...(document._source.read !== undefined && { read: document._source.read }),
     ...(document._source.status !== undefined && { status: document._source.status }),
+    ...(document._source.read !== undefined && { read: document._source.read }),
   };
 };
 
