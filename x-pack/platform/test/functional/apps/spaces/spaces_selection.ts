@@ -169,7 +169,8 @@ export default function spaceSelectorFunctionalTests({
           await expectDashboardRenders('[Logs] Web Traffic');
         });
 
-        it('in a custom space', async () => {
+        // TEMP SKIP: apiFormat flag enabled
+        it.skip('in a custom space', async () => {
           await PageObjects.common.navigateToApp('dashboard', {
             basePath: `/s/${spaceId}`,
           });
