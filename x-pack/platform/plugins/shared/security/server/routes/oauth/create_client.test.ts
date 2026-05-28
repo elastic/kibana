@@ -7,14 +7,14 @@
 
 import Boom from '@hapi/boom';
 
-import type { ObjectType } from '@kbn/config-schema';
-import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { UiamOAuthType } from '@kbn/core-security-server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { defineCreateOAuthClientRoute } from './create_client';
+import { createClientBodySchema } from './schemas';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
@@ -60,25 +60,23 @@ describe('Create OAuth Client route', () => {
 
     defineCreateOAuthClientRoute(mockRouteDefinitionParams);
 
-    const [config, handler] = mockRouteDefinitionParams.router.post.mock.calls.find(
+    const [, handler] = mockRouteDefinitionParams.router.post.mock.calls.find(
       ([{ path }]) => path === '/internal/security/oauth/clients'
     )!;
 
     return {
-      routeConfig: config as RouteConfig<any, any, any, any>,
       routeHandler: handler as RequestHandler<any, any, any, any>,
       authc: authcMock,
       oauthMock: authcMock.oauth as jest.Mocked<UiamOAuthType>,
     };
   }
 
-  let routeConfig: RouteConfig<any, any, any, any>;
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   let oauthMock: jest.Mocked<UiamOAuthType>;
 
   beforeEach(() => {
-    ({ routeConfig, routeHandler, authc, oauthMock } = setup());
+    ({ routeHandler, authc, oauthMock } = setup());
   });
 
   it('returns result of license checker', async () => {
@@ -119,18 +117,17 @@ describe('Create OAuth Client route', () => {
   });
 
   it('rejects unknown body fields (including `resource`) at the schema layer', () => {
-    const bodySchema = (routeConfig.validate as any).body as ObjectType;
-
     expect(() =>
-      bodySchema.validate({ client_name: 'Test', resource: 'https://attacker.example.com' })
+      createClientBodySchema.validate({
+        client_name: 'Test',
+        resource: 'https://attacker.example.com',
+      })
     ).toThrow(/resource/);
   });
 
   it('rejects a body-supplied `project_id` at the schema layer', () => {
-    const bodySchema = (routeConfig.validate as any).body as ObjectType;
-
     expect(() =>
-      bodySchema.validate({ client_name: 'Test', project_id: 'attacker-project' })
+      createClientBodySchema.validate({ client_name: 'Test', project_id: 'attacker-project' })
     ).toThrow(/project_id/);
   });
 
