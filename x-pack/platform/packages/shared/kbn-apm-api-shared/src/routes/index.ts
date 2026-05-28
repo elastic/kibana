@@ -34,7 +34,6 @@ import { anomalyDetectionRouteDefinitions } from './anomaly_detection';
 import { mobileRouteDefinitions } from './mobile';
 import { mobileErrorsRouteDefinitions } from './mobile_errors';
 import { mobileCrashesRouteDefinitions } from './mobile_crashes';
-import { diagnosticsRouteDefinitions } from './diagnostics';
 import { fleetRouteDefinitions } from './fleet';
 import { debugTelemetryRouteDefinitions } from './debug_telemetry';
 import { storageExplorerRouteDefinitions } from './storage_explorer';
@@ -73,7 +72,6 @@ export const routeDefinitions = {
   mobile: mobileRouteDefinitions,
   mobileErrors: mobileErrorsRouteDefinitions,
   mobileCrashes: mobileCrashesRouteDefinitions,
-  diagnostics: diagnosticsRouteDefinitions,
   fleet: fleetRouteDefinitions,
   debugTelemetry: debugTelemetryRouteDefinitions,
   storageExplorer: storageExplorerRouteDefinitions,

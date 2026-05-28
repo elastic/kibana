@@ -18,4 +18,3 @@ export const sourceMapsRouteDefinitions = {
 
 export { sourceMapRt, type SourceMap, type ApmSourceMapArtifactBody } from './source_map_types';
 export type { ListSourceMapArtifactsResponse } from './list_source_maps';
-export type { UploadSourceMapResponse } from './upload_source_map';
