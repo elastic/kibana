@@ -6,6 +6,11 @@
  */
 
 // Stub: real implementation lands in PR10 (Schedule Integration).
-// Returns the input unchanged so callers compile FF-off; not reached at
-// runtime when the feature flag is OFF.
-export const transformCreatePropsFromApi = (apiProps: unknown): unknown => apiProps;
+// Returns the input cast to the alerting-side create props shape so PR3 route
+// handlers compile FF-off; not reached at runtime when the feature flag is
+// OFF (the schedule routes are FF-gated at registration).
+import type { AttackDiscoveryScheduleCreateProps } from '@kbn/elastic-assistant-common';
+
+export const transformCreatePropsFromApi = (
+  apiProps: unknown
+): AttackDiscoveryScheduleCreateProps => (apiProps ?? {}) as AttackDiscoveryScheduleCreateProps;

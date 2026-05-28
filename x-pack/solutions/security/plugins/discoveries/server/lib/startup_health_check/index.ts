@@ -7,10 +7,17 @@
 
 import type { Logger } from '@kbn/core/server';
 
+// PR3 callers pass `{ expectedWorkflowIds, failedWorkflowIds, logger,
+// workflowsManagementApiAvailable }`; older callers passed the
+// `failedStepIds`/`registeredStepCount` shape. Both are accepted here so the
+// stub satisfies PR2 + PR3 simultaneously; the real impl (PR4) refines the
+// signature.
 export interface StartupHealthCheckParams {
-  failedStepIds: string[];
+  expectedWorkflowIds?: readonly string[];
+  failedStepIds?: string[];
+  failedWorkflowIds?: string[];
   logger: Logger;
-  registeredStepCount: number;
+  registeredStepCount?: number;
   workflowsManagementApiAvailable: boolean;
 }
 

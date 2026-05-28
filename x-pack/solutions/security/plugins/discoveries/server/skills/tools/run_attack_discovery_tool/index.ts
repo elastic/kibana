@@ -6,6 +6,8 @@
  */
 
 // Stub: real implementation lands in PR8 (Skills). FF-off safe.
+import { ToolType } from '@kbn/agent-builder-common';
+import type { SkillBoundedTool } from '@kbn/agent-builder-server';
 
 export const RUN_ATTACK_DISCOVERY_TOOL_ID = 'security.attack-discovery.run' as const;
 
@@ -13,4 +15,5 @@ export interface RunAttackDiscoveryToolDeps {
   [key: string]: unknown;
 }
 
-export const getRunAttackDiscoveryTool = (_deps: RunAttackDiscoveryToolDeps): unknown => undefined;
+export const getRunAttackDiscoveryTool = (_deps: RunAttackDiscoveryToolDeps): SkillBoundedTool =>
+  ({ id: RUN_ATTACK_DISCOVERY_TOOL_ID, type: ToolType.builtin } as unknown as SkillBoundedTool);

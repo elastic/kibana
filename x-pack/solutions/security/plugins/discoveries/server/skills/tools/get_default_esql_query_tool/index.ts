@@ -6,8 +6,11 @@
  */
 
 // Stub: real implementation lands in PR8 (Skills). FF-off safe.
+import { ToolType } from '@kbn/agent-builder-common';
+import type { SkillBoundedTool } from '@kbn/agent-builder-server';
 
 export const GET_DEFAULT_ESQL_QUERY_TOOL_ID =
   'security.attack-discovery.default_esql_query' as const;
 
-export const getDefaultEsqlQueryTool = (): unknown => undefined;
+export const getDefaultEsqlQueryTool = (): SkillBoundedTool =>
+  ({ id: GET_DEFAULT_ESQL_QUERY_TOOL_ID, type: ToolType.builtin } as unknown as SkillBoundedTool);

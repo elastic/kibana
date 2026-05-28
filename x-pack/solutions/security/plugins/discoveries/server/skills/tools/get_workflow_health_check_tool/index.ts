@@ -7,8 +7,8 @@
 
 // Stub: real implementation lands in PR8 (Skills). FF-off safe.
 
-export interface WorkflowFetcher {
-  fetch: (workflowId: string) => Promise<unknown | undefined>;
-}
+// Shape kept permissive (`unknown`) so PR3 can pass `workflowsManagementApi`
+// directly; PR8's real impl refines to the precise API surface used.
+export type WorkflowFetcher = unknown;
 
 export const getWorkflowHealthCheckTool = (_deps: unknown): unknown => undefined;
