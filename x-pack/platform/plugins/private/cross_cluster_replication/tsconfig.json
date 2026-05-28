@@ -7,8 +7,10 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
   ],
   "kbn_references": [
+    "@kbn/scout",
     "@kbn/core",
     // required plugins
     "@kbn/licensing-plugin",
