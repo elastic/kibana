@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { createTrajectoryEvaluator } from '@kbn/evals';
 import { tags } from '@kbn/scout';
 import { evaluate as base } from '../../src/evaluate';
-import type { EvaluateDataset } from '../../src/evaluate_dataset';
+import type { DashboardAgentTaskOutput, EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
 import {
   dashboardAttachmentExistsEvaluator,
@@ -20,6 +21,7 @@ import {
 import {
   dashboardSkillActivatedEvaluator,
   dashboardSkillNotActivatedEvaluator,
+  getToolIds,
   visualizationSkillWithoutDashboardEvaluator,
 } from '../../src/skill_selection_evaluators';
 
@@ -36,6 +38,16 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
     },
     { scope: 'test' },
   ],
+});
+
+const trajectoryEvaluator = createTrajectoryEvaluator({
+  extractToolCalls: (output) => getToolIds(output as DashboardAgentTaskOutput),
+  goldenPathExtractor: (expected) => {
+    const exp = expected as { goldenToolPath?: string[] };
+    return exp.goldenToolPath ?? [];
+  },
+  orderWeight: 0.4,
+  coverageWeight: 0.6,
 });
 
 evaluate.describe(
@@ -69,6 +81,7 @@ evaluate.describe(
                   panelCount: { min: 10, max: 20 },
                   grid: { maxColumns: 48, noOverflow: true },
                 },
+                goldenToolPath: ['load_skill', 'platform.dashboard.manage_dashboard'],
               },
             },
           ],
@@ -79,48 +92,55 @@ evaluate.describe(
           dashboardAttachmentTitleEvaluator,
           dashboardPanelCountEvaluator,
           dashboardGridBoundsEvaluator,
+          trajectoryEvaluator,
         ],
       });
     });
 
-    evaluate('dashboard section requests create requested sections', async ({ evaluateDataset }) => {
-      await evaluateDataset({
-        dataset: {
-          name: 'agent builder dashboards: dashboard section creation',
-          description: 'Checks that dashboard section requests create the requested sections',
-          examples: [
-            {
-              input: {
-                question:
-                  "Create a dashboard using kibana_sample_data_logs with 2 sections: 'Traffic Volume' with a panel showing requests over time, and 'Response Codes' with a panel showing response.keyword distribution.",
-              },
-              output: {
-                expected: 'Dashboard skill should be activated and create the requested sections.',
-                expectedDashboardAttachment: {
-                  exists: true,
-                  title: { nonEmpty: true },
-                  panelCount: { min: 2 },
-                  sectionCount: 2,
-                  sections: [
-                    { titleIncludesAny: ['traffic', 'trend', 'time'], minPanels: 1 },
-                    { titleIncludesAny: ['response', 'status', 'code'], minPanels: 1 },
-                  ],
-                  grid: { maxColumns: 48, noOverflow: true },
+    evaluate(
+      'dashboard section requests create requested sections',
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'agent builder dashboards: dashboard section creation',
+            description: 'Checks that dashboard section requests create the requested sections',
+            examples: [
+              {
+                input: {
+                  question:
+                    "Create a dashboard using kibana_sample_data_logs with 2 sections: 'Traffic Volume' with a panel showing requests over time, and 'Response Codes' with a panel showing response.keyword distribution.",
+                },
+                output: {
+                  expected:
+                    'Dashboard skill should be activated and create the requested sections.',
+                  expectedDashboardAttachment: {
+                    exists: true,
+                    title: { nonEmpty: true },
+                    panelCount: { min: 2 },
+                    sectionCount: 2,
+                    sections: [
+                      { titleIncludesAny: ['traffic', 'trend', 'time'], minPanels: 1 },
+                      { titleIncludesAny: ['response', 'status', 'code'], minPanels: 1 },
+                    ],
+                    grid: { maxColumns: 48, noOverflow: true },
+                  },
+                  goldenToolPath: ['load_skill', 'platform.dashboard.manage_dashboard'],
                 },
               },
-            },
+            ],
+          },
+          evaluators: [
+            dashboardSkillActivatedEvaluator,
+            dashboardAttachmentExistsEvaluator,
+            dashboardAttachmentTitleEvaluator,
+            dashboardPanelCountEvaluator,
+            dashboardSectionShapeEvaluator,
+            dashboardGridBoundsEvaluator,
+            trajectoryEvaluator,
           ],
-        },
-        evaluators: [
-          dashboardSkillActivatedEvaluator,
-          dashboardAttachmentExistsEvaluator,
-          dashboardAttachmentTitleEvaluator,
-          dashboardPanelCountEvaluator,
-          dashboardSectionShapeEvaluator,
-          dashboardGridBoundsEvaluator,
-        ],
-      });
-    });
+        });
+      }
+    );
 
     evaluate('visualization request does not create dashboard', async ({ evaluateDataset }) => {
       await evaluateDataset({
@@ -140,6 +160,7 @@ evaluate.describe(
                 expectedDashboardAttachment: {
                   exists: false,
                 },
+                goldenToolPath: ['load_skill', 'platform.core.create_visualization'],
               },
             },
           ],
@@ -147,6 +168,7 @@ evaluate.describe(
         evaluators: [
           visualizationSkillWithoutDashboardEvaluator,
           dashboardAttachmentExistsEvaluator,
+          trajectoryEvaluator,
         ],
       });
     });
@@ -167,6 +189,7 @@ evaluate.describe(
                 expectedDashboardAttachment: {
                   exists: false,
                 },
+                goldenToolPath: [],
               },
             },
             {
@@ -178,11 +201,16 @@ evaluate.describe(
                 expectedDashboardAttachment: {
                   exists: false,
                 },
+                goldenToolPath: ['platform.core.get_index_mapping'],
               },
             },
           ],
         },
-        evaluators: [dashboardSkillNotActivatedEvaluator, dashboardAttachmentExistsEvaluator],
+        evaluators: [
+          dashboardSkillNotActivatedEvaluator,
+          dashboardAttachmentExistsEvaluator,
+          trajectoryEvaluator,
+        ],
       });
     });
 
@@ -217,6 +245,7 @@ evaluate.describe(
                     ],
                   },
                 },
+                goldenToolPath: ['load_skill', 'platform.dashboard.manage_dashboard'],
               },
             },
             {
@@ -249,6 +278,7 @@ evaluate.describe(
                     ],
                   },
                 },
+                goldenToolPath: ['load_skill', 'platform.dashboard.manage_dashboard'],
               },
             },
           ],
@@ -259,6 +289,7 @@ evaluate.describe(
           dashboardAttachmentTitleEvaluator,
           dashboardGridBoundsEvaluator,
           dashboardGridRowLayoutEvaluator,
+          trajectoryEvaluator,
         ],
       });
     });

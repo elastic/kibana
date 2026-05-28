@@ -59,6 +59,7 @@ export interface DashboardDatasetExample extends Example {
         }>;
       };
     };
+    goldenToolPath?: string[];
   };
   metadata?: {
     [key: string]: unknown;
@@ -70,6 +71,7 @@ export interface DashboardAgentTaskOutput {
   messages: Array<{ message: string }>;
   steps?: Array<Record<string, unknown>>;
   traceId?: string;
+  agentTraceId?: string;
 }
 
 export type DashboardAgentEvaluator = Evaluator<DashboardDatasetExample, DashboardAgentTaskOutput>;
@@ -85,6 +87,20 @@ export type EvaluateDataset = ({
   };
   evaluators?: DashboardAgentEvaluator[];
 }) => Promise<void>;
+
+const useAgentTraceId = (evaluator: Evaluator): DashboardAgentEvaluator => ({
+  ...evaluator,
+  evaluate: async ({ input, output, expected, metadata }) =>
+    evaluator.evaluate({
+      input,
+      output: {
+        ...output,
+        traceId: output.agentTraceId ?? output.traceId,
+      },
+      expected,
+      metadata,
+    }),
+});
 
 export function createEvaluateDataset({
   evaluators,
@@ -126,13 +142,13 @@ export function createEvaluateDataset({
         errors: response.errors,
         messages: response.messages,
         steps: response.steps,
-        traceId: response.traceId,
+        agentTraceId: response.traceId,
       };
     };
 
     await executorClient.runExperiment({ dataset, task }, [
       ...(customEvaluators ?? []),
-      ...Object.values(evaluators.traceBasedEvaluators),
+      ...Object.values(evaluators.traceBasedEvaluators).map(useAgentTraceId),
     ]);
   };
 }
