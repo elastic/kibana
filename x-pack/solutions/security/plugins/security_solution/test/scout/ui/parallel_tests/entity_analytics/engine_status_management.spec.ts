@@ -14,13 +14,11 @@ spaceTest.describe(
   () => {
     spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
-      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
       await browserAuth.loginAsAdmin();
     });
 
     spaceTest.afterEach(async ({ apiServices }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
-      await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
     });
 
     spaceTest(
@@ -47,7 +45,7 @@ spaceTest.describe(
           await managementPage.waitForStatusLoaded();
           await managementPage.toggleEntityAnalytics();
           await managementPage.waitForStatusLoaded();
-          await apiServices.entityAnalytics.waitForEntityStoreStatus('running', 60000);
+          await apiServices.entityAnalytics.waitForEntityStoreStatusV2('running', 60000);
           await expect(managementPage.entityAnalyticsHealth).toContainText('On', {
             timeout: 60000,
           });
