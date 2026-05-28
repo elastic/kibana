@@ -19,7 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GrokProcessor } from '@kbn/streamlang';
+import type { DissectProcessor, GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
@@ -36,10 +36,16 @@ import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { DOC_VIEW_DIFF_ID, DocViewerContext } from './doc_viewer_diff';
 import {
   createOriginalGrokFieldValuesMap,
+  getDissectFieldDisplayValue,
   getGrokFieldDisplayValue,
   grokExpressionOverwritesSourceField,
   hasPrecedingProcessorTouchedField,
 } from './processor_outcome_preview_helpers';
+import {
+  DissectHighlightProvider,
+  DissectSample,
+  dissectPatternOverwritesSourceField,
+} from './dissect_highlighting';
 import {
   NoPreviewDocumentsEmptyPrompt,
   NoProcessingDataAvailableEmptyPrompt,
@@ -376,6 +382,29 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       ? draftProcessor.processor.patterns
       : [];
 
+  // Get dissect pattern from the draft processor
+  const dissectPattern =
+    draftProcessor?.processor &&
+    'action' in draftProcessor.processor &&
+    draftProcessor.processor.action === 'dissect'
+      ? draftProcessor.processor.pattern
+      : '';
+
+  // Determine if the dissect processor is active (has a from field and a pattern)
+  const isDissectProcessorActive =
+    draftProcessor?.processor &&
+    'action' in draftProcessor.processor &&
+    draftProcessor.processor.action === 'dissect' &&
+    !isEmpty(draftProcessor.processor.from) &&
+    !isEmpty(draftProcessor.processor.pattern);
+
+  // Get the source field for the dissect processor
+  const dissectSourceField = isDissectProcessorActive
+    ? (draftProcessor.processor as DissectProcessor).from
+    : undefined;
+  const validDissectSourceField =
+    dissectSourceField && allColumns.includes(dissectSourceField) ? dissectSourceField : undefined;
+
   // Convert patterns to DraftGrokExpression instances for field analysis
   const grokExpressions = useGrokExpressions(grokPatterns);
 
@@ -432,13 +461,43 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const validGrokField = grokMode ? validGrokSourceField : undefined;
 
+  // Check if the dissect pattern overwrites the source field
+  const dissectOverwritesSourceField = useMemo(() => {
+    if (!validDissectSourceField || !dissectPattern) return false;
+    return dissectPatternOverwritesSourceField(dissectPattern, validDissectSourceField);
+  }, [dissectPattern, validDissectSourceField]);
+
+  // Check if any preceding processor has touched the dissect source field
+  const precedingProcessorTouchedDissectField = useMemo(() => {
+    if (!validDissectSourceField) return false;
+    return hasPrecedingProcessorTouchedField(
+      stepIds,
+      currentStepId,
+      processorsMetrics,
+      validDissectSourceField
+    );
+  }, [stepIds, currentStepId, processorsMetrics, validDissectSourceField]);
+
+  /**
+   * Dissect mode enables the special highlighting preview for dissect patterns.
+   * Same logic as grok mode.
+   */
+  const dissectMode =
+    isDissectProcessorActive &&
+    validDissectSourceField !== undefined &&
+    !(dissectOverwritesSourceField && precedingProcessorTouchedDissectField);
+
+  const validDissectField = dissectMode ? validDissectSourceField : undefined;
+
   const validCurrentProcessorSourceField =
     currentProcessorSourceField && allColumns.includes(currentProcessorSourceField)
       ? currentProcessorSourceField
       : undefined;
 
   // Calculate if view mode should be forced to 'columns'
-  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
+  const isViewModeForced = Boolean(
+    validGrokField || validDissectField || validCurrentProcessorSourceField
+  );
 
   // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
   const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode ?? 'summary';
@@ -483,6 +542,14 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   );
 
   /**
+   * Same as grokColumns but for dissect mode.
+   */
+  const dissectColumns = useMemo(
+    () => (validDissectField ? [validDissectField] : undefined),
+    [validDissectField]
+  );
+
+  /**
    * Map from preview document to the original (pre-transformation) value of the grok field.
    * This is needed when the grok pattern extracts into the same field it reads from (e.g., message → message).
    * We use a WeakMap keyed by the document object reference for O(1) lookup in renderCellValue.
@@ -498,7 +565,23 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     return createOriginalGrokFieldValuesMap(previewDocuments, originalSamples, validGrokField);
   }, [grokMode, validGrokField, originalSamples, previewDocuments, grokOverwritesSourceField]);
 
-  const previewColumns = grokColumns ?? availableColumns;
+  /**
+   * Same as originalGrokFieldValues but for dissect mode.
+   */
+  const originalDissectFieldValues = useMemo(() => {
+    if (!dissectMode || !validDissectField || !originalSamples) return undefined;
+    if (!dissectOverwritesSourceField) return undefined;
+
+    return createOriginalGrokFieldValuesMap(previewDocuments, originalSamples, validDissectField);
+  }, [
+    dissectMode,
+    validDissectField,
+    originalSamples,
+    previewDocuments,
+    dissectOverwritesSourceField,
+  ]);
+
+  const previewColumns = dissectColumns ?? grokColumns ?? availableColumns;
 
   // Calculate columns specifically for summary mode
   const displayColumnsForSummaryMode = useMemo(() => {
@@ -568,27 +651,48 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     ]
   );
 
-  const renderCellValue = useMemo(
-    () =>
-      grokMode && validGrokField
-        ? (document: SampleDocument, columnId: string) => {
-            // Use the original (pre-transformation) value for the grok field.
-            // This ensures highlighting works even when grok extracts into the same field it reads from.
-            const value = getGrokFieldDisplayValue(
-              document,
-              columnId,
-              validGrokField,
-              originalGrokFieldValues
-            );
+  const renderCellValue = useMemo(() => {
+    if (grokMode && validGrokField) {
+      return (document: SampleDocument, columnId: string) => {
+        const value = getGrokFieldDisplayValue(
+          document,
+          columnId,
+          validGrokField,
+          originalGrokFieldValues
+        );
 
-            if (typeof value === 'string') {
-              return <GrokSampleWithContext sample={value} />;
-            }
-            return <>&nbsp;</>;
-          }
-        : undefined,
-    [grokMode, originalGrokFieldValues, validGrokField]
-  );
+        if (typeof value === 'string') {
+          return <GrokSampleWithContext sample={value} />;
+        }
+        return <>&nbsp;</>;
+      };
+    }
+
+    if (dissectMode && validDissectField) {
+      return (document: SampleDocument, columnId: string) => {
+        const value = getDissectFieldDisplayValue(
+          document,
+          columnId,
+          validDissectField,
+          originalDissectFieldValues
+        );
+
+        if (typeof value === 'string') {
+          return <DissectSample sample={value} />;
+        }
+        return <>&nbsp;</>;
+      };
+    }
+
+    return undefined;
+  }, [
+    grokMode,
+    originalGrokFieldValues,
+    validGrokField,
+    dissectMode,
+    originalDissectFieldValues,
+    validDissectField,
+  ]);
 
   const hits = useMemo(() => {
     return toDataTableRecordWithIndex(previewDocuments);
@@ -633,7 +737,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         <MemoPreviewTable
           documents={previewDocuments}
           displayColumns={displayColumnsForTable}
-          rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
+          rowHeightsOptions={validGrokField || validDissectField ? staticRowHeightsOptions : undefined}
           toolbarVisibility
           setVisibleColumns={setVisibleColumns}
           sorting={previewColumnsSorting}
@@ -659,12 +763,16 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     </>
   );
 
-  // Wrap with GrokExpressionsProvider when in grok mode to provide patterns to Sample components
-  return grokMode ? (
-    <GrokExpressionsProvider patterns={grokPatterns}>{content}</GrokExpressionsProvider>
-  ) : (
-    content
-  );
+  // Wrap with appropriate provider when in highlighting mode
+  if (grokMode) {
+    return <GrokExpressionsProvider patterns={grokPatterns}>{content}</GrokExpressionsProvider>;
+  }
+
+  if (dissectMode && dissectPattern) {
+    return <DissectHighlightProvider pattern={dissectPattern}>{content}</DissectHighlightProvider>;
+  }
+
+  return content;
 };
 
 const staticRowHeightsOptions: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
