@@ -6,7 +6,9 @@
  */
 
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
+import type { EventHit, RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { SearchHit as EsSearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
   type AttackDiscoveryAlert,
   transformAttackDiscoveryAlertDocumentToApi,
@@ -56,6 +58,18 @@ export interface UseAttackDetailsResult {
   refetch: () => Promise<void>;
 }
 
+export interface UseAttackDetailsOptions {
+  /**
+   * Optional caller-provided refresh hand. Invoked by the returned `refetch`
+   * when the hook's own `useTimelineEventsDetails` fetch is skipped because
+   * `hit.raw._source` is already populated. Lets callers (e.g. the V1 thin
+   * wrappers and the Discover lazy wrappers) trigger their own upstream
+   * refresh so mutations on Status / Assignees / take-action items keep
+   * updating the displayed data.
+   */
+  refresh?: () => Promise<void> | void;
+}
+
 /**
  * Fetches the attack-discovery document for the given hit and exposes the
  * derived data the v2 attack-details flyout consumes (browserFields,
@@ -75,10 +89,26 @@ export interface UseAttackDetailsResult {
  * the rest read the published snapshot from the cache. When the primary
  * unmounts, the next-in-order is promoted and re-renders to start its own
  * search.
+ *
+ * When `hit.raw._source` is already populated (V1 path: `useAttackHit`
+ * built the hit from an upstream timeline-details fetch and passed it
+ * through), the hook resolves synchronously without firing a second
+ * identical fetch. `dataFormattedForFieldBrowser` is always derived
+ * locally from the resolved `searchHit` via `getTimelineFieldsDataFromHit`
+ * — the server-side `timelineEventsDetails.parse` step does no more than
+ * that.
  */
-export const useAttackDetails = (hit: DataTableRecord): UseAttackDetailsResult => {
+export const useAttackDetails = (
+  hit: DataTableRecord,
+  { refresh }: UseAttackDetailsOptions = {}
+): UseAttackDetailsResult => {
   const attackId = hit.raw._id ?? '';
   const indexName = hit.raw._index ?? '';
+
+  const hasSource =
+    hit.raw._source != null &&
+    typeof hit.raw._source === 'object' &&
+    Object.keys(hit.raw._source).length > 0;
 
   const { isPrimary, cachedSnapshot, publishSnapshot } = useAttackDetailsSubscription(
     indexName,
@@ -90,41 +120,28 @@ export const useAttackDetails = (hit: DataTableRecord): UseAttackDetailsResult =
   const browserFields = useBrowserFields(pageScope);
   const runtimeMappings = dataView?.getRuntimeMappings() as RunTimeMappings;
 
-  const [primaryLoading, primaryDataFormattedForFieldBrowser, primarySearchHit, , primaryRefetch] =
-    useTimelineEventsDetails({
-      indexName,
-      eventId: attackId,
-      runtimeMappings,
-      skip: !attackId || !isPrimary,
-    });
+  const [primaryLoading, , primarySearchHit, , primaryRefetch] = useTimelineEventsDetails({
+    indexName,
+    eventId: attackId,
+    runtimeMappings,
+    skip: !attackId || !isPrimary || hasSource,
+  });
 
-  // The primary publishes its latest values so secondaries can read them.
-  useEffect(() => {
-    if (!isPrimary) {
-      return;
-    }
-    publishSnapshot({
-      loading: primaryLoading,
-      dataFormattedForFieldBrowser: primaryDataFormattedForFieldBrowser,
-      searchHit: primarySearchHit,
-      refetch: primaryRefetch,
-    });
-  }, [
-    isPrimary,
-    primaryDataFormattedForFieldBrowser,
-    primaryLoading,
-    primaryRefetch,
-    primarySearchHit,
-    publishSnapshot,
-  ]);
+  const searchHit: SearchHit | undefined = hasSource
+    ? (hit.raw as unknown as SearchHit)
+    : isPrimary
+    ? primarySearchHit
+    : cachedSnapshot?.searchHit;
 
-  const loading = isPrimary ? primaryLoading : cachedSnapshot?.loading ?? true;
-  const dataFormattedForFieldBrowser = isPrimary
-    ? primaryDataFormattedForFieldBrowser
-    : cachedSnapshot?.dataFormattedForFieldBrowser ?? null;
-  const searchHit = isPrimary ? primarySearchHit : cachedSnapshot?.searchHit;
+  const loading = hasSource ? false : isPrimary ? primaryLoading : cachedSnapshot?.loading ?? true;
 
   const refetch = useCallback(async () => {
+    if (hasSource) {
+      if (refresh) {
+        await refresh();
+      }
+      return;
+    }
     if (isPrimary) {
       await primaryRefetch();
       return;
@@ -132,7 +149,29 @@ export const useAttackDetails = (hit: DataTableRecord): UseAttackDetailsResult =
     if (cachedSnapshot?.refetch) {
       await cachedSnapshot.refetch();
     }
-  }, [cachedSnapshot, isPrimary, primaryRefetch]);
+  }, [cachedSnapshot, hasSource, isPrimary, primaryRefetch, refresh]);
+
+  // The primary publishes its resolved values so secondaries (whose own
+  // `hit.raw._source` may be empty) read a coherent snapshot regardless of
+  // whether the primary skipped its fetch.
+  useEffect(() => {
+    if (!isPrimary) {
+      return;
+    }
+    publishSnapshot({
+      loading,
+      searchHit,
+      refetch,
+    });
+  }, [isPrimary, loading, searchHit, refetch, publishSnapshot]);
+
+  const dataFormattedForFieldBrowser = useMemo(
+    () =>
+      searchHit
+        ? getTimelineFieldsDataFromHit(searchHit as unknown as EsSearchHit<EventHit>)
+        : null,
+    [searchHit]
+  );
 
   const attack = useMemo(() => {
     const source = searchHit?._source;

@@ -57,9 +57,12 @@ export interface AttackDetailsProps {
    */
   renderCellActions: CellActionRenderer;
   /**
-   * Callback invoked after alert mutations to refresh related flyouts.
-   * Threaded to {@link DocumentFlyoutWrapper} when previewing a related
-   * alert from the attack-correlations child flyout.
+   * Callback invoked after alert mutations. Used both as the
+   * `onAlertUpdated` hand threaded to {@link DocumentFlyoutWrapper} when
+   * previewing a related alert from the attack-correlations child flyout,
+   * and as the `refresh` source for {@link useAttackDetails} when the
+   * hook skips its own fetch because `hit.raw._source` is already
+   * populated (V1 path).
    */
   onAlertUpdated: () => void;
   /**
@@ -128,7 +131,7 @@ export const AttackDetails: FC<AttackDetailsProps> = memo(
     const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
     const { attack, browserFields, dataFormattedForFieldBrowser, loading, refetch } =
-      useAttackDetails(hit);
+      useAttackDetails(hit, { refresh: onAlertUpdated });
 
     const onShowAlert = useCallback(
       (id: string, indexName: string) =>

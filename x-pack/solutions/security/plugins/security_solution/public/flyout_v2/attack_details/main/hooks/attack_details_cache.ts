@@ -40,14 +40,12 @@
  * flyouts, not the number ever opened.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useCallback, useRef, useState, useSyncExternalStore } from 'react';
 import type { SearchHit } from '../../../../../common/search_strategy';
 
 /** Subset of the `useTimelineEventsDetails` result that consumers share. */
 export interface AttackDetailsSnapshot {
   loading: boolean;
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
   searchHit: SearchHit | undefined;
   refetch: () => Promise<void>;
 }

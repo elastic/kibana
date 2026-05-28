@@ -44,7 +44,7 @@ export const AttackFlyoutHeader = ({
   hit,
   servicesPromise,
   storePromise,
-  onAlertUpdated: _onAlertUpdated,
+  onAlertUpdated,
 }: AttackFlyoutHeaderProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
@@ -80,22 +80,25 @@ export const AttackFlyoutHeader = ({
   return flyoutProviders({
     services,
     store,
-    children: <AttackFlyoutHeaderContent hit={hit} />,
+    children: <AttackFlyoutHeaderContent hit={hit} onAlertUpdated={onAlertUpdated} />,
   });
 };
 
 interface AttackFlyoutHeaderContentProps {
   hit: DataTableRecord;
+  onAlertUpdated: () => void;
 }
 
-const AttackFlyoutHeaderContent = ({ hit }: AttackFlyoutHeaderContentProps) => {
+const AttackFlyoutHeaderContent = ({ hit, onAlertUpdated }: AttackFlyoutHeaderContentProps) => {
   const { services } = useKibana();
   const store = useStore();
   const history = useHistory();
   const isSecurityApp = useIsInSecurityApp();
   const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
-  const { browserFields, dataFormattedForFieldBrowser, refetch, loading } = useAttackDetails(hit);
+  const { browserFields, dataFormattedForFieldBrowser, refetch, loading } = useAttackDetails(hit, {
+    refresh: onAlertUpdated,
+  });
 
   const openNotesFlyout = useCallback(() => {
     services.overlays?.openSystemFlyout(

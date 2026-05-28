@@ -178,6 +178,28 @@ describe('AttackFlyoutFooter', () => {
     expect(mockFooter).not.toHaveBeenCalled();
   });
 
+  it('forwards onAlertUpdated to useAttackDetails as the refresh option so synchronous-resolution paths can still refetch', async () => {
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+
+    render(
+      <AttackFlyoutFooter
+        hit={hit}
+        servicesPromise={Promise.resolve(servicesMock)}
+        storePromise={Promise.resolve(store as never)}
+        onAlertUpdated={mockOnAlertUpdated}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockUseAttackDetails).toHaveBeenCalledWith(hit, { refresh: mockOnAlertUpdated });
+    });
+  });
+
   it('does not render footer when resolving dependencies fails', async () => {
     const hit = {
       id: '1',

@@ -150,6 +150,32 @@ describe('AttackFlyoutHeader', () => {
     );
   });
 
+  it('forwards onAlertUpdated to useAttackDetails as the refresh option so synchronous-resolution paths can still refetch', async () => {
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+    const onAlertUpdated = jest.fn();
+
+    render(
+      <Router history={history}>
+        <AttackFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={onAlertUpdated}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(mockUseAttackDetails).toHaveBeenCalledWith(hit, { refresh: onAlertUpdated });
+    });
+  });
+
   it('renders nothing while attack details are loading', async () => {
     mockUseAttackDetails.mockReturnValue({
       attack: null,

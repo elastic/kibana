@@ -38,10 +38,10 @@ export interface UseAttackHitResult {
  * search hit via {@link useTimelineEventsDetails}, and exposes the result
  * as a {@link DataTableRecord} suitable for the v2 surface.
  *
- * The v2 `flyout_v2/attack_details/main/hooks/use_attack_details` hook does
- * an identical fetch when handed the resulting hit. We accept that duplicate
- * fetch in the legacy → v2 boundary; both surfaces share React-Query's
- * default request dedupe so back-to-back identical requests collapse.
+ * The resulting hit has `_source` populated by the fetch above, which v2's
+ * `flyout_v2/attack_details/main/hooks/use_attack_details` detects and uses
+ * to skip its own otherwise-identical timeline-search call — so the V1 path
+ * runs the search exactly once.
  */
 export const useAttackHit = (attackId: string, indexName: string): UseAttackHitResult => {
   const { dataView } = useDataView(PageScope.attacks);

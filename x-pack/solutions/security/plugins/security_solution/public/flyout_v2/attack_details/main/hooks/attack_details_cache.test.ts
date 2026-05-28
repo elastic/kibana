@@ -10,11 +10,8 @@ import { type AttackDetailsSnapshot, useAttackDetailsSubscription } from './atta
 
 const INDEX = '.alerts-default';
 
-const buildSnapshot = (
-  overrides: Partial<AttackDetailsSnapshot> = {}
-): AttackDetailsSnapshot => ({
+const buildSnapshot = (overrides: Partial<AttackDetailsSnapshot> = {}): AttackDetailsSnapshot => ({
   loading: false,
-  dataFormattedForFieldBrowser: [],
   searchHit: undefined,
   refetch: jest.fn().mockResolvedValue(undefined),
   ...overrides,

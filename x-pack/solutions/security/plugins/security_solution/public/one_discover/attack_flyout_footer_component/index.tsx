@@ -36,7 +36,7 @@ export const AttackFlyoutFooter = ({
   hit,
   servicesPromise,
   storePromise,
-  onAlertUpdated: _onAlertUpdated,
+  onAlertUpdated,
 }: AttackFlyoutFooterProps) => {
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
@@ -72,16 +72,17 @@ export const AttackFlyoutFooter = ({
   return flyoutProviders({
     services,
     store,
-    children: <AttackFlyoutFooterContent hit={hit} />,
+    children: <AttackFlyoutFooterContent hit={hit} onAlertUpdated={onAlertUpdated} />,
   });
 };
 
 interface AttackFlyoutFooterContentProps {
   hit: DataTableRecord;
+  onAlertUpdated: () => void;
 }
 
-const AttackFlyoutFooterContent = ({ hit }: AttackFlyoutFooterContentProps) => {
-  const { attack, refetch, loading } = useAttackDetails(hit);
+const AttackFlyoutFooterContent = ({ hit, onAlertUpdated }: AttackFlyoutFooterContentProps) => {
+  const { attack, refetch, loading } = useAttackDetails(hit, { refresh: onAlertUpdated });
 
   if (loading || !attack) {
     return null;
