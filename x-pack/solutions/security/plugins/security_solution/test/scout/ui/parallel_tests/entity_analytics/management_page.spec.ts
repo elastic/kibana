@@ -22,6 +22,9 @@ spaceTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+      // v2 may be the environment default; uninstall it before flipping the FF
+      // so the v1 status poll in deleteEntityStoreEngines doesn't hang.
+      await apiServices.entityAnalytics.uninstallEntityStoreV2();
       await apiServices.entityAnalytics.setEntityStoreV2Enabled(false);
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
       await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
@@ -36,6 +39,7 @@ spaceTest.describe(
     });
 
     spaceTest.afterEach(async ({ apiServices }) => {
+      await apiServices.entityAnalytics.uninstallEntityStoreV2();
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
       await apiServices.entityAnalytics.deleteRiskEngineConfiguration();
       await apiServices.detectionRule.deleteAll();
