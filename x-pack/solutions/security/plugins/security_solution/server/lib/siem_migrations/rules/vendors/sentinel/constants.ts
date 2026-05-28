@@ -63,13 +63,16 @@ export const SENTINEL_NRT_RULE_KIND = 'NRT';
  *
  * Supported units are years, months, days, hours, minutes, and seconds. Weeks (`P1W`),
  * fractional values (`PT0.5H`), and comma decimals are intentionally not supported.
+ * The converter accepts either one date unit or a time-only duration. Mixed date units
+ * (`P1Y2M`) and date-plus-time durations (`P1DT2H`) are intentionally rejected to avoid
+ * changing schedule semantics during migration.
+ *
  * `T` starts the time portion and is required when the duration includes hours,
  * minutes, or seconds:
  *
  * PT5M = 5 minutes
  * PT1H = 1 hour
  * PT30S = 30 seconds
- * P1DT2H = 1 day and 2 hours
  *
  * `T` is not used for date-only units:
  *
