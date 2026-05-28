@@ -26425,7 +26425,7 @@ junk@^3.1.0:
   resolved "https://registry.yarnpkg.com/junk/-/junk-3.1.0.tgz#31499098d902b7e98c5d9b9c80f43457a88abfa1"
   integrity sha512-pBxcB3LFc8QVgdggvZWyeys+hnrNWg4OcZIU/1X59k5jQdLBlCsYGRQaz234SqoRLTCgMH00fY0xRJH+F9METQ==
 
-just-bash@^3.0.1:
+just-bash@3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/just-bash/-/just-bash-3.0.1.tgz#a4aa809525176fff0645ad71eb2a7bcd6cbf49ff"
   integrity sha512-YVyzCN08fKarUnwqy7rKOAcX+2MLYLnYInuowmUXn3mqhrtd4ieZNBuzdQG+qYV9DqnIWuv9Whiph0WRIWsBtw==
