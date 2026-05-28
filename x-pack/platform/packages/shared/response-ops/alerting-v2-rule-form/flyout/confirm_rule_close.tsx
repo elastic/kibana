@@ -7,12 +7,23 @@
 
 import React from 'react';
 import { EuiConfirmModal, EuiText } from '@elastic/eui';
-import {
-  RULE_FORM_CANCEL_MODAL_TITLE,
-  RULE_FORM_CANCEL_MODAL_DESCRIPTION,
-  RULE_FORM_CANCEL_MODAL_CONFIRM,
-  RULE_FORM_CANCEL_MODAL_CANCEL,
-} from './translations';
+import { i18n } from '@kbn/i18n';
+
+const MODAL_TITLE = i18n.translate('xpack.alertingV2.ruleForm.cancelModal.title', {
+  defaultMessage: 'Discard unsaved changes to rule?',
+});
+
+const MODAL_DESCRIPTION = i18n.translate('xpack.alertingV2.ruleForm.cancelModal.description', {
+  defaultMessage: "You can't recover unsaved changes.",
+});
+
+const CONFIRM_BUTTON = i18n.translate('xpack.alertingV2.ruleForm.cancelModal.confirm', {
+  defaultMessage: 'Discard changes',
+});
+
+const CANCEL_BUTTON = i18n.translate('xpack.alertingV2.ruleForm.cancelModal.cancel', {
+  defaultMessage: 'Continue editing',
+});
 
 export interface ConfirmRuleCloseProps {
   onCancel: () => void;
@@ -26,13 +37,13 @@ export const ConfirmRuleClose = ({ onCancel, onConfirm }: ConfirmRuleCloseProps)
     data-test-subj="alertingV2ConfirmRuleCloseModal"
     buttonColor="danger"
     defaultFocusedButton="cancel"
-    title={RULE_FORM_CANCEL_MODAL_TITLE}
-    confirmButtonText={RULE_FORM_CANCEL_MODAL_CONFIRM}
-    cancelButtonText={RULE_FORM_CANCEL_MODAL_CANCEL}
-    aria-label={RULE_FORM_CANCEL_MODAL_TITLE}
+    title={MODAL_TITLE}
+    confirmButtonText={CONFIRM_BUTTON}
+    cancelButtonText={CANCEL_BUTTON}
+    aria-label={MODAL_TITLE}
   >
     <EuiText>
-      <p>{RULE_FORM_CANCEL_MODAL_DESCRIPTION}</p>
+      <p>{MODAL_DESCRIPTION}</p>
     </EuiText>
   </EuiConfirmModal>
 );
