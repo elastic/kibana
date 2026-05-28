@@ -102,13 +102,13 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
       () => allAgentErrors.map((agentErrorInfo) => agentErrorInfo.errors).flat().length,
       [allAgentErrors]
     );
-    const isMultiAgentAction = errorCount && !agentId && action.agents.length > 1;
-    const isCompletedAndSuccessful = useMemo(() => {
+    const isMultiAgentAction = Boolean(errorCount && !agentId && action.agents.length > 1);
+    const isPendingOrSuccessful: boolean = useMemo(() => {
       const actionInfoState = agentId ? action.agentState[agentId] : action;
-      return actionInfoState.isCompleted && actionInfoState.wasSuccessful;
+      return !actionInfoState.isCompleted || actionInfoState.wasSuccessful;
     }, [action, agentId]);
 
-    if (isCompletedAndSuccessful) {
+    if (isPendingOrSuccessful) {
       return null;
     }
 
@@ -125,7 +125,11 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
         <>
           {!errorCount ? (
             action.wasCanceled ? (
-              <CanceledMessage cancelActionId="" cancelType="action" />
+              <CanceledMessage
+                cancelActionId=""
+                cancelType="action"
+                data-test-subj={getTestId('canceledMessage')}
+              />
             ) : (
               <FormattedMessage
                 id="xpack.securitySolution.endpointActionFailureMessage.unknownFailure"
@@ -147,6 +151,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
                         <CanceledMessage
                           cancelType={agentErrorInfo.cancelType || 'action'}
                           cancelActionId={agentErrorInfo.cancelActionId}
+                          data-test-subj={getTestId('canceledMessage')}
                         />
                       )}
                       {agentErrorInfo.errors.join(' | ')}
@@ -162,6 +167,7 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
                 <CanceledMessage
                   cancelType={allAgentErrors[0].cancelType || 'action'}
                   cancelActionId={allAgentErrors[0].cancelActionId}
+                  data-test-subj={getTestId('canceledMessage')}
                 />
               )}
               {allAgentErrors[0].errors.join(' | ')}
@@ -174,13 +180,15 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
 );
 EndpointActionFailureMessage.displayName = 'EndpointActionFailureMessage';
 
-export interface CanceledMessageProps {
+/** @private */
+interface CanceledMessageProps {
   cancelType: string;
   cancelActionId: string; // Could be an empty string.
   'data-test-subj'?: string;
 }
 
-export const CanceledMessage = memo<CanceledMessageProps>(
+/** @private */
+const CanceledMessage = memo<CanceledMessageProps>(
   ({ cancelType, cancelActionId, 'data-test-subj': dataTestSubj }) => {
     if (!cancelType && !cancelActionId) {
       return null;
