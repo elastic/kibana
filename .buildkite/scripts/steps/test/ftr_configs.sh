@@ -123,12 +123,17 @@ while read -r config; do
     result: ${lastCode}")
 
   if [ $lastCode -eq 0 ]; then
+    # Test was successful, so mark it as executed
     buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
   else
     exitCode=10
     echo "FTR exited with code $lastCode"
     echo "^^^ +++"
-    failedConfigs="${failedConfigs:+${failedConfigs}$'\n'}$config"
+    if [[ "$failedConfigs" ]]; then
+      failedConfigs="${failedConfigs}"$'\n'"$config"
+    else
+      failedConfigs="$config"
+    fi
   fi
 done <<< "$configs"
 
