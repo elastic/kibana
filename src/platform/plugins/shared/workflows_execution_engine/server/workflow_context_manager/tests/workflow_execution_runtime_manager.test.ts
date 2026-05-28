@@ -22,7 +22,7 @@ import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { buildWorkflowContext } from '../build_workflow_context';
 import type { StepIoService } from '../step_io_service';
 import type { ContextDependencies } from '../types';
-import { WorkflowExecutionDriver } from '../workflow_execution_driver';
+import type { WorkflowExecutionDriver } from '../workflow_execution_driver';
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
