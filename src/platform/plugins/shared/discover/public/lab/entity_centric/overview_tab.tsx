@@ -53,7 +53,7 @@ export const OverviewTab = ({ overview }: OverviewTabProps) => {
             title={i18n.translate('discover.entityCentricLab.flyout.overview.entitySummaryTitle', {
               defaultMessage: 'Entity Summary',
             })}
-            adornment={<EuiIcon type="sparkles" color="accentSecondary" aria-hidden={true} />}
+            adornment={<AssistanceSparklesIcon />}
           />
         }
         extraAction={<SectionMenuButton sectionLabel="entitySummary" />}
@@ -159,6 +159,11 @@ const SectionMenuButton = ({ sectionLabel }: { sectionLabel: string }) => (
   />
 );
 
+const AssistanceSparklesIcon = () => {
+  const { euiTheme } = useEuiTheme();
+  return <EuiIcon type="sparkles" color={euiTheme.colors.textAssistance} aria-hidden={true} />;
+};
+
 const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -166,12 +171,12 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
       hasBorder
       hasShadow={false}
       paddingSize="m"
-      // Accent-tinted backdrop ties the AI summary card to the `sparkles`
-      // section adornment and the `accent`-colored refresh affordance below
-      // (canonical EUI signal for AI-generated content).
+      // Assistance-tinted backdrop ties the AI summary card to the `sparkles`
+      // section adornment and the `assistance`-colored refresh affordance below
+      // (canonical Borealis purple palette dedicated to AI-generated content).
       css={css`
-        background-color: ${euiTheme.colors.backgroundLightAccentSecondary};
-        border-color: ${euiTheme.colors.borderBaseAccentSecondary};
+        background-color: ${euiTheme.colors.backgroundLightAssistance};
+        border-color: ${euiTheme.colors.borderBaseAssistance};
       `}
       data-test-subj="entityCentricLabEntitySummaryCard"
     >
@@ -191,8 +196,10 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType="refresh"
-            color="accentSecondary"
             size="xs"
+            css={css`
+              color: ${euiTheme.colors.textAssistance};
+            `}
             aria-label={i18n.translate(
               'discover.entityCentricLab.flyout.overview.regenerateSummaryAriaLabel',
               { defaultMessage: 'Regenerate summary' }
