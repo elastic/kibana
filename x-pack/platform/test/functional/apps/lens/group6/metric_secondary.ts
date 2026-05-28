@@ -149,11 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await lens.getSecondaryMetricLabel()).to.be('Difference');
       expect(await lens.getSecondaryMetricBadgeText()).to.be('+8,277.678\n↑');
 
-      // Save the visualization
-      await lens.save('Metric label badge test', false, false);
-
-      // Open in edit mode and change primary metric to last value of ip
-      await openBaseMetric();
+      await lens.closeDimensionEditor();
 
       await lens.openDimensionEditor(
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
@@ -181,7 +177,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await testSubjects.isDisplayed('lnsMetric_secondary_trend_baseline_input')).to.be(
         true
       );
-      await lens.closeDimensionEditor();
     });
   });
 }

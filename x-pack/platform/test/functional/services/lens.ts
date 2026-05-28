@@ -27,6 +27,7 @@ interface CreateMetricChartOptions {
   secondaryMetric?: SecondaryMetric;
 }
 
+// TODO: Will be removed when moved to Scout
 export function LensServiceProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
