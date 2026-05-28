@@ -28,6 +28,8 @@ plugins:
     - lens
     - logstash
     - maps
+    - ml
+    - monitoring
     - navigation
     - observability
     - observability_onboarding
