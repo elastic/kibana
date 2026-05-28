@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 /**
- * Purpose: Verify maps support for courier:ignoreFilterIfFieldNotInIndex
+ * Purpose: courier:ignoreFilterIfFieldNotInIndex smoke test
  * 
  * Migration: migrate to scout
  */

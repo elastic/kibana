@@ -10,7 +10,7 @@ import type { Feature } from 'geojson';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 /**
- * Purpose: Verify geo grid layer interfactions
+ * Purpose: Geo grid layer smoke test
  * 
  * Migration: migrate to scout
  */

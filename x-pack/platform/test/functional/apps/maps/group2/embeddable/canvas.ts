@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 /**
- * Purpose: Verify map renders in canvas
+ * Purpose: Canvas embeddable smoke test
  * 
  * Migration: Migrate to scout. Remove "should not show draw controls" test case
  */

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 /**
- * Purpose: Verify geojson layer interacts with unified search
+ * Purpose: Documents layer smoke test
  * 
  * Migration: Migrate to Scout
  */
