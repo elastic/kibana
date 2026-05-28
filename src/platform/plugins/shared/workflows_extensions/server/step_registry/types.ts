@@ -30,10 +30,7 @@ export const DEFAULT_POLL_CEILINGS: Required<PollCeilings> = {
  * (or when individual ceiling properties are missing). Override in your step definition for
  * production integrations.
  */
-const PollStepDefaults: {
-  ceilings: PollCeilings;
-  policy: PollPolicy;
-} = {
+export const PollStepDefaults = {
   ceilings: {
     maxAttempts: 60,
     maxWaitMs: 60 * 1_000, // 1 minute
@@ -42,6 +39,9 @@ const PollStepDefaults: {
     strategy: 'fixed',
     intervalMs: 1000,
   },
+} as const satisfies {
+  ceilings: PollCeilings;
+  policy: PollPolicy;
 };
 
 // -----------------------------------------------------------------------------
@@ -69,7 +69,9 @@ export type PollContinueResult<State extends z.ZodObject = z.ZodObject> =
       state?: z.infer<State>;
       /**
        * Optional delay (ms) until the next poll. When omitted or non-positive, the
-       * engine uses {@link PollPolicy} for the next wake-up.
+       * engine uses {@link PollPolicy} for the next wake-up. Overrides only the
+       * upcoming sleep; the poll `attempt` counter still increments, and the
+       * following wake-up uses {@link PollPolicy} from that incremented attempt.
        */
       nextPollDelayMs?: number;
       error?: never;
