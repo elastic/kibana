@@ -11,11 +11,15 @@ import type { RelationshipObservationDoc } from '@kbn/entity-store/common';
 
 import { writeRelationshipObservations } from './write_relationship_observations';
 import type { EntityRelationshipRecord } from './types';
+import { LOOKBACK_WINDOW } from './constants';
 
+// The maintainer documents what window it actually scanned over — assert
+// against the constant, not a literal, so tests stay in lockstep with the
+// engine if the lookback period ever changes.
 const baseContext = {
   scanId: '11111111-1111-1111-1111-111111111111',
   maintainerKind: 'accesses_frequently_and_infrequently',
-  lookbackWindow: 'now-30d',
+  lookbackWindow: LOOKBACK_WINDOW,
   entitySource: 'elastic_defend',
   observedAt: '2026-05-15T10:30:00.000Z',
 };
@@ -180,7 +184,7 @@ describe('writeRelationshipObservations', () => {
     });
 
     it('sets Maintainer.lookback_window to context.lookbackWindow', () => {
-      expect(docs[0].Maintainer.lookback_window).toBe('now-30d');
+      expect(docs[0].Maintainer.lookback_window).toBe(LOOKBACK_WINDOW);
     });
 
     it('does NOT set event.ingested (the ingest pipeline owns that field)', () => {

@@ -12,7 +12,7 @@ import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { runRelationshipMaintainer } from './run_relationship_maintainer';
-import { COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
+import { COMPOSITE_PAGE_SIZE, MAX_ITERATIONS, LOOKBACK_WINDOW } from './constants';
 import type { RelationshipIntegrationConfig } from './types';
 
 interface SearchResponse {
@@ -1062,9 +1062,9 @@ describe('runRelationshipMaintainer', () => {
         // record. Hardcoded at the runRelationshipMaintainer call site.
         expect(d.Maintainer.kind).toBe('accesses_frequently_and_infrequently');
         // Lookback window mirrors the engine constant LOOKBACK_WINDOW
-        // (`engine/constants.ts:8`) — the maintainer documents what window it
-        // scanned over.
-        expect(d.Maintainer.lookback_window).toBe('now-30d');
+        // (`engine/constants.ts:8`) — assert against the imported constant so
+        // this test stays correct if the engine's lookback period changes.
+        expect(d.Maintainer.lookback_window).toBe(LOOKBACK_WINDOW);
       }
     });
 
