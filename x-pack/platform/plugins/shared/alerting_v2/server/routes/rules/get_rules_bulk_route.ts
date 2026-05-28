@@ -39,7 +39,7 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => bulkGetRulesResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the requested rules.',
       },
       400: {
         body: () => errorResponseSchema,
