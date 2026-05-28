@@ -1,0 +1,663 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/**
+ * Mock data backing the non-Overview tabs of the entity-centric lab flyout.
+ * Mirrors {@link buildFakeEntityOverview} — everything is hard-coded from the
+ * design, interpolating the clicked service name where the screen references
+ * it so the flyout still feels specific.
+ */
+
+export interface MetricSeriesPoint {
+  readonly x: number;
+  readonly y: number;
+}
+
+export interface MetricSeries {
+  readonly id: string;
+  readonly label: string;
+  readonly unit: string;
+  readonly description: string;
+  /** Threshold line drawn as a dotted reference (e.g. SLO target). Optional. */
+  readonly threshold?: number;
+  /** One or more named series rendered in the same chart. */
+  readonly series: ReadonlyArray<{
+    readonly id: string;
+    readonly label: string;
+    readonly points: readonly MetricSeriesPoint[];
+  }>;
+}
+
+export interface MetricsTabData {
+  readonly goldenSignals: readonly MetricSeries[];
+  readonly otherMetrics: readonly MetricSeries[];
+  /** X-positions where the lab renders purple event annotations. */
+  readonly eventPositions: readonly number[];
+}
+
+export interface LogRow {
+  readonly id: string;
+  readonly timestamp: string;
+  readonly attribute: string;
+  readonly summary: string;
+}
+
+export interface AlertRow {
+  readonly id: string;
+  readonly status: 'Active';
+  readonly triggeredAt: string;
+  readonly ruleName: string;
+  readonly reason: string;
+}
+
+export interface AlertsTabData {
+  readonly activeCount: number;
+  readonly totalCount: number;
+  readonly overTime: readonly MetricSeriesPoint[];
+  readonly details: readonly AlertRow[];
+}
+
+export type RelatedEntityHealth = 'Unhealthy' | 'At risk' | 'Healthy';
+
+export interface RelatedEntity {
+  readonly id: string;
+  readonly name: string;
+  readonly health: RelatedEntityHealth;
+  readonly entityType: string;
+  readonly relation: string;
+}
+
+export interface TopologyNode {
+  readonly id: string;
+  readonly label: string;
+  /** Whether this is the entity the flyout is open on — drives highlight. */
+  readonly focal?: boolean;
+}
+
+export interface TopologyEdge {
+  readonly from: string;
+  readonly to: string;
+  /** Thicker edge — design highlights a subset of edges with the focal node. */
+  readonly emphasized?: boolean;
+}
+
+export interface RelationshipsTabData {
+  readonly topology: {
+    readonly nodes: readonly TopologyNode[];
+    readonly edges: readonly TopologyEdge[];
+  };
+  readonly related: readonly RelatedEntity[];
+}
+
+export type SecuritySeverity = 'Critical' | 'High' | 'Medium' | 'Low';
+
+export interface SecurityIssue {
+  readonly id: string;
+  readonly severity: SecuritySeverity;
+  readonly title: string;
+  readonly detectedAt: string;
+  readonly source: string;
+  readonly status: 'Open' | 'Triaged' | 'Suppressed';
+}
+
+export interface SecurityTabData {
+  readonly riskScore: number;
+  readonly riskLevel: 'Low' | 'Medium' | 'High';
+  readonly lastEvent: string;
+  readonly issues: readonly SecurityIssue[];
+}
+
+export interface EntityTabsData {
+  readonly metrics: MetricsTabData;
+  readonly logs: readonly LogRow[];
+  readonly alerts: AlertsTabData;
+  readonly relationships: RelationshipsTabData;
+  readonly security: SecurityTabData;
+}
+
+/** 24-point evenly-spaced X domain shared by every chart in the flyout. */
+const X_DOMAIN = Array.from({ length: 24 }, (_, i) => i);
+
+const series = (id: string, label: string, ys: readonly number[]) => ({
+  id,
+  label,
+  points: X_DOMAIN.map((x, i) => ({ x, y: ys[i] ?? 0 })),
+});
+
+export const buildFakeEntityTabsData = (serviceName: string): EntityTabsData => ({
+  metrics: {
+    eventPositions: [4, 9],
+    goldenSignals: [
+      {
+        id: 'latency',
+        label: 'Latency',
+        unit: 'ms',
+        threshold: 320,
+        description: 'Average end-to-end request latency across all instances of this service.',
+        series: [
+          series(
+            'latency-ms',
+            'latency (ms)',
+            [
+              310, 290, 270, 260, 280, 320, 360, 340, 300, 250, 220, 200, 230, 260, 290, 280, 250,
+              230, 240, 260, 280, 290, 300, 310,
+            ]
+          ),
+        ],
+      },
+      {
+        id: 'errorRate',
+        label: 'Error rate',
+        unit: '%',
+        threshold: 3,
+        description: 'Percentage of failed requests (status >= 500 or trace error tag).',
+        series: [
+          series(
+            'error-rate-pct',
+            'Error rate (%)',
+            [
+              3.2, 3.5, 3.8, 4.2, 4.6, 5.1, 4.9, 4.6, 4.3, 4.0, 3.8, 3.5, 3.2, 3.0, 2.9, 3.0, 3.3,
+              3.7, 4.1, 4.4, 4.7, 5.0, 5.3, 5.6,
+            ]
+          ),
+        ],
+      },
+      {
+        id: 'throughput',
+        label: 'Throughput',
+        unit: 'req/s',
+        description: 'Requests per second served by this service across all instances.',
+        series: [
+          series(
+            'network-in',
+            'Network in',
+            [
+              52, 50, 55, 60, 58, 65, 70, 68, 60, 55, 50, 48, 52, 55, 60, 62, 60, 55, 50, 48, 50,
+              52, 55, 58,
+            ]
+          ),
+          series(
+            'network-out',
+            'Network out',
+            [
+              60, 58, 55, 50, 48, 52, 55, 60, 65, 68, 70, 72, 70, 68, 65, 62, 60, 58, 60, 62, 65,
+              68, 70, 72,
+            ]
+          ),
+        ],
+      },
+    ],
+    otherMetrics: [
+      {
+        id: 'cpu-usage',
+        label: 'Other metric',
+        unit: '%',
+        description: 'Average CPU utilization across pods running this service.',
+        series: [
+          series(
+            'do-nyc1-demo-infra-1',
+            'do-nyc1-demo-infra',
+            [
+              55, 60, 58, 52, 50, 48, 50, 55, 60, 62, 60, 58, 55, 52, 50, 55, 60, 62, 64, 60, 55,
+              52, 50, 55,
+            ]
+          ),
+        ],
+      },
+      {
+        id: 'memory-usage',
+        label: 'Other metric',
+        unit: '%',
+        description: 'Average memory utilization across pods running this service.',
+        series: [
+          series(
+            'do-nyc1-demo-infra-2',
+            'do-nyc1-demo-infra',
+            [
+              60, 65, 70, 72, 68, 65, 60, 58, 55, 60, 65, 70, 72, 75, 78, 80, 78, 75, 72, 70, 68,
+              65, 60, 58,
+            ]
+          ),
+        ],
+      },
+    ],
+  },
+  logs: buildFakeLogRows(serviceName),
+  alerts: {
+    activeCount: 16,
+    totalCount: 20,
+    overTime: X_DOMAIN.map((x) => ({
+      x,
+      y: [
+        60, 62, 65, 68, 64, 60, 58, 55, 50, 48, 52, 55, 58, 60, 62, 64, 60, 55, 58, 62, 66, 68, 70,
+        72,
+      ][x],
+    })),
+    details: [
+      {
+        id: 'a1',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:30:45.873',
+        ruleName: 'K8s memory.usage limits',
+        reason: `Max k8s memory.usage spiked for ${serviceName}`,
+      },
+      {
+        id: 'a2',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:30:44.136',
+        ruleName: 'API Server Responsiveness',
+        reason: 'Server responsiveness is degraded',
+      },
+      {
+        id: 'a3',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:30:44.081',
+        ruleName: '[Elastic] Node availability',
+        reason: 'Max node availability is below threshold',
+      },
+      {
+        id: 'a4',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:30:43.345',
+        ruleName: '[Elastic Agent] Excessive memory',
+        reason: 'Max k8s memory.usage is above 90%',
+      },
+      {
+        id: 'a5',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:30:43.136',
+        ruleName: 'K8s memory.usage limits',
+        reason: 'Avg k8s memory.usage is at the limit',
+      },
+      {
+        id: 'a6',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:30:43.136',
+        ruleName: 'K8s memory.usage limits',
+        reason: 'Avg k8s memory.usage is at the limit',
+      },
+      {
+        id: 'a7',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:30:43.136',
+        ruleName: 'K8s memory.usage limits',
+        reason: 'Avg k8s memory.usage is at the limit',
+      },
+      {
+        id: 'a8',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:30:43.136',
+        ruleName: 'K8s memory.usage limits',
+        reason: 'Avg k8s memory.usage is at the limit',
+      },
+      {
+        id: 'a9',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:30:43.136',
+        ruleName: 'K8s memory.usage limits',
+        reason: 'Avg k8s memory.usage is at the limit',
+      },
+      {
+        id: 'a10',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:30:00.000',
+        ruleName: 'API Server Responsiveness',
+        reason: 'Server responsiveness is degraded',
+      },
+      {
+        id: 'a11',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:29:55.000',
+        ruleName: 'K8s CPU.usage limits',
+        reason: `CPU spike detected on ${serviceName}`,
+      },
+      {
+        id: 'a12',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:29:50.000',
+        ruleName: '[Elastic] Disk pressure',
+        reason: 'Max disk usage above threshold',
+      },
+      {
+        id: 'a13',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:29:45.000',
+        ruleName: 'K8s pod restarts',
+        reason: 'Pod restart rate elevated',
+      },
+      {
+        id: 'a14',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:29:40.000',
+        ruleName: '[Elastic] Network errors',
+        reason: 'Network error rate above SLO',
+      },
+      {
+        id: 'a15',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:29:35.000',
+        ruleName: 'API latency SLO',
+        reason: '99p latency above target',
+      },
+      {
+        id: 'a16',
+        status: 'Active',
+        triggeredAt: 'Dec 10, 2025, 11:29:30.000',
+        ruleName: 'Synthetic check',
+        reason: 'Uptime check failing from 2 regions',
+      },
+    ],
+  },
+  relationships: buildFakeRelationships(serviceName),
+  security: {
+    riskScore: 72,
+    riskLevel: 'High',
+    lastEvent: '14 min ago',
+    issues: [
+      {
+        id: 's1',
+        severity: 'Critical',
+        title: 'CVE-2026-12345: Remote code execution in payments-lib v2.1.0',
+        detectedAt: 'May 6, 2026, 09:12',
+        source: 'Vulnerabilities',
+        status: 'Open',
+      },
+      {
+        id: 's2',
+        severity: 'High',
+        title: `Privileged container detected for ${serviceName}`,
+        detectedAt: 'May 5, 2026, 18:42',
+        source: 'CSPM',
+        status: 'Open',
+      },
+      {
+        id: 's3',
+        severity: 'High',
+        title: 'Outbound traffic to unknown destination 185.220.101.42',
+        detectedAt: 'May 5, 2026, 14:05',
+        source: 'Detections',
+        status: 'Triaged',
+      },
+      {
+        id: 's4',
+        severity: 'Medium',
+        title: 'Secret rotated more than 90 days ago',
+        detectedAt: 'May 4, 2026, 22:18',
+        source: 'CSPM',
+        status: 'Open',
+      },
+      {
+        id: 's5',
+        severity: 'Low',
+        title: 'Deprecated TLS version negotiated by a downstream client',
+        detectedAt: 'May 2, 2026, 08:30',
+        source: 'Detections',
+        status: 'Suppressed',
+      },
+    ],
+  },
+});
+
+const buildFakeLogRows = (serviceName: string): LogRow[] => {
+  const baseTimestamp = 'Apr 20, 2026 @ 11:36:5';
+  const lines: Array<Omit<LogRow, 'id' | 'timestamp'> & { ts: string }> = [
+    {
+      ts: '5.803',
+      attribute: '3 attributes.log.file.path',
+      summary: `/var/log/pods/${serviceName}-system_konnectivity-agent-6ffb545547-phjh2_c9b9e8d6-9b95-...`,
+    },
+    {
+      ts: '2.542',
+      attribute: '2 attributes.log.file.path',
+      summary: `/var/log/pods/${serviceName}-system_konnectivity-agent-6ffb545547-w6lg4_298622e6-f54d-...`,
+    },
+    {
+      ts: '2.295',
+      attribute: '5 attributes.log.file.path',
+      summary: `/var/log/pods/ensemble-oteldemo-yrxlg-default_kafka-6989c85598-4mwpt_92fe8ad...`,
+    },
+    {
+      ts: '2.295',
+      attribute: '5 attributes.log.file.path',
+      summary: `/var/log/pods/ensemble-oteldemo-yrxlg-default_kafka-6989c85598-4mwpt_92fe8ad...`,
+    },
+    {
+      ts: '2.293',
+      attribute: 'body.text',
+      summary: `[LocalLog partition=__cluster_metadata-0, dir=/tmp/kafka-logs] Rolled new log segment at offset 1895220 in...`,
+    },
+    {
+      ts: '2.293',
+      attribute: 'body.text',
+      summary: `[ProducerStateManager partition=__cluster_metadata-0] Wrote producer snapshot at offset 1895220 with 0 pre...`,
+    },
+    {
+      ts: '2.150',
+      attribute: '2 attributes.log.file.path',
+      summary: `/var/log/pods/${serviceName}_default_main-9c0e8d2e-9b95.log`,
+    },
+    {
+      ts: '1.987',
+      attribute: 'body.text',
+      summary: `[Health] Service ${serviceName} reported healthy after readiness probe`,
+    },
+    {
+      ts: '1.812',
+      attribute: '3 attributes.log.file.path',
+      summary: `/var/log/pods/${serviceName}_default_sidecar-1f2a3b-4c5d.log`,
+    },
+    {
+      ts: '1.654',
+      attribute: 'body.text',
+      summary: `[GC] Young generation pause 18ms (allocated 412MB)`,
+    },
+    {
+      ts: '1.501',
+      attribute: 'body.text',
+      summary: `[HTTP] POST /v1/orders 201 in 84ms (request_id=req_8821)`,
+    },
+    {
+      ts: '1.342',
+      attribute: 'body.text',
+      summary: `[HTTP] GET /v1/orders/42 200 in 12ms (cache hit)`,
+    },
+    {
+      ts: '1.193',
+      attribute: 'body.text',
+      summary: `[Cache] Evicted 32 entries from session cache (capacity reached)`,
+    },
+    {
+      ts: '0.998',
+      attribute: 'body.text',
+      summary: `[Auth] Issued JWT for user_id=4711, scopes=[orders:read]`,
+    },
+    {
+      ts: '0.834',
+      attribute: 'body.text',
+      summary: `[Outbound] charge tx_8821 → stripe.charges.create OK in 1.2s`,
+    },
+    {
+      ts: '0.671',
+      attribute: 'body.text',
+      summary: `[Worker] Retrying charge tx_8821 (attempt 2/5)`,
+    },
+    {
+      ts: '0.512',
+      attribute: 'body.text',
+      summary: `[Outbound] stock-db connection-timeout after 5000ms`,
+    },
+    {
+      ts: '0.345',
+      attribute: 'body.text',
+      summary: `[Health] Service ${serviceName} liveness probe OK`,
+    },
+    { ts: '0.198', attribute: 'body.text', summary: `[HTTP] GET /healthz 200 in 2ms` },
+    {
+      ts: '0.050',
+      attribute: 'body.text',
+      summary: `[Worker] Restored connection to stock-db (3 pending writes flushed)`,
+    },
+  ];
+  return lines.map((line, idx) => ({
+    id: `log-${idx}`,
+    timestamp: `${baseTimestamp}${line.ts}`,
+    attribute: line.attribute,
+    summary: line.summary,
+  }));
+};
+
+const buildFakeRelationships = (serviceName: string): RelationshipsTabData => {
+  // Layout coordinates aren't here — the topology component lays the nodes out
+  // along a fixed radial arrangement based on order.
+  const topology: RelationshipsTabData['topology'] = {
+    nodes: [
+      { id: 'focal', label: serviceName, focal: true },
+      { id: 'cart', label: 'cart' },
+      { id: 'ad', label: 'ad' },
+      { id: 'recommendation', label: 'recommendation' },
+      { id: 'product-catalog', label: 'product-catalog' },
+      { id: 'currency', label: 'currency' },
+      { id: 'frontend-proxy', label: 'frontend-proxy' },
+      { id: 'load-generator', label: 'load-generator' },
+      { id: 'payment', label: 'payment' },
+      { id: 'redis', label: 'redis' },
+      { id: 'flagd', label: 'flagd' },
+    ],
+    edges: [
+      { from: 'focal', to: 'cart', emphasized: true },
+      { from: 'focal', to: 'ad', emphasized: true },
+      { from: 'focal', to: 'recommendation', emphasized: true },
+      { from: 'focal', to: 'product-catalog', emphasized: true },
+      { from: 'focal', to: 'currency', emphasized: true },
+      { from: 'cart', to: 'redis' },
+      { from: 'recommendation', to: 'product-catalog' },
+      { from: 'frontend-proxy', to: 'focal' },
+      { from: 'load-generator', to: 'frontend-proxy' },
+      { from: 'product-catalog', to: 'flagd' },
+      { from: 'payment', to: 'cart' },
+    ],
+  };
+  return {
+    topology,
+    related: [
+      {
+        id: 'r1',
+        name: 'gke-abcdefgh',
+        health: 'Unhealthy',
+        entityType: 'Host',
+        relation: `Hosting ${serviceName}`,
+      },
+      {
+        id: 'r2',
+        name: 'checkout-api',
+        health: 'Unhealthy',
+        entityType: 'API',
+        relation: `Called by ${serviceName}`,
+      },
+      {
+        id: 'r3',
+        name: 'entity-name',
+        health: 'At risk',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r4',
+        name: 'entity-name',
+        health: 'At risk',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r5',
+        name: 'entity-name',
+        health: 'Healthy',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r6',
+        name: 'entity-name',
+        health: 'Healthy',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r7',
+        name: 'entity-name',
+        health: 'Healthy',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r8',
+        name: 'entity-name',
+        health: 'Healthy',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r9',
+        name: 'entity-name',
+        health: 'Healthy',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r10',
+        name: 'entity-name',
+        health: 'Healthy',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r11',
+        name: 'entity-name',
+        health: 'Healthy',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r12',
+        name: 'entity-name',
+        health: 'Healthy',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r13',
+        name: 'entity-name',
+        health: 'Healthy',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r14',
+        name: 'entity-name',
+        health: 'Healthy',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r15',
+        name: 'entity-name',
+        health: 'Healthy',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+      {
+        id: 'r16',
+        name: 'entity-name',
+        health: 'Healthy',
+        entityType: 'entity-type',
+        relation: 'Relation in plain language',
+      },
+    ],
+  };
+};

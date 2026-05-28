@@ -31,7 +31,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { OverviewTab } from './overview_tab';
+import { MetricsTab } from './metrics_tab';
+import { LogsTab } from './logs_tab';
+import { AlertsTab } from './alerts_tab';
+import { RelationshipsTab } from './relationships_tab';
+import { SecurityTab } from './security_tab';
 import { buildFakeEntityOverview } from './fake_entity_overview';
+import { buildFakeEntityTabsData } from './fake_entity_tabs';
 
 interface EntityFlyoutProps {
   readonly serviceName: string;
@@ -45,6 +51,7 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
   const [activeTab, setActiveTab] = useState<TabId>('overview');
 
   const overview = useMemo(() => buildFakeEntityOverview(serviceName), [serviceName]);
+  const tabsData = useMemo(() => buildFakeEntityTabsData(serviceName), [serviceName]);
 
   const tabs = useMemo<Array<{ id: TabId; label: string; appendBadge?: number }>>(
     () => [
@@ -197,11 +204,12 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {activeTab === 'overview' ? (
-          <OverviewTab overview={overview} />
-        ) : (
-          <PlaceholderTab tabId={activeTab} />
-        )}
+        <TabContent
+          activeTab={activeTab}
+          serviceName={serviceName}
+          overview={overview}
+          tabsData={tabsData}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
@@ -235,13 +243,29 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
   );
 };
 
-const PlaceholderTab = ({ tabId }: { tabId: TabId }) => (
-  <EuiText color="subdued">
-    <p data-test-subj={`entityCentricLabPlaceholderTab-${tabId}`}>
-      {i18n.translate('discover.entityCentricLab.flyout.placeholderTab', {
-        defaultMessage: 'The “{tabId}” tab is not implemented yet in this prototype.',
-        values: { tabId },
-      })}
-    </p>
-  </EuiText>
-);
+const TabContent = ({
+  activeTab,
+  serviceName,
+  overview,
+  tabsData,
+}: {
+  readonly activeTab: TabId;
+  readonly serviceName: string;
+  readonly overview: ReturnType<typeof buildFakeEntityOverview>;
+  readonly tabsData: ReturnType<typeof buildFakeEntityTabsData>;
+}) => {
+  switch (activeTab) {
+    case 'overview':
+      return <OverviewTab overview={overview} />;
+    case 'metrics':
+      return <MetricsTab metrics={tabsData.metrics} />;
+    case 'logs':
+      return <LogsTab serviceName={serviceName} logs={tabsData.logs} />;
+    case 'alerts':
+      return <AlertsTab alerts={tabsData.alerts} />;
+    case 'relationships':
+      return <RelationshipsTab relationships={tabsData.relationships} />;
+    case 'security':
+      return <SecurityTab security={tabsData.security} />;
+  }
+};
