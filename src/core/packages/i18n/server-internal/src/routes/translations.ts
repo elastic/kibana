@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createReadStream } from 'fs';
-import { PassThrough } from 'stream';
+import { open } from 'fs/promises';
+import type { ReadStream } from 'fs';
 import { i18n, i18nLoader } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
@@ -79,19 +79,17 @@ export const registerTranslationsRoute = ({
             });
           }
 
-          let body: string | PassThrough;
+          let body: string | ReadStream;
           if (canonicalLocale.toLowerCase() === locale.toLowerCase()) {
             // Default locale: already in memory from server startup
             body = JSON.stringify(i18n.getTranslation());
           } else {
             const files = localeFileMap[canonicalLocale] ?? [];
             if (files.length === 1) {
-              // Single pre-merged file streamed directly. The i18n tooling
-              // (serializeToJson) always writes a top-level "locale" field, so we don't
-              // re-parse here. An empty `{}` file would be served as-is without a locale.
-              const stream = new PassThrough();
-              createReadStream(files[0]).pipe(stream);
-              body = stream;
+              // Open before res.ok() so I/O errors surface as 500, not a truncated 200.
+              // autoClose: true (Node default) closes the handle when the stream ends or is destroyed.
+              const fileHandle = await open(files[0], 'r');
+              body = fileHandle.createReadStream();
             } else {
               // Multiple files (external plugin contributed translations): merge via
               // the loader and serve without caching.

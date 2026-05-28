@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Readable, PassThrough } from 'stream';
+import { Readable } from 'stream';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { registerTranslationsRoute } from './translations';
 
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  createReadStream: jest.fn(),
+jest.mock('fs/promises', () => ({
+  ...jest.requireActual('fs/promises'),
+  open: jest.fn(),
 }));
 
 jest.mock('@kbn/i18n', () => ({
@@ -25,10 +25,10 @@ jest.mock('@kbn/i18n', () => ({
   },
 }));
 
-import { createReadStream } from 'fs';
+import { open } from 'fs/promises';
 import { i18n } from '@kbn/i18n';
 
-const createReadStreamMock = createReadStream as jest.MockedFunction<typeof createReadStream>;
+const openMock = open as jest.MockedFunction<typeof open>;
 const getTranslationMock = i18n.getTranslation as jest.Mock;
 
 const buildHandler = (opts: Omit<Parameters<typeof registerTranslationsRoute>[0], 'router'>) => {
@@ -55,7 +55,7 @@ const makeReadable = (content: string): Readable => {
   return readable;
 };
 
-const collectStream = (stream: PassThrough): Promise<string> =>
+const collectStream = (stream: Readable): Promise<string> =>
   new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     stream.on('data', (chunk: Buffer) => chunks.push(chunk));
@@ -63,10 +63,19 @@ const collectStream = (stream: PassThrough): Promise<string> =>
     stream.on('error', reject);
   });
 
+const mockOpenWithContent = (content: string) => {
+  const handle = {
+    createReadStream: () => makeReadable(content),
+    close: jest.fn().mockResolvedValue(undefined),
+  } as unknown as Awaited<ReturnType<typeof open>>;
+  openMock.mockResolvedValue(handle);
+  return handle;
+};
+
 describe('registerTranslationsRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    createReadStreamMock.mockReturnValue(makeReadable('') as any);
+    mockOpenWithContent('');
     getTranslationMock.mockReturnValue({ locale: 'en', messages: {} });
   });
 
@@ -143,20 +152,20 @@ describe('registerTranslationsRoute', () => {
       const handler = buildHandler(defaultOpts);
       const res = makeResponse();
       await handler({}, makeRequest('en'), res);
-      expect(createReadStreamMock).not.toHaveBeenCalled();
+      expect(openMock).not.toHaveBeenCalled();
       const { body } = (res.ok as jest.Mock).mock.calls[0][0];
       expect(JSON.parse(body)).toEqual({ locale: 'en', messages: { key: 'value' } });
     });
 
     test('serves non-default single-file locale by streaming the file', async () => {
       const fileContent = '{"locale":"fr-FR","formats":{},"messages":{"key":"valeur"}}';
-      createReadStreamMock.mockReturnValue(makeReadable(fileContent) as any);
+      mockOpenWithContent(fileContent);
       const handler = buildHandler(defaultOpts);
       const res = makeResponse();
       await handler({}, makeRequest('fr-FR'), res);
-      expect(createReadStreamMock).toHaveBeenCalledWith('/translations/fr-FR.json');
+      expect(openMock).toHaveBeenCalledWith('/translations/fr-FR.json', 'r');
       const { body } = (res.ok as jest.Mock).mock.calls[0][0];
-      expect(body).toBeInstanceOf(PassThrough);
+      expect(body).toBeInstanceOf(Readable);
       const content = await collectStream(body);
       expect(JSON.parse(content)).toEqual({
         locale: 'fr-FR',
@@ -165,13 +174,31 @@ describe('registerTranslationsRoute', () => {
       });
     });
 
+    test('propagates open errors before committing the response', async () => {
+      openMock.mockRejectedValue(Object.assign(new Error('ENOENT'), { code: 'ENOENT' }));
+      const handler = buildHandler(defaultOpts);
+      const res = makeResponse();
+      await expect(handler({}, makeRequest('fr-FR'), res)).rejects.toThrow('ENOENT');
+      expect(res.ok).not.toHaveBeenCalled();
+    });
+
+test('streams translation file content without modifying it', async () => {
+      mockOpenWithContent('{}');
+      const handler = buildHandler(defaultOpts);
+      const res = makeResponse();
+      await handler({}, makeRequest('fr-FR'), res);
+      const { body } = (res.ok as jest.Mock).mock.calls[0][0];
+      const content = await collectStream(body);
+      expect(JSON.parse(content)).toEqual({});
+    });
+
     test('locale lookup is case-insensitive', async () => {
       const fileContent = '{"locale":"fr-FR","messages":{}}';
-      createReadStreamMock.mockReturnValue(makeReadable(fileContent) as any);
+      mockOpenWithContent(fileContent);
       const handler = buildHandler(defaultOpts);
       const res = makeResponse();
       await handler({}, makeRequest('fr-fr'), res);
-      expect(createReadStreamMock).toHaveBeenCalledWith('/translations/fr-FR.json');
+      expect(openMock).toHaveBeenCalledWith('/translations/fr-FR.json', 'r');
       const { body } = (res.ok as jest.Mock).mock.calls[0][0];
       const content = await collectStream(body);
       expect(JSON.parse(content).locale).toBe('fr-FR');
