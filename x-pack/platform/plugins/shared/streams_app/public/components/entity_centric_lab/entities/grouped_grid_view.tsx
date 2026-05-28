@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import {
   EuiBadge,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -21,18 +22,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import type {
-  EntityCategoryCounts,
-  EntityCategoryId,
-  EntityHealth,
-  FakeEntitiesDataset,
-} from './fake_entities';
-import { ENTITY_CATEGORIES, generateHealthTiles, getCategoryDescriptor } from './fake_entities';
+import type { Entity, EntityCategoryId, EntityHealth } from './fake_entities';
+import { ENTITY_CATEGORIES, getCategoryDescriptor } from './fake_entities';
 
 interface Props {
-  readonly dataset: FakeEntitiesDataset;
+  readonly entities: readonly Entity[];
   readonly onSelectEntity: (entityName: string) => void;
 }
+
+const MAX_TILES_PER_ROW = 96;
 
 const useHealthColors = (): Record<EntityHealth, string> => {
   const { euiTheme } = useEuiTheme();
@@ -58,38 +56,11 @@ const HEALTH_LABEL: Record<EntityHealth, string> = {
   }),
 };
 
-/**
- * Build a synthetic entity name for a heatmap tile. Each category's tiles are
- * laid out 1..N, and Kubernetes sub-types prefix their label so the resulting
- * entity name doesn't collide with siblings (e.g. `kubernetes-pods-3`).
- */
-const synthesizeEntityName = ({
-  categoryId,
-  index,
-  subLabel,
-}: {
-  categoryId: EntityCategoryId;
-  index: number;
-  subLabel?: string;
-}): string => {
-  const subSlug = subLabel
-    ? `-${subLabel
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '')}`
-    : '';
-  return `${categoryId}${subSlug}-${index + 1}`;
-};
-
 const HealthTile = ({
-  health,
-  index,
-  entityName,
+  entity,
   onSelectEntity,
 }: {
-  health: EntityHealth;
-  index: number;
-  entityName: string;
+  entity: Entity;
   onSelectEntity: (entityName: string) => void;
 }) => {
   const colors = useHealthColors();
@@ -97,7 +68,7 @@ const HealthTile = ({
     width: 22px;
     height: 22px;
     border-radius: 4px;
-    background-color: ${colors[health]};
+    background-color: ${colors[entity.health]};
     flex: 0 0 22px;
     padding: 0;
     border: none;
@@ -107,7 +78,7 @@ const HealthTile = ({
     'xpack.streams.entityCentricLab.entities.healthTileTooltip',
     {
       defaultMessage: '{entityName} — {status}',
-      values: { entityName, status: HEALTH_LABEL[health] },
+      values: { entityName: entity.name, status: HEALTH_LABEL[entity.health] },
     }
   );
   return (
@@ -116,54 +87,40 @@ const HealthTile = ({
         type="button"
         className={tileClass}
         aria-label={tooltipContent}
-        data-test-subj={`entityCentricLabHealthTile-${entityName}`}
-        onClick={() => onSelectEntity(entityName)}
+        data-test-subj={`entityCentricLabHealthTile-${entity.name}`}
+        onClick={() => onSelectEntity(entity.name)}
       />
     </EuiToolTip>
   );
 };
 
 const HealthTileRow = ({
-  count,
-  seed,
-  categoryId,
-  subLabel,
+  entities,
   onSelectEntity,
-  maxTiles = 96,
+  maxTiles = MAX_TILES_PER_ROW,
 }: {
-  count: number;
-  seed: number;
-  categoryId: EntityCategoryId;
-  subLabel?: string;
+  entities: readonly Entity[];
   onSelectEntity: (entityName: string) => void;
   maxTiles?: number;
 }) => {
-  const tileCount = Math.min(count, maxTiles);
-  const tiles = useMemo(
-    () => generateHealthTiles({ key: `seed-${seed}`, count: tileCount, bias: seed }),
-    [seed, tileCount]
-  );
+  const visible = entities.slice(0, maxTiles);
+  const overflow = entities.length - visible.length;
   const containerClass = css`
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
+    align-items: center;
   `;
   return (
     <div className={containerClass} role="list">
-      {tiles.map((health, index) => (
-        <HealthTile
-          key={`${seed}-${index}`}
-          health={health}
-          index={index}
-          entityName={synthesizeEntityName({ categoryId, index, subLabel })}
-          onSelectEntity={onSelectEntity}
-        />
+      {visible.map((entity) => (
+        <HealthTile key={entity.id} entity={entity} onSelectEntity={onSelectEntity} />
       ))}
-      {count > maxTiles ? (
+      {overflow > 0 ? (
         <EuiText size="xs" color="subdued">
           {i18n.translate('xpack.streams.entityCentricLab.entities.tileOverflow', {
             defaultMessage: '+{count} more',
-            values: { count: (count - maxTiles).toLocaleString() },
+            values: { count: overflow.toLocaleString() },
           })}
         </EuiText>
       ) : null}
@@ -193,41 +150,61 @@ const CategoryHeader = ({ category, total }: { category: EntityCategoryId; total
 };
 
 const KubernetesCard = ({
-  counts,
+  entities,
   onSelectEntity,
 }: {
-  counts: EntityCategoryCounts;
+  entities: readonly Entity[];
   onSelectEntity: (entityName: string) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const subCounts = counts.subCounts ?? [];
   const subRowClass = css`
     padding: ${euiTheme.size.s} 0;
     border-top: ${euiTheme.border.thin};
   `;
+
+  const groupedBySubType = useMemo(() => {
+    const groups = new Map<string, Entity[]>();
+    for (const entity of entities) {
+      const key = entity.subType ?? 'Other';
+      const list = groups.get(key) ?? [];
+      list.push(entity);
+      groups.set(key, list);
+    }
+    return groups;
+  }, [entities]);
+
+  // Preserve the canonical sub-type ordering (Clusters → Containers) when
+  // some sub-types are still present after filtering; rendering nothing if
+  // a sub-type has zero matches keeps the card compact.
+  const orderedSubTypes = useMemo(
+    () =>
+      ['Clusters', 'Nodes', 'Namespaces', 'Pods', 'Deployments', 'Containers']
+        .map((label) => ({ label, rows: groupedBySubType.get(label) ?? [] }))
+        .filter((group) => group.rows.length > 0),
+    [groupedBySubType]
+  );
+
+  if (entities.length === 0) {
+    return null;
+  }
+
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-      <CategoryHeader category="kubernetes" total={counts.total} />
+      <CategoryHeader category="kubernetes" total={entities.length} />
       <EuiSpacer size="m" />
-      {subCounts.map((sub, index) => (
-        <div key={sub.label} className={index === 0 ? undefined : subRowClass}>
+      {orderedSubTypes.map((group, index) => (
+        <div key={group.label} className={index === 0 ? undefined : subRowClass}>
           <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false} style={{ minWidth: 140 }}>
               <EuiText size="s">
-                <strong>{sub.label}</strong>
+                <strong>{group.label}</strong>
               </EuiText>
               <EuiText size="xs" color="subdued">
-                {sub.total.toLocaleString()}
+                {group.rows.length.toLocaleString()}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              <HealthTileRow
-                count={sub.total}
-                seed={index + 7}
-                categoryId="kubernetes"
-                subLabel={sub.label}
-                onSelectEntity={onSelectEntity}
-              />
+              <HealthTileRow entities={group.rows} onSelectEntity={onSelectEntity} />
             </EuiFlexItem>
           </EuiFlexGroup>
           {index === 0 ? <EuiSpacer size="s" /> : null}
@@ -238,35 +215,76 @@ const KubernetesCard = ({
 };
 
 const CategoryCard = ({
-  counts,
+  category,
+  entities,
   onSelectEntity,
 }: {
-  counts: EntityCategoryCounts;
+  category: EntityCategoryId;
+  entities: readonly Entity[];
   onSelectEntity: (entityName: string) => void;
 }) => {
-  if (counts.category === 'kubernetes') {
-    return <KubernetesCard counts={counts} onSelectEntity={onSelectEntity} />;
+  if (category === 'kubernetes') {
+    return <KubernetesCard entities={entities} onSelectEntity={onSelectEntity} />;
+  }
+  if (entities.length === 0) {
+    return null;
   }
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-      <CategoryHeader category={counts.category} total={counts.total} />
+      <CategoryHeader category={category} total={entities.length} />
       <EuiSpacer size="s" />
-      <HealthTileRow
-        count={counts.total}
-        seed={ENTITY_CATEGORIES.findIndex((c) => c.id === counts.category)}
-        categoryId={counts.category}
-        onSelectEntity={onSelectEntity}
-      />
+      <HealthTileRow entities={entities} onSelectEntity={onSelectEntity} />
     </EuiPanel>
   );
 };
 
-export const GroupedGridView = ({ dataset, onSelectEntity }: Props) => {
+export const GroupedGridView = ({ entities, onSelectEntity }: Props) => {
+  const grouped = useMemo(() => {
+    const buckets = new Map<EntityCategoryId, Entity[]>();
+    for (const entity of entities) {
+      const list = buckets.get(entity.category) ?? [];
+      list.push(entity);
+      buckets.set(entity.category, list);
+    }
+    return ENTITY_CATEGORIES.map((descriptor) => ({
+      category: descriptor.id,
+      rows: buckets.get(descriptor.id) ?? [],
+    })).filter((section) => section.rows.length > 0);
+  }, [entities]);
+
+  if (grouped.length === 0) {
+    return (
+      <EuiEmptyPrompt
+        iconType="filter"
+        title={
+          <h2>
+            {i18n.translate('xpack.streams.entityCentricLab.entities.grid.empty.title', {
+              defaultMessage: 'No entities match your filters',
+            })}
+          </h2>
+        }
+        body={
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate('xpack.streams.entityCentricLab.entities.grid.empty.body', {
+                defaultMessage: 'Try removing one or more filters to see entities.',
+              })}
+            </p>
+          </EuiText>
+        }
+      />
+    );
+  }
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {dataset.categoryCounts.map((counts) => (
-        <EuiFlexItem key={counts.category} grow={false}>
-          <CategoryCard counts={counts} onSelectEntity={onSelectEntity} />
+      {grouped.map((section) => (
+        <EuiFlexItem key={section.category} grow={false}>
+          <CategoryCard
+            category={section.category}
+            entities={section.rows}
+            onSelectEntity={onSelectEntity}
+          />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

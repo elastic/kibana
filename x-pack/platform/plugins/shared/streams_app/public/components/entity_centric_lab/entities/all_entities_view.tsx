@@ -24,9 +24,16 @@ import { EntityFlyout, EntityFlyoutServicesProvider } from '@kbn/entity-centric-
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useKibana } from '../../../hooks/use_kibana';
-import { buildFakeEntities } from './fake_entities';
+import type { ActiveTagFilters } from './fake_entities';
+import {
+  EMPTY_TAG_FILTERS,
+  buildFakeEntities,
+  getTagFacets,
+  matchesTagFilters,
+} from './fake_entities';
 import { GroupedGridView } from './grouped_grid_view';
 import { EntitiesListView } from './entities_list_view';
+import { EntitiesTagFilters } from './entities_tag_filters';
 
 type ViewMode = 'grid' | 'list';
 
@@ -56,15 +63,19 @@ export const AllEntitiesView = () => {
     },
   } = useKibana();
   const dataset = useMemo(() => buildFakeEntities(), []);
+  const tagFacets = useMemo(() => getTagFacets(dataset.entities), [dataset.entities]);
   const [search, setSearch] = useState('');
+  const [activeTagFilters, setActiveTagFilters] = useState<ActiveTagFilters>(EMPTY_TAG_FILTERS);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [selectedEntityName, setSelectedEntityName] = useState<string | null>(null);
 
   const filteredEntities = useMemo(() => {
     const query = search.trim().toLowerCase();
-    if (!query) return dataset.entities;
-    return dataset.entities.filter((entity) => entity.name.toLowerCase().includes(query));
-  }, [dataset.entities, search]);
+    return dataset.entities.filter((entity) => {
+      if (query && !entity.name.toLowerCase().includes(query)) return false;
+      return matchesTagFilters(entity, activeTagFilters);
+    });
+  }, [dataset.entities, search, activeTagFilters]);
 
   // `agentBuilder` is intentionally undefined: streams_app does not declare it
   // as a start dependency. The shared flyout hides the "Add to chat" button
@@ -79,7 +90,7 @@ export const AllEntitiesView = () => {
             <EuiFlexItem grow={false}>
               {i18n.translate('xpack.streams.entityCentricLab.entities.title', {
                 defaultMessage: 'All entities ({count})',
-                values: { count: dataset.totalEntities.toLocaleString() },
+                values: { count: filteredEntities.length.toLocaleString() },
               })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -119,6 +130,12 @@ export const AllEntitiesView = () => {
           onChange={(event) => setSearch(event.target.value)}
           data-test-subj="entityCentricLabEntitiesSearch"
         />
+        <EuiSpacer size="s" />
+        <EntitiesTagFilters
+          facets={tagFacets}
+          activeFilters={activeTagFilters}
+          onChange={setActiveTagFilters}
+        />
         <EuiSpacer size="m" />
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
           <EuiFlexItem grow={false}>
@@ -127,7 +144,7 @@ export const AllEntitiesView = () => {
                 {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
                   defaultMessage: '{entities} Entities · {groups} Groups',
                   values: {
-                    entities: dataset.totalEntities.toLocaleString(),
+                    entities: filteredEntities.length.toLocaleString(),
                     groups: dataset.totalGroups,
                   },
                 })}
@@ -177,7 +194,7 @@ export const AllEntitiesView = () => {
         </EuiFlexGroup>
         <EuiHorizontalRule margin="m" />
         {viewMode === 'grid' ? (
-          <GroupedGridView dataset={dataset} onSelectEntity={setSelectedEntityName} />
+          <GroupedGridView entities={filteredEntities} onSelectEntity={setSelectedEntityName} />
         ) : (
           <EntitiesListView entities={filteredEntities} onSelectEntity={setSelectedEntityName} />
         )}

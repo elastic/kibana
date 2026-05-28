@@ -6723,6 +6723,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/entity-centric-lab-flyout@link:src/platform/packages/shared/kbn-entity-centric-lab-flyout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/entity-manager-fixture-plugin@link:x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin":
   version "0.0.0"
   uid ""
