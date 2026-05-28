@@ -27,5 +27,6 @@ export const resolveConfiguration = (configuration: AgentConfiguration): Resolve
     answer: {
       instructions: answerInstructions,
     },
+    singleAgentMode: configuration.single_agent_mode ?? false,
   };
 };

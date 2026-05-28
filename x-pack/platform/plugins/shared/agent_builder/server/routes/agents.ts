@@ -252,6 +252,22 @@ export function registerAgentRoutes({
                   ),
                   plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                   connector_ids: schema.maybe(CONNECTORS_SCHEMA),
+                  single_agent_mode: schema.maybe(
+                    schema.boolean({
+                      meta: {
+                        description:
+                          'When true, the research agent produces the final response directly, skipping the dedicated answer-agent LLM call. Use for task-focused agents where research output is already a complete answer.',
+                      },
+                    })
+                  ),
+                  disable_filestore: schema.maybe(
+                    schema.boolean({
+                      meta: {
+                        description:
+                          'When true, disables the built-in filestore tools and their system-prompt instructions for this agent.',
+                      },
+                    })
+                  ),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -396,6 +412,22 @@ export function registerAgentRoutes({
                     ),
                     plugin_ids: schema.maybe(PLUGINS_SCHEMA),
                     connector_ids: schema.maybe(CONNECTORS_SCHEMA),
+                    single_agent_mode: schema.maybe(
+                      schema.boolean({
+                        meta: {
+                          description:
+                            'When true, the research agent produces the final response directly, skipping the dedicated answer-agent LLM call.',
+                        },
+                      })
+                    ),
+                    disable_filestore: schema.maybe(
+                      schema.boolean({
+                        meta: {
+                          description:
+                            'When true, disables the built-in filestore tools and their system-prompt instructions for this agent.',
+                        },
+                      })
+                    ),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },

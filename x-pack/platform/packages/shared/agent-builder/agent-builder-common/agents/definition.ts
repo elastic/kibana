@@ -131,6 +131,28 @@ export interface AgentConfiguration {
   connector_ids?: string[];
 
   /**
+   * When true, disables the built-in filestore tools (read, ls, glob, grep) and
+   * their associated system prompt instructions for this agent. Use for agents
+   * that do not need file-system access to avoid injecting ~400 unused tokens
+   * into every LLM call. Default: false (filestore enabled for backward compatibility).
+   */
+  disable_filestore?: boolean;
+
+  /**
+   * When true, the research agent produces the final user-facing response directly,
+   * skipping the dedicated answer-agent LLM call.
+   *
+   * Use for task-focused agents (e.g. code navigation, data lookup) where the
+   * research output is already a complete, factual answer and a separate formatting
+   * pass adds cost without quality benefit. Saves approximately one full LLM call
+   * (~15–20% of total token cost) per round.
+   *
+   * When enabled, the research agent must be prompted to produce a direct answer
+   * rather than a handover note. Default: false.
+   */
+  single_agent_mode?: boolean;
+
+  /**
    * Custom configuration for the research step of the agent.
    */
   research?: AgentResearchStepConfiguration;
