@@ -37,6 +37,9 @@ export function RuleActionItemWrapper({
         gutterSize="s"
         responsive={false}
         direction="row"
+        css={css`
+          min-height: ${euiTheme.size.xl};
+        `}
       >
         <EuiFlexItem>{children}</EuiFlexItem>
         {onOpenDetails && (
