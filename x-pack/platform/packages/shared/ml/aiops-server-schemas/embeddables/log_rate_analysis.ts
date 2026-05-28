@@ -17,6 +17,7 @@ export const logRateAnalysisEmbeddableStateSchema = schema.object(
     ...serializedTimeRangeSchema.getPropSchemas(),
     data_view_id: schema.string({
       minLength: 1,
+      maxLength: 1000,
       meta: { description: 'The data view ID used to run log rate analysis.' },
     }),
   },
