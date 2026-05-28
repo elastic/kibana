@@ -438,7 +438,7 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
   const lastCommand = root.commands[root.commands.length - 1];
   const fields: Array<ESQLColumn | PromQLLabel> = [];
 
-  if (lastCommand.name === 'promql') {
+  if (lastCommand?.name === 'promql') {
     // Empty `{agent=}` loses its label; reopen so the `""` below keeps it.
     const validPromqlQuery = queryInCursorPosition.replace(TRAILING_CLOSERS_REGEX, '');
     const { root: promqlRoot } = Parser.parse(correctPromqlQuerySyntax(`${validPromqlQuery} ""`));
