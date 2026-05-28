@@ -68,6 +68,21 @@ export type ListEntityRelationshipsRequestQueryInput = z.input<
   typeof ListEntityRelationshipsRequestQuery
 >;
 
+export const ListEntityRelationshipsRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The EUID of the entity to list relationship observations for.
+     */
+    entityId: z.string().min(1),
+  })
+);
+export type ListEntityRelationshipsRequestParams = z.infer<
+  typeof ListEntityRelationshipsRequestParams
+>;
+export type ListEntityRelationshipsRequestParamsInput = z.input<
+  typeof ListEntityRelationshipsRequestParams
+>;
+
 export const ListEntityRelationshipsResponse = lazySchema(() =>
   z.object({
     records: z.array(z.object({})),

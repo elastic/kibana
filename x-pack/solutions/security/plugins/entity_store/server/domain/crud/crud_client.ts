@@ -18,9 +18,17 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
-import type { RelationshipObservationDoc } from '../../../common/domain/entity_metadata/relationship_observation';
+import {
+  RELATIONSHIP_KINDS,
+  type RelationshipKind,
+  type RelationshipObservationDoc,
+} from '../../../common/domain/entity_metadata/relationship_observation';
 import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
-import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
+import {
+  ENTITY_METADATA,
+  getEntitiesAlias,
+  getLatestEntitiesIndexName,
+} from '../../../common/domain/entity_index';
 import { getMetadataEntitiesDataStreamName } from '../asset_manager/metadata_data_stream';
 import {
   BadCRUDRequestError,
@@ -85,6 +93,27 @@ export interface BulkObjectResponse {
 interface BulkUpdateEntityParams {
   objects: BulkObject[];
   force?: boolean;
+}
+
+const RELATIONSHIP_OBSERVATIONS_SORT_FIELDS = ['@timestamp', 'event.ingested'] as const;
+
+export interface ListRelationshipObservationsParams {
+  entityId: string;
+  kind?: RelationshipKind;
+  target?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  per_page?: number;
+  sort_field?: string;
+  sort_order?: SortOrder;
+}
+
+export interface ListRelationshipObservationsResult {
+  records: RelationshipObservationDoc[];
+  total: number;
+  page: number;
+  per_page: number;
 }
 
 // EntityUpdateClient is the maintainer-safe CRUD surface: all CRUD methods
@@ -239,6 +268,25 @@ export class CRUDClient {
 
     Object.defineProperty(this, 'searchLatestEntities', {
       value: tracedSearchLatestEntities,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseListRelationshipObservations = this.listRelationshipObservations.bind(this);
+    const tracedListRelationshipObservations = (
+      params: ListRelationshipObservationsParams
+    ): Promise<ListRelationshipObservationsResult> =>
+      runWithSpan({
+        name: 'entityStore.crud.list_relationship_observations',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'list_relationship_observations',
+        },
+        cb: () => baseListRelationshipObservations(params),
+      });
+
+    Object.defineProperty(this, 'listRelationshipObservations', {
+      value: tracedListRelationshipObservations,
       configurable: true,
       writable: true,
     });
@@ -501,5 +549,70 @@ export class CRUDClient {
       nextSearchAfter: lastHit?.sort as Array<string | number> | undefined,
       ...(entityFields ? { fields: entityFields } : {}),
     };
+  }
+
+  // Reads relationship observations from the metadata datastream alias. The
+  // method owns query construction — routes forward parsed params untouched.
+  public async listRelationshipObservations(
+    params: ListRelationshipObservationsParams
+  ): Promise<ListRelationshipObservationsResult> {
+    const page = params.page ?? 1;
+    const perPage = params.per_page ?? 10;
+    const sortField: string = params.sort_field ?? '@timestamp';
+    const sortOrder: SortOrder = params.sort_order ?? 'desc';
+
+    if (!(RELATIONSHIP_OBSERVATIONS_SORT_FIELDS as readonly string[]).includes(sortField)) {
+      throw new BadCRUDRequestError(
+        `Invalid sort_field "${sortField}": must be one of ${RELATIONSHIP_OBSERVATIONS_SORT_FIELDS.join(
+          ', '
+        )}`
+      );
+    }
+
+    const filter: QueryDslQueryContainer[] = [
+      { term: { 'event.action': 'relationship_observed' } },
+      { term: { 'entity.id': params.entityId } },
+    ];
+
+    if (params.from !== undefined || params.to !== undefined) {
+      const range: { gte?: string; lte?: string } = {};
+      if (params.from !== undefined) range.gte = params.from;
+      if (params.to !== undefined) range.lte = params.to;
+      filter.push({ range: { '@timestamp': range } });
+    }
+
+    if (params.kind !== undefined && params.target !== undefined) {
+      filter.push({
+        term: { [`entity.relationships.${params.kind}.target`]: params.target },
+      });
+    } else if (params.kind !== undefined) {
+      filter.push({ exists: { field: `entity.relationships.${params.kind}` } });
+    } else if (params.target !== undefined) {
+      const target = params.target;
+      filter.push({
+        bool: {
+          should: RELATIONSHIP_KINDS.map((kind) => ({
+            term: { [`entity.relationships.${kind}.target`]: target },
+          })),
+          minimum_should_match: 1,
+        },
+      });
+    }
+
+    const resp = await this.esClient.search<RelationshipObservationDoc>({
+      index: getEntitiesAlias(ENTITY_METADATA, this.namespace),
+      query: { bool: { filter } },
+      from: (page - 1) * perPage,
+      size: perPage,
+      sort: [{ [sortField]: sortOrder }, { _shard_doc: 'desc' }],
+    });
+
+    const records = resp.hits.hits
+      .map((hit) => hit._source)
+      .filter((src): src is RelationshipObservationDoc => src !== undefined);
+    const total =
+      typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total?.value ?? 0;
+
+    return { records, total, page, per_page: perPage };
   }
 }

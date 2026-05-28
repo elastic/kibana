@@ -5,7 +5,7 @@ info:
   title: List Entity Relationships Schema
   version: '1'
 paths:
-  /api/entity_store/entities/{id}/observations/relationships:
+  /api/security/entity_store/observations/relationships/{entityId}:
     get:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
@@ -16,6 +16,14 @@ paths:
         history datastream for a given entity. Implicit filter on
         event.action=relationship_observed.
       parameters:
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          description: The EUID of the entity to list relationship observations for.
+          example: 'user:alice@corp'
         - name: page
           in: query
           required: false
