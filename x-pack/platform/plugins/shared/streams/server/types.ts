@@ -58,10 +58,11 @@ export interface StreamsServer {
   licensing: LicensingPluginStart;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   memoryTriggerRegistry?: MemoryTriggerRegistry;
   ensureMemorySkillRegistered?: () => void;
-  ensureMemoryTasksScheduled?: () => Promise<void>;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  workflowsManagement?: WorkflowsServerPluginSetup;
+  spaces?: SpacesPluginStart;
 }
 
 export interface ElasticsearchAccessorOptions {

@@ -71,8 +71,6 @@ import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/proc
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
 import { TaskService } from './lib/tasks/task_service';
-import { CONVERSATION_SCRAPER_TASK_TYPE } from './lib/tasks/task_definitions/conversation_scraper';
-import { MEMORY_CONSOLIDATION_TASK_TYPE } from './lib/tasks/task_definitions/memory_consolidation';
 import { InsightService } from './lib/sig_events/insights/client/insight_service';
 import {
   createSignificantEventsClients,
@@ -81,7 +79,9 @@ import {
 } from './lib/sig_events/significant_events_clients';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
-import { registerStreamsAgentBuilder } from './agent_builder/register';
+import { createMemoryToolsOptions, registerStreamsAgentBuilder } from './agent_builder/register';
+import { registerStreamsMemoryAgentBuilder } from './agent_builder/skills/register_memory_skills';
+import type { MemoryToolsOptions } from './agent_builder/tools/memory';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
@@ -91,6 +91,7 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
+import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -116,6 +117,7 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
+  private memoryToolsOptions?: MemoryToolsOptions;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -131,7 +133,10 @@ export class StreamsPlugin
     this.server = {
       config: this.config,
       logger: this.logger,
+      workflowsManagement: plugins.workflowsManagement,
     } as StreamsServer;
+
+    plugins.workflowsExtensions?.registerManagedWorkflowOwner('streams');
 
     this.patternExtractionService = new PatternExtractionService(
       this.config.workers.patternExtraction,
@@ -323,29 +328,20 @@ export class StreamsPlugin
     const telemetryClient = this.ebtTelemetryService.getClient();
 
     if (plugins.agentBuilder) {
+      this.memoryToolsOptions = createMemoryToolsOptions({
+        server: this.server,
+        logger: this.logger,
+      });
+
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
         getScopedClients,
         server: this.server,
         logger: this.logger,
         telemetry: telemetryClient,
-        isMemoryEnabled: async () => {
-          try {
-            const [coreStart] = await core.getStartServices();
-            const soClient = coreStart.savedObjects.createInternalRepository();
-            const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
-            return await uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
-          } catch {
-            return false;
-          }
-        },
-      })
-        .then(({ ensureMemorySkillRegistered }) => {
-          this.server!.ensureMemorySkillRegistered = ensureMemorySkillRegistered;
-        })
-        .catch((err) => {
-          this.logger.error(`Failed to register agent builder: ${err.message}`);
-        });
+      }).catch((err) => {
+        this.logger.error(`Failed to register agent builder: ${err.message}`);
+      });
     }
 
     let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
@@ -574,6 +570,27 @@ export class StreamsPlugin
   }
 
   public start(core: CoreStart, plugins: StreamsPluginStartDependencies): StreamsPluginStart {
+    if (plugins.agentBuilder && this.memoryToolsOptions) {
+      const soClient = core.savedObjects.getUnsafeInternalClient();
+      const uiSettings = core.uiSettings.asScopedToClient(soClient);
+      const isMemoryEnabled = () => uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+
+      registerStreamsMemoryAgentBuilder({
+        agentBuilder: plugins.agentBuilder,
+        memoryToolsOptions: this.memoryToolsOptions,
+        logger: this.logger,
+        isMemoryEnabled,
+      })
+        .then(({ ensureMemorySkillRegistered }) => {
+          if (this.server) {
+            this.server.ensureMemorySkillRegistered = ensureMemorySkillRegistered;
+          }
+        })
+        .catch((err) => {
+          this.logger.error(`Failed to register streams memory skills: ${err.message}`);
+        });
+    }
+
     initializeSignificantEventsTemplates({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger,
@@ -585,6 +602,28 @@ export class StreamsPlugin
       );
     });
 
+    if (plugins.workflowsExtensions) {
+      const workflowsExtensions = plugins.workflowsExtensions;
+      const soClient = core.savedObjects.getUnsafeInternalClient();
+      const uiSettings = core.uiSettings.asScopedToClient(soClient);
+      uiSettings
+        .get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY)
+        .then(async (memoryEnabled) => {
+          if (!memoryEnabled) {
+            this.logger.debug('streams: memory is disabled, skipping memory workflow installation');
+            return;
+          }
+          await installMemoryWorkflows({ workflowsExtensions });
+        })
+        .catch((error: unknown) => {
+          this.logger.error(
+            `streams: Failed to install memory managed workflows: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
+    }
+
     if (this.server) {
       this.server.core = core;
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
@@ -595,39 +634,12 @@ export class StreamsPlugin
       this.server.licensing = plugins.licensing;
       this.server.taskManager = plugins.taskManager;
       this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
+      this.server.spaces = plugins.spaces;
 
       // Set up memory trigger registry with all built-in triggers
       const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
       memoryTriggerRegistry.register(discoveryCompletedTrigger);
       this.server.memoryTriggerRegistry = memoryTriggerRegistry;
-
-      // Set up recurring memory tasks (conversation scraper + consolidation).
-      // These are scheduled only when useMemory is enabled.
-      const taskManager = plugins.taskManager;
-      const logger = this.logger;
-      this.server.ensureMemoryTasksScheduled = async () => {
-        try {
-          await taskManager.ensureScheduled({
-            id: 'streams_conversation_scraper_recurring',
-            taskType: CONVERSATION_SCRAPER_TASK_TYPE,
-            params: {},
-            state: {},
-            scope: ['streams'],
-            schedule: { interval: '4h' },
-          });
-          await taskManager.ensureScheduled({
-            id: 'streams_memory_consolidation_recurring',
-            taskType: MEMORY_CONSOLIDATION_TASK_TYPE,
-            params: {},
-            state: {},
-            scope: ['streams'],
-            schedule: { interval: '24h' },
-          });
-          logger.info('Recurring memory tasks scheduled');
-        } catch (err) {
-          logger.error(`Failed to schedule recurring memory tasks: ${(err as Error).message}`);
-        }
-      };
     }
 
     if (plugins.workflowsExtensions) {
