@@ -10,7 +10,14 @@ import type {
   EuiTableComputedColumnType,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiLink, EuiNotificationBadge, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiLink,
+  EuiNotificationBadge,
+  EuiText,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { labels } from '../constants/i18n';

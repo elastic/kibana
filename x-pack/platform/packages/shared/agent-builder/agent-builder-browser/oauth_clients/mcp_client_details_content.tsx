@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonIcon, EuiCallOut, EuiCopy, EuiFlexGroup } from '@elastic/eui';
+import { EuiButtonIcon, EuiCallOut, EuiCopy, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import type { OAuthClient } from '@kbn/agent-builder-common';
 import { MCP_SERVER_PATH, OAuthClientType } from '@kbn/agent-builder-common';
 import fileSaver from 'file-saver';
