@@ -107,6 +107,8 @@ export default createPlaywrightConfig({
 
 Scout relies on configuration to determine the test files and opt-in [parallel test execution](https://playwright.dev/docs/test-parallel) against the single Elastic cluster.
 
+When `runGlobalSetup: true` is set, Scout also auto-discovers an optional `global.teardown.ts` next to `global.setup.ts`. Use `globalTeardownHook(...)` in that file to reset shared cluster/Kibana state once after all workers finish (even on failure) — for example, dropping legacy/hand-indexed data ingested by `global.setup.ts` or reverting feature-flag overrides. The teardown surface intentionally excludes `esArchiver`; use `esClient`/`kbnClient`/`apiServices` instead. See [`docs/extend/scout/global-setup-hook.md`](../../../../docs/extend/scout/global-setup-hook.md#global-teardown-hook) for the contract and examples.
+
 The Playwright configuration should only be created this way to ensure compatibility with Scout functionality. For configuration verification, we use a marker `VALID_CONFIG_MARKER`, and Scout will throw an error if the configuration is invalid.
 
 #### Fixtures

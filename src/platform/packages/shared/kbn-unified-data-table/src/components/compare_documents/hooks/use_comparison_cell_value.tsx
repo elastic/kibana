@@ -20,6 +20,7 @@ import { isEqual, memoize } from 'lodash';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { CELL_CLASS } from '../../../utils/get_render_cell_value';
 import type { DocumentDiffMode } from '../types';
+import type { DocMap } from '../../../types';
 import type { CalculateDiffProps } from './calculate_diff';
 import { calculateDiff, formatDiffValue } from './calculate_diff';
 import {
@@ -39,7 +40,7 @@ export interface UseComparisonCellValueProps {
   selectedDocIds: string[];
   diffMode: DocumentDiffMode | undefined;
   fieldFormats: FieldFormatsStart;
-  getDocById: (id: string) => DataTableRecord | undefined;
+  docMap: DocMap;
 }
 
 export const useComparisonCellValue = ({
@@ -49,10 +50,10 @@ export const useComparisonCellValue = ({
   selectedDocIds,
   diffMode,
   fieldFormats,
-  getDocById,
+  docMap,
 }: UseComparisonCellValueProps) => {
   const baseDocId = selectedDocIds[0];
-  const baseDoc = useMemo(() => getDocById(baseDocId)?.flattened, [baseDocId, getDocById]);
+  const baseDoc = useMemo(() => docMap.get(baseDocId)?.doc.flattened, [baseDocId, docMap]);
   const [calculateDiffMemoized] = useState(() => createCalculateDiffMemoized());
 
   return useCallback(
@@ -66,7 +67,7 @@ export const useComparisonCellValue = ({
           baseDoc={baseDoc}
           diffMode={diffMode}
           fieldFormats={fieldFormats}
-          getDocById={getDocById}
+          docMap={docMap}
           {...props}
         />
       </DiffProvider>
@@ -80,7 +81,7 @@ export const useComparisonCellValue = ({
       diffMode,
       fieldColumnId,
       fieldFormats,
-      getDocById,
+      docMap,
     ]
   );
 };
@@ -94,10 +95,10 @@ type CellValueProps = Omit<UseComparisonCellValueProps, 'selectedDocIds'> &
 const EMPTY_VALUE = '-';
 
 const CellValue = (props: CellValueProps) => {
-  const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, getDocById } = props;
+  const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, docMap } = props;
   const fieldName = comparisonFields[rowIndex];
   const field = useMemo(() => dataView.fields.getByName(fieldName), [dataView.fields, fieldName]);
-  const comparisonDoc = useMemo(() => getDocById(columnId), [columnId, getDocById]);
+  const comparisonDoc = useMemo(() => docMap.get(columnId)?.doc, [columnId, docMap]);
   if (columnId === fieldColumnId) {
     return <FieldCellValue field={field} fieldName={fieldName} />;
   }

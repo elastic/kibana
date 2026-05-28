@@ -1,5 +1,5 @@
 pageLoadAssetSize:
-  actions: 20000
+  actions: 20500
   advancedSettings: 6196
   agentBuilderPlatform: 64202
   aiAssistantManagementSelection: 13590
@@ -143,7 +143,7 @@ pageLoadAssetSize:
   savedObjects: 11735
   savedObjectsFinder: 4319
   savedObjectsManagement: 22390
-  savedObjectsTagging: 23144
+  savedObjectsTagging: 26129
   savedObjectsTaggingOss: 2163
   savedSearch: 11000
   screenshotMode: 2351

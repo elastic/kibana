@@ -208,7 +208,9 @@ upload_tmp_artifact() {
   "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"
 
   printf '%s\n' "${GCS_CI_ARTIFACT_REGIONS[@]}" | xargs -P 0 -I{} \
-    gcloud storage cp "$local_path" "gs://kibana-ci-artifacts-{}/tmp/builds/${build_id}/${artifact_name}"
+    env CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False gcloud storage cp \
+      "$local_path" \
+      "gs://kibana-ci-artifacts-{}/tmp/builds/${build_id}/${artifact_name}"
 }
 
 print_if_dry_run() {

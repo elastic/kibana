@@ -30,8 +30,7 @@ import {
   fleetServerHostsRoutesService,
   outputRoutesService,
 } from '@kbn/fleet-plugin/common/services';
-import axios from 'axios';
-import * as https from 'https';
+import { Agent } from 'undici';
 import {
   CA_TRUSTED_FINGERPRINT,
   FLEET_SERVER_CERT_PATH,
@@ -40,11 +39,10 @@ import {
 } from '@kbn/dev-utils';
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
+import { KbnClientRequesterError } from '@kbn/kbn-client';
 import { isServerlessKibanaFlavor } from '../../../../common/endpoint/utils/kibana_status';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
-import type { FormattedAxiosError } from '../../../../common/endpoint/format_axios_error';
-import { catchAxiosErrorFormatAndThrow } from '../../../../common/endpoint/format_axios_error';
 import {
   createAgentPolicy,
   createIntegrationPolicy,
@@ -630,14 +628,14 @@ const addFleetServerHostToFleetSettings = async (
           },
           body: newFleetHostEntry,
         })
-        .catch(catchAxiosErrorFormatAndThrow)
-        .catch((error: FormattedAxiosError) => {
+        .catch((error) => {
           if (
-            error.response.status === 403 &&
-            ((error.response?.data?.message as string) ?? '').includes('disabled')
+            error instanceof KbnClientRequesterError &&
+            error.status === 403 &&
+            error.message.includes('disabled')
           ) {
             log.error(`Attempt to update fleet server host URL in fleet failed with [403: ${
-              error.response.data.message
+              error.message
             }].
 
   ${chalk.red('Are you running this utility against a Serverless project?')}
@@ -707,14 +705,12 @@ const updateFleetElasticsearchOutputHostNames = async (
 
               log.info(`Updating Fleet Settings for Output [${output.name} (${id})]`);
 
-              await kbnClient
-                .request<GetOneOutputResponse>({
-                  method: 'PUT',
-                  headers: { 'elastic-api-version': '2023-10-31' },
-                  path: outputRoutesService.getUpdatePath(id),
-                  body: update,
-                })
-                .catch(catchAxiosErrorFormatAndThrow);
+              await kbnClient.request<GetOneOutputResponse>({
+                method: 'PUT',
+                headers: { 'elastic-api-version': '2023-10-31' },
+                path: outputRoutesService.getUpdatePath(id),
+                body: update,
+              });
             }
           }
         }
@@ -747,21 +743,24 @@ export const isFleetServerRunning = async (
 
   return pRetry(
     async () => {
-      return axios
-        .request({
-          method: 'GET',
-          url: url.toString(),
-          responseType: 'json',
-          // Custom agent to ensure we don't get cert errors
-          httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-        })
-        .then((response) => {
-          log.debug(
-            `Fleet server is up and running at [${fleetServerUrl}]. Status: `,
-            response.data
-          );
-        })
-        .catch(catchAxiosErrorFormatAndThrow);
+      const response = await fetch(url, {
+        method: 'GET',
+        // Custom dispatcher to ensure we don't get cert errors
+        dispatcher: new Agent({ connect: { rejectUnauthorized: false } }),
+      } as RequestInit);
+
+      if (!response.ok) {
+        throw new Error(
+          `Fleet server status check failed at [${url.toString()}]: ${response.status} ${
+            response.statusText
+          } -- ${await response.text()}`
+        );
+      }
+
+      log.debug(
+        `Fleet server is up and running at [${fleetServerUrl}]. Status: `,
+        await response.json()
+      );
     },
     {
       maxTimeout: 10000,

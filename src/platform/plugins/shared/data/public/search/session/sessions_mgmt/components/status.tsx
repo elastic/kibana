@@ -96,7 +96,7 @@ const getStatusAttributes = ({
         });
 
         return {
-          icon: <EuiIcon color="#9AA" type="clock" />,
+          icon: <EuiIcon color="#9AA" type="clock" aria-hidden={true} />,
           label: <TableText>{getStatusText(session.status)}</TableText>,
           toolTipContent,
         };
@@ -108,7 +108,7 @@ const getStatusAttributes = ({
 
     case SearchSessionStatus.CANCELLED:
       return {
-        icon: <EuiIcon color="#9AA" type="error" />,
+        icon: <EuiIcon color="#9AA" type="error" aria-hidden={true} />,
         label: <TableText>{getStatusText(session.status)}</TableText>,
         toolTipContent: i18n.translate('data.mgmt.searchSessions.status.message.cancelled', {
           defaultMessage: 'Cancelled by user',
@@ -118,7 +118,7 @@ const getStatusAttributes = ({
     case SearchSessionStatus.ERROR:
       return {
         textColor: 'danger',
-        icon: <EuiIcon color="danger" type="error" />,
+        icon: <EuiIcon color="danger" type="error" aria-hidden={true} />,
         label: <TableText>{getStatusText(session.status)}</TableText>,
         toolTipContent:
           session.errors && session.errors.length > 0
@@ -140,7 +140,7 @@ const getStatusAttributes = ({
 
         return {
           textColor: 'success',
-          icon: <EuiIcon color="success" type="checkInCircleFilled" />,
+          icon: <EuiIcon color="success" type="checkInCircleFilled" aria-hidden={true} />,
           label: <TableText>{getStatusText(session.status)}</TableText>,
           toolTipContent,
         };

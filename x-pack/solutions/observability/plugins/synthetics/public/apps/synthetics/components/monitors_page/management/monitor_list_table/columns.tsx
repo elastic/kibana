@@ -143,6 +143,7 @@ export function useMonitorListColumns({
             monitorId={monitor[ConfigKey.CONFIG_ID] ?? monitor.id}
             locations={locations}
             overviewStatus={overviewStatus}
+            spaces={monitor.spaces}
           />
         ) : null,
     },

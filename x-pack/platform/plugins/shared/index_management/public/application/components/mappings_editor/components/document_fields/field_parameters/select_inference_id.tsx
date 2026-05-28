@@ -173,6 +173,10 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       <EuiFlexGroup data-test-subj="selectInferenceId" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.ariaLabel',
+              { defaultMessage: 'Select inference endpoint' }
+            )}
             button={
               <>
                 <EuiText size="xs">
@@ -298,7 +302,10 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
               </EuiPanel>
             </EuiContextMenuPanel>
             <EuiHorizontalRule margin="none" />
-            <EuiContextMenuItem icon={<EuiIcon type="question" color="primary" />} size="m">
+            <EuiContextMenuItem
+              icon={<EuiIcon type="question" color="primary" aria-hidden={true} />}
+              size="m"
+            >
               <EuiLink
                 href={docLinks.links.inferenceManagement.inferenceAPIDocumentation}
                 target="_blank"

@@ -70,6 +70,7 @@ export const WaterfallTickAxis = ({
                       <EuiIcon
                         type={showOnlyHighlightedNetworkRequests ? 'eyeClosed' : 'eye'}
                         size="s"
+                        aria-hidden={true}
                       />
                       <EuiText size="xs">
                         <FormattedMessage

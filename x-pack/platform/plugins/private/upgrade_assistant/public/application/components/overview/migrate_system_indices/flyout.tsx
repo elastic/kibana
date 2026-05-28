@@ -133,7 +133,7 @@ const renderMigrationStatus = (status: MIGRATION_STATUS) => {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="checkInCircleFilled" color="success" />
+          <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="green" size="s" data-test-subj="featureNoUpgradeNeeded">
@@ -171,7 +171,7 @@ const renderMigrationStatus = (status: MIGRATION_STATUS) => {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" color="danger" />
+          <EuiIcon type="warning" color="danger" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="danger" size="s" data-test-subj="featureError">
