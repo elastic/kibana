@@ -17,12 +17,29 @@ export interface WorkflowExecutionDriverInit {
   workflowExecutionGraph: WorkflowGraph;
 }
 
+/** Public surface of {@link WorkflowExecutionDriver} for typing mocks and loop params. */
+export interface WorkflowExecutionDriverApi {
+  readonly isExecuting: boolean;
+  error: Error | undefined;
+  start(): void;
+  stop(): void;
+  handleStartOfCycle(): void;
+  commitPendingNavigation(): void;
+  readonly currentNode: GraphNodeUnion | null;
+  readonly nextNode: GraphNodeUnion | null;
+  navigateToNode(nodeId: string): void;
+  navigateToNextNode(): void;
+  navigateToAfterNode(nodeId: string): void;
+  readonly currentStackFrames: StackFrame[];
+  setCurrentScopeId(scopeId?: string): void;
+}
+
 /**
  * Drives in-memory workflow step iteration: pending node navigation (`nextNodeId`),
  * whether the execution and persistence loops keep running (`isExecuting`), controlled with
  * {@link WorkflowExecutionDriver.start} and {@link WorkflowExecutionDriver.stop}.
  */
-export class WorkflowExecutionDriver {
+export class WorkflowExecutionDriver implements WorkflowExecutionDriverApi {
   private readonly workflowGraph: WorkflowGraph;
   private currentNodeId: string | undefined;
   private nextNodeId: string | undefined;

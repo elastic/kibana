@@ -87,6 +87,9 @@ describe('setupDependencies', () => {
     const mockWorkflowGraph = {
       fromWorkflowDefinition: jest.fn().mockReturnThis(),
       getStepGraph: jest.fn().mockReturnThis(),
+      topologicalOrder: ['entry-node'],
+      getNode: jest.fn().mockReturnValue({ id: 'entry-node' }),
+      getNodeStack: jest.fn().mockReturnValue(['entry-node']),
     };
     (WorkflowGraph.fromWorkflowDefinition as jest.Mock) = jest
       .fn()

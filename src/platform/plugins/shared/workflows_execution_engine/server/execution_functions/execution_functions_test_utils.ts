@@ -13,6 +13,8 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 import type { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import type { MockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
+import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 
 export const createMockWorkflowExecutionEngineConfig = (): WorkflowsExecutionEngineConfig => ({
@@ -41,6 +43,7 @@ export interface MockWorkflowRuntime {
   resume: jest.Mock;
   getWorkflowExecutionStatus: jest.Mock;
   getWorkflowExecution: jest.Mock;
+  executionDriver: MockWorkflowExecutionDriver;
 }
 
 export const createMockWorkflowRuntime = (): MockWorkflowRuntime => ({
@@ -51,6 +54,7 @@ export const createMockWorkflowRuntime = (): MockWorkflowRuntime => ({
     isTestRun: false,
     status: ExecutionStatus.COMPLETED,
   }),
+  executionDriver: createMockWorkflowExecutionDriver(),
 });
 
 export interface MockWorkflowExecutionRepository {

@@ -76,13 +76,7 @@ async function runOnCancelIfNeeded(
  * @throws Will catch and handle errors through the workflow runtime's error handling mechanism
  */
 export async function runNode(params: WorkflowExecutionLoopParams): Promise<void> {
-  const {
-    workflowExecutionDriver,
-    stepExecutionRuntimeFactory,
-    nodesFactory,
-    workflowLogger,
-    workflowRuntime,
-  } = params;
+  const { workflowExecutionDriver, stepExecutionRuntimeFactory } = params;
   const node = workflowExecutionDriver.currentNode;
   let monitorAbortController: AbortController | undefined;
   let stepExecutionRuntime: StepExecutionRuntime | undefined;

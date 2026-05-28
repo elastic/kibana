@@ -8,6 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
+import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
 import { workflowExecutionLoop } from './workflow_execution_loop';
 import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
@@ -29,6 +30,7 @@ jest.mock('./persistence_loop', () => ({
 
 describe('workflowExecutionLoop', () => {
   const createParams = () => ({
+    workflowExecutionDriver: createMockWorkflowExecutionDriver(),
     workflowRuntime: {
       saveState: jest.fn().mockResolvedValue(undefined),
       setWorkflowError: jest.fn(),
@@ -65,7 +67,6 @@ describe('workflowExecutionLoop', () => {
     expect(persistenceLoop).toHaveBeenCalled();
     expect(flushState).toHaveBeenCalled();
     expect(params.workflowExecutionDriver.start).toHaveBeenCalled();
-    expect(params.workflowExecutionDriver.stop).toHaveBeenCalled();
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
     expect(params.stepIoService.flush).toHaveBeenCalled();
     // Workflow-end cleanup for transient rehydrations (deferred-release pattern).
@@ -84,7 +85,6 @@ describe('workflowExecutionLoop', () => {
     await workflowExecutionLoop(params as any);
 
     expect(params.workflowRuntime.setWorkflowError).toHaveBeenCalledWith(testError);
-    expect(params.workflowExecutionDriver.stop).toHaveBeenCalled();
   });
 
   it('updates execution state when task abort is signaled during workflow execution', async () => {

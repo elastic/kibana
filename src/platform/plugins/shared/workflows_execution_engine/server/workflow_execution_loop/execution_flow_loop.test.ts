@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
+import type { GraphNodeUnion } from '@kbn/workflows/graph';
+import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
 import { executionFlowLoop } from './execution_flow_loop';
 
 jest.mock('./run_node', () => ({
@@ -22,47 +23,63 @@ describe('executionFlowLoop', () => {
     jest.clearAllMocks();
   });
 
-  it('calls runNode while status is RUNNING and stops when terminal', async () => {
-    let callCount = 0;
-    const workflowExecutionDriver = { isExecuting: true };
+  it('calls runNode while the execution driver is executing', async () => {
+    let iterations = 0;
+    const workflowExecutionDriver = createMockWorkflowExecutionDriver({
+      currentNode: { id: 'node1' } as GraphNodeUnion,
+    });
+    workflowExecutionDriver.commitPendingNavigation.mockImplementation(() => {
+      iterations += 1;
+      if (iterations >= 3) {
+        workflowExecutionDriver.setMockCurrentNode(null);
+        workflowExecutionDriver.setMockIsExecuting(false);
+      }
+    });
+
     const params = {
       workflowExecutionDriver,
       workflowRuntime: {
         executionDriver: workflowExecutionDriver,
-        getWorkflowExecutionStatus: jest.fn(() => {
-          callCount++;
-          return callCount <= 3 ? ExecutionStatus.RUNNING : ExecutionStatus.COMPLETED;
-        }),
+        saveState: jest.fn().mockResolvedValue(undefined),
       },
     } as any;
 
     await executionFlowLoop(params);
 
     expect(runNode).toHaveBeenCalledTimes(3);
+    expect(workflowExecutionDriver.commitPendingNavigation).toHaveBeenCalledTimes(3);
   });
 
-  it('does not call runNode when status is not RUNNING', async () => {
-    const workflowExecutionDriver = { isExecuting: true };
+  it('stops the driver when there is no current node after navigation commit', async () => {
+    const workflowExecutionDriver = createMockWorkflowExecutionDriver({
+      currentNode: null,
+    });
+
     const params = {
       workflowExecutionDriver,
       workflowRuntime: {
         executionDriver: workflowExecutionDriver,
-        getWorkflowExecutionStatus: jest.fn(() => ExecutionStatus.COMPLETED),
+        saveState: jest.fn().mockResolvedValue(undefined),
       },
     } as any;
 
     await executionFlowLoop(params);
 
-    expect(runNode).not.toHaveBeenCalled();
+    expect(runNode).toHaveBeenCalledTimes(1);
+    expect(workflowExecutionDriver.stop).toHaveBeenCalled();
   });
 
   it('does not call runNode when execution driver is not executing', async () => {
-    const workflowExecutionDriver = { isExecuting: false };
+    const workflowExecutionDriver = createMockWorkflowExecutionDriver({
+      currentNode: { id: 'node1' } as GraphNodeUnion,
+      isExecuting: false,
+    });
+
     const params = {
       workflowExecutionDriver,
       workflowRuntime: {
         executionDriver: workflowExecutionDriver,
-        getWorkflowExecutionStatus: jest.fn(() => ExecutionStatus.RUNNING),
+        saveState: jest.fn().mockResolvedValue(undefined),
       },
     } as any;
 

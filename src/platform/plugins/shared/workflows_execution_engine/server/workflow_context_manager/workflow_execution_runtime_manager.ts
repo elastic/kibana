@@ -400,6 +400,7 @@ export class WorkflowExecutionRuntimeManager {
     await this.stepIoService.load();
     this.stepIoService.evictCompletedLoopsOnResume(this.workflowGraph);
     this.workflowExecutionDriver.navigateToNode(this.workflowExecution.currentNodeId);
+    this.workflowExecutionDriver.commitPendingNavigation();
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
     };

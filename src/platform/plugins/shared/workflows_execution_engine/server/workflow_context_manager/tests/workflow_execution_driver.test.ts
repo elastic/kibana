@@ -7,73 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { WorkflowExecutionDriver } from '../workflow_execution_driver';
-import type { WorkflowExecutionState } from '../workflow_execution_state';
 
 describe('WorkflowExecutionDriver', () => {
   let driver: WorkflowExecutionDriver;
-  let workflowExecution: EsWorkflowExecution;
   let workflowExecutionGraph: WorkflowGraph;
-  let workflowExecutionState: WorkflowExecutionState;
 
   beforeEach(() => {
-    workflowExecution = {
-      id: 'exec1',
-      currentNodeId: 'node1',
-      scopeStack: [],
-    } as EsWorkflowExecution;
-
     workflowExecutionGraph = {
       topologicalOrder: ['node1', 'node2', 'node3'],
       getNode: jest.fn().mockImplementation((nodeId: string) => {
         if (nodeId === 'node1') {
-          return { id: 'node1', stepId: 's1', stepType: 't1' } as GraphNodeUnion;
+          return { id: 'node1', stepId: 's1', type: 't1' } as GraphNodeUnion;
         }
         if (nodeId === 'node2') {
-          return { id: 'node2', stepId: 's2', stepType: 't2' } as GraphNodeUnion;
+          return { id: 'node2', stepId: 's2', type: 't2' } as GraphNodeUnion;
         }
         if (nodeId === 'node3') {
-          return { id: 'node3', stepId: 's3', stepType: 't3' } as GraphNodeUnion;
+          return { id: 'node3', stepId: 's3', type: 't3' } as GraphNodeUnion;
         }
         return undefined;
       }),
+      getNodeStack: jest.fn().mockImplementation((nodeId: string) => [nodeId]),
     } as unknown as WorkflowGraph;
 
-    workflowExecutionState = {
-      getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
-    } as unknown as WorkflowExecutionState;
-
     driver = new WorkflowExecutionDriver({
-      workflowExecutionState,
+      nodeId: 'node1',
       workflowExecutionGraph,
     });
   });
 
-  it('starts with isExecuting false', () => {
-    expect(driver.isExecuting).toBe(false);
+  it('starts with isExecuting true before start/stop', () => {
+    expect(driver.isExecuting).toBe(true);
   });
 
   it('start sets isExecuting true', () => {
+    driver.stop();
     driver.start();
     expect(driver.isExecuting).toBe(true);
   });
 
   it('stop clears isExecuting', () => {
-    driver.start();
     driver.stop();
     expect(driver.isExecuting).toBe(false);
   });
 
-  it('getCurrentNode and currentNode return graph node for persisted currentNodeId', () => {
-    expect(driver.getCurrentNode()).toEqual(expect.objectContaining({ id: 'node1' }));
+  it('currentNode returns graph node for current node id', () => {
     expect(driver.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
   });
 
-  it('navigateToNode sets pending next for saveState', () => {
+  it('navigateToNode sets pending next node', () => {
     driver.navigateToNode('node3');
-    expect(driver.getNextNodeId()).toBe('node3');
+    expect(driver.nextNode).toEqual(expect.objectContaining({ id: 'node3' }));
+    expect(driver.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
   });
 
   it('navigateToNode throws when node is missing', () => {
@@ -83,27 +70,24 @@ describe('WorkflowExecutionDriver', () => {
     );
   });
 
-  it('navigateToNextNode advances from persisted currentNodeId', () => {
+  it('navigateToNextNode advances from current node', () => {
     driver.navigateToNextNode();
-    expect(driver.getNextNodeId()).toBe('node2');
+    expect(driver.nextNode).toEqual(expect.objectContaining({ id: 'node2' }));
   });
 
   it('navigateToAfterNode sets next after given id', () => {
     driver.navigateToAfterNode('node1');
-    expect(driver.getNextNodeId()).toBe('node2');
+    expect(driver.nextNode).toEqual(expect.objectContaining({ id: 'node2' }));
   });
 
-  it('setEntryNodeFromTopologicalOrder sets first node', () => {
-    driver.setEntryNodeFromTopologicalOrder();
-    expect(driver.getNextNodeId()).toBe('node1');
+  it('commitPendingNavigation promotes next to current', () => {
+    driver.navigateToNode('node3');
+    driver.commitPendingNavigation();
+    expect(driver.currentNode).toEqual(expect.objectContaining({ id: 'node3' }));
   });
 
-  it('syncPendingNavigationFromPersistedCurrentNode copies currentNodeId', () => {
-    (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
-      ...workflowExecution,
-      currentNodeId: 'node2',
-    });
-    driver.syncPendingNavigationFromPersistedCurrentNode();
-    expect(driver.getNextNodeId()).toBe('node2');
+  it('defaults to first topological node when nodeId is omitted', () => {
+    const entryDriver = new WorkflowExecutionDriver({ workflowExecutionGraph });
+    expect(entryDriver.currentNode).toEqual(expect.objectContaining({ id: 'node1' }));
   });
 });
