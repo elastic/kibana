@@ -49,11 +49,7 @@ export const SHOWN_EVENTS_VS_TOTAL = ({
       id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.totalEvents"
       defaultMessage="Showing {range} of {total} {totalNum, plural, one {change} other {changes}}"
       values={{
-        range: (
-          <strong>
-            {start}-{end}
-          </strong>
-        ),
+        range: <strong>{`${start}-${end}`}</strong>,
         total: <strong>{total}</strong>,
         totalNum: total,
       }}
@@ -104,49 +100,242 @@ export const LOADING_LABEL = i18n.translate(
   }
 );
 
-interface RuleChangeMessageProps {
+const REVISION_ACTION_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.revisionActionLabel',
+  { defaultMessage: 'Revision' }
+);
+
+const ELASTIC_VERSION_ACTION_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.elasticVersionActionLabel',
+  { defaultMessage: 'Elastic version' }
+);
+
+interface RuleRevisionMessageProps {
+  date: React.ReactNode;
+  username: string;
+  revision: number;
+  fields: React.ReactNode;
+}
+
+export const RULE_REVISION_MESSAGE = ({
+  date,
+  username,
+  revision,
+  fields,
+}: RuleRevisionMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleRevisionMessage"
+    defaultMessage="On {date} {username} made {actionLabel} {revision} updating the {fields}"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+      actionLabel: <strong>{REVISION_ACTION_LABEL}</strong>,
+      revision: <EuiBadge>{revision}</EuiBadge>,
+      fields,
+    }}
+  />
+);
+
+interface ElasticVersionMessageProps {
+  date: React.ReactNode;
+  username: string;
+  version: number;
+  fields: React.ReactNode;
+}
+
+export const ELASTIC_VERSION_MESSAGE = ({
+  date,
+  username,
+  version,
+  fields,
+}: ElasticVersionMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.elasticVersionMessage"
+    defaultMessage="On {date} {username} made {actionLabel} {version} installing the Elastic update to the {fields}"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+      actionLabel: <strong>{ELASTIC_VERSION_ACTION_LABEL}</strong>,
+      version: <EuiBadge>{version}</EuiBadge>,
+      fields,
+    }}
+  />
+);
+
+interface RuleInstallMessageProps {
+  date: React.ReactNode;
+  username: string;
+  version: number;
+}
+
+export const RULE_INSTALL_MESSAGE = ({
+  date,
+  username,
+  version,
+}: RuleInstallMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleInstallMessage"
+    defaultMessage="On {date} {username} installed {actionLabel} {version} of the rule"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+      actionLabel: <strong>{ELASTIC_VERSION_ACTION_LABEL}</strong>,
+      version: <EuiBadge>{version}</EuiBadge>,
+    }}
+  />
+);
+
+interface SimpleActionMessageProps {
+  date: React.ReactNode;
+  username: string;
+}
+
+export const RULE_CREATED_MESSAGE = ({ date, username }: SimpleActionMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleCreatedMessage"
+    defaultMessage="On {date} {username} created the rule"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+    }}
+  />
+);
+
+export const RULE_ENABLED_MESSAGE = ({ date, username }: SimpleActionMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleEnabledMessage"
+    defaultMessage="On {date} {username} enabled the rule"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+    }}
+  />
+);
+
+export const RULE_DISABLED_MESSAGE = ({
+  date,
+  username,
+}: SimpleActionMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleDisabledMessage"
+    defaultMessage="On {date} {username} disabled the rule"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+    }}
+  />
+);
+
+export const RULE_SNOOZED_MESSAGE = ({ date, username }: SimpleActionMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleSnoozedMessage"
+    defaultMessage="On {date} {username} snoozed the rule"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+    }}
+  />
+);
+
+export const RULE_UNSNOOZED_MESSAGE = ({
+  date,
+  username,
+}: SimpleActionMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleUnsnoozedMessage"
+    defaultMessage="On {date} {username} unsnoozed the rule"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+    }}
+  />
+);
+
+export const RULE_API_KEY_UPDATED_MESSAGE = ({
+  date,
+  username,
+}: SimpleActionMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleApiKeyUpdatedMessage"
+    defaultMessage="On {date} {username} updated the API key of the rule"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+    }}
+  />
+);
+
+export const RULE_DELETED_MESSAGE = ({ date, username }: SimpleActionMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleDeletedMessage"
+    defaultMessage="On {date} {username} deleted the rule"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+    }}
+  />
+);
+
+export const RULE_DUPLICATED_MESSAGE = ({
+  date,
+  username,
+}: SimpleActionMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleDuplicatedMessage"
+    defaultMessage="On {date} {username} duplicated the rule"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+    }}
+  />
+);
+
+export const RULE_IMPORTED_MESSAGE = ({
+  date,
+  username,
+}: SimpleActionMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleImportedMessage"
+    defaultMessage="On {date} {username} imported the rule"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+    }}
+  />
+);
+
+export const RULE_REVERTED_MESSAGE = ({
+  date,
+  username,
+}: SimpleActionMessageProps): JSX.Element => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleRevertedMessage"
+    defaultMessage="On {date} {username} reverted the rule to a previous version"
+    values={{
+      date,
+      username: <EuiBadge color="hollow">{username}</EuiBadge>,
+    }}
+  />
+);
+
+interface RuleGenericChangeMessageProps {
   date: React.ReactNode;
   username: string;
   action: string;
 }
 
-export const RULE_CHANGE_MESSAGE = ({
+export const RULE_GENERIC_CHANGE_MESSAGE = ({
   date,
   username,
   action,
-}: RuleChangeMessageProps): JSX.Element => (
+}: RuleGenericChangeMessageProps): JSX.Element => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleChangeMessage"
+    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleGenericChangeMessage"
     defaultMessage="On {date} {username} {action} the rule"
     values={{
       date,
       username: <EuiBadge color="hollow">{username}</EuiBadge>,
       action: <strong>{action}</strong>,
-    }}
-  />
-);
-
-interface RuleUpdateMessageProps {
-  date: React.ReactNode;
-  username: string;
-  revision: number;
-  fields: string[];
-}
-
-export const RULE_UPDATE_MESSAGE = ({
-  date,
-  username,
-  revision,
-  fields,
-}: RuleUpdateMessageProps): JSX.Element => (
-  <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.ruleUpdateMessage"
-    defaultMessage="On {date} {username} made revision {revision} changing {fields}"
-    values={{
-      date,
-      username: <EuiBadge color="hollow">{username}</EuiBadge>,
-      revision: <EuiBadge>{revision}</EuiBadge>,
-      fields: fields.map((field) => <EuiBadge>{field}</EuiBadge>),
     }}
   />
 );

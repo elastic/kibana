@@ -10,8 +10,7 @@ import { EuiFlexGroup, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { describeAction } from './describe_action';
 import * as i18n from './translations';
-import { extractChangedFieldNames } from './extract_changed_field_names';
-import { IGNORED_DIFF_FIELDS } from './constants';
+import { extractChangedFieldNames } from '../../utils/extract_changed_field_names';
 
 interface ChangeHistoryFlyoutHeaderProps {
   item: RuleHistoryItem;
@@ -23,7 +22,7 @@ export function ChangeHistoryFlyoutHeader({
   titleId,
 }: ChangeHistoryFlyoutHeaderProps): JSX.Element {
   const userName = item.user?.name ?? i18n.SYSTEM_USER_LABEL;
-  const changedFields = useMemo(() => extractChangedFieldNames(item, IGNORED_DIFF_FIELDS), [item]);
+  const changedFields = useMemo(() => extractChangedFieldNames(item), [item]);
   const prevRevision = item.old_values?.revision as number | undefined;
 
   return (

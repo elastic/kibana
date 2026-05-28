@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
+import type { RuleHistoryItem } from '../../../../common/api/detection_engine/rule_management';
 
 /**
  * Extract the list of changed-field names from a history item, stripping out
@@ -15,7 +15,7 @@ import type { RuleHistoryItem } from '../../../../../common/api/detection_engine
  */
 export const extractChangedFieldNames = (
   item: Pick<RuleHistoryItem, 'old_values'>,
-  ignored: ReadonlySet<string>
+  ignored = IGNORED_DIFF_FIELDS
 ): string[] => {
   if (!item.old_values) {
     return [];
@@ -23,3 +23,18 @@ export const extractChangedFieldNames = (
 
   return Object.keys(item.old_values).filter((field) => !ignored.has(field));
 };
+
+/**
+ * Rule field names that are excluded from the visible "changed fields" list
+ * and from the diff view in the flyout. These are bookkeeping fields that
+ * change on every rule write and would otherwise dominate the UI.
+ */
+const IGNORED_DIFF_FIELDS: ReadonlySet<string> = new Set([
+  'updated_at',
+  'updated_by',
+  'created_at',
+  'created_by',
+  'revision',
+  'execution_summary',
+  'meta',
+]);

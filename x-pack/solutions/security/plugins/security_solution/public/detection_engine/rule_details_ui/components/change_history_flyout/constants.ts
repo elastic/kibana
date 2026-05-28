@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DATE_DISPLAY_FORMAT, IGNORED_DIFF_FIELDS } from '../change_history_table/constants';
+export { DATE_DISPLAY_FORMAT } from '../change_history_table/constants';

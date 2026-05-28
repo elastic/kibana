@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { convertFieldToDisplayName } from '../../../rule_management/components/rule_details/helpers';
 
 interface ChangedFieldsBadgesProps {
@@ -31,11 +31,7 @@ export function ChangedFieldsBadges({
   }
 
   const visible = fields.slice(0, inlineLimit);
-  const overflowCount = Math.max(0, fields.length - inlineLimit);
-  const overflowTitle = fields
-    .slice(inlineLimit, inlineLimit + overflowLimit)
-    .map(convertFieldToDisplayName)
-    .join(', ');
+  const overflowFieldNames = fields.slice(inlineLimit + 1).map(convertFieldToDisplayName);
 
   return (
     <>
@@ -44,10 +40,11 @@ export function ChangedFieldsBadges({
           {convertFieldToDisplayName(field)}
         </EuiBadge>
       ))}
-      {overflowCount > 0 && (
-        <EuiBadge color="hollow" title={overflowTitle}>
-          {`+${overflowCount}`}
-        </EuiBadge>
+      &nbsp;
+      {overflowFieldNames.length > 0 && (
+        <EuiToolTip content={overflowFieldNames.join(', ')}>
+          <EuiBadge color="hollow">{`+${overflowFieldNames.length}`}</EuiBadge>
+        </EuiToolTip>
       )}
     </>
   );

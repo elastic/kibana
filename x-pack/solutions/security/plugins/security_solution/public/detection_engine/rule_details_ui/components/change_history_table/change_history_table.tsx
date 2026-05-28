@@ -33,7 +33,6 @@ interface ChangeHistoryTableProps {
 }
 
 export function ChangeHistoryTable({ ruleId }: ChangeHistoryTableProps): JSX.Element {
-  const { euiTheme } = useEuiTheme();
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState<number>(DEFAULT_PAGE_SIZE);
   const [selectedItem, setSelectedItem] = useState<RuleHistoryItem | undefined>();
@@ -66,30 +65,11 @@ export function ChangeHistoryTable({ ruleId }: ChangeHistoryTableProps): JSX.Ele
   );
 
   if (isLoading && items.length === 0) {
-    return (
-      <EuiPanel hasBorder data-test-subj="ruleChangeHistoryTableLoading">
-        <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18n.LOADING_LABEL}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    );
+    return <Loading />;
   }
 
   if (!isFetching && items.length === 0) {
-    return (
-      <EuiPanel hasBorder data-test-subj="ruleChangeHistoryTableEmpty">
-        <EuiEmptyPrompt
-          iconType="clock"
-          title={<h2>{i18n.EMPTY_PROMPT_TITLE}</h2>}
-          body={<p>{i18n.EMPTY_PROMPT_BODY}</p>}
-        />
-      </EuiPanel>
-    );
+    return <NoData />;
   }
 
   return (
@@ -116,6 +96,33 @@ export function ChangeHistoryTable({ ruleId }: ChangeHistoryTableProps): JSX.Ele
         onChangeItemsPerPage={handleChangePageSize}
         itemsPerPage={itemsPerPage}
         itemsPerPageOptions={PAGE_SIZE_OPTIONS}
+      />
+    </EuiPanel>
+  );
+}
+
+function Loading(): JSX.Element {
+  return (
+    <EuiPanel hasBorder data-test-subj="ruleChangeHistoryTableLoading">
+      <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">{i18n.LOADING_LABEL}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+}
+
+function NoData(): JSX.Element {
+  return (
+    <EuiPanel hasBorder data-test-subj="ruleChangeHistoryTableEmpty">
+      <EuiEmptyPrompt
+        iconType="clock"
+        title={<h2>{i18n.EMPTY_PROMPT_TITLE}</h2>}
+        body={<p>{i18n.EMPTY_PROMPT_BODY}</p>}
       />
     </EuiPanel>
   );

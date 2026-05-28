@@ -124,7 +124,7 @@ export const VIEW_REVISION = ({ revision }: ViewRevisionProps): JSX.Element => (
     id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.header.viewRevision"
     defaultMessage="{header} {revision}"
     values={{
-      header: <strong>{REVISION_HEADER}:</strong>,
+      header: <strong>{`${REVISION_HEADER}:`}</strong>,
       revision: <EuiBadge>{revision}</EuiBadge>,
     }}
   />
@@ -143,7 +143,7 @@ export const COMPARED_REVISIONS = ({
     id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.header.comparedRevisions"
     defaultMessage="{comparing} Revisions {revisionBefore} -> {revisionAfter}"
     values={{
-      comparing: <strong>{COMPARED_REVISIONS_HEADER}:</strong>,
+      comparing: <strong>{`${COMPARED_REVISIONS_HEADER}:`}</strong>,
       revisionBefore: <EuiBadge>{revisionBefore}</EuiBadge>,
       revisionAfter: <EuiBadge>{revisionAfter}</EuiBadge>,
     }}
@@ -161,7 +161,7 @@ export const UPDATED_BY = ({ action, username, timestamp }: UpdatedByProps): JSX
     id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.header.updatedBy"
     defaultMessage="{action} {username} on {timestamp}"
     values={{
-      action: <strong>{startCase(action)} by:</strong>,
+      action: <strong>{`${startCase(action)} by:`}</strong>,
       username: <EuiBadge>{username}</EuiBadge>,
       timestamp: <PreferenceFormattedDate value={new Date(timestamp)} />,
     }}
@@ -177,7 +177,7 @@ export const FIELD_CHANGES = ({ fields }: FieldChangesProps): JSX.Element => (
     id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.header.fieldChanges"
     defaultMessage="{fieldChanges} {fields}"
     values={{
-      fieldChanges: <strong>{FIELD_CHANGES_HEADER}:</strong>,
+      fieldChanges: <strong>{`${FIELD_CHANGES_HEADER}:`}</strong>,
       fields: fields.map((field) => <EuiBadge>{field}</EuiBadge>),
     }}
   />
@@ -196,4 +196,9 @@ const COMPARED_REVISIONS_HEADER = i18n.translate(
 const FIELD_CHANGES_HEADER = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.header.fieldChangesHeader',
   { defaultMessage: 'Field changes' }
+);
+
+export const NO_VISIBLE_CHANGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.noVisibleChanges',
+  { defaultMessage: 'No visible field changes for this revision.' }
 );

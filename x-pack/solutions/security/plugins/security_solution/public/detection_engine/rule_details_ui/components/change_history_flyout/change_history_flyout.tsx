@@ -17,10 +17,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
+import { extractChangedFieldNames } from '../../utils/extract_changed_field_names';
 import { ChangeDetailsTab } from './change_details_tab';
 import { ChangeHistoryFlyoutHeader } from './change_history_flyout_header';
-import { IGNORED_DIFF_FIELDS } from './constants';
-import { extractChangedFieldNames } from './extract_changed_field_names';
 import { OverviewTab } from './overview_tab';
 import { ChangeHistoryFlyoutActions } from './change_history_flyout_actions';
 import * as i18n from './translations';
@@ -32,7 +31,7 @@ interface ChangeHistoryFlyoutProps {
 
 export function ChangeHistoryFlyout({ item, onClose }: ChangeHistoryFlyoutProps): JSX.Element {
   const titleId = useGeneratedHtmlId();
-  const changedFields = useMemo(() => extractChangedFieldNames(item, IGNORED_DIFF_FIELDS), [item]);
+  const changedFields = useMemo(() => extractChangedFieldNames(item), [item]);
   const [selectedTab, setSelectedTab] = useState(
     changedFields.length > 0 ? TabId.Changes : TabId.Overview
   );
