@@ -1693,6 +1693,7 @@
         "type": "boolean"
       },
       "installed_es": {
+        "dynamic": false,
         "properties": {
           "deferred": {
             "type": "boolean"
