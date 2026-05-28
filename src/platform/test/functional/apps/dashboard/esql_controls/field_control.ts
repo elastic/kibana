@@ -11,6 +11,13 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Purpose: 
+ *   1) Verify user able to add variable control when creating an ES|QL visualization
+ *   2) Verify variable control change updates ES|QL visualization
+ * 
+ * Migration: Migrate to scout. Tests interactions between create ES|QL vis and create variable control
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
@@ -71,6 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'InlineEditingESQLEditor'
         );
         // Wait until suggestions are loaded
+        // TODO avoid race condition during migration and properly await suggestions load
         await common.sleep(1000);
         // Create control is the third suggestion
         await browser.pressKeys(browser.keys.ARROW_DOWN);

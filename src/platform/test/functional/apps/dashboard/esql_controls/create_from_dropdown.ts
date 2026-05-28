@@ -11,6 +11,12 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Purpose: Verify user able to add ESQL control to dashboard
+ * 
+ * Migration: Replace FTR test with unit test. Verify `execute` in 
+ * src/platform/plugins/shared/controls/public/actions/create_esql_control_action.tsx
+ */
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
