@@ -32,9 +32,11 @@ export const defineIndexThresholdRule = async (page: ScoutPage, name: string) =>
   // getIndexOptions() always adds a "Choose…" entry for the typed text, so the
   // option is present even if the API finds no matching indices.
   await indexCombo.locator('[data-test-subj="comboBoxInput"]').click();
+  // Type a partial prefix so the "Based on your data views" entry gets title="scout-threshold-rule-test"
+  // while the "Choose…" entry gets title="scout-threshold-rule" — keeping the target selector unique.
   await indexCombo
     .locator('[data-test-subj="comboBoxSearchInput"]')
-    .pressSequentially(THRESHOLD_TEST_INDEX, { delay: 50 });
+    .pressSequentially('scout-threshold-rule', { delay: 50 });
   const indexOption = page.locator(`.euiComboBoxOption[title="${THRESHOLD_TEST_INDEX}"]`);
   await indexOption.waitFor({ state: 'visible', timeout: 30000 });
   await indexOption.click();
