@@ -52,7 +52,11 @@ describe('AttachmentPillsRow', () => {
     mockRemoveAttachment.mockReset();
     MockAttachmentGroupPill.mockReset();
     MockAttachmentGroupPill.mockReturnValue(null);
-    mockUseConversationContext.mockReturnValue({ removeAttachment: mockRemoveAttachment });
+    mockUseConversationContext.mockReturnValue({
+      removeAttachment: mockRemoveAttachment,
+      isEmbeddedContext: false,
+      conversationActions: {} as never,
+    });
   });
 
   it('renders nothing when the attachments list is empty', () => {
@@ -85,8 +89,8 @@ describe('AttachmentPillsRow', () => {
   it('passes an onRemove callback to AttachmentGroupPill when removable is true', () => {
     render(<AttachmentPillsRow attachments={[makeGroup('g1')]} removable />);
     const { onRemove } = MockAttachmentGroupPill.mock.calls[0][0];
-    expect(typeof onRemove).toBe('function');
-    onRemove();
+    expect(onRemove).toBeDefined();
+    if (onRemove) onRemove();
     expect(mockRemoveAttachment).toHaveBeenCalledWith(0);
   });
 
