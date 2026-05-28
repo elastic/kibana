@@ -19,6 +19,26 @@ import { createSummarizeQueriesPrompt } from './prompts/summarize_queries/prompt
 import { createSummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
 import { SUBMIT_INSIGHTS_TOOL_NAME } from './client/insight_tool';
 import { extractInsightsFromResponse, collectQueryData, type QueryData } from './utils';
+import type { InsightsDiscoveryAgentContext } from './insights_discovery_agent_context';
+import { INSIGHTS_DISCOVERY_MAX_STEPS } from './insights_discovery_agent_context';
+
+const emptyDiscoveryContext: InsightsDiscoveryAgentContext = {
+  additionalTools: {},
+  toolCallbacks: {},
+  systemPromptSuffix: '',
+  maxSteps: INSIGHTS_DISCOVERY_MAX_STEPS,
+};
+
+const buildPromptOptions = (discoveryContext: InsightsDiscoveryAgentContext) => {
+  const { additionalTools, systemPromptSuffix } = discoveryContext;
+  if (Object.keys(additionalTools).length === 0 && !systemPromptSuffix) {
+    return {};
+  }
+  return {
+    additionalTools,
+    ...(systemPromptSuffix ? { systemPromptSuffix } : {}),
+  };
+};
 
 export async function generateInsights({
   streamsClient,
@@ -28,6 +48,7 @@ export async function generateInsights({
   signal,
   logger,
   streamNames,
+  discoveryContext = emptyDiscoveryContext,
 }: {
   streamsClient: StreamsClient;
   queryClient: QueryClient;
@@ -37,6 +58,8 @@ export async function generateInsights({
   logger: Logger;
   /** When provided, only generate insights for these streams. Otherwise all streams are used. */
   streamNames?: string[];
+  /** Memory and connector tools for root-cause-oriented discovery. */
+  discoveryContext?: InsightsDiscoveryAgentContext;
 }): Promise<GenerateInsightsResult> {
   const allStreams = await streamsClient.listStreams();
   let streams = allStreams;
@@ -53,6 +76,7 @@ export async function generateInsights({
         inferenceClient,
         signal,
         logger,
+        discoveryContext,
       });
       return {
         streamName: stream.name,
@@ -78,7 +102,7 @@ export async function generateInsights({
   }
 
   try {
-    const prompt = createSummarizeStreamsPrompt({});
+    const prompt = createSummarizeStreamsPrompt(buildPromptOptions(discoveryContext));
 
     const response = await executeAsReasoningAgent({
       prompt,
@@ -86,7 +110,7 @@ export async function generateInsights({
         streamInsights: JSON.stringify(streamInsightsWithData),
       },
       inferenceClient,
-      maxSteps: 2,
+      maxSteps: discoveryContext.maxSteps,
       finalToolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
       toolCallbacks: {
         [SUBMIT_INSIGHTS_TOOL_NAME]: async (toolCall) => ({
@@ -95,6 +119,7 @@ export async function generateInsights({
             count: (toolCall.function.arguments as { insights?: unknown[] })?.insights?.length,
           },
         }),
+        ...discoveryContext.toolCallbacks,
       },
       abortSignal: signal,
     });
@@ -130,6 +155,7 @@ async function generateStreamInsights({
   inferenceClient,
   signal,
   logger,
+  discoveryContext,
 }: {
   stream: Streams.all.Definition;
   queryClient: QueryClient;
@@ -137,6 +163,7 @@ async function generateStreamInsights({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
+  discoveryContext: InsightsDiscoveryAgentContext;
 }): Promise<GenerateInsightsResult> {
   const queries = await queryClient.getAssets(stream.name);
 
@@ -159,7 +186,7 @@ async function generateStreamInsights({
   }
 
   try {
-    const prompt = createSummarizeQueriesPrompt({});
+    const prompt = createSummarizeQueriesPrompt(buildPromptOptions(discoveryContext));
 
     const response = await executeAsReasoningAgent({
       prompt,
@@ -168,7 +195,7 @@ async function generateStreamInsights({
         queries: JSON.stringify(queryDataList),
       },
       inferenceClient,
-      maxSteps: 2,
+      maxSteps: discoveryContext.maxSteps,
       finalToolChoice: { function: SUBMIT_INSIGHTS_TOOL_NAME },
       toolCallbacks: {
         [SUBMIT_INSIGHTS_TOOL_NAME]: async (toolCall) => ({
@@ -177,6 +204,7 @@ async function generateStreamInsights({
             count: (toolCall.function.arguments as { insights?: unknown[] })?.insights?.length,
           },
         }),
+        ...discoveryContext.toolCallbacks,
       },
       abortSignal: signal,
     });

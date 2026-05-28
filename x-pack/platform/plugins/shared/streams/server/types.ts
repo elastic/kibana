@@ -27,6 +27,10 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type {
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+} from '@kbn/agent-context-layer-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   FieldsMetadataServerSetup,
@@ -53,6 +57,7 @@ export interface StreamsServer {
   logger: Logger;
   security: SecurityPluginStart;
   actions: ActionsPluginStart;
+  agentContextLayer?: AgentContextLayerPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
@@ -71,6 +76,7 @@ export interface ElasticsearchAccessorOptions {
 
 export interface StreamsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
+  agentContextLayer?: AgentContextLayerPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
@@ -87,6 +93,7 @@ export interface StreamsPluginSetupDependencies {
 
 export interface StreamsPluginStartDependencies {
   actions: ActionsPluginStart;
+  agentContextLayer?: AgentContextLayerPluginStart;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;

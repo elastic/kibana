@@ -19,9 +19,11 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyoutFooter,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DiscussWithAgentButton, formatEntityDetailChatMessage } from '../sig_event_agent_chat';
 
 interface DescriptionItem {
   title: string;
@@ -100,6 +102,16 @@ export const EntityDetailFlyout = ({
           )}
         </EuiAccordion>
       </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <DiscussWithAgentButton
+              initialMessage={formatEntityDetailChatMessage({ title, entityId, details })}
+              dataTestSubj="streamsEntityDetailFlyoutDiscussWithAgentButton"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

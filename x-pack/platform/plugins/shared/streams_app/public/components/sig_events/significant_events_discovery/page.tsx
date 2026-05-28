@@ -44,6 +44,17 @@ function isValidDiscoveryTab(value: string): value is DiscoveryTab {
   return discoveryTabs.includes(value as DiscoveryTab);
 }
 
+const SYSTEM_ONBOARDING_AGENT_ID = 'sigevents.memory.system-onboarding';
+const SYSTEM_ONBOARDING_SESSION_TAG = 'streams-significant-events-onboarding';
+
+const systemOnboardingInitialMessage = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.systemOnboardingInitialMessage',
+  {
+    defaultMessage:
+      'Help me document my system for significant events analysis — architecture, deployment, infrastructure, and operational context.',
+  }
+);
+
 export function SignificantEventsDiscoveryPage() {
   const {
     path: { tab },
@@ -79,7 +90,9 @@ export function SignificantEventsDiscoveryPage() {
   const handleOpenSystemOnboarding = useCallback(() => {
     agentBuilder?.openChat({
       newConversation: true,
-      agentId: 'sigevents.memory.system-onboarding',
+      sessionTag: SYSTEM_ONBOARDING_SESSION_TAG,
+      agentId: SYSTEM_ONBOARDING_AGENT_ID,
+      initialMessage: systemOnboardingInitialMessage,
       autoSendInitialMessage: true,
     });
   }, [agentBuilder]);

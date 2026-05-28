@@ -30,6 +30,7 @@
     ],
     "optionalPlugins": [
       "agentBuilder",
+      "agentContextLayer",
       "alertingVTwo",
       "cloud",
       "esql",

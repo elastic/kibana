@@ -45,7 +45,11 @@ export type InsightUserEvaluation = z.infer<typeof insightUserEvaluationSchema>;
  */
 export const insightCoreSchema = z.object({
   title: z.string().describe('Short, actionable title summarizing the insight'),
-  description: z.string().describe('Detailed explanation of what is happening and why it matters'),
+  description: z
+    .string()
+    .describe(
+      'What is happening, the hypothesized root cause (why), and why it matters — grounded in evidence and any memory/connector context'
+    ),
   impact: insightImpactLevelSchema.describe(
     'Severity level: critical (service down), high (degraded), medium (potential issue), low (informational)'
   ),
@@ -54,7 +58,9 @@ export const insightCoreSchema = z.object({
     .describe('Evidence supporting this insight from streams and queries'),
   recommendations: z
     .array(z.string())
-    .describe('Actionable steps to investigate or resolve the issue'),
+    .describe(
+      'Mitigation and investigation steps derived from the hypothesized root cause — concrete actions, not generic monitoring advice'
+    ),
 });
 export type InsightCore = z.infer<typeof insightCoreSchema>;
 

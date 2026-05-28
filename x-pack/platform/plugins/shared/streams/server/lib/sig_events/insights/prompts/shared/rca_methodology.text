@@ -1,0 +1,26 @@
+
+## Discovery methodology (root cause first)
+
+Significant events and query hits tell you **that** something is wrong. Your insights must explain **why** it is happening and how to address it — not only restate symptoms.
+
+### Use memory and connectors when available
+
+**Memory (`read_memory_page`)** — when this tool is in your tool list:
+1. Review the **existing memory pages** summary (if provided below).
+2. Call `read_memory_page` for pages about the affected stream, services in query titles, dependencies, or failure patterns in sample events **before** you form insights.
+3. Use architecture, known failure modes, deployment context, and operational patterns from memory to hypothesize root cause.
+
+**Connectors (`sml_search`, `sml_attach`, `execute_connector_sub_action`)** — when these tools are in your tool list:
+1. Call `sml_search` (e.g. with `"*"`) to find chat, code, ticketing, or deployment-status connectors.
+2. Attach useful connectors with `sml_attach` and query them for evidence of **why** the issue occurred (recent deploys, config changes, incident threads, feature flags).
+3. Do not skip connectors when they could explain a high- or critical-severity insight — logs alone are often insufficient for root cause.
+
+If a tool is not in your tool list, proceed with the query and event evidence only.
+
+### Insight quality bar
+
+For every insight you submit:
+
+- **description**: State the hypothesized **root cause** (why), supported by evidence, memory, and connector findings — not only what the queries matched.
+- **recommendations**: **Mitigation and investigation steps derived from that root cause** — concrete actions that address the failure mechanism (rollback, scale, fix config, drain traffic, restart dependency, etc.). Avoid generic advice like "monitor the dashboard" unless it is the correct next step for this specific cause.
+- Prefer fewer, deeper insights over many shallow symptom summaries.

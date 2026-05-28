@@ -9,7 +9,16 @@ import { createPrompt, type ToolDefinition } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
 import systemPromptTemplate from './system_prompt.text';
 import userPromptTemplate from './user_prompt.text';
+import rcaMethodology from '../shared/rca_methodology.text';
 import { insightsSchema, SUBMIT_INSIGHTS_TOOL_NAME } from '../../client/insight_tool';
+
+const buildSystemPrompt = (systemPromptSuffix?: string) => {
+  const parts = [systemPromptTemplate, rcaMethodology];
+  if (systemPromptSuffix) {
+    parts.push(systemPromptSuffix);
+  }
+  return parts.join('\n');
+};
 
 export const createSummarizeStreamsPrompt = ({
   additionalTools,
@@ -27,9 +36,7 @@ export const createSummarizeStreamsPrompt = ({
     .version({
       system: {
         mustache: {
-          template: systemPromptSuffix
-            ? `${systemPromptTemplate}\n${systemPromptSuffix}`
-            : systemPromptTemplate,
+          template: buildSystemPrompt(systemPromptSuffix),
         },
       },
       template: {
