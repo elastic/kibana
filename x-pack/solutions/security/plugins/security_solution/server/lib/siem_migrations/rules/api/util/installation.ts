@@ -27,7 +27,11 @@ import {
 } from '../../../../../../common/siem_migrations/rules/utils';
 import { DEFAULT_TRANSLATION_FIELDS } from '../../../../../../common/siem_migrations/constants';
 import { getVendorTag } from '../../../common/api/util/tags';
-import { SENTINEL_DEFAULT_QUERY_FREQUENCY } from '../../vendors/sentinel/constants';
+import {
+  SENTINEL_DEFAULT_QUERY_FREQUENCY,
+  SENTINEL_NRT_RULE_KIND,
+  SENTINEL_RULE_KIND_ANNOTATION_KEY,
+} from '../../vendors/sentinel/constants';
 
 const MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL = 50;
 
@@ -35,10 +39,12 @@ const getTranslationFieldsFromAnnotations = (
   originalRule: OriginalRule
 ): MigrationTranslationFields => {
   const { annotations } = originalRule;
-  const defaultInterval =
-    originalRule.vendor === 'microsoft-sentinel'
-      ? SENTINEL_DEFAULT_QUERY_FREQUENCY
-      : DEFAULT_TRANSLATION_FIELDS.interval;
+  const isSentinelNrtRule =
+    originalRule.vendor === 'microsoft-sentinel' &&
+    annotations?.[SENTINEL_RULE_KIND_ANNOTATION_KEY] === SENTINEL_NRT_RULE_KIND;
+  const defaultInterval = isSentinelNrtRule
+    ? SENTINEL_DEFAULT_QUERY_FREQUENCY
+    : DEFAULT_TRANSLATION_FIELDS.interval;
 
   return {
     from:

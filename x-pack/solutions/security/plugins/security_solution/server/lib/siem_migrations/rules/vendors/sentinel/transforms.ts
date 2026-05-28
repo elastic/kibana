@@ -15,6 +15,7 @@ import {
   SENTINEL_TACTIC_NAME_TO_ID,
   SENTINEL_TACTIC_NAME_TO_DISPLAY,
   ISO_8601_DURATION_PATTERN,
+  SENTINEL_RULE_KIND_ANNOTATION_KEY,
 } from './constants';
 
 /**
@@ -103,15 +104,6 @@ function convertIsoDurationToDateMath(isoString: string): string | undefined {
   if (hours > 0) {
     return `${hours}h`;
   }
-  if (days > 0) {
-    return `${days}d`;
-  }
-  if (months > 0) {
-    return `${months}M`;
-  }
-  if (years > 0) {
-    return `${years}y`;
-  }
 
   return undefined;
 }
@@ -157,6 +149,7 @@ export function transformSentinelRuleToOriginalRule(rule: SentinelRule): Origina
     query_language: 'kql',
     severity: rule.severity.toLowerCase(),
     annotations: {
+      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: rule.kind,
       ...(isNonEmptyString(rule.queryPeriod)
         ? transformQueryPeriodToTimeRange(rule.queryPeriod)
         : {}),

@@ -55,22 +55,29 @@ export const SENTINEL_TACTIC_NAME_TO_DISPLAY: Record<string, string> = {
 };
 
 export const SENTINEL_DEFAULT_QUERY_FREQUENCY = '1m';
+export const SENTINEL_RULE_KIND_ANNOTATION_KEY = 'kind';
+export const SENTINEL_NRT_RULE_KIND = 'NRT';
 
 /**
- * A regular expression to match ISO 8601 duration strings.
- * In ISO 8601 durations, T starts the time portion.
- * Use T when the duration includes hours, minutes, or seconds:
+ * Matches the integer-only ISO 8601 duration subset supported by the Sentinel rule transform.
+ *
+ * Supported units are years, months, days, hours, minutes, and seconds. Weeks (`P1W`),
+ * fractional values (`PT0.5H`), and comma decimals are intentionally not supported.
+ * `T` starts the time portion and is required when the duration includes hours,
+ * minutes, or seconds:
+ *
  * PT5M = 5 minutes
  * PT1H = 1 hour
  * PT30S = 30 seconds
  * P1DT2H = 1 day and 2 hours
  *
- * Do not use T for date-only units:
+ * `T` is not used for date-only units:
+ *
  * P1D = 1 day
  * P2M = 2 months
  * P1Y = 1 year
- * Important ambiguity: M means months before T, but minutes after T.
  *
+ * Important ambiguity: M means months before T, but minutes after T.
  * P1M = 1 month
  * PT1M = 1 minute
  */

@@ -6,11 +6,9 @@
  */
 
 import type { SentinelArmResource } from '../../model/vendor/rules/sentinel.gen';
-import type { SentinelRule } from './types';
+import type { SentinelRule, SentinelRuleKind } from './types';
 
-type SupportedSentinelRuleKind = 'Scheduled' | 'NRT';
-
-const isSupportedSentinelRuleKind = (kind: string | undefined): kind is SupportedSentinelRuleKind =>
+const isSupportedSentinelRuleKind = (kind: string | undefined): kind is SentinelRuleKind =>
   kind === 'Scheduled' || kind === 'NRT';
 
 /**
@@ -56,6 +54,7 @@ export class SentinelRulesParser {
 
     return {
       id,
+      kind: resource.kind,
       displayName,
       description: description ?? '',
       query,

@@ -8,6 +8,7 @@
 import type { IDetectionRulesClient } from '../../../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import { SiemMigrationStatus } from '../../../../../../common/siem_migrations/constants';
 import type { StoredRuleMigrationRule } from '../../types';
+import { SENTINEL_RULE_KIND_ANNOTATION_KEY } from '../../vendors/sentinel/constants';
 import { installCustomRules } from './installation';
 
 const translatedRule: StoredRuleMigrationRule = {
@@ -59,14 +60,16 @@ describe('installCustomRules', () => {
     expect(createCustomRule.mock.calls[0][0].params).not.toHaveProperty('ignored_annotation');
   });
 
-  it('uses Sentinel query frequency default when no interval annotation is present', async () => {
+  it('uses Sentinel NRT query frequency default when no interval annotation is present', async () => {
     const createCustomRule = jest.fn().mockResolvedValue({ id: 'created-rule-id' });
     const detectionRulesClient = { createCustomRule } as unknown as IDetectionRulesClient;
     const ruleWithoutAnnotations: StoredRuleMigrationRule = {
       ...translatedRule,
       original_rule: {
         ...translatedRule.original_rule,
-        annotations: undefined,
+        annotations: {
+          [SENTINEL_RULE_KIND_ANNOTATION_KEY]: 'NRT',
+        },
       },
     };
 
@@ -77,6 +80,30 @@ describe('installCustomRules', () => {
         from: 'now-360s',
         to: 'now',
         interval: '1m',
+      }),
+    });
+  });
+
+  it('uses shared interval default for Scheduled Sentinel rules without interval annotation', async () => {
+    const createCustomRule = jest.fn().mockResolvedValue({ id: 'created-rule-id' });
+    const detectionRulesClient = { createCustomRule } as unknown as IDetectionRulesClient;
+    const ruleWithoutIntervalAnnotation: StoredRuleMigrationRule = {
+      ...translatedRule,
+      original_rule: {
+        ...translatedRule.original_rule,
+        annotations: {
+          [SENTINEL_RULE_KIND_ANNOTATION_KEY]: 'Scheduled',
+        },
+      },
+    };
+
+    await installCustomRules([ruleWithoutIntervalAnnotation], false, detectionRulesClient);
+
+    expect(createCustomRule).toHaveBeenCalledWith({
+      params: expect.objectContaining({
+        from: 'now-360s',
+        to: 'now',
+        interval: '5m',
       }),
     });
   });
