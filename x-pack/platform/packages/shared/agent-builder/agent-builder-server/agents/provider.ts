@@ -211,9 +211,7 @@ export interface AgentHandlerContext {
    */
   filestore: IFileStore;
   /**
-   * Unified virtual filesystem service. Owns the just-bash `IFileSystem`
-   * exposed at `/workspace`, `/tool_calls`, `/skills` and `/tmp`.
-   * Always available regardless of feature flags.
+   * Unified virtual filesystem service.
    */
   filesystemService: IFilesystemService;
   /**
