@@ -16,6 +16,10 @@ export const WORKFLOWS_MANAGEMENT_FEATURE_ID = 'workflowsManagement';
  * UI Setting ID for enabling / disabling the workflows management UI
  */
 export const WORKFLOWS_UI_SETTING_ID = 'workflows:ui:enabled';
+/**
+ * Read-only workflow graph editor flag. Enable in `kibana.yml` via
+ * `uiSettings.overrides.workflows:ui:visualEditor:enabled` (not Advanced Settings).
+ */
 export const WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID = 'workflows:ui:visualEditor:enabled';
 export const WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID = 'workflows:ui:executionGraph:enabled';
 export const WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID = 'workflows:ui:showExecutor:enabled';
@@ -45,3 +49,9 @@ export const WORKFLOW_SML_TYPE = 'workflow';
  * attachment is created or modified by an agent tool.
  */
 export const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
+
+/**
+ * Sentinel `focusStepId` for {@link WorkflowGraphCanvas}: centre on the first
+ * trigger node. Matches `HIGHLIGHTED_STEP_TRIGGER` in workflows_management.
+ */
+export const WORKFLOW_GRAPH_FOCUS_TRIGGER = '__trigger';
