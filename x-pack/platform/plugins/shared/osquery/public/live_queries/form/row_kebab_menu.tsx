@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useContext, useState, useMemo } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AddToCaseContextProvider } from '../../cases/add_to_cases';
