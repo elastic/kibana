@@ -23,7 +23,7 @@
       "searchInferenceEndpoints"
     ],
     "optionalPlugins": ["ml", "spaces", "cloud"],
-    "requiredBundles": ["apm", "kibanaReact", "kibanaUtils"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "extraPublicDirs": []
   }
 }

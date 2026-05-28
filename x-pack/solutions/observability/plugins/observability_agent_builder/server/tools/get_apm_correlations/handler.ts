@@ -28,12 +28,10 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
   USER_AGENT_NAME,
-} from '@kbn/apm-types';
-import {
   THROUGHPUT_BUCKET_COUNT,
   THROUGHPUT_CORRELATION_THRESHOLD,
   THROUGHPUT_TOP_VALUES_PER_FIELD,
-} from '@kbn/apm-plugin/common/correlations/constants';
+} from '@kbn/apm-types';
 import type {
   ObservabilityAgentBuilderCoreSetup,
   ObservabilityAgentBuilderPluginSetupDependencies,
