@@ -201,8 +201,8 @@ function getIconForSeriesType(layer: CommonXYDataLayerConfig): IconType {
   );
 }
 
-const computedColumnWarningStyles = {
-  message: ({ euiTheme }: UseEuiTheme) =>
+const chartTooltipFooterMessageStyles = {
+  root: ({ euiTheme }: UseEuiTheme) =>
     css`
       color: ${euiTheme.colors.textSubdued};
       font-size: ${euiTheme.size.m};
@@ -210,11 +210,11 @@ const computedColumnWarningStyles = {
     `,
 };
 
-/** Renders the computed-column filter warning inside the chart tooltip footer. */
-const ComputedColumnWarning: React.FC<{ message: string }> = ({ message }) => {
-  const styles = useMemoCss(computedColumnWarningStyles);
+/** Renders a styled message in the footer of the chart tooltip. */
+const ChartTooltipFooterMessage: React.FC<{ message: string }> = ({ message }) => {
+  const styles = useMemoCss(chartTooltipFooterMessageStyles);
   return (
-    <div css={styles.message} data-test-subj="xyChartComputedColumnWarning">
+    <div css={styles.root} data-test-subj="chartTooltipFooterMessage">
       {message}
     </div>
   );
@@ -374,7 +374,7 @@ export function XYChart({
   const isEsqlMode = dataLayers.some((l) => l.table?.meta?.type === ESQL_TABLE_TYPE);
 
   // Compute warning message for ES|QL computed columns that cannot be filtered.
-  const computedColumnWarningMessage = useMemo(
+  const warningMessage = useMemo(
     () =>
       isEsqlMode
         ? getComputedColumnWarning(dataLayers, panelHasConfiguredDrilldowns ?? false)
@@ -382,16 +382,16 @@ export function XYChart({
     [isEsqlMode, dataLayers, panelHasConfiguredDrilldowns]
   );
 
-  const TooltipWarningFooter = useMemo<
+  const TooltipFooter = useMemo<
     | React.ComponentType<{
         items: Array<TooltipValue<Record<string, string | number>, XYChartSeriesIdentifier>>;
         header: PointerValue<Record<string, string | number>> | null;
       }>
     | 'default'
   >(() => {
-    if (!computedColumnWarningMessage) return 'default';
-    return () => <ComputedColumnWarning message={computedColumnWarningMessage} />;
-  }, [computedColumnWarningMessage]);
+    if (!warningMessage) return 'default';
+    return () => <ChartTooltipFooterMessage message={warningMessage} />;
+  }, [warningMessage]);
 
   const icon: IconType = getIconForSeriesType(getDataLayers(layers)?.[0]);
 
@@ -882,7 +882,7 @@ export function XYChart({
                   : undefined
               }
               type={args.showTooltip ? TooltipType.VerticalCursor : TooltipType.None}
-              footer={TooltipWarningFooter}
+              footer={TooltipFooter}
             />
             <Settings
               noResults={

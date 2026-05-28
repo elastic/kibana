@@ -288,8 +288,8 @@ export function getDateFormatPattern(
   return uiSettings.get('dateFormat');
 }
 
-const computedColumnWarningStyles = {
-  message: ({ euiTheme }: UseEuiTheme) =>
+const chartTooltipFooterMessageStyles = {
+  root: ({ euiTheme }: UseEuiTheme) =>
     css`
       color: ${euiTheme.colors.textSubdued};
       font-size: ${euiTheme.size.m};
@@ -297,11 +297,11 @@ const computedColumnWarningStyles = {
     `,
 };
 
-/** Renders the computed-column filter warning inside the chart tooltip footer. */
-const ComputedColumnWarning: React.FC<{ message: string }> = ({ message }) => {
-  const styles = useMemoCss(computedColumnWarningStyles);
+/** Renders a styled message in the footer of the chart tooltip. */
+const ChartTooltipFooterMessage: React.FC<{ message: string }> = ({ message }) => {
+  const styles = useMemoCss(chartTooltipFooterMessageStyles);
   return (
-    <div css={styles.message} data-test-subj="heatmapChartComputedColumnWarning">
+    <div css={styles.root} data-test-subj="chartTooltipFooterMessage">
       {message}
     </div>
   );
@@ -484,7 +484,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const hasTooltipActions = interactive && !isEsqlMode;
 
     // Compute warning message for ES|QL computed columns that cannot be filtered.
-    const computedColumnWarningMessage = useMemo(
+    const warningMessage = useMemo(
       () =>
         isEsqlMode
           ? getComputedColumnWarningForColumns(
@@ -495,16 +495,16 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       [isEsqlMode, xAxisColumn, yAxisColumn, panelHasConfiguredDrilldowns]
     );
 
-    const TooltipWarningFooter = useMemo<
+    const TooltipFooter = useMemo<
       | React.ComponentType<{
           items: Array<TooltipValue<Record<string, string | number>, SeriesIdentifier>>;
           header: PointerValue<Record<string, string | number>> | null;
         }>
       | 'default'
     >(() => {
-      if (!computedColumnWarningMessage) return 'default';
-      return () => <ComputedColumnWarning message={computedColumnWarningMessage} />;
-    }, [computedColumnWarningMessage]);
+      if (!warningMessage) return 'default';
+      return () => <ChartTooltipFooterMessage message={warningMessage} />;
+    }, [warningMessage]);
 
     const onElementClick = useCallback(
       (e: HeatmapElementEvent[]) => {
@@ -912,7 +912,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   : undefined
               }
               type={args.showTooltip ? TooltipType.Follow : TooltipType.None}
-              footer={TooltipWarningFooter}
+              footer={TooltipFooter}
             />
             <Settings
               onRenderChange={onRenderChange}
