@@ -28,6 +28,7 @@ import {
   toAssetReference,
 } from './install';
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
+import { indexPatternTypes } from '../index_pattern/install';
 
 interface InstallKibanaAssetsWithStreamingArgs {
   pkgName: string;
@@ -72,6 +73,13 @@ export async function installKibanaAssetsWithStreaming({
     if (
       soType === KibanaSavedObjectType.alertingRuleTemplate &&
       !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
+    ) {
+      return;
+    }
+
+    if (
+      soType === KibanaSavedObjectType.indexPattern &&
+      indexPatternTypes.some((pattern) => `${pattern}-*` === savedObject.id)
     ) {
       return;
     }
