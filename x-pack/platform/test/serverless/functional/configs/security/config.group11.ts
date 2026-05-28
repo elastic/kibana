@@ -20,6 +20,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'Serverless Security Functional Tests - Common Group 11',
     },
-    indexRefreshInterval: '1s',
   };
 }
