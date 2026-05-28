@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`synthesizeSourceReadingRuntimeField produces a stable script for a scalar runtime field type 1`] = `
+exports[`buildSourceReadingRuntimeField produces a stable script for a scalar runtime field type 1`] = `
 Object {
   "script": Object {
     "params": Object {

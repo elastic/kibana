@@ -20,8 +20,8 @@ import { getRuleByRuleId } from '../../rule_management/logic/detection_rules_cli
  *
  * Rather than re-execute the user's Painless against alert documents — which
  * would only work if every field the user's script depends on is also present
- * on the alert — we synthesize a constant runtime field per name that simply
- * reads the value out of `_source`. By default the alerting framework's
+ * on the alert — we build a constant runtime field per name that simply reads
+ * the value out of `_source`. By default the alerting framework's
  * `missingFields` merge strategy copies runtime field values from the source
  * doc's `fields` API response into the alert's `_source`, so the value the
  * rule originally computed is already there.
@@ -47,10 +47,10 @@ export const resolveRuntimeMappingsFromIndices = async (
   const mappings = await safelyGetMapping(esClient, indices, logger);
   if (mappings === null) return undefined;
 
-  const synthesized: estypes.MappingRuntimeFields = {};
+  const runtimeFields: estypes.MappingRuntimeFields = {};
   const sources: Record<string, string> = {};
   for (const { indexName, name, type } of collectRuntimeFieldEntries(mappings)) {
-    const previousType = synthesized[name]?.type;
+    const previousType = runtimeFields[name]?.type;
     if (previousType !== undefined && previousType !== type) {
       logger.warn(
         `Conflicting runtime field types for "${name}" while building bulk-close runtime_mappings: ` +
@@ -58,11 +58,11 @@ export const resolveRuntimeMappingsFromIndices = async (
           `Last-write-wins; using "${type}" from [${indexName}].`
       );
     }
-    synthesized[name] = synthesizeSourceReadingRuntimeField(name, type);
+    runtimeFields[name] = buildSourceReadingRuntimeField(name, type);
     sources[name] = indexName;
   }
 
-  return Object.keys(synthesized).length > 0 ? synthesized : undefined;
+  return Object.keys(runtimeFields).length > 0 ? runtimeFields : undefined;
 };
 
 const safelyGetMapping = async (
@@ -111,7 +111,7 @@ const collectRuntimeFieldEntries = (
  * and the flat-dotted-key fallback (`{"source.ip_ecs": ...}`), and emits
  * each element if the stored value is an array.
  */
-export const synthesizeSourceReadingRuntimeField = (
+export const buildSourceReadingRuntimeField = (
   fieldName: string,
   type: estypes.MappingRuntimeFieldType
 ): estypes.MappingRuntimeField => ({

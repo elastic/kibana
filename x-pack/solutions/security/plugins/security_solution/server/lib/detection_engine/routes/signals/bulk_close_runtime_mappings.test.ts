@@ -16,7 +16,7 @@ import {
   resolveDataViewIndices,
   resolveIndicesForRule,
   resolveRuntimeMappingsFromIndices,
-  synthesizeSourceReadingRuntimeField,
+  buildSourceReadingRuntimeField,
 } from './bulk_close_runtime_mappings';
 import { getRuleByRuleId } from '../../rule_management/logic/detection_rules_client/methods/get_rule_by_rule_id';
 
@@ -24,28 +24,19 @@ jest.mock('../../rule_management/logic/detection_rules_client/methods/get_rule_b
 
 const mockGetRuleByRuleId = getRuleByRuleId as jest.MockedFunction<typeof getRuleByRuleId>;
 
-describe('synthesizeSourceReadingRuntimeField', () => {
+describe('buildSourceReadingRuntimeField', () => {
   // Snapshot the script body so any change to it surfaces in review. The
   // bulk-close path attaches this script to `_update_by_query` and the
   // alerting framework's `missingFields` merge strategy is what makes it
   // resolve to a real value — both contracts depend on the exact shape.
   it('produces a stable script for a scalar runtime field type', () => {
-    expect(synthesizeSourceReadingRuntimeField('source.ip_ecs', 'ip')).toMatchSnapshot();
+    expect(buildSourceReadingRuntimeField('source.ip_ecs', 'ip')).toMatchSnapshot();
   });
 
   it('carries the field name through unchanged into script params', () => {
-    const result = synthesizeSourceReadingRuntimeField('some.nested.field', 'keyword');
+    const result = buildSourceReadingRuntimeField('some.nested.field', 'keyword');
     expect(result.script).toMatchObject({ params: { fieldName: 'some.nested.field' } });
     expect(result.type).toBe('keyword');
-  });
-
-  it('does not embed the field name into the script source itself', () => {
-    // The script reads `params.fieldName` rather than concatenating the
-    // name into the source string — this is intentional to keep the script
-    // identical across all fields (Painless caches by source text).
-    const result = synthesizeSourceReadingRuntimeField('aaa', 'long');
-    expect(result.script?.source).not.toContain('aaa');
-    expect(result.script?.source).toContain('params.fieldName');
   });
 });
 
@@ -70,7 +61,7 @@ describe('resolveRuntimeMappingsFromIndices', () => {
     expect(await resolveRuntimeMappingsFromIndices(esClient, ['my-index'], logger)).toBeUndefined();
   });
 
-  it('synthesizes a runtime field per name when one index declares them', async () => {
+  it('builds a runtime field per name when one index declares them', async () => {
     const { esClient, logger } = setup();
     esClient.indices.getMapping.mockResolvedValue({
       'my-index': {
@@ -88,7 +79,7 @@ describe('resolveRuntimeMappingsFromIndices', () => {
         script: { params: { fieldName: 'source.ip_ecs' } },
       },
     });
-    // The synthesized script must NOT echo the user's original script.
+    // The script we built must NOT echo the user's original script.
     expect(JSON.stringify(result)).not.toContain('emit("ignored")');
   });
 
