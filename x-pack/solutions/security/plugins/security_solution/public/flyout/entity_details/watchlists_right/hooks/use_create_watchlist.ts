@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
+import { getApiErrorMessage } from '../utils';
 
 export interface UseCreateWatchlistOptions {
   watchlist: CreateWatchlistRequestBodyInput;
@@ -55,16 +56,6 @@ export const useCreateWatchlist = ({
       onSuccess?.();
     },
     onError: (error: Error) => {
-      let errorMessage;
-      if (
-        'body' in error &&
-        error.body &&
-        typeof error.body === 'object' &&
-        'message' in error.body &&
-        typeof error.body.message === 'string'
-      ) {
-        errorMessage = error.body.message;
-      }
       toasts.addError(error, {
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.watchlists.flyout.createError',
@@ -72,7 +63,7 @@ export const useCreateWatchlist = ({
             defaultMessage: 'Failed to create watchlist',
           }
         ),
-        toastMessage: errorMessage,
+        toastMessage: getApiErrorMessage(error),
       });
     },
   });

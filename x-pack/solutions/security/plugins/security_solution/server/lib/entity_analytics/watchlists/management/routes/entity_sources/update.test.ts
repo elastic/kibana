@@ -19,13 +19,16 @@ jest.mock('../../../shared/utils', () => ({
 }));
 
 const mockCheckIndexReadPrivilege = jest.fn();
-const mockGrantEntitySourceApiKey = jest.fn();
+const mockGrantAndStoreIndexSourceApiKey = jest.fn();
 const mockInvalidateEntitySourceApiKey = jest.fn();
 
 jest.mock('../../../entity_sources/entity_source_api_key', () => ({
   checkIndexReadPrivilege: (...args: unknown[]) => mockCheckIndexReadPrivilege(...args),
-  grantEntitySourceApiKey: (...args: unknown[]) => mockGrantEntitySourceApiKey(...args),
+  grantAndStoreIndexSourceApiKey: (...args: unknown[]) =>
+    mockGrantAndStoreIndexSourceApiKey(...args),
   invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
+  INSUFFICIENT_INDEX_PRIVILEGES_ERROR:
+    'Insufficient privileges to read from the selected index pattern.',
 }));
 
 const { mockGetEntitySource, mockUpdateEntitySource, mockUpdateApiKeyFields } = jest.requireMock(
@@ -59,7 +62,7 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
     mockUpdateEntitySource.mockReset();
     mockUpdateApiKeyFields.mockReset();
     mockCheckIndexReadPrivilege.mockReset().mockResolvedValue(true);
-    mockGrantEntitySourceApiKey.mockReset().mockResolvedValue(null);
+    mockGrantAndStoreIndexSourceApiKey.mockReset().mockResolvedValue(undefined);
     mockInvalidateEntitySourceApiKey.mockReset().mockResolvedValue(undefined);
 
     const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: jest.fn() } } };
@@ -94,7 +97,6 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
     it('invalidates old API key and mints a new one', async () => {
       mockGetEntitySource.mockResolvedValue({ id: SOURCE_ID, type: 'index', apiKeyId: 'old-kid' });
       mockUpdateEntitySource.mockResolvedValue({ id: SOURCE_ID, name: 'updated', type: 'index' });
-      mockGrantEntitySourceApiKey.mockResolvedValue({ apiKeyId: 'new-kid', apiKey: 'new-secret' });
 
       const response = await server.inject(buildRequest({ indexPattern: 'logs-*' }), context);
 
@@ -104,11 +106,12 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
         'old-kid',
         logger
       );
-      expect(mockGrantEntitySourceApiKey).toHaveBeenCalled();
-      expect(mockUpdateApiKeyFields).toHaveBeenCalledWith(SOURCE_ID, {
-        apiKeyId: 'new-kid',
-        apiKey: 'new-secret',
-      });
+      expect(mockGrantAndStoreIndexSourceApiKey).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        { id: SOURCE_ID, name: 'updated' }
+      );
     });
   });
 
@@ -125,7 +128,7 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
         'old-kid',
         logger
       );
-      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
+      expect(mockGrantAndStoreIndexSourceApiKey).not.toHaveBeenCalled();
       expect(mockUpdateApiKeyFields).toHaveBeenCalledWith(SOURCE_ID, {
         apiKeyId: null,
         apiKey: null,
@@ -137,7 +140,6 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
     it('mints a new API key without trying to invalidate a previous one', async () => {
       mockGetEntitySource.mockResolvedValue({ id: SOURCE_ID, type: 'store' });
       mockUpdateEntitySource.mockResolvedValue({ id: SOURCE_ID, name: 'updated', type: 'index' });
-      mockGrantEntitySourceApiKey.mockResolvedValue({ apiKeyId: 'kid-1', apiKey: 'secret-1' });
 
       const response = await server.inject(
         buildRequest({ type: 'index', indexPattern: 'logs-*' }),
@@ -146,11 +148,12 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
 
       expect(response.status).toEqual(200);
       expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
-      expect(mockGrantEntitySourceApiKey).toHaveBeenCalled();
-      expect(mockUpdateApiKeyFields).toHaveBeenCalledWith(SOURCE_ID, {
-        apiKeyId: 'kid-1',
-        apiKey: 'secret-1',
-      });
+      expect(mockGrantAndStoreIndexSourceApiKey).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        { id: SOURCE_ID, name: 'updated' }
+      );
     });
   });
 
@@ -164,7 +167,7 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
       expect(response.status).toEqual(200);
       expect(mockCheckIndexReadPrivilege).not.toHaveBeenCalled();
       expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
-      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
+      expect(mockGrantAndStoreIndexSourceApiKey).not.toHaveBeenCalled();
       expect(mockUpdateApiKeyFields).not.toHaveBeenCalled();
     });
   });

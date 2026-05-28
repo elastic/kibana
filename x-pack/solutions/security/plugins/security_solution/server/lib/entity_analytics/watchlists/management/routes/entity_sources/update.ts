@@ -20,10 +20,10 @@ import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
 import { getRequestSavedObjectClient } from '../../../shared/utils';
 import {
   checkIndexReadPrivilege,
-  grantEntitySourceApiKey,
+  grantAndStoreIndexSourceApiKey,
   invalidateEntitySourceApiKey,
+  INSUFFICIENT_INDEX_PRIVILEGES_ERROR,
 } from '../../../entity_sources/entity_source_api_key';
-import { INSUFFICIENT_INDEX_PRIVILEGES_ERROR } from '../translations';
 
 export const updateEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -101,15 +101,11 @@ export const updateEntitySourceRoute = (
               }
 
               if (isNowIndex) {
-                const apiKey = await grantEntitySourceApiKey(coreStart.security, request, {
+                await grantAndStoreIndexSourceApiKey(coreStart.security, request, client, {
                   id: request.params.id,
                   name: body.name ?? request.params.id,
                 });
-                if (apiKey) {
-                  await client.updateApiKeyFields(request.params.id, apiKey);
-                }
               } else {
-                // Transitioning away from index: clear stale key reference
                 await client.updateApiKeyFields(request.params.id, {
                   apiKeyId: null,
                   apiKey: null,

@@ -28,10 +28,10 @@ import {
 } from '../../../entity_sources/infra';
 import type { IntegrationType } from '../../../entity_sources/infra';
 import {
-  grantEntitySourceApiKey,
   checkIndexReadPrivilege,
+  grantAndStoreIndexSourceApiKey,
+  INSUFFICIENT_INDEX_PRIVILEGES_ERROR,
 } from '../../../entity_sources/entity_source_api_key';
-import { INSUFFICIENT_INDEX_PRIVILEGES_ERROR } from '../translations';
 
 export const createEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -92,13 +92,10 @@ export const createEntitySourceRoute = (
 
             if (monitoringSource.type === 'index' && body.name) {
               const [coreStart] = await getStartServices();
-              const apiKey = await grantEntitySourceApiKey(coreStart.security, request, {
+              await grantAndStoreIndexSourceApiKey(coreStart.security, request, client, {
                 id: body.id,
                 name: body.name,
               });
-              if (apiKey) {
-                await client.updateApiKeyFields(body.id, apiKey);
-              }
             }
 
             const watchlistClient = new WatchlistConfigClient({

@@ -11,6 +11,7 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectReference,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 import type { SetOptional } from 'type-fest';
 import type {
@@ -25,6 +26,7 @@ import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
+import { invalidateEntitySourceApiKey } from '../entity_sources/entity_source_api_key';
 
 export const MAX_PER_PAGE = 10_000;
 
@@ -37,6 +39,7 @@ interface WatchlistConfigClientDeps {
    * only attached when using the internal client.
    */
   internalEsClient?: ElasticsearchClient;
+  securityServiceStart?: SecurityServiceStart;
   namespace: string;
   logger: Logger;
 }
@@ -178,8 +181,31 @@ export class WatchlistConfigClient {
   }
 
   async delete(id: string) {
-    // Cascade-delete linked entity sources to prevent orphans
     const entitySourceIds = await this.getEntitySourceIds(id);
+
+    const securityServiceStart = this.deps.securityServiceStart;
+    if (securityServiceStart && entitySourceIds.length > 0) {
+      const soResults = await this.deps.soClient.bulkGet<MonitoringEntitySource>(
+        entitySourceIds.map((sourceId) => ({ type: watchlistEntitySourceTypeName, id: sourceId }))
+      );
+
+      await Promise.all(
+        soResults.saved_objects
+          .filter(
+            (so): so is SavedObject<MonitoringEntitySource & { apiKeyId: string }> =>
+              !so.error && !!so.attributes.apiKeyId
+          )
+          .map((so) =>
+            invalidateEntitySourceApiKey(
+              securityServiceStart,
+              so.attributes.apiKeyId,
+              this.deps.logger
+            )
+          )
+      );
+    }
+
+    // Cascade-delete linked entity sources to prevent orphans
     const results = await Promise.allSettled(
       entitySourceIds.map((sourceId) =>
         this.deps.soClient.delete(watchlistEntitySourceTypeName, sourceId, {

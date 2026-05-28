@@ -26,9 +26,9 @@ import {
 } from './watchlist_ebt_helpers';
 import {
   checkIndexReadPrivilege,
-  grantEntitySourceApiKey,
+  grantAndStoreIndexSourceApiKey,
+  INSUFFICIENT_INDEX_PRIVILEGES_ERROR,
 } from '../../entity_sources/entity_source_api_key';
-import { INSUFFICIENT_INDEX_PRIVILEGES_ERROR } from './translations';
 
 export const createWatchlistRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -113,13 +113,15 @@ export const createWatchlistRoute = (
 
                   if (entitySourceInput.type === 'index' && entitySource.name) {
                     const [coreStart] = await getStartServices();
-                    const apiKey = await grantEntitySourceApiKey(coreStart.security, request, {
-                      id: entitySource.id,
-                      name: entitySource.name,
-                    });
-                    if (apiKey) {
-                      await sourceClient.updateApiKeyFields(entitySource.id, apiKey);
-                    }
+                    await grantAndStoreIndexSourceApiKey(
+                      coreStart.security,
+                      request,
+                      sourceClient,
+                      {
+                        id: entitySource.id,
+                        name: entitySource.name,
+                      }
+                    );
                   }
 
                   createdSources.push(entitySource);

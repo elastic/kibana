@@ -90,24 +90,22 @@ const getAllowedEntityIds = (
 ): string[] => entityStoreEntityIdsByType[entityType] ?? [];
 
 export const createUpdateDetectionService = ({
-  writeEsClient,
-  indexReadEsClient,
+  internalEsClient,
+  dataEsClient,
   crudClient,
   logger,
   descriptorClient,
   watchlist,
 }: {
-  // Entity Store installer's credentials client, used for writes to internal watchlist indices
-  writeEsClient: ElasticsearchClient;
-  // Client used to read from the source index. Scoped to the configuring user's API key for index sources
-  indexReadEsClient: ElasticsearchClient;
+  internalEsClient: ElasticsearchClient;
+  dataEsClient: ElasticsearchClient;
   crudClient: CRUDClient;
   logger: Logger;
   descriptorClient?: WatchlistEntitySourceClient;
   watchlist: { name: string; id: string; index: string };
 }) => {
   const syncMarkersService = descriptorClient
-    ? createWatchlistSyncMarkersService(descriptorClient, writeEsClient)
+    ? createWatchlistSyncMarkersService(descriptorClient, internalEsClient)
     : undefined;
 
   const detectForIntegrationEntityType = async (
@@ -130,7 +128,7 @@ export const createUpdateDetectionService = ({
         source.queryRule,
         source.range
       );
-      const response = await indexReadEsClient.search<never, EntitiesAggregation>({
+      const response = await dataEsClient.search<never, EntitiesAggregation>({
         index: source.indexPattern,
         ...query,
       });
@@ -184,7 +182,7 @@ export const createUpdateDetectionService = ({
         source.queryRule,
         source.range
       );
-      const response = await indexReadEsClient.search<never, IndexSourceAggregation>({
+      const response = await dataEsClient.search<never, IndexSourceAggregation>({
         index: source.indexPattern,
         ...query,
       });
@@ -273,7 +271,7 @@ export const createUpdateDetectionService = ({
     }
 
     await applyBulkUpsert({
-      esClient: writeEsClient,
+      esClient: internalEsClient,
       crudClient,
       logger,
       entities: allEntities,

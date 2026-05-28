@@ -180,4 +180,5 @@ export const watchlistEntitySourceType: SavedObjectsType = {
 export const WatchlistEntitySourceApiKeyEncryptionParams: EncryptedSavedObjectTypeRegistration = {
   type: watchlistEntitySourceTypeName,
   attributesToEncrypt: new Set(['apiKey']),
+  attributesToIncludeInAAD: new Set(['apiKeyId']),
 };

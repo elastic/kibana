@@ -16,32 +16,30 @@ import { createDeletionDetectionService } from './deletion_detection/deletion_de
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
 export const createIndexSyncService = ({
-  writeEsClient,
-  indexReadEsClient,
+  internalEsClient,
+  dataEsClient,
   crudClient,
   logger,
   descriptorClient,
   watchlist,
 }: {
-  // Entity Store installer's credentials client, used for writes to internal watchlist indices
-  writeEsClient: ElasticsearchClient;
-  // Client used to read from the source index. Scoped to the configuring user's API key for index sources
-  indexReadEsClient: ElasticsearchClient;
+  internalEsClient: ElasticsearchClient;
+  dataEsClient: ElasticsearchClient;
   crudClient: CRUDClient;
   logger: Logger;
   descriptorClient: WatchlistEntitySourceClient;
   watchlist: { name: string; id: string; index: string };
 }) => {
   const updateDetectionService = createUpdateDetectionService({
-    writeEsClient,
-    indexReadEsClient,
+    internalEsClient,
+    dataEsClient,
     crudClient,
     logger,
     descriptorClient,
     watchlist,
   });
   const deletionDetectionService = createDeletionDetectionService({
-    esClient: writeEsClient,
+    esClient: internalEsClient,
     crudClient,
     logger,
     descriptorClient,

@@ -40,11 +40,14 @@ jest.mock('../../entity_sources/entity_sources_service', () => ({
 }));
 
 const mockCheckIndexReadPrivilege = jest.fn();
-const mockGrantEntitySourceApiKey = jest.fn();
+const mockGrantAndStoreIndexSourceApiKey = jest.fn();
 
 jest.mock('../../entity_sources/entity_source_api_key', () => ({
   checkIndexReadPrivilege: (...args: unknown[]) => mockCheckIndexReadPrivilege(...args),
-  grantEntitySourceApiKey: (...args: unknown[]) => mockGrantEntitySourceApiKey(...args),
+  grantAndStoreIndexSourceApiKey: (...args: unknown[]) =>
+    mockGrantAndStoreIndexSourceApiKey(...args),
+  INSUFFICIENT_INDEX_PRIVILEGES_ERROR:
+    'Insufficient privileges to read from the selected index pattern.',
 }));
 
 const { mockCreateEntitySource, mockUpdateApiKeyFields } = jest.requireMock(
@@ -78,7 +81,7 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
     mockCreateEntitySource.mockReset();
     mockSyncWatchlist.mockReset();
     mockCheckIndexReadPrivilege.mockReset().mockResolvedValue(true);
-    mockGrantEntitySourceApiKey.mockReset().mockResolvedValue(null);
+    mockGrantAndStoreIndexSourceApiKey.mockReset().mockResolvedValue(undefined);
     mockUpdateApiKeyFields.mockReset();
 
     const mockSecurity = { authc: { apiKeys: { grantAsInternalUser: jest.fn() } } };
@@ -397,28 +400,22 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
       expect(mockCreateEntitySource).not.toHaveBeenCalled();
     });
 
-    it('mints an API key for an index-type source and persists it', async () => {
+    it('mints an API key for an index-type source', async () => {
       const watchlistResult = { id: 'wl-1', name: 'test-watchlist', riskModifier: 10 };
       const entitySourceResult = { id: 'es-1', ...entitySourceInputA };
-      const apiKeyResult = { apiKeyId: 'kid-1', apiKey: 'secret-1' };
       mockWatchlistCreate.mockResolvedValue(watchlistResult);
       mockCreateEntitySource.mockResolvedValue(entitySourceResult);
-      mockCheckIndexReadPrivilege.mockResolvedValue(true);
-      mockGrantEntitySourceApiKey.mockResolvedValue(apiKeyResult);
 
       const request = buildRequest({ entitySources: [entitySourceInputA] });
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
-      expect(mockGrantEntitySourceApiKey).toHaveBeenCalledWith(
+      expect(mockGrantAndStoreIndexSourceApiKey).toHaveBeenCalledWith(
+        expect.anything(),
         expect.anything(),
         expect.anything(),
         { id: entitySourceResult.id, name: entitySourceResult.name }
       );
-      expect(mockUpdateApiKeyFields).toHaveBeenCalledWith(entitySourceResult.id, {
-        apiKeyId: apiKeyResult.apiKeyId,
-        apiKey: apiKeyResult.apiKey,
-      });
     });
 
     it('does not mint an API key for a non-index source', async () => {
@@ -433,7 +430,7 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
 
       expect(response.status).toEqual(200);
       expect(mockCheckIndexReadPrivilege).not.toHaveBeenCalled();
-      expect(mockGrantEntitySourceApiKey).not.toHaveBeenCalled();
+      expect(mockGrantAndStoreIndexSourceApiKey).not.toHaveBeenCalled();
       expect(mockUpdateApiKeyFields).not.toHaveBeenCalled();
     });
   });

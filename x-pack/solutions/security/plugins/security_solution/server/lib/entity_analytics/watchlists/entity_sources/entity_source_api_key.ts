@@ -5,12 +5,21 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type {
   ElasticsearchClient,
   KibanaRequest,
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { WatchlistEntitySourceClient } from './infra';
+
+export const INSUFFICIENT_INDEX_PRIVILEGES_ERROR = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.api.insufficientIndexPrivileges',
+  {
+    defaultMessage: 'Insufficient privileges to read from the selected index pattern.',
+  }
+);
 
 const isApiKeyAuthentication = (
   security: SecurityServiceStart,
@@ -20,11 +29,11 @@ const isApiKeyAuthentication = (
   return user?.authentication_type === 'api_key';
 };
 
-export const grantEntitySourceApiKey = async (
+const grantEntitySourceApiKey = async (
   security: SecurityServiceStart,
   request: KibanaRequest,
   source: { id: string; name: string }
-): Promise<{ apiKeyId: string; apiKey: string } | null> => {
+) => {
   const keyName = `watchlist-entity-source: ${source.name}`;
   const metadata = {
     description: 'API key used to scope watchlist entity source index sync',
@@ -38,7 +47,7 @@ export const grantEntitySourceApiKey = async (
       name: keyName,
       metadata,
     });
-    if (!result) return null;
+    if (!result) return;
     return { apiKeyId: result.id, apiKey: result.api_key };
   }
 
@@ -47,7 +56,7 @@ export const grantEntitySourceApiKey = async (
     role_descriptors: {},
     metadata,
   });
-  if (!result) return null;
+  if (!result) return;
   return { apiKeyId: result.id, apiKey: result.api_key };
 };
 
@@ -65,7 +74,7 @@ export const invalidateEntitySourceApiKey = async (
   security: SecurityServiceStart,
   apiKeyId: string,
   logger: Logger
-): Promise<void> => {
+) => {
   try {
     await security.authc.apiKeys.invalidateAsInternalUser({ ids: [apiKeyId] });
   } catch (err) {
@@ -75,4 +84,14 @@ export const invalidateEntitySourceApiKey = async (
       }`
     );
   }
+};
+
+export const grantAndStoreIndexSourceApiKey = async (
+  security: SecurityServiceStart,
+  request: KibanaRequest,
+  sourceClient: WatchlistEntitySourceClient,
+  source: { id: string; name: string }
+): Promise<void> => {
+  const apiKey = await grantEntitySourceApiKey(security, request, source);
+  if (apiKey) await sourceClient.updateApiKeyFields(source.id, apiKey);
 };

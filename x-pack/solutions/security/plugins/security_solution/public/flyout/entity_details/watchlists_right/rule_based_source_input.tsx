@@ -31,6 +31,7 @@ import type { MonitoringEntitySource } from '../../../../common/api/entity_analy
 import { QueryBar } from '../../../common/components/query_bar';
 import { useFetchWatchlistIndices } from './hooks/use_fetch_watchlist_indices';
 import { useRuleBasedSourceState, ENTITY_FIELD_OPTIONS } from './hooks/use_rule_based_source_state';
+import { getApiErrorMessage } from './utils';
 import { useDataViewSetup } from './hooks/use_data_view_setup';
 import { useEntityAnalyticsRoutes } from '../../../entity_analytics/api/api';
 import { useKibana } from '../../../common/lib/kibana';
@@ -146,20 +147,12 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
       queryClient.invalidateQueries(['watchlist-entity-sources', watchlistId]);
     },
     onError: (error: Error) => {
-      const errorMessage =
-        'body' in error &&
-        error.body &&
-        typeof error.body === 'object' &&
-        'message' in error.body &&
-        typeof error.body.message === 'string'
-          ? error.body.message
-          : undefined;
       toasts.addError(error, {
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.watchlists.flyout.reauthorizeErrorTitle',
           { defaultMessage: 'Failed to re-authorize' }
         ),
-        toastMessage: errorMessage,
+        toastMessage: getApiErrorMessage(error),
       });
     },
   });
@@ -283,7 +276,6 @@ export const RuleBasedSourceInput: React.FC<RuleBasedSourceInputProps> = ({
           <EuiComboBox
             isInvalid={validation.errors.indexPattern}
             isLoading={isLoadingIndices && !indicesError}
-            isInvalid={validation.errors.indexPattern}
             fullWidth
             aria-label={WATCHLIST_INDEX_PATTERN_PLACEHOLDER}
             placeholder={WATCHLIST_INDEX_PATTERN_PLACEHOLDER}

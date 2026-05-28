@@ -102,14 +102,14 @@ describe('Watchlist update detection service', () => {
         name: 'test-watchlist',
         index: '.watchlist-entities-default',
       };
-      const writeEsClient = elasticsearchServiceMock.createElasticsearchClient();
-      const indexReadEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
 
       const correlationMap: CorrelationMap = new Map([
         ['jdoe', { euids: ['user:jdoe'], entityType: 'user' as const }],
       ]);
 
-      indexReadEsClient.search.mockImplementation((params?: SearchRequest) => {
+      dataEsClient.search.mockImplementation((params?: SearchRequest) => {
         if (!params) {
           throw new Error('Expected search params');
         }
@@ -126,11 +126,11 @@ describe('Watchlist update detection service', () => {
           },
         } as never);
       });
-      writeEsClient.bulk.mockResolvedValue({ errors: false } as never);
+      internalEsClient.bulk.mockResolvedValue({ errors: false } as never);
 
       const service = createUpdateDetectionService({
-        writeEsClient,
-        indexReadEsClient,
+        internalEsClient,
+        dataEsClient,
         logger,
         crudClient: createMockCrudClient(),
         watchlist,
@@ -152,18 +152,18 @@ describe('Watchlist update detection service', () => {
       expect(sourceSearchParams.query?.bool?.must).toContainEqual({
         range: { '@timestamp': { gte: 'now-10d', lte: 'now' } },
       });
-      expect(indexReadEsClient.search).toHaveBeenCalledWith({
+      expect(dataEsClient.search).toHaveBeenCalledWith({
         index: indexSource.indexPattern,
         ...sourceSearchParams,
       });
-      expect(writeEsClient.search).not.toHaveBeenCalled();
-      expect(writeEsClient.bulk).toHaveBeenCalled();
-      expect(indexReadEsClient.bulk).not.toHaveBeenCalled();
+      expect(internalEsClient.search).not.toHaveBeenCalled();
+      expect(internalEsClient.bulk).toHaveBeenCalled();
+      expect(dataEsClient.bulk).not.toHaveBeenCalled();
     });
 
     it('skips sync when correlation map is empty', async () => {
-      const writeEsClient = elasticsearchServiceMock.createElasticsearchClient();
-      const indexReadEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
 
       const watchlist2 = {
         id: 'test-watchlist-id',
@@ -171,8 +171,8 @@ describe('Watchlist update detection service', () => {
         index: '.watchlist-entities-default',
       };
       const service = createUpdateDetectionService({
-        writeEsClient,
-        indexReadEsClient,
+        internalEsClient,
+        dataEsClient,
         logger,
         crudClient: createMockCrudClient(),
         watchlist: watchlist2,
@@ -187,8 +187,8 @@ describe('Watchlist update detection service', () => {
       );
 
       expect(result).toEqual([]);
-      expect(indexReadEsClient.search).not.toHaveBeenCalled();
-      expect(writeEsClient.bulk).not.toHaveBeenCalled();
+      expect(dataEsClient.search).not.toHaveBeenCalled();
+      expect(internalEsClient.bulk).not.toHaveBeenCalled();
     });
 
     it('logs warning and returns empty when correlationMap is not provided', async () => {
@@ -200,8 +200,8 @@ describe('Watchlist update detection service', () => {
         index: '.watchlist-entities-default',
       };
       const service = createUpdateDetectionService({
-        writeEsClient: esClient,
-        indexReadEsClient: esClient,
+        internalEsClient: esClient,
+        dataEsClient: esClient,
         logger,
         crudClient: createMockCrudClient(),
         watchlist: watchlist3,
@@ -223,8 +223,8 @@ describe('Watchlist update detection service', () => {
 
   describe('integration source without descriptorClient', () => {
     it('logs warning and returns empty array without calling search or bulk', async () => {
-      const writeEsClient = elasticsearchServiceMock.createElasticsearchClient();
-      const indexReadEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
 
       const watchlist4 = {
         id: 'test-watchlist-id',
@@ -232,8 +232,8 @@ describe('Watchlist update detection service', () => {
         index: '.watchlist-entities-default',
       };
       const service = createUpdateDetectionService({
-        writeEsClient,
-        indexReadEsClient,
+        internalEsClient,
+        dataEsClient,
         logger,
         crudClient: createMockCrudClient(),
         watchlist: watchlist4,
@@ -250,8 +250,8 @@ describe('Watchlist update detection service', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('descriptorClient not available')
       );
-      expect(indexReadEsClient.search).not.toHaveBeenCalled();
-      expect(writeEsClient.bulk).not.toHaveBeenCalled();
+      expect(dataEsClient.search).not.toHaveBeenCalled();
+      expect(internalEsClient.bulk).not.toHaveBeenCalled();
     });
   });
 
@@ -263,9 +263,9 @@ describe('Watchlist update detection service', () => {
       mockUpdateLastProcessedMarker.mockResolvedValue(undefined);
 
       const searchCalls: CapturedSearchRequest[] = [];
-      const writeEsClient = elasticsearchServiceMock.createElasticsearchClient();
-      const indexReadEsClient = elasticsearchServiceMock.createElasticsearchClient();
-      indexReadEsClient.search.mockImplementation((params?: SearchRequest) => {
+      const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      dataEsClient.search.mockImplementation((params?: SearchRequest) => {
         if (!params) {
           throw new Error('Expected search params');
         }
@@ -279,7 +279,7 @@ describe('Watchlist update detection service', () => {
           },
         } as never);
       });
-      writeEsClient.bulk.mockResolvedValue({ errors: false } as never);
+      internalEsClient.bulk.mockResolvedValue({ errors: false } as never);
 
       const watchlist5 = {
         id: 'test-watchlist-id',
@@ -287,8 +287,8 @@ describe('Watchlist update detection service', () => {
         index: '.watchlist-entities-default',
       };
       const service = createUpdateDetectionService({
-        writeEsClient,
-        indexReadEsClient,
+        internalEsClient,
+        dataEsClient,
         logger,
         descriptorClient,
         crudClient: createMockCrudClient(),
@@ -323,9 +323,9 @@ describe('Watchlist update detection service', () => {
       mockUpdateLastProcessedMarker.mockResolvedValue(undefined);
 
       const targetIndex = '.watchlist-entities-default';
-      const writeEsClient = elasticsearchServiceMock.createElasticsearchClient();
-      const indexReadEsClient = elasticsearchServiceMock.createElasticsearchClient();
-      indexReadEsClient.search.mockImplementation((params?: SearchRequest) => {
+      const internalEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const dataEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      dataEsClient.search.mockImplementation((params?: SearchRequest) => {
         if (!params) {
           throw new Error('Expected search params');
         }
@@ -350,7 +350,7 @@ describe('Watchlist update detection service', () => {
           },
         } as never);
       });
-      writeEsClient.bulk.mockResolvedValue({ errors: false } as never);
+      internalEsClient.bulk.mockResolvedValue({ errors: false } as never);
 
       const watchlist6 = {
         id: 'test-watchlist-id',
@@ -358,8 +358,8 @@ describe('Watchlist update detection service', () => {
         index: '.watchlist-entities-default',
       };
       const service = createUpdateDetectionService({
-        writeEsClient,
-        indexReadEsClient,
+        internalEsClient,
+        dataEsClient,
         logger,
         descriptorClient,
         crudClient: createMockCrudClient(),

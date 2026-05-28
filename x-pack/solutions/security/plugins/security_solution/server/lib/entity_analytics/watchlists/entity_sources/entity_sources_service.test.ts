@@ -153,9 +153,9 @@ describe('createEntitySourcesService', () => {
   });
 
   it('uses a scoped ES client for an index source when an API key is stored', async () => {
-    const mockScopedEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const mockDataEsClient = elasticsearchServiceMock.createElasticsearchClient();
     const mockCoreElasticsearchClient = {
-      asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockScopedEsClient }),
+      asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockDataEsClient }),
     };
     const mockEsoClientGet = jest.fn().mockResolvedValue({
       attributes: { apiKeyId: 'key-id', apiKey: 'key-secret' },
@@ -178,15 +178,15 @@ describe('createEntitySourcesService', () => {
     // source-a (index) should be synced via the scoped client
     expect(mockCreateIndexSyncService).toHaveBeenCalledWith(
       expect.objectContaining({
-        writeEsClient: esClient,
-        indexReadEsClient: mockScopedEsClient,
+        internalEsClient: esClient,
+        dataEsClient: mockDataEsClient,
       })
     );
     // source-c (integration) uses the plain esClient for both
     expect(mockCreateIndexSyncService).toHaveBeenCalledWith(
       expect.objectContaining({
-        writeEsClient: esClient,
-        indexReadEsClient: esClient,
+        internalEsClient: esClient,
+        dataEsClient: esClient,
       })
     );
   });

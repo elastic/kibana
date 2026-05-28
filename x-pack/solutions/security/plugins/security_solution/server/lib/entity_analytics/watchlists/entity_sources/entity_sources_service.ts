@@ -302,21 +302,15 @@ export const createEntitySourcesService = ({
       sources
         .filter((s) => sourceIds.includes(s.id))
         .map(async (source) => {
-          let indexReadEsClient: ElasticsearchClient;
-          if (source.type === 'index') {
-            const scopedClient = await getSourceEsClient(source);
-            if (!scopedClient) {
-              logger.warn(`[WatchlistSync] Skipping index source ${source.id}: no API key stored.`);
-              return;
-            }
-            indexReadEsClient = scopedClient;
-          } else {
-            indexReadEsClient = esClient;
+          const dataEsClient = source.type === 'index' ? await getSourceEsClient(source) : esClient;
+          if (!dataEsClient) {
+            logger.warn(`[WatchlistSync] Skipping index source ${source.id}: no API key stored.`);
+            return;
           }
 
           const indexSyncService = createIndexSyncService({
-            writeEsClient: esClient,
-            indexReadEsClient,
+            internalEsClient: esClient,
+            dataEsClient,
             crudClient,
             logger,
             descriptorClient,
