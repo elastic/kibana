@@ -7,6 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
@@ -82,6 +83,9 @@ describe('DetectionRulesClient.importRule', () => {
           }),
         }),
         allowMissingConnectorSecrets,
+        changeTracking: expect.objectContaining({
+          action: SecurityRuleChangeTrackingAction.ruleImport,
+        }),
       })
     );
   });
@@ -127,6 +131,9 @@ describe('DetectionRulesClient.importRule', () => {
             }),
           }),
           id: existingRule.id,
+          changeTracking: expect.objectContaining({
+            action: SecurityRuleChangeTrackingAction.ruleImport,
+          }),
         })
       );
     });
