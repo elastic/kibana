@@ -21,6 +21,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  transparentize,
   useEuiTheme,
   useGeneratedHtmlId,
   type EuiThemeComputed,
@@ -214,17 +215,22 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
 
 const GOLDEN_SIGNAL_TILE_HEIGHT = 132;
 
+// Soften the saturated severity palette into pastel backgrounds suitable for
+// large filled tiles -- the hue stays recognisable while the value/chrome on
+// top of the tile (delta, sparkline, big number) stays legible.
+const GOLDEN_SIGNAL_TILE_ALPHA = 0.35;
+
 const goldenSignalTileBackground = (
   level: GoldenSignalLevel,
   euiTheme: EuiThemeComputed
 ): string => {
   switch (level) {
     case 'warning':
-      return euiTheme.colors.severity.warning;
+      return transparentize(euiTheme.colors.severity.warning, GOLDEN_SIGNAL_TILE_ALPHA);
     case 'danger':
-      return euiTheme.colors.severity.danger;
+      return transparentize(euiTheme.colors.severity.danger, GOLDEN_SIGNAL_TILE_ALPHA);
     case 'success':
-      return euiTheme.colors.severity.success;
+      return transparentize(euiTheme.colors.severity.success, GOLDEN_SIGNAL_TILE_ALPHA);
   }
 };
 
