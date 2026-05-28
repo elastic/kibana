@@ -37,7 +37,6 @@ import {
   type Subscription,
 } from 'rxjs';
 import { apm } from '@elastic/apm-rum';
-import type { HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import { getEditPath } from '../../common/constants';
 import { prepareCallbacks } from './expressions/callbacks';
 import { getExpressionRendererParams } from './expressions/expression_params';
@@ -60,14 +59,6 @@ const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
   'visualizationOnEmbeddable',
 ];
 
-function apiHasDrilldowns(api: unknown): api is HasDrilldowns {
-  return Boolean(
-    api &&
-      typeof (api as HasDrilldowns).setDrilldowns === 'function' &&
-      (api as HasDrilldowns).drilldowns$
-  );
-}
-
 export type ReloadReason =
   | 'ESQLvariables'
   | 'attributes'
@@ -75,8 +66,7 @@ export type ReloadReason =
   | 'overrides'
   | 'disableTriggers'
   | 'viewMode'
-  | 'searchContext'
-  | 'drilldowns';
+  | 'searchContext';
 
 function getSearchContext(parentApi: unknown) {
   const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
@@ -328,16 +318,7 @@ export function loadEmbeddableData(
     internalApi.disableTriggers$.pipe(
       waitUntilChanged(),
       map(() => 'disableTriggers' as ReloadReason)
-    ),
-    ...(apiHasDrilldowns(api)
-      ? [
-          api.drilldowns$.pipe(
-            map(() => Boolean(api.drilldowns$.getValue()?.length)),
-            waitUntilChanged(),
-            map(() => 'drilldowns' as ReloadReason)
-          ),
-        ]
-      : [])
+    )
   );
 
   const subscriptions: Subscription[] = [

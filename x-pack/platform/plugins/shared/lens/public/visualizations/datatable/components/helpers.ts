@@ -32,32 +32,18 @@ export const isEsqlTableComputedColumn = (table: Datatable, columnId: string): b
   return Boolean(lookup[columnId]?.isComputedColumn);
 };
 
-/**
- * Shown when filtering is disabled for an ES|QL table column backed by a computed column.
- */
-export const getEsqlComputedColumnFilterDisabledMessage = (
-  panelHasConfiguredDrilldowns: boolean = false
-) => {
-  return panelHasConfiguredDrilldowns
-    ? i18n.translate(
-        'xpack.lens.table.tableCellFilter.esqlComputedColumnFilterDrilldownDisabledTooltip',
-        {
-          defaultMessage:
-            "You can't apply a filter or drill down from this value because it relies on a field created at query time.",
-        }
-      )
-    : i18n.translate('xpack.lens.table.tableCellFilter.esqlComputedColumnFilterDisabledTooltip', {
-        defaultMessage:
-          "You can't apply a filter from this value because it relies on a field created at query time.",
-      });
+export const getEsqlComputedColumnFilterDisabledMessage = () => {
+  return i18n.translate(
+    'xpack.lens.table.tableCellFilter.esqlComputedColumnFilterDrilldownDisabledTooltip',
+    {
+      defaultMessage:
+        "You can't apply a filter or drill down from this value because it relies on a field created at query time.",
+    }
+  );
 };
 
-export const getGenericFilterDisabledMessage = (panelHasConfiguredDrilldowns: boolean = false) => {
-  return panelHasConfiguredDrilldowns
-    ? i18n.translate('xpack.lens.table.tableCellFilter.valueFilterDrilldownDisabledTooltip', {
-        defaultMessage: "You can't apply a filter or drill down from this value.",
-      })
-    : i18n.translate('xpack.lens.table.tableCellFilter.valueFilterDisabledTooltip', {
-        defaultMessage: "You can't apply a filter from this value.",
-      });
+export const getGenericFilterDisabledMessage = () => {
+  return i18n.translate('xpack.lens.table.tableCellFilter.valueFilterDrilldownDisabledTooltip', {
+    defaultMessage: "You can't apply a filter or drill down from this value.",
+  });
 };
