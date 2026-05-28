@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ComposeDiscoverMode, RuleFormServices } from '@kbn/alerting-v2-rule-form';
+import type {
+  ComposeDiscoverMode,
+  RuleFormServices,
+  BuilderState,
+} from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -24,7 +28,7 @@ import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
 
-const tryParseBuilderState = (type: string, query: string): unknown | null => {
+const tryParseBuilderState = (type: string, query: string): BuilderState => {
   const definition = RULE_BUILDER_REGISTRY[type];
   if (definition?.parseState) {
     return definition.parseState(query);
@@ -51,7 +55,7 @@ export const useComposeDiscoverFlyout = ({
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
   const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
   const [builderType, setBuilderType] = useState<string | null>(null);
-  const [initialBuilderState, setInitialBuilderState] = useState<unknown>(undefined);
+  const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
   const createRuleMutation = useCreateRule();
   const setupNotificationsMutation = useSetupRuleNotifications();
