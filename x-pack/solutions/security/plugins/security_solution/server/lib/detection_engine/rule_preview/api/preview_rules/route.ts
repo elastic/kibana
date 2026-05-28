@@ -14,10 +14,8 @@ import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,
-  SERVER_APP_ID,
 } from '../../../../../../common/constants';
 import { validateCreateRuleProps } from '../../../../../../common/api/detection_engine/rule_management';
-import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   RulePreviewResponse,
   RulePreviewLogs,

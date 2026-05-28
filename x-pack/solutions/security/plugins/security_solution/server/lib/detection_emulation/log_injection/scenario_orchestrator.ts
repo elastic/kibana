@@ -53,6 +53,22 @@ export interface OrchestratorOptions {
   evaluate?: boolean;
   /** Evaluation timeout (ms). */
   evaluationTimeoutMs?: number;
+  /**
+   * Optional rule preview validation deps. When provided, the orchestrator
+   * runs rule preview (via the extracted `runRuleExecutors`) against the
+   * emulation index after injection to validate documents would actually
+   * trigger their target detection rules — without waiting for the real
+   * detection engine schedule.
+   */
+  rulePreviewDeps?: {
+    runRuleExecutors: (
+      ruleType: any,
+      params: any,
+      deps: any
+    ) => Promise<{ logs: any[]; isAborted: boolean }>;
+    executorDepsFactory: () => any;
+    createRuleTypeForParams: (ruleParams: any) => any;
+  };
   /** Rule definitions to use (if not provided, will load from prebuilt rules). */
   ruleDefinitions?: Array<{
     id: string;
@@ -76,6 +92,12 @@ export interface OrchestratorResult {
   targetedRules: Array<{ ruleId: string; ruleName: string }>;
   /** Evaluation result (if evaluate=true). */
   evaluation?: EvaluationResult;
+  /** Rule preview validation results (if rulePreviewDeps provided). */
+  rulePreviewValidation?: {
+    rulesValidated: number;
+    rulesWithAlerts: number;
+    previewLogs: Array<{ ruleId: string; logs: any[]; isAborted: boolean }>;
+  };
   /** Errors encountered during orchestration. */
   errors: string[];
   /** Duration of the full orchestration (ms). */
@@ -212,6 +234,55 @@ export async function executeScenario(
 
   const durationMs = Date.now() - startTime;
 
+  // ── Step 8: Rule preview validation (optional) ──────────────
+  let rulePreviewValidation: OrchestratorResult['rulePreviewValidation'];
+  if (options.rulePreviewDeps && injectedDocIds.length > 0) {
+    const { runRuleExecutors, executorDepsFactory, createRuleTypeForParams } =
+      options.rulePreviewDeps;
+    const previewLogs: Array<{ ruleId: string; logs: any[]; isAborted: boolean }> = [];
+    let rulesWithAlerts = 0;
+
+    for (const ruleDef of ruleDefinitions) {
+      try {
+        const ruleType = createRuleTypeForParams(ruleDef);
+        if (!ruleType) continue;
+
+        const result = await runRuleExecutors(
+          ruleType.alertType,
+          ruleType.params,
+          executorDepsFactory()
+        );
+
+        const hasAlerts = result.logs.some(
+          (l: any) => l.errors.length === 0 && !result.isAborted
+        );
+        if (hasAlerts) rulesWithAlerts++;
+
+        previewLogs.push({
+          ruleId: ruleDef.id,
+          logs: result.logs,
+          isAborted: result.isAborted,
+        });
+      } catch (err) {
+        errors.push(
+          `Rule preview failed for ${ruleDef.id}: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    }
+
+    rulePreviewValidation = {
+      rulesValidated: previewLogs.length,
+      rulesWithAlerts,
+      previewLogs,
+    };
+
+    logger.info(
+      `[orchestrator] Rule preview validation: ${rulesWithAlerts}/${previewLogs.length} rules would fire`
+    );
+  }
+
   logger.info(
     `[orchestrator] Scenario "${scenario.name}" completed in ${durationMs}ms: ` +
     `${attackDocs.length} attack + ${noiseDocs.length} noise docs, ` +
@@ -226,6 +297,7 @@ export async function executeScenario(
     injectedDocIds,
     targetedRules: invertedRules.map((r) => ({ ruleId: r.ruleId, ruleName: r.ruleName })),
     evaluation,
+    rulePreviewValidation,
     errors,
     durationMs,
   };

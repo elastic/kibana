@@ -534,3 +534,67 @@ This also means we can **replace the current `telemetry_collector.ts`
 polling approach** (which waits for the detection engine to run on its
 schedule) with a synchronous preview-based check that returns results
 in seconds, not minutes.
+
+---
+
+## 9. Implementation Status & Gap Analysis
+
+> **Updated:** 2026-05-28 — reflects the current state of the branch.
+
+### 9.1 What Has Been Built
+
+All code resides under `server/lib/detection_emulation/`:
+
+| Module | Status | Tests | Notes |
+|--------|--------|-------|-------|
+| **EQL Parser** (`log_injection/eql_parser/`) | ✅ Done | 28/28 pass | Recursive-descent parser (~250 lines). Handles `where`, `sequence by`, boolean ops, comparisons, wildcards, `in`, `not` |
+| **KQL Query Inverter** (`log_injection/query_inverter.ts`) | ✅ Done | Passing | Uses `@kbn/es-query` `toElasticsearchQuery` + AST walking for field extraction |
+| **EQL Query Inverter** (in `query_inverter.ts`) | ✅ Done | Passing | Uses the custom EQL parser above; supports single-event and sequence rules |
+| **Causal Chain Generator** (`log_injection/causal_chain.ts`) | ✅ Done | Passing | Static causal graph: DNS → connection, auth → process, parent → child |
+| **Document Assembler** (`log_injection/document_assembler.ts`) | ✅ Done | Passing | PID allocation, timestamp spread (Poisson + jitter), session consistency, emulation tagging |
+| **Noise Generator** (`log_injection/noise_generator.ts`) | ✅ Done | Passing | Role-based profiles (workstation/server), red herrings, configurable ratio |
+| **Scenario Schema** (`log_injection/scenario_schema.ts`) | ✅ Done | Passing | Zod schema with explicit nested defaults (no `.default({})` recursion) |
+| **Scenario Library** (`log_injection/scenario_library.ts`) | ✅ Done | — | Built-in scenarios for common techniques |
+| **Quality Evaluator** (`log_injection/quality_evaluator.ts`) | ✅ Done | Passing | Post-injection evaluation: counts alerts in emulation index, scores coverage |
+| **Executor** (`log_injection/executor.ts`) | ✅ Done | — | Bulk-indexes docs into `.kibana-security-emulation-logs-<spaceId>-*` |
+| **Index Template** (`log_injection/index_template.ts`) | ✅ Done | — | `dynamic: 'runtime'` for flexible field mapping |
+| **Scenario Orchestrator** (`log_injection/scenario_orchestrator.ts`) | ✅ Done | Passing | End-to-end pipeline: validate → invert → assemble → inject → evaluate → preview-validate |
+| **`run_rule_executors.ts`** (under `rule_preview/api/preview_rules/`) | ✅ Done | — | Extracted from `route.ts`; standalone function for running rule preview executors outside the HTTP route |
+
+**Test coverage:** 296 tests across 20 suites (1 skipped).
+
+### 9.2 Extracted `runRuleExecutors`
+
+The `runRuleExecutors` function was extracted from the monolithic `previewRulesRoute` handler in `route.ts` into a standalone, importable module (`run_rule_executors.ts`). This enables:
+
+1. **Scenario orchestrator integration** — the orchestrator can run rule preview validation after doc injection without making an HTTP request to itself.
+2. **Unit testability** — the executor can be tested in isolation with mock deps.
+3. **Reuse in emulation API routes** — future emulation-specific routes can validate docs against rules directly.
+
+The function accepts explicit dependencies (no closure captures) and returns `{ logs, isAborted }`.
+
+### 9.3 Scenario Orchestrator ↔ Rule Preview Wiring
+
+The orchestrator now accepts an optional `rulePreviewDeps` in its options:
+
+```typescript
+rulePreviewDeps?: {
+  runRuleExecutors: (ruleType, params, deps) => Promise<{ logs, isAborted }>;
+  executorDepsFactory: () => ExecutorDeps;
+  createRuleTypeForParams: (ruleDef) => { alertType, params };
+};
+```
+
+When provided, after document injection (Step 6) and evaluation (Step 7), the orchestrator runs **Step 8: Rule Preview Validation** — iterating over each target rule, running the real detection engine executor against the emulation index, and recording which rules would actually fire. Results appear in `OrchestratorResult.rulePreviewValidation`.
+
+### 9.4 Remaining Gaps
+
+| Gap | Priority | Effort | Notes |
+|-----|----------|--------|-------|
+| **API route for orchestrator** | High | M | Wire `executeScenario` into a POST endpoint (e.g., `_emulation/scenario/run`) with proper auth |
+| **Skill integration** | High | M | The Agent Builder skill should call the orchestrator, not `generator.ts` directly |
+| **Real `createRuleTypeForParams` factory** | Medium | S | Currently typed as `any`; needs a proper factory that maps rule definitions to alert types |
+| **ES|QL inverter** | Medium | L | ES|QL rules (~5% of prebuilt) not yet supported in query inverter |
+| **Scenario library expansion** | Low | M | More built-in scenarios covering T1059.*, T1070.*, T1053.* families |
+| **Ground truth document** | Low | S | EvidenceForge-style `GROUND_TRUTH.md` per scenario for analyst scoring |
+| **UI for scenario management** | Low | L | Import/export, run history, coverage dashboard |
