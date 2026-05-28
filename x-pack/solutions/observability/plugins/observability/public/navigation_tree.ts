@@ -101,6 +101,77 @@ function createNavTree({
         link: 'slo',
         icon: 'visGauge',
       },
+      ...(streamsAvailable && entityCentricLabEnabled
+        ? [
+            {
+              // Entity-centric lab: top-level Entities panel that exposes the
+              // "All entities" landing page, the per-category sub-pages and a
+              // duplicated "Manage entity types" entry. Sits above Streams so
+              // the user lands on the entities experience first when the lab
+              // is enabled.
+              id: 'entities',
+              link: 'streams:entitiesAll' as const,
+              icon: 'nodes',
+              title: i18n.translate('xpack.observability.obltNav.entities', {
+                defaultMessage: 'Entities',
+              }),
+              renderAs: 'panelOpener' as const,
+              children: [
+                {
+                  children: [
+                    {
+                      id: 'entityCentricLab-entitiesAll',
+                      link: 'streams:entitiesAll' as const,
+                    },
+                  ],
+                },
+                {
+                  children: [
+                    {
+                      id: 'entityCentricLab-entitiesHosts',
+                      link: 'streams:entitiesHosts' as const,
+                    },
+                    {
+                      id: 'entityCentricLab-entitiesKubernetes',
+                      link: 'streams:entitiesKubernetes' as const,
+                    },
+                    {
+                      id: 'entityCentricLab-entitiesDatabases',
+                      link: 'streams:entitiesDatabases' as const,
+                    },
+                    {
+                      id: 'entityCentricLab-entitiesServices',
+                      link: 'streams:entitiesServices' as const,
+                    },
+                    {
+                      id: 'entityCentricLab-entitiesCloud',
+                      link: 'streams:entitiesCloud' as const,
+                    },
+                    {
+                      id: 'entityCentricLab-entitiesMiddlewares',
+                      link: 'streams:entitiesMiddlewares' as const,
+                    },
+                    {
+                      id: 'entityCentricLab-entitiesLlms',
+                      link: 'streams:entitiesLlms' as const,
+                    },
+                  ],
+                },
+                {
+                  // Duplicate of the Streams panel's "Manage entity types"
+                  // entry: the same route is reachable from both panels per
+                  // the lab design.
+                  children: [
+                    {
+                      id: 'entityCentricLab-manage-fromEntities',
+                      link: 'streams:manageEntityTypes' as const,
+                    },
+                  ],
+                },
+              ],
+            },
+          ]
+        : []),
       ...(streamsAvailable
         ? [
             entityCentricLabEnabled

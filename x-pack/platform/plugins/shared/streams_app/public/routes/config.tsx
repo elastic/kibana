@@ -17,7 +17,12 @@ import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
 import { SignificantEventsDiscoveryPage } from '../components/sig_events/significant_events_discovery/page';
-import { ManageEntityTypesView, SignificantEventsView } from '../components/entity_centric_lab';
+import {
+  AllEntitiesView,
+  CategoryComingSoonView,
+  ManageEntityTypesView,
+  SignificantEventsView,
+} from '../components/entity_centric_lab';
 
 /**
  * Optional time range query params.
@@ -89,6 +94,27 @@ const streamsAppRoutes = {
        */
       '/significant-events': {
         element: <SignificantEventsView />,
+      },
+      /**
+       * Entity-centric lab: prototype "All entities" landing page reachable
+       * via the `streams:entities` / `streams:entitiesAll` deep links. Same
+       * gating as `manage-entity-types`.
+       */
+      '/entities': {
+        element: <AllEntitiesView />,
+      },
+      /**
+       * Entity-centric lab: per-category sub-pages reachable via the
+       * `streams:entities<Category>` deep links. All categories share the
+       * same placeholder view (it picks its content from the path param).
+       */
+      '/entities/{category}': {
+        element: <CategoryComingSoonView />,
+        params: t.type({
+          path: t.type({
+            category: t.string,
+          }),
+        }),
       },
       '/_discovery': {
         element: <Outlet />,

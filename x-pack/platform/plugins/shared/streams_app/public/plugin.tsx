@@ -133,6 +133,78 @@ export class StreamsAppPlugin
           path: '/significant-events',
           visibleIn: [],
         },
+        {
+          id: 'entities',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesTitle', {
+            defaultMessage: 'Entities',
+          }),
+          path: '/entities',
+          visibleIn: [],
+        },
+        {
+          id: 'entitiesAll',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesAllTitle', {
+            defaultMessage: 'All entities',
+          }),
+          path: '/entities',
+          visibleIn: [],
+        },
+        {
+          id: 'entitiesHosts',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesHostsTitle', {
+            defaultMessage: 'Hosts',
+          }),
+          path: '/entities/hosts',
+          visibleIn: [],
+        },
+        {
+          id: 'entitiesKubernetes',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesKubernetesTitle', {
+            defaultMessage: 'Kubernetes',
+          }),
+          path: '/entities/kubernetes',
+          visibleIn: [],
+        },
+        {
+          id: 'entitiesDatabases',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesDatabasesTitle', {
+            defaultMessage: 'Databases',
+          }),
+          path: '/entities/databases',
+          visibleIn: [],
+        },
+        {
+          id: 'entitiesServices',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesServicesTitle', {
+            defaultMessage: 'Services',
+          }),
+          path: '/entities/services',
+          visibleIn: [],
+        },
+        {
+          id: 'entitiesCloud',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesCloudTitle', {
+            defaultMessage: 'Cloud',
+          }),
+          path: '/entities/cloud',
+          visibleIn: [],
+        },
+        {
+          id: 'entitiesMiddlewares',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesMiddlewaresTitle', {
+            defaultMessage: 'Middlewares',
+          }),
+          path: '/entities/middlewares',
+          visibleIn: [],
+        },
+        {
+          id: 'entitiesLlms',
+          title: i18n.translate('xpack.streams.deepLinks.entitiesLlmsTitle', {
+            defaultMessage: 'LLMs',
+          }),
+          path: '/entities/llms',
+          visibleIn: [],
+        },
       ],
       updater$: from(startServicesPromise).pipe(
         switchMap(([_, pluginsStart]) =>
