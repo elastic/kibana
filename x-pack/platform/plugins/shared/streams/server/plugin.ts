@@ -25,15 +25,13 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import {
-  STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
-  STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-  STREAMS_KI_ONBOARDING_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { StreamsConfig } from '../common/config';
+import {
+  installWorkflows,
+  type ManagedWorkflowsClient,
+} from './lib/workflows/setup/install_workflows';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_CONSUMER,
@@ -116,6 +114,7 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
+  private managedWorkflowsClient?: ManagedWorkflowsClient;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -434,6 +433,11 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
         continuousKiExtractionWorkflowService,
+        getManagedWorkflowsClient: () => this.managedWorkflowsClient,
+        getSpaceId: async (request: KibanaRequest) => {
+          const [, pluginsStart] = await core.getStartServices();
+          return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+        },
       },
       core,
       logger: this.logger,
@@ -642,33 +646,23 @@ export class StreamsPlugin
   private async installManagedWorkflows(
     workflowsExtensions: WorkflowsExtensionsServerPluginStart
   ): Promise<void> {
+    const client = await workflowsExtensions.initManagedWorkflowsClient(
+      STREAMS_MANAGED_WORKFLOW_OWNER
+    );
+
     try {
-      const client = await workflowsExtensions.initManagedWorkflowsClient(
-        STREAMS_MANAGED_WORKFLOW_OWNER
-      );
-
-      await Promise.all([
-        client.install(STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID, {
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        }),
-        client.install(STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID, {
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        }),
-        client.install(STREAMS_KI_ONBOARDING_WORKFLOW_ID, {
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        }),
-      ]);
-
-      await client.ready();
-
-      this.logger.info('Streams KI managed workflows installed');
+      await installWorkflows({ client });
     } catch (error) {
       this.logger.warn(
-        `Failed to install streams KI managed workflows: ${
+        `Failed to install streams managed workflows: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
     }
+
+    await client.ready();
+    this.managedWorkflowsClient = client;
+    this.logger.info('Streams managed workflows installed');
   }
 
   public async stop() {

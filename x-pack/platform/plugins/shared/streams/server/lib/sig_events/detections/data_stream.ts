@@ -9,14 +9,13 @@ import type { DataStreamDefinition } from '@kbn/data-streams';
 import type { Detection } from '@kbn/streams-schema';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
-
 export const DETECTIONS_DATA_STREAM = '.significant_events-detections';
-
 export const detectionsMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
     silent: mappings.boolean(),
+    kind: mappings.keyword(),
     processed: mappings.boolean(),
     detection_id: mappings.keyword(),
     rule_uuid: mappings.keyword(),

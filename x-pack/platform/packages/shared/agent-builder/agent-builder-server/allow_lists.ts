@@ -91,6 +91,9 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+  // Streams – SigEvents discovery
+  `${internalNamespaces.streams}.sigevents.discovery.investigator`,
+  `${internalNamespaces.streams}.sigevents.discovery.judge`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];

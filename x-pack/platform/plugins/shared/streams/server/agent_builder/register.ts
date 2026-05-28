@@ -14,6 +14,7 @@ import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
+import { registerDiscoveryAgents } from './agents/discovery';
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
@@ -32,6 +33,7 @@ export const registerStreamsAgentBuilder = async ({
 }) => {
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
   registerAgentBuilderSkills({ agentBuilder, getScopedClients, telemetry });
+  registerDiscoveryAgents(agentBuilder);
 
   const getMemoryService = () =>
     new MemoryServiceImpl({
