@@ -53,7 +53,7 @@ export const createMemoryWriteTool = ({
     { name, title, content, categories, references, tags, change_summary: changeSummary },
     context
   ) => {
-    const memoryService = getMemoryService();
+    const memoryService = getMemoryService(context.esClient.asCurrentUser);
     const { request, esClient } = context;
     const { username: user } = await getUserFromRequest({
       request,

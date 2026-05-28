@@ -31,7 +31,6 @@ import { createUpdateStreamTool } from './write/update_stream';
 import { createCreatePartitionTool } from './write/create_partition';
 import { createDeleteStreamTool } from './write/delete_stream';
 import { StreamsWriteQueue } from '../utils/write_queue';
-
 export {
   STREAMS_READ_TOOL_IDS,
   STREAMS_WRITE_TOOL_IDS,
@@ -51,7 +50,7 @@ export {
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
 };
 
-export function registerAgentBuilderTools({
+export async function registerAgentBuilderTools({
   agentBuilder,
   getScopedClients,
   server,
@@ -63,7 +62,7 @@ export function registerAgentBuilderTools({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-}): void {
+}): Promise<void> {
   if (!agentBuilder) {
     return;
   }

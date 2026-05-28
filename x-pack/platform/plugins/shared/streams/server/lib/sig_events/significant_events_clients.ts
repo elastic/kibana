@@ -16,6 +16,8 @@ import { EventService, eventsDataStream } from './events';
 import type { EventClient } from './events';
 import { VerdictService, verdictsDataStream } from './verdicts';
 import type { VerdictClient } from './verdicts';
+import { memoriesDataStream } from '../memory';
+import { memoryHistoryDataStream } from '../memory/history_data_stream';
 
 export interface SignificantEventsServices {
   detection: DetectionService;
@@ -36,6 +38,8 @@ const SIGNIFICANT_EVENTS_DATA_STREAMS: AnyDataStreamDefinition[] = [
   discoveriesDataStream,
   eventsDataStream,
   verdictsDataStream,
+  memoriesDataStream,
+  memoryHistoryDataStream,
 ];
 
 export function createSignificantEventsServices(): SignificantEventsServices {

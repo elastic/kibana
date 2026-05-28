@@ -24,3 +24,8 @@ export {
   createReadMemoryPageCallback,
   createWriteMemoryPageCallback,
 } from './tool_callbacks';
+
+export { memoriesDataStream } from './data_stream';
+export type { StoredMemoryPage, MemoryPageDocument } from './data_stream';
+
+export { memoryHistoryDataStream } from './history_data_stream';
