@@ -384,18 +384,20 @@ export const PresentationPanelHoverActions = ({
   });
 
   const ContextMenuButton = (
-    <EuiButtonIcon
-      color="text"
-      data-test-subj="embeddablePanelToggleMenuIcon"
-      aria-label={getContextMenuAriaLabel(panelTitle, index)}
-      onClick={() => {
-        setIsContextMenuOpen(!isContextMenuOpen);
-        if (apiCanLockHoverActions(api)) {
-          api.lockHoverActions(!hasLockedHoverActions);
-        }
-      }}
-      iconType="boxesVertical"
-    />
+    <EuiToolTip content={getContextMenuAriaLabel(panelTitle, index)} disableScreenReaderOutput>
+      <EuiButtonIcon
+        color="text"
+        data-test-subj="embeddablePanelToggleMenuIcon"
+        aria-label={getContextMenuAriaLabel(panelTitle, index)}
+        onClick={() => {
+          setIsContextMenuOpen(!isContextMenuOpen);
+          if (apiCanLockHoverActions(api)) {
+            api.lockHoverActions(!hasLockedHoverActions);
+          }
+        }}
+        iconType="boxesVertical"
+      />
+    </EuiToolTip>
   );
 
   const dragHandle = useMemo(
