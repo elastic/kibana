@@ -8,8 +8,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EuiButton, EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CloudOnboardingDeployment } from '@kbn/fleet-plugin/common/types/models/cloud_onboarding_deployment';
-import type { AwsServiceVarsSource } from '@kbn/fleet-plugin/public/components/cloud_connector/aws_cloud_connector/aws_services_matrix';
+import type { AwsServiceVarsSource } from '../../aws_service_matrix';
 
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { computeRequiredStacks, type RequiredStack } from './compute_required_stacks';
 import { DeploymentStackSection } from './deployment_stack_section';
 import {
@@ -18,6 +19,10 @@ import {
   useCompleteDeployment,
   useUpdateDeployment,
 } from './use_deployment_api';
+
+interface DeploymentStepProps {
+  onNext: () => void;
+}
 
 interface PrepareResult {
   templateUrl: string;
@@ -33,13 +38,20 @@ interface StackState {
   isCreating: boolean;
 }
 
-export const DeploymentStep: React.FC = () => {
-  // TODO: Replace with OnboardingFlowContext from PR #271195
+export const DeploymentStep: React.FC<DeploymentStepProps> = ({ onNext }) => {
+  const { connectStep } = useOnboardingFlow();
+
+  const connectorId = connectStep.connectorId ?? '';
+  const authType: 'identity_federation' | 'static_keys' = connectStep.connectorId
+    ? 'identity_federation'
+    : 'static_keys';
+
+  // TODO: Wire from OnboardingFlowContext once the Services step PR extends it
+  // with selectedServices, serviceVars, and isNewConnection.
+  // Deployment step renders "no stacks required" until then.
   const selectedServices = useMemo(() => [], []);
   const serviceVars = useMemo<Record<string, AwsServiceVarsSource[]>>(() => ({}), []);
-  const authType = 'identity_federation' as const;
   const isNewConnection = true;
-  const connectorId = '';
 
   const requiredStacks = useMemo(
     () =>
@@ -204,7 +216,12 @@ export const DeploymentStep: React.FC = () => {
 
       <EuiSpacer size="l" />
 
-      <EuiButton fill disabled={!allSucceeded} data-test-subj="deploymentContinueButton">
+      <EuiButton
+        fill
+        disabled={!allSucceeded}
+        onClick={onNext}
+        data-test-subj="deploymentContinueButton"
+      >
         Continue
       </EuiButton>
     </div>

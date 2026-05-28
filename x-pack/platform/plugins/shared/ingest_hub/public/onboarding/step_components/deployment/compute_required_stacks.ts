@@ -10,7 +10,7 @@ import type {
   DeliveryMethod,
   DeliveryMethodEntry,
   AwsServiceVarsSource,
-} from '@kbn/fleet-plugin/public/components/cloud_connector/aws_cloud_connector/aws_services_matrix';
+} from '../../aws_service_matrix';
 
 export type StackMechanism = 'identity_federation' | 'firehose' | 'cloud_forwarder';
 

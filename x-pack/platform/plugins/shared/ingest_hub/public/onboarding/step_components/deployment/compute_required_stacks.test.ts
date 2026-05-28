@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AwsServiceMatrixEntry } from '@kbn/fleet-plugin/public/components/cloud_connector/aws_cloud_connector/aws_services_matrix';
+import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 
 import { computeRequiredStacks, getPrimaryMethod } from './compute_required_stacks';
 
