@@ -8,27 +8,28 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type {
-  AnomalySwimLaneEmbeddableState,
-  SwimlaneType,
-} from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import type {
   PublishesWritableUnifiedSearch,
   HasSerializedChildState,
 } from '@kbn/presentation-publishing';
-import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables';
 
+type AnomalySwimLaneViewByState = Extract<
+  AnomalySwimLaneEmbeddableState,
+  { swimlane_type: 'viewBy' }
+>;
+
 export interface AnomalySwimLaneProps {
   id?: string;
-  jobIds: JobId[];
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-  timeRange?: TimeRange;
-  perPage?: number;
+  jobIds: AnomalySwimLaneEmbeddableState['job_ids'];
+  swimlaneType: AnomalySwimLaneEmbeddableState['swimlane_type'];
+  viewBy?: AnomalySwimLaneViewByState['view_by'];
+  timeRange?: AnomalySwimLaneEmbeddableState['time_range'];
+  perPage?: AnomalySwimLaneEmbeddableState['per_page'];
   filters?: Filter[];
   query?: Query;
   executionContext: KibanaExecutionContext;
