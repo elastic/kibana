@@ -11,6 +11,7 @@ import { NotFoundPage } from '../app/404';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import {
   ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
+  ENTITY_ANALYTICS_DEV_PERMISSION_AUDIT_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
@@ -25,6 +26,7 @@ import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
 import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
+import { DevPermissionAuditPage } from './pages/dev_permission_audit';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 
 // ---- Management routes ----
@@ -196,6 +198,9 @@ const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsHomePageContainer.displayName = 'EntityAnalyticsHomePageContainer';
 
+// ---- Dev-only: permission audit page ----
+const DevPermissionAuditWrapper = () => <DevPermissionAuditPage />;
+
 // ---- Route definitions ----
 export const routes = [
   {
@@ -240,5 +245,10 @@ export const routes = [
       EntityAnalyticsHomePageContainer,
       SecurityPageName.entityAnalyticsHomePage
     ),
+  },
+  // Dev-only page — no nav link, direct URL access only
+  {
+    path: ENTITY_ANALYTICS_DEV_PERMISSION_AUDIT_PATH,
+    component: DevPermissionAuditWrapper,
   },
 ];
