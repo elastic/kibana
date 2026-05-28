@@ -9,14 +9,15 @@ import React from 'react';
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import type { DragDropContextProps, EuiButtonEmptyProps } from '@elastic/eui';
 import {
-  EuiFormRow,
-  EuiPanel,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiDraggable,
   EuiFlexGroup,
-  EuiIcon,
-  EuiButtonIcon,
   EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiPanel,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
