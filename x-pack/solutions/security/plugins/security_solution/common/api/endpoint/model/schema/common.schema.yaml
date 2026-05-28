@@ -276,6 +276,9 @@ components:
          wasSuccessful:
            type: boolean
            description: Whether the response action was successful
+         wasCanceled:
+           type: boolean
+           description: Whether the response action was canceled
          status:
            type: string
            description: The response action status
@@ -322,6 +325,9 @@ components:
                wasSuccessful:
                  type: boolean
                  description: Whether the response action was successful for the agent ID
+               wasCanceled:
+                 type: boolean
+                 description: Whether the response action was canceled for the agent ID
                completedAt:
                  type: string
                  description: The date and time the response action was completed for the agent ID
