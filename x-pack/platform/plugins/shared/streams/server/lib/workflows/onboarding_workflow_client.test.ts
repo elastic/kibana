@@ -378,7 +378,7 @@ describe('OnboardingWorkflowClient', () => {
       expect(result).toEqual(executions);
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({
-          sortField: 'createdAt',
+          sortField: 'finishedAt',
           sortOrder: 'desc',
           size: 10000,
           collapse: 'concurrencyGroupKey',
