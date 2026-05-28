@@ -28,7 +28,7 @@ describe('#alertAuditEvent', () => {
             "access",
           ],
         },
-        "message": "User is accessing alert with instance id \\"123\\"",
+        "message": "User is accessing alert [id=123]",
       }
     `);
   });
@@ -52,7 +52,7 @@ describe('#alertAuditEvent', () => {
             "access",
           ],
         },
-        "message": "User has accessed alert with instance id \\"123\\"",
+        "message": "User has accessed alert [id=123]",
       }
     `);
   });
@@ -76,7 +76,7 @@ describe('#alertAuditEvent', () => {
             "deletion",
           ],
         },
-        "message": "System has deleted alert with instance id \\"123\\"",
+        "message": "System has deleted alert [id=123]",
       }
     `);
   });
@@ -129,7 +129,7 @@ describe('#alertAuditEvent', () => {
             "access",
           ],
         },
-        "message": "Failed attempt to access alert with instance id \\"123\\"",
+        "message": "Failed attempt to access alert [id=123]",
       }
     `);
   });
@@ -155,7 +155,7 @@ describe('#alertAuditEvent - acknowledge/unacknowledge', () => {
             "change",
           ],
         },
-        "message": "User has acknowledged alert with instance id \\"123\\"",
+        "message": "User has acknowledged alert [id=123]",
       }
     `);
   });
@@ -179,7 +179,7 @@ describe('#alertAuditEvent - acknowledge/unacknowledge', () => {
             "change",
           ],
         },
-        "message": "User has unacknowledged alert with instance id \\"456\\"",
+        "message": "User has unacknowledged alert [id=456]",
       }
     `);
   });
@@ -238,7 +238,7 @@ describe('#alertAuditEvent - snooze/unsnooze/auto_unsnooze', () => {
             "type": "alert",
           },
         },
-        "message": "User is snoozing alert with instance id \\"instance-1\\" of rule with id \\"RULE_ID\\" and name \\"my rule\\"",
+        "message": "User is snoozing alert [id=instance-1] of rule [id=RULE_ID] and [name=my rule]",
       }
     `);
   });
@@ -270,7 +270,7 @@ describe('#alertAuditEvent - snooze/unsnooze/auto_unsnooze', () => {
             "type": "alert",
           },
         },
-        "message": "User has snoozed alert with instance id \\"instance-1\\" of rule with id \\"RULE_ID\\" and name \\"my rule\\"",
+        "message": "User has snoozed alert [id=instance-1] of rule [id=RULE_ID] and [name=my rule]",
       }
     `);
   });
@@ -306,7 +306,7 @@ describe('#alertAuditEvent - snooze/unsnooze/auto_unsnooze', () => {
             "type": "alert",
           },
         },
-        "message": "Failed attempt to snooze alert with instance id \\"instance-1\\" of rule with id \\"RULE_ID\\" and name \\"my rule\\"",
+        "message": "Failed attempt to snooze alert [id=instance-1] of rule [id=RULE_ID] and [name=my rule]",
       }
     `);
   });
@@ -338,7 +338,7 @@ describe('#alertAuditEvent - snooze/unsnooze/auto_unsnooze', () => {
             "type": "alert",
           },
         },
-        "message": "User has unsnoozed alert with instance id \\"instance-1\\" of rule with id \\"RULE_ID\\" and name \\"my rule\\"",
+        "message": "User has unsnoozed alert [id=instance-1] of rule [id=RULE_ID] and [name=my rule]",
       }
     `);
   });
@@ -371,7 +371,7 @@ describe('#alertAuditEvent - snooze/unsnooze/auto_unsnooze', () => {
             "type": "alert",
           },
         },
-        "message": "System has auto-unsnoozed alert with instance id \\"instance-1\\" of rule with id \\"RULE_ID\\" and name \\"my rule\\" (reason: ttl_expired)",
+        "message": "System has auto-unsnoozed alert [id=instance-1] of rule [id=RULE_ID] and [name=my rule] (reason: ttl_expired)",
       }
     `);
   });
@@ -404,7 +404,7 @@ describe('#alertAuditEvent - snooze/unsnooze/auto_unsnooze', () => {
             "type": "alert",
           },
         },
-        "message": "System has auto-unsnoozed alert with instance id \\"instance-2\\" of rule with id \\"RULE_ID\\" and name \\"my rule\\" (reason: condition_met)",
+        "message": "System has auto-unsnoozed alert [id=instance-2] of rule [id=RULE_ID] and [name=my rule] (reason: condition_met)",
       }
     `);
   });
@@ -428,7 +428,7 @@ describe('#alertAuditEvent - snooze/unsnooze/auto_unsnooze', () => {
             "change",
           ],
         },
-        "message": "User has snoozed alert with instance id \\"instance-1\\"",
+        "message": "User has snoozed alert [id=instance-1]",
       }
     `);
   });

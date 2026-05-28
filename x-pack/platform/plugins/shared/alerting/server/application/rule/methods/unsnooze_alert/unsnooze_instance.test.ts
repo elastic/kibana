@@ -151,8 +151,7 @@ describe('unsnooze alert instance', () => {
         kibana: expect.objectContaining({
           saved_object: { type: RULE_SAVED_OBJECT_TYPE, id: '1', name: 'test rule' },
         }),
-        message:
-          'User is unsnoozing alert with instance id "instance1" of rule with id "1" and name "test rule"',
+        message: 'User is unsnoozing alert [id=instance1] of rule [id=1] and [name=test rule]',
       })
     );
   });

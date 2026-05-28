@@ -100,14 +100,14 @@ export function alertAuditEvent({
 }: AlertAuditEventParams): AuditEvent {
   let doc: string;
   if (id) {
-    doc = `alert with instance id "${id}"`;
+    doc = `alert [id=${id}]`;
   } else {
     doc = bulk ? 'alerts' : 'an alert';
   }
   if (ruleSavedObject) {
     const ruleDoc = [
-      `rule with id "${ruleSavedObject.id}"`,
-      ruleSavedObject.name && `and name "${ruleSavedObject.name}"`,
+      `rule [id=${ruleSavedObject.id}]`,
+      ruleSavedObject.name && `and [name=${ruleSavedObject.name}]`,
     ]
       .filter(Boolean)
       .join(' ');
