@@ -29,18 +29,16 @@ node scripts/evals init --skip-discovery
 | ------------------ | ------------------------------------------------------------------ |
 | `--skip-discovery` | Skip EIS model discovery (reuse existing `target/eis_models.json`) |
 
-#### `init config` -- Vault config for golden cluster
+#### `init config` -- Local config for golden cluster
 
-Create or verify golden cluster config setup (behavior depends on profile).
+Create golden cluster config files interactively.
 
 ```bash
 node scripts/evals init config
-node scripts/evals init config --profile dev-vault
 node scripts/evals init config --profile local
 ```
 
 - **Default** — creates/updates `scripts/vault/config.json` interactively
-- **`--profile dev-vault`** — `vault login --method oidc` + verify dev Vault is readable
 - **`--profile local`** — creates `config.local.json` with localhost export URLs only
 
 #### Vault scripts
@@ -100,11 +98,6 @@ Create the profiles:
 ```bash
 # default: config.json (after retrieve_secrets.js, or copy from config.example.json)
 node scripts/evals init config
-
-# vault profile: no local secrets file
-export VAULT_ADDR=https://secrets.elastic.co:8200
-vault login --method oidc
-node scripts/evals init config --profile dev-vault
 
 # local export profile (results + traces to localhost:9200)
 node scripts/evals init config --profile local

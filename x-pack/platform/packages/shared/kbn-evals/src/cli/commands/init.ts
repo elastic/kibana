@@ -13,13 +13,8 @@ import inquirer from 'inquirer';
 import type { Command } from '@kbn/dev-cli-runner';
 import { set } from '@kbn/safer-lodash-set';
 import { parseConnectorsFromEnv, parseConnectorsFromKibanaDevYml } from '../prompts';
-import { safeExec, getVaultAddr, VAULT_SECRET_PATH, KBN_EVALS_DEV_VAULT_PATH } from '../utils';
-import {
-  VAULT_CONFIG_DIR,
-  DEV_VAULT_DATASETS_PROFILE,
-  isDevVaultConfigReadable,
-  isDevVaultProfile,
-} from '../profiles';
+import { safeExec, getVaultAddr, VAULT_SECRET_PATH } from '../utils';
+import { VAULT_CONFIG_DIR } from '../profiles';
 import { buildApiKeyPayload } from '../../api_key/build_api_key_payload';
 
 const EIS_MODELS_PATH = 'target/eis_models.json';
@@ -180,54 +175,11 @@ const getExistingApiKey = (configPath: string): string | null => {
   }
 };
 
-const runVaultDevConfigInit = async (log: {
-  info: (msg: string) => void;
-  warning: (msg: string) => void;
-}): Promise<boolean> => {
-  log.info('Golden cluster config is loaded from Vault at runtime (no local secrets file).');
-  log.info('');
-
-  try {
-    await ensureVaultAuth({ info: log.info, error: log.warning });
-  } catch (e) {
-    log.warning(`Vault auth failed: ${(e as Error).message}`);
-    return false;
-  }
-
-  if (!isDevVaultConfigReadable()) {
-    log.warning(
-      [
-        `Could not read dev Vault config at ${KBN_EVALS_DEV_VAULT_PATH}.`,
-        'Ensure VPN is connected and you have read access.',
-      ].join('\n')
-    );
-    return false;
-  }
-
-  log.info('Vault auth OK — dev golden cluster config is readable.');
-  log.info('');
-  log.info('Run an eval with the vault profile (no local secrets file):');
-  log.info(
-    `  node scripts/evals start --suite <suite-id> --datasets-profile ${DEV_VAULT_DATASETS_PROFILE}`
-  );
-  log.info('');
-  log.info('Optional: export results/traces locally');
-  log.info('  node scripts/evals init config --profile local');
-  log.info('  node scripts/evals start --suite <suite-id> --export-profile local');
-  log.info('');
-  log.info('Writers updating Vault: see README (retrieve_secrets.js / upload_secrets.js).');
-  return true;
-};
-
 const runConfigInit = async (
   repoRoot: string,
   log: { info: (msg: string) => void; warning: (msg: string) => void },
   options?: { profile?: string }
 ): Promise<boolean> => {
-  if (isDevVaultProfile(options?.profile)) {
-    return runVaultDevConfigInit(log);
-  }
-
   const configDir = Path.resolve(repoRoot, VAULT_CONFIG_DIR);
   const configFileName = options?.profile ? `config.${options.profile}.json` : CONFIG_FILENAME;
   const configPath = Path.join(configDir, configFileName);
@@ -539,7 +491,7 @@ export const initCmd: Command<void> = {
 
   Subcommands:
     node scripts/evals init              Full setup (config + connectors)
-    node scripts/evals init config       Create config.json or verify dev Vault (dev-vault)
+    node scripts/evals init config       Create config.json (or config.<profile>.json)
 
   Guides you through eval config creation and EIS (Cloud Connected Mode)
   connector discovery or validates an existing configuration.
@@ -548,7 +500,6 @@ export const initCmd: Command<void> = {
     node scripts/evals init
     node scripts/evals init config
     node scripts/evals init config --profile local
-    node scripts/evals init config --profile dev-vault
     node scripts/evals init --skip-discovery
   `,
   flags: {
@@ -556,7 +507,7 @@ export const initCmd: Command<void> = {
     string: ['profile'],
     default: { 'skip-discovery': false },
     help: `
-      --profile <name>   local: config.local.json; dev-vault: verify dev Vault read (no local file)
+      --profile <name>   e.g. local -> config.local.json (default: config.json)
       --skip-discovery    Skip EIS model discovery (only applies to full init)
     `,
   },

@@ -280,7 +280,7 @@ export const doctorCmd: Command<void> = {
         log.info(`  (datasets from ${resolveVaultConfigPath(repoRoot)};`);
       } else {
         log.info(
-          `  (datasets via --datasets-profile ${DEV_VAULT_DATASETS_PROFILE}; run: node scripts/evals init config --profile ${DEV_VAULT_DATASETS_PROFILE})`
+          `  (datasets via --datasets-profile ${DEV_VAULT_DATASETS_PROFILE}; authenticate: vault login --method oidc)`
         );
       }
       log.info(

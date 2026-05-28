@@ -148,16 +148,11 @@ The Evals CLI supports this via **vault config profiles** in:
 Create the profiles:
 
 ```bash
-# 1) Dev reader path (recommended): runtime Vault profile, no local shared secrets file
-export VAULT_ADDR=https://secrets.elastic.co:8200
-vault login --method oidc
-node scripts/evals init config --profile dev-vault
-
-# 2) Local export profile (results + traces to localhost:9200, no secrets)
-node scripts/evals init config --profile local
-
-# Optional writer/offline path: local config.json for retrieve/edit/upload workflows
+# Golden cluster credentials (interactive, or copy from config.example.json)
 node scripts/evals init config
+
+# Local export profile (results + traces to localhost:9200)
+node scripts/evals init config --profile local
 ```
 
 Run a suite using golden datasets but exporting locally:
@@ -360,13 +355,13 @@ Kibana developers run evals against the shared **golden cluster** (datasets, tra
 **Developer setup:**
 
 ```bash
-# Default: local config.json (after retrieve, or copy config.example.json)
+# Default: local config.json (interactive init, retrieve_secrets.js, or copy config.example.json)
 node scripts/evals init config
 
-# Vault profile: no local secrets file
-export VAULT_ADDR=https://secrets.elastic.co:8200
-vault login --method oidc
-node scripts/evals init config --profile dev-vault
+# Or retrieve from dev Vault:
+node scripts/evals start --suite <id> --profile dev-vault
+
+# Golden datasets from dev Vault at runtime (no config.json) + local export:
 node scripts/evals start --suite <id> --datasets-profile dev-vault --export-profile local
 ```
 
