@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { QueryClientProvider } from '@kbn/react-query';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
-import { QueryClientProvider } from '@kbn/react-query';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { ComposeDiscoverForm, getSteps } from '.';
 import { RuleFormProvider, type RuleFormServices } from '../../../form/contexts';
 import { createMockServices, createTestQueryClient } from '../../../test_utils';
-import { createInitialState } from '../use_compose_discover_state';
-import type { ComposeDiscoverState } from '../types';
 import type { ComposeFormValues } from '../compose_form_types';
-import { ComposeDiscoverForm, getSteps } from '.';
+import type { ComposeDiscoverState } from '../types';
+import { createInitialState } from '../use_compose_discover_state';
 
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),
@@ -196,14 +196,98 @@ describe('step validation', () => {
       const recoveryStep = getSteps(true).find((s) => s.id === 'recoveryCondition')!;
       expect(recoveryStep.validate).toBeUndefined();
     });
+  });
 
-    it('does not include the placeholder notifications step', () => {
-      expect(getSteps(false).map((step) => step.id)).toEqual(['alertCondition', 'details']);
-      expect(getSteps(true).map((step) => step.id)).toEqual([
-        'alertCondition',
-        'recoveryCondition',
-        'details',
-      ]);
+  describe('notifications.validate', () => {
+    const notificationsStep = getSteps(true).find((s) => s.id === 'notifications')!;
+
+    const makeServices = (isValid?: (v: object) => boolean): RuleFormServices =>
+      ({ workflowForm: { isValid } } as unknown as RuleFormServices);
+
+    it('returns true in edit mode regardless of form state', async () => {
+      const state = createState({ mode: 'edit' });
+      const methods = {
+        getValues: jest.fn().mockReturnValue({ workflow: {} }),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(
+        await notificationsStep.validate!(
+          methods,
+          state,
+          makeServices(() => false)
+        )
+      ).toBe(true);
     });
+
+    it('returns true when notifications are disabled', async () => {
+      const state = createState({ mode: 'create' });
+      const methods = {
+        getValues: jest.fn().mockReturnValue(undefined),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(await notificationsStep.validate!(methods, state, makeServices())).toBe(true);
+    });
+
+    it('returns false when notifications enabled and isValid returns false', async () => {
+      const state = createState({ mode: 'create' });
+      const methods = {
+        getValues: jest.fn().mockReturnValue({ workflow: { mode: 'existing', workflowId: null } }),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(
+        await notificationsStep.validate!(
+          methods,
+          state,
+          makeServices(() => false)
+        )
+      ).toBe(false);
+    });
+
+    it('returns true when notifications enabled and isValid returns true (existing workflow)', async () => {
+      const state = createState({ mode: 'create' });
+      const methods = {
+        getValues: jest
+          .fn()
+          .mockReturnValue({ workflow: { mode: 'existing', workflowId: 'wf-1' } }),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(
+        await notificationsStep.validate!(
+          methods,
+          state,
+          makeServices(() => true)
+        )
+      ).toBe(true);
+    });
+
+    it('returns false when notifications enabled and in create mode with no connector', async () => {
+      const state = createState({ mode: 'create' });
+      const methods = {
+        getValues: jest.fn().mockReturnValue({
+          workflow: { mode: 'create', connectorId: null, typeId: 'email', params: '' },
+        }),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(
+        await notificationsStep.validate!(
+          methods,
+          state,
+          makeServices(() => false)
+        )
+      ).toBe(false);
+    });
+
+    it('returns true when notifications enabled but services.workflowForm.isValid is absent', async () => {
+      const state = createState({ mode: 'create' });
+      const methods = {
+        getValues: jest.fn().mockReturnValue({ workflow: {} }),
+      } as unknown as UseFormReturn<ComposeFormValues>;
+      expect(await notificationsStep.validate!(methods, state, makeServices())).toBe(true);
+    });
+  });
+
+  it('includes the correct steps based on isAlert', () => {
+    expect(getSteps(false).map((step) => step.id)).toEqual(['alertCondition', 'details']);
+    expect(getSteps(true).map((step) => step.id)).toEqual([
+      'alertCondition',
+      'recoveryCondition',
+      'details',
+      'notifications',
+    ]);
   });
 });

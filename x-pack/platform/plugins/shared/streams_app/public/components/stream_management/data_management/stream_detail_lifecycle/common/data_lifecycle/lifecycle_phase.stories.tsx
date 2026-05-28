@@ -165,6 +165,36 @@ export const FrozenPhaseEnterpriseCallout: Story = {
   },
 };
 
+export const FrozenPhaseDefaultRepositoryCallout: Story = {
+  render: () => {
+    const StoryComponent = () => {
+      const phaseColors = usePhaseColors();
+      return (
+        <Centered>
+          <LifecyclePhase
+            label="frozen"
+            color={phaseColors.frozen}
+            description="Use for infrequently searched, read-only data where cost savings are prioritized over performance."
+            minAge="40d"
+            sizeInBytes={75_100_000_000}
+            docsCount={1_651_698}
+            isReadOnly={false}
+            showDefaultRepositoryCallout={true}
+            onCreateDefaultRepository={() => action('onCreateDefaultRepository')()}
+            onRefreshDefaultRepository={() => action('onRefreshDefaultRepository')()}
+            isRefreshingDefaultRepository={false}
+            showActions={true}
+            onEditPhase={(phaseName) => action('onEditPhase')(phaseName)}
+            onRemovePhase={(phaseName) => action('onRemovePhase')(phaseName)}
+            canManageLifecycle={true}
+          />
+        </Centered>
+      );
+    };
+    return <StoryComponent />;
+  },
+};
+
 export const DeletePhase: Story = {
   render: () => (
     <Centered>

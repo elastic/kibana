@@ -249,20 +249,11 @@ export function useAppMenu() {
 }
 
 /**
- * Returns the current legacy action menu mount point, or `undefined` if none is set.
- * @deprecated Legacy action menus use imperative mount points. Prefer `chrome.setAppMenu()`.
- */
-export function useCurrentActionMenu(): MountPoint | undefined {
-  const { application } = useChromeComponentsDeps();
-  return useObservable(application.currentActionMenu$, undefined);
-}
-
-/**
  * Whether a legacy action menu mount point is currently set.
  * @deprecated Legacy action menus use imperative mount points. Prefer `chrome.setAppMenu()`.
  */
 export function useHasLegacyActionMenu(): boolean {
-  return !!useCurrentActionMenu();
+  return !!useInternalLegacyActionMenu();
 }
 
 /** Whether the current app menu (registered via `chrome.setAppMenu()`) has items configured. */
