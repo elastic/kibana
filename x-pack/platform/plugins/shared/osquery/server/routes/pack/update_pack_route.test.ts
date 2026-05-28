@@ -7,6 +7,7 @@
 
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { PackSavedObject } from '../../common/types';
@@ -45,7 +46,11 @@ describe('updatePackRoute', () => {
     return httpService.createRouter();
   };
 
-  const basePackSO: { id: string; references: []; attributes: Partial<PackSavedObject> } = {
+  const basePackSO: {
+    id: string;
+    references: Array<{ id: string; name: string; type: string }>;
+    attributes: Partial<PackSavedObject>;
+  } = {
     id: 'pack-id',
     references: [],
     attributes: {
@@ -1078,6 +1083,178 @@ describe('updatePackRoute', () => {
       expect(responseBody.data.schedule_type).toBe('rrule');
       expect(responseBody.data.rrule_schedule).toEqual(rruleValue);
       expect(responseBody.data).not.toHaveProperty('interval');
+    });
+  });
+
+  describe('response contract (PUT/GET parity)', () => {
+    // Regression for CodeRabbit PR#270639 r4381326725 — buildResponseData was
+    // pulling `policy_ids` from `attrs.policy_ids` (always undefined: the route
+    // writes policies to `references`, not attributes) and emitting `shards` in
+    // the SO array form instead of the public object map. These tests pin the
+    // PUT response to the same contract as GET / find_packs.
+
+    it('derives policy_ids from SO references, not attributes', async () => {
+      const currentSO = {
+        ...basePackSO,
+        // Two attached legacy agent policies + one unrelated reference type
+        // (prebuilt pack asset). Only ingest-agent-policies refs should
+        // surface as policy_ids; the asset ref must be filtered out.
+        references: [
+          { id: 'policy-a', name: 'policy-a', type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE },
+          { id: 'policy-b', name: 'policy-b', type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE },
+          { id: 'asset-1', name: 'asset-1', type: 'osquery-pack-asset' },
+        ],
+        attributes: {
+          ...basePackSO.attributes,
+          // Spurious attrs.policy_ids that must NOT be the source of truth.
+          // If buildResponseData regresses to attrs, this stale value will
+          // leak into the response — the assertion below catches that.
+          policy_ids: ['stale-attrs-only-policy'] as unknown as never,
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+      mockClient.get = jest.fn().mockResolvedValue(currentSO);
+      mockClient.update = jest.fn().mockResolvedValue({
+        id: 'pack-id',
+        attributes: currentSO.attributes,
+        references: currentSO.references,
+      });
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      // The route validates that all currentAgentPolicyIds resolve to known
+      // osquery_manager package policies; otherwise it 400s with "invalid
+      // policy ids" before reaching buildResponseData. Mock the lookup so
+      // policy-a and policy-b are accepted.
+      const packagePolicyList = jest.fn().mockResolvedValue({
+        items: [
+          {
+            id: 'package-policy-a',
+            policy_ids: ['policy-a'],
+            package: { name: 'osquery_manager', version: '1.0.0' },
+            inputs: [],
+          },
+          {
+            id: 'package-policy-b',
+            policy_ids: ['policy-b'],
+            package: { name: 'osquery_manager', version: '1.0.0' },
+            inputs: [],
+          },
+        ],
+      });
+
+      const mockRouter = createMockRouter();
+      mockOsqueryContext = {
+        logFactory: { get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()) },
+        security: {},
+        getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
+        experimentalFeatures: { rruleScheduling: true },
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+          getAgentPolicyService: jest.fn().mockReturnValue({
+            getByIds: jest.fn().mockResolvedValue([
+              { id: 'policy-a', name: 'policy-a' },
+              { id: 'policy-b', name: 'policy-b' },
+            ]),
+          }),
+          getPackagePolicyService: jest.fn().mockReturnValue({
+            list: packagePolicyList,
+          }),
+        },
+      } as unknown as OsqueryAppContext;
+
+      updatePackRoute(mockRouter, mockOsqueryContext);
+      const route = mockRouter.versioned.getRoute('put', '/api/osquery/packs/{id}');
+      const routeVersion = route.versions[API_VERSIONS.public.v1];
+      if (!routeVersion) throw new Error('no route version');
+      routeHandler = routeVersion.handler;
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        // Description-only PUT — disabled pack → hits the early-return path
+        // that calls buildResponseData without touching agent policies.
+        body: { description: 'response-contract-policy-ids-probe' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
+      expect(responseBody.data.policy_ids).toEqual(['policy-a', 'policy-b']);
+      expect(responseBody.data.policy_ids).not.toContain('stale-attrs-only-policy');
+      expect(responseBody.data.policy_ids).not.toContain('asset-1');
+    });
+
+    it('returns shards as object map (Record<policyId, percent>), not SO array form', async () => {
+      const currentSO = {
+        ...basePackSO,
+        references: [],
+        attributes: {
+          ...basePackSO.attributes,
+          // Internal SO storage shape — array of {key,value}. The response
+          // must normalize this to the documented public object form so PUT
+          // matches GET / find_packs / the OpenAPI `$ref: Shards`.
+          shards: [
+            { key: 'policy-a', value: 50 },
+            { key: 'policy-b', value: 75 },
+          ] as never,
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'response-contract-shards-probe' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
+      expect(responseBody.data.shards).toEqual({
+        'policy-a': 50,
+        'policy-b': 75,
+      });
+      // Make the contract explicit: not an array.
+      expect(Array.isArray(responseBody.data.shards)).toBe(false);
+    });
+
+    it('empty references and empty shards — policy_ids: [], shards: {}', async () => {
+      // Edge case: a pack with no agent policy attachments and no shard
+      // overrides should still emit the public contract shapes (empty array
+      // / empty object), not undefined or the raw SO empty array.
+      const currentSO = {
+        ...basePackSO,
+        references: [],
+        attributes: {
+          ...basePackSO.attributes,
+          shards: [],
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO);
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: { description: 'response-contract-empty-probe' },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const responseBody = mockResponse.ok.mock.calls[0][0]?.body as any;
+      expect(responseBody.data.policy_ids).toEqual([]);
+      expect(responseBody.data.shards).toEqual({});
     });
   });
 });

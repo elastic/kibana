@@ -362,7 +362,8 @@ components:
     PackInterval:
       description: 'Pack-level interval, in seconds. Used when `schedule_type` is `interval`. Mutually exclusive with `rrule_schedule`.'
       example: 60
-      type: number
+      type: integer
+      minimum: 1
 
     PackIntervalOrUndefined:
       $ref: '#/components/schemas/PackInterval'

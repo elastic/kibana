@@ -59,7 +59,7 @@ import {
   stripPriorModePerQueryFields,
 } from './utils';
 
-import { convertShardsToArray } from '../utils';
+import { convertShardsToArray, convertShardsToObject } from '../utils';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import type { PackQueryInput } from './utils';
@@ -434,6 +434,13 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const buildResponseData = (): PackResponseData => {
           const { attributes: attrs } = updatedPackSO;
+          // policy_ids and shards must mirror the GET contract: policy attachments
+          // live on `references`, not `attributes`, and the public shards shape is
+          // an object map (read_pack_route uses convertShardsToObject).
+          const policyIds = map(
+            filter(updatedPackSO.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
+            'id'
+          );
 
           return {
             name: attrs.name,
@@ -447,8 +454,16 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             updated_at: attrs.updated_at,
             updated_by: attrs.updated_by,
             updated_by_profile_uid: attrs.updated_by_profile_uid,
-            policy_ids: attrs.policy_ids,
-            shards: attrs.shards,
+            policy_ids: policyIds,
+            // TODO: collapse `PackResponseData.shards` (currently `SOShard`,
+            // array form) onto the documented public contract `Record<string,
+            // number>`. The OAS, the GET responses, and the runtime validator's
+            // `oneOf(array, object)` all point to the object form being the real
+            // public shape; the array typing here is a leak of the internal SO
+            // storage shape. Fix would also let `find_pack_route` and
+            // `create_pack_route` stop returning array form silently. Tracked
+            // separately — this cast is the bridge until then.
+            shards: convertShardsToObject(attrs.shards) as unknown as PackResponseData['shards'],
             saved_object_id: updatedPackSO.id,
             // Discriminated response — see buildScheduleResponseSlice.
             ...buildScheduleResponseSlice(attrs, isRruleFeatureEnabled),

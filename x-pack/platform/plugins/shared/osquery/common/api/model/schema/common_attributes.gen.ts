@@ -336,7 +336,7 @@ export type DefaultSuccessResponse = z.infer<typeof DefaultSuccessResponse>;
 /**
  * Pack-level interval, in seconds. Used when `schedule_type` is `interval`. Mutually exclusive with `rrule_schedule`.
  */
-export const PackInterval = lazySchema(() => z.number());
+export const PackInterval = lazySchema(() => z.number().int().min(1));
 export type PackInterval = z.infer<typeof PackInterval>;
 
 export const PackIntervalOrUndefined = lazySchema(() => PackInterval.nullable());
