@@ -268,9 +268,11 @@ export async function installKibanaAssetsAndReferencesMultispace({
     ? (installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceId
     : false;
 
-  if (installedPkg && !installAsAdditionalSpace) {
+  if (installedPkg) {
     await pruneMisplacedAdditionalSpacesEntry({ savedObjectsClient, pkgName, installedPkg });
+  }
 
+  if (installedPkg && !installAsAdditionalSpace) {
     // Install in every space => upgrades
     const refs = await installKibanaAssetsAndReferences({
       savedObjectsClient,
