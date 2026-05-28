@@ -20,6 +20,7 @@ import {
   MONITOR_EDIT_ROUTE,
   MONITOR_ROUTE,
   SETTINGS_ROUTE,
+  SYNTHETICS_STEP_DETAIL_ROUTE,
 } from '../../../../../../common/constants';
 import { stringifyUrlParams } from '../../../utils/url_params';
 import { InspectorHeaderLink } from './inspector_header_link';
@@ -46,9 +47,13 @@ export function ActionMenuContent(): React.ReactElement {
   }; /* useSelector(monitorStatusSelector) TODO: Implement state for monitor status */
 
   const detailRouteMatch = useRouteMatch(MONITOR_ROUTE);
-  const isEditRoute = useRouteMatch(MONITOR_EDIT_ROUTE);
-  const isAddRoute = useRouteMatch(MONITOR_ADD_ROUTE);
   const monitorId = selectedMonitor?.monitor?.id;
+
+  const hideRefreshRoute = useRouteMatch([
+    SYNTHETICS_STEP_DETAIL_ROUTE,
+    MONITOR_EDIT_ROUTE,
+    MONITOR_ADD_ROUTE,
+  ]);
 
   const syntheticExploratoryViewLink = createExploratoryViewUrl(
     {
@@ -76,7 +81,7 @@ export function ActionMenuContent(): React.ReactElement {
 
   return (
     <EuiHeaderLinks gutterSize="xs">
-      {!isEditRoute && !isAddRoute && (
+      {!hideRefreshRoute && (
         <>
           <LastRefreshed />
           <AutoRefreshButton />
