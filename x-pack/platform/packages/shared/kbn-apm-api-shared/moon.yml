@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/apm-types'
   - '@kbn/es-types'
   - '@kbn/security-plugin-types-common'
-  - '@kbn/data-views-plugin'
   - '@kbn/fleet-plugin'
   - '@kbn/profiling-utils'
   - '@kbn/slo-schema'
