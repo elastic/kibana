@@ -19,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE } from '@kbn/connector-schemas/mcp/constants';
 import type { Tool } from '@kbn/mcp-client';
 import React, { useCallback, useEffect, useMemo } from 'react';
@@ -180,7 +182,14 @@ export const McpEditableFields = ({
           isInvalid={!!errors.connectorId}
           error={errors.connectorId?.message}
           labelAppend={
-            <EuiLink onClick={openCreateMcpServerFlyout} css={mcpActionLinkStyles(euiThemeContext)}>
+            <EuiLink
+              onClick={openCreateMcpServerFlyout}
+              css={mcpActionLinkStyles(euiThemeContext)}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.ADD_MCP_SERVER,
+              })}
+            >
               {i18nMessages.configuration.form.mcp.addMcpServerButtonLabel}
             </EuiLink>
           }
@@ -217,7 +226,14 @@ export const McpEditableFields = ({
           isInvalid={!!errors.mcpToolName}
           error={errors.mcpToolName?.message}
           labelAppend={
-            <EuiLink onClick={handleBulkImportClick} css={mcpActionLinkStyles(euiThemeContext)}>
+            <EuiLink
+              onClick={handleBulkImportClick}
+              css={mcpActionLinkStyles(euiThemeContext)}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.globalManagement.BULK_IMPORT_MCP,
+              })}
+            >
               {i18nMessages.configuration.form.mcp.bulkImportMcpToolsButtonLabel}
             </EuiLink>
           }

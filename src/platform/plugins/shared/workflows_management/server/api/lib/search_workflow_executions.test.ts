@@ -69,6 +69,31 @@ describe('searchWorkflowExecutions', () => {
     });
   });
 
+  describe('search options', () => {
+    it('should forward collapse to Elasticsearch search', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 0 },
+          hits: [],
+        },
+      } as any);
+
+      await searchWorkflowExecutions({
+        esClient: mockEsClient,
+        logger: mockLogger,
+        workflowExecutionIndex: '.workflows-executions',
+        query: { term: { workflowId: 'workflow-1' } },
+        collapse: { field: 'concurrencyGroupKey' },
+      });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          collapse: { field: 'concurrencyGroupKey' },
+        })
+      );
+    });
+  });
+
   describe('error handling', () => {
     it('should not log error when index_not_found_exception occurs (expected behavior)', async () => {
       mockLogger.error.mockClear();

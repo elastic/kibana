@@ -148,6 +148,8 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/reporting-public'
   - '@kbn/use-observable'
+  - '@kbn/logging'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod
