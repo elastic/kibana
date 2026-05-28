@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiIcon, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiLoadingSpinner, EuiToolTip, euiShadowXSmall, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { Handle, Position } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import React, { memo, useState } from 'react';
@@ -71,42 +72,52 @@ function getNodeIcon(stepType: string): string {
 // tinted with the trigger/step accent color.
 const LOGO_ICONS = new Set(['logoElasticsearch', 'logoKibana']);
 
-// Figma drop-shadow tokens — three layers each.
-// rgba(43, 57, 79, ...) is the Elastic ink color; kept as-is because EUI
-// does not expose a CSS-shadow token that adapts to dark mode.
-const NODE_SHADOW_SMALL =
-  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 2px 7px 0 rgba(43, 57, 79, 0.08), 0 4px 11px 0 rgba(43, 57, 79, 0.05)';
-const NODE_SHADOW_MEDIUM =
-  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 3px 10px 0 rgba(43, 57, 79, 0.10), 0 6px 14px 0 rgba(43, 57, 79, 0.06)';
-const NODE_SHADOW_LARGE =
-  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 4px 13px 0 rgba(43, 57, 79, 0.12), 0 8px 17px 0 rgba(43, 57, 79, 0.07)';
+// Figma step/trigger state colors (light mode). Hardcoded to match Figma tokens
+// exactly; EUI does not expose equivalents for these specific tints.
+// Regular step — Static (node 11094:5696)
+const FIGMA_STEP_OUTER_BORDER = '#e3e8f2';
+const FIGMA_STEP_ICON_AREA_BG = '#f1f6ff';
+const FIGMA_STEP_INNER_BOX_BORDER = '#e4e7f1';
+const FIGMA_STEP_ICON_COLOR = '#61a2ff';
+const FIGMA_STEP_LABEL_COLOR = '#111c2c';
+// Regular step — Working (node 10791:5624)
+const FIGMA_RUNNING_BORDER = '#bfdbff';
+// Regular step — Executed (node 11094:5703)
+const FIGMA_SUCCESS_BG = '#d0f3f2';
+const FIGMA_SUCCESS_COLOR = '#16c5c0';
+// Trigger (node 11099:5798)
+const FIGMA_TRIGGER_ICON_AREA_BG = '#fff3f9';
+const FIGMA_TRIGGER_INNER_BOX_BORDER = '#ffc7db';
+const FIGMA_TRIGGER_ICON_COLOR = '#ee72a6';
+
 
 function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
   const { stepType, label, isTrigger, stepExecution, preview, step } = node.data;
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const isTriggerNode = isTrigger || TRIGGER_STEP_TYPES.has(stepType);
 
   // Theme-derived palettes — adapt to dark/light mode automatically.
   const palette = isTriggerNode
     ? {
-        outerBorder: euiTheme.colors.borderBaseAccent,
-        iconAreaBg: euiTheme.colors.backgroundBaseAccent,
-        innerBoxBorder: euiTheme.colors.borderBaseAccent,
-        iconColor: euiTheme.colors.accent,
+        outerBorder: FIGMA_STEP_OUTER_BORDER,
+        iconAreaBg: FIGMA_TRIGGER_ICON_AREA_BG,
+        innerBoxBorder: FIGMA_TRIGGER_INNER_BOX_BORDER,
+        iconColor: FIGMA_TRIGGER_ICON_COLOR,
         activeBorder: euiTheme.colors.accent,
         activeIconAreaBg: euiTheme.colors.borderBaseAccent,
       }
     : {
-        outerBorder: euiTheme.colors.borderBaseAccentSecondary,
-        iconAreaBg: euiTheme.colors.backgroundLightAccentSecondary,
-        innerBoxBorder: euiTheme.colors.borderBaseFloating,
-        iconColor: euiTheme.colors.accentSecondary,
+        outerBorder: FIGMA_STEP_OUTER_BORDER,
+        iconAreaBg: FIGMA_STEP_ICON_AREA_BG,
+        innerBoxBorder: FIGMA_STEP_INNER_BOX_BORDER,
+        iconColor: FIGMA_STEP_ICON_COLOR,
         activeBorder: euiTheme.colors.accentSecondary,
         activeIconAreaBg: euiTheme.colors.borderBaseAccentSecondary,
       };
 
-  const statusSuccessColor = euiTheme.colors.vis.euiColorVisSuccess0;
-  const statusSuccessBg = euiTheme.colors.backgroundBaseSuccess;
+  const statusSuccessColor = FIGMA_SUCCESS_COLOR;
+  const statusSuccessBg = FIGMA_SUCCESS_BG;
   const statusFailColor = euiTheme.colors.danger;
   const statusFailBg = euiTheme.colors.backgroundBaseDanger;
 
@@ -131,6 +142,8 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
     execStatus === ExecutionStatus.CANCELLED;
   const borderColor = isActive
     ? palette.activeBorder
+    : isRunning
+    ? FIGMA_RUNNING_BORDER
     : isSuccess
     ? statusSuccessColor
     : isFailed
@@ -143,18 +156,23 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
     : isFailed
     ? statusFailBg
     : palette.iconAreaBg;
-  const innerBoxBorder = isActive ? 'transparent' : palette.innerBoxBorder;
+  const innerBoxBorder = isActive
+    ? 'transparent'
+    : isSuccess
+    ? statusSuccessColor
+    : isFailed
+    ? statusFailColor
+    : palette.innerBoxBorder;
+  // Retry badge — Warning variant (Figma 11107:6610)
+const FIGMA_RETRY_BADGE_BG = '#fde9b5';
+const FIGMA_RETRY_BADGE_COLOR = '#825803';
+
+// Figma: 10px for static/executed, 8px for working/running
+  const borderRadius = isRunning ? 8 : 10;
   const hasStatusIcon = isRunning || isSuccess || isFailed;
   // Hover actions hide when an execution-status icon is visible so they
   // don't overlap. They still show on hover/select when there's no status.
   const showActions = (isHovered || isActive) && !isTrigger && !hasStatusIcon;
-  // Use the medium shadow for in-flight / executed steps to lift them
-  // slightly from the canvas (matches the Figma running/success spec).
-  const shadow = isActive
-    ? NODE_SHADOW_LARGE
-    : hasStatusIcon
-    ? NODE_SHADOW_MEDIUM
-    : NODE_SHADOW_SMALL;
   const runLabel = i18n.translate('workflowsUi.graphNode.runStep', { defaultMessage: 'Run step' });
 
   // Compact icon-only render for the workflow-list hover preview. All hooks
@@ -211,29 +229,29 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             onStepSelect?.(node.id);
           }
         }}
-        css={{
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          background: euiTheme.colors.backgroundBasePlain,
-          border: `1px solid ${borderColor}`,
-          borderRadius: 8,
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          // 16px gutter on the right whenever any meta is present (retry badge,
-          // status icon, or hover action) so the retry badge sits at the
-          // design's 16px inset from the step's right edge.
-          paddingRight: showActions || hasStatusIcon || maxAttempts != null ? 16 : 6,
-          boxShadow: shadow,
-          transition: 'border-color 120ms ease, box-shadow 120ms ease, background 120ms ease',
-          '&:hover': isActive
-            ? undefined
-            : {
-                boxShadow: NODE_SHADOW_MEDIUM,
-              },
-        }}
+        css={[
+          {
+            position: 'relative',
+            width: '100%',
+            height: '100%',
+            background: euiTheme.colors.backgroundBasePlain,
+            border: `1px solid ${borderColor}`,
+            borderRadius,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+            // 16px gutter on the right whenever any meta is present (retry badge,
+            // status icon, or hover action) so the retry badge sits at the
+            // design's 16px inset from the step's right edge.
+            paddingRight: showActions || hasStatusIcon || maxAttempts != null ? 16 : 6,
+            transition: 'border-color 120ms ease, background 120ms ease, box-shadow 120ms ease',
+          },
+          css`
+            &:hover {
+              ${euiShadowXSmall(euiThemeContext)}
+            }
+          `,
+        ]}
       >
         {/* Icon area — colored background pane */}
         <div
@@ -244,6 +262,8 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             display: 'flex',
             alignItems: 'center',
             padding: 12,
+            borderTopLeftRadius: borderRadius,
+            borderBottomLeftRadius: borderRadius,
             transition: 'background 120ms ease',
           }}
         >
@@ -263,7 +283,9 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             {renderStepIcon ? (
               <div
                 css={{
-                  color: isSuccess
+                  color: isActive
+                    ? palette.iconColor
+                    : isSuccess
                     ? statusSuccessColor
                     : isFailed
                     ? statusFailColor
@@ -280,6 +302,8 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
                 color={
                   LOGO_ICONS.has(iconType)
                     ? undefined
+                    : isActive
+                    ? palette.iconColor
                     : isSuccess
                     ? statusSuccessColor
                     : isFailed
@@ -299,7 +323,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
             fontSize: 12,
             fontWeight: 500,
             lineHeight: '24px',
-            color: euiTheme.colors.textParagraph,
+            color: FIGMA_STEP_LABEL_COLOR,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -331,15 +355,14 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
                 flex: '0 0 auto',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 4,
+                gap: 2,
                 paddingLeft: 8,
                 paddingRight: 8,
-                paddingTop: 2,
-                paddingBottom: 2,
+                paddingTop: 4,
+                paddingBottom: 4,
                 borderRadius: 999,
-                background: statusFailBg,
-                border: `1px solid ${euiTheme.colors.borderBaseDanger}`,
-                color: statusFailColor,
+                background: FIGMA_RETRY_BADGE_BG,
+                color: FIGMA_RETRY_BADGE_COLOR,
                 fontFamily: euiTheme.font.family,
                 fontSize: 12,
                 fontWeight: 400,
@@ -347,7 +370,7 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
-              <EuiIcon type="refresh" size="s" color={statusFailColor} aria-hidden />
+              <EuiIcon type="refresh" size="s" color={FIGMA_RETRY_BADGE_COLOR} aria-hidden />
               <span>{maxAttempts}</span>
             </div>
           </EuiToolTip>
