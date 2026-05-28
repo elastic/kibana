@@ -49,14 +49,12 @@ export const syncWatchlistRoute = (
           const secSol = await context.securitySolution;
           const core = await context.core;
 
-          const [coreStart, pluginsStart] = await getStartServices();
           const entitySourcesService = createEntitySourcesService({
             esClient: core.elasticsearch.client.asCurrentUser,
             soClient: getRequestSavedObjectClient(core),
             logger,
             namespace: secSol.getSpaceId(),
-            encryptedSavedObjects: pluginsStart.encryptedSavedObjects,
-            coreElasticsearchClient: coreStart.elasticsearch.client,
+            getStartServices,
           });
 
           await entitySourcesService.syncWatchlist(request.params.watchlist_id);

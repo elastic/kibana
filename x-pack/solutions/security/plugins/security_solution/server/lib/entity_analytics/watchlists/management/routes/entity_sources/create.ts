@@ -114,6 +114,7 @@ export const createEntitySourceRoute = (
                   soClient: getRequestSavedObjectClient(core),
                   logger,
                   namespace,
+                  getStartServices,
                 });
                 await entitySourcesService.syncWatchlist(request.params.watchlist_id);
                 logger.info(

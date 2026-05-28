@@ -7,15 +7,15 @@
 
 import type {
   ElasticsearchClient,
-  IClusterClient,
   Logger,
   SavedObjectsClientContract,
+  StartServicesAccessor,
 } from '@kbn/core/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_client';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
-import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
+import type { StartPlugins } from '../../../../plugin';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import {
   type IntegrationType,
@@ -95,15 +95,13 @@ export const createEntitySourcesService = ({
   soClient,
   logger,
   namespace,
-  encryptedSavedObjects,
-  coreElasticsearchClient,
+  getStartServices,
 }: {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   logger: Logger;
   namespace: string;
-  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
-  coreElasticsearchClient?: IClusterClient;
+  getStartServices: StartServicesAccessor<StartPlugins>;
 }) => {
   const watchlistClient = new WatchlistConfigClient({ esClient, soClient, logger, namespace });
   const descriptorClient = new WatchlistEntitySourceClient({ soClient, namespace });
@@ -117,8 +115,10 @@ export const createEntitySourcesService = ({
   const getSourceEsClient = async (
     source: MonitoringEntitySource
   ): Promise<ElasticsearchClient | undefined> => {
-    const esoClient = encryptedSavedObjects?.getClient();
-    if (!esoClient || !coreElasticsearchClient) return;
+    const [coreStart, pluginsStart] = await getStartServices();
+    const esoClient = pluginsStart.encryptedSavedObjects?.getClient();
+    const coreElasticsearchClient = coreStart.elasticsearch.client;
+    if (!esoClient) return;
 
     try {
       const decrypted = await esoClient.getDecryptedAsInternalUser<EntitySourceApiKeyFields>(
@@ -303,6 +303,7 @@ export const createEntitySourcesService = ({
         .filter((s) => sourceIds.includes(s.id))
         .map(async (source) => {
           const dataEsClient = source.type === 'index' ? await getSourceEsClient(source) : esClient;
+          logger.info(`>>>>> Data ES client for source ${source.id}: ${dataEsClient}`);
           if (!dataEsClient) {
             logger.warn(`[WatchlistSync] Skipping index source ${source.id}: no API key stored.`);
             return;

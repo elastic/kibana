@@ -61,6 +61,7 @@ export const deleteWatchlistRoute = (
               soClient,
               esClient,
               logger,
+              getStartServices,
             });
 
             // Clean up entities from the watchlist index and entity store before

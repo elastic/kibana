@@ -60,9 +60,14 @@ describe('createEntitySourcesService', () => {
   const soClient = savedObjectsClientMock.create();
   const logger = loggingSystemMock.createLogger();
   const namespace = 'default';
+  const mockGetStartServices = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetStartServices.mockResolvedValue([
+      { elasticsearch: { client: {} } },
+      { encryptedSavedObjects: undefined },
+    ]);
 
     mockWatchlistGet.mockResolvedValue({ name: 'VIP Users' });
     mockGetEntitySourceIds.mockResolvedValue(['source-a', 'source-c']);
@@ -111,6 +116,7 @@ describe('createEntitySourcesService', () => {
       soClient,
       logger,
       namespace,
+      getStartServices: mockGetStartServices as never,
     });
 
     await service.syncWatchlist('watchlist-1');
@@ -164,13 +170,19 @@ describe('createEntitySourcesService', () => {
       getClient: () => ({ getDecryptedAsInternalUser: mockEsoClientGet }),
     };
 
+    const getStartServices = jest
+      .fn()
+      .mockResolvedValue([
+        { elasticsearch: { client: mockCoreElasticsearchClient } },
+        { encryptedSavedObjects: mockEncryptedSavedObjects },
+      ]);
+
     const service = createEntitySourcesService({
       esClient,
       soClient,
       logger,
       namespace,
-      encryptedSavedObjects: mockEncryptedSavedObjects as never,
-      coreElasticsearchClient: mockCoreElasticsearchClient as never,
+      getStartServices: getStartServices as never,
     });
 
     await service.syncWatchlist('watchlist-1');
@@ -193,7 +205,13 @@ describe('createEntitySourcesService', () => {
 
   describe('syncAllWatchlists', () => {
     const createService = () =>
-      createEntitySourcesService({ esClient, soClient, logger, namespace });
+      createEntitySourcesService({
+        esClient,
+        soClient,
+        logger,
+        namespace,
+        getStartServices: mockGetStartServices as never,
+      });
 
     it('syncs each watchlist returned by list', async () => {
       mockWatchlistList.mockResolvedValue([
@@ -374,7 +392,13 @@ describe('createEntitySourcesService', () => {
 
   describe('syncWatchlist abort handling', () => {
     const createService = () =>
-      createEntitySourcesService({ esClient, soClient, logger, namespace });
+      createEntitySourcesService({
+        esClient,
+        soClient,
+        logger,
+        namespace,
+        getStartServices: mockGetStartServices as never,
+      });
 
     it('skips cleanup when abort signal fires after plainIndexSync', async () => {
       const controller = new AbortController();

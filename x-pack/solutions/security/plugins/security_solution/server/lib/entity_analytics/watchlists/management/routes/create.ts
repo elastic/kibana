@@ -148,6 +148,7 @@ export const createWatchlistRoute = (
                         soClient,
                         logger,
                         namespace,
+                        getStartServices,
                       });
                       await entitySourcesService.syncWatchlist(watchlistId);
                       logger.info(
