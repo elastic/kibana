@@ -35,5 +35,6 @@
     "@kbn/controls-constants",
     "@kbn/presentation-publishing",
     "@kbn/controls-schemas",
+    "@kbn/code-editor",
   ]
 }

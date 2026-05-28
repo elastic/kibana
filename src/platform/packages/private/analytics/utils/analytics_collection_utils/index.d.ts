@@ -1,0 +1,1 @@
+export { isSyntheticsMonitor } from './src';

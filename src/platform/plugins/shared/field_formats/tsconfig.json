@@ -18,6 +18,8 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/config-schema",
+    "@kbn/discover-utils",
+    "@kbn/esql-utils",
   ],
   "exclude": [
     "target/**/*",
