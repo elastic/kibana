@@ -10,6 +10,7 @@ import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
 import type { EventHit, RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { SearchHit as EsSearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
+  ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   type AttackDiscoveryAlert,
   transformAttackDiscoveryAlertDocumentToApi,
   transformAttackDiscoveryAlertFromApi,
@@ -105,10 +106,31 @@ export const useAttackDetails = (
   const attackId = hit.raw._id ?? '';
   const indexName = hit.raw._index ?? '';
 
+  // `hit.raw._source` is "ready" — usable without firing our own
+  // timeline-details fetch — only when it carries the flat, dotted
+  // attack-discovery keys (e.g. `kibana.alert.attack_discovery.alert_ids`
+  // as a top-level array property) that
+  // `transformAttackDiscoveryAlertDocumentToApi` reads. That's the shape
+  // ES `_source` has on the V1 path (after `useAttackHit`'s
+  // timeline-details fetch) and on the Discover lazy-wrapper path (the
+  // rendered hit already carries the full document).
+  //
+  // A simple presence check (`_source != null`) is not enough: callers
+  // can supply a `_source` that is populated but in the wrong shape, and
+  // the transform reads top-level dotted properties only — it would
+  // silently yield a null `attack` for a wrong-shape source. The canonical
+  // example, exercised by the tests, is timeline's
+  // `eventData.raw._source = ecs`: a nested ECS object such as
+  // `{ kibana: { alert: { attack_discovery: { alert_ids: [...] } } } }`
+  // where `alert_ids` lives at a nested path rather than as the top-level
+  // dotted `kibana.alert.attack_discovery.alert_ids` key. Probing for that
+  // top-level dotted key with `Array.isArray` distinguishes the two
+  // shapes, so wrong-shape sources fall through to the fetch and the
+  // transform sees the keys it expects.
   const hasSource =
     hit.raw._source != null &&
     typeof hit.raw._source === 'object' &&
-    Object.keys(hit.raw._source).length > 0;
+    Array.isArray((hit.raw._source as Record<string, unknown>)[ALERT_ATTACK_DISCOVERY_ALERT_IDS]);
 
   const { isPrimary, cachedSnapshot, publishSnapshot } = useAttackDetailsSubscription(
     indexName,

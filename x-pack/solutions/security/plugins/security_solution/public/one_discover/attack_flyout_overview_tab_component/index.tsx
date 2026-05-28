@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { useHistory } from 'react-router-dom';
@@ -196,6 +197,7 @@ const AttackFlyoutOverviewTabContent = ({
 
   return (
     <div data-test-subj="discover-attack-flyout-overview-tab">
+      <EuiSpacer size="m" />
       <OverviewTab
         hit={hit}
         onShowAttackEntities={onShowAttackEntities}

@@ -224,7 +224,10 @@ describe('useAttackDetails', () => {
   });
 
   describe('when hit.raw._source is already populated', () => {
-    const source = { 'kibana.alert.attack_discovery.title': 'Test attack' };
+    const source = {
+      'kibana.alert.attack_discovery.title': 'Test attack',
+      'kibana.alert.attack_discovery.alert_ids': ['a-1'],
+    };
 
     it('skips useTimelineEventsDetails and resolves loading=false synchronously', () => {
       const { result } = renderHook(() =>
@@ -283,6 +286,25 @@ describe('useAttackDetails', () => {
 
       await expect(result.current.refetch()).resolves.toBeUndefined();
       expect(mockRefetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when hit.raw._source is populated but not in the flat attack-discovery shape (timeline ECS path)', () => {
+    // Timeline passes `eventData.raw._source = ecs` — a nested ECS object,
+    // not the flat-dotted ES `_source` shape the transform expects. The
+    // hook must fall back to the fetch so `transformAttackDiscoveryAlertDocumentToApi`
+    // sees the keys it needs.
+    const ecsLikeSource = {
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+      kibana: { alert: { attack_discovery: { alert_ids: ['nested-id'] } } },
+    };
+
+    it('does NOT skip useTimelineEventsDetails — the populated _source lacks the flat attack-discovery alert_ids key', () => {
+      renderHook(() => useAttackDetails(buildHit('attack-1', '.alerts-default', ecsLikeSource)));
+
+      expect(useTimelineEventsDetails).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: false })
+      );
     });
   });
 
