@@ -43,7 +43,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
         id: connector.id,
         name: connector.name,
         connectorTypeId,
-        isMissingSecrets: false,
+        isMissingSecrets: connector.isMissingSecrets ?? false,
         isDeprecated: false,
       },
     ]);
@@ -54,7 +54,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
   const options: Array<EuiComboBoxOptionOption<string>> = connectors.map((connector) => ({
     label: connector.name,
     value: connector.id,
-    disabled: connector.isMissingSecrets,
+    disabled: connector.isMissingSecrets || connector.isDeprecated,
   }));
 
   const selected: Array<EuiComboBoxOptionOption<string>> = value

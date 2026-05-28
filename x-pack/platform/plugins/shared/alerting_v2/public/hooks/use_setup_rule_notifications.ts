@@ -62,7 +62,13 @@ export const useSetupRuleNotifications = () => {
           });
         } catch (err) {
           if (createdWorkflowId) {
-            await workflowApi.deleteWorkflow(createdWorkflowId).catch(() => {});
+            await workflowApi.deleteWorkflow(createdWorkflowId).catch((deleteErr: unknown) => {
+              const orig = err instanceof Error ? err.message : String(err);
+              const cleanup = deleteErr instanceof Error ? deleteErr.message : String(deleteErr);
+              throw new Error(
+                `${orig}. Workflow ${createdWorkflowId} could not be cleaned up: ${cleanup}. Manual cleanup may be required.`
+              );
+            });
           }
           throw err;
         }

@@ -168,6 +168,7 @@ export const useComposeDiscoverFlyout = ({
       initialBuilderState={initialBuilderState}
       onCreateRule={(payload, ruleNotifications) =>
         createRuleMutation.mutate(payload, {
+          onError: () => closeFlyout(),
           onSuccess: (rule) => {
             const actions = ruleNotifications?.workflows ?? [];
             if (actions.length > 0) {

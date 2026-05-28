@@ -403,7 +403,10 @@ export function ComposeDiscoverFlyout({
   const { run: runYamlParse, cancel: cancelYamlParse } = useDebounceFn((yaml: string) => {
     const result = parseYamlToFormValues(yaml);
     if (result.values) {
-      methods.reset(formValuesFromYamlToCompose(result.values));
+      methods.reset({
+        ...formValuesFromYamlToCompose(result.values),
+        notifications: methods.getValues('notifications'),
+      });
       syncSandbox();
     }
   }, YAML_PARSE_DEBOUNCE_OPTIONS);
@@ -424,7 +427,10 @@ export function ComposeDiscoverFlyout({
         cancelYamlParse();
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
-          const compose = formValuesFromYamlToCompose(result.values);
+          const compose = {
+            ...formValuesFromYamlToCompose(result.values),
+            notifications: methods.getValues('notifications'),
+          };
           methods.reset(compose);
           syncSandbox();
           if (getBreachQuery(compose.query).trim()) {

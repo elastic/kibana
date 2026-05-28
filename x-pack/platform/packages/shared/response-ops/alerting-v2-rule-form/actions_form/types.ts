@@ -26,7 +26,11 @@ export type ActionDraft = ExistingWorkflowActionDraft | InlineWorkflowActionDraf
 
 export type ActionFormValue = ActionDraft[];
 
+const HAS_FILLED_VALUE_RE = /"[^"]+"/;
+
 export const isActionValid = (action: ActionDraft): boolean =>
   action.source === 'existing'
     ? Boolean(action.workflowId)
-    : action.connectorId !== null && action.params.trim() !== '';
+    : action.connectorId !== null &&
+      action.params.trim() !== '' &&
+      HAS_FILLED_VALUE_RE.test(action.params);

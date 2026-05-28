@@ -32,12 +32,15 @@ const buildActionFromTemplate = (templateId: ActionTemplateId): ActionDraft => {
   }
   const stepType = templateId.slice('inline-'.length) as InlineActionStepType;
   const definition = getInlineActionStepDefinition(stepType);
+  if (!definition) {
+    throw new Error(`Unknown inline action step type: ${stepType}`);
+  }
   return {
     id,
     source: 'inline',
-    stepType,
+    stepType: definition.id,
     connectorId: null,
-    params: definition?.paramsTemplate ?? '',
+    params: definition.paramsTemplate,
   };
 };
 
