@@ -10,7 +10,6 @@ import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskResult } from '@kbn/streams-schema';
 import { featureSchema, generatedSignificantEventQuerySchema } from '@kbn/streams-schema';
-import { EMPTY_TOKENS } from '@kbn/streams-ai';
 import { notFound } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -34,11 +33,11 @@ import {
   type MemoryConsolidationTaskParams,
   type MemoryConsolidationTaskResult,
 } from '../../../lib/tasks/task_definitions/memory_consolidation';
-import { resolveConnectorForSignificantEventsDiscovery } from '../../utils/resolve_connector_for_feature';
-import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
-import type { MemoryGenerationResult } from '../../../lib/sig_events/memory_generation';
-import { generateMemory } from '../../../lib/sig_events/memory_generation';
+import {
+  MEMORY_GENERATION_TASK_TYPE,
+  type MemoryGenerationTaskParams,
+} from '../../../lib/tasks/task_definitions/memory_generation';
 
 const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
   const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
@@ -524,6 +523,11 @@ const consolidateMemoryRoute = createServerRoute({
   },
 });
 
+// Schedules a singleton memory generation task (same fixed task ID as the
+// onboarding task uses). Concurrent calls replace rather than queue, which is
+// fine because memory generation is idempotent and best-effort.
+// TODO: Replace this endpoint with a managed workflow once memory generation
+// is migrated to the workflow engine.
 const generateMemoryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/memory/_generate',
   params: z.object({
@@ -537,8 +541,7 @@ const generateMemoryRoute = createServerRoute({
     access: 'internal',
     summary: 'Generate memory from discovery indicators',
     description:
-      'Runs the memory generation reasoning agent to synthesize features and queries into memory pages.',
-    timeout: { idleSocket: 600_000 },
+      'Schedules a background task to synthesize features and queries into memory pages.',
   },
   security: {
     authz: {
@@ -550,19 +553,15 @@ const generateMemoryRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    logger,
-  }): Promise<
-    MemoryGenerationResult & { skipped?: boolean; reason?: string; connectorId?: string }
-  > => {
-    const { inferenceClient, uiSettingsClient, licensing } = await getScopedClients({ request });
+  }): Promise<{ acknowledged: boolean; skipped?: boolean; reason?: string }> => {
+    const { uiSettingsClient, licensing, taskClient } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const memoryEnabled = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
     if (!memoryEnabled) {
       return {
-        streamsProcessed: 0,
-        tokensUsed: EMPTY_TOKENS,
+        acknowledged: false,
         skipped: true,
         reason: 'memory_disabled',
       };
@@ -574,23 +573,17 @@ const generateMemoryRoute = createServerRoute({
     const features = rawFeatures?.filter((f) => f.stream_name === streamName);
     const queries = rawQueries?.map((query) => ({ streamName, query }));
 
-    const connectorId = await resolveConnectorForSignificantEventsDiscovery({
-      searchInferenceEndpoints: server.searchInferenceEndpoints,
+    await taskClient.schedule<MemoryGenerationTaskParams>({
+      task: {
+        type: MEMORY_GENERATION_TASK_TYPE,
+        id: MEMORY_GENERATION_TASK_TYPE,
+        space: '*',
+      },
+      params: { features, queries },
       request,
     });
 
-    const result = await generateMemory(
-      { features, queries },
-      {
-        inferenceClient,
-        connectorId,
-        esClient: server.core.elasticsearch.client.asInternalUser,
-        logger: logger.get('memory_generation'),
-        signal: getRequestAbortSignal(request),
-      }
-    );
-
-    return { ...result, connectorId };
+    return { acknowledged: true };
   },
 });
 
