@@ -28,9 +28,10 @@ const VALIDATION_RUN_FLAGS = new Set(VALIDATION_RUN_STRING_FLAGS.map((flag) => `
 export const VALIDATION_RUN_HELP: FlagHelpItem[] = [
   {
     flag: '--profile [name]',
-    description: 'Validation profile: precommit, quick, agent, branch, pr, full (default: branch)',
+    description:
+      'Validation profile: precommit, quick, agent, branch, pr, prepush, full (default: branch)',
   },
-  { flag: '--scope [scope]', description: 'Scope: staged, local, branch, full' },
+  { flag: '--scope [scope]', description: 'Scope: staged, local, branch, prepush, full' },
   { flag: '--test-mode [mode]', description: 'Test selection mode: related, affected, all' },
   { flag: '--base-ref [git-ref]', description: 'Base revision for branch scope' },
   { flag: '--head-ref [git-ref]', description: 'Head revision for branch scope (default: HEAD)' },
@@ -128,7 +129,7 @@ export const buildValidationCliArgs = ({
     reproductionArgs.push('--downstream', contract.downstream);
   }
 
-  if (contract.scope === 'branch' && resolvedBase) {
+  if ((contract.scope === 'branch' || contract.scope === 'prepush') && resolvedBase) {
     if (resolvedBase.baseRef === 'GITHUB_PR_MERGE_BASE') {
       logArgs.push('--base-ref', '$GITHUB_PR_MERGE_BASE');
     } else {
