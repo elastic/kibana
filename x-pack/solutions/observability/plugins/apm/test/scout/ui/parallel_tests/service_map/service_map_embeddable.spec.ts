@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags, EuiComboBoxWrapper } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
@@ -13,6 +13,7 @@ import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 const APM_DASHBOARD_DATA_VIEW_TITLE = 'traces-apm*,logs-apm*,metrics-apm*';
 
 const { SERVICE_MAP_TEST_SERVICE, SERVICE_MAP_TEST_ENVIRONMENT_STAGING } = testData;
+const COMBO_BOX_LOADING_TIMEOUT = 5_000;
 
 test.describe(
   'Service map embeddable',
@@ -82,13 +83,13 @@ test.describe(
         await expect(
           page.getByRole('heading', { name: 'Create service map panel', level: 2 })
         ).toBeVisible();
-        await page.testSubj.locator('apmServiceMapEditorSaveButton').click();
+        await pageObjects.serviceMapPage.serviceMapEditorSaveButton.click();
       });
 
       await test.step('verify panel was added with the default custom time range', async () => {
         await pageObjects.dashboard.waitForPanelsToLoad(1);
         expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
-        await expect(page.testSubj.locator('apmServiceMapEmbeddable')).toBeVisible();
+        await expect(pageObjects.serviceMapPage.serviceMapEmbeddable).toBeVisible();
         await pageObjects.dashboard.expectTimeRangeBadgeExists();
       });
 
@@ -99,9 +100,7 @@ test.describe(
         // between global setup and this test running.
         await pageObjects.dashboard.openCustomizePanel();
         await pageObjects.dashboard.enableCustomTimeRange();
-        await page.testSubj
-          .locator('customizePanelTimeRangeDatePicker > superDatePickerToggleQuickMenuButton')
-          .click();
+        await pageObjects.dashboard.openDatePickerQuickMenu();
         await pageObjects.dashboard.clickCommonlyUsedTimeRange('Last_24 hours');
         await pageObjects.dashboard.saveCustomizePanel();
         await pageObjects.dashboard.expectTimeRangeBadgeExists();
@@ -117,70 +116,51 @@ test.describe(
           page.getByRole('heading', { name: 'Edit service map', level: 2 })
         ).toBeVisible();
 
-        // wait for combobox `isLoading` to finish
-        // before interaction (see `euiLoadingSpinner` + `state: 'hidden'`).
-        const serviceNameCombo = page.testSubj.locator('apmServiceMapEditorServiceNameComboBox');
-        const environmentCombo = page.testSubj.locator('apmServiceMapEditorEnvironmentComboBox');
-        await serviceNameCombo
-          .locator('.euiLoadingSpinner')
-          .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
-        await environmentCombo
-          .locator('.euiLoadingSpinner')
-          .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+        await expect
+          .poll(() => pageObjects.serviceMapPage.getServiceMapEditorComboBoxLoadingCount(), {
+            timeout: COMBO_BOX_LOADING_TIMEOUT,
+          })
+          .toBe(0);
 
         // Suggestions can be empty under load on cloud/serverless, but the
         // control supports committing typed values via onCreateOption.
-        const serviceNameComboBox = new EuiComboBoxWrapper(
-          page,
-          'apmServiceMapEditorServiceNameComboBox'
+        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSingleOption(
+          SERVICE_MAP_TEST_SERVICE,
+          {
+            useFill: true,
+            settleTimeoutMs: EXTENDED_TIMEOUT,
+          }
         );
-        await serviceNameComboBox.setCustomSingleOption(SERVICE_MAP_TEST_SERVICE, {
-          useFill: true,
-          settleTimeoutMs: EXTENDED_TIMEOUT,
-        });
 
-        // wait for combobox `isLoading` to finish
-        await page.testSubj
-          .locator('apmServiceMapEditorServiceNameComboBox')
-          .locator('.euiLoadingSpinner')
-          .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+        await expect
+          .poll(() => pageObjects.serviceMapPage.getServiceMapEditorComboBoxLoadingCount(), {
+            timeout: COMBO_BOX_LOADING_TIMEOUT,
+          })
+          .toBe(0);
 
-        // wait for combobox `isLoading` to finish
-        await page.testSubj
-          .locator('apmServiceMapEditorEnvironmentComboBox')
-          .locator('.euiLoadingSpinner')
-          .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
-
-        // Select environment from dropdown (the environment combo is not clearable)
-        const environmentInput = page.testSubj
-          .locator('apmServiceMapEditorEnvironmentComboBox')
-          .locator('[data-test-subj="comboBoxInput"]');
-        await environmentInput.click();
-        await page.keyboard.type(SERVICE_MAP_TEST_ENVIRONMENT_STAGING, { delay: 50 });
-        const environmentOption = page.getByRole('option', {
-          name: SERVICE_MAP_TEST_ENVIRONMENT_STAGING,
-        });
-        await environmentOption.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-        await environmentOption.click();
+        await pageObjects.serviceMapPage.selectServiceMapEditorEnvironment(
+          SERVICE_MAP_TEST_ENVIRONMENT_STAGING
+        );
 
         // Add KQL filter matching the staging transaction
-        const kueryInput = page.testSubj.locator('apmServiceMapEditorKueryInput');
-        await kueryInput.fill('transaction.name: "GET /api/staging"');
+        await pageObjects.serviceMapPage.serviceMapEditorKueryInput.fill(
+          'transaction.name: "GET /api/staging"'
+        );
 
-        await page.testSubj.locator('apmServiceMapEditorSaveButton').click();
+        await pageObjects.serviceMapPage.serviceMapEditorSaveButton.click();
       });
 
       await test.step('verify embeddable panel renders service map with connected nodes', async () => {
         await expect(
-          page.testSubj.locator(
-            `serviceMapNodeContextHighlightFrame > serviceMapNode-service-${SERVICE_MAP_TEST_SERVICE}`
+          pageObjects.serviceMapPage.getServiceMapNodeContextHighlightFrame(
+            SERVICE_MAP_TEST_SERVICE
           )
         ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('verify embeddable fills the panel horizontally', async () => {
-        const panel = page.testSubj.locator('embeddablePanel');
-        const embeddable = page.testSubj.locator('apmServiceMapEmbeddable');
+        const panel = pageObjects.serviceMapPage.dashboardEmbeddablePanel;
+        const embeddable = pageObjects.serviceMapPage.serviceMapEmbeddable;
 
         const panelBox = await panel.boundingBox();
         const embeddableBox = await embeddable.boundingBox();
@@ -193,30 +173,25 @@ test.describe(
       });
 
       await test.step('click on a service node and verify popover appears', async () => {
-        const serviceNode = page.testSubj.locator(
-          `serviceMapNode-service-${SERVICE_MAP_TEST_SERVICE}`
+        await pageObjects.serviceMapPage.clickServiceNode(SERVICE_MAP_TEST_SERVICE);
+
+        await expect(pageObjects.serviceMapPage.serviceMapPopover).toBeVisible({ timeout: 5000 });
+        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toHaveText(
+          SERVICE_MAP_TEST_SERVICE
         );
-        await expect(serviceNode).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-        await serviceNode.click();
-
-        const popover = page.testSubj.locator('serviceMapPopover');
-        await expect(popover).toBeVisible({ timeout: 5000 });
-
-        const popoverTitle = page.testSubj.locator('serviceMapPopoverTitle');
-        await expect(popoverTitle).toHaveText(SERVICE_MAP_TEST_SERVICE);
 
         await page.keyboard.press('Escape');
-        await expect(popoverTitle).toBeHidden();
+        await expect(pageObjects.serviceMapPage.serviceMapPopoverTitle).toBeHidden();
       });
 
       await test.step('maximize the Service map panel', async () => {
         await pageObjects.dashboard.maximizePanel();
-        await expect(page.testSubj.locator('apmServiceMapEmbeddable')).toBeVisible();
+        await expect(pageObjects.serviceMapPage.serviceMapEmbeddable).toBeVisible();
       });
 
       await test.step('verify embeddable fills the maximized panel', async () => {
-        const maximizedPanel = page.locator('.dshLayout-isMaximizedPanel');
-        const embeddable = page.testSubj.locator('apmServiceMapEmbeddable');
+        const maximizedPanel = pageObjects.serviceMapPage.maximizedDashboardPanel;
+        const embeddable = pageObjects.serviceMapPage.serviceMapEmbeddable;
 
         const panelBox = await maximizedPanel.boundingBox();
         const embeddableBox = await embeddable.boundingBox();
@@ -239,9 +214,8 @@ test.describe(
       });
 
       await test.step('click View full service map button and verify navigation', async () => {
-        const viewFullMapButton = page.testSubj.locator('serviceMapViewFullMapButton');
-        await expect(viewFullMapButton).toBeVisible();
-        await viewFullMapButton.click();
+        await expect(pageObjects.serviceMapPage.serviceMapViewFullMapButton).toBeVisible();
+        await pageObjects.serviceMapPage.serviceMapViewFullMapButton.click();
 
         await expect(page).toHaveURL(
           new RegExp(`/app/apm/services/${SERVICE_MAP_TEST_SERVICE}/service-map`)
