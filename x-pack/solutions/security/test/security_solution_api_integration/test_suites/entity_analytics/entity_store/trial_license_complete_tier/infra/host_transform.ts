@@ -56,6 +56,9 @@ export async function createDocumentsAndTriggerTransform(
     expect(result).toBe('created');
   }
 
+  // Refresh the index to ensure documents are visible to the transform
+  await es.indices.refresh({ index: dataStream });
+
   // Trigger the transform manually
   await triggerTransform(providerContext, HOST_TRANSFORM_ID);
   await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
