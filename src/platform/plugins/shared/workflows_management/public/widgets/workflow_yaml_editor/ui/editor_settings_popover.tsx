@@ -11,9 +11,12 @@ import type { EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonGroup,
   EuiButtonIcon,
-  EuiCheckbox,
+  EuiForm,
+  EuiFormRow,
   EuiPopover,
   EuiPopoverTitle,
+  EuiSwitch,
+  EuiText,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -31,6 +34,23 @@ interface EditorSettingsPopoverProps {
   onGraphDirectionChange?: (next: LayoutDirection) => void;
 }
 
+const directionOptions = [
+  {
+    id: 'TB',
+    iconType: 'arrowDown',
+    label: i18n.translate('workflows.yamlEditor.editorSettings.directionVertical', {
+      defaultMessage: 'Vertical',
+    }),
+  },
+  {
+    id: 'LR',
+    iconType: 'arrowRight',
+    label: i18n.translate('workflows.yamlEditor.editorSettings.directionHorizontal', {
+      defaultMessage: 'Horizontal',
+    }),
+  },
+] satisfies EuiButtonGroupOptionProps[];
+
 export function EditorSettingsPopover({
   editorRef,
   graphDirection,
@@ -42,36 +62,30 @@ export function EditorSettingsPopover({
   const [showIndentGuides, setShowIndentGuides] = useState(true);
   const [showWhitespace, setShowWhitespace] = useState(false);
 
-  const indentGuidesCheckboxId = useGeneratedHtmlId({ prefix: 'wf-editor-setting-indent-guides' });
-  const whitespaceCheckboxId = useGeneratedHtmlId({ prefix: 'wf-editor-setting-whitespace' });
   const popoverTitleId = useGeneratedHtmlId({ prefix: 'wf-editor-settings-title' });
   const editorSectionId = useGeneratedHtmlId({ prefix: 'wf-editor-settings-editor-section' });
   const directionSectionId = useGeneratedHtmlId({ prefix: 'wf-editor-settings-direction-section' });
 
-  const handleIndentGuidesChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const enabled = e.target.checked;
-      setShowIndentGuides(enabled);
-      editorRef.current?.updateOptions({
-        guides: { indentation: enabled },
-      });
-    },
-    [editorRef]
-  );
+  const handleIndentGuidesChange = useCallback(() => {
+    setShowIndentGuides(!showIndentGuides);
+    editorRef.current?.updateOptions({
+      guides: { indentation: !showIndentGuides },
+    });
+  }, [editorRef, showIndentGuides]);
 
-  const handleWhitespaceChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const enabled = e.target.checked;
-      setShowWhitespace(enabled);
-      editorRef.current?.updateOptions({
-        renderWhitespace: enabled ? 'all' : 'none',
-      });
-    },
-    [editorRef]
-  );
+  const handleWhitespaceChange = useCallback(() => {
+    setShowWhitespace(!showWhitespace);
+    editorRef.current?.updateOptions({
+      renderWhitespace: !showWhitespace ? 'all' : 'none',
+    });
+  }, [editorRef, showWhitespace]);
 
   const label = i18n.translate('workflows.yamlEditor.editorSettings.label', {
     defaultMessage: 'Editor settings',
+  });
+
+  const directionLabel = i18n.translate('workflows.yamlEditor.editorSettings.directionLabel', {
+    defaultMessage: 'Direction',
   });
 
   return (
@@ -100,79 +114,85 @@ export function EditorSettingsPopover({
       <EuiPopoverTitle id={popoverTitleId} paddingSize="s">
         {label}
       </EuiPopoverTitle>
-      <section aria-labelledby={editorSectionId} css={styles.section}>
-        <div id={editorSectionId} css={styles.sectionHeader}>
-          {i18n.translate('workflows.yamlEditor.editorSettings.editorSectionTitle', {
-            defaultMessage: 'Editor',
-          })}
-        </div>
-        <div css={styles.fieldStack}>
-          <EuiCheckbox
-            id={indentGuidesCheckboxId}
-            label={i18n.translate('workflows.yamlEditor.editorSettings.showIndentGuides', {
-              defaultMessage: 'Show indent guides',
-            })}
-            checked={showIndentGuides}
-            onChange={handleIndentGuidesChange}
-          />
-          <EuiCheckbox
-            id={whitespaceCheckboxId}
-            label={i18n.translate('workflows.yamlEditor.editorSettings.showWhitespace', {
-              defaultMessage: 'Show whitespace characters',
-            })}
-            checked={showWhitespace}
-            onChange={handleWhitespaceChange}
-          />
-        </div>
-      </section>
-      {graphDirection && onGraphDirectionChange && (
-        <section aria-labelledby={directionSectionId} css={styles.section}>
-          <div id={directionSectionId} css={styles.sectionHeader}>
-            {i18n.translate('workflows.yamlEditor.editorSettings.directionSectionTitle', {
-              defaultMessage: 'Direction',
+      <EuiForm component="div" css={styles.form}>
+        <section aria-labelledby={editorSectionId} css={styles.section}>
+          <div id={editorSectionId} css={styles.sectionHeader}>
+            {i18n.translate('workflows.yamlEditor.editorSettings.editorSectionTitle', {
+              defaultMessage: 'Editor',
             })}
           </div>
-          <EuiButtonGroup
-            legend={i18n.translate('workflows.yamlEditor.editorSettings.directionLegend', {
-              defaultMessage: 'Graph layout direction',
-            })}
-            options={
-              [
-                {
-                  id: 'TB',
-                  iconType: 'arrowDown',
-                  label: i18n.translate('workflows.yamlEditor.editorSettings.directionVertical', {
-                    defaultMessage: 'Vertical',
-                  }),
+          <EuiFormRow css={styles.checkboxRow}>
+            <EuiSwitch
+              label={
+                <EuiText size="xs">
+                  {i18n.translate('workflows.yamlEditor.editorSettings.showIndentGuides', {
+                    defaultMessage: 'Show indent guides',
+                  })}
+                </EuiText>
+              }
+              labelProps={{
+                style: {
+                  fontWeight: euiTheme.font.weight.medium,
                 },
-                {
-                  id: 'LR',
-                  iconType: 'arrowRight',
-                  label: i18n.translate('workflows.yamlEditor.editorSettings.directionHorizontal', {
-                    defaultMessage: 'Horizontal',
-                  }),
+              }}
+              checked={showIndentGuides}
+              onChange={handleIndentGuidesChange}
+              compressed
+            />
+          </EuiFormRow>
+          <EuiFormRow css={styles.checkboxRow}>
+            <EuiSwitch
+              label={
+                <EuiText size="xs">
+                  {i18n.translate('workflows.yamlEditor.editorSettings.showWhitespace', {
+                    defaultMessage: 'Show whitespace characters',
+                  })}
+                </EuiText>
+              }
+              labelProps={{
+                style: {
+                  fontWeight: euiTheme.font.weight.medium,
                 },
-              ] satisfies EuiButtonGroupOptionProps[]
-            }
-            idSelected={graphDirection}
-            onChange={(id) => onGraphDirectionChange(id as LayoutDirection)}
-            buttonSize="compressed"
-            isIconOnly
-          />
+              }}
+              checked={showWhitespace}
+              onChange={handleWhitespaceChange}
+              compressed
+            />
+          </EuiFormRow>
         </section>
-      )}
+        {graphDirection && onGraphDirectionChange && (
+          <section aria-labelledby={directionSectionId} css={styles.section}>
+            <div id={directionSectionId} css={styles.sectionHeader}>
+              {i18n.translate('workflows.yamlEditor.editorSettings.directionSectionTitle', {
+                defaultMessage: 'Visualization',
+              })}
+            </div>
+            <EuiFormRow label={directionLabel} display="columnCompressed" css={styles.directionRow}>
+              <EuiButtonGroup
+                legend={directionLabel}
+                options={directionOptions}
+                idSelected={graphDirection}
+                onChange={(id) => onGraphDirectionChange(id as LayoutDirection)}
+                buttonSize="compressed"
+                isIconOnly
+              />
+            </EuiFormRow>
+          </section>
+        )}
+      </EuiForm>
     </EuiPopover>
   );
 }
 
 const componentStyles = {
+  form: css({
+    // EuiForm adds a large gap between fieldsets/sections; keep the compact popover rhythm.
+    gap: 0,
+  }),
   section: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: `${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.m}`,
     }),
-  // Small uppercase subdued subheader — replaces the heavy second-level
-  // `EuiPopoverTitle` so the popover reads as one cohesive panel with two
-  // grouped sections rather than two stacked sub-popovers.
   sectionHeader: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontSize: '11px',
@@ -182,10 +202,16 @@ const componentStyles = {
       color: euiTheme.colors.textSubdued,
       marginBottom: euiTheme.size.s,
     }),
-  fieldStack: ({ euiTheme }: UseEuiTheme) =>
+  checkboxRow: ({ euiTheme }: UseEuiTheme) =>
     css({
-      display: 'flex',
-      flexDirection: 'column',
-      gap: euiTheme.size.s,
+      marginBlock: 0,
+      paddingBlock: 0,
+      '& + &': {
+        marginTop: euiTheme.size.s,
+      },
     }),
+  directionRow: css({
+    marginBlock: 0,
+    paddingBlock: 0,
+  }),
 };
