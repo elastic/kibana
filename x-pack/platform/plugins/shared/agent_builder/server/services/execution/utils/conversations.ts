@@ -8,10 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { of, forkJoin, switchMap } from 'rxjs';
-import {
-  type Conversation,
-  type RoundCompleteEvent,
-  type ConversationAction,
+import type {
+  Conversation,
+  RoundCompleteEvent,
+  ConversationAction,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
@@ -89,8 +89,8 @@ export const updateConversation$ = ({
         title,
         rounds: updatedRound,
         state: conversation_state,
-        read: false,
         status: round.status,
+        read: false,
         ...(roundCompletedEvent.data.attachments !== undefined
           ? { attachments: roundCompletedEvent.data.attachments }
           : {}),

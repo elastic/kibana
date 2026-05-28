@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { createInternalError } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -86,11 +87,11 @@ export function registerInternalConversationRoutes({
         read,
       });
 
-      // Do this validation in order to be able to return `read` that is always defined instead of an optional `read` which is in the Conversation type.
+      // Enables `read` to be mandatory in the response and not `read?`.
       if (read !== updatedConversation.read) {
-        // TODO: check what error to throw, there are also x-pack/platform/packages/shared/agent-builder/agent-builder-common/base/errors.ts
-        throw new Error(
-          `Failed to persist read state for conversation ${conversationId}: expected ${read}, got ${updatedConversation.read}`
+        throw createInternalError(
+          `Failed to persist read state for conversation ${conversationId}: expected ${read}, got ${updatedConversation.read}`,
+          { conversationId, expected: read, actual: updatedConversation.read }
         );
       }
 
