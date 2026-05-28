@@ -43,7 +43,7 @@ const ALERT_ATTACHMENT_CONFIG: AttachmentTypeConfig = {
 
 const ALERTS_DEFAULT_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.attachments.alerts.label',
-  { defaultMessage: 'Security Alerts' }
+  { defaultMessage: 'Security alerts' }
 );
 
 const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
