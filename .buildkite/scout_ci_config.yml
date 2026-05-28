@@ -44,6 +44,7 @@ plugins:
     - management
     - maps
     - ml
+    - monitoring
     - navigation
     - observability
     - observability_onboarding
