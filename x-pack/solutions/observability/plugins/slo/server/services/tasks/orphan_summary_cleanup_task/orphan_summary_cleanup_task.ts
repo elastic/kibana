@@ -43,7 +43,7 @@ export class OrphanSummaryCleanupTask {
     taskManager.registerTaskDefinitions({
       [TYPE]: {
         title: 'SLO orphan summary cleanup task',
-        timeout: '3m',
+        timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
