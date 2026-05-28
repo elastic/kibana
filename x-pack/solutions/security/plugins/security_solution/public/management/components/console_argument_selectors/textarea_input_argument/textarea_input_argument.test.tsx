@@ -82,14 +82,18 @@ describe('TextareaInputArgument component', () => {
     });
     const { getByTestId } = render();
 
-    expect(getByTestId('test-openInputButton').getAttribute('aria-label')).toEqual(componentPropsMock.openLabel);
+    expect(getByTestId('test-openInputButton').getAttribute('aria-label')).toEqual(
+      componentPropsMock.openLabel
+    );
     expect(getByTestId('test-selectionDisplay').textContent).toEqual(
       componentPropsMock.noInputEnteredMessage
     );
     expect(getByTestId('test-closeButton').textContent).toEqual(
       componentPropsMock.closePopupButtonLabel
     );
-    expect(getByTestId('test-helpButton').getAttribute('aria-label')).toEqual(componentPropsMock.helpIconLabel);
+    expect(getByTestId('test-helpButton').getAttribute('aria-label')).toEqual(
+      componentPropsMock.helpIconLabel
+    );
     expect(getByTestId('test-title').textContent).toEqual(componentPropsMock.textareaLabel);
     expect((getByTestId('test-textarea') as HTMLTextAreaElement).placeholder).toEqual(
       componentPropsMock.textareaPlaceholderLabel
