@@ -187,6 +187,20 @@ const runLintTsProjects = async (
   };
 };
 
+const runMoonRegeneration = async (): Promise<{ passed: boolean; output: string }> => {
+  const execa = (await import('execa')).default;
+  const result = await execa(
+    process.execPath,
+    ['scripts/regenerate_moon_projects.js', '--update'],
+    { cwd: REPO_ROOT, reject: false }
+  );
+
+  return {
+    passed: result.exitCode === 0,
+    output: [result.stdout, result.stderr].filter(Boolean).join('\n'),
+  };
+};
+
 const runJestTestsDirectly = async (
   testFiles: string[]
 ): Promise<{ testCount: number; passed: boolean; output: string }> => {
@@ -610,6 +624,31 @@ run(
       }
     }
 
+    // ── moon ───────────────────────────────────────────────────────────
+
+    if (flagsReader.boolean('regenerate-moon')) {
+      const moonProgress = startProgress('moon');
+      try {
+        const result = await runMoonRegeneration();
+        if (result.passed) {
+          moonProgress.writeResult(
+            line('moon', '✓', 'projects regenerated', moonProgress.elapsed())
+          );
+        } else {
+          moonProgress.writeResult(line('moon', '✗', 'failed', moonProgress.elapsed()));
+          writeln('');
+          const excerpt = result.output.split('\n').slice(-15);
+          for (const l of excerpt) writeln(`    ${l}`);
+          writeln('    $ node scripts/regenerate_moon_projects.js --update');
+          writeln('');
+          errors.push(new Error('regenerate_moon_projects failed'));
+        }
+      } catch (error) {
+        moonProgress.writeResult(line('moon', '✗', 'failed', moonProgress.elapsed()));
+        errors.push(error instanceof Error ? error : new Error(String(error)));
+      }
+    }
+
     if (errors.length > 0) {
       process.exitCode = 1;
     }
@@ -627,11 +666,19 @@ run(
     `,
     flags: {
       string: [...VALIDATION_RUN_STRING_FLAGS],
-      boolean: ['fix'],
+      boolean: ['fix', 'regenerate-moon'],
       default: {
         fix: true,
+        'regenerate-moon': false,
       },
-      help: [...VALIDATION_RUN_HELP, { flag: '--no-fix', description: 'Disable lint auto-fix' }],
+      help: [
+        ...VALIDATION_RUN_HELP,
+        { flag: '--no-fix', description: 'Disable lint auto-fix' },
+        {
+          flag: '--regenerate-moon',
+          description: 'Run a full Moon project regeneration after the other checks',
+        },
+      ],
     },
   }
 );
