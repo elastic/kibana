@@ -8,6 +8,11 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
+/**
+ * Purpose: Verify map renders in canvas
+ * 
+ * Migration: Migrate to scout. Remove "should not show draw controls" test case
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { canvas, maps } = getPageObjects(['canvas', 'maps']);
   const retry = getService('retry');
