@@ -20,9 +20,9 @@ describe('ExpressionsServerPlugin', () => {
     describe('.registerFunction()', () => {
       test('can register a function', async () => {
         const { setup } = await expressionsPluginMock.createPlugin();
-        expect(setup.getFunctions().add).toBe(undefined);
+        expect((await setup.getFunctions()).add).toBe(undefined);
         setup.registerFunction(add);
-        expect(setup.getFunctions().add.name).toBe('add');
+        expect((await setup.getFunctions()).add.name).toBe('add');
       });
     });
   });

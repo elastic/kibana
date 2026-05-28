@@ -56,21 +56,21 @@ export interface ExpressionsServiceSetup {
    * service - do not mutate that object.
    * @deprecated Use start contract instead.
    */
-  getFunction(name: string, namespace?: string): ReturnType<Executor['getFunction']>;
+  getFunction(name: string, namespace?: string): Promise<ReturnType<Executor['getFunction']>>;
 
   /**
    * Returns POJO map of all registered expression functions, where keys are
    * names of the functions and values are `ExpressionFunction` instances.
    * @deprecated Use start contract instead.
    */
-  getFunctions(namespace?: string): ReturnType<Executor['getFunctions']>;
+  getFunctions(namespace?: string): Promise<ReturnType<Executor['getFunctions']>>;
 
   /**
    * Returns POJO map of all registered expression types, where keys are
    * names of the types and values are `ExpressionType` instances.
    * @deprecated Use start contract instead.
    */
-  getTypes(): ReturnType<Executor['getTypes']>;
+  getTypes(): Promise<ReturnType<Executor['getTypes']>>;
 
   /**
    * Create a new instance of `ExpressionsService`. The new instance inherits
@@ -117,15 +117,18 @@ export interface ExpressionsServiceSetup {
    * passed to all functions that can be used for side-effects.
    */
   registerFunction(
-    functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
+    name: string,
+    functionDefinition: AnyExpressionFunctionDefinition | (() => Promise<AnyExpressionFunctionDefinition>)
   ): void;
 
   registerType(
-    typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
+    name: string,
+    typeDefinition: AnyExpressionTypeDefinition | (() => Promise<AnyExpressionTypeDefinition>)
   ): void;
 
   registerRenderer(
-    definition: AnyExpressionRenderDefinition | (() => AnyExpressionRenderDefinition)
+    name: string,
+    definition: AnyExpressionRenderDefinition | (() => Promise<AnyExpressionRenderDefinition>)
   ): void;
 
   getAllMigrations(): MigrateFunctionsObject;
@@ -190,13 +193,13 @@ export interface ExpressionsServiceStart {
    * instance is an internal representation of the function in Expressions
    * service - do not mutate that object.
    */
-  getFunction(name: string, namespace?: string): ReturnType<Executor['getFunction']>;
+  getFunction(name: string, namespace?: string): Promise<ReturnType<Executor['getFunction']>>;
 
   /**
    * Returns POJO map of all registered expression functions, where keys are
    * names of the functions and values are `ExpressionFunction` instances.
    */
-  getFunctions(namespace?: string): ReturnType<Executor['getFunctions']>;
+  getFunctions(namespace?: string): Promise<ReturnType<Executor['getFunctions']>>;
 
   /**
    * Get a registered `ExpressionRenderer` by its name, which was registered
@@ -204,13 +207,13 @@ export interface ExpressionsServiceStart {
    * instance is an internal representation of the renderer in Expressions
    * service - do not mutate that object.
    */
-  getRenderer(name: string): ReturnType<ExpressionRendererRegistry['get']>;
+  getRenderer(name: string): Promise<ReturnType<ExpressionRendererRegistry['get']>>;
 
   /**
    * Returns POJO map of all registered expression renderers, where keys are
    * names of the renderers and values are `ExpressionRenderer` instances.
    */
-  getRenderers(): ReturnType<ExpressionRendererRegistry['toJS']>;
+  getRenderers(): Promise<ReturnType<ExpressionRendererRegistry['toJS']>>;
 
   /**
    * Get a registered `ExpressionType` by its name, which was registered
@@ -349,19 +352,19 @@ export class ExpressionsService
     }
   }
 
-  public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name, namespace) =>
+  public readonly getFunction: ExpressionsServiceStart['getFunction'] = async (name, namespace) =>
     this.executor.getFunction(name, namespace);
 
-  public readonly getFunctions: ExpressionsServiceStart['getFunctions'] = (namespace) =>
+  public readonly getFunctions: ExpressionsServiceStart['getFunctions'] = async (namespace) =>
     this.executor.getFunctions(namespace);
 
-  public readonly getRenderer: ExpressionsServiceStart['getRenderer'] = (name) => {
+  public readonly getRenderer: ExpressionsServiceStart['getRenderer'] = async (name) => {
     this.assertStart();
 
     return this.renderers.get(name);
   };
 
-  public readonly getRenderers: ExpressionsServiceStart['getRenderers'] = () => {
+  public readonly getRenderers: ExpressionsServiceStart['getRenderers'] = async () => {
     this.assertStart();
 
     return this.renderers.toJS();
@@ -376,6 +379,7 @@ export class ExpressionsService
   public readonly getTypes: ExpressionsServiceStart['getTypes'] = () => this.executor.getTypes();
 
   public readonly registerFunction: ExpressionsServiceSetup['registerFunction'] = (
+    name,
     functionDefinition
   ) => this.executor.registerFunction(functionDefinition);
 

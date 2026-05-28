@@ -28,7 +28,7 @@ describe('Get list of serverside expression functions', () => {
 
     const routerDeps = getMockedRouterDeps();
 
-    routerDeps.expressions.getFunctions.mockReturnValueOnce(mockFuncs);
+    routerDeps.expressions.getFunctions.mockResolvedValueOnce(mockFuncs);
 
     initializeGetFunctionsRoute(routerDeps);
 

@@ -52,10 +52,10 @@ describe('ExpressionsService', () => {
     });
   });
 
-  test('has pre-installed default functions', () => {
+  test('has pre-installed default functions', async () => {
     const expressions = new ExpressionsService();
 
-    expect(typeof expressions.setup().getFunctions().var_set).toBe('object');
+    expect(typeof (await expressions.setup().getFunctions()).var_set).toBe('object');
   });
 
   describe('.fork()', () => {
