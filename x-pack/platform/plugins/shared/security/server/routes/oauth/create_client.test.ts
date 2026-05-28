@@ -20,6 +20,7 @@ import { authenticationServiceMock } from '../../authentication/authentication_s
 import { routeDefinitionParamsMock } from '../index.mock';
 
 const RESOURCE = 'https://test-project.kb.us-central1.gcp.elastic.cloud';
+const PROJECT_ID = 'mock-project-id';
 
 const mcpConfig = {
   mcp: {
@@ -45,10 +46,15 @@ describe('Create OAuth Client route', () => {
     });
   }
 
-  function setup(rawConfig: Record<string, unknown> = mcpConfig) {
+  function setup(
+    rawConfig: Record<string, unknown> = mcpConfig,
+    options: { serverlessProjectId?: string } = {}
+  ) {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create(rawConfig, {
       serverless: true,
     });
+    mockRouteDefinitionParams.serverlessProjectId =
+      'serverlessProjectId' in options ? options.serverlessProjectId : PROJECT_ID;
     const authcMock = authenticationServiceMock.createStart();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authcMock);
 
@@ -87,7 +93,7 @@ describe('Create OAuth Client route', () => {
     expect(response.payload).toEqual({ message: 'test forbidden message' });
   });
 
-  it('injects the configured resource and returns the created client on success', async () => {
+  it('injects the configured resource and serverless project id and returns the created client on success', async () => {
     const mockClient = {
       id: 'client-1',
       resource: RESOURCE,
@@ -106,6 +112,7 @@ describe('Create OAuth Client route', () => {
     expect(oauthMock.createClient).toHaveBeenCalledWith(expect.anything(), {
       client_name: 'Test',
       resource: RESOURCE,
+      project_id: PROJECT_ID,
     });
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(mockClient);
@@ -117,6 +124,14 @@ describe('Create OAuth Client route', () => {
     expect(() =>
       bodySchema.validate({ client_name: 'Test', resource: 'https://attacker.example.com' })
     ).toThrow(/resource/);
+  });
+
+  it('rejects a body-supplied `project_id` at the schema layer', () => {
+    const bodySchema = (routeConfig.validate as any).body as ObjectType;
+
+    expect(() =>
+      bodySchema.validate({ client_name: 'Test', project_id: 'attacker-project' })
+    ).toThrow(/project_id/);
   });
 
   it('overrides any body-supplied `resource` with the configured value as defense-in-depth', async () => {
@@ -135,7 +150,43 @@ describe('Create OAuth Client route', () => {
     expect(oauthMock.createClient).toHaveBeenCalledWith(expect.anything(), {
       client_name: 'Test',
       resource: RESOURCE,
+      project_id: PROJECT_ID,
     });
+  });
+
+  it('overrides any body-supplied `project_id` with the serverless project id as defense-in-depth', async () => {
+    oauthMock.createClient.mockResolvedValue({ id: 'client-1', resource: RESOURCE });
+
+    // Bypass schema validation by handing the handler an "already validated" body
+    // that still contains a `project_id` field; the handler must not honor it.
+    await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({
+        body: { client_name: 'Test', project_id: 'attacker-project' },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(oauthMock.createClient).toHaveBeenCalledWith(expect.anything(), {
+      client_name: 'Test',
+      resource: RESOURCE,
+      project_id: PROJECT_ID,
+    });
+  });
+
+  it('returns 404 when the serverless project id is not configured', async () => {
+    ({ routeHandler, oauthMock } = setup(mcpConfig, { serverlessProjectId: undefined }));
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({
+        body: { client_name: 'Test' },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(404);
+    expect(oauthMock.createClient).not.toHaveBeenCalled();
   });
 
   it('returns 404 when OAuth is not available', async () => {
