@@ -195,16 +195,11 @@ export const ConnectorSelector: React.FC<{}> = () => {
     settings,
   });
 
-  // When the Feature Settings page saves inference settings, immediately refetch so
-  // the model list reflects the admin's change without requiring a page reload.
+  // Refetch immediately when the Feature Settings page saves inference settings so the
+  // model list updates without requiring a page reload.
   useEffect(() => {
-    const handleSettingsSaved = () => {
-      refetch();
-    };
-    window.addEventListener('kibana:inference-settings-saved', handleSettingsSaved);
-    return () => {
-      window.removeEventListener('kibana:inference-settings-saved', handleSettingsSaved);
-    };
+    window.addEventListener('kibana:inference-settings-saved', refetch);
+    return () => window.removeEventListener('kibana:inference-settings-saved', refetch);
   }, [refetch]);
 
   const connectors = useMemo(() => aiConnectors ?? [], [aiConnectors]);
@@ -287,18 +282,13 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
 
-  // When the admin has saved a feature-specific SO assignment the server puts that
-  // connector first in the list. We read it directly from connectors[0] rather than
-  // from initialConnectorId (which runs useDefaultConnector's global-default priority
-  // and may resolve to the global default even when a feature-specific override exists).
+  // The server places the SO-assigned connector first when soEntryFound is true.
+  // Reading connectors[0] directly avoids useDefaultConnector's global-default priority
+  // bias, which would otherwise mask the feature-specific assignment.
   const soAssignedConnectorId = soEntryFound ? connectors[0]?.id : undefined;
 
-  // Track the previously-observed default connector so we can detect admin-initiated
-  // global-default changes mid-session.
   const previousDefaultRef = useRef(defaultConnectorId);
-  // Track the previously-observed SO-assigned connector. Initialized to null (sentinel
-  // meaning "not yet observed") so the first data load always triggers the SO branch
-  // when needed, regardless of what connectors[0] happens to be on first render.
+  // null sentinel: ensures the SO branch fires on the first data load after mount/remount.
   const previousSOAssignedRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -340,13 +330,11 @@ export const ConnectorSelector: React.FC<{}> = () => {
       return;
     }
 
-    // Admin set or changed the feature-specific SO assignment.
-    // The server places the SO-assigned connector first (connectors[0]) when soEntryFound
-    // is true. We compare against connectors[0] directly to avoid useDefaultConnector's
-    // global-default priority masking the actual SO-assigned model.
-    // Fire when:
-    //   a) First data load with an SO entry (previousSOAssigned is null — sentinel), or
-    //   b) Admin changed the assignment mid-session (soAssignedConnectorId changed).
+    // Admin set or changed the feature-specific SO assignment. The server places the
+    // SO-assigned connector first (connectors[0]) when soEntryFound is true, so we read
+    // it directly rather than through useDefaultConnector (which would give the global
+    // default priority and mask the feature-specific assignment). previousSOAssigned is
+    // null on first load (sentinel), so this also fires on fresh mount/remount.
     if (
       soAssignedConnectorId &&
       soAssignedConnectorId !== selectedConnectorId &&

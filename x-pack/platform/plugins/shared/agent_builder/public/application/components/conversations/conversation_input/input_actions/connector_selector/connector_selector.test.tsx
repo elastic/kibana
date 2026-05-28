@@ -260,18 +260,16 @@ describe('ConnectorSelector sync effect', () => {
     expect(selectConnector).not.toHaveBeenCalled();
   });
 
-  it('switches to the SO-assigned connector (connectors[0]) on mount even when the global default matches the stored selection', () => {
-    // This is the primary regression test for the original bug.
-    // Scenario: admin assigned 'B' to Agent Builder in Feature Settings, but the global
-    // GenAI default is still 'A', and the user had 'A' in localStorage.
-    // useDefaultConnector would return 'A' (global default wins its priority check), so
-    // the old code compared 'A' !== 'A' → false and never switched. The fix reads
-    // connectors[0] directly instead, bypassing the global-default priority.
+  it('switches to connectors[0] on mount even when the global default matches the stored selection', () => {
+    // Regression: admin assigned 'B' to Agent Builder, but the global GenAI default is
+    // still 'A' and the user had 'A' in localStorage. useDefaultConnector returns 'A'
+    // (global default wins its priority chain), so checking against initialConnectorId
+    // would compare 'A' !== 'A' → false and never switch. The fix reads connectors[0].
     const connectors = [mkConnector('B'), mkConnector('A')];
     const { selectConnector } = setup({
       connectors,
-      selectedConnector: 'A', // global default and localStorage value
-      defaultConnectorId: 'A', // global GenAI setting
+      selectedConnector: 'A',
+      defaultConnectorId: 'A',
       soEntryFound: true,
       initialConnectorId: 'A', // what useDefaultConnector returns (biased by global default)
     });
@@ -289,9 +287,8 @@ describe('ConnectorSelector sync effect', () => {
     expect(selectConnector).not.toHaveBeenCalled();
 
     // Admin saves a feature-specific assignment for 'B'; the connector list refreshes
-    // with soEntryFound=true and 'B' becomes connectors[0].
+    // with soEntryFound=true and 'B' as connectors[0].
     const updatedConnectors = [mkConnector('B'), mkConnector('A'), mkConnector('saved')];
-    mockUseDefaultConnector.mockReturnValue('B');
     updateContext({ connectors: updatedConnectors, soEntryFound: true });
 
     expect(selectConnector).toHaveBeenCalledWith('B');
