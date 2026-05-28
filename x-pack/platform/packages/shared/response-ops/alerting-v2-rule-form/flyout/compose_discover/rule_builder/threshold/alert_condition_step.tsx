@@ -474,15 +474,22 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
               </EuiFlexItem>
               {thresholdValues.stats.length > 1 && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="trash"
-                    color="danger"
-                    aria-label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.removeStat', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.alertingV2.ruleBuilder.stats.removeStat', {
                       defaultMessage: 'Remove stat',
                     })}
-                    onClick={() => removeStat(idx)}
-                    data-test-subj={`ruleBuilderRemoveStat-${idx}`}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="trash"
+                      color="danger"
+                      aria-label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.removeStat', {
+                        defaultMessage: 'Remove stat',
+                      })}
+                      onClick={() => removeStat(idx)}
+                      data-test-subj={`ruleBuilderRemoveStat-${idx}`}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
@@ -581,16 +588,24 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.alertingV2.ruleBuilder.evaluations.removeEvaluation',
                     { defaultMessage: 'Remove evaluation' }
                   )}
-                  onClick={() => removeEvaluation(idx)}
-                  data-test-subj={`ruleBuilderRemoveEval-${idx}`}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    aria-label={i18n.translate(
+                      'xpack.alertingV2.ruleBuilder.evaluations.removeEvaluation',
+                      { defaultMessage: 'Remove evaluation' }
+                    )}
+                    onClick={() => removeEvaluation(idx)}
+                    data-test-subj={`ruleBuilderRemoveEval-${idx}`}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -729,16 +744,24 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                 )}
                 {thresholdValues.alertConditions.length > 1 && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="trash"
-                      color="danger"
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.alertingV2.ruleBuilder.alertConditions.removeCondition',
                         { defaultMessage: 'Remove condition' }
                       )}
-                      onClick={() => removeCondition(idx)}
-                      data-test-subj={`ruleBuilderRemoveCondition-${idx}`}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType="trash"
+                        color="danger"
+                        aria-label={i18n.translate(
+                          'xpack.alertingV2.ruleBuilder.alertConditions.removeCondition',
+                          { defaultMessage: 'Remove condition' }
+                        )}
+                        onClick={() => removeCondition(idx)}
+                        data-test-subj={`ruleBuilderRemoveCondition-${idx}`}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
