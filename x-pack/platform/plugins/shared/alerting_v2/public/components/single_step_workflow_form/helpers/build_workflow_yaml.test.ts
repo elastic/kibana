@@ -12,6 +12,7 @@ import { buildSingleStepWorkflowYaml, InvalidSingleStepWorkflowError } from './b
 describe('buildSingleStepWorkflowYaml', () => {
   it('builds a valid email workflow YAML', () => {
     const yaml = buildSingleStepWorkflowYaml({
+      id: 't1',
       kind: 'email',
       connectorId: 'my-email-connector',
       params: 'to: "ops@example.com"\nsubject: "Alert"\nmessage: "Body"',
@@ -32,6 +33,7 @@ describe('buildSingleStepWorkflowYaml', () => {
 
   it('builds a valid slack workflow YAML', () => {
     const yaml = buildSingleStepWorkflowYaml({
+      id: 't2',
       kind: 'slack',
       connectorId: 'my-slack-connector',
       params: 'message: "Hello {{ policyId }}"',
@@ -47,6 +49,7 @@ describe('buildSingleStepWorkflowYaml', () => {
 
   it('uses the type label as the workflow name', () => {
     const yaml = buildSingleStepWorkflowYaml({
+      id: 't3',
       kind: 'email',
       connectorId: 'c1',
       params: 'to: ""\nsubject: ""\nmessage: ""',
@@ -56,6 +59,7 @@ describe('buildSingleStepWorkflowYaml', () => {
 
   it('treats empty params as an empty `with` block', () => {
     const yaml = buildSingleStepWorkflowYaml({
+      id: 't4',
       kind: 'email',
       connectorId: 'c1',
       params: '',
@@ -66,6 +70,7 @@ describe('buildSingleStepWorkflowYaml', () => {
   it('throws when the params YAML is malformed', () => {
     expect(() =>
       buildSingleStepWorkflowYaml({
+        id: 't5',
         kind: 'email',
         connectorId: 'c1',
         params: 'to: [unclosed',
@@ -76,6 +81,7 @@ describe('buildSingleStepWorkflowYaml', () => {
   it('throws when params is not an object', () => {
     expect(() =>
       buildSingleStepWorkflowYaml({
+        id: 't6',
         kind: 'email',
         connectorId: 'c1',
         params: '- one\n- two',
@@ -86,6 +92,7 @@ describe('buildSingleStepWorkflowYaml', () => {
   it('throws when no connector is selected', () => {
     expect(() =>
       buildSingleStepWorkflowYaml({
+        id: 't7',
         kind: 'email',
         connectorId: null,
         params: 'to: ""',

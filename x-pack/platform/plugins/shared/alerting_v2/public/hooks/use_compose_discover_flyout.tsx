@@ -18,6 +18,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   SingleStepWorkflowForm,
   createInitialValue,
+  isItemValid,
   type SingleStepWorkflowFormValue,
 } from '../components/single_step_workflow_form';
 import type { RuleApiResponse } from '../services/rules_api';
@@ -68,11 +69,7 @@ export const useComposeDiscoverFlyout = ({
       workflowForm: {
         Component: SingleStepWorkflowForm,
         defaultValue: createInitialValue,
-        isValid: (value: SingleStepWorkflowFormValue) => {
-          if (value.kind === 'unselected') return true;
-          if (value.kind === 'workflow') return Boolean(value.workflowId);
-          return value.connectorId !== null && value.params.trim() !== '';
-        },
+        isValid: (value: SingleStepWorkflowFormValue) => value.every(isItemValid),
       },
       uiActions,
     }),
@@ -183,9 +180,10 @@ export const useComposeDiscoverFlyout = ({
       onCreateRule={(payload, ruleNotifications) =>
         createRuleMutation.mutate(payload, {
           onSuccess: (rule) => {
-            if (ruleNotifications) {
+            const workflows = ruleNotifications?.workflows ?? [];
+            if (workflows.length > 0) {
               setupNotificationsMutation.mutate(
-                { rule, workflow: ruleNotifications.workflow },
+                { rule, workflows },
                 { onSuccess: closeAndRedirect, onError: closeAndRedirect }
               );
             } else {

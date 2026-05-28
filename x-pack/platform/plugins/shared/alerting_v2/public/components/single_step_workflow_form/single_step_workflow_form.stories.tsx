@@ -32,61 +32,60 @@ export default meta;
 
 type Story = StoryObj<typeof SingleStepWorkflowFormStory>;
 
-export const Unselected: Story = {
+export const Empty: Story = {
   args: {
-    initialValue: { kind: 'unselected' },
+    initialValue: [],
   },
 };
 
-export const WorkflowSelected: Story = {
+export const WorkflowItem: Story = {
   args: {
-    initialValue: { kind: 'workflow', workflowId: null },
-  },
-};
-
-export const WorkflowSelectedWithValue: Story = {
-  args: {
-    initialValue: { kind: 'workflow', workflowId: 'singlestep-1' },
+    initialValue: [{ id: 'w1', kind: 'workflow', workflowId: 'singlestep-1' }],
   },
 };
 
 export const SlackEmpty: Story = {
   args: {
-    initialValue: {
-      kind: 'slack',
-      connectorId: null,
-      params: 'message: ""\n',
-    },
+    initialValue: [
+      {
+        id: 's1',
+        kind: 'slack',
+        connectorId: null,
+        params: 'message: ""\n',
+      },
+    ],
   },
 };
 
 export const SlackFilled: Story = {
   args: {
-    initialValue: {
-      kind: 'slack',
-      connectorId: 'slack-ops',
-      params: 'message: "Alert for {{ inputs.policyId }}"\n',
-    },
+    initialValue: [
+      {
+        id: 's1',
+        kind: 'slack',
+        connectorId: 'slack-ops',
+        params: 'message: "Alert for {{ inputs.policyId }}"\n',
+      },
+    ],
   },
 };
 
-export const EmailEmpty: Story = {
+export const MultipleActions: Story = {
   args: {
-    initialValue: {
-      kind: 'email',
-      connectorId: null,
-      params: 'to: ""\nsubject: ""\nmessage: ""\n',
-    },
-  },
-};
-
-export const EmailFilled: Story = {
-  args: {
-    initialValue: {
-      kind: 'email',
-      connectorId: 'email-ops',
-      params:
-        'to: "{{ inputs.policyId }}@example.com"\nsubject: "Alert for {{ inputs.id }}"\nmessage: "{{ inputs.episodes }} episodes"\n',
-    },
+    initialValue: [
+      {
+        id: 'e1',
+        kind: 'email',
+        connectorId: 'email-ops',
+        params: 'to: ""\nsubject: ""\nmessage: ""\n',
+      },
+      {
+        id: 's1',
+        kind: 'slack',
+        connectorId: 'slack-ops',
+        params: 'message: "Alert for {{ inputs.policyId }}"\n',
+      },
+      { id: 'w1', kind: 'workflow', workflowId: 'singlestep-1' },
+    ],
   },
 };

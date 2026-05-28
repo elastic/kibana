@@ -18,9 +18,11 @@ export {
 } from './registry';
 export type { PayloadVariable, SingleStepWorkflowType } from './registry';
 export { SingleStepWorkflowForm, createInitialValue } from './single_step_workflow_form';
+export { isItemValid } from './types';
 export type {
-  ConnectorBackedFormValue,
+  ConnectorBackedItem,
   SingleStepWorkflowFormValue,
+  SingleStepWorkflowItem,
   SingleStepWorkflowKind,
   SingleStepWorkflowTypeId,
 } from './types';

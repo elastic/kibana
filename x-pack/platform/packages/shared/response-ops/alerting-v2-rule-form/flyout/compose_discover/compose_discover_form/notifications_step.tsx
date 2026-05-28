@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import type { ComposeFormValues } from '../compose_form_types';
 
@@ -25,11 +25,6 @@ const notificationsSubtext = i18n.translate(
   }
 );
 
-const createSingleActionLabel = i18n.translate(
-  'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.createSingleActionLabel',
-  { defaultMessage: 'Create action policy' }
-);
-
 interface Props {
   services: RuleFormServices;
 }
@@ -37,15 +32,11 @@ interface Props {
 export const NotificationsStep = ({ services }: Props) => {
   const { watch, setValue } = useFormContext<ComposeFormValues>();
   const notifications = watch('notifications');
-  const enabled = !!notifications;
   const { workflowForm } = services;
   const [touched, setTouched] = useState(false);
-  const isWorkflowInvalid =
-    touched && enabled && !(workflowForm.isValid?.(notifications!.workflow) ?? true);
 
-  const handleCreate = useCallback(() => {
-    setValue('notifications', { workflow: workflowForm.defaultValue() }, { shouldDirty: true });
-  }, [setValue, workflowForm]);
+  const workflows = notifications?.workflows ?? workflowForm.defaultValue();
+  const isWorkflowInvalid = touched && !(workflowForm.isValid?.(workflows) ?? true);
 
   return (
     <>
@@ -58,29 +49,19 @@ export const NotificationsStep = ({ services }: Props) => {
       </EuiText>
       <EuiSpacer size="m" />
 
-      {enabled ? (
+      {workflowForm.supported !== false && (
         <div onBlur={() => setTouched(true)}>
           <Suspense fallback={<EuiLoadingSpinner size="m" />}>
             <workflowForm.Component
-              value={notifications!.workflow}
+              value={workflows}
               onChange={(next) =>
-                setValue('notifications', { workflow: next }, { shouldDirty: true })
+                setValue('notifications', { workflows: next }, { shouldDirty: true })
               }
               isInvalid={isWorkflowInvalid}
             />
           </Suspense>
         </div>
-      ) : workflowForm.supported !== false ? (
-        <EuiButton
-          iconType="plusInCircle"
-          onClick={handleCreate}
-          size="s"
-          color="text"
-          data-test-subj="createSingleActionButton"
-        >
-          {createSingleActionLabel}
-        </EuiButton>
-      ) : null}
+      )}
     </>
   );
 };

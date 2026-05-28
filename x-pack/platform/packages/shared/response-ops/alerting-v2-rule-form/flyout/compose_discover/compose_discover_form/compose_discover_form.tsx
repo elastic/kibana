@@ -105,7 +105,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
       if (state.mode === 'edit') return true;
       const notifs = methods.getValues('notifications');
       if (!notifs) return true;
-      return services?.workflowForm?.isValid?.(notifs.workflow) ?? true;
+      return services?.workflowForm?.isValid?.(notifs.workflows) ?? true;
     },
   },
 };

@@ -64,7 +64,7 @@ export interface WorkflowFormComponentProps<TWorkflow extends object = object> {
 }
 
 export interface RuleNotificationsValue<TWorkflow extends object = object> {
-  workflow: TWorkflow;
+  workflows: TWorkflow;
 }
 
 /**

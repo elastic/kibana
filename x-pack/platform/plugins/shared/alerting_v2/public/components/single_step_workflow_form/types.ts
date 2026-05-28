@@ -6,32 +6,35 @@
  */
 
 export type SingleStepWorkflowTypeId = 'email' | 'slack';
-export type SingleStepWorkflowKind = 'unselected' | 'workflow' | 'slack' | 'email';
+export type SingleStepWorkflowKind = 'workflow' | 'slack' | 'email';
 
-export interface UnselectedWorkflowFormValue {
-  kind: 'unselected';
-}
-
-export interface WorkflowReferenceFormValue {
+export interface WorkflowReferenceItem {
+  id: string;
   kind: 'workflow';
   workflowId: string | null;
 }
 
-export interface SlackWorkflowFormValue {
+export interface SlackItem {
+  id: string;
   kind: 'slack';
   connectorId: string | null;
   params: string;
 }
 
-export interface EmailWorkflowFormValue {
+export interface EmailItem {
+  id: string;
   kind: 'email';
   connectorId: string | null;
   params: string;
 }
 
-export type ConnectorBackedFormValue = SlackWorkflowFormValue | EmailWorkflowFormValue;
+export type ConnectorBackedItem = SlackItem | EmailItem;
 
-export type SingleStepWorkflowFormValue =
-  | UnselectedWorkflowFormValue
-  | WorkflowReferenceFormValue
-  | ConnectorBackedFormValue;
+export type SingleStepWorkflowItem = WorkflowReferenceItem | ConnectorBackedItem;
+
+export type SingleStepWorkflowFormValue = SingleStepWorkflowItem[];
+
+export const isItemValid = (item: SingleStepWorkflowItem): boolean => {
+  if (item.kind === 'workflow') return Boolean(item.workflowId);
+  return item.connectorId !== null && item.params.trim() !== '';
+};
