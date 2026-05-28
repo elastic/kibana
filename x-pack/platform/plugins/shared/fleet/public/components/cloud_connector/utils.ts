@@ -98,9 +98,12 @@ export const isAwsCloudConnectorVars = (
 export function isAwsCredentials(
   credentials: CloudConnectorCredentials
 ): credentials is AwsCloudConnectorCredentials {
-  return (
-    'cloudConnectorId' in credentials || 'roleArn' in credentials || 'externalId' in credentials
-  );
+  // Discriminate by AWS-distinctive keys. Including `cloudConnectorId` here would
+  // misroute Azure/GCP credentials (both also carry `cloudConnectorId` when reusing
+  // an existing connector) through the AWS handler. The selector always includes
+  // `roleArn` for AWS reuse via conditional spread, so id-only reuse still routes
+  // correctly without false-matching the other providers.
+  return 'roleArn' in credentials || 'externalId' in credentials;
 }
 
 export const isAzureCloudConnectorVars = (
