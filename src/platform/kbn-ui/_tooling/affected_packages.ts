@@ -72,7 +72,7 @@ export const getPackageNameFromSourceRoot = (
  * Throws if a dependency cycle is detected.
  */
 export const topologicallySortPackages = (packageNames: string[], kbnUiRoot: string): string[] => {
-  // Read each package's moon.yml once.
+  // Read each packages moon.yml
   const moonData = new Map<string, MoonYml>();
   for (const name of packageNames) {
     moonData.set(
@@ -81,7 +81,7 @@ export const topologicallySortPackages = (packageNames: string[], kbnUiRoot: str
     );
   }
 
-  // Map @kbn/... id → directory name (kbn-ui packages only).
+  // Map @kbn/... id -> directory name (so that its kbn-ui packages only)
   const idToName = new Map<string, string>();
   for (const [name, { id }] of moonData) {
     idToName.set(id, name);
@@ -101,7 +101,6 @@ export const topologicallySortPackages = (packageNames: string[], kbnUiRoot: str
     }
   }
 
-  // Kahn's algorithm — sorted queue maintains alphabetical tie-breaking.
   const queue = packageNames.filter((n) => inDegree.get(n) === 0).sort();
   const sorted: string[] = [];
 
