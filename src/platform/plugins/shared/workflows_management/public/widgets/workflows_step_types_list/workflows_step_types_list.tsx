@@ -36,7 +36,7 @@ const stepTypesListStyles = {
   }),
 };
 
-const getStepTypeLabel = (stepType: string): string => {
+export const getStepTypeLabel = (stepType: string): string => {
   const definition = getBuiltInStepDefinition(stepType);
   if (definition?.label) {
     return definition.label;
