@@ -537,4 +537,230 @@ describe('cleanupOrphanTransforms', () => {
       expect.stringContaining('Failed to stop transform [slo-disabled-slo-1]')
     );
   });
+
+  // The tests below guard against production outages where the task could
+  // delete transforms that are still owned by a live SLO definition.
+  describe('production safety', () => {
+    it('should NOT delete any transforms when the SLO definition lookup fails', async () => {
+      esClient.transform.getTransformStats.mockResolvedValueOnce({
+        count: 2,
+        transforms: [
+          { id: 'slo-my-slo-id-1', state: 'started' },
+          { id: 'slo-summary-my-slo-id-1', state: 'started' },
+        ],
+      } as any);
+
+      soClient.find.mockRejectedValueOnce(new Error('saved objects index unavailable'));
+
+      await expect(
+        cleanupOrphanTransforms(
+          {},
+          { esClient, soClient: soClient as any, logger, abortController }
+        )
+      ).rejects.toThrow('saved objects index unavailable');
+
+      expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
+      expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
+    });
+
+    it('should NOT delete transforms for SLOs whose ids contain numeric segments', async () => {
+      // Guards against the parsing regex stripping a trailing "-<digits>" from
+      // an SLO id like `my-slo-id-42` and then incorrectly classifying the
+      // transform as orphan because the lookup key would not match.
+      esClient.transform.getTransformStats.mockResolvedValueOnce({
+        count: 2,
+        transforms: [
+          { id: 'slo-my-slo-id-42-1', state: 'started' },
+          { id: 'slo-summary-my-slo-id-42-1', state: 'started' },
+        ],
+      } as any);
+
+      soClient.find.mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [
+          { id: 'so-1', attributes: { id: 'my-slo-id-42', revision: 1, enabled: true } },
+        ],
+        page: 1,
+        per_page: 1,
+      } as any);
+
+      await cleanupOrphanTransforms(
+        {},
+        { esClient, soClient: soClient as any, logger, abortController }
+      );
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `slo.attributes.id:(my-slo-id-42)`,
+        })
+      );
+      expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
+      expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
+    });
+
+    it('should NOT touch transforms for ENABLED SLOs regardless of transform state', async () => {
+      esClient.transform.getTransformStats.mockResolvedValueOnce({
+        count: 4,
+        transforms: [
+          { id: 'slo-enabled-slo-1', state: 'started' },
+          { id: 'slo-summary-enabled-slo-1', state: 'indexing' },
+          { id: 'slo-other-slo-1', state: 'stopped' },
+          { id: 'slo-summary-other-slo-1', state: 'failed' },
+        ],
+      } as any);
+
+      soClient.find.mockResolvedValueOnce({
+        total: 2,
+        saved_objects: [
+          { id: 'so-1', attributes: { id: 'enabled-slo', revision: 1, enabled: true } },
+          { id: 'so-2', attributes: { id: 'other-slo', revision: 1, enabled: true } },
+        ],
+        page: 1,
+        per_page: 2,
+      } as any);
+
+      await cleanupOrphanTransforms(
+        {},
+        { esClient, soClient: soClient as any, logger, abortController }
+      );
+
+      expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
+      expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
+    });
+
+    it('should only delete the OLD revision when a single SLO has transforms at multiple revisions', async () => {
+      // Reset/upgrade flow: the SLO has been bumped from revision 1 to 2. The
+      // old-revision transforms must be deleted, but the current ones must
+      // stay running.
+      esClient.transform.getTransformStats.mockResolvedValueOnce({
+        count: 4,
+        transforms: [
+          { id: 'slo-my-slo-1', state: 'started' },
+          { id: 'slo-summary-my-slo-1', state: 'started' },
+          { id: 'slo-my-slo-2', state: 'started' },
+          { id: 'slo-summary-my-slo-2', state: 'started' },
+        ],
+      } as any);
+
+      soClient.find.mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [{ id: 'so-1', attributes: { id: 'my-slo', revision: 2, enabled: true } }],
+        page: 1,
+        per_page: 1,
+      } as any);
+
+      await cleanupOrphanTransforms(
+        {},
+        { esClient, soClient: soClient as any, logger, abortController }
+      );
+
+      expect(esClient.transform.deleteTransform).toHaveBeenCalledTimes(2);
+      const deletedIds = esClient.transform.deleteTransform.mock.calls.map(
+        (call) => (call[0] as { transform_id: string }).transform_id
+      );
+      expect(deletedIds.sort()).toEqual(['slo-my-slo-1', 'slo-summary-my-slo-1']);
+      expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
+    });
+
+    it('should query saved objects across ALL spaces so SLOs in non-default spaces are not deleted', async () => {
+      // A regression that drops `namespaces: [ALL_SPACES_ID]` would cause
+      // every transform owned by SLOs in custom spaces to be classified as
+      // orphan and deleted on the next task run.
+      esClient.transform.getTransformStats.mockResolvedValueOnce({
+        count: 1,
+        transforms: [{ id: 'slo-my-slo-1', state: 'started' }],
+      } as any);
+
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 1,
+      } as any);
+
+      await cleanupOrphanTransforms(
+        {},
+        { esClient, soClient: soClient as any, logger, abortController }
+      );
+
+      expect(soClient.find).toHaveBeenCalledWith(expect.objectContaining({ namespaces: ['*'] }));
+    });
+
+    it('should not delete transforms whose ids match the wildcard but are not parseable SLO transforms', async () => {
+      // Even if a transform name happens to start with `slo-`, we must not
+      // attempt to delete it unless the parser confidently extracts an SLO
+      // id and a revision >= 1. This guards the SO lookup against being
+      // skipped on a page of only-unparseable transforms (which would cause
+      // the loop to never call `find` and therefore never delete anything).
+      esClient.transform.getTransformStats
+        .mockResolvedValueOnce({
+          count: 2,
+          transforms: [{ id: 'slo-some-config' }, { id: 'slo-anything-else' }],
+        } as any)
+        .mockResolvedValueOnce({ count: 0, transforms: [] } as any);
+
+      await cleanupOrphanTransforms(
+        { pageSize: 2 },
+        { esClient, soClient: soClient as any, logger, abortController }
+      );
+
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
+      expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
+    });
+
+    it('should not delete transforms with revision 0 (would not parse, so cannot be matched against any SLO)', async () => {
+      esClient.transform.getTransformStats.mockResolvedValueOnce({
+        count: 2,
+        transforms: [
+          { id: 'slo-my-slo-0', state: 'started' },
+          { id: 'slo-summary-my-slo-0', state: 'started' },
+        ],
+      } as any);
+
+      await cleanupOrphanTransforms(
+        {},
+        { esClient, soClient: soClient as any, logger, abortController }
+      );
+
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
+    });
+
+    it('should not stop transforms that are in a transient non-running state for a disabled SLO', async () => {
+      // States like `stopping` / `failed` are not "running"; trying to stop a
+      // stopping/failed transform is wasteful and could cause noisy warnings
+      // or unexpected side-effects.
+      esClient.transform.getTransformStats.mockResolvedValueOnce({
+        count: 3,
+        transforms: [
+          { id: 'slo-disabled-slo-1', state: 'stopping' },
+          { id: 'slo-summary-disabled-slo-1', state: 'failed' },
+          { id: 'slo-other-disabled-1', state: 'started' },
+        ],
+      } as any);
+
+      soClient.find.mockResolvedValueOnce({
+        total: 2,
+        saved_objects: [
+          { id: 'so-1', attributes: { id: 'disabled-slo', revision: 1, enabled: false } },
+          { id: 'so-2', attributes: { id: 'other-disabled', revision: 1, enabled: false } },
+        ],
+        page: 1,
+        per_page: 2,
+      } as any);
+
+      await cleanupOrphanTransforms(
+        {},
+        { esClient, soClient: soClient as any, logger, abortController }
+      );
+
+      expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
+      expect(esClient.transform.stopTransform).toHaveBeenCalledTimes(1);
+      expect(esClient.transform.stopTransform).toHaveBeenCalledWith(
+        expect.objectContaining({ transform_id: 'slo-other-disabled-1' }),
+        expect.any(Object)
+      );
+    });
+  });
 });
