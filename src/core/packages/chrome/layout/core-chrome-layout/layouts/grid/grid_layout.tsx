@@ -101,7 +101,6 @@ export class GridLayout implements LayoutService {
       http,
       docLinks,
       customBranding,
-      featureFlags,
     };
 
     const GridLayoutContent = React.memo(() => {

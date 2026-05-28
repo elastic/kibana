@@ -15,12 +15,12 @@ import { EuiContextMenuItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
+import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
 import { useIsServerless } from '@kbn/react-env';
 import { css } from '@emotion/react';
 import type { HelpLinks, HelpMenuLinkItem } from './help_menu_links';
 import { buildHelpLinks, toContextMenuItem } from './help_menu_links';
-import { useNavigateToUrl, useIsNextChrome } from './chrome_hooks';
+import { useNavigateToUrl } from './chrome_hooks';
 import { useChromeComponentsDeps } from '../context';
 
 /**
