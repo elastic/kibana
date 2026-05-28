@@ -11,7 +11,14 @@ import type { IRouter, CoreSetup, IUiSettingsClient, KibanaRequest } from '@kbn/
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-import { getCached, setCached, hashKey, L3_TTL_SECONDS, CACHE_SO_TYPE } from '../cache/html_cache';
+import {
+  getCached,
+  setCached,
+  hashKey,
+  L3_TTL_SECONDS,
+  TEMPLATE_TTL_SECONDS,
+  CACHE_SO_TYPE,
+} from '../cache/html_cache';
 import { runEsqlQuery } from '../utils/esql_query';
 import type { EsqlColumn } from '../utils/esql_query';
 
@@ -314,7 +321,8 @@ export function registerGenerateRoute(
           if (sizeLimitExceeded) return;
           if (!passThrough.destroyed) passThrough.end();
           if (accHtml) {
-            setCached(cacheRepo, cacheKey, accHtml, L3_TTL_SECONDS).catch(() => {});
+            const ttl = isTemplatePath ? TEMPLATE_TTL_SECONDS : L3_TTL_SECONDS;
+            setCached(cacheRepo, cacheKey, accHtml, ttl).catch(() => {});
           }
         },
       });

@@ -12,6 +12,7 @@ export const CACHE_SO_TYPE = 'ai_panel_html_cache';
 export const CACHE_INDEX = '.kibana_ai_panel_html_cache';
 
 export const L3_TTL_SECONDS = 7 * 24 * 60 * 60;
+export const TEMPLATE_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 interface CacheAttributes {
   html: string;
