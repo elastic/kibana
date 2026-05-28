@@ -2497,7 +2497,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('alerts should be enriched', () => {
+        describe('@skipInServerlessMKI alerts should be enriched', () => {
           before(async () => {
             await esArchiver.load(
               'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
@@ -2570,7 +2570,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('with asset criticality', () => {
+        describe('@skipInServerlessMKI with asset criticality', () => {
           before(async () => {
             await esArchiver.load(
               'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
