@@ -92,7 +92,6 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
         name: i18n.translate('xpack.fleet.collectors.table.versionColumn', {
           defaultMessage: 'Version',
         }),
-        // TODO not implemented yet, waiting for backend to populate the field
         render: (_: unknown, collector: Agent) => {
           if (!collector.pipeline_config) return '-';
           return (
