@@ -24,9 +24,13 @@ import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { LOOKUP_INDEX_RECREATE_ROUTE } from '@kbn/esql-types';
 
-jest.mock('@kbn/esql-utils', () => ({
-  getESQLAdHocDataview: jest.fn(),
-}));
+jest.mock('@kbn/esql-utils', () => {
+  const actual = jest.requireActual('@kbn/esql-utils');
+  return {
+    ...actual,
+    getESQLAdHocDataview: jest.fn(),
+  };
+});
 
 describe('IndexUpdateService', () => {
   let http: HttpStart;
@@ -68,7 +72,7 @@ describe('IndexUpdateService', () => {
     it('emits ESQL query with metadata once the index is created', async () => {
       service.setIndexName('my-index');
       service.setIndexCreated(true);
-      service.setQstr('200');
+      service.setFilterQuery({ query: '200', language: 'kuery' });
       service.setSort([['@timestamp' as any, 'desc']]);
 
       const query = await firstValueFrom(service.esqlQuery$);
@@ -80,7 +84,7 @@ describe('IndexUpdateService', () => {
 
     it('emits Discover ESQL query without metadata', async () => {
       service.setIndexName('logs-*');
-      service.setQstr('host.name: "test"');
+      service.setFilterQuery({ query: 'host.name: "test"', language: 'kuery' });
 
       const query = await firstValueFrom(service.esqlDiscoverQuery$);
 

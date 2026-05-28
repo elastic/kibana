@@ -31,14 +31,19 @@ export const QueryBar = ({
   const KQLComponent = kql.QueryStringInput;
   const dataView = useObservable(indexUpdateService.dataView$);
   const esqlDiscoverQuery = useObservable(indexUpdateService.esqlDiscoverQuery$, '');
-  const searchQuery = useObservable(indexUpdateService.qstr$, '');
+  const filterQuery = useObservable<Query>(indexUpdateService.filterQuery$, {
+    query: '',
+    language: 'kuery',
+  });
   const isIndexCreated = useObservable(
     indexUpdateService.indexCreated$,
     indexUpdateService.isIndexCreated()
   );
   const indexName = useObservable(indexUpdateService.indexName$, null);
 
-  const [kqlQuery, setKqlQuery] = useState<string>('');
+  const [kqlQuery, setKqlQuery] = useState<Query>({ query: '', language: 'kuery' });
+
+  const indexPatterns = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
   const discoverLocator = useMemo(() => {
     return share?.url.locators.get('DISCOVER_APP_LOCATOR');
@@ -57,7 +62,9 @@ export const QueryBar = ({
 
   const openInDiscover = useCallback(
     (e: React.MouseEvent) => {
-      indexEditorTelemetryService.trackQueryThisIndexClicked(searchQuery);
+      indexEditorTelemetryService.trackQueryThisIndexClicked(
+        typeof filterQuery.query === 'string' ? filterQuery.query : ''
+      );
 
       // If onOpenIndexInDiscover is provided, we let that handler to manage the navigation to Discover
       // If not, the button href will be executed
@@ -69,7 +76,7 @@ export const QueryBar = ({
     },
     [
       indexEditorTelemetryService,
-      searchQuery,
+      filterQuery.query,
       onOpenIndexInDiscover,
       indexName,
       esqlDiscoverQuery,
@@ -89,20 +96,15 @@ export const QueryBar = ({
           disableLanguageSwitcher
           disableAutoFocus
           autoSubmit
-          indexPatterns={[dataView]}
+          indexPatterns={indexPatterns}
           bubbleSubmitEvent={false}
-          query={{
-            query: kqlQuery,
-            language: 'kuery',
-          }}
+          query={kqlQuery}
           placeholder={i18n.translate('indexEditor.queryBar.placeholder', {
             defaultMessage: 'Filter your data using KQL',
           })}
-          onChange={(newQuery: Query) => {
-            setKqlQuery(newQuery.query as string);
-          }}
+          onChange={setKqlQuery}
           onSubmit={(newQuery: Query) => {
-            indexUpdateService.setQstr(newQuery.query as string);
+            indexUpdateService.setFilterQuery(newQuery);
           }}
           appName="esqlIndexEditor"
           dataTestSubj="indexEditorQueryBar"

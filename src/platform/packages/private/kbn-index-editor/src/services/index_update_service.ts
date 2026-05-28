@@ -49,9 +49,10 @@ import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { SortOrder } from '@kbn/unified-data-table';
 import { esql } from '@elastic/esql';
 import type { ESQLOrderExpression } from '@elastic/esql/types';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { convertQueryToESQLExpression, getESQLAdHocDataview } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import type { Query } from '@kbn/es-query';
 import {
   LOOKUP_INDEX_CREATE_ROUTE,
   LOOKUP_INDEX_PRIVILEGES_ROUTE,
@@ -134,10 +135,10 @@ export class IndexUpdateService {
   public readonly indexName$: Observable<string | null> = this._indexName$.asObservable();
 
   /** User input query */
-  private readonly _qstr$ = new BehaviorSubject<string>('');
-  public readonly qstr$: Observable<string> = this._qstr$.asObservable();
-  public setQstr(queryString: string) {
-    this._qstr$.next(queryString);
+  private readonly _filterQuery$ = new BehaviorSubject<Query>({ query: '', language: 'kuery' });
+  public readonly filterQuery$: Observable<Query> = this._filterQuery$.asObservable();
+  public setFilterQuery(filterQuery: Query) {
+    this._filterQuery$.next(filterQuery);
   }
 
   /** User sort */
@@ -213,16 +214,16 @@ export class IndexUpdateService {
   public readonly esqlQuery$: Observable<string> = combineLatest([
     this._indexCreated$,
     this._indexName$,
-    this._qstr$,
+    this._filterQuery$,
     this._sortOrder$,
   ]).pipe(
     skipWhile(([indexCreated, indexName]) => {
       return !indexCreated || !indexName;
     }),
-    map(([indexCreated, indexName, qstr, sortOrder]) => {
+    map(([indexCreated, indexName, filterQuery, sortOrder]) => {
       return this._buildESQLQuery({
         indexName: indexName!,
-        qstr,
+        filterQuery,
         includeMetadata: true,
         sortOrder,
       });
@@ -232,24 +233,24 @@ export class IndexUpdateService {
   // ESQL query used to build the link to Discover, it does not include metadata fields
   public readonly esqlDiscoverQuery$: Observable<string | undefined> = combineLatest([
     this._indexName$,
-    this._qstr$,
+    this._filterQuery$,
     this._sortOrder$,
   ]).pipe(
-    map(([indexName, qstr, sortOrder]) => {
+    map(([indexName, filterQuery, sortOrder]) => {
       if (indexName) {
-        return this._buildESQLQuery({ indexName, qstr, includeMetadata: false, sortOrder });
+        return this._buildESQLQuery({ indexName, filterQuery, includeMetadata: false, sortOrder });
       }
     })
   );
 
   private _buildESQLQuery({
     indexName,
-    qstr,
+    filterQuery,
     includeMetadata,
     sortOrder,
   }: {
     indexName: string;
-    qstr: string | null;
+    filterQuery: Query;
     includeMetadata: boolean;
     sortOrder?: SortOrder[];
   }): string {
@@ -257,8 +258,9 @@ export class IndexUpdateService {
       ? esql`FROM ${indexName} METADATA _id, _source`
       : esql`FROM ${indexName}`;
 
-    if (qstr) {
-      query.pipe`WHERE KQL(${qstr})`;
+    const filterExpression = convertQueryToESQLExpression(filterQuery);
+    if (filterExpression) {
+      query.where(filterExpression);
     }
 
     query.pipe`LIMIT ${DOCS_PER_FETCH}`;
@@ -1077,7 +1079,7 @@ export class IndexUpdateService {
     this._actions$.complete();
     this._pendingColumnsToBeSaved$.complete();
     this._indexCreated$.complete();
-    this._qstr$.complete();
+    this._filterQuery$.complete();
     this._refreshSubject$.complete();
     this._exitAttemptWithUnsavedChanges$.complete();
     this.data.dataViews.clearCache();
