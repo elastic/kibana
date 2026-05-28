@@ -18,6 +18,9 @@ import type { CommandName } from 'just-bash';
  *  - ln, readlink — symlinks aren't persisted in the workspace document schema,
  *    so they'd be silently dropped on flush. Footgun; re-enable when symlink
  *    persistence is designed.
+ *  - tar — pulls in just-bash's optional native deps (`node-liblzma` LGPL-3.0,
+ *    `@mongodb-js/zstd`) for compressed-archive support. Disabled until we
+ *    decide to take those deps; agents can still gunzip/gzip plain streams.
  */
 export const ALLOWED_BASH_COMMANDS: readonly CommandName[] = [
   'alias',
@@ -81,7 +84,6 @@ export const ALLOWED_BASH_COMMANDS: readonly CommandName[] = [
   'strings',
   'tac',
   'tail',
-  'tar',
   'tee',
   'time',
   'timeout',

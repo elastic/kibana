@@ -23,6 +23,10 @@ const EROFS = (op: string, path: string) =>
 const DEFAULT_FILE_MODE = 0o644;
 const DEFAULT_DIR_MODE = 0o755;
 
+// The underlying volumes don't track real mtimes; we surface a stable sentinel
+// so `stat()`/`lstat()` are deterministic between calls.
+const SYNTHETIC_MTIME = new Date(0);
+
 const encoder = new TextEncoder();
 
 const entryToString = (entry: FileEntry): string =>
@@ -112,7 +116,7 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
         isSymbolicLink: false,
         mode: DEFAULT_FILE_MODE,
         size: entryBytes(fileEntry).length,
-        mtime: new Date(),
+        mtime: SYNTHETIC_MTIME,
       };
     }
     if (await this.volume.exists(path)) {
@@ -122,7 +126,7 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
         isSymbolicLink: false,
         mode: DEFAULT_DIR_MODE,
         size: 0,
-        mtime: new Date(),
+        mtime: SYNTHETIC_MTIME,
       };
     }
     throw new Error(`ENOENT: no such file or directory, ${op} '${path}'`);
