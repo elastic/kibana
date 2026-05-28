@@ -12,6 +12,7 @@ plugins:
     - cloud_security_posture
     - console
     - contentManagementExamples
+    - cross_cluster_replication
     - custom_branding
     - dashboard
     - dashboard_markdown
@@ -70,6 +71,7 @@ plugins:
     - upgrade_assistant
     - uptime
     - ux
+    - watcher
     - workflows_extensions
     - workflows_management
   disabled:
