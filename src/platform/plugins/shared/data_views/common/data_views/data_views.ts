@@ -366,10 +366,6 @@ export class DataViewsService {
   private dataViewLazyCache: Map<string, Promise<DataViewLazy>>;
 
   /**
-   * Can the user save advanced settings?
-   */
-  private getCanSaveAdvancedSettings: () => Promise<boolean>;
-  /**
    * Can the user save data views?
    */
   public getCanSave: () => Promise<boolean>;
@@ -388,7 +384,6 @@ export class DataViewsService {
       onNotification,
       onError,
       getCanSave = () => Promise.resolve(false),
-      getCanSaveAdvancedSettings,
       scriptedFieldsEnabled,
     } = deps;
     this.apiClient = apiClient;
@@ -398,7 +393,6 @@ export class DataViewsService {
     this.onNotification = onNotification;
     this.onError = onError;
     this.getCanSave = getCanSave;
-    this.getCanSaveAdvancedSettings = getCanSaveAdvancedSettings;
 
     this.dataViewCache = new Map();
     this.dataViewLazyCache = new Map();
@@ -557,6 +551,7 @@ export class DataViewsService {
   };
 
   /**
+   * This appears to be just be used in tsvb
    * Get default index pattern
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
@@ -565,7 +560,6 @@ export class DataViewsService {
     if (defaultIndexPatternId) {
       return await this.get(defaultIndexPatternId, displayErrors);
     }
-
     return null;
   };
 
@@ -573,8 +567,8 @@ export class DataViewsService {
    * Get default index pattern id
    */
   getDefaultId = async (): Promise<string | null> => {
-    const defaultIndexPatternId = await this.config.get<string | null>(DEFAULT_DATA_VIEW_ID);
-    return defaultIndexPatternId ?? null;
+    const defaultId = await this.config.get<string | null>(DEFAULT_DATA_VIEW_ID);
+    return defaultId ?? null;
   };
 
   /**
@@ -1251,7 +1245,7 @@ export class DataViewsService {
   async createAndSaveDataViewLazy(spec: DataViewSpec, overwrite = false) {
     const dataViewLazy = await this.createFromSpecLazy(spec);
     await this.createSavedObject(dataViewLazy, overwrite);
-    await this.setDefault(dataViewLazy.id!);
+    // await this.setDefault(dataViewLazy.id!);
     return dataViewLazy;
   }
 
@@ -1271,7 +1265,7 @@ export class DataViewsService {
   ) {
     const dataView = await this.createFromSpec(spec, skipFetchFields, displayErrors);
     await this.createSavedObject(dataView, overwrite);
-    await this.setDefault(dataView.id!);
+    // await this.setDefault(dataView.id!);
     return dataView;
   }
 
@@ -1429,33 +1423,29 @@ export class DataViewsService {
   }
 
   private async getDefaultDataViewId() {
-    const patterns = await this.getIdsWithTitle();
-    let defaultId: string | null = await this.getDefaultId();
-    const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
-
-    if (defaultId && !exists) {
-      if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.remove(DEFAULT_DATA_VIEW_ID);
-      }
-
-      defaultId = null;
+    if (!this.savedObjectsCache) {
+      await this.refreshSavedObjectsCache();
     }
-
-    if (!defaultId && patterns.length >= 1 && (await this.hasUserDataView().catch(() => true))) {
-      defaultId = patterns[0].id;
-      if (await this.getCanSaveAdvancedSettings()) {
-        await this.config.set(DEFAULT_DATA_VIEW_ID, defaultId);
-      }
+    if (!this.savedObjectsCache || this.savedObjectsCache.length === 0) {
+      return null;
     }
-
-    return defaultId;
+    const configuredDefaultId = await this.getDefaultId();
+    if (configuredDefaultId) {
+      const exists = this.savedObjectsCache.some((obj) => obj.id === configuredDefaultId);
+      if (exists) return configuredDefaultId;
+    }
+    const sorted = [...this.savedObjectsCache].sort(
+      (a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+    );
+    return sorted[0]?.id ?? null;
   }
 
   /**
    * Returns whether a default data view exists.
    */
   async defaultDataViewExists() {
-    return !!(await this.getDefaultDataViewId());
+    const defaultId = await this.getDefaultDataViewId();
+    return Boolean(defaultId);
   }
 
   /**
