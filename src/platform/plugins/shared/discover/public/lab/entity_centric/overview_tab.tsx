@@ -170,11 +170,7 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
       // section adornment and the `accent`-colored refresh affordance below
       // (canonical EUI signal for AI-generated content).
       css={css`
-        background: linear-gradient(
-          135deg,
-          ${euiTheme.colors.backgroundBaseAccent} 0%,
-          ${euiTheme.colors.backgroundLightAccent} 100%
-        );
+        background-color: ${euiTheme.colors.backgroundLightAccent};
         border-color: ${euiTheme.colors.borderBaseAccent};
       `}
       data-test-subj="entityCentricLabEntitySummaryCard"
