@@ -45,7 +45,7 @@ export const EMULATION_LOGS_INDEX_TEMPLATE = deepFreeze<IndicesPutIndexTemplateR
       'index.lifecycle.name': EMULATION_LOGS_ILM_POLICY_NAME,
     },
     mappings: {
-      dynamic: false,
+      dynamic: 'runtime',
       properties: {
         '@timestamp': { type: 'date' },
         event: {
@@ -60,13 +60,70 @@ export const EMULATION_LOGS_INDEX_TEMPLATE = deepFreeze<IndicesPutIndexTemplateR
         process: {
           properties: {
             name: { type: 'keyword' },
+            pid: { type: 'long' },
+            entity_id: { type: 'keyword' },
+            executable: { type: 'keyword' },
             command_line: { type: 'wildcard' },
-            parent: { properties: { name: { type: 'keyword' } } },
+            working_directory: { type: 'keyword' },
+            args: { type: 'keyword' },
+            parent: {
+              properties: {
+                name: { type: 'keyword' },
+                pid: { type: 'long' },
+                entity_id: { type: 'keyword' },
+              },
+            },
           },
         },
         host: { properties: { id: { type: 'keyword' }, name: { type: 'keyword' }, os: { properties: { type: { type: 'keyword' } } } } },
         user: { properties: { name: { type: 'keyword' } } },
         agent: { properties: { type: { type: 'keyword' } } },
+        file: {
+          properties: {
+            name: { type: 'keyword' },
+            path: { type: 'keyword' },
+            extension: { type: 'keyword' },
+          },
+        },
+        network: {
+          properties: {
+            direction: { type: 'keyword' },
+            transport: { type: 'keyword' },
+          },
+        },
+        destination: {
+          properties: {
+            ip: { type: 'ip' },
+            port: { type: 'long' },
+            domain: { type: 'keyword' },
+          },
+        },
+        source: {
+          properties: {
+            ip: { type: 'ip' },
+            port: { type: 'long' },
+          },
+        },
+        dns: {
+          properties: {
+            question: {
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        registry: {
+          properties: {
+            path: { type: 'keyword' },
+            data: {
+              properties: {
+                strings: { type: 'keyword' },
+              },
+            },
+          },
+        },
         kibana: {
           properties: {
             alert: {
