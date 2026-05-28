@@ -214,6 +214,61 @@ describe('Case View Attachments tab', () => {
     expect(screen.getByTestId('case-view-attachment-badge-security.alert')).toHaveTextContent('3');
   });
 
+  it('renders a "no results found" empty state when searching and nothing matches', () => {
+    useGetCaseFileStatsMock.mockReturnValue({ data: { total: 0 } });
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        searchTerm="foobar"
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    const emptyPrompt = screen.getByTestId('case-view-attachments-no-search-results');
+    expect(emptyPrompt).toBeInTheDocument();
+    expect(emptyPrompt).toHaveTextContent('No results found');
+    expect(emptyPrompt).toHaveTextContent('foobar');
+    expect(screen.queryByTestId('case-view-attachment-accordion-file')).not.toBeInTheDocument();
+  });
+
+  it('does not render the empty state when there is no search term, even if everything is empty', () => {
+    useGetCaseFileStatsMock.mockReturnValue({ data: { total: 0 } });
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    expect(screen.queryByTestId('case-view-attachments-no-search-results')).not.toBeInTheDocument();
+  });
+
+  it('does not render the empty state when search matches at least one section', () => {
+    useGetCaseFileStatsMock.mockReturnValue({ data: { total: 1 } });
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        searchTerm="elastic"
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    expect(screen.queryByTestId('case-view-attachments-no-search-results')).not.toBeInTheDocument();
+    expect(screen.getByTestId('case-view-attachment-accordion-file')).toBeInTheDocument();
+  });
+
   it('renders accordions in alphabetical order by display name', () => {
     const unifiedAttachmentTypeRegistry = buildRegistry();
     // 2 alerts + 1 event so all three registry-driven accordions render

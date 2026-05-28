@@ -52,7 +52,11 @@ describe('Case view helpers', () => {
     });
 
     it('counts a legacy alert with an array of ids by length', () => {
-      const bulk = { ...alertComment, alertId: ['a-1', 'a-2', 'a-3'], index: ['i-1', 'i-2', 'i-3'] };
+      const bulk = {
+        ...alertComment,
+        alertId: ['a-1', 'a-2', 'a-3'],
+        index: ['i-1', 'i-2', 'i-3'],
+      };
       expect(getAttachmentItemCount(bulk)).toBe(3);
     });
 

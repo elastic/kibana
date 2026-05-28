@@ -281,3 +281,16 @@ export const ERROR_CHANGING_TEMPLATE = i18n.translate(
     defaultMessage: 'Error changing template',
   }
 );
+
+export const NO_SEARCH_RESULTS_TITLE = i18n.translate(
+  'xpack.cases.caseView.attachments.noSearchResults.title',
+  {
+    defaultMessage: 'No results found',
+  }
+);
+
+export const NO_SEARCH_RESULTS_BODY = (searchTerm: string) =>
+  i18n.translate('xpack.cases.caseView.attachments.noSearchResults.body', {
+    values: { searchTerm },
+    defaultMessage: 'No attachments match "{searchTerm}".',
+  });

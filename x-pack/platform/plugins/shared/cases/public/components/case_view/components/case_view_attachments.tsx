@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFieldSearch, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFieldSearch, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
@@ -17,10 +17,12 @@ import { SEARCH_PLACEHOLDER } from '../../actions/translations';
 import { CaseViewAttachButton } from './case_view_attach_button';
 import { CaseViewTabs } from '../case_view_tabs';
 import { CaseViewObservables } from './case_view_observables';
+import { useCaseObservables } from '../use_case_observables';
 import type { OnUpdateFields } from '../types';
 import { AttachmentAccordion } from './attachment_accordion';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 import { getAttachmentItemCount } from './helpers';
+import { NO_SEARCH_RESULTS_TITLE, NO_SEARCH_RESULTS_BODY } from '../translations';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;
@@ -72,6 +74,18 @@ export const CaseViewAttachments = ({
   // Observables stays hardcoded: there's no other entry point to add observables
   // to a case, so the accordion must be visible even when the count is 0.
   const showObservables = observablesAuthorized && isObservablesFeatureEnabled;
+  const { observables: filteredObservables, isLoading: isLoadingObservables } = useCaseObservables(
+    caseData,
+    searchTerm
+  );
+
+  const showNoResults = useMemo(
+    () =>
+      Boolean(searchTerm) &&
+      attachmentSections.length === 0 &&
+      (!showObservables || filteredObservables.length === 0),
+    [searchTerm, attachmentSections.length, showObservables, filteredObservables.length]
+  );
 
   return (
     <>
@@ -96,21 +110,32 @@ export const CaseViewAttachments = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <EuiFlexGroup direction="column" gutterSize="m">
-          {attachmentSections.map(({ id, displayName, count, Children }) => (
-            <AttachmentAccordion key={id} id={id} title={displayName} count={count}>
-              <Children caseData={caseData} searchTerm={searchTerm} />
-            </AttachmentAccordion>
-          ))}
-          {showObservables && (
-            <CaseViewObservables
-              isLoading={false}
-              caseData={caseData}
-              searchTerm={searchTerm}
-              onUpdateField={onUpdateField}
-            />
-          )}
-        </EuiFlexGroup>
+        {showNoResults ? (
+          <EuiEmptyPrompt
+            data-test-subj="case-view-attachments-no-search-results"
+            iconType="search"
+            titleSize="xs"
+            title={<h3>{NO_SEARCH_RESULTS_TITLE}</h3>}
+            body={<p>{NO_SEARCH_RESULTS_BODY(searchTerm ?? '')}</p>}
+          />
+        ) : (
+          <EuiFlexGroup direction="column" gutterSize="m">
+            {attachmentSections.map(({ id, displayName, count, Children }) => (
+              <AttachmentAccordion key={id} id={id} title={displayName} count={count}>
+                <Children caseData={caseData} searchTerm={searchTerm} />
+              </AttachmentAccordion>
+            ))}
+            {showObservables && (
+              <CaseViewObservables
+                caseData={caseData}
+                observables={filteredObservables}
+                isLoading={isLoadingObservables}
+                searchTerm={searchTerm}
+                onUpdateField={onUpdateField}
+              />
+            )}
+          </EuiFlexGroup>
+        )}
       </EuiFlexItem>
     </>
   );
