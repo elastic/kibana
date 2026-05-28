@@ -1031,7 +1031,6 @@ describe('saveKibanaAssetsRefs', () => {
   beforeEach(() => {
     soClient.get.mockReset();
     soClient.update.mockReset();
-    (soClient.getCurrentNamespace as jest.Mock).mockReturnValue('my-space');
   });
 
   it('should append to existing additional space refs when saveAsAdditionnalSpace and append are both true', async () => {
@@ -1052,7 +1051,8 @@ describe('saveKibanaAssetsRefs', () => {
       'test-pkg',
       [{ id: 'new-template', type: 'alerting_rule_template' as any }],
       true,
-      true
+      true,
+      'my-space'
     );
 
     expect(soClient.update).toHaveBeenCalledWith(
@@ -1088,7 +1088,8 @@ describe('saveKibanaAssetsRefs', () => {
       'test-pkg',
       [{ id: 'existing-template', type: 'alerting_rule_template' as any }],
       true,
-      true
+      true,
+      'my-space'
     );
 
     const updateCall = soClient.update.mock.calls[0][2] as any;
@@ -1115,12 +1116,71 @@ describe('saveKibanaAssetsRefs', () => {
       'test-pkg',
       [{ id: 'new-dashboard', type: 'dashboard' as any }],
       true,
-      false
+      false,
+      'my-space'
     );
 
     const updateCall = soClient.update.mock.calls[0][2] as any;
     const spaceRefs = updateCall.additional_spaces_installed_kibana['my-space'];
     expect(spaceRefs).toHaveLength(1);
     expect(spaceRefs[0].id).toBe('new-dashboard');
+  });
+
+  it('should strip the installed_kibana_space_id key from additional_spaces when writing a new additional-space entry', async () => {
+    soClient.get.mockResolvedValue({
+      id: 'test-pkg',
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: {
+        installed_kibana_space_id: 'default',
+        additional_spaces_installed_kibana: {
+          default: [{ id: 'misplaced-dash', type: 'dashboard' }],
+          'space-a': [{ id: 'a-dash', type: 'dashboard' }],
+        },
+      },
+    } as any);
+    soClient.update.mockResolvedValue({} as any);
+
+    await saveKibanaAssetsRefs(
+      soClient,
+      'test-pkg',
+      [{ id: 'b-dash', type: 'dashboard' as any }],
+      true,
+      false,
+      'space-b'
+    );
+
+    const updateCall = soClient.update.mock.calls[0][2] as any;
+    const keys = Object.keys(updateCall.additional_spaces_installed_kibana);
+    expect(keys).not.toContain('default');
+    expect(keys).toContain('space-a');
+    expect(keys).toContain('space-b');
+  });
+
+  it('should be a no-op and log an error when saveAsAdditionnalSpace is true and spaceId matches installed_kibana_space_id', async () => {
+    soClient.get.mockResolvedValue({
+      id: 'test-pkg',
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      references: [],
+      attributes: {
+        installed_kibana_space_id: 'my-space',
+        additional_spaces_installed_kibana: {},
+      },
+    } as any);
+
+    const mockLogger = appContextService.getLogger();
+    (mockLogger.error as jest.Mock).mockClear();
+
+    await saveKibanaAssetsRefs(
+      soClient,
+      'test-pkg',
+      [{ id: 'some-dash', type: 'dashboard' as any }],
+      true,
+      false,
+      'my-space'
+    );
+
+    expect(soClient.update).not.toHaveBeenCalled();
+    expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('my-space'));
   });
 });

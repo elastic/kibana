@@ -182,4 +182,59 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
       expect(spaceId).toBe('default');
     });
   });
+
+  describe('when additional_spaces_installed_kibana contains a misplaced primary-space key', () => {
+    it('prunes the misplaced key and does not iterate into the primary space as additional', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const installedPkg = makeInstalledPkg('default', ['space-b']);
+      (installedPkg.attributes as any).additional_spaces_installed_kibana = {
+        default: [{ id: 'misplaced-dash', type: 'dashboard' }],
+        'space-b': [{ id: 'space-b-dash', type: 'dashboard' }],
+      };
+
+      await installKibanaAssetsAndReferencesMultispace({
+        ...baseArgs(),
+        savedObjectsClient,
+        spaceId: 'default',
+        installedPkg,
+      });
+
+      // SO update for the prune — must not carry the misplaced key
+      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+      const updateArg = (savedObjectsClient.update.mock.calls[0][2] as any)
+        .additional_spaces_installed_kibana;
+      expect(Object.keys(updateArg)).not.toContain('default');
+      expect(Object.keys(updateArg)).toContain('space-b');
+
+      // space-b must still be installed as additional; 'default' must never appear as additional
+      const additionalCalls = mockSaveKibanaAssetsRefs.mock.calls.filter(
+        ([, , , saveAsAdditional]) => saveAsAdditional === true
+      );
+      expect(additionalCalls.map(([, , , , , sid]) => sid)).toContain('space-b');
+      expect(additionalCalls.map(([, , , , , sid]) => sid)).not.toContain('default');
+    });
+
+    it('handles a misplaced-only map without additional-space iterations', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const installedPkg = makeInstalledPkg('default');
+      (installedPkg.attributes as any).additional_spaces_installed_kibana = {
+        default: [{ id: 'misplaced-dash', type: 'dashboard' }],
+      };
+
+      await installKibanaAssetsAndReferencesMultispace({
+        ...baseArgs(),
+        savedObjectsClient,
+        spaceId: 'default',
+        installedPkg,
+      });
+
+      // SO update for the prune
+      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+
+      // Only the primary-space install — no additional-space iterations
+      expect(mockSaveKibanaAssetsRefs).toHaveBeenCalledTimes(1);
+      const [, , , saveAsAdditional] = mockSaveKibanaAssetsRefs.mock.calls[0];
+      expect(saveAsAdditional).toBe(false);
+    });
+  });
 });
