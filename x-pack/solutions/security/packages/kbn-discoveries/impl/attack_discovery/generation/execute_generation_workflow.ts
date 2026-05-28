@@ -5,29 +5,584 @@
  * 2.0.
  */
 
-// Stub: the real `executeGenerationWorkflow` orchestration entry point lands
-// in PR4 (Orchestration + Event Logging). PR3 routes (post_generate,
-// workflow_executor) import this symbol, so an FF-off-safe stub is exported
-// here. The function is never called at runtime when the feature flag is
-// OFF — the discoveries plugin's generate path is FF-gated upstream.
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import dateMath from '@kbn/datemath';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import moment from 'moment';
+import { uniq } from 'lodash/fp';
+import type { ErrorCategory } from '@kbn/discoveries-schemas';
+import type {
+  AttackDiscoverySource,
+  DiagnosticsContext,
+  SourceMetadata,
+} from '../persistence/event_logging';
+import {
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
+  writeAttackDiscoveryEvent,
+} from '../persistence/event_logging';
+import { getDurationNanoseconds } from '../../lib/persistence';
 
-import type { Logger } from '@kbn/core/server';
-import type { ManualOrchestrationOutcome } from './run_manual_orchestration';
+import { reportMisconfiguration } from '../../lib/telemetry/report_misconfiguration';
+import {
+  reportWorkflowError,
+  reportWorkflowSuccess,
+} from '../../lib/telemetry/report_workflow_telemetry';
+import type { MisconfigurationType } from '../../lib/telemetry/event_based_telemetry';
+import { getSpaceId } from '../../lib/helpers/get_space_id';
+import { AttackDiscoveryError } from '../../lib/errors/attack_discovery_error';
+import { assertAttackDiscoveryType } from './assert_attack_discovery_type';
+import { buildResolveConnector } from './build_resolve_connector';
+import { createAuthenticatedUserForEventLogging } from './create_authenticated_user_for_event_logging';
+import { fetchAnonymizationFields } from './fetch_anonymization_fields';
+import { getParsedApiConfig } from './get_parsed_api_config';
+import { getWorkflowLoadingMessage } from './get_workflow_loading_message';
+import { refreshEventLogIndex } from './refresh_event_log_index';
+import { resolveDefaultWorkflowIds } from './resolve_default_workflow_ids';
+import { validatePreExecution } from './validate_pre_execution';
+import { verifyWorkflowIntegrity } from './verify_workflow_integrity';
+import { type WorkflowsManagementApi } from './invoke_alert_retrieval_workflow';
+import {
+  PipelineStepError,
+  runManualOrchestration,
+  type ManualOrchestrationOutcome,
+} from './run_manual_orchestration';
+import type { ExecuteGenerationWorkflowParams, ParsedApiConfig } from './types';
+import type { PreExecutionIssue } from './validate_pre_execution';
+import { writeGenerationStartedEvent } from './write_generation_started_event';
 
-// Permissive params for PR3 consumers. Real signature lives in PR4. The few
-// callback shapes are typed so destructured binding elements (e.g.
-// `checkIntegrity: ({ logger, spaceId }) => ...`) don't trigger TS7031
-// implicit-any errors in PR3.
-export interface ExecuteGenerationWorkflowParams {
-  checkIntegrity?: (args: { logger: Logger; spaceId: string }) => unknown;
-  // Permissive: PR3 callers pass a `WorkflowConfig` object (from the API
-  // schemas) here; PR4's real impl narrows this to the precise type.
-  workflowConfig?: unknown;
-  [key: string]: unknown;
+const CHECK_TO_MISCONFIGURATION_TYPE: Record<string, MisconfigurationType> = {
+  alertsIndex: 'alerts_index_missing',
+  connectorAccessibility: 'connector_unreachable',
+  managedWorkflowEnabled: 'managed_workflow_disabled',
+  workflowsManagementApi: 'default_workflows_resolution_failed',
+};
+
+const reportPreExecutionMisconfigurations = ({
+  analytics,
+  issues,
+  logger,
+  spaceId,
+}: {
+  analytics: NonNullable<ExecuteGenerationWorkflowParams['analytics']>;
+  issues: PreExecutionIssue[];
+  logger: Logger;
+  spaceId?: string;
+}): void => {
+  for (const issue of issues) {
+    const misconfigurationType = CHECK_TO_MISCONFIGURATION_TYPE[issue.check];
+
+    if (misconfigurationType != null) {
+      reportMisconfiguration({
+        analytics,
+        logger,
+        params: {
+          detail: issue.message,
+          misconfiguration_type: misconfigurationType,
+          space_id: spaceId,
+        },
+      });
+    }
+  }
+};
+
+/**
+ * Writes a generation-failed event to the event log so the UI can display the
+ * failure status instead of remaining stuck in "loading" state forever.
+ */
+const writeGenerationFailedEvent = async ({
+  authenticatedUser,
+  connectorId,
+  endTime,
+  errorCategory,
+  errorMessage,
+  eventLogger,
+  eventLogIndex,
+  executionUuid,
+  failedWorkflowId,
+  logger,
+  source: failedSource,
+  sourceMetadata: failedSourceMetadata,
+  spaceId,
+  startTime,
+  workflowId,
+}: {
+  authenticatedUser: AuthenticatedUser;
+  connectorId: string;
+  endTime: Date;
+  errorCategory?: ErrorCategory;
+  errorMessage: string;
+  eventLogger: IEventLogger;
+  eventLogIndex: string;
+  executionUuid: string;
+  failedWorkflowId?: string;
+  logger: Logger;
+  source?: AttackDiscoverySource;
+  sourceMetadata?: SourceMetadata;
+  spaceId: string;
+  startTime: Date;
+  workflowId: string;
+}): Promise<void> => {
+  try {
+    await writeAttackDiscoveryEvent({
+      action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
+      authenticatedUser,
+      connectorId,
+      dataClient: null,
+      duration: getDurationNanoseconds({ end: endTime, start: startTime }),
+      end: endTime,
+      errorCategory,
+      eventLogger,
+      eventLogIndex,
+      executionUuid,
+      failedWorkflowId,
+      message: `Attack discovery generation ${executionUuid} failed: ${errorMessage}`,
+      outcome: 'failure',
+      reason: errorMessage,
+      source: failedSource,
+      sourceMetadata: failedSourceMetadata,
+      spaceId,
+      start: startTime,
+      workflowId,
+    });
+  } catch (loggingError) {
+    logger.error(
+      `Failed to write generation-failed event: ${
+        loggingError instanceof Error ? loggingError.message : String(loggingError)
+      }`
+    );
+  }
+};
+
+const getTimeRangeDuration = ({
+  end: endRange,
+  start: startRange,
+}: {
+  end?: string;
+  start?: string;
+}): { dateRangeDuration: number; isDefaultDateRange: boolean } => {
+  if (startRange != null && endRange != null) {
+    const forceNow = moment().toDate();
+    const dateStart = dateMath.parse(startRange, {
+      forceNow,
+      momentInstance: moment,
+      roundUp: false,
+    });
+    const dateEnd = dateMath.parse(endRange, { forceNow, momentInstance: moment, roundUp: false });
+
+    if (dateStart != null && dateEnd != null) {
+      return {
+        dateRangeDuration: dateEnd.diff(dateStart),
+        isDefaultDateRange: false,
+      };
+    }
+  }
+
+  return { dateRangeDuration: 0, isDefaultDateRange: true };
+};
+
+export async function executeGenerationWorkflow({
+  alerts,
+  alertsIndexPattern,
+  analytics,
+  apiConfig,
+  checkIntegrity,
+  end,
+  esClient: preAuthenticatedEsClient,
+  executionUuid,
+  filter,
+  getEventLogIndex,
+  getEventLogger,
+  getInferredPrebuiltStepTypes,
+  getStartServices,
+  logger,
+  request,
+  scheduleInfo,
+  size,
+  source,
+  sourceMetadata,
+  start,
+  trigger,
+  type,
+  workflowConfig,
+  workflowsManagementApi,
+}: ExecuteGenerationWorkflowParams): Promise<ManualOrchestrationOutcome> {
+  // Track these outside try block so they're available in the catch for event writing
+  let authenticatedUser: AuthenticatedUser | undefined;
+  let coreStart: Awaited<ReturnType<typeof getStartServices>>['coreStart'] | undefined;
+  let esClient: ElasticsearchClient | undefined;
+  let parsedApiConfig: ParsedApiConfig | undefined;
+  let eventLogger: IEventLogger | undefined;
+  let eventLogIndex: string | undefined;
+  let preExecutionResult: { issues: PreExecutionIssue[]; valid: boolean } | undefined;
+  let spaceId: string | undefined;
+  let generationWorkflowId: string | undefined;
+  const pipelineStartTime = new Date();
+
+  try {
+    logger.info(`Starting ${type} generation workflow`);
+
+    const startServices = await getStartServices();
+    coreStart = startServices.coreStart;
+    const { pluginsStart } = startServices;
+    parsedApiConfig = getParsedApiConfig(apiConfig);
+
+    assertAttackDiscoveryType({ type });
+
+    const { spaces: spacesPlugin } = pluginsStart as { spaces?: SpacesPluginStart };
+
+    spaceId = getSpaceId({
+      request,
+      spaces: spacesPlugin?.spacesService,
+    });
+
+    logger.debug(() => {
+      return `Invoking generation workflow with config: ${JSON.stringify({
+        alert_retrieval_mode: workflowConfig.alert_retrieval_mode,
+        alert_retrieval_workflow_ids: workflowConfig.alert_retrieval_workflow_ids,
+        alerts_index_pattern: alertsIndexPattern,
+        end,
+        esql_query: workflowConfig.esql_query,
+        filter,
+        size,
+        space_id: spaceId,
+        start,
+        validation_workflow_id: workflowConfig.validation_workflow_id,
+      })}`;
+    });
+
+    eventLogger = await getEventLogger();
+    eventLogIndex = await getEventLogIndex();
+
+    esClient =
+      preAuthenticatedEsClient ?? coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+
+    const authenticationInfo = await esClient.security.authenticate();
+
+    authenticatedUser = createAuthenticatedUserForEventLogging({ authenticationInfo });
+
+    const anonymizationFields = await fetchAnonymizationFields({
+      esClient,
+      logger,
+      spaceId,
+    });
+
+    const loadingMessage = getWorkflowLoadingMessage({
+      alertsCount:
+        workflowConfig.alert_retrieval_mode === 'provided' ? alerts?.length ?? 0 : size ?? 0,
+      end,
+      start,
+      workflowConfig,
+    });
+
+    const defaultWorkflowIds = resolveDefaultWorkflowIds();
+
+    // verifyWorkflowIntegrity checks managed workflow integrity via the platform API and
+    // returns the up-to-date IDs. checkIntegrity is injected by the plugin caller and
+    // bound to the workflowsManagementApi — the package never imports plugin code directly.
+    const resolvedSpaceId = spaceId;
+    const boundCheckIntegrity =
+      checkIntegrity != null && resolvedSpaceId != null
+        ? () => checkIntegrity({ logger, spaceId: resolvedSpaceId })
+        : undefined;
+
+    const { integrityResult, updatedIds: verifiedWorkflowIds } = await verifyWorkflowIntegrity({
+      checkIntegrity: boundCheckIntegrity,
+      defaultWorkflowIds,
+      logger,
+    });
+
+    const connectorId = parsedApiConfig.connector_id;
+    const resolveConnector = buildResolveConnector({
+      connectorId,
+      getStartServices,
+      request,
+    });
+
+    preExecutionResult = await validatePreExecution({
+      alertsIndexPattern,
+      connectorId,
+      esClient,
+      logger,
+      resolveConnector,
+      workflowIntegrityResult: integrityResult,
+      workflowsManagementApi,
+    });
+
+    if (preExecutionResult.issues.length > 0 && analytics != null) {
+      reportPreExecutionMisconfigurations({
+        analytics,
+        issues: preExecutionResult.issues,
+        logger,
+        spaceId,
+      });
+    }
+
+    // Assemble DiagnosticsContext from pre-execution checks + workflow integrity + config summary.
+    // Written to the generation-started event so the pipeline_data route can surface it to the UI.
+    const diagnosticsContext: DiagnosticsContext = {
+      config: {
+        alertRetrievalMode: workflowConfig.alert_retrieval_mode,
+        alertRetrievalWorkflowCount: workflowConfig.alert_retrieval_workflow_ids.length,
+        connectorType: parsedApiConfig.action_type_id,
+        hasCustomValidation:
+          workflowConfig.validation_workflow_id !== '' &&
+          workflowConfig.validation_workflow_id !== verifiedWorkflowIds?.validate,
+      },
+      preExecutionChecks: preExecutionResult.issues.map((issue) => ({
+        check: issue.check,
+        message: issue.message,
+        passed: false,
+        severity: issue.severity,
+      })),
+      workflowIntegrity:
+        integrityResult != null
+          ? {
+              repaired: (integrityResult.repaired ?? []).map(({ key, workflowId }) => ({
+                key,
+                workflowId,
+              })),
+              status: integrityResult.status,
+              unrepairableErrors: (integrityResult.unrepairableErrors ?? []).map(
+                ({ error, key, workflowId }) => ({ error, key, workflowId })
+              ),
+            }
+          : {
+              repaired: [],
+              status: 'all_intact' as const,
+              unrepairableErrors: [],
+            },
+    };
+
+    if (!preExecutionResult.valid) {
+      const criticalMessages = preExecutionResult.issues
+        .filter((i) => i.severity === 'critical')
+        .map((i) => i.message);
+
+      throw new Error(criticalMessages.join('; '));
+    }
+
+    if (verifiedWorkflowIds == null || workflowsManagementApi == null) {
+      throw new Error('Pre-execution validation passed but critical dependencies are missing');
+    }
+
+    generationWorkflowId = verifiedWorkflowIds.generation;
+
+    /**
+     * Manual orchestration can take minutes (polling for workflow completion).
+     * We write the overall generation-started event up front so the UI can
+     * immediately observe that the generation has begun.
+     */
+    await writeGenerationStartedEvent({
+      authenticatedUser,
+      connectorId: parsedApiConfig.connector_id,
+      diagnosticsContext,
+      eventLogger,
+      eventLogIndex,
+      executionUuid,
+      loadingMessage,
+      source,
+      sourceMetadata,
+      spaceId,
+      workflowId: generationWorkflowId,
+    });
+
+    await refreshEventLogIndex({
+      coreStart,
+      esClient,
+      eventLogIndex,
+      logger,
+      request,
+    });
+
+    /** Manual workflow invocation: runs bundled workflows sequentially. */
+    const workflowsApi = workflowsManagementApi as WorkflowsManagementApi;
+    const basePath = coreStart.http.basePath.get(request);
+    const orchestrationOutcome = await runManualOrchestration({
+      alerts,
+      alertsIndexPattern,
+      analytics,
+      anonymizationFields,
+      apiConfig: parsedApiConfig,
+      authenticatedUser,
+      basePath,
+      defaultWorkflowIds: verifiedWorkflowIds,
+      end,
+      eventLogger,
+      eventLogIndex,
+      executionUuid,
+      filter,
+      logger,
+      request,
+      size,
+      source,
+      sourceMetadata,
+      spaceId,
+      start,
+      workflowConfig,
+      workflowsManagementApi: workflowsApi,
+    });
+
+    if (analytics != null) {
+      const durationMs = Date.now() - pipelineStartTime.getTime();
+      const { dateRangeDuration, isDefaultDateRange } = getTimeRangeDuration({ end, start });
+      const usesDefaultRetrieval = workflowConfig.alert_retrieval_mode !== 'custom_only';
+      const usesDefaultValidation =
+        workflowConfig.validation_workflow_id === '' ||
+        workflowConfig.validation_workflow_id === verifiedWorkflowIds.validate;
+
+      const alertsCount =
+        orchestrationOutcome.outcome === 'validation_succeeded'
+          ? uniq(
+              (
+                orchestrationOutcome.generationResult.attackDiscoveries as Array<{
+                  alertIds?: string[];
+                }>
+              ).flatMap((d) => d.alertIds ?? [])
+            ).length
+          : 0;
+
+      const discoveriesGenerated =
+        orchestrationOutcome.outcome === 'validation_succeeded'
+          ? orchestrationOutcome.generationResult.attackDiscoveries?.length ?? 0
+          : 0;
+
+      const alertsContextCount =
+        orchestrationOutcome.outcome === 'validation_succeeded'
+          ? orchestrationOutcome.generationResult.alertsContextCount
+          : 0;
+
+      const validationDiscoveriesCount =
+        orchestrationOutcome.outcome === 'validation_succeeded'
+          ? orchestrationOutcome.validationResult.validationSummary.persistedCount
+          : undefined;
+
+      const duplicatesDroppedCount =
+        orchestrationOutcome.outcome === 'validation_succeeded'
+          ? orchestrationOutcome.validationResult.duplicatesDroppedCount
+          : undefined;
+
+      const hallucinationsFilteredCount =
+        orchestrationOutcome.outcome === 'validation_succeeded'
+          ? orchestrationOutcome.validationResult.validationSummary.hallucinationsFilteredCount
+          : undefined;
+
+      reportWorkflowSuccess({
+        analytics,
+        logger,
+        params: {
+          actionTypeId: parsedApiConfig.action_type_id,
+          alertsContextCount,
+          alertsCount,
+          configuredAlertsCount: size ?? 0,
+          custom_retrieval_workflow_count: workflowConfig.alert_retrieval_workflow_ids.length,
+          dateRangeDuration,
+          alert_retrieval_mode: workflowConfig.alert_retrieval_mode,
+          discoveriesGenerated,
+          duplicatesDroppedCount,
+          durationMs,
+          execution_mode: 'workflow',
+          hallucinations_filtered_count: hallucinationsFilteredCount,
+          hasFilter: filter != null,
+          isDefaultDateRange,
+          model: parsedApiConfig.model,
+          prebuilt_step_types_used:
+            getInferredPrebuiltStepTypes?.({
+              defaultValidationWorkflowId: verifiedWorkflowIds.validate,
+              workflowConfig,
+            }) ?? [],
+          provider: parsedApiConfig.provider,
+          retrieval_workflow_count:
+            workflowConfig.alert_retrieval_workflow_ids.length + (usesDefaultRetrieval ? 1 : 0),
+          scheduleInfo,
+          trigger: trigger ?? 'unknown',
+          uses_default_retrieval: usesDefaultRetrieval,
+          uses_default_validation: usesDefaultValidation,
+          validation_discoveries_count: validationDiscoveriesCount,
+        },
+      });
+    }
+
+    return orchestrationOutcome;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error(`Generation workflow failed: ${message}`, err);
+
+    const failedStep = err instanceof PipelineStepError ? err.step : undefined;
+    const misconfigurationDetected = preExecutionResult != null && !preExecutionResult.valid;
+
+    const errorCategory =
+      err instanceof PipelineStepError
+        ? err.errorCategory
+        : err instanceof AttackDiscoveryError
+        ? err.errorCategory
+        : undefined;
+    const failedWorkflowId =
+      err instanceof PipelineStepError
+        ? err.failedWorkflowId
+        : err instanceof AttackDiscoveryError
+        ? err.workflowId
+        : undefined;
+
+    if (analytics != null && parsedApiConfig != null) {
+      reportWorkflowError({
+        analytics,
+        logger,
+        params: {
+          actionTypeId: parsedApiConfig.action_type_id,
+          errorMessage: message,
+          execution_mode: 'workflow',
+          failed_step: failedStep,
+          misconfiguration_detected: misconfigurationDetected,
+          model: parsedApiConfig.model,
+          provider: parsedApiConfig.provider,
+          scheduleInfo,
+          trigger: trigger ?? 'unknown',
+        },
+      });
+    }
+
+    // Write a generation-failed event so the UI can detect the failure
+    // (instead of remaining stuck in "loading" state forever)
+    if (
+      authenticatedUser != null &&
+      parsedApiConfig != null &&
+      eventLogger != null &&
+      eventLogIndex != null &&
+      spaceId != null
+    ) {
+      await writeGenerationFailedEvent({
+        authenticatedUser,
+        connectorId: parsedApiConfig.connector_id,
+        endTime: new Date(),
+        errorCategory,
+        errorMessage: message,
+        eventLogger,
+        eventLogIndex,
+        executionUuid,
+        failedWorkflowId,
+        logger,
+        source,
+        sourceMetadata,
+        spaceId,
+        startTime: pipelineStartTime,
+        workflowId: generationWorkflowId ?? 'unknown',
+      });
+
+      // Refresh the index so the failure is immediately visible to the UI poller.
+      // Without this, the UI remains stuck in "loading" state until the next
+      // periodic ES refresh fires (up to 1 second by default).
+      if (coreStart != null) {
+        await refreshEventLogIndex({
+          coreStart,
+          esClient,
+          eventLogIndex,
+          logger,
+          request,
+        });
+      }
+    }
+
+    throw err;
+  }
 }
-
-export const executeGenerationWorkflow = async (
-  _params: ExecuteGenerationWorkflowParams
-): Promise<ManualOrchestrationOutcome> => ({
-  outcome: 'validation_failed',
-});
