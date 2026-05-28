@@ -4,7 +4,7 @@
       "id": "smoke-tests",
       "name": "@kbn/evals Smoke Tests",
       "slackChannel": "#obs-ai-team-alerts",
-      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-smoketests/playwright.config.ts",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-smoke-tests/playwright.config.ts",
       "tags": [
         "platform",
         "smoke"
