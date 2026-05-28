@@ -220,11 +220,11 @@ const goldenSignalTileBackground = (
 ): string => {
   switch (level) {
     case 'warning':
-      return euiTheme.colors.backgroundBaseWarning;
+      return euiTheme.colors.severity.warning;
     case 'danger':
-      return euiTheme.colors.backgroundBaseDanger;
+      return euiTheme.colors.severity.danger;
     case 'success':
-      return euiTheme.colors.backgroundBaseSuccess;
+      return euiTheme.colors.severity.success;
   }
 };
 
