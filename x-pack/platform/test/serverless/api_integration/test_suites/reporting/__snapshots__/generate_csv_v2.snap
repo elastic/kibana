@@ -86,8 +86,8 @@ exports[`Reporting Generate CSV from csv_v2 with unmapped fields includes all un
 
 exports[`Reporting Generate CSV from csv_v2 with unmapped fields includes an unmapped field to the report 1`] = `
 "\\"_id\\",\\"_ignored\\",\\"_index\\",\\"_score\\",text,unmapped
-1,\\"-\\",recipes,\\"-\\",text1,unmapped1
-2,\\"-\\",recipes,\\"-\\",text2,\\"-\\"
+1,\\"-\\",recipes,1,text1,unmapped1
+2,\\"-\\",recipes,1,text2,\\"-\\"
 "
 `;
 
