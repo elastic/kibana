@@ -32,6 +32,7 @@ import { useDataFields } from '../../../../form/hooks/use_data_fields';
 import { ScheduleField } from '../../../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../../../form/fields/lookback_window_field';
 import type { RuleBuilderStepProps } from '../types';
+import { useBuilderState } from '../builder_state_context';
 import type {
   ThresholdFormValues,
   StatDefinition,
@@ -56,13 +57,13 @@ import {
   CONDITION_OPERATOR_OPTIONS,
 } from './translations';
 
-export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<ThresholdFormValues>> = ({
+export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps> = ({
   state,
   dispatch,
   services,
-  builderState: thresholdValues,
-  onBuilderStateChange: onThresholdValuesChange,
 }) => {
+  const { state: thresholdValues, setState: onThresholdValuesChange } =
+    useBuilderState<ThresholdFormValues>();
   const { setValue, watch } = useFormContext<ComposeFormValues>();
   const isAlert = watch('kind') === 'alert';
 
