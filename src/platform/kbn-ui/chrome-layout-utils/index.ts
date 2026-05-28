@@ -7,4 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from '@kbn/ui-chrome-layout-utils';
+export {
+  type ScrollContainer,
+  getScrollContainer,
+  scrollTo,
+  scrollToTop,
+  scrollToBottom,
+  getViewportHeight,
+  getViewportBoundaries,
+  getScrollPosition,
+  getScrollDimensions,
+  scrollBy,
+  isAtBottomOfPage,
+} from './src/scroll';
+
+export {
+  type HighContrastSeparatorOptions,
+  getHighContrastBorder,
+  getHighContrastSeparator,
+} from './src/high_contrast';

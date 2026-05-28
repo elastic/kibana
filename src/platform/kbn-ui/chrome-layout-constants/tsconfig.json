@@ -10,12 +10,11 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    "packaging/target/**/*"
   ],
-  "kbn_references": [
-    "@kbn/ui-chrome-layout-utils"
-  ]
+  "kbn_references": []
 }
