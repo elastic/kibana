@@ -7,6 +7,11 @@
 
 import expect from '@kbn/expect';
 
+/**
+ * Purpose: Full screen smoke test
+ * 
+ * Migration: migrate to scout
+ */
 export default function ({ getService, getPageObjects }) {
   const { maps, common } = getPageObjects(['maps', 'common']);
   const retry = getService('retry');
