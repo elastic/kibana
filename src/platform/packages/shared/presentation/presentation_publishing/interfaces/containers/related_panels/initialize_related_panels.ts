@@ -22,9 +22,9 @@ import {
   type Observable,
 } from 'rxjs';
 
+import { Parser, Walker } from '@elastic/esql';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariable } from '@kbn/esql-types';
-import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { apiHasSections, apiPublishesChildren } from '../presentation_container';
 import {
@@ -36,6 +36,12 @@ import { apiPublishesESQLQuery } from '../../publishes_esql_query';
 import type { ViewMode } from '../../publishes_view_mode';
 import { apiPublishesViewMode } from '../../publishes_view_mode';
 import type { PublishingSubject } from '../../../publishing_subject';
+
+// Redeclare instead of importing from `@kbn/esql-utils` to avoid circular dependency issues
+const getESQLQueryVariables = (esql: string): string[] => {
+  const { root } = Parser.parse(esql);
+  return Walker.params(root).map((v) => v.text.replace(/^\?+/, ''));
+};
 
 interface BaseProps {
   uuid: string;

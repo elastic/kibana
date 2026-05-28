@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/esql-types'
   - '@kbn/safer-lodash-set'
-  - '@kbn/esql-utils'
 tags:
   - shared-common
   - package
