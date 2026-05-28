@@ -5,10 +5,8 @@ description: >
   Execute ES|QL (Elasticsearch Query Language) queries, use when the user wants to query Elasticsearch data, analyze
   logs, aggregate metrics, explore data, or create charts and dashboards from ES|QL results.
 compatibility: >
-  Requires Elasticsearch 8.11+ (8.14+ for GA ES|QL) or Elastic Cloud Serverless. Uses the `elastic` CLI when installed,
-  or the `elastic` MCP server (tools: `discover`, `man`, `exec`) when the CLI is not available. CLI credentials are read
-  from ELASTICSEARCH_URL or ELASTICSEARCH_CLOUD_ID plus ELASTICSEARCH_API_KEY (or
-  ELASTICSEARCH_USERNAME/ELASTICSEARCH_PASSWORD).
+  Requires Elasticsearch 8.11+ (8.14+ for GA ES|QL) or Elastic Cloud Serverless. Uses the `elastic` CLI for all
+  operations.
 metadata:
   author: es-analytical-engine
   version: "0.5.0"
@@ -53,28 +51,20 @@ ES|QL uses pipes (`|`) to chain commands:
 
 ## Environment Configuration
 
-This skill executes Elasticsearch operations through one of two integrations. Detect which is available, in this order,
-before running any other step:
+This skill executes Elasticsearch operations through the `elastic` CLI. Before running any other step, confirm the
+`elastic` CLI is installed and available. If it is not installed, ask the user:
 
-1. **`elastic` CLI** (preferred). Run `which elastic`. When the binary is on `PATH`, route every operation in the
-   [Operations](#operations) table through the CLI command in column 2.
-2. **`elastic` MCP server** (fallback). When the CLI is not installed, check whether the `elastic` MCP server is
-   connected — its tools (`discover`, `man`, and `exec`) must be exposed in the current agent session. If so, route
-   every operation through the MCP tool in column 3 of the [Operations](#operations) table.
-3. **Neither installed nor connected.** Stop and ask the user:
+> "The `elastic` CLI is not available. You must install the
+> [`elastic` CLI](https://github.com/elastic/cli#configuration) before continuing?"
 
-   > "Neither the `elastic` CLI nor the `elastic` MCP server is available. Would you like to install the
-   > [`elastic` CLI](https://github.com/elastic/cli#configuration) (recommended) or connect the `elastic` MCP server
-   > before continuing?"
-
-   Wait for the user's response. Do not guess credentials, call the HTTP API directly, or attempt other workarounds.
+Wait for the user's response. Do not guess credentials, call the HTTP API directly, or attempt other workarounds.
 
 This skill references operations in HTTP-shorthand form (e.g., `GET /`, `GET /_cat/indices`, `GET /<index>/_mapping`,
 `GET /<index>/_settings/index.mode`, `POST /_query`). The [Operations](#operations) table at the end of this document
-maps each shorthand to the equivalent CLI command and MCP tool — always use whichever integration is available rather
-than calling the HTTP API directly.
+maps each shorthand to the equivalent `elastic` CLI command — always use the CLI rather than calling the HTTP API
+directly.
 
-Verify the connection by calling `GET /`. If verification fails on the CLI path, point the user to the
+Verify the connection by calling `GET /`. If verification fails, point the user to the
 [CLI configuration instructions](https://github.com/elastic/cli#configuration).
 
 ## Guidelines
@@ -388,25 +378,19 @@ When query execution fails, the script returns:
 ## Operations
 
 The body of this skill references Elasticsearch operations in HTTP-shorthand form. The following table maps each
-shorthand to its `elastic` CLI command and to the equivalent tool on the `elastic` MCP server.
+shorthand to its `elastic` CLI command. Always use the CLI rather than calling the HTTP API directly — see
+[Environment Configuration](#environment-configuration).
 
-**Pick the integration based on what is available** — see [Environment Configuration](#environment-configuration):
+For operations not listed below, run `elastic --help` (or `elastic es --help`, `elastic es <subcommand> --help`) to
+discover the matching command and its flags.
 
-- CLI installed → use the `elastic` CLI commands in column 2.
-- CLI not installed, MCP server connected → call the `exec` tool on the `elastic` MCP server with the JSON object in
-  column 3 as the `arguments` payload.
-- Neither available → stop and prompt the user to install the CLI or connect the MCP server.
-
-For operations not listed below, call `discover` to find the matching command id, then `man` to read its `input_schema`
-before calling `exec` with snake_case keys.
-
-| HTTP API (shorthand)                | `elastic` CLI command                                                 | `elastic` MCP `exec` arguments                                                           |
-| ----------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `GET /`                             | `elastic es info`                                                     | `{"id": "es.info", "input": {}}`                                                         |
-| `GET /_cat/indices`                 | `elastic es cat indices`                                              | `{"id": "es.cat.indices", "input": {}}`                                                  |
-| `GET /_cat/indices/<pattern>`       | `elastic es cat indices --index '<pattern>'`                          | `{"id": "es.cat.indices", "input": {"index": "<pattern>"}}`                              |
-| `GET /<pattern>`                    | `elastic es indices get --index '<pattern>'`                          | `{"id": "es.indices.get", "input": {"index": "<pattern>"}}`                              |
-| `GET /<index>/_mapping`             | `elastic es indices get-mapping --index '<index>'`                    | `{"id": "es.indices.get-mapping", "input": {"index": "<index>"}}`                        |
-| `GET /<index>/_settings/index.mode` | `elastic es indices get-settings --name index.mode --index '<index>'` | `{"id": "es.indices.get-settings", "input": {"name": "index.mode", "index": "<index>"}}` |
-| `POST /_query`                      | `elastic es esql query --query "<esql>"`                              | `{"id": "es.esql.query", "input": {"query": "<esql>"}}`                                  |
-| `POST /_query?format=tsv`           | `elastic es esql query --format tsv --query "<esql>"`                 | `{"id": "es.esql.query", "input": {"format": "tsv", "query": "<esql>"}}`                 |
+| HTTP API (shorthand)                | `elastic` CLI command                                                 |
+| ----------------------------------- | --------------------------------------------------------------------- |
+| `GET /`                             | `elastic es info`                                                     |
+| `GET /_cat/indices`                 | `elastic es cat indices`                                              |
+| `GET /_cat/indices/<pattern>`       | `elastic es cat indices --index '<pattern>'`                          |
+| `GET /<pattern>`                    | `elastic es indices get --index '<pattern>'`                          |
+| `GET /<index>/_mapping`             | `elastic es indices get-mapping --index '<index>'`                    |
+| `GET /<index>/_settings/index.mode` | `elastic es indices get-settings --name index.mode --index '<index>'` |
+| `POST /_query`                      | `elastic es esql query --query "<esql>"`                              |
+| `POST /_query?format=tsv`           | `elastic es esql query --format tsv --query "<esql>"`                 |
