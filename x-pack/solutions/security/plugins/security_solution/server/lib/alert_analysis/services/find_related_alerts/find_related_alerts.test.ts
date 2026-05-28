@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { findRelatedAlerts } from './find_related_alerts';
-import { RELATED_ALERT_ENTITY_SOURCE_INCLUDES } from './find_related_alerts_entity_utils';
+import { RELATED_ALERT_ENTITY_SOURCE_INCLUDES } from './utils/entity_utils';
 
 describe('findRelatedAlerts', () => {
   const esClient = {

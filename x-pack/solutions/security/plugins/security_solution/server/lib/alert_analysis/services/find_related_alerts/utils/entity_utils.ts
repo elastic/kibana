@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { RELATED_ALERT_ENTITY_LIST_MAX_LENGTH } from '../../../../common/api/alert_analysis/related_alerts';
+import { RELATED_ALERT_ENTITY_LIST_MAX_LENGTH } from '../../../../../../common/api/alert_analysis/related_alerts';
 
 export interface SourceEntities {
   hostNames: string[];

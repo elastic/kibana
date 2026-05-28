@@ -12,10 +12,10 @@ import {
   RELATED_ALERT_SOURCE_ALLOWLIST,
   trimEntityValues,
   type SourceEntities,
-} from './find_related_alerts_entity_utils';
-import { getErrorMessage, isElasticsearchNotFoundError } from './find_related_alerts_es_errors';
+} from './utils/entity_utils';
+import { getErrorMessage, isElasticsearchNotFoundError } from './utils/es_errors';
 
-export type { SourceEntities } from './find_related_alerts_entity_utils';
+export type { SourceEntities } from './utils/entity_utils';
 
 export interface FindRelatedAlertsParams {
   alertId: string;

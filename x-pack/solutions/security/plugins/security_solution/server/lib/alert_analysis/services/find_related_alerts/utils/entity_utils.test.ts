@@ -9,10 +9,10 @@ import {
   extractSourceEntitiesFromAlert,
   getEntityFieldValues,
   trimEntityValues,
-} from './find_related_alerts_entity_utils';
-import { RELATED_ALERT_ENTITY_LIST_MAX_LENGTH } from '../../../../common/api/alert_analysis/related_alerts';
+} from './entity_utils';
+import { RELATED_ALERT_ENTITY_LIST_MAX_LENGTH } from '../../../../../../common/api/alert_analysis/related_alerts';
 
-describe('find_related_alerts_entity_utils', () => {
+describe('entity_utils', () => {
   it('reads nested ECS host.name values', () => {
     const entities = extractSourceEntitiesFromAlert({
       host: { name: 'nested-host' },
