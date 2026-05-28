@@ -2,6 +2,7 @@
 plugins:
   enabled:
     - advanced_settings
+    - agent_builder
     - alerting
     - alerting_v2
     - apm
@@ -25,7 +26,9 @@ plugins:
     - flyoutSystemExamples
     - gen_ai_settings
     - global_search
-    - index_lifecycle_management
+    - graph
+    - grokdebugger
+    - home
     - index_management
     - infra
     - intercepts
