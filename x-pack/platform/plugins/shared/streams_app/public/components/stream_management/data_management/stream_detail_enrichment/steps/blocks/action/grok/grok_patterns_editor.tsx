@@ -192,16 +192,24 @@ const DraggablePatternInput = ({
               />
             </EuiFlexItem>
             {onRemove && (
-              <EuiButtonIcon
-                data-test-subj="streamsAppDraggablePatternInputButton"
-                iconType="minusCircle"
-                color="danger"
-                onClick={onRemove}
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.removePattern',
                   { defaultMessage: 'Remove grok pattern' }
                 )}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="streamsAppDraggablePatternInputButton"
+                  iconType="minusCircle"
+                  color="danger"
+                  onClick={onRemove}
+                  aria-label={i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.removePattern',
+                    { defaultMessage: 'Remove grok pattern' }
+                  )}
+                />
+              </EuiToolTip>
             )}
           </EuiFlexGroup>
         </EuiFormRow>
