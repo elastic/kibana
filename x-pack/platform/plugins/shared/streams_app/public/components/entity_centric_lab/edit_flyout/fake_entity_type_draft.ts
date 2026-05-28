@@ -95,9 +95,12 @@ export interface SubsetDraft {
   };
   readonly ownershipOverride: {
     readonly enabled: boolean;
+    readonly ownership: OwnershipConfig;
+    readonly coveragePreview: CoveragePreview;
   };
   readonly contentOverride: {
     readonly enabled: boolean;
+    readonly flyoutTabs: readonly FlyoutTabConfig[];
   };
 }
 
@@ -115,6 +118,13 @@ const defaultHealth = (): HealthSignals => ({
   activeAlertsSeverity: true,
   availableSignals: true,
   securitySignals: true,
+});
+
+const defaultCoveragePreview = (): CoveragePreview => ({
+  resolvedPercent: 0,
+  resolvedCount: 0,
+  totalCount: 0,
+  unmatched: [],
 });
 
 const defaultFlyoutTabs = (): FlyoutTabConfig[] => [
@@ -208,8 +218,9 @@ const PRESETS: Readonly<Record<string, PresetSeed>> = {
     subsets: [
       {
         id: 'subset-1',
-        name: 'SubsetName',
-        description: 'SubsetName overrides A & B for entityTypeName when serviceName = "myService"',
+        name: 'Checkout clusters',
+        description:
+          'Overrides health and ownership for K8s clusters running the checkout service.',
         enabled: true,
         filter: [
           {
@@ -219,19 +230,52 @@ const PRESETS: Readonly<Record<string, PresetSeed>> = {
             value: 'myService',
           },
         ],
-        healthOverride: { enabled: true, signals: defaultHealth() },
-        ownershipOverride: { enabled: false },
-        contentOverride: { enabled: false },
+        healthOverride: {
+          enabled: true,
+          signals: { activeAlertsSeverity: true, availableSignals: true, securitySignals: false },
+        },
+        ownershipOverride: {
+          enabled: true,
+          ownership: {
+            resolverField: 'cluster.labels.team',
+            owners: [
+              {
+                id: 'owner-subset-1',
+                resolverValue: 'checkout',
+                ownerName: 'checkout-oncall',
+                email: 'checkout-oncall@example.com',
+                slack: '#checkout-oncall',
+                ownershipType: 'operational',
+              },
+            ],
+          },
+          coveragePreview: {
+            resolvedPercent: 92,
+            resolvedCount: 23,
+            totalCount: 25,
+            unmatched: [{ value: 'checkout-beta', unmatchedEntities: 2 }],
+          },
+        },
+        contentOverride: { enabled: false, flyoutTabs: defaultFlyoutTabs() },
       },
       {
         id: 'subset-2',
-        name: 'SubsetName',
-        description: 'Subset description',
+        name: 'Edge clusters',
+        description: 'Surfaces a profiling tab for edge clusters.',
         enabled: true,
         filter: [],
         healthOverride: { enabled: false, signals: defaultHealth() },
-        ownershipOverride: { enabled: false },
-        contentOverride: { enabled: false },
+        ownershipOverride: {
+          enabled: false,
+          ownership: { resolverField: 'cluster.labels.team', owners: [] },
+          coveragePreview: defaultCoveragePreview(),
+        },
+        contentOverride: {
+          enabled: true,
+          flyoutTabs: defaultFlyoutTabs().map((tab) =>
+            tab.id === 'profiling' ? { ...tab, enabled: true } : tab
+          ),
+        },
       },
     ],
   },
@@ -344,10 +388,11 @@ export const buildFakeEntityTypeDraft = (entityType: FakeEntityType): EntityType
 
 /**
  * Builder for a brand-new subset draft when the user clicks "Add a subset".
- * Kept colocated with the rest of the mock data so step components don't have
- * to know about the field defaults.
+ * Seeds the override payloads from the parent entity-type draft so that
+ * flipping the override toggle on shows the current parent values as the
+ * starting point (the user then tweaks from there).
  */
-export const buildBlankSubsetDraft = (): SubsetDraft => ({
+export const buildBlankSubsetDraft = (parent: EntityTypeDraft): SubsetDraft => ({
   id: `subset-${Date.now()}`,
   name: '',
   description: '',
@@ -360,9 +405,22 @@ export const buildBlankSubsetDraft = (): SubsetDraft => ({
       value: '',
     },
   ],
-  healthOverride: { enabled: false, signals: defaultHealth() },
-  ownershipOverride: { enabled: false },
-  contentOverride: { enabled: false },
+  healthOverride: { enabled: false, signals: { ...parent.health } },
+  ownershipOverride: {
+    enabled: false,
+    ownership: {
+      resolverField: parent.ownership.resolverField,
+      owners: parent.ownership.owners.map((owner) => ({ ...owner })),
+    },
+    coveragePreview: {
+      ...parent.coveragePreview,
+      unmatched: parent.coveragePreview.unmatched.map((unmatched) => ({ ...unmatched })),
+    },
+  },
+  contentOverride: {
+    enabled: false,
+    flyoutTabs: parent.flyoutTabs.map((tab) => ({ ...tab })),
+  },
 });
 
 export const buildBlankOwnerMapping = (): OwnerMapping => ({

@@ -27,31 +27,12 @@ import type { DragDropContextProps } from '@elastic/eui';
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import type { EntityTypeDraft, FlyoutTabConfig } from '../fake_entity_type_draft';
 
-interface Props {
+interface StepProps {
   readonly draft: EntityTypeDraft;
   readonly onChange: (next: FlyoutTabConfig[]) => void;
 }
 
-export const FlyoutContentStep = ({ draft, onChange }: Props) => {
-  const { flyoutTabs } = draft;
-
-  const handleDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
-    ({ source, destination }) => {
-      if (source && destination) {
-        const next = euiDragDropReorder([...flyoutTabs], source.index, destination.index);
-        onChange(next);
-      }
-    },
-    [flyoutTabs, onChange]
-  );
-
-  const handleToggle = useCallback(
-    (id: string, enabled: boolean) => {
-      onChange(flyoutTabs.map((tab) => (tab.id === id ? { ...tab, enabled } : tab)));
-    },
-    [flyoutTabs, onChange]
-  );
-
+export const FlyoutContentStep = ({ draft, onChange }: StepProps) => {
   return (
     <div data-test-subj="entityCentricLabEditFlyoutContentStep">
       <EuiText size="s">
@@ -71,43 +52,91 @@ export const FlyoutContentStep = ({ draft, onChange }: Props) => {
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiDragDropContext onDragEnd={handleDragEnd}>
-        <EuiDroppable
-          droppableId="entityCentricLabFlyoutTabsDroppable"
-          spacing="m"
-          data-test-subj="entityCentricLabEditFlyoutContentDroppable"
-        >
-          {flyoutTabs.map((tab, index) => (
-            <EuiDraggable
-              key={tab.id}
-              index={index}
-              draggableId={tab.id}
-              spacing="m"
-              hasInteractiveChildren
-              customDragHandle
-            >
-              {(provided) => (
-                <FlyoutTabRow
-                  tab={tab}
-                  onToggle={(enabled) => handleToggle(tab.id, enabled)}
-                  dragHandleProps={provided.dragHandleProps}
-                />
-              )}
-            </EuiDraggable>
-          ))}
-        </EuiDroppable>
-      </EuiDragDropContext>
+      <FlyoutTabsList
+        tabs={draft.flyoutTabs}
+        onChange={onChange}
+        droppableId="entityCentricLabFlyoutTabsDroppable"
+        testSubjPrefix="entityCentricLabEditFlyoutContent"
+      />
     </div>
+  );
+};
+
+export interface FlyoutTabsListProps {
+  readonly tabs: readonly FlyoutTabConfig[];
+  readonly onChange: (next: FlyoutTabConfig[]) => void;
+  /** Must be unique across simultaneously rendered drag-drop contexts. */
+  readonly droppableId: string;
+  /** Prefix used to derive data-test-subj values. */
+  readonly testSubjPrefix: string;
+}
+
+/**
+ * Reusable drag-and-drop list of flyout-tab toggles. Used both from Step 4
+ * of the wizard and from the subset editor's "Content override" accordion.
+ */
+export const FlyoutTabsList = ({
+  tabs,
+  onChange,
+  droppableId,
+  testSubjPrefix,
+}: FlyoutTabsListProps) => {
+  const handleDragEnd: DragDropContextProps['onDragEnd'] = useCallback(
+    ({ source, destination }) => {
+      if (source && destination) {
+        const next = euiDragDropReorder([...tabs], source.index, destination.index);
+        onChange(next);
+      }
+    },
+    [tabs, onChange]
+  );
+
+  const handleToggle = useCallback(
+    (id: string, enabled: boolean) => {
+      onChange(tabs.map((tab) => (tab.id === id ? { ...tab, enabled } : tab)));
+    },
+    [tabs, onChange]
+  );
+
+  return (
+    <EuiDragDropContext onDragEnd={handleDragEnd}>
+      <EuiDroppable
+        droppableId={droppableId}
+        spacing="m"
+        data-test-subj={`${testSubjPrefix}Droppable`}
+      >
+        {tabs.map((tab, index) => (
+          <EuiDraggable
+            key={tab.id}
+            index={index}
+            draggableId={`${droppableId}-${tab.id}`}
+            spacing="m"
+            hasInteractiveChildren
+            customDragHandle
+          >
+            {(provided) => (
+              <FlyoutTabRow
+                tab={tab}
+                testSubjPrefix={testSubjPrefix}
+                onToggle={(enabled) => handleToggle(tab.id, enabled)}
+                dragHandleProps={provided.dragHandleProps}
+              />
+            )}
+          </EuiDraggable>
+        ))}
+      </EuiDroppable>
+    </EuiDragDropContext>
   );
 };
 
 interface FlyoutTabRowProps {
   readonly tab: FlyoutTabConfig;
+  readonly testSubjPrefix: string;
   readonly onToggle: (enabled: boolean) => void;
   readonly dragHandleProps?: DraggableProvidedDragHandleProps | null;
 }
 
-const FlyoutTabRow = ({ tab, onToggle, dragHandleProps }: FlyoutTabRowProps) => {
+const FlyoutTabRow = ({ tab, testSubjPrefix, onToggle, dragHandleProps }: FlyoutTabRowProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel
@@ -117,7 +146,7 @@ const FlyoutTabRow = ({ tab, onToggle, dragHandleProps }: FlyoutTabRowProps) => 
       css={css`
         opacity: ${tab.enabled ? 1 : 0.55};
       `}
-      data-test-subj={`entityCentricLabEditFlyoutContentRow-${tab.id}`}
+      data-test-subj={`${testSubjPrefix}Row-${tab.id}`}
     >
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -135,7 +164,7 @@ const FlyoutTabRow = ({ tab, onToggle, dragHandleProps }: FlyoutTabRowProps) => 
               cursor: grab;
               color: ${euiTheme.colors.textSubdued};
             `}
-            data-test-subj={`entityCentricLabEditFlyoutContentHandle-${tab.id}`}
+            data-test-subj={`${testSubjPrefix}Handle-${tab.id}`}
           >
             <EuiIcon type="grab" aria-hidden={true} />
           </span>
@@ -160,7 +189,7 @@ const FlyoutTabRow = ({ tab, onToggle, dragHandleProps }: FlyoutTabRowProps) => 
             )}
             checked={tab.enabled}
             onChange={(event) => onToggle(event.target.checked)}
-            data-test-subj={`entityCentricLabEditFlyoutContentToggle-${tab.id}`}
+            data-test-subj={`${testSubjPrefix}Toggle-${tab.id}`}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

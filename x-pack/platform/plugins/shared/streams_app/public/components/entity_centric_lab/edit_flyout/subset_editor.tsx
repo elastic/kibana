@@ -11,7 +11,6 @@ import {
   EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,10 +31,14 @@ import type { FakeEntityType } from '../fake_entity_types';
 import type {
   FilterCondition,
   FilterOperator,
+  FlyoutTabConfig,
   HealthSignals,
+  OwnershipConfig,
   SubsetDraft,
 } from './fake_entity_type_draft';
 import { buildBlankFilterCondition } from './fake_entity_type_draft';
+import { OwnershipForm } from './steps/ownership_step';
+import { FlyoutTabsList } from './steps/flyout_content_step';
 
 const OPERATOR_OPTIONS: ReadonlyArray<{ value: FilterOperator; text: string }> = [
   {
@@ -122,6 +125,26 @@ export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorB
       onChange({
         ...subset,
         healthOverride: { ...subset.healthOverride, signals: next },
+      });
+    },
+    [onChange, subset]
+  );
+
+  const updateOwnershipConfig = useCallback(
+    (next: OwnershipConfig) => {
+      onChange({
+        ...subset,
+        ownershipOverride: { ...subset.ownershipOverride, ownership: next },
+      });
+    },
+    [onChange, subset]
+  );
+
+  const updateFlyoutTabs = useCallback(
+    (next: FlyoutTabConfig[]) => {
+      onChange({
+        ...subset,
+        contentOverride: { ...subset.contentOverride, flyoutTabs: next },
       });
     },
     [onChange, subset]
@@ -295,28 +318,13 @@ export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorB
         )}
         dataTestSubj="entityCentricLabEditFlyoutSubsetEditorOwnershipOverride"
       >
-        <EuiCallOut
-          announceOnMount={false}
-          size="s"
-          color="warning"
-          iconType="info"
-          title={i18n.translate(
-            'xpack.streams.entityCentricLab.editFlyout.subsetEditor.ownershipTbdTitle',
-            { defaultMessage: 'TBD' }
-          )}
-        >
-          <EuiText size="s">
-            <p>
-              {i18n.translate(
-                'xpack.streams.entityCentricLab.editFlyout.subsetEditor.ownershipTbdBody',
-                {
-                  defaultMessage:
-                    'Ownership overrides are not yet wired in this prototype. The shape will mirror Step 3.',
-                }
-              )}
-            </p>
-          </EuiText>
-        </EuiCallOut>
+        <OwnershipForm
+          ownership={subset.ownershipOverride.ownership}
+          coveragePreview={subset.ownershipOverride.coveragePreview}
+          onChange={updateOwnershipConfig}
+          idPrefix={`subsetOwnership-${subset.id}`}
+          testSubjPrefix="entityCentricLabEditFlyoutSubsetEditorOwnership"
+        />
       </OverrideAccordion>
 
       <EuiSpacer size="m" />
@@ -346,28 +354,21 @@ export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorB
         )}
         dataTestSubj="entityCentricLabEditFlyoutSubsetEditorContentOverride"
       >
-        <EuiCallOut
-          announceOnMount={false}
-          size="s"
-          color="warning"
-          iconType="info"
-          title={i18n.translate(
-            'xpack.streams.entityCentricLab.editFlyout.subsetEditor.contentTbdTitle',
-            { defaultMessage: 'TBD' }
-          )}
-        >
-          <EuiText size="s">
-            <p>
-              {i18n.translate(
-                'xpack.streams.entityCentricLab.editFlyout.subsetEditor.contentTbdBody',
-                {
-                  defaultMessage:
-                    'Content overrides are not yet wired in this prototype. The shape will mirror Step 4 (flyout tabs).',
-                }
-              )}
-            </p>
-          </EuiText>
-        </EuiCallOut>
+        <EuiText size="s">
+          <p>
+            {i18n.translate('xpack.streams.entityCentricLab.editFlyout.subsetEditor.contentIntro', {
+              defaultMessage:
+                'Re-order or toggle tabs for entities in this subset. Disabled tabs are hidden from the entity flyout.',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <FlyoutTabsList
+          tabs={subset.contentOverride.flyoutTabs}
+          onChange={updateFlyoutTabs}
+          droppableId={`entityCentricLabSubsetFlyoutTabsDroppable-${subset.id}`}
+          testSubjPrefix="entityCentricLabEditFlyoutSubsetEditorContent"
+        />
       </OverrideAccordion>
 
       <EuiSpacer size="m" />

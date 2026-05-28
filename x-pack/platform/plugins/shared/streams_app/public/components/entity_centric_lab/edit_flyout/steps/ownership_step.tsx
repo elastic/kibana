@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
+  CoveragePreview,
   EntityTypeDraft,
   OwnerMapping,
   OwnershipConfig,
@@ -38,7 +39,7 @@ import type {
 } from '../fake_entity_type_draft';
 import { buildBlankOwnerMapping } from '../fake_entity_type_draft';
 
-interface Props {
+interface StepProps {
   readonly draft: EntityTypeDraft;
   readonly onChange: (next: OwnershipConfig) => void;
 }
@@ -95,11 +96,53 @@ const OWNERSHIP_TYPE_OPTIONS: ReadonlyArray<{ id: OwnershipType; label: string }
   },
 ];
 
-export const OwnershipStep = ({ draft, onChange }: Props) => {
-  const { ownership, coveragePreview } = draft;
-  const resolverFieldAccordionId = useGeneratedHtmlId({ prefix: 'ownershipResolverField' });
-  const mappingAccordionId = useGeneratedHtmlId({ prefix: 'ownershipMapping' });
-  const coverageAccordionId = useGeneratedHtmlId({ prefix: 'ownershipCoverage' });
+export const OwnershipStep = ({ draft, onChange }: StepProps) => {
+  return (
+    <div data-test-subj="entityCentricLabEditFlyoutOwnershipStep">
+      <EuiText size="s">
+        <p>
+          {i18n.translate('xpack.streams.entityCentricLab.editFlyout.ownership.intro', {
+            defaultMessage: 'You can define ownership for this entity type.',
+          })}
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <OwnershipForm
+        ownership={draft.ownership}
+        coveragePreview={draft.coveragePreview}
+        onChange={onChange}
+        idPrefix="ownership"
+        testSubjPrefix="entityCentricLabEditFlyoutOwnership"
+      />
+    </div>
+  );
+};
+
+export interface OwnershipFormProps {
+  readonly ownership: OwnershipConfig;
+  readonly coveragePreview: CoveragePreview;
+  readonly onChange: (next: OwnershipConfig) => void;
+  /** Prefix used to generate stable accordion ids. */
+  readonly idPrefix: string;
+  /** Prefix used to derive data-test-subj values. */
+  readonly testSubjPrefix: string;
+}
+
+/**
+ * Reusable ownership editor (resolver field + owners mapping + coverage
+ * preview). Used both from Step 3 of the wizard and from the subset
+ * editor's "Ownership overrides" accordion.
+ */
+export const OwnershipForm = ({
+  ownership,
+  coveragePreview,
+  onChange,
+  idPrefix,
+  testSubjPrefix,
+}: OwnershipFormProps) => {
+  const resolverFieldAccordionId = useGeneratedHtmlId({ prefix: `${idPrefix}ResolverField` });
+  const mappingAccordionId = useGeneratedHtmlId({ prefix: `${idPrefix}Mapping` });
+  const coverageAccordionId = useGeneratedHtmlId({ prefix: `${idPrefix}Coverage` });
 
   const updateOwner = useCallback(
     (ownerId: string, patch: Partial<OwnerMapping>) => {
@@ -131,16 +174,7 @@ export const OwnershipStep = ({ draft, onChange }: Props) => {
   }, [onChange, ownership]);
 
   return (
-    <div data-test-subj="entityCentricLabEditFlyoutOwnershipStep">
-      <EuiText size="s">
-        <p>
-          {i18n.translate('xpack.streams.entityCentricLab.editFlyout.ownership.intro', {
-            defaultMessage: 'You can define ownership for this entity type.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-
+    <>
       <EuiAccordion
         id={resolverFieldAccordionId}
         initialIsOpen
@@ -175,7 +209,7 @@ export const OwnershipStep = ({ draft, onChange }: Props) => {
                   ]
             }
             onChange={(event) => onChange({ ...ownership, resolverField: event.target.value })}
-            data-test-subj="entityCentricLabEditFlyoutOwnershipResolverField"
+            data-test-subj={`${testSubjPrefix}ResolverField`}
           />
         </EuiFormRow>
       </EuiAccordion>
@@ -197,6 +231,7 @@ export const OwnershipStep = ({ draft, onChange }: Props) => {
         paddingSize="m"
       >
         <EuiCallOut
+          announceOnMount={false}
           size="s"
           color="primary"
           iconType="info"
@@ -215,6 +250,7 @@ export const OwnershipStep = ({ draft, onChange }: Props) => {
               <OwnerCard
                 owner={owner}
                 index={index + 1}
+                testSubjPrefix={testSubjPrefix}
                 onUpdate={(patch) => updateOwner(owner.id, patch)}
                 onRemove={() => removeOwner(owner.id)}
               />
@@ -225,7 +261,7 @@ export const OwnershipStep = ({ draft, onChange }: Props) => {
         <EuiButtonEmpty
           iconType="plusInCircle"
           onClick={addOwner}
-          data-test-subj="entityCentricLabEditFlyoutOwnershipAddOwner"
+          data-test-subj={`${testSubjPrefix}AddOwner`}
         >
           {i18n.translate('xpack.streams.entityCentricLab.editFlyout.ownership.addOwnerButton', {
             defaultMessage: 'Add owner',
@@ -249,20 +285,21 @@ export const OwnershipStep = ({ draft, onChange }: Props) => {
         }
         paddingSize="m"
       >
-        <CoverageBar coverage={coveragePreview} />
+        <CoverageBar coverage={coveragePreview} testSubjPrefix={testSubjPrefix} />
       </EuiAccordion>
-    </div>
+    </>
   );
 };
 
 interface OwnerCardProps {
   readonly owner: OwnerMapping;
   readonly index: number;
+  readonly testSubjPrefix: string;
   readonly onUpdate: (patch: Partial<OwnerMapping>) => void;
   readonly onRemove: () => void;
 }
 
-const OwnerCard = ({ owner, index, onUpdate, onRemove }: OwnerCardProps) => {
+const OwnerCard = ({ owner, index, testSubjPrefix, onUpdate, onRemove }: OwnerCardProps) => {
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
       <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
@@ -287,7 +324,7 @@ const OwnerCard = ({ owner, index, onUpdate, onRemove }: OwnerCardProps) => {
                 defaultMessage: 'Remove owner',
               }
             )}
-            data-test-subj={`entityCentricLabEditFlyoutOwnershipRemove-${owner.id}`}
+            data-test-subj={`${testSubjPrefix}Remove-${owner.id}`}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -303,7 +340,7 @@ const OwnerCard = ({ owner, index, onUpdate, onRemove }: OwnerCardProps) => {
           fullWidth
           value={owner.resolverValue}
           onChange={(event) => onUpdate({ resolverValue: event.target.value })}
-          data-test-subj={`entityCentricLabEditFlyoutOwnershipResolverValue-${owner.id}`}
+          data-test-subj={`${testSubjPrefix}ResolverValue-${owner.id}`}
         />
       </EuiFormRow>
       <EuiFlexGroup gutterSize="m">
@@ -374,10 +411,11 @@ const OwnerCard = ({ owner, index, onUpdate, onRemove }: OwnerCardProps) => {
 };
 
 interface CoverageBarProps {
-  readonly coverage: EntityTypeDraft['coveragePreview'];
+  readonly coverage: CoveragePreview;
+  readonly testSubjPrefix: string;
 }
 
-const CoverageBar = ({ coverage }: CoverageBarProps) => {
+const CoverageBar = ({ coverage, testSubjPrefix }: CoverageBarProps) => {
   const unmatchedColumns: Array<EuiBasicTableColumn<UnmatchedResolverValue>> = [
     {
       field: 'value',
@@ -402,10 +440,7 @@ const CoverageBar = ({ coverage }: CoverageBarProps) => {
       ),
       width: '140px',
       render: () => (
-        <EuiLink
-          onClick={() => undefined}
-          data-test-subj="entityCentricLabEditFlyoutOwnershipAddOwnerInline"
-        >
+        <EuiLink onClick={() => undefined} data-test-subj={`${testSubjPrefix}AddOwnerInline`}>
           {i18n.translate(
             'xpack.streams.entityCentricLab.editFlyout.ownership.coverageAddOwnerLink',
             { defaultMessage: 'Add owner' }
@@ -461,7 +496,7 @@ const CoverageBar = ({ coverage }: CoverageBarProps) => {
           'xpack.streams.entityCentricLab.editFlyout.ownership.coverageTableCaption',
           { defaultMessage: 'Top unmatched resolver values' }
         )}
-        data-test-subj="entityCentricLabEditFlyoutOwnershipCoverageTable"
+        data-test-subj={`${testSubjPrefix}CoverageTable`}
       />
     </>
   );

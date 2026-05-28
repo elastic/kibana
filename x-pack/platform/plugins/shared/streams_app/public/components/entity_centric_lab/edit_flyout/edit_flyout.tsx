@@ -123,8 +123,8 @@ export const EditEntityTypeFlyout = ({ entityType, onClose }: Props) => {
   );
 
   const handleAddSubset = useCallback(() => {
-    setView({ kind: 'subset-editor', subset: buildBlankSubsetDraft() });
-  }, []);
+    setView({ kind: 'subset-editor', subset: buildBlankSubsetDraft(draft) });
+  }, [draft]);
 
   const handleEditSubset = useCallback(
     (subsetId: string) => {
