@@ -11,6 +11,7 @@ import type {
   RuleParamsV1,
 } from '../../../../../../../../common/routes/rule/response';
 import type { FindResult } from '../../../../../../../application/rule/methods/find';
+import type { RuleSnoozedInstance } from '../../../../../../../application/rule/types';
 import {
   transformRuleActionsInternalV1,
   transformMonitoringV1,
@@ -18,8 +19,12 @@ import {
   transformFlappingV1,
 } from '../../../../../transforms';
 
+type RuleWithSnoozedInstances = FindResult<{}>['data'][number] & {
+  snoozedInstances?: RuleSnoozedInstance[];
+};
+
 export const transformPartialRule = (
-  rule: FindResult<{}>['data'][number],
+  rule: RuleWithSnoozedInstances,
   fields?: string[]
 ): FindRulesInternalResponseV1['data'][number] => {
   const ruleResponse = {
@@ -125,6 +130,6 @@ export const transformFindRulesInternalResponse = (
     page: result.page,
     per_page: result.perPage,
     total: result.total,
-    data: result.data.map((rule) => transformPartialRule(rule, fields)),
+    data: result.data.map((rule) => transformPartialRule(rule as RuleWithSnoozedInstances, fields)),
   };
 };

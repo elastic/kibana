@@ -223,21 +223,6 @@ export type RuleSnooze = Array<{
   skipRecurrences?: string[];
 }>;
 
-export type RuleSnoozedInstanceCondition =
-  | { type: 'field_change'; field: string }
-  | { type: 'severity_change' }
-  | { type: 'severity_equals'; value: 'critical' | 'high' | 'medium' | 'low' | 'info' };
-
-export interface RuleSnoozedInstance {
-  instanceId: string;
-  expiresAt?: string | null;
-  conditions?: RuleSnoozedInstanceCondition[];
-  conditionOperator?: 'any' | 'all';
-  snoozeSnapshot?: Record<string, unknown>;
-  snoozedAt: string;
-  snoozedBy: string;
-}
-
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
   outcomeOrder?: number;
@@ -309,7 +294,6 @@ export interface Rule<Params extends RuleTypeParams = never> {
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
-  snoozedInstances?: RuleSnoozedInstance[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
