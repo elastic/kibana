@@ -222,4 +222,61 @@ describe('AttackDiscoveryScheduleDataClient', () => {
       });
     });
   });
+
+  describe('bulkDeleteSchedules', () => {
+    it('should call `rulesClient.bulkDeleteRules` with the schedule ids to delete', async () => {
+      const scheduleIds = ['schedule-1', 'schedule-2'];
+      (scheduleDataClientParams.rulesClient.bulkDeleteRules as jest.Mock).mockResolvedValue({
+        errors: [],
+        rules: scheduleIds.map((id) => ({ id })),
+        total: scheduleIds.length,
+      });
+
+      const scheduleDataClient = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+      const result = await scheduleDataClient.bulkDeleteSchedules({ ids: scheduleIds });
+
+      expect(scheduleDataClientParams.rulesClient.bulkDeleteRules).toHaveBeenCalledWith({
+        ids: scheduleIds,
+      });
+      expect(result).toEqual({ ids: scheduleIds, errors: [], total: scheduleIds.length });
+    });
+  });
+
+  describe('bulkEnableSchedules', () => {
+    it('should call `rulesClient.bulkEnableRules` with the schedule ids to enable', async () => {
+      const scheduleIds = ['schedule-3', 'schedule-4'];
+      (scheduleDataClientParams.rulesClient.bulkEnableRules as jest.Mock).mockResolvedValue({
+        errors: [],
+        rules: scheduleIds.map((id) => ({ id })),
+        total: scheduleIds.length,
+      });
+
+      const scheduleDataClient = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+      const result = await scheduleDataClient.bulkEnableSchedules({ ids: scheduleIds });
+
+      expect(scheduleDataClientParams.rulesClient.bulkEnableRules).toHaveBeenCalledWith({
+        ids: scheduleIds,
+      });
+      expect(result).toEqual({ ids: scheduleIds, errors: [], total: scheduleIds.length });
+    });
+  });
+
+  describe('bulkDisableSchedules', () => {
+    it('should call `rulesClient.bulkDisableRules` with the schedule ids to disable', async () => {
+      const scheduleIds = ['schedule-5', 'schedule-6'];
+      (scheduleDataClientParams.rulesClient.bulkDisableRules as jest.Mock).mockResolvedValue({
+        errors: [],
+        rules: scheduleIds.map((id) => ({ id })),
+        total: scheduleIds.length,
+      });
+
+      const scheduleDataClient = new AttackDiscoveryScheduleDataClient(scheduleDataClientParams);
+      const result = await scheduleDataClient.bulkDisableSchedules({ ids: scheduleIds });
+
+      expect(scheduleDataClientParams.rulesClient.bulkDisableRules).toHaveBeenCalledWith({
+        ids: scheduleIds,
+      });
+      expect(result).toEqual({ ids: scheduleIds, errors: [], total: scheduleIds.length });
+    });
+  });
 });

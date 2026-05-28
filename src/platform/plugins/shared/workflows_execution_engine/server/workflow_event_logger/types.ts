@@ -85,6 +85,10 @@ export interface WorkflowEventLoggerOptions {
   enableConsoleLogging?: boolean;
 }
 
+export interface WorkflowEventFlushOptions {
+  signal?: AbortSignal;
+}
+
 export interface IWorkflowEventLogger {
   logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
   logError(message: string, error?: Error, additionalData?: Partial<WorkflowLogEvent>): void;
@@ -98,5 +102,5 @@ export interface IWorkflowEventLogger {
     stepName?: string,
     stepType?: string
   ): IWorkflowEventLogger;
-  flushEvents(): Promise<void>;
+  flushEvents(options?: WorkflowEventFlushOptions): Promise<void>;
 }

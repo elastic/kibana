@@ -152,7 +152,7 @@ describe('aiPromptStepDefinition', () => {
           'test-connector-id',
           mockInference,
           expect.any(Object),
-          { featureId: 'ai.prompt', searchInferenceEndpoints: undefined }
+          { featureId: 'ai_prompt', searchInferenceEndpoints: undefined }
         );
         expect(mockInference.getChatModel).toHaveBeenCalledWith({
           connectorId: 'resolved-connector-id',
@@ -232,7 +232,7 @@ describe('aiPromptStepDefinition', () => {
           undefined,
           mockInference,
           expect.any(Object),
-          { featureId: 'ai.prompt', searchInferenceEndpoints: undefined }
+          { featureId: 'ai_prompt', searchInferenceEndpoints: undefined }
         );
       });
     });
@@ -430,7 +430,7 @@ describe('aiPromptStepDefinition', () => {
           'test-connector-id',
           mockInference,
           expect.any(Object),
-          { featureId: 'ai.prompt', searchInferenceEndpoints: undefined }
+          { featureId: 'ai_prompt', searchInferenceEndpoints: undefined }
         );
 
         // Verify getChatModel is called with correct parameters
@@ -468,7 +468,7 @@ describe('aiPromptStepDefinition', () => {
           'test-connector-id',
           mockInference,
           mockFakeRequest,
-          { featureId: 'ai.prompt', searchInferenceEndpoints: undefined }
+          { featureId: 'ai_prompt', searchInferenceEndpoints: undefined }
         );
 
         expect(mockInference.getChatModel).toHaveBeenCalledWith({

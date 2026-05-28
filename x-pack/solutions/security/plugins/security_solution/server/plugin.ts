@@ -59,7 +59,6 @@ import {
   DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
-  CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
 import { registerCaseAttachments } from './cases/attachments/register';
 import { securityAlertAttachmentType } from './cases/attachments/alert';
@@ -169,6 +168,7 @@ import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capab
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
+import { registerMlAnomalyDetectionBehaviorMaintainer } from './lib/entity_analytics/maintainers/behaviors/ml_anomaly_detection';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
 
@@ -269,9 +269,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = this.config.experimentalFeatures;
     const endpointAppContextService = this.endpointAppContextService;
 
-    registerTools(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
-      this.logger.error(`Error registering security tools: ${error}`);
-    });
+    registerTools(agentBuilder, core, logger, experimentalFeatures, this.isServerless).catch(
+      (error) => {
+        this.logger.error(`Error registering security tools: ${error}`);
+      }
+    );
     registerAttachments(agentBuilder).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
@@ -329,6 +331,14 @@ export class Plugin implements ISecuritySolutionPlugin {
         entityAnalyticsConfig: config.entityAnalytics,
         telemetry: core.analytics,
       });
+      if (experimentalFeatures.entityAnalyticsMlJobBehaviorMaintainer) {
+        registerMlAnomalyDetectionBehaviorMaintainer({
+          entityStore: plugins.entityStore,
+          getStartServices: core.getStartServices,
+          ml: plugins.ml,
+          logger: this.logger,
+        });
+      }
       if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
         registerWatchlistMaintainer({
           entityStore: plugins.entityStore,
@@ -477,6 +487,15 @@ export class Plugin implements ISecuritySolutionPlugin {
           recommendedEndpoints: [],
         });
       }
+
+      plugins.searchInferenceEndpoints.features.register({
+        parentFeatureId: 'security_search_inference_parent',
+        featureId: 'ai_value_report',
+        featureName: 'AI Value Report',
+        featureDescription: 'AI Value Report inference endpoint configuration',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
     }
 
     const requestContextFactory = new RequestContextFactory({
@@ -749,10 +768,6 @@ export class Plugin implements ISecuritySolutionPlugin {
           threatIntelligenceSearchStrategy
         );
 
-        plugins.cases.attachmentFramework.registerExternalReference({
-          id: CASE_ATTACHMENT_INDICATOR_TYPE_ID,
-        });
-
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })
       .catch(() => {}); // it shouldn't reject, but just in case
@@ -919,6 +934,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       connectorActions: plugins.actions,
       spacesService: plugins.spaces?.spacesService,
       agentBuilder: plugins.agentBuilder,
+      getExceptionListClient: this.lists?.getExceptionListClient,
     });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
