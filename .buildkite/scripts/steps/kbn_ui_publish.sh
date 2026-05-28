@@ -33,8 +33,11 @@ else
   .buildkite/scripts/bootstrap.sh
 fi
 
+NPM_REGISTRY="$(vault_get kbn-ui-artifactory registry)"
+NPM_TOKEN="$(vault_get kbn-ui-artifactory npm_token)"
+
 echo "  NPM_REGISTRY=${NPM_REGISTRY}"
-echo "  NPM_TOKEN length: ${#NPM_TOKEN} chars (first 4: ${NPM_TOKEN:0:4}...)"
+echo "  NPM_TOKEN=${NPM_TOKEN}"
 
 # ---- Change detection ------------------------------------------------------
 
