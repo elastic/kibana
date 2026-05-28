@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const SINGLE_STEP_WORKFLOW_TAG = 'alertingv2_singlestep';
+export const INLINE_WORKFLOW_TAG = 'alertingv2_singlestep';

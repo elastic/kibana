@@ -16,11 +16,11 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
-  SingleStepWorkflowForm,
-  createInitialValue,
-  isItemValid,
-  type SingleStepWorkflowFormValue,
-} from '../components/single_step_workflow_form';
+  ActionForm,
+  createInitialActionFormValue,
+  isActionValid,
+  type ActionFormValue,
+} from '../components/actions_form';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
@@ -58,7 +58,7 @@ export const useComposeDiscoverFlyout = ({
   const createRuleMutation = useCreateRule();
   const setupNotificationsMutation = useSetupRuleNotifications();
   const updateRuleMutation = useUpdateRule();
-  const ruleFormServices = useMemo<RuleFormServices<SingleStepWorkflowFormValue>>(
+  const ruleFormServices = useMemo<RuleFormServices<ActionFormValue>>(
     () => ({
       http,
       data,
@@ -67,9 +67,9 @@ export const useComposeDiscoverFlyout = ({
       application,
       lens,
       workflowForm: {
-        Component: SingleStepWorkflowForm,
-        defaultValue: createInitialValue,
-        isValid: (value: SingleStepWorkflowFormValue) => value.every(isItemValid),
+        Component: ActionForm,
+        defaultValue: createInitialActionFormValue,
+        isValid: (value: ActionFormValue) => value.every(isActionValid),
       },
       uiActions,
     }),
@@ -168,7 +168,7 @@ export const useComposeDiscoverFlyout = ({
   );
 
   const flyout = flyoutOpen ? (
-    <ComposeDiscoverFlyout<SingleStepWorkflowFormValue>
+    <ComposeDiscoverFlyout<ActionFormValue>
       historyKey={historyKey}
       mode={flyoutMode}
       rule={targetRule ?? undefined}
@@ -180,10 +180,10 @@ export const useComposeDiscoverFlyout = ({
       onCreateRule={(payload, ruleNotifications) =>
         createRuleMutation.mutate(payload, {
           onSuccess: (rule) => {
-            const workflows = ruleNotifications?.workflows ?? [];
-            if (workflows.length > 0) {
+            const actions = ruleNotifications?.workflows ?? [];
+            if (actions.length > 0) {
               setupNotificationsMutation.mutate(
-                { rule, workflows },
+                { rule, actions },
                 { onSuccess: closeAndRedirect, onError: closeAndRedirect }
               );
             } else {

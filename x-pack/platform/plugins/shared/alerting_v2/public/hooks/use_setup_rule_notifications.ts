@@ -9,16 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { useMutation } from '@kbn/react-query';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import {
-  buildSingleStepWorkflowYaml,
-  type SingleStepWorkflowItem,
-} from '../components/single_step_workflow_form';
+import { buildInlineWorkflowYaml, type ActionDraft } from '../components/actions_form';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import type { RuleApiResponse } from '../services/rules_api';
 
 export interface SetupRuleNotificationsParams {
   rule: RuleApiResponse;
-  workflows: SingleStepWorkflowItem[];
+  actions: ActionDraft[];
 }
 
 export const useSetupRuleNotifications = () => {
@@ -27,30 +24,30 @@ export const useSetupRuleNotifications = () => {
   const { toasts } = useService(CoreStart('notifications'));
 
   return useMutation({
-    mutationFn: async ({ rule, workflows }: SetupRuleNotificationsParams) => {
-      if (workflows.length === 0) {
+    mutationFn: async ({ rule, actions }: SetupRuleNotificationsParams) => {
+      if (actions.length === 0) {
         return;
       }
 
-      const setupOne = async (item: SingleStepWorkflowItem): Promise<void> => {
+      const setupOne = async (action: ActionDraft): Promise<void> => {
         let createdWorkflowId: string | null = null;
         let workflowId: string;
 
-        if (item.kind === 'slack' || item.kind === 'email') {
+        if (action.source === 'inline') {
           const created = await workflowApi.createWorkflow({
-            yaml: buildSingleStepWorkflowYaml(item),
+            yaml: buildInlineWorkflowYaml(action),
           });
           workflowId = created.id;
           createdWorkflowId = workflowId;
         } else {
-          if (!item.workflowId) {
+          if (!action.workflowId) {
             throw new Error(
               i18n.translate('xpack.alertingV2.useSetupRuleNotifications.workflowRequiredError', {
                 defaultMessage: 'A workflow must be selected when notifications are enabled.',
               })
             );
           }
-          workflowId = item.workflowId;
+          workflowId = action.workflowId;
         }
 
         try {
@@ -71,7 +68,7 @@ export const useSetupRuleNotifications = () => {
         }
       };
 
-      const results = await Promise.allSettled(workflows.map(setupOne));
+      const results = await Promise.allSettled(actions.map(setupOne));
 
       const failures = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
 
@@ -94,13 +91,13 @@ export const useSetupRuleNotifications = () => {
         );
       }
     },
-    onSuccess: (_, { workflows }) => {
-      if (workflows.length === 0) return;
+    onSuccess: (_, { actions }) => {
+      if (actions.length === 0) return;
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.useSetupRuleNotifications.successMessage', {
           defaultMessage:
             '{count} action {count, plural, one {policy} other {policies}} created successfully',
-          values: { count: workflows.length },
+          values: { count: actions.length },
         })
       );
     },

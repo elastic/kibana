@@ -65,7 +65,7 @@ export const WorkflowReferenceSelector = ({
     return (
       <EuiCallOut
         announceOnMount={false}
-        title={i18n.translate('xpack.alertingV2.singleStepWorkflow.workflowsDisabled.title', {
+        title={i18n.translate('xpack.alertingV2.actionForm.workflowsDisabled.title', {
           defaultMessage: 'Workflows are not enabled',
         })}
         color="warning"
@@ -73,13 +73,13 @@ export const WorkflowReferenceSelector = ({
         data-test-subj="singleStepWorkflowsDisabledCallout"
       >
         <FormattedMessage
-          id="xpack.alertingV2.singleStepWorkflow.workflowsDisabled.description"
+          id="xpack.alertingV2.actionForm.workflowsDisabled.description"
           defaultMessage="Single-step workflows require the Workflows feature. Enable it in {advancedSettingsLink}, then refresh this page."
           values={{
             advancedSettingsLink: (
               <EuiLink href={settingsUrl} data-test-subj="singleStepWorkflowsDisabledSettingsLink">
                 <FormattedMessage
-                  id="xpack.alertingV2.singleStepWorkflow.workflowsDisabled.advancedSettingsLink"
+                  id="xpack.alertingV2.actionForm.workflowsDisabled.advancedSettingsLink"
                   defaultMessage="Advanced Settings"
                 />
               </EuiLink>
@@ -92,7 +92,7 @@ export const WorkflowReferenceSelector = ({
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.alertingV2.singleStepWorkflow.workflowReference.label', {
+      label={i18n.translate('xpack.alertingV2.actionForm.workflowReference.label', {
         defaultMessage: 'Workflow',
       })}
       fullWidth
@@ -106,12 +106,9 @@ export const WorkflowReferenceSelector = ({
         isLoading={isLoading}
         isInvalid={!!isInvalid}
         data-test-subj="workflowReferenceSelector"
-        placeholder={i18n.translate(
-          'xpack.alertingV2.singleStepWorkflow.workflowReference.placeholder',
-          {
-            defaultMessage: 'Search for a workflow',
-          }
-        )}
+        placeholder={i18n.translate('xpack.alertingV2.actionForm.workflowReference.placeholder', {
+          defaultMessage: 'Search for a workflow',
+        })}
         selectedOptions={selectedOptions}
         onSearchChange={setSearchQuery}
         onChange={(options) => {

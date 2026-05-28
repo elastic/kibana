@@ -7,22 +7,22 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import React, { useState } from 'react';
-import { SingleStepWorkflowForm } from './single_step_workflow_form';
-import type { SingleStepWorkflowFormValue } from './types';
+import { ActionForm } from './action_form';
+import type { ActionFormValue } from './types';
 
 interface StoryProps {
-  initialValue: SingleStepWorkflowFormValue;
+  initialValue: ActionFormValue;
 }
 
-const SingleStepWorkflowFormStory = ({ initialValue }: StoryProps) => {
-  const [value, setValue] = useState<SingleStepWorkflowFormValue>(initialValue);
+const ActionFormStory = ({ initialValue }: StoryProps) => {
+  const [value, setValue] = useState<ActionFormValue>(initialValue);
 
-  return <SingleStepWorkflowForm value={value} onChange={setValue} />;
+  return <ActionForm value={value} onChange={setValue} />;
 };
 
-const meta: Meta<typeof SingleStepWorkflowFormStory> = {
-  title: 'Alerting V2/Single Step Workflow/Form',
-  component: SingleStepWorkflowFormStory,
+const meta: Meta<typeof ActionFormStory> = {
+  title: 'Alerting V2/Action Form/Form',
+  component: ActionFormStory,
   parameters: {
     layout: 'padded',
   },
@@ -30,7 +30,7 @@ const meta: Meta<typeof SingleStepWorkflowFormStory> = {
 
 export default meta;
 
-type Story = StoryObj<typeof SingleStepWorkflowFormStory>;
+type Story = StoryObj<typeof ActionFormStory>;
 
 export const Empty: Story = {
   args: {
@@ -38,9 +38,9 @@ export const Empty: Story = {
   },
 };
 
-export const WorkflowItem: Story = {
+export const ExistingWorkflow: Story = {
   args: {
-    initialValue: [{ id: 'w1', kind: 'workflow', workflowId: 'singlestep-1' }],
+    initialValue: [{ id: 'w1', source: 'existing', workflowId: 'singlestep-1' }],
   },
 };
 
@@ -49,7 +49,8 @@ export const SlackEmpty: Story = {
     initialValue: [
       {
         id: 's1',
-        kind: 'slack',
+        source: 'inline',
+        stepType: 'slack',
         connectorId: null,
         params: 'message: ""\n',
       },
@@ -62,7 +63,8 @@ export const SlackFilled: Story = {
     initialValue: [
       {
         id: 's1',
-        kind: 'slack',
+        source: 'inline',
+        stepType: 'slack',
         connectorId: 'slack-ops',
         params: 'message: "Alert for {{ inputs.policyId }}"\n',
       },
@@ -75,17 +77,19 @@ export const MultipleActions: Story = {
     initialValue: [
       {
         id: 'e1',
-        kind: 'email',
+        source: 'inline',
+        stepType: 'email',
         connectorId: 'email-ops',
         params: 'to: ""\nsubject: ""\nmessage: ""\n',
       },
       {
         id: 's1',
-        kind: 'slack',
+        source: 'inline',
+        stepType: 'slack',
         connectorId: 'slack-ops',
         params: 'message: "Alert for {{ inputs.policyId }}"\n',
       },
-      { id: 'w1', kind: 'workflow', workflowId: 'singlestep-1' },
+      { id: 'w1', source: 'existing', workflowId: 'singlestep-1' },
     ],
   },
 };

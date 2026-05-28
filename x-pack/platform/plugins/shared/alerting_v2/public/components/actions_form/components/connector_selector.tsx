@@ -69,7 +69,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.alertingV2.singleStepWorkflow.connector.label', {
+        label={i18n.translate('xpack.alertingV2.actionForm.connector.label', {
           defaultMessage: 'Connector',
         })}
         labelAppend={
@@ -77,7 +77,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
             data-test-subj="singleStepWorkflowCreateConnectorLink"
             onClick={() => setIsCreateFlyoutOpen(true)}
           >
-            {i18n.translate('xpack.alertingV2.singleStepWorkflow.connector.createNew', {
+            {i18n.translate('xpack.alertingV2.actionForm.connector.createNew', {
               defaultMessage: '+ Create new connector',
             })}
           </EuiLink>
@@ -89,7 +89,7 @@ export const ConnectorSelector = ({ connectorTypeId, value, onChange }: Connecto
           singleSelection={{ asPlainText: true }}
           data-test-subj="singleStepWorkflowConnectorSelect"
           isLoading={isLoading}
-          placeholder={i18n.translate('xpack.alertingV2.singleStepWorkflow.connector.placeholder', {
+          placeholder={i18n.translate('xpack.alertingV2.actionForm.connector.placeholder', {
             defaultMessage: 'Select a connector',
           })}
           selectedOptions={selected}

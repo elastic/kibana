@@ -17,8 +17,8 @@ import type { RuleApiResponse } from '../services/rules_api';
 jest.mock('@kbn/core-di-browser');
 jest.mock('@kbn/workflows-ui');
 jest.mock('../services/action_policies_api');
-jest.mock('../components/single_step_workflow_form', () => ({
-  buildSingleStepWorkflowYaml: jest.fn().mockReturnValue('workflow: yaml'),
+jest.mock('../components/actions_form', () => ({
+  buildInlineWorkflowYaml: jest.fn().mockReturnValue('workflow: yaml'),
 }));
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
@@ -29,23 +29,25 @@ const mockRule = {
   metadata: { name: 'My Test Rule', description: '', tags: [] },
 } as unknown as RuleApiResponse;
 
-const emailItem = {
-  id: 'item-email',
-  kind: 'email' as const,
+const emailAction = {
+  id: 'action-email',
+  source: 'inline' as const,
+  stepType: 'email' as const,
   connectorId: 'connector-1',
   params: '{}',
 };
 
-const slackItem = {
-  id: 'item-slack',
-  kind: 'slack' as const,
+const slackAction = {
+  id: 'action-slack',
+  source: 'inline' as const,
+  stepType: 'slack' as const,
   connectorId: 'connector-2',
   params: 'message: ""',
 };
 
-const workflowItem = {
-  id: 'item-wf',
-  kind: 'workflow' as const,
+const existingWorkflowAction = {
+  id: 'action-wf',
+  source: 'existing' as const,
   workflowId: 'workflow-existing-1',
 };
 
@@ -92,12 +94,12 @@ describe('useSetupRuleNotifications', () => {
   });
 
   describe('empty list', () => {
-    it('does nothing and shows no toast when workflows is empty', async () => {
+    it('does nothing and shows no toast when actions is empty', async () => {
       const { result } = renderHook(() => useSetupRuleNotifications(), {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflows: [] });
+      result.current.mutate({ rule: mockRule, actions: [] });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -110,8 +112,8 @@ describe('useSetupRuleNotifications', () => {
     });
   });
 
-  describe('single item — email / slack (create) mode', () => {
-    it('creates workflow and action policy for an email item, shows success toast', async () => {
+  describe('single action — inline (create) mode', () => {
+    it('creates workflow and action policy for an email action, shows success toast', async () => {
       mockCreateWorkflowFn.mockResolvedValue({ id: 'workflow-new-1' });
       mockCreateActionPolicy.mockResolvedValue({});
 
@@ -119,7 +121,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflows: [emailItem] });
+      result.current.mutate({ rule: mockRule, actions: [emailAction] });
 
       await waitFor(() => {
         expect(mockCreateWorkflowFn).toHaveBeenCalledWith({ yaml: expect.any(String) });
@@ -135,7 +137,7 @@ describe('useSetupRuleNotifications', () => {
       });
     });
 
-    it('also works for the slack kind', async () => {
+    it('also works for the slack step type', async () => {
       mockCreateWorkflowFn.mockResolvedValue({ id: 'workflow-new-2' });
       mockCreateActionPolicy.mockResolvedValue({});
 
@@ -143,7 +145,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflows: [slackItem] });
+      result.current.mutate({ rule: mockRule, actions: [slackAction] });
 
       await waitFor(() => {
         expect(mockCreateWorkflowFn).toHaveBeenCalledTimes(1);
@@ -162,7 +164,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflows: [emailItem] });
+      result.current.mutate({ rule: mockRule, actions: [emailAction] });
 
       await waitFor(() => {
         expect(mockDeleteWorkflowFn).toHaveBeenCalledWith('workflow-new-1');
@@ -180,7 +182,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflows: [emailItem] });
+      result.current.mutate({ rule: mockRule, actions: [emailAction] });
 
       await waitFor(() => {
         expect(mockDeleteWorkflowFn).toHaveBeenCalledWith('workflow-new-1');
@@ -190,7 +192,7 @@ describe('useSetupRuleNotifications', () => {
     });
   });
 
-  describe('single item — workflow reference mode', () => {
+  describe('single action — existing workflow reference mode', () => {
     it('uses the existing workflow id and creates action policy, shows success toast', async () => {
       mockCreateActionPolicy.mockResolvedValue({});
 
@@ -198,7 +200,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflows: [workflowItem] });
+      result.current.mutate({ rule: mockRule, actions: [existingWorkflowAction] });
 
       await waitFor(() => {
         expect(mockCreateWorkflowFn).not.toHaveBeenCalled();
@@ -218,7 +220,7 @@ describe('useSetupRuleNotifications', () => {
 
       result.current.mutate({
         rule: mockRule,
-        workflows: [{ id: 'item-x', kind: 'workflow', workflowId: null }],
+        actions: [{ id: 'action-x', source: 'existing', workflowId: null }],
       });
 
       await waitFor(() => {
@@ -230,8 +232,8 @@ describe('useSetupRuleNotifications', () => {
     });
   });
 
-  describe('multiple items — fan-out', () => {
-    it('calls createWorkflow + createActionPolicy for each item in parallel', async () => {
+  describe('multiple actions — fan-out', () => {
+    it('calls createWorkflow + createActionPolicy for each action in parallel', async () => {
       mockCreateWorkflowFn
         .mockResolvedValueOnce({ id: 'wf-a' })
         .mockResolvedValueOnce({ id: 'wf-b' });
@@ -241,7 +243,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflows: [emailItem, slackItem] });
+      result.current.mutate({ rule: mockRule, actions: [emailAction, slackAction] });
 
       await waitFor(() => {
         expect(mockCreateWorkflowFn).toHaveBeenCalledTimes(2);
@@ -250,7 +252,7 @@ describe('useSetupRuleNotifications', () => {
       });
     });
 
-    it('succeeds for passing items and fails for failing items (partial success)', async () => {
+    it('succeeds for passing actions and fails for failing actions (partial success)', async () => {
       mockCreateWorkflowFn
         .mockResolvedValueOnce({ id: 'wf-a' })
         .mockRejectedValueOnce(new Error('slack connector unreachable'));
@@ -260,7 +262,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflows: [emailItem, slackItem] });
+      result.current.mutate({ rule: mockRule, actions: [emailAction, slackAction] });
 
       await waitFor(() => {
         expect(mockCreateActionPolicy).toHaveBeenCalledTimes(1);
@@ -269,7 +271,7 @@ describe('useSetupRuleNotifications', () => {
       });
     });
 
-    it('includes a workflow reference item alongside connector-backed items', async () => {
+    it('includes an existing workflow action alongside inline actions', async () => {
       mockCreateWorkflowFn.mockResolvedValue({ id: 'wf-new' });
       mockCreateActionPolicy.mockResolvedValue({});
 
@@ -277,7 +279,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflows: [emailItem, workflowItem] });
+      result.current.mutate({ rule: mockRule, actions: [emailAction, existingWorkflowAction] });
 
       await waitFor(() => {
         expect(mockCreateWorkflowFn).toHaveBeenCalledTimes(1);
@@ -297,7 +299,7 @@ describe('useSetupRuleNotifications', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate({ rule: mockRule, workflows: [emailItem] });
+      result.current.mutate({ rule: mockRule, actions: [emailAction] });
 
       await waitFor(() => {
         expect(mockAddError).toHaveBeenCalledWith(

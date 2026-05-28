@@ -62,7 +62,7 @@ export const useFetchConnectorsByType = ({
     retry: false,
     onError: (error: Error) => {
       toasts.addError(error, {
-        title: i18n.translate('xpack.alertingV2.singleStepWorkflow.connectors.fetchError', {
+        title: i18n.translate('xpack.alertingV2.actionForm.connectors.fetchError', {
           defaultMessage: 'Failed to load connectors',
         }),
       });
