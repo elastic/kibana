@@ -92,6 +92,7 @@ const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({
     fullWidth
   >
     <EuiSuperSelect
+      compressed
       options={RECOVERY_TYPE_OPTIONS}
       valueOfSelected={recoveryType}
       onChange={(val) => onRecoveryTypeChange(val as RecoveryType)}

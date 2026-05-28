@@ -2670,7 +2670,6 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts
-/x-pack/platform/test/functional/fixtures/kbn_archives/home/feature_controls/security/security.json @elastic/kibana-management
 /x-pack/platform/test/fixtures/es_archives/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/services/ace_editor.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
@@ -2694,7 +2693,6 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /src/platform/test/functional/services/management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/cross_cluster_replication @elastic/kibana-management
 /x-pack/platform/test/functional/apps/ingest_pipelines @elastic/kibana-management
-/x-pack/platform/test/functional/apps/home @elastic/kibana-management
 /x-pack/platform/test/functional/apps/license_management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/remote_clusters @elastic/kibana-management
@@ -3330,8 +3328,10 @@ x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details
 
 ## Fleet plugin (co-owned with Fleet team)
 x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/contextual-security-apps
-x-pack/platform/plugins/shared/fleet/public/components/cloud_connector @elastic/fleet @elastic/contextual-security-apps
-x-pack/platform/plugins/shared/fleet/common/services/cloud_connectors @elastic/fleet @elastic/contextual-security-apps
+x-pack/platform/plugins/shared/fleet/public/components/cloud_connector @elastic/fleet @elastic/cloud-services
+x-pack/platform/plugins/shared/fleet/common/services/cloud_connectors @elastic/fleet @elastic/cloud-services
+x-pack/platform/plugins/shared/fleet/server/routes/cloud_connector @elastic/fleet @elastic/cloud-services
+x-pack/platform/plugins/shared/fleet/server/services/cloud_connectors @elastic/fleet @elastic/cloud-services
 x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/contextual-security-apps
 x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/fleet @elastic/contextual-security-apps
 ## SessionView tests
