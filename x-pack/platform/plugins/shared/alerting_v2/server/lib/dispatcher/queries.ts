@@ -39,10 +39,11 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
       | STATS
           last_event_timestamp = MAX(@timestamp) WHERE type IS NOT NULL,
           last_episode_status = LAST(episode_status, @timestamp) WHERE type IS NOT NULL,
-          data_json = LAST(data_json, @timestamp) WHERE type IS NOT NULL
+          data_json = LAST(data_json, @timestamp) WHERE type IS NOT NULL,
+          severity = LAST(severity, @timestamp) WHERE type IS NOT NULL
           BY rule_id, group_hash, episode_id
       | WHERE last_event_timestamp IS NOT NULL
-      | KEEP last_event_timestamp, rule_id, group_hash, episode_id, last_episode_status, data_json
+      | KEEP last_event_timestamp, rule_id, group_hash, episode_id, last_episode_status, data_json, severity
       | RENAME last_episode_status AS episode_status
       | SORT last_event_timestamp asc
       | LIMIT 10000`.toRequest();
