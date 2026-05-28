@@ -34,7 +34,13 @@ const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) =>
 
 describe('getWorkflowTriggerEventsLogQueryKey', () => {
   it('returns the same key for equivalent param objects', () => {
-    const paramsA = { page: 1, size: 10, from: '2025-01-01', to: '2025-01-02', kql: 'triggerId: foo' };
+    const paramsA = {
+      page: 1,
+      size: 10,
+      from: '2025-01-01',
+      to: '2025-01-02',
+      kql: 'triggerId: foo',
+    };
     const paramsB = {
       kql: 'triggerId: foo',
       from: '2025-01-01',

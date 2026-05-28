@@ -17,7 +17,7 @@ export type WorkflowTriggerEventsLogQueryKey = readonly [
   string | undefined,
   string | undefined,
   number | undefined,
-  number | undefined,
+  number | undefined
 ];
 
 /**
