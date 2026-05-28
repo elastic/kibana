@@ -8,13 +8,19 @@
 /**
  * Eval spec for the detection-emulation skill's validateRule tool.
  *
- * Three evaluators per example:
+ * Per-example evaluators:
  *  - toolSelection      : verifies the detection-emulation skill was activated
- *                         (APM trace contains the SKILL.md filestore.read span)
+ *                         (APM trace contains the SKILL.md filestore.read span).
+ *                         For distractor examples the skill should NOT appear;
+ *                         the evaluator scores based on presence (success/failure
+ *                         examples) or absence (distractors).
  *  - schemaCompliance   : verifies that any validateRule tool call in the trace
  *                         includes `ruleId` and `endpointIds` in its parameters;
- *                         vacuously passes when the tool is correctly NOT called
- *  - criteria           : per-example LLM criteria scoring from output.criteria
+ *                         vacuously passes when the tool is correctly NOT called.
+ *  - trajectory         : verifies the actual tool-call sequence aligns with each
+ *                         example's `output.tool_sequence` golden path (LCS-based,
+ *                         code evaluator, zero LLM cost).
+ *  - criteria           : per-example LLM criteria scoring from `output.criteria`.
  *
  * NOT a Jest test — run via the @kbn/evals Playwright eval runner.
  * Excluded from the plugin's main tsconfig; requires @kbn/evals (devOnly).
@@ -28,7 +34,9 @@ import {
   evaluate as base,
   createSkillInvocationEvaluator,
   createTraceBasedEvaluator,
+  createTrajectoryEvaluator,
   tags,
+  withRetry,
 } from '@kbn/evals';
 import type {
   DefaultEvaluators,
@@ -40,7 +48,6 @@ import type {
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core-http-browser';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import pRetry from 'p-retry';
 import { validateRuleDataset } from './validate_rule_dataset';
 
 // ─── Chat client ──────────────────────────────────────────────────────────────
@@ -53,6 +60,42 @@ interface ConverseResponse {
   traceId?: string;
 }
 
+/** Pending prompt as emitted by the converse API when a tool calls
+ * `prompts.askForConfirmation` (or via declarative `confirmation:`).
+ * The shape mirrors `ConfirmPromptDefinition` from
+ * @kbn/agent-builder-common/agents/prompts. */
+interface PendingPrompt {
+  id: string;
+  type?: string;
+  title?: string;
+  message?: string;
+}
+
+interface ConverseApiResponseShape {
+  conversation_id: string;
+  trace_id?: string;
+  steps: unknown[];
+  response: { message: string; prompts?: PendingPrompt[] };
+}
+
+/**
+ * Auto-confirmation policy for HITL prompts emitted by the agent
+ * during a converse turn.
+ *
+ *  - `'allow'`  — accept every prompt (default; mirrors the prior
+ *                 always-proceed behaviour for examples that don't
+ *                 exercise rejection)
+ *  - `'reject'` — decline every prompt (used by the `userDeclines`
+ *                 example so the agent must honour the cancellation)
+ */
+export type AutoConfirmPolicy = 'allow' | 'reject';
+
+/** Bounded loop ceiling so a malformed agent loop can't run forever
+ * inside a single eval example. 5 is generous — validateRule only
+ * needs a single confirmation today; the per-family `run*Command`
+ * tools share a `once`-scoped policy so they prompt once at most. */
+const MAX_PROMPT_ROUNDS = 5;
+
 class DetectionEmulationChatClient {
   constructor(
     private readonly fetch: HttpHandler,
@@ -63,65 +106,114 @@ class DetectionEmulationChatClient {
   async converse({
     message,
     conversationId,
+    autoConfirm = 'allow',
   }: {
     message: string;
     conversationId?: string;
+    autoConfirm?: AutoConfirmPolicy;
   }): Promise<ConverseResponse> {
     const agentId = process.env.AGENT_BUILDER_AGENT_ID ?? agentBuilderDefaultAgentId;
 
     this.log.info('Calling converse');
 
-    const callConverseApi = async (): Promise<ConverseResponse> => {
+    /**
+     * Calls the converse endpoint once. May return either a final
+     * response or a turn that ends in pending prompts.
+     */
+    const callConverseApi = async (turnInput: {
+      input?: string;
+      promptResponses?: Record<string, { allow: boolean }>;
+      currentConversationId?: string;
+    }): Promise<ConverseApiResponseShape> => {
+      const body: Record<string, unknown> = {
+        agent_id: agentId,
+        connector_id: this.connectorId,
+      };
+      if (turnInput.currentConversationId) {
+        body.conversation_id = turnInput.currentConversationId;
+      }
+      if (turnInput.input !== undefined) {
+        body.input = turnInput.input;
+      }
+      if (turnInput.promptResponses && Object.keys(turnInput.promptResponses).length > 0) {
+        body.prompts = turnInput.promptResponses;
+      }
+
       const response = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
         version: '2023-10-31',
-        body: JSON.stringify({
-          agent_id: agentId,
-          connector_id: this.connectorId,
-          conversation_id: conversationId,
-          input: message,
-        }),
+        body: JSON.stringify(body),
       });
 
-      const {
-        conversation_id,
-        response: latestResponse,
-        steps,
-        trace_id,
-      } = response as {
-        conversation_id: string;
-        trace_id?: string;
-        steps: unknown[];
-        response: { message: string };
-      };
-
-      return {
-        conversationId: conversation_id,
-        messages: [{ message }, latestResponse],
-        steps,
-        errors: [],
-        traceId: trace_id,
-      };
+      return response as ConverseApiResponseShape;
     };
 
-    try {
-      return await pRetry(callConverseApi, {
-        retries: 2,
-        minTimeout: 2000,
-        onFailedAttempt: (error) => {
-          if (error.retriesLeft === 0) {
-            this.log.error(
-              new Error(`converse: failed after ${error.attemptNumber} attempts`, { cause: error })
-            );
-          } else {
-            this.log.warning(
-              new Error(`converse: attempt ${error.attemptNumber} failed; retrying`, {
-                cause: error,
-              })
-            );
-          }
+    const callWithRetry = async (turnInput: {
+      input?: string;
+      promptResponses?: Record<string, { allow: boolean }>;
+      currentConversationId?: string;
+    }): Promise<ConverseApiResponseShape> =>
+      withRetry(() => callConverseApi(turnInput), {
+        maxAttempts: 3,
+        minDelayMs: 2000,
+        label: 'converse',
+        onRetry: ({ attempt, maxAttempts, error }) => {
+          this.log.warning(
+            new Error(`converse: attempt ${attempt}/${maxAttempts} failed; retrying`, {
+              cause: error instanceof Error ? error : new Error(String(error)),
+            })
+          );
         },
       });
+
+    try {
+      let apiResponse = await callWithRetry({
+        input: message,
+        currentConversationId: conversationId,
+      });
+      const aggregatedSteps: unknown[] = Array.isArray(apiResponse.steps)
+        ? [...apiResponse.steps]
+        : [];
+      let turn = 0;
+
+      // HITL auto-resume loop: if the agent emitted pending prompts,
+      // respond with the configured policy and continue the same
+      // conversation.
+      while (apiResponse.response?.prompts && apiResponse.response.prompts.length > 0) {
+        if (turn >= MAX_PROMPT_ROUNDS) {
+          this.log.warning(
+            `converse: hit MAX_PROMPT_ROUNDS=${MAX_PROMPT_ROUNDS} for conversation [${apiResponse.conversation_id}] — likely a malformed agent loop`
+          );
+          break;
+        }
+        const allow = autoConfirm === 'allow';
+        const promptResponses: Record<string, { allow: boolean }> = {};
+        for (const prompt of apiResponse.response.prompts) {
+          promptResponses[prompt.id] = { allow };
+        }
+        this.log.info(
+          `converse: auto-${allow ? 'accepting' : 'rejecting'} ${
+            apiResponse.response.prompts.length
+          } pending prompt(s)`
+        );
+
+        apiResponse = await callWithRetry({
+          promptResponses,
+          currentConversationId: apiResponse.conversation_id,
+        });
+        if (Array.isArray(apiResponse.steps)) {
+          aggregatedSteps.push(...apiResponse.steps);
+        }
+        turn += 1;
+      }
+
+      return {
+        conversationId: apiResponse.conversation_id,
+        messages: [{ message }, apiResponse.response],
+        steps: aggregatedSteps,
+        errors: [],
+        traceId: apiResponse.trace_id,
+      };
     } catch (error) {
       this.log.error('converse: fatal error');
       return {
@@ -252,6 +344,29 @@ function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEvaluators
   };
 }
 
+/**
+ * trajectory — code evaluator (zero LLM cost) that compares the actual
+ * tool-call sequence against the example's `output.tool_sequence` golden
+ * path using LCS for order + set intersection for coverage.
+ *
+ * - Distractor examples set `tool_sequence: []` so the evaluator returns 1.0
+ *   when no tools were called and 0.0 if any tool fired.
+ * - Order weight 0.7 reflects that for this skill the BEFORE-relationship
+ *   (history before validate) carries most of the signal.
+ */
+function createValidateRuleTrajectoryEvaluator(): Evaluator {
+  return createTrajectoryEvaluator({
+    extractToolCalls: (output: unknown) => {
+      const steps = (output as { steps?: Array<{ type?: string; tool_id?: string }> })?.steps ?? [];
+      return steps.filter((step) => step.type === 'tool_call').map((step) => step.tool_id ?? '');
+    },
+    goldenPathExtractor: (expected: unknown) =>
+      (expected as { tool_sequence?: string[] })?.tool_sequence ?? [],
+    orderWeight: 0.7,
+    coverageWeight: 0.3,
+  });
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 type DatasetExample = (typeof validateRuleDataset.examples)[number];
@@ -279,12 +394,16 @@ function runScenario({
     examples: [example as Example],
   } satisfies EvaluationDataset;
 
+  const autoConfirm: AutoConfirmPolicy =
+    (example.input as { autoConfirm?: AutoConfirmPolicy } | undefined)?.autoConfirm ?? 'allow';
+
   return executorClient.runExperiment(
     {
       dataset,
       task: async ({ input }) => {
         const response = await chatClient.converse({
           message: (input as { question: string }).question,
+          autoConfirm,
         });
         return {
           messages: response.messages,
@@ -298,6 +417,7 @@ function runScenario({
       createToolSelectionEvaluator({ traceEsClient, log }),
       createSchemaComplianceEvaluator({ traceEsClient, log }),
       createCriteriaEvaluator({ evaluators }),
+      createValidateRuleTrajectoryEvaluator(),
     ]
   );
 }
@@ -316,8 +436,12 @@ evaluate.describe(
       noMitreTags,
       noSupportedTechniques,
       realExecBlocked,
+      userDeclines,
       alertInvestigation,
       ruleCreation,
+      esqlQuestion,
+      threatHunting,
+      dashboardCreation,
     ] = validateRuleDataset.examples;
 
     evaluate(
@@ -426,6 +550,21 @@ evaluate.describe(
     );
 
     evaluate(
+      'HITL — user declines real_execution prompt',
+      async ({ chatClient, evaluators, executorClient, traceEsClient, log }) => {
+        await runScenario({
+          name: 'HITL: user declines',
+          example: userDeclines,
+          chatClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+        });
+      }
+    );
+
+    evaluate(
       'distractor — alert investigation (skill must not fire)',
       async ({ chatClient, evaluators, executorClient, traceEsClient, log }) => {
         await runScenario({
@@ -446,6 +585,51 @@ evaluate.describe(
         await runScenario({
           name: 'distractor: rule creation',
           example: ruleCreation,
+          chatClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+        });
+      }
+    );
+
+    evaluate(
+      'distractor — ES|QL question (skill must not fire)',
+      async ({ chatClient, evaluators, executorClient, traceEsClient, log }) => {
+        await runScenario({
+          name: 'distractor: ES|QL question',
+          example: esqlQuestion,
+          chatClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+        });
+      }
+    );
+
+    evaluate(
+      'distractor — threat hunting request (skill must not fire)',
+      async ({ chatClient, evaluators, executorClient, traceEsClient, log }) => {
+        await runScenario({
+          name: 'distractor: threat hunting',
+          example: threatHunting,
+          chatClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+        });
+      }
+    );
+
+    evaluate(
+      'distractor — dashboard creation (skill must not fire)',
+      async ({ chatClient, evaluators, executorClient, traceEsClient, log }) => {
+        await runScenario({
+          name: 'distractor: dashboard creation',
+          example: dashboardCreation,
           chatClient,
           evaluators,
           executorClient,
