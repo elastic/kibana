@@ -18,6 +18,7 @@ export interface FakeEntityType {
   readonly category: string;
   readonly entitiesCount: string;
   readonly subsetsCount: string;
+  readonly lastUpdate: string;
 }
 
 export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
@@ -28,6 +29,7 @@ export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
     category: 'Kubernetes',
     entitiesCount: '12',
     subsetsCount: '3',
+    lastUpdate: '2026-04-20',
   },
   {
     id: 'k8s-node',
@@ -36,6 +38,7 @@ export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
     category: 'Kubernetes',
     entitiesCount: '184',
     subsetsCount: '2',
+    lastUpdate: '2026-04-20',
   },
   {
     id: 'k8s-pod',
@@ -44,6 +47,7 @@ export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
     category: 'Kubernetes',
     entitiesCount: '2,310',
     subsetsCount: '1',
+    lastUpdate: '2026-04-18',
   },
   {
     id: 'apm-service',
@@ -52,6 +56,7 @@ export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
     category: 'Services',
     entitiesCount: '47',
     subsetsCount: '4',
+    lastUpdate: '2026-03-30',
   },
   {
     id: 'aws-ec2',
@@ -60,6 +65,7 @@ export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
     category: 'Custom',
     entitiesCount: '203',
     subsetsCount: '2',
+    lastUpdate: '2026-05-05',
   },
   {
     id: 'aws-lambda',
@@ -68,6 +74,7 @@ export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
     category: 'Category name',
     entitiesCount: '58',
     subsetsCount: '1',
+    lastUpdate: '2026-04-12',
   },
   {
     id: 'aws-s3',
@@ -76,5 +83,6 @@ export const FAKE_ENTITY_TYPES: readonly FakeEntityType[] = [
     category: 'Storage',
     entitiesCount: '92',
     subsetsCount: '1',
+    lastUpdate: '2026-04-02',
   },
 ];
