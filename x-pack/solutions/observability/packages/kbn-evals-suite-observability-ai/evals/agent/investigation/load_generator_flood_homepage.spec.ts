@@ -42,7 +42,7 @@ evaluate.describe(
         dataset: {
           name: 'load-generator-flood-homepage investigation',
           description:
-            'Evaluates whether the agent correctly investigates a frontend traffic spike caused by the load generator flooding the homepage (loadGeneratorFloodHomepage feature flag). The load generator fires 100 GET / requests per task invocation, causing a large throughput spike on the frontend. There are no service errors — this is a traffic anomaly, not a failure. The agent should trace the spike back to the load generator rather than concluding a service is broken.',
+            'Evaluates whether the agent correctly investigates the otel-demo loadGeneratorFloodHomepage scenario, where the load generator floods the frontend with excess traffic.',
           examples: [
             {
               input: {
