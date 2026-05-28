@@ -74,13 +74,21 @@ export function buildTriggerStepExecutionFromContext(
     workflowExecution.stepExecutions
   );
 
+  // For non-manual triggers (alert/document/scheduled/event), manual inputs supplied alongside
+  // the event are stored in context.inputs and surfaced as the step's output field
+  const ctx = workflowExecution.context as Record<string, unknown> | undefined | null;
+  const triggerOutput: JsonValue | undefined =
+    triggerContext.triggerType !== 'manual' && ctx?.inputs !== undefined
+      ? (ctx.inputs as JsonValue)
+      : (workflowExecution.context?.output as JsonValue | undefined) ?? undefined;
+
   return {
     id: 'trigger',
     stepId: triggerContext.triggerType,
     stepType: `trigger_${triggerContext.triggerType}`,
     status: failedBeforeSteps ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
     input: triggerContext.input,
-    output: (workflowExecution.context?.output as JsonValue | undefined) ?? undefined,
+    output: triggerOutput,
     error: failedBeforeSteps ? workflowExecution.error ?? undefined : undefined,
     scopeStack: [],
     workflowRunId: workflowExecution.id,

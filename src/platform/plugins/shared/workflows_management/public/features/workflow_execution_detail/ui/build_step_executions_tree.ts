@@ -193,10 +193,10 @@ export function buildStepExecutionsTree(
       });
     }
 
-    // Show the Inputs pseudo-step whenever user-supplied manual inputs exist.
-    // Scheduled workflows carry their trigger metadata in `event`, not `inputs`, so
-    // this step only appears when the caller explicitly passed manual input values.
-    if (hasInputs) {
+    // in scheduled workflows, inputs are available but are presented in the trigger itself.
+    // This is to avoid showing the inputs pseudo-step when the event is present
+    // as the inputs are already displayed in the event pseudo-step
+    if (hasInputs && !hasEvent) {
       pseudoSteps.push({
         stepId: 'Inputs',
         stepType: '__inputs',
