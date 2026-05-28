@@ -129,6 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
                       status: 'pending',
                     },
                     monitoring: response.body.rules[0].monitoring,
+                    is_snoozed_until: response.body.rules[0].is_snoozed_until,
                   },
                 ],
                 errors: [],
@@ -233,6 +234,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[0].next_run }
                       : {}),
                     monitoring: response.body.rules[0].monitoring,
+                    is_snoozed_until: response.body.rules[0].is_snoozed_until,
                   },
                 ],
               });
@@ -325,6 +327,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[0].next_run }
                       : {}),
                     monitoring: response.body.rules[0].monitoring,
+                    is_snoozed_until: response.body.rules[0].is_snoozed_until,
                   },
                 ],
               });
@@ -418,6 +421,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[0].next_run }
                       : {}),
                     monitoring: response.body.rules[0].monitoring,
+                    is_snoozed_until: response.body.rules[0].is_snoozed_until,
                   },
                   {
                     id: response.body.rules[1].id,
@@ -456,6 +460,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[1].next_run }
                       : {}),
                     monitoring: response.body.rules[1].monitoring,
+                    is_snoozed_until: response.body.rules[1].is_snoozed_until,
                   },
                   {
                     id: response.body.rules[2].id,
@@ -494,6 +499,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[2].next_run }
                       : {}),
                     monitoring: response.body.rules[2].monitoring,
+                    is_snoozed_until: response.body.rules[2].is_snoozed_until,
                   },
                 ],
                 total: 3,
@@ -589,6 +595,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[0].next_run }
                       : {}),
                     monitoring: response.body.rules[0].monitoring,
+                    is_snoozed_until: response.body.rules[0].is_snoozed_until,
                   },
                   {
                     id: response.body.rules[1].id,
@@ -627,6 +634,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[1].next_run }
                       : {}),
                     monitoring: response.body.rules[1].monitoring,
+                    is_snoozed_until: response.body.rules[1].is_snoozed_until,
                   },
                   {
                     id: response.body.rules[2].id,
@@ -665,6 +673,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[2].next_run }
                       : {}),
                     monitoring: response.body.rules[2].monitoring,
+                    is_snoozed_until: response.body.rules[2].is_snoozed_until,
                   },
                 ],
               });
@@ -732,6 +741,7 @@ export default ({ getService }: FtrProviderContext) => {
                       ? { next_run: response.body.rules[0].next_run }
                       : {}),
                     monitoring: response.body.rules[0].monitoring,
+                    is_snoozed_until: response.body.rules[0].is_snoozed_until,
                   },
                 ],
               });
