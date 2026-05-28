@@ -26,16 +26,7 @@ import {
 } from '../../../logic/search/granular_facet_aggregations';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { resolveGapPreFilter, transformFindAlerts } from '../../../utils/utils';
-
-const REQUIRED_TRANSFORM_FIELDS: readonly string[] = [
-  'schedule',
-  'params',
-  'updatedAt',
-  'createdAt',
-];
-
-const resolveEffectiveFields = (fields: string[] | undefined): string[] | undefined =>
-  fields?.length ? Array.from(new Set([...fields, ...REQUIRED_TRANSFORM_FIELDS])) : undefined;
+import { translateSearchFieldsToSoFields } from '../../../logic/search/search_rules_field_translation';
 
 /**
  * Internal route for listing rules with facets and deep pagination. To be made public in a future release.
@@ -147,7 +138,7 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, _logger: 
               ? buildAggregations({ categories: categoryCounts })
               : undefined;
 
-          const effectiveFields = resolveEffectiveFields(fields);
+          const effectiveFields = translateSearchFieldsToSoFields(fields);
 
           const rules = await findRules({
             rulesClient,
