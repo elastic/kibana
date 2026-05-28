@@ -837,4 +837,60 @@ describe('runRelationshipMaintainer', () => {
       expect(esqlArg.query).toContain('FROM logs-endpoint.events.security-default');
     });
   });
+
+  describe('CPS read client routing', () => {
+    it('uses cpsEsClient for both search and esql.query when provided, leaving esClient untouched', async () => {
+      const { esClient, search: localSearch, esql: localEsql } = makeEsClient();
+      const { esClient: cpsEsClient, search: cpsSearch, esql: cpsEsql } = makeEsClient();
+      const { crudClient } = makeCrudClient();
+
+      cpsSearch.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      cpsEsql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'accesses_frequently', type: 'keyword' },
+          { name: 'accesses_infrequently', type: 'keyword' },
+        ],
+        values: [['user:alice@corp', ['host:H1'], null]],
+      });
+
+      await runRelationshipMaintainer({
+        esClient,
+        cpsEsClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+      });
+
+      expect(cpsSearch).toHaveBeenCalledTimes(1);
+      expect(cpsEsql).toHaveBeenCalledTimes(1);
+      expect(localSearch).not.toHaveBeenCalled();
+      expect(localEsql).not.toHaveBeenCalled();
+    });
+
+    it('falls back to esClient for reads when cpsEsClient is undefined', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient } = makeCrudClient();
+
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      esql.mockResolvedValueOnce({ columns: [], values: [] });
+
+      await runRelationshipMaintainer({
+        esClient,
+        cpsEsClient: undefined,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+      });
+
+      expect(search).toHaveBeenCalledTimes(1);
+      expect(esql).toHaveBeenCalledTimes(1);
+    });
+  });
 });
