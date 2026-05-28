@@ -150,6 +150,7 @@ dependsOn:
   - '@kbn/core-chrome-feature-flags'
   - '@kbn/logging'
   - '@kbn/logging-mocks'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod
