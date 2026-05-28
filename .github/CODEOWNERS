@@ -519,6 +519,7 @@ src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana
 src/platform/packages/shared/kbn-cases-components @elastic/kibana-cases
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting
+src/platform/packages/shared/kbn-change-point-chart-viewer @elastic/ml-ui
 src/platform/packages/shared/kbn-chart-icons @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-charts-theme @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-cleanup-before-exit @elastic/observability-ui
@@ -992,6 +993,7 @@ x-pack/platform/packages/private/upgrade-assistant/common @elastic/kibana-manage
 x-pack/platform/packages/private/upgrade-assistant/public @elastic/kibana-management
 x-pack/platform/packages/private/upgrade-assistant/server @elastic/kibana-management
 x-pack/platform/packages/shared/agent-builder-dashboards/agent-builder-dashboards-common @elastic/appex-ai-infra
+x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards @elastic/appex-ai-infra
 x-pack/platform/packages/shared/agent-builder/agent-builder-browser @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-common @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils @elastic/workchat-eng
@@ -1541,6 +1543,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/metrics_data_source_profile @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/deprecation_logs_data_source_profile @elastic/kibana-data-discovery @elastic/kibana-core
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/patterns_data_source_profile @elastic/ml-ui
+/src/platform/plugins/shared/discover/public/context_awareness/profile_providers/common/change_point_data_source_profile @elastic/ml-ui
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability @elastic/kibana-data-discovery @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/observability_document_profile @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/observability_root_profile @elastic/obs-exploration-team
@@ -1594,7 +1597,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/functional/apps/visualize @elastic/kibana-visualizations
 /x-pack/platform/test/functional/apps/lens @elastic/kibana-visualizations
 /src/platform/test/functional/apps/visualize/ @elastic/kibana-visualizations
-/x-pack/platform/test/functional/apps/graph @elastic/kibana-visualizations
 /src/platform/test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/platform/test/serverless/functional/test_suites/visualizations/ @elastic/kibana-visualizations
 /x-pack/platform/test/serverless/fixtures/kbn_archives/lens/ @elastic/kibana-visualizations
@@ -2672,7 +2674,6 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts
-/x-pack/platform/test/functional/fixtures/kbn_archives/home/feature_controls/security/security.json @elastic/kibana-management
 /x-pack/platform/test/fixtures/es_archives/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/services/ace_editor.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
@@ -2696,7 +2697,6 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /src/platform/test/functional/services/management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/cross_cluster_replication @elastic/kibana-management
 /x-pack/platform/test/functional/apps/ingest_pipelines @elastic/kibana-management
-/x-pack/platform/test/functional/apps/home @elastic/kibana-management
 /x-pack/platform/test/functional/apps/license_management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/remote_clusters @elastic/kibana-management
@@ -3179,6 +3179,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/unified_alerts @elastic/security-detection-engine @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/attacks @elastic/security-detection-engine @elastic/security-threat-hunting
 
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine @elastic/security-detection-engine
 
@@ -3331,8 +3332,10 @@ x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details
 
 ## Fleet plugin (co-owned with Fleet team)
 x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/contextual-security-apps
-x-pack/platform/plugins/shared/fleet/public/components/cloud_connector @elastic/fleet @elastic/contextual-security-apps
-x-pack/platform/plugins/shared/fleet/common/services/cloud_connectors @elastic/fleet @elastic/contextual-security-apps
+x-pack/platform/plugins/shared/fleet/public/components/cloud_connector @elastic/fleet @elastic/cloud-services
+x-pack/platform/plugins/shared/fleet/common/services/cloud_connectors @elastic/fleet @elastic/cloud-services
+x-pack/platform/plugins/shared/fleet/server/routes/cloud_connector @elastic/fleet @elastic/cloud-services
+x-pack/platform/plugins/shared/fleet/server/services/cloud_connectors @elastic/fleet @elastic/cloud-services
 x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/contextual-security-apps
 x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/fleet @elastic/contextual-security-apps
 ## SessionView tests
