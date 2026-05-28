@@ -10,6 +10,7 @@ import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder
 import type {
   ListConversationsResponse,
   DeleteConversationResponse,
+  MarkReadConversationResponse,
   RenameConversationResponse,
 } from '../../../common/http_api/conversations';
 import type {
@@ -57,16 +58,15 @@ export class ConversationsService {
     );
   }
 
-  // todo update url
   async updateReadStatus({
     conversationId,
     read,
   }: {
     conversationId: string;
     read: boolean;
-  }): Promise<{ id: string; read?: boolean }> {
-    return await this.http.post<{ id: string; read?: boolean }>(
-      `${internalApiPath}/conversations/${conversationId}/_update_read_status`,
+  }): Promise<MarkReadConversationResponse> {
+    return await this.http.post<MarkReadConversationResponse>(
+      `${internalApiPath}/conversations/${conversationId}/_mark_read`,
       { body: JSON.stringify({ read }) }
     );
   }

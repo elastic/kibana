@@ -9,7 +9,6 @@ import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import produce from 'immer';
 import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
-import { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 
 import { queryKeys } from '../query_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
@@ -74,7 +73,7 @@ export const useConversationListMutations = ({
         return produce(current, (draft) => {
           const conv = draft.find((c) => c.id === conversationId);
           if (conv) {
-            conv.status = read ? undefined : ConversationDisplayStatus.unread;
+            conv.read = read;
           }
         });
       });

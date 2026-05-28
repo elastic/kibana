@@ -350,10 +350,6 @@ export interface Conversation {
   created_at: string;
   /** update date */
   updated_at: string;
-  /**
-   * Computed display status returned by the conversations list endpoint.
-   */
-  status?: ConversationDisplayStatus;
   /** list of round for this conversation */
   rounds: ConversationRound[];
   /**

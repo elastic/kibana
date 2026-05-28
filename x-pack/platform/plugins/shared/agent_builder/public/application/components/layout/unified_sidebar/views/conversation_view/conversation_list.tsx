@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConversationDisplayStatus } from '@kbn/agent-builder-common';
+import { ConversationDisplayStatus, ConversationRoundStatus } from '@kbn/agent-builder-common';
 import { appPaths } from '../../../../../utils/app_paths';
 import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
@@ -25,6 +25,22 @@ import {
   createActiveConversationListItemStyles,
 } from '../../../../conversations/conversation_list_item_styles';
 import { ConversationListItemRow } from './conversation_list_item_row';
+
+const deriveDisplayStatus = (
+  conversation: { read?: boolean; status?: ConversationRoundStatus },
+  isStreaming: boolean
+): ConversationDisplayStatus | undefined => {
+  if (isStreaming || conversation.status === ConversationRoundStatus.inProgress) {
+    return ConversationDisplayStatus.inProgress;
+  }
+  if (conversation.status === ConversationRoundStatus.awaitingPrompt) {
+    return ConversationDisplayStatus.awaitingPrompt;
+  }
+  if (conversation.read === false) {
+    return ConversationDisplayStatus.unread;
+  }
+  return undefined;
+};
 
 const newConversationLabel = i18n.translate(
   'xpack.agentBuilder.sidebar.conversation.newConversation',
@@ -89,10 +105,10 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {sortedConversations.map((conversation, index) => {
+      {sortedConversations.map((conversation) => {
         const isActive = currentConversationId === conversation.id;
         const isStreaming = activeStreams.has(conversation.id);
-        const status = isStreaming ? ConversationDisplayStatus.inProgress : conversation.status;
+        const status = deriveDisplayStatus(conversation, isStreaming);
         return (
           <EuiFlexItem grow={false} key={conversation.id}>
             <ConversationListItemRow
