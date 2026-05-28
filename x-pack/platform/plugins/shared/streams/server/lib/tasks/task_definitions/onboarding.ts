@@ -72,15 +72,11 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               const { streamName, from, to, steps, connectors, _task } = runContext.taskInstance
                 .params as TaskParams<OnboardingTaskParams>;
 
-              const {
-                taskClient,
-                getQueryClient,
-                getFeatureClient,
-                streamsClient,
-              } = await taskContext.getScopedClients({
-                request: fakeRequest,
-                rulesClientOptions: { cloneApiKeysOnCreate: true },
-              });
+              const { taskClient, getQueryClient, getFeatureClient, streamsClient } =
+                await taskContext.getScopedClients({
+                  request: fakeRequest,
+                  rulesClientOptions: { cloneApiKeysOnCreate: true },
+                });
 
               const featureClient = await getFeatureClient();
 

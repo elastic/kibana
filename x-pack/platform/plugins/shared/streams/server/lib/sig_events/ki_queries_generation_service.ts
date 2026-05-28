@@ -18,10 +18,10 @@ import {
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   type SignificantEventsQueriesGenerationResult,
 } from '@kbn/streams-schema';
-import { isSignificantEventsMemoryEnabled } from '../memory/is_significant_events_memory_enabled';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
+import { isSignificantEventsMemoryEnabled } from '../memory/is_significant_events_memory_enabled';
 import type { StreamsClient } from '../streams/client';
 import type { FeatureClient } from '../streams/feature/feature_client';
 import type { QueryClient } from '../streams/assets/query/query_client';
