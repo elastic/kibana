@@ -13,6 +13,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
 import type { ServiceMapOrientation } from '../../components/app/service_map/service_map_options_panel';
+import type { ServiceMapViewFilters } from '../../components/app/service_map/apply_service_map_visibility';
 import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getDateRange } from '../../context/url_params_context/helpers';
@@ -71,6 +72,8 @@ export interface ServiceMapEmbeddableProps {
   parentFilters?: Filter[];
   /** Parent dashboard query when the panel opts in to sync. */
   parentQuery?: Query | AggregateQuery;
+  /** Persisted view filters (alerts / SLOs / connection / anomaly severity) captured at "Copy to dashboard" time. */
+  viewFilters?: ServiceMapViewFilters;
 }
 
 function LoadingSpinner() {
@@ -104,6 +107,7 @@ export function ServiceMapEmbeddable({
   onMapOrientationChange,
   parentFilters,
   parentQuery,
+  viewFilters,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -314,6 +318,7 @@ export function ServiceMapEmbeddable({
           clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
           mapOrientation={mapOrientation}
           onMapOrientationChange={onMapOrientationChange}
+          viewFilters={viewFilters}
         />
       </div>
       {sloOverviewFlyout && (

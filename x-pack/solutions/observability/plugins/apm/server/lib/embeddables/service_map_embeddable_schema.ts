@@ -23,6 +23,41 @@ export const serviceMapCustomStateSchema = schema.object({
     schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')])
   ),
   sync_with_dashboard_filters: schema.maybe(schema.boolean()),
+  alert_status_filter: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal('active'),
+        schema.literal('recovered'),
+        schema.literal('untracked'),
+        schema.literal('delayed'),
+      ])
+    )
+  ),
+  slo_status_filter: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal('healthy'),
+        schema.literal('degrading'),
+        schema.literal('violated'),
+        schema.literal('noData'),
+      ])
+    )
+  ),
+  connection_filter: schema.maybe(
+    schema.arrayOf(schema.oneOf([schema.literal('orphaned'), schema.literal('connected')]))
+  ),
+  anomaly_severity_filter: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal('critical'),
+        schema.literal('major'),
+        schema.literal('minor'),
+        schema.literal('warning'),
+        schema.literal('low'),
+        schema.literal('unknown'),
+      ])
+    )
+  ),
 });
 
 export type ServiceMapCustomState = TypeOf<typeof serviceMapCustomStateSchema>;
