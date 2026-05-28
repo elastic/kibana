@@ -180,11 +180,7 @@ describe('alertAnalysisSkill', () => {
       });
 
       it('returns error result when findRelatedAlerts returns ok: false', async () => {
-        findRelatedAlerts.mockResolvedValueOnce({
-          ok: false,
-          reason: 'alert_not_found',
-          message: 'Alert not found',
-        });
+        findRelatedAlerts.mockResolvedValueOnce({ ok: false, message: 'Alert not found' });
 
         const result = await callHandler({ alertId: 'missing-alert' });
 

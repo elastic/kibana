@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { findRelatedAlerts } from './find_related_alerts';
-import { RELATED_ALERT_ENTITY_SOURCE_INCLUDES } from './find_related_alerts_entity_utils';
 
 describe('findRelatedAlerts', () => {
   const esClient = {
@@ -38,11 +37,8 @@ describe('findRelatedAlerts', () => {
     }
   });
 
-  it('returns alert_not_found when alert is missing and no entity shortcuts are provided', async () => {
-    (esClient.get as jest.Mock).mockRejectedValue({
-      meta: { statusCode: 404 },
-      body: { error: { type: 'document_missing_exception' } },
-    });
+  it('returns error when alert is missing and no entity shortcuts are provided', async () => {
+    (esClient.get as jest.Mock).mockRejectedValue(new Error('document missing'));
 
     const result = await findRelatedAlerts(esClient, {
       alertId: 'missing-alert',
@@ -52,60 +48,9 @@ describe('findRelatedAlerts', () => {
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.reason).toBe('alert_not_found');
       expect(result.message).toContain('missing-alert');
     }
     expect(esClient.search).not.toHaveBeenCalled();
-  });
-
-  it('returns search_failed when Elasticsearch returns a non-404 error', async () => {
-    (esClient.get as jest.Mock).mockRejectedValue({
-      meta: { statusCode: 403 },
-      message: 'security_exception',
-    });
-
-    const result = await findRelatedAlerts(esClient, {
-      alertId: 'alert-1',
-      alertsIndex: '.alerts-security.alerts-default',
-      timeWindowHours: 24,
-    });
-
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.reason).toBe('search_failed');
-      expect(result.message).toContain('Failed to find related alerts');
-    }
-    expect(esClient.search).not.toHaveBeenCalled();
-  });
-
-  it('extracts entities from nested ECS fields on the source alert', async () => {
-    (esClient.get as jest.Mock).mockResolvedValue({
-      _source: {
-        host: { name: 'host-from-alert' },
-      },
-    });
-    (esClient.search as jest.Mock).mockResolvedValue({
-      hits: {
-        total: { value: 0, relation: 'eq' },
-        hits: [],
-      },
-    });
-
-    const result = await findRelatedAlerts(esClient, {
-      alertId: 'alert-1',
-      alertsIndex: '.alerts-security.alerts-default',
-      timeWindowHours: 24,
-    });
-
-    expect(esClient.get).toHaveBeenCalledWith({
-      index: '.alerts-security.alerts-default',
-      id: 'alert-1',
-      _source_includes: [...RELATED_ALERT_ENTITY_SOURCE_INCLUDES],
-    });
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.sourceEntities.hostNames).toEqual(['host-from-alert']);
-    }
   });
 
   it('merges partial entity shortcut params with alert source entities', async () => {
@@ -129,6 +74,10 @@ describe('findRelatedAlerts', () => {
       hostNames: ['host-from-model'],
     });
 
+    expect(esClient.get).toHaveBeenCalledWith({
+      index: '.alerts-security.alerts-default',
+      id: 'alert-1',
+    });
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.sourceEntities.hostNames).toEqual(['host-from-alert', 'host-from-model']);

@@ -21,46 +21,18 @@ export const relatedAlertIpSchema = z.string().max(RELATED_ALERT_IP_MAX_LENGTH);
 
 export const relatedAlertsRequestSchema = z.object({
   alertId: relatedAlertIdSchema.describe('The _id of the alert to correlate'),
-  timeWindowHours: z
-    .number()
-    .min(1)
-    .max(168)
-    .default(24)
-    .describe('Lookback window in hours for related alerts (1–168).'),
-  maxResults: z
-    .number()
-    .min(1)
-    .max(100)
-    .default(25)
-    .describe('Maximum number of related alerts to return.'),
+  timeWindowHours: z.number().min(1).max(168).default(24),
+  maxResults: z.number().min(1).max(100).default(25),
   hostNames: z
     .array(relatedAlertEntityNameSchema)
     .max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH)
-    .optional()
-    .describe(
-      'Optional host.name values to correlate. Merged with values from the source alert when both are present.'
-    ),
+    .optional(),
   userNames: z
     .array(relatedAlertEntityNameSchema)
     .max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH)
-    .optional()
-    .describe(
-      'Optional user.name values to correlate. Merged with values from the source alert when both are present.'
-    ),
-  sourceIps: z
-    .array(relatedAlertIpSchema)
-    .max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH)
-    .optional()
-    .describe(
-      'Optional source.ip values to correlate. Merged with values from the source alert when both are present.'
-    ),
-  destIps: z
-    .array(relatedAlertIpSchema)
-    .max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH)
-    .optional()
-    .describe(
-      'Optional destination.ip values to correlate. Merged with values from the source alert when both are present.'
-    ),
+    .optional(),
+  sourceIps: z.array(relatedAlertIpSchema).max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH).optional(),
+  destIps: z.array(relatedAlertIpSchema).max(RELATED_ALERT_ENTITY_LIST_MAX_LENGTH).optional(),
 });
 
 /** Inline tool omits maxResults; the handler applies RELATED_ALERTS_INLINE_MAX_RESULTS. */
