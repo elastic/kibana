@@ -192,14 +192,14 @@ describe('parseAlertEpisodes', () => {
         episode_id: 'e1',
         episode_status: 'active' as const,
         data_json: null,
-        severity: 'warning' as AlertEventSeverity,
+        severity: 'medium' as AlertEventSeverity,
       },
     ];
 
     const result = parseAlertEpisodes(raw);
 
     expect(result).toHaveLength(1);
-    expect(result[0].severity).toBe('warning');
+    expect(result[0].severity).toBe('medium');
   });
 
   it('omits severity when severity is null', () => {
