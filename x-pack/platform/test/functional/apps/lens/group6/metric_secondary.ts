@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
+  const { lens, common } = getPageObjects(['lens', 'common']);
   const lensApi = getService('lens');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -150,11 +150,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await lens.getSecondaryMetricBadgeText()).to.be('+8,277.678\n↑');
 
       // Save the visualization
-      await lens.save('Metric label badge test', true, true);
+      await lens.save('Metric label badge test', false, false);
 
       // Open in edit mode and change primary metric to last value of ip
-      await visualize.gotoVisualizationLandingPage();
-      await visualize.openSavedVisualization('Metric label badge test');
+      await openBaseMetric();
 
       await lens.openDimensionEditor(
         'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
