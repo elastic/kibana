@@ -127,9 +127,9 @@ export async function executeMaintainerRun({
 
   const maintainerStatus = createMaintainerStatus({ status, namespace, initialState });
   const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-  const cpsEsClient = coreStart.elasticsearch.client
-    .asScoped(request, { projectRouting: 'space' })
-    .asCurrentUser;
+  const cpsEsClient = coreStart.elasticsearch.client.asScoped(request, {
+    projectRouting: 'space',
+  }).asCurrentUser;
   const crudClient = new CRUDClient({
     logger,
     esClient,
