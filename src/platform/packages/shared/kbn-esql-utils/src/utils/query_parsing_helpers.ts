@@ -16,9 +16,13 @@ import {
   BasicPrettyPrinter,
   isStringLiteral,
 } from '@elastic/esql';
-import { CommandNames, esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '@kbn/esql-language';
+import {
+  CommandNames,
+  esqlCommandRegistry,
+  getPromqlBracketsToClose,
+  TRANSFORMATIONAL_COMMANDS,
+} from '@kbn/esql-language';
 import type { PromQLLabel } from '@elastic/esql';
-import { correctPromqlQuerySyntax } from '@kbn/esql-language/src/commands/definitions/utils/ast';
 import type {
   ESQLAstItem,
   ESQLSource,
@@ -439,9 +443,11 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
   const fields: Array<ESQLColumn | PromQLLabel> = [];
 
   if (lastCommand?.name === 'promql') {
-    // Empty `{agent=}` loses its label; reopen so the `""` below keeps it.
-    const validPromqlQuery = queryInCursorPosition.replace(TRAILING_CLOSERS_REGEX, '');
-    const { root: promqlRoot } = Parser.parse(correctPromqlQuerySyntax(`${validPromqlQuery} ""`));
+    // Empty `{agent=}` loses its label; reopen and add a placeholder value so it survives.
+    const validPromqlQuery = `${queryInCursorPosition.replace(TRAILING_CLOSERS_REGEX, '')} ""`;
+    const { root: promqlRoot } = Parser.parse(
+      `${validPromqlQuery}${getPromqlBracketsToClose(validPromqlQuery)}`
+    );
 
     Walker.walk(promqlRoot, {
       promql: { visitPromqlLabel: (label) => fields.push(label) },

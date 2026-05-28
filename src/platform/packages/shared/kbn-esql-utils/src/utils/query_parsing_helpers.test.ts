@@ -768,6 +768,48 @@ describe('esql query helpers', () => {
       } as monaco.Position);
       expect(values).toEqual(undefined);
     });
+
+    describe('PromQL label matchers', () => {
+      const cursorAfter = (queryString: string, matcherPrefix: string) =>
+        ({
+          lineNumber: 1,
+          column: queryString.indexOf(matcherPrefix) + matcherPrefix.length + 1,
+        } as monaco.Position);
+
+      it('should return the label name after a matcher operator', () => {
+        const queryString = 'PROMQL index=metrics sum(bytes{agent= })';
+        expect(getValuesFromQueryField(queryString, cursorAfter(queryString, 'agent='))).toEqual(
+          'agent'
+        );
+      });
+
+      it('should return the label name for an already-closed empty matcher', () => {
+        const queryString = 'PROMQL index=metrics sum(bytes{agent=})';
+        expect(getValuesFromQueryField(queryString, cursorAfter(queryString, 'agent='))).toEqual(
+          'agent'
+        );
+      });
+
+      it('should return the label under the cursor with multiple matchers', () => {
+        const queryString = 'PROMQL index=metrics sum(bytes{foo="x", agent=})';
+        expect(getValuesFromQueryField(queryString, cursorAfter(queryString, 'agent='))).toEqual(
+          'agent'
+        );
+      });
+
+      it('should return the label name inside a nested function', () => {
+        const queryString = 'PROMQL index=metrics sum(rate(http{label=}))';
+        expect(getValuesFromQueryField(queryString, cursorAfter(queryString, 'label='))).toEqual(
+          'label'
+        );
+      });
+
+      it('should return undefined for an empty PROMQL query', () => {
+        expect(
+          getValuesFromQueryField('PROMQL ', { lineNumber: 1, column: 8 } as monaco.Position)
+        ).toEqual(undefined);
+      });
+    });
   });
 
   describe('fixESQLQueryWithVariables', () => {
