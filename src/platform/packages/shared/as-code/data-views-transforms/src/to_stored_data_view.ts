@@ -49,7 +49,12 @@ export function toStoredDataView(
 function isSavedDataView(
   dataView: AsCodeDataView | AsCodeSavedDataView
 ): dataView is AsCodeSavedDataView {
-  return 'id' in dataView || 'name' in dataView || 'allow_hidden_indices' in dataView;
+  return (
+    'id' in dataView ||
+    'name' in dataView ||
+    'allow_hidden_indices' in dataView ||
+    'field_filters' in dataView
+  );
 }
 
 function getSavedDataViewFields(dataView: AsCodeSavedDataView): Partial<DataViewSpec> {
@@ -58,5 +63,6 @@ function getSavedDataViewFields(dataView: AsCodeSavedDataView): Partial<DataView
     id: dataView.id,
     name: dataView.name,
     allowHidden: dataView.allow_hidden_indices,
+    sourceFilters: dataView.field_filters?.map((filter) => ({ value: filter })),
   };
 }
