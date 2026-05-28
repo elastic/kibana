@@ -7,7 +7,6 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
-  conditionToESQL,
   isAlwaysCondition,
   isAndCondition,
   isFilterCondition,
@@ -16,6 +15,7 @@ import {
   isOrCondition,
   type Condition,
 } from '@kbn/streamlang';
+import { entityStoreConditionToESQL as conditionToESQL } from '../../../common/esql/condition_to_esql';
 import { recentData } from '../../../common/domain/definitions/esql';
 import type {
   EntityDefinition,
