@@ -132,6 +132,7 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
 
     const ruleId = await findRuleIdByName(kbnClient, ruleName);
     expect(ruleId).toBeDefined();
-    expect(page.url()).toContain(`/app/rules/rule/${ruleId}`);
+    // Rules page lives under Stack Management since #269568; /app/rules redirects there.
+    expect(page.url()).toContain(`/rule/${ruleId}`);
   });
 });
