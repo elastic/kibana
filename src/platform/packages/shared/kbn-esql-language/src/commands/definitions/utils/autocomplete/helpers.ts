@@ -141,6 +141,7 @@ export function getFunctionsSuggestions({
     location,
     returnTypes: types,
     ignored,
+    isTimeseriesSource: context?.isTimeseriesSource,
   };
 
   const hasMinimumLicenseRequired = callbacks?.hasMinimumLicenseRequired;

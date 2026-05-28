@@ -16,8 +16,9 @@ import type {
   DraftTextEdit,
   DraftMediaEdit,
 } from '../../../../lib/history/draft_history';
-import { setImportant, restoreDimensions } from '../../../../edit_engine/clone_element';
+import { restoreDimensions, reflowAfterStyleChange } from '../../../../edit_engine/clone_element';
 import type { DimensionRecord } from '../../../../edit_engine/clone_element';
+import { setImportant } from '../../../../lib/dom/set_important';
 import { applySourceAttribute } from '../../library/eui_icon_cache';
 
 interface DraftEntry extends StackEntry {
@@ -93,6 +94,18 @@ const applyTextValue = (node: Text, field: string, value: string): void => {
 
 const applyMediaValue = (el: Element, attribute: string, value: string): void => {
   applySourceAttribute(el, attribute, value);
+};
+
+/**
+ * Re-run style reflow side effects that cannot be represented by property removal alone.
+ *
+ * @param edit - The draft edit being reapplied during redo.
+ * @returns Nothing.
+ */
+const reflowRedoEdit = (edit: DraftEdit): void => {
+  if (edit.type === 'style' && edit.property === 'padding') {
+    reflowAfterStyleChange(edit.cloneElement, edit.property, edit.reflowRoot);
+  }
 };
 
 /**
@@ -195,6 +208,9 @@ export const useDraftHistory = (): DraftHistoryResult => {
       for (const { element, property } of dims) {
         element.style.removeProperty(property);
       }
+    }
+    if (batch) {
+      for (const edit of batch) reflowRedoEdit(edit);
     }
     return batch?.[0] ?? null;
   }, [stack]);
