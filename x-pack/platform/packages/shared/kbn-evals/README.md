@@ -112,25 +112,23 @@ Then use helpers like `selectEvaluators<MyExample, MyTaskOutput>(...)` so your e
 The fastest way to go from zero to running evals locally:
 
 ```bash
-# 1. Set up connectors (one-time, interactive wizard)
-node scripts/evals init
-
-# 2. Start everything and run a suite (one command, one terminal)
-node scripts/evals start --suite agent-builder
+node scripts/evals start
 ```
 
-`evals init` walks you through EIS (Cloud Connected Mode) connector discovery or validates existing connectors in `kibana.dev.yml`. It outputs an `export KIBANA_TESTING_AI_CONNECTORS="..."` command to paste into your shell.
+From a clean state (no config, no connectors), `start` handles everything:
 
-`evals start` orchestrates the full stack in one terminal:
-
-1. Starts the EDOT collector (Docker) for trace capture -- exports traces to the configured tracing Elasticsearch cluster (via `TRACING_ES_URL`)
-2. Starts Scout (ES + Kibana with `evals_tracing` config)
-3. Enables EIS CCM on the Scout ES cluster (if using EIS connectors)
-4. Runs the Playwright eval suite with `TRACING_ES_URL` pointing to the configured tracing cluster
+1. **Config setup**: if `config.json` (or `config.<profile>.json`) is missing, prompts to create it
+2. **Connector setup**: prompts for connector source (EIS / `kibana.dev.yml` / existing `KIBANA_TESTING_AI_CONNECTORS`)
+3. Starts the EDOT collector (Docker) for trace capture -- exports traces to the configured tracing Elasticsearch cluster (via `TRACING_ES_URL`)
+4. Starts Scout (ES + Kibana with `evals_tracing` config)
+5. Enables EIS CCM on the Scout ES cluster (if using EIS connectors)
+6. Runs the Playwright eval suite with all traces going to the predefined tracing export destination.
 
 EDOT and Scout run as **persistent background daemons** -- they stay alive between eval runs for faster iteration. Use `node scripts/evals stop` to shut them down when you're done.
 
-Both commands prompt interactively when flags are omitted (suite, connector, model). Pass `--skip-server` to skip EDOT/Scout startup if you already have them running.
+`start` prompts interactively when flags are omitted (suite, connector, model). Pass `--skip-server` to skip EDOT/Scout startup if you already have them running, or `--skip-init` to bypass the config and connector setup checks.
+
+> **Note:** `evals init` is still available if you prefer to run setup separately (e.g. to set up connectors once and export `KIBANA_TESTING_AI_CONNECTORS` to your shell for use across terminals). It is no longer required before `start`.
 
 #### Profiles: golden datasets + local export (recommended for UI iteration)
 
@@ -145,14 +143,12 @@ The Evals CLI supports this via **vault config profiles** in:
 - `config.json` (default)
 - `config.<profile>.json` (e.g. `config.local.json`)
 
-Create the profiles:
+Create the profiles explicitly, or let `start` prompt you when a profile config is missing:
 
 ```bash
-# 1) Golden cluster config (datasets + keys)
-node scripts/evals init config
-
-# 2) Local export profile (results + traces to localhost:9200, no golden API key setup)
-node scripts/evals init config --profile local
+# Explicit setup (optional -- start --profile <name> will prompt if the config is missing)
+node scripts/evals init config                   # golden cluster config (datasets + keys)
+node scripts/evals init config --profile local   # local export profile (results + traces to localhost:9200)
 ```
 
 Run a suite using golden datasets but exporting locally:
@@ -191,8 +187,9 @@ node scripts/evals start --suite agent-builder --model eis-gpt-4.1 --judge eis-c
 ### Evals CLI commands
 
 ```bash
-node scripts/evals init                  # Set up connectors (EIS or validate existing)
-node scripts/evals start [--suite <id>]  # Start stack + run an eval suite
+node scripts/evals init                  # Set up connectors separately (optional -- start auto-inits)
+node scripts/evals start [--suite <id>]  # Auto-init config/connectors + start stack + run a suite
+node scripts/evals start --skip-init     # Start without first-run checks (connectors must already exist)
 node scripts/evals stop                  # Stop background EDOT + Scout daemons
 node scripts/evals logs [--service <n>]  # Tail logs from background services
 node scripts/evals scout                 # Start Scout with evals config (standalone)
@@ -372,19 +369,20 @@ To run eval suites against **EIS-backed models** locally, you need:
 - **EIS connectors** in `KIBANA_TESTING_AI_CONNECTORS` (so `@kbn/evals` can build Playwright projects)
 - **CCM enabled** on your test Elasticsearch cluster (so EIS inference endpoints exist)
 
-**Recommended flow** -- use the interactive CLI:
+**Recommended flow** -- a single command:
 
 ```bash
-# 1) Set up connectors (automates Vault, model discovery, connector generation)
-node scripts/evals init
-
-# 2) Export the KIBANA_TESTING_AI_CONNECTORS value printed by init
-
-# 3) Start everything and run a suite
 node scripts/evals start --suite <suite-id>
 ```
 
-`evals start` handles EDOT, Scout, and EIS CCM enablement automatically.
+`start` auto-detects missing connectors and walks you through EIS setup (Vault auth, model discovery, connector generation) before starting the stack. It also handles EDOT, Scout, and EIS CCM enablement automatically.
+
+If you prefer to run setup separately (e.g. to export `KIBANA_TESTING_AI_CONNECTORS` once for use across terminals):
+
+```bash
+node scripts/evals init       # interactive wizard -- prints an export command
+node scripts/evals start --skip-init --suite <suite-id>
+```
 
 ## Snapshot datasets (Dataplex)
 

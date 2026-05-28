@@ -5,20 +5,26 @@ The `node scripts/evals` CLI orchestrates LLM evaluation workflows. All commands
 ## Workflow overview
 
 ```
-init  -->  start  -->  [iterate: start again]  -->  stop
-           ^  |
-           |  +-- runs EDOT, Scout, EIS CCM, then Playwright
-           |
-       logs (tail background service output)
+start  -->  [iterate: start again]  -->  stop
+  |  ^
+  |  +-- runs EDOT, Scout, EIS CCM, then Playwright
+  |
+  +-- auto-inits config + connectors on first run (or use init separately)
+  |
+logs (tail background service output)
 ```
+
+`start` is the only command you need. On first run it auto-detects missing config and connectors, prompting you through setup before starting the stack. Use `init` separately only if you want to run setup in isolation (e.g. exporting `KIBANA_TESTING_AI_CONNECTORS` for use across terminals). Pass `--skip-init` to bypass these checks.
 
 EDOT and Scout run as **persistent background daemons**. They survive between `start` runs so you can iterate on eval suites without waiting for ES/Kibana to restart each time.
 
 ## Commands
 
-### `init` -- Set up connectors
+### `init` -- Set up connectors (optional)
 
-Interactive wizard that discovers EIS models or validates existing connectors in `kibana.dev.yml`.
+Interactive wizard that discovers EIS models or validates existing connectors in `kibana.dev.yml`. Running `init` separately is **optional** -- `start` auto-triggers the same setup when config or connectors are missing.
+
+Use `init` when you want to run setup in isolation, e.g. to export `KIBANA_TESTING_AI_CONNECTORS` to your shell before running `start` or `run` in another terminal.
 
 ```bash
 node scripts/evals init
@@ -31,7 +37,7 @@ node scripts/evals init --skip-discovery
 
 ### `start` -- Start stack and run a suite
 
-The main command. Starts EDOT + Scout as background daemons, enables EIS CCM if needed, then runs a Playwright eval suite.
+The main command. On first run, auto-detects missing config and connectors and prompts for setup. Then starts EDOT + Scout as background daemons, enables EIS CCM if needed, and runs a Playwright eval suite.
 
 ```bash
 node scripts/evals start
@@ -40,6 +46,7 @@ node scripts/evals start --suite agent-builder --model eis-gpt-4.1 --judge eis-c
 node scripts/evals start --suite agent-builder --model eis-gpt-4.1,eis-claude-4-sonnet
 node scripts/evals start --suite agent-builder --grep "product documentation"
 node scripts/evals start --suite agent-builder --skip-server
+node scripts/evals start --skip-init --suite agent-builder
 ```
 
 | Flag | Alias | Description |
@@ -54,9 +61,10 @@ node scripts/evals start --suite agent-builder --skip-server
 | `--grep <pattern>` | | Filter tests by name (passed to Playwright `--grep`) |
 | `--repetitions <n>` | | Number of times to repeat each example |
 | `--skip-server` | | Skip EDOT/Scout/EIS startup (use existing services) |
+| `--skip-init` | | Skip automatic first-run config and connector setup |
 | `--dry-run` | | Print configuration and exit without running |
 
-When flags are omitted and stdin is a TTY, `start` prompts interactively for suite, judge, and model selection.
+When flags are omitted and stdin is a TTY, `start` prompts interactively for suite, judge, model selection, and first-run config/connector setup. In non-TTY environments (e.g. CI), missing config or connectors cause a fast failure with an actionable error message.
 
 Traces are exported by EDOT to the export cluster (controlled by `--export-profile` / `TRACING_ES_URL`), and `TRACING_ES_URL` is set so trace-based evaluators query the right cluster.
 
@@ -64,14 +72,12 @@ Traces are exported by EDOT to the export cluster (controlled by `--export-profi
 
 Use profiles to fetch datasets from the golden cluster while exporting results and traces to your local Elasticsearch/Kibana (default: `http://localhost:9200` / `http://localhost:5601`).
 
-Create the profiles:
+Create the profiles explicitly, or let `start --profile <name>` prompt you when the config is missing:
 
 ```bash
-# golden cluster config (datasets)
-node scripts/evals init config
-
-# local export profile (results + traces to localhost:9200)
-node scripts/evals init config --profile local
+# explicit setup (optional -- start prompts if missing)
+node scripts/evals init config                   # golden cluster config (datasets)
+node scripts/evals init config --profile local   # local export profile (results + traces to localhost:9200)
 ```
 
 Run:
