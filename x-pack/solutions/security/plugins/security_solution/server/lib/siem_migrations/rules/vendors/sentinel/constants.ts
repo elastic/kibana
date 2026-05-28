@@ -6,6 +6,10 @@
  */
 
 export { TACTICS_BASE_URL, TECHNIQUES_BASE_URL } from '../qradar/constants';
+export {
+  SENTINEL_NRT_RULE_KIND,
+  SENTINEL_SCHEDULED_RULE_KIND,
+} from '../../../../../../common/siem_migrations/parsers/sentinel/types';
 
 /**
  * Map of Sentinel tactic display names to MITRE ATT&CK tactic IDs.
@@ -56,7 +60,6 @@ export const SENTINEL_TACTIC_NAME_TO_DISPLAY: Record<string, string> = {
 
 export const SENTINEL_DEFAULT_QUERY_FREQUENCY = '1m';
 export const SENTINEL_RULE_KIND_ANNOTATION_KEY = 'sentinel_rule_kind';
-export const SENTINEL_NRT_RULE_KIND = 'NRT';
 
 /**
  * Matches the integer-only ISO 8601 duration subset supported by the Sentinel rule transform.

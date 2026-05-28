@@ -6,10 +6,15 @@
  */
 
 import type { SentinelArmResource } from '../../model/vendor/rules/sentinel.gen';
-import type { SentinelRule, SentinelRuleKind } from './types';
+import {
+  SENTINEL_NRT_RULE_KIND,
+  SENTINEL_SCHEDULED_RULE_KIND,
+  type SentinelRule,
+  type SentinelRuleKind,
+} from './types';
 
 const isSupportedSentinelRuleKind = (kind: string | undefined): kind is SentinelRuleKind =>
-  kind === 'Scheduled' || kind === 'NRT';
+  kind === SENTINEL_SCHEDULED_RULE_KIND || kind === SENTINEL_NRT_RULE_KIND;
 
 /**
  * Processes pre-validated Sentinel ARM template resources into SentinelRule objects.

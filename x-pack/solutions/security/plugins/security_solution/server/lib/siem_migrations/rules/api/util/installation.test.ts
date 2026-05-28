@@ -8,7 +8,11 @@
 import type { IDetectionRulesClient } from '../../../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import { SiemMigrationStatus } from '../../../../../../common/siem_migrations/constants';
 import type { StoredRuleMigrationRule } from '../../types';
-import { SENTINEL_RULE_KIND_ANNOTATION_KEY } from '../../vendors/sentinel/constants';
+import {
+  SENTINEL_NRT_RULE_KIND,
+  SENTINEL_RULE_KIND_ANNOTATION_KEY,
+  SENTINEL_SCHEDULED_RULE_KIND,
+} from '../../vendors/sentinel/constants';
 import { installCustomRules } from './installation';
 
 const translatedRule: StoredRuleMigrationRule = {
@@ -68,7 +72,7 @@ describe('installCustomRules', () => {
       original_rule: {
         ...translatedRule.original_rule,
         annotations: {
-          [SENTINEL_RULE_KIND_ANNOTATION_KEY]: 'NRT',
+          [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_NRT_RULE_KIND,
         },
       },
     };
@@ -92,7 +96,7 @@ describe('installCustomRules', () => {
       original_rule: {
         ...translatedRule.original_rule,
         annotations: {
-          [SENTINEL_RULE_KIND_ANNOTATION_KEY]: 'Scheduled',
+          [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_SCHEDULED_RULE_KIND,
         },
       },
     };

@@ -6,12 +6,12 @@
  */
 
 import type { SentinelRule } from '../../../../../../common/siem_migrations/parsers/sentinel/types';
-import { SENTINEL_RULE_KIND_ANNOTATION_KEY } from './constants';
+import { SENTINEL_RULE_KIND_ANNOTATION_KEY, SENTINEL_SCHEDULED_RULE_KIND } from './constants';
 import { transformSentinelMitreMapping, transformSentinelRuleToOriginalRule } from './transforms';
 
 const baseSentinelRule: SentinelRule = {
   id: 'rule-id-1',
-  kind: 'Scheduled',
+  kind: SENTINEL_SCHEDULED_RULE_KIND,
   displayName: 'Suspicious sign-in',
   description: 'Detects suspicious sign-in activity',
   query: 'SigninLogs | where ResultType != 0',
@@ -82,7 +82,7 @@ describe('transformSentinelRuleToOriginalRule', () => {
       query: 'SigninLogs | where ResultType != 0',
       query_language: 'kql',
       annotations: {
-        [SENTINEL_RULE_KIND_ANNOTATION_KEY]: 'Scheduled',
+        [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_SCHEDULED_RULE_KIND,
       },
     });
   });
@@ -120,7 +120,7 @@ describe('transformSentinelRuleToOriginalRule', () => {
     });
 
     expect(result.annotations).toEqual({
-      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: 'Scheduled',
+      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_SCHEDULED_RULE_KIND,
       from: 'now-330s',
       to: 'now',
       interval: '5m',
@@ -135,7 +135,7 @@ describe('transformSentinelRuleToOriginalRule', () => {
     });
 
     expect(result.annotations).toEqual({
-      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: 'Scheduled',
+      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_SCHEDULED_RULE_KIND,
       from: 'now-150s',
       to: 'now',
       interval: '90s',
@@ -150,7 +150,7 @@ describe('transformSentinelRuleToOriginalRule', () => {
     });
 
     expect(result.annotations).toEqual({
-      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: 'Scheduled',
+      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_SCHEDULED_RULE_KIND,
       from: 'now-2M',
       to: 'now',
       interval: '1y',
@@ -165,7 +165,23 @@ describe('transformSentinelRuleToOriginalRule', () => {
     });
 
     expect(result.annotations).toEqual({
-      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: 'Scheduled',
+      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_SCHEDULED_RULE_KIND,
+    });
+  });
+
+  it.each([
+    ['week duration', 'P1W'],
+    ['fractional duration', 'PT0.5H'],
+    ['date-plus-time duration', 'P1DT2H'],
+  ])('omits unsupported %s overrides', (_description, duration) => {
+    const result = transformSentinelRuleToOriginalRule({
+      ...baseSentinelRule,
+      queryFrequency: duration,
+      queryPeriod: duration,
+    });
+
+    expect(result.annotations).toEqual({
+      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_SCHEDULED_RULE_KIND,
     });
   });
 
@@ -177,7 +193,7 @@ describe('transformSentinelRuleToOriginalRule', () => {
     });
 
     expect(result.annotations).toEqual({
-      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: 'Scheduled',
+      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_SCHEDULED_RULE_KIND,
       interval: '1m',
     });
   });
@@ -190,7 +206,7 @@ describe('transformSentinelRuleToOriginalRule', () => {
     });
 
     expect(result.annotations).toEqual({
-      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: 'Scheduled',
+      [SENTINEL_RULE_KIND_ANNOTATION_KEY]: SENTINEL_SCHEDULED_RULE_KIND,
       from: 'now-1m',
       to: 'now',
     });

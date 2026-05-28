@@ -9,7 +9,10 @@
  * Represents a Microsoft Sentinel Scheduled or Near-Real-Time Analytics Rule as parsed from
  * an ARM template JSON export.
  */
-export type SentinelRuleKind = 'Scheduled' | 'NRT';
+export const SENTINEL_SCHEDULED_RULE_KIND = 'Scheduled';
+export const SENTINEL_NRT_RULE_KIND = 'NRT';
+
+export type SentinelRuleKind = typeof SENTINEL_SCHEDULED_RULE_KIND | typeof SENTINEL_NRT_RULE_KIND;
 
 export interface SentinelRule {
   /** The rule's unique identifier (ARM resource name or GUID) */
