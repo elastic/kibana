@@ -35,8 +35,6 @@ interface Props {
   onKindChange: (kind: 'signal' | 'alert') => void;
   ruleId?: string;
   builderType?: string;
-  builderState?: unknown;
-  onBuilderStateChange?: (state: unknown) => void;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -120,16 +118,12 @@ export const getSteps = (isAlert: boolean, builderType?: string): StepDefinition
         return {
           ...base,
           title: definition.stepTitle,
-          render: (props) => {
-            if (!props.builderState || !props.onBuilderStateChange) return null;
-            return definition.renderStep({
+          render: (props) =>
+            definition.renderStep({
               state: props.state,
               dispatch: props.dispatch,
               services: props.services,
-              builderState: props.builderState,
-              onBuilderStateChange: props.onBuilderStateChange,
-            });
-          },
+            }),
           validate: definition.validate
             ? (_methods, s, _services, bs) => definition.validate!(s, bs)
             : base.validate,
@@ -148,8 +142,6 @@ export const ComposeDiscoverForm = ({
   onKindChange,
   ruleId,
   builderType,
-  builderState,
-  onBuilderStateChange,
 }: Props) => {
   const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const steps = getSteps(isAlert, builderType);
@@ -160,7 +152,5 @@ export const ComposeDiscoverForm = ({
     onRecoveryTypeChange,
     onKindChange,
     ruleId,
-    builderState,
-    onBuilderStateChange,
   });
 };
