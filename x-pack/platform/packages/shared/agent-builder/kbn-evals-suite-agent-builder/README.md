@@ -135,10 +135,16 @@ SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality" RAG_EVAL_K=5,10,20 no
 # Override RAG evaluator K value (supports comma-separated values for multi-K evaluation)
 RAG_EVAL_K=5,10,20 node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
+# Run RAG evaluators directly on platform.core.search instead of /converse
+RAG_EVAL_EXECUTION_MODE=search_tool SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K" node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
+
 # Retrieve traces from another (monitoring) cluster
 TRACING_ES_URL=http://elastic:changeme@localhost:9200 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/playwright.config.ts
 
 ```
+
+`RAG_EVAL_EXECUTION_MODE` defaults to `converse`. Set it to `search_tool` to evaluate retrieval metrics against direct search tool execution.
+When `search_tool` is enabled, non-RAG evaluators still run on the `converse` response.
 
 > **Tip:** When using preconfigured connectors, set `KBN_EVALS_SKIP_CONNECTOR_SETUP=true` to skip automatic connector setup/teardown, causing instability running evaluations.
 
