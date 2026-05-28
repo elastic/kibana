@@ -52,6 +52,7 @@ import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
 } from '../../../../common/sig_events_tuning_config';
+import type { StreamAssetIndexer } from '../sml_writer';
 
 const SEARCH_SIZE_LIMIT = 10_000;
 
@@ -153,7 +154,14 @@ function appendKeywordEsqlPipeline(searchTerm: string, size: number): ComposerQu
     | LIMIT ${esql.num(size)}`;
 }
 
-function buildBaseFilters({
+/**
+ * Filters that gate which features participate in user-facing read paths:
+ * search, list, and the SML crawler. Every consumer must apply the same
+ * defaults (drop expired + excluded) so what surfaces in one place is what
+ * surfaces in all of them. Exported so the agent-builder SML type definition
+ * can reuse it without re-deriving the semantics.
+ */
+export function buildFeatureBaseFilters({
   includeExpired,
   includeExcluded,
   type,
@@ -241,12 +249,17 @@ export class FeatureClient {
     private readonly clients: {
       storageClient: IStorageClient<FeatureStorageSettings, StoredFeature>;
       logger: Logger;
+      assetIndexer?: StreamAssetIndexer;
     },
     private readonly config: Pick<
       SigEventsTuningConfig,
       'feature_ttl_days' | 'semantic_min_score' | 'rrf_rank_constant'
     > = DEFAULT_SIG_EVENTS_TUNING_CONFIG
   ) {}
+
+  private notifyAsset(action: 'upsert' | 'delete', id: string): void {
+    this.clients.assetIndexer?.notify(action, id);
+  }
 
   private get maxFeatureAgeMs(): number {
     return this.config.feature_ttl_days * 24 * 60 * 60 * 1000;
@@ -292,6 +305,19 @@ export class FeatureClient {
       })
     );
 
+    // Sync SML chunks. An `index` op that materializes an excluded feature
+    // (excluded_at set) should drop from SML — getFeatures/findFeatures
+    // filter those out by default and the picker should follow suit.
+    for (const operation of resolvedOperations) {
+      if ('index' in operation) {
+        const feature = operation.index.feature;
+        const action = feature.excluded_at ? 'delete' : 'upsert';
+        this.notifyAsset(action, feature.uuid);
+      } else {
+        this.notifyAsset('delete', operation.delete.id);
+      }
+    }
+
     return { applied: resolvedOperations.length, skipped };
   }
 
@@ -315,7 +341,7 @@ export class FeatureClient {
     const filterClauses: QueryDslQueryContainer[] = [
       ...termsQuery(STREAM_NAME, streamNames),
       ...(options.id?.length ? termsQuery(FEATURE_ID, options.id) : []),
-      ...buildBaseFilters(options),
+      ...buildFeatureBaseFilters(options),
     ];
 
     const sortField = options.sortBy === 'lastSeen' ? FEATURE_LAST_SEEN : FEATURE_CONFIDENCE;
@@ -377,7 +403,9 @@ export class FeatureClient {
 
   async deleteFeature(stream: string, uuid: string) {
     const feature = await this.getFeature(stream, uuid);
-    return await this.clients.storageClient.delete({ id: feature.uuid });
+    const result = await this.clients.storageClient.delete({ id: feature.uuid });
+    this.notifyAsset('delete', feature.uuid);
+    return result;
   }
 
   async deleteFeatures(stream: string) {
@@ -385,11 +413,20 @@ export class FeatureClient {
       includeExcluded: true,
       includeExpired: true,
     });
-    return await this.clients.storageClient.bulk({
+    // `throwOnFail: true` matches the other bulk-write site in this client and
+    // makes the SML notify below the only "the storage write happened" path.
+    // If we leak partial failures back as a resolved result, we'd notify the
+    // indexer for features that were never deleted, leaving stale chunks.
+    const result = await this.clients.storageClient.bulk({
       operations: features.hits.map((feature) => ({
         delete: { _id: feature.uuid },
       })),
+      throwOnFail: true,
     });
+    for (const feature of features.hits) {
+      this.notifyAsset('delete', feature.uuid);
+    }
+    return result;
   }
 
   async getExcludedFeatures(stream: string): Promise<{ hits: Feature[] }> {
@@ -441,7 +478,7 @@ export class FeatureClient {
 
     const filter: QueryDslQueryContainer[] = [
       ...termsQuery(STREAM_NAME, streamNames),
-      ...buildBaseFilters(options),
+      ...buildFeatureBaseFilters(options),
     ];
 
     if (mode === 'keyword') {

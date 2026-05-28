@@ -11,7 +11,9 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ValidateAttachmentResult } from './validate_attachment';
 
 export interface AttachmentServiceSetup {
-  registerType(attachmentType: AttachmentTypeDefinition): void;
+  registerType<TType extends string = string, TContent = unknown>(
+    attachmentType: AttachmentTypeDefinition<TType, TContent>
+  ): void;
 }
 
 export interface AttachmentServiceStart {

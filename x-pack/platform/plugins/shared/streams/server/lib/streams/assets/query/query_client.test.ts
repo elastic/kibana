@@ -63,12 +63,16 @@ const createMockStorageClient = () => ({
 const createMockDefinition = (name = 'logs.test'): Streams.all.Definition =>
   ({ name } as Streams.all.Definition);
 
+const createMockAssetIndexer = () => ({ notify: jest.fn() });
+
 const createQueryClient = ({
   storageClient = createMockStorageClient(),
   logger = createMockLogger(),
+  assetIndexer,
 }: {
   storageClient?: ReturnType<typeof createMockStorageClient>;
   logger?: ReturnType<typeof createMockLogger>;
+  assetIndexer?: ReturnType<typeof createMockAssetIndexer>;
 } = {}) => {
   const client = new QueryClient(
     {
@@ -79,10 +83,11 @@ const createQueryClient = ({
       soClient: {} as SavedObjectsClientContract,
       rulesManagementClient: {} as IRulesManagementClient,
       logger: logger as unknown as Logger,
+      assetIndexer,
     },
     true
   );
-  return { client, storageClient, logger };
+  return { client, storageClient, logger, assetIndexer };
 };
 
 const createQuery = (overrides: Partial<StreamQuery> = {}): StreamQuery => ({
@@ -1338,5 +1343,85 @@ describe('rule lifecycle — syncQueries', () => {
 
       expect(rc.bulkDeleteRules).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('QueryClient event-driven SML indexer hooks', () => {
+  it('notifies action=upsert for each indexed asset in syncQueryList', async () => {
+    const storageClient = createMockStorageClient();
+    storageClient.esql.mockResolvedValue(toEsqlSourceResponse([]));
+    const assetIndexer = createMockAssetIndexer();
+    const { client } = createQueryClient({ storageClient, assetIndexer });
+
+    await client.syncQueryList(createMockDefinition(), [
+      {
+        [ASSET_ID]: 'q-1',
+        [ASSET_TYPE]: 'query',
+        query: createQuery({ id: 'q-1' }),
+        rule_backed: true,
+        rule_id: 'rule-1',
+      },
+      {
+        [ASSET_ID]: 'q-2',
+        [ASSET_TYPE]: 'query',
+        query: createQuery({ id: 'q-2' }),
+        rule_backed: false,
+        rule_id: 'rule-2',
+      },
+    ]);
+
+    expect(assetIndexer.notify).toHaveBeenCalledTimes(2);
+    for (const [action, id] of assetIndexer.notify.mock.calls) {
+      expect(action).toBe('upsert');
+      expect(typeof id).toBe('string');
+      expect(id.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('notifies delete for assets dropped by syncQueryList', async () => {
+    const storageClient = createMockStorageClient();
+    storageClient.esql.mockResolvedValue(
+      toEsqlSourceResponse([
+        createOldShapeStoredDoc({ [ASSET_UUID]: 'uuid-stale', [ASSET_ID]: 'q-stale' }),
+      ])
+    );
+    const assetIndexer = createMockAssetIndexer();
+    const { client } = createQueryClient({ storageClient, assetIndexer });
+
+    await client.syncQueryList(createMockDefinition(), []);
+
+    // bulkStorage re-derives the uuid from `getQueryLinkUuid(definition.name, asset)`
+    // rather than re-using the stored `ASSET_UUID`, so we only assert shape.
+    expect(assetIndexer.notify).toHaveBeenCalledTimes(1);
+    const [action, id] = assetIndexer.notify.mock.calls[0];
+    expect(action).toBe('delete');
+    expect(typeof id).toBe('string');
+    expect(id.length).toBeGreaterThan(0);
+  });
+
+  it('notifies delete from unlinkQuery once the storage delete returns deleted', async () => {
+    const storageClient = createMockStorageClient();
+    storageClient.delete.mockResolvedValueOnce({ result: 'deleted', acknowledged: true });
+    const assetIndexer = createMockAssetIndexer();
+    const { client } = createQueryClient({ storageClient, assetIndexer });
+
+    await client.unlinkQuery('logs.test', { [ASSET_ID]: 'q-1', [ASSET_TYPE]: 'query' });
+
+    expect(assetIndexer.notify).toHaveBeenCalledTimes(1);
+    const [action, id] = assetIndexer.notify.mock.calls[0];
+    expect(action).toBe('delete');
+    expect(typeof id).toBe('string');
+  });
+
+  it('does not notify when unlinkQuery throws because the asset is missing', async () => {
+    const storageClient = createMockStorageClient();
+    storageClient.delete.mockResolvedValueOnce({ result: 'not_found', acknowledged: true });
+    const assetIndexer = createMockAssetIndexer();
+    const { client } = createQueryClient({ storageClient, assetIndexer });
+
+    await expect(
+      client.unlinkQuery('logs.test', { [ASSET_ID]: 'q-1', [ASSET_TYPE]: 'query' })
+    ).rejects.toThrow();
+    expect(assetIndexer.notify).not.toHaveBeenCalled();
   });
 });

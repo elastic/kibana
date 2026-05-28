@@ -17,6 +17,7 @@ export type {
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,
   SmlIndexAttachmentParams,
+  SmlIndexAttachmentAsInternalParams,
 } from './types';
 
 export type {

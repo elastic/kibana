@@ -254,7 +254,12 @@ export class SmlCrawlerImpl implements SmlCrawler {
         newItems++;
         updateAction = 'create';
       } else if (
-        existing.updated_at < item.updatedAt ||
+        // Strict inequality so any change in `updatedAt` triggers a re-index,
+        // not just monotonic forward jumps. Types that use a content fingerprint
+        // (e.g. a hash of user-visible fields) would otherwise miss reverts and
+        // back-jumps; types that emit monotonic timestamps see identical
+        // behavior to the previous `<` check.
+        existing.updated_at !== item.updatedAt ||
         !arraysEqual(existing.spaces, item.spaces)
       ) {
         updatedItems++;

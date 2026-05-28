@@ -66,6 +66,7 @@ import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
 } from '../../../../../common/sig_events_tuning_config';
+import type { StreamAssetIndexer } from '../../sml_writer';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
@@ -410,9 +411,13 @@ export class QueryClient {
   constructor(
     private readonly dependencies: {
       storageClient: IStorageClient<QueryStorageSettings, StoredQueryLink>;
-      soClient: SavedObjectsClientContract;
+      // Currently unused inside QueryClient itself, but kept so request-scoped
+      // callers (HTTP routes) can pass through the saved-objects client they
+      // already own. Read-only consumers (the SML crawler) skip it.
+      soClient?: SavedObjectsClientContract;
       rulesManagementClient: IRulesManagementClient;
       logger: Logger;
+      assetIndexer?: StreamAssetIndexer;
     },
     private readonly isSignificantEventsEnabled: boolean = false,
     private readonly config: Pick<
@@ -420,6 +425,10 @@ export class QueryClient {
       'semantic_min_score' | 'rrf_rank_constant'
     > = DEFAULT_SIG_EVENTS_TUNING_CONFIG
   ) {}
+
+  private notifyAsset(action: 'upsert' | 'delete', id: string): void {
+    this.dependencies.assetIndexer?.notify(action, id);
+  }
 
   // ==================== Storage Operations ====================
 
@@ -470,6 +479,7 @@ export class QueryClient {
     if (result === 'not_found') {
       throw new AssetNotFoundError(`${asset[ASSET_TYPE]} not found`);
     }
+    this.notifyAsset('delete', id);
   }
 
   async clean() {
@@ -508,6 +518,28 @@ export class QueryClient {
     }
 
     return queriesPerName;
+  }
+
+  /**
+   * Resolves a list of asset UUIDs to their underlying {@link QueryLink}.
+   *
+   * Counterpart of {@link FeatureClient.findFeaturesByUuids} — useful when the
+   * caller has UUIDs (storage `_id`s) but does not know which stream owns each
+   * query. UUIDs that do not exist in storage are simply absent from the
+   * result; callers can compute "not found" as `input.length - result.length`.
+   */
+  async findQueryLinksByUuids(uuids: string[]): Promise<QueryLink[]> {
+    if (uuids.length === 0) {
+      return [];
+    }
+
+    const idLiterals = uuids.map((id) => esql.str(id));
+    const response = await this.dependencies.storageClient.esql({
+      metadata: ['_id', '_source'],
+      pipeline: esql`WHERE _id IN (${idLiterals}) | LIMIT ${esql.num(uuids.length)}`,
+    });
+
+    return mapSourceRows<StoredQueryLink, QueryLink>(response, fromStorage);
   }
 
   /**
@@ -826,29 +858,43 @@ export class QueryClient {
     definition: Streams.all.Definition,
     operations: QueryStorageBulkOperation[]
   ) {
-    return await bulkWithInferenceFallback(this.dependencies.logger, ({ includeEmbedding }) =>
-      this.dependencies.storageClient.bulk({
-        operations: operations.map((operation) => {
-          if ('index' in operation) {
-            const document = toStorage(definition, operation.index.asset, includeEmbedding);
+    const response = await bulkWithInferenceFallback(
+      this.dependencies.logger,
+      ({ includeEmbedding }) =>
+        this.dependencies.storageClient.bulk({
+          operations: operations.map((operation) => {
+            if ('index' in operation) {
+              const document = toStorage(definition, operation.index.asset, includeEmbedding);
+              return {
+                index: {
+                  document,
+                  _id: document[ASSET_UUID],
+                },
+              };
+            }
+
+            const id = getQueryLinkUuid(definition.name, operation.delete.asset);
             return {
-              index: {
-                document,
-                _id: document[ASSET_UUID],
+              delete: {
+                _id: id,
               },
             };
-          }
-
-          const id = getQueryLinkUuid(definition.name, operation.delete.asset);
-          return {
-            delete: {
-              _id: id,
-            },
-          };
-        }),
-        throwOnFail: true,
-      })
+          }),
+          throwOnFail: true,
+        })
     );
+
+    for (const operation of operations) {
+      if ('index' in operation) {
+        const uuid = getQueryLinkUuid(definition.name, operation.index.asset);
+        this.notifyAsset('upsert', uuid);
+      } else {
+        const uuid = getQueryLinkUuid(definition.name, operation.delete.asset);
+        this.notifyAsset('delete', uuid);
+      }
+    }
+
+    return response;
   }
 
   async getAssets(name: string): Promise<Query[]> {

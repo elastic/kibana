@@ -56,11 +56,13 @@ import {
   logAlertingV2PluginUnavailable,
   readSignificantEventsAlertingV2UiEnabled,
 } from '../../../sig_events/significant_events_alerting_v2';
+import type { StreamAssetIndexer } from '../../sml_writer';
 
 export class QueryService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly assetIndexer?: StreamAssetIndexer
   ) {}
 
   async getClient({
@@ -221,6 +223,7 @@ export class QueryService {
         soClient,
         rulesManagementClient,
         logger: this.logger,
+        assetIndexer: this.assetIndexer,
       },
       isSignificantEventsEnabled,
       config

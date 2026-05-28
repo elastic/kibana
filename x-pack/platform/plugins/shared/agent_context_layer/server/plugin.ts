@@ -164,6 +164,20 @@ export class AgentContextLayerPlugin
           logger: this.logger.get('sml'),
         });
       },
+      indexAttachmentAsInternal: async (params) => {
+        const internalRepository = savedObjects.createInternalRepository(
+          params.includedHiddenTypes ?? []
+        );
+        return smlService.indexAttachment({
+          originId: params.originId,
+          attachmentType: params.attachmentType,
+          action: params.action,
+          spaces: params.spaces,
+          esClient: elasticsearch.client.asInternalUser,
+          savedObjectsClient: internalRepository,
+          logger: this.logger.get('sml'),
+        });
+      },
     };
   }
 

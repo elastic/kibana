@@ -63,13 +63,17 @@ const renderEsqlCall = (call: {
   return call.pipeline.toRequest();
 };
 
+const createMockAssetIndexer = () => ({ notify: jest.fn() });
+
 const createFeatureClient = ({
   storageClient = createMockStorageClient(),
   logger = createMockLogger(),
+  assetIndexer,
   config,
 }: {
   storageClient?: ReturnType<typeof createMockStorageClient>;
   logger?: ReturnType<typeof createMockLogger>;
+  assetIndexer?: ReturnType<typeof createMockAssetIndexer>;
   config?: {
     feature_ttl_days: number;
     semantic_min_score: number;
@@ -83,10 +87,11 @@ const createFeatureClient = ({
         StoredFeature
       >,
       logger: logger as unknown as Logger,
+      assetIndexer,
     },
     config
   );
-  return { client, storageClient, logger };
+  return { client, storageClient, logger, assetIndexer };
 };
 
 const createFeature = (overrides: Partial<Feature> = {}): Feature => ({
@@ -508,7 +513,21 @@ describe('FeatureClient', () => {
 
       expect(storageClient.bulk).toHaveBeenCalledWith({
         operations: [{ delete: { _id: 'uuid-a' } }, { delete: { _id: 'uuid-b' } }],
+        throwOnFail: true,
       });
+    });
+
+    it('does not notify the indexer when the bulk delete throws', async () => {
+      const storageClient = createMockStorageClient();
+      storageClient.esql.mockResolvedValue(
+        toEsqlSourceResponse([createStoredFeature({ [FEATURE_UUID]: 'uuid-a' })])
+      );
+      storageClient.bulk.mockRejectedValueOnce(new Error('partial bulk failure'));
+      const assetIndexer = createMockAssetIndexer();
+      const { client } = createFeatureClient({ storageClient, assetIndexer });
+
+      await expect(client.deleteFeatures('logs.test')).rejects.toThrow('partial bulk failure');
+      expect(assetIndexer.notify).not.toHaveBeenCalled();
     });
   });
 
@@ -725,6 +744,89 @@ describe('FeatureClient', () => {
         client.bulk('logs.test', [{ index: { feature: createFeature() } }])
       ).rejects.toThrow('cluster unreachable');
       expect(storageClient.bulk).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('event-driven SML indexer hooks', () => {
+    it('notifies the asset indexer with action=upsert for each index op', async () => {
+      const assetIndexer = createMockAssetIndexer();
+      const { client } = createFeatureClient({ assetIndexer });
+
+      await client.bulk('logs.test', [
+        { index: { feature: createFeature({ uuid: 'uuid-a' }) } },
+        { index: { feature: createFeature({ uuid: 'uuid-b' }) } },
+      ]);
+
+      expect(assetIndexer.notify).toHaveBeenCalledTimes(2);
+      expect(assetIndexer.notify).toHaveBeenNthCalledWith(1, 'upsert', 'uuid-a');
+      expect(assetIndexer.notify).toHaveBeenNthCalledWith(2, 'upsert', 'uuid-b');
+    });
+
+    it('notifies delete when an index op materializes an excluded feature', async () => {
+      const assetIndexer = createMockAssetIndexer();
+      const { client } = createFeatureClient({ assetIndexer });
+
+      await client.bulk('logs.test', [
+        {
+          index: {
+            feature: createFeature({ uuid: 'uuid-x', excluded_at: '2024-06-01T00:00:00.000Z' }),
+          },
+        },
+      ]);
+
+      expect(assetIndexer.notify).toHaveBeenCalledWith('delete', 'uuid-x');
+    });
+
+    it('notifies delete for a bulk delete op once it is resolved against storage', async () => {
+      const storageClient = createMockStorageClient();
+      storageClient.esql.mockResolvedValueOnce(
+        toEsqlIdSourceResponse([['uuid-1', createStoredFeature()]])
+      );
+      const assetIndexer = createMockAssetIndexer();
+      const { client } = createFeatureClient({ storageClient, assetIndexer });
+
+      await client.bulk('logs.test', [{ delete: { id: 'uuid-1' } }]);
+
+      expect(assetIndexer.notify).toHaveBeenCalledWith('delete', 'uuid-1');
+    });
+
+    it('does not notify when every operation was filtered out (no storage write)', async () => {
+      const assetIndexer = createMockAssetIndexer();
+      const { client } = createFeatureClient({ assetIndexer });
+
+      const result = await client.bulk('logs.test', [{ delete: { id: 'uuid-missing' } }]);
+
+      expect(result).toEqual({ applied: 0, skipped: 1 });
+      expect(assetIndexer.notify).not.toHaveBeenCalled();
+    });
+
+    it('notifies delete from deleteFeature after the storage delete completes', async () => {
+      const storageClient = createMockStorageClient();
+      storageClient.esql.mockResolvedValue(toEsqlSourceResponse([createStoredFeature()]));
+      const assetIndexer = createMockAssetIndexer();
+      const { client } = createFeatureClient({ storageClient, assetIndexer });
+
+      await client.deleteFeature('logs.test', 'uuid-1');
+
+      expect(assetIndexer.notify).toHaveBeenCalledWith('delete', 'uuid-1');
+    });
+
+    it('notifies delete once per existing feature when deleteFeatures sweeps a stream', async () => {
+      const storageClient = createMockStorageClient();
+      storageClient.esql.mockResolvedValue(
+        toEsqlSourceResponse([
+          createStoredFeature({ [FEATURE_UUID]: 'uuid-a' }),
+          createStoredFeature({ [FEATURE_UUID]: 'uuid-b' }),
+        ])
+      );
+      const assetIndexer = createMockAssetIndexer();
+      const { client } = createFeatureClient({ storageClient, assetIndexer });
+
+      await client.deleteFeatures('logs.test');
+
+      expect(assetIndexer.notify).toHaveBeenCalledTimes(2);
+      expect(assetIndexer.notify).toHaveBeenNthCalledWith(1, 'delete', 'uuid-a');
+      expect(assetIndexer.notify).toHaveBeenNthCalledWith(2, 'delete', 'uuid-b');
     });
   });
 });

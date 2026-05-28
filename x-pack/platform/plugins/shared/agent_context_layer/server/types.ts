@@ -78,6 +78,15 @@ export interface AgentContextLayerPluginStart {
   }) => Promise<SmlResolvedItemResult[]>;
 
   indexAttachment: (params: SmlIndexAttachmentParams) => Promise<void>;
+
+  /**
+   * Index/delete an attachment from a non-request context (background tasks,
+   * post-write hooks on internal storage clients, etc.). Uses the internal
+   * Elasticsearch user and an internal saved-objects repository, so callers
+   * must supply the `spaces` array explicitly — typically `['*']` for
+   * globally-visible content backed by indices without per-space scoping.
+   */
+  indexAttachmentAsInternal: (params: SmlIndexAttachmentAsInternalParams) => Promise<void>;
 }
 
 export interface SmlIndexAttachmentParams {
@@ -86,5 +95,13 @@ export interface SmlIndexAttachmentParams {
   attachmentType: string;
   action: SmlIndexAction;
   spaceId?: string;
+  includedHiddenTypes?: string[];
+}
+
+export interface SmlIndexAttachmentAsInternalParams {
+  originId: string;
+  attachmentType: string;
+  action: SmlIndexAction;
+  spaces: string[];
   includedHiddenTypes?: string[];
 }

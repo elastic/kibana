@@ -75,6 +75,13 @@ import {
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
+import {
+  createFeatureKiAdapter,
+  createKnowledgeIndicatorEventIndexer,
+  createQueryKiAdapter,
+} from './agent_builder/sml/ki_event_indexer';
+import { createKnowledgeIndicatorSmlType } from './agent_builder/sml/knowledge_indicator_sml_type';
+import { createKnowledgeIndicatorAttachmentType } from './agent_builder/attachments/knowledge_indicator_attachment_type';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
@@ -155,10 +162,20 @@ export class StreamsPlugin
     const significantEventsServices = createSignificantEventsServices();
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
-    const featureService = new FeatureService(core, this.logger);
+
+    // The KI event indexer keeps the SML index in sync after every KI write.
+    // We instantiate it unconditionally so the FeatureClient/QueryClient
+    // wiring stays uniform; when agentContextLayer is not available the
+    // notify() calls are silently dropped. The two adapters tag each call
+    // with the right KI kind without leaking that detail to the clients.
+    const kiEventIndexer = createKnowledgeIndicatorEventIndexer(this.logger.get('ki-sml'));
+    const featureKiAdapter = createFeatureKiAdapter(kiEventIndexer);
+    const queryKiAdapter = createQueryKiAdapter(kiEventIndexer);
+
+    const featureService = new FeatureService(core, this.logger, featureKiAdapter);
     const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, this.logger);
+    const queryService = new QueryService(core, this.logger, queryKiAdapter);
     const taskService = new TaskService(plugins.taskManager);
     const getScopedClients = async ({
       request,
@@ -337,6 +354,55 @@ export class StreamsPlugin
         .catch((err) => {
           this.logger.error(`Failed to register agent builder: ${err.message}`);
         });
+    }
+
+    // KI surfacing in chat needs BOTH halves: the SML type makes the picker
+    // work and the attachment type owns rendering / staleness. Registering
+    // only one would surface KIs that fail to attach (or vice versa), so we
+    // gate them together and log when only one half is available.
+    if (plugins.agentBuilder && plugins.agentContextLayer) {
+      // The cast matches every other agent-builder attachment registrar in
+      // the repo (dashboards, workflows, alerting, apm). `AttachmentTypeDefinition`
+      // is invariant in `TContent` because of its `format`/`isStale` parameter
+      // shapes, so TS can't infer through `registerType` even with the generic
+      // signature; rewriting the contract is out of scope here.
+      plugins.agentBuilder.attachments.registerType(
+        createKnowledgeIndicatorAttachmentType({
+          logger: this.logger.get('ki-attachment'),
+          getScopedClients,
+        }) as Parameters<typeof plugins.agentBuilder.attachments.registerType>[0]
+      );
+      plugins.agentContextLayer.registerType(
+        createKnowledgeIndicatorSmlType({
+          coreSetup: core,
+          logger: this.logger.get('ki-sml'),
+          getScopedClients,
+        })
+      );
+
+      // The real indexAttachmentAsInternal becomes available once the agent
+      // context layer plugin has started — wire it into the indexer proxy so
+      // event-driven KI writes start flowing to SML.
+      core
+        .getStartServices()
+        .then(([, startPlugins]) => {
+          if (startPlugins.agentContextLayer) {
+            kiEventIndexer.setImpl(startPlugins.agentContextLayer.indexAttachmentAsInternal);
+          }
+        })
+        .catch((err) => {
+          this.logger.warn(
+            `Failed to bind KI event indexer to agentContextLayer: ${(err as Error).message}`
+          );
+        });
+    } else if (plugins.agentBuilder || plugins.agentContextLayer) {
+      this.logger.info(
+        `Knowledge Indicator chat integration disabled: requires both agentBuilder and agentContextLayer (have ${
+          plugins.agentBuilder ? 'agentBuilder' : ''
+        }${plugins.agentBuilder && plugins.agentContextLayer ? ', ' : ''}${
+          plugins.agentContextLayer ? 'agentContextLayer' : ''
+        })`
+      );
     }
 
     let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;

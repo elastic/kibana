@@ -28,11 +28,13 @@ import {
   type SigEventsTuningConfig,
 } from '../../../../common/sig_events_tuning_config';
 import { getInferenceIdFromIndex } from '../helpers/get_inference_id_from_index';
+import type { StreamAssetIndexer } from '../sml_writer';
 
 export class FeatureService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly assetIndexer?: StreamAssetIndexer
   ) {}
 
   async getClient(
@@ -83,6 +85,7 @@ export class FeatureService {
       {
         storageClient: adapter.getClient(),
         logger: this.logger,
+        assetIndexer: this.assetIndexer,
       },
       config
     );

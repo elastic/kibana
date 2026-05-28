@@ -17,6 +17,7 @@ import type { Observable } from 'rxjs';
 import { of, from } from 'rxjs';
 import { map, catchError } from 'rxjs';
 import { once } from 'lodash';
+import { KI_ATTACHMENT_TYPE } from '@kbn/streams-schema';
 import type { StreamsPublicConfig } from '../common/config';
 import type {
   ClassicStreamsStatus,
@@ -30,6 +31,7 @@ import type {
 } from './types';
 import type { StreamsRepositoryClient } from './api';
 import { createStreamsSourceEnricher } from './services/esql_source_enricher';
+import { knowledgeIndicatorAttachmentDefinition } from './components/knowledge_indicator_attachment';
 
 export class Plugin implements StreamsPluginClass {
   public config: StreamsPublicConfig;
@@ -58,6 +60,16 @@ export class Plugin implements StreamsPluginClass {
   }
 
   start(core: CoreStart, pluginsStart: StreamsPluginStartDependencies): StreamsPluginStart {
+    if (pluginsStart.agentBuilder) {
+      // Synchronous registration so the picker can render KI attachments the
+      // first time they appear in a conversation. The renderer module is
+      // small enough that a static import doesn't materially affect startup.
+      pluginsStart.agentBuilder.attachments.addAttachmentType(
+        KI_ATTACHMENT_TYPE,
+        knowledgeIndicatorAttachmentDefinition
+      );
+    }
+
     return {
       streamsRepositoryClient: this.repositoryClient,
       navigationStatus$: createStreamsNavigationStatusObservable(

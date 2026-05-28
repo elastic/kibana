@@ -323,3 +323,20 @@ export {
   STREAMS_PARTITIONING_SUGGESTIONS_INFERENCE_FEATURE_ID,
   STREAMS_PROCESSING_SUGGESTIONS_INFERENCE_FEATURE_ID,
 } from './src/inference_feature_ids';
+
+export {
+  KI_SML_TYPE,
+  KI_ATTACHMENT_TYPE,
+  KI_ORIGIN_KIND_FEATURE,
+  KI_ORIGIN_KIND_QUERY,
+  kiOriginKindSchema,
+  encodeKiOriginId,
+  decodeKiOriginId,
+  kiFeatureDataSchemaV1,
+  kiQueryDataSchemaV1,
+  kiAttachmentDataSchemaV1,
+  type KiOriginKind,
+  type KnowledgeIndicatorAttachmentData,
+  type KnowledgeIndicatorFeatureAttachmentDataV1,
+  type KnowledgeIndicatorQueryAttachmentDataV1,
+} from './src/knowledge_indicators/ki_attachment';
