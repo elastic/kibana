@@ -44,6 +44,23 @@ function getRawErrorMessage(error: unknown): string {
   }
 }
 
+function logAiInsightRouteError({
+  logger,
+  routeType,
+  error,
+}: {
+  logger: Pick<Logger, 'debug' | 'error'>;
+  routeType: 'alert' | 'error' | 'log';
+  error: unknown;
+}) {
+  const message = getRawErrorMessage(error);
+  logger.error(`Failed to generate AI insight for ${routeType} route: ${message}`);
+
+  if (error instanceof Error) {
+    logger.debug(error.stack ?? error.message);
+  }
+}
+
 function aiInsightSseErrorResponse({
   response,
   message,
@@ -176,7 +193,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
           }),
         });
       } catch (error) {
-        logger.error(error);
+        logAiInsightRouteError({ logger, routeType: 'alert', error });
         return routeAiInsightError({
           error,
           response,
@@ -247,7 +264,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
           }),
         });
       } catch (error) {
-        logger.error(error);
+        logAiInsightRouteError({ logger, routeType: 'error', error });
         return routeAiInsightError({
           error,
           response,
@@ -326,7 +343,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
           }),
         });
       } catch (error) {
-        logger.error(error);
+        logAiInsightRouteError({ logger, routeType: 'log', error });
         return routeAiInsightError({
           error,
           response,

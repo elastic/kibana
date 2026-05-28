@@ -38,10 +38,12 @@ export class ObservabilityAgentBuilderPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly aiInsightsLogger: Logger;
   private readonly dataRegistry: ObservabilityAgentBuilderDataRegistry;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
+    this.aiInsightsLogger = this.logger.get('aiInsights');
     this.dataRegistry = new ObservabilityAgentBuilderDataRegistry(this.logger);
   }
 
@@ -72,7 +74,12 @@ export class ObservabilityAgentBuilderPlugin
       this.logger.error(`Error registering observability attachments: ${error}`);
     });
 
-    registerServerRoutes({ core, plugins, logger: this.logger, dataRegistry: this.dataRegistry });
+    registerServerRoutes({
+      core,
+      plugins,
+      logger: this.aiInsightsLogger,
+      dataRegistry: this.dataRegistry,
+    });
 
     if (plugins.searchInferenceEndpoints) {
       plugins.searchInferenceEndpoints.features.register(observabilityParentFeature);
