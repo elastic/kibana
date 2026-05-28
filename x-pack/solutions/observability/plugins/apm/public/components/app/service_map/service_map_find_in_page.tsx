@@ -53,15 +53,31 @@ function getAbsolutePosition(
 
 export interface ServiceMapFindInPageProps {
   nodes: ServiceMapNode[];
+  /** Controlled search query when supplied (e.g. embeddable hydrating from persisted state). */
+  searchQuery?: string;
+  /** Fires when the user types in the search field (use to mirror state up for snapshot persistence). */
+  onSearchQueryChange?: (next: string) => void;
 }
 
 /**
  * Find-in-page for the service map: filters visible service/dependency nodes, centers the canvas on
  * matches, and keeps `selectedIndex` aligned with the last centered match (so prev/next stay in sync).
  */
-export function ServiceMapFindInPage({ nodes }: ServiceMapFindInPageProps) {
+export function ServiceMapFindInPage({
+  nodes,
+  searchQuery: controlledSearchQuery,
+  onSearchQueryChange,
+}: ServiceMapFindInPageProps) {
   const { euiTheme } = useEuiTheme();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [internalSearchQuery, setInternalSearchQuery] = useState(controlledSearchQuery ?? '');
+  const searchQuery = controlledSearchQuery ?? internalSearchQuery;
+  const setSearchQuery = useCallback(
+    (next: string) => {
+      setInternalSearchQuery(next);
+      onSearchQueryChange?.(next);
+    },
+    [onSearchQueryChange]
+  );
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
   const { setSearchHighlight } = useServiceMapSearchContext();

@@ -58,6 +58,7 @@ const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   slo_status_filter: undefined,
   connection_filter: undefined,
   anomaly_severity_filter: undefined,
+  find_query: undefined,
 };
 
 const customStateComparators: StateComparators<ServiceMapCustomState> = {
@@ -71,6 +72,7 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   slo_status_filter: 'referenceEquality',
   connection_filter: 'referenceEquality',
   anomaly_severity_filter: 'referenceEquality',
+  find_query: 'referenceEquality',
 };
 
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
@@ -143,6 +145,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           slo_status_filter: state.slo_status_filter,
           connection_filter: state.connection_filter,
           anomaly_severity_filter: state.anomaly_severity_filter,
+          find_query: state.find_query,
         },
         defaultCustomState
       );
@@ -263,6 +266,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             sloStatusFilter,
             connectionFilter,
             anomalySeverityFilter,
+            findQuery,
           ] = useBatchedPublishingSubjects(
             customStateManager.api.environment$,
             customStateManager.api.kuery$,
@@ -273,7 +277,8 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             customStateManager.api.alertStatusFilter$,
             customStateManager.api.sloStatusFilter$,
             customStateManager.api.connectionFilter$,
-            customStateManager.api.anomalySeverityFilter$
+            customStateManager.api.anomalySeverityFilter$,
+            customStateManager.api.findQuery$
           );
 
           // Schema literals (`'critical' | 'major' | ...`) and the runtime enums consumed by
@@ -320,6 +325,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                   parentFilters={parentFilters}
                   parentQuery={parentQuery}
                   viewFilters={viewFilters}
+                  searchQuery={findQuery ?? undefined}
                 />
               </ApmEmbeddableContext>
             </div>

@@ -116,6 +116,10 @@ interface GraphProps {
   viewFilters?: ServiceMapViewFilters;
   /** Called when view filters change in the options panel. */
   onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
+  /** Controlled find-in-page query when supplied (e.g. embeddable hydrating from persisted state). */
+  searchQuery?: string;
+  /** Called when the user edits the find-in-page search field. */
+  onSearchQueryChange?: (next: string) => void;
   /** Optional service group filter — forwarded to the "Add to dashboard" panel state. */
   serviceGroupId?: string;
 }
@@ -141,6 +145,8 @@ function GraphInner({
   onMapOrientationChange,
   viewFilters: controlledViewFilters,
   onViewFiltersChange,
+  searchQuery: controlledSearchQuery,
+  onSearchQueryChange,
   serviceGroupId,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
@@ -170,12 +176,24 @@ function GraphInner({
     },
     [onViewFiltersChange]
   );
+  const [internalSearchQuery, setInternalSearchQuery] = useState(controlledSearchQuery ?? '');
+  const searchQuery = controlledSearchQuery ?? internalSearchQuery;
+  const setSearchQuery = useCallback(
+    (next: string) => {
+      setInternalSearchQuery(next);
+      onSearchQueryChange?.(next);
+    },
+    [onSearchQueryChange]
+  );
   const hasAnyViewFilter =
     viewFilters.alertStatusFilter.length > 0 ||
     viewFilters.sloStatusFilter.length > 0 ||
     viewFilters.connectionFilter.length > 0 ||
     viewFilters.anomalySeverityFilter.length > 0;
-  const [panelExpanded, setPanelExpanded] = useState(!isEmbedded || hasAnyViewFilter);
+  const hasSearchQuery = searchQuery.trim().length > 0;
+  const [panelExpanded, setPanelExpanded] = useState(
+    !isEmbedded || hasAnyViewFilter || hasSearchQuery
+  );
   const [internalOrientation, setInternalOrientation] = useState<ServiceMapOrientation>(
     controlledOrientation ?? 'horizontal'
   );
@@ -727,6 +745,8 @@ function GraphInner({
                   }
                   mapOrientation={mapOrientation}
                   onMapOrientationChange={setMapOrientation}
+                  searchQuery={searchQuery}
+                  onSearchQueryChange={setSearchQuery}
                 />
               )}
             </Panel>
@@ -741,6 +761,7 @@ function GraphInner({
                   serviceGroupId={serviceGroupId}
                   mapOrientation={mapOrientation}
                   viewFilters={viewFilters}
+                  searchQuery={searchQuery}
                 />
               </Panel>
             )}

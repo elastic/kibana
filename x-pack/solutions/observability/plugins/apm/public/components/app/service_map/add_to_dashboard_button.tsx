@@ -36,6 +36,8 @@ interface AddToDashboardButtonProps {
   serviceGroupId?: string;
   mapOrientation: ServiceMapOrientation;
   viewFilters: ServiceMapViewFilters;
+  /** Current find-in-page query — captured into the dashboard panel state. */
+  searchQuery: string;
 }
 
 /** Serialize a single string value as a quoted KQL phrase. */
@@ -149,6 +151,7 @@ export function AddToDashboardButton({
   serviceGroupId,
   mapOrientation,
   viewFilters,
+  searchQuery,
 }: AddToDashboardButtonProps) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const embeddable = services?.embeddable;
@@ -193,6 +196,7 @@ export function AddToDashboardButton({
         anomaly_severity_filter: viewFilters.anomalySeverityFilter.length
           ? viewFilters.anomalySeverityFilter
           : undefined,
+        find_query: searchQuery.trim() ? searchQuery : undefined,
       };
 
       const packageState: EmbeddablePackageState<ServiceMapEmbeddableState> = {
@@ -218,6 +222,7 @@ export function AddToDashboardButton({
       serviceGroupId,
       mapOrientation,
       viewFilters,
+      searchQuery,
     ]
   );
 
