@@ -210,6 +210,23 @@ export function ServiceMapEmbeddable({
     nodesStatus: status,
   });
 
+  // The alert / SLO / anomaly-severity filters depend on badge data. Until badges arrive,
+  // node fields like `alertsCount` / `sloStatus` are undefined and the visibility helper
+  // would hide every service — producing a flash of empty map on dashboard load whenever
+  // a persisted filter is set. Strip those filters until badges resolve; the connection
+  // filter stays since it only needs topology. On a badges failure we deliberately stay
+  // stripped (fail open: show all services rather than nothing).
+  const viewFiltersForGraph = useMemo<ServiceMapViewFilters | undefined>(() => {
+    if (!viewFilters) return viewFilters;
+    if (badgesStatus === FETCH_STATUS.SUCCESS) return viewFilters;
+    return {
+      ...viewFilters,
+      alertStatusFilter: [],
+      sloStatusFilter: [],
+      anomalySeverityFilter: [],
+    };
+  }, [viewFilters, badgesStatus]);
+
   if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
     return (
       <div
@@ -327,7 +344,7 @@ export function ServiceMapEmbeddable({
           clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
           mapOrientation={mapOrientation}
           onMapOrientationChange={onMapOrientationChange}
-          viewFilters={viewFilters}
+          viewFilters={viewFiltersForGraph}
           onViewFiltersChange={onViewFiltersChange}
           searchQuery={searchQuery}
           onSearchQueryChange={onSearchQueryChange}
