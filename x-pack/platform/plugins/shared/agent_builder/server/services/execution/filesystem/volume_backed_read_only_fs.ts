@@ -40,14 +40,38 @@ const entryBytes = (entry: FileEntry): Uint8Array => encoder.encode(entryToStrin
  * Delegates each read method to the underlying volume on every call — no caching
  * or refresh dance. New entries appearing in the volume mid-session are visible
  * immediately. All mutating methods throw `EROFS`.
+ *
+ * The underlying volumes store entries under their fully-qualified path
+ * (e.g. `/tool_calls/foo/...` for the tool_results volume). `MountableFs`
+ * strips the mount-point prefix before calling into this adapter, so we
+ * re-prepend `mountPoint` before querying the volume to match the storage
+ * scheme used by the legacy aggregator.
  */
 export class VolumeBackedReadOnlyFs implements IFileSystem {
-  constructor(private readonly volume: Volume) {}
+  private readonly volume: Volume;
+  private readonly mountPoint: string;
+
+  constructor(volume: Volume, mountPoint: string = '') {
+    this.volume = volume;
+    // Normalize: strip any trailing slash so the join is unambiguous.
+    this.mountPoint = mountPoint.endsWith('/') ? mountPoint.slice(0, -1) : mountPoint;
+  }
+
+  /**
+   * Translate a relative path (as received from `MountableFs`) back to the
+   * absolute path the volume stores entries under.
+   */
+  private toVolumePath(relativePath: string): string {
+    if (!this.mountPoint) return relativePath;
+    if (relativePath === '/') return this.mountPoint;
+    return `${this.mountPoint}${relativePath}`;
+  }
 
   async readFile(path: string): Promise<string> {
-    const entry = await this.volume.get(path);
+    const vp = this.toVolumePath(path);
+    const entry = await this.volume.get(vp);
     if (!entry) {
-      if (await this.volume.exists(path)) {
+      if (await this.volume.exists(vp)) {
         throw new Error(`EISDIR: illegal operation on a directory, read '${path}'`);
       }
       throw new Error(`ENOENT: no such file or directory, open '${path}'`);
@@ -56,9 +80,10 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
   }
 
   async readFileBuffer(path: string): Promise<Uint8Array> {
-    const entry = await this.volume.get(path);
+    const vp = this.toVolumePath(path);
+    const entry = await this.volume.get(vp);
     if (!entry) {
-      if (await this.volume.exists(path)) {
+      if (await this.volume.exists(vp)) {
         throw new Error(`EISDIR: illegal operation on a directory, read '${path}'`);
       }
       throw new Error(`ENOENT: no such file or directory, open '${path}'`);
@@ -79,11 +104,12 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
   }
 
   async readdirWithFileTypes(path: string): Promise<DirentEntry[]> {
-    if (!(await this.volume.exists(path))) {
+    const vp = this.toVolumePath(path);
+    if (!(await this.volume.exists(vp))) {
       throw new Error(`ENOENT: no such file or directory, scandir '${path}'`);
     }
-    const fsEntries = await this.volume.list(path);
-    const prefix = path === '/' ? '/' : `${path}/`;
+    const fsEntries = await this.volume.list(vp);
+    const prefix = vp === '/' ? '/' : `${vp}/`;
     return fsEntries.map((e) => {
       const name = e.path.startsWith(prefix) ? e.path.slice(prefix.length) : e.path;
       return {
@@ -96,7 +122,7 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
   }
 
   async exists(path: string): Promise<boolean> {
-    return this.volume.exists(path);
+    return this.volume.exists(this.toVolumePath(path));
   }
 
   async stat(path: string): Promise<FsStat> {
@@ -108,7 +134,8 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
   }
 
   private async statInternal(path: string, op: 'stat' | 'lstat'): Promise<FsStat> {
-    const fileEntry = await this.volume.get(path);
+    const vp = this.toVolumePath(path);
+    const fileEntry = await this.volume.get(vp);
     if (fileEntry) {
       return {
         isFile: true,
@@ -119,7 +146,7 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
         mtime: SYNTHETIC_MTIME,
       };
     }
-    if (await this.volume.exists(path)) {
+    if (await this.volume.exists(vp)) {
       return {
         isFile: false,
         isDirectory: true,
@@ -146,7 +173,7 @@ export class VolumeBackedReadOnlyFs implements IFileSystem {
   }
 
   async realpath(path: string): Promise<string> {
-    if (!(await this.volume.exists(path))) {
+    if (!(await this.volume.exists(this.toVolumePath(path)))) {
       throw new Error(`ENOENT: no such file or directory, realpath '${path}'`);
     }
     return path;

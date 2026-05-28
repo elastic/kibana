@@ -10,8 +10,9 @@ import type { IFileSystem } from 'just-bash';
 import { InMemoryFs } from 'just-bash';
 import type { IWorkspaceClient, WorkspaceFile } from '../../workspaces';
 import { CapacityLimitedFs } from './capacity_limited_fs';
+import { MOUNT_POINTS } from './mount_points';
 
-const WORKSPACE_PREFIX = '/workspace';
+const WORKSPACE_PREFIX = MOUNT_POINTS.workspace;
 
 /** Hard cap on total bytes the agent can store in `/workspace`. */
 export const DEFAULT_WORKSPACE_CAPACITY_BYTES = 25 * 1024 * 1024; // 25 MiB

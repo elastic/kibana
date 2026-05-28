@@ -11,14 +11,13 @@ import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
 import type { Volume } from '../runner/store/filesystem/types';
 import { VolumeBackedReadOnlyFs } from './volume_backed_read_only_fs';
 import type { WorkspaceVolume } from './workspace_volume';
+import { MOUNT_POINTS } from './mount_points';
 
 export interface FilesystemServiceDeps {
   workspaceVolume: WorkspaceVolume;
   toolResultsVolume: Volume;
   skillsVolume: Volume;
 }
-
-const WORKSPACE_PREFIX = '/workspace';
 
 /**
  * Owns the unified `IFileSystem` exposed to the agent. Always instantiated,
@@ -47,15 +46,21 @@ export class FilesystemService implements IFilesystemService {
 
     await this.deps.workspaceVolume.load();
 
-    const toolCallsFs = new VolumeBackedReadOnlyFs(this.deps.toolResultsVolume);
-    const skillsFs = new VolumeBackedReadOnlyFs(this.deps.skillsVolume);
+    const toolCallsFs = new VolumeBackedReadOnlyFs(
+      this.deps.toolResultsVolume,
+      MOUNT_POINTS.toolCalls
+    );
+    const skillsFs = new VolumeBackedReadOnlyFs(this.deps.skillsVolume, MOUNT_POINTS.skills);
 
     this.fs = new MountableFs({
       base,
       mounts: [
-        { mountPoint: WORKSPACE_PREFIX, filesystem: this.deps.workspaceVolume.getFilesystem() },
-        { mountPoint: '/tool_calls', filesystem: toolCallsFs },
-        { mountPoint: '/skills', filesystem: skillsFs },
+        {
+          mountPoint: MOUNT_POINTS.workspace,
+          filesystem: this.deps.workspaceVolume.getFilesystem(),
+        },
+        { mountPoint: MOUNT_POINTS.toolCalls, filesystem: toolCallsFs },
+        { mountPoint: MOUNT_POINTS.skills, filesystem: skillsFs },
       ],
     });
   }

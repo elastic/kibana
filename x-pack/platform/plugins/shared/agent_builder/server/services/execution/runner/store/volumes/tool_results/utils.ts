@@ -12,6 +12,7 @@ import type { ToolResultWithMeta } from '@kbn/agent-builder-server/runner';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
+import { MOUNT_POINTS } from '../../../../filesystem/mount_points';
 import type { ToolCallFileEntry } from './types';
 
 export const getToolCallEntryPath = ({
@@ -23,7 +24,7 @@ export const getToolCallEntryPath = ({
   toolCallId: string;
   toolResultId: string;
 }): string => {
-  return `/tool_calls/${sanitizeToolId(toolId)}/${toolCallId}/${toolResultId}.json`;
+  return `${MOUNT_POINTS.toolCalls}/${sanitizeToolId(toolId)}/${toolCallId}/${toolResultId}.json`;
 };
 
 export const createToolCallEntry = (result: ToolResultWithMeta): ToolCallFileEntry => {
