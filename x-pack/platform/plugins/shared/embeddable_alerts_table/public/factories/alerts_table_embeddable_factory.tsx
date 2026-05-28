@@ -136,7 +136,7 @@ export const getAlertsTableEmbeddableFactory = (
           if (fetchContext.isReload) {
             setLastReloadRequestTime(Date.now());
           }
-        }, [fetchContext]);
+        }, [fetchContext.isReload]);
 
         const onLoadingChange = useCallback((isLoading: boolean) => {
           queryLoading$.next(isLoading);

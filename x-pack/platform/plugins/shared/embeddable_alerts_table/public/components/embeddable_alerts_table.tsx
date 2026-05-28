@@ -77,6 +77,8 @@ export const EmbeddableAlertsTable = ({
     () => (!ruleTypes || !solution ? [] : getRuleTypeIdsForSolution(ruleTypes, solution)),
     [ruleTypes, solution]
   );
+  // Depend on the primitive `from`/`to` values rather than the `timeRange` object, whose
+  // reference is unstable across fetch contexts and would otherwise retrigger the query.
   const timeRangeFrom = timeRange?.from;
   const timeRangeTo = timeRange?.to;
   const timeRangeQuery = useMemo<QueryDslQueryContainer | null>(() => {
