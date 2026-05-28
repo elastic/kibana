@@ -260,6 +260,24 @@ describe('ConnectorSelector sync effect', () => {
     expect(selectConnector).not.toHaveBeenCalled();
   });
 
+  it('switches to the SO-assigned connector (connectors[0]) on mount even when the global default matches the stored selection', () => {
+    // This is the primary regression test for the original bug.
+    // Scenario: admin assigned 'B' to Agent Builder in Feature Settings, but the global
+    // GenAI default is still 'A', and the user had 'A' in localStorage.
+    // useDefaultConnector would return 'A' (global default wins its priority check), so
+    // the old code compared 'A' !== 'A' → false and never switched. The fix reads
+    // connectors[0] directly instead, bypassing the global-default priority.
+    const connectors = [mkConnector('B'), mkConnector('A')];
+    const { selectConnector } = setup({
+      connectors,
+      selectedConnector: 'A', // global default and localStorage value
+      defaultConnectorId: 'A', // global GenAI setting
+      soEntryFound: true,
+      initialConnectorId: 'A', // what useDefaultConnector returns (biased by global default)
+    });
+    expect(selectConnector).toHaveBeenCalledWith('B');
+  });
+
   it('switches to the SO-assigned connector when an admin saves a feature-specific assignment during the session', () => {
     // Initial state: no SO entry, user has manually selected 'saved'.
     const initialConnectors = [mkConnector('A'), mkConnector('saved')];
@@ -271,7 +289,7 @@ describe('ConnectorSelector sync effect', () => {
     expect(selectConnector).not.toHaveBeenCalled();
 
     // Admin saves a feature-specific assignment for 'B'; the connector list refreshes
-    // with soEntryFound=true and 'B' becomes the initialConnectorId.
+    // with soEntryFound=true and 'B' becomes connectors[0].
     const updatedConnectors = [mkConnector('B'), mkConnector('A'), mkConnector('saved')];
     mockUseDefaultConnector.mockReturnValue('B');
     updateContext({ connectors: updatedConnectors, soEntryFound: true });
@@ -279,18 +297,28 @@ describe('ConnectorSelector sync effect', () => {
     expect(selectConnector).toHaveBeenCalledWith('B');
   });
 
-  it('does not switch when soEntryFound is true but initialConnectorId has not changed', () => {
-    // SO entry already existed and still points to the same connector.
-    const connectors = [mkConnector('A'), mkConnector('saved')];
-    mockUseDefaultConnector.mockReturnValue('A');
+  it('does not switch when the user is already on the SO-assigned connector (connectors[0])', () => {
+    // User's current selection already matches the SO-assigned connector — no-op.
+    const connectors = [mkConnector('A'), mkConnector('B')];
+    const { selectConnector } = setup({
+      connectors,
+      selectedConnector: 'A', // already on the SO-assigned model
+      soEntryFound: true,
+    });
+    expect(selectConnector).not.toHaveBeenCalled();
+  });
+
+  it('does not switch on refetch when the SO assignment has not changed mid-session', () => {
+    // Initial render: soEntryFound=true, user is already on the SO-assigned connector 'A'.
+    const connectors = [mkConnector('A'), mkConnector('B')];
     const { selectConnector, updateContext } = setup({
       connectors,
-      selectedConnector: 'saved',
+      selectedConnector: 'A',
       soEntryFound: true,
     });
     expect(selectConnector).not.toHaveBeenCalled();
 
-    // Simulate a refetch that returns the same data.
+    // Simulate a refetch that returns identical data.
     updateContext({ connectors: [...connectors], soEntryFound: true });
 
     expect(selectConnector).not.toHaveBeenCalled();

@@ -165,6 +165,9 @@ export const ModelSettings: React.FC = () => {
     const allSavesSucceeded = results.every((result) => result.status === 'fulfilled');
     if (allSavesSucceeded) {
       usageTracker.count(EventType.FEATURE_SETTINGS_SAVED);
+      // Notify any mounted connector-aware components (e.g. the Agent AI sidebar) that
+      // the inference settings have changed so they can refetch without a page reload.
+      window.dispatchEvent(new CustomEvent('kibana:inference-settings-saved'));
     }
   }, [
     isFeatureDirty,
