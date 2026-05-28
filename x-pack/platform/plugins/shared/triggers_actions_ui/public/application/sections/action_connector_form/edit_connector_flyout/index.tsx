@@ -28,7 +28,6 @@ import { isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { Option } from 'fp-ts/Option';
 import { none, some } from 'fp-ts/Option';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types/action_types';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
@@ -141,7 +140,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
   const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
-  const source = connector.source ?? ACTION_TYPE_SOURCES.stack;
 
   const {
     actionTypeModel,
@@ -151,7 +149,6 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   } = useActionTypeModel({
     actionTypeRegistry,
     actionTypeId: connector.actionTypeId,
-    source,
     http,
     uiSettings,
   });
@@ -460,11 +457,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     return actionTypeModel?.isExperimental;
   }, [actionTypeModel, connector]);
 
-  const isTestable =
-    isTestableProp ??
-    (() => {
-      return (actionTypeModel?.source ?? source) === ACTION_TYPE_SOURCES.stack;
-    })();
+  const isTestable = isTestableProp ?? actionTypeRegistry.has(connector.actionTypeId);
 
   return (
     <>
