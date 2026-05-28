@@ -24,7 +24,6 @@ import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import {
-  buildInputsStepExecutionFromContext,
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
@@ -43,7 +42,6 @@ const DefaultSidebarWidth = 300;
 
 const PSEUDO_STEP_OVERVIEW = '__overview';
 const PSEUDO_STEP_TRIGGER = 'trigger';
-const PSEUDO_STEP_INPUTS = 'inputs';
 
 export interface WorkflowExecutionDetailProps {
   executionId: string;
@@ -54,11 +52,7 @@ function assignSelectedStepId(
   selectedStepExecutionId: string | undefined,
   executionIdToStepId: Map<string, string>
 ) {
-  if (
-    !selectedStepExecutionId ||
-    selectedStepExecutionId === PSEUDO_STEP_OVERVIEW ||
-    selectedStepExecutionId === PSEUDO_STEP_INPUTS
-  ) {
+  if (!selectedStepExecutionId || selectedStepExecutionId === PSEUDO_STEP_OVERVIEW) {
     return undefined;
   }
   if (selectedStepExecutionId === PSEUDO_STEP_TRIGGER) {
@@ -144,12 +138,10 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
       return { resumeMessage: stepInput?.message, resumeSchema: stepInput?.schema };
     }, [pausedStepFullData]);
 
-    // For pseudo-steps (overview, trigger, inputs), build from execution context directly
+    // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
       selectedStepExecutionId &&
-      [PSEUDO_STEP_OVERVIEW, PSEUDO_STEP_TRIGGER, PSEUDO_STEP_INPUTS].includes(
-        selectedStepExecutionId
-      );
+      [PSEUDO_STEP_OVERVIEW, PSEUDO_STEP_TRIGGER].includes(selectedStepExecutionId);
 
     // Stable map: step-execution-id → workflow step-id (new ref only when entries change)
     const executionIdToStepId = useMemo(() => {
@@ -251,10 +243,6 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
 
       if (selectedStepExecutionId === PSEUDO_STEP_TRIGGER && workflowExecution?.context) {
         return buildTriggerStepExecutionFromContext(workflowExecution) ?? undefined;
-      }
-
-      if (selectedStepExecutionId === PSEUDO_STEP_INPUTS && workflowExecution) {
-        return buildInputsStepExecutionFromContext(workflowExecution) ?? undefined;
       }
 
       if (!lightweightStep) {

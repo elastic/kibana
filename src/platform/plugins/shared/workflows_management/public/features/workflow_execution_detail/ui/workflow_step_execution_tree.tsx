@@ -46,7 +46,6 @@ import type { StepExecutionTreeItem } from './build_step_executions_tree';
 import { buildStepExecutionsTree, injectChildWorkflowSteps } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import {
-  buildInputsStepExecutionFromContext,
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
@@ -287,23 +286,15 @@ export const WorkflowStepExecutionTree = ({
       stepExecutionMap.set('__overview', executionOverview);
     }
 
-    const eventPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__trigger');
-    if (eventPseudoStep && execution.context) {
+    const triggerTreeItem =
+      stepExecutionsTree.find((item) => item.stepType === '__trigger') ??
+      stepExecutionsTree.find((item) => item.stepType === '__inputs');
+    if (triggerTreeItem && execution.context) {
       const triggerExecution = buildTriggerStepExecutionFromContext(execution);
       if (triggerExecution) {
         stepExecutionMap.set(triggerExecution.id, triggerExecution);
-        eventPseudoStep.stepExecutionId = triggerExecution.id;
-        eventPseudoStep.stepType = triggerExecution.stepType ?? '';
-      }
-    }
-
-    const inputsPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__inputs');
-    if (inputsPseudoStep && execution.context) {
-      const inputsExecution = buildInputsStepExecutionFromContext(execution);
-      if (inputsExecution) {
-        stepExecutionMap.set(inputsExecution.id, inputsExecution);
-        inputsPseudoStep.stepExecutionId = inputsExecution.id;
-        inputsPseudoStep.stepType = inputsExecution.stepType ?? '';
+        triggerTreeItem.stepExecutionId = triggerExecution.id;
+        triggerTreeItem.stepType = triggerExecution.stepType ?? '';
       }
     }
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
