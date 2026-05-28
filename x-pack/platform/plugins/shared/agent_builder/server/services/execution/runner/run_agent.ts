@@ -67,7 +67,9 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     .catch(() => false);
 
   const experimentalFeatures: ExperimentalFeatures = {
-    filestore: true,
+    // Respect the per-agent disable_filestore flag: when true, suppress the
+    // filestore tools and their system-prompt instructions for this agent.
+    filestore: !(manager.deps.agentConfiguration?.disable_filestore ?? false),
     skills: true,
     subagents: isExperimentalEnabled,
     todos: isExperimentalEnabled,
