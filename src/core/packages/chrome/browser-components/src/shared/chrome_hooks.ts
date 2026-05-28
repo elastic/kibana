@@ -26,7 +26,6 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { useChromeComponentsDeps } from '../context';
 
 /**
@@ -282,12 +281,6 @@ export function useGlobalSearch(): GlobalSearchConfig | undefined {
   const chrome = useChromeService();
   const config$ = useMemo(() => chrome.next.globalSearch.get$(), [chrome]);
   return useObservable(config$, undefined);
-}
-
-/** Returns whether the next-chrome experience is enabled via feature flag. */
-export function useIsNextChrome(): boolean {
-  const { featureFlags } = useChromeComponentsDeps();
-  return isNextChrome(featureFlags);
 }
 
 /** Whether an inline `AppHeader` is currently mounted by the active app. */
