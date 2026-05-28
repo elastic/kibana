@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiToolTip,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
