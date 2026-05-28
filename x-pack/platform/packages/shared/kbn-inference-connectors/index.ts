@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { useLoadConnectors, INFERENCE_SETTINGS_SAVED_EVENT } from './src/use_load_connectors';
+export { useLoadConnectors } from './src/use_load_connectors';
 export type { UseLoadConnectorsProps, UseLoadConnectorsResult } from './src/use_load_connectors';
 export { useConnectorById } from './src/use_connector_by_id';
 export type { UseConnectorByIdProps, UseConnectorByIdResult } from './src/use_connector_by_id';

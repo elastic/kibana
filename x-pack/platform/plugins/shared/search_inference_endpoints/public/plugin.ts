@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Subscription } from 'rxjs';
+import { Subject, type Subscription } from 'rxjs';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +33,7 @@ export class SearchInferenceEndpointsPlugin
   private registerModelSettings?: ManagementApp;
   private registerElasticInferenceService?: ManagementApp;
   private licenseSubscription?: Subscription;
+  private readonly featureSettingsSaved$ = new Subject<void>();
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchInferenceEndpointsConfigType>();
   }
@@ -65,6 +66,7 @@ export class SearchInferenceEndpointsPlugin
         },
       });
 
+    const { featureSettingsSaved$ } = this;
     this.registerModelSettings = plugins.management.sections.section.modelManagement.registerApp({
       id: MODEL_SETTINGS_APP_ID,
       title: i18n.translate('xpack.searchInferenceEndpoints.modelSettingsTitle', {
@@ -78,6 +80,7 @@ export class SearchInferenceEndpointsPlugin
           ...depsStart,
           history,
           setBreadcrumbs,
+          notifyFeatureSettingsSaved: () => featureSettingsSaved$.next(),
         };
 
         return renderSettingsMgmtApp(coreStart, startDeps, element);
@@ -135,10 +138,13 @@ export class SearchInferenceEndpointsPlugin
       }
     });
 
-    return {};
+    return {
+      featureSettingsSaved$: this.featureSettingsSaved$.asObservable(),
+    };
   }
 
   public stop() {
     this.licenseSubscription?.unsubscribe();
+    this.featureSettingsSaved$.complete();
   }
 }

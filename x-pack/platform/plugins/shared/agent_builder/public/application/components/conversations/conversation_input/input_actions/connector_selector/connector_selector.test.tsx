@@ -9,10 +9,10 @@ import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { AIConnector } from '@kbn/elastic-assistant';
+import { Subject } from 'rxjs';
 
 jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn(),
-  INFERENCE_SETTINGS_SAVED_EVENT: 'kibana:inference-settings-saved',
 }));
 
 jest.mock('../../../../../hooks/use_kibana', () => ({
@@ -121,10 +121,14 @@ const setup = ({
   initialConnectorId,
   soEntryFound = false,
 }: RenderOptions = {}) => {
+  const featureSettingsSaved$ = new Subject<void>();
   mockUseKibana.mockReturnValue({
     services: {
       http: {} as any,
       settings: {} as any,
+      plugins: {
+        searchInferenceEndpoints: { featureSettingsSaved$ },
+      },
     },
   } as any);
 
@@ -161,6 +165,7 @@ const setup = ({
     ...utils,
     selectConnector,
     refetch,
+    featureSettingsSaved$,
     // Helper to re-render with updated context (simulates admin changing a setting).
     updateContext: (next: Partial<RenderOptions>) => {
       if ('connectors' in next || 'soEntryFound' in next) {
@@ -265,12 +270,16 @@ describe('ConnectorSelector sync effect', () => {
     expect(selectConnector).not.toHaveBeenCalled();
   });
 
-  it('calls refetch when kibana:inference-settings-saved is dispatched', () => {
+  it('calls refetch when featureSettingsSaved$ emits', () => {
     const connectors = [mkConnector('A')];
-    const { refetch } = setup({ connectors, selectedConnector: 'A', soEntryFound: false });
+    const { refetch, featureSettingsSaved$ } = setup({
+      connectors,
+      selectedConnector: 'A',
+      soEntryFound: false,
+    });
 
     act(() => {
-      window.dispatchEvent(new CustomEvent('kibana:inference-settings-saved'));
+      featureSettingsSaved$.next();
     });
 
     expect(refetch).toHaveBeenCalledTimes(1);

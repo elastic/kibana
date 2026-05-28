@@ -23,6 +23,7 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { Observable } from 'rxjs';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { EisModelStatus } from '../common/types';
 
@@ -30,8 +31,15 @@ export * from '../common/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchInferenceEndpointsPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchInferenceEndpointsPluginStart {}
+
+export interface SearchInferenceEndpointsPluginStart {
+  /**
+   * Emits once each time the Feature Settings page saves successfully.
+   * Subscribe to trigger a refetch of any connector/model list that may be
+   * affected by feature-specific SO assignment changes.
+   */
+  featureSettingsSaved$: Observable<void>;
+}
 
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
@@ -43,6 +51,8 @@ export interface AppPluginStartDependencies {
   cloud?: CloudStart;
   cloudConnect?: CloudConnectedPluginStart;
   usageCollection?: UsageCollectionStart;
+  /** Callback provided by the plugin to signal a successful Feature Settings save. */
+  notifyFeatureSettingsSaved: () => void;
 }
 
 export interface AppPluginSetupDependencies {

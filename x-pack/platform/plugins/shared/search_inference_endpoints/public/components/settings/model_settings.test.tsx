@@ -46,6 +46,7 @@ const mockUseKibana = useKibana as jest.Mock;
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => path) };
+let mockNotifyFeatureSettingsSaved: jest.Mock;
 
 const childFeature: InferenceFeatureConfig = {
   featureId: 'child_1',
@@ -122,10 +123,12 @@ describe('ModelSettings', () => {
       data: [{ connectorId: 'test-connector', name: 'Test', isPreconfigured: true }],
       isLoading: false,
     });
+    mockNotifyFeatureSettingsSaved = jest.fn();
     mockUseKibana.mockReturnValue({
       services: {
         application: { navigateToUrl: mockNavigateToUrl },
         http: { basePath: mockBasePath },
+        notifyFeatureSettingsSaved: mockNotifyFeatureSettingsSaved,
       },
     });
   });
@@ -308,9 +311,7 @@ describe('ModelSettings', () => {
     });
   });
 
-  it('dispatches kibana:inference-settings-saved when all saves succeed', async () => {
-    const dispatchSpy = jest.spyOn(window, 'dispatchEvent');
-
+  it('calls notifyFeatureSettingsSaved when all saves succeed', async () => {
     mockUseModelSettingsForm.mockReturnValue({
       ...defaultFormState,
       isDirty: true,
@@ -326,19 +327,11 @@ describe('ModelSettings', () => {
     fireEvent.click(screen.getByTestId('save-settings-button'));
 
     await waitFor(() => {
-      const call = dispatchSpy.mock.calls.find(
-        ([event]) =>
-          event instanceof CustomEvent && event.type === 'kibana:inference-settings-saved'
-      );
-      expect(call).toBeDefined();
+      expect(mockNotifyFeatureSettingsSaved).toHaveBeenCalledTimes(1);
     });
-
-    dispatchSpy.mockRestore();
   });
 
-  it('does not dispatch kibana:inference-settings-saved when a save fails', async () => {
-    const dispatchSpy = jest.spyOn(window, 'dispatchEvent');
-
+  it('does not call notifyFeatureSettingsSaved when a save fails', async () => {
     mockUseModelSettingsForm.mockReturnValue({
       ...defaultFormState,
       isDirty: true,
@@ -358,12 +351,7 @@ describe('ModelSettings', () => {
       await new Promise((r) => setTimeout(r, 50));
     });
 
-    const call = dispatchSpy.mock.calls.find(
-      ([event]) => event instanceof CustomEvent && event.type === 'kibana:inference-settings-saved'
-    );
-    expect(call).toBeUndefined();
-
-    dispatchSpy.mockRestore();
+    expect(mockNotifyFeatureSettingsSaved).not.toHaveBeenCalled();
   });
 
   it('renders empty state when no sections are registered', () => {
