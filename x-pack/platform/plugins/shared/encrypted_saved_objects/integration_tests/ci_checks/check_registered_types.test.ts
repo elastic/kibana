@@ -87,7 +87,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "task": "d6cc30871dc78caf3f451de1275a3803879ec9935b4a2e34076dee56878c228f",
         "uptime-synthetics-api-key": "5ca81f180763e85397fa8c6508adcd60efd0f916e29bac6dcd5b4564f1db7375",
         "user_connector_token": "b443b022b46b79c0ff9fa674aecc64176a5fcbd09c2db2d9f050a6a88435732e",
-        "watchlist-entity-source": "9154125202e15894b470561696abe1fa88f0559b39da83c5004461d871af06b0",
+        "watchlist-entity-source": "9e6445feba401a9b6d44c412d8fe9a069e051ea2483570c03ef17b5cf5e718d7",
       }
     `);
     expect(Object.keys(hashMap).length).toEqual(ESO_TYPES_COUNT);
