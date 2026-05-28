@@ -95,7 +95,11 @@ describe('EpisodesKpis', () => {
       />
     );
 
-    expect(screen.getByText('Failed to load stats.')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'An error occurred while fetching the alert statistics. Try refreshing the page.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('passes filterState and timeRange to the hook', () => {

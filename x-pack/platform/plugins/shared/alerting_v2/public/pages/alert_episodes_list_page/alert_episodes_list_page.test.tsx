@@ -15,6 +15,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { UnifiedDataTable } from '@kbn/unified-data-table';
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
+import { queryKeys } from '@kbn/alerting-v2-episodes-ui/query_keys';
 import { createMockSpaces } from '../../../common/utils/test_utils';
 import {
   createEpisodeActions,
@@ -231,7 +232,7 @@ describe('query invalidation', () => {
 
     act(() => capturedFilterBarOnRefresh!());
 
-    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['episodesKpis'] });
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: queryKeys.kpisAll() });
   });
 
   it('invalidates episodesKpis when an episode action succeeds', async () => {
@@ -269,6 +270,6 @@ describe('query invalidation', () => {
     // Simulate success — verify the KPIs query is invalidated
     act(() => capturedOnSuccess!());
 
-    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['episodesKpis'] });
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: queryKeys.kpisAll() });
   });
 });
