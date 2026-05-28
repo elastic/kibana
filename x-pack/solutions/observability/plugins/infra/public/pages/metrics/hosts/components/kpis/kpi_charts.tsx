@@ -116,8 +116,8 @@ type KpiLensConfig = LensConfig & { id: string; trendLine?: boolean };
 //      bypasses Lens entirely.
 //   2. `useLensEsqlKpiCharts` (P15c) — Lens metric viz, ES|QL datasource,
 //      no trendline.
-//   3. neither — Lens metric viz, DSL/formula datasource, trendline per
-//      the `kpiTrendline` flag (the pre-PoC main behaviour).
+//   3. neither — Lens metric viz, DSL/formula datasource, trendline ON
+//      unless `dropKpiTrendline` is flipped (the pre-PoC main behaviour).
 export const KpiCharts = () => {
   const { useEsqlEndpointKpi } = usePocSettingsContext();
   if (useEsqlEndpointKpi) {
@@ -132,7 +132,12 @@ const LensKpiCharts = () => {
   const { hostNodes, loading: hostsLoading, error } = useHostsViewContext();
   const { loading: hostCountLoading, count: hostCount } = useHostCountContext();
   const { metricsView } = useMetricsDataViewContext();
-  const { useLensEsqlKpiCharts, kpiTrendline } = usePocSettingsContext();
+  const { useLensEsqlKpiCharts, dropKpiTrendline } = usePocSettingsContext();
+  // Inverted at the read site: every other flag in the popover follows
+  // the "ON = optimisation engaged" convention, so the stored value is
+  // `dropKpiTrendline` (P15a = ON = drop) and we flip it to the
+  // `trendLine` prop here.
+  const renderKpiTrendline = !dropKpiTrendline;
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
   const loading = hostsLoading || hostCountLoading;
@@ -171,7 +176,7 @@ const LensKpiCharts = () => {
   // inventory model config so the two render paths are visually identical
   // for the headline number. The trendline (P15a) is intentionally
   // disabled on the ES|QL path (see `esql_kpi_chart.ts` header); the DSL
-  // path still honours `kpiTrendline`.
+  // path still honours the popover toggle (`dropKpiTrendline`).
   //
   // Host scoping comes from the embeddable's `filters` prop (the
   // `host.name` filter built above) — Lens converts it into the ES|QL
@@ -182,7 +187,7 @@ const LensKpiCharts = () => {
       return baseCharts.map((chart) => {
         const id = (chart as { id?: string }).id;
         if (!id || !isSupportedEsqlKpi(id)) {
-          return { ...chart, trendLine: kpiTrendline } as KpiLensConfig;
+          return { ...chart, trendLine: renderKpiTrendline } as KpiLensConfig;
         }
         return toEsqlKpiChartConfig({
           baseChart: chart as KpiLensConfig,
@@ -190,8 +195,10 @@ const LensKpiCharts = () => {
         });
       });
     }
-    return baseCharts.map((chart) => ({ ...chart, trendLine: kpiTrendline } as KpiLensConfig));
-  }, [baseCharts, useLensEsqlKpiCharts, kpiTrendline]);
+    return baseCharts.map(
+      (chart) => ({ ...chart, trendLine: renderKpiTrendline } as KpiLensConfig)
+    );
+  }, [baseCharts, useLensEsqlKpiCharts, renderKpiTrendline]);
 
   const { afterLoadedState } = useAfterLoadedState(loading, {
     dateRange: parsedDateRange,

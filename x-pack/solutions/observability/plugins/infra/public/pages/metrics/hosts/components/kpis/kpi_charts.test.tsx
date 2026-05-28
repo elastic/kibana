@@ -56,7 +56,7 @@ jest.mock('../../hooks/use_poc_settings', () => ({
   usePocSettingsContext: () => ({
     useEsqlEndpointKpi: false,
     useLensEsqlKpiCharts: false,
-    kpiTrendline: true,
+    dropKpiTrendline: false,
   }),
 }));
 

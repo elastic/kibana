@@ -165,8 +165,9 @@ export function toEsqlKpiChartConfig<T extends KpiChartWithId>({
   //
   // `trendLine: false` is unconditional: the library can't render an
   // ES|QL-backed trendline (see the file header), so we strip the flag
-  // even when the caller wired `kpiTrendline` on. The DSL path still
-  // honours `kpiTrendline` because it never reaches this helper.
+  // even when the caller wanted the trendline. The DSL path still
+  // honours the popover (`dropKpiTrendline`) because it never reaches
+  // this helper.
   return {
     ...baseChart,
     dataset: { esql: scalar },

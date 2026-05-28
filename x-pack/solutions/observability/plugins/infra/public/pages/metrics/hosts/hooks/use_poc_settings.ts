@@ -54,17 +54,24 @@ interface PocSettings {
   // `useLensEsqlKpiCharts` / DSL Lens paths above.
   //
   // Strictly higher-precedence than `useLensEsqlKpiCharts` and
-  // `kpiTrendline`: when this flag is on the entire Lens render path is
-  // skipped (there's no Lens embeddable to feed a trendline into).
+  // `dropKpiTrendline`: when this flag is on the entire Lens render path
+  // is skipped (there's no Lens embeddable to feed a trendline into).
   useEsqlEndpointKpi: boolean;
-  // P15a. ON → render the small sparkline behind each KPI headline number
-  // (the inventory-model + main behaviour). OFF → drop the trendline so
-  // the tile only renders the scalar headline.
+  // P15a. ON → drop the small sparkline behind each KPI headline number,
+  // so the tile only renders the scalar headline. OFF → keep the
+  // sparkline (the inventory-model + main behaviour).
+  //
+  // The semantic is intentionally "drop" rather than "trendline-on" so
+  // every flag in this interface follows the same convention: OFF means
+  // "main behaviour, no optimisation applied"; ON means "this PoC
+  // optimisation is engaged". Makes the benchmark journey config
+  // (`x-pack/performance/journeys_e2e/infra_hosts_view_tier1_poc.ts`)
+  // collapse to "all false = main".
   //
   // Independent of `useLensEsqlKpiCharts` for the DSL Lens path; the
   // ES|QL Lens path is hardcoded to no trendline, and the server-endpoint
   // path renders without a trendline by construction.
-  kpiTrendline: boolean;
+  dropKpiTrendline: boolean;
 
   // Cross-cutting plumbing section
   // P1. ON → flat `terms({ field: 'host.name', values: [...] })` for
@@ -93,7 +100,9 @@ const DEFAULT_SETTINGS: PocSettings = {
   // Default OFF — opt-in third KPI render path for the A/B/C benchmark
   // matrix. Server endpoint + plain `<MetricChartWrapper>` indicator.
   useEsqlEndpointKpi: false,
-  kpiTrendline: true,
+  // Default OFF — main behaviour keeps the trendline. Flip ON to engage
+  // the P15a optimisation (drop the per-tile bucketed query).
+  dropKpiTrendline: false,
   useTermsFilter: true,
   useConsolidatedKql: true,
   useStrippedBoolWrap: true,
@@ -114,7 +123,7 @@ const hydrate = (stored: Partial<PocSettings> | undefined): PocSettings => {
       stored.useLensEsqlMetricsCharts ?? DEFAULT_SETTINGS.useLensEsqlMetricsCharts,
     useLensEsqlKpiCharts: stored.useLensEsqlKpiCharts ?? DEFAULT_SETTINGS.useLensEsqlKpiCharts,
     useEsqlEndpointKpi: stored.useEsqlEndpointKpi ?? DEFAULT_SETTINGS.useEsqlEndpointKpi,
-    kpiTrendline: stored.kpiTrendline ?? DEFAULT_SETTINGS.kpiTrendline,
+    dropKpiTrendline: stored.dropKpiTrendline ?? DEFAULT_SETTINGS.dropKpiTrendline,
     useTermsFilter: stored.useTermsFilter ?? DEFAULT_SETTINGS.useTermsFilter,
     useConsolidatedKql: stored.useConsolidatedKql ?? DEFAULT_SETTINGS.useConsolidatedKql,
     useStrippedBoolWrap: stored.useStrippedBoolWrap ?? DEFAULT_SETTINGS.useStrippedBoolWrap,
@@ -153,8 +162,8 @@ const usePocSettings = () => {
     (value: boolean) => setSetting('useEsqlEndpointKpi', value),
     [setSetting]
   );
-  const setKpiTrendline = useCallback(
-    (value: boolean) => setSetting('kpiTrendline', value),
+  const setDropKpiTrendline = useCallback(
+    (value: boolean) => setSetting('dropKpiTrendline', value),
     [setSetting]
   );
   const setUseTermsFilter = useCallback(
@@ -179,7 +188,7 @@ const usePocSettings = () => {
     setUseLensEsqlMetricsCharts,
     setUseLensEsqlKpiCharts,
     setUseEsqlEndpointKpi,
-    setKpiTrendline,
+    setDropKpiTrendline,
     setUseTermsFilter,
     setUseConsolidatedKql,
     setUseStrippedBoolWrap,

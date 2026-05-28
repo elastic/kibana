@@ -41,10 +41,12 @@ export const PocSettingsPopover = () => {
   const settings = usePocSettingsContext();
 
   // The button switches to "fill" state whenever *any* flag is in a non-
-  // default (ON) position, so a reviewer's eye is drawn to the gear icon
-  // when the page is in a non-default configuration.
+  // default position, so a reviewer's eye is drawn to the gear icon
+  // when the page is in a non-default configuration. `dropKpiTrendline`
+  // defaults to `false` (main behaviour) — every other "default" flag
+  // here is on by default. Invert the trendline check accordingly.
   const allDefault =
-    settings.kpiTrendline &&
+    !settings.dropKpiTrendline &&
     settings.useTermsFilter &&
     settings.useConsolidatedKql &&
     settings.useStrippedBoolWrap;
@@ -80,16 +82,16 @@ export const PocSettingsPopover = () => {
         <Section title="KPI tiles" defaultOpen>
           <Toggle
             proposal="P15a"
-            label="Trendline behind KPI headline"
-            checked={settings.kpiTrendline}
-            onChange={settings.setKpiTrendline}
-            dataTestSubj="hostsViewPocSettingsKpiTrendlineSwitch"
+            label="Drop trendline behind KPI headline"
+            checked={settings.dropKpiTrendline}
+            onChange={settings.setDropKpiTrendline}
+            dataTestSubj="hostsViewPocSettingsKpiDropTrendlineSwitch"
             description={
               <>
-                ON — render the small sparkline behind each KPI headline number (the inventory-
-                model + main behaviour). OFF — drop the trendline so the tile only renders the
-                scalar headline. Independent of the ES|QL toggle below: with ES|QL ON, dropping the
-                trendline skips the second bucketed{' '}
+                ON — drop the small sparkline behind each KPI headline number, so the tile only
+                renders the scalar headline (the P15a optimisation). OFF — keep the trendline, which
+                is the inventory-model + main behaviour. Independent of the ES|QL toggle below: with
+                ES|QL ON, dropping the trendline skips the second bucketed{' '}
                 <EuiCode language="esql">STATS … BY BUCKET(...)</EuiCode> query per tile; with ES|QL
                 OFF, it suppresses the DSL <EuiCode>date_histogram</EuiCode> sub-aggregation Lens
                 adds for the formula trendline path.
