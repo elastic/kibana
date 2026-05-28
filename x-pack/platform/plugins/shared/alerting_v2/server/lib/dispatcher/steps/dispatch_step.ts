@@ -25,6 +25,8 @@ import type {
   ActionPolicyId,
   ActionPolicy,
   ActionPolicyWorkflowPayload,
+  Rule,
+  RuleId,
 } from '../types';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
@@ -42,12 +44,12 @@ export class DispatchStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatch = [], policies } = state;
+    const { dispatch = [], policies, rules } = state;
 
     const limiter = pLimit(MAX_CONCURRENT_DISPATCHES);
 
     const groupResults = await Promise.allSettled(
-      dispatch.map((group) => limiter(() => this.dispatchGroup(group, policies)))
+      dispatch.map((group) => limiter(() => this.dispatchGroup(group, policies, rules)))
     );
 
     const dispatchedExecutions = new Map<ActionGroupId, string[]>();
@@ -64,7 +66,8 @@ export class DispatchStep implements DispatcherStep {
 
   private async dispatchGroup(
     group: ActionGroup,
-    policies?: Map<ActionPolicyId, ActionPolicy>
+    policies?: Map<ActionPolicyId, ActionPolicy>,
+    rules?: Map<RuleId, Rule>
   ): Promise<{ groupId: ActionGroupId; executionIds: string[] }> {
     const executionIds: string[] = [];
     try {
@@ -87,7 +90,7 @@ export class DispatchStep implements DispatcherStep {
         }
 
         try {
-          const executionId = await this.dispatchWorkflow(group, destination.id, fakeRequest);
+          const executionId = await this.dispatchWorkflow(group, destination.id, fakeRequest, rules);
           if (executionId) {
             executionIds.push(executionId);
           }
@@ -133,7 +136,8 @@ export class DispatchStep implements DispatcherStep {
   private async dispatchWorkflow(
     group: ActionGroup,
     workflowId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    rules?: Map<RuleId, Rule>
   ): Promise<string | undefined> {
     const workflow = await this.workflowsManagement.getWorkflow(workflowId, group.spaceId);
 
@@ -160,11 +164,21 @@ export class DispatchStep implements DispatcherStep {
       yaml: workflow.yaml,
     };
 
+    const ruleIds = [...new Set(group.episodes.map((e) => e.rule_id))];
+    const rulesMap: ActionPolicyWorkflowPayload['rules'] = Object.fromEntries(
+      ruleIds.flatMap((ruleId) => {
+        const rule = rules?.get(ruleId);
+        if (!rule) return [];
+        return [[ruleId, { name: rule.name }]];
+      })
+    );
+
     const payload: ActionPolicyWorkflowPayload = {
       id: group.id,
       policyId: group.policyId,
       groupKey: group.groupKey,
       episodes: group.episodes,
+      rules: rulesMap,
     };
 
     this.logger.debug({

@@ -116,11 +116,16 @@ export interface ActionGroup {
   episodes: AlertEpisode[];
 }
 
+export interface ActionPolicyWorkflowPayloadRule {
+  name: string;  
+}
+
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;
   policyId: ActionPolicyId;
   groupKey: Record<string, unknown>;
   episodes: AlertEpisode[];
+  rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
 export interface LastNotifiedRecord {

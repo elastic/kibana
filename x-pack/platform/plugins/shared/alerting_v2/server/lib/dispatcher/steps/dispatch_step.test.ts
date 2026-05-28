@@ -12,6 +12,8 @@ import {
   createDispatcherPipelineState,
   createActionGroup,
   createActionPolicy,
+  createAlertEpisode,
+  createRule,
 } from '../fixtures/test_utils';
 import { DispatchStep } from './dispatch_step';
 
@@ -298,6 +300,75 @@ describe('DispatchStep', () => {
     expect(result.type).toBe('continue');
     expect(mockWfm.scheduleWorkflow).toHaveBeenCalledTimes(2);
     expect(mockLogger.error).toHaveBeenCalledTimes(1);
+  });
+
+  it('includes rule metadata in the workflow payload', async () => {
+    const { loggerService } = createLoggerService();
+    const step = new DispatchStep(loggerService, mockWfm);
+
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow.mockResolvedValue('exec-1');
+
+    const rule = createRule({ id: 'rule-1', name: 'CPU spike monitor' });
+    const episode = createAlertEpisode({ rule_id: 'rule-1' });
+    const group = createActionGroup({
+      id: 'g1',
+      policyId: 'p1',
+      destinations: [{ type: 'workflow', id: 'workflow-1' }],
+      episodes: [episode],
+    });
+    const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
+
+    const state = createDispatcherPipelineState({
+      dispatch: [group],
+      policies: new Map([['p1', policy]]),
+      rules: new Map([['rule-1', rule]]),
+    });
+
+    await step.execute(state);
+
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        rules: { 'rule-1': { name: 'CPU spike monitor' } },
+      }),
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
+  it('omits rules missing from state.rules in the payload', async () => {
+    const { loggerService } = createLoggerService();
+    const step = new DispatchStep(loggerService, mockWfm);
+
+    mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
+    mockWfm.scheduleWorkflow.mockResolvedValue('exec-1');
+
+    const episode = createAlertEpisode({ rule_id: 'rule-unknown' });
+    const group = createActionGroup({
+      id: 'g1',
+      policyId: 'p1',
+      destinations: [{ type: 'workflow', id: 'workflow-1' }],
+      episodes: [episode],
+    });
+    const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
+
+    const state = createDispatcherPipelineState({
+      dispatch: [group],
+      policies: new Map([['p1', policy]]),
+      rules: new Map(), // rule-unknown not present
+    });
+
+    await step.execute(state);
+
+    expect(mockWfm.scheduleWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ rules: {} }),
+      expect.anything(),
+      expect.anything()
+    );
   });
 
   it('dispatches multiple groups concurrently with a max concurrency of 3', async () => {
