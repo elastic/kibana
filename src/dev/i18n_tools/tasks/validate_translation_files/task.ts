@@ -16,6 +16,7 @@ import { removeOutdatedTranslations } from './remove_outdated_translations';
 import { updateTranslationFile } from './update_translation_file';
 import { ErrorReporter } from '../../utils/error_reporter';
 import { getLocalesFromFiles, getLocaleFromFile } from './get_locale_from_file';
+import { validateTranslationFileLocale } from './validate_translation_file_locale';
 
 import type { TaskSignature } from '../../types';
 import { makeAbsolutePath } from '../../utils';
@@ -54,6 +55,7 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
           const translationFiles = getLocalesFromFiles(config.translations);
           for (const filePath of translationFiles.values()) {
             const translationInput = await parseTranslationFile(filePath);
+            validateTranslationFileLocale({ filePath, translationInput, errorReporter });
             if (filterTranslationFiles && filterTranslationFiles.length) {
               const matchingFilteredFile = filterTranslationFiles.find((filterTranslationFile) => {
                 return makeAbsolutePath(filterTranslationFile) === makeAbsolutePath(filePath);
