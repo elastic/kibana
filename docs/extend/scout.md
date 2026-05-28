@@ -12,6 +12,7 @@ Scout is Kibana’s **modern UI and API test framework** built on [Playwright](h
 - [Best practices](./scout/best-practices.md) (see also [UI](./scout/ui-best-practices.md) and [API](./scout/api-best-practices.md) test best practices)
 - [UI testing](./scout/ui-testing.md)
 - [API testing](./scout/api-testing.md)
+- [Migrate tests to Scout](./scout/migrate-tests.md)
 
 ## Scout benefits [scout-main-features]
 
