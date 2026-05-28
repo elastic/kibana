@@ -18,76 +18,11 @@ export {
 
 export { AttackDiscoveryApiAlert } from './attack_discovery/attack_discovery_api_alert.gen';
 
-// Workflow steps
-// Note: default_alert_retrieval file contains DefaultAlertRetrieval types
-// (file named to avoid ESLint restrictions on "legacy" keyword)
-export {
-  DefaultAlertRetrievalInput,
-  DefaultAlertRetrievalOutput,
-} from './workflow_steps/default_alert_retrieval.gen';
-
-export {
-  DefaultValidationInput,
-  DefaultValidationOutput,
-} from './workflow_steps/default_validation.gen';
-
 export { Replacements, Provider, ApiConfig } from './common_attributes.gen';
 
 // Common types
 export { ERROR_CATEGORIES } from './common/error_category';
 export type { ErrorCategory } from './common/error_category';
 
-// Schedule types (common)
-export {
-  AttackDiscoveryApiConfig,
-  AttackDiscoverySchedule,
-  AttackDiscoveryScheduleCreateProps,
-  AttackDiscoveryScheduleParams,
-  AttackDiscoveryScheduleUpdateProps,
-  IntervalSchedule,
-  ScheduleAction,
-  ScheduleActionFrequency,
-  ScheduleActionNotifyWhen,
-  ScheduleExecution,
-  ScheduleExecutionStatus,
-  ScheduleGeneralAction,
-  ScheduleSystemAction,
-  WorkflowConfig,
-} from './common/schedules/schedule_types.gen';
-
-// Schedule routes
-export {
-  CreateAttackDiscoveryScheduleRequestBody,
-  CreateAttackDiscoveryScheduleResponse,
-} from './routes/post/schedules/create_schedule_route.gen';
-
-export {
-  FindAttackDiscoverySchedulesRequestQuery,
-  FindAttackDiscoverySchedulesResponse,
-} from './routes/get/schedules/find_schedules_route.gen';
-
-export {
-  GetAttackDiscoveryScheduleRequestParams,
-  GetAttackDiscoveryScheduleResponse,
-} from './routes/get/schedules/get_schedule_route.gen';
-
-export {
-  UpdateAttackDiscoveryScheduleRequestBody,
-  UpdateAttackDiscoveryScheduleRequestParams,
-  UpdateAttackDiscoveryScheduleResponse,
-} from './routes/put/schedules/update_schedule_route.gen';
-
-export {
-  DeleteAttackDiscoveryScheduleRequestParams,
-  DeleteAttackDiscoveryScheduleResponse,
-} from './routes/delete/schedules/delete_schedule_route.gen';
-
-export {
-  EnableAttackDiscoveryScheduleRequestParams,
-  EnableAttackDiscoveryScheduleResponse,
-} from './routes/post/schedules/enable_schedule_route.gen';
-
-export {
-  DisableAttackDiscoveryScheduleRequestParams,
-  DisableAttackDiscoveryScheduleResponse,
-} from './routes/post/schedules/disable_schedule_route.gen';
+// Note: workflow_steps/* and common/schedules/* and routes/{get,post,put,delete}/schedules/*
+// are added in later PRs alongside their source files.

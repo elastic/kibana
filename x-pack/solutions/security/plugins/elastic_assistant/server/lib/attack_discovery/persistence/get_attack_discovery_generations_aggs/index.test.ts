@@ -35,6 +35,9 @@ describe('getAttackDiscoveryGenerationsAggs', () => {
         discoveries: {
           max: { field: 'kibana.alert.rule.execution.metrics.alert_counts.new' },
         },
+        loading_message: {
+          terms: { field: 'kibana.alert.rule.execution.status' },
+        },
         event_actions: {
           terms: { field: 'event.action' },
         },
@@ -46,18 +49,6 @@ describe('getAttackDiscoveryGenerationsAggs', () => {
         },
         generation_start_time: {
           min: { field: 'event.start', format: 'strict_date_optional_time' },
-        },
-        loading_message: {
-          terms: { field: 'kibana.alert.rule.execution.status' },
-        },
-        workflow_id: {
-          terms: { field: 'event.module' },
-        },
-        workflow_run_id: {
-          terms: { field: 'event.id' },
-        },
-        workflow_reference: {
-          terms: { field: 'event.reference' },
         },
       },
     });
