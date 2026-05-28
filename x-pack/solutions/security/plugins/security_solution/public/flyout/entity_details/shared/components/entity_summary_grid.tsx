@@ -87,6 +87,7 @@ export const EntitySummaryGrid = memo(
                       'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
                       { defaultMessage: 'Copy to clipboard' }
                     )}
+                    disableScreenReaderOutput
                   >
                     <EuiCopy textToCopy={entityId}>
                       {(copy) => (

@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EngineComponentResourceEnum,
   type EngineComponentResource,
@@ -158,11 +159,21 @@ export const useColumns = (
         render: (component: EngineComponentStatus) => {
           const isItemExpanded = expandedItems.includes(component);
 
+          const collapseLabel = i18n.translate(
+            'xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.collapse',
+            { defaultMessage: 'Collapse' }
+          );
+          const expandLabel = i18n.translate(
+            'xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.expand',
+            { defaultMessage: 'Expand' }
+          );
+          const label = isItemExpanded ? collapseLabel : expandLabel;
+
           return component.errors && component.errors.length > 0 ? (
-            <EuiToolTip content={isItemExpanded ? 'Collapse' : 'Expand'} disableScreenReaderOutput>
+            <EuiToolTip content={label} disableScreenReaderOutput>
               <EuiButtonIcon
                 onClick={() => onToggleExpandedItem(component)}
-                aria-label={isItemExpanded ? 'Collapse' : 'Expand'}
+                aria-label={label}
                 iconType={isItemExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
               />
             </EuiToolTip>

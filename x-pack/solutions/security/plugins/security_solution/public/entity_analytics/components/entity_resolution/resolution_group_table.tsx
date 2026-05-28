@@ -143,11 +143,11 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
 
           const nameContent =
             onEntityNameClick && !isCurrentEntity && !showActions ? (
-              <EuiText size="xs" css={truncatedCellCss}>
-                <EuiToolTip content={name}>
+              <EuiToolTip content={name}>
+                <EuiText size="xs" css={truncatedCellCss}>
                   <EuiLink onClick={() => onEntityNameClick(entity)}>{name}</EuiLink>
-                </EuiToolTip>
-              </EuiText>
+                </EuiText>
+              </EuiToolTip>
             ) : (
               <EuiText size="xs" css={truncatedCellCss}>
                 {name}
