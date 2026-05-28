@@ -51,8 +51,16 @@ export const onboardingExecuteRoute = createServerRoute({
           ),
         connectors: z
           .object({
-            features: z.string().optional().describe('Connector ID for features identification.'),
-            queries: z.string().optional().describe('Connector ID for queries generation.'),
+            features: z
+              .string()
+              .max(255)
+              .optional()
+              .describe('Connector ID for features identification.'),
+            queries: z
+              .string()
+              .max(255)
+              .optional()
+              .describe('Connector ID for queries generation.'),
           })
           .optional()
           .describe(
@@ -141,7 +149,8 @@ export const onboardingStatusRoute = createServerRoute({
       path: { streamName },
     } = params;
 
-    return onboardingClient.getStatus({ streamName });
+    const { executionId: _, ...statusResult } = await onboardingClient.getStatus({ streamName });
+    return statusResult;
   },
 });
 

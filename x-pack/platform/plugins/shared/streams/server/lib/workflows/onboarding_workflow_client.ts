@@ -96,6 +96,9 @@ const mapExecutionToOnboardingStatus = (
     case ExecutionStatus.CANCELLED:
     case ExecutionStatus.SKIPPED:
       return OnboardingStatus.Canceled;
+    default:
+      const _exhaustiveCheck: never = status;
+      return _exhaustiveCheck;
   }
 };
 
@@ -276,6 +279,7 @@ export class OnboardingWorkflowClient {
       {
         workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
         statuses: [...NonTerminalExecutionStatuses],
+        size: MAX_STREAMS_PER_QUERY,
       },
       ONBOARDING_EXECUTIONS_SPACE_ID
     );

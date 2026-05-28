@@ -39,7 +39,7 @@ export type OnboardingStatusResult =
         | OnboardingStatus.BeingCanceled
         | OnboardingStatus.Canceled;
     }
-  | ({ status: OnboardingStatus.Failed; error: string } & Partial<OnboardingResult>)
+  | { status: OnboardingStatus.Failed; error: string }
   | ({ status: OnboardingStatus.Completed } & OnboardingResult);
 
 /** Statuses that indicate the onboarding pipeline is still active (running or pending cancel). */
