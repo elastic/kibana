@@ -6,16 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLCallbacks, ESQLControlVariable } from '@kbn/esql-types';
 import { Walker, within, type WalkerAstNode } from '@elastic/esql';
 import type { PromQLFunction, PromQLLiteral, PromQLSelector } from '@elastic/esql';
 import { getPromqlFunctionSignatureHover } from './get_function_signature_hover';
 
-export const getVariablesHoverContent = (
-  node?: WalkerAstNode,
+const buildVariablesHoverContent = (
+  usedVariablesInNode: string[],
   variables?: ESQLControlVariable[]
 ) => {
-  const usedVariablesInNode = node ? Walker.params(node).map((v) => v.text.replace('?', '')) : [];
   const usedVariables = variables?.filter((v) => usedVariablesInNode.includes(v.key));
 
   const hoverContents: Array<{ value: string }> = [];
@@ -31,13 +30,24 @@ export const getVariablesHoverContent = (
   return hoverContents;
 };
 
+export const getVariablesHoverContent = (
+  node?: WalkerAstNode,
+  variables?: ESQLControlVariable[]
+) => {
+  const usedVariablesInNode = node ? Walker.params(node).map((v) => v.text.replace('?', '')) : [];
+
+  return buildVariablesHoverContent(usedVariablesInNode, variables);
+};
+
 export function getPromqlHoverItem(
   root: WalkerAstNode,
-  offset: number
+  offset: number,
+  callbacks?: ESQLCallbacks
 ): { contents: Array<{ value: string }> } {
   let functionNode: PromQLFunction | undefined;
   let selectorNode: PromQLSelector | undefined;
   let literalNode: PromQLLiteral | undefined;
+  let paramNode: PromQLLiteral | undefined;
 
   Walker.walk(root, {
     promql: {
@@ -52,16 +62,23 @@ export function getPromqlHoverItem(
         }
       },
       visitPromqlLiteral: (literal) => {
-        if (
-          literal.literalType !== 'string' &&
-          literal.literalType !== 'param' &&
-          within(offset, literal)
-        ) {
-          literalNode = literal;
-        }
+        if (!within(offset, literal)) return;
+
+        if (literal.literalType === 'param') paramNode = literal;
+        else if (literal.literalType !== 'string') literalNode = literal;
       },
     },
   });
+
+  if (paramNode) {
+    const variables = callbacks?.getVariables?.();
+    const usedVariablesInNode = [paramNode.text.replace('?', '')];
+    const variablesContent = buildVariablesHoverContent(usedVariablesInNode, variables);
+
+    if (variablesContent.length) {
+      return { contents: variablesContent };
+    }
+  }
 
   if (literalNode) {
     const hoverType = literalNode.literalType === 'time' ? 'duration' : 'scalar';
