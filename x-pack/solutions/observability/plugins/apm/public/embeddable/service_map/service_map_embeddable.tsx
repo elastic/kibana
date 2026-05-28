@@ -74,8 +74,12 @@ export interface ServiceMapEmbeddableProps {
   parentQuery?: Query | AggregateQuery;
   /** Persisted view filters (alerts / SLOs / connection / anomaly severity) captured at "Copy to dashboard" time. */
   viewFilters?: ServiceMapViewFilters;
+  /** Push in-panel filter edits back to the state manager so the embeddable's controlled value updates. */
+  onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
   /** Persisted find-in-page query captured at "Copy to dashboard" time. */
   searchQuery?: string;
+  /** Push in-panel search edits back to the state manager. */
+  onSearchQueryChange?: (next: string) => void;
 }
 
 function LoadingSpinner() {
@@ -110,7 +114,9 @@ export function ServiceMapEmbeddable({
   parentFilters,
   parentQuery,
   viewFilters,
+  onViewFiltersChange,
   searchQuery,
+  onSearchQueryChange,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -322,7 +328,9 @@ export function ServiceMapEmbeddable({
           mapOrientation={mapOrientation}
           onMapOrientationChange={onMapOrientationChange}
           viewFilters={viewFilters}
+          onViewFiltersChange={onViewFiltersChange}
           searchQuery={searchQuery}
+          onSearchQueryChange={onSearchQueryChange}
         />
       </div>
       {sloOverviewFlyout && (

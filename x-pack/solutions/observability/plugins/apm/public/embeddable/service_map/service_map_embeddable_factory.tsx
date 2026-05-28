@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type {
@@ -294,6 +294,28 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             [alertStatusFilter, sloStatusFilter, connectionFilter, anomalySeverityFilter]
           );
 
+          // Push in-panel edits back to the state manager so the controlled `viewFilters` /
+          // `searchQuery` reflect changes; without these the chips/search would feel locked.
+          // Empty arrays / empty strings are normalized to `undefined` so saved state stays tidy.
+          const onViewFiltersChange = useCallback((next: ServiceMapViewFilters) => {
+            customStateManager.api.setAlertStatusFilter(
+              next.alertStatusFilter.length ? next.alertStatusFilter : undefined
+            );
+            customStateManager.api.setSloStatusFilter(
+              next.sloStatusFilter.length ? next.sloStatusFilter : undefined
+            );
+            customStateManager.api.setConnectionFilter(
+              next.connectionFilter.length ? next.connectionFilter : undefined
+            );
+            customStateManager.api.setAnomalySeverityFilter(
+              next.anomalySeverityFilter.length ? next.anomalySeverityFilter : undefined
+            );
+          }, []);
+
+          const onSearchQueryChange = useCallback((next: string) => {
+            customStateManager.api.setFindQuery(next.trim() ? next : undefined);
+          }, []);
+
           const fetchContext = useFetchContext(api);
           const effectiveTimeRange = fetchContext.timeRange ?? DEFAULT_TIME_RANGE;
 
@@ -325,7 +347,9 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                   parentFilters={parentFilters}
                   parentQuery={parentQuery}
                   viewFilters={viewFilters}
+                  onViewFiltersChange={onViewFiltersChange}
                   searchQuery={findQuery ?? undefined}
+                  onSearchQueryChange={onSearchQueryChange}
                 />
               </ApmEmbeddableContext>
             </div>
