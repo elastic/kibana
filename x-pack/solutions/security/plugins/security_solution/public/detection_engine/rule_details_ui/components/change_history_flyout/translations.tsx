@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { startCase } from 'lodash';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -161,7 +160,7 @@ export const UPDATED_BY = ({ action, username, timestamp }: UpdatedByProps): JSX
     id="xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.header.updatedBy"
     defaultMessage="{action} {username} on {timestamp}"
     values={{
-      action: <strong>{`${startCase(action)} by:`}</strong>,
+      action: <strong>{`${action[0].toUpperCase()}${action.slice(1)} by:`}</strong>,
       username: <EuiBadge>{username}</EuiBadge>,
       timestamp: <PreferenceFormattedDate value={new Date(timestamp)} />,
     }}
@@ -178,7 +177,7 @@ export const FIELD_CHANGES = ({ fields }: FieldChangesProps): JSX.Element => (
     defaultMessage="{fieldChanges} {fields}"
     values={{
       fieldChanges: <strong>{`${FIELD_CHANGES_HEADER}:`}</strong>,
-      fields: fields.map((field) => <EuiBadge>{field}</EuiBadge>),
+      fields: fields.map((field) => <EuiBadge key={field}>{field}</EuiBadge>),
     }}
   />
 );

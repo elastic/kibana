@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { describeAction } from './describe_action';
 import * as i18n from './translations';
-import { extractChangedFieldNames } from '../../utils/extract_changed_field_names';
 
 interface ChangeHistoryFlyoutHeaderProps {
   item: RuleHistoryItem;
   titleId: string;
+  changedFields: string[];
 }
 
 export function ChangeHistoryFlyoutHeader({
   item,
   titleId,
+  changedFields,
 }: ChangeHistoryFlyoutHeaderProps): JSX.Element {
   const userName = item.user?.name ?? i18n.SYSTEM_USER_LABEL;
-  const changedFields = useMemo(() => extractChangedFieldNames(item), [item]);
   const prevRevision = item.old_values?.revision as number | undefined;
 
   return (

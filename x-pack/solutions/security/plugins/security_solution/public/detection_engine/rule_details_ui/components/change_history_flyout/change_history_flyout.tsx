@@ -51,7 +51,7 @@ export function ChangeHistoryFlyout({ item, onClose }: ChangeHistoryFlyoutProps)
       data-test-subj="ruleChangeHistoryFlyout"
     >
       <EuiFlyoutHeader>
-        <ChangeHistoryFlyoutHeader item={item} titleId={titleId} />
+        <ChangeHistoryFlyoutHeader item={item} titleId={titleId} changedFields={changedFields} />
         <EuiSpacer size="m" />
         <EuiTabs>
           {tabs.map((tab) => (
@@ -67,7 +67,7 @@ export function ChangeHistoryFlyout({ item, onClose }: ChangeHistoryFlyoutProps)
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {selectedTab === 'changes' ? (
+        {selectedTab === TabId.Changes ? (
           <ChangeDetailsTab
             changedFields={changedFields}
             oldValues={oldValues}

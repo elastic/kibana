@@ -8,21 +8,6 @@
 export const DATE_DISPLAY_FORMAT = 'MMM D\\, YYYY @ HH:mm';
 export const DATE_DISPLAY_FORMAT_WITH_SECONDS = 'MMM D, YYYY @ HH:mm:ss';
 
-/**
- * Rule field names that are excluded from the visible "changed fields" list
- * and from the diff view in the flyout. These are bookkeeping fields that
- * change on every rule write and would otherwise dominate the UI.
- */
-export const IGNORED_DIFF_FIELDS: ReadonlySet<string> = new Set([
-  'updated_at',
-  'updated_by',
-  'created_at',
-  'created_by',
-  'revision',
-  'execution_summary',
-  'meta',
-]);
-
 export const DEFAULT_PAGE_SIZE = 10;
 export const PAGE_SIZE_OPTIONS = [10, 20, 50];
 

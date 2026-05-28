@@ -57,7 +57,13 @@ interface UseExpandReturn {
  */
 const useExpand = (hunks: HunkData[], oldSource: string): UseExpandReturn => {
   const [hunksWithSourceExpanded, expandRange] = useSourceExpansion(hunks, oldSource);
-  const hunksWithMinLinesCollapsed = useMinCollapsedLines(0, hunksWithSourceExpanded, oldSource);
+  // react-diff-view's expandCollapsedBlockBy crashes when hunks is empty but oldSource is non-empty.
+  // Passing empty string triggers its early-return guard, avoiding the bug.
+  const hunksWithMinLinesCollapsed = useMinCollapsedLines(
+    0,
+    hunksWithSourceExpanded,
+    hunksWithSourceExpanded.length > 0 ? oldSource : ''
+  );
 
   return {
     expandRange,

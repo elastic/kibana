@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 
 import { SecurityRuleChangeTrackingAction } from '../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { RuleActionItemWrapper } from './rule_action_item_wrapper';
-
-import { useMemo } from 'react';
 import { extractChangedFieldNames } from '../../utils/extract_changed_field_names';
 import { INLINE_CHANGED_FIELDS_LIMIT, POPOVER_CHANGED_FIELDS_LIMIT } from './constants';
 import * as i18n from './translations';
@@ -27,7 +25,7 @@ export interface ActionItemContentProps {
   onOpenDetails: (item: RuleHistoryItem) => void;
 }
 
-export function RuleChangeHistoryAction({
+export const RuleChangeHistoryAction = memo(function RuleChangeHistoryAction({
   item,
   date,
   username,
@@ -192,4 +190,4 @@ export function RuleChangeHistoryAction({
         </RuleActionItemWrapper>
       );
   }
-}
+});

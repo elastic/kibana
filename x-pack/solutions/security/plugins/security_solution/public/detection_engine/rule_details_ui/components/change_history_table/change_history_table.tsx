@@ -64,17 +64,19 @@ export function ChangeHistoryTable({ ruleId }: ChangeHistoryTableProps): JSX.Ele
     [items, openFlyout]
   );
 
-  if (isLoading && items.length === 0) {
+  if (items.length === 0 && (isLoading || isFetching)) {
     return <Loading />;
   }
 
-  if (!isFetching && items.length === 0) {
+  if (items.length === 0) {
     return <NoData />;
   }
 
   return (
     <EuiPanel hasBorder data-test-subj="ruleChangeHistoryTable">
-      {selectedItem && <ChangeHistoryFlyout item={selectedItem} onClose={closeFlyout} />}
+      {selectedItem && (
+        <ChangeHistoryFlyout key={selectedItem.id} item={selectedItem} onClose={closeFlyout} />
+      )}
       <EuiText size="xs">
         <i18n.SHOWN_EVENTS_VS_TOTAL
           page={data?.page ?? 0}

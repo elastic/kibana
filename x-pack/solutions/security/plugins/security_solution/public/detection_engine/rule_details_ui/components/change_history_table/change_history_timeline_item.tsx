@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { EuiAvatar, EuiTimelineItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import moment from 'moment';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { DATE_DISPLAY_FORMAT, DATE_DISPLAY_FORMAT_WITH_SECONDS } from './constants';
 import { SYSTEM_USER_LABEL } from '../change_history_flyout/translations';
@@ -19,7 +19,7 @@ interface ChangeHistoryTimelineItemProps {
   onOpenDetails: (item: RuleHistoryItem) => void;
 }
 
-export function ChangeHistoryTimelineItem({
+export const ChangeHistoryTimelineItem = memo(function ChangeHistoryTimelineItem({
   item,
   onOpenDetails,
 }: ChangeHistoryTimelineItemProps): JSX.Element {
@@ -29,7 +29,10 @@ export function ChangeHistoryTimelineItem({
         position="top"
         content={moment(item.timestamp).format(DATE_DISPLAY_FORMAT_WITH_SECONDS)}
       >
-        <FormattedRelativePreferenceDate value={item.timestamp} dateFormat={DATE_DISPLAY_FORMAT} />
+        <PreferenceFormattedDate
+          value={new Date(item.timestamp)}
+          dateFormat={DATE_DISPLAY_FORMAT}
+        />
       </EuiToolTip>
     ),
     [item.timestamp]
@@ -45,7 +48,7 @@ export function ChangeHistoryTimelineItem({
       />
     </EuiTimelineItem>
   );
-}
+});
 
 interface UserAvatarProps {
   user?: RuleHistoryItem['user'];

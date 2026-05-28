@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { convertFieldToDisplayName } from '../../../rule_management/components/rule_details/helpers';
 
@@ -21,7 +21,7 @@ interface ChangedFieldsBadgesProps {
  * additional field names on hover — caller chooses if they want richer popover
  * UX by wrapping us in one.
  */
-export function ChangedFieldsBadges({
+export const ChangedFieldsBadges = memo(function ChangedFieldsBadges({
   fields,
   inlineLimit,
   overflowLimit,
@@ -31,7 +31,9 @@ export function ChangedFieldsBadges({
   }
 
   const visible = fields.slice(0, inlineLimit);
-  const overflowFieldNames = fields.slice(inlineLimit + 1).map(convertFieldToDisplayName);
+  const overflowFields = fields.slice(inlineLimit);
+  const overflowFieldNames = overflowFields.slice(0, overflowLimit).map(convertFieldToDisplayName);
+  const isLargeOverflow = overflowFields.length > overflowLimit;
 
   return (
     <>
@@ -42,10 +44,12 @@ export function ChangedFieldsBadges({
       ))}
       &nbsp;
       {overflowFieldNames.length > 0 && (
-        <EuiToolTip content={overflowFieldNames.join(', ')}>
-          <EuiBadge color="hollow">{`+${overflowFieldNames.length}`}</EuiBadge>
+        <EuiToolTip content={`${overflowFieldNames.join(', ')}${isLargeOverflow ? ', +' : ''}`}>
+          <EuiBadge color="hollow">{`+${overflowFieldNames.length}${
+            isLargeOverflow ? '+' : ''
+          }`}</EuiBadge>
         </EuiToolTip>
       )}
     </>
   );
-}
+});

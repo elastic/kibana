@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiAccordion, EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { RuleHistoryItem } from '../../../../../common/api/detection_engine/rule_management';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from '../../../rule_management/components/rule_details/constants';
 import { RuleAboutSection } from '../../../rule_management/components/rule_details/rule_about_section';
@@ -18,10 +25,13 @@ interface OverviewTabProps {
 }
 
 export function OverviewTab({ rule }: OverviewTabProps): JSX.Element {
+  const aboutId = useGeneratedHtmlId();
+  const definitionId = useGeneratedHtmlId();
+
   return (
     <>
       <EuiAccordion
-        id="ruleChangeHistoryFlyoutAbout"
+        id={aboutId}
         buttonContent={
           <EuiTitle size="m">
             <h3>{i18n.OVERVIEW_ABOUT_TITLE}</h3>
@@ -38,7 +48,7 @@ export function OverviewTab({ rule }: OverviewTabProps): JSX.Element {
       <EuiHorizontalRule />
       <EuiSpacer size="l" />
       <EuiAccordion
-        id="ruleChangeHistoryFlyoutDefinition"
+        id={definitionId}
         buttonContent={
           <EuiTitle size="m">
             <h3>{i18n.OVERVIEW_DEFINITION_TITLE}</h3>
