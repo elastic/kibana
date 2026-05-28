@@ -92,13 +92,15 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
   const sourcererScopeId = useMemo(() => getSourcererScopeId(TableId.alertsOnAlertsPage), []);
 
   const dataStatsButton = (
-    <EuiButtonIcon
-      color="text"
-      iconType="info"
-      aria-label="info"
-      size="xs"
-      onClick={onButtonClick}
-    />
+    <EuiToolTip content="info" disableScreenReaderOutput>
+      <EuiButtonIcon
+        color="text"
+        iconType="info"
+        aria-label="info"
+        size="xs"
+        onClick={onButtonClick}
+      />
+    </EuiToolTip>
   );
 
   const dataStatsMessage = (

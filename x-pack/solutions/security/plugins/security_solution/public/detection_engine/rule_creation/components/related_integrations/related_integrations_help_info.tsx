@@ -26,11 +26,13 @@ export function RelatedIntegrationsHelpInfo(): JSX.Element {
   const { docLinks } = useKibana().services;
 
   const button = (
-    <EuiButtonIcon
-      iconType="question"
-      onClick={togglePopover}
-      aria-label={RELATED_INTEGRATIONS_HELP_ARIA_LABEL}
-    />
+    <EuiToolTip content={RELATED_INTEGRATIONS_HELP_ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="question"
+        onClick={togglePopover}
+        aria-label={RELATED_INTEGRATIONS_HELP_ARIA_LABEL}
+      />
+    </EuiToolTip>
   );
 
   return (

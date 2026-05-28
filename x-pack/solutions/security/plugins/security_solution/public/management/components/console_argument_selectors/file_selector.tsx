@@ -141,12 +141,14 @@ export const ArgumentFileSelector = memo<
               </div>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="folderOpen"
-                size="xs"
-                onClick={handleOpenPopover}
-                aria-label={OPEN_FILE_PICKER_LABEL}
-              />
+              <EuiToolTip content={OPEN_FILE_PICKER_LABEL} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="folderOpen"
+                  size="xs"
+                  onClick={handleOpenPopover}
+                  aria-label={OPEN_FILE_PICKER_LABEL}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         }

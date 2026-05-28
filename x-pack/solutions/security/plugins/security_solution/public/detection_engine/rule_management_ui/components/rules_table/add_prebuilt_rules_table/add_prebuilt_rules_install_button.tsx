@@ -75,14 +75,16 @@ export const PrebuiltRulesInstallButton = ({
 
   const popoverButton = useMemo(
     () => (
-      <EuiButtonIcon
-        display="empty"
-        size="s"
-        iconType="boxesVertical"
-        aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
-        onClick={onOverflowButtonClick}
-        disabled={isInstallButtonDisabled}
-      />
+      <EuiToolTip content={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+        <EuiButtonIcon
+          display="empty"
+          size="s"
+          iconType="boxesVertical"
+          aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
+          onClick={onOverflowButtonClick}
+          disabled={isInstallButtonDisabled}
+        />
+      </EuiToolTip>
     ),
     [isInstallButtonDisabled, onOverflowButtonClick]
   );

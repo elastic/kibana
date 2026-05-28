@@ -36,13 +36,15 @@ export const AlertSummaryOptionsMenu = memo(({ hasAlertSummary }: AlertSummaryOp
 
   const button = useMemo(
     () => (
-      <EuiButtonIcon
-        aria-label={OPTIONS_MENU}
-        data-test-subj={ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID}
-        color="text"
-        iconType="boxesVertical"
-        onClick={togglePopover}
-      />
+      <EuiToolTip content={OPTIONS_MENU} disableScreenReaderOutput>
+        <EuiButtonIcon
+          aria-label={OPTIONS_MENU}
+          data-test-subj={ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID}
+          color="text"
+          iconType="boxesVertical"
+          onClick={togglePopover}
+        />
+      </EuiToolTip>
     ),
     [togglePopover]
   );

@@ -50,14 +50,21 @@ export const TableRowActions = memo<TableRowActionProps>(({ endpointInfo }) => {
       panelPaddingSize="none"
       panelProps={panelProps}
       button={
-        <EuiButtonIcon
-          data-test-subj="endpointTableRowActions"
-          iconType="boxesVertical"
-          onClick={handleToggleMenu}
-          aria-label={i18n.translate('xpack.securitySolution.endpoint.list.actionmenu', {
+        <EuiToolTip
+          content={i18n.translate('xpack.securitySolution.endpoint.list.actionmenu', {
             defaultMessage: 'Open',
           })}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="endpointTableRowActions"
+            iconType="boxesVertical"
+            onClick={handleToggleMenu}
+            aria-label={i18n.translate('xpack.securitySolution.endpoint.list.actionmenu', {
+              defaultMessage: 'Open',
+            })}
+          />
+        </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={handleCloseMenu}

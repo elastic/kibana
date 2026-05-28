@@ -58,14 +58,16 @@ export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ 
 
   const plusButton = useMemo(
     () => (
-      <EuiButtonIcon
-        iconType="plusCircle"
-        iconSize="m"
-        color="primary"
-        data-test-subj="timeline-bottom-bar-open-button"
-        aria-label={i18n.ADD_TIMELINE}
-        onClick={togglePopover}
-      />
+      <EuiToolTip content={i18n.ADD_TIMELINE} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="plusCircle"
+          iconSize="m"
+          color="primary"
+          data-test-subj="timeline-bottom-bar-open-button"
+          aria-label={i18n.ADD_TIMELINE}
+          onClick={togglePopover}
+        />
+      </EuiToolTip>
     ),
     [togglePopover]
   );

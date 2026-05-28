@@ -20,7 +20,9 @@ export const EsqlInfoIcon = memo(function EsqlInfoIcon(): JSX.Element {
   const [isPopoverOpen, { off: closePopover, on: togglePopover }] = useBoolean(false);
 
   const button = (
-    <EuiButtonIcon iconType="info" onClick={togglePopover} aria-label={i18n.ARIA_LABEL} />
+    <EuiToolTip content={i18n.ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon iconType="info" onClick={togglePopover} aria-label={i18n.ARIA_LABEL} />
+    </EuiToolTip>
   );
 
   return (

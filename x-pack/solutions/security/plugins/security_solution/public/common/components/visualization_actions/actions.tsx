@@ -139,13 +139,15 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
 
   const button = useMemo(
     () => (
-      <EuiButtonIcon
-        aria-label={MORE_ACTIONS}
-        className={VISUALIZATION_ACTIONS_BUTTON_CLASS}
-        data-test-subj={dataTestSubj}
-        iconType="boxesVertical"
-        onClick={onButtonClick}
-      />
+      <EuiToolTip content={MORE_ACTIONS} disableScreenReaderOutput>
+        <EuiButtonIcon
+          aria-label={MORE_ACTIONS}
+          className={VISUALIZATION_ACTIONS_BUTTON_CLASS}
+          data-test-subj={dataTestSubj}
+          iconType="boxesVertical"
+          onClick={onButtonClick}
+        />
+      </EuiToolTip>
     ),
     [dataTestSubj, onButtonClick]
   );

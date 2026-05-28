@@ -258,18 +258,19 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
             </EuiFlexItem>
             {showHelpIcon && (
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="pencil"
-                  size="xs"
-                  onClick={handleOpenPopover}
-                  title={openLabel}
-                  aria-label={openLabel}
-                  data-test-subj={testId('openInputButton')}
-                  css={css`
-                    inline-size: auto;
-                    block-size: auto;
-                  `}
-                />
+                <EuiToolTip content={openLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    size="xs"
+                    onClick={handleOpenPopover}
+                    aria-label={openLabel}
+                    data-test-subj={testId('openInputButton')}
+                    css={css`
+                      inline-size: auto;
+                      block-size: auto;
+                    `}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -292,7 +293,6 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
                       size="xs"
                       onClick={handleHelpOnClick}
                       isSelected={showHelpContent}
-                      title={helpIconLabel}
                       aria-label={helpIconLabel}
                       disabled={!helpContent}
                       data-test-subj={testId('helpButton')}

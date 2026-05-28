@@ -22,11 +22,16 @@ export function SuppressionInfoIcon(): JSX.Element {
   const { docLinks } = useKibana().services;
 
   const button = (
-    <EuiButtonIcon
-      iconType="question"
-      onClick={togglePopover}
-      aria-label={ALERT_SUPPRESSION_MISSING_FIELDS_HELP_ARIA_LABEL}
-    />
+    <EuiToolTip
+      content={ALERT_SUPPRESSION_MISSING_FIELDS_HELP_ARIA_LABEL}
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="question"
+        onClick={togglePopover}
+        aria-label={ALERT_SUPPRESSION_MISSING_FIELDS_HELP_ARIA_LABEL}
+      />
+    </EuiToolTip>
   );
 
   return (

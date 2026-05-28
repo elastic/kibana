@@ -59,13 +59,18 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
         <EuiFlexItem grow={false}>
           <EuiPopover
             button={
-              <EuiButtonIcon
-                isDisabled={disableActions}
-                aria-label={EXCEPTION_ITEM_ACTIONS_MENU_ARIA_LABEL}
-                iconType="boxesVertical"
-                onClick={onItemActionsClick}
-                data-test-subj={`${dataTestSubj}-actionButton`}
-              />
+              <EuiToolTip
+                content={EXCEPTION_ITEM_ACTIONS_MENU_ARIA_LABEL}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  isDisabled={disableActions}
+                  aria-label={EXCEPTION_ITEM_ACTIONS_MENU_ARIA_LABEL}
+                  iconType="boxesVertical"
+                  onClick={onItemActionsClick}
+                  data-test-subj={`${dataTestSubj}-actionButton`}
+                />
+              </EuiToolTip>
             }
             panelPaddingSize="none"
             isOpen={isPopoverOpen}

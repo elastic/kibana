@@ -51,12 +51,14 @@ export const MoreActionsRowControlColumn = memo(({ alert }: MoreActionsRowContro
 
   const button = useMemo(
     () => (
-      <EuiButtonIcon
-        aria-label={MORE_ACTIONS_BUTTON_ARIA_LABEL}
-        data-test-subj={MORE_ACTIONS_BUTTON_TEST_ID}
-        iconType="boxesVertical"
-        onClick={togglePopover}
-      />
+      <EuiToolTip content={MORE_ACTIONS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+        <EuiButtonIcon
+          aria-label={MORE_ACTIONS_BUTTON_ARIA_LABEL}
+          data-test-subj={MORE_ACTIONS_BUTTON_TEST_ID}
+          iconType="boxesVertical"
+          onClick={togglePopover}
+        />
+      </EuiToolTip>
     ),
     [togglePopover]
   );

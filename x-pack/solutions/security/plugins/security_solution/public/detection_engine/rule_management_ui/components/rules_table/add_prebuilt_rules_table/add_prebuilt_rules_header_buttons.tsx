@@ -85,14 +85,19 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           <EuiFlexItem grow={false}>
             <EuiPopover
               button={
-                <EuiButtonIcon
-                  display="base"
-                  size="m"
-                  iconType="boxesVertical"
-                  aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
-                  onClick={onOverflowButtonClick}
-                  disabled={!canEditRules || isRequestInProgress}
-                />
+                <EuiToolTip
+                  content={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    display="base"
+                    size="m"
+                    iconType="boxesVertical"
+                    aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
+                    onClick={onOverflowButtonClick}
+                    disabled={!canEditRules || isRequestInProgress}
+                  />
+                </EuiToolTip>
               }
               isOpen={isOverflowPopoverOpen}
               closePopover={closeOverflowPopover}

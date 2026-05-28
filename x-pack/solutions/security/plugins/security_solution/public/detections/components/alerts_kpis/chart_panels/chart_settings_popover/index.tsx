@@ -34,13 +34,15 @@ const ChartSettingsPopoverComponent: React.FC<Props> = ({
 
   const button = useMemo(
     () => (
-      <EuiButtonIcon
-        aria-label={i18n.CHART_SETTINGS_POPOVER_ARIA_LABEL}
-        color="text"
-        iconType="boxesVertical"
-        onClick={onButtonClick}
-        size="xs"
-      />
+      <EuiToolTip content={i18n.CHART_SETTINGS_POPOVER_ARIA_LABEL} disableScreenReaderOutput>
+        <EuiButtonIcon
+          aria-label={i18n.CHART_SETTINGS_POPOVER_ARIA_LABEL}
+          color="text"
+          iconType="boxesVertical"
+          onClick={onButtonClick}
+          size="xs"
+        />
+      </EuiToolTip>
     ),
     [onButtonClick]
   );

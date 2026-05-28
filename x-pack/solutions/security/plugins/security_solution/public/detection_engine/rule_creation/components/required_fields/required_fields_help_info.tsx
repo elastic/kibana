@@ -25,11 +25,13 @@ export function RequiredFieldsHelpInfo(): JSX.Element {
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
   const button = (
-    <EuiButtonIcon
-      iconType="question"
-      onClick={togglePopover}
-      aria-label={i18n.OPEN_HELP_POPOVER_ARIA_LABEL}
-    />
+    <EuiToolTip content={i18n.OPEN_HELP_POPOVER_ARIA_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="question"
+        onClick={togglePopover}
+        aria-label={i18n.OPEN_HELP_POPOVER_ARIA_LABEL}
+      />
+    </EuiToolTip>
   );
 
   return (
