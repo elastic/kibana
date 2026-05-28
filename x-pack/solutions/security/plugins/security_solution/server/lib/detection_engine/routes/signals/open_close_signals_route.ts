@@ -184,13 +184,12 @@ export const setSignalsStatusRoute = (
  * This method calls `updateByQuery` with `refresh: true` which is expensive on
  * serverless.
  *
- * When `runtimeMappings` are provided (the rule's source indices supplied at
- * least one runtime field), they are attached to the `_update_by_query`
+ * When `runtimeMappings` are provided, they are attached to the `_update_by_query`
  * request alongside the filter. ES evaluates the runtime scripts in the
  * query's filter context against each candidate alert.
  *
  * `runtime_mappings` is a valid top-level field on the `_update_by_query`
- * wire protocol — confirmed with the ES Search team — but it isn't typed on
+ * request, but it isn't typed on
  * `UpdateByQueryRequest` in the JS client (yet). We widen the request type
  * inline rather than suppressing the type error.
  */
