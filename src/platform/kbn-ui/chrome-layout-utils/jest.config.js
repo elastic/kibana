@@ -11,4 +11,5 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
   roots: ['<rootDir>/src/platform/kbn-ui/chrome-layout-utils'],
+  modulePathIgnorePatterns: ['<rootDir>/src/platform/kbn-ui/chrome-layout-utils/packaging'],
 };
