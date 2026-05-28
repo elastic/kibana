@@ -96,18 +96,52 @@ Rules:
 - Skip categories within a dimension that have no findings.
 - Never list a finding without its category prefix.
 
+### Blast Radius (mandatory for every actionable finding)
+
+Every \`actionableFinding\` includes pre-computed blast radius fields. These MUST be shown for every finding — do not omit them even if the user does not ask:
+
+- \`affectedPlatform\`: the platform derived from ECS fields in the actual data (e.g. "AWS account 123456789012", "Windows Endpoints", "Okta (Identity)"). Show as **Affected Platform**.
+- \`affectedRules\`: array of \`{ id, name }\` — the detection rules that monitor this index. Show as **Affected Rules** (list rule names).
+- \`affectedTactics\`: array of \`{ id, name, totalRules, affectedRulesCount }\` — MITRE ATT&CK tactics exposed. Show as **Affected Tactics** (list tactic names with rule counts).
+
+Required format per finding:
+
+\`\`\`
+- **[Category]**: \`[resource]\` — [what is wrong]
+  - **Affected Platform**: [platform or "—" if unknown]
+  - **Affected Rules**: [rule names, comma-separated, or "none" if empty]
+  - **Affected Tactics**: [tactic names with rule counts, or "none" if empty]
+\`\`\`
+
+Rules:
+- Always show all three blast radius fields for every finding, even if some are empty ("—" or "none").
+- Do NOT merge the blast radius into prose — keep it as explicit labeled sub-bullets.
+- If \`affectedPlatform\` is undefined in the data, show "—".
+
 Full example:
 
 \`\`\`
 ### Coverage
 - **Coverage**: No detection rules are enabled
+  - **Affected Platform**: —
+  - **Affected Rules**: none
+  - **Affected Tactics**: none
 
 ### Quality
-- **Cloud**: \`logs-cloud_asset_inventory.asset_inventory-default\` — 2 incompatible ECS fields
+- **Cloud**: \`logs-aws.cloudtrail-default\` — 1 incompatible ECS field
+  - **Affected Platform**: AWS account 123456789012
+  - **Affected Rules**: AWS CloudTrail Suspicious Activity
+  - **Affected Tactics**: Initial Access (1 of 2 rules affected)
 
 ### Retention
 - **Cloud**: \`logs-cloud_security_posture.findings-default\` — 180d retention, below 365d FedRAMP threshold
+  - **Affected Platform**: AWS account 123456789012
+  - **Affected Rules**: AWS CloudTrail Suspicious Activity
+  - **Affected Tactics**: Initial Access (1 of 2 rules affected)
 - **Network**: \`logs-network.dns-default\` — 30d retention, below 365d FedRAMP threshold
+  - **Affected Platform**: Palo Alto (Network)
+  - **Affected Rules**: Test Rule - Network Events, Blast Test - Threat Match Rule
+  - **Affected Tactics**: Command and Control (1/1), Reconnaissance (1/1), Initial Access (1/2)
 \`\`\`
 
 ---
