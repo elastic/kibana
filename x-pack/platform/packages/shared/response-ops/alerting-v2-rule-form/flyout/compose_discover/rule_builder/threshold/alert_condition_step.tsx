@@ -118,9 +118,9 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
 
     if (isAlert) {
       const { base, alertBlock } = splitQuery(esqlQuery);
-      setValue('query', { format: 'composed', base, blocks: { breach: alertBlock } });
+      setValue('query', { format: 'composed', base, breach: { segment: alertBlock } });
     } else {
-      setValue('query', { format: 'standalone', breach: esqlQuery });
+      setValue('query', { format: 'standalone', breach: { query: esqlQuery } });
     }
     setValue('timeField', thresholdValues.timeField);
     if (thresholdValues.groupByFields.length > 0) {

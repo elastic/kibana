@@ -126,8 +126,16 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   const queryFields = useMemo(
     () =>
       query.format === 'composed'
-        ? { base: query.base, breach: query.blocks.breach, recover: query.blocks.recover ?? '' }
-        : { base: query.no_data ?? '', breach: query.breach, recover: query.recover ?? '' },
+        ? {
+            base: query.base,
+            breach: query.breach.segment,
+            recover: query.recovery?.segment ?? '',
+          }
+        : {
+            base: query.no_data?.query ?? '',
+            breach: query.breach.query,
+            recover: query.recovery?.query ?? '',
+          },
     [query]
   );
 
@@ -140,13 +148,14 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
           ? {
               format: 'composed',
               base: next.base,
-              blocks: { breach: next.breach, ...(next.recover ? { recover: next.recover } : {}) },
+              breach: { segment: next.breach },
+              ...(next.recover ? { recovery: { segment: next.recover } } : {}),
             }
           : {
               format: 'standalone',
-              breach: next.breach,
-              ...(next.base ? { no_data: next.base } : {}),
-              ...(next.recover ? { recover: next.recover } : {}),
+              breach: { query: next.breach },
+              ...(next.base ? { no_data: { query: next.base } } : {}),
+              ...(next.recover ? { recovery: { query: next.recover } } : {}),
             }
       );
     },
@@ -163,8 +172,8 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   // reducer tracking flag — assembling here keeps execution correct regardless.
   const activeQuery =
     query.format === 'composed'
-      ? [query.base, query.blocks.breach].filter(Boolean).join('\n')
-      : query.breach;
+      ? [query.base, query.breach.segment].filter(Boolean).join('\n')
+      : query.breach.query;
 
   // Only fetch fields when the query has a real index pattern after FROM.
   const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(activeQuery) ? activeQuery : '';
