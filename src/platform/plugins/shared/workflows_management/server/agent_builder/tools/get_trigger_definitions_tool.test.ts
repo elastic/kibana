@@ -10,8 +10,8 @@
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { z } from '@kbn/zod/v4';
-import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import { registerGetTriggerDefinitionsTool } from './get_trigger_definitions_tool';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 
 type GetRegisteredTriggersApi = Pick<WorkflowsManagementApi, 'getRegisteredTriggers'>;
 

@@ -9,9 +9,9 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { lookupTriggerDefinitionsForAgent } from '@kbn/workflows-management-plugin/common/build_trigger_definitions_for_agent';
 import { z } from '@kbn/zod/v4';
 import { workflowTools } from '../../../common/agent_builder/constants';
+import { lookupTriggerDefinitionsForAgent } from '../../../common/build_trigger_definitions_for_agent';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 import type { AgentBuilderPluginSetupContract } from '../../types';
 
