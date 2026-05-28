@@ -158,14 +158,21 @@ const waitForHostsMeasure = async (
 };
 
 const emitHostsPerfMeasures = async (page: Page, log: ToolingLog, configName: string) => {
-  const measures = await page.evaluate(() =>
-    performance
+  const snapshot = await page.evaluate(() => ({
+    marks: performance.getEntriesByType('mark').map((m) => m.name),
+    measures: performance
       .getEntriesByType('measure')
       .filter((m) => m.name.startsWith('infra.hosts.'))
-      .map(({ name, duration }) => ({ name, duration }))
+      .map(({ name, duration }) => ({ name, duration })),
+  }));
+
+  log.info(
+    `[journey-snapshot] config=${configName} marks=${JSON.stringify(
+      snapshot.marks.filter((n) => n.startsWith('infra.hosts.'))
+    )}`
   );
 
-  for (const { name, duration } of measures) {
+  for (const { name, duration } of snapshot.measures) {
     const line = `[journey-metric] config=${configName} name=${name} duration_ms=${duration}`;
     // eslint-disable-next-line no-console
     console.log(line);
@@ -202,6 +209,15 @@ const runConfigBenchmark = async (
   });
 
   await waitForHostsMeasure(page, log, 'infra.hosts.tableReadyDuration');
+
+  // Give the KPI strip a chance to finish loading before clicking the
+  // Metrics tab. Non-fatal: if the Lens KPI tiles legitimately take >30 s
+  // (very cold cache + trendline + 1500 hosts) we still want the rest of
+  // the bench to proceed.
+  await waitForHostsMeasure(page, log, 'infra.hosts.kpiReadyDuration', {
+    timeoutMs: 30_000,
+    throwOnTimeout: false,
+  });
 
   // Metrics-tab readiness is best-effort: the mark fires only once *every*
   // Lens chart in the grid calls `onLoad(false)`. A single embeddable

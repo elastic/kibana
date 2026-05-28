@@ -13,7 +13,7 @@
 // `getSubtitle` is exported so legacy tests can assert the "Average (of N
 // hosts)" copy logic without re-mounting the whole strip.
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -34,7 +34,7 @@ import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 import { usePocSettingsContext } from '../../hooks/use_poc_settings';
-import { PERF_KEYS, perfTracker } from '../../utils/perf_tracker';
+import { PERF_KEYS, markOnce, measureSince, perfTracker } from '../../utils/perf_tracker';
 import {
   MAX_AS_FIRST_FUNCTION_PATTERN,
   AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
@@ -208,11 +208,63 @@ const LensKpiCharts = () => {
     charts: chartsForRender,
   });
 
+  // Per-tile load tracker — `infra.hosts.kpiReady` fires once all four
+  // Lens KPI embeddables have called `onLoad(false)` at least once. Mirrors
+  // the P15b `useHostsKpis` mark so the benchmark journey can compare the
+  // two render paths on the same axis. Using a `Set` (keyed by tile id)
+  // rather than a counter so we don't fire early if a single tile fires
+  // its `onLoad(false)` twice — which happens in the trendline shape
+  // because Lens emits one onLoad per layer.
+  const loadedKpiTileIdsRef = useRef<Set<string>>(new Set());
+  const kpiReadyFiredRef = useRef(false);
+  const totalKpiTiles = afterLoadedState.charts.length;
+
+  const maybeFireKpiReady = useCallback(() => {
+    if (kpiReadyFiredRef.current) return;
+    if (totalKpiTiles === 0) return;
+    if (loadedKpiTileIdsRef.current.size < totalKpiTiles) return;
+    markOnce('infra.hosts.kpiReady');
+    measureSince('infra.hosts.kpiReadyDuration', 'infra.hosts.navigationStart');
+    kpiReadyFiredRef.current = true;
+  }, [totalKpiTiles]);
+
+  // The callback always adds to the set even when `totalKpiTiles` hasn't
+  // resolved yet (initial render of `afterLoadedState.charts` is `[]`
+  // until `baseCharts` resolves). The useEffect below re-checks once
+  // `totalKpiTiles` flips from 0 → 4 so we don't miss tiles that
+  // completed during the gap.
+  const handleKpiTileLoadComplete = useCallback(
+    (id: string) => {
+      if (kpiReadyFiredRef.current) return;
+      loadedKpiTileIdsRef.current.add(id);
+      maybeFireKpiReady();
+    },
+    [maybeFireKpiReady]
+  );
+
+  useEffect(() => {
+    maybeFireKpiReady();
+  }, [maybeFireKpiReady]);
+
   // Mirror the upstream `<HostKpiCharts>` neutral-empty / error fallback:
   // when the page has loaded but no hosts matched (or the list endpoint
   // erroed), render four placeholder panels in place of the embeddables
   // so reviewers see the same UX on every toggle path.
-  if (!loading && (!hasData || error)) {
+  const isEmptyOrError = !loading && (!hasData || error);
+
+  // For the empty/error path the placeholders don't have an `onLoad` cycle.
+  // Mark the strip as "ready" anyway so the benchmark journey doesn't hang
+  // waiting for a signal that will never arrive — semantically the strip
+  // *has* finished rendering, just with no data.
+  useEffect(() => {
+    if (isEmptyOrError && !kpiReadyFiredRef.current) {
+      markOnce('infra.hosts.kpiReady');
+      measureSince('infra.hosts.kpiReadyDuration', 'infra.hosts.navigationStart');
+      kpiReadyFiredRef.current = true;
+    }
+  }, [isEmptyOrError]);
+
+  if (isEmptyOrError) {
     return (
       <>
         {afterLoadedState.charts.map((chartProps: KpiLensConfig) => (
@@ -249,6 +301,7 @@ const LensKpiCharts = () => {
             lastReloadRequestTime={afterLoadedState.reloadRequestTime}
             loading={loading}
             perfEnabled={useLensEsqlKpiCharts}
+            onLoadComplete={handleKpiTileLoadComplete}
             valueOverride={metricDataAvailability?.[chartProps.id] === false ? NaN : undefined}
           />
         </EuiFlexItem>
@@ -270,6 +323,7 @@ const KpiCell: React.FC<{
   lastReloadRequestTime?: number;
   loading: boolean;
   perfEnabled: boolean;
+  onLoadComplete: (id: string) => void;
   valueOverride?: number;
 }> = ({
   chart,
@@ -279,6 +333,7 @@ const KpiCell: React.FC<{
   lastReloadRequestTime,
   loading,
   perfEnabled,
+  onLoadComplete,
   valueOverride,
 }) => {
   // Track the most recent mount-start so we can attribute a wall-time to
@@ -291,18 +346,27 @@ const KpiCell: React.FC<{
 
   const handleOnLoad = useCallback(
     (isLoading: boolean) => {
-      if (!perfEnabled) return;
       if (isLoading) {
-        startedAt.current = performance.now();
+        if (perfEnabled) {
+          startedAt.current = performance.now();
+        }
         return;
       }
+
+      // Always notify the parent strip on `loaded` so the
+      // `infra.hosts.kpiReady` mark fires regardless of the perf-overlay
+      // toggle. The strip dedupes by tile id; re-entries from Lens
+      // (trendline emits one onLoad per layer) are harmless.
+      onLoadComplete(chart.id);
+
+      if (!perfEnabled) return;
       if (startedAt.current !== null) {
         const duration = performance.now() - startedAt.current;
         perfTracker.record(PERF_KEYS.lensEsqlKpi, duration, { tile: chart.id });
         startedAt.current = null;
       }
     },
-    [perfEnabled, chart.id]
+    [perfEnabled, chart.id, onLoadComplete]
   );
 
   return (
@@ -313,7 +377,7 @@ const KpiCell: React.FC<{
       query={query}
       lastReloadRequestTime={lastReloadRequestTime}
       loading={loading}
-      onLoad={perfEnabled ? handleOnLoad : undefined}
+      onLoad={handleOnLoad}
       valueOverride={valueOverride}
     />
   );
