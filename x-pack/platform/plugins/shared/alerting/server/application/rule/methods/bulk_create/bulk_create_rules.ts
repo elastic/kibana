@@ -40,6 +40,7 @@ import {
   demotePreparedRules,
   flushKeysToInvalidate,
   prepareRule,
+  preValidate,
 } from './utils';
 
 export async function bulkCreateRules<Params extends RuleParams = never>(
@@ -72,17 +73,38 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
 
   const username = await context.getUserName();
   const actionsClient = await context.getActionsClient();
-
   const successfulIds: string[] = [];
   const errors: BulkCreateOperationError[] = [];
 
-  const totalBatches = Math.ceil(total / batchSize);
-  logger.debug(`bulkCreateRules: ${total} rules, ${totalBatches}x batches of ${batchSize} rules.`);
+  const inputs = rules.map((rule) => ({
+    id: rule.options?.id ?? SavedObjectsUtils.generateId(),
+    rule,
+  }));
+
+  // Phase A: Validate in-memory (schema, rule type enabled, check params, etc...). Then authorize consumer/alertTypeId pairs.
+  const { validated, errors: validationErrors } = await preValidate({ context, inputs });
+  errors.push(...validationErrors);
+
+  if (validationErrors.length > 0 && exitEarlyOnError) {
+    logger.warn(
+      `bulkCreateRules: exiting early on preValidate; ${validationErrors.length} rule(s) failed pre-flight, zero ES writes.`
+    );
+    return { successfulIds, errors, total };
+  }
+  if (validated.length === 0) {
+    return { successfulIds, errors, total };
+  }
+
+  const totalBatches = Math.ceil(validated.length / batchSize);
+  logger.debug(
+    `bulkCreateRules: ${total} input(s), ${validated.length} validated after preValidate, ${totalBatches}x batches of ${batchSize}.`
+  );
 
   for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
     const start = batchIndex * batchSize;
-    const batch = rules.slice(start, start + batchSize);
+    const batch = validated.slice(start, start + batchSize);
 
+    // Phase B: per-batch ES writes.
     const result = await runBatch<Params>({
       context,
       username,
@@ -99,7 +121,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
           batchIndex + 1
         }/${totalBatches}. ` +
           `${successfulIds.length} rule(s) created, ${
-            total - start - batch.length
+            validated.length - start - batch.length
           } rule(s) skipped.`
       );
       break;
@@ -113,7 +135,7 @@ interface RunBatchArgs<Params extends RuleParams> {
   context: RulesClientContext;
   username: string | null;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
-  batch: Array<BulkCreateRulesItem<Params>>;
+  batch: Array<{ id: string; rule: BulkCreateRulesItem<Params> }>;
 }
 
 async function runBatch<Params extends RuleParams>({
@@ -124,23 +146,16 @@ async function runBatch<Params extends RuleParams>({
 }: RunBatchArgs<Params>): Promise<BatchResult> {
   const { logger } = context;
 
-  const inputsWithIds = batch.map((rule) => ({
-    id: rule.options?.id ?? SavedObjectsUtils.generateId(),
-    rule,
-  }));
-
-  // Phase 1: per-rule prepare (validation + api key generation).
   // NOTE: in order to minimise external calls, the values below get mutated
-  // at different stages in the process (ie if we fail schedule creation),
-  // so that we invalidate keys and create rule SOs in a single batch at the end.
+  // at different stages in the process (ie if we fail schedule creation).
   const preparedRules = new Map<string, PreparedRule>();
   const keysToInvalidate = new Set<string>();
   const apiKeysMap = new Map<string, ApiKeyEntry>();
   const errors: BulkCreateOperationError[] = [];
-  const authzCache = new Map<string, Promise<void>>();
 
+  // Phase B1: per-rule prepare (high latency validation + API key generation).
   await pMap(
-    inputsWithIds,
+    batch,
     async ({ id, rule }) => {
       const { prepared, error } = await prepareRule({
         context,
@@ -148,7 +163,6 @@ async function runBatch<Params extends RuleParams>({
         username,
         id,
         rule,
-        authzCache,
         errors,
         apiKeysMap,
       });
@@ -164,14 +178,16 @@ async function runBatch<Params extends RuleParams>({
     return { successfulIds: [], errors, soFailureOccurred: false };
   }
 
-  // Phase 2: validate schedule-limits, enabled subset only.
+  // Phase B2: check schedule-limit on the enabled subset; demote on overflow.
   const enabled = [...preparedRules.values()].filter((p) => p.enabled);
 
   if (enabled.length > 0) {
-    const updatedInterval = enabled.map((r) => r.schedule.interval);
-    const validationPayload = await validateScheduleLimit({ context, updatedInterval });
-    const enabledIds = enabled.map((p) => p.id);
+    const validationPayload = await validateScheduleLimit({
+      context,
+      updatedInterval: enabled.map((r) => r.schedule.interval),
+    });
     if (validationPayload) {
+      const enabledIds = enabled.map((p) => p.id);
       const reasonMessage = getRuleCircuitBreakerErrorMessage({
         interval: validationPayload.interval,
         intervalAvailable: validationPayload.intervalAvailable,
@@ -192,7 +208,7 @@ async function runBatch<Params extends RuleParams>({
     }
   }
 
-  // Phase 3: schedule tasks for the surviving enabled subset.
+  // Phase B3: schedule tasks for the surviving enabled subset.
   const survivingEnabled = [...preparedRules.values()].filter((p) => p.enabled);
   const newlyScheduledTaskIds = new Set<string>();
 
@@ -262,7 +278,7 @@ async function runBatch<Params extends RuleParams>({
     );
   }
 
-  // Phase 4: bulk SO create (no overwrite — id collisions surface as per-row 409)
+  // Phase B4: bulk SO create (no overwrite — id collisions surface as per-row 409).
   const bulkObjects: Array<SavedObjectsBulkCreateObject<RawRule>> = [...preparedRules.values()].map(
     (prepared) => ({
       type: RULE_SAVED_OBJECT_TYPE,
@@ -306,7 +322,7 @@ async function runBatch<Params extends RuleParams>({
     return { successfulIds: [], errors, soFailureOccurred: true };
   }
 
-  // Phase 4 per-row outcomes.
+  // Phase B4 per-row outcomes.
   const batchSuccessfulIds: string[] = [];
   const taskIdsToCleanUp: string[] = [];
   let perRowFailureOccurred = false;
@@ -325,7 +341,7 @@ async function runBatch<Params extends RuleParams>({
         for (const k of collectNewKeysToInvalidate([apiKey])) keysToInvalidate.add(k);
       }
 
-      // Only ids we scheduled in Phase 3. Skipping caller-supplied id collisions
+      // Only ids we scheduled in Phase B3. Skipping caller-supplied id collisions
       // avoids nuking a pre-existing rule's task on a 409.
       if (newlyScheduledTaskIds.has(so.id)) {
         taskIdsToCleanUp.push(so.id);

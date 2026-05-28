@@ -36,7 +36,6 @@ export interface PrepareRuleArgs<Params extends RuleParams> {
   username: string | null;
   id: string;
   rule: BulkCreateRulesItem<Params>;
-  authzCache: Map<string, Promise<void>>;
   errors: BulkCreateOperationError[];
   apiKeysMap: Map<string, ApiKeyEntry>;
 }
