@@ -12,17 +12,30 @@ import type { DlmPhasesFlyoutFormInternal } from './types';
 
 export const getDlmPhasesFlyoutFormSchema = (): z.ZodType<DlmPhasesFlyoutFormInternal> => {
   const preservedTimeUnitSchema = z.enum(PRESERVED_TIME_UNITS);
+  const maxAfterValueChars = 100;
 
   const schema: z.ZodType<DlmPhasesFlyoutFormInternal> = z
     .object({
       frozen: z.object({
         enabled: z.boolean(),
-        afterValue: z.string(),
+        afterValue: z.string().max(
+          maxAfterValueChars,
+          i18n.translate('xpack.streams.editDlmPhasesFlyout.afterValueMaxLength', {
+            defaultMessage: 'Must be {max} characters or less.',
+            values: { max: maxAfterValueChars },
+          })
+        ),
         afterUnit: preservedTimeUnitSchema,
       }),
       delete: z.object({
         enabled: z.boolean(),
-        afterValue: z.string(),
+        afterValue: z.string().max(
+          maxAfterValueChars,
+          i18n.translate('xpack.streams.editDlmPhasesFlyout.afterValueMaxLength', {
+            defaultMessage: 'Must be {max} characters or less.',
+            values: { max: maxAfterValueChars },
+          })
+        ),
         afterUnit: preservedTimeUnitSchema,
       }),
     })
