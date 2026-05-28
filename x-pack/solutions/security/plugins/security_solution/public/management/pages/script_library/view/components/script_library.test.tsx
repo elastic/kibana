@@ -136,6 +136,12 @@ describe('ScriptLibrary', () => {
       render();
       const { getByText, getByTestId } = renderResult;
 
+      expect(getByTestId('test-header')).toBeInTheDocument();
+      expect(getByTestId('header-page-title').textContent).toEqual('Script Library');
+      expect(getByTestId('header-panel-subtitle').textContent).toEqual(
+        'Upload and manage scripts to use with the runscript response action on endpoints protected by Elastic Defend.'
+      );
+      expect(getByTestId('test-upload-script-button')).toBeInTheDocument();
       expect(getByTestId('test-no-data-empty-prompt')).toBeInTheDocument();
       expect(getByText('Add your first script')).toBeInTheDocument();
       expect(getByTestId('test-no-data-empty-prompt-upload-button')).toBeInTheDocument();
