@@ -67,7 +67,7 @@ export const useConversationListMutations = ({
   const listQueryKey = useMemo(() => queryKeys.conversations.byAgent(agentId), [agentId]);
 
   const updateReadStatus = useCallback(
-    async (conversationId: string, read: boolean) => {
+    (conversationId: string, read: boolean) => {
       queryClient.setQueryData<ConversationWithoutRounds[]>(listQueryKey, (current) => {
         if (!current) return current;
         return produce(current, (draft) => {
@@ -78,11 +78,9 @@ export const useConversationListMutations = ({
         });
       });
 
-      try {
-        await conversationsService.updateReadStatus({ conversationId, read });
-      } catch {
-        queryClient.invalidateQueries({ queryKey: listQueryKey });
-      }
+      conversationsService
+        .updateReadStatus({ conversationId, read })
+        .catch(() => void queryClient.invalidateQueries({ queryKey: listQueryKey }));
     },
     [conversationsService, queryClient, listQueryKey]
   );
