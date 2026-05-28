@@ -423,7 +423,7 @@ export const RuleDetailsPage = connector(
         ) : ruleLoading ? (
           <EuiLoadingSpinner size="m" />
         ) : null,
-      [rule, ruleLoading]
+      [rule, ruleLoading, isRuleChangesHistoryEnabled]
     );
 
     // Callback for when open/closed filter changes
