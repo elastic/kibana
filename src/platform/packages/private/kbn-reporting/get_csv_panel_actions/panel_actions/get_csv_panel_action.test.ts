@@ -131,7 +131,7 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_v2', {
-      browserTimezone: undefined,
+      browserTimezone: 'America/Los_Angeles',
       locatorParams: [
         {
           id: 'DISCOVER_APP_LOCATOR',
@@ -173,7 +173,7 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_v2', {
-      browserTimezone: undefined,
+      browserTimezone: 'America/Los_Angeles',
       locatorParams: [
         {
           id: 'DISCOVER_APP_LOCATOR',
@@ -203,7 +203,7 @@ describe('GetCsvReportPanelAction', () => {
     await panel.execute(context);
 
     expect(core.http.post).toHaveBeenCalledWith('/internal/reporting/generate/csv_v2', {
-      body: '{"jobParams":"(locatorParams:!((id:DISCOVER_APP_LOCATOR,params:(columns:!()))),objectType:search,title:\'embeddable title\',version:\'9.2.0\')"}',
+      body: '{"jobParams":"(browserTimezone:America/Los_Angeles,locatorParams:!((id:DISCOVER_APP_LOCATOR,params:(columns:!()))),objectType:search,title:\'embeddable title\',version:\'9.2.0\')"}',
       method: 'POST',
     });
   });

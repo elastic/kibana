@@ -9,7 +9,7 @@
 
 import type { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { DataViewsService, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import type { LocatorServicesDeps as Services } from '.';
 import { timeFieldNameFromLocatorFactory } from './time_field_name_from_locator';
@@ -31,6 +31,7 @@ beforeAll(async () => {
     searchSourceStart,
     savedObjects: soClient,
     uiSettings: uiSettingsClient,
+    dataViewsService: {} as DataViewsService,
   };
 });
 
