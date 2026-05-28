@@ -52,8 +52,14 @@ import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../ser
 import type { PackagePolicyValidationResults } from '../../services';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../common/constants/epm';
 
-import { PackagePolicyInputVarField, VarGroupSelector, useVarGroupSelections } from './components';
+import {
+  PackagePolicyConditionField,
+  PackagePolicyInputVarField,
+  VarGroupSelector,
+  useVarGroupSelections,
+} from './components';
 import { useOutputs } from './components/hooks';
 import { useNamespaceCustomization } from './use_namespace_customization';
 
@@ -99,6 +105,12 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     const varGroups =
       enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
+
+    const isAgentless =
+      (isEditPage || isAgentlessSelected) && Boolean(packagePolicy.supports_agentless);
+    const allInputsAreOtel =
+      packagePolicy.inputs.length > 0 &&
+      packagePolicy.inputs.every((i) => i.type === OTEL_COLLECTOR_INPUT_TYPE);
 
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
@@ -757,6 +769,17 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       </EuiFlexItem>
                     );
                   })}
+                  {/* Integration-level condition — hidden for agentless and all-otelcol */}
+                  {!isAgentless && !allInputsAreOtel && (
+                    <EuiFlexItem>
+                      <PackagePolicyConditionField
+                        value={packagePolicy.condition ?? ''}
+                        onChange={(v) => updatePackagePolicy({ condition: v })}
+                        isInvalid={submitAttempted && Boolean(validationResults?.condition)}
+                        errors={validationResults?.condition ?? null}
+                      />
+                    </EuiFlexItem>
+                  )}
                   {/* Custom fields — agentless only */}
                   {isAgentlessSelected && (
                     <EuiFlexItem>
