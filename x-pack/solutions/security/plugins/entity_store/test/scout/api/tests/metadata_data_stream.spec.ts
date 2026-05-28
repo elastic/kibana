@@ -88,11 +88,10 @@ apiTest.describe(
         });
         expect(pipelineResponse[METADATA_INGEST_PIPELINE]).toBeDefined();
 
-        // Indexing a doc through the pipeline sets event.ingested even when
-        // the source omits it.
+        // The datastream's default_pipeline must auto-run on index, populating
+        // event.ingested without the caller naming the pipeline explicitly.
         await esClient.index({
           index: METADATA_DATA_STREAM,
-          pipeline: METADATA_INGEST_PIPELINE,
           op_type: 'create',
           refresh: 'wait_for',
           body: {

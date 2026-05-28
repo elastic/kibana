@@ -16,6 +16,7 @@ import {
   getEntitiesAlias,
 } from '../../../common/domain/entity_index';
 import { getMetadataComponentTemplateName } from './metadata_component_templates';
+import { getMetadataIndexIngestPipelineId } from './metadata_index_ingest_pipeline';
 
 const DATA_RETENTION_PERIOD = '90d';
 
@@ -58,6 +59,7 @@ export const getMetadataEntityIndexTemplateConfig = (
     settings: {
       index: {
         codec: 'best_compression',
+        default_pipeline: getMetadataIndexIngestPipelineId(namespace),
         mapping: { total_fields: { limit: 2000 } },
       },
     },

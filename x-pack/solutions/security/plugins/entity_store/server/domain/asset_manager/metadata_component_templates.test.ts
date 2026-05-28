@@ -30,10 +30,6 @@ describe('EMH Phase 1 — getMetadataComponentTemplate', () => {
       expect(template.name).toBe(getMetadataComponentTemplateName(namespace));
     });
 
-    it('disables date_detection (matches updates index template)', () => {
-      expect(mappings?.date_detection).toBe(false);
-    });
-
     it('maps @timestamp as date', () => {
       expect(properties['@timestamp']).toEqual(expect.objectContaining({ type: 'date' }));
     });

@@ -10,6 +10,7 @@ import {
   getMetadataIndexTemplateId,
   getMetadataEntityIndexTemplateConfig,
 } from './metadata_index_template';
+import { getMetadataIndexIngestPipelineId } from './metadata_index_ingest_pipeline';
 
 describe('EMH Phase 1 — getMetadataEntityIndexTemplateConfig', () => {
   const namespace = 'default';
@@ -53,6 +54,13 @@ describe('EMH Phase 1 — getMetadataEntityIndexTemplateConfig', () => {
       expect(settings.lifecycle).toBeUndefined();
       expect(settings['index.lifecycle.name']).toBeUndefined();
       expect(settings.index?.lifecycle).toBeUndefined();
+    });
+
+    it('wires the metadata ingest pipeline as default_pipeline', () => {
+      const settings = (config.template?.settings ?? {}) as {
+        index?: { default_pipeline?: string };
+      };
+      expect(settings.index?.default_pipeline).toBe(getMetadataIndexIngestPipelineId(namespace));
     });
 
     it('disables date_detection on the template mappings', () => {
