@@ -116,6 +116,7 @@ dependsOn:
   - '@kbn/workflows-yaml'
   - '@kbn/workflows-ui'
   - '@kbn/datemath'
+  - '@kbn/triggers-actions-ui-plugin'
 tags:
   - plugin
   - prod
