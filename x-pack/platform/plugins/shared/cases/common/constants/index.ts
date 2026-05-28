@@ -272,7 +272,9 @@ export const SEARCH_DEBOUNCE_MS = 500;
  */
 export const LOCAL_STORAGE_KEYS = {
   casesTableColumns: 'cases.list.tableColumns',
+  casesListFields: 'cases.list.fields',
   casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
+  casesViewMode: 'cases.list.viewMode',
   casesTableState: 'cases.list.state',
   templatesTableState: 'templates.list.state',
   templatesYamlEditorCreateState: 'templates.yaml.editor.create',
