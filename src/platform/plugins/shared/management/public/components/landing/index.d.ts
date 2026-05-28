@@ -1,1 +1,0 @@
-export { ManagementLandingPage } from './landing';
