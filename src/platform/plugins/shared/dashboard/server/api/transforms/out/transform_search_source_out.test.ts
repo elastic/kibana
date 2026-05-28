@@ -7,6 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import * as filterTransformModule from '@kbn/as-code-filters-transforms';
+import * as sharedTransformsModule from '@kbn/as-code-shared-transforms';
+jest.mock('@kbn/as-code-filters-transforms', () => {
+  return {
+    __esModule: true,
+    ...jest.requireActual('@kbn/as-code-filters-transforms'),
+  };
+});
+jest.mock('@kbn/as-code-shared-transforms', () => {
+  return {
+    __esModule: true,
+    ...jest.requireActual('@kbn/as-code-shared-transforms'),
+  };
+});
+
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformSearchSourceOut } from './transform_search_source_out';
 
@@ -43,6 +58,42 @@ describe('transformSearchSourceOut', () => {
     });
   });
 
+  it('drops any invalid filters', () => {
+    jest.spyOn(filterTransformModule, 'fromStoredFilters').mockImplementationOnce((val: any) => {
+      // `fromStoredFilters` is **too** type safe so we have to allow invalid filters through
+      return val;
+    });
+
+    const meta = {
+      searchSourceJSON: JSON.stringify({
+        filter: [
+          { type: 'condition', condition: { field: 'valid', operator: 'is', value: true } },
+          {
+            invalidFilter: true,
+          },
+          {
+            anotherInvalidFilter: 'yup',
+          },
+        ],
+      }),
+    };
+    const result = transformSearchSourceOut(meta, references, getDashboardStateSchema(false));
+
+    expect(result).toEqual({
+      filters: [{ type: 'condition', condition: { field: 'valid', operator: 'is', value: true } }],
+      query: undefined,
+      warnings: [
+        {
+          type: 'dropped_property',
+          key: 'filters',
+          message:
+            'Unexpected error transforming filter state on read. Error: [filters.1]: "type" property is required',
+          value: [{ invalidFilter: true }, { anotherInvalidFilter: 'yup' }],
+        },
+      ],
+    });
+  });
+
   it('returns empty object if searchSourceJSON is missing', () => {
     expect(transformSearchSourceOut({}, [], getDashboardStateSchema(false))).toEqual({
       warnings: [],
@@ -68,6 +119,32 @@ describe('transformSearchSourceOut', () => {
       filters: [{ type: 'dsl', dsl: { query: { foo: 'bar' } } }],
       query: { expression: 'test', language: 'kql' },
       warnings: [],
+    });
+  });
+
+  it('drops invalid query', () => {
+    jest.spyOn(sharedTransformsModule, 'toAsCodeQuery').mockImplementationOnce((val: any) => {
+      // `toAsCodeQuery` is **too** type safe so we have to allow invalid query through
+      return val;
+    });
+    const meta = {
+      searchSourceJSON: JSON.stringify({
+        query: { query: { invalid: true } },
+      }),
+    };
+    const result = transformSearchSourceOut(meta, references, getDashboardStateSchema(false));
+    expect(result).toEqual({
+      filters: [],
+      query: undefined,
+      warnings: [
+        {
+          type: 'dropped_property',
+          key: 'query',
+          message:
+            "Unexpected error transforming query state on read. Error: [query.query]: Additional properties are not allowed ('query' was unexpected)",
+          value: { language: 'lucene', query: { query: { invalid: true } } },
+        },
+      ],
     });
   });
 });

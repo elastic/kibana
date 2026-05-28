@@ -83,8 +83,8 @@ export function transformSearchSourceOut(
   }
 
   let query: AsCodeQuery | undefined;
+  const storedQuery = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
   try {
-    const storedQuery = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
     query = strictValidationSchema.validateKey('query', toAsCodeQuery(storedQuery));
   } catch (error) {
     const warningMessage = `Unexpected error transforming query state on read. Error: ${error.message}`;
@@ -93,7 +93,7 @@ export function transformSearchSourceOut(
       type: 'dropped_property',
       message: warningMessage,
       key: 'query',
-      value: query,
+      value: storedQuery,
     });
   }
 
