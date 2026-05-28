@@ -73,6 +73,6 @@ export const SENTINEL_DEFAULT_QUERY_FREQUENCY = '1m';
  *
  * P1M = 1 month
  * PT1M = 1 minute
- **/
+ */
 export const ISO_8601_DURATION_PATTERN =
   /^P(?=\d|T\d)(?:(?<years>\d+)Y)?(?:(?<months>\d+)M)?(?:(?<days>\d+)D)?(?:T(?=\d)(?:(?<hours>\d+)H)?(?:(?<minutes>\d+)M)?(?:(?<seconds>\d+)S)?)?$/;
