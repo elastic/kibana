@@ -190,4 +190,59 @@ describe('useAttackDetails', () => {
 
     expect(result.current.attack).toBeNull();
   });
+
+  describe('deduplication', () => {
+    const getSkipFalseCallCount = () =>
+      useTimelineEventsDetails.mock.calls.filter((call) => call[0]?.skip === false).length;
+
+    it('deduplicates two hooks against the same key so only one underlying search runs', () => {
+      renderHook(() => useAttackDetails(buildHit('attack-1', '.alerts-default')));
+      renderHook(() => useAttackDetails(buildHit('attack-1', '.alerts-default')));
+
+      expect(useTimelineEventsDetails).toHaveBeenCalledTimes(2);
+      expect(getSkipFalseCallCount()).toBe(1);
+      expect(useTimelineEventsDetails.mock.calls.some((call) => call[0]?.skip === true)).toBe(true);
+    });
+
+    it('clears the cache when the last subscriber unmounts', () => {
+      const first = renderHook(() => useAttackDetails(buildHit('attack-1', '.alerts-default')));
+      const second = renderHook(() => useAttackDetails(buildHit('attack-1', '.alerts-default')));
+
+      first.unmount();
+      second.unmount();
+
+      useTimelineEventsDetails.mockClear();
+
+      renderHook(() => useAttackDetails(buildHit('attack-1', '.alerts-default')));
+
+      expect(useTimelineEventsDetails).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: false,
+        })
+      );
+    });
+
+    it('hands off primary responsibility when the primary unmounts', () => {
+      const primary = renderHook(() => useAttackDetails(buildHit('attack-1', '.alerts-default')));
+      const secondary = renderHook(() => useAttackDetails(buildHit('attack-1', '.alerts-default')));
+
+      expect(getSkipFalseCallCount()).toBe(1);
+
+      primary.unmount();
+      secondary.rerender();
+
+      expect(useTimelineEventsDetails).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          skip: false,
+        })
+      );
+    });
+
+    it('does not deduplicate hooks with different cache keys', () => {
+      renderHook(() => useAttackDetails(buildHit('attack-1', '.alerts-default')));
+      renderHook(() => useAttackDetails(buildHit('attack-2', '.alerts-default')));
+
+      expect(getSkipFalseCallCount()).toBe(2);
+    });
+  });
 });

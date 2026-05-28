@@ -160,6 +160,21 @@ export interface SecuritySolutionIOCFlyoutFooterFeature {
   renderFooter: (props: DocViewRenderProps) => JSX.Element;
 }
 
+export interface SecuritySolutionAttackFlyoutOverviewTabFeature {
+  id: 'security-solution-attack-flyout-overview-tab';
+  render: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionAttackFlyoutHeaderTitleFeature {
+  id: 'security-solution-attack-flyout-header-title';
+  renderHeader: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionAttackFlyoutFooterFeature {
+  id: 'security-solution-attack-flyout-footer';
+  renderFooter: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
+}
+
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
   | SecuritySolutionAlertFlyoutOverviewTabFeature
@@ -167,7 +182,10 @@ export type SecuritySolutionFeature =
   | SecuritySolutionAlertFlyoutFooterFeature
   | SecuritySolutionIOCFlyoutOverviewTabFeature
   | SecuritySolutionIOCFlyoutHeaderFeature
-  | SecuritySolutionIOCFlyoutFooterFeature;
+  | SecuritySolutionIOCFlyoutFooterFeature
+  | SecuritySolutionAttackFlyoutOverviewTabFeature
+  | SecuritySolutionAttackFlyoutHeaderTitleFeature
+  | SecuritySolutionAttackFlyoutFooterFeature;
 
 /** ****************************************************************************************/
 

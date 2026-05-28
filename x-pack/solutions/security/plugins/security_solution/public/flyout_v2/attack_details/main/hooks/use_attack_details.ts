@@ -13,7 +13,7 @@ import {
   transformAttackDiscoveryAlertFromApi,
   type AttackDiscoveryAlertDocument,
 } from '@kbn/elastic-assistant-common';
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { SearchHit } from '../../../../../common/search_strategy';
 
@@ -23,6 +23,7 @@ import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import type { GetFieldsData } from '../../../../flyout/document_details/shared/hooks/use_get_fields_data';
 import { useGetFieldsData } from '../../../../flyout/document_details/shared/hooks/use_get_fields_data';
+import { useAttackDetailsSubscription } from './attack_details_cache';
 
 export interface UseAttackDetailsResult {
   /**
@@ -67,22 +68,71 @@ export interface UseAttackDetailsResult {
  * builds it as the composite `${_index}::${_id}::${_routing}` key, which
  * does not match anything when sent as `terms: { _id: [...] }` to the
  * timeline-details search strategy.
+ *
+ * Multiple components mounted with the same `(indexName, attackId)` are
+ * deduplicated through {@link useAttackDetailsSubscription}: only the
+ * primary subscriber's `useTimelineEventsDetails` actually runs the search;
+ * the rest read the published snapshot from the cache. When the primary
+ * unmounts, the next-in-order is promoted and re-renders to start its own
+ * search.
  */
 export const useAttackDetails = (hit: DataTableRecord): UseAttackDetailsResult => {
   const attackId = hit.raw._id ?? '';
   const indexName = hit.raw._index ?? '';
+
+  const { isPrimary, cachedSnapshot, publishSnapshot } = useAttackDetailsSubscription(
+    indexName,
+    attackId
+  );
+
   const pageScope = PageScope.attacks;
   const { dataView } = useDataView(pageScope);
   const browserFields = useBrowserFields(pageScope);
-
   const runtimeMappings = dataView?.getRuntimeMappings() as RunTimeMappings;
 
-  const [loading, dataFormattedForFieldBrowser, searchHit, , refetch] = useTimelineEventsDetails({
-    indexName,
-    eventId: attackId,
-    runtimeMappings,
-    skip: !attackId,
-  });
+  const [primaryLoading, primaryDataFormattedForFieldBrowser, primarySearchHit, , primaryRefetch] =
+    useTimelineEventsDetails({
+      indexName,
+      eventId: attackId,
+      runtimeMappings,
+      skip: !attackId || !isPrimary,
+    });
+
+  // The primary publishes its latest values so secondaries can read them.
+  useEffect(() => {
+    if (!isPrimary) {
+      return;
+    }
+    publishSnapshot({
+      loading: primaryLoading,
+      dataFormattedForFieldBrowser: primaryDataFormattedForFieldBrowser,
+      searchHit: primarySearchHit,
+      refetch: primaryRefetch,
+    });
+  }, [
+    isPrimary,
+    primaryDataFormattedForFieldBrowser,
+    primaryLoading,
+    primaryRefetch,
+    primarySearchHit,
+    publishSnapshot,
+  ]);
+
+  const loading = isPrimary ? primaryLoading : cachedSnapshot?.loading ?? true;
+  const dataFormattedForFieldBrowser = isPrimary
+    ? primaryDataFormattedForFieldBrowser
+    : cachedSnapshot?.dataFormattedForFieldBrowser ?? null;
+  const searchHit = isPrimary ? primarySearchHit : cachedSnapshot?.searchHit;
+
+  const refetch = useCallback(async () => {
+    if (isPrimary) {
+      await primaryRefetch();
+      return;
+    }
+    if (cachedSnapshot?.refetch) {
+      await cachedSnapshot.refetch();
+    }
+  }, [cachedSnapshot, isPrimary, primaryRefetch]);
 
   const attack = useMemo(() => {
     const source = searchHit?._source;

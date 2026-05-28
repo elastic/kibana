@@ -25,6 +25,9 @@ import type {
   SecuritySolutionAlertFlyoutFooterFeature,
   SecuritySolutionAlertFlyoutHeaderTitleFeature,
   SecuritySolutionAlertFlyoutOverviewTabFeature,
+  SecuritySolutionAttackFlyoutFooterFeature,
+  SecuritySolutionAttackFlyoutHeaderTitleFeature,
+  SecuritySolutionAttackFlyoutOverviewTabFeature,
   SecuritySolutionCellRendererFeature,
   SecuritySolutionIOCFlyoutFooterFeature,
   SecuritySolutionIOCFlyoutHeaderFeature,
@@ -603,6 +606,85 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     };
     discoverFeatureRegistry.register(iocFlyoutHeaderFeature);
+
+    const LazyAttackFlyoutHeader = React.lazy(async () => {
+      const { AttackFlyoutHeader } = await this.getLazyDiscoverSharedDeps();
+      return { default: AttackFlyoutHeader };
+    });
+
+    const attackFlyoutHeaderFeature: SecuritySolutionAttackFlyoutHeaderTitleFeature = {
+      id: 'security-solution-attack-flyout-header-title',
+      renderHeader: ({ hit, onAlertUpdated }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAttackFlyoutHeader
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              onAlertUpdated={onAlertUpdated}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(attackFlyoutHeaderFeature);
+
+    const LazyAttackFlyoutOverviewTab = React.lazy(async () => {
+      const { AttackFlyoutOverviewTab } = await this.getLazyDiscoverSharedDeps();
+      return { default: AttackFlyoutOverviewTab };
+    });
+
+    const attackFlyoutOverviewTabFeature: SecuritySolutionAttackFlyoutOverviewTabFeature = {
+      id: 'security-solution-attack-flyout-overview-tab',
+      render: ({ hit, onAlertUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAttackFlyoutOverviewTab
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              onAlertUpdated={onAlertUpdated}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(attackFlyoutOverviewTabFeature);
+
+    const LazyAttackFlyoutFooter = React.lazy(async () => {
+      const { AttackFlyoutFooter } = await this.getLazyDiscoverSharedDeps();
+      return { default: AttackFlyoutFooter };
+    });
+
+    const attackFlyoutFooterFeature: SecuritySolutionAttackFlyoutFooterFeature = {
+      id: 'security-solution-attack-flyout-footer',
+      renderFooter: ({ hit, onAlertUpdated }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAttackFlyoutFooter
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              onAlertUpdated={onAlertUpdated}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(attackFlyoutFooterFeature);
   }
 
   public async getLazyDiscoverSharedDeps() {
