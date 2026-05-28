@@ -944,6 +944,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       uninstallAgent: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/uninstall-elastic-agent`,
       installAndUninstallIntegrationAssets: `${ELASTIC_DOCS}reference/fleet/install-uninstall-integration-assets`,
       elasticAgentInputConfiguration: `${ELASTIC_DOCS}reference/fleet/elastic-agent-input-configuration`,
+      elasticAgentInputConditions: `${ELASTIC_DOCS}reference/fleet/dynamic-input-configuration#conditions`,
       policySecrets: `${ELASTIC_DOCS}reference/fleet/agent-policy#agent-policy-secret-values`,
       remoteESOoutput: `${ELASTIC_DOCS}reference/fleet/remote-elasticsearch-output`,
       performancePresets: `${ELASTIC_DOCS}reference/fleet/es-output-settings#es-output-settings-performance-tuning-settings`,

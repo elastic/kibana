@@ -581,6 +581,7 @@ export interface DocLinks {
     uninstallAgent: string;
     installAndUninstallIntegrationAssets: string;
     elasticAgentInputConfiguration: string;
+    elasticAgentInputConditions: string;
     policySecrets: string;
     remoteESOoutput: string;
     performancePresets: string;
