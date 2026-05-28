@@ -168,7 +168,7 @@ export const initRoutes = (
   registerTrialCompanionRoutes(trialCompanionDeps);
 
   registerInitializationRoutes({ router, logger });
-  registerAlertAnalysisRoutes(router);
+  registerAlertAnalysisRoutes(router, logger);
 
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);

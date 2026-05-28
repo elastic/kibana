@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  extractSourceEntitiesFromAlert,
+  RELATED_ALERT_ENTITY_SOURCE_INCLUDES,
+  RELATED_ALERT_SOURCE_ALLOWLIST,
+  trimEntityValues,
+  type SourceEntities,
+} from './find_related_alerts_entity_utils';
+import { getErrorMessage, isElasticsearchNotFoundError } from './find_related_alerts_es_errors';
 
-export interface SourceEntities {
-  hostNames: string[];
-  userNames: string[];
-  sourceIps: string[];
-  destIps: string[];
-}
+export type { SourceEntities } from './find_related_alerts_entity_utils';
 
 export interface FindRelatedAlertsParams {
   alertId: string;
@@ -23,6 +26,7 @@ export interface FindRelatedAlertsParams {
   userNames?: string[];
   sourceIps?: string[];
   destIps?: string[];
+  logger?: Logger;
 }
 
 interface RelatedAlertDocument extends Record<string, unknown> {
@@ -40,9 +44,12 @@ export interface FindRelatedAlertsSuccess {
   isTruncated: boolean;
 }
 
+export type FindRelatedAlertsFailureReason = 'alert_not_found' | 'search_failed';
+
 export interface FindRelatedAlertsError {
   ok: false;
   message: string;
+  reason: FindRelatedAlertsFailureReason;
 }
 
 export type FindRelatedAlertsResult = FindRelatedAlertsSuccess | FindRelatedAlertsError;
@@ -51,26 +58,6 @@ export type FindRelatedAlertsResult = FindRelatedAlertsSuccess | FindRelatedAler
 export const RELATED_ALERTS_DEFAULT_MAX_RESULTS = 25;
 /** Matches legacy inline-tool behavior and 15-rep eval token budget. */
 export const RELATED_ALERTS_INLINE_MAX_RESULTS = 50;
-const MAX_ENTITY_VALUES_PER_FIELD = 50;
-
-const RELATED_ALERT_SOURCE_ALLOWLIST = [
-  '@timestamp',
-  'kibana.alert.rule.name',
-  'kibana.alert.severity',
-  'kibana.alert.risk_score',
-  'kibana.alert.workflow_status',
-  'kibana.alert.reason',
-  'kibana.alert.rule.threat',
-  'host.name',
-  'user.name',
-  'source.ip',
-  'destination.ip',
-  'process.name',
-  'process.executable',
-  'file.name',
-  'file.path',
-  'message',
-] as const;
 
 export const findRelatedAlerts = async (
   esClient: ElasticsearchClient,
@@ -85,6 +72,7 @@ export const findRelatedAlerts = async (
     userNames: providedUserNames,
     sourceIps: providedSourceIps,
     destIps: providedDestIps,
+    logger,
   } = params;
 
   const providedEntities: SourceEntities = {
@@ -100,13 +88,14 @@ export const findRelatedAlerts = async (
     let sourceEntities: SourceEntities;
 
     if (hasProvidedEntities) {
-      const alertEntities = await getAlertSourceEntities(esClient, alertsIndex, alertId);
+      const alertEntities = await getAlertSourceEntities(esClient, alertsIndex, alertId, logger);
       sourceEntities = mergeSourceEntities(alertEntities, providedEntities);
     } else {
-      const alertEntities = await getAlertSourceEntities(esClient, alertsIndex, alertId);
+      const alertEntities = await getAlertSourceEntities(esClient, alertsIndex, alertId, logger);
       if (!alertEntities) {
         return {
           ok: false,
+          reason: 'alert_not_found',
           message: `Alert ${alertId} not found or has no source data.`,
         };
       }
@@ -193,11 +182,11 @@ export const findRelatedAlerts = async (
       isTruncated,
     };
   } catch (error) {
+    logger?.error(`Failed to find related alerts for alert ${alertId}: ${getErrorMessage(error)}`);
     return {
       ok: false,
-      message: `Failed to find related alerts: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
+      reason: 'search_failed',
+      message: `Failed to find related alerts: ${getErrorMessage(error)}`,
     };
   }
 };
@@ -253,12 +242,14 @@ const unionEntityValues = (...valueLists: Array<string[] | undefined>): string[]
 const getAlertSourceEntities = async (
   esClient: ElasticsearchClient,
   alertsIndex: string,
-  alertId: string
+  alertId: string,
+  logger?: Logger
 ): Promise<SourceEntities | null> => {
   try {
     const alertResult = await esClient.get({
       index: alertsIndex,
       id: alertId,
+      _source_includes: [...RELATED_ALERT_ENTITY_SOURCE_INCLUDES],
     });
 
     const alertSource = alertResult._source as Record<string, unknown> | undefined;
@@ -267,59 +258,14 @@ const getAlertSourceEntities = async (
     }
 
     return extractSourceEntitiesFromAlert(alertSource);
-  } catch {
-    return null;
+  } catch (error) {
+    if (isElasticsearchNotFoundError(error)) {
+      return null;
+    }
+
+    logger?.error(
+      `Failed to load source alert ${alertId} from index ${alertsIndex}: ${getErrorMessage(error)}`
+    );
+    throw error;
   }
 };
-
-const extractSourceEntitiesFromAlert = (alertSource: Record<string, unknown>): SourceEntities => ({
-  hostNames: trimEntityValues(getNestedValues(alertSource, 'host.name')),
-  userNames: trimEntityValues(getNestedValues(alertSource, 'user.name')),
-  sourceIps: trimEntityValues(getNestedValues(alertSource, 'source.ip')),
-  destIps: trimEntityValues(getNestedValues(alertSource, 'destination.ip')),
-});
-
-function trimEntityValues(values: string[] | undefined): string[] {
-  if (!Array.isArray(values)) {
-    return [];
-  }
-  const uniqueValues = [
-    ...new Set(
-      values.filter((value): value is string => typeof value === 'string' && value.length > 0)
-    ),
-  ];
-  return uniqueValues.slice(0, MAX_ENTITY_VALUES_PER_FIELD);
-}
-
-function getNestedValues(obj: Record<string, unknown>, path: string): string[] {
-  const parts = path.split('.');
-  let current: unknown = obj;
-  for (const part of parts) {
-    if (current == null || typeof current !== 'object') {
-      current = undefined;
-      break;
-    }
-    current = (current as Record<string, unknown>)[part];
-  }
-
-  if (current !== undefined) {
-    return normalizeToStringArray(current);
-  }
-
-  const flatValue = obj[path];
-  if (flatValue !== undefined) {
-    return normalizeToStringArray(flatValue);
-  }
-
-  return [];
-}
-
-function normalizeToStringArray(value: unknown): string[] {
-  if (typeof value === 'string') {
-    return [value];
-  }
-  if (Array.isArray(value)) {
-    return value.filter((item): item is string => typeof item === 'string');
-  }
-  return [];
-}
