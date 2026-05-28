@@ -44,7 +44,7 @@ const ALL_OFF: PocSettings = {
   useStrippedBoolWrap: false,
 };
 
-const POC_CONFIGS: Array<{ name: string; settings: PocSettings }> = [
+const ALL_POC_CONFIGS: Array<{ name: string; settings: PocSettings }> = [
   // `baseline-main` is the unmodified main path — Lens DSL KPI tiles WITH
   // trendline, all Tier-1 fixes off. Every other config is reported as a
   // delta against this row.
@@ -104,14 +104,57 @@ const POC_CONFIGS: Array<{ name: string; settings: PocSettings }> = [
   },
 ];
 
+// `JOURNEY_CONFIG_FILTER` filters the matrix to a comma-separated list of
+// config names. Useful for smoke runs (`JOURNEY_CONFIG_FILTER=everything`)
+// or iterating on a single shape. Unset = run all configs.
+const CONFIG_FILTER = process.env.JOURNEY_CONFIG_FILTER?.split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+const POC_CONFIGS = CONFIG_FILTER?.length
+  ? ALL_POC_CONFIGS.filter((c) => CONFIG_FILTER.includes(c.name))
+  : ALL_POC_CONFIGS;
+
 const HOSTS_VIEW_PATH = `app/metrics/hosts?_g=(time:(from:'now-24h',to:'now'))&_a=(dateRange:(from:now-24h,to:now),filters:!(),limit:500,panelFilters:!(),preferredSchema:semconv,query:(language:kuery,query:''))`;
 
-const waitForHostsMeasure = async (page: Page, measureName: string) => {
-  await page.waitForFunction(
-    (name) => performance.getEntriesByName(name, 'measure').length > 0,
-    measureName,
-    { timeout: TIMEOUT_MS }
-  );
+interface WaitOpts {
+  timeoutMs?: number;
+  throwOnTimeout?: boolean;
+}
+
+const waitForHostsMeasure = async (
+  page: Page,
+  log: ToolingLog,
+  measureName: string,
+  { timeoutMs = TIMEOUT_MS, throwOnTimeout = true }: WaitOpts = {}
+) => {
+  try {
+    await page.waitForFunction(
+      (name) => performance.getEntriesByName(name, 'measure').length > 0,
+      measureName,
+      { timeout: timeoutMs }
+    );
+    return true;
+  } catch (err) {
+    // On timeout, surface what marks/measures the page actually has so we
+    // can tell whether the page reached `navigationStart` at all, vs. the
+    // table data fetch is in-flight, vs. addInitScript wiped marks too
+    // late, etc.
+    const snapshot = await page.evaluate(() => ({
+      url: window.location.href,
+      readyState: document.readyState,
+      marks: performance.getEntriesByType('mark').map((m) => m.name),
+      measures: performance
+        .getEntriesByType('measure')
+        .map(({ name, duration }) => ({ name, duration })),
+    }));
+    log.error(
+      `[journey-diag] waiting for ${measureName} timed out. page snapshot: ${JSON.stringify(
+        snapshot
+      )}`
+    );
+    if (throwOnTimeout) throw err;
+    return false;
+  }
 };
 
 const emitHostsPerfMeasures = async (page: Page, log: ToolingLog, configName: string) => {
@@ -133,7 +176,6 @@ const emitHostsPerfMeasures = async (page: Page, log: ToolingLog, configName: st
 const runConfigBenchmark = async (
   page: Page,
   kbnUrl: { get: (path: string) => string },
-  kibanaPage: { waitForHeader: () => Promise<void> },
   log: ToolingLog,
   configName: string,
   settings: PocSettings
@@ -150,12 +192,27 @@ const runConfigBenchmark = async (
   );
 
   await page.goto(kbnUrl.get(HOSTS_VIEW_PATH), { timeout: TIMEOUT_MS });
-  await kibanaPage.waitForHeader();
+  // `KibanaPage.waitForHeader` waits on the `.headerGlobalNav` class which
+  // only exists on the classic chrome variant. The project chrome variant
+  // (used by FTR's Kibana on stateful) only emits the data-test-subj. Use
+  // that directly so the journey works against both variants.
+  await page.waitForSelector(subj('headerGlobalNav'), {
+    state: 'attached',
+    timeout: TIMEOUT_MS,
+  });
 
-  await waitForHostsMeasure(page, 'infra.hosts.tableReadyDuration');
+  await waitForHostsMeasure(page, log, 'infra.hosts.tableReadyDuration');
 
+  // Metrics-tab readiness is best-effort: the mark fires only once *every*
+  // Lens chart in the grid calls `onLoad(false)`. A single embeddable
+  // getting stuck (or `onLoad` firing in an order we don't expect) will
+  // prevent it from ever resolving, so we cap the wait and continue with
+  // whatever measures the page already has rather than failing the run.
   await page.locator(subj('hostsView-tabs-metrics')).click();
-  await waitForHostsMeasure(page, 'infra.hosts.metricsTabReadyDuration');
+  await waitForHostsMeasure(page, log, 'infra.hosts.metricsTabReadyDuration', {
+    timeoutMs: 45_000,
+    throwOnTimeout: false,
+  });
 
   await emitHostsPerfMeasures(page, log, configName);
 };
@@ -165,8 +222,8 @@ let journeyInstance = new Journey({});
 for (const { name, settings } of POC_CONFIGS) {
   journeyInstance = journeyInstance.step(
     `[${name}] benchmark Hosts UI PoC toggles`,
-    async ({ page, kbnUrl, kibanaPage, log }) => {
-      await runConfigBenchmark(page, kbnUrl, kibanaPage, log, name, settings);
+    async ({ page, kbnUrl, log }) => {
+      await runConfigBenchmark(page, kbnUrl, log, name, settings);
     }
   );
 }

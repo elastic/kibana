@@ -18,13 +18,28 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import {
-  CPU_USAGE_LABEL,
-  DISK_USAGE_LABEL,
-  MEMORY_USAGE_LABEL,
-  NORMALIZED_LOAD_LABEL,
-} from '@kbn/metrics-data-access-plugin/common/inventory_models/shared/charts/constants';
 import { KPI_CHART_HEIGHT, METRICS_TOOLTIP } from '../../../../../common/visualizations';
+
+// The Lens KPI path imports these labels from
+// `@kbn/metrics-data-access-plugin/common/inventory_models/shared/charts/constants`,
+// but that file is a private subpath of the plugin and the optimised
+// build forbids subpath imports outside `[public, common]`. Inline the
+// `i18n.translate` calls with the same translation IDs so the strings
+// stay in sync with the shared constants without crossing the module
+// boundary.
+const CPU_USAGE_LABEL = i18n.translate('xpack.infra.assetDetails.metrics.label.cpuUsage', {
+  defaultMessage: 'CPU Usage',
+});
+const MEMORY_USAGE_LABEL = i18n.translate('xpack.infra.assetDetails.metrics.label.memoryUsage', {
+  defaultMessage: 'Memory Usage',
+});
+const NORMALIZED_LOAD_LABEL = i18n.translate(
+  'xpack.infra.assetDetails.metrics.label.normalizedLoad',
+  { defaultMessage: 'Normalized Load' }
+);
+const DISK_USAGE_LABEL = i18n.translate('xpack.infra.assetDetails.metrics.label.diskUsage', {
+  defaultMessage: 'Disk Usage',
+});
 import { TooltipContent } from '../../../../../components/lens';
 import { useHostsKpis } from '../../hooks/use_hosts_kpis';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
