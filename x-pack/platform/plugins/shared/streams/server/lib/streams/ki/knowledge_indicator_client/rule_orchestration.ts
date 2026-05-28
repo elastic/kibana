@@ -9,7 +9,7 @@ import { isBoom } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { QueryLink } from '@kbn/streams-schema';
-import type { Streams } from '@kbn/streams-schema/src/models/streams';
+import type { Streams } from '@kbn/streams-schema';
 import pLimit from 'p-limit';
 import type { EsqlRuleParams } from '../../../sig_events/rules/esql/types';
 
@@ -115,7 +115,7 @@ export async function uninstallQueries(
     return;
   }
 
-  const ruleIds = queries.map((q) => q.rule_id).filter(Boolean);
+  const ruleIds = queries.map((q) => q.rule_id);
   if (ruleIds.length === 0) {
     return;
   }

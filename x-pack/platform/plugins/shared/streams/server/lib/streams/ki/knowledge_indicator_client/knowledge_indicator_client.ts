@@ -7,7 +7,7 @@
 
 import type { ComposerSortShorthand } from '@elastic/esql';
 import type { Feature, KnowledgeIndicator, QueryLink, StreamQuery } from '@kbn/streams-schema';
-import type { Streams } from '@kbn/streams-schema/src/models/streams';
+import type { Streams } from '@kbn/streams-schema';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,

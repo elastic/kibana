@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import type { Feature, KnowledgeIndicator, QueryLink } from '@kbn/streams-schema';
 import {
@@ -137,7 +138,7 @@ export class IndicatorSearcher {
       filter.push({ terms: { type: options.types } });
     }
 
-    let retriever: Record<string, unknown>;
+    let retriever: RetrieverContainer;
     if (mode === 'keyword') {
       retriever = {
         standard: {
@@ -194,7 +195,7 @@ export class IndicatorSearcher {
     const response = await this.dataStreamClient.search({
       size: limit,
       track_total_hits: true,
-      retriever: retriever as never,
+      retriever,
     });
 
     const hits: KnowledgeIndicator[] = [];

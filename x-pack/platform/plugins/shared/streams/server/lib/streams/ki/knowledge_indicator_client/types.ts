@@ -24,7 +24,7 @@ interface KIBulkIndexFeatureOperation {
   index: { feature: Feature };
 }
 interface KIBulkIndexQueryOperation {
-  index: { query: StreamQuery & { rule_backed?: boolean } };
+  index: { query: StreamQuery & { rule_backed?: boolean; rule_id?: string } };
 }
 interface KIBulkDeleteOperation {
   delete: { type: KnowledgeIndicatorType; id: string };

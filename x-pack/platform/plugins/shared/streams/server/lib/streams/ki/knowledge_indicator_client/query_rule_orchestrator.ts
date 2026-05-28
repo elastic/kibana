@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { QueryLink, StreamQuery } from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS, deriveQueryType, hasSameEsql } from '@kbn/streams-schema';
-import type { Streams } from '@kbn/streams-schema/src/models/streams';
+import type { Streams } from '@kbn/streams-schema';
 import { computeRuleId } from '../helpers/compute_rule_id';
 import { installQueries, uninstallQueries } from './rule_orchestration';
 import { KI_TYPE_QUERY } from '../fields';
@@ -119,7 +119,7 @@ export class QueryRuleOrchestrator {
             ...next.query,
             rule_backed: next.rule_backed,
             rule_id: next.rule_id,
-          } as StreamQuery & { rule_backed?: boolean; rule_id?: string },
+          },
         },
       });
     }
@@ -263,7 +263,7 @@ export class QueryRuleOrchestrator {
               ...link.query,
               rule_backed: true,
               rule_id: link.rule_id,
-            } as StreamQuery & { rule_backed?: boolean; rule_id?: string },
+            },
           },
         }))
       );
@@ -359,7 +359,7 @@ export class QueryRuleOrchestrator {
             ...link.query,
             rule_backed: false,
             rule_id: link.rule_id,
-          } as StreamQuery & { rule_backed?: boolean; rule_id?: string },
+          },
         },
       }))
     );
