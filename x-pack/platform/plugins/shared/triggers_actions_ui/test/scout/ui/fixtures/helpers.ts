@@ -7,8 +7,6 @@
 
 import type { ScoutPage } from '@kbn/scout';
 
-// Visible (non-hidden) test index created in beforeAll by tests that call defineIndexThresholdRule.
-// ES 8.x wildcard searches exclude hidden indices, so .kibana* cannot be used here.
 export const THRESHOLD_TEST_INDEX = 'scout-threshold-rule-test';
 
 // Fills the index-threshold rule form to a state where save is enabled:
@@ -26,14 +24,9 @@ export const defineIndexThresholdRule = async (page: ScoutPage, name: string) =>
   await page.testSubj.click('selectIndexExpression');
   const indexCombo = page.testSubj.locator('thresholdIndexesComboBox');
   await indexCombo.waitFor({ state: 'visible' });
-  // Follow EuiComboBoxWrapper pattern: click comboBoxInput to open, type into
-  // comboBoxSearchInput with a 50ms inter-key delay so the 250ms debounce fires
-  // reliably, then target the option by its EUI title attribute.
-  // getIndexOptions() always adds a "Choose…" entry for the typed text, so the
-  // option is present even if the API finds no matching indices.
+
   await indexCombo.locator('[data-test-subj="comboBoxInput"]').click();
-  // Type a partial prefix so the "Based on your data views" entry gets title="scout-threshold-rule-test"
-  // while the "Choose…" entry gets title="scout-threshold-rule" — keeping the target selector unique.
+
   await indexCombo
     .locator('[data-test-subj="comboBoxSearchInput"]')
     .pressSequentially('scout-threshold-rule', { delay: 50 });

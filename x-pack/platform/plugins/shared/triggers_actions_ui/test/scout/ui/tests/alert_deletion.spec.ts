@@ -59,8 +59,6 @@ const EXPECTED_ALERT_IDS = [
 
 const ALL_ALERT_IDS = [...DELETED_ALERT_IDS, ...EXPECTED_ALERT_IDS];
 
-// Passkey and success message match translations.ts constants
-// (DELETE_PASSKEY = 'Delete', ALERT_DELETE_SUCCESS = 'Clean up task started successfully').
 const DELETE_PASSKEY = 'Delete';
 const SUCCESS_MESSAGE = 'Clean up task started successfully';
 
@@ -118,8 +116,6 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
     await page.testSubj.click('alert-delete-active-checkbox');
     await page.testSubj.click('alert-delete-inactive-checkbox');
 
-    // The confirmation field is enabled only once the preview shows > 0 alerts
-    // to delete. Poll until it becomes enabled.
     const confirmField = page.testSubj.locator('alert-delete-delete-confirmation');
     await expect(confirmField).toBeEnabled({ timeout: 15000 });
 
