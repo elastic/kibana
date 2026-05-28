@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('@kbn/moon', () => ({
+  getMoonChangedFiles: jest.fn(),
+  getAffectedMoonProjectsFromChangedFiles: jest.fn(),
+}));
+
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -14,7 +19,6 @@ import path from 'path';
 import {
   FORCE_ALL_CHANGED_PATHS,
   getPackageNameFromSourceRoot,
-  type MoonProject,
   resolveAffectedPackages,
   shouldForceAllPackages,
   topologicallySortPackages,
@@ -49,7 +53,7 @@ const createMockKbnUiRoot = (packages: Record<string, PackageSpec>): string => {
   return tmpDir;
 };
 
-const createProject = (sourceRoot: string): MoonProject => ({ id: sourceRoot, sourceRoot });
+const createProject = (sourceRoot: string) => ({ id: sourceRoot, sourceRoot });
 
 // ---------------------------------------------------------------------------
 // topologicallySortPackages
@@ -88,9 +92,10 @@ describe('topologicallySortPackages', () => {
         dependsOn: ['@kbn/ui-chrome-layout'],
       },
     });
-    expect(
-      topologicallySortPackages(['side-navigation', 'chrome-layout'], tmpDir)
-    ).toEqual(['chrome-layout', 'side-navigation']);
+    expect(topologicallySortPackages(['side-navigation', 'chrome-layout'], tmpDir)).toEqual([
+      'chrome-layout',
+      'side-navigation',
+    ]);
   });
 
   it('handles a linear chain (a → b → c)', () => {

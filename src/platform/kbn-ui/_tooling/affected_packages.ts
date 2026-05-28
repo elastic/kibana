@@ -71,10 +71,7 @@ export const getPackageNameFromSourceRoot = (
  * Alphabetical tie-breaking ensures deterministic output.
  * Throws if a dependency cycle is detected.
  */
-export const topologicallySortPackages = (
-  packageNames: string[],
-  kbnUiRoot: string
-): string[] => {
+export const topologicallySortPackages = (packageNames: string[], kbnUiRoot: string): string[] => {
   // Read each package's moon.yml once.
   const moonData = new Map<string, MoonYml>();
   for (const name of packageNames) {
