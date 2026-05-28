@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiSpacer,
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
@@ -33,123 +32,140 @@ export const GeneralStep = ({ draft, onChange }: Props) => {
 
   return (
     <EuiForm component="form" data-test-subj="entityCentricLabEditFlyoutGeneralStep">
-      <EuiText size="s" color="subdued">
-        <p>
-          {isManaged
-            ? i18n.translate('xpack.streams.entityCentricLab.editFlyout.general.subtitleManaged', {
-                defaultMessage: 'Managed entity types general data cannot be all customised.',
-              })
-            : i18n.translate('xpack.streams.entityCentricLab.editFlyout.general.subtitleUser', {
-                defaultMessage: 'Define how this entity type is identified in your data.',
-              })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        label={i18n.translate('xpack.streams.entityCentricLab.editFlyout.general.entityTypeName', {
-          defaultMessage: 'Entity type name',
-        })}
-        fullWidth
-      >
-        <EuiFieldText
-          fullWidth
-          readOnly={isManaged}
-          value={general.name}
-          onChange={(event) => update({ name: event.target.value })}
-          data-test-subj="entityCentricLabEditFlyoutGeneralName"
-        />
-      </EuiFormRow>
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
-          <EuiFormRow
-            label={i18n.translate('xpack.streams.entityCentricLab.editFlyout.general.dataStream', {
-              defaultMessage: 'Data stream',
-            })}
-          >
-            <EuiFieldText
-              readOnly={isManaged}
-              value={general.dataStream}
-              onChange={(event) => update({ dataStream: event.target.value })}
-              data-test-subj="entityCentricLabEditFlyoutGeneralDataStream"
-            />
-          </EuiFormRow>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            <p>
+              {isManaged
+                ? i18n.translate(
+                    'xpack.streams.entityCentricLab.editFlyout.general.subtitleManaged',
+                    {
+                      defaultMessage: 'Managed entity types general data cannot be all customised.',
+                    }
+                  )
+                : i18n.translate('xpack.streams.entityCentricLab.editFlyout.general.subtitleUser', {
+                    defaultMessage: 'Define how this entity type is identified in your data.',
+                  })}
+            </p>
+          </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFormRow
             label={i18n.translate(
-              'xpack.streams.entityCentricLab.editFlyout.general.identifierField',
-              {
-                defaultMessage: 'Stream field that identifies the entity',
-              }
+              'xpack.streams.entityCentricLab.editFlyout.general.entityTypeName',
+              { defaultMessage: 'Entity type name' }
             )}
+            fullWidth
           >
             <EuiFieldText
+              fullWidth
               readOnly={isManaged}
-              value={general.identifierField}
-              onChange={(event) => update({ identifierField: event.target.value })}
-              data-test-subj="entityCentricLabEditFlyoutGeneralIdentifierField"
+              value={general.name}
+              onChange={(event) => update({ name: event.target.value })}
+              data-test-subj="entityCentricLabEditFlyoutGeneralName"
             />
           </EuiFormRow>
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFormRow
-        label={i18n.translate('xpack.streams.entityCentricLab.editFlyout.general.category', {
-          defaultMessage: 'Category',
-        })}
-        fullWidth
-      >
-        <EuiFieldText
-          fullWidth
-          readOnly={isManaged}
-          value={general.category}
-          onChange={(event) => update({ category: event.target.value })}
-          data-test-subj="entityCentricLabEditFlyoutGeneralCategory"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('xpack.streams.entityCentricLab.editFlyout.general.description', {
-          defaultMessage: 'Description',
-        })}
-        fullWidth
-      >
-        <EuiTextArea
-          fullWidth
-          rows={4}
-          readOnly={isManaged}
-          value={general.description}
-          onChange={(event) => update({ description: event.target.value })}
-          data-test-subj="entityCentricLabEditFlyoutGeneralDescription"
-        />
-      </EuiFormRow>
-      {isManaged ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiCallOut
-            announceOnMount={false}
-            size="s"
-            color="primary"
-            iconType="info"
-            title={i18n.translate(
-              'xpack.streams.entityCentricLab.editFlyout.general.managedCalloutTitle',
-              {
-                defaultMessage: 'This entity type is managed by Elastic',
-              }
-            )}
-          >
-            <EuiText size="s">
-              <p>
-                {i18n.translate(
-                  'xpack.streams.entityCentricLab.editFlyout.general.managedCalloutBody',
-                  {
-                    defaultMessage:
-                      'Fields above describe how the entity type is detected. Customise health, ownership, flyout content and subsets in the next steps.',
-                  }
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="m">
+            <EuiFlexItem>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.streams.entityCentricLab.editFlyout.general.dataStream',
+                  { defaultMessage: 'Data stream' }
                 )}
-              </p>
-            </EuiText>
-          </EuiCallOut>
-        </>
-      ) : null}
+                fullWidth
+              >
+                <EuiFieldText
+                  fullWidth
+                  readOnly={isManaged}
+                  value={general.dataStream}
+                  onChange={(event) => update({ dataStream: event.target.value })}
+                  data-test-subj="entityCentricLabEditFlyoutGeneralDataStream"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow
+                label={i18n.translate(
+                  'xpack.streams.entityCentricLab.editFlyout.general.identifierField',
+                  { defaultMessage: 'Stream field that identifies the entity' }
+                )}
+                fullWidth
+              >
+                <EuiFieldText
+                  fullWidth
+                  readOnly={isManaged}
+                  value={general.identifierField}
+                  onChange={(event) => update({ identifierField: event.target.value })}
+                  data-test-subj="entityCentricLabEditFlyoutGeneralIdentifierField"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            label={i18n.translate('xpack.streams.entityCentricLab.editFlyout.general.category', {
+              defaultMessage: 'Category',
+            })}
+            fullWidth
+          >
+            <EuiFieldText
+              fullWidth
+              readOnly={isManaged}
+              value={general.category}
+              onChange={(event) => update({ category: event.target.value })}
+              data-test-subj="entityCentricLabEditFlyoutGeneralCategory"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            label={i18n.translate('xpack.streams.entityCentricLab.editFlyout.general.description', {
+              defaultMessage: 'Description',
+            })}
+            fullWidth
+          >
+            <EuiTextArea
+              fullWidth
+              rows={4}
+              readOnly={isManaged}
+              value={general.description}
+              onChange={(event) => update({ description: event.target.value })}
+              data-test-subj="entityCentricLabEditFlyoutGeneralDescription"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        {isManaged ? (
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              announceOnMount={false}
+              size="s"
+              color="primary"
+              iconType="info"
+              title={i18n.translate(
+                'xpack.streams.entityCentricLab.editFlyout.general.managedCalloutTitle',
+                {
+                  defaultMessage: 'This entity type is managed by Elastic',
+                }
+              )}
+            >
+              <EuiText size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.streams.entityCentricLab.editFlyout.general.managedCalloutBody',
+                    {
+                      defaultMessage:
+                        'Fields above describe how the entity type is detected. Customise health, ownership, flyout content and subsets in the next steps.',
+                    }
+                  )}
+                </p>
+              </EuiText>
+            </EuiCallOut>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
     </EuiForm>
   );
 };
