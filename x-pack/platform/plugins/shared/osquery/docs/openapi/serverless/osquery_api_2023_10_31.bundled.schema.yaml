@@ -2657,8 +2657,7 @@ components:
       $ref: '#/components/schemas/PackId'
       nullable: true
     PackInterval:
-      description: >-
-        Pack-level interval, in seconds. Used when `schedule_type` is
+      description: Pack-level interval, in seconds. Used when `schedule_type` is
         `interval`. Mutually exclusive with `rrule_schedule`.
       example: 60
       type: number
@@ -2726,8 +2725,7 @@ components:
       type: object
       properties:
         end_date:
-          description: >-
-            Optional RFC 3339 datetime string for the schedule's end. MUST be
+          description: Optional RFC 3339 datetime string for the schedule's end. MUST be
             after `start_date`.
           example: '2024-12-31T23:59:59Z'
           format: date-time
@@ -2762,8 +2760,7 @@ components:
           maxLength: 64
           type: string
         timeout:
-          description: >-
-            Optional query execution timeout, in seconds. Defaults to 60 in
+          description: Optional query execution timeout, in seconds. Defaults to 60 in
             osquerybeat when unset.
           example: 60
           type: number
