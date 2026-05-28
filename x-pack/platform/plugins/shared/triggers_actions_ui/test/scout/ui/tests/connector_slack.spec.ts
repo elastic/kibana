@@ -47,6 +47,16 @@ const deleteRuleById = async (kbnClient: KbnClient, id: string) => {
   });
 };
 
+const deleteRulesByPrefix = async (kbnClient: KbnClient, prefix: string) => {
+  const res = await kbnClient.request<RuleFindResponse>({
+    method: 'GET',
+    path: `/api/alerting/rules/_find?search=${encodeURIComponent(prefix)}&search_fields=name&per_page=100`,
+    headers: { 'kbn-xsrf': 'scout' },
+  });
+  const stale = res.data?.data?.filter((r) => r.name.startsWith(prefix)) ?? [];
+  await Promise.allSettled(stale.map((r) => deleteRuleById(kbnClient, r.id)));
+};
+
 const selectConnectorInRuleAction = async (page: ScoutPage, connectorName: string) => {
   await page.testSubj.click('ruleActionsAddActionButton');
   await expect(page.testSubj.locator('ruleActionsConnectorsModal')).toBeVisible();
@@ -62,7 +72,8 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
   const createdConnectorIds: string[] = [];
   const createdRuleNames: string[] = [];
 
-  test.beforeAll(async ({ esClient }) => {
+  test.beforeAll(async ({ esClient, kbnClient }) => {
+    await deleteRulesByPrefix(kbnClient, 'scout-slack-');
     await esClient.indices.create(
       {
         index: THRESHOLD_TEST_INDEX,
