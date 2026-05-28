@@ -94,18 +94,14 @@ interface BulkFieldUpdate {
 /**
  * Refresh option for bulk writes against the latest entities index.
  *
- * - `'wait_for'` (default): block until the next scheduled refresh fires
- *   (typically <1s). Read-your-writes guaranteed on subsequent searches.
- *   Only requires `write` privilege.
- * - `false`: return immediately; the doc becomes searchable on the next
- *   natural refresh. Stale reads possible for ~1s. Only requires `write`.
+ * - `false` (default): return immediately; the doc becomes searchable on the
+ *   next natural refresh. Stale reads possible for ~1s. Only requires `write`.
+ *   Matches the ES native default.
+ * - `'wait_for'`: block until the next scheduled refresh fires (typically <1s).
+ *   Read-your-writes guaranteed on subsequent searches. Only requires `write`.
  *
  * `true` is intentionally not supported: forcing a refresh requires the
  * `indices:admin/refresh/unpromotable` action.
- *
- * Caller guidance: UI routes rely on the default so the immediate refetch
- * sees the new state. Bulk callers (CSV upload, automated maintainer) pass
- * `false` to avoid the per-write refresh wait.
  */
 export type RefreshOption = boolean | 'wait_for';
 
@@ -121,7 +117,7 @@ export const bulkUpdateEntityDocs = (
     refresh?: RefreshOption;
   }
 ): Promise<BulkResponse> => {
-  const { index, updates, refresh = 'wait_for' } = params;
+  const { index, updates, refresh = false } = params;
   const operations = updates.flatMap(({ docId, doc }) => [
     {
       update: {
