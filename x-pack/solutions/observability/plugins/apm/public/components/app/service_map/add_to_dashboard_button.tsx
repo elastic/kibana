@@ -24,6 +24,7 @@ import { APM_SERVICE_MAP_EMBEDDABLE } from '../../../embeddable/service_map/cons
 import type { ServiceMapEmbeddableState } from '../../../../server/lib/embeddables/service_map_embeddable_schema';
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceMapOrientation } from './service_map_options_panel';
+import type { ServiceMapViewFilters } from './apply_service_map_visibility';
 import { readInitialAppStateFromRawUrl } from './use_filter_url_sync';
 
 interface AddToDashboardButtonProps {
@@ -34,6 +35,7 @@ interface AddToDashboardButtonProps {
   serviceName?: string;
   serviceGroupId?: string;
   mapOrientation: ServiceMapOrientation;
+  viewFilters: ServiceMapViewFilters;
 }
 
 /** Serialize a single string value as a quoted KQL phrase. */
@@ -146,6 +148,7 @@ export function AddToDashboardButton({
   serviceName,
   serviceGroupId,
   mapOrientation,
+  viewFilters,
 }: AddToDashboardButtonProps) {
   const { services } = useKibana<ApmPluginStartDeps>();
   const embeddable = services?.embeddable;
@@ -176,6 +179,20 @@ export function AddToDashboardButton({
         // Default ON for the APM-UI creation flow: the user explicitly chose to put this
         // view on a dashboard, so they likely want it to behave like a dashboard panel.
         sync_with_dashboard_filters: true,
+        // Snapshot the options-panel selections so the dashboard panel renders with the
+        // same filter chips selected. Empty arrays are dropped to keep saved state minimal.
+        alert_status_filter: viewFilters.alertStatusFilter.length
+          ? viewFilters.alertStatusFilter
+          : undefined,
+        slo_status_filter: viewFilters.sloStatusFilter.length
+          ? viewFilters.sloStatusFilter
+          : undefined,
+        connection_filter: viewFilters.connectionFilter.length
+          ? viewFilters.connectionFilter
+          : undefined,
+        anomaly_severity_filter: viewFilters.anomalySeverityFilter.length
+          ? viewFilters.anomalySeverityFilter
+          : undefined,
       };
 
       const packageState: EmbeddablePackageState<ServiceMapEmbeddableState> = {
@@ -200,6 +217,7 @@ export function AddToDashboardButton({
       environment,
       serviceGroupId,
       mapOrientation,
+      viewFilters,
     ]
   );
 

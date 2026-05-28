@@ -112,6 +112,10 @@ interface GraphProps {
   mapOrientation?: ServiceMapOrientation;
   /** Called when orientation changes (Options panel or any other host control). */
   onMapOrientationChange?: (next: ServiceMapOrientation) => void;
+  /** Controlled view filters when supplied (e.g. embeddable hydrating from persisted state). */
+  viewFilters?: ServiceMapViewFilters;
+  /** Called when view filters change in the options panel. */
+  onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
   /** Optional service group filter — forwarded to the "Add to dashboard" panel state. */
   serviceGroupId?: string;
 }
@@ -135,6 +139,8 @@ function GraphInner({
   highlightedServiceName,
   mapOrientation: controlledOrientation,
   onMapOrientationChange,
+  viewFilters: controlledViewFilters,
+  onViewFiltersChange,
   serviceGroupId,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
@@ -150,10 +156,26 @@ function GraphInner({
   const serviceMapId = useGeneratedHtmlId({ prefix: 'serviceMap' });
   const mapRegionRef = useRef<HTMLDivElement | null>(null);
 
-  const [viewFilters, setViewFilters] = useState<ServiceMapViewFilters>(
-    DEFAULT_SERVICE_MAP_VIEW_FILTERS
+  const [internalViewFilters, setInternalViewFilters] = useState<ServiceMapViewFilters>(
+    controlledViewFilters ?? DEFAULT_SERVICE_MAP_VIEW_FILTERS
   );
-  const [panelExpanded, setPanelExpanded] = useState(!isEmbedded);
+  const viewFilters = controlledViewFilters ?? internalViewFilters;
+  const setViewFilters = useCallback(
+    (updater: ServiceMapViewFilters | ((prev: ServiceMapViewFilters) => ServiceMapViewFilters)) => {
+      setInternalViewFilters((prev) => {
+        const next = typeof updater === 'function' ? updater(prev) : updater;
+        onViewFiltersChange?.(next);
+        return next;
+      });
+    },
+    [onViewFiltersChange]
+  );
+  const hasAnyViewFilter =
+    viewFilters.alertStatusFilter.length > 0 ||
+    viewFilters.sloStatusFilter.length > 0 ||
+    viewFilters.connectionFilter.length > 0 ||
+    viewFilters.anomalySeverityFilter.length > 0;
+  const [panelExpanded, setPanelExpanded] = useState(!isEmbedded || hasAnyViewFilter);
   const [internalOrientation, setInternalOrientation] = useState<ServiceMapOrientation>(
     controlledOrientation ?? 'horizontal'
   );
@@ -718,6 +740,7 @@ function GraphInner({
                   serviceName={serviceName}
                   serviceGroupId={serviceGroupId}
                   mapOrientation={mapOrientation}
+                  viewFilters={viewFilters}
                 />
               </Panel>
             )}

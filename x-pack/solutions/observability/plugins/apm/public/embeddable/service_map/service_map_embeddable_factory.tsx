@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type {
@@ -40,6 +40,7 @@ import type {
 
 import type { EmbeddableDeps } from '../types';
 import { ApmEmbeddableContext } from '../embeddable_context';
+import type { ServiceMapViewFilters } from '../../components/app/service_map/apply_service_map_visibility';
 import { ServiceMapEmbeddable } from './service_map_embeddable';
 import { ServiceMapEditorFlyout } from './service_map_editor_flyout';
 import { APM_SERVICE_MAP_EMBEDDABLE } from './constants';
@@ -53,6 +54,10 @@ const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   service_group_id: undefined,
   map_orientation: 'horizontal',
   sync_with_dashboard_filters: false,
+  alert_status_filter: undefined,
+  slo_status_filter: undefined,
+  connection_filter: undefined,
+  anomaly_severity_filter: undefined,
 };
 
 const customStateComparators: StateComparators<ServiceMapCustomState> = {
@@ -62,6 +67,10 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   service_group_id: 'referenceEquality',
   map_orientation: 'referenceEquality',
   sync_with_dashboard_filters: 'referenceEquality',
+  alert_status_filter: 'referenceEquality',
+  slo_status_filter: 'referenceEquality',
+  connection_filter: 'referenceEquality',
+  anomaly_severity_filter: 'referenceEquality',
 };
 
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
@@ -130,6 +139,10 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           service_group_id: state.service_group_id,
           map_orientation: state.map_orientation,
           sync_with_dashboard_filters: state.sync_with_dashboard_filters,
+          alert_status_filter: state.alert_status_filter,
+          slo_status_filter: state.slo_status_filter,
+          connection_filter: state.connection_filter,
+          anomaly_severity_filter: state.anomaly_severity_filter,
         },
         defaultCustomState
       );
@@ -245,13 +258,34 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             serviceGroupId,
             mapOrientation,
             syncWithDashboardFilters,
+            alertStatusFilter,
+            sloStatusFilter,
+            connectionFilter,
+            anomalySeverityFilter,
           ] = useBatchedPublishingSubjects(
             customStateManager.api.environment$,
             customStateManager.api.kuery$,
             customStateManager.api.serviceName$,
             customStateManager.api.serviceGroupId$,
             customStateManager.api.mapOrientation$,
-            customStateManager.api.syncWithDashboardFilters$
+            customStateManager.api.syncWithDashboardFilters$,
+            customStateManager.api.alertStatusFilter$,
+            customStateManager.api.sloStatusFilter$,
+            customStateManager.api.connectionFilter$,
+            customStateManager.api.anomalySeverityFilter$
+          );
+
+          // Schema literals (`'critical' | 'major' | ...`) and the runtime enums consumed by
+          // ServiceMapViewFilters share string values, so a single cast preserves the shape.
+          const viewFilters = useMemo(
+            () =>
+              ({
+                alertStatusFilter: alertStatusFilter ?? [],
+                sloStatusFilter: sloStatusFilter ?? [],
+                connectionFilter: connectionFilter ?? [],
+                anomalySeverityFilter: anomalySeverityFilter ?? [],
+              } as ServiceMapViewFilters),
+            [alertStatusFilter, sloStatusFilter, connectionFilter, anomalySeverityFilter]
           );
 
           const fetchContext = useFetchContext(api);
@@ -284,6 +318,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                   onMapOrientationChange={customStateManager.api.setMapOrientation}
                   parentFilters={parentFilters}
                   parentQuery={parentQuery}
+                  viewFilters={viewFilters}
                 />
               </ApmEmbeddableContext>
             </div>
