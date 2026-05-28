@@ -54,8 +54,7 @@ import {
 import { useServiceMapFilterState } from './use_service_map_filter_state';
 import { focusServiceMapFindInput } from './service_map_find_in_page';
 import { ServiceMapSearchProvider } from '../../shared/service_map/service_map_search_context';
-import { ServiceMapAlertsNavigateProvider } from '../../shared/service_map/service_map_alerts_navigate_context';
-import { useServiceMapAlertsNavigateFactory } from './use_service_map_alerts_tab_href';
+import { ServiceMapAlertsNavigateGraphWrapper } from './service_map_alerts_navigate_graph_wrapper';
 import {
   ServiceMapOptionsPanel,
   ServiceMapOptionsPanelToggle,
@@ -129,7 +128,6 @@ function GraphInner({
   const { telemetry } = services;
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut } = useReactFlow();
-  const makeAlertsNavigateHandler = useServiceMapAlertsNavigateFactory();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
   const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
@@ -508,7 +506,7 @@ function GraphInner({
 
   return (
     <ServiceMapSearchProvider>
-      <ServiceMapAlertsNavigateProvider makeAlertsNavigateHandler={makeAlertsNavigateHandler}>
+      <ServiceMapAlertsNavigateGraphWrapper>
         <div
           ref={mapRegionRef}
           css={css(containerStyle)}
@@ -680,7 +678,7 @@ function GraphInner({
             clearKueryOnNavigation={clearKueryOnPopoverNavigation}
           />
         </div>
-      </ServiceMapAlertsNavigateProvider>
+      </ServiceMapAlertsNavigateGraphWrapper>
     </ServiceMapSearchProvider>
   );
 }

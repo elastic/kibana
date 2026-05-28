@@ -5,6 +5,22 @@
  * 2.0.
  */
 
+/** Dedicated service-map pages and embed hosts (e.g. service overview). */
+export const SERVICE_MAP_URL_PARAM_ROUTES = [
+  '/service-map',
+  '/services/{serviceName}/service-map',
+  '/mobile-services/{serviceName}/service-map',
+  '/services/{serviceName}/overview',
+] as const;
+
+/** Routes where alert-badge SPA navigation is supported. */
+export const SERVICE_MAP_ALERTS_NAVIGATE_ROUTES = [
+  '/service-map',
+  '/services/{serviceName}/service-map',
+  '/mobile-services/{serviceName}/service-map',
+  '/services/{serviceName}/overview',
+] as const;
+
 /**
  * Layout constants for the React Flow service map (client-side only)
  */

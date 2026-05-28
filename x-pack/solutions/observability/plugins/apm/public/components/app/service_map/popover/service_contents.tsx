@@ -23,6 +23,7 @@ import { AnomalyDetection } from './anomaly_detection';
 import { StatsList } from './stats_list';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { SERVICE_MAP_URL_PARAM_ROUTES } from '../constants';
 
 type ServiceNodeReturn = APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
 
@@ -43,11 +44,7 @@ export function ServiceContents({
   const apmRouter = useApmRouter();
   const { services } = useKibana<ApmPluginStartDeps>();
   const filterManager = services.data?.query?.filterManager;
-  const { query } = useAnyOfApmParams(
-    '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
+  const { query } = useAnyOfApmParams(...SERVICE_MAP_URL_PARAM_ROUTES);
 
   if (!('rangeFrom' in query && 'rangeTo' in query) || !query.rangeFrom || !query.rangeTo) {
     throw new Error('Expected rangeFrom and rangeTo to be set');

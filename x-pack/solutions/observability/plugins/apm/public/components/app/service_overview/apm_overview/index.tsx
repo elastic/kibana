@@ -33,6 +33,7 @@ import { ServiceOverviewDependenciesTable } from '../service_overview_dependenci
 import { ServiceOverviewErrorsTable } from '../service_overview_errors_table';
 import { ServiceOverviewInstancesChartAndTable } from '../service_overview_instances_chart_and_table';
 import { ServiceOverviewThroughputChart } from '../service_overview_throughput_chart';
+import { ServiceOverviewServiceMapSection } from '../service_overview_service_map_section';
 import { SloCallout } from '../../../shared/slo_callout';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -124,6 +125,9 @@ export function ApmOverview() {
           <AggregatedTransactionsBadge />
         </EuiFlexItem>
       )}
+      <EuiFlexItem>
+        <ServiceOverviewServiceMapSection />
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasBorder={true}>
           <LatencyChart height={latencyChartHeight} kuery={kuery} />
