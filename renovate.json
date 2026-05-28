@@ -26,6 +26,15 @@
       "enabled": false
     },
     {
+      "groupName": "gh-aw",
+      "matchDepNames": ["github/gh-aw"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "backport:skip", "release_note:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "webpack",
       "matchDepNames": [
         "autoprefixer",
@@ -121,7 +130,6 @@
         "@smithy/node-http-handler",
         "@smithy/types",
         "@types/aws4",
-        "ajv",
         "aws4",
         "eventsource-parser",
         "fast-glob",
@@ -818,6 +826,7 @@
         "@apidevtools/swagger-parser",
         "@redocly/cli",
         "openapi-types",
+        "ajv",
         "ajv-draft-04",
         "ajv-formats"
       ],
@@ -2565,6 +2574,18 @@
     }
   ],
   "customManagers": [
+    {
+      "description": "Update gh-aw CLI version used to validate generated agentic workflows",
+      "customType": "regex",
+      "fileMatch": ["^\\.github/workflows/validate-agentic-workflow-locks\\.yml$"],
+      "matchStrings": [
+        "GH_AW_VERSION:\\s(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)"
+      ],
+      "depNameTemplate": "github/gh-aw",
+      "packageNameTemplate": "github/gh-aw",
+      "datasourceTemplate": "github-releases",
+      "versioningTemplate": "semver"
+    },
     {
       "description": "Update Wolfi base image",
       "customType": "regex",

@@ -45,6 +45,7 @@ import { useLicense } from '../hooks/use_license';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { defaultAlertsTableColumns } from '../configuration';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 
 // Search alerts mock
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts');
@@ -225,6 +226,7 @@ describe('AlertsTable', () => {
       fieldFormats: fieldFormatsMock,
       licensing: licensingMock.createStart(),
       notifications: notificationServiceMock.createStartContract(),
+      rendering: renderingServiceMock.create(),
       settings: settingsServiceMock.createStartContract(),
     },
   };

@@ -13,6 +13,7 @@ import {
   withAutoSuggest,
   METADATA_FIELDS,
   ESQL_STRING_TYPES,
+  ESQL_COMMON_NUMERIC_TYPES,
 } from '../../..';
 import { getSafeInsertText } from '../../commands/definitions/utils';
 import { scalarFunctionDefinitions } from '../../commands/definitions/generated/scalar_functions';
@@ -1145,10 +1146,27 @@ describe('autocomplete', () => {
   describe('IN operator with lists', () => {
     testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ',' }]);
 
+    testSuggestions('FROM index | WHERE doubleField IN (ROW /)', [
+      'col0 = ',
+      ...getFunctionSignaturesByReturnType(Location.ROW, 'any', { scalar: true }),
+    ]);
+
     testSuggestions(
       'FROM kibana_sample_data_logs | WHERE agent NOT IN (FROM kibana_sample_data_logs)/',
       ['AND $0', 'OR $0', '| ']
     );
+  });
+
+  describe('ROW operator expressions', () => {
+    testSuggestions('ROW col0 = ABS(/)', [
+      ...getFunctionSignaturesByReturnType(
+        Location.ROW,
+        [...ESQL_COMMON_NUMERIC_TYPES, 'unsigned_long'],
+        { scalar: true },
+        undefined,
+        ['abs']
+      ),
+    ]);
   });
 
   describe('Replacement ranges are attached when needed', () => {

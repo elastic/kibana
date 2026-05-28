@@ -121,6 +121,24 @@ describe('reducer', () => {
     });
   });
 
+  describe('SET_YAML_MODE', () => {
+    it('opens child when enabling yaml mode', () => {
+      const state = createState({ childOpen: false, yamlMode: false });
+      const next = reducer(state, { type: 'SET_YAML_MODE', enabled: true });
+
+      expect(next.yamlMode).toBe(true);
+      expect(next.childOpen).toBe(true);
+    });
+
+    it('closes child when disabling yaml mode', () => {
+      const state = createState({ childOpen: true, yamlMode: true });
+      const next = reducer(state, { type: 'SET_YAML_MODE', enabled: false });
+
+      expect(next.yamlMode).toBe(false);
+      expect(next.childOpen).toBe(false);
+    });
+  });
+
   describe('CLOSE_CHILD', () => {
     it('sets childOpen false without changing other fields', () => {
       const state = createState({ childOpen: true, queryCommitted: true });

@@ -101,6 +101,7 @@ interface RenderAttachmentRendererProps {
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
   isSidebar: boolean;
+  isStreaming: boolean;
 }
 /**
  * Creates a renderer for <render_attachment> tags.
@@ -111,6 +112,7 @@ export const createRenderAttachmentRenderer = ({
   attachmentRefs,
   conversationId,
   isSidebar,
+  isStreaming,
 }: RenderAttachmentRendererProps) => {
   const screenContext = getScreenContext(conversationAttachments);
 
@@ -123,9 +125,7 @@ export const createRenderAttachmentRenderer = ({
 
     const attachment = conversationAttachments?.find((att) => att.id === attachmentId);
 
-    if (!attachment) {
-      // During streaming the conversation query is disabled, so newly created attachments
-      // won't be in conversationAttachments yet. Show a skeleton until data arrives.
+    if (isStreaming || !attachment) {
       return <AttachmentLoadingSkeleton />;
     }
 

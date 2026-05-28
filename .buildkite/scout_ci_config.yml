@@ -16,6 +16,7 @@ plugins:
     - dashboard_markdown
     - data
     - data_views
+    - data_view_management
     - dev_tools
     - discover
     - discover_enhanced
@@ -29,6 +30,7 @@ plugins:
     - grokdebugger
     - index_management
     - infra
+    - ingest_hub
     - ingest_pipelines
     - intercepts
     - home
@@ -62,6 +64,7 @@ plugins:
     - task_manager
     - transform
     - triggers_actions_ui
+    - unified_search
     - upgrade_assistant
     - uptime
     - ux

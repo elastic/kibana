@@ -9,6 +9,8 @@ import React from 'react';
 import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 
 interface ConversationActionButtonProps {
@@ -52,6 +54,11 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
           resetToPendingMessage();
         }
       }}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.CANCEL,
+        detail: 'conversation',
+      })}
     />
   ) : (
     <EuiButtonIcon
@@ -62,6 +69,11 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
       size="s"
       disabled={isSubmitDisabled}
       onClick={onSubmit}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.conversation.SUBMIT,
+        detail: 'conversation',
+      })}
     />
   );
 };
