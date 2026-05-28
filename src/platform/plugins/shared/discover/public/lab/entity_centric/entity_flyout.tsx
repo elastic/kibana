@@ -14,6 +14,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -22,6 +23,7 @@ import {
   EuiFlyoutHeader,
   EuiIcon,
   EuiNotificationBadge,
+  EuiPopover,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -29,6 +31,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { OverviewTab } from './overview_tab';
@@ -55,7 +58,8 @@ type TabId = 'overview' | 'metrics' | 'logs' | 'alerts' | 'relationships' | 'sec
 export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   const [activeTab, setActiveTab] = useState<TabId>('overview');
-  const { agentBuilder } = useDiscoverServices();
+  const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+  const { agentBuilder, notifications } = useDiscoverServices();
 
   const overview = useMemo(() => buildFakeEntityOverview(serviceName), [serviceName]);
   const tabsData = useMemo(() => buildFakeEntityTabsData(serviceName), [serviceName]);
@@ -90,6 +94,110 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
       attachments: [chatAttachment],
     });
   }, [agentBuilder, serviceName, chatAttachment]);
+
+  const closeActionMenu = useCallback(() => setIsActionMenuOpen(false), []);
+
+  const handleActionClick = useCallback(
+    (actionLabel: string) => {
+      closeActionMenu();
+      // Lab prototype: real wiring (deep-links, case creation, rule creation,
+      // annotation flyout) lands once we connect this to real solutions.
+      notifications.toasts.addInfo({
+        title: i18n.translate('discover.entityCentricLab.flyout.takeActionToastTitle', {
+          defaultMessage: '{actionLabel}',
+          values: { actionLabel },
+        }),
+        text: i18n.translate('discover.entityCentricLab.flyout.takeActionToastText', {
+          defaultMessage: 'Action "{actionLabel}" triggered for "{serviceName}" (lab prototype).',
+          values: { actionLabel, serviceName },
+        }),
+      });
+    },
+    [closeActionMenu, notifications, serviceName]
+  );
+
+  const actionPanels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
+    const viewInApmLabel = i18n.translate('discover.entityCentricLab.flyout.actions.viewInApm', {
+      defaultMessage: 'View in APM',
+    });
+    const viewInLogsExplorerLabel = i18n.translate(
+      'discover.entityCentricLab.flyout.actions.viewInLogsExplorer',
+      { defaultMessage: 'View in Logs Explorer' }
+    );
+    const viewInInfrastructureLabel = i18n.translate(
+      'discover.entityCentricLab.flyout.actions.viewInInfrastructure',
+      { defaultMessage: 'View in Infrastructure' }
+    );
+    const openRelatedDashboardLabel = i18n.translate(
+      'discover.entityCentricLab.flyout.actions.openRelatedDashboard',
+      { defaultMessage: 'Open related dashboard' }
+    );
+    const addToCaseLabel = i18n.translate('discover.entityCentricLab.flyout.actions.addToCase', {
+      defaultMessage: 'Add to case',
+    });
+    const createAlertRuleLabel = i18n.translate(
+      'discover.entityCentricLab.flyout.actions.createAlertRule',
+      { defaultMessage: 'Create alert rule' }
+    );
+    const annotateDeploymentLabel = i18n.translate(
+      'discover.entityCentricLab.flyout.actions.annotateDeployment',
+      { defaultMessage: 'Annotate deployment' }
+    );
+
+    return [
+      {
+        id: 0,
+        title: i18n.translate('discover.entityCentricLab.flyout.actions.panelTitle', {
+          defaultMessage: 'Take action',
+        }),
+        items: [
+          {
+            name: viewInApmLabel,
+            icon: 'apmApp',
+            'data-test-subj': 'entityCentricLabFlyoutAction-viewInApm',
+            onClick: () => handleActionClick(viewInApmLabel),
+          },
+          {
+            name: viewInLogsExplorerLabel,
+            icon: 'logoLogging',
+            'data-test-subj': 'entityCentricLabFlyoutAction-viewInLogs',
+            onClick: () => handleActionClick(viewInLogsExplorerLabel),
+          },
+          {
+            name: viewInInfrastructureLabel,
+            icon: 'logoMetrics',
+            'data-test-subj': 'entityCentricLabFlyoutAction-viewInInfrastructure',
+            onClick: () => handleActionClick(viewInInfrastructureLabel),
+          },
+          {
+            name: openRelatedDashboardLabel,
+            icon: 'dashboardApp',
+            'data-test-subj': 'entityCentricLabFlyoutAction-openDashboard',
+            onClick: () => handleActionClick(openRelatedDashboardLabel),
+          },
+          { isSeparator: true, key: 'sep-manage' },
+          {
+            name: addToCaseLabel,
+            icon: 'casesApp',
+            'data-test-subj': 'entityCentricLabFlyoutAction-addToCase',
+            onClick: () => handleActionClick(addToCaseLabel),
+          },
+          {
+            name: createAlertRuleLabel,
+            icon: 'bell',
+            'data-test-subj': 'entityCentricLabFlyoutAction-createAlertRule',
+            onClick: () => handleActionClick(createAlertRuleLabel),
+          },
+          {
+            name: annotateDeploymentLabel,
+            icon: 'tag',
+            'data-test-subj': 'entityCentricLabFlyoutAction-annotateDeployment',
+            onClick: () => handleActionClick(annotateDeploymentLabel),
+          },
+        ],
+      },
+    ];
+  }, [handleActionClick]);
 
   const tabs = useMemo<Array<{ id: TabId; label: string; appendBadge?: number }>>(
     () => [
@@ -265,17 +373,32 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
             ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              iconType="arrowDown"
-              iconSide="right"
-              data-test-subj="entityCentricLabFlyoutTakeAction"
-              onClick={() => undefined}
+            <EuiPopover
+              button={
+                <EuiButton
+                  fill
+                  iconType="arrowDown"
+                  iconSide="right"
+                  data-test-subj="entityCentricLabFlyoutTakeAction"
+                  onClick={() => setIsActionMenuOpen((open) => !open)}
+                >
+                  {i18n.translate('discover.entityCentricLab.flyout.takeAction', {
+                    defaultMessage: 'Take action',
+                  })}
+                </EuiButton>
+              }
+              isOpen={isActionMenuOpen}
+              closePopover={closeActionMenu}
+              panelPaddingSize="none"
+              anchorPosition="upRight"
+              aria-label={i18n.translate(
+                'discover.entityCentricLab.flyout.takeActionMenuAriaLabel',
+                { defaultMessage: 'Take action menu' }
+              )}
+              data-test-subj="entityCentricLabFlyoutTakeActionMenu"
             >
-              {i18n.translate('discover.entityCentricLab.flyout.takeAction', {
-                defaultMessage: 'Take action',
-              })}
-            </EuiButton>
+              <EuiContextMenu initialPanelId={0} panels={actionPanels} size="s" />
+            </EuiPopover>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
