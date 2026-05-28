@@ -68,7 +68,9 @@ describe('createChangePointDataSourceProfileProvider', () => {
         expect(result.isMatch).toBe(true);
         if (result.isMatch) {
           expect(result.context.chartSectionProps$).toBeInstanceOf(BehaviorSubject);
-          expect((result.context.chartSectionProps$ as BehaviorSubject<unknown>).getValue()).toBeUndefined();
+          expect(
+            (result.context.chartSectionProps$ as BehaviorSubject<unknown>).getValue()
+          ).toBeUndefined();
         }
       });
 
