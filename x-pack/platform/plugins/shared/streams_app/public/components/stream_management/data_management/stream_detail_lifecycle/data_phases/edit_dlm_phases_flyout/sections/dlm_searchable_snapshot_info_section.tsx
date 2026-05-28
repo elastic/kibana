@@ -6,16 +6,9 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiText,
-  EuiTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { SearchableSnapshotRepositoryInfo } from '@kbn/data-lifecycle-phases';
 import { FrozenDefaultRepositoryRequiredCallout } from '../../../common/data_lifecycle/frozen_default_repository_required_callout';
 
 export interface DlmSearchableSnapshotInfoSectionProps {
@@ -36,13 +29,6 @@ export const DlmSearchableSnapshotInfoSection = ({
   isRefreshing,
 }: DlmSearchableSnapshotInfoSectionProps) => {
   const titleId = useGeneratedHtmlId({ prefix: `${dataTestSubj}DlmSearchableSnapshotTitle` });
-
-  const manageLink = (chunks: React.ReactNode) =>
-    manageRepositoriesHref ? (
-      <EuiLink href={manageRepositoriesHref}>{chunks}</EuiLink>
-    ) : (
-      <>{chunks}</>
-    );
 
   return (
     <EuiFlexGroup
@@ -68,13 +54,9 @@ export const DlmSearchableSnapshotInfoSection = ({
 
       {defaultRepositoryName ? (
         <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.streams.editDlmPhasesFlyout.searchableSnapshotBody"
-            defaultMessage="All streams using a data stream lifecycle use the deployment's default snapshot repository, ‘{defaultRepository}’. To change the default repository, <manageLink>manage your repositories</manageLink>."
-            values={{
-              defaultRepository: defaultRepositoryName,
-              manageLink,
-            }}
+          <SearchableSnapshotRepositoryInfo
+            defaultRepository={defaultRepositoryName}
+            manageRepositoriesHref={manageRepositoriesHref}
           />
         </EuiText>
       ) : (
