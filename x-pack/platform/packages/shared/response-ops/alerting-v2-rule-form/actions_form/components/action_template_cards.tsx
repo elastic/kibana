@@ -6,20 +6,18 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { INLINE_ACTION_STEP_DEFINITIONS } from '../registry';
-import type { ActionDraft } from '../types';
-
-export type ActionTemplateId = 'existing-workflow' | `inline-${'slack' | 'email'}`;
+import type { ActionDraft, ActionTemplateId } from '../types';
 
 interface ActionTemplateCard {
   id: ActionTemplateId;
@@ -33,15 +31,11 @@ export const ACTION_TEMPLATE_CARDS: readonly ActionTemplateCard[] = [
     id: 'existing-workflow',
     label: i18n.translate(
       'xpack.responseOps.alertingV2RuleForm.actionForm.card.existingWorkflow.label',
-      {
-        defaultMessage: 'Workflow',
-      }
+      { defaultMessage: 'Workflow' }
     ),
     description: i18n.translate(
       'xpack.responseOps.alertingV2RuleForm.actionForm.card.existingWorkflow.description',
-      {
-        defaultMessage: 'Select an existing workflow',
-      }
+      { defaultMessage: 'Select an existing workflow' }
     ),
     iconType: 'workflowsApp',
   },
@@ -94,11 +88,11 @@ export const ActionTemplateCards = ({ onPick, onCancel }: ActionTemplateCardsPro
     {onCancel && (
       <>
         <EuiSpacer size="s" />
-        <EuiLink onClick={onCancel} data-test-subj="actionFormCancelPicker">
+        <EuiButtonEmpty onClick={onCancel} data-test-subj="actionFormCancelPicker">
           {i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.list.cancelPicker', {
             defaultMessage: 'Cancel',
           })}
-        </EuiLink>
+        </EuiButtonEmpty>
       </>
     )}
   </>

@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ActionRow } from './components/action_row';
-import { ActionTemplateCards, type ActionTemplateId } from './components/action_template_cards';
+import { ActionTemplateCards } from './components/action_template_cards';
 import { getInlineActionStepDefinition } from './registry';
-import type { ActionDraft, ActionFormValue, InlineActionStepType } from './types';
+import type { ActionDraft, ActionFormValue, ActionTemplateId, InlineActionStepType } from './types';
 import { isActionValid } from './types';
 
 const MAX_ACTIONS = 10;

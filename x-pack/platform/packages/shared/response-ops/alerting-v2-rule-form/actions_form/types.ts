@@ -24,6 +24,8 @@ export interface InlineWorkflowActionDraft {
 
 export type ActionDraft = ExistingWorkflowActionDraft | InlineWorkflowActionDraft;
 
+export type ActionTemplateId = 'existing-workflow' | `inline-${InlineActionStepType}`;
+
 export type ActionFormValue = ActionDraft[];
 
 const HAS_FILLED_VALUE_RE = /"[^"]+"/;
