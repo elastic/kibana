@@ -109,7 +109,8 @@
     "@kbn/core-user-profile-browser",
     "@kbn/code-editor",
     "@kbn/workflows-yaml",
-    "@kbn/workflows-ui"
+    "@kbn/workflows-ui",
+    "@kbn/triggers-actions-ui-plugin"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
