@@ -86,7 +86,7 @@ export const SystemActionTypeForm = ({
   ruleTypeId,
   disableErrorMessages,
 }: SystemActionTypeFormProps) => {
-  const { http, uiSettings } = useKibana().services;
+  const { http } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},

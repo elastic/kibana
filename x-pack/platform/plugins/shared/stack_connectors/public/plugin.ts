@@ -43,7 +43,6 @@ export class StackConnectorsPublicPlugin
         validateEmailAddresses: actions.validateEmailAddresses,
       },
     });
-
   }
 
   public start() {}
