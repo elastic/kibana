@@ -10,7 +10,8 @@ import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
-export const RECENT_DASHBOARDS_EXTENSION_POINT_ID = 'security.dashboards.recent';
+export const RECENT_DASHBOARDS_EXTENSION_POINT_ID =
+  'xpack.security.nav.dashboards.extensions.recent';
 
 export const createDashboardsNavigationTree = (): NodeDefinition => ({
   id: SecurityPageName.dashboards,

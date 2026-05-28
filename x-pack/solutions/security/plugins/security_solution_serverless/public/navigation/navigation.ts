@@ -10,12 +10,15 @@ import { firstValueFrom } from 'rxjs';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AIChatExperience } from '@kbn/ai-assistant-common';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
-import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
+import {
+  AGENT_BUILDER_NAV_AT_TOP_FLAG,
+  recentDashboardsNavExtension,
+} from '@kbn/navigation-plugin/public';
 import { ProductLine } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
 import { type Services } from '../common/services';
 import { createAiNavigationTree } from './ai_navigation/ai_navigation_tree';
-import { createNavigationTree } from './navigation_tree';
+import { createNavigationTree, RECENT_DASHBOARDS_EXTENSION_POINT_ID } from './navigation_tree';
 
 export const registerSolutionNavigation = async (
   services: Services,
@@ -55,5 +58,7 @@ export const registerSolutionNavigation = async (
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);
 
-  services.serverless.initNavigation('security', Rx.of(navigationTree));
+  services.serverless.initNavigation('security', Rx.of(navigationTree), {
+    [RECENT_DASHBOARDS_EXTENSION_POINT_ID]: recentDashboardsNavExtension,
+  });
 };

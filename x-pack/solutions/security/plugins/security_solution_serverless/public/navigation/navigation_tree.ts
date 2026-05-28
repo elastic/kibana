@@ -14,7 +14,10 @@ import {
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
-import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
+import {
+  defaultNavigationTree,
+  RECENT_DASHBOARDS_EXTENSION_POINT_ID,
+} from '@kbn/security-solution-navigation/navigation_tree';
 import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 
 import { type Services } from '../common/services';
@@ -24,6 +27,8 @@ const SOLUTION_NAME = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.projectType.title',
   { defaultMessage: 'Security' }
 );
+
+export { RECENT_DASHBOARDS_EXTENSION_POINT_ID };
 
 export const createNavigationTree = async (
   services: Services,
