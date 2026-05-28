@@ -230,8 +230,8 @@ describe('Case View Attachments tab', () => {
 
     const emptyPrompt = screen.getByTestId('case-view-attachments-no-search-results');
     expect(emptyPrompt).toBeInTheDocument();
-    expect(emptyPrompt).toHaveTextContent('No results found');
-    expect(emptyPrompt).toHaveTextContent('foobar');
+    expect(emptyPrompt).toHaveTextContent('No results match your search criteria');
+    expect(emptyPrompt).toHaveTextContent('Try modifying your search.');
     expect(screen.queryByTestId('case-view-attachment-accordion-file')).not.toBeInTheDocument();
   });
 

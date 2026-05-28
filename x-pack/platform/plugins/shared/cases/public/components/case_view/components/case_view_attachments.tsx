@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFieldSearch, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFieldSearch,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiImage,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
+import noResultsIllustration from '../../../assets/illustration_product_no_results_magnifying_glass.svg';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
@@ -37,6 +46,7 @@ export const CaseViewAttachments = ({
   searchTerm,
   onUpdateField,
 }: CaseViewAttachmentsProps) => {
+  const { euiTheme } = useEuiTheme();
   const { unifiedAttachmentTypeRegistry } = useCasesContext();
   const { observablesAuthorized, isObservablesFeatureEnabled } = useCasesFeatures();
   const { data: fileStats } = useGetCaseFileStats({ caseId: caseData.id, searchTerm });
@@ -113,10 +123,19 @@ export const CaseViewAttachments = ({
         {showNoResults ? (
           <EuiEmptyPrompt
             data-test-subj="case-view-attachments-no-search-results"
-            iconType="search"
-            titleSize="xs"
-            title={<h3>{NO_SEARCH_RESULTS_TITLE}</h3>}
-            body={<p>{NO_SEARCH_RESULTS_BODY(searchTerm ?? '')}</p>}
+            layout="horizontal"
+            color="transparent"
+            css={{ paddingBlockStart: euiTheme.size.xxl }}
+            icon={
+              <EuiImage
+                css={{ width: 200, height: 148 }}
+                size="200"
+                alt=""
+                url={noResultsIllustration}
+              />
+            }
+            title={<h2>{NO_SEARCH_RESULTS_TITLE}</h2>}
+            body={<p>{NO_SEARCH_RESULTS_BODY}</p>}
           />
         ) : (
           <EuiFlexGroup direction="column" gutterSize="m">
