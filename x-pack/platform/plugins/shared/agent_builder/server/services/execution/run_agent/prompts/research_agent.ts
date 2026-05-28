@@ -14,7 +14,7 @@ import { attachmentTypeInstructions } from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
-import { getFileSystemInstructions } from '../../runner/store';
+import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
@@ -101,7 +101,7 @@ Before each tool call, assess whether your current approach is making progress:
 - **Loop**: if you are repeating the same sequence of tool calls, treat it as a signal to change approach.
 - **Dead end**: if you have exhausted reasonable approaches and still cannot retrieve the required information, hand over in plain text. Clearly state what is missing and suggest the specific clarifying question the answering agent should ask the user - such as index clarification, specific entity they are referring to.
 
-${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
+${experimentalFeatures.filestore ? getFileSystemInstructions() : ''}
 
 ${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
 

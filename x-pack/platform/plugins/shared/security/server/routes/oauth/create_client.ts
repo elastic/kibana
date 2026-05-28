@@ -13,6 +13,7 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineCreateOAuthClientRoute({
   router,
+  config,
   getAuthenticationService,
 }: RouteDefinitionParams) {
   router.post(
@@ -42,7 +43,17 @@ export function defineCreateOAuthClientRoute({
             });
           }
 
-          const result = await oauth.createClient(request, request.body);
+          const resource = config.mcp?.oauth2?.metadata?.resource;
+          if (!resource) {
+            return response.notFound({
+              body: {
+                message:
+                  'OAuth management is not available: MCP protected resource metadata is not configured',
+              },
+            });
+          }
+
+          const result = await oauth.createClient(request, { ...request.body, resource });
           if (!result) {
             return response.notFound({
               body: {

@@ -122,6 +122,7 @@ export async function sendEmailWithExchange(
     logger,
     configurationUtilities,
     credentials: {
+      type: 'client_secret',
       config: {
         clientId: clientId as string,
       },
