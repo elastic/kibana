@@ -27,8 +27,8 @@ describe('ES|QL validation integration suites', () => {
   const clientErrorsWhenEsAccepts: string[] = [];
   const setup: Setup = createValidationTestSetup({
     afterValidate: async ({ query, result, hasUnmodifiedDefaultCallbacks }) => {
-      // Custom callback tests model synthetic metadata or licenses; skip them so
-      // the ES comparison only covers queries using the real integration setup.
+      // Integration tests compare with real ES, while validateQuery still uses unit-test mocks.
+      // This flag lets us skip ES checks when a unit test overrides those mocks.
       if (!hasUnmodifiedDefaultCallbacks) {
         return;
       }
@@ -44,7 +44,8 @@ describe('ES|QL validation integration suites', () => {
 
       const esqlResponse = await esqlEnv.sendEsqlQuery(query);
 
-      // If Elasticsearch accepts the query, client validation must not report errors.
+      // Only client false positives are blocking because they reject queries ES would accept.
+      // False negatives are weaker signals here because they do not block valid user queries.
       if (!esqlResponse.error) {
         clientErrorsWhenEsAccepts.push(
           `Elasticsearch accepted the query but client validation reported errors: ${JSON.stringify(
@@ -61,6 +62,7 @@ describe('ES|QL validation integration suites', () => {
   });
 
   afterAll(async () => {
+    // Delete the test data first, then stop the ES cluster started for this suite.
     await esqlEnv?.cleanup();
     await esqlEnv?.integrationEnv.stop();
   });

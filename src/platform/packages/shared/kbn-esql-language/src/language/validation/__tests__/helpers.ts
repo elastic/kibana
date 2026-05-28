@@ -54,7 +54,7 @@ const mustBeAwaited = <T>(promise: Promise<T>, fnName: string): Promise<T> => {
   } as Promise<T>;
 };
 
-export interface ValidationTestSetup {
+interface ValidationTestSetup {
   callbacks: ESQLCallbacks;
   validate: (query: string, cb?: ESQLCallbacks) => Promise<ValidationResult>;
   expectErrors: (
@@ -70,7 +70,6 @@ export type Setup = () => Promise<ValidationTestSetup>;
 interface CreateValidationTestSetupOptions {
   afterValidate?: (context: {
     query: string;
-    callbacks: ESQLCallbacks;
     result: ValidationResult;
     hasUnmodifiedDefaultCallbacks: boolean;
   }) => Promise<void> | void;
@@ -102,7 +101,6 @@ export const createValidationTestSetup =
       const promise = validateQuery(query, cb).then(async (result) => {
         await afterValidate?.({
           query,
-          callbacks: cb,
           result,
           hasUnmodifiedDefaultCallbacks: hasUnmodifiedDefaultCallbacks(cb),
         });

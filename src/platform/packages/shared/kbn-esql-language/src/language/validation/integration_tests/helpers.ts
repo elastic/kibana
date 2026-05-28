@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EsqlQueryRequest,
-  EsqlQueryResponse,
-  MappingProperty,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlQueryResponse, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { createTestEsCluster } from '@kbn/test-es-server';
 import { ToolingLog } from '@kbn/tooling-log';
 import { ESQL_NAMED_PARAMS_TYPE } from '../../../commands/definitions/types';
@@ -42,20 +38,8 @@ const enrichIndexFields = [
   ...enrichFieldsHelper,
   { name: policies[0].matchField, type: 'keyword' },
 ];
-const timeRangeParams: NonNullable<EsqlQueryRequest['params']> = [
-  {
-    _tstart: '2026-04-20T23:00:00.000Z',
-  },
-  {
-    _tend: '2026-05-20T09:09:08.139Z',
-  },
-];
-
 const isIndexableField = ({ type }: { type: string }) =>
   !type.startsWith('counter_') && !nonIndexableFieldTypes.has(type);
-
-// Keep this local to avoid a circular package dependency on @kbn/esql-utils.
-const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
 
 const getEsqlErrorReason = (error: unknown): string => {
   const responseError = error as EsqlErrorResponse;
@@ -66,14 +50,6 @@ const getEsqlErrorReason = (error: unknown): string => {
   );
 };
 
-const getParams = (query: string): NonNullable<EsqlQueryRequest['params']> => {
-  if (!hasStartEndParams(query)) {
-    return [];
-  }
-
-  return timeRangeParams;
-};
-
 const createIndexRequest = (index: string, fieldList: Array<{ name: string; type: string }>) => {
   return {
     index,
@@ -81,8 +57,6 @@ const createIndexRequest = (index: string, fieldList: Array<{ name: string; type
       properties: fieldList.reduce((memo: Record<string, MappingProperty>, { name, type }) => {
         let esType = type;
 
-        // Unit-test fields are reused as ES mappings; these ES|QL names are
-        // not valid mapping types, so translate them before index creation.
         if (type === 'cartesian_point') {
           esType = 'point';
         }
@@ -114,14 +88,11 @@ const setupIntegrationEnv = async () => {
     }),
   });
 
-  // The ES test cluster startup time varies a lot in CI; align Jest timeout
-  // with the cluster's own start timeout plus some buffer.
-  jest.setTimeout(es.getStartTimeout() + 100_000);
-
   await es.start();
 
   const esClient = es.getClient();
   const stop = async () => {
+    // Remove the ES test install after the suite to avoid leaving test artifacts behind.
     await es.cleanup();
   };
 
@@ -197,10 +168,8 @@ export const setupEsqlEnv = async () => {
     error: { message: string } | undefined;
   }> => {
     try {
-      const params = getParams(query);
       const resp = await es.esql.query({
         query,
-        ...(params.length ? { params } : {}),
       });
       return { resp, error: undefined };
     } catch (error) {
