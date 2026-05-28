@@ -20,31 +20,72 @@ const schema = z.object({
     ),
 });
 
-// NOTE: description below is a draft against the design's 7-point content
-// checklist. Final wording is tuned manually after implementation.
-const description = [
-  'Run a bash command in a sandboxed shell. The shell can compose tool calls with standard Unix utilities (grep, awk, jq, tee, etc.).',
-  '',
-  'Filesystem layout:',
-  '- /workspace: persistent across rounds AND across conversation resumptions',
-  '- /tool_calls/<tool_id>/<tool_call_id>/<tool_result_id>.json: read-only view of prior tool results in this conversation',
-  '- /skills/...: read-only skill files',
-  '- /tmp, /home/user, other paths: EPHEMERAL — gone after this call',
-  '- Default cwd is /tmp; use absolute paths under /workspace to persist',
-  '',
-  'Use exec_tool to invoke another Agent Builder tool from the shell:',
-  "  exec_tool <tool_id> --args='{...}'",
-  '  exec_tool platform_core_generate_esql --args=\'{"query":"..."}\' | jq',
-  '',
-  'Both sanitized tool names (as listed in your tools) and underscore-namespaced internal IDs are accepted.',
-  '',
-  'Output is JSON-serialized to stdout on success; the command exit code is returned.',
-  'Stdout and stderr are truncated past a token safeguard for the model — the truncated flag will be set in the result.',
-  '',
-  'NOT available: python, js-exec, sqlite3, curl, html-to-markdown, network access.',
-  '',
-  'Prefer bash for composition, piping, and writing files. Prefer read_file for a single-file read with token-managed output.',
-].join('\n');
+const description = `Run a bash command in a sandboxed shell environment.
+
+The bash environment is using the virtual filesystem (with /workspace, /tool_calls, /skills, /tmp...)
+Default cwd is /tmp; use absolute paths under /workspace to persist
+
+## Supported commands
+
+### File Operations
+
+cat, cp, file, ln, ls, mkdir, mv, readlink, rm, rmdir, split, stat, touch, tree
+
+### Text Processing
+
+awk, base64, column, comm, cut, diff, expand, fold, grep, egrep, fgrep, head, join, md5sum, nl, od, paste, printf, rev, rg, sed, sha1sum, sha256sum, sort, strings, tac, tail, tr, unexpand, uniq, wc, xargs
+
+### Data Processing
+
+jq, xan, yq
+
+### Navigation & Environment
+
+basename, cd, dirname, du, echo, env, export, find, hostname, printenv, pwd, tee
+
+### Shell Utilities
+
+alias, bash, chmod, clear, date, expr, false, help, history, seq, sh, sleep, time, timeout, true, unalias, which, whoami
+
+### Compression & Archives
+
+gzip, gunzip, zcat
+
+All commands support --help for usage information.
+
+### Shell Features
+
+- **Pipes**: cmd1 | cmd2
+- **Redirections**: >, >>, 2>, 2>&1, <
+- **Command chaining**: &&, ||, ;
+- **Variables**: $VAR, \${VAR}, \${VAR:-default}
+- **Positional parameters**: $1, $2, $@, $#
+- **Glob patterns**: *, ?, [...]
+- **If statements**: if COND; then CMD; elif COND; then CMD; else CMD; fi
+- **Functions**: function name { ... } or name() { ... }
+- **Local variables**: local VAR=value
+- **Loops**: for, while, until
+- **Symbolic links**: ln -s target link
+- **Hard links**: ln target link
+
+## Custom commands
+
+### exec_tool
+
+Use exec_tool to invoke another tool from the shell:
+  exec_tool <tool_id> --args='{...}'
+  exec_tool platform_core_generate_esql --args='{"query":"..."}' | jq
+
+Both sanitized tool names (as listed in your tools) and underscore-namespaced internal IDs are accepted.
+
+Output is JSON-serialized to stdout on success; the command exit code is returned.
+Stdout and stderr are truncated past a token safeguard for the model — the truncated flag will be set in the result.
+
+## Guidelines
+
+- Prefer bash tool for composition, piping, and writing files. Prefer read_file tool for a single-file read.
+- Use /workspace for persistent files you're planning to re-use, use /tmp for temporary file you won't need anymore
+- /tool_calls and /skills are read only folders`;
 
 export const createBashTool = ({
   bashService,

@@ -10,7 +10,7 @@ import {
   truncateTokens,
 } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
 
-export const SAFEGUARD_TOKEN_COUNT = 10_000;
+export const SAFEGUARD_TOKEN_COUNT = 20_000;
 
 export interface TruncatedOutput {
   stdout: string;

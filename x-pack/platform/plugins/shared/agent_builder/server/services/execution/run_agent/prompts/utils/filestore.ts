@@ -6,7 +6,6 @@
  */
 
 import { internalTools } from '@kbn/agent-builder-common/tools';
-import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 
@@ -27,29 +26,21 @@ export const getFileSystemInstructions = ({
 }: {
   bashEnabled?: boolean;
 } = {}): string => {
-  const bashSection = bashEnabled
-    ? `
-  - ${tools.bash}: run a bash command in a sandboxed shell. Use for composition, piping, and writing files. See the tool description for the full layout and capabilities.`
+  const bashToolSection = bashEnabled
+    ? `- ${tools.bash}: run a bash command in a sandboxed shell. Use for composition, piping, and writing files. Refer to the tool description for the full capabilities.`
     : '';
 
   return cleanPrompt(`
-  ## FILESYSTEM
+  ## FILESYSTEM (VFS)
 
-  You have access to a unified virtual filesystem with three areas:
+  You have access to a virtual filesystem with the following root folders:
   - /workspace: persistent across rounds and conversation resumptions — anything you write here is saved.
   - /tool_calls: read-only view of prior tool results in this conversation. Path convention: /tool_calls/{tool_id}/{tool_call_id}/{tool_result_id}.json
   - /skills: read-only skill files (main file: SKILL.md, plus subfiles).
+  - /tmp and /home/user: ephemeral folders — not persisted between rounds.
 
-  Other paths (/tmp, /home/user) exist but are ephemeral — gone after the current call.
-
-  Tools:
-  - ${tools.readFile}: read a single file's content (with a token safeguard, output may be truncated).${bashSection}
-
-  Note: Results from tools called before the last user message will be excluded from the conversation. To access them, use ${tools.readFile} (or bash) against the appropriate /tool_calls/... path.
-
-  ### File types in /tool_calls and /skills
-
-  - "${FileEntryType.toolResult}": prior tool call results.
-  - "${FileEntryType.skill}" / "${FileEntryType.skillReferenceContent}": main and additional skill files.
-  `);
+  Available tools:
+  - ${tools.readFile}: read a single file's content.
+  ${bashToolSection}
+`);
 };

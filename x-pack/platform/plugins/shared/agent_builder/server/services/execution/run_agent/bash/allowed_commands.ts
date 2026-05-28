@@ -15,12 +15,8 @@ import type { CommandName } from 'just-bash';
  *  - python, python3 — Python via CPython WASM; same WASM issue + security surface
  *  - js-exec, node — JS/TS via QuickJS; security surface, not needed
  *  - curl, html-to-markdown — network access, needs explicit security model
- *  - ln, readlink — symlinks aren't persisted in the workspace document schema,
- *    so they'd be silently dropped on flush. Footgun; re-enable when symlink
- *    persistence is designed.
- *  - tar — pulls in just-bash's optional native deps (`node-liblzma` LGPL-3.0,
- *    `@mongodb-js/zstd`) for compressed-archive support. Disabled until we
- *    decide to take those deps; agents can still gunzip/gzip plain streams.
+ *  - ln, readlink — symlinks aren't supported by workspace volume / persistence,
+ *  - tar — pulls in `node-liblzma` and `@mongodb-js/zstd`for compressed-archive support. Disabled until we
  */
 export const ALLOWED_BASH_COMMANDS: readonly CommandName[] = [
   'alias',
