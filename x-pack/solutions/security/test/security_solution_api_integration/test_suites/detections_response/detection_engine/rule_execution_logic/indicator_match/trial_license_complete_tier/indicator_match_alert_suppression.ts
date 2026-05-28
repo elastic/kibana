@@ -37,12 +37,14 @@ import {
   dataGeneratorFactory,
 } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
 
   const {
     indexListOfDocuments: indexListOfSourceDocuments,
@@ -2497,17 +2499,33 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('@skipInServerlessMKI alerts should be enriched', () => {
+        describe('alerts should be enriched', () => {
           before(async () => {
-            await esArchiver.load(
-              'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
-            );
+            await entityStoreV2.setup({
+              hosts: [
+                {
+                  host: { name: 'zeek-sensor-amsterdam' },
+                  entity: {
+                    id: 'host:zeek-sensor-amsterdam',
+                    type: 'host',
+                    risk: { calculated_level: 'Critical', calculated_score_norm: 70 },
+                  },
+                },
+              ],
+              users: [
+                {
+                  user: { name: 'root' },
+                  entity: {
+                    type: 'user',
+                    risk: { calculated_level: 'Low', calculated_score_norm: 11 },
+                  },
+                },
+              ],
+            });
           });
 
           after(async () => {
-            await esArchiver.unload(
-              'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
-            );
+            await entityStoreV2.teardown();
           });
 
           it('should be enriched with host risk score', async () => {
@@ -2570,17 +2588,28 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        describe('@skipInServerlessMKI with asset criticality', () => {
+        describe('with asset criticality', () => {
           before(async () => {
-            await esArchiver.load(
-              'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-            );
+            await entityStoreV2.setup({
+              hosts: [
+                {
+                  host: { name: 'zeek-sensor-amsterdam' },
+                  entity: { id: 'host:zeek-sensor-amsterdam', type: 'host' },
+                  asset: { criticality: 'low_impact' },
+                },
+              ],
+              users: [
+                {
+                  user: { name: 'root' },
+                  entity: { type: 'user' },
+                  asset: { criticality: 'extreme_impact' },
+                },
+              ],
+            });
           });
 
           after(async () => {
-            await esArchiver.unload(
-              'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-            );
+            await entityStoreV2.teardown();
           });
 
           it('should be enriched alert with criticality_level', async () => {

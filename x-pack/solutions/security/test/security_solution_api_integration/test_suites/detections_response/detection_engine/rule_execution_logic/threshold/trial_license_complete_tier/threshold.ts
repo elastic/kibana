@@ -436,8 +436,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with host risk index', () => {
-      before(async function () {
-        const available = await entityStoreV2.setup({
+      before(async () => {
+        await entityStoreV2.setup({
           hosts: [
             {
               host: { name: LONDON_HOST_NAME, id: [LONDON_HOST_ID] },
@@ -457,7 +457,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
-        if (!available) this.skip();
       });
 
       after(async () => {
@@ -483,9 +482,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with asset criticality', () => {
-      before(async function () {
+      before(async () => {
         // Only the first alert (sorted by host.name) is asserted on — suricata-sensor-london.
-        const available = await entityStoreV2.setup({
+        await entityStoreV2.setup({
           hosts: [
             {
               host: { name: LONDON_HOST_NAME, id: [LONDON_HOST_ID] },
@@ -494,7 +493,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
-        if (!available) this.skip();
       });
 
       after(async () => {

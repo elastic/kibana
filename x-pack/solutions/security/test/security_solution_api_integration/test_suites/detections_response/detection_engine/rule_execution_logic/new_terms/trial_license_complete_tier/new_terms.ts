@@ -1047,9 +1047,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('alerts should be be enriched', () => {
-      before(async function () {
+      before(async () => {
         // The first new term alert uses auditbeat data (host.id present), so EUID is id-based.
-        const available = await entityStoreV2.setup({
+        await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
@@ -1061,7 +1061,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
-        if (!available) this.skip();
       });
 
       after(async () => {
@@ -1085,12 +1084,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with asset criticality', () => {
-      before(async function () {
+      before(async () => {
         await esArchiver.load(
           'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
         );
         // Dynamic docs use host.name only (no host.id) → name-based EUID.
-        const available = await entityStoreV2.setup({
+        await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME },
@@ -1106,12 +1105,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
-        if (!available) {
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
-          );
-          this.skip();
-        }
       });
 
       after(async () => {

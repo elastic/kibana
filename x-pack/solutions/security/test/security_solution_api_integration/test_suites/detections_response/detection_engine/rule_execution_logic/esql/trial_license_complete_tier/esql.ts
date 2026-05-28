@@ -1974,8 +1974,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('alerts enrichment', () => {
-      before(async function () {
-        const available = await entityStoreV2.setup({
+      before(async () => {
+        await entityStoreV2.setup({
           hosts: [
             {
               host: { name: 'host-0' },
@@ -1987,7 +1987,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
-        if (!available) this.skip();
       });
 
       after(async () => {
@@ -2024,8 +2023,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with asset criticality', () => {
-      before(async function () {
-        const available = await entityStoreV2.setup({
+      before(async () => {
+        await entityStoreV2.setup({
           hosts: [
             {
               host: { name: 'host-0' },
@@ -2034,7 +2033,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
-        if (!available) this.skip();
       });
 
       after(async () => {

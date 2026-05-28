@@ -1720,10 +1720,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('alert enrichment', () => {
-        before(async function () {
+        before(async () => {
           // Dynamic docs in this describe only have host.name / user.name (no host.id),
           // so the EUID is name-based.
-          const available = await entityStoreV2.setup({
+          await entityStoreV2.setup({
             hosts: [
               {
                 host: { name: 'suricata-zeek-sensor-toronto' },
@@ -1747,7 +1747,6 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
           });
-          if (!available) this.skip();
         });
 
         after(async () => {

@@ -49,7 +49,6 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'endpointExceptionsMovedUnderManagement',
             'ruleChangesHistoryEnabled',
-            'disable:entityAnalyticsEntityStoreV2',
           ])}`,
           '--xpack.alerting.ruleChangeTracking.enabled=true',
           ...(options.kbnTestServerArgs || []),
