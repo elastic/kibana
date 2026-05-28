@@ -64,6 +64,13 @@ export const metadataSchema = z
       .min(1)
       .optional()
       .describe('Tags for categorization, e.g. ["production", "infra"].'),
+    builder_type: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
+      ),
   })
   .strict()
   .describe('Rule metadata.');
@@ -294,7 +301,10 @@ export type ImmutableRuleField = (typeof IMMUTABLE_RULE_FIELDS)[number];
 
 export const updateRuleDataSchema = z
   .object({
-    metadata: metadataSchema.partial().optional(),
+    metadata: metadataSchema
+      .partial()
+      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),
     evaluation: z
@@ -340,13 +350,13 @@ export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */
 export const findRulesParamsSchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return.'),
+  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
   perPage: z.coerce
     .number()
     .min(1)
     .max(1000)
     .optional()
-    .describe('The number of rules to return per page.'),
+    .describe('The number of rules to return per page. Defaults to 20.'),
   filter: z.string().optional().describe('The filter to apply to the rules.'),
   sortField: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
   sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),

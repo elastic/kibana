@@ -45,6 +45,7 @@ import { ActionPolicyTagsRoute } from '../routes/suggestions/action_policy_tags_
 import { SuggestUserProfilesRoute } from '../routes/suggestions/suggest_user_profiles_route';
 import { UpsertRuleRoute } from '../routes/rules/upsert_rule_route';
 import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action_policy_route';
+import { MatchActionPoliciesForRuleRoute } from '../routes/action_policies/match_action_policies_for_rule_route';
 
 /**
  * TODO: https://github.com/elastic/rna-program/issues/426
@@ -95,4 +96,5 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(ResetResourcesRoute);
   bind(Route).toConstantValue(UpsertRuleRoute);
   bind(Route).toConstantValue(UpsertActionPolicyRoute);
+  bind(Route).toConstantValue(MatchActionPoliciesForRuleRoute);
 }
