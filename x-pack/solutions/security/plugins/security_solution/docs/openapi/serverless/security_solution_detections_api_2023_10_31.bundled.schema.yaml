@@ -3812,8 +3812,7 @@ components:
       minItems: 1
       type: array
     AlertSuppressionGroupByFieldV2:
-      description: >-
-        Per-field suppression options. Reserved for field-specific duration
+      description: Per-field suppression options. Reserved for field-specific duration
         windows and sequence event targeting; executors may not honor all
         properties until follow-up work lands.
       type: object
@@ -3823,8 +3822,7 @@ components:
         field:
           type: string
         sequence_index:
-          description: >-
-            When using EQL sequence rules, identifies which sequence event this
+          description: When using EQL sequence rules, identifies which sequence event this
             field applies to.
           minimum: 0
           type: integer
