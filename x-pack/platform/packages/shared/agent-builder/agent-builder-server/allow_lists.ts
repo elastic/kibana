@@ -54,6 +54,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_readiness.get_quality`,
   `${internalNamespaces.security}.siem_readiness.get_continuity`,
   `${internalNamespaces.security}.siem_readiness.get_retention`,
+  `${internalNamespaces.security}.alert-triage.prioritize-alerts`,
 
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
@@ -136,6 +137,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'automatic_troubleshooting',
   'entity-analytics',
   'alert-analysis',
+  'alert-triage',
   'detection-rule-edit',
   'threat-hunting',
   'pci-compliance',
