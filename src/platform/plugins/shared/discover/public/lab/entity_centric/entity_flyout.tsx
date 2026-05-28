@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBetaBadge,
@@ -30,6 +30,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { OverviewTab } from './overview_tab';
 import { MetricsTab } from './metrics_tab';
 import { LogsTab } from './logs_tab';
@@ -38,6 +39,11 @@ import { RelationshipsTab } from './relationships_tab';
 import { SecurityTab } from './security_tab';
 import { buildFakeEntityOverview } from './fake_entity_overview';
 import { buildFakeEntityTabsData } from './fake_entity_tabs';
+import {
+  ENTITY_CENTRIC_LAB_SESSION_TAG,
+  buildEntityFlyoutAttachment,
+  buildEntityFlyoutInitialMessage,
+} from './build_entity_flyout_attachment';
 
 interface EntityFlyoutProps {
   readonly serviceName: string;
@@ -49,9 +55,41 @@ type TabId = 'overview' | 'metrics' | 'logs' | 'alerts' | 'relationships' | 'sec
 export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   const [activeTab, setActiveTab] = useState<TabId>('overview');
+  const { agentBuilder } = useDiscoverServices();
 
   const overview = useMemo(() => buildFakeEntityOverview(serviceName), [serviceName]);
   const tabsData = useMemo(() => buildFakeEntityTabsData(serviceName), [serviceName]);
+
+  const chatAttachment = useMemo(
+    () => buildEntityFlyoutAttachment({ serviceName, activeTab, overview, tabsData }),
+    [serviceName, activeTab, overview, tabsData]
+  );
+
+  useEffect(() => {
+    if (!agentBuilder?.setChatConfig || !agentBuilder?.clearChatConfig) {
+      return;
+    }
+    agentBuilder.setChatConfig({
+      sessionTag: ENTITY_CENTRIC_LAB_SESSION_TAG,
+      attachments: [chatAttachment],
+    });
+    return () => {
+      agentBuilder.clearChatConfig();
+    };
+  }, [agentBuilder, chatAttachment]);
+
+  const handleAddToChat = useCallback(() => {
+    if (!agentBuilder?.openChat) {
+      return;
+    }
+    agentBuilder.openChat({
+      newConversation: true,
+      sessionTag: ENTITY_CENTRIC_LAB_SESSION_TAG,
+      initialMessage: buildEntityFlyoutInitialMessage(serviceName),
+      autoSendInitialMessage: false,
+      attachments: [chatAttachment],
+    });
+  }, [agentBuilder, serviceName, chatAttachment]);
 
   const tabs = useMemo<Array<{ id: TabId; label: string; appendBadge?: number }>>(
     () => [
@@ -214,15 +252,17 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="comment"
-              data-test-subj="entityCentricLabFlyoutAddToChat"
-              onClick={() => undefined}
-            >
-              {i18n.translate('discover.entityCentricLab.flyout.addToChat', {
-                defaultMessage: 'Add to chat',
-              })}
-            </EuiButtonEmpty>
+            {agentBuilder?.openChat ? (
+              <EuiButtonEmpty
+                iconType="comment"
+                data-test-subj="entityCentricLabFlyoutAddToChat"
+                onClick={handleAddToChat}
+              >
+                {i18n.translate('discover.entityCentricLab.flyout.addToChat', {
+                  defaultMessage: 'Add to chat',
+                })}
+              </EuiButtonEmpty>
+            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
