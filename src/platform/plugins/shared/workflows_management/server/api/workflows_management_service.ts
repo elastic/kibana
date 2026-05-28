@@ -59,7 +59,10 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type {
+  ServerTriggerDefinition,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
 import { getChildWorkflowExecutions } from './lib/get_child_workflow_executions';
@@ -2181,6 +2184,11 @@ export class WorkflowsService {
       return { config: { taskType: connector.config?.taskType } };
     }
     return undefined;
+  }
+
+  public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {
+    await this.ensureInitialized();
+    return this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
   }
 
   public async validateWorkflow(
