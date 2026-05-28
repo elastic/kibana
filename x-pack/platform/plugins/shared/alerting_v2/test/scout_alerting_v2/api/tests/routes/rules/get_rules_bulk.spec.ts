@@ -24,7 +24,7 @@ apiTest.describe('Bulk get rules API', { tag: '@local-stateful-classic' }, () =>
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     readerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_READ_ROLE);
-    readerHeaders = { ...readerCredentials.apiKeyHeader };
+    readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
