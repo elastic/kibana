@@ -49,14 +49,12 @@ const renderCellPopover = (
   params: {
     table?: Datatable;
     columnFilterable?: boolean[];
-    panelHasConfiguredDrilldowns?: boolean;
     popoverProps?: Partial<EuiDataGridCellPopoverElementProps>;
   } = {}
 ) => {
   const renderPopover = createRenderDatatableCellPopover(
     params.table ?? table,
-    params.columnFilterable,
-    params.panelHasConfiguredDrilldowns
+    params.columnFilterable
   );
 
   return render(
@@ -85,7 +83,7 @@ describe('createRenderDatatableCellPopover', () => {
     renderCellPopover({ columnFilterable: [false] });
 
     expect(screen.getByTestId('lensDatatableCellPopoverMessage')).toHaveTextContent(
-      `You can't apply a filter from this value.`
+      `You can't apply a filter or drill down from this value.`
     );
     expect(screen.getByTestId('cellActions')).toBeInTheDocument();
   });
@@ -100,24 +98,6 @@ describe('createRenderDatatableCellPopover', () => {
     renderCellPopover({
       table: esqlTable,
       columnFilterable: [false],
-    });
-
-    expect(screen.getByTestId('lensDatatableCellPopoverMessage')).toHaveTextContent(
-      `You can't apply a filter from this value because it relies on a field created at query time.`
-    );
-  });
-
-  it('renders a drilldown-specific ES|QL computed column message when panel has drilldowns', () => {
-    const esqlTable: Datatable = {
-      ...table,
-      meta: { type: ESQL_TABLE_TYPE },
-      columns: [{ ...table.columns[0], isComputedColumn: true }],
-    };
-
-    renderCellPopover({
-      table: esqlTable,
-      columnFilterable: [false],
-      panelHasConfiguredDrilldowns: true,
     });
 
     expect(screen.getByTestId('lensDatatableCellPopoverMessage')).toHaveTextContent(

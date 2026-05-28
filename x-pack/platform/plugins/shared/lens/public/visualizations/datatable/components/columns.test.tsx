@@ -65,7 +65,6 @@ const callCreateGridColumns = (
     columnCellValueActions: CreateGridColumnsParams[12];
     closeCellPopover: CreateGridColumnsParams[13];
     columnFilterable: CreateGridColumnsParams[14];
-    panelHasConfiguredDrilldowns: CreateGridColumnsParams[15];
   }> = {}
 ) =>
   createGridColumns(
@@ -84,8 +83,7 @@ const callCreateGridColumns = (
     params.headerRowLines ?? 1,
     params.columnCellValueActions ?? [],
     params.closeCellPopover ?? jest.fn(),
-    params.columnFilterable ?? [],
-    params.panelHasConfiguredDrilldowns ?? false
+    params.columnFilterable ?? []
   );
 
 const renderCellAction = (
@@ -128,29 +126,6 @@ describe('getContentData', () => {
       expect(screen.getByTestId('lensDatatableFilterFor')).toBeDisabled();
       expect(screen.getByTestId('lensDatatableFilterFor')).toHaveAttribute(
         'title',
-        `You can't apply a filter from this value.`
-      );
-
-      renderCellAction(cellActions, 1);
-      expect(screen.getByTestId('lensDatatableFilterOut')).toBeDisabled();
-      expect(screen.getByTestId('lensDatatableFilterOut')).toHaveAttribute(
-        'title',
-        `You can't apply a filter from this value.`
-      );
-    });
-
-    it('should include disabled filter actions when column is not filterable and panel has drilldowns', () => {
-      const [{ cellActions }] = callCreateGridColumns({
-        handleFilterClick: () => {},
-        columnFilterable: [false],
-        panelHasConfiguredDrilldowns: true,
-      });
-      expect(cellActions).toHaveLength(2);
-
-      renderCellAction(cellActions, 0);
-      expect(screen.getByTestId('lensDatatableFilterFor')).toBeDisabled();
-      expect(screen.getByTestId('lensDatatableFilterFor')).toHaveAttribute(
-        'title',
         `You can't apply a filter or drill down from this value.`
       );
 
@@ -172,26 +147,6 @@ describe('getContentData', () => {
         table: esqlTable,
         handleFilterClick: () => {},
         columnFilterable: [false],
-      });
-
-      renderCellAction(cellActions, 0);
-      expect(screen.getByTestId('lensDatatableFilterFor')).toHaveAttribute(
-        'title',
-        `You can't apply a filter from this value because it relies on a field created at query time.`
-      );
-    });
-
-    it('should use drilldown-specific ES|QL computed column disabled message when panel has drilldowns', () => {
-      const esqlTable: Datatable = {
-        ...table,
-        meta: { type: ESQL_TABLE_TYPE },
-        columns: [{ ...table.columns[0], isComputedColumn: true }],
-      };
-      const [{ cellActions }] = callCreateGridColumns({
-        table: esqlTable,
-        handleFilterClick: () => {},
-        columnFilterable: [false],
-        panelHasConfiguredDrilldowns: true,
       });
 
       renderCellAction(cellActions, 0);
