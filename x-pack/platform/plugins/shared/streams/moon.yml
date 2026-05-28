@@ -86,6 +86,10 @@ dependsOn:
   - '@kbn/search-inference-endpoints'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/i18n-react'
   - '@kbn/datemath'
   - '@kbn/setup-node-env'
   - '@kbn/synthtrace'
@@ -98,6 +102,8 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/data-streams'
   - '@kbn/es-mappings'
+  - '@kbn/test'
+  - '@kbn/test-es-server'
 tags:
   - plugin
   - prod
