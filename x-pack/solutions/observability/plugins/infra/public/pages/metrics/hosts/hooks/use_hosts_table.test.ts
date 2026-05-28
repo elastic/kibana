@@ -19,20 +19,6 @@ jest.mock('./use_unified_search');
 jest.mock('./use_hosts_view');
 jest.mock('../../../../containers/metrics_source');
 jest.mock('../../../../hooks/use_kibana');
-jest.mock('./use_poc_settings', () => {
-  const allOn = {
-    useLensEsqlMetricsCharts: false,
-    useLensEsqlKpiCharts: false,
-    kpiTrendline: true,
-    useTermsFilter: true,
-    useConsolidatedKql: true,
-    useStrippedBoolWrap: true,
-  };
-  return {
-    usePocSettingsContext: () => allOn,
-    pocFlags: { ...allOn },
-  };
-});
 
 const mockUseUnifiedSearchContext =
   useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<

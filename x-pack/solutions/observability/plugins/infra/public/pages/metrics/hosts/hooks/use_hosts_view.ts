@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import createContainer from 'constate';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { useMemo } from 'react';
+import createContainer from 'constate';
 import type { BoolQuery } from '@kbn/es-query';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
+// P5.5 — first-paint double-fire gate. Same gate is used by
+// `useHostCount` and `useHostsKpis` so all three fetchers fire once
+// after the unified search context settles instead of twice.
 import { useHostsPageReady } from './use_hosts_page_ready';
 import type {
   GetInfraMetricsRequestBodyPayloadClient,
@@ -31,7 +41,7 @@ const COMMON_HOST_METRICS: InfraEntityMetricType[] = [
 const HOST_TABLE_METRICS: InfraEntityMetricType[] = [...COMMON_HOST_METRICS, 'rxV2', 'txV2'];
 const OTEL_HOSTS_TABLE_METRICS: InfraEntityMetricType[] = [...COMMON_HOST_METRICS];
 
-const HOSTS_PATH = '/api/metrics/infra/host';
+const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
 
 export const useHostsView = () => {
   const {
@@ -40,21 +50,17 @@ export const useHostsView = () => {
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const isReady = useHostsPageReady();
 
-  const schema = searchCriteria?.preferredSchema || DEFAULT_SCHEMA;
-  const metrics = schema === 'semconv' ? OTEL_HOSTS_TABLE_METRICS : HOST_TABLE_METRICS;
-
-  const payload = useMemo<string>(
+  const payload = useMemo(
     () =>
       JSON.stringify(
-        buildRequestPayload({
+        createInfraMetricsRequest({
           dateRange: parsedDateRange,
           esQuery: buildQuery(),
           limit: searchCriteria.limit,
-          metrics,
-          schema,
+          schema: searchCriteria?.preferredSchema || DEFAULT_SCHEMA,
         })
       ),
-    [buildQuery, parsedDateRange, searchCriteria.limit, metrics, schema]
+    [buildQuery, parsedDateRange, searchCriteria.limit, searchCriteria.preferredSchema]
   );
 
   const { data, error, status } = useFetcher(
@@ -62,10 +68,13 @@ export const useHostsView = () => {
       if (!isReady) return;
       return (async () => {
         const start = performance.now();
-        const response = await callApi<GetInfraMetricsResponsePayload>(HOSTS_PATH, {
-          method: 'POST',
-          body: payload,
-        });
+        const metricsResponse = await callApi<GetInfraMetricsResponsePayload>(
+          `${BASE_INFRA_METRICS_PATH}/host`,
+          {
+            method: 'POST',
+            body: payload,
+          }
+        );
         const duration = performance.now() - start;
         telemetry.reportPerformanceMetricEvent(
           'infra_hosts_table_load',
@@ -73,45 +82,41 @@ export const useHostsView = () => {
           { key1: 'data_load', value1: duration },
           { limit: searchCriteria.limit }
         );
-        return response;
+        return metricsResponse;
       })();
     },
     [isReady, payload, searchCriteria.limit, telemetry]
   );
 
-  const hostNodes = data?.nodes ?? [];
-  const totalHosts = hostNodes.length;
-
   return {
     loading: isPending(status),
-    error: error ?? undefined,
-    hostNodes,
-    totalHosts,
+    error,
+    hostNodes: data?.nodes ?? [],
   };
 };
 
 export const HostsView = createContainer(useHostsView);
 export const [HostsViewProvider, useHostsViewContext] = HostsView;
 
-function buildRequestPayload({
+/**
+ * Helpers
+ */
+
+const createInfraMetricsRequest = ({
   esQuery,
   dateRange,
   limit,
-  metrics,
   schema,
 }: {
   esQuery: { bool: BoolQuery };
   dateRange: StringDateRange;
   limit: number;
-  metrics: InfraEntityMetricType[];
   schema?: DataSchemaFormat;
-}): GetInfraMetricsRequestBodyPayloadClient {
-  return {
-    query: esQuery,
-    from: dateRange.from,
-    to: dateRange.to,
-    metrics,
-    limit,
-    schema,
-  };
-}
+}): GetInfraMetricsRequestBodyPayloadClient => ({
+  query: esQuery,
+  from: dateRange.from,
+  to: dateRange.to,
+  metrics: schema === 'semconv' ? OTEL_HOSTS_TABLE_METRICS : HOST_TABLE_METRICS,
+  limit,
+  schema,
+});

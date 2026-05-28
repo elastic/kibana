@@ -23,7 +23,7 @@ import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '../constants';
 import { FilterAction } from './table/filter_action';
 
 export const HostsTable = () => {
-  const { loading, totalHosts } = useHostsViewContext();
+  const { loading } = useHostsViewContext();
   const { loading: hostCountLoading, count } = useHostCountContext();
   const { searchCriteria } = useUnifiedSearchContext();
   const { data: timeRangeMetadata } = useTimeRangeMetadataContext();
@@ -37,6 +37,7 @@ export const HostsTable = () => {
 
   const {
     columns,
+    items,
     currentPage,
     isFlyoutOpen,
     closeFlyout,
@@ -87,9 +88,7 @@ export const HostsTable = () => {
         pagination={{
           pageIndex: pagination.pageIndex ?? 0,
           pageSize: pagination.pageSize ?? DEFAULT_PAGE_SIZE,
-          // P10 — Phase A returns the total ranked fleet count; the table
-          // paginates against that instead of the visible page length.
-          totalItemCount: totalHosts,
+          totalItemCount: items.length,
           pageSizeOptions: PAGE_SIZE_OPTIONS,
         }}
         sorting={{

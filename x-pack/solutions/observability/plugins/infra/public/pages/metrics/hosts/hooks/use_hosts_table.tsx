@@ -44,7 +44,6 @@ import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 import { AddDataTroubleshootingPopover } from '../components/table/add_data_troubleshooting_popover';
 import { NOT_AVAILABLE_LABEL } from '../../../../components/asset_details/translations';
 import { useUnifiedSearchContext } from './use_unified_search';
-import { DEFAULT_PAGE_SIZE } from '../constants';
 
 /**
  * Columns and items types
@@ -237,31 +236,27 @@ export const useHostsTable = () => {
   );
 
   const currentPage = useMemo(() => {
-    const sorted = sorting.field ? [...items].sort(sortTableData(sorting)) : items;
-    const pageIndex = pagination.pageIndex ?? 0;
-    const pageSize = pagination.pageSize ?? DEFAULT_PAGE_SIZE;
-    return sorted.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
-  }, [items, sorting, pagination.pageIndex, pagination.pageSize]);
+    const { pageSize = 0, pageIndex = 0 } = pagination;
+
+    const endIndex = (pageIndex + 1) * pageSize;
+    const startIndex = pageIndex * pageSize;
+
+    return items.sort(sortTableData(sorting)).slice(startIndex, endIndex);
+  }, [items, pagination, sorting]);
 
   const showNetworkColumns = searchCriteria.preferredSchema !== 'semconv';
-  // EUI deprecated `%` / `vw` / `cqw` / `cqi` units for table column widths
-  // (logs "Detected not recommended unit ..." on every render). Using `em`
-  // here keeps the proportional relationship between columns —
-  // title:metric:metric ≈ same ratio as before — while satisfying EUI's
-  // requirement for absolute-length units. Values picked so the visible
-  // grid lays out within the existing breakpoints.
   const metricColumnsWidth = useMemo(() => {
     if (displayAlerts) {
-      return showNetworkColumns ? '8em' : '11em';
+      return showNetworkColumns ? '12%' : '16%';
     }
-    return showNetworkColumns ? '11em' : '14em';
+    return showNetworkColumns ? '16%' : '20%';
   }, [displayAlerts, showNetworkColumns]);
 
   const titleColumnWidth = useMemo(() => {
     if (displayAlerts) {
-      return showNetworkColumns ? '11em' : '14em';
+      return showNetworkColumns ? '15%' : '20%';
     }
-    return showNetworkColumns ? '14em' : '18em';
+    return showNetworkColumns ? '20%' : '25%';
   }, [displayAlerts, showNetworkColumns]);
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
@@ -489,7 +484,7 @@ export const useHostsTable = () => {
                   />
                 </>
               ),
-              width: '8em',
+              width: '12%',
               field: 'rxV2',
               sortable: true,
               'data-test-subj': 'hostsView-tableRow-rx',
@@ -514,7 +509,7 @@ export const useHostsTable = () => {
                   />
                 </>
               ),
-              width: '8em',
+              width: '12%',
               field: 'txV2',
               sortable: true,
               'data-test-subj': 'hostsView-tableRow-tx',
