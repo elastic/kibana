@@ -1092,6 +1092,8 @@
       "@kbn/enterprise-search-plugin/*": ["x-pack/solutions/search/plugins/enterprise_search/*"],
       "@kbn/entities-schema": ["x-pack/platform/packages/shared/kbn-entities-schema"],
       "@kbn/entities-schema/*": ["x-pack/platform/packages/shared/kbn-entities-schema/*"],
+      "@kbn/entity-centric-lab-flyout": ["src/platform/packages/shared/kbn-entity-centric-lab-flyout"],
+      "@kbn/entity-centric-lab-flyout/*": ["src/platform/packages/shared/kbn-entity-centric-lab-flyout/*"],
       "@kbn/entity-manager-fixture-plugin": ["x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin"],
       "@kbn/entity-manager-fixture-plugin/*": ["x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin/*"],
       "@kbn/entity-store": ["x-pack/solutions/security/plugins/entity_store"],

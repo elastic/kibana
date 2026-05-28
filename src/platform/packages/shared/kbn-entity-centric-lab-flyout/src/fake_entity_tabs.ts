@@ -10,7 +10,7 @@
 /**
  * Mock data backing the non-Overview tabs of the entity-centric lab flyout.
  * Mirrors {@link buildFakeEntityOverview} — everything is hard-coded from the
- * design, interpolating the clicked service name where the screen references
+ * design, interpolating the clicked entity name where the screen references
  * it so the flyout still feels specific.
  */
 
@@ -130,7 +130,7 @@ const series = (id: string, label: string, ys: readonly number[]) => ({
   points: X_DOMAIN.map((x, i) => ({ x, y: ys[i] ?? 0 })),
 });
 
-export const buildFakeEntityTabsData = (serviceName: string): EntityTabsData => ({
+export const buildFakeEntityTabsData = (entityName: string): EntityTabsData => ({
   metrics: {
     eventPositions: [4, 9],
     goldenSignals: [
@@ -139,7 +139,7 @@ export const buildFakeEntityTabsData = (serviceName: string): EntityTabsData => 
         label: 'Latency',
         unit: 'ms',
         threshold: 320,
-        description: 'Average end-to-end request latency across all instances of this service.',
+        description: 'Average end-to-end request latency across all instances of this entity.',
         series: [
           series(
             'latency-ms',
@@ -172,7 +172,7 @@ export const buildFakeEntityTabsData = (serviceName: string): EntityTabsData => 
         id: 'throughput',
         label: 'Throughput',
         unit: 'req/s',
-        description: 'Requests per second served by this service across all instances.',
+        description: 'Requests per second served by this entity across all instances.',
         series: [
           series(
             'network-in',
@@ -198,7 +198,7 @@ export const buildFakeEntityTabsData = (serviceName: string): EntityTabsData => 
         id: 'cpu-usage',
         label: 'Other metric',
         unit: '%',
-        description: 'Average CPU utilization across pods running this service.',
+        description: 'Average CPU utilization across pods running this entity.',
         series: [
           series(
             'do-nyc1-demo-infra-1',
@@ -214,7 +214,7 @@ export const buildFakeEntityTabsData = (serviceName: string): EntityTabsData => 
         id: 'memory-usage',
         label: 'Other metric',
         unit: '%',
-        description: 'Average memory utilization across pods running this service.',
+        description: 'Average memory utilization across pods running this entity.',
         series: [
           series(
             'do-nyc1-demo-infra-2',
@@ -228,7 +228,7 @@ export const buildFakeEntityTabsData = (serviceName: string): EntityTabsData => 
       },
     ],
   },
-  logs: buildFakeLogRows(serviceName),
+  logs: buildFakeLogRows(entityName),
   alerts: {
     activeCount: 16,
     totalCount: 20,
@@ -245,7 +245,7 @@ export const buildFakeEntityTabsData = (serviceName: string): EntityTabsData => 
         status: 'Active',
         triggeredAt: 'Dec 10, 2025, 11:30:45.873',
         ruleName: 'K8s memory.usage limits',
-        reason: `Max k8s memory.usage spiked for ${serviceName}`,
+        reason: `Max k8s memory.usage spiked for ${entityName}`,
       },
       {
         id: 'a2',
@@ -315,7 +315,7 @@ export const buildFakeEntityTabsData = (serviceName: string): EntityTabsData => 
         status: 'Active',
         triggeredAt: 'Dec 10, 2025, 11:29:55.000',
         ruleName: 'K8s CPU.usage limits',
-        reason: `CPU spike detected on ${serviceName}`,
+        reason: `CPU spike detected on ${entityName}`,
       },
       {
         id: 'a12',
@@ -354,7 +354,7 @@ export const buildFakeEntityTabsData = (serviceName: string): EntityTabsData => 
       },
     ],
   },
-  relationships: buildFakeRelationships(serviceName),
+  relationships: buildFakeRelationships(entityName),
   security: {
     riskScore: 72,
     riskLevel: 'High',
@@ -371,7 +371,7 @@ export const buildFakeEntityTabsData = (serviceName: string): EntityTabsData => 
       {
         id: 's2',
         severity: 'High',
-        title: `Privileged container detected for ${serviceName}`,
+        title: `Privileged container detected for ${entityName}`,
         detectedAt: 'May 5, 2026, 18:42',
         source: 'CSPM',
         status: 'Open',
@@ -404,18 +404,18 @@ export const buildFakeEntityTabsData = (serviceName: string): EntityTabsData => 
   },
 });
 
-const buildFakeLogRows = (serviceName: string): LogRow[] => {
+const buildFakeLogRows = (entityName: string): LogRow[] => {
   const baseTimestamp = 'Apr 20, 2026 @ 11:36:5';
   const lines: Array<Omit<LogRow, 'id' | 'timestamp'> & { ts: string }> = [
     {
       ts: '5.803',
       attribute: '3 attributes.log.file.path',
-      summary: `/var/log/pods/${serviceName}-system_konnectivity-agent-6ffb545547-phjh2_c9b9e8d6-9b95-...`,
+      summary: `/var/log/pods/${entityName}-system_konnectivity-agent-6ffb545547-phjh2_c9b9e8d6-9b95-...`,
     },
     {
       ts: '2.542',
       attribute: '2 attributes.log.file.path',
-      summary: `/var/log/pods/${serviceName}-system_konnectivity-agent-6ffb545547-w6lg4_298622e6-f54d-...`,
+      summary: `/var/log/pods/${entityName}-system_konnectivity-agent-6ffb545547-w6lg4_298622e6-f54d-...`,
     },
     {
       ts: '2.295',
@@ -440,17 +440,17 @@ const buildFakeLogRows = (serviceName: string): LogRow[] => {
     {
       ts: '2.150',
       attribute: '2 attributes.log.file.path',
-      summary: `/var/log/pods/${serviceName}_default_main-9c0e8d2e-9b95.log`,
+      summary: `/var/log/pods/${entityName}_default_main-9c0e8d2e-9b95.log`,
     },
     {
       ts: '1.987',
       attribute: 'body.text',
-      summary: `[Health] Service ${serviceName} reported healthy after readiness probe`,
+      summary: `[Health] Entity ${entityName} reported healthy after readiness probe`,
     },
     {
       ts: '1.812',
       attribute: '3 attributes.log.file.path',
-      summary: `/var/log/pods/${serviceName}_default_sidecar-1f2a3b-4c5d.log`,
+      summary: `/var/log/pods/${entityName}_default_sidecar-1f2a3b-4c5d.log`,
     },
     {
       ts: '1.654',
@@ -495,7 +495,7 @@ const buildFakeLogRows = (serviceName: string): LogRow[] => {
     {
       ts: '0.345',
       attribute: 'body.text',
-      summary: `[Health] Service ${serviceName} liveness probe OK`,
+      summary: `[Health] Entity ${entityName} liveness probe OK`,
     },
     { ts: '0.198', attribute: 'body.text', summary: `[HTTP] GET /healthz 200 in 2ms` },
     {
@@ -512,12 +512,12 @@ const buildFakeLogRows = (serviceName: string): LogRow[] => {
   }));
 };
 
-const buildFakeRelationships = (serviceName: string): RelationshipsTabData => {
+const buildFakeRelationships = (entityName: string): RelationshipsTabData => {
   // Layout coordinates aren't here — the topology component lays the nodes out
   // along a fixed radial arrangement based on order.
   const topology: RelationshipsTabData['topology'] = {
     nodes: [
-      { id: 'focal', label: serviceName, focal: true },
+      { id: 'focal', label: entityName, focal: true },
       { id: 'cart', label: 'cart' },
       { id: 'ad', label: 'ad' },
       { id: 'recommendation', label: 'recommendation' },
@@ -551,14 +551,14 @@ const buildFakeRelationships = (serviceName: string): RelationshipsTabData => {
         name: 'gke-abcdefgh',
         health: 'Unhealthy',
         entityType: 'Host',
-        relation: `Hosting ${serviceName}`,
+        relation: `Hosting ${entityName}`,
       },
       {
         id: 'r2',
         name: 'checkout-api',
         health: 'Unhealthy',
         entityType: 'API',
-        relation: `Called by ${serviceName}`,
+        relation: `Called by ${entityName}`,
       },
       {
         id: 'r3',

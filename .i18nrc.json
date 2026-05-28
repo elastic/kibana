@@ -39,6 +39,7 @@
     "savedSearch": "src/platform/plugins/shared/saved_search",
     "embeddableApi": "src/platform/plugins/shared/embeddable",
     "embeddableExamples": "examples/embeddable_examples",
+    "entityCentricLabFlyout": "src/platform/packages/shared/kbn-entity-centric-lab-flyout/src",
     "esQuery": "src/platform/packages/shared/kbn-es-query/src",
     "kbnGridLayout": "src/platform/packages/private/kbn-grid-layout",
     "esUi": "src/platform/plugins/shared/es_ui_shared",

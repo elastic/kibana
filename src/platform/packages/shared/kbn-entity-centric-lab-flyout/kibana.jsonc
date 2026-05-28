@@ -1,0 +1,11 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/entity-centric-lab-flyout",
+  "owner": [
+    "@elastic/obs-onboarding-team",
+    "@elastic/obs-sig-events-team"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Reusable entity-centric lab flyout (Overview / Metrics / Logs / Alerts / Relationships / Security tabs) shared between Discover and the Streams app."
+}

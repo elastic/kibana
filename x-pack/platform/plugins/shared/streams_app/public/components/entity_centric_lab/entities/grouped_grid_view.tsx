@@ -31,6 +31,7 @@ import { ENTITY_CATEGORIES, generateHealthTiles, getCategoryDescriptor } from '.
 
 interface Props {
   readonly dataset: FakeEntitiesDataset;
+  readonly onSelectEntity: (entityName: string) => void;
 }
 
 const useHealthColors = (): Record<EntityHealth, string> => {
@@ -57,7 +58,40 @@ const HEALTH_LABEL: Record<EntityHealth, string> = {
   }),
 };
 
-const HealthTile = ({ health, index }: { health: EntityHealth; index: number }) => {
+/**
+ * Build a synthetic entity name for a heatmap tile. Each category's tiles are
+ * laid out 1..N, and Kubernetes sub-types prefix their label so the resulting
+ * entity name doesn't collide with siblings (e.g. `kubernetes-pods-3`).
+ */
+const synthesizeEntityName = ({
+  categoryId,
+  index,
+  subLabel,
+}: {
+  categoryId: EntityCategoryId;
+  index: number;
+  subLabel?: string;
+}): string => {
+  const subSlug = subLabel
+    ? `-${subLabel
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')}`
+    : '';
+  return `${categoryId}${subSlug}-${index + 1}`;
+};
+
+const HealthTile = ({
+  health,
+  index,
+  entityName,
+  onSelectEntity,
+}: {
+  health: EntityHealth;
+  index: number;
+  entityName: string;
+  onSelectEntity: (entityName: string) => void;
+}) => {
   const colors = useHealthColors();
   const tileClass = css`
     width: 22px;
@@ -65,15 +99,26 @@ const HealthTile = ({ health, index }: { health: EntityHealth; index: number }) 
     border-radius: 4px;
     background-color: ${colors[health]};
     flex: 0 0 22px;
+    padding: 0;
+    border: none;
+    cursor: pointer;
   `;
+  const tooltipContent = i18n.translate(
+    'xpack.streams.entityCentricLab.entities.healthTileTooltip',
+    {
+      defaultMessage: '{entityName} — {status}',
+      values: { entityName, status: HEALTH_LABEL[health] },
+    }
+  );
   return (
-    <EuiToolTip
-      content={i18n.translate('xpack.streams.entityCentricLab.entities.healthTileTooltip', {
-        defaultMessage: 'Entity #{index} — {status}',
-        values: { index: index + 1, status: HEALTH_LABEL[health] },
-      })}
-    >
-      <div className={tileClass} aria-label={HEALTH_LABEL[health]} role="img" tabIndex={0} />
+    <EuiToolTip content={tooltipContent}>
+      <button
+        type="button"
+        className={tileClass}
+        aria-label={tooltipContent}
+        data-test-subj={`entityCentricLabHealthTile-${entityName}`}
+        onClick={() => onSelectEntity(entityName)}
+      />
     </EuiToolTip>
   );
 };
@@ -81,10 +126,16 @@ const HealthTile = ({ health, index }: { health: EntityHealth; index: number }) 
 const HealthTileRow = ({
   count,
   seed,
+  categoryId,
+  subLabel,
+  onSelectEntity,
   maxTiles = 96,
 }: {
   count: number;
   seed: number;
+  categoryId: EntityCategoryId;
+  subLabel?: string;
+  onSelectEntity: (entityName: string) => void;
   maxTiles?: number;
 }) => {
   const tileCount = Math.min(count, maxTiles);
@@ -100,7 +151,13 @@ const HealthTileRow = ({
   return (
     <div className={containerClass} role="list">
       {tiles.map((health, index) => (
-        <HealthTile key={`${seed}-${index}`} health={health} index={index} />
+        <HealthTile
+          key={`${seed}-${index}`}
+          health={health}
+          index={index}
+          entityName={synthesizeEntityName({ categoryId, index, subLabel })}
+          onSelectEntity={onSelectEntity}
+        />
       ))}
       {count > maxTiles ? (
         <EuiText size="xs" color="subdued">
@@ -135,7 +192,13 @@ const CategoryHeader = ({ category, total }: { category: EntityCategoryId; total
   );
 };
 
-const KubernetesCard = ({ counts }: { counts: EntityCategoryCounts }) => {
+const KubernetesCard = ({
+  counts,
+  onSelectEntity,
+}: {
+  counts: EntityCategoryCounts;
+  onSelectEntity: (entityName: string) => void;
+}) => {
   const { euiTheme } = useEuiTheme();
   const subCounts = counts.subCounts ?? [];
   const subRowClass = css`
@@ -158,7 +221,13 @@ const KubernetesCard = ({ counts }: { counts: EntityCategoryCounts }) => {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              <HealthTileRow count={sub.total} seed={index + 7} />
+              <HealthTileRow
+                count={sub.total}
+                seed={index + 7}
+                categoryId="kubernetes"
+                subLabel={sub.label}
+                onSelectEntity={onSelectEntity}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           {index === 0 ? <EuiSpacer size="s" /> : null}
@@ -168,9 +237,15 @@ const KubernetesCard = ({ counts }: { counts: EntityCategoryCounts }) => {
   );
 };
 
-const CategoryCard = ({ counts }: { counts: EntityCategoryCounts }) => {
+const CategoryCard = ({
+  counts,
+  onSelectEntity,
+}: {
+  counts: EntityCategoryCounts;
+  onSelectEntity: (entityName: string) => void;
+}) => {
   if (counts.category === 'kubernetes') {
-    return <KubernetesCard counts={counts} />;
+    return <KubernetesCard counts={counts} onSelectEntity={onSelectEntity} />;
   }
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
@@ -179,17 +254,19 @@ const CategoryCard = ({ counts }: { counts: EntityCategoryCounts }) => {
       <HealthTileRow
         count={counts.total}
         seed={ENTITY_CATEGORIES.findIndex((c) => c.id === counts.category)}
+        categoryId={counts.category}
+        onSelectEntity={onSelectEntity}
       />
     </EuiPanel>
   );
 };
 
-export const GroupedGridView = ({ dataset }: Props) => {
+export const GroupedGridView = ({ dataset, onSelectEntity }: Props) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       {dataset.categoryCounts.map((counts) => (
         <EuiFlexItem key={counts.category} grow={false}>
-          <CategoryCard counts={counts} />
+          <CategoryCard counts={counts} onSelectEntity={onSelectEntity} />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

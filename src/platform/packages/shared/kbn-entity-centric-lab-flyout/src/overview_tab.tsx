@@ -30,7 +30,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { MetricDatum } from '@elastic/charts';
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { useEntityFlyoutServices } from './services_context';
 import type { EntityOverview, GoldenSignal, GoldenSignalLevel } from './fake_entity_overview';
 import { formatGoldenSignalValue } from './fake_entity_overview';
 
@@ -51,7 +51,7 @@ export const OverviewTab = ({ overview }: OverviewTabProps) => {
         initialIsOpen
         buttonContent={
           <SectionTitle
-            title={i18n.translate('discover.entityCentricLab.flyout.overview.entitySummaryTitle', {
+            title={i18n.translate('entityCentricLabFlyout.flyout.overview.entitySummaryTitle', {
               defaultMessage: 'Entity Summary',
             })}
             adornment={<AssistanceSparklesIcon />}
@@ -71,7 +71,7 @@ export const OverviewTab = ({ overview }: OverviewTabProps) => {
         initialIsOpen
         buttonContent={
           <SectionTitle
-            title={i18n.translate('discover.entityCentricLab.flyout.overview.goldenSignalsTitle', {
+            title={i18n.translate('entityCentricLabFlyout.flyout.overview.goldenSignalsTitle', {
               defaultMessage: 'Golden signals',
             })}
           />
@@ -90,7 +90,7 @@ export const OverviewTab = ({ overview }: OverviewTabProps) => {
         initialIsOpen
         buttonContent={
           <SectionTitle
-            title={i18n.translate('discover.entityCentricLab.flyout.overview.entityDetailsTitle', {
+            title={i18n.translate('entityCentricLabFlyout.flyout.overview.entityDetailsTitle', {
               defaultMessage: 'Entity details',
             })}
           />
@@ -102,7 +102,7 @@ export const OverviewTab = ({ overview }: OverviewTabProps) => {
         <KeyValueGrid
           rows={overview.details}
           ariaLabel={i18n.translate(
-            'discover.entityCentricLab.flyout.overview.entityDetailsAriaLabel',
+            'entityCentricLabFlyout.flyout.overview.entityDetailsAriaLabel',
             { defaultMessage: 'Entity details' }
           )}
         />
@@ -115,7 +115,7 @@ export const OverviewTab = ({ overview }: OverviewTabProps) => {
         initialIsOpen
         buttonContent={
           <SectionTitle
-            title={i18n.translate('discover.entityCentricLab.flyout.overview.ownershipTitle', {
+            title={i18n.translate('entityCentricLabFlyout.flyout.overview.ownershipTitle', {
               defaultMessage: 'Ownership',
             })}
           />
@@ -126,12 +126,9 @@ export const OverviewTab = ({ overview }: OverviewTabProps) => {
       >
         <KeyValueGrid
           rows={overview.ownership}
-          ariaLabel={i18n.translate(
-            'discover.entityCentricLab.flyout.overview.ownershipAriaLabel',
-            {
-              defaultMessage: 'Ownership',
-            }
-          )}
+          ariaLabel={i18n.translate('entityCentricLabFlyout.flyout.overview.ownershipAriaLabel', {
+            defaultMessage: 'Ownership',
+          })}
         />
       </EuiAccordion>
     </>
@@ -153,7 +150,7 @@ const SectionMenuButton = ({ sectionLabel }: { sectionLabel: string }) => (
   <EuiButtonIcon
     iconType="boxesVertical"
     color="text"
-    aria-label={i18n.translate('discover.entityCentricLab.flyout.overview.sectionMenuAriaLabel', {
+    aria-label={i18n.translate('entityCentricLabFlyout.flyout.overview.sectionMenuAriaLabel', {
       defaultMessage: 'Open section actions',
     })}
     data-test-subj={`entityCentricLabSectionMenu-${sectionLabel}`}
@@ -188,7 +185,7 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
-            {i18n.translate('discover.entityCentricLab.flyout.overview.summaryGeneratedAt', {
+            {i18n.translate('entityCentricLabFlyout.flyout.overview.summaryGeneratedAt', {
               defaultMessage: 'Generated on {generatedAt}',
               values: { generatedAt: overview.summary.generatedAt },
             })}
@@ -202,7 +199,7 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
               color: ${euiTheme.colors.textAssistance};
             `}
             aria-label={i18n.translate(
-              'discover.entityCentricLab.flyout.overview.regenerateSummaryAriaLabel',
+              'entityCentricLabFlyout.flyout.overview.regenerateSummaryAriaLabel',
               { defaultMessage: 'Regenerate summary' }
             )}
             data-test-subj="entityCentricLabSummaryRegenerate"
@@ -246,10 +243,9 @@ const GoldenSignalsRow = ({ signals }: { signals: readonly GoldenSignal[] }) => 
 
 const GoldenSignalCard = ({ signal }: { signal: GoldenSignal }) => {
   const { euiTheme } = useEuiTheme();
-  const { charts } = useDiscoverServices();
-  // Discover plugin entry already depends on `charts`, so the start contract
-  // is guaranteed at this point — pulling the base theme through it keeps us
-  // off the (currently un-referenced) `@kbn/charts-theme` package.
+  const { charts } = useEntityFlyoutServices();
+  // Hosting plugin guarantees `charts` is wired through, so the base theme is
+  // always available — we don't need to fall back to `@kbn/charts-theme`.
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const datum: MetricDatum = {

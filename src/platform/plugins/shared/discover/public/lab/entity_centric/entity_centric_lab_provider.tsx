@@ -9,21 +9,21 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { PropsWithChildren } from 'react';
+import { EntityFlyout, EntityFlyoutServicesProvider } from '@kbn/entity-centric-lab-flyout';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { ENTITY_CENTRIC_LAB_SETTING } from './constants';
-import { EntityFlyout } from './entity_flyout';
 
 interface EntityCentricLabContextValue {
   readonly enabled: boolean;
-  readonly currentServiceName: string | null;
-  readonly openEntity: (serviceName: string) => void;
+  readonly currentEntityName: string | null;
+  readonly openEntity: (entityName: string) => void;
   readonly closeEntity: () => void;
 }
 
 const EntityCentricLabContext = createContext<EntityCentricLabContextValue | null>(null);
 
 export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) => {
-  const { uiSettings } = useDiscoverServices();
+  const { uiSettings, agentBuilder, notifications, charts } = useDiscoverServices();
   // Space-scoped advanced setting; lives in Stack Management → Advanced Settings
   // under the Discover category. `requiresPageReload: true`, so we don't need to
   // subscribe to live updates here — a fresh page render will pick up changes.
@@ -32,26 +32,33 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
     [uiSettings]
   );
 
-  const [currentServiceName, setCurrentServiceName] = useState<string | null>(null);
+  const [currentEntityName, setCurrentEntityName] = useState<string | null>(null);
 
-  const openEntity = useCallback((serviceName: string) => {
-    setCurrentServiceName(serviceName);
+  const openEntity = useCallback((entityName: string) => {
+    setCurrentEntityName(entityName);
   }, []);
 
   const closeEntity = useCallback(() => {
-    setCurrentServiceName(null);
+    setCurrentEntityName(null);
   }, []);
 
   const value = useMemo<EntityCentricLabContextValue>(
-    () => ({ enabled, currentServiceName, openEntity, closeEntity }),
-    [enabled, currentServiceName, openEntity, closeEntity]
+    () => ({ enabled, currentEntityName, openEntity, closeEntity }),
+    [enabled, currentEntityName, openEntity, closeEntity]
+  );
+
+  const flyoutServices = useMemo(
+    () => ({ agentBuilder, notifications, charts }),
+    [agentBuilder, notifications, charts]
   );
 
   return (
     <EntityCentricLabContext.Provider value={value}>
       {children}
-      {enabled && currentServiceName !== null ? (
-        <EntityFlyout serviceName={currentServiceName} onClose={closeEntity} />
+      {enabled && currentEntityName !== null ? (
+        <EntityFlyoutServicesProvider services={flyoutServices}>
+          <EntityFlyout entityName={currentEntityName} onClose={closeEntity} />
+        </EntityFlyoutServicesProvider>
       ) : null}
     </EntityCentricLabContext.Provider>
   );
@@ -62,7 +69,7 @@ export const useEntityCentricLab = (): EntityCentricLabContextValue => {
   if (!ctx) {
     return {
       enabled: false,
-      currentServiceName: null,
+      currentEntityName: null,
       openEntity: () => undefined,
       closeEntity: () => undefined,
     };

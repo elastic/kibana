@@ -27,11 +27,11 @@ import { i18n } from '@kbn/i18n';
 import type { LogRow } from './fake_entity_tabs';
 
 interface LogsTabProps {
-  readonly serviceName: string;
+  readonly entityName: string;
   readonly logs: readonly LogRow[];
 }
 
-export const LogsTab = ({ serviceName, logs }: LogsTabProps) => {
+export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 100 });
 
   const pageOfItems = useMemo(
@@ -48,7 +48,7 @@ export const LogsTab = ({ serviceName, logs }: LogsTabProps) => {
             id="entityCentricLabLogsSelectAll"
             checked={false}
             onChange={() => undefined}
-            aria-label={i18n.translate('discover.entityCentricLab.flyout.logs.selectAllAriaLabel', {
+            aria-label={i18n.translate('entityCentricLabFlyout.flyout.logs.selectAllAriaLabel', {
               defaultMessage: 'Select all rows',
             })}
           />
@@ -59,7 +59,7 @@ export const LogsTab = ({ serviceName, logs }: LogsTabProps) => {
             id="entityCentricLabLogsRowSelect"
             checked={false}
             onChange={() => undefined}
-            aria-label={i18n.translate('discover.entityCentricLab.flyout.logs.selectRowAriaLabel', {
+            aria-label={i18n.translate('entityCentricLabFlyout.flyout.logs.selectRowAriaLabel', {
               defaultMessage: 'Select row',
             })}
           />
@@ -73,7 +73,7 @@ export const LogsTab = ({ serviceName, logs }: LogsTabProps) => {
           <EuiButtonIcon
             iconType="expand"
             color="text"
-            aria-label={i18n.translate('discover.entityCentricLab.flyout.logs.expandRowAriaLabel', {
+            aria-label={i18n.translate('entityCentricLabFlyout.flyout.logs.expandRowAriaLabel', {
               defaultMessage: 'Expand row',
             })}
           />
@@ -84,7 +84,7 @@ export const LogsTab = ({ serviceName, logs }: LogsTabProps) => {
         name: (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              {i18n.translate('discover.entityCentricLab.flyout.logs.columns.timestamp', {
+              {i18n.translate('entityCentricLabFlyout.flyout.logs.columns.timestamp', {
                 defaultMessage: '@timestamp',
               })}
             </EuiFlexItem>
@@ -106,14 +106,14 @@ export const LogsTab = ({ serviceName, logs }: LogsTabProps) => {
         name: (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              {i18n.translate('discover.entityCentricLab.flyout.logs.columns.summary', {
+              {i18n.translate('entityCentricLabFlyout.flyout.logs.columns.summary', {
                 defaultMessage: 'Summary',
               })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate(
-                  'discover.entityCentricLab.flyout.logs.columns.summaryTooltip',
+                  'entityCentricLabFlyout.flyout.logs.columns.summaryTooltip',
                   {
                     defaultMessage:
                       'A condensed view of the structured log entry — attributes and body text.',
@@ -126,7 +126,7 @@ export const LogsTab = ({ serviceName, logs }: LogsTabProps) => {
                   iconType="question"
                   color="text"
                   aria-label={i18n.translate(
-                    'discover.entityCentricLab.flyout.logs.columns.summaryTooltipAriaLabel',
+                    'entityCentricLabFlyout.flyout.logs.columns.summaryTooltipAriaLabel',
                     { defaultMessage: 'Show summary column description' }
                   )}
                 />
@@ -150,9 +150,9 @@ export const LogsTab = ({ serviceName, logs }: LogsTabProps) => {
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h3>
-              {i18n.translate('discover.entityCentricLab.flyout.logs.panelTitle', {
-                defaultMessage: 'Logs emitted by {serviceName}',
-                values: { serviceName },
+              {i18n.translate('entityCentricLabFlyout.flyout.logs.panelTitle', {
+                defaultMessage: 'Logs emitted by {entityName}',
+                values: { entityName },
               })}
             </h3>
           </EuiTitle>
@@ -161,12 +161,9 @@ export const LogsTab = ({ serviceName, logs }: LogsTabProps) => {
           <EuiButtonIcon
             iconType="boxesVertical"
             color="text"
-            aria-label={i18n.translate(
-              'discover.entityCentricLab.flyout.logs.sectionMenuAriaLabel',
-              {
-                defaultMessage: 'Open section actions',
-              }
-            )}
+            aria-label={i18n.translate('entityCentricLabFlyout.flyout.logs.sectionMenuAriaLabel', {
+              defaultMessage: 'Open section actions',
+            })}
             data-test-subj="entityCentricLabLogsSectionMenu"
           />
         </EuiFlexItem>
@@ -175,9 +172,9 @@ export const LogsTab = ({ serviceName, logs }: LogsTabProps) => {
       <EuiBasicTable<LogRow>
         items={pageOfItems as LogRow[]}
         columns={columns}
-        tableCaption={i18n.translate('discover.entityCentricLab.flyout.logs.tableCaption', {
-          defaultMessage: 'Logs emitted by {serviceName}',
-          values: { serviceName },
+        tableCaption={i18n.translate('entityCentricLabFlyout.flyout.logs.tableCaption', {
+          defaultMessage: 'Logs emitted by {entityName}',
+          values: { entityName },
         })}
         pagination={{
           pageIndex,

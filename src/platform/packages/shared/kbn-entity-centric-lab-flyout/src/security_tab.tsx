@@ -48,7 +48,7 @@ export const SecurityTab = ({ security }: SecurityTabProps) => {
     () => [
       {
         field: 'severity',
-        name: i18n.translate('discover.entityCentricLab.flyout.security.columns.severity', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.security.columns.severity', {
           defaultMessage: 'Severity',
         }),
         width: '110px',
@@ -58,7 +58,7 @@ export const SecurityTab = ({ security }: SecurityTabProps) => {
       },
       {
         field: 'title',
-        name: i18n.translate('discover.entityCentricLab.flyout.security.columns.title', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.security.columns.title', {
           defaultMessage: 'Title',
         }),
         render: (title: string) => (
@@ -67,7 +67,7 @@ export const SecurityTab = ({ security }: SecurityTabProps) => {
       },
       {
         field: 'detectedAt',
-        name: i18n.translate('discover.entityCentricLab.flyout.security.columns.detected', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.security.columns.detected', {
           defaultMessage: 'Detected',
         }),
         sortable: true,
@@ -75,7 +75,7 @@ export const SecurityTab = ({ security }: SecurityTabProps) => {
       },
       {
         field: 'source',
-        name: i18n.translate('discover.entityCentricLab.flyout.security.columns.source', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.security.columns.source', {
           defaultMessage: 'Source',
         }),
         width: '140px',
@@ -83,7 +83,7 @@ export const SecurityTab = ({ security }: SecurityTabProps) => {
       },
       {
         field: 'status',
-        name: i18n.translate('discover.entityCentricLab.flyout.security.columns.status', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.security.columns.status', {
           defaultMessage: 'Status',
         }),
         width: '110px',
@@ -100,7 +100,7 @@ export const SecurityTab = ({ security }: SecurityTabProps) => {
       <EuiFlexGroup gutterSize="m" responsive={false} wrap>
         <EuiFlexItem style={{ minWidth: 160 }}>
           <SecurityStatPanel
-            title={i18n.translate('discover.entityCentricLab.flyout.security.riskScoreTitle', {
+            title={i18n.translate('entityCentricLabFlyout.flyout.security.riskScoreTitle', {
               defaultMessage: 'Risk score',
             })}
             value={
@@ -135,7 +135,7 @@ export const SecurityTab = ({ security }: SecurityTabProps) => {
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 160 }}>
           <SecurityStatPanel
-            title={i18n.translate('discover.entityCentricLab.flyout.security.openIssuesTitle', {
+            title={i18n.translate('entityCentricLabFlyout.flyout.security.openIssuesTitle', {
               defaultMessage: 'Open security issues',
             })}
             value={
@@ -152,7 +152,7 @@ export const SecurityTab = ({ security }: SecurityTabProps) => {
             }
             footer={
               <EuiText size="xs" color="subdued">
-                {i18n.translate('discover.entityCentricLab.flyout.security.openIssuesSubtitle', {
+                {i18n.translate('entityCentricLabFlyout.flyout.security.openIssuesSubtitle', {
                   defaultMessage: 'across {total} tracked',
                   values: { total: security.issues.length },
                 })}
@@ -162,7 +162,7 @@ export const SecurityTab = ({ security }: SecurityTabProps) => {
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 160 }}>
           <SecurityStatPanel
-            title={i18n.translate('discover.entityCentricLab.flyout.security.lastEventTitle', {
+            title={i18n.translate('entityCentricLabFlyout.flyout.security.lastEventTitle', {
               defaultMessage: 'Last security event',
             })}
             value={
@@ -178,7 +178,7 @@ export const SecurityTab = ({ security }: SecurityTabProps) => {
             }
             footer={
               <EuiText size="xs" color="subdued">
-                {i18n.translate('discover.entityCentricLab.flyout.security.lastEventSubtitle', {
+                {i18n.translate('entityCentricLabFlyout.flyout.security.lastEventSubtitle', {
                   defaultMessage: 'Time since last detection or finding.',
                 })}
               </EuiText>
@@ -192,13 +192,13 @@ export const SecurityTab = ({ security }: SecurityTabProps) => {
       <EuiPanel hasBorder hasShadow={false} paddingSize="m">
         <EuiTitle size="xs">
           <h3>
-            {i18n.translate('discover.entityCentricLab.flyout.security.openIssuesTableTitle', {
+            {i18n.translate('entityCentricLabFlyout.flyout.security.openIssuesTableTitle', {
               defaultMessage: 'Open security issues',
             })}
           </h3>
         </EuiTitle>
         <EuiText size="s" color="subdued">
-          {i18n.translate('discover.entityCentricLab.flyout.security.openIssuesTableSubtitle', {
+          {i18n.translate('entityCentricLabFlyout.flyout.security.openIssuesTableSubtitle', {
             defaultMessage:
               'Findings, detections and vulnerabilities currently associated with this entity.',
           })}
@@ -208,7 +208,7 @@ export const SecurityTab = ({ security }: SecurityTabProps) => {
           items={pageOfItems as SecurityIssue[]}
           columns={columns}
           tableCaption={i18n.translate(
-            'discover.entityCentricLab.flyout.security.openIssuesTableCaption',
+            'entityCentricLabFlyout.flyout.security.openIssuesTableCaption',
             { defaultMessage: 'Open security issues' }
           )}
           pagination={{

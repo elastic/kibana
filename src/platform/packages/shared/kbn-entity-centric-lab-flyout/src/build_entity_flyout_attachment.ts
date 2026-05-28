@@ -14,13 +14,13 @@ import type { EntityTabsData } from './fake_entity_tabs';
 
 /**
  * Session tag used for every Agent Builder chat surface driven by the entity
- * centric lab flyout. Keeps lab conversations isolated from Discover's main
- * tab session (`discover` — see `discover_agent_builder_config.tsx`).
+ * centric lab flyout. Keeps lab conversations isolated from other Discover /
+ * Streams chat sessions.
  */
-export const ENTITY_CENTRIC_LAB_SESSION_TAG = 'discover-entity-centric-lab';
+export const ENTITY_CENTRIC_LAB_SESSION_TAG = 'entity-centric-lab';
 
 interface BuildEntityFlyoutAttachmentArgs {
-  readonly serviceName: string;
+  readonly entityName: string;
   readonly activeTab: string;
   readonly overview: EntityOverview;
   readonly tabsData: EntityTabsData;
@@ -28,11 +28,11 @@ interface BuildEntityFlyoutAttachmentArgs {
 
 /**
  * Build a hidden screen-context attachment describing the entity the flyout is
- * currently showing. Shape mirrors `buildScreenContext` in
- * `discover_agent_builder_config.tsx` so the agent gets a familiar payload.
+ * currently showing. Shape mirrors the screen-context payloads produced by the
+ * Discover main agent builder config so the agent gets a familiar payload.
  */
 export const buildEntityFlyoutAttachment = ({
-  serviceName,
+  entityName,
   activeTab,
   overview,
   tabsData,
@@ -47,13 +47,13 @@ export const buildEntityFlyoutAttachment = ({
     data: {
       app: ENTITY_CENTRIC_LAB_SESSION_TAG,
       url: window.location.href,
-      description: i18n.translate('discover.entityCentricLab.flyout.chatScreenContextDescription', {
+      description: i18n.translate('entityCentricLabFlyout.flyout.chatScreenContextDescription', {
         defaultMessage:
-          'The user is viewing the entity-centric lab flyout for service "{serviceName}" on the {activeTab} tab.',
-        values: { serviceName, activeTab },
+          'The user is viewing the entity-centric lab flyout for entity "{entityName}" on the {activeTab} tab.',
+        values: { entityName, activeTab },
       }),
       additional_data: {
-        entity_name: serviceName,
+        entity_name: entityName,
         active_tab: activeTab,
         last_update: overview.lastUpdate,
         tags: JSON.stringify(overview.tags.map((tag) => tag.label)),
@@ -89,9 +89,9 @@ export const buildEntityFlyoutAttachment = ({
  * Default draft prompt that pops into the chat composer when the user clicks
  * "Add to chat". Kept short and editable so the user can refine before sending.
  */
-export const buildEntityFlyoutInitialMessage = (serviceName: string): string =>
-  i18n.translate('discover.entityCentricLab.flyout.chatInitialMessage', {
+export const buildEntityFlyoutInitialMessage = (entityName: string): string =>
+  i18n.translate('entityCentricLabFlyout.flyout.chatInitialMessage', {
     defaultMessage:
-      'Investigate "{serviceName}". Summarize current health, the most important active alerts and security issues, and suggest concrete next steps.',
-    values: { serviceName },
+      'Investigate "{entityName}". Summarize current health, the most important active alerts and security issues, and suggest concrete next steps.',
+    values: { entityName },
   });

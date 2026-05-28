@@ -143,6 +143,7 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-http-server-mocks",
     "@kbn/reporting-public",
+    "@kbn/entity-centric-lab-flyout",
   ],
   "exclude": ["target/**/*"]
 }

@@ -35,7 +35,7 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { useEntityFlyoutServices } from './services_context';
 import type { MetricSeries, MetricsTabData } from './fake_entity_tabs';
 
 interface MetricsTabProps {
@@ -56,7 +56,7 @@ export const MetricsTab = ({ metrics }: MetricsTabProps) => {
   return (
     <>
       <EuiSwitch
-        label={i18n.translate('discover.entityCentricLab.flyout.metrics.surfaceEventsToggle', {
+        label={i18n.translate('entityCentricLabFlyout.flyout.metrics.surfaceEventsToggle', {
           defaultMessage: 'Surface events on graphs',
         })}
         checked={surfaceEvents}
@@ -71,7 +71,7 @@ export const MetricsTab = ({ metrics }: MetricsTabProps) => {
         buttonContent={
           <EuiTitle size="xxs">
             <h3>
-              {i18n.translate('discover.entityCentricLab.flyout.metrics.goldenSignalsTitle', {
+              {i18n.translate('entityCentricLabFlyout.flyout.metrics.goldenSignalsTitle', {
                 defaultMessage: 'Golden signals',
               })}
             </h3>
@@ -105,7 +105,7 @@ export const MetricsTab = ({ metrics }: MetricsTabProps) => {
         buttonContent={
           <EuiTitle size="xxs">
             <h3>
-              {i18n.translate('discover.entityCentricLab.flyout.metrics.otherSectionTitle', {
+              {i18n.translate('entityCentricLabFlyout.flyout.metrics.otherSectionTitle', {
                 defaultMessage: 'Other section with more metrics',
               })}
             </h3>
@@ -136,7 +136,7 @@ const SectionMenuButton = ({ sectionLabel }: { sectionLabel: string }) => (
   <EuiButtonIcon
     iconType="boxesVertical"
     color="text"
-    aria-label={i18n.translate('discover.entityCentricLab.flyout.metrics.sectionMenuAriaLabel', {
+    aria-label={i18n.translate('entityCentricLabFlyout.flyout.metrics.sectionMenuAriaLabel', {
       defaultMessage: 'Open section actions',
     })}
     data-test-subj={`entityCentricLabMetricsSectionMenu-${sectionLabel}`}
@@ -153,7 +153,7 @@ const MetricChartCard = ({
   readonly eventPositions: readonly number[];
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { charts } = useDiscoverServices();
+  const { charts } = useEntityFlyoutServices();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">
@@ -169,7 +169,7 @@ const MetricChartCard = ({
               iconType="question"
               color="text"
               aria-label={i18n.translate(
-                'discover.entityCentricLab.flyout.metrics.descriptionAriaLabel',
+                'entityCentricLabFlyout.flyout.metrics.descriptionAriaLabel',
                 { defaultMessage: 'Show metric description' }
               )}
               data-test-subj={`entityCentricLabMetricsDescription-${series.id}`}

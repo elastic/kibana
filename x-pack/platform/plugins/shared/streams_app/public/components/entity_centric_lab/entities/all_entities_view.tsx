@@ -20,13 +20,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EntityFlyout, EntityFlyoutServicesProvider } from '@kbn/entity-centric-lab-flyout';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import type { Entity } from './fake_entities';
+import { useKibana } from '../../../hooks/use_kibana';
 import { buildFakeEntities } from './fake_entities';
 import { GroupedGridView } from './grouped_grid_view';
 import { EntitiesListView } from './entities_list_view';
-import { EntityDetailsFlyout } from './entity_details_flyout';
 
 type ViewMode = 'grid' | 'list';
 
@@ -49,16 +49,27 @@ const VIEW_MODE_OPTIONS = [
 
 export const AllEntitiesView = () => {
   const router = useStreamsAppRouter();
+  const {
+    core: { notifications },
+    dependencies: {
+      start: { charts },
+    },
+  } = useKibana();
   const dataset = useMemo(() => buildFakeEntities(), []);
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [selectedEntity, setSelectedEntity] = useState<Entity | null>(null);
+  const [selectedEntityName, setSelectedEntityName] = useState<string | null>(null);
 
   const filteredEntities = useMemo(() => {
     const query = search.trim().toLowerCase();
     if (!query) return dataset.entities;
     return dataset.entities.filter((entity) => entity.name.toLowerCase().includes(query));
   }, [dataset.entities, search]);
+
+  // `agentBuilder` is intentionally undefined: streams_app does not declare it
+  // as a start dependency. The shared flyout hides the "Add to chat" button
+  // when this is omitted, so the rest of the UI keeps working.
+  const flyoutServices = useMemo(() => ({ notifications, charts }), [notifications, charts]);
 
   return (
     <>
@@ -166,16 +177,18 @@ export const AllEntitiesView = () => {
         </EuiFlexGroup>
         <EuiHorizontalRule margin="m" />
         {viewMode === 'grid' ? (
-          <GroupedGridView dataset={dataset} />
+          <GroupedGridView dataset={dataset} onSelectEntity={setSelectedEntityName} />
         ) : (
-          <EntitiesListView
-            entities={filteredEntities}
-            onSelectEntity={(entity) => setSelectedEntity(entity)}
-          />
+          <EntitiesListView entities={filteredEntities} onSelectEntity={setSelectedEntityName} />
         )}
       </StreamsAppPageTemplate.Body>
-      {selectedEntity ? (
-        <EntityDetailsFlyout entity={selectedEntity} onClose={() => setSelectedEntity(null)} />
+      {selectedEntityName ? (
+        <EntityFlyoutServicesProvider services={flyoutServices}>
+          <EntityFlyout
+            entityName={selectedEntityName}
+            onClose={() => setSelectedEntityName(null)}
+          />
+        </EntityFlyoutServicesProvider>
       ) : null}
     </>
   );

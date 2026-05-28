@@ -27,7 +27,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { useEntityFlyoutServices } from './services_context';
 import type { AlertRow, AlertsTabData } from './fake_entity_tabs';
 
 interface AlertsTabProps {
@@ -36,7 +36,7 @@ interface AlertsTabProps {
 
 export const AlertsTab = ({ alerts }: AlertsTabProps) => {
   const { euiTheme } = useEuiTheme();
-  const { charts } = useDiscoverServices();
+  const { charts } = useEntityFlyoutServices();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
@@ -49,7 +49,7 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
     () => [
       {
         field: 'id',
-        name: i18n.translate('discover.entityCentricLab.flyout.alerts.columns.actions', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.actions', {
           defaultMessage: 'Actions',
         }),
         width: '70px',
@@ -57,16 +57,15 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
           <EuiButtonIcon
             iconType="arrowRight"
             color="primary"
-            aria-label={i18n.translate(
-              'discover.entityCentricLab.flyout.alerts.openAlertAriaLabel',
-              { defaultMessage: 'Open alert' }
-            )}
+            aria-label={i18n.translate('entityCentricLabFlyout.flyout.alerts.openAlertAriaLabel', {
+              defaultMessage: 'Open alert',
+            })}
           />
         ),
       },
       {
         field: 'status',
-        name: i18n.translate('discover.entityCentricLab.flyout.alerts.columns.status', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.status', {
           defaultMessage: 'Status',
         }),
         width: '100px',
@@ -74,7 +73,7 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
       },
       {
         field: 'triggeredAt',
-        name: i18n.translate('discover.entityCentricLab.flyout.alerts.columns.triggered', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.triggered', {
           defaultMessage: 'Triggered',
         }),
         sortable: true,
@@ -82,7 +81,7 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
       },
       {
         field: 'ruleName',
-        name: i18n.translate('discover.entityCentricLab.flyout.alerts.columns.ruleName', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.ruleName', {
           defaultMessage: 'Rule name',
         }),
         render: (ruleName: string) => (
@@ -91,7 +90,7 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
       },
       {
         field: 'reason',
-        name: i18n.translate('discover.entityCentricLab.flyout.alerts.columns.reason', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.alerts.columns.reason', {
           defaultMessage: 'Reason',
         }),
         render: (reason: string) => (
@@ -133,13 +132,13 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
               <EuiFlexItem>
                 <EuiTitle size="xs">
                   <h3>
-                    {i18n.translate('discover.entityCentricLab.flyout.alerts.activeAlertsTitle', {
+                    {i18n.translate('entityCentricLabFlyout.flyout.alerts.activeAlertsTitle', {
                       defaultMessage: 'Active alerts',
                     })}
                   </h3>
                 </EuiTitle>
                 <EuiText size="s" color="subdued">
-                  {i18n.translate('discover.entityCentricLab.flyout.alerts.activePercent', {
+                  {i18n.translate('entityCentricLabFlyout.flyout.alerts.activePercent', {
                     defaultMessage: '{percent}% of {total}',
                     values: { percent: activePercent, total: alerts.totalCount },
                   })}
@@ -167,7 +166,7 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
                 <EuiTitle size="xs">
                   <h3>
                     {i18n.translate(
-                      'discover.entityCentricLab.flyout.alerts.activeAlertsOverTimeTitle',
+                      'entityCentricLabFlyout.flyout.alerts.activeAlertsOverTimeTitle',
                       { defaultMessage: 'Active alerts over time' }
                     )}
                   </h3>
@@ -175,13 +174,10 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  content={i18n.translate(
-                    'discover.entityCentricLab.flyout.alerts.overTimeTooltip',
-                    {
-                      defaultMessage:
-                        'Number of active alerts attributed to this entity over the selected time window.',
-                    }
-                  )}
+                  content={i18n.translate('entityCentricLabFlyout.flyout.alerts.overTimeTooltip', {
+                    defaultMessage:
+                      'Number of active alerts attributed to this entity over the selected time window.',
+                  })}
                   position="top"
                   delay="long"
                 >
@@ -189,7 +185,7 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
                     iconType="question"
                     color="text"
                     aria-label={i18n.translate(
-                      'discover.entityCentricLab.flyout.alerts.overTimeTooltipAriaLabel',
+                      'entityCentricLabFlyout.flyout.alerts.overTimeTooltipAriaLabel',
                       { defaultMessage: 'Show chart description' }
                     )}
                   />
@@ -235,7 +231,7 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
-                  {i18n.translate('discover.entityCentricLab.flyout.alerts.activeAlertsLegend', {
+                  {i18n.translate('entityCentricLabFlyout.flyout.alerts.activeAlertsLegend', {
                     defaultMessage: 'Active alerts',
                   })}
                 </EuiText>
@@ -250,13 +246,13 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
       <EuiPanel hasBorder hasShadow={false} paddingSize="m">
         <EuiTitle size="xs">
           <h3>
-            {i18n.translate('discover.entityCentricLab.flyout.alerts.detailsTitle', {
+            {i18n.translate('entityCentricLabFlyout.flyout.alerts.detailsTitle', {
               defaultMessage: 'Active alerts details',
             })}
           </h3>
         </EuiTitle>
         <EuiText size="s" color="subdued">
-          {i18n.translate('discover.entityCentricLab.flyout.alerts.showingCount', {
+          {i18n.translate('entityCentricLabFlyout.flyout.alerts.showingCount', {
             defaultMessage:
               'Showing {start}-{end} of {total} {total, plural, one {Alert} other {Alerts}}',
             values: {
@@ -270,10 +266,9 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
         <EuiBasicTable<AlertRow>
           items={pageOfItems as AlertRow[]}
           columns={columns}
-          tableCaption={i18n.translate(
-            'discover.entityCentricLab.flyout.alerts.detailsTableCaption',
-            { defaultMessage: 'Active alerts details' }
-          )}
+          tableCaption={i18n.translate('entityCentricLabFlyout.flyout.alerts.detailsTableCaption', {
+            defaultMessage: 'Active alerts details',
+          })}
           pagination={{
             pageIndex,
             pageSize,

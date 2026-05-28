@@ -50,7 +50,7 @@ export const RelationshipsTab = ({ relationships }: RelationshipsTabProps) => {
     () => [
       {
         field: 'id',
-        name: i18n.translate('discover.entityCentricLab.flyout.relationships.columns.action', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.relationships.columns.action', {
           defaultMessage: 'Action',
         }),
         width: '70px',
@@ -59,7 +59,7 @@ export const RelationshipsTab = ({ relationships }: RelationshipsTabProps) => {
             iconType="arrowRight"
             color="primary"
             aria-label={i18n.translate(
-              'discover.entityCentricLab.flyout.relationships.openRelatedAriaLabel',
+              'entityCentricLabFlyout.flyout.relationships.openRelatedAriaLabel',
               { defaultMessage: 'Open related entity' }
             )}
           />
@@ -67,7 +67,7 @@ export const RelationshipsTab = ({ relationships }: RelationshipsTabProps) => {
       },
       {
         field: 'name',
-        name: i18n.translate('discover.entityCentricLab.flyout.relationships.columns.entityName', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.relationships.columns.entityName', {
           defaultMessage: 'Entity name',
         }),
         render: (name: string) => (
@@ -76,7 +76,7 @@ export const RelationshipsTab = ({ relationships }: RelationshipsTabProps) => {
       },
       {
         field: 'health',
-        name: i18n.translate('discover.entityCentricLab.flyout.relationships.columns.health', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.relationships.columns.health', {
           defaultMessage: 'Health',
         }),
         width: '110px',
@@ -86,13 +86,13 @@ export const RelationshipsTab = ({ relationships }: RelationshipsTabProps) => {
       },
       {
         field: 'entityType',
-        name: i18n.translate('discover.entityCentricLab.flyout.relationships.columns.entityType', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.relationships.columns.entityType', {
           defaultMessage: 'Entity type',
         }),
       },
       {
         field: 'relation',
-        name: i18n.translate('discover.entityCentricLab.flyout.relationships.columns.relation', {
+        name: i18n.translate('entityCentricLabFlyout.flyout.relationships.columns.relation', {
           defaultMessage: 'Relation',
         }),
         sortable: true,
@@ -108,13 +108,13 @@ export const RelationshipsTab = ({ relationships }: RelationshipsTabProps) => {
       <EuiPanel hasBorder hasShadow={false} paddingSize="m">
         <EuiTitle size="xs">
           <h3>
-            {i18n.translate('discover.entityCentricLab.flyout.relationships.relatedEntitiesTitle', {
+            {i18n.translate('entityCentricLabFlyout.flyout.relationships.relatedEntitiesTitle', {
               defaultMessage: 'Related entities',
             })}
           </h3>
         </EuiTitle>
         <EuiText size="s" color="subdued">
-          {i18n.translate('discover.entityCentricLab.flyout.relationships.showingCount', {
+          {i18n.translate('entityCentricLabFlyout.flyout.relationships.showingCount', {
             defaultMessage:
               'Showing {start}-{end} of {total} {total, plural, one {Alert} other {Alerts}}',
             values: {
@@ -129,7 +129,7 @@ export const RelationshipsTab = ({ relationships }: RelationshipsTabProps) => {
           items={pageOfItems as RelatedEntity[]}
           columns={columns}
           tableCaption={i18n.translate(
-            'discover.entityCentricLab.flyout.relationships.relatedEntitiesTableCaption',
+            'entityCentricLabFlyout.flyout.relationships.relatedEntitiesTableCaption',
             { defaultMessage: 'Related entities' }
           )}
           pagination={{
@@ -201,7 +201,7 @@ const TopologyPanel = ({ topology }: { readonly topology: RelationshipsTabData['
           viewBox="0 0 440 320"
           role="img"
           aria-label={i18n.translate(
-            'discover.entityCentricLab.flyout.relationships.topologyAriaLabel',
+            'entityCentricLabFlyout.flyout.relationships.topologyAriaLabel',
             { defaultMessage: 'Service topology graph' }
           )}
           css={css`
@@ -243,7 +243,7 @@ const TopologyControls = () => (
             iconType="plus"
             color="text"
             aria-label={i18n.translate(
-              'discover.entityCentricLab.flyout.relationships.zoomInAriaLabel',
+              'entityCentricLabFlyout.flyout.relationships.zoomInAriaLabel',
               { defaultMessage: 'Zoom in' }
             )}
             data-test-subj="entityCentricLabTopologyZoomIn"
@@ -254,7 +254,7 @@ const TopologyControls = () => (
             iconType="minus"
             color="text"
             aria-label={i18n.translate(
-              'discover.entityCentricLab.flyout.relationships.zoomOutAriaLabel',
+              'entityCentricLabFlyout.flyout.relationships.zoomOutAriaLabel',
               { defaultMessage: 'Zoom out' }
             )}
             data-test-subj="entityCentricLabTopologyZoomOut"
@@ -265,7 +265,7 @@ const TopologyControls = () => (
             iconType="bullseye"
             color="text"
             aria-label={i18n.translate(
-              'discover.entityCentricLab.flyout.relationships.recenterAriaLabel',
+              'entityCentricLabFlyout.flyout.relationships.recenterAriaLabel',
               { defaultMessage: 'Re-center' }
             )}
             data-test-subj="entityCentricLabTopologyRecenter"
@@ -276,7 +276,7 @@ const TopologyControls = () => (
             iconType="grid"
             color="text"
             aria-label={i18n.translate(
-              'discover.entityCentricLab.flyout.relationships.toggleGridAriaLabel',
+              'entityCentricLabFlyout.flyout.relationships.toggleGridAriaLabel',
               { defaultMessage: 'Toggle grid' }
             )}
             data-test-subj="entityCentricLabTopologyGrid"

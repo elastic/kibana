@@ -26,7 +26,7 @@ import { ENTITY_CATEGORIES, getCategoryDescriptor } from './fake_entities';
 
 interface Props {
   readonly entities: readonly Entity[];
-  readonly onSelectEntity: (entity: Entity) => void;
+  readonly onSelectEntity: (entityName: string) => void;
 }
 
 const HEALTH_BADGE_COLOR: Record<EntityHealth, 'success' | 'warning' | 'danger'> = {
@@ -54,7 +54,7 @@ const CategorySection = ({
 }: {
   category: EntityCategoryId;
   rows: readonly Entity[];
-  onSelectEntity: (entity: Entity) => void;
+  onSelectEntity: (entityName: string) => void;
 }) => {
   const descriptor = getCategoryDescriptor(category);
 
@@ -68,7 +68,7 @@ const CategorySection = ({
         render: (name: string, row: Entity) => (
           <EuiLink
             data-test-subj={`entityCentricLabEntityRow-${row.id}`}
-            onClick={() => onSelectEntity(row)}
+            onClick={() => onSelectEntity(row.name)}
           >
             {name}
           </EuiLink>

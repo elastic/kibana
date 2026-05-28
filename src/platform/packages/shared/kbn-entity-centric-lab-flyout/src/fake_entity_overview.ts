@@ -86,18 +86,18 @@ export interface EntityOverview {
 }
 
 /**
- * Build a fake overview for a given service name. The shape mirrors the design
+ * Build a fake overview for a given entity name. The shape mirrors the design
  * mockup — only the title is interpolated so the flyout looks specific to the
  * row the user clicked.
  */
-export const buildFakeEntityOverview = (serviceName: string): EntityOverview => ({
-  displayName: serviceName,
+export const buildFakeEntityOverview = (entityName: string): EntityOverview => ({
+  displayName: entityName,
   lastUpdate: '2026-04-20',
   tags: [
     { label: 'Service', color: 'hollow' },
     { label: 'Unhealthy', color: 'danger' },
     { label: 'Production', color: 'hollow' },
-    { label: `${serviceName} subset`, color: 'hollow' },
+    { label: `${entityName} subset`, color: 'hollow' },
   ],
   summary: {
     text:
@@ -119,7 +119,7 @@ export const buildFakeEntityOverview = (serviceName: string): EntityOverview => 
         0.83, 0.84, 0.85, 0.87, 0.88, 0.89, 0.9, 0.9,
       ],
       description:
-        'Average end-to-end request latency across all instances of this service over the selected time window.',
+        'Average end-to-end request latency across all instances of this entity over the selected time window.',
     },
     {
       id: 'errorRate',
@@ -147,7 +147,7 @@ export const buildFakeEntityOverview = (serviceName: string): EntityOverview => 
         311, 312, 313, 312, 312, 312,
       ],
       description:
-        'Requests per second served by this service across all instances over the selected time window.',
+        'Requests per second served by this entity across all instances over the selected time window.',
     },
   ],
   details: [

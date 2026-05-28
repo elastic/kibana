@@ -33,7 +33,7 @@ import {
 } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { useEntityFlyoutServices } from './services_context';
 import { OverviewTab } from './overview_tab';
 import { MetricsTab } from './metrics_tab';
 import { LogsTab } from './logs_tab';
@@ -49,24 +49,24 @@ import {
 } from './build_entity_flyout_attachment';
 
 interface EntityFlyoutProps {
-  readonly serviceName: string;
+  readonly entityName: string;
   readonly onClose: () => void;
 }
 
 type TabId = 'overview' | 'metrics' | 'logs' | 'alerts' | 'relationships' | 'security';
 
-export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
+export const EntityFlyout = ({ entityName, onClose }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
-  const { agentBuilder, notifications } = useDiscoverServices();
+  const { agentBuilder, notifications } = useEntityFlyoutServices();
 
-  const overview = useMemo(() => buildFakeEntityOverview(serviceName), [serviceName]);
-  const tabsData = useMemo(() => buildFakeEntityTabsData(serviceName), [serviceName]);
+  const overview = useMemo(() => buildFakeEntityOverview(entityName), [entityName]);
+  const tabsData = useMemo(() => buildFakeEntityTabsData(entityName), [entityName]);
 
   const chatAttachment = useMemo(
-    () => buildEntityFlyoutAttachment({ serviceName, activeTab, overview, tabsData }),
-    [serviceName, activeTab, overview, tabsData]
+    () => buildEntityFlyoutAttachment({ entityName, activeTab, overview, tabsData }),
+    [entityName, activeTab, overview, tabsData]
   );
 
   useEffect(() => {
@@ -89,11 +89,11 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
     agentBuilder.openChat({
       newConversation: true,
       sessionTag: ENTITY_CENTRIC_LAB_SESSION_TAG,
-      initialMessage: buildEntityFlyoutInitialMessage(serviceName),
+      initialMessage: buildEntityFlyoutInitialMessage(entityName),
       autoSendInitialMessage: false,
       attachments: [chatAttachment],
     });
-  }, [agentBuilder, serviceName, chatAttachment]);
+  }, [agentBuilder, entityName, chatAttachment]);
 
   const closeActionMenu = useCallback(() => setIsActionMenuOpen(false), []);
 
@@ -103,51 +103,51 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
       // Lab prototype: real wiring (deep-links, case creation, rule creation,
       // annotation flyout) lands once we connect this to real solutions.
       notifications.toasts.addInfo({
-        title: i18n.translate('discover.entityCentricLab.flyout.takeActionToastTitle', {
+        title: i18n.translate('entityCentricLabFlyout.flyout.takeActionToastTitle', {
           defaultMessage: '{actionLabel}',
           values: { actionLabel },
         }),
-        text: i18n.translate('discover.entityCentricLab.flyout.takeActionToastText', {
-          defaultMessage: 'Action "{actionLabel}" triggered for "{serviceName}" (lab prototype).',
-          values: { actionLabel, serviceName },
+        text: i18n.translate('entityCentricLabFlyout.flyout.takeActionToastText', {
+          defaultMessage: 'Action "{actionLabel}" triggered for "{entityName}" (lab prototype).',
+          values: { actionLabel, entityName },
         }),
       });
     },
-    [closeActionMenu, notifications, serviceName]
+    [closeActionMenu, notifications, entityName]
   );
 
   const actionPanels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
-    const viewInApmLabel = i18n.translate('discover.entityCentricLab.flyout.actions.viewInApm', {
+    const viewInApmLabel = i18n.translate('entityCentricLabFlyout.flyout.actions.viewInApm', {
       defaultMessage: 'View in APM',
     });
     const viewInLogsExplorerLabel = i18n.translate(
-      'discover.entityCentricLab.flyout.actions.viewInLogsExplorer',
+      'entityCentricLabFlyout.flyout.actions.viewInLogsExplorer',
       { defaultMessage: 'View in Logs Explorer' }
     );
     const viewInInfrastructureLabel = i18n.translate(
-      'discover.entityCentricLab.flyout.actions.viewInInfrastructure',
+      'entityCentricLabFlyout.flyout.actions.viewInInfrastructure',
       { defaultMessage: 'View in Infrastructure' }
     );
     const openRelatedDashboardLabel = i18n.translate(
-      'discover.entityCentricLab.flyout.actions.openRelatedDashboard',
+      'entityCentricLabFlyout.flyout.actions.openRelatedDashboard',
       { defaultMessage: 'Open related dashboard' }
     );
-    const addToCaseLabel = i18n.translate('discover.entityCentricLab.flyout.actions.addToCase', {
+    const addToCaseLabel = i18n.translate('entityCentricLabFlyout.flyout.actions.addToCase', {
       defaultMessage: 'Add to case',
     });
     const createAlertRuleLabel = i18n.translate(
-      'discover.entityCentricLab.flyout.actions.createAlertRule',
+      'entityCentricLabFlyout.flyout.actions.createAlertRule',
       { defaultMessage: 'Create alert rule' }
     );
     const annotateDeploymentLabel = i18n.translate(
-      'discover.entityCentricLab.flyout.actions.annotateDeployment',
+      'entityCentricLabFlyout.flyout.actions.annotateDeployment',
       { defaultMessage: 'Annotate deployment' }
     );
 
     return [
       {
         id: 0,
-        title: i18n.translate('discover.entityCentricLab.flyout.actions.panelTitle', {
+        title: i18n.translate('entityCentricLabFlyout.flyout.actions.panelTitle', {
           defaultMessage: 'Take action',
         }),
         items: [
@@ -203,37 +203,37 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
     () => [
       {
         id: 'overview',
-        label: i18n.translate('discover.entityCentricLab.flyout.tabs.overview', {
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.overview', {
           defaultMessage: 'Overview',
         }),
       },
       {
         id: 'metrics',
-        label: i18n.translate('discover.entityCentricLab.flyout.tabs.metrics', {
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.metrics', {
           defaultMessage: 'Metrics',
         }),
       },
       {
         id: 'logs',
-        label: i18n.translate('discover.entityCentricLab.flyout.tabs.logs', {
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.logs', {
           defaultMessage: 'Logs',
         }),
       },
       {
         id: 'alerts',
-        label: i18n.translate('discover.entityCentricLab.flyout.tabs.alerts', {
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.alerts', {
           defaultMessage: 'Alerts',
         }),
       },
       {
         id: 'relationships',
-        label: i18n.translate('discover.entityCentricLab.flyout.tabs.relationships', {
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.relationships', {
           defaultMessage: 'Relationships',
         }),
       },
       {
         id: 'security',
-        label: i18n.translate('discover.entityCentricLab.flyout.tabs.security', {
+        label: i18n.translate('entityCentricLabFlyout.flyout.tabs.security', {
           defaultMessage: 'Security',
         }),
         appendBadge: overview.securityIssueCount,
@@ -261,7 +261,7 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
             <EuiButtonIcon
               iconType="share"
               color="text"
-              aria-label={i18n.translate('discover.entityCentricLab.flyout.shareAriaLabel', {
+              aria-label={i18n.translate('entityCentricLabFlyout.flyout.shareAriaLabel', {
                 defaultMessage: 'Share',
               })}
               data-test-subj="entityCentricLabFlyoutShare"
@@ -271,7 +271,7 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
             <EuiButtonIcon
               iconType="gear"
               color="text"
-              aria-label={i18n.translate('discover.entityCentricLab.flyout.settingsAriaLabel', {
+              aria-label={i18n.translate('entityCentricLabFlyout.flyout.settingsAriaLabel', {
                 defaultMessage: 'Settings',
               })}
               data-test-subj="entityCentricLabFlyoutSettings"
@@ -292,7 +292,7 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBetaBadge
-              label={i18n.translate('discover.entityCentricLab.flyout.labBadgeLabel', {
+              label={i18n.translate('entityCentricLabFlyout.flyout.labBadgeLabel', {
                 defaultMessage: 'Lab',
               })}
               color="hollow"
@@ -301,7 +301,7 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiText size="xs" color="subdued">
-          {i18n.translate('discover.entityCentricLab.flyout.lastUpdate', {
+          {i18n.translate('entityCentricLabFlyout.flyout.lastUpdate', {
             defaultMessage: 'Last update {lastUpdate}',
             values: { lastUpdate: overview.lastUpdate },
           })}
@@ -341,7 +341,7 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
             <EuiButtonIcon
               iconType="plus"
               color="text"
-              aria-label={i18n.translate('discover.entityCentricLab.flyout.addTabAriaLabel', {
+              aria-label={i18n.translate('entityCentricLabFlyout.flyout.addTabAriaLabel', {
                 defaultMessage: 'Add tab',
               })}
               data-test-subj="entityCentricLabFlyoutAddTab"
@@ -352,7 +352,7 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
       <EuiFlyoutBody>
         <TabContent
           activeTab={activeTab}
-          serviceName={serviceName}
+          entityName={entityName}
           overview={overview}
           tabsData={tabsData}
         />
@@ -366,7 +366,7 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
                 data-test-subj="entityCentricLabFlyoutAddToChat"
                 onClick={handleAddToChat}
               >
-                {i18n.translate('discover.entityCentricLab.flyout.addToChat', {
+                {i18n.translate('entityCentricLabFlyout.flyout.addToChat', {
                   defaultMessage: 'Add to chat',
                 })}
               </EuiButtonEmpty>
@@ -382,7 +382,7 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
                   data-test-subj="entityCentricLabFlyoutTakeAction"
                   onClick={() => setIsActionMenuOpen((open) => !open)}
                 >
-                  {i18n.translate('discover.entityCentricLab.flyout.takeAction', {
+                  {i18n.translate('entityCentricLabFlyout.flyout.takeAction', {
                     defaultMessage: 'Take action',
                   })}
                 </EuiButton>
@@ -391,10 +391,9 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
               closePopover={closeActionMenu}
               panelPaddingSize="none"
               anchorPosition="upRight"
-              aria-label={i18n.translate(
-                'discover.entityCentricLab.flyout.takeActionMenuAriaLabel',
-                { defaultMessage: 'Take action menu' }
-              )}
+              aria-label={i18n.translate('entityCentricLabFlyout.flyout.takeActionMenuAriaLabel', {
+                defaultMessage: 'Take action menu',
+              })}
               data-test-subj="entityCentricLabFlyoutTakeActionMenu"
             >
               <EuiContextMenu initialPanelId={0} panels={actionPanels} size="s" />
@@ -408,12 +407,12 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
 
 const TabContent = ({
   activeTab,
-  serviceName,
+  entityName,
   overview,
   tabsData,
 }: {
   readonly activeTab: TabId;
-  readonly serviceName: string;
+  readonly entityName: string;
   readonly overview: ReturnType<typeof buildFakeEntityOverview>;
   readonly tabsData: ReturnType<typeof buildFakeEntityTabsData>;
 }) => {
@@ -423,7 +422,7 @@ const TabContent = ({
     case 'metrics':
       return <MetricsTab metrics={tabsData.metrics} />;
     case 'logs':
-      return <LogsTab serviceName={serviceName} logs={tabsData.logs} />;
+      return <LogsTab entityName={entityName} logs={tabsData.logs} />;
     case 'alerts':
       return <AlertsTab alerts={tabsData.alerts} />;
     case 'relationships':
