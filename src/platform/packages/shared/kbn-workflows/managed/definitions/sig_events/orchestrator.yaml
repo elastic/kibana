@@ -89,29 +89,41 @@ steps:
           detectionRan: true
 
   # Step 2: Discovery gate — counts after detection to pick up new detection docs.
+  # Collapse by rule_uuid + sort desc → latest non-handled doc per rule.
+  # Post-filter to kind:detection so only actively-firing rules trigger discovery.
   - name: count_unhandled_detections
     type: elasticsearch.request
     with:
       method: POST
-      path: '/{{ consts.DETECTIONS_INDEX }}/_count'
+      path: '/{{ consts.DETECTIONS_INDEX }}/_search?ignore_unavailable=true'
       body:
+        size: 500
+        collapse:
+          field: rule_uuid
+        sort:
+          - "@timestamp":
+              order: desc
+        _source:
+          includes:
+            - kind
         query:
           bool:
             must:
               - term:
                   kibana.space_ids: "{{ variables.spaceId }}"
-              - term:
-                  kind: "{{ consts.KIND_DETECTION }}"
               - range:
                   "@timestamp":
                     gte: "{{ consts.DETECTION_RETENTION_WINDOW }}"
+            must_not:
+              - term:
+                  kind: "{{ consts.KIND_HANDLED }}"
     on-failure:
       continue: false
 
   - name: evaluate_discovery_gate
     type: data.set
     with:
-      unhandled_detections_count: "${{ steps.count_unhandled_detections.output.count | default: 1 }}"
+      unhandled_detections_count: "${{ steps.count_unhandled_detections.output.hits.hits | where: '_source.kind', 'detection' | size | default: 1 }}"
 
   - name: run_discovery
     type: if
