@@ -13,15 +13,15 @@ export interface OnboardingStepConfig {
 
 export const ONBOARDING_STEPS: OnboardingStepConfig[] = [
   {
-    id: 'connect',
-    title: i18n.translate('xpack.ingestHub.onboarding.steps.connect.title', {
-      defaultMessage: 'Connect',
-    }),
-  },
-  {
     id: 'services',
     title: i18n.translate('xpack.ingestHub.onboarding.steps.services.title', {
       defaultMessage: 'Services',
+    }),
+  },
+  {
+    id: 'connect',
+    title: i18n.translate('xpack.ingestHub.onboarding.steps.connect.title', {
+      defaultMessage: 'Connect',
     }),
   },
   {

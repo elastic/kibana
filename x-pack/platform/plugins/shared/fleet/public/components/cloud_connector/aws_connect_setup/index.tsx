@@ -30,6 +30,7 @@ export interface AwsConnectSetupProps {
   initialConnectorId?: string;
   initialStaticKeys?: Partial<AwsStaticKeyCredentials>;
   initialTemporaryKeys?: Partial<AwsTemporaryKeyCredentials>;
+  showIdentityFederation?: boolean;
   onNext?: () => void;
   onConnectorIdChange?: (connectorId: string | undefined) => void;
   onStaticKeysChange?: (keys: AwsStaticKeyCredentials | undefined) => void;
@@ -53,6 +54,7 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
   initialConnectorId,
   initialStaticKeys,
   initialTemporaryKeys,
+  showIdentityFederation = true,
   onNext,
   onConnectorIdChange,
   onStaticKeysChange,
@@ -63,7 +65,9 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
       ? 'temporary_keys'
       : initialStaticKeys
       ? 'static_keys'
-      : 'identity_federation'
+      : showIdentityFederation
+      ? 'identity_federation'
+      : 'static_keys'
   );
   const [isFormReady, setIsFormReady] = useState(false);
 
@@ -91,7 +95,11 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <AwsAuthTypeSelector selectedAuthType={authType} onChange={handleAuthTypeChange} />
+      <AwsAuthTypeSelector
+        selectedAuthType={authType}
+        showIdentityFederation={showIdentityFederation}
+        onChange={handleAuthTypeChange}
+      />
       <EuiSpacer size="l" />
       {authType === 'identity_federation' && (
         <AwsIdentityFederationSetup
