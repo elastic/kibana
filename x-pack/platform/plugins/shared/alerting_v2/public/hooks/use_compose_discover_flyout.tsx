@@ -28,7 +28,7 @@ import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
 
-const tryParseBuilderState = (type: string, query: string): BuilderState => {
+const tryParseBuilderState = (type: string, query: string): BuilderState | null => {
   const definition = RULE_BUILDER_REGISTRY[type];
   if (definition?.parseState) {
     return definition.parseState(query);
