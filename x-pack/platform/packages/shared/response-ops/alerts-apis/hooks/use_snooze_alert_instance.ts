@@ -38,7 +38,13 @@ export const useSnoozeAlertInstance = ({
   notifications: { toasts },
 }: UseSnoozeAlertInstanceParams) => {
   return useMutation(
-    ({ ruleId, alertInstanceId, expiresAt, conditions, conditionOperator }: SnoozeAlertInstanceMutationParams) =>
+    ({
+      ruleId,
+      alertInstanceId,
+      expiresAt,
+      conditions,
+      conditionOperator,
+    }: SnoozeAlertInstanceMutationParams) =>
       snoozeAlertInstance({
         http,
         id: ruleId,
