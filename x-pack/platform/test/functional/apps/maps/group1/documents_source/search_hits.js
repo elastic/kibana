@@ -7,6 +7,11 @@
 
 import expect from '@kbn/expect';
 
+/**
+ * Purpose: Verify geojson layer interacts with unified search
+ * 
+ * Migration: Migrate to Scout - rename to smoke test
+ */
 export default function ({ getPageObjects, getService }) {
   const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
