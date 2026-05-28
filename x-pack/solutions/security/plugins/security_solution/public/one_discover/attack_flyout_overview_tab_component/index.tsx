@@ -14,9 +14,12 @@ import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
+import { useAttackDetails } from '../../flyout_v2/attack_details/main/hooks/use_attack_details';
 import { OverviewTab } from '../../flyout_v2/attack_details/main/tabs/overview_tab';
 import { AttackEntities } from '../../flyout_v2/attack_details/tools/entities';
 import { AttackCorrelations } from '../../flyout_v2/attack_details/tools/correlations';
+import { FlyoutLoading } from '../../flyout_v2/shared/components/flyout_loading';
+import { FlyoutError } from '../../flyout_v2/shared/components/flyout_error';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
@@ -195,11 +198,26 @@ const AttackFlyoutOverviewTabContent = ({
     [hit, onShowAlert, openAttackTool]
   );
 
+  // Resolve the parsed attack-discovery alert so the Overview tab's AI
+  // Summary section can source markdown from it (the hit's flattened/source
+  // data isn't reliable across entry points). Discover's hit already carries
+  // a populated `_source`, so this short-circuits without firing a fetch.
+  const { attack, loading } = useAttackDetails(hit, { refresh: onAlertUpdated });
+
+  if (loading) {
+    return <FlyoutLoading />;
+  }
+
+  if (!attack) {
+    return <FlyoutError />;
+  }
+
   return (
     <div data-test-subj="discover-attack-flyout-overview-tab">
       <EuiSpacer size="m" />
       <OverviewTab
         hit={hit}
+        attack={attack}
         onShowAttackEntities={onShowAttackEntities}
         onShowAttackCorrelations={onShowAttackCorrelations}
       />

@@ -8,6 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as tabs from '../tabs';
@@ -18,6 +19,13 @@ export interface UseTabsProps {
    * The attack-discovery document hit forwarded to every tab.
    */
   hit: DataTableRecord;
+  /**
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails};
+   * forwarded into the Overview tab so the AI Summary section can source the
+   * markdown bodies from the alert rather than from `hit.flattened` (which
+   * is unreliable across entry points).
+   */
+  attack: AttackDiscoveryAlert;
   /**
    * Browser fields resolved by {@link useAttackDetails}; needed by the Table
    * tab's column renderers.
@@ -69,6 +77,7 @@ export interface UseTabsResult {
  */
 export const useTabs = ({
   hit,
+  attack,
   browserFields,
   dataFormattedForFieldBrowser,
   onShowAttackEntities,
@@ -78,11 +87,12 @@ export const useTabs = ({
 
   const tabsDisplayed = useMemo<AttackDetailsPanelTabType[]>(
     () => [
-      tabs.overviewTab({ hit, onShowAttackEntities, onShowAttackCorrelations }),
+      tabs.overviewTab({ hit, attack, onShowAttackEntities, onShowAttackCorrelations }),
       tabs.tableTab({ hit, browserFields, dataFormattedForFieldBrowser }),
       tabs.jsonTab({ hit }),
     ],
     [
+      attack,
       browserFields,
       dataFormattedForFieldBrowser,
       hit,

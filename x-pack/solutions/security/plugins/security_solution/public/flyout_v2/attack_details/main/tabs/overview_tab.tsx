@@ -10,6 +10,7 @@ import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { OVERVIEW_TAB_TEST_ID } from '../constants/test_ids';
 import { AISummarySection } from '../components/ai_summary_section';
 import { VisualizationsSection } from '../components/visualizations_section';
@@ -20,6 +21,13 @@ export interface OverviewTabProps {
    * The attack-discovery document hit. Forwarded to every child section.
    */
   hit: DataTableRecord;
+  /**
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails};
+   * forwarded to {@link AISummarySection} so the markdown bodies are sourced
+   * from the alert (the hit's flattened/source data is unreliable across
+   * entry points).
+   */
+  attack: AttackDiscoveryAlert;
   /**
    * Callback that opens the attack-specific Entities child flyout. Forwarded
    * to {@link InsightsSection} → {@link EntitiesOverview}.
@@ -36,7 +44,7 @@ export interface OverviewTabProps {
  * Renders the Overview tab content in the Attack Details flyout.
  */
 export const OverviewTab: React.FC<OverviewTabProps> = memo(
-  ({ hit, onShowAttackEntities, onShowAttackCorrelations }) => {
+  ({ hit, attack, onShowAttackEntities, onShowAttackCorrelations }) => {
     return (
       <EuiPanel
         hasBorder={false}
@@ -48,7 +56,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = memo(
           { defaultMessage: 'Overview' }
         )}
       >
-        <AISummarySection hit={hit} />
+        <AISummarySection attack={attack} />
         <EuiHorizontalRule margin="m" />
         <VisualizationsSection hit={hit} />
         <EuiHorizontalRule margin="m" />

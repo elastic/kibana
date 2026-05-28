@@ -26,21 +26,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { DataTableRecord } from '@kbn/discover-utils';
-import { getFieldValue } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import { AttackDiscoveryMarkdownFormatter } from '../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 
 const KEY = 'aisummary';
-
-const FIELD_SUMMARY_MARKDOWN = 'kibana.alert.attack_discovery.summary_markdown' as const;
-const FIELD_SUMMARY_MARKDOWN_WITH_REPLACEMENTS =
-  'kibana.alert.attack_discovery.summary_markdown_with_replacements' as const;
-const FIELD_DETAILS_MARKDOWN = 'kibana.alert.attack_discovery.details_markdown' as const;
-const FIELD_DETAILS_MARKDOWN_WITH_REPLACEMENTS =
-  'kibana.alert.attack_discovery.details_markdown_with_replacements' as const;
 
 const titleIconCss = css`
   margin-left: 4px;
@@ -159,10 +152,17 @@ const AISummarySectionSettings: React.FC<AISummarySectionSettingsProps> = ({
 
 export interface AISummarySectionProps {
   /**
-   * The attack-discovery document hit. The four markdown fields are read
-   * directly off `hit.flattened` via `getFieldValue`.
+   * The parsed attack-discovery alert resolved by {@link useAttackDetails}.
+   * Sourced from the alert (not from `hit.flattened` / `hit.raw._source`)
+   * because the hit is built without a `DataView` on the legacy thin-wrapper
+   * timeline path, which drops the dotted markdown keys from `flattened`.
+   *
+   * `useAttackDetails` resolves the alert with `withReplacements: false`, so
+   * `attack.summaryMarkdown` / `attack.detailsMarkdown` carry the anonymized
+   * (UUID) values; the resolved variants are derived client-side from
+   * `attack.replacements` via {@link replaceAnonymizedValuesWithOriginalValues}.
    */
-  hit: DataTableRecord;
+  attack: AttackDiscoveryAlert;
 }
 
 /**
@@ -172,19 +172,33 @@ export interface AISummarySectionProps {
  * to switch between anonymized and resolved values. The section is expandable
  * and persists its expanded state.
  */
-export const AISummarySection = memo(({ hit }: AISummarySectionProps) => {
+export const AISummarySection = memo(({ attack }: AISummarySectionProps) => {
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.ATTACK_DETAILS_OVERVIEW_TAB_EXPANDED_SECTIONS,
     title: KEY,
     defaultValue: true,
   });
 
-  const summaryMarkdown = (getFieldValue(hit, FIELD_SUMMARY_MARKDOWN) as string | undefined) ?? '';
-  const summaryMarkdownWithReplacements =
-    (getFieldValue(hit, FIELD_SUMMARY_MARKDOWN_WITH_REPLACEMENTS) as string | undefined) ?? '';
-  const detailsMarkdown = (getFieldValue(hit, FIELD_DETAILS_MARKDOWN) as string | undefined) ?? '';
-  const detailsMarkdownWithReplacements =
-    (getFieldValue(hit, FIELD_DETAILS_MARKDOWN_WITH_REPLACEMENTS) as string | undefined) ?? '';
+  const summaryMarkdown = attack.summaryMarkdown ?? '';
+  const detailsMarkdown = attack.detailsMarkdown ?? '';
+
+  const summaryMarkdownWithReplacements = useMemo(
+    () =>
+      replaceAnonymizedValuesWithOriginalValues({
+        messageContent: summaryMarkdown,
+        replacements: attack.replacements,
+      }),
+    [attack.replacements, summaryMarkdown]
+  );
+
+  const detailsMarkdownWithReplacements = useMemo(
+    () =>
+      replaceAnonymizedValuesWithOriginalValues({
+        messageContent: detailsMarkdown,
+        replacements: attack.replacements,
+      }),
+    [attack.replacements, detailsMarkdown]
+  );
 
   const hasAnonymizedContent = summaryMarkdown.trim() !== '' || detailsMarkdown.trim() !== '';
 

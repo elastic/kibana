@@ -259,6 +259,7 @@ const AttackDetailsInner: FC<AttackDetailsInnerProps> = memo(
   }) => {
     const { tabsDisplayed, selectedTabId, setSelectedTabId } = useTabs({
       hit,
+      attack,
       browserFields,
       dataFormattedForFieldBrowser,
       onShowAttackEntities,

@@ -38,6 +38,13 @@ jest.mock('../../flyout_v2/attack_details/main/tabs/overview_tab', () => ({
   OverviewTab: (props: unknown) => mockOverviewTab(props),
 }));
 
+jest.mock('../../flyout_v2/attack_details/main/hooks/use_attack_details', () => ({
+  useAttackDetails: jest.fn(() => ({
+    attack: { id: 'attack-1', title: 'Test attack' },
+    loading: false,
+  })),
+}));
+
 jest.mock('../../flyout_v2/document/main/document_flyout_wrapper', () => ({
   DocumentFlyoutWrapper: () => <div>{'MockDocumentFlyoutWrapper'}</div>,
 }));

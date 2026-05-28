@@ -9,6 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './constants/test_ids';
 import { JsonTab } from './tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
@@ -20,6 +21,14 @@ export interface OverviewTabFactoryProps {
    * Attack-discovery document hit forwarded to the Overview tab.
    */
   hit: DataTableRecord;
+  /**
+   * Parsed attack-discovery alert resolved by {@link useAttackDetails}. Used
+   * by the AI Summary section to render the markdown bodies — sourcing the
+   * markdown from the resolved alert (rather than `hit.flattened` /
+   * `hit.raw._source`) keeps it working regardless of which entry point
+   * built the hit.
+   */
+  attack: AttackDiscoveryAlert;
   /**
    * Callback that opens the attack-specific Entities child flyout.
    */
@@ -40,6 +49,7 @@ export interface OverviewTabFactoryProps {
  */
 export const overviewTab = ({
   hit,
+  attack,
   onShowAttackEntities,
   onShowAttackCorrelations,
 }: OverviewTabFactoryProps): AttackDetailsPanelTabType => ({
@@ -54,6 +64,7 @@ export const overviewTab = ({
   content: (
     <OverviewTab
       hit={hit}
+      attack={attack}
       onShowAttackEntities={onShowAttackEntities}
       onShowAttackCorrelations={onShowAttackCorrelations}
     />

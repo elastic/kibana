@@ -206,7 +206,11 @@ export const useAttackDetails = (
         enableFieldRendering: true,
         id: searchHit._id ?? attackId,
         index: searchHit._index,
-        withReplacements: true,
+        // Mirrors `useFindAttackDiscoveries`: keep the anonymized values so
+        // the "Show anonymized values" toggle in `AISummarySection` has both
+        // variants available (resolved is derived client-side via
+        // `replaceAnonymizedValuesWithOriginalValues` + `attack.replacements`).
+        withReplacements: false,
       });
       return transformAttackDiscoveryAlertFromApi(apiAlert);
     } catch {
