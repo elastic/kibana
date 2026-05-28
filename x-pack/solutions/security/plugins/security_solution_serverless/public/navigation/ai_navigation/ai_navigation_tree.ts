@@ -105,6 +105,10 @@ export const createAiNavigationTree = (
         },
       ],
     },
+    {
+      link: 'onboarding' as AppDeepLinkId,
+      sideNavStatus: 'hidden',
+    },
   ],
   footer: [
     {
@@ -178,13 +182,17 @@ export const createAiNavigationTree = (
                 children: [
                   { link: 'management:rules' as const },
                   { link: 'management:action_policies' as const },
+                  { link: 'management:execution_history' as const },
                 ],
               },
             ]
           : []),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
-          children: [{ link: 'rules' }, { link: 'management:triggersActionsConnectors' }],
+          children: [
+            { link: 'management:triggersActions' },
+            { link: 'management:triggersActionsConnectors' },
+          ],
         },
         {
           title: i18nStrings.ml.title,

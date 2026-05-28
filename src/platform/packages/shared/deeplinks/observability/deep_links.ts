@@ -24,6 +24,7 @@ import type {
   INVENTORY_APP_ID,
   STREAMS_APP_ID,
   INGEST_HUB_APP_ID,
+  ONBOARDING_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
@@ -42,6 +43,7 @@ type ObltProfilingApp = typeof OBLT_PROFILING_APP_ID;
 type InventoryApp = typeof INVENTORY_APP_ID;
 type StreamsApp = typeof STREAMS_APP_ID;
 type IngestHubApp = typeof INGEST_HUB_APP_ID;
+type OnboardingApp = typeof ONBOARDING_APP_ID;
 
 export type AppId =
   | LogsApp
@@ -59,7 +61,8 @@ export type AppId =
   | ObltProfilingApp
   | InventoryApp
   | StreamsApp
-  | IngestHubApp;
+  | IngestHubApp
+  | OnboardingApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 

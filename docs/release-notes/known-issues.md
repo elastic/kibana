@@ -26,6 +26,32 @@ This issue is resolved in {{stack}} 9.2.8, 9.3.3, 9.4.0. Version 9.1 is end of l
 
 ::::
 
+::::{dropdown} Upgrading to 9.3.x fails when a rule action contains oversized content
+
+Applies to: {{stack}} 9.3.0, 9.3.1, 9.3.2, 9.3.3, 9.3.4
+
+**Details**
+
+Upgrading from 9.2.x to 9.3.x can fail if any rule (Stack, Observability, or Security) has a connector action whose parameter values are larger than 32,766 bytes. Common examples include email message bodies or HTML templates, large webhook payloads, or Slack messages built from verbose templates.
+
+During the upgrade, {{kib}} migrates rule saved objects to a new internal mapping. Any oversized action parameter value causes the migration to abort with an error similar to:
+
+````
+Flattened field [alert.actions.params] contains one immense field whose keyed encoding is longer than the allowed max length of 32766 bytes
+````
+
+**Workaround**
+
+Upgrade to 9.3.5 or 9.4.2.
+
+If the upgrade to 9.3.0, 9.3.1, 9.3.2, 9.3.3, 9.3.4 failed with this error, identify rules that use connectors with large content (particularly email, webhook, and Slack connectors) and shorten the action parameter values, such as message bodies or HTML templates. Then retry the upgrade.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.3.5 and 9.4.2.
+
+::::
+
 ::::{dropdown} Stack alerts remain active instead of transitioning to recovered
 
 Applies to: {{stack}} 9.2.7, 9.2.8, 9.3.2, 9.3.3

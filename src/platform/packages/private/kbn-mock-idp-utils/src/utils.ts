@@ -316,8 +316,7 @@ const normalizeProjectType = (projectType: string) => {
   }
 
   if (projectType === 'vectordb') {
-    // return 'vectordb' here once stateless ES and UIAM supports it
-    return 'elasticsearch';
+    return 'vectordb';
   }
 
   return projectType;
