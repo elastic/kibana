@@ -82,6 +82,8 @@ test.describe.serial(
       });
 
       await test.step('ingestion mode survives the collection method switch', async () => {
+        await pageObjects.kubernetesV2.elasticAgentDeploymentTab('standalone').click();
+        await pageObjects.kubernetesV2.ingestionSelector().waitFor({ state: 'visible' });
         await expect(pageObjects.onboarding.wiredStreamsOption).toHaveAttribute(
           'aria-pressed',
           'true'
@@ -97,6 +99,63 @@ test.describe.serial(
 
       await expect(page).toHaveURL(/\/kubernetes\?ingestion=wired/);
       await expect(pageObjects.kubernetesV2.layout('otel')).toBeVisible();
+    });
+
+    test('Kubernetes V2 step controls expose expected branch UI', async ({ pageObjects }) => {
+      await pageObjects.kubernetesV2.gotoPath('/kubernetes');
+      await expect(pageObjects.kubernetesV2.layout('otel')).toBeVisible();
+
+      await test.step('select existing collector tab', async () => {
+        await pageObjects.kubernetesV2.collectorTab('existing').click();
+        await expect(pageObjects.kubernetesV2.existingCollectorTitle()).toBeVisible();
+        await expect(pageObjects.kubernetesV2.existingCollectorDescription()).toBeVisible();
+      });
+
+      await test.step('enable OTel instrumentation and select namespace annotations', async () => {
+        await pageObjects.kubernetesV2.otelInstrumentationSwitch().waitFor({ state: 'visible' });
+        await pageObjects.kubernetesV2.otelInstrumentationSwitch().click();
+        await pageObjects.kubernetesV2.clickOtelAnnotationCard('namespace');
+
+        await expect(pageObjects.kubernetesV2.otelAnnotationCard('namespace')).toHaveAttribute(
+          'data-selected',
+          'true'
+        );
+        await expect(pageObjects.kubernetesV2.otelAnnotationCard('pods')).toHaveAttribute(
+          'data-selected',
+          'false'
+        );
+        await expect(pageObjects.kubernetesV2.otelInstrumentationNamespaceSnippet()).toBeVisible();
+        await expect(pageObjects.kubernetesV2.otelInstrumentationPodsSnippet()).toHaveCount(0);
+      });
+
+      await test.step('navigate to Elastic Agent page and select deployment tabs', async () => {
+        await pageObjects.kubernetesV2.collectionMethodCard('elastic-agent').click();
+        await expect(pageObjects.kubernetesV2.layout('elastic-agent')).toBeVisible();
+
+        await pageObjects.kubernetesV2.elasticAgentDeploymentTab('fleet-managed').click();
+        await expect(pageObjects.kubernetesV2.elasticAgentFleetManagedStep()).toBeVisible();
+
+        await pageObjects.kubernetesV2.elasticAgentDeploymentTab('standalone').click();
+        await expect(pageObjects.kubernetesV2.elasticAgentFleetManagedStep()).toHaveCount(0);
+      });
+
+      await test.step('select Elastic Agent app instrumentation Yes and No branches', async () => {
+        await pageObjects.kubernetesV2.clickElasticAgentAppInstrumentationCard('yes');
+        await expect(
+          pageObjects.kubernetesV2.elasticAgentAppInstrumentationCard('yes')
+        ).toHaveAttribute('data-selected', 'true');
+        await expect(
+          pageObjects.kubernetesV2.elasticAgentAppInstrumentationApmServerUrlInput()
+        ).toBeVisible();
+
+        await pageObjects.kubernetesV2.clickElasticAgentAppInstrumentationCard('no');
+        await expect(
+          pageObjects.kubernetesV2.elasticAgentAppInstrumentationCard('no')
+        ).toHaveAttribute('data-selected', 'true');
+        await expect(
+          pageObjects.kubernetesV2.elasticAgentAppInstrumentationApmServerUrlInput()
+        ).toHaveCount(0);
+      });
     });
 
     test('navigating to /kubernetes renders the V1 experience when V2 is disabled', async ({

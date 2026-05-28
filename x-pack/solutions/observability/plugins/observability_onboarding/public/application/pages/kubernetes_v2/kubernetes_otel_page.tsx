@@ -41,17 +41,28 @@ import {
 } from '../../quickstart_flows/otel_kubernetes/constants';
 import { buildValuesFileUrl } from '../../quickstart_flows/otel_kubernetes/build_values_file_url';
 import { buildOtelKubernetesActionLinks } from '../../quickstart_flows/otel_kubernetes/build_otel_kubernetes_action_links';
-import {
-  OtelKubernetesAddRepositoryStep,
-  OtelKubernetesInstallStep,
-  OtelKubernetesInstrumentStep,
-  OtelKubernetesVisualizeStep,
-} from '../../quickstart_flows/otel_kubernetes/steps';
+import { OtelKubernetesVisualizeStep } from '../../quickstart_flows/otel_kubernetes/steps';
+import { OtelCollectorSetupStep } from './otel_collector_setup_step';
+import { OtelInstrumentationStep } from './otel_instrumentation_step';
 import {
   buildKubernetesCollectionMethodOptions,
   KUBERNETES_SELECTOR_LEGEND,
   KUBERNETES_SELECTOR_STEP_TITLE,
 } from './kubernetes_collection_method_options';
+
+const SET_UP_OTEL_COLLECTOR_TITLE = i18n.translate(
+  'xpack.observability_onboarding.kubernetesV2.otel.collectorSetupStepTitle',
+  {
+    defaultMessage: 'Set up the OpenTelemetry Collector',
+  }
+);
+
+const INSTRUMENT_APPLICATION_STEP_TITLE = i18n.translate(
+  'xpack.observability_onboarding.kubernetesV2.otel.instrumentationStepTitle',
+  {
+    defaultMessage: 'Instrument your application',
+  }
+);
 
 export const KubernetesOtelPage: React.FC = () => {
   useFlowBreadcrumb(
@@ -143,22 +154,22 @@ export const KubernetesOtelPage: React.FC = () => {
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
   const otelKubeStackValuesFileUrl = data
     ? buildValuesFileUrl({
-      isMetricsOnboardingEnabled,
-      isManagedOtlpServiceAvailable,
-      agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
-    })
+        isMetricsOnboardingEnabled,
+        isManagedOtlpServiceAvailable,
+        agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
+      })
     : undefined;
   const installStackCommand = data
     ? buildInstallStackCommand({
-      isMetricsOnboardingEnabled,
-      isManagedOtlpServiceAvailable,
-      managedOtlpEndpointUrl: data.managedOtlpServiceUrl,
-      elasticsearchUrl: data.elasticsearchUrl,
-      apiKeyEncoded: data.apiKeyEncoded,
-      agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
-      useWiredStreams,
-      onboardingId: data.onboardingId,
-    })
+        isMetricsOnboardingEnabled,
+        isManagedOtlpServiceAvailable,
+        managedOtlpEndpointUrl: data.managedOtlpServiceUrl,
+        elasticsearchUrl: data.elasticsearchUrl,
+        apiKeyEncoded: data.apiKeyEncoded,
+        agentVersion: data.elasticAgentVersionInfo.agentBaseVersion,
+        useWiredStreams,
+        onboardingId: data.onboardingId,
+      })
     : undefined;
 
   const steps: EuiStepsProps['steps'] = useMemo(() => {
@@ -176,67 +187,43 @@ export const KubernetesOtelPage: React.FC = () => {
       ),
     };
 
-    const installStep = error
+    const collectorSetupStep = error
       ? {
-        title: i18n.translate(
-          'xpack.observability_onboarding.otelKubernetesPanel.installStackStepTitle',
-          {
-            defaultMessage: 'Install the OpenTelemetry Operator',
-          }
-        ),
-        status: 'danger' as const,
-        children: (
-          <EmptyPrompt
-            inline
-            onboardingFlowType="kubernetes_otel"
-            error={error}
-            onRetryClick={refetch}
-          />
-        ),
-      }
+          title: SET_UP_OTEL_COLLECTOR_TITLE,
+          status: 'danger' as const,
+          children: (
+            <EmptyPrompt
+              inline
+              onboardingFlowType="kubernetes_otel"
+              error={error}
+              onRetryClick={refetch}
+            />
+          ),
+        }
       : {
-        title: i18n.translate(
-          'xpack.observability_onboarding.otelKubernetesPanel.installStackStepTitle',
-          {
-            defaultMessage: 'Install the OpenTelemetry Operator',
-          }
-        ),
-        children: (
-          <OtelKubernetesInstallStep
-            installStackCommand={installStackCommand}
-            valuesFileUrl={otelKubeStackValuesFileUrl}
-            ingestionMode={ingestionMode}
-            onIngestionModeChange={setIngestionMode}
-            streamsDocLink={docLinks?.links.observability.logsStreams}
-            wiredStreamsStatus={wiredStreamsStatus}
-          />
-        ),
-      };
+          title: SET_UP_OTEL_COLLECTOR_TITLE,
+          children: (
+            <OtelCollectorSetupStep
+              addRepoCommand={addRepoCommand}
+              installStackCommand={installStackCommand}
+              valuesFileUrl={otelKubeStackValuesFileUrl}
+              ingestionMode={ingestionMode}
+              onIngestionModeChange={setIngestionMode}
+              streamsDocLink={docLinks?.links.observability.logsStreams}
+              wiredStreamsStatus={wiredStreamsStatus}
+            />
+          ),
+        };
 
     if (error) {
-      return [collectionMethodStep, installStep];
+      return [collectionMethodStep, collectorSetupStep];
     }
-
-    const addRepositoryStep = {
-      title: i18n.translate(
-        'xpack.observability_onboarding.otelKubernetesPanel.addRepositoryStepTitle',
-        {
-          defaultMessage: 'Add the OpenTelemetry repository to Helm',
-        }
-      ),
-      children: <OtelKubernetesAddRepositoryStep addRepoCommand={addRepoCommand} />,
-    };
 
     const instrumentStep = isMetricsOnboardingEnabled
       ? {
-        title: i18n.translate(
-          'xpack.observability_onboarding.otelKubernetesPanel.instrumentApplicationStepTitle',
-          {
-            defaultMessage: 'Instrument your application (optional)',
-          }
-        ),
-        children: <OtelKubernetesInstrumentStep />,
-      }
+          title: INSTRUMENT_APPLICATION_STEP_TITLE,
+          children: <OtelInstrumentationStep />,
+        }
       : null;
 
     const visualizeStep = {
@@ -246,8 +233,8 @@ export const KubernetesOtelPage: React.FC = () => {
       status: (dataReceived || hasPreExistingDataEarly
         ? 'complete'
         : isMonitoringStepActive
-          ? 'current'
-          : 'incomplete') as EuiStepStatus,
+        ? 'current'
+        : 'incomplete') as EuiStepStatus,
       children: (
         <OtelKubernetesVisualizeStep
           isMonitoringStepActive={isMonitoringStepActive}
@@ -261,8 +248,7 @@ export const KubernetesOtelPage: React.FC = () => {
 
     return [
       collectionMethodStep,
-      addRepositoryStep,
-      installStep,
+      collectorSetupStep,
       ...(instrumentStep ? [instrumentStep] : []),
       visualizeStep,
     ];

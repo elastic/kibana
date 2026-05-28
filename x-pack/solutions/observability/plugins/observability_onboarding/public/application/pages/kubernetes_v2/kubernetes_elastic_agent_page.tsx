@@ -30,10 +30,9 @@ import { EmptyPrompt } from '../../quickstart_flows/shared/empty_prompt';
 import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 import { WIRED_ECS_DATA_VIEW_SPEC } from '../../quickstart_flows/shared/wired_streams_data_view';
 import { useKubernetesFlow } from '../../quickstart_flows/kubernetes/use_kubernetes_flow';
-import {
-  KubernetesElasticAgentInstallStep,
-  KubernetesElasticAgentVisualizeStep,
-} from '../../quickstart_flows/kubernetes/steps';
+import { KubernetesElasticAgentVisualizeStep } from '../../quickstart_flows/kubernetes/steps';
+import { ElasticAgentAppInstrumentationStep } from './elastic_agent_app_instrumentation_step';
+import { ElasticAgentDeploymentStep } from './elastic_agent_deployment_step';
 import type { ActionLink } from '../../quickstart_flows/kubernetes/data_ingest_status';
 import { usePricingFeature } from '../../quickstart_flows/shared/use_pricing_feature';
 import {
@@ -115,25 +114,25 @@ export const KubernetesElasticAgentPage: React.FC = () => {
     () => [
       ...(metricsOnboardingEnabled
         ? [
-          {
-            id: CLUSTER_OVERVIEW_DASHBOARD_ID,
-            label: i18n.translate(
-              'xpack.observability_onboarding.kubernetesPanel.exploreDashboard',
-              { defaultMessage: 'Explore Kubernetes cluster' }
-            ),
-            title: i18n.translate(
-              'xpack.observability_onboarding.kubernetesPanel.monitoringCluster',
-              {
-                defaultMessage: 'Overview your Kubernetes cluster with this pre-made dashboard',
-              }
-            ),
-            requires: 'metrics' as const,
-            href:
-              dashboardLocator?.getRedirectUrl({
-                dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
-              }) ?? '',
-          },
-        ]
+            {
+              id: CLUSTER_OVERVIEW_DASHBOARD_ID,
+              label: i18n.translate(
+                'xpack.observability_onboarding.kubernetesPanel.exploreDashboard',
+                { defaultMessage: 'Explore Kubernetes cluster' }
+              ),
+              title: i18n.translate(
+                'xpack.observability_onboarding.kubernetesPanel.monitoringCluster',
+                {
+                  defaultMessage: 'Overview your Kubernetes cluster with this pre-made dashboard',
+                }
+              ),
+              requires: 'metrics' as const,
+              href:
+                dashboardLocator?.getRedirectUrl({
+                  dashboardId: CLUSTER_OVERVIEW_DASHBOARD_ID,
+                }) ?? '',
+            },
+          ]
         : []),
       {
         id: 'logs',
@@ -155,9 +154,9 @@ export const KubernetesElasticAgentPage: React.FC = () => {
   const elasticAgentNavigateTo = `/kubernetes/elastic-agent${search}`;
 
   const installStepTitle = i18n.translate(
-    'xpack.observability_onboarding.experimentalOnboardingFlow.kubernetes.installStepTitle',
+    'xpack.observability_onboarding.kubernetesV2.elasticAgent.deploymentStepTitle',
     {
-      defaultMessage: 'Install standalone Elastic Agent on your Kubernetes cluster',
+      defaultMessage: 'Deploy Elastic Agent on your Kubernetes cluster',
     }
   );
 
@@ -185,41 +184,49 @@ export const KubernetesElasticAgentPage: React.FC = () => {
 
     const installStep = error
       ? {
-        title: installStepTitle,
-        status: 'danger' as const,
-        children: (
-          <EmptyPrompt
-            inline
-            onboardingFlowType="kubernetes"
-            error={error}
-            onRetryClick={refetch}
-          />
-        ),
-      }
+          title: installStepTitle,
+          status: 'danger' as const,
+          children: (
+            <EmptyPrompt
+              inline
+              onboardingFlowType="kubernetes"
+              error={error}
+              onRetryClick={refetch}
+            />
+          ),
+        }
       : {
-        title: installStepTitle,
-        children: (
-          <KubernetesElasticAgentInstallStep
-            status={status}
-            data={data}
-            isMonitoringStepActive={isMonitoringStepActive}
-            ingestionMode={ingestionMode}
-            onIngestionModeChange={setIngestionMode}
-          />
-        ),
-      };
+          title: installStepTitle,
+          children: (
+            <ElasticAgentDeploymentStep
+              status={status}
+              data={data}
+              isMonitoringStepActive={isMonitoringStepActive}
+              ingestionMode={ingestionMode}
+              onIngestionModeChange={setIngestionMode}
+            />
+          ),
+        };
 
     if (error) {
       return [collectionMethodStep, installStep];
     }
+
+    const appInstrumentationStep = {
+      title: i18n.translate(
+        'xpack.observability_onboarding.kubernetesV2.elasticAgent.appInstrumentationStepTitle',
+        { defaultMessage: 'Instrument your application' }
+      ),
+      children: <ElasticAgentAppInstrumentationStep />,
+    };
 
     const visualizeStep = {
       title: monitorStepTitle,
       status: (dataReceived || hasPreExistingDataEarly
         ? 'complete'
         : isMonitoringStepActive
-          ? 'current'
-          : 'incomplete') as EuiStepStatus,
+        ? 'current'
+        : 'incomplete') as EuiStepStatus,
       children: (
         <KubernetesElasticAgentVisualizeStep
           isMonitoringStepActive={isMonitoringStepActive}
@@ -230,7 +237,7 @@ export const KubernetesElasticAgentPage: React.FC = () => {
       ),
     };
 
-    return [collectionMethodStep, installStep, visualizeStep];
+    return [collectionMethodStep, installStep, appInstrumentationStep, visualizeStep];
   }, [
     otelNavigateTo,
     elasticAgentNavigateTo,
@@ -256,8 +263,7 @@ export const KubernetesElasticAgentPage: React.FC = () => {
       subtitle={i18n.translate(
         'xpack.observability_onboarding.kubernetesV2.elasticAgent.subtitle',
         {
-          defaultMessage:
-            'Collect logs, metrics, and traces from your Kubernetes infrastructure.',
+          defaultMessage: 'Collect logs, metrics, and traces from your Kubernetes infrastructure.',
         }
       )}
       logo="kubernetes"

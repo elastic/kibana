@@ -10,10 +10,19 @@ import React from 'react';
 import { KubernetesElasticAgentPage } from '../kubernetes_elastic_agent_page';
 import { buildFetchError, renderWithHostPageProviders } from '../../host/__tests__/test_helpers';
 
-jest.mock('../../../quickstart_flows/kubernetes/steps', () => ({
-  KubernetesElasticAgentInstallStep: ({ ingestionMode }: { ingestionMode: string }) => (
-    <div data-test-subj="kubernetesEaInstallStep" data-ingestion-mode={ingestionMode} />
+jest.mock('../elastic_agent_deployment_step', () => ({
+  ElasticAgentDeploymentStep: ({ ingestionMode }: { ingestionMode: string }) => (
+    <div data-test-subj="elasticAgentDeploymentStep" data-ingestion-mode={ingestionMode} />
   ),
+}));
+
+jest.mock('../elastic_agent_app_instrumentation_step', () => ({
+  ElasticAgentAppInstrumentationStep: () => (
+    <div data-test-subj="elasticAgentAppInstrumentationStep" />
+  ),
+}));
+
+jest.mock('../../../quickstart_flows/kubernetes/steps', () => ({
   KubernetesElasticAgentVisualizeStep: () => <div data-test-subj="kubernetesEaVisualizeStep" />,
 }));
 
@@ -122,10 +131,10 @@ describe('KubernetesElasticAgentPage', () => {
     ).toBe('false');
   });
 
-  it('passes wired ingestion mode into the install step when the URL says so', () => {
+  it('passes wired ingestion mode into the deployment step when the URL says so', () => {
     renderPage(['/kubernetes/elastic-agent?ingestion=wired']);
-    const installStep = screen.getByTestId('kubernetesEaInstallStep');
-    expect(installStep.getAttribute('data-ingestion-mode')).toBe('wired');
+    const deploymentStep = screen.getByTestId('elasticAgentDeploymentStep');
+    expect(deploymentStep.getAttribute('data-ingestion-mode')).toBe('wired');
   });
 
   it('calls useKubernetesFlow with no arguments', () => {
@@ -151,6 +160,12 @@ describe('KubernetesElasticAgentPage', () => {
     );
   });
 
+  it('renders the app instrumentation step before visualize when setup succeeds', () => {
+    renderPage();
+    expect(screen.getByTestId('elasticAgentAppInstrumentationStep')).toBeInTheDocument();
+    expect(screen.getByTestId('kubernetesEaVisualizeStep')).toBeInTheDocument();
+  });
+
   it('renders an inline EmptyPrompt and drops the visualize step when setup errors', () => {
     useKubernetesFlowMock.mockReturnValue({
       data: undefined,
@@ -163,6 +178,7 @@ describe('KubernetesElasticAgentPage', () => {
     expect(emptyPrompt.getAttribute('data-onboarding-flow-type')).toBe('kubernetes');
     expect(emptyPrompt.getAttribute('data-inline')).toBe('true');
     expect(screen.getByTestId('collectionMethodSelector')).toBeInTheDocument();
+    expect(screen.queryByTestId('elasticAgentAppInstrumentationStep')).toBeNull();
     expect(screen.queryByTestId('kubernetesEaVisualizeStep')).toBeNull();
   });
 });

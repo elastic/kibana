@@ -10,11 +10,17 @@ import React from 'react';
 import { KubernetesOtelPage } from '../kubernetes_otel_page';
 import { buildFetchError, renderWithHostPageProviders } from '../../host/__tests__/test_helpers';
 
-jest.mock('../../../quickstart_flows/otel_kubernetes/steps', () => ({
-  OtelKubernetesAddRepositoryStep: () => <div data-test-subj="otelK8sAddRepoStep" />,
-  OtelKubernetesInstallStep: ({ ingestionMode }: { ingestionMode: string }) => (
-    <div data-test-subj="otelK8sInstallStep" data-ingestion-mode={ingestionMode} />
+jest.mock('../otel_collector_setup_step', () => ({
+  OtelCollectorSetupStep: ({ ingestionMode }: { ingestionMode: string }) => (
+    <div data-test-subj="otelCollectorSetupStep" data-ingestion-mode={ingestionMode} />
   ),
+}));
+
+jest.mock('../otel_instrumentation_step', () => ({
+  OtelInstrumentationStep: () => <div data-test-subj="otelInstrumentationStep" />,
+}));
+
+jest.mock('../../../quickstart_flows/otel_kubernetes/steps', () => ({
   OtelKubernetesInstrumentStep: () => <div data-test-subj="otelK8sInstrumentStep" />,
   OtelKubernetesVisualizeStep: () => <div data-test-subj="otelK8sVisualizeStep" />,
 }));
@@ -72,8 +78,9 @@ jest.mock('../../../../hooks/use_wired_streams_status', () => ({
   }),
 }));
 
+const mockUsePricingFeature = jest.fn().mockReturnValue(true);
 jest.mock('../../../quickstart_flows/shared/use_pricing_feature', () => ({
-  usePricingFeature: () => true,
+  usePricingFeature: (...args: unknown[]) => mockUsePricingFeature(...args),
 }));
 
 jest.mock('../../../quickstart_flows/shared/use_pre_existing_data_check', () => ({
@@ -102,6 +109,7 @@ const renderPage = (initialEntries: string[] = ['/kubernetes']) =>
 
 describe('KubernetesOtelPage', () => {
   beforeEach(() => {
+    mockUsePricingFeature.mockReturnValue(true);
     useKubernetesFlowMock.mockReturnValue({
       data: mockKubernetesFlowData,
       status: 'success',
@@ -129,10 +137,10 @@ describe('KubernetesOtelPage', () => {
     ).toBe('false');
   });
 
-  it('passes wired ingestion mode into the install step when the URL says so', () => {
+  it('passes wired ingestion mode into the collector setup step when the URL says so', () => {
     renderPage(['/kubernetes?ingestion=wired']);
-    const installStep = screen.getByTestId('otelK8sInstallStep');
-    expect(installStep.getAttribute('data-ingestion-mode')).toBe('wired');
+    const collectorSetupStep = screen.getByTestId('otelCollectorSetupStep');
+    expect(collectorSetupStep.getAttribute('data-ingestion-mode')).toBe('wired');
   });
 
   it('wires the pre-existing-data probe with the kubernetes flow id and wired-streams flag', () => {
@@ -153,6 +161,19 @@ describe('KubernetesOtelPage', () => {
     );
   });
 
+  it('renders the V2 instrumentation step when metrics onboarding is enabled', () => {
+    renderPage();
+    expect(screen.getByTestId('otelInstrumentationStep')).toBeInTheDocument();
+    expect(screen.queryByTestId('otelK8sInstrumentStep')).toBeNull();
+  });
+
+  it('omits the instrumentation step when metrics onboarding is disabled', () => {
+    mockUsePricingFeature.mockReturnValue(false);
+    renderPage();
+    expect(screen.queryByTestId('otelInstrumentationStep')).toBeNull();
+    expect(screen.queryByTestId('otelK8sInstrumentStep')).toBeNull();
+  });
+
   it('renders an inline EmptyPrompt and drops later OTel steps when setup errors', () => {
     useKubernetesFlowMock.mockReturnValue({
       data: undefined,
@@ -165,7 +186,7 @@ describe('KubernetesOtelPage', () => {
     expect(emptyPrompt.getAttribute('data-onboarding-flow-type')).toBe('kubernetes_otel');
     expect(emptyPrompt.getAttribute('data-inline')).toBe('true');
     expect(screen.getByTestId('collectionMethodSelector')).toBeInTheDocument();
-    expect(screen.queryByTestId('otelK8sInstrumentStep')).toBeNull();
+    expect(screen.queryByTestId('otelInstrumentationStep')).toBeNull();
     expect(screen.queryByTestId('otelK8sVisualizeStep')).toBeNull();
   });
 });

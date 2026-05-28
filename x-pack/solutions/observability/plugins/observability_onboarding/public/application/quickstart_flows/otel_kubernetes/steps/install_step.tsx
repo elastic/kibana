@@ -15,6 +15,7 @@ import {
   EuiLink,
   EuiSkeletonText,
   EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,6 +36,8 @@ export interface OtelKubernetesInstallStepProps {
     UseWiredStreamsStatusResult,
     'isEnabled' | 'isLoading' | 'isEnabling' | 'enableWiredStreams'
   >;
+  showTitle?: boolean;
+  useInlineCopyOnly?: boolean;
 }
 
 export const OtelKubernetesInstallStep: React.FC<OtelKubernetesInstallStepProps> = ({
@@ -44,6 +47,8 @@ export const OtelKubernetesInstallStep: React.FC<OtelKubernetesInstallStepProps>
   onIngestionModeChange,
   streamsDocLink,
   wiredStreamsStatus,
+  showTitle = false,
+  useInlineCopyOnly = false,
 }) => {
   const { isEnabled, isLoading, isEnabling, enableWiredStreams } = wiredStreamsStatus;
 
@@ -67,6 +72,19 @@ export const OtelKubernetesInstallStep: React.FC<OtelKubernetesInstallStepProps>
           <EuiSpacer size="xl" />
         </>
       )}
+      {showTitle ? (
+        <>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate(
+                'xpack.observability_onboarding.otelKubernetesPanel.installCollectorTitle',
+                { defaultMessage: 'Install the Elastic Distribution for OTel Collector' }
+              )}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
       <p>
         <FormattedMessage
           id="xpack.observability_onboarding.otelKubernetesPanel.injectAutoinstrumentationLibrariesForLabel"
@@ -111,17 +129,24 @@ export const OtelKubernetesInstallStep: React.FC<OtelKubernetesInstallStepProps>
         />
       </p>
       <EuiSpacer />
-      <EuiCodeBlock paddingSize="m" language="bash">
+      <EuiCodeBlock
+        paddingSize="m"
+        language="bash"
+        isCopyable={useInlineCopyOnly}
+        overflowHeight={useInlineCopyOnly ? 300 : undefined}
+      >
         {installStackCommand}
       </EuiCodeBlock>
       <EuiSpacer />
       <EuiFlexGroup alignItems="center" justifyContent="flexStart">
-        <EuiFlexItem grow={false}>
-          <CopyToClipboardButton
-            textToCopy={installStackCommand}
-            data-test-subj="observabilityOnboardingOtelKubernetesPanelInstallStackCopyToClipboard"
-          />
-        </EuiFlexItem>
+        {!useInlineCopyOnly ? (
+          <EuiFlexItem grow={false}>
+            <CopyToClipboardButton
+              textToCopy={installStackCommand}
+              data-test-subj="observabilityOnboardingOtelKubernetesPanelInstallStackCopyToClipboard"
+            />
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType="download"

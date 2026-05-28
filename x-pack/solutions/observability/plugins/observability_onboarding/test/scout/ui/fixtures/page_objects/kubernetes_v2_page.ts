@@ -57,4 +57,66 @@ export class KubernetesV2Page {
   emptyPromptRetryButton() {
     return this.page.getByTestId('observabilityOnboardingEmptyPromptRetryButton');
   }
+
+  collectorTab(id: 'edot' | 'existing') {
+    return this.page.getByTestId(`observabilityOnboardingKubernetesV2CollectorTab-${id}`);
+  }
+
+  existingCollectorTitle() {
+    return this.page.getByRole('heading', { name: 'Add an OTLP exporter' });
+  }
+
+  existingCollectorDescription() {
+    return this.page.getByText('Add the following exporter to your collector config.');
+  }
+
+  otelInstrumentationSwitch() {
+    return this.page.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationSwitch');
+  }
+
+  otelAnnotationCard(id: 'pods' | 'namespace') {
+    return this.page.getByTestId(`observabilityOnboardingKubernetesV2OtelAnnotationMode-${id}`);
+  }
+
+  otelInstrumentationNamespaceSnippet() {
+    return this.page.getByTestId(
+      'observabilityOnboardingKubernetesV2OtelInstrumentationNamespaceSnippet'
+    );
+  }
+
+  otelInstrumentationPodsSnippet() {
+    return this.page.getByTestId(
+      'observabilityOnboardingKubernetesV2OtelInstrumentationPodsSnippet'
+    );
+  }
+
+  elasticAgentDeploymentTab(id: 'fleet-managed' | 'standalone') {
+    return this.page.getByTestId(
+      `observabilityOnboardingKubernetesV2ElasticAgentDeploymentTab-${id}`
+    );
+  }
+
+  elasticAgentFleetManagedStep() {
+    return this.page.getByTestId('observabilityOnboardingKubernetesV2FleetManagedStep');
+  }
+
+  elasticAgentAppInstrumentationCard(id: 'yes' | 'no') {
+    return this.page.getByTestId(
+      `observabilityOnboardingKubernetesV2ElasticAgentAppInstrumentation-${id}`
+    );
+  }
+
+  elasticAgentAppInstrumentationApmServerUrlInput() {
+    return this.page.getByTestId(
+      'observabilityOnboardingKubernetesV2ElasticAgentAppInstrumentationApmServerUrlInput'
+    );
+  }
+
+  async clickOtelAnnotationCard(id: 'pods' | 'namespace') {
+    await this.otelAnnotationCard(id).getByRole('radio').click();
+  }
+
+  async clickElasticAgentAppInstrumentationCard(id: 'yes' | 'no') {
+    await this.elasticAgentAppInstrumentationCard(id).getByRole('radio').click();
+  }
 }

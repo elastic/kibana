@@ -6,19 +6,36 @@
  */
 
 import React from 'react';
-import { EuiCodeBlock, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCodeBlock, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CopyToClipboardButton } from '../../shared/copy_to_clipboard_button';
 
 export interface OtelKubernetesAddRepositoryStepProps {
   addRepoCommand: string;
+  showTitle?: boolean;
+  useInlineCopyOnly?: boolean;
 }
 
 export const OtelKubernetesAddRepositoryStep: React.FC<OtelKubernetesAddRepositoryStepProps> = ({
   addRepoCommand,
+  showTitle = false,
+  useInlineCopyOnly = false,
 }) => (
   <>
+    {showTitle ? (
+      <>
+        <EuiTitle size="xs">
+          <h3>
+            {i18n.translate(
+              'xpack.observability_onboarding.otelKubernetesPanel.addRepositoryTitle',
+              { defaultMessage: 'Add the OpenTelemetry Helm repository' }
+            )}
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+      </>
+    ) : null}
     <p>
       <FormattedMessage
         id="xpack.observability_onboarding.otelKubernetesPanel.addRepositoryDescription"
@@ -41,13 +58,17 @@ export const OtelKubernetesAddRepositoryStep: React.FC<OtelKubernetesAddReposito
       />
     </p>
     <EuiSpacer />
-    <EuiCodeBlock paddingSize="m" language="bash">
+    <EuiCodeBlock paddingSize="m" language="bash" isCopyable={useInlineCopyOnly}>
       {addRepoCommand}
     </EuiCodeBlock>
-    <EuiSpacer />
-    <CopyToClipboardButton
-      textToCopy={addRepoCommand}
-      data-test-subj="observabilityOnboardingOtelKubernetesPanelAddRepositoryCopyToClipboard"
-    />
+    {!useInlineCopyOnly ? (
+      <>
+        <EuiSpacer />
+        <CopyToClipboardButton
+          textToCopy={addRepoCommand}
+          data-test-subj="observabilityOnboardingOtelKubernetesPanelAddRepositoryCopyToClipboard"
+        />
+      </>
+    ) : null}
   </>
 );
