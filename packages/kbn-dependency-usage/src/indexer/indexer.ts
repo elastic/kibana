@@ -9,6 +9,8 @@
 
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import nodePath from 'path';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { parse as parseJsonc } from 'jsonc-parser';
 
 // @ts-ignore
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -30,17 +32,14 @@ interface KibanaJsonc {
 }
 
 /**
- * Read the kibana.jsonc manifest for a package path.
+ * Read and parse the kibana.jsonc manifest for a package path.
  * Returns null if the file is absent or unparseable.
  */
 function readKibanaJsonc(packagePath: string): KibanaJsonc | null {
   const filePath = nodePath.join(REPO_ROOT, packagePath, 'kibana.jsonc');
   try {
-    // Strip single-line // comments and trailing commas before parsing (JSONC extension).
-    const raw = readFileSync(filePath, 'utf8')
-      .replace(/\/\/[^\n]*/g, '')
-      .replace(/,(\s*[}\]])/g, '$1');
-    return JSON.parse(raw) as KibanaJsonc;
+    const raw = readFileSync(filePath, 'utf8');
+    return parseJsonc(raw) as KibanaJsonc;
   } catch {
     return null;
   }
