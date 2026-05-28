@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { installAgentBuilderDashboard } from './install_dashboard';
+export { installAgentBuilderDashboardIfExperimentalEnabled } from './install_dashboard';

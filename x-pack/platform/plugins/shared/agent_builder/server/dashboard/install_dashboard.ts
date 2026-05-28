@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { v4 as uuidv4 } from 'uuid';
+import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import overviewDashboard from './assets/overview-dashboard.json';
 import {
   AGENT_BUILDER_DASHBOARD_CORE_MIGRATION_VERSION,
@@ -14,142 +17,146 @@ import {
   AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION,
   AGENT_BUILDER_OVERVIEW_DASHBOARD_ID,
 } from './constants';
-import chatcompleteAvgDurationMetricPanel from './assets/panels/chatcomplete-avg-duration-metric.json';
-import chatcompleteCostOverTimePanel from './assets/panels/chatcomplete-cost-over-time.json';
-import chatcompleteCountByModelBarPanel from './assets/panels/chatcomplete-count-by-model-bar.json';
-import chatcompleteCountByModelOverTimePanel from './assets/panels/chatcomplete-count-by-model-over-time.json';
-import chatcompleteCountByProviderBarPanel from './assets/panels/chatcomplete-count-by-provider-bar.json';
-import chatcompleteLatencyByProviderOverTimePanel from './assets/panels/chatcomplete-latency-by-provider-over-time.json';
-import chatcompleteTokenUsageOverTimePanel from './assets/panels/chatcomplete-token-usage-over-time.json';
-import chatcompleteTotalCostMetricPanel from './assets/panels/chatcomplete-total-cost-metric.json';
-import chatcompleteTotalCountMetricPanel from './assets/panels/chatcomplete-total-count-metric.json';
-import chatcompleteTotalInputTokensMetricPanel from './assets/panels/chatcomplete-total-input-tokens-metric.json';
-import chatcompleteTotalOutputTokensMetricPanel from './assets/panels/chatcomplete-total-output-tokens-metric.json';
-import converseAvgDurationMetricPanel from './assets/panels/converse-avg-duration-metric.json';
-import converseAvgDurationOverTimePanel from './assets/panels/converse-avg-duration-over-time.json';
-import converseCountOverTimePanel from './assets/panels/converse-count-over-time.json';
-import converseMaxDurationMetricPanel from './assets/panels/converse-max-duration-metric.json';
-import converseP95DurationMetricPanel from './assets/panels/converse-p95-duration-metric.json';
-import converseSpanCountMetricPanel from './assets/panels/converse-span-count-metric.json';
-import executeAgentAvgDurationMetricPanel from './assets/panels/execute-agent-avg-duration-metric.json';
-import executeAgentCountByAgentBarPanel from './assets/panels/execute-agent-count-by-agent-bar.json';
-import executeAgentCountByAgentOverTimePanel from './assets/panels/execute-agent-count-by-agent-over-time.json';
-import executeAgentCountMetricPanel from './assets/panels/execute-agent-count-metric.json';
-import executeAgentDurationByAgentOverTimePanel from './assets/panels/execute-agent-duration-by-agent-over-time.json';
-import executeAgentMaxDurationMetricPanel from './assets/panels/execute-agent-max-duration-metric.json';
-import executeAgentP95DurationMetricPanel from './assets/panels/execute-agent-p95-duration-metric.json';
-import toolAvgDurationMetricPanel from './assets/panels/tool-avg-duration-metric.json';
-import toolCountByNameOverTimePanel from './assets/panels/tool-count-by-name-over-time.json';
-import toolCountByStatusOverTimePanel from './assets/panels/tool-count-by-status-over-time.json';
-import toolErrorCountMetricPanel from './assets/panels/tool-error-count-metric.json';
-import toolSuccessRateMetricPanel from './assets/panels/tool-success-rate-metric.json';
-import toolTop15ByNamePanel from './assets/panels/tool-top-15-by-name.json';
-import toolTotalCountMetricPanel from './assets/panels/tool-total-count-metric.json';
-import workflowAvgDurationMetricPanel from './assets/panels/workflow-avg-duration-metric.json';
-import workflowAvgDurationOverTimePanel from './assets/panels/workflow-avg-duration-over-time.json';
-import workflowCountByNameBarPanel from './assets/panels/workflow-count-by-name-bar.json';
-import workflowCountByNameOverTimePanel from './assets/panels/workflow-count-by-name-over-time.json';
-import workflowMaxDurationMetricPanel from './assets/panels/workflow-max-duration-metric.json';
-import workflowP95DurationMetricPanel from './assets/panels/workflow-p95-duration-metric.json';
-import workflowTotalCountMetricPanel from './assets/panels/workflow-total-count-metric.json';
 
 interface DashboardGridPosition {
-  x: number;
+  x?: number;
   y: number;
-  w: number;
-  h: number;
+  w?: number;
+  h?: number;
 }
 
-interface PanelTemplate {
+interface DashboardPanelAsset {
+  id: string;
   type: string;
-  embeddableConfig: Record<string, unknown>;
+  grid: DashboardGridPosition;
+  config?: Record<string, unknown>;
 }
+
+interface DashboardSectionAsset {
+  id: string;
+  title?: string;
+  collapsed?: boolean;
+  grid: DashboardGridPosition;
+  panels: DashboardPanelAsset[];
+}
+
+type DashboardWidget = DashboardPanelAsset | DashboardSectionAsset;
 
 interface SavedDashboardPanel {
   type: string;
   panelIndex: string;
-  gridData: DashboardGridPosition & { i: string };
+  gridData: DashboardGridPosition & { i: string; sectionId?: string };
   embeddableConfig: Record<string, unknown>;
 }
 
-const PANELS: Record<string, PanelTemplate> = {
-  'panels/chatcomplete-avg-duration-metric.json': chatcompleteAvgDurationMetricPanel,
-  'panels/chatcomplete-cost-over-time.json': chatcompleteCostOverTimePanel,
-  'panels/chatcomplete-count-by-model-bar.json': chatcompleteCountByModelBarPanel,
-  'panels/chatcomplete-count-by-model-over-time.json': chatcompleteCountByModelOverTimePanel,
-  'panels/chatcomplete-count-by-provider-bar.json': chatcompleteCountByProviderBarPanel,
-  'panels/chatcomplete-latency-by-provider-over-time.json':
-    chatcompleteLatencyByProviderOverTimePanel,
-  'panels/chatcomplete-token-usage-over-time.json': chatcompleteTokenUsageOverTimePanel,
-  'panels/chatcomplete-total-cost-metric.json': chatcompleteTotalCostMetricPanel,
-  'panels/chatcomplete-total-count-metric.json': chatcompleteTotalCountMetricPanel,
-  'panels/chatcomplete-total-input-tokens-metric.json': chatcompleteTotalInputTokensMetricPanel,
-  'panels/chatcomplete-total-output-tokens-metric.json': chatcompleteTotalOutputTokensMetricPanel,
-  'panels/converse-avg-duration-metric.json': converseAvgDurationMetricPanel,
-  'panels/converse-avg-duration-over-time.json': converseAvgDurationOverTimePanel,
-  'panels/converse-count-over-time.json': converseCountOverTimePanel,
-  'panels/converse-max-duration-metric.json': converseMaxDurationMetricPanel,
-  'panels/converse-p95-duration-metric.json': converseP95DurationMetricPanel,
-  'panels/converse-span-count-metric.json': converseSpanCountMetricPanel,
-  'panels/execute-agent-avg-duration-metric.json': executeAgentAvgDurationMetricPanel,
-  'panels/execute-agent-count-by-agent-bar.json': executeAgentCountByAgentBarPanel,
-  'panels/execute-agent-count-by-agent-over-time.json': executeAgentCountByAgentOverTimePanel,
-  'panels/execute-agent-count-metric.json': executeAgentCountMetricPanel,
-  'panels/execute-agent-duration-by-agent-over-time.json': executeAgentDurationByAgentOverTimePanel,
-  'panels/execute-agent-max-duration-metric.json': executeAgentMaxDurationMetricPanel,
-  'panels/execute-agent-p95-duration-metric.json': executeAgentP95DurationMetricPanel,
-  'panels/tool-avg-duration-metric.json': toolAvgDurationMetricPanel,
-  'panels/tool-count-by-name-over-time.json': toolCountByNameOverTimePanel,
-  'panels/tool-count-by-status-over-time.json': toolCountByStatusOverTimePanel,
-  'panels/tool-error-count-metric.json': toolErrorCountMetricPanel,
-  'panels/tool-success-rate-metric.json': toolSuccessRateMetricPanel,
-  'panels/tool-top-15-by-name.json': toolTop15ByNamePanel,
-  'panels/tool-total-count-metric.json': toolTotalCountMetricPanel,
-  'panels/workflow-avg-duration-metric.json': workflowAvgDurationMetricPanel,
-  'panels/workflow-avg-duration-over-time.json': workflowAvgDurationOverTimePanel,
-  'panels/workflow-count-by-name-bar.json': workflowCountByNameBarPanel,
-  'panels/workflow-count-by-name-over-time.json': workflowCountByNameOverTimePanel,
-  'panels/workflow-max-duration-metric.json': workflowMaxDurationMetricPanel,
-  'panels/workflow-p95-duration-metric.json': workflowP95DurationMetricPanel,
-  'panels/workflow-total-count-metric.json': workflowTotalCountMetricPanel,
+interface SavedDashboardSection {
+  title: string;
+  collapsed?: boolean;
+  gridData: { y: number; i: string };
+}
+
+const isDashboardSection = (widget: DashboardWidget): widget is DashboardSectionAsset =>
+  'panels' in widget;
+
+const transformOptionsIn = (options: typeof overviewDashboard.options): string => {
+  const apiToSavedObjectOptionsKeys = {
+    hide_panel_titles: 'hidePanelTitles',
+    hide_panel_borders: 'hidePanelBorders',
+    use_margins: 'useMargins',
+    sync_colors: 'syncColors',
+    sync_tooltips: 'syncTooltips',
+    sync_cursor: 'syncCursor',
+    auto_apply_filters: 'autoApplyFilters',
+  } as const;
+
+  const savedObjectOptions: Record<string, unknown> = {};
+  for (const [apiKey, soKey] of Object.entries(apiToSavedObjectOptionsKeys)) {
+    if (apiKey in options) {
+      savedObjectOptions[soKey] = options[apiKey as keyof typeof options];
+    }
+  }
+  return JSON.stringify(savedObjectOptions);
 };
 
-export function buildOverviewDashboardPanels(): SavedDashboardPanel[] {
+function transformVisPanelConfig(
+  builder: LensConfigBuilder,
+  config: Record<string, unknown>
+): Record<string, unknown> {
+  const {
+    title,
+    description,
+    hide_title,
+    hide_border,
+    time_range,
+    drilldowns,
+    ...attributesConfig
+  } = config;
+
+  const lensAttributes = builder.fromAPIFormat(
+    attributesConfig as Parameters<LensConfigBuilder['fromAPIFormat']>[0]
+  );
+
+  return {
+    ...(typeof title === 'string' && { title }),
+    ...(typeof description === 'string' && { description }),
+    ...(typeof hide_title === 'boolean' && { hide_title }),
+    ...(typeof hide_border === 'boolean' && { hide_border }),
+    ...(time_range !== undefined && { time_range }),
+    ...(drilldowns !== undefined && { drilldowns }),
+    attributes: lensAttributes,
+  };
+}
+
+function transformPanel(
+  panel: DashboardPanelAsset,
+  builder: LensConfigBuilder,
+  sectionId?: string
+): SavedDashboardPanel {
+  const embeddableConfig =
+    panel.type === LENS_EMBEDDABLE_TYPE && panel.config
+      ? transformVisPanelConfig(builder, panel.config)
+      : panel.config ?? {};
+
+  return {
+    type: panel.type,
+    panelIndex: panel.id,
+    gridData: {
+      x: panel.grid.x ?? 0,
+      y: panel.grid.y,
+      w: panel.grid.w ?? 48,
+      h: panel.grid.h ?? 6,
+      i: panel.id,
+      ...(sectionId && { sectionId }),
+    },
+    embeddableConfig,
+  };
+}
+
+function buildOverviewDashboardPanels(): {
+  panels: SavedDashboardPanel[];
+  sections: SavedDashboardSection[];
+} {
+  const builder = new LensConfigBuilder();
   const panels: SavedDashboardPanel[] = [];
-  let globalY = 0;
+  const sections: SavedDashboardSection[] = [];
 
-  for (const section of overviewDashboard.sections) {
-    const headerId = uuidv4();
-    panels.push({
-      type: 'markdown',
-      panelIndex: headerId,
-      gridData: { x: 0, y: globalY, w: 48, h: 2, i: headerId },
-      embeddableConfig: { content: `**${section.title}**` },
-    });
-    globalY += 2;
-
-    let sectionMaxY = 0;
-    for (const { $ref, grid } of section.panels) {
-      const template = PANELS[$ref];
-      if (!template) {
-        throw new Error(`Unknown panel ref: ${$ref}`);
-      }
-
-      const panelIndex = uuidv4();
-      const absoluteY = globalY + grid.y;
-      panels.push({
-        type: template.type,
-        panelIndex,
-        gridData: { x: grid.x, y: absoluteY, w: grid.w, h: grid.h, i: panelIndex },
-        embeddableConfig: template.embeddableConfig,
+  for (const widget of overviewDashboard.panels as DashboardWidget[]) {
+    if (isDashboardSection(widget)) {
+      sections.push({
+        title: widget.title ?? '',
+        collapsed: widget.collapsed ?? false,
+        gridData: { y: widget.grid.y, i: widget.id },
       });
-      sectionMaxY = Math.max(sectionMaxY, grid.y + grid.h);
-    }
 
-    globalY += sectionMaxY + 1;
+      for (const panel of widget.panels) {
+        panels.push(transformPanel(panel, builder, widget.id));
+      }
+    } else {
+      panels.push(transformPanel(widget, builder));
+    }
   }
 
-  return panels;
+  return { panels, sections };
 }
 
 /**
@@ -157,41 +164,32 @@ export function buildOverviewDashboardPanels(): SavedDashboardPanel[] {
  * Idempotent: uses a stable id with overwrite. Re-run on startup upgrades the dashboard
  * when {@link AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION} increases.
  */
-export const installAgentBuilderDashboard = async (
+async function installAgentBuilderDashboard(
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger
-): Promise<void> => {
-  if (
-    overviewDashboard.definition_version !== AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION
-  ) {
-    throw new Error(
-      `overview-dashboard.json definition_version (${overviewDashboard.definition_version}) must match AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION (${AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION})`
-    );
-  }
-
+): Promise<void> {
   logger.debug(
     `Installing Agent Builder overview dashboard (${AGENT_BUILDER_OVERVIEW_DASHBOARD_ID}, definition v${AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION})...`
   );
 
+  const { panels, sections } = buildOverviewDashboardPanels();
+
   await savedObjectsClient.create(
     'dashboard',
     {
-      description: overviewDashboard.description,
       kibanaSavedObjectMeta: {
-        searchSourceJSON: JSON.stringify({ query: { query: '', language: 'kuery' } }),
+        searchSourceJSON: JSON.stringify({
+          query: {
+            query: overviewDashboard.query?.expression ?? '',
+            language: 'kuery',
+          },
+        }),
       },
-      optionsJSON: JSON.stringify({
-        hidePanelTitles: overviewDashboard.options.hide_panel_titles,
-        hidePanelBorders: false,
-        useMargins: overviewDashboard.options.use_margins,
-        autoApplyFilters: overviewDashboard.options.auto_apply_filters,
-        syncColors: false,
-        syncCursor: overviewDashboard.options.sync_cursor,
-        syncTooltips: false,
-      }),
-      panelsJSON: JSON.stringify(buildOverviewDashboardPanels()),
+      optionsJSON: transformOptionsIn(overviewDashboard.options),
+      panelsJSON: JSON.stringify(panels),
+      ...(sections.length > 0 && { sections }),
       timeRestore: false,
-      title: `[Elastic] ${overviewDashboard.title}`,
+      title: overviewDashboard.title,
       version: AGENT_BUILDER_OVERVIEW_DASHBOARD_DEFINITION_VERSION,
     },
     {
@@ -199,7 +197,6 @@ export const installAgentBuilderDashboard = async (
       references: [],
       overwrite: true,
       managed: true,
-      initialNamespaces: ['*'],
       coreMigrationVersion: AGENT_BUILDER_DASHBOARD_CORE_MIGRATION_VERSION,
       typeMigrationVersion: AGENT_BUILDER_DASHBOARD_TYPE_MIGRATION_VERSION,
       refresh: false,
@@ -207,4 +204,17 @@ export const installAgentBuilderDashboard = async (
   );
 
   logger.debug('Agent Builder overview dashboard installed');
-};
+}
+
+export async function installAgentBuilderDashboardIfExperimentalEnabled(
+  coreStart: Pick<CoreStart, 'savedObjects' | 'uiSettings'>,
+  logger: Logger
+): Promise<void> {
+  const internalRepository = coreStart.savedObjects.createInternalRepository();
+  const internalClient = new SavedObjectsClient(internalRepository);
+  const uiSettingsClient = coreStart.uiSettings.asScopedToClient(internalClient);
+  if (!(await uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID))) {
+    return;
+  }
+  await installAgentBuilderDashboard(internalClient, logger);
+}
