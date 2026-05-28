@@ -328,6 +328,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
       >
         <EuiComboBox
           fullWidth
+          compressed
           singleSelection={{ asPlainText: true }}
           selectedOptions={
             thresholdValues.indexPattern ? [{ label: thresholdValues.indexPattern }] : []
@@ -350,6 +351,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
       >
         <EuiSelect
           fullWidth
+          compressed
           options={dateFields.map((name) => ({ value: name, text: name }))}
           value={thresholdValues.timeField}
           onChange={(e) => update('timeField', e.target.value)}
@@ -366,6 +368,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
       >
         <EuiComboBox
           fullWidth
+          compressed
           options={allFields.map((name) => ({ label: name }))}
           selectedOptions={thresholdValues.groupByFields.map((f) => ({ label: f }))}
           onChange={(opts) =>
@@ -391,6 +394,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
       >
         <EuiFieldText
           fullWidth
+          compressed
           value={thresholdValues.filterQuery ?? ''}
           onChange={(e) => update('filterQuery', e.target.value || undefined)}
           placeholder={i18n.translate('xpack.alertingV2.ruleBuilder.filterPlaceholder', {
@@ -401,7 +405,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
       </EuiFormRow>
 
       {/* ── Stats ── */}
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <EuiTitle size="xxs">
         <h4>
           <FormattedMessage id="xpack.alertingV2.ruleBuilder.statsTitle" defaultMessage="Stats" />
@@ -422,6 +426,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                 >
                   <EuiSelect
                     fullWidth
+                    compressed
                     options={AGGREGATION_OPTIONS}
                     value={stat.aggregation}
                     onChange={(e) =>
@@ -444,6 +449,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                   >
                     <EuiComboBox
                       fullWidth
+                      compressed
                       singleSelection={{ asPlainText: true }}
                       options={numericFields.map((name) => ({ label: name }))}
                       selectedOptions={stat.field ? [{ label: stat.field }] : []}
@@ -466,6 +472,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                 >
                   <EuiFieldText
                     fullWidth
+                    compressed
                     value={stat.label}
                     onChange={(e) => updateStat(idx, { label: e.target.value })}
                     data-test-subj={`ruleBuilderStatLabel-${idx}`}
@@ -474,15 +481,22 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
               </EuiFlexItem>
               {thresholdValues.stats.length > 1 && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="trash"
-                    color="danger"
-                    aria-label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.removeStat', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.alertingV2.ruleBuilder.stats.removeStat', {
                       defaultMessage: 'Remove stat',
                     })}
-                    onClick={() => removeStat(idx)}
-                    data-test-subj={`ruleBuilderRemoveStat-${idx}`}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="trash"
+                      color="danger"
+                      aria-label={i18n.translate('xpack.alertingV2.ruleBuilder.stats.removeStat', {
+                        defaultMessage: 'Remove stat',
+                      })}
+                      onClick={() => removeStat(idx)}
+                      data-test-subj={`ruleBuilderRemoveStat-${idx}`}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
@@ -523,7 +537,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
       </EuiButtonEmpty>
 
       {/* ── Evaluations ── */}
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <EuiTitle size="xxs">
         <h4>
           <FormattedMessage
@@ -554,6 +568,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                 >
                   <EuiFieldText
                     fullWidth
+                    compressed
                     value={ev.label}
                     onChange={(e) => updateEvaluation(idx, { label: e.target.value })}
                     data-test-subj={`ruleBuilderEvalLabel-${idx}`}
@@ -570,6 +585,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                 >
                   <EuiFieldText
                     fullWidth
+                    compressed
                     value={ev.expression}
                     onChange={(e) => updateEvaluation(idx, { expression: e.target.value })}
                     placeholder={i18n.translate(
@@ -581,16 +597,24 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.alertingV2.ruleBuilder.evaluations.removeEvaluation',
                     { defaultMessage: 'Remove evaluation' }
                   )}
-                  onClick={() => removeEvaluation(idx)}
-                  data-test-subj={`ruleBuilderRemoveEval-${idx}`}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    aria-label={i18n.translate(
+                      'xpack.alertingV2.ruleBuilder.evaluations.removeEvaluation',
+                      { defaultMessage: 'Remove evaluation' }
+                    )}
+                    onClick={() => removeEvaluation(idx)}
+                    data-test-subj={`ruleBuilderRemoveEval-${idx}`}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -610,7 +634,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
       </EuiButtonEmpty>
 
       {/* ── Alert Conditions ── */}
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <EuiTitle size="xxs">
         <h4>
           <FormattedMessage
@@ -654,6 +678,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                   >
                     <EuiSelect
                       fullWidth
+                      compressed
                       options={metricOptions.map((m) => ({ value: m, text: m }))}
                       value={condition.metric}
                       onChange={(e) => updateCondition(idx, { metric: e.target.value })}
@@ -671,6 +696,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                   >
                     <EuiSelect
                       fullWidth
+                      compressed
                       options={COMPARATOR_OPTIONS}
                       value={condition.comparator}
                       onChange={(e) =>
@@ -690,6 +716,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                   >
                     <EuiFieldNumber
                       fullWidth
+                      compressed
                       value={condition.threshold[0] ?? 0}
                       onChange={(e) =>
                         updateCondition(idx, {
@@ -713,6 +740,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                     >
                       <EuiFieldNumber
                         fullWidth
+                        compressed
                         value={condition.threshold[1] ?? 0}
                         onChange={(e) =>
                           updateCondition(idx, {
@@ -729,16 +757,24 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
                 )}
                 {thresholdValues.alertConditions.length > 1 && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="trash"
-                      color="danger"
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.alertingV2.ruleBuilder.alertConditions.removeCondition',
                         { defaultMessage: 'Remove condition' }
                       )}
-                      onClick={() => removeCondition(idx)}
-                      data-test-subj={`ruleBuilderRemoveCondition-${idx}`}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType="trash"
+                        color="danger"
+                        aria-label={i18n.translate(
+                          'xpack.alertingV2.ruleBuilder.alertConditions.removeCondition',
+                          { defaultMessage: 'Remove condition' }
+                        )}
+                        onClick={() => removeCondition(idx)}
+                        data-test-subj={`ruleBuilderRemoveCondition-${idx}`}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -762,6 +798,7 @@ export const RuleBuilderAlertConditionStep: React.FC<RuleBuilderStepProps<Thresh
       {/* ── Tracking toggle ── */}
       <EuiSpacer size="m" />
       <EuiSwitch
+        compressed
         label={i18n.translate('xpack.alertingV2.ruleBuilder.trackingToggleLabel', {
           defaultMessage: 'Track active and recovered state over time',
         })}
