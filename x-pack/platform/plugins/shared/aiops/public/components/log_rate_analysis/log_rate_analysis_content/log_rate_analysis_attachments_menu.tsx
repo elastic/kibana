@@ -215,18 +215,28 @@ export const LogRateAnalysisAttachmentsMenu = ({
               defaultMessage: 'Attachments',
             })}
             button={
-              <EuiButtonIcon
-                data-test-subj="aiopsLogRateAnalysisAttachmentsMenuButton"
-                aria-label={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
                   defaultMessage: 'Attachments',
                 })}
-                color="text"
-                display="base"
-                size="s"
-                isSelected={isActionMenuOpen}
-                iconType="boxesVertical"
-                onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="aiopsLogRateAnalysisAttachmentsMenuButton"
+                  aria-label={i18n.translate(
+                    'xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel',
+                    {
+                      defaultMessage: 'Attachments',
+                    }
+                  )}
+                  color="text"
+                  display="base"
+                  size="s"
+                  isSelected={isActionMenuOpen}
+                  iconType="boxesVertical"
+                  onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+                />
+              </EuiToolTip>
             }
             isOpen={isActionMenuOpen}
             closePopover={() => setIsActionMenuOpen(false)}
