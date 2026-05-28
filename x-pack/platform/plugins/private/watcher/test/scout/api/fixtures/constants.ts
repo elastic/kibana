@@ -7,12 +7,8 @@
 
 import type { KibanaRole } from '@kbn/scout';
 
-export const WATCHER_API_TAGS = ['@local-stateful-classic', '@cloud-stateful-classic'];
-
 export const API_PATHS = {
   INDEX_PATTERNS: 'api/watcher/indices/index_patterns',
-  DATA_VIEWS: 'api/data_views/data_view',
-  DATA_VIEW_BY_ID: (id: string) => `api/data_views/data_view/${id}`,
 };
 
 export const COMMON_HEADERS = {
@@ -20,19 +16,22 @@ export const COMMON_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
 };
 
-/** Minimum Kibana privileges needed to call GET /api/watcher/indices/index_patterns. */
+/**
+ * Minimum Kibana privileges needed to call GET /api/watcher/indices/index_patterns.
+ * The route has authz disabled and relies on the saved objects client, which requires
+ * read access to 'index-pattern' saved objects.
+ */
 export const WATCHER_API_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
   },
   kibana: [
     {
-      base: ['all'],
-      feature: {},
+      base: [],
+      feature: { indexPatterns: ['read'] },
       spaces: ['*'],
     },
   ],
 };
 
-export const DATA_VIEW_TITLE = 'ft_ecommerce';
-export const DATA_VIEW_TIME_FIELD = 'order_date';
+export const DATA_VIEW_TITLE = 'scout-watcher-api-test';

@@ -7,11 +7,11 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import { CCR_TAGS, CCR_USER_ROLE } from '../fixtures/constants';
+import { CCR_TAGS, KIBANA_ADMIN_ROLE, CCR_USER_ROLE } from '../fixtures/constants';
 
 test.describe('Cross-Cluster Replication - Feature Controls', { tag: CCR_TAGS }, () => {
   test('kibana_admin can access Stack Management but not CCR', async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginWithCustomRole(KIBANA_ADMIN_ROLE);
     await page.gotoApp('management');
 
     await test.step('Stack Management page is visible', async () => {

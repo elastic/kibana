@@ -18,6 +18,7 @@ export const WATCHER_ADMIN_ROLE = {
       {
         names: ['.watches', 'watcher-*', '.triggered_watches', '.watcher-history-*'],
         privileges: ['all'],
+        allow_restricted_indices: true,
       },
     ],
   },

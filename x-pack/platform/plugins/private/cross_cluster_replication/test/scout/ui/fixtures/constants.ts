@@ -34,3 +34,16 @@ export const CCR_USER_ROLE = {
     },
   ],
 };
+
+export const KIBANA_ADMIN_ROLE = {
+  elasticsearch: {
+    cluster: [],
+  },
+  kibana: [
+    {
+      base: ['all'],
+      feature: {},
+      spaces: ['*'],
+    },
+  ],
+};
