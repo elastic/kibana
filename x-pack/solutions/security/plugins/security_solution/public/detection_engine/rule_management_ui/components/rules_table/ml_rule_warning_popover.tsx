@@ -13,6 +13,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -58,12 +59,15 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
   }
 
   const button = (
-    <EuiButtonIcon
-      display={'empty'}
-      color={'warning'}
-      iconType={'warning'}
-      onClick={togglePopover}
-    />
+    <EuiToolTip content={i18n.ML_RULE_JOBS_WARNING_ICON_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        display={'empty'}
+        color={'warning'}
+        iconType={'warning'}
+        onClick={togglePopover}
+        aria-label={i18n.ML_RULE_JOBS_WARNING_ICON_LABEL}
+      />
+    </EuiToolTip>
   );
   const popoverTitle = getCapitalizedStatusText(RuleExecutionStatusEnum['partial failure']);
 
