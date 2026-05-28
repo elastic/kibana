@@ -13,12 +13,9 @@ Treat migration as a chance to revisit your tests and make them more robust, not
 :::::::::{stepper}
 
 ::::::::{step} Do your UI tests _really_ need to be UI tests?
+UI tests (the slowest, most expensive, and most brittle kind) should be reserved for full end-to-end user flows.<br><br> • UI tests that assert **backend behavior** (is a given feature available for the user? Is the table rendering the right number of items?) should be rewritten as **API tests**. <br> • Tests that only verify a **component** renders correctly belong as **RTL component tests**.
 
-We found that many UI tests should be rewritten as API or component tests (see [Pick the right test type](./best-practices.md#pick-the-right-test-type)).
-
-::::::{tip}
-Whenever possible, prefer an **API test** over asserting on a rendered element. UI tests (the slowest, most expensive, and most brittle kind) should be reserved for full end-to-end user flows. Tests that only verify a component renders correctly belong as **RTL component tests**.
-::::::
+See [Pick the right test type](./best-practices.md#pick-the-right-test-type) for complete guidance.
 
 ::::::::
 
