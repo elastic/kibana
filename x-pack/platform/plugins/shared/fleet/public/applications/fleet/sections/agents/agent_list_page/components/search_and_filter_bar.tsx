@@ -174,7 +174,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   ]);
 
   const NO_TAGS_VALUE = i18n.translate('xpack.fleet.agentList.noTagsValue', {
-    defaultMessage: 'No Tags',
+    defaultMessage: 'No tags',
   });
   const tagsWithNoTagsIncluded = [...tags, NO_TAGS_VALUE];
   const hasAddOptions = addMenuItems.length > 0;

@@ -670,33 +670,35 @@ export const SharedLists = React.memo(() => {
             )}
           </>
         )}
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="flexStart">
-              <EuiFlexItem>
-                <EuiPopover
-                  button={rowSizeButton}
-                  isOpen={isRowSizePopoverOpen}
-                  closePopover={closeRowSizePopover}
-                >
-                  <EuiContextMenuPanel items={rowSizeItems} />
-                </EuiPopover>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem css={{ alignItems: 'flex-end' }}>
-            <EuiFlexGroup alignItems="flexEnd">
-              <EuiFlexItem>
-                <EuiPagination
-                  aria-label={'Custom pagination example'}
-                  pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
-                  activePage={activePage}
-                  onPageClick={goToPage}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {viewerStatus == null && (
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="flexStart">
+                <EuiFlexItem>
+                  <EuiPopover
+                    button={rowSizeButton}
+                    isOpen={isRowSizePopoverOpen}
+                    closePopover={closeRowSizePopover}
+                  >
+                    <EuiContextMenuPanel items={rowSizeItems} />
+                  </EuiPopover>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem css={{ alignItems: 'flex-end' }}>
+              <EuiFlexGroup alignItems="flexEnd">
+                <EuiFlexItem>
+                  <EuiPagination
+                    aria-label={'Custom pagination example'}
+                    pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
+                    activePage={activePage}
+                    onPageClick={goToPage}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
 
         <AutoDownload
           blob={exportDownload.blob}
