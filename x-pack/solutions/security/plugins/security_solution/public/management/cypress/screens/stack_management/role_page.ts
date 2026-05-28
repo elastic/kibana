@@ -62,6 +62,43 @@ export const getSecuritySolutionCategoryKibanaPrivileges = (): Cypress.Chainable
 };
 
 /**
+ * Returns the area of the ui (`div`) that holds the Management kibana privileges.
+ * This is the top-level accordion group in the flyout that is titled "Management" with
+ * icon next to it.
+ */
+export const getManagementCategoryKibanaPrivileges = (): Cypress.Chainable<
+  JQuery<HTMLDivElement>
+> => {
+  return getKibanaFeaturePrivilegesFlyout().findByTestSubj<HTMLDivElement>(
+    'featureCategory_management'
+  );
+};
+
+/**
+ * Returns the area of the ui (`div`) that holds the "Search" set of kibana privileges.
+ * This is the top-level accordion group in the flyout that is titled "Elasticsearch" with
+ * icon next to it.
+ */
+export const getESCategoryKibanaPrivileges = (): Cypress.Chainable<JQuery<HTMLDivElement>> => {
+  return getKibanaFeaturePrivilegesFlyout().findByTestSubj<HTMLDivElement>(
+    'featureCategory_enterpriseSearch'
+  );
+};
+
+/**
+ * Returns the area of the ui (`div`) that holds the o11y set of kibana privileges.
+ * This is the top-level accordion group in the flyout that is titled "Security" with
+ * icon next to it.
+ */
+export const getObservabilityCategoryKibanaPrivileges = (): Cypress.Chainable<
+  JQuery<HTMLDivElement>
+> => {
+  return getKibanaFeaturePrivilegesFlyout().findByTestSubj<HTMLDivElement>(
+    'featureCategory_observability'
+  );
+};
+
+/**
  * Expand the "security" grouping found inside of the top-level "Security" (security solution)
  * kibana feature privileges grouping. This is the area where Endpoint related RBAC is managed
  */
