@@ -36,7 +36,7 @@ export class GraphPage {
   private readonly saveTitleInput: Locator;
   private readonly saveConfirmButton: Locator;
   private readonly saveSuccessToast: Locator;
-  private readonly confirmModal: Locator;
+  private readonly confirmModalTitle: Locator;
   private readonly confirmModalConfirmButton: Locator;
   private readonly nodeCircles: Locator;
   private readonly clickableEdges: Locator;
@@ -49,11 +49,8 @@ export class GraphPage {
 
     this.newButton = this.page.testSubj.locator('graphNewButton');
     this.saveButton = this.page.testSubj.locator('graphSaveButton');
-    // EUI merges the breadcrumb's `data-test-subj` with `breadcrumb first` /
-    // `breadcrumb last` into a single space-separated value, and two
-    // breadcrumbs register `graphHomeBreadcrumb` (chrome + shared-ux mirror).
-    // Match by whole-word + `first` to mirror the FTR selector
-    // `'breadcrumb graphHomeBreadcrumb first'`.
+    // Two breadcrumbs register `graphHomeBreadcrumb` (chrome + shared-ux
+    // mirror); match `first` to pick the chrome one.
     this.homeBreadcrumb = this.page.locator(
       '[data-test-subj~="graphHomeBreadcrumb"][data-test-subj~="first"]'
     );
@@ -76,7 +73,7 @@ export class GraphPage {
     this.saveConfirmButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.saveSuccessToast = this.page.testSubj.locator('saveGraphSuccess');
 
-    this.confirmModal = this.page.testSubj.locator('confirmModalTitleText');
+    this.confirmModalTitle = this.page.testSubj.locator('confirmModalTitleText');
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
 
     this.nodeCircles = this.page.testSubj.locator('graphNodeCircle');
@@ -107,9 +104,9 @@ export class GraphPage {
   }
 
   /**
-   * The shell loads as soon as the `Unsaved graph` breadcrumb appears — this
-   * is reachable even when the user has no data-view access (the SVG canvas
-   * is replaced by a "No data source" panel in that case).
+   * Wait for the workspace shell. The `Unsaved graph` breadcrumb appears
+   * even without data-view access (the canvas is then replaced by a
+   * "No data source" panel), so this is safe for read-only/security tests.
    */
   async waitForWorkspace() {
     await this.currentGraphBreadcrumb.waitFor({ state: 'visible' });
@@ -118,8 +115,7 @@ export class GraphPage {
   async pickIndexPattern(indexPattern: string) {
     await this.datasourceButton.click();
     await this.page.testSubj.locator(`savedObjectTitle${indexPattern}`).click();
-    // "Add fields" stays `aria-disabled` until the data view's fields finish
-    // loading; visibility alone is not enough.
+    // "Add fields" stays `aria-disabled` until the fields finish loading.
     await this.addFieldButton.waitFor({ state: 'visible' });
     await this.page.waitForFunction(
       () =>
@@ -136,8 +132,7 @@ export class GraphPage {
     await this.fieldSearchInput.waitFor({ state: 'visible' });
     for (const field of fields) {
       await this.fieldSearchInput.fill(field);
-      // EuiSelectable list items expose the field name as `title=` — use an
-      // attribute selector to avoid races as the filter narrows the list.
+      // Match the EuiSelectable item by `title` to wait for the filtered list.
       const option = this.page.locator(`.euiSelectableListItem[title="${field}"]`);
       await option.waitFor({ state: 'visible' });
       await option.click();
@@ -162,7 +157,7 @@ export class GraphPage {
   async newWorkspace({ discardChanges = false }: { discardChanges?: boolean } = {}) {
     await this.newButton.click();
     if (discardChanges) {
-      await this.confirmModal.waitFor({ state: 'visible' });
+      await this.confirmModalTitle.waitFor({ state: 'visible' });
       await this.confirmModalConfirmButton.click();
     }
   }
@@ -172,22 +167,22 @@ export class GraphPage {
   }
 
   async openWorkspace(title: string) {
-    await this.page
-      .locator(`[data-test-subj="graphListingTitleLink-${title.split(' ').join('-')}"]`)
-      .click();
+    await this.workspaceListingLink(title).click();
   }
 
   async deleteWorkspace(title: string) {
-    const rowLink = this.page.locator(
-      `[data-test-subj^="graphListingTitleLink-${title.split(' ').join('-')}"]`
-    );
+    const rowLink = this.workspaceListingLink(title);
     await this.listingSearchBox.fill(title);
     await rowLink.waitFor({ state: 'visible' });
     await this.page.testSubj.locator('checkboxSelectAll').click();
     await this.page.testSubj.locator('deleteSelectedItems').click();
-    await this.confirmModal.waitFor({ state: 'visible' });
+    await this.confirmModalTitle.waitFor({ state: 'visible' });
     await this.confirmModalConfirmButton.click();
     await rowLink.waitFor({ state: 'hidden' });
+  }
+
+  private workspaceListingLink(title: string): Locator {
+    return this.page.testSubj.locator(`graphListingTitleLink-${title.split(' ').join('-')}`);
   }
 
   async nodeCount(): Promise<number> {
@@ -204,14 +199,15 @@ export class GraphPage {
 
   /**
    * Click the only remaining edge after `isolateEdge`. Dispatches a synthetic
-   * SVG click because the overlapping thinner line + SVG `pointer-events`
-   * rules make Playwright's actionable click flaky.
+   * SVG click — overlapping thin lines and SVG `pointer-events` make
+   * Playwright's actionable click flaky here.
    */
   async clickIsolatedEdge() {
     await this.clickableEdges.evaluateAll((els) => {
-      if (els[0]) {
-        (els[0] as SVGElement).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      if (els.length !== 1) {
+        throw new Error(`Expected exactly one isolated edge, found ${els.length}`);
       }
+      (els[0] as SVGElement).dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
   }
 
@@ -228,13 +224,11 @@ export class GraphPage {
   }
 
   /**
-   * Reduce the selection list to exactly `from` and `to` (mirrors the FTR
-   * `isolateEdge` flow).
+   * Reduce the selection list to exactly `from` and `to`.
    *
-   * Deselecting a node removes its `<SelectedNodeItem>`, so we cannot iterate
-   * the list while mutating it (later `.nth(i)` handles go stale). Snapshot
-   * all labels first via `evaluateAll`, then click each non-keep target by
-   * its own `graph-selected-<label>` selector — fresh resolution every time.
+   * Deselecting a node removes its `<SelectedNodeItem>`, so snapshot labels
+   * first; click each non-keep node via its own `graph-selected-<label>`
+   * selector to avoid stale list-index handles.
    */
   async isolateEdge(from: string, to: string) {
     await this.selectAllButton.click();
