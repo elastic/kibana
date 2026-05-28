@@ -8,11 +8,7 @@
 export interface MatcherContextRule {
   id: string;
   name: string;
-  description: string;
   tags: string[];
-  enabled: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface MatcherContext {
@@ -38,10 +34,6 @@ export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
   { path: 'severity', type: 'string' },
   { path: 'rule.id', type: 'string' },
   { path: 'rule.name', type: 'string' },
-  { path: 'rule.description', type: 'string' },
   { path: 'rule.tags', type: 'string[]' },
-  { path: 'rule.enabled', type: 'boolean' },
-  { path: 'rule.createdAt', type: 'string' },
-  { path: 'rule.updatedAt', type: 'string' },
   { path: 'data', type: 'object' },
 ];
