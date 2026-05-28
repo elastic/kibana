@@ -351,7 +351,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
   evaluate.describe('empty datastream', () => {
     let emptyDataStreamTestIndex: string | undefined;
 
-    evaluate.beforeAll(async ({ esClient, apiServices, log }) => {
+    evaluate.beforeAll(async ({ esClient, apiServices }) => {
       emptyDataStreamTestIndex = `logs-sig-events-test-${Date.now()}`;
       await apiServices.streams.disable().catch(() => {});
       await apiServices.streams.enable();
@@ -406,7 +406,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
       }
     );
 
-    evaluate.afterAll(async ({ esClient, apiServices, log }) => {
+    evaluate.afterAll(async ({ esClient, apiServices }) => {
       if (emptyDataStreamTestIndex) {
         await esClient.indices.deleteDataStream({ name: emptyDataStreamTestIndex }).catch(() => {});
       }
