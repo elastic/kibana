@@ -180,7 +180,6 @@ const descriptionFromAttachmentLabel = (data: unknown): string | undefined => {
   return trimmed || undefined;
 };
 
-
 /**
  * Private implementation of AttachmentStateManager.
  */

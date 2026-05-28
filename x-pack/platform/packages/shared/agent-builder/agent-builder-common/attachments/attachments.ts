@@ -20,8 +20,6 @@ export interface Attachment<
   type: Type;
   /** data bound to the attachment */
   data: DataType;
-  /** Human-readable description of the attachment */
-  description?: string;
   /** should the attachment be hidden from the user - e.g. for screen context */
   hidden?: boolean;
   /**
@@ -30,12 +28,7 @@ export interface Attachment<
    * Undefined for by-value attachments.
    */
   origin?: string;
-  /**
-   * Human-readable description of the attachment. Displayed in the chat as
-   * "Attachment added: {description}" in the user's input round. This field is
-   * carried through from AttachmentInput so that the optimistic render during
-   * streaming can show the label before the server persists the VersionedAttachment.
-   */
+  /** Human-readable description of the attachment */
   description?: string;
   /** The version number of this attachment snapshot. Undefined when version metadata is unavailable. */
   version?: number;
