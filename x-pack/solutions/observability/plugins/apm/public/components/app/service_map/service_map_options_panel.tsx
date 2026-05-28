@@ -149,6 +149,8 @@ const ANOMALY_SEVERITY_OPTIONS: { value: ML_ANOMALY_SEVERITY; label: string }[] 
 export interface ServiceMapOptionsPanelToggleProps {
   isExpanded: boolean;
   onExpandedChange: (next: boolean) => void;
+  /** When true, show a small dot on the toggle indicating filters or a search query are active. */
+  hasActiveControls?: boolean;
 }
 
 export interface ServiceMapOptionsPanelProps {
@@ -191,16 +193,50 @@ const useToolbarToggleIconCss = () => {
 export function ServiceMapOptionsPanelToggle({
   isExpanded,
   onExpandedChange,
+  hasActiveControls = false,
 }: ServiceMapOptionsPanelToggleProps) {
   const mapToolbarToggleIconCss = useToolbarToggleIconCss();
+  const { euiTheme } = useEuiTheme();
 
-  const toggleLabel = isExpanded
+  // Only badge while collapsed — once open the chips themselves communicate the same thing.
+  const showBadge = hasActiveControls && !isExpanded;
+
+  const baseLabel = isExpanded
     ? i18n.translate('xpack.apm.serviceMap.controls.hideControls', {
         defaultMessage: 'Hide controls',
       })
     : i18n.translate('xpack.apm.serviceMap.controls.showControls', {
         defaultMessage: 'Show controls',
       });
+
+  const toggleLabel = showBadge
+    ? i18n.translate('xpack.apm.serviceMap.controls.showControlsWithActiveFilters', {
+        defaultMessage: '{baseLabel} (filters active)',
+        values: { baseLabel },
+      })
+    : baseLabel;
+
+  const panelWrapperCss = useMemo(
+    () => css`
+      position: relative;
+    `,
+    []
+  );
+
+  const badgeCss = useMemo(
+    () => css`
+      position: absolute;
+      top: -${euiTheme.size.xs};
+      right: -${euiTheme.size.xs};
+      width: ${euiTheme.size.s};
+      height: ${euiTheme.size.s};
+      border-radius: 50%;
+      background-color: ${euiTheme.colors.accent};
+      border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.emptyShade};
+      pointer-events: none;
+    `,
+    [euiTheme]
+  );
 
   return (
     <EuiPanel
@@ -210,6 +246,7 @@ export function ServiceMapOptionsPanelToggle({
       paddingSize="none"
       borderRadius="m"
       grow={false}
+      css={panelWrapperCss}
     >
       <EuiFlexGroup
         justifyContent="center"
@@ -232,6 +269,13 @@ export function ServiceMapOptionsPanelToggle({
           }
         />
       </EuiFlexGroup>
+      {showBadge && (
+        <span
+          css={badgeCss}
+          data-test-subj="serviceMapOptionsPanelToggleActiveIndicator"
+          aria-hidden="true"
+        />
+      )}
     </EuiPanel>
   );
 }
