@@ -45,7 +45,11 @@ export const NotificationsStep = () => {
       </EuiText>
       <EuiSpacer size="m" />
 
-      <div onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setTouched(true); }}>
+      <div
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) setTouched(true);
+        }}
+      >
         <ActionForm
           value={workflows}
           onChange={(next) => setValue('notifications', { workflows: next }, { shouldDirty: true })}
