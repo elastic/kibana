@@ -128,6 +128,15 @@ export type {
   AgentRegistry,
 } from './agents';
 export type { SkillRegistry } from './skills';
+// `SkillBoundedTool` is the return-type union for `SkillDefinition.getInlineTools`.
+// Re-exporting from the package root so consumers (e.g. the discoveries
+// plugin's attack-discovery generator skill) can type their inline tools
+// without subpath imports. Type-only addition — no runtime impact.
+export type { BuiltinSkillBoundedTool, SkillBoundedTool } from './skills/tools';
+// `SkillDefinition` is the server-side type used to define an agent-builder
+// skill. Re-exported here for consumers that register skills (e.g. the
+// discoveries plugin's workflow-troubleshooting skill). Type-only addition.
+export type { SkillDefinition } from './skills';
 export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,

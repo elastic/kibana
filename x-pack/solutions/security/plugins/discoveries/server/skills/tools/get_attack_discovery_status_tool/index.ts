@@ -10,10 +10,28 @@
 // and register_skills can type-check FF-off. The tool is never registered
 // at runtime when the feature flag is OFF.
 
+import { ToolType } from '@kbn/agent-builder-common';
+import type { SkillBoundedTool } from '@kbn/agent-builder-server';
+
 export const GET_ATTACK_DISCOVERY_STATUS_TOOL_ID = 'security.attack-discovery.get_status' as const;
 
 export interface WorkflowExecutionLookup {
-  lookup: (executionUuid: string) => Promise<unknown | undefined>;
+  // Shape mirrors `workflowsManagementApi.getWorkflowExecution`; callers in
+  // PR3 (plugin.ts) construct this from that API. Kept permissive on the
+  // return type so PR8's real impl can refine without breaking the stub
+  // contract.
+  getWorkflowExecution: (
+    executionId: string,
+    spaceId: string,
+    options?: { includeInput?: boolean; includeOutput?: boolean }
+  ) => Promise<unknown>;
 }
 
-export const getAttackDiscoveryStatusTool = (_deps: unknown): unknown => undefined;
+// Return type is `SkillBoundedTool` so callers that assemble
+// `getInlineTools: () => [...]` arrays type-check; the placeholder is
+// never actually invoked unless the FF is on (skill is FF-gated).
+export const getAttackDiscoveryStatusTool = (_deps: unknown): SkillBoundedTool =>
+  ({
+    id: GET_ATTACK_DISCOVERY_STATUS_TOOL_ID,
+    type: ToolType.builtin,
+  } as unknown as SkillBoundedTool);

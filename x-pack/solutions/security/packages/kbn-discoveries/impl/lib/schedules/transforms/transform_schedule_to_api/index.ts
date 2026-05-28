@@ -6,4 +6,7 @@
  */
 
 // Stub: real implementation lands in PR10 (Schedule Integration).
-export const transformScheduleToApi = (schedule: unknown): unknown => schedule;
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
+
+export const transformScheduleToApi = (schedule: unknown): AttackDiscoverySchedule =>
+  (schedule ?? {}) as AttackDiscoverySchedule;

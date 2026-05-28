@@ -6,4 +6,12 @@
  */
 
 // Stub: real implementation lands in PR10 (Schedule Integration).
-export const transformUpdatePropsFromApi = (apiProps: unknown): unknown => apiProps;
+// PR3 callers pass `(request.body, existingSchedule.params.workflowConfig)`;
+// the second arg is the existing workflow config, used for partial-merge
+// semantics in the real impl. Stub accepts and discards it.
+import type { AttackDiscoveryScheduleUpdateProps } from '@kbn/elastic-assistant-common';
+
+export const transformUpdatePropsFromApi = (
+  apiProps: unknown,
+  _existingWorkflowConfig?: unknown
+): AttackDiscoveryScheduleUpdateProps => (apiProps ?? {}) as AttackDiscoveryScheduleUpdateProps;

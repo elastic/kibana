@@ -8,4 +8,13 @@
 // Stub: real implementation lands in PR8 (Skills). FF-off safe — never
 // registered when the feature flag is OFF.
 
-export const createWorkflowTroubleshootingSkill = (_deps: unknown): unknown => undefined;
+import type { SkillDefinition } from '@kbn/agent-builder-server';
+
+export const createWorkflowTroubleshootingSkill = (_deps: unknown): SkillDefinition =>
+  ({
+    basePath: 'skills/platform/workflows',
+    content: '',
+    description: 'placeholder',
+    id: 'security.attack-discovery.workflow-troubleshooting',
+    name: 'workflow-troubleshooting',
+  } as unknown as SkillDefinition);
