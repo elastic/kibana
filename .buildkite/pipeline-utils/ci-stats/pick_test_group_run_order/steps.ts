@@ -8,7 +8,7 @@
  */
 
 import type { BuildkiteClient, BuildkiteGroupStep, BuildkiteStep } from '../../buildkite';
-import { AGENT_DISK_GIB, RETRIES, STEP_KEYS, TEST_STEP_TIMEOUT_MINUTES } from './const';
+import { AGENT_DISK_GIB, RETRIES, STEP_KEYS, TEST_STEP_TIMEOUT_MINUTES, TEST_STEP_TIMEOUT_MINUTES_UNIT } from './const';
 import type { FunctionalGroup } from './types';
 import { expandAgentQueue } from '#pipeline-utils';
 
@@ -34,7 +34,7 @@ export function buildJestStep(opts: JestStepOptions): BuildkiteStep | undefined 
     label: opts.label,
     command: opts.command,
     parallelism: opts.parallelism,
-    timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
+    timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES_UNIT,
     key: opts.key,
     agents: expandAgentQueue('n2-4-spot', opts.agentDiskSize),
     env: opts.envFromLabels,
