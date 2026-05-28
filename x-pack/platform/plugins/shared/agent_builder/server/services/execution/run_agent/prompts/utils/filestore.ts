@@ -14,13 +14,6 @@ const tools = {
   bash: sanitizeToolId(internalTools.bash),
 };
 
-/**
- * Returns the FILESYSTEM section of the agent's system prompt.
- *
- * Describes the unified VFS layout (`/workspace`, `/tool_calls`, `/skills`,
- * ephemeral paths) and which tools are available to interact with it. The
- * `bash` tool mention is conditional on the bash FF being on.
- */
 export const getFileSystemInstructions = ({
   bashEnabled = false,
 }: {
@@ -39,7 +32,7 @@ export const getFileSystemInstructions = ({
   - /skills: read-only skill files (main file: SKILL.md, plus subfiles).
   - /tmp and /home/user: ephemeral folders — not persisted between rounds.
 
-  Available tools:
+  The following tools can interact with the VFS:
   - ${tools.readFile}: read a single file's content.
   ${bashToolSection}
 `);
