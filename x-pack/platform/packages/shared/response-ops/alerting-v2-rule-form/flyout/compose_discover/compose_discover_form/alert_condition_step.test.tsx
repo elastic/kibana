@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useForm, FormProvider, useFormContext } from 'react-hook-form';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createTestQueryClient, createMockServices } from '../../../test_utils';
@@ -220,5 +220,61 @@ describe('AlertConditionStep', () => {
     const values = getFormValues!();
     expect(values.stateTransitionAlertDelayMode).toBe('breaches');
     expect(values.stateTransition?.pendingCount).toBe(2);
+  });
+
+  describe('group-by auto-population in tracking mode', () => {
+    it('extracts BY columns from the base query (composed format)', async () => {
+      renderAlertStep(
+        { queryCommitted: true },
+        {
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*\n| STATS count = COUNT(*) BY host.name',
+            blocks: { breach: '| WHERE count > 100' },
+          },
+        }
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('host.name')).toBeInTheDocument();
+      });
+    });
+
+    it('extracts multiple BY columns from the base query', async () => {
+      renderAlertStep(
+        { queryCommitted: true },
+        {
+          query: {
+            format: 'composed',
+            base: 'FROM kibana_sample_data_ecommerce\n| STATS total = SUM(taxful_total_price) BY customer_gender, day_of_week',
+            blocks: { breach: '| WHERE total > 1000' },
+          },
+        }
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('customer_gender')).toBeInTheDocument();
+        expect(screen.getByText('day_of_week')).toBeInTheDocument();
+      });
+    });
+
+    it('clears group fields when the base query has no STATS BY', async () => {
+      renderAlertStep(
+        { queryCommitted: true },
+        {
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*\n| STATS count = COUNT(*)',
+            blocks: { breach: '| WHERE count > 100' },
+          },
+        }
+      );
+
+      const comboBox = screen.getByTestId('composeDiscoverGroupFields');
+      await waitFor(() => {
+        expect(comboBox).toBeInTheDocument();
+      });
+      expect(comboBox.querySelectorAll('[data-test-subj="euiComboBoxPill"]')).toHaveLength(0);
+    });
   });
 });
