@@ -60,6 +60,7 @@ export const useLoadConnectors = ({
     },
     retry: false,
     keepPreviousData: true,
+    refetchOnWindowFocus: true,
     onError: (error: IHttpFetchError) => {
       if (error.name !== 'AbortError') {
         toasts?.addError(

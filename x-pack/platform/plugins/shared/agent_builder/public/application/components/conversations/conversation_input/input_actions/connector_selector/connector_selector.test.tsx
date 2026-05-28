@@ -108,6 +108,7 @@ interface RenderOptions {
   defaultConnectorId?: string;
   defaultConnectorOnly?: boolean;
   initialConnectorId?: string;
+  soEntryFound?: boolean;
 }
 
 const setup = ({
@@ -117,6 +118,7 @@ const setup = ({
   defaultConnectorId,
   defaultConnectorOnly = false,
   initialConnectorId,
+  soEntryFound = false,
 }: RenderOptions = {}) => {
   mockUseKibana.mockReturnValue({
     services: {
@@ -128,6 +130,7 @@ const setup = ({
   mockUseLoadConnectors.mockReturnValue({
     data: connectors,
     isLoading,
+    soEntryFound,
   } as any);
 
   // Default: pick defaultConnectorId if it's in the list, otherwise fall back to the first connector.
@@ -154,8 +157,15 @@ const setup = ({
   return {
     ...utils,
     selectConnector,
-    // Helper to re-render with a new connector selection (simulates admin changing a setting).
+    // Helper to re-render with updated context (simulates admin changing a setting).
     updateContext: (next: Partial<RenderOptions>) => {
+      if ('connectors' in next || 'soEntryFound' in next) {
+        mockUseLoadConnectors.mockReturnValue({
+          data: next.connectors ?? connectors,
+          isLoading: next.isLoading ?? isLoading,
+          soEntryFound: 'soEntryFound' in next ? next.soEntryFound : soEntryFound,
+        } as any);
+      }
       mockUseConnectorSelection.mockReturnValue({
         selectedConnector: next.selectedConnector ?? selectedConnector,
         selectConnector,
@@ -246,6 +256,42 @@ describe('ConnectorSelector sync effect', () => {
     });
 
     updateContext({ defaultConnectorId: undefined });
+
+    expect(selectConnector).not.toHaveBeenCalled();
+  });
+
+  it('switches to the SO-assigned connector when an admin saves a feature-specific assignment during the session', () => {
+    // Initial state: no SO entry, user has manually selected 'saved'.
+    const initialConnectors = [mkConnector('A'), mkConnector('saved')];
+    const { selectConnector, updateContext } = setup({
+      connectors: initialConnectors,
+      selectedConnector: 'saved',
+      soEntryFound: false,
+    });
+    expect(selectConnector).not.toHaveBeenCalled();
+
+    // Admin saves a feature-specific assignment for 'B'; the connector list refreshes
+    // with soEntryFound=true and 'B' becomes the initialConnectorId.
+    const updatedConnectors = [mkConnector('B'), mkConnector('A'), mkConnector('saved')];
+    mockUseDefaultConnector.mockReturnValue('B');
+    updateContext({ connectors: updatedConnectors, soEntryFound: true });
+
+    expect(selectConnector).toHaveBeenCalledWith('B');
+  });
+
+  it('does not switch when soEntryFound is true but initialConnectorId has not changed', () => {
+    // SO entry already existed and still points to the same connector.
+    const connectors = [mkConnector('A'), mkConnector('saved')];
+    mockUseDefaultConnector.mockReturnValue('A');
+    const { selectConnector, updateContext } = setup({
+      connectors,
+      selectedConnector: 'saved',
+      soEntryFound: true,
+    });
+    expect(selectConnector).not.toHaveBeenCalled();
+
+    // Simulate a refetch that returns the same data.
+    updateContext({ connectors: [...connectors], soEntryFound: true });
 
     expect(selectConnector).not.toHaveBeenCalled();
   });

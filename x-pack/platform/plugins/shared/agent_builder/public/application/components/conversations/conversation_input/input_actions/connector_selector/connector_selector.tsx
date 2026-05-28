@@ -184,7 +184,11 @@ export const ConnectorSelector: React.FC<{}> = () => {
   } = useConnectorSelection();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const { data: aiConnectors, isLoading } = useLoadConnectors({
+  const {
+    data: aiConnectors,
+    isLoading,
+    soEntryFound,
+  } = useLoadConnectors({
     http,
     featureId: 'agent_builder',
     settings,
@@ -270,17 +274,18 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
 
-  // Track the previously-observed default so we can detect admin-initiated changes.
-  // Seeded with the current value on first render and updated on every effect run
-  // (including early returns) so the ref stays aligned with the observable even
-  // while connectors are still loading. That way, once we proceed past the early
-  // return, `previousDefault` reflects the last observed value — not a mount-time
-  // baseline — and the first real emission is not mistaken for a change.
+  // Track the previously-observed default and initial connector so we can detect
+  // admin-initiated changes. Seeded with the current value on first render and
+  // updated on every effect run (including early returns) so the refs stay aligned
+  // with the observables even while connectors are still loading.
   const previousDefaultRef = useRef(defaultConnectorId);
+  const previousInitialConnectorRef = useRef(initialConnectorId);
 
   useEffect(() => {
     const previousDefault = previousDefaultRef.current;
+    const previousInitial = previousInitialConnectorRef.current;
     previousDefaultRef.current = defaultConnectorId;
+    previousInitialConnectorRef.current = initialConnectorId;
 
     if (isLoading || !initialConnectorId) return;
 
@@ -312,6 +317,18 @@ export const ConnectorSelector: React.FC<{}> = () => {
       connectors.some((c) => c.id === defaultConnectorId)
     ) {
       onSelectConnector(defaultConnectorId);
+      return;
+    }
+
+    // Admin changed the feature-specific SO assignment, which changed the top connector
+    // in the list returned by the server. Follow the new assignment so the open session
+    // does not silently continue using the previously-selected (now stale) model.
+    if (
+      soEntryFound &&
+      initialConnectorId !== previousInitial &&
+      initialConnectorId !== selectedConnectorId
+    ) {
+      onSelectConnector(initialConnectorId);
     }
   }, [
     selectedConnectorId,
@@ -322,6 +339,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
     defaultConnectorOnly,
     connectors,
     onSelectConnector,
+    soEntryFound,
   ]);
 
   const selectorListStyles = useSelectorListStyles({ listId: connectorListId });
