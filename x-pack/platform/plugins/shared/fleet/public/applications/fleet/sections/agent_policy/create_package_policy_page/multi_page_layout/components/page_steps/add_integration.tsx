@@ -35,6 +35,7 @@ import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../co
 import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../../services/ensure_kibana_assets_installed';
 import { useYaml } from '../../../../../../../../services';
+import { CreatePackagePolicyFormProvider } from '../../../contexts/create_package_policy_form_context';
 
 const ExpandableAdvancedSettings: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -97,6 +98,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const confirmForceInstall = useConfirmForceInstall();
+  const [createDatasetTemplates, setCreateDatasetTemplates] = useState<boolean>(true);
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     name: '',
     description: '',
@@ -185,6 +187,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
       const result = await sendCreatePackagePolicy({
         ...policy,
         force: forceCreateNeeded || force,
+        create_dataset_templates: createDatasetTemplates,
       });
       setFormState('SUBMITTED');
       if (!result.error && result.data?.item.package)
@@ -196,7 +199,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
         });
       return result;
     },
-    [notifications.toasts, spaceId]
+    [notifications.toasts, spaceId, createDatasetTemplates]
   );
 
   const onSubmit = useCallback(
@@ -274,7 +277,9 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   const content = useMemo(() => {
     if (packageInfo.name !== 'endpoint') {
       return (
-        <>
+        <CreatePackagePolicyFormProvider
+          value={{ createDatasetTemplates, setCreateDatasetTemplates }}
+        >
           <EuiSpacer size={'l'} />
           <StepConfigurePackagePolicy
             packageInfo={packageInfo}
@@ -298,7 +303,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
               />
             </ExpandableAdvancedSettings>
           )}
-        </>
+        </CreatePackagePolicyFormProvider>
       );
     }
   }, [
@@ -309,6 +314,8 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     updatePackagePolicy,
     validationResults,
     agentPolicy,
+    createDatasetTemplates,
+    setCreateDatasetTemplates,
   ]);
 
   if (!agentPolicy) {

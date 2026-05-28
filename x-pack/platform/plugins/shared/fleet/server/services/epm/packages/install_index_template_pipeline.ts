@@ -106,7 +106,9 @@ export async function installIndexTemplatesAndPipelines({
       ...preparedIndexTemplates.assetsToAdd,
     ];
     const annotatedAssets = customDataStreamOriginPath
-      ? assetsToAdd.map((ref) => ({ ...ref, customDataStreamOriginPath }))
+      ? assetsToAdd.map((ref) =>
+          ref.type === 'index_template' ? { ...ref, customDataStreamOriginPath } : ref
+        )
       : assetsToAdd;
     newEsReferences = await optimisticallyAddEsAssetReferences(
       savedObjectsClient,

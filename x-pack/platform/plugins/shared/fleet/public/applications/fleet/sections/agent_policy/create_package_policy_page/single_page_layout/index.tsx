@@ -87,6 +87,7 @@ import { applyNamespaceCustomizationChange } from '../services/apply_namespace_c
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
 import { packageHasAtLeastOneSecret } from '../utils';
+import { CreatePackagePolicyFormProvider } from '../contexts/create_package_policy_form_context';
 
 import { SetupTechnologySelector } from '../../../../../../services/setup_technology_selector';
 
@@ -222,6 +223,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
+    createDatasetTemplates,
+    setCreateDatasetTemplates,
   } = useOnSubmit({
     agentCount,
     packageInfo,
@@ -420,6 +423,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedPolicyTab,
     withSysMonitoring,
     packageInfo,
+    createDatasetTemplates,
   });
 
   const layoutProps = useMemo(
@@ -578,7 +582,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       isPackageInfoLoading || !isInitialized ? (
         <Loading />
       ) : packageInfo ? (
-        <>
+        <CreatePackagePolicyFormProvider
+          value={{ createDatasetTemplates, setCreateDatasetTemplates }}
+        >
           <StepDefinePackagePolicy
             namespacePlaceholder={getInheritedNamespace(
               agentPolicies,
@@ -622,7 +628,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               />
             </ExtensionWrapper>
           )}
-        </>
+        </CreatePackagePolicyFormProvider>
       ) : (
         <div />
       ),
@@ -643,6 +649,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       varGroupSelections,
       setupTechnologySelector,
       useCheckableCardsForSetupTechnologySelector,
+      createDatasetTemplates,
+      setCreateDatasetTemplates,
     ]
   );
 

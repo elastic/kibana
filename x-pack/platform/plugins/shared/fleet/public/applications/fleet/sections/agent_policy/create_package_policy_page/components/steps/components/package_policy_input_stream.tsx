@@ -33,6 +33,7 @@ import { useQuery } from '@kbn/react-query';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
+  GENERIC_DATASET_NAME,
   USE_APM_VAR_NAME,
 } from '../../../../../../../../../common/constants';
 
@@ -63,6 +64,8 @@ import { useIndexTemplateExists } from '../../datastream_hooks';
 
 import { shouldShowVar, isVarRequiredByVarGroup } from '../../../services/var_group_helpers';
 import { ExperimentalFeaturesService } from '../../../../../../services';
+
+import { useCreatePackagePolicyFormContext } from '../../../contexts/create_package_policy_form_context';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
@@ -106,6 +109,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
   }) => {
     const { docLinks } = useStartServices();
     const { isAgentlessEnabled } = useAgentless();
+    const formContext = useCreatePackagePolicyFormContext();
     const { enableVarGroups } = ExperimentalFeaturesService.get();
 
     const pkgVarGroups =
@@ -126,6 +130,12 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const isPackagePolicyEdit = !!packagePolicyId;
     const customDatasetVar = packagePolicyInputStream.vars?.[DATASET_VAR_NAME];
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
+
+    const isCustomDataset = useMemo(() => {
+      if (!customDatasetVarValue) return false;
+      if (packageInfo.type === 'input') return customDatasetVarValue !== GENERIC_DATASET_NAME;
+      return customDatasetVarValue !== packageInputStream.data_stream.dataset;
+    }, [customDatasetVarValue, packageInfo.type, packageInputStream.data_stream.dataset]);
 
     const customDataStreamTypeVar = packagePolicyInputStream.vars?.[DATA_STREAM_TYPE_VAR_NAME];
 
@@ -258,7 +268,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     );
 
     const { data: dataStreamsData } = useQuery(['datastreams'], () => sendGetDataStreams(), {
-      enabled: packageInfo.type === 'input', // Only fetch datastream for input type package
+      enabled: !!customDatasetVar,
     });
     const datasetList = uniq(dataStreamsData?.data_streams) ?? [];
     const datastreams = sortDatastreamsByDataset(datasetList, packageInfo.name);
@@ -459,6 +469,36 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       isRequiredByVarGroup={requiredByVarGroup}
                       isUpgrade={isUpgrade}
                     />
+                    {varName === DATASET_VAR_NAME && isCustomDataset && !isEditPage && (
+                      <EuiFormRow
+                        fullWidth
+                        helpText={
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.createDatasetTemplatesHelpText"
+                            defaultMessage="Creates a dedicated index template with proper mappings and settings for this custom dataset."
+                          />
+                        }
+                        label={
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.createDatasetTemplatesLabel"
+                            defaultMessage="Create dedicated index template for custom dataset (recommended)"
+                          />
+                        }
+                      >
+                        <EuiSwitch
+                          label={
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.stepConfigure.createDatasetTemplatesLabel"
+                              defaultMessage="Create dedicated index template for custom dataset (recommended)"
+                            />
+                          }
+                          showLabel={false}
+                          checked={formContext?.createDatasetTemplates ?? true}
+                          onChange={(e) => formContext?.setCreateDatasetTemplates(e.target.checked)}
+                          data-test-subj="createDatasetTemplatesSwitch"
+                        />
+                      </EuiFormRow>
+                    )}
                   </EuiFlexItem>
                 );
               })}

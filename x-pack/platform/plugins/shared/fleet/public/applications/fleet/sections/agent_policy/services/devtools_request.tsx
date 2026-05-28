@@ -49,7 +49,7 @@ export function generateCreateAgentPolicyDevToolsRequest(
  * @returns
  */
 export function generateCreatePackagePolicyDevToolsRequest(
-  packagePolicy: NewPackagePolicy & { force?: boolean }
+  packagePolicy: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean }
 ) {
   const canHaveNoAgentPolicies = canUseMultipleAgentPolicies();
 
@@ -66,7 +66,7 @@ export function generateCreatePackagePolicyDevToolsRequest(
 }
 
 export function generateCreateAgentlessPolicyDevToolsRequest(
-  packagePolicy: NewPackagePolicy & { force?: boolean }
+  packagePolicy: NewPackagePolicy & { force?: boolean; create_dataset_templates?: boolean }
 ) {
   return generateKibanaDevToolsRequest('POST', agentlessPolicyRouteService.getCreatePath(), {
     package: formatPackage(packagePolicy.package),

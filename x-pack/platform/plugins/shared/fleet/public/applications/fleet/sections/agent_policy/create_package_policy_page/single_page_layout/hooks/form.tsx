@@ -325,6 +325,8 @@ export function useOnSubmit({
 
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
+  // Create dataset templates toggle (checked/recommended by default)
+  const [createDatasetTemplates, setCreateDatasetTemplates] = useState<boolean>(true);
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
 
@@ -748,6 +750,7 @@ export function useOnSubmit({
             ...packagePolicy,
             policy_ids: agentPolicyIdToSave,
             force: forceInstall,
+            create_dataset_templates: createDatasetTemplates,
           },
           varGroups
         );
@@ -879,6 +882,7 @@ export function useOnSubmit({
       spaceId,
       onSaveNavigate,
       confirmForceInstall,
+      createDatasetTemplates,
     ]
   );
 
@@ -905,5 +909,7 @@ export function useOnSubmit({
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
+    createDatasetTemplates,
+    setCreateDatasetTemplates,
   };
 }
