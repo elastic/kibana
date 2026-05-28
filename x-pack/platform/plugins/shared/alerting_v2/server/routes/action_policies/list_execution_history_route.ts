@@ -43,7 +43,7 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => listPolicyExecutionHistoryResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns a paginated list of execution history events.',
       },
       400: {
         body: () => errorResponseSchema,
