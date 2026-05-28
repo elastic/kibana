@@ -103,10 +103,12 @@
     "@kbn/rule-data-utils",
     "@kbn/std",
     "@kbn/core-saved-objects-common",
-    "@kbn/datemath",
+    "@kbn/esql-types",
+    "@kbn/esql-language",
+    "@kbn/esql-utils",
+    "@kbn/inbox-plugin",
     "@kbn/inbox-common",
-    "@kbn/core-saved-objects-common",
-    "@kbn/inbox-plugin"
+    "@kbn/datemath"
   ],
   "exclude": ["target/**/*"]
 }
