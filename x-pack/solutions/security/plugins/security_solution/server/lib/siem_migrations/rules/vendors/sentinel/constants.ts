@@ -55,7 +55,7 @@ export const SENTINEL_TACTIC_NAME_TO_DISPLAY: Record<string, string> = {
 };
 
 export const SENTINEL_DEFAULT_QUERY_FREQUENCY = '1m';
-export const SENTINEL_RULE_KIND_ANNOTATION_KEY = 'kind';
+export const SENTINEL_RULE_KIND_ANNOTATION_KEY = 'sentinel_rule_kind';
 export const SENTINEL_NRT_RULE_KIND = 'NRT';
 
 /**
