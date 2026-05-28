@@ -6,10 +6,12 @@
  */
 
 import { useSelector } from '@xstate/react';
-import React, { useEffect, useRef } from 'react';
-import { EuiPanel, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { useFirstMountState } from 'react-use/lib/useFirstMountState';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { isActionBlock } from '@kbn/streamlang';
 import {
   useSimulatorSelector,
   useStreamEnrichmentSelector,
@@ -24,12 +26,14 @@ import { selectStreamType } from '../../../state_management/stream_enrichment_st
 
 export type ActionBlockProps = StepConfigurationProps & {
   processorMetrics?: ProcessorMetrics;
+  onInteractiveHover?: (enabled: boolean) => void;
 };
 export function ActionBlock(props: StepConfigurationProps) {
-  const { stepRef, level } = props;
+  const { stepRef, level, readOnly = false } = props;
   const { euiTheme } = useEuiTheme();
   const isUnderEdit = useSelector(stepRef, (snapshot) => isStepUnderEdit(snapshot));
   const isRootStepValue = useSelector(stepRef, (snapshot) => isRootStep(snapshot));
+  const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 
@@ -42,6 +46,12 @@ export function ActionBlock(props: StepConfigurationProps) {
   const isFirstMount = useFirstMountState();
   const freshBlockRef = useRef<HTMLDivElement>(null);
 
+  const handlePanelClick = useCallback(() => {
+    if (!isUnderEdit && !readOnly) {
+      stepRef.send({ type: 'step.edit' });
+    }
+  }, [isUnderEdit, readOnly, stepRef]);
+
   useEffect(() => {
     if (isFirstMount && isUnderEdit && freshBlockRef.current) {
       freshBlockRef.current.scrollIntoView({
@@ -52,12 +62,16 @@ export function ActionBlock(props: StepConfigurationProps) {
     }
   }, [isFirstMount, isUnderEdit]);
 
-  return (
+  const isClickable = !isUnderEdit && !readOnly;
+  const [tooltipEnabled, setTooltipEnabled] = useState(true);
+
+  const panel = (
     <EuiPanel
       data-test-subj="streamsAppProcessorBlock"
       data-stream-type={streamType}
       hasShadow={false}
       color={isUnderEdit && isRootStepValue ? undefined : panelColour}
+      onClick={isClickable ? handlePanelClick : undefined}
       css={
         isUnderEdit
           ? css`
@@ -69,14 +83,43 @@ export function ActionBlock(props: StepConfigurationProps) {
               border: ${euiTheme.border.thin};
               border-radius: ${euiTheme.size.s};
               padding: ${euiTheme.size.m};
+              overflow: hidden;
+              ${isClickable
+                ? `cursor: pointer;`
+                : ''}
             `
       }
     >
       {isUnderEdit ? (
         <ActionBlockEditor {...props} ref={freshBlockRef} processorMetrics={processorMetrics} />
       ) : (
-        <ActionBlockListItem {...props} processorMetrics={processorMetrics} />
+        <ActionBlockListItem
+          {...props}
+          processorMetrics={processorMetrics}
+          onInteractiveHover={setTooltipEnabled}
+        />
       )}
     </EuiPanel>
   );
+
+  if (isClickable && isActionBlock(step)) {
+    return (
+      <EuiToolTip
+        position="top"
+        content={
+          tooltipEnabled
+            ? i18n.translate('xpack.streams.actionBlock.tooltip.editProcessorLabel', {
+                defaultMessage: 'Edit {stepAction} processor',
+                values: { stepAction: step.action },
+              })
+            : null
+        }
+        display="block"
+      >
+        {panel}
+      </EuiToolTip>
+    );
+  }
+
+  return panel;
 }

@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -21,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate/react';
-import React from 'react';
+import React, { type MouseEvent } from 'react';
 import type { ActionBlockProps } from '.';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
 import { selectValidationErrors } from '../../../state_management/stream_enrichment_state_machine/selectors';
@@ -36,7 +35,7 @@ import { DragHandle } from '../../draggable_step_wrapper';
 
 export const ActionBlockListItem = (props: ActionBlockProps) => {
   const { euiTheme } = useEuiTheme();
-  const { stepRef, level, processorMetrics, readOnly = false } = props;
+  const { stepRef, level, processorMetrics, readOnly = false, onInteractiveHover } = props;
 
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
   const isUnsaved = useSelector(
@@ -59,9 +58,9 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
   const stepDescription = getStepDescription(step);
   const actionDisplayName = step.action.toUpperCase();
 
-  const handleTitleClick = () => {
-    stepRef.send({ type: 'step.edit' });
-  };
+  const stopPropagation = (e: MouseEvent) => e.stopPropagation();
+  const suppressTooltip = () => onInteractiveHover?.(false);
+  const restoreTooltip = () => onInteractiveHover?.(true);
 
   return (
     <>
@@ -76,11 +75,16 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             {!readOnly && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem
+                grow={false}
+                onClick={stopPropagation}
+                onMouseEnter={suppressTooltip}
+                onMouseLeave={restoreTooltip}
+              >
                 <DragHandle />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} onClick={stopPropagation}>
               <ProcessorStatusIndicator
                 stepRef={stepRef}
                 stepsProcessingSummaryMap={props.stepsProcessingSummaryMap}
@@ -107,58 +111,28 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                     max-width: 100%;
                   `}
                 >
-                  <EuiToolTip
-                    position="top"
-                    content={
-                      <>
-                        <p>
-                          <strong>{actionDisplayName}</strong>
-                        </p>
-                        <p>
-                          {i18n.translate(
-                            'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
-                            {
-                              defaultMessage: 'Edit {stepAction} processor',
-                              values: {
-                                stepAction: step.action,
-                              },
-                            }
-                          )}
-                        </p>
-                      </>
-                    }
+                  <EuiText
+                    size="s"
+                    component="span"
+                    style={{ fontWeight: euiTheme.font.weight.bold }}
+                    data-test-subj="streamsAppProcessorTitleEditButton"
+                    css={css`
+                      display: block;
+                      ${euiTextTruncate()}
+                    `}
                   >
-                    <EuiButtonEmpty
-                      onClick={handleTitleClick}
-                      color="text"
-                      aria-label={i18n.translate(
-                        'xpack.streams.actionBlockListItem.euiButtonEmpty.editProcessorLabel',
-                        { defaultMessage: 'Edit processor' }
-                      )}
-                      size="xs"
-                      data-test-subj="streamsAppProcessorTitleEditButton"
-                      css={css`
-                        max-width: 100%;
-                      `}
-                    >
-                      <EuiText
-                        size="s"
-                        component="span"
-                        style={{ fontWeight: euiTheme.font.weight.bold }}
-                        css={css`
-                          display: block;
-                          ${euiTextTruncate()}
-                        `}
-                      >
-                        {actionDisplayName}
-                      </EuiText>
-                    </EuiButtonEmpty>
-                  </EuiToolTip>
+                    {actionDisplayName}
+                  </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             {(processorMetrics || hasValidationErrors || isUnsaved || !readOnly) && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem
+                grow={false}
+                onClick={stopPropagation}
+                onMouseEnter={suppressTooltip}
+                onMouseLeave={restoreTooltip}
+              >
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
                   {processorMetrics && (
                     <EuiFlexItem>
@@ -233,20 +207,19 @@ export const ActionBlockListItem = (props: ActionBlockProps) => {
                 )}
               />
             ) : (
-              <EuiToolTip content={stepDescription} display="block">
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  tabIndex={0}
-                  data-test-subj="streamsAppProcessorDescription"
-                  css={css`
-                    font-family: ${euiTheme.font.familyCode};
-                    ${euiTextTruncate()}
-                  `}
-                >
-                  {stepDescription}
-                </EuiText>
-              </EuiToolTip>
+              <EuiText
+                size="xs"
+                color="subdued"
+                tabIndex={0}
+                title={stepDescription}
+                data-test-subj="streamsAppProcessorDescription"
+                css={css`
+                  font-family: ${euiTheme.font.familyCode};
+                  ${euiTextTruncate()}
+                `}
+              >
+                {stepDescription}
+              </EuiText>
             )}
           </EuiPanel>
         </EuiFlexItem>
