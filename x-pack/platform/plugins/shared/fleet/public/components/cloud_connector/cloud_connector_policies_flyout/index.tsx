@@ -159,6 +159,14 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           defaultMessage: 'Federated Identity ID',
         });
 
+  const copyIdentifierLabel = i18n.translate(
+    'xpack.fleet.cloudConnector.policiesFlyout.copyIdentifier',
+    {
+      defaultMessage: 'Copy {label}',
+      values: { label: identifierLabel },
+    }
+  );
+
   const handleSaveName = () => {
     if (editedName && editedName !== cloudConnectorName) {
       updateConnector({ name: editedName });
@@ -293,26 +301,11 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={identifier}>
                 {(copy) => (
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.fleet.cloudConnector.policiesFlyout.copyIdentifier',
-                      {
-                        defaultMessage: 'Copy {label}',
-                        values: { label: identifierLabel },
-                      }
-                    )}
-                    disableScreenReaderOutput
-                  >
+                  <EuiToolTip content={copyIdentifierLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
                       onClick={copy}
                       iconType="copy"
-                      aria-label={i18n.translate(
-                        'xpack.fleet.cloudConnector.policiesFlyout.copyIdentifier',
-                        {
-                          defaultMessage: 'Copy {label}',
-                          values: { label: identifierLabel },
-                        }
-                      )}
+                      aria-label={copyIdentifierLabel}
                       size="xs"
                       data-test-subj={
                         CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.COPY_IDENTIFIER_BUTTON
