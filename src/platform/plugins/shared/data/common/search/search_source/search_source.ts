@@ -402,6 +402,15 @@ export class SearchSource {
   }
 
   /**
+   * Builds the search request by flattening the inheritance chain.
+   * Returns the request ready to be passed to the search service.
+   * @public
+   */
+  build(): SearchRequest {
+    return this.flatten();
+  }
+
+  /**
    * Returns body contents of the search request, often referred as query DSL.
    */
   getSearchRequestBody() {

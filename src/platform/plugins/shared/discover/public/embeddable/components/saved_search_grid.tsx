@@ -44,14 +44,21 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
   onRefreshData?: () => void;
+  onFetchMoreRecords?: () => void;
   savedSearchId?: string;
   enableDocumentViewer: boolean;
   inlineEditing: InlineEditing;
 }
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const { enableDocumentViewer, inlineEditing, interceptedWarnings, onRefreshData, ...gridProps } =
-    props;
+  const {
+    enableDocumentViewer,
+    inlineEditing,
+    interceptedWarnings,
+    onRefreshData,
+    onFetchMoreRecords,
+    ...gridProps
+  } = props;
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const [initialTabId, setInitialTabId] = useState<string | undefined>(undefined);
@@ -174,6 +181,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         enableComparisonMode
         showColumnTokens
         showFullScreenButton={false}
+        onFetchMoreRecords={onFetchMoreRecords}
         className="unifiedDataTable"
         css={{ '.unifiedDataTableToolbar': { paddingBlockStart: euiTheme.size.xs } }}
       />

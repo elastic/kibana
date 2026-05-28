@@ -8,33 +8,36 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
-import type { PresentationContainer } from '@kbn/presentation-publishing';
-import type { PhaseEvent, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import type {
+  PhaseEvent,
+  PresentationContainer,
+  PublishesUnifiedSearch,
+} from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
+import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 import type { EmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { createDataViewDataSource } from '../../common/data_sources';
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import { discoverServiceMock } from '../__mocks__/services';
+import { SolutionType } from '../context_awareness';
 import { getSearchEmbeddableFactory } from './get_search_embeddable_factory';
 import type {
   SearchEmbeddableApi,
   SearchEmbeddablePanelApiState,
   SearchEmbeddableRuntimeState,
 } from './types';
-import { SolutionType } from '../context_awareness';
-import { mockInitializeDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 
 jest.mock('./utils/serialization_utils', () => ({}));
 
@@ -121,15 +124,28 @@ describe('saved search embeddable', () => {
 
   const createSearchFnMock = (nrOfHits: number) => {
     let resolveSearch = () => {};
-    const search = jest.fn(() => {
-      return new Observable((subscriber) => {
+    // Mock dslPaginated for the new implementation
+    const dslPaginatedMock = jest.fn(() => {
+      return new Promise((resolve) => {
         resolveSearch = () => {
-          subscriber.next(getSearchResponse(nrOfHits));
-          subscriber.complete();
+          const response = getSearchResponse(nrOfHits);
+          resolve({
+            rawResponse: response.rawResponse,
+            requestParams: undefined,
+            pagination: {
+              hasNextPage: false,
+              nextPage: jest.fn(async () => null),
+              getAllPages: jest.fn(),
+            },
+          });
         };
       });
     });
-    return { search, resolveSearch: () => resolveSearch() };
+    discoverServiceMock.data.search.dslPaginated =
+      dslPaginatedMock as typeof discoverServiceMock.data.search.dslPaginated;
+
+    // Return dslPaginatedMock as 'search' for backwards compatibility with tests
+    return { search: dslPaginatedMock, resolveSearch: () => resolveSearch() };
   };
 
   const finalizeApiMock = (

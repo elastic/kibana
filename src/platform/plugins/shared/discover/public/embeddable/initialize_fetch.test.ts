@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -15,8 +15,8 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
 import { discoverServiceMock } from '../__mocks__/services';
-import { initializeFetch } from './initialize_fetch';
 import { getMockedSearchApi } from './__mocks__/get_mocked_api';
+import { initializeFetch } from './initialize_fetch';
 
 describe('initialize fetch', () => {
   const searchSource = createSearchSourceMock({ index: dataViewMock });
@@ -56,19 +56,23 @@ describe('initialize fetch', () => {
     expect(stateManager.rows.getValue()).toEqual([]);
     expect(stateManager.totalHitCount.getValue()).toEqual(0);
 
-    searchSource.fetch$ = jest.fn().mockImplementation(() =>
-      of({
-        rawResponse: {
-          hits: {
-            hits: [
-              { _id: '1', _index: dataViewMock.id },
-              { _id: '2', _index: dataViewMock.id },
-            ],
-            total: 2,
-          },
+    discoverServiceMock.data.search.dslPaginated = jest.fn().mockResolvedValue({
+      rawResponse: {
+        hits: {
+          hits: [
+            { _id: '1', _index: dataViewMock.id },
+            { _id: '2', _index: dataViewMock.id },
+          ],
+          total: 2,
         },
-      })
-    );
+      },
+      requestParams: undefined,
+      pagination: {
+        hasNextPage: false,
+        nextPage: jest.fn(async () => null),
+        getAllPages: jest.fn(),
+      },
+    });
     mockedApi.savedSearch$.next(savedSearch); // reload
     await waitOneTick();
 
@@ -84,12 +88,9 @@ describe('initialize fetch', () => {
 
   it('should catch and emit error', async () => {
     expect(mockedApi.blockingError$.getValue()).toBeUndefined();
-    searchSource.fetch$ = jest.fn().mockImplementation(
-      () =>
-        new Observable(() => {
-          throw new Error('Search failed');
-        })
-    );
+    discoverServiceMock.data.search.dslPaginated = jest
+      .fn()
+      .mockRejectedValue(new Error('Search failed'));
     mockedApi.savedSearch$.next(savedSearch);
     await waitOneTick();
     expect(mockedApi.blockingError$.getValue()).toBeDefined();
@@ -99,12 +100,16 @@ describe('initialize fetch', () => {
   it('should correctly handle aborted requests', async () => {
     const abortSignals: AbortSignal[] = [];
 
-    searchSource.fetch$ = jest.fn().mockImplementation(
-      (options) =>
-        new Observable(() => {
+    discoverServiceMock.data.search.dslPaginated = jest
+      .fn()
+      .mockImplementation(async (params, options) => {
+        if (options?.abortSignal) {
           abortSignals.push(options.abortSignal);
-        })
-    );
+        }
+        return new Promise(() => {
+          // Never resolves to simulate long-running request
+        });
+      });
 
     mockedApi.savedSearch$.next(savedSearch); // reload
     await waitOneTick(); // allow first request to start
@@ -121,17 +126,21 @@ describe('initialize fetch', () => {
   });
 
   it('should fetch again when refresh trigger emits', async () => {
-    const fetchMock = jest.fn().mockImplementation(() =>
-      of({
-        rawResponse: {
-          hits: {
-            hits: [{ _id: '1', _index: dataViewMock.id }],
-            total: 1,
-          },
+    const fetchMock = jest.fn().mockResolvedValue({
+      rawResponse: {
+        hits: {
+          hits: [{ _id: '1', _index: dataViewMock.id }],
+          total: 1,
         },
-      })
-    );
-    searchSource.fetch$ = fetchMock;
+      },
+      requestParams: undefined,
+      pagination: {
+        hasNextPage: false,
+        nextPage: jest.fn(async () => null),
+        getAllPages: jest.fn(),
+      },
+    });
+    discoverServiceMock.data.search.dslPaginated = fetchMock;
 
     mockedApi.savedSearch$.next(savedSearch);
     await waitOneTick();

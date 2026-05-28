@@ -37,11 +37,8 @@ export const useFetchMoreRecords = (): UseFetchMoreRecordsResult => {
   const isMoreDataLoading = documentState.fetchStatus === FetchStatus.LOADING_MORE;
 
   const totalHits = totalHitsState.result || 0;
-  const canFetchMoreRecords =
-    !isEsqlMode &&
-    rows.length > 0 &&
-    totalHits > rows.length &&
-    Boolean(rows[rows.length - 1].raw.sort?.length);
+  const pagination = documentState.pagination;
+  const canFetchMoreRecords = !isEsqlMode && rows.length > 0 && Boolean(pagination?.hasNextPage);
 
   const onFetchMoreRecords = useMemo(
     () =>

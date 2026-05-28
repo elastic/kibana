@@ -47,6 +47,8 @@ const createSearchEmbeddableStateManager = (): SearchEmbeddableStateManager => (
   rows: new BehaviorSubject<DataTableRecord[]>([]),
   totalHitCount: new BehaviorSubject<number | undefined>(undefined),
   inspectorAdapters: new BehaviorSubject<Record<string, unknown>>({}),
+  pagination: new BehaviorSubject(undefined),
+  isLoadingMore: new BehaviorSubject<boolean>(false),
 });
 
 const createMockSavedSearch = (): SavedSearch => ({

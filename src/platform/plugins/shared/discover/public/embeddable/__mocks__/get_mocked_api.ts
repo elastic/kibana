@@ -19,6 +19,7 @@ import type { FetchContext } from '@kbn/presentation-publishing';
 import type { DiscoverGridSettings, SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { SortOrder, DataGridDensity } from '@kbn/unified-data-table';
+import type { IDSLPagination } from '@kbn/search-types';
 
 export const getMockedSearchApi = ({
   searchSource,
@@ -61,6 +62,8 @@ export const getMockedSearchApi = ({
       totalHitCount: new BehaviorSubject<number | undefined>(0),
       columnsMeta: new BehaviorSubject<Record<string, DatatableColumnMeta> | undefined>(undefined),
       inspectorAdapters: new BehaviorSubject<Adapters>({}),
+      pagination: new BehaviorSubject<IDSLPagination | undefined>(undefined),
+      isLoadingMore: new BehaviorSubject<boolean>(false),
     },
     setters: {
       setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
