@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import Semver from 'semver';
 import { i18n } from '@kbn/i18n';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { parseDuration } from '../../../../../common';
-import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   validateRuleTypeParams,
   getRuleNotifyWhenType,
@@ -31,19 +27,16 @@ import {
   apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
 } from '../../../../rules_client/common';
-import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import type { RuleDomain, RuleParams } from '../../types';
 import { transformRuleDomainToRuleAttributes } from '../../transforms';
-import { createRuleDataSchema } from '../create/schemas';
 import type {
   PreparedRule,
   PrepareRuleArgs,
   ApiKeyEntry,
   BulkCreateOperationError,
   BulkCreateDisabledReason,
-  BulkCreateRulesItem,
 } from './types';
 
 export const getBulkCreateAsDisabledMessage = (message: string): string =>
@@ -83,119 +76,6 @@ export const buildTaskInstance = (
   scope: ['alerting'],
   enabled: true,
 });
-
-export const preValidate = async <Params extends RuleParams>({
-  context,
-  inputs,
-}: {
-  context: RulesClientContext;
-  inputs: Array<{ id: string; rule: BulkCreateRulesItem<Params> }>;
-}): Promise<{
-  validated: Array<{ id: string; rule: BulkCreateRulesItem<Params> }>;
-  errors: BulkCreateOperationError[];
-}> => {
-  const validated = new Map<string, { id: string; rule: BulkCreateRulesItem<Params> }>();
-  const errors: BulkCreateOperationError[] = [];
-  const authPairs = new Map<
-    string,
-    { ruleTypeId: string; consumer: string; ids: string[]; names: Map<string, string> }
-  >();
-
-  // Phase A1: per-rule in-memory checks, sequential, cheapest-first.
-  for (const { id, rule } of inputs) {
-    try {
-      const { actions: genActions, systemActions: genSystemActions } =
-        await addGeneratedActionValues(rule.data.actions, rule.data.systemActions, context);
-      const data = { ...rule.data, actions: genActions, systemActions: genSystemActions };
-
-      try {
-        createRuleDataSchema.validate(data);
-      } catch (err) {
-        throw Boom.badRequest(`Error validating create data - ${err.message}`);
-      }
-
-      // ruleTypeRegistry.get throws 400 if not registered.
-      const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
-      context.ruleTypeRegistry.ensureRuleTypeEnabled(data.alertTypeId);
-      validateRuleTypeParams(data.params, ruleType.validate.params);
-
-      const intervalInMs = parseDuration(data.schedule.interval);
-      if (
-        intervalInMs < context.minimumScheduleIntervalInMs &&
-        context.minimumScheduleInterval.enforce
-      ) {
-        throw Boom.badRequest(
-          `Error creating rule: the interval is less than the allowed minimum interval of ${context.minimumScheduleInterval.value}`
-        );
-      }
-      if (
-        intervalInMs < context.minimumScheduleIntervalInMs &&
-        !context.minimumScheduleInterval.enforce
-      ) {
-        context.logger.warn(
-          `Rule schedule interval (${data.schedule.interval}) for "${ruleType.id}" rule type with ID "${id}" is less than the minimum value (${context.minimumScheduleInterval.value}). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
-        );
-      }
-
-      const authzKey = `${data.alertTypeId}::${data.consumer}`;
-      const pair = authPairs.get(authzKey);
-      if (pair) {
-        pair.ids.push(id);
-        pair.names.set(id, data.name);
-      } else {
-        authPairs.set(authzKey, {
-          ruleTypeId: data.alertTypeId,
-          consumer: data.consumer,
-          ids: [id],
-          names: new Map([[id, data.name]]),
-        });
-      }
-
-      validated.set(id, { id, rule });
-    } catch (err) {
-      errors.push({
-        message: err.message,
-        status: err.output?.statusCode,
-        rule: { id, name: rule.data?.name ?? 'n/a' },
-      });
-    }
-  }
-
-  if (validated.size === 0) {
-    return { validated: [], errors };
-  }
-
-  // Phase A2: deduped per-pair authorization.
-  for (const { ruleTypeId, consumer, ids, names } of authPairs.values()) {
-    try {
-      await context.authorization.ensureAuthorized({
-        ruleTypeId,
-        consumer,
-        operation: WriteOperations.Create,
-        entity: AlertingAuthorizationEntity.Rule,
-      });
-    } catch (authzError) {
-      // One audit per rule in failing set. Following single rule `create()`.
-      for (const ruleId of ids) {
-        context.auditLogger?.log(
-          ruleAuditEvent({
-            action: RuleAuditAction.CREATE,
-            savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: names.get(ruleId)! },
-            error: authzError,
-          })
-        );
-        errors.push({
-          message: authzError.message,
-          status: authzError.output?.statusCode,
-          rule: { id: ruleId, name: names.get(ruleId) ?? 'n/a' },
-        });
-        validated.delete(ruleId);
-      }
-    }
-  }
-
-  return { validated: [...validated.values()], errors };
-};
 
 export const prepareRule = async <Params extends RuleParams>({
   context,
