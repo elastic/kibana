@@ -100,6 +100,8 @@
     "@kbn/workflows",
     "@kbn/agent-builder-plugin",
     "@kbn/data-streams",
-    "@kbn/es-mappings"
+    "@kbn/es-mappings",
+    "@kbn/test",
+    "@kbn/test-es-server"
   ]
 }
