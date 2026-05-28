@@ -13,7 +13,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
 import { useStyles } from './styles';
 import { useIndicatorById } from '../hooks/use_indicator_by_id';
-import type { IndicatorAttachmentMetadata } from '../utils/attachments';
+import type { IndicatorAttachmentMetadata } from '..';
 
 export const INDICATOR_NAME_TEST_ID = 'tiCasesIndicatorName';
 export const INDICATOR_FEED_NAME_TEST_ID = 'tiCasesIndicatorFeedName';

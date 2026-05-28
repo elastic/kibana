@@ -32,6 +32,7 @@ export interface ScoutFailureTrackingEntry {
     stack_trace?: string;
   };
   stdout?: string;
+  consoleErrors?: string;
   attachments: Array<{
     name: string;
     path?: string;
@@ -73,6 +74,7 @@ export class ScoutFailureTracker {
       duration: failure.duration,
       error: failure.error,
       stdout: failure.stdout,
+      consoleErrors: failure.consoleErrors,
       attachments: failure.attachments,
       timestamp: new Date().toISOString(),
       buildkite: {

@@ -167,6 +167,171 @@ describe('ConnectorStepImpl', () => {
     expect(result.error.type).toBe('StepSizeLimitExceeded');
   });
 
+  it('returns ActionsResponseContentLengthLimitError for spec connector maxContentLength failures without explicit max-step-size', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+
+    connectorExecutor.execute.mockResolvedValue({
+      status: 'error',
+      message: null,
+      serviceMessage: 'maxContentLength size of 1048576 exceeded',
+      errorMeta: {
+        contentLengthBytes: 10 * 1024 * 1024,
+        estimatedOutputBytes: 14 * 1024 * 1024,
+      },
+    });
+
+    const step = {
+      name: 'download_file',
+      stepId: 'download_file',
+      type: 'google_drive.downloadFile',
+      'connector-id': 'conn-123',
+    };
+
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    const result = await (impl as any)._run({});
+    expect(result.error.type).toBe('ActionsResponseContentLengthExceeded');
+    expect(result.error.message).toContain('current Actions HTTP response limit');
+    expect(result.error.message).toContain('10 MB');
+    expect(result.error.message).toContain("Set 'max-step-size' to at least 14 MB on this step");
+    expect(result.error.message).toContain('to raise both the workflow output limit');
+    expect(result.error.message).not.toContain(
+      'Increasing "max-step-size" will not change this limit'
+    );
+    expect(result.error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+      estimatedOutputBytes: 14 * 1024 * 1024,
+      suggestedLimitBytes: 14 * 1024 * 1024,
+    });
+  });
+
+  it('suggests max-step-size for spec connector maxContentLength failures without content-length', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+
+    connectorExecutor.execute.mockResolvedValue({
+      status: 'error',
+      message: null,
+      serviceMessage: 'maxContentLength size of 1048576 exceeded',
+    });
+
+    const step = {
+      name: 'download_file',
+      stepId: 'download_file',
+      type: 'google_drive.downloadFile',
+      'connector-id': 'conn-123',
+    };
+
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    const result = await (impl as any)._run({});
+    expect(result.error.type).toBe('ActionsResponseContentLengthExceeded');
+    expect(result.error.message).toContain("Set a larger 'max-step-size' on this step");
+    expect(result.error.message).toContain('to raise both the workflow output limit');
+    expect(result.error.message).not.toContain(
+      'Increasing "max-step-size" will not change this limit'
+    );
+    expect(result.error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1024 * 1024,
+    });
+  });
+
+  it('returns StepSizeLimitExceeded for spec connector maxContentLength failures with explicit max-step-size', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+
+    connectorExecutor.execute.mockResolvedValue({
+      status: 'error',
+      message: null,
+      serviceMessage: 'maxContentLength size of 1048576 exceeded',
+      errorMeta: {
+        contentLengthBytes: 10 * 1024 * 1024,
+        estimatedOutputBytes: 14 * 1024 * 1024,
+      },
+    });
+
+    const step = {
+      name: 'download_file',
+      stepId: 'download_file',
+      type: 'google_drive.downloadFile',
+      'connector-id': 'conn-123',
+      'max-step-size': '1mb',
+    };
+
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    const result = await (impl as any)._run({});
+    expect(result.error.type).toBe('StepSizeLimitExceeded');
+    expect(result.error.message).toContain('10 MB');
+    expect(result.error.message).toContain("Set 'max-step-size' to at least 14 MB");
+    expect(result.error.details).toEqual({
+      limitBytes: 1024 * 1024,
+      contentLengthBytes: 10 * 1024 * 1024,
+      estimatedOutputBytes: 14 * 1024 * 1024,
+      suggestedLimitBytes: 14 * 1024 * 1024,
+    });
+  });
+
+  it('returns ActionsResponseContentLengthLimitError for non-layer-1 connector maxContentLength failures', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+
+    connectorExecutor.execute.mockResolvedValue({
+      status: 'error',
+      message: null,
+      serviceMessage: 'maxContentLength size of 1048576 exceeded',
+      errorMeta: { contentLengthBytes: 10 * 1024 * 1024 },
+    });
+
+    const step = {
+      name: 'jira-step',
+      stepId: 'jira-step',
+      type: 'jira.getFields',
+      'connector-id': 'conn-123',
+    };
+
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    const result = await (impl as any)._run({});
+    expect(result.error.type).toBe('ActionsResponseContentLengthExceeded');
+    expect(result.error.message).toContain('xpack.actions.maxResponseContentLength');
+    expect(result.error.message).toContain('max-step-size');
+    expect(result.error.details).toEqual({
+      configKey: 'xpack.actions.maxResponseContentLength',
+      limitBytes: 1048576,
+      contentLengthBytes: 10 * 1024 * 1024,
+      suggestedLimitBytes: 10 * 1024 * 1024,
+    });
+  });
+
   it('throws when connectorExecutor is undefined', async () => {
     const { stepExecutionRuntime, workflowRuntime, workflowLogger } = createMocks();
 
@@ -225,6 +390,75 @@ describe('ConnectorStepImpl', () => {
         }),
       })
     );
+    expect(connectorExecutor.execute.mock.calls[0][0].input.fetchOptions).toBeUndefined();
+  });
+
+  it('injects max_content_length for spec connector sub-actions', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+
+    connectorExecutor.execute.mockResolvedValue({
+      status: 'ok',
+      data: { response: 'ok' },
+    });
+
+    const step = {
+      name: 'download_file',
+      stepId: 'download_file',
+      type: 'google_drive.downloadFile',
+      'connector-id': 'conn-123',
+      'max-step-size': '20mb',
+    };
+
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    await (impl as any)._run({ fileId: 'file-1' });
+    const callInput = connectorExecutor.execute.mock.calls[0][0].input;
+    expect(callInput).toEqual({
+      subAction: 'downloadFile',
+      subActionParams: { fileId: 'file-1' },
+      fetchOptions: {
+        max_content_length: 20 * 1024 * 1024,
+      },
+    });
+  });
+
+  it('does not inject default max_content_length for spec connector sub-actions', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+
+    connectorExecutor.execute.mockResolvedValue({
+      status: 'ok',
+      data: { response: 'ok' },
+    });
+
+    const step = {
+      name: 'download_file',
+      stepId: 'download_file',
+      type: 'google_drive.downloadFile',
+      'connector-id': 'conn-123',
+    };
+
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    await (impl as any)._run({ fileId: 'file-1' });
+    const callInput = connectorExecutor.execute.mock.calls[0][0].input;
+    expect(callInput).toEqual({
+      subAction: 'downloadFile',
+      subActionParams: { fileId: 'file-1' },
+    });
   });
 
   it('uses system connector when no connector-id is provided', async () => {
