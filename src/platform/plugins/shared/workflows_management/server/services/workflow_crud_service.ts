@@ -365,6 +365,8 @@ export class WorkflowCrudService {
     await scheduleWorkflowTriggers({
       workflowId: id,
       definition,
+      enabled: workflowData.enabled,
+      valid: workflowData.valid,
       spaceId,
       request,
       taskScheduler: this.deps.getTaskScheduler(),
@@ -518,6 +520,8 @@ export class WorkflowCrudService {
           scheduleWorkflowTriggers({
             workflowId: vw.id,
             definition: vw.definition,
+            enabled: vw.workflowData.enabled,
+            valid: vw.workflowData.valid,
             spaceId,
             request,
             taskScheduler,
