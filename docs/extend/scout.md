@@ -57,7 +57,7 @@ We welcome contributions to one of the Scout packages.
 | Is reusable but scoped to a solution  | In the solution Scout package (for example `@kbn/scout-security`, `@kbn/scout-oblt`, `@kbn/scout-search`) | Solution workflows and domain-specific helpers     |
 | Is specific to one plugin or package  | In your plugin or package’s `test/scout` directory                                                        | Components specific to your plugin or package only |
 
-## Need help?
+## Need help? [need-help]
 
 - **Internal (Elasticians)**: reach out to the AppEx QA team in the `#kibana-scout` Slack channel for guidance.
 

@@ -53,7 +53,7 @@ This test will only run locally (stateful classic and serverless Security comple
 
 ## Pick the right tags [scout-deployment-tags-pick]
 
-Pick the narrowest scope that's still correct for the feature under test as every extra deployment target spins up an additional run:
+Pick the narrowest scope that's still correct for the feature under test, as every extra deployment target spins up an additional run:
 
 | The test covers…                                 | Use                                                                                                                  |
 | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |

@@ -8,7 +8,7 @@ This guide covers migrating existing FTR and Cypress tests to [Scout](../scout.m
 
 ## Don't migrate blindly [dont-migrate-blindly]
 
-Treat migration as a chance to revist your tests and make them more robust, not a 1-to-1 port:
+Treat migration as a chance to revisit your tests and make them more robust, not a 1-to-1 port:
 
 :::::::::{stepper}
 
@@ -48,9 +48,9 @@ Agentic skills in Kibana can take most of the toil out of migration, but **alway
 
 The [`scout-migrate-from-ftr`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-migrate-from-ftr/SKILL.md) skill analyzes your FTR tests and drafts a migration plan. Review it, and the skill executes the migration.
 
-### Cypress → Scout skill
+### Cypress → Scout
 
-The Security Engineering Productivity team maintains the **Cypress → Scout**: [`cypress-to-scout-migration`](https://github.com/elastic/kibana/blob/main/.agents/skills/cypress-to-scout-migration/SKILL.md) skill for porting Cypress to Scout.
+The [`cypress-to-scout-migration`](https://github.com/elastic/kibana/blob/main/.agents/skills/cypress-to-scout-migration/SKILL.md) skill, maintained by the Security Engineering Productivity team, ports Cypress tests to Scout.
 
 ::::::{warning}
 Cypress gives each spec a clean environment, so many Cypress tests never clean up after themselves. Scout shares the deployment across specs, so leftover state leaks between tests. Audit every resource the source test creates — saved objects, indices, agents, UI settings — and clean it up explicitly.
