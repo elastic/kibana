@@ -117,7 +117,7 @@ export interface ActionGroup {
 }
 
 export interface ActionPolicyWorkflowPayloadRule {
-  name: string;  
+  name: string;
 }
 
 export interface ActionPolicyWorkflowPayload {

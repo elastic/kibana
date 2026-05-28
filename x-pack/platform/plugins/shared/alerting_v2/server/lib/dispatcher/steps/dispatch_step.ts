@@ -90,7 +90,12 @@ export class DispatchStep implements DispatcherStep {
         }
 
         try {
-          const executionId = await this.dispatchWorkflow(group, destination.id, fakeRequest, rules);
+          const executionId = await this.dispatchWorkflow(
+            group,
+            destination.id,
+            fakeRequest,
+            rules
+          );
           if (executionId) {
             executionIds.push(executionId);
           }
