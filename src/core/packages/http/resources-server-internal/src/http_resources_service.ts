@@ -43,11 +43,17 @@ const toArray = (val: string | string[] | undefined): string[] => {
 const mergeRenderHeaders = (
   renderHeaders: ResponseHeaders,
   optionsHeaders: ResponseHeaders = {}
-): ResponseHeaders => ({
-  ...renderHeaders,
-  ...optionsHeaders,
-  'set-cookie': [...toArray(renderHeaders['set-cookie']), ...toArray(optionsHeaders['set-cookie'])],
-});
+): ResponseHeaders => {
+  const setCookie = [
+    ...toArray(renderHeaders[set-cookie]),
+    ...toArray(optionsHeaders[set-cookie]),
+  ];
+  return {
+    ...renderHeaders,
+    ...optionsHeaders,
+    ...(setCookie.length > 0 ? { set-cookie: setCookie } : {}),
+  };
+};
 
 /**
  * @internal
