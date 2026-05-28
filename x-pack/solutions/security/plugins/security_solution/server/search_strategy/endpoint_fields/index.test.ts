@@ -280,9 +280,15 @@ describe('Endpoint fields', () => {
         (
           endpointAppContextService.experimentalFeatures as DeepMutable<ExperimentalFeatures>
         ).defendRemoteOutputCcs = false;
+        // Restore benign namespace mocks so the events-branch setup above does not leak
+        // namespace expansion into later order-dependent tests in this file.
+        (endpointAppContextService.getInternalFleetServices as jest.Mock).mockReturnValue({
+          getIntegrationNamespaces: jest.fn().mockResolvedValue({ endpoint: [] }),
+        });
+        buildIndexNameWithNamespaceMock.mockReturnValue(null);
       });
 
-      it('should prefix the metadata index pattern when remotes are connected', async () => {
+      it('should pass the local and remote metadata patterns as separate entries when remotes are connected', async () => {
         const indices = [METADATA_UNITED_INDEX];
         const request = {
           indices,
@@ -298,9 +304,53 @@ describe('Endpoint fields', () => {
           esClient
         );
 
-        const expectedPattern = `${METADATA_UNITED_INDEX},*:${METADATA_UNITED_INDEX}`;
-        expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: expectedPattern });
-        expect(response.indicesExist).toEqual([expectedPattern]);
+        // The combined `local,*:local` pattern must be split so the existence check can
+        // resolve the remote entry independently (the local entry is empty under remote
+        // output, where `allow_no_indices: false` would otherwise fail the whole call).
+        expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: METADATA_UNITED_INDEX });
+        expect(getFieldsForWildcardMock).toHaveBeenCalledWith({
+          pattern: `*:${METADATA_UNITED_INDEX}`,
+        });
+        expect(response.indicesExist).toEqual([
+          METADATA_UNITED_INDEX,
+          `*:${METADATA_UNITED_INDEX}`,
+        ]);
+      });
+
+      it('should pass the local and remote events patterns as separate entries when remotes are connected', async () => {
+        const spaceId = 'default';
+        const namespacedEventsPattern = `${eventsIndexPattern}-${spaceId}`;
+        const request = {
+          indices: [eventsIndexPattern],
+          onlyCheckIfIndicesExist: false,
+        };
+
+        (endpointAppContextService.getActiveSpace as jest.Mock).mockResolvedValue({ id: spaceId });
+        const mockFleetServices = {
+          getIntegrationNamespaces: jest.fn().mockResolvedValue({ endpoint: [spaceId] }),
+        };
+        (endpointAppContextService.getInternalFleetServices as jest.Mock).mockReturnValue(
+          mockFleetServices
+        );
+        buildIndexNameWithNamespaceMock.mockReturnValue(namespacedEventsPattern);
+
+        const response = await requestEndpointFieldsSearch(
+          endpointAppContextService,
+          request,
+          deps,
+          beatFields,
+          IndexPatterns,
+          esClient
+        );
+
+        expect(getFieldsForWildcardMock).toHaveBeenCalledWith({ pattern: namespacedEventsPattern });
+        expect(getFieldsForWildcardMock).toHaveBeenCalledWith({
+          pattern: `*:${namespacedEventsPattern}`,
+        });
+        expect(response.indicesExist).toEqual([
+          namespacedEventsPattern,
+          `*:${namespacedEventsPattern}`,
+        ]);
       });
     });
 

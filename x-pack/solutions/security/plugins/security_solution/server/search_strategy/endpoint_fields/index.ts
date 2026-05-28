@@ -105,9 +105,16 @@ export const requestEndpointFieldsSearch = async (
     throw new EndpointAuthorizationError();
   }
 
+  const ccsIndexPattern = prefixIndexPatternsWithCcs(parsedRequest.indices[0], ccsEnabled);
+
   parsedRequest = {
     ...parsedRequest,
-    indices: [prefixIndexPatternsWithCcs(parsedRequest.indices[0], ccsEnabled)],
+    // CCS prefixing yields `local,*:local`. The downstream existence check
+    // (`findExistingIndices`) runs `field_caps` with `allow_no_indices: false`, which
+    // errors on the local entry when all endpoint data lives on the remote cluster
+    // (remote-output topology). Passing each pattern separately lets the remote (`*:`)
+    // entry resolve on its own instead of the empty local entry failing the whole call.
+    indices: ccsEnabled ? ccsIndexPattern.split(',') : [ccsIndexPattern],
   };
 
   return requestIndexFieldSearch(parsedRequest, deps, beatFields, indexPatterns, true);
