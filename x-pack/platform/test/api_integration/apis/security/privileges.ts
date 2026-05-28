@@ -110,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
         'minimal_read',
         'workflow_create',
         'workflow_update',
+        'workflow_update_managed',
         'workflow_delete',
         'workflow_execute',
         'workflow_read',

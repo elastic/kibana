@@ -28,6 +28,7 @@ export interface SyntheticsUrlParams {
   tags?: string[];
   locations?: string[];
   monitorTypes?: string[] | string;
+  statusCodes?: string[];
   configIds?: string[];
   status?: string[];
   locationId?: string;
@@ -89,6 +90,7 @@ export const getSupportedUrlParams = (params: {
     query,
     tags,
     monitorTypes,
+    statusCodes,
     configIds,
     locations,
     locationId,
@@ -127,6 +129,7 @@ export const getSupportedUrlParams = (params: {
     query: query || '',
     tags: parseFilters(tags),
     monitorTypes: parseFilters(monitorTypes),
+    statusCodes: parseFilters(statusCodes),
     configIds: parseFilters(configIds),
     locations: parseFilters(locations),
     projects: parseFilters(projects),
