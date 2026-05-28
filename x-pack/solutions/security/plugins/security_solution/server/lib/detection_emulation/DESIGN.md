@@ -549,7 +549,8 @@ All code resides under `server/lib/detection_emulation/`:
 |--------|--------|-------|-------|
 | **EQL Parser** (`log_injection/eql_parser/`) | ✅ Done | 28/28 pass | Recursive-descent parser (~250 lines). Handles `where`, `sequence by`, boolean ops, comparisons, wildcards, `in`, `not` |
 | **KQL Query Inverter** (`log_injection/query_inverter.ts`) | ✅ Done | Passing | Uses `@kbn/es-query` `toElasticsearchQuery` + AST walking for field extraction |
-| **EQL Query Inverter** (in `query_inverter.ts`) | ✅ Done | Passing | Uses the custom EQL parser above; supports single-event and sequence rules |
+|| **EQL Query Inverter** (in `query_inverter.ts`) | ✅ Done | Passing | Uses the custom EQL parser above; supports single-event and sequence rules |
+|| **ES|QL Query Inverter** (`log_injection/esql_inverter.ts`) | ✅ Done | 26/26 pass | Uses `@elastic/esql` AST parser; extracts WHERE clause constraints (==, !=, <, <=, >, >=, LIKE, RLIKE, IN, IS NULL/NOT NULL); handles aggregating queries (inverts first WHERE only) |
 | **Causal Chain Generator** (`log_injection/causal_chain.ts`) | ✅ Done | Passing | Static causal graph: DNS → connection, auth → process, parent → child |
 | **Document Assembler** (`log_injection/document_assembler.ts`) | ✅ Done | Passing | PID allocation, timestamp spread (Poisson + jitter), session consistency, emulation tagging |
 | **Noise Generator** (`log_injection/noise_generator.ts`) | ✅ Done | Passing | Role-based profiles (workstation/server), red herrings, configurable ratio |
@@ -561,7 +562,7 @@ All code resides under `server/lib/detection_emulation/`:
 | **Scenario Orchestrator** (`log_injection/scenario_orchestrator.ts`) | ✅ Done | Passing | End-to-end pipeline: validate → invert → assemble → inject → evaluate → preview-validate |
 | **`run_rule_executors.ts`** (under `rule_preview/api/preview_rules/`) | ✅ Done | — | Extracted from `route.ts`; standalone function for running rule preview executors outside the HTTP route |
 
-**Test coverage:** 296 tests across 20 suites (1 skipped).
+**Test coverage:** 322 tests across 22 suites (1 skipped).
 
 ### 9.2 Extracted `runRuleExecutors`
 
@@ -594,7 +595,6 @@ When provided, after document injection (Step 6) and evaluation (Step 7), the or
 | **API route for orchestrator** | High | M | Wire `executeScenario` into a POST endpoint (e.g., `_emulation/scenario/run`) with proper auth |
 | **Skill integration** | High | M | The Agent Builder skill should call the orchestrator, not `generator.ts` directly |
 | **Real `createRuleTypeForParams` factory** | Medium | S | Currently typed as `any`; needs a proper factory that maps rule definitions to alert types |
-| **ES|QL inverter** | Medium | L | ES|QL rules (~5% of prebuilt) not yet supported in query inverter |
 | **Scenario library expansion** | Low | M | More built-in scenarios covering T1059.*, T1070.*, T1053.* families |
 | **Ground truth document** | Low | S | EvidenceForge-style `GROUND_TRUTH.md` per scenario for analyst scoring |
 | **UI for scenario management** | Low | L | Import/export, run history, coverage dashboard |
