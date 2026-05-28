@@ -350,6 +350,8 @@ export interface Conversation {
    * Any new or updated conversation has `read` set to `false` by default
    */
   read?: boolean;
+  /** current status of the conversation */
+  status?: ConversationRoundStatus;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
