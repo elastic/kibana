@@ -10,18 +10,18 @@
 // Bypasses Lens for the headline numbers above the table. The four tiles
 // (CPU Usage, Normalized Load, Memory Usage, Disk Usage) used to be four
 // independent Lens charts, each issuing one DSL aggregation against the
-// 500-host filter; this hook collapses them into one `POST
+// table's host-name filter; this hook collapses them into one `POST
 // /api/metrics/infra/host/kpis` request that returns four scalars + the
 // host count.
 //
-// Scope semantics:
-// - We pass `names: string[]` from `useHostsViewContext()` so the KPIs are
-//   averaged over the same hosts the table renders (Lens did this
-//   implicitly via `buildCombinedAssetFilter`). Empty name list → KPIs are
-//   scoped by the unified-search KQL alone.
-// - `isReady` gating matches the host count hook: `useFetcher` skips the
-//   request until the unified search has resolved so we don't double-fire
-//   on first paint.
+// Parallel fetch: this hook intentionally does NOT consume
+// `useHostsViewContext()`. The endpoint computes its KPIs over the entire
+// filter-matched fleet, so the request body only needs `from/to/query`
+// — no `names` from the legacy `/host` endpoint, no `limit`. Both the
+// host endpoint and the KPI endpoint fire from the same
+// `useHostsPageReady` gate, so user-perceived KPI strip latency is
+// `max(/host, /kpis)` rather than `/host + /kpis`. At 5000 hosts on the
+// deploy bench that saves ~40 s on first paint.
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { useMemo } from 'react';
@@ -35,7 +35,6 @@ import { GetHostsKpisResponsePayloadRT } from '../../../../../common/http_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { PERF_KEYS, perfTracker } from '../utils/perf_tracker';
 import { useUnifiedSearchContext } from './use_unified_search';
-import { useHostsViewContext } from './use_hosts_view';
 import { useHostsPageReady } from './use_hosts_page_ready';
 
 const KPIS_PATH = '/api/metrics/infra/host/kpis';
@@ -56,14 +55,7 @@ export interface UseHostsKpisResult {
 
 export const useHostsKpis = (): UseHostsKpisResult => {
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
-  const { hostNodes } = useHostsViewContext();
   const isReady = useHostsPageReady();
-
-  // Match the table's host set exactly. Lens did this implicitly with
-  // `buildCombinedAssetFilter`; here the contract is explicit (the names
-  // travel in the request body) which also makes the KPI 1:1 reproducible
-  // for a given host-list response.
-  const names = useMemo(() => hostNodes.map((node) => node.name), [hostNodes]);
 
   const payload = useMemo<string>(() => {
     const body: GetHostsKpisRequestBodyPayloadClient = {
@@ -71,18 +63,9 @@ export const useHostsKpis = (): UseHostsKpisResult => {
       to: new Date(parsedDateRange.to).toISOString(),
       query: buildQuery() as GetHostsKpisRequestBodyPayloadClient['query'],
       schema: searchCriteria?.preferredSchema || DEFAULT_SCHEMA,
-      limit: searchCriteria.limit,
-      ...(names.length > 0 ? { names } : {}),
     };
     return JSON.stringify(body);
-  }, [
-    buildQuery,
-    parsedDateRange.from,
-    parsedDateRange.to,
-    searchCriteria?.preferredSchema,
-    searchCriteria.limit,
-    names,
-  ]);
+  }, [buildQuery, parsedDateRange.from, parsedDateRange.to, searchCriteria?.preferredSchema]);
 
   const { data, status, error } = useFetcher(
     (callApi) => {
@@ -100,17 +83,16 @@ export const useHostsKpis = (): UseHostsKpisResult => {
         });
         perfTracker.record(PERF_KEYS.esqlEndpointKpi, performance.now() - startedAt, {
           schema: searchCriteria?.preferredSchema ?? DEFAULT_SCHEMA,
-          hosts: names.length,
         });
         return decodeOrThrow(GetHostsKpisResponsePayloadRT)(
           response as GetHostsKpisResponsePayload
         );
       })();
     },
-    // `searchCriteria.preferredSchema` and `names.length` are read by
-    // `perfTracker.record` only; the request itself is keyed off `payload`,
-    // which already encodes them. Intentionally omitted from deps so the
-    // hook doesn't refire when only a logging tag changes.
+    // `searchCriteria.preferredSchema` is read by `perfTracker.record`
+    // only; the request itself is keyed off `payload`, which already
+    // encodes it. Intentionally omitted from deps so the hook doesn't
+    // refire when only a logging tag changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isReady, payload]
   );

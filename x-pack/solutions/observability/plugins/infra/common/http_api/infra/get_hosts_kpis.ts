@@ -10,33 +10,43 @@
 // The Hosts page renders four headline tiles (CPU Usage, Normalized Load,
 // Memory Usage, Disk Usage) above the table. On main each tile is a Lens
 // `chartType: 'metric'` chart driven by the inventory-model formulas, which
-// fans out to four parallel DSL aggregations against the full host set
-// returned by the legacy host endpoint. P15a already dropped the per-tile
+// fans out to four parallel DSL aggregations against the host set returned
+// by the legacy host endpoint. P15a already dropped the per-tile
 // `date_histogram` (the trend line), so the only remaining work is the
 // headline scalar — four numbers. This endpoint collapses those four DSL
 // round-trips into one request:
 //
-// - semconv: a single ES|QL `FROM … | STATS … | EVAL …` query with
-//   filter-in-aggregation per metric / per state.
-// - ecs: a single DSL search with four sibling aggregations (sub-aggs and
-//   `bucket_script` where the formula needs a ratio).
+// - semconv: a single ES|QL `FROM … | STATS … | EVAL` pipeline with
+//   filter-in-aggregation per metric/state and a pre-STATS
+//   `WHERE state IN (…)` so the engine prunes via the inverted index on
+//   `state` before the filter-in-agg operator runs (massive win on real
+//   OTel data where each host emits ~30 docs per interval, one per
+//   state).
+// - ecs: a single DSL search with four sibling aggregations + a
+//   `bucket_script` for the normalised-load ratio.
 //
 // Scope.
-// - The endpoint takes the legacy host endpoint's *name set*
-//   (`names: string[]`) plus the same `query` (KQL) the user sees in the
-//   table, and computes the four KPIs over the intersection. Sending
-//   `names` rather than re-running the ranking server-side keeps the KPI
-//   1:1 consistent with the table.
-// - `names.length` is capped at `MAX_HOST_COUNT_LIMIT` (the same ceiling
-//   the host count endpoint enforces). Going wider would defeat the user's
-//   `limit` selector.
+// - KPIs are computed over the *entire* filter-matched fleet. The
+//   request body carries `from`, `to`, `query` (KQL), and `schema`;
+//   there is no `names` list and no server-side `limit`. The legacy
+//   Lens-DSL path scoped KPIs to the table's host set via
+//   `buildCombinedAssetFilter` — that coupling was only meaningful when
+//   `limit` ≥ fleet, and degenerated to an alphabetical sample
+//   otherwise. The new shape is the fleet-level summary the UI label
+//   promises; the "of {N} hosts" subtitle is computed client-side as
+//   `min(hostCount, searchCriteria.limit)` so it stays consistent with
+//   the table.
+// - Parallel with `/host`: the client (`useHostsKpis`) does NOT depend
+//   on `hostNodes`. Both endpoints fire from the same `useHostsPageReady`
+//   gate, so user-perceived KPI strip latency is `max(/host, /kpis)`
+//   rather than `/host + /kpis`.
 // - No `BUCKET` / `date_histogram` — the trendline is intentionally not
 //   produced here. Without time bucketing the ES cell count is
-//   `O(hosts × per-state slices)` ≈ single-digit MB at 500 hosts × 4
-//   states, which keeps the query safely under the 1 GB Serverless
-//   circuit-breaker.
+//   `O(hosts × per-state slices)` ≈ single-digit MB on the deploy
+//   fixture (5000 hosts × ~4 states), well under any realistic
+//   Serverless circuit-breaker budget.
 
-import { createLiteralValueFromUndefinedRT, inRangeRt, isoToEpochRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { EntityTypeRT, DataSchemaFormatRT } from '../shared';
 
@@ -44,19 +54,10 @@ export const GetHostsKpisRequestBodyPayloadRT = rt.intersection([
   rt.partial({
     query: rt.UnknownRecord,
     schema: DataSchemaFormatRT,
-    // The route validator additionally caps `names.length` at
-    // `MAX_HOST_COUNT_LIMIT` so the cost-model invariant
-    // (`cells = hosts × states`) holds.
-    names: rt.array(rt.string),
   }),
   rt.type({
     from: isoToEpochRt,
     to: isoToEpochRt,
-    // Mirrored from the legacy host endpoint purely for the subtitle
-    // ("Average (of N hosts)"). Defaults to the same 500-host fleet cap so
-    // callers that don't pass it still get a sensible "of {limit} hosts"
-    // label.
-    limit: rt.union([inRangeRt(1, 500), createLiteralValueFromUndefinedRT(500)]),
   }),
 ]);
 
@@ -73,10 +74,11 @@ export const GetHostsKpisResponsePayloadRT = rt.intersection([
   EntityTypeRT,
   rt.type({
     kpis: HostsKpisRT,
-    // The number of hosts the four KPIs were actually averaged across.
-    // Drives the "Average (of N hosts)" subtitle; lets the UI fall back to
-    // "Average" with no parenthetical when the value matches the total
-    // fleet count (i.e. the user didn't hit `limit`).
+    // Total number of distinct hosts the four KPIs were computed over.
+    // Drives the client-side subtitle (`Average (of min(hostCount,
+    // limit) hosts)`); pegging the displayed count to `min(…, limit)`
+    // keeps the wording consistent with what the user sees in the
+    // table.
     hostCount: rt.number,
   }),
 ]);

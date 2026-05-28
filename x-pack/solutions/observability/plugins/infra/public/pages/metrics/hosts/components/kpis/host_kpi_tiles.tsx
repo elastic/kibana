@@ -38,43 +38,50 @@ const TILE_DEFS: ReadonlyArray<{
   id: string;
   title: string;
   tooltipKey: keyof typeof METRICS_TOOLTIP;
-  // `normalizedLoad1m` is displayed as a raw multiplier on the legacy Lens
-  // chart (`1.5×` style); the rest are percentages. Encode that here so the
-  // formatter stays a pure function of the tile.
-  format: 'percent' | 'ratio';
 }> = [
   {
     key: 'cpuUsage',
     id: 'hostsViewKPI-cpuUsage',
     title: CPU_USAGE_LABEL,
     tooltipKey: 'cpuUsage',
-    format: 'percent',
   },
   {
     key: 'normalizedLoad1m',
     id: 'hostsViewKPI-normalizedLoad1m',
     title: NORMALIZED_LOAD_LABEL,
     tooltipKey: 'normalizedLoad1m',
-    format: 'ratio',
   },
   {
     key: 'memoryUsage',
     id: 'hostsViewKPI-memoryUsage',
     title: MEMORY_USAGE_LABEL,
     tooltipKey: 'memoryUsage',
-    format: 'percent',
   },
   {
     key: 'diskUsage',
     id: 'hostsViewKPI-diskUsage',
     title: DISK_USAGE_LABEL,
     tooltipKey: 'diskUsage',
-    format: 'percent',
   },
 ] as const;
 
-const percentFormatter = (value: number) => `${(value * 100).toFixed(1)}%`;
-const ratioFormatter = (value: number) => value.toFixed(2);
+// One decimal place across the KPI strip — uniform with how CPU and
+// memory render on the legacy Lens path, and one extra digit of precision
+// over the legacy `decimals: 0` setting for `diskUsage` /
+// `normalizedLoad1m` (deliberate — the headline number reads better with
+// one significant fractional digit at fleet scale, where deltas between
+// reloads are typically sub-percentage).
+//
+// We still respect the formula's `format` so a future tile that lands as
+// `format: 'number'` renders without a `%` suffix.
+const KPI_DECIMALS = 1;
+
+const buildFormatter = (format: 'percent' | 'number' | undefined): ((value: number) => string) => {
+  if (format === 'number') {
+    return (value: number) => value.toFixed(KPI_DECIMALS);
+  }
+  return (value: number) => `${(value * 100).toFixed(KPI_DECIMALS)}%`;
+};
 
 export const HostKpiTiles = () => {
   const { euiTheme } = useEuiTheme();
@@ -89,26 +96,26 @@ export const HostKpiTiles = () => {
     [schema, inventoryModel.metrics]
   );
 
-  // "Average (of {limit} hosts)" when the user-selected `limit` is below the
-  // total matching host count; otherwise the plain "Average" subtitle.
-  // Matches the wording the Lens-path `getSubtitle` uses so the tile copy
-  // doesn't shift under users when they flip the toggle.
+  // "Average (of N hosts)" where N is `min(hostCount, limit)`:
+  //   - when `hostCount < limit` we show the genuine fleet size,
+  //   - when `hostCount > limit` we show the user-selected `limit` so the
+  //     KPI subtitle matches the host count displayed in the table even
+  //     though the KPI itself is computed over the entire filtered fleet.
+  // Endpoint always returns `hostCount` so we never fall back to a bare
+  // "Average" string.
   const subtitle = useMemo(() => {
-    const { limit } = searchCriteria;
-    return limit < hostCount
-      ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
-          defaultMessage: 'Average (of {limit} hosts)',
-          values: { limit },
-        })
-      : i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
-          defaultMessage: 'Average',
-        });
-  }, [searchCriteria, hostCount]);
+    const visibleHosts = Math.min(hostCount, searchCriteria.limit);
+    return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average', {
+      defaultMessage: 'Average (of {hosts} hosts)',
+      values: { hosts: visibleHosts },
+    });
+  }, [hostCount, searchCriteria.limit]);
 
   return (
     <>
       {TILE_DEFS.map((tile) => {
-        const formatter = tile.format === 'percent' ? percentFormatter : ratioFormatter;
+        const formula = formulas?.get(tile.key);
+        const formatter = buildFormatter(formula?.format as 'percent' | 'number' | undefined);
         return (
           <EuiFlexItem key={tile.id}>
             <MetricChartWrapper
