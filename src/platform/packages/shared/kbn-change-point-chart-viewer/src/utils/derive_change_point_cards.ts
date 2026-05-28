@@ -63,6 +63,13 @@ export interface ChangePointCardModel {
   /** Distinct change-point type strings present in this card's annotations (empty in BY mode). */
   readonly changePointTypes: readonly string[];
   /**
+   * Column IDs used to identify change-point annotation rows in this result set.
+   * Used by {@link getCardForRow} to determine whether a no-BY row is an actual
+   * change point before returning the card.
+   */
+  readonly typeColumnId: string;
+  readonly pvalueColumnId: string;
+  /**
    * Serialized value of each entity-dimension column for this card (keyed by column ID).
    * Populated from entityColumnIds — covers both explicit BY columns and heuristic columns.
    * Empty object for no-split (single-series) cards.
@@ -357,6 +364,8 @@ export const buildChangePointCards = (params: {
       annotationEvents,
       minPvalue,
       changePointTypes: [...typesSeen],
+      typeColumnId,
+      pvalueColumnId,
       entityValues,
       entityDescription,
     });
@@ -379,7 +388,13 @@ export const getCardForRow = (
 
   const { byColumns } = firstCard;
   if (!byColumns?.length) {
-    // No BY clause — exactly one card covers all rows.
+    // No BY clause — one card covers the whole dataset. Only return it for rows that are
+    // actual change points (non-empty type + defined pvalue). All other rows (e.g. regular
+    // time-series buckets without a detected change) should show an empty state.
+    const { typeColumnId, pvalueColumnId } = firstCard;
+    if (!isChangePointTableRow(row as Record<string, unknown>, typeColumnId, pvalueColumnId)) {
+      return undefined;
+    }
     return firstCard;
   }
 

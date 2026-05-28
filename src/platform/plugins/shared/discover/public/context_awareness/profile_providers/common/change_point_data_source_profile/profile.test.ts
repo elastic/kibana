@@ -50,53 +50,57 @@ describe('createChangePointDataSourceProfileProvider', () => {
     ...overrides,
   });
 
+  /**
+   * Resolves the provider with the given params overrides, asserts it matched,
+   * and returns the context — eliminating the repeated isMatch guard in each test.
+   */
+  const resolveMatch = async (overrides: Partial<DataSourceProfileProviderParams> = {}) => {
+    const result = await provider.resolve(createParams(overrides));
+    expect(result.isMatch).toBe(true);
+    if (!result.isMatch) throw new Error('Expected isMatch: true');
+    return result.context;
+  };
+
+  /** Builds a registry mock and the spread form expected by docViewsRegistry. */
+  const buildRegistry = () => {
+    const addMock = jest.fn();
+    const registry = { add: addMock } as unknown as DocViewsRegistry;
+    return { addMock, registryArg: { ...registry, clone: () => registry } as never };
+  };
+
+  const MOCK_RECORD = { id: 'row-1', raw: {}, flattened: {} } as never;
+
   describe('resolve', () => {
     describe('matches', () => {
       it('returns isMatch true with category and pvalueColumnId for a query with top-level CHANGE_POINT', async () => {
-        const result = await provider.resolve(createParams({}));
-        expect(result.isMatch).toBe(true);
-        if (result.isMatch) {
-          expect(result.context).toMatchObject({
-            category: DataSourceCategory.Default,
-            pvalueColumnId: 'pvalue',
-          });
-        }
+        const context = await resolveMatch();
+        expect(context).toMatchObject({
+          category: DataSourceCategory.Default,
+          pvalueColumnId: 'pvalue',
+        });
       });
 
       it('includes a BehaviorSubject as chartSectionProps$ in the context', async () => {
-        const result = await provider.resolve(createParams({}));
-        expect(result.isMatch).toBe(true);
-        if (result.isMatch) {
-          expect(result.context.chartSectionProps$).toBeInstanceOf(BehaviorSubject);
-          expect(
-            (result.context.chartSectionProps$ as BehaviorSubject<unknown>).getValue()
-          ).toBeUndefined();
-        }
+        const context = await resolveMatch();
+        expect(context.chartSectionProps$).toBeInstanceOf(BehaviorSubject);
+        expect((context.chartSectionProps$ as BehaviorSubject<unknown>).getValue()).toBeUndefined();
       });
 
       it('picks up a custom pvalue AS alias', async () => {
-        const result = await provider.resolve(
-          createParams({
-            query: {
-              esql: 'FROM logs-* | STATS avg_val = AVG(bytes) BY bucket = BUCKET(@timestamp, 1h) | CHANGE_POINT avg_val ON bucket AS change_type, p_value',
-            },
-          })
-        );
-        expect(result.isMatch).toBe(true);
-        if (result.isMatch) {
-          expect(result.context).toMatchObject({
-            category: DataSourceCategory.Default,
-            pvalueColumnId: 'p_value',
-          });
-        }
+        const context = await resolveMatch({
+          query: {
+            esql: 'FROM logs-* | STATS avg_val = AVG(bytes) BY bucket = BUCKET(@timestamp, 1h) | CHANGE_POINT avg_val ON bucket AS change_type, p_value',
+          },
+        });
+        expect(context).toMatchObject({
+          category: DataSourceCategory.Default,
+          pvalueColumnId: 'p_value',
+        });
       });
 
       it('context does not include typeColumnId', async () => {
-        const result = await provider.resolve(createParams({}));
-        expect(result.isMatch).toBe(true);
-        if (result.isMatch) {
-          expect(result.context).not.toHaveProperty('typeColumnId');
-        }
+        const context = await resolveMatch();
+        expect(context).not.toHaveProperty('typeColumnId');
       });
     });
 
@@ -153,8 +157,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
       const getColumns = provider.profile.getColumnsConfiguration!(() => ({}), {
         context: buildContext({ pvalueColumnId: 'my_pvalue' }),
       });
-      const columns = getColumns();
-      expect(columns).toHaveProperty('my_pvalue');
+      expect(getColumns()).toHaveProperty('my_pvalue');
     });
 
     it('returns base config when pvalueColumnId is absent', () => {
@@ -162,8 +165,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
       const getColumns = provider.profile.getColumnsConfiguration!(() => base, {
         context: buildContext({ pvalueColumnId: '' }),
       });
-      const columns = getColumns();
-      expect(columns).toBe(base);
+      expect(getColumns()).toBe(base);
     });
   });
 
@@ -180,13 +182,9 @@ describe('createChangePointDataSourceProfileProvider', () => {
       });
     };
 
-    it('registers a renderer for the pvalue column', () => {
+    it('registers a function renderer for the pvalue column', () => {
       const renderers = buildRenderers('pvalue');
       expect(renderers).toHaveProperty('pvalue');
-    });
-
-    it('registered renderer is a function', () => {
-      const renderers = buildRenderers('pvalue');
       expect(renderers.pvalue).toBeInstanceOf(Function);
     });
 
@@ -209,61 +207,40 @@ describe('createChangePointDataSourceProfileProvider', () => {
   describe('getDocViewer', () => {
     const buildDocViewer = () => {
       const getDocViewer = provider.profile.getDocViewer!(
-        () => ({
-          title: undefined,
-          docViewsRegistry: (registry: DocViewsRegistry) => registry,
-        }),
+        () => ({ title: undefined, docViewsRegistry: (r: DocViewsRegistry) => r }),
         { context: buildContext() }
       );
-      return getDocViewer({
-        record: { id: 'row-1', raw: {}, flattened: {} } as never,
-        actions: {},
-      });
+      return getDocViewer({ record: MOCK_RECORD, actions: {} });
     };
 
-    it('registers the doc_view_change_point_chart tab', () => {
-      const docViewer = buildDocViewer();
-      const registry = {
-        add: jest.fn(),
-      } as unknown as DocViewsRegistry;
-      docViewer.docViewsRegistry({ ...registry, clone: () => registry } as never);
-      expect(registry.add).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'doc_view_change_point_chart' })
-      );
-    });
+    describe('registered tab', () => {
+      let addMock: jest.Mock;
 
-    it('tab is added with order 0 (first tab)', () => {
-      const docViewer = buildDocViewer();
-      const registry = { add: jest.fn() } as unknown as DocViewsRegistry;
-      docViewer.docViewsRegistry({ ...registry, clone: () => registry } as never);
-      expect(registry.add).toHaveBeenCalledWith(expect.objectContaining({ order: 0 }));
-    });
+      beforeEach(() => {
+        const { addMock: mock, registryArg } = buildRegistry();
+        addMock = mock;
+        buildDocViewer().docViewsRegistry(registryArg);
+      });
 
-    it('render function produces a React element', () => {
-      const docViewer = buildDocViewer();
-      const addMock = jest.fn();
-      const registry = { add: addMock } as unknown as DocViewsRegistry;
-      docViewer.docViewsRegistry({ ...registry, clone: () => registry } as never);
-      const renderFn = addMock.mock.calls[0][0].render;
-      expect(React.isValidElement(renderFn({} as never))).toBe(true);
+      it('registers the doc_view_change_point_chart tab with correct id, order, and render function', () => {
+        expect(addMock).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'doc_view_change_point_chart', order: 0 })
+        );
+        const renderFn = addMock.mock.calls[0][0].render;
+        expect(React.isValidElement(renderFn({} as never))).toBe(true);
+      });
     });
 
     it('chains the previous registry callback', () => {
       const prevRegistry = { add: jest.fn() } as unknown as DocViewsRegistry;
       const prevDocViewsRegistry = jest.fn(() => prevRegistry);
       const getDocViewer = provider.profile.getDocViewer!(
-        () => ({
-          title: undefined,
-          docViewsRegistry: prevDocViewsRegistry,
-        }),
+        () => ({ title: undefined, docViewsRegistry: prevDocViewsRegistry }),
         { context: buildContext() }
       );
-      const docViewer = getDocViewer({
-        record: { id: 'row-1', raw: {}, flattened: {} } as never,
-        actions: {},
-      });
-      const registry = { add: jest.fn() } as unknown as DocViewsRegistry;
-      const result = docViewer.docViewsRegistry({ ...registry, clone: () => registry } as never);
+      const docViewer = getDocViewer({ record: MOCK_RECORD, actions: {} });
+      const { registryArg } = buildRegistry();
+      const result = docViewer.docViewsRegistry(registryArg);
       expect(prevDocViewsRegistry).toHaveBeenCalled();
       expect(result).toBe(prevRegistry);
     });

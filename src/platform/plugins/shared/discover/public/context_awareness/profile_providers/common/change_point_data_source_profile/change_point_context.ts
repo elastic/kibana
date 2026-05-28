@@ -16,13 +16,10 @@ export const CHANGE_POINT_DATA_SOURCE_PROFILE_ID = 'change-point-data-source-pro
  * Snapshot of the chart section props shared from `getChartSectionConfiguration` to
  * `getDocViewer` via the profile context. Contains only the fields the flyout tab needs.
  */
-export interface ChangePointChartSectionSnapshot {
-  fetchParams: UnifiedChangePointGridProps['fetchParams'];
-  fetch$: UnifiedChangePointGridProps['fetch$'];
-  services: UnifiedChangePointGridProps['services'];
-  onBrushEnd: UnifiedChangePointGridProps['onBrushEnd'];
-  onFilter: UnifiedChangePointGridProps['onFilter'];
-}
+export type ChangePointChartSectionSnapshot = Pick<
+  UnifiedChangePointGridProps,
+  'fetchParams' | 'fetch$' | 'services' | 'onBrushEnd' | 'onFilter'
+>;
 
 export type ChangePointChartSectionProps$ = BehaviorSubject<
   ChangePointChartSectionSnapshot | undefined

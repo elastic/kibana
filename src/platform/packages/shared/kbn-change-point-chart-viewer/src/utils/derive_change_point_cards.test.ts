@@ -295,7 +295,7 @@ describe('derive_change_point_cards', () => {
       expect(getCardForRow([], { host: 'a', bucket: '2023-01-01T00:00:00.000Z' })).toBeUndefined();
     });
 
-    it('returns the single card for a no-BY query regardless of row values', () => {
+    it('returns the card for a no-BY query when the row is a change point', () => {
       const table = {
         type: 'datatable' as const,
         columns: COLUMNS_NO_BY,
@@ -307,8 +307,46 @@ describe('derive_change_point_cards', () => {
       const cards = buildChangePointCards({ table, esql: ESQL_NO_BY })!;
       expect(cards).toHaveLength(1);
 
-      const result = getCardForRow(cards, { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14 });
-      expect(result).toBe(cards[0]);
+      expect(
+        getCardForRow(cards, {
+          bucket: '2023-11-15T00:00:00.000Z',
+          avg_bytes: 14,
+          type: 'mean_shift',
+          pvalue: 0.001,
+        })
+      ).toBe(cards[0]);
+    });
+
+    it('returns undefined for a no-BY query when the row is not a change point', () => {
+      const table = {
+        type: 'datatable' as const,
+        columns: COLUMNS_NO_BY,
+        rows: [
+          { bucket: '2023-11-14T00:00:00.000Z', avg_bytes: 12, type: '', pvalue: null },
+          { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: 'mean_shift', pvalue: 0.001 },
+        ],
+      };
+      const cards = buildChangePointCards({ table, esql: ESQL_NO_BY })!;
+
+      // Empty type — not a change point row
+      expect(
+        getCardForRow(cards, {
+          bucket: '2023-11-14T00:00:00.000Z',
+          avg_bytes: 12,
+          type: '',
+          pvalue: null,
+        })
+      ).toBeUndefined();
+
+      // Null type — not a change point row
+      expect(
+        getCardForRow(cards, {
+          bucket: '2023-11-14T00:00:00.000Z',
+          avg_bytes: 12,
+          type: null,
+          pvalue: null,
+        })
+      ).toBeUndefined();
     });
 
     it('matches a single-BY row to its card', () => {

@@ -10,10 +10,9 @@
 import React, { useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getChangePointSeriesColumns } from '@kbn/esql-utils';
 import { ChangePointLensChart } from './components/change_point_lens_chart';
-import { buildChangePointCards, getCardForRow } from './utils/derive_change_point_cards';
-import { getEsqlQuery } from './utils/get_esql_query';
+import { getCardForRow } from './utils/derive_change_point_cards';
+import { useChangePointCards } from './hooks/use_change_point_cards';
 import type { UnifiedChangePointGridProps } from './types';
 
 export interface ChangePointChartForRowProps
@@ -39,19 +38,7 @@ export const ChangePointChartForRow: React.FC<ChangePointChartForRowProps> = ({
   actions,
   row,
 }) => {
-  const esql = useMemo(() => getEsqlQuery(fetchParams.query), [fetchParams.query]);
-
-  // Memoized on (table, esql) — only re-runs when a new Discover fetch delivers new data.
-  const cards = useMemo(
-    () => buildChangePointCards({ table: fetchParams.table, esql: esql ?? '' }),
-    [esql, fetchParams.table]
-  );
-
-  const seriesColumns = useMemo(
-    () => (esql ? getChangePointSeriesColumns(esql) : undefined),
-    [esql]
-  );
-
+  const { cards, seriesColumns } = useChangePointCards(fetchParams);
   const card = useMemo(() => (cards ? getCardForRow(cards, row) : undefined), [cards, row]);
 
   if (!card || !seriesColumns) {
@@ -61,14 +48,14 @@ export const ChangePointChartForRow: React.FC<ChangePointChartForRowProps> = ({
         title={
           <h3>
             {i18n.translate('changePointChartViewer.flyout.noChartTitle', {
-              defaultMessage: 'No change point chart available',
+              defaultMessage: 'No change point detected',
             })}
           </h3>
         }
         body={
           <p>
             {i18n.translate('changePointChartViewer.flyout.noChartBody', {
-              defaultMessage: 'The change point chart for this row could not be loaded.',
+              defaultMessage: 'This row does not have a detected change point.',
             })}
           </p>
         }
