@@ -255,7 +255,7 @@ export const Box: ConnectorSpec = {
       handler: async (ctx, input: AiQaSingleFileInput) => {
         return callToolJson(ctx, 'ai_qa_single_file', {
           file_id: input.fileId,
-          prompt: input.prompt,
+          question: input.prompt,
         });
       },
     },
@@ -268,7 +268,7 @@ export const Box: ConnectorSpec = {
       handler: async (ctx, input: AiQaMultiFileInput) => {
         return callToolJson(ctx, 'ai_qa_multi_file', {
           file_ids: input.fileIds,
-          prompt: input.prompt,
+          question: input.prompt,
         });
       },
     },
@@ -281,7 +281,7 @@ export const Box: ConnectorSpec = {
       handler: async (ctx, input: AiQaHubInput) => {
         return callToolJson(ctx, 'ai_qa_hub', {
           hub_id: input.hubId,
-          prompt: input.prompt,
+          question: input.prompt,
         });
       },
     },

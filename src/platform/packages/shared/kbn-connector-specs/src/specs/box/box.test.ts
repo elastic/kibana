@@ -390,7 +390,7 @@ describe('Box', () => {
         name: 'ai_qa_single_file',
         arguments: {
           file_id: '123456789',
-          prompt: 'What is the contract renewal date?',
+          question: 'What is the contract renewal date?',
         },
       });
     });
@@ -411,7 +411,7 @@ describe('Box', () => {
         name: 'ai_qa_multi_file',
         arguments: {
           file_ids: ['111', '222', '333'],
-          prompt: 'Compare the budget figures across these reports.',
+          question: 'Compare the budget figures across these reports.',
         },
       });
     });
@@ -432,7 +432,7 @@ describe('Box', () => {
         name: 'ai_qa_hub',
         arguments: {
           hub_id: 'hub-abc123',
-          prompt: 'What projects are currently in progress?',
+          question: 'What projects are currently in progress?',
         },
       });
     });
