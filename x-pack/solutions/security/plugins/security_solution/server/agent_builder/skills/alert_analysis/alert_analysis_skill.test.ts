@@ -10,7 +10,10 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills/t
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolHandlerContext, createToolTestMocks } from '../../__mocks__/test_helpers';
 import { alertAnalysisSkill } from './alert_analysis_skill';
-import type { FindRelatedAlertsResult } from '../../../lib/alert_analysis/services/find_related_alerts';
+import type {
+  FindRelatedAlertsResult,
+  FindRelatedAlertsSuccess,
+} from '../../../lib/alert_analysis/services/find_related_alerts';
 import { RELATED_ALERTS_INLINE_MAX_RESULTS } from '../../../lib/alert_analysis/services/find_related_alerts';
 
 jest.mock('../../../lib/alert_analysis/services/find_related_alerts');
@@ -34,8 +37,8 @@ const getData = (result: ToolHandlerStandardReturn, idx = 0): ResultData =>
   result.results[idx].data as unknown as ResultData;
 
 const makeSuccess = (
-  overrides: Partial<FindRelatedAlertsResult> = {}
-): FindRelatedAlertsResult => ({
+  overrides: Partial<Omit<FindRelatedAlertsSuccess, 'ok'>> = {}
+): FindRelatedAlertsSuccess => ({
   ok: true,
   message: 'Found 0 related alerts sharing entities with alert test-alert-id.',
   relatedAlerts: [],
