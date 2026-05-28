@@ -2318,6 +2318,7 @@
         "type": "date"
       },
       "verification_permissions": {
+        "ignore_above": 8191,
         "type": "flattened"
       },
       "verification_started_at": {
