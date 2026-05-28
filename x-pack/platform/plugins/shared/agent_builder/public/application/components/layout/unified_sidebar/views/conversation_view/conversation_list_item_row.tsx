@@ -22,8 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import type { ConversationDisplayStatus } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { ConversationDisplayStatus, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
 import { appPaths } from '../../../../../utils/app_paths';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
@@ -45,6 +44,12 @@ const labels = {
   }),
   delete: i18n.translate('xpack.agentBuilder.sidebar.conversationList.delete', {
     defaultMessage: 'Delete',
+  }),
+  markAsRead: i18n.translate('xpack.agentBuilder.sidebar.conversationList.markAsRead', {
+    defaultMessage: 'Mark as read',
+  }),
+  markAsUnread: i18n.translate('xpack.agentBuilder.sidebar.conversationList.markAsUnread', {
+    defaultMessage: 'Mark as unread',
   }),
   openMenu: i18n.translate('xpack.agentBuilder.sidebar.conversationList.openMenu', {
     defaultMessage: 'Open conversation menu',
@@ -80,9 +85,8 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const { deleteConversation, renameConversation } = useConversationListMutations({
-    routeConversationId,
-  });
+  const { deleteConversation, renameConversation, markAsRead, markAsUnread } =
+    useConversationListMutations({ routeConversationId, agentId });
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
@@ -172,6 +176,30 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         {labels.rename}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
+        key="read-status"
+        icon={status === ConversationDisplayStatus.unread ? 'eyeClosed' : 'eye'}
+        data-test-subj={`agentBuilderSidebarConversation${
+          status === ConversationDisplayStatus.unread ? 'MarkRead' : 'MarkUnread'
+        }-${conversationId}`}
+        onClick={() => {
+          closePopover();
+          if (status === ConversationDisplayStatus.unread) {
+            markAsRead(conversationId);
+          } else {
+            markAsUnread(conversationId);
+          }
+        }}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.sidebar,
+          action:
+            status === ConversationDisplayStatus.unread
+              ? AGENT_BUILDER_UI_EBT.action.conversationList.MARK_AS_READ
+              : AGENT_BUILDER_UI_EBT.action.conversationList.MARK_AS_UNREAD,
+        })}
+      >
+        {status === ConversationDisplayStatus.unread ? labels.markAsRead : labels.markAsUnread}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
         key="delete"
         icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
         data-test-subj={`agentBuilderSidebarConversationDelete-${conversationId}`}
@@ -190,7 +218,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         {labels.delete}
       </EuiContextMenuItem>,
     ],
-    [closePopover, conversationId, euiTheme.colors.danger]
+    [closePopover, conversationId, euiTheme.colors.danger, markAsRead, markAsUnread, status]
   );
 
   const menuButton = (

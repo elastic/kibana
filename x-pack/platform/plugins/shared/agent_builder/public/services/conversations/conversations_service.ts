@@ -56,4 +56,18 @@ export class ConversationsService {
       }
     );
   }
+
+  // todo update url
+  async updateReadStatus({
+    conversationId,
+    read,
+  }: {
+    conversationId: string;
+    read: boolean;
+  }): Promise<{ id: string; read?: boolean }> {
+    return await this.http.post<{ id: string; read?: boolean }>(
+      `${internalApiPath}/conversations/${conversationId}/_update_read_status`,
+      { body: JSON.stringify({ read }) }
+    );
+  }
 }
