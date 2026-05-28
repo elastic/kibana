@@ -14,6 +14,7 @@ import React from 'react';
 import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import type { CoreStart } from '@kbn/core/public';
 import { SearchSessionStatus } from '../../../../../../../common';
 import type { SearchUsageCollector } from '../../../../../collectors';
 import type { BackgroundSearchOpenedHandler, UISession } from '../../../types';
@@ -54,10 +55,12 @@ const NameColumnText = ({
 export const nameColumn = ({
   searchUsageCollector,
   kibanaVersion,
+  navigateToUrl,
   onBackgroundSearchOpened,
 }: {
   searchUsageCollector: SearchUsageCollector;
   kibanaVersion: string;
+  navigateToUrl?: CoreStart['application']['navigateToUrl'];
   onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
 }): EuiBasicTableColumn<UISession> => ({
   field: 'name',
@@ -109,10 +112,11 @@ export const nameColumn = ({
         href={href}
         onClick={(event) => {
           if (hasActiveModifierKey(event)) return;
-          if (onBackgroundSearchOpened) {
+          if (navigateToUrl || onBackgroundSearchOpened) {
             event.preventDefault();
           }
           trackAction?.();
+          navigateToUrl?.(href);
           onBackgroundSearchOpened?.({ session, event });
         }}
       >

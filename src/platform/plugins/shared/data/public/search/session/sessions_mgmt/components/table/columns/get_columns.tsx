@@ -50,6 +50,7 @@ export const getColumns = ({
       ...nameColumn({
         searchUsageCollector,
         kibanaVersion,
+        navigateToUrl: core.application.navigateToUrl,
       }),
       width: '20%',
     },

@@ -24,6 +24,7 @@ export const getColumns: GetColumnsFn = ({
   columns.nameColumn({
     kibanaVersion,
     searchUsageCollector,
+    navigateToUrl: core.application.navigateToUrl,
     onBackgroundSearchOpened,
   }),
   columns.statusColumn(timezone),
