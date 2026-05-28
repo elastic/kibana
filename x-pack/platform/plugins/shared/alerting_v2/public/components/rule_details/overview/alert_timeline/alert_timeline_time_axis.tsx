@@ -60,7 +60,16 @@ const snapForward = (ms: number, step: StepDef): number => {
     d.setSeconds(0, 0);
   }
   let cursor = d.getTime();
-  while (cursor < ms) cursor += step.ms;
+  if (step.unit === 'day') {
+    const stepDays = Math.round(step.ms / DAY_MS);
+    while (cursor < ms) {
+      const next = new Date(cursor);
+      next.setDate(next.getDate() + stepDays);
+      cursor = next.getTime();
+    }
+  } else {
+    while (cursor < ms) cursor += step.ms;
+  }
   return cursor;
 };
 
@@ -80,12 +89,20 @@ const buildTicks = (gteMs: number, lteMs: number, locale: string): Tick[] => {
     hour12: false,
   });
 
+  const stepDays = step.unit === 'day' ? Math.round(step.ms / DAY_MS) : 0;
+
   const ticks: Tick[] = [];
   let cursor = snapForward(gteMs, step);
   let idx = 0;
   while (cursor <= lteMs && idx++ < 200) {
     ticks.push({ ms: cursor, label: formatter.format(new Date(cursor)) });
-    cursor += step.ms;
+    if (step.unit === 'day') {
+      const next = new Date(cursor);
+      next.setDate(next.getDate() + stepDays);
+      cursor = next.getTime();
+    } else {
+      cursor += step.ms;
+    }
   }
   return ticks;
 };
