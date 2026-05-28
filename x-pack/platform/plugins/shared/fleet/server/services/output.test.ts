@@ -1279,6 +1279,19 @@ describe('Output Service', () => {
         ).resolves.not.toThrow();
       });
     });
+
+    it('should throw FleetError when given an invalid id', async () => {
+      const soClient = getMockedSoClient();
+
+      await expect(
+        outputService.create(
+          soClient,
+          esClientMock,
+          { is_default: false, is_default_monitoring: false, name: 'Test', type: 'elasticsearch' },
+          { id: '../bad-id' }
+        )
+      ).rejects.toThrow('id is not valid');
+    });
   });
 
   describe('update', () => {

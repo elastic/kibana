@@ -175,6 +175,10 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
             <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  aria-label={i18n.translate(
+                    'xpack.indexLifecycleMgmt.policyFlyout.managePolicyPopoverAriaLabel',
+                    { defaultMessage: 'Manage policy options' }
+                  )}
                   isOpen={showPopover}
                   closePopover={() => setShowPopover(false)}
                   button={managePolicyButton}
