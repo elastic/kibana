@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_node',
   rootDir: '../../../..',
   roots: ['<rootDir>/src/platform/kbn-ui/chrome-layout-constants'],
 };
