@@ -55,6 +55,16 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
       expect(response).toHaveStatusCode(200);
       expect(response.body.locale).toBe('fr-FR');
       expect(response).toHaveHeaders({ 'content-type': 'application/json; charset=utf-8' });
+
+      if (process.env.CI) {
+        expect(response).toHaveHeaders({
+          'cache-control': 'public, max-age=31536000, immutable',
+        });
+        expect(response.headers.etag).toBeUndefined();
+      } else {
+        expect(response).toHaveHeaders({ 'cache-control': 'must-revalidate' });
+        expect(response.headers.etag).toBeDefined();
+      }
     }
   );
 
