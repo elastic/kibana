@@ -32,9 +32,9 @@ Reach for a [custom server config](./feature-flags.md#scout-feature-flags-custom
 
 ::::::::
 
-::::::::{step} Where should your tests run?
+::::::::{step} Be the driver: review and _understand_ your new tests
 
-[Deployment tags](./deployment-tags.md) control where your tests run (e.g., local and Elastic Cloud pipelines, and serverless project tiers for serverless tests). Decide up front by [choosing the right deployment tags](./deployment-tags.md#scout-deployment-tags-pick).
+We provide AI tooling to most of the toil out of migration, but **always review their AI-generated output manually**. _Understand_ the decisions the AI made for you as it will help you troubleshoot flaky tests down the road. <br><br> **Some helpful questions**: <br> • Did we lose or gain any test coverage with the migration?<br> • Should the new tests really be UI tests? Should they be made [parallel](./parallelism.md)?<br> • Are the [deployment tags](./deployment-tags.md) looking good? See [pick the right tags](./deployment-tags.md#scout-deployment-tags-pick).<br> • Is there any way tests can use Scout's default test servers config?
 
 ::::::::
 
@@ -55,7 +55,3 @@ The [`cypress-to-scout-migration`](https://github.com/elastic/kibana/blob/main/.
 ### Best practices review
 
 Run the [`scout-best-practices-reviewer`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-best-practices-reviewer/SKILL.md) skill on the migrated tests to make sure they follow our [Scout best practices](./best-practices.md).
-
-## Questions?
-
-See [Need help?](../scout.md#need-help) to get in touch with the AppEx QA team. We're happy to provide guidance as you migrate.
