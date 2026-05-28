@@ -77,14 +77,12 @@ export function registerEntityMaintainerTask({
   config,
   core,
   analytics,
-  isServerless = false,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   config: RegisterEntityMaintainerConfig;
   core: EntityStoreCoreSetup;
   analytics: TelemetryReporter;
-  isServerless?: boolean;
 }): void {
   logger.debug(`Registering entity maintainer task: ${config.id}`);
   const { title } = TasksConfig[EntityStoreTaskType.enum.entityMaintainer];
@@ -136,7 +134,6 @@ export function registerEntityMaintainerTask({
                   licensing: plugins.licensing,
                   analytics,
                   logger,
-                  isServerless,
                 });
 
                 return result ?? { state: status };

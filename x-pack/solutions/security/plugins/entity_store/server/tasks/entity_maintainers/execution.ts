@@ -40,7 +40,6 @@ export interface ExecuteMaintainerRunParams {
   licensing: LicensingPluginStart;
   analytics: TelemetryReporter;
   logger: Logger;
-  isServerless?: boolean;
 }
 
 export async function canRunMaintainerWithLicense({
@@ -110,7 +109,6 @@ export async function executeMaintainerRun({
   licensing,
   analytics,
   logger,
-  isServerless,
 }: ExecuteMaintainerRunParams): Promise<{ state: EntityMaintainerStatus } | null> {
   if (status.taskStatus === EntityMaintainerTaskStatus.STOPPED) {
     logger.debug(`Entity maintainer task is stopped, skipping run`);
@@ -129,10 +127,9 @@ export async function executeMaintainerRun({
 
   const maintainerStatus = createMaintainerStatus({ status, namespace, initialState });
   const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-  const cpsEsClient = isServerless
-    ? coreStart.elasticsearch.client.asScoped(request, { projectRouting: 'space' }).asCurrentUser
-    : undefined;
-  logger.debug(`[${id}] read client: ${cpsEsClient ? 'cross-project' : 'origin-only'}`);
+  const cpsEsClient = coreStart.elasticsearch.client
+    .asScoped(request, { projectRouting: 'space' })
+    .asCurrentUser;
   const crudClient = new CRUDClient({
     logger,
     esClient,
@@ -200,7 +197,7 @@ export async function runEntityMaintainerTask({
   run: EntityMaintainerTaskMethod;
   abortController: AbortController;
   esClient: ElasticsearchClient;
-  cpsEsClient?: ElasticsearchClient;
+  cpsEsClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
   id: string;
   analytics: TelemetryReporter;

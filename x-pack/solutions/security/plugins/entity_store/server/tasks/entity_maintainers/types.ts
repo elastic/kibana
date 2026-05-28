@@ -83,7 +83,7 @@ export interface EntityMaintainerTaskMethodContext {
   logger: Logger;
   fakeRequest: KibanaRequest;
   esClient: ElasticsearchClient;
-  cpsEsClient?: ElasticsearchClient;
+  cpsEsClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
 }
 

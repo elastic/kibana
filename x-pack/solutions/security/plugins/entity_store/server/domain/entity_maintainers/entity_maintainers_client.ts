@@ -57,7 +57,6 @@ interface EntityMaintainersClientDeps {
   analytics: TelemetryReporter;
   coreStart: CoreStart;
   licensing: LicensingPluginStart;
-  isServerless?: boolean;
 }
 
 interface SyncExecutionContext extends EntityMaintainerTaskMethodContext {
@@ -71,7 +70,6 @@ export class EntityMaintainersClient {
   private readonly analytics: TelemetryReporter;
   private readonly coreStart: CoreStart;
   private readonly licensing: LicensingPluginStart;
-  private readonly isServerless: boolean;
 
   constructor(deps: EntityMaintainersClientDeps) {
     this.logger = deps.logger;
@@ -80,7 +78,6 @@ export class EntityMaintainersClient {
     this.analytics = deps.analytics;
     this.coreStart = deps.coreStart;
     this.licensing = deps.licensing;
-    this.isServerless = deps.isServerless ?? false;
   }
 
   public async start(id: string, request: KibanaRequest): Promise<void> {
@@ -300,10 +297,9 @@ export class EntityMaintainersClient {
       initialState,
     });
     const esClient = this.coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-    const cpsEsClient = this.isServerless
-      ? this.coreStart.elasticsearch.client.asScoped(request, { projectRouting: 'space' })
-          .asCurrentUser
-      : undefined;
+    const cpsEsClient = this.coreStart.elasticsearch.client.asScoped(request, {
+      projectRouting: 'space',
+    }).asCurrentUser;
     const crudClient = new CRUDClient({
       logger: this.logger,
       esClient,

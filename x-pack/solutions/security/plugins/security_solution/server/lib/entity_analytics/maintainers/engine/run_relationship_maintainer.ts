@@ -276,7 +276,6 @@ export const runRelationshipMaintainer = async ({
   assertValidNamespace(namespace);
 
   const readClient = cpsEsClient ?? esClient;
-  logger.debug(`read client: ${cpsEsClient ? 'cross-project' : 'origin-only'}`);
 
   let totalBuckets = 0;
   let totalRecords = 0;

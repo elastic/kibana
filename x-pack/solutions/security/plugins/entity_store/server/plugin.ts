@@ -89,7 +89,6 @@ export class EntityStorePlugin
       config: automatedResolutionMaintainerConfig,
       core,
       analytics: createReportEvent(core.analytics),
-      isServerless: this.isServerless,
     });
 
     return {
@@ -100,7 +99,6 @@ export class EntityStorePlugin
           config,
           core,
           analytics: createReportEvent(core.analytics),
-          isServerless: this.isServerless,
         }),
     };
   }
