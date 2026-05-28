@@ -294,6 +294,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
       ]);
     });
+
+    describe('edit session round-trip', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'src/platform/test/functional/fixtures/kbn_archiver/discover'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'src/platform/test/functional/fixtures/kbn_archiver/discover'
+        );
+      });
+
+      describeEditSessionTests({
+        title: 'saved search panel',
+        panelName: 'Rendering Test: saved search',
+        editingTitle: 'Rendering Test: saved search',
+        savedAsTitle: 'Rendering Test: saved as search',
+      });
+
+      describeEditSessionTests({
+        title: 'ES|QL panel',
+        panelName: 'ES|QL Discover Session',
+        editingTitle: 'ES|QL Discover Session',
+        savedAsTitle: 'ES|QL Discover Session Saved As',
+      });
+    });
   });
 
   /**
@@ -312,6 +340,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     savedAsTitle: string;
   }) {
     describe(title, () => {
+      beforeEach(async () => {
+        await dashboard.navigateToApp();
+        await filterBar.ensureFieldEditorModalIsClosed();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+      });
+
       it('can edit a linked session and return to the dashboard', async () => {
         await dashboardAddPanel.addSavedSearch(panelName);
         await header.waitUntilLoadingHasFinished();
@@ -388,59 +423,4 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
   }
-
-  describe('edit session round-trip', () => {
-    before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
-      );
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.importExport.load(
-        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
-      );
-      await kibanaServer.importExport.load(
-        'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-      });
-      await common.setTime({
-        from: 'Sep 22, 2015 @ 00:00:00.000',
-        to: 'Sep 23, 2015 @ 00:00:00.000',
-      });
-    });
-
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.importExport.unload(
-        'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      await common.unsetTime();
-      await kibanaServer.uiSettings.unset('defaultIndex');
-    });
-
-    beforeEach(async () => {
-      await dashboard.navigateToApp();
-      await filterBar.ensureFieldEditorModalIsClosed();
-      await dashboard.gotoDashboardLandingPage();
-      await dashboard.clickNewDashboard();
-    });
-
-    describeEditSessionTests({
-      title: 'saved search panel',
-      panelName: 'Rendering Test: saved search',
-      editingTitle: 'Rendering Test: saved search',
-      savedAsTitle: 'Rendering Test: saved as search',
-    });
-
-    describeEditSessionTests({
-      title: 'ES|QL panel',
-      panelName: 'ES|QL Discover Session',
-      editingTitle: 'ES|QL Discover Session',
-      savedAsTitle: 'ES|QL Discover Session Saved As',
-    });
-  });
 }
