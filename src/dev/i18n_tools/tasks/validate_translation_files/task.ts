@@ -55,6 +55,7 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
           const translationFiles = getLocalesFromFiles(config.translations);
           for (const filePath of translationFiles.values()) {
             const translationInput = await parseTranslationFile(filePath);
+            // Intentionally runs before namespace filtering — locale validity is checked on every file.
             validateTranslationFileLocale({ filePath, translationInput, errorReporter });
             if (filterTranslationFiles && filterTranslationFiles.length) {
               const matchingFilteredFile = filterTranslationFiles.find((filterTranslationFile) => {
