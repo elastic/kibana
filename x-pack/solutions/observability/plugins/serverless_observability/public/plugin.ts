@@ -12,7 +12,8 @@ import type { Subscription } from 'rxjs';
 import { combineLatest, distinctUntilChanged, map, of, switchMap } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { createNavigationTree } from './navigation_tree';
+import { recentDashboardsNavExtension } from '@kbn/navigation-plugin/public';
+import { createNavigationTree, RECENT_DASHBOARDS_EXTENSION_POINT_ID } from './navigation_tree';
 import type {
   ServerlessObservabilityPublicSetup,
   ServerlessObservabilityPublicStart,
@@ -64,7 +65,10 @@ export class ServerlessObservabilityPlugin
         });
       })
     );
-    serverless.initNavigation('oblt', navigationTree$);
+
+    serverless.initNavigation('oblt', navigationTree$, {
+      [RECENT_DASHBOARDS_EXTENSION_POINT_ID]: recentDashboardsNavExtension,
+    });
 
     if (workflowsManagement && !core.pricing.isFeatureAvailable('observability:workflows')) {
       workflowsManagement.setUnavailableInServerlessTier({

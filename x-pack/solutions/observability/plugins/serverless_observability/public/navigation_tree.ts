@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  AppDeepLinkId,
+  NavigationTreeDefinition,
+  PanelOpenerChildDefinition,
+  RootNodeDefinition,
+} from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
-export function filterForFeatureAvailability(
-  node: NodeDefinition,
-  featureFlag: boolean = false
-): NodeDefinition[] {
+export const RECENT_DASHBOARDS_EXTENSION_POINT_ID =
+  'xpack.serverlessObservability.nav.dashboards.extensions.recent';
+
+export function filterForFeatureAvailability<
+  T extends RootNodeDefinition<AppDeepLinkId> | PanelOpenerChildDefinition<AppDeepLinkId>
+>(node: T, featureFlag: boolean = false): T[] {
   if (!featureFlag) {
     return [];
   }
@@ -60,9 +67,21 @@ export const createNavigationTree = ({
         }),
         link: 'dashboards',
         icon: 'productDashboard',
+        renderAs: 'panelOpener',
         getIsActive: ({ pathNameSerialized, prepend }) => {
           return pathNameSerialized.startsWith(prepend('/app/dashboards'));
         },
+        children: [
+          {
+            id: 'recent-dashboards',
+            title: i18n.translate('xpack.serverlessObservability.nav.dashboards.recentlyViewed', {
+              defaultMessage: 'Recently viewed',
+            }),
+            renderAs: 'extensionPoint',
+            extensionPointId: RECENT_DASHBOARDS_EXTENSION_POINT_ID,
+            popoverOnly: true,
+          },
+        ],
       },
       {
         link: 'workflows',
