@@ -60,9 +60,6 @@ describe('FilesystemService', () => {
 
   it('loads persisted workspace files on init when workspaceId is set', async () => {
     workspaceClient.load.mockResolvedValueOnce({
-      workspace_id: 'ws-1',
-      created_at: '2025-01-01T00:00:00.000Z',
-      updated_at: '2025-01-01T00:00:00.000Z',
       files: {
         '/workspace/persisted.txt': {
           content: Buffer.from('saved').toString('base64'),

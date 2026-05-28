@@ -6,10 +6,15 @@
  */
 
 import type { WorkspaceStorage } from './storage';
-import type { WorkspaceDocument, WorkspaceFile } from '../types';
+import {
+  WORKSPACE_SCHEMA_VERSION,
+  type WorkspaceDocument,
+  type WorkspaceFile,
+  type WorkspaceSnapshot,
+} from '../types';
 
 export interface IWorkspaceClient {
-  load(workspaceId: string): Promise<WorkspaceDocument | undefined>;
+  load(workspaceId: string): Promise<WorkspaceSnapshot | undefined>;
   save(workspaceId: string, files: Record<string, WorkspaceFile>): Promise<void>;
 }
 
@@ -20,7 +25,27 @@ export class WorkspaceClient implements IWorkspaceClient {
     this.storage = storage;
   }
 
-  async load(workspaceId: string): Promise<WorkspaceDocument | undefined> {
+  async load(workspaceId: string): Promise<WorkspaceSnapshot | undefined> {
+    const doc = await this.loadDocument(workspaceId);
+    if (!doc) return undefined;
+    return { files: doc.files };
+  }
+
+  async save(workspaceId: string, files: Record<string, WorkspaceFile>): Promise<void> {
+    const now = new Date().toISOString();
+    const existing = await this.loadDocument(workspaceId);
+    const document: WorkspaceDocument = {
+      workspace_id: workspaceId,
+      schema_version: WORKSPACE_SCHEMA_VERSION,
+      created_at: existing?.created_at ?? now,
+      updated_at: now,
+      files,
+    };
+    await this.storage.getClient().index({ id: workspaceId, document });
+  }
+
+  /** Internal — full document fetch including metadata. */
+  private async loadDocument(workspaceId: string): Promise<WorkspaceDocument | undefined> {
     try {
       const response = await this.storage.getClient().get({ id: workspaceId });
       return response._source as WorkspaceDocument | undefined;
@@ -30,17 +55,5 @@ export class WorkspaceClient implements IWorkspaceClient {
       }
       throw err;
     }
-  }
-
-  async save(workspaceId: string, files: Record<string, WorkspaceFile>): Promise<void> {
-    const now = new Date().toISOString();
-    const existing = await this.load(workspaceId);
-    const document: WorkspaceDocument = {
-      workspace_id: workspaceId,
-      created_at: existing?.created_at ?? now,
-      updated_at: now,
-      files,
-    };
-    await this.storage.getClient().index({ id: workspaceId, document });
   }
 }

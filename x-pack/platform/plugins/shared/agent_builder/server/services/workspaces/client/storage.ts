@@ -18,6 +18,7 @@ const storageSettings = {
   schema: {
     properties: {
       workspace_id: types.keyword({}),
+      schema_version: types.long({}),
       created_at: types.date({}),
       updated_at: types.date({}),
       // Never queried - Disable dynamic mapping to avoid explosions from arbitrary path keys

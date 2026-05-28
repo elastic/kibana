@@ -16,12 +16,22 @@ export interface WorkspaceFile {
 }
 
 /**
- * A workspace document persisted in `chatSystemIndex('workspaces')`.
+ * Public-facing view of a loaded workspace
+ */
+export interface WorkspaceSnapshot {
+  files: Record<string, WorkspaceFile>;
+}
+
+/**
+ * Internal — the ES document shape persisted in the workspaces index.
  * `files` keys are absolute paths within `/workspace` (e.g. `/workspace/notes.txt`).
  */
 export interface WorkspaceDocument {
   workspace_id: string;
+  schema_version: number;
   created_at: string;
   updated_at: string;
   files: Record<string, WorkspaceFile>;
 }
+
+export const WORKSPACE_SCHEMA_VERSION = 1;

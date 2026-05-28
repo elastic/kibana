@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IWorkspaceClient, WorkspaceDocument } from '../../workspaces';
+import type { IWorkspaceClient, WorkspaceFile, WorkspaceSnapshot } from '../../workspaces';
 import { WorkspaceVolume } from './workspace_volume';
 
 const mockWorkspaceClient = (): jest.Mocked<IWorkspaceClient> => ({
@@ -13,12 +13,7 @@ const mockWorkspaceClient = (): jest.Mocked<IWorkspaceClient> => ({
   save: jest.fn().mockResolvedValue(undefined),
 });
 
-const persistedDoc = (files: WorkspaceDocument['files']): WorkspaceDocument => ({
-  workspace_id: 'ws-test',
-  created_at: '2025-01-01T00:00:00.000Z',
-  updated_at: '2025-01-01T00:00:00.000Z',
-  files,
-});
+const persistedDoc = (files: Record<string, WorkspaceFile>): WorkspaceSnapshot => ({ files });
 
 describe('WorkspaceVolume', () => {
   describe('getOrCreateWorkspaceId', () => {

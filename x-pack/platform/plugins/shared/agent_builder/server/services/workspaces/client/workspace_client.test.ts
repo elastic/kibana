@@ -7,7 +7,7 @@
 
 import type { WorkspaceStorage } from './storage';
 import { WorkspaceClient } from './workspace_client';
-import type { WorkspaceDocument } from '../types';
+import { WORKSPACE_SCHEMA_VERSION, type WorkspaceDocument } from '../types';
 
 const createMockStorage = () => {
   const get = jest.fn();
@@ -21,23 +21,26 @@ const createMockStorage = () => {
 
 describe('WorkspaceClient', () => {
   describe('load', () => {
-    it('returns the document when it exists', async () => {
+    it('returns the workspace snapshot when the document exists', async () => {
       const { storage, get } = createMockStorage();
+      const files = {
+        '/workspace/a.txt': {
+          content: 'aGVsbG8=',
+          mode: 0o644,
+          mtime: '2025-01-01T00:00:00.000Z',
+        },
+      };
       const doc: WorkspaceDocument = {
         workspace_id: 'ws-1',
+        schema_version: WORKSPACE_SCHEMA_VERSION,
         created_at: '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
-        files: {
-          '/workspace/a.txt': {
-            content: 'aGVsbG8=',
-            mode: 0o644,
-            mtime: '2025-01-01T00:00:00.000Z',
-          },
-        },
+        files,
       };
       get.mockResolvedValue({ _source: doc });
       const client = new WorkspaceClient({ storage });
-      expect(await client.load('ws-1')).toEqual(doc);
+      // load() returns the public snapshot shape (no schema_version/timestamps).
+      expect(await client.load('ws-1')).toEqual({ files });
       expect(get).toHaveBeenCalledWith({ id: 'ws-1' });
     });
 
@@ -75,6 +78,7 @@ describe('WorkspaceClient', () => {
       const arg = index.mock.calls[0][0];
       expect(arg.id).toBe('ws-2');
       expect(arg.document.workspace_id).toBe('ws-2');
+      expect(arg.document.schema_version).toBe(WORKSPACE_SCHEMA_VERSION);
       expect(arg.document.files).toEqual(files);
       expect(typeof arg.document.updated_at).toBe('string');
       expect(typeof arg.document.created_at).toBe('string');
@@ -86,6 +90,7 @@ describe('WorkspaceClient', () => {
       get.mockResolvedValue({
         _source: {
           workspace_id: 'ws-3',
+          schema_version: WORKSPACE_SCHEMA_VERSION,
           created_at: originalCreated,
           updated_at: '2024-12-25T00:00:00.000Z',
           files: {},

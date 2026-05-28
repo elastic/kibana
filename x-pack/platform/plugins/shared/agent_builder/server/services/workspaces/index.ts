@@ -7,4 +7,4 @@
 
 export { WorkspaceClient, type IWorkspaceClient } from './client/workspace_client';
 export { createStorage as createWorkspaceStorage, workspaceIndexName } from './client/storage';
-export type { WorkspaceDocument, WorkspaceFile } from './types';
+export type { WorkspaceFile, WorkspaceSnapshot } from './types';
