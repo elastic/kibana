@@ -9,7 +9,7 @@ applies_to:
 
 # Box connector [box-action-type]
 
-The Box connector integrates with Box through the official remote MCP server at `https://mcp.box.com`. It searches files and folders, retrieves file content and metadata, and answers questions about enterprise content using Box AI. Authentication uses OAuth 2.0 Authorization Code.
+The Box connector integrates with Box through the official remote MCP server at `https://mcp.box.com`. It searches files and folders, retrieves file content and metadata, and uses Box AI to answer questions about enterprise content. It uses OAuth 2.0 Authorization Code flow to authenticate.
 
 ## Create connectors in {{kib}} [define-box-ui]
 
@@ -19,11 +19,11 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 Box connectors have the following configuration properties:
 
-**MCP Server URL**
+MCP Server URL
 :   The URL of the remote Box MCP server. Defaults to `https://mcp.box.com`.
 
-**Authentication**
-:   Connects via Box's OAuth 2.0 Authorization Code flow. Requires a Client ID and Client Secret from the Box MCP server integration in the Admin Console. Refer to [OAuth credentials](#box-oauth-credentials) for setup instructions.
+Authentication
+:   Connects through Box's OAuth 2.0 Authorization Code flow. Requires a Client ID and Client Secret from the Box MCP server integration in the Admin Console. Refer to [OAuth credentials](#box-oauth-credentials) for setup instructions.
 
 ## Test connectors [box-test-connector]
 
@@ -53,7 +53,7 @@ The Box connector exposes the following actions:
 ### File and folder details
 
 `getFileContent`
-:   Retrieve the text content of a file stored in Box. Works with documents, spreadsheets, PDFs, and other text-extractable formats. Check file size with `getFileDetails` before calling this on large files.
+:   Retrieve the text content of a file stored in Box. Works with documents, spreadsheets, PDFs, and other text-extractable formats. Check the file size with `getFileDetails` before retrieving large files.
 
 `getFileDetails`
 :   Get detailed metadata for a specific Box file, including size, owner, modification date, permissions, and shared link status.
@@ -67,7 +67,7 @@ The Box connector exposes the following actions:
 ### Box AI
 
 `aiQaSingleFile`
-:   Ask Box AI a question about a single file. Returns an answer with citations. Files must be under 1 MB in extracted text.
+:   Ask Box AI a question about a single file. Returns an answer with citations. Files must have fewer than 1 MB of extracted text.
 
 `aiQaMultiFile`
 :   Ask Box AI a question across multiple files simultaneously. Returns a unified answer with citations.
@@ -76,7 +76,7 @@ The Box connector exposes the following actions:
 :   Ask Box AI a question about the contents of a Box Hub. Returns an answer with citations from the hub's content.
 
 `aiExtractFreeform`
-:   Extract metadata from a Box file using a natural-language prompt. Returns structured key-value pairs for the described fields. Files must be under 1 MB in extracted text.
+:   Extract metadata from a Box file using a natural-language prompt. Returns structured key-value pairs for the described fields. Files must have fewer than 1 MB of extracted text.
 
 `aiExtractStructuredFromMetadataTemplate`
 :   Extract structured metadata from a Box file using an existing enterprise metadata template. Box AI fills in the template fields automatically.
@@ -100,7 +100,7 @@ Box Hubs are curated collections of files and folders organized around a topic o
 :   Retrieve details about the currently authenticated Box user, including name, email, and account type. Use this to confirm authentication is working.
 
 `listTools`
-:   List all tools available on the Box MCP server. Use this to discover capabilities not exposed as named actions, such as write and admin operations.
+:   List all tools available on the Box MCP server. Use this to discover capabilities not exposed as named actions, such as write operations and admin operations.
 
 `callTool`
 :   Call any tool on the Box MCP server directly by name. Use this as a fallback for tools not yet exposed as named actions (such as `upload_file`, `create_folder`, or `create_collaboration`). Use `listTools` first to discover available tool names and their arguments.
@@ -111,13 +111,13 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get OAuth credentials [box-oauth-credentials]
 
-Box MCP server authentication uses the Box Admin Console integration — not a custom OAuth app. To get your credentials:
+The Box MCP server authenticates through the Box Admin Console integration, not a custom OAuth app. To get your credentials:
 
 1. Log in to your [Box Admin Console](https://app.box.com/master).
 2. Go to **Integrations** and search for **Box MCP server**.
 3. Open the integration and select **Configure**.
-4. Under **Additional Configuration**, click **Add Integration Credentials**, enter a name, and click **Save**.
+4. Under **Additional Configuration**, select **Add Integration Credentials**, enter a name, and select **Save**.
 5. Copy the generated **Client ID** and **Client Secret**.
-6. Note the **Redirect URI** shown — you will need to enter this in Kibana.
-7. In {{kib}}, enter the Client ID and Client Secret. The authorization URL and token URL are pre-configured.
+6. Copy the **Redirect URI** shown.
+7. In {{kib}}, enter the **Client ID**, **Client Secret**, and **Redirect URI**. Kibana preconfigures the authorization URL and token URL.
 8. Complete the authorization flow to connect your Box account.
