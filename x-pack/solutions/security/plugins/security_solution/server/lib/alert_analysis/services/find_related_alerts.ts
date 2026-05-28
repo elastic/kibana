@@ -13,10 +13,7 @@ import {
   trimEntityValues,
   type SourceEntities,
 } from './find_related_alerts_entity_utils';
-import {
-  getErrorMessage,
-  isElasticsearchNotFoundError,
-} from './find_related_alerts_es_errors';
+import { getErrorMessage, isElasticsearchNotFoundError } from './find_related_alerts_es_errors';
 
 export type { SourceEntities } from './find_related_alerts_entity_utils';
 

@@ -41,7 +41,9 @@ export const RELATED_ALERT_ENTITY_SOURCE_INCLUDES = [
   'destination.ip',
 ] as const;
 
-export const extractSourceEntitiesFromAlert = (alertSource: Record<string, unknown>): SourceEntities => ({
+export const extractSourceEntitiesFromAlert = (
+  alertSource: Record<string, unknown>
+): SourceEntities => ({
   hostNames: trimEntityValues(getEntityFieldValues(alertSource, 'host.name')),
   userNames: trimEntityValues(getEntityFieldValues(alertSource, 'user.name')),
   sourceIps: trimEntityValues(getEntityFieldValues(alertSource, 'source.ip')),
