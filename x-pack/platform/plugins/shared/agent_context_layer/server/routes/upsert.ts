@@ -43,7 +43,7 @@ export const registerUpsertRoute = ({
               kibana: schema.maybe(
                 schema.object({
                   privileges: schema.arrayOf(
-                    schema.object({ name: schema.string({ minLength: 1 }) }),
+                    schema.object({ name: schema.string({ minLength: 1, maxLength: 255 }) }),
                     { maxSize: 100 }
                   ),
                 })
@@ -51,7 +51,7 @@ export const registerUpsertRoute = ({
               elasticsearch: schema.maybe(
                 schema.object({
                   indices: schema.arrayOf(
-                    schema.object({ name: schema.string({ minLength: 1 }) }),
+                    schema.object({ name: schema.string({ minLength: 1, maxLength: 255 }) }),
                     { maxSize: 100 }
                   ),
                 })
