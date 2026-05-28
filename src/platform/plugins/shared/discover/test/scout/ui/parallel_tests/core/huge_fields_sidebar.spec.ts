@@ -12,21 +12,82 @@
  */
 
 import { spaceTest, tags } from '@kbn/scout';
+import type { EsClient } from '@kbn/scout';
 import { expect, scrollContainerUntilTargetIsVisible } from '@kbn/scout/ui';
 
-const HUGE_FIELDS_ARCHIVE_PATH = 'src/platform/test/functional/fixtures/es_archiver/huge_fields';
-const HUGE_FIELDS_DATA_VIEW = 'testhuge*';
+const HUGE_FIELDS_INDEX_PREFIX = 'testhuge_scout_virtualized';
+const HUGE_FIELDS_DATA_VIEW_SUFFIX = '*';
+const HUGE_FIELDS_DOC_ID = '1';
+const HUGE_FIELDS_TARGET_INDEX = 1_050;
+const HUGE_FIELDS_MAX_INDEX = 1_500;
 const HUGE_FIELDS_TIME_DEFAULTS = '{ "from": "2016-10-05T00:00:00", "to": "2016-10-06T00:00:00"}';
+
+const ensureHugeFieldsData = async ({
+  esClient,
+  indexName,
+}: {
+  esClient: EsClient;
+  indexName: string;
+}) => {
+  const indexExists = await esClient.indices.exists({ index: indexName });
+
+  if (!indexExists) {
+    await esClient.indices.create({
+      index: indexName,
+      settings: {
+        index: {
+          mapping: {
+            total_fields: {
+              limit: 10_000,
+            },
+          },
+          number_of_replicas: 0,
+          number_of_shards: 1,
+        },
+      },
+      mappings: {
+        properties: {
+          date: {
+            type: 'date',
+          },
+        },
+      },
+    });
+  }
+
+  const document: Record<string, number | string> = {
+    date: '2016-10-05T14:00:00',
+  };
+
+  for (let i = 0; i <= HUGE_FIELDS_MAX_INDEX; i++) {
+    document[`myvar${i}`] = i;
+  }
+
+  await esClient.index({
+    index: indexName,
+    id: HUGE_FIELDS_DOC_ID,
+    document,
+    refresh: 'wait_for',
+  });
+};
 
 spaceTest.describe('Discover huge field list virtualization', { tag: tags.stateful.all }, () => {
   let hugeFieldsDataViewId: string | undefined;
+  let hugeFieldsDataViewTitle = '';
+  let hugeFieldsIndexName = '';
 
-  spaceTest.beforeAll(async ({ scoutSpace, apiServices, esArchiver }) => {
-    await esArchiver.loadIfNeeded(HUGE_FIELDS_ARCHIVE_PATH);
+  spaceTest.beforeAll(async ({ scoutSpace, apiServices, esClient }) => {
+    hugeFieldsIndexName = `${HUGE_FIELDS_INDEX_PREFIX}_${scoutSpace.id}`;
+    hugeFieldsDataViewTitle = `${hugeFieldsIndexName}${HUGE_FIELDS_DATA_VIEW_SUFFIX}`;
+
+    await ensureHugeFieldsData({
+      esClient,
+      indexName: hugeFieldsIndexName,
+    });
 
     const { data } = await apiServices.dataViews.create({
-      title: HUGE_FIELDS_DATA_VIEW,
-      name: HUGE_FIELDS_DATA_VIEW,
+      title: hugeFieldsDataViewTitle,
+      name: hugeFieldsDataViewTitle,
       timeFieldName: 'date',
       override: true,
       spaceId: scoutSpace.id,
@@ -46,11 +107,18 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
     await pageObjects.discover.waitUntilSearchingHasFinished();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
+  spaceTest.afterAll(async ({ scoutSpace, apiServices, esClient }) => {
     await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
 
     if (hugeFieldsDataViewId) {
       await apiServices.dataViews.delete(hugeFieldsDataViewId, scoutSpace.id);
+    }
+
+    if (hugeFieldsIndexName) {
+      await esClient.indices.delete({
+        index: hugeFieldsIndexName,
+        ignore_unavailable: true,
+      });
     }
 
     await scoutSpace.savedObjects.cleanStandardList();
@@ -59,7 +127,9 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
   spaceTest(
     'renders offscreen sidebar fields after scroll in huge data view',
     async ({ page, pageObjects }) => {
-      await expect(pageObjects.discover.getSelectedDataView()).toContainText(HUGE_FIELDS_DATA_VIEW);
+      await expect(pageObjects.discover.getSelectedDataView()).toContainText(
+        hugeFieldsDataViewTitle
+      );
 
       await expect(
         page.testSubj.locator('fieldListGroupedAvailableFields-countLoading')
@@ -70,9 +140,9 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
       const availableFieldCount = Number(
         (await page.testSubj.innerText('fieldListGroupedAvailableFields-count')).replace(/,/g, '')
       );
-      expect(availableFieldCount).toBeGreaterThan(5_000);
+      expect(availableFieldCount).toBeGreaterThan(HUGE_FIELDS_TARGET_INDEX);
 
-      const virtualizedField = page.testSubj.locator('field-myvar1050');
+      const virtualizedField = page.testSubj.locator(`field-myvar${HUGE_FIELDS_TARGET_INDEX}`);
 
       // Initially this field should not be rendered in the virtualized list.
       await expect(virtualizedField).toBeHidden();
