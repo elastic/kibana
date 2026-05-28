@@ -352,8 +352,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
-  // Persist workspace at end of round when bash was used. No-op otherwise.
-  await context.bashService?.flush();
+  // Persist filesystem state for this round (today: the workspace volume).
+  // No-op when nothing changed.
+  await context.filesystemService.flush();
   return {
     round,
   };

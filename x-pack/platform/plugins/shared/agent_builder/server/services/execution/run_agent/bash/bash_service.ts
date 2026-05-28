@@ -60,12 +60,10 @@ export interface BashServiceDeps {
 
 /**
  * Owns the just-bash runtime for a conversation run. Constructed only when
- * `experimentalFeatures.bash` is on. Tracks whether bash was used at least
- * once and asks the workspace volume to flush at end of round.
+ * `experimentalFeatures.bash` is on.
  */
 export class BashService implements IBashService {
   private readonly deps: BashServiceDeps;
-  private touched = false;
 
   constructor(deps: BashServiceDeps) {
     this.deps = deps;
@@ -85,7 +83,6 @@ export class BashService implements IBashService {
   }
 
   async exec(command: string): Promise<BashExecResult> {
-    this.touched = true;
     // Ensure a workspace_id exists once bash is actually used; surfaced via
     // getWorkspaceId() for propagation to the conversation document.
     this.getOrCreateWorkspaceId();
@@ -133,15 +130,5 @@ export class BashService implements IBashService {
     } finally {
       clearTimeout(timer);
     }
-  }
-
-  /**
-   * Persist the current workspace state. No-op when bash was never used in
-   * this run. Delegates to the workspace volume, which handles the empty-doc
-   * + no-existing-doc skip on its end.
-   */
-  async flush(): Promise<void> {
-    if (!this.touched) return;
-    await this.deps.workspaceVolume.flush();
   }
 }

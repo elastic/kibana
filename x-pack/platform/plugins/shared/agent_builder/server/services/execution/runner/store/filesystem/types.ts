@@ -8,11 +8,6 @@
 import type { FsEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type { Volume } from '@kbn/agent-builder-server/runner';
 
-// `Volume` and `VolumeGlobOptions` moved to agent-builder-server (so the
-// `WritableToolResultStore` / `WritableSkillsStore` interfaces can reference
-// them via `getVolume()`). Re-exported here for backward compatibility.
-export type { Volume, VolumeGlobOptions } from '@kbn/agent-builder-server/runner';
-
 // ============================================================================
 // VirtualFileSystem types
 // ============================================================================

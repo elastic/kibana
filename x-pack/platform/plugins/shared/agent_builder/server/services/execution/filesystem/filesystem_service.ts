@@ -8,7 +8,7 @@
 import type { IFileSystem } from 'just-bash';
 import { InMemoryFs, MountableFs } from 'just-bash';
 import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
-import type { Volume } from '../runner/store/filesystem/types';
+import type { Volume } from '@kbn/agent-builder-server/runner';
 import { VolumeBackedReadOnlyFs } from './volume_backed_read_only_fs';
 import type { WorkspaceVolume } from './workspace_volume';
 import { MOUNT_POINTS } from './mount_points';
@@ -70,5 +70,13 @@ export class FilesystemService implements IFilesystemService {
       throw new Error('FilesystemService not initialised; call init() first');
     }
     return this.fs;
+  }
+
+  /**
+   * Persist mutable filesystem state for this round. Today that's just the
+   * workspace volume → ES; no-op when nothing changed.
+   */
+  async flush(): Promise<void> {
+    await this.deps.workspaceVolume.flush();
   }
 }

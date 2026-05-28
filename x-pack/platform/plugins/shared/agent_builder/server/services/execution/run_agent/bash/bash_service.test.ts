@@ -62,34 +62,22 @@ describe('BashService', () => {
     expect(result.stdout.trim()).toBe('hi');
   });
 
-  it('flush() saves /workspace files to WorkspaceClient', async () => {
-    const { fsService, workspaceVolume, workspaceClient } = await makeFixture({
-      generateId: () => 'ws-test',
-    });
+  it('a write through bash flips workspace dirty (so flush will save)', async () => {
+    // bash no longer owns flush — that's `FilesystemService.flush()` /
+    // `WorkspaceVolume.flush()`. What we verify here is that writes via bash
+    // do reach the dirty-tracked workspace fs.
+    const { fsService, workspaceVolume } = await makeFixture();
     const bash = makeBash(fsService, workspaceVolume);
+    expect(workspaceVolume.isDirty()).toBe(false);
     await bash.exec('echo data > /workspace/file.txt');
-    await bash.flush();
-    expect(workspaceClient.save).toHaveBeenCalledTimes(1);
-    const [wsId, files] = workspaceClient.save.mock.calls[0];
-    expect(wsId).toBe('ws-test');
-    expect(Buffer.from(files['/workspace/file.txt'].content, 'base64').toString()).toBe('data\n');
+    expect(workspaceVolume.isDirty()).toBe(true);
   });
 
-  it('flush() is a no-op when bash was never used in this run', async () => {
-    const { fsService, workspaceVolume, workspaceClient } = await makeFixture();
+  it('read-only bash commands do not flip dirty', async () => {
+    const { fsService, workspaceVolume } = await makeFixture();
     const bash = makeBash(fsService, workspaceVolume);
-    await bash.flush();
-    expect(workspaceClient.save).not.toHaveBeenCalled();
-  });
-
-  it('flush() is a no-op when workspace is empty AND no doc exists', async () => {
-    const { fsService, workspaceVolume, workspaceClient } = await makeFixture({
-      generateId: () => 'ws-empty',
-    });
-    const bash = makeBash(fsService, workspaceVolume);
-    await bash.exec('echo hello'); // touches but writes nothing under /workspace
-    await bash.flush();
-    expect(workspaceClient.save).not.toHaveBeenCalled();
+    await bash.exec('echo hi');
+    expect(workspaceVolume.isDirty()).toBe(false);
   });
 
   it('truncates large stdout', async () => {

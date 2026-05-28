@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ByteString, IFileSystem, FsStat } from 'just-bash';
+import type { IFileSystem } from 'just-bash';
+import { PassthroughFs } from './passthrough_fs';
 
 const encoder = new TextEncoder();
 
@@ -20,22 +21,20 @@ const enospc = (op: string, path: string, limit: number) =>
 /**
  * Caps the total content size of an underlying writable `IFileSystem`. Writes
  * that would push the aggregate above `maxBytes` are rejected with `ENOSPC`.
- * Reads and non-growing operations (rm, mkdir, chmod, ...) pass through.
+ * Reads and non-growing operations (rm, mkdir, chmod, ...) pass through
+ * unchanged via `PassthroughFs`.
  *
  * The current size is computed by walking the fs on each mutation. That's O(n)
  * per write; acceptable for the workspace's tens-to-hundreds of small files at
  * worst. Revisit (cache + invalidate) if walk cost becomes measurable.
  */
-export class CapacityLimitedFs implements IFileSystem {
-  private readonly inner: IFileSystem;
+export class CapacityLimitedFs extends PassthroughFs {
   private readonly maxBytes: number;
 
   constructor(inner: IFileSystem, maxBytes: number) {
-    this.inner = inner;
+    super(inner);
     this.maxBytes = maxBytes;
   }
-
-  // ---- mutation paths with capacity enforcement ----
 
   async writeFile(
     path: string,
@@ -46,7 +45,7 @@ export class CapacityLimitedFs implements IFileSystem {
     const existingBytes = await this.tryGetFileSize(path);
     const projected = (await this.currentSize()) - existingBytes + newBytes;
     if (projected > this.maxBytes) throw enospc('writeFile', path, this.maxBytes);
-    return this.inner.writeFile(path, content, options);
+    return super.writeFile(path, content, options);
   }
 
   async appendFile(
@@ -57,7 +56,7 @@ export class CapacityLimitedFs implements IFileSystem {
     const addedBytes = byteLengthOf(content);
     const projected = (await this.currentSize()) + addedBytes;
     if (projected > this.maxBytes) throw enospc('appendFile', path, this.maxBytes);
-    return this.inner.appendFile(path, content, options);
+    return super.appendFile(path, content, options);
   }
 
   async cp(src: string, dest: string, options?: Parameters<IFileSystem['cp']>[2]): Promise<void> {
@@ -65,73 +64,11 @@ export class CapacityLimitedFs implements IFileSystem {
     const existingDestBytes = await this.subtreeSize(dest);
     const projected = (await this.currentSize()) - existingDestBytes + srcBytes;
     if (projected > this.maxBytes) throw enospc('cp', dest, this.maxBytes);
-    return this.inner.cp(src, dest, options);
+    return super.cp(src, dest, options);
   }
 
-  // ---- pass-through (no growth or freeing) ----
-
-  async readFile(path: string, options?: Parameters<IFileSystem['readFile']>[1]): Promise<string> {
-    return this.inner.readFile(path, options);
-  }
-  async readFileBuffer(path: string): Promise<Uint8Array> {
-    return this.inner.readFileBuffer(path);
-  }
-  async readFileBytes(path: string): Promise<ByteString> {
-    return this.inner.readFileBytes!(path);
-  }
-  async exists(path: string): Promise<boolean> {
-    return this.inner.exists(path);
-  }
-  async stat(path: string): Promise<FsStat> {
-    return this.inner.stat(path);
-  }
-  async lstat(path: string): Promise<FsStat> {
-    return this.inner.lstat(path);
-  }
-  async readdir(path: string): Promise<string[]> {
-    return this.inner.readdir(path);
-  }
-  async readdirWithFileTypes(
-    path: string
-  ): Promise<
-    Array<{ name: string; isFile: boolean; isDirectory: boolean; isSymbolicLink: boolean }>
-  > {
-    return this.inner.readdirWithFileTypes!(path);
-  }
-  getAllPaths(): string[] {
-    return this.inner.getAllPaths();
-  }
-  resolvePath(base: string, path: string): string {
-    return this.inner.resolvePath(base, path);
-  }
-  async realpath(path: string): Promise<string> {
-    return this.inner.realpath(path);
-  }
-  async readlink(path: string): Promise<string> {
-    return this.inner.readlink(path);
-  }
-  async mkdir(path: string, options?: Parameters<IFileSystem['mkdir']>[1]): Promise<void> {
-    return this.inner.mkdir(path, options);
-  }
-  async rm(path: string, options?: Parameters<IFileSystem['rm']>[1]): Promise<void> {
-    return this.inner.rm(path, options);
-  }
-  async mv(src: string, dest: string): Promise<void> {
-    // Net-neutral within the same fs: bytes move from src to dest, total unchanged.
-    return this.inner.mv(src, dest);
-  }
-  async chmod(path: string, mode: number): Promise<void> {
-    return this.inner.chmod(path, mode);
-  }
-  async symlink(target: string, linkPath: string): Promise<void> {
-    return this.inner.symlink(target, linkPath);
-  }
-  async link(existingPath: string, newPath: string): Promise<void> {
-    return this.inner.link(existingPath, newPath);
-  }
-  async utimes(path: string, atime: Date, mtime: Date): Promise<void> {
-    return this.inner.utimes(path, atime, mtime);
-  }
+  // mv is net-neutral in size (bytes move from src to dest); inherited
+  // passthrough is correct. rm and mkdir don't grow content; same.
 
   // ---- size helpers ----
 

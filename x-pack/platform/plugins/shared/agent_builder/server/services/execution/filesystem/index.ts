@@ -12,4 +12,6 @@ export {
   type WorkspaceVolumeDeps,
   DEFAULT_WORKSPACE_CAPACITY_BYTES,
 } from './workspace_volume';
+export { PassthroughFs } from './passthrough_fs';
 export { CapacityLimitedFs } from './capacity_limited_fs';
+export { DirtyTrackingFs } from './dirty_tracking_fs';

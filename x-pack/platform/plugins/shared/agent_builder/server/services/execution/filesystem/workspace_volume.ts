@@ -10,6 +10,7 @@ import type { IFileSystem } from 'just-bash';
 import { InMemoryFs } from 'just-bash';
 import type { IWorkspaceClient, WorkspaceFile } from '../../workspaces';
 import { CapacityLimitedFs } from './capacity_limited_fs';
+import { DirtyTrackingFs } from './dirty_tracking_fs';
 import { MOUNT_POINTS } from './mount_points';
 
 const WORKSPACE_PREFIX = MOUNT_POINTS.workspace;
@@ -38,20 +39,28 @@ export interface WorkspaceVolumeDeps {
 export class WorkspaceVolume {
   private readonly deps: WorkspaceVolumeDeps;
   /** Raw underlying fs. Internal `load()` and `snapshot()` use this directly,
-   * bypassing the capacity check (loading persisted state and reading should
-   * never trip the cap). */
+   * bypassing the capacity check + dirty tracking — loading persisted state
+   * shouldn't count as user-driven changes, and reads should never trip the cap. */
   private readonly fs: InMemoryFs;
+  /** Dirty-tracking wrapper. Inspected by `flush()` to skip redundant ES writes
+   * when nothing changed this round. */
+  private readonly dirtyTrackingFs: DirtyTrackingFs;
   /** Capacity-enforced view exposed via `getFilesystem()` and mounted by
-   * `FilesystemService`. Writes from the agent go through this wrapper. */
-  private readonly capacityLimitedFs: IFileSystem;
+   * `FilesystemService`. Writes from the agent flow capacity-check → underlying
+   * fs → dirty flag. */
+  private readonly exposedFs: IFileSystem;
   private workspaceId?: string;
   private loaded = false;
 
   constructor(deps: WorkspaceVolumeDeps) {
     this.deps = deps;
     this.fs = new InMemoryFs();
-    this.capacityLimitedFs = new CapacityLimitedFs(
-      this.fs,
+    // Stack: writes go capacity-check first → if it passes, hit the dirty
+    // tracker (which calls the inner fs and flips dirty on success). Failed
+    // capacity checks short-circuit before dirty is touched.
+    this.dirtyTrackingFs = new DirtyTrackingFs(this.fs);
+    this.exposedFs = new CapacityLimitedFs(
+      this.dirtyTrackingFs,
       deps.capacityBytes ?? DEFAULT_WORKSPACE_CAPACITY_BYTES
     );
     this.workspaceId = deps.initialWorkspaceId;
@@ -87,12 +96,17 @@ export class WorkspaceVolume {
   }
 
   /**
-   * The capacity-enforced in-memory FS, suitable for mounting under
-   * `MountableFs`. Writes that would push the workspace past its byte cap
-   * throw `ENOSPC`.
+   * The capacity-enforced, dirty-tracked in-memory FS, suitable for mounting
+   * under `MountableFs`. Writes that would push the workspace past its byte
+   * cap throw `ENOSPC`; successful mutations flip the internal dirty bit.
    */
   getFilesystem(): IFileSystem {
-    return this.capacityLimitedFs;
+    return this.exposedFs;
+  }
+
+  /** Has the workspace been modified since the last `flush()` (or construction)? */
+  isDirty(): boolean {
+    return this.dirtyTrackingFs.isDirty();
   }
 
   /**
@@ -111,18 +125,26 @@ export class WorkspaceVolume {
   }
 
   /**
-   * Persist the current state of the workspace to ES. No-op when no
-   * workspace_id has been minted. Also skips the ES write when the workspace
-   * is empty and the document doesn't exist yet (avoids creating an empty doc).
+   * Persist the current state of the workspace to ES. No-ops when:
+   *  - no `workspace_id` has been minted (bash was never used), OR
+   *  - nothing has changed since the last flush (`isDirty() === false`), OR
+   *  - the workspace is empty and the document doesn't exist yet (no need
+   *    to create an empty doc).
+   * Resets the dirty bit on success so the next round starts fresh.
    */
   async flush(): Promise<void> {
     if (!this.workspaceId) return;
+    if (!this.isDirty()) return;
     const files = await this.snapshot();
     if (Object.keys(files).length === 0) {
       const existing = await this.deps.workspaceClient.load(this.workspaceId);
-      if (!existing) return;
+      if (!existing) {
+        this.dirtyTrackingFs.resetDirty();
+        return;
+      }
     }
     await this.deps.workspaceClient.save(this.workspaceId, files);
+    this.dirtyTrackingFs.resetDirty();
   }
 
   /**

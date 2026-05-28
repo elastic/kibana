@@ -145,7 +145,18 @@ describe('WorkspaceVolume', () => {
       expect(client.save).not.toHaveBeenCalled();
     });
 
-    it('saves the snapshot under the workspace_id', async () => {
+    it('is a no-op when nothing has changed since construction', async () => {
+      const client = mockWorkspaceClient();
+      const v = new WorkspaceVolume({
+        workspaceClient: client,
+        initialWorkspaceId: 'ws-clean',
+      });
+      // No writes through getFilesystem() — dirty=false.
+      await v.flush();
+      expect(client.save).not.toHaveBeenCalled();
+    });
+
+    it('saves the snapshot after a write', async () => {
       const client = mockWorkspaceClient();
       const v = new WorkspaceVolume({
         workspaceClient: client,
@@ -160,22 +171,52 @@ describe('WorkspaceVolume', () => {
     });
 
     it('skips the ES write when the workspace is empty and no doc exists yet', async () => {
+      // Mutate so dirty=true, but the final snapshot is empty AND no prior doc.
       const client = mockWorkspaceClient();
       const v = new WorkspaceVolume({
         workspaceClient: client,
         initialWorkspaceId: 'ws-empty',
       });
+      await v.getFilesystem().writeFile('/scratch.txt', 'tmp');
+      await v.getFilesystem().rm('/scratch.txt');
       await v.flush();
       expect(client.save).not.toHaveBeenCalled();
     });
 
-    it('still saves an empty workspace when a doc already exists (to record deletes)', async () => {
+    it('saves an empty workspace after deleting persisted content (records the delete)', async () => {
       const client = mockWorkspaceClient();
-      client.load.mockResolvedValueOnce(persistedDoc({}));
+      client.load.mockResolvedValue(
+        persistedDoc({
+          '/workspace/old.txt': {
+            content: Buffer.from('legacy').toString('base64'),
+            mode: 0o644,
+            mtime: '2025-01-01T00:00:00.000Z',
+          },
+        })
+      );
       const v = new WorkspaceVolume({
         workspaceClient: client,
-        initialWorkspaceId: 'ws-empty-existing',
+        initialWorkspaceId: 'ws-delete',
       });
+      await v.load();
+      // Delete the only file via the public (dirty-tracked) fs.
+      await v.getFilesystem().rm('/old.txt');
+      await v.flush();
+      expect(client.save).toHaveBeenCalledTimes(1);
+      const [, files] = client.save.mock.calls[0];
+      expect(files).toEqual({});
+    });
+
+    it('resets dirty after a successful save (subsequent unchanged flush is a no-op)', async () => {
+      const client = mockWorkspaceClient();
+      const v = new WorkspaceVolume({
+        workspaceClient: client,
+        initialWorkspaceId: 'ws-double-flush',
+      });
+      await v.getFilesystem().writeFile('/a.txt', 'a');
+      await v.flush();
+      expect(client.save).toHaveBeenCalledTimes(1);
+      // Second flush with no further changes should not call save again.
       await v.flush();
       expect(client.save).toHaveBeenCalledTimes(1);
     });
