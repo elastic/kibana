@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const browser = getService('browser');
+  const dataGrid = getService('dataGrid');
   const { common, header, discover, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'header',
@@ -136,6 +137,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(marks).to.contain('club');
 
         expect(await browser.getCurrentUrl()).to.contain('columns:!()');
+      });
+
+      it('doc view should show exact header fields', async function () {
+        await common.navigateToApp('discover');
+        await discover.waitUntilSearchingHasFinished();
+        const expectedHeader = '@timestamp Summary';
+        const DocHeader = await dataGrid.getHeaderFields();
+        expect(DocHeader.join(' ')).to.be(expectedHeader);
+      });
+
+      it('doc view should sort ascending', async function () {
+        const expectedTimeStamp = 'Sep 20, 2015 @ 00:00:00.000';
+        await dataGrid.clickDocSortAsc();
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains expected timestamp', async () => {
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
+          const text = await cell.getVisibleText();
+          return text === expectedTimeStamp;
+        });
       });
     });
   });
