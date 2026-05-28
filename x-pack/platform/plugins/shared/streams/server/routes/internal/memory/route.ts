@@ -9,6 +9,11 @@ import { z } from '@kbn/zod/v4';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import { forbidden, notFound, serverUnavailable } from '@hapi/boom';
+import {
+  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import type {
@@ -19,11 +24,6 @@ import type {
 } from '../../../lib/memory';
 import { MemoryServiceImpl } from '../../../lib/memory';
 import type { StreamsServer } from '../../../types';
-import {
-  STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
-  STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { triggerMemorySynthesisWorkflow } from '../../../lib/memory/trigger_memory_synthesis_workflow';
 
 const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
@@ -541,4 +541,3 @@ export const internalMemoryRoutes = {
   ...consolidateMemoryRoute,
   ...synthesizeMemoryRoute,
 };
-
