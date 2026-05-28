@@ -20,33 +20,35 @@ interface ServiceRowProps {
 
 export const ServiceRow: React.FC<ServiceRowProps> = ({ service, isSelected, onToggle }) => {
   return (
-    <EuiCheckableCard
-      id={`service-toggle-${service.id}`}
-      label={
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem>
-            <EuiText size="s">
-              <strong>{service.name}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <SignalTypeBadge signalType={service.signalType} />
-              </EuiFlexItem>
-              {service.deliveryMethods.map((entry) => (
-                <EuiFlexItem key={entry.method} grow={false}>
-                  <DeliveryMethodBadge method={entry.method} preferred={entry.preferred} />
+    <div data-test-subj={`servicesStep-serviceRow-${service.id}`}>
+      <EuiCheckableCard
+        id={`service-toggle-${service.id}`}
+        label={
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <strong>{service.name}</strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <SignalTypeBadge signalType={service.signalType} />
                 </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      checkableType="checkbox"
-      checked={isSelected}
-      onChange={(e) => onToggle(service.id, e.target.checked)}
-      data-test-subj={`servicesStep-serviceRow-${service.id}`}
-    />
+                {service.deliveryMethods.map((entry) => (
+                  <EuiFlexItem key={entry.method} grow={false}>
+                    <DeliveryMethodBadge method={entry.method} preferred={entry.preferred} />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        checkableType="checkbox"
+        checked={isSelected}
+        onChange={(e) => onToggle(service.id, e.target.checked)}
+        data-test-subj={`servicesStep-toggle-${service.id}`}
+      />
+    </div>
   );
 };

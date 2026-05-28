@@ -74,7 +74,7 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
   const handleToggle = useCallback(
     (serviceId: string, checked: boolean) => {
       const next = checked
-        ? [...selectedServiceIds, serviceId]
+        ? [...new Set([...selectedServiceIds, serviceId])]
         : selectedServiceIds.filter((id) => id !== serviceId);
       setSelectedServiceIds(next);
     },
@@ -82,9 +82,9 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
   );
 
   const handleSelectAll = useCallback(() => {
-    const filteredIds = filteredServices.map((s) => s.id);
-    const existing = selectedServiceIds.filter((id) => !filteredIds.includes(id));
-    setSelectedServiceIds([...existing, ...filteredIds]);
+    const filteredIdSet = new Set(filteredServices.map((s) => s.id));
+    const existing = selectedServiceIds.filter((id) => !filteredIdSet.has(id));
+    setSelectedServiceIds([...existing, ...filteredIdSet]);
   }, [filteredServices, selectedServiceIds, setSelectedServiceIds]);
 
   const handleDeselectAll = useCallback(() => {

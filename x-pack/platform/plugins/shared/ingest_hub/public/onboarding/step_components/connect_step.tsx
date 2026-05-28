@@ -15,6 +15,8 @@ import { LazyAwsConnectSetup } from '@kbn/fleet-plugin/public';
 import { AWS_SERVICES_MATRIX } from '../aws_service_matrix';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 
+const SERVICE_MAP = new Map(AWS_SERVICES_MATRIX.map((s) => [s.id, s]));
+
 interface ConnectStepProps {
   onNext: () => void;
 }
@@ -23,15 +25,14 @@ export function ConnectStep({ onNext }: ConnectStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
   const { connectStep, setConnectorId, setStaticKeys, setTemporaryKeys, servicesStep } =
     useOnboardingFlow();
+  const { selectedServiceIds } = servicesStep;
 
   const showIdentityFederation = useMemo(() => {
-    const { selectedServiceIds } = servicesStep;
     if (selectedServiceIds.length === 0) return true;
-    return selectedServiceIds.every((id) => {
-      const service = AWS_SERVICES_MATRIX.find((s) => s.id === id);
-      return service?.identityFederationSupported === true;
-    });
-  }, [servicesStep]);
+    return selectedServiceIds.every(
+      (id) => SERVICE_MAP.get(id)?.identityFederationSupported === true
+    );
+  }, [selectedServiceIds]);
 
   return (
     <div data-test-subj="onboardingStep-connect">

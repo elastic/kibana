@@ -25,7 +25,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
   test.afterAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': false,
+        'ingestHub.onboardingEnabled': 'false',
       },
     });
   });
@@ -65,32 +65,24 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     await expect(page.getByText(`${DEFAULT_SELECTED_COUNT} services selected`)).toBeVisible();
   });
 
-  test('config validation gates Next — required fields must be filled', async ({
-    browserAuth,
-    page,
-  }) => {
+  test('Next is disabled when no services are selected', async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
     await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
 
-    // cloudtrail is selected by default and requires s3_bucket_arn, cloudtrail_trail_arn, regions
-    // click Next without filling config to trigger validation
-    await page.testSubj.locator('servicesStep-nextButton').click();
+    // Next is enabled while services are selected (defaults have selections)
+    await expect(page.testSubj.locator('servicesStep-nextButton')).toBeEnabled();
 
-    // validation errors should appear for unfilled cloudtrail fields
-    await expect(
-      page.testSubj.locator('servicesStep-configField-cloudtrail-s3_bucket_arn')
-    ).toBeVisible();
+    // deselect all services via "Deselect all"
+    await page.testSubj.locator('servicesStep-deselectAllButton').click();
+    await expect(page.getByText('0 services selected')).toBeVisible();
 
-    // fill all required config for cloudtrail (and all other selected services)
-    // For this test just fill cloudtrail's fields to verify the pattern
-    await page.testSubj
-      .locator('servicesStep-configField-cloudtrail-s3_bucket_arn')
-      .fill('arn:aws:s3:::my-bucket');
-    await page.testSubj
-      .locator('servicesStep-configField-cloudtrail-cloudtrail_trail_arn')
-      .fill('arn:aws:cloudtrail:us-east-1:123456789012:trail/MyTrail');
-    await page.testSubj.locator('servicesStep-configField-cloudtrail-regions').fill('us-east-1');
+    // Next must be disabled with nothing selected
+    await expect(page.testSubj.locator('servicesStep-nextButton')).toBeDisabled();
+
+    // re-selecting any service re-enables Next
+    await page.testSubj.locator(`servicesStep-toggle-cloudtrail`).click();
+    await expect(page.testSubj.locator('servicesStep-nextButton')).toBeEnabled();
   });
 
   test('signal-type filter shows only matching services', async ({ browserAuth, page }) => {
