@@ -142,7 +142,7 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="iInCircle" color="subdued" aria-hidden={true} />
+            <EuiIcon type="info" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBetaBadge
@@ -215,7 +215,7 @@ export const EntityFlyout = ({ serviceName, onClose }: EntityFlyoutProps) => {
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              iconType="discuss"
+              iconType="comment"
               data-test-subj="entityCentricLabFlyoutAddToChat"
               onClick={() => undefined}
             >

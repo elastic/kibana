@@ -67,7 +67,7 @@ export const LogsTab = ({ serviceName, logs }: LogsTabProps) => {
       },
       {
         field: 'id',
-        name: <EuiIcon type="iInCircle" aria-hidden />,
+        name: <EuiIcon type="info" aria-hidden />,
         width: '32px',
         render: () => (
           <EuiButtonIcon
@@ -123,7 +123,7 @@ export const LogsTab = ({ serviceName, logs }: LogsTabProps) => {
                 delay="long"
               >
                 <EuiButtonIcon
-                  iconType="questionInCircle"
+                  iconType="question"
                   color="text"
                   aria-label={i18n.translate(
                     'discover.entityCentricLab.flyout.logs.columns.summaryTooltipAriaLabel',

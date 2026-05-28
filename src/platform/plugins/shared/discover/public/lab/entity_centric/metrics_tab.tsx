@@ -166,7 +166,7 @@ const MetricChartCard = ({
         <EuiFlexItem grow={false}>
           <EuiToolTip content={series.description} position="top" delay="long">
             <EuiButtonIcon
-              iconType="questionInCircle"
+              iconType="question"
               color="text"
               aria-label={i18n.translate(
                 'discover.entityCentricLab.flyout.metrics.descriptionAriaLabel',

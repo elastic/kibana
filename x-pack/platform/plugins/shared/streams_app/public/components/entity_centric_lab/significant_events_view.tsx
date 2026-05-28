@@ -40,7 +40,7 @@ export const SignificantEventsView = () => {
             { defaultMessage: 'Placeholder page' }
           )}
           color="primary"
-          iconType="iInCircle"
+          iconType="info"
         >
           <EuiText size="s">
             <p>

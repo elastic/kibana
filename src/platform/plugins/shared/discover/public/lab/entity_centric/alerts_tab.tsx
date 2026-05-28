@@ -186,7 +186,7 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
                   delay="long"
                 >
                   <EuiButtonIcon
-                    iconType="questionInCircle"
+                    iconType="question"
                     color="text"
                     aria-label={i18n.translate(
                       'discover.entityCentricLab.flyout.alerts.overTimeTooltipAriaLabel',
