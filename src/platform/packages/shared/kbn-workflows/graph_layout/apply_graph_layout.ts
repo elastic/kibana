@@ -9,6 +9,12 @@
 
 import dagre, { graphlib } from '@dagrejs/dagre';
 import { Position } from '@xyflow/react';
+import {
+  alignDagreCrossAxisInPlace,
+  type CrossAxis,
+  shiftEdgePointsOnCrossAxis,
+  snapshotDagreNodeCenters,
+} from './align_dagre_cross_axis';
 import type { ForeachGroup, GraphEdge, LayoutedEdge, LayoutedNode, PreLayoutNode } from './types';
 import { DEFAULT_NODE_STYLE } from './types';
 
@@ -36,11 +42,11 @@ function applyDagre(
 ): { nodes: LayoutedNode[]; edges: LayoutedEdge[] } {
   const g = new graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
+  const nodeSep = options.compact ? 8 : 50;
   g.setGraph({
     rankdir: direction,
-    align: 'UL',
     ranker: 'tight-tree',
-    nodesep: options.compact ? 8 : 50,
+    nodesep: nodeSep,
     ranksep: options.compact ? 16 : 70,
     edgesep: options.compact ? 8 : 40,
   });
@@ -53,6 +59,11 @@ function applyDagre(
   }
 
   dagre.layout(g);
+
+  const crossAxis: CrossAxis = direction === 'LR' ? 'y' : 'x';
+  const nodeIds = nodes.map((n) => n.id);
+  const centersBefore = snapshotDagreNodeCenters(g, nodeIds);
+  alignDagreCrossAxisInPlace(g, crossAxis, nodeSep);
 
   const isHorizontal = direction === 'LR';
   const layouted: LayoutedNode[] = nodes.map((node) => {
@@ -75,9 +86,25 @@ function applyDagre(
   const routedEdges: LayoutedEdge[] = edges.map((edge) => {
     const dagreEdge = g.edge(edge.source, edge.target);
     const rawPoints = dagreEdge?.points;
+    const beforeSource = centersBefore.get(edge.source);
+    const beforeTarget = centersBefore.get(edge.target);
+    const afterSource = g.node(edge.source);
+    const afterTarget = g.node(edge.target);
+    let deltaCross = 0;
+    if (beforeSource && beforeTarget && afterSource && afterTarget) {
+      const sourceDelta =
+        crossAxis === 'x' ? afterSource.x - beforeSource.x : afterSource.y - beforeSource.y;
+      const targetDelta =
+        crossAxis === 'x' ? afterTarget.x - beforeTarget.x : afterTarget.y - beforeTarget.y;
+      deltaCross = (sourceDelta + targetDelta) / 2;
+    }
     const points =
       rawPoints && rawPoints.length >= 2
-        ? rawPoints.map((p) => ({ x: p.x, y: p.y }))
+        ? shiftEdgePointsOnCrossAxis(
+            rawPoints.map((p) => ({ x: p.x, y: p.y })),
+            crossAxis,
+            deltaCross
+          )
         : [
             { x: 0, y: 0 },
             { x: 0, y: 0 },
