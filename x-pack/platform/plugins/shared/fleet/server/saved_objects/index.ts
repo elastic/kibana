@@ -1783,7 +1783,7 @@ export const getSavedObjectTypes = (
           verification_status: { type: 'keyword' },
           verification_started_at: { type: 'date' },
           verification_failed_at: { type: 'date' },
-          verification_permissions: { type: 'flattened' },
+          verification_permissions: { type: 'flattened', ignore_above: 8191 },
         },
       },
       modelVersions: {
@@ -1904,7 +1904,7 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
-                verification_permissions: { type: 'flattened' },
+                verification_permissions: { type: 'flattened', ignore_above: 8191 },
               },
             },
           ],
