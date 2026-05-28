@@ -139,12 +139,12 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
             format: 'standalone',
             breach: {
               query:
-                'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+                'FROM logs-* | EVAL severity = "high", host_name = "host-1" | WHERE severity == "high" | STATS count = COUNT(*) BY host_name | WHERE count >= 1',
             },
             recovery: {
               strategy: 'query',
               query:
-                'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+                'FROM logs-* | EVAL severity = "resolved", host_name = "host-1" | WHERE severity == "resolved" | STATS count = COUNT(*) BY host_name | WHERE count >= 1',
             },
           },
         },
@@ -155,12 +155,12 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         format: 'standalone',
         breach: {
           query:
-            'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+            'FROM logs-* | EVAL severity = "high", host_name = "host-1" | WHERE severity == "high" | STATS count = COUNT(*) BY host_name | WHERE count >= 1',
         },
         recovery: {
           strategy: 'query',
           query:
-            'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+            'FROM logs-* | EVAL severity = "resolved", host_name = "host-1" | WHERE severity == "resolved" | STATS count = COUNT(*) BY host_name | WHERE count >= 1',
         },
       });
       expect(response.body.schedule).toStrictEqual(created.schedule);
@@ -205,7 +205,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       body: {
         query: {
           format: 'composed',
-          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+          base: 'FROM logs-* | EVAL host_name = "host-1" | STATS count = COUNT(*) BY host_name',
           breach: { segment: 'WHERE count >= 10' },
         },
       },
@@ -214,7 +214,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
     expect(response).toHaveStatusCode(200);
     expect(response.body.query).toStrictEqual({
       format: 'composed',
-      base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+      base: 'FROM logs-* | EVAL host_name = "host-1" | STATS count = COUNT(*) BY host_name',
       breach: { segment: 'WHERE count >= 10' },
     });
     expect(response.body.schedule).toStrictEqual(created.schedule);
@@ -232,7 +232,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: {
           query: {
             format: 'composed',
-            base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
+            base: 'FROM logs-* | EVAL host_name = "host-1", value = 0 | STATS max_val = MAX(value) BY host_name',
             breach: { segment: 'WHERE max_val >= 10' },
             recovery: { strategy: 'query', segment: 'WHERE max_val < 5' },
           },
@@ -242,7 +242,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response).toHaveStatusCode(200);
       expect(response.body.query).toStrictEqual({
         format: 'composed',
-        base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
+        base: 'FROM logs-* | EVAL host_name = "host-1", value = 0 | STATS max_val = MAX(value) BY host_name',
         breach: { segment: 'WHERE max_val >= 10' },
         recovery: { strategy: 'query', segment: 'WHERE max_val < 5' },
       });

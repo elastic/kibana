@@ -416,7 +416,9 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         schedule: { every: '5m', lookback: '10m' },
         query: {
           format: 'standalone',
-          breach: { query: 'FROM logs-* | LIMIT 10 | WHERE status == "error"' },
+          breach: {
+            query: 'FROM logs-* | LIMIT 10 | EVAL status = "error" | WHERE status == "error"',
+          },
         },
         state_transition: { pending_count: 3 },
         grouping: { fields: ['host.name'] },
@@ -446,12 +448,12 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
           format: 'standalone',
           breach: {
             query:
-              'FROM logs-* | WHERE severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+              'FROM logs-* | EVAL severity = "high", host_name = "host-1" | WHERE severity == "high" | STATS count = COUNT(*) BY host_name | WHERE count >= 1',
           },
           recovery: {
             strategy: 'query',
             query:
-              'FROM logs-* | WHERE severity == "resolved" | STATS count = COUNT(*) BY host.name | WHERE count >= 1',
+              'FROM logs-* | EVAL severity = "resolved", host_name = "host-1" | WHERE severity == "resolved" | STATS count = COUNT(*) BY host_name | WHERE count >= 1',
           },
         },
       });
@@ -509,7 +511,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       metadata: { name: 'composed-rule' },
       query: {
         format: 'composed',
-        base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+        base: 'FROM logs-* | EVAL host_name = "host-1" | STATS count = COUNT(*) BY host_name',
         breach: { segment: 'WHERE count >= 10' },
       },
     });
@@ -528,7 +530,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         metadata: { name: 'composed-recover-rule' },
         query: {
           format: 'composed',
-          base: 'FROM logs-* | STATS max_val = MAX(value) BY host.name',
+          base: 'FROM logs-* | EVAL host_name = "host-1", value = 0 | STATS max_val = MAX(value) BY host_name',
           breach: { segment: 'WHERE max_val >= 10' },
           recovery: { strategy: 'query', segment: 'WHERE max_val < 5' },
         },
@@ -549,7 +551,7 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         metadata: { name: 'composed-no-data-rule' },
         query: {
           format: 'composed',
-          base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+          base: 'FROM logs-* | EVAL host_name = "host-1" | STATS count = COUNT(*) BY host_name',
           breach: { segment: 'WHERE count >= 1' },
           no_data: { segment: 'WHERE count == 0', behavior: 'last_status' },
         },
