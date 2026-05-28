@@ -94,9 +94,7 @@ describe('UnenrollInProgressActivityItem', () => {
 
     it('disables the button while aborting', async () => {
       let resolveAbort!: () => void;
-      const abortUnenroll = jest.fn(
-        () => new Promise<void>((resolve) => (resolveAbort = resolve))
-      );
+      const abortUnenroll = jest.fn(() => new Promise<void>((resolve) => (resolveAbort = resolve)));
       const result = renderComponent(baseAction, abortUnenroll);
 
       act(() => {
