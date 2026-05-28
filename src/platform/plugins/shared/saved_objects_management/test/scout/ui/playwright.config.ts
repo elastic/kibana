@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default function savedObjectsManagementApp({ loadTestFile }: FtrProviderContext) {
-  describe('saved objects management', function savedObjectsManagementAppTestSuite() {
-    loadTestFile(require.resolve('./inspect_saved_objects'));
-    loadTestFile(require.resolve('./show_relationships'));
-  });
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
