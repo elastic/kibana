@@ -210,14 +210,11 @@ describe('EMH Phase 2 — drift guard against Phase 1 component template', () =>
     'Maintainer.lookback_window',
   ] as const;
 
-  it.each(flatKeywordOrDatePaths)(
-    'declares %s on the Phase 1 component template',
-    (path) => {
-      expect(properties[path]).toBeDefined();
-      const declaredType = properties[path]?.type;
-      expect(['keyword', 'date']).toContain(declaredType);
-    }
-  );
+  it.each(flatKeywordOrDatePaths)('declares %s on the Phase 1 component template', (path) => {
+    expect(properties[path]).toBeDefined();
+    const declaredType = properties[path]?.type;
+    expect(['keyword', 'date']).toContain(declaredType);
+  });
 
   it('declares entity.relationships.*.target dynamic_template as keyword', () => {
     const dynamicTemplates = mappings?.dynamic_templates ?? [];

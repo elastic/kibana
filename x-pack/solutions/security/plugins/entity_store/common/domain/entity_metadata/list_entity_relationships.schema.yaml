@@ -1,0 +1,112 @@
+# Generate schema by calling:
+# cd x-pack/solutions/security/plugins/entity_store && yarn openapi:generate
+openapi: 3.0.0
+info:
+  title: List Entity Relationships Schema
+  version: '1'
+paths:
+  /api/entity_store/entities/{id}/observations/relationships:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ListEntityRelationships
+      summary: List entity relationship observations
+      description: >-
+        List paginated relationship observations from the entity metadata
+        history datastream for a given entity. Implicit filter on
+        event.action=relationship_observed.
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          description: Page number to return (1-indexed).
+          example: 1
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          description: Number of observations per page.
+          example: 10
+        - name: sort_field
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Field to sort results by.
+          example: '@timestamp'
+        - name: sort_order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+          description: Sort order.
+        - name: kind
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - accesses_frequently
+              - communicates_with
+              - administers
+              - depends_on
+              - owns
+              - supervises
+          description: Relationship kind to filter on.
+        - name: target
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Target EUID to filter on.
+          example: 'host:laptopA'
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: ISO-8601 lower bound for @timestamp.
+          example: '2026-04-27T00:00:00.000Z'
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+          description: ISO-8601 upper bound for @timestamp.
+          example: '2026-05-27T23:59:59.999Z'
+      responses:
+        '200':
+          description: Relationship observations returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      type: object
+                  page:
+                    type: integer
+                    minimum: 1
+                  per_page:
+                    type: integer
+                    minimum: 1
+                  total:
+                    type: integer
+                    minimum: 0
+                required:
+                  - records
+                  - page
+                  - per_page
+                  - total

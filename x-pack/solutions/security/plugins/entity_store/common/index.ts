@@ -120,3 +120,12 @@ export {
   getLatestEntitiesIndexName,
   getLatestEntityIndexPattern,
 } from './domain/entity_index';
+
+export { RELATIONSHIP_KINDS } from './domain/entity_metadata/relationship_observation';
+export type {
+  RelationshipKind,
+  RelationshipObservationDoc,
+  RelationshipObservationMaintainer,
+} from './domain/entity_metadata/relationship_observation';
+export { ListEntityRelationshipsRequestQuery } from './domain/entity_metadata/list_entity_relationships.gen';
+export type { ListEntityRelationshipsRequestQueryInput } from './domain/entity_metadata/list_entity_relationships.gen';
