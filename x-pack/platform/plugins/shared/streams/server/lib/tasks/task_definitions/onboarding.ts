@@ -16,7 +16,7 @@ import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
-import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
+import { isSignificantEventsMemoryEnabled } from '../../memory/is_significant_events_memory_enabled';
 import type { StreamsTaskType, TaskContext } from '.';
 import { getErrorMessage, parseError } from '../../streams/errors/parse_error';
 import { shouldIdentifyFeatures } from '../../sig_events/features/should_identify_features';
@@ -77,7 +77,6 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 getQueryClient,
                 getFeatureClient,
                 streamsClient,
-                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: fakeRequest,
                 rulesClientOptions: { cloneApiKeysOnCreate: true },
@@ -200,8 +199,8 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                   (memoryParams.features?.length ?? 0) > 0 ||
                   (memoryParams.queries?.length ?? 0) > 0;
 
-                const onboardingUseMemory = await uiSettingsClient.get<boolean>(
-                  OBSERVABILITY_STREAMS_ENABLE_MEMORY
+                const onboardingUseMemory = await isSignificantEventsMemoryEnabled(
+                  taskContext.server.core.featureFlags
                 );
                 if (hasMemoryInputs && onboardingUseMemory && runContext.fakeRequest) {
                   try {

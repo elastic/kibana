@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
-import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
+import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface DiscoverySettingsContextValue {
@@ -25,15 +25,18 @@ export const DiscoverySettingsProvider: React.FC<{ children: React.ReactNode }> 
   children,
 }) => {
   const {
-    core: { uiSettings },
+    core: { featureFlags },
   } = useKibana();
 
   const value = useMemo(
     () => ({
-      isMemoryEnabled: uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY, false),
+      isMemoryEnabled: featureFlags.getBooleanValue(
+        STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG,
+        false
+      ),
       isLoading: false,
     }),
-    [uiSettings]
+    [featureFlags]
   );
 
   return (

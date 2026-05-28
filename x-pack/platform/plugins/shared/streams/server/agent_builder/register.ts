@@ -39,9 +39,8 @@ export const registerStreamsAgentBuilder = async ({
       esClient: server.core.elasticsearch.client.asInternalUser,
     });
 
-  // The memory skill is registered lazily — only once the Streams memory advanced setting is on.
+  // The memory skill is registered lazily — only once the significant events memory feature flag is on.
   // This avoids exposing the skill to the agent when memory is not configured.
-  // Call onMemorySettingChanged when observability:streamsEnableMemory may have changed (e.g. from a uiSettings subscription).
   let memorySkillRegistered = false;
 
   const ensureMemorySkillRegistered = () => {
@@ -55,7 +54,9 @@ export const registerStreamsAgentBuilder = async ({
         getSecurity: () => server.core.security,
       })
     );
-    logger.info('Memory skill registered (observability:streamsEnableMemory is enabled)');
+    logger.info(
+      'Memory skill registered (streams.significantEventsMemoryEnabled feature flag is enabled)'
+    );
   };
 
   if (await isMemoryEnabled()) {
@@ -64,14 +65,5 @@ export const registerStreamsAgentBuilder = async ({
 
   return {
     ensureMemorySkillRegistered,
-    /**
-     * Call this from a uiSettings change subscription (e.g. in plugin start)
-     * to auto-register the memory skill when the setting is toggled on.
-     */
-    onMemorySettingChanged: async () => {
-      if (await isMemoryEnabled()) {
-        ensureMemorySkillRegistered();
-      }
-    },
   };
 };
