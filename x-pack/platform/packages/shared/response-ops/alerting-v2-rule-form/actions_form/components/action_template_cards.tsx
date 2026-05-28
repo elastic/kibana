@@ -17,10 +17,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { INLINE_ACTION_STEP_DEFINITIONS } from '../registry';
-import type { ActionDraft, ActionTemplateId } from '../types';
+import type { ActionDraft, ActionTemplate } from '../types';
+import { getActionTemplateKey } from '../types';
 
 interface ActionTemplateCard {
-  id: ActionTemplateId;
+  key: string;
+  template: ActionTemplate;
   label: string;
   description: string;
   iconType: string;
@@ -28,7 +30,8 @@ interface ActionTemplateCard {
 
 export const ACTION_TEMPLATE_CARDS: readonly ActionTemplateCard[] = [
   {
-    id: 'existing-workflow',
+    key: getActionTemplateKey({ source: 'existing' }),
+    template: { source: 'existing' },
     label: i18n.translate(
       'xpack.responseOps.alertingV2RuleForm.actionForm.card.existingWorkflow.label',
       { defaultMessage: 'Workflow' }
@@ -40,20 +43,28 @@ export const ACTION_TEMPLATE_CARDS: readonly ActionTemplateCard[] = [
     iconType: 'workflowsApp',
   },
   ...INLINE_ACTION_STEP_DEFINITIONS.map((definition) => ({
-    id: `inline-${definition.id}` as ActionTemplateId,
+    key: getActionTemplateKey({ source: 'inline', stepType: definition.id }),
+    template: { source: 'inline', stepType: definition.id } as const,
     label: definition.label,
     description: definition.description ?? '',
     iconType: definition.iconType ?? 'gear',
   })),
 ];
 
-export const getTemplateIdForAction = (action: ActionDraft): ActionTemplateId =>
+export const getTemplateForAction = (action: ActionDraft): ActionTemplate =>
   action.source === 'existing'
-    ? 'existing-workflow'
-    : (`inline-${action.stepType}` as ActionTemplateId);
+    ? { source: 'existing' }
+    : { source: 'inline', stepType: action.stepType };
+
+export const findActionTemplateCard = (
+  template: ActionTemplate
+): ActionTemplateCard | undefined => {
+  const key = getActionTemplateKey(template);
+  return ACTION_TEMPLATE_CARDS.find((card) => card.key === key);
+};
 
 interface ActionTemplateCardsProps {
-  onPick: (templateId: ActionTemplateId) => void;
+  onPick: (template: ActionTemplate) => void;
   onCancel?: () => void;
 }
 
@@ -61,7 +72,7 @@ export const ActionTemplateCards = ({ onPick, onCancel }: ActionTemplateCardsPro
   <>
     <EuiFlexGroup direction="column" gutterSize="s">
       {ACTION_TEMPLATE_CARDS.map((card) => (
-        <EuiFlexItem key={card.id}>
+        <EuiFlexItem key={card.key}>
           <EuiCard
             paddingSize="s"
             layout="horizontal"
@@ -79,8 +90,8 @@ export const ActionTemplateCards = ({ onPick, onCancel }: ActionTemplateCardsPro
                 <p>{card.description}</p>
               </EuiText>
             }
-            onClick={() => onPick(card.id)}
-            data-test-subj={`actionTemplateCard-${card.id}`}
+            onClick={() => onPick(card.template)}
+            data-test-subj={`actionTemplateCard-${card.key}`}
           />
         </EuiFlexItem>
       ))}

@@ -24,7 +24,12 @@ export interface InlineWorkflowActionDraft {
 
 export type ActionDraft = ExistingWorkflowActionDraft | InlineWorkflowActionDraft;
 
-export type ActionTemplateId = 'existing-workflow' | `inline-${InlineActionStepType}`;
+export type ActionTemplate =
+  | { source: 'existing' }
+  | { source: 'inline'; stepType: InlineActionStepType };
+
+export const getActionTemplateKey = (template: ActionTemplate): string =>
+  template.source === 'existing' ? 'existing-workflow' : `inline-${template.stepType}`;
 
 export type ActionFormValue = ActionDraft[];
 

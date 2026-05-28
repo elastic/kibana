@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ActionRow } from './components/action_row';
 import { ActionTemplateCards } from './components/action_template_cards';
 import { getInlineActionStepDefinition } from './registry';
-import type { ActionDraft, ActionFormValue, ActionTemplateId, InlineActionStepType } from './types';
+import type { ActionDraft, ActionFormValue, ActionTemplate } from './types';
 import { isActionValid } from './types';
 
 const MAX_ACTIONS = 10;
@@ -25,15 +25,14 @@ interface ActionFormProps {
 
 export const createInitialActionFormValue = (): ActionFormValue => [];
 
-const buildActionFromTemplate = (templateId: ActionTemplateId): ActionDraft => {
+const buildActionFromTemplate = (template: ActionTemplate): ActionDraft => {
   const id = uuidv4();
-  if (templateId === 'existing-workflow') {
+  if (template.source === 'existing') {
     return { id, source: 'existing', workflowId: null };
   }
-  const stepType = templateId.slice('inline-'.length) as InlineActionStepType;
-  const definition = getInlineActionStepDefinition(stepType);
+  const definition = getInlineActionStepDefinition(template.stepType);
   if (!definition) {
-    throw new Error(`Unknown inline action step type: ${stepType}`);
+    throw new Error(`Unknown inline action step type: ${template.stepType}`);
   }
   return {
     id,
@@ -48,9 +47,9 @@ export const ActionForm = ({ value, onChange, isInvalid }: ActionFormProps) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-  const addAction = (templateId: ActionTemplateId) => {
+  const addAction = (template: ActionTemplate) => {
     if (value.length >= MAX_ACTIONS) return;
-    const newAction = buildActionFromTemplate(templateId);
+    const newAction = buildActionFromTemplate(template);
     onChange([...value, newAction]);
     setExpandedId(newAction.id);
     setIsPickerOpen(false);

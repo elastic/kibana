@@ -18,7 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ActionDraft } from '../types';
-import { ACTION_TEMPLATE_CARDS, getTemplateIdForAction } from './action_template_cards';
+import { getActionTemplateKey } from '../types';
+import { findActionTemplateCard, getTemplateForAction } from './action_template_cards';
 import { InlineWorkflowEditor } from './inline_workflow_editor';
 import { WorkflowReferenceSelector } from './workflow_reference_selector';
 
@@ -39,10 +40,10 @@ export const ActionRow = ({
   onRemove,
   onChange,
 }: ActionRowProps) => {
-  const templateId = getTemplateIdForAction(action);
-  const card = ACTION_TEMPLATE_CARDS.find((c) => c.id === templateId);
+  const template = getTemplateForAction(action);
+  const card = findActionTemplateCard(template);
   const iconType = card?.iconType ?? 'gear';
-  const label = card?.label ?? templateId;
+  const label = card?.label ?? getActionTemplateKey(template);
   const toggleLabel = isExpanded
     ? i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.list.collapseItem', {
         defaultMessage: 'Collapse action',
