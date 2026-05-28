@@ -518,6 +518,37 @@ describe('WorkflowExecuteModal', () => {
       expect(mockOnClose).toHaveBeenCalled();
     });
 
+    it('auto-runs only once when onSubmit and onClose change identity', () => {
+      const definition = {
+        ...baseWorkflowDefinition,
+        triggers: [{ type: 'manual' as const }],
+      };
+
+      const { rerender } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={definition}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+
+      rerender(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={definition}
+          onClose={jest.fn()}
+          onSubmit={jest.fn()}
+        />
+      );
+
+      expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+      expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+
     it('does not auto-run when workflow has alert triggers', () => {
       const { getByText } = renderWithProviders(
         <WorkflowExecuteModal

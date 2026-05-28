@@ -24,7 +24,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -192,11 +192,15 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       return !hasAlertTrigger && !hasWorkflowInputFields(normalizedInputs);
     }, [definition, normalizedInputs]);
 
+    const autoRunFiredRef = useRef(false);
+
     useEffect(() => {
-      if (shouldAutoRun) {
-        onSubmit({}, 'manual');
-        onClose();
+      if (!shouldAutoRun || autoRunFiredRef.current) {
+        return;
       }
+      autoRunFiredRef.current = true;
+      onSubmit({}, 'manual');
+      onClose();
     }, [shouldAutoRun, onSubmit, onClose]);
 
     useEffect(() => {
