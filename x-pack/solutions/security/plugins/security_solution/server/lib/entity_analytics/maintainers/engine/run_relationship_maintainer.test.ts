@@ -45,10 +45,21 @@ const makeEsClient = (): {
 
 const makeCrudClient = (
   errors: Array<{ status: number }> = []
-): { crudClient: EntityUpdateClient; bulkUpdate: jest.Mock } => {
+): {
+  crudClient: EntityUpdateClient;
+  bulkUpdate: jest.Mock;
+  bulkAppend: jest.Mock;
+} => {
   const bulkUpdate = jest.fn().mockResolvedValue(errors);
-  const crudClient = { bulkUpdateEntity: bulkUpdate } as unknown as EntityUpdateClient;
-  return { crudClient, bulkUpdate };
+  // EMH Phase 3a: after writeEntityIds, runIntegration must call the metadata
+  // append path through `bulkAppendRelationshipObservations`. Mocked here so
+  // the relationship maintainer tests can assert on the second write.
+  const bulkAppend = jest.fn().mockResolvedValue([]);
+  const crudClient = {
+    bulkUpdateEntity: bulkUpdate,
+    bulkAppendRelationshipObservations: bulkAppend,
+  } as unknown as EntityUpdateClient;
+  return { crudClient, bulkUpdate, bulkAppend };
 };
 
 const baseConfig: RelationshipIntegrationConfig = {
@@ -835,6 +846,266 @@ describe('runRelationshipMaintainer', () => {
       expect(filterStr).toContain('@timestamp');
       expect(filterStr).toContain('alice');
       expect(esqlArg.query).toContain('FROM logs-endpoint.events.security-default');
+    });
+  });
+
+  describe('EMH Phase 3a — write-path wiring (bulkAppendRelationshipObservations)', () => {
+    const oneActorOneTarget = (esql: jest.Mock) => {
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'accesses_frequently', type: 'keyword' },
+          { name: 'accesses_infrequently', type: 'keyword' },
+        ],
+        values: [['user:alice@corp', ['host:H1'], null]],
+      });
+    };
+
+    it('calls bulkAppendRelationshipObservations after writeEntityIds for each integration that produced records', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, bulkUpdate, bulkAppend } = makeCrudClient();
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      oneActorOneTarget(esql);
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+      });
+      expect(bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(bulkAppend).toHaveBeenCalledTimes(1);
+      // writeEntityIds (latest index) must precede the metadata append so the
+      // entity exists when an external reader joins on entity.id.
+      const updateOrder = bulkUpdate.mock.invocationCallOrder[0];
+      const appendOrder = bulkAppend.mock.invocationCallOrder[0];
+      expect(appendOrder).toBeGreaterThan(updateOrder);
+    });
+
+    it('does NOT call bulkAppendRelationshipObservations when no records were produced', async () => {
+      const { esClient, search } = makeEsClient();
+      const { crudClient, bulkAppend } = makeCrudClient();
+      search.mockResolvedValueOnce(successResponse([]));
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+      });
+      expect(bulkAppend).not.toHaveBeenCalled();
+    });
+
+    it('reuses one scanId across every integration in a single run', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, bulkAppend } = makeCrudClient();
+      // baseConfig produces a record.
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      oneActorOneTarget(esql);
+      // oktaConfig produces a record.
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'carol' }, doc_count: 1 }])
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'communicates_with', type: 'keyword' },
+        ],
+        values: [['user:carol@okta', ['user:dave@okta']]],
+      });
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig, oktaConfig],
+      });
+      expect(bulkAppend).toHaveBeenCalledTimes(2);
+      const scanIds = bulkAppend.mock.calls.flatMap(([docs]) =>
+        (docs as Array<{ Maintainer: { scan_id: string } }>).map((d) => d.Maintainer.scan_id)
+      );
+      expect(new Set(scanIds).size).toBe(1);
+      expect(scanIds[0]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+    });
+
+    it('reuses one observedAt timestamp across every integration in a single run', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, bulkAppend } = makeCrudClient();
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      oneActorOneTarget(esql);
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'carol' }, doc_count: 1 }])
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'communicates_with', type: 'keyword' },
+        ],
+        values: [['user:carol@okta', ['user:dave@okta']]],
+      });
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig, oktaConfig],
+      });
+      const timestamps = bulkAppend.mock.calls.flatMap(([docs]) =>
+        (docs as Array<{ '@timestamp': string }>).map((d) => d['@timestamp'])
+      );
+      expect(new Set(timestamps).size).toBe(1);
+    });
+
+    it('passes entity.source = config.id per integration', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, bulkAppend } = makeCrudClient();
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      oneActorOneTarget(esql);
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'carol' }, doc_count: 1 }])
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'communicates_with', type: 'keyword' },
+        ],
+        values: [['user:carol@okta', ['user:dave@okta']]],
+      });
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig, oktaConfig],
+      });
+      const sourcesPerCall = bulkAppend.mock.calls.map(([docs]) => {
+        const set = new Set(
+          (docs as Array<{ 'entity.source': string }>).map((d) => d['entity.source'])
+        );
+        return [...set];
+      });
+      expect(sourcesPerCall).toEqual([['elastic_defend'], ['okta']]);
+    });
+
+    it('fans one record with multiple targets into one observation doc per target', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, bulkAppend } = makeCrudClient();
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'accesses_frequently', type: 'keyword' },
+          { name: 'accesses_infrequently', type: 'keyword' },
+        ],
+        values: [['user:alice@corp', ['host:H1', 'host:H2', 'host:H3'], null]],
+      });
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+      });
+      const [docs] = bulkAppend.mock.calls[0] as [Array<Record<string, unknown>>];
+      expect(docs).toHaveLength(3);
+    });
+
+    it('propagates exceptions thrown by bulkAppendRelationshipObservations (no try/catch around the write)', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, bulkAppend } = makeCrudClient();
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      oneActorOneTarget(esql);
+      bulkAppend.mockRejectedValueOnce(new Error('metadata transport failure'));
+      await expect(
+        runRelationshipMaintainer({
+          esClient,
+          logger: loggerMock.create(),
+          namespace: 'default',
+          crudClient,
+          integrations: [baseConfig],
+        })
+      ).rejects.toThrow(/metadata transport failure/);
+    });
+
+    it('sets Maintainer.kind to "accesses_frequently_and_infrequently" and Maintainer.lookback_window to LOOKBACK_WINDOW on every emitted doc', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, bulkAppend } = makeCrudClient();
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      oneActorOneTarget(esql);
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+      });
+      const [docs] = bulkAppend.mock.calls[0] as [
+        Array<{ Maintainer: { kind: string; lookback_window: string } }>
+      ];
+      expect(docs.length).toBeGreaterThan(0);
+      for (const d of docs) {
+        // The maintainer kind documents which Phase 3a maintainer produced the
+        // record. Hardcoded at the runRelationshipMaintainer call site.
+        expect(d.Maintainer.kind).toBe('accesses_frequently_and_infrequently');
+        // Lookback window mirrors the engine constant LOOKBACK_WINDOW
+        // (`engine/constants.ts:8`) — the maintainer documents what window it
+        // scanned over.
+        expect(d.Maintainer.lookback_window).toBe('now-30d');
+      }
+    });
+
+    it('produces a fresh scan_id on each runRelationshipMaintainer invocation (different runs → different ids)', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, bulkAppend } = makeCrudClient();
+      // First run.
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
+      );
+      oneActorOneTarget(esql);
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+      });
+      // Second run.
+      search.mockResolvedValueOnce(
+        successResponse([{ key: { 'user.name': 'bob' }, doc_count: 1 }])
+      );
+      esql.mockResolvedValueOnce({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'accesses_frequently', type: 'keyword' },
+          { name: 'accesses_infrequently', type: 'keyword' },
+        ],
+        values: [['user:bob@corp', ['host:H2'], null]],
+      });
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        integrations: [baseConfig],
+      });
+      expect(bulkAppend).toHaveBeenCalledTimes(2);
+      const [run1Docs] = bulkAppend.mock.calls[0] as [Array<{ Maintainer: { scan_id: string } }>];
+      const [run2Docs] = bulkAppend.mock.calls[1] as [Array<{ Maintainer: { scan_id: string } }>];
+      expect(run1Docs[0].Maintainer.scan_id).not.toBe(run2Docs[0].Maintainer.scan_id);
     });
   });
 
