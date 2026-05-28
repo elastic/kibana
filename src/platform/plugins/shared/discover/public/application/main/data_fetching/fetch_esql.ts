@@ -124,7 +124,9 @@ export function fetchEsql({
               }
             }
             finalData = rows.map((row, idx) => {
-              const raw = inlineHighlights ? { ...row, inline_highlights: inlineHighlights } : row;
+              const raw = Object.keys(inlineHighlights ?? {}).length
+                ? { ...row, inline_highlights: inlineHighlights }
+                : row;
               const record: DataTableRecord = {
                 id: row._index && row._id ? getDocId(row) : `${idx + 1}@${responseTime}`,
                 raw,
