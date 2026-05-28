@@ -68,28 +68,5 @@ export type {
 
 export type { RuleFormFlyoutProps, DynamicRuleFormFlyoutProps } from './flyout';
 
-// Action form — the canonical "Simple action policy" authoring UX rendered by the
-// rule-form's compose-discover flow. Exposed for plugins that submit the captured
-// drafts (e.g. as part of rule creation).
-export {
-  ActionForm,
-  createInitialActionFormValue,
-  isActionValid,
-  buildInlineWorkflowYaml,
-  InvalidInlineWorkflowError,
-  INLINE_WORKFLOW_TAG,
-  INLINE_ACTION_STEP_DEFINITIONS,
-  getDefaultInlineActionStepDefinition,
-  getInlineActionStepDefinition,
-  DISPATCH_PAYLOAD_VARIABLES,
-} from './actions_form';
-export type {
-  ActionDraft,
-  ActionFormValue,
-  ActionSource,
-  ExistingWorkflowActionDraft,
-  InlineActionStepType,
-  InlineActionStepDefinition,
-  InlineWorkflowActionDraft,
-  PayloadVariable,
-} from './actions_form';
+export { buildInlineWorkflowYaml } from './actions_form';
+export type { ActionDraft } from './actions_form';
