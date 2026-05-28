@@ -31,7 +31,7 @@ export const Header: FC<HeaderProps> = ({ title, 'aria-describedby': ariaDescrib
     background: ${euiTheme.colors.backgroundBasePlain};
     border-radius: ${euiTheme.border.radius.medium};
     display: flex;
-    gap: ${euiTheme.size.s};
+    gap: ${euiTheme.size.xs};
     ${headerStyle}
   `;
 
