@@ -21,6 +21,10 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
     path: `${MARKDOWN_API_PATH}/{id}`,
     summary: `Upsert markdown library item`,
     ...commonRouteConfig,
+    description: `Replaces the full state of a markdown library item. Partial updates are not supported.
+To make incremental changes, retrieve the item first, modify the fields you need, then send the complete object back.
+
+If no item exists with the specified ID, a new one is created.`,
   });
 
   updateRoute.addVersion(

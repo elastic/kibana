@@ -20,6 +20,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
     path: `${MARKDOWN_API_PATH}/{id}`,
     summary: `Get a markdown library item by ID`,
     ...commonRouteConfig,
+    description: 'Returns the complete state of a markdown library item by ID.',
   });
 
   readRoute.addVersion(
