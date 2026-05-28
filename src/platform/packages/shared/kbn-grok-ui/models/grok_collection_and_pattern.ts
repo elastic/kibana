@@ -63,6 +63,7 @@ export class GrokCollection {
   // Combination of core and custom patterns.
   private patternKeys: string[] = [];
   private colourIndex = 0;
+  private fieldColourMap = new Map<string, string>();
 
   // NOTE: Model as async for now with future intent to use the /_ingest/processor/grok endpoint
   public async setup() {
@@ -158,11 +159,19 @@ export class GrokCollection {
     return provider;
   };
 
-  public getColour = () => {
-    // Loop back to 0 once at the end of the rotations
-    this.colourIndex =
-      this.colourIndex + 1 < EUI_COLOR_PALETTE_VALUES.length ? this.colourIndex + 1 : 0;
-    return EUI_COLOR_PALETTE_VALUES[this.colourIndex];
+  public getColour = (fieldName?: string) => {
+    // If a field name is provided, return its existing colour or assign a new one.
+    // This ensures the same field always gets the same colour across all patterns.
+    if (fieldName && this.fieldColourMap.has(fieldName)) {
+      return this.fieldColourMap.get(fieldName)!;
+    }
+    const colour =
+      EUI_COLOR_PALETTE_VALUES[this.colourIndex % EUI_COLOR_PALETTE_VALUES.length];
+    this.colourIndex++;
+    if (fieldName) {
+      this.fieldColourMap.set(fieldName, colour);
+    }
+    return colour;
   };
 
   // Only relevant for Monaco users.
@@ -184,6 +193,7 @@ export class GrokCollection {
 
   public resetColourIndex = () => {
     this.colourIndex = 0;
+    this.fieldColourMap.clear();
   };
 }
 export class GrokPattern {
@@ -215,7 +225,6 @@ export class GrokPattern {
       return this.resolvedPattern;
     }
 
-    this.parentCollection.resetColourIndex();
     this.fields.clear();
     this.resolveSubPatterns();
     this.resolveFieldNames();
@@ -269,7 +278,7 @@ export class GrokPattern {
             fieldType && SUPPORTED_TYPE_CONVERSIONS.includes(fieldType as SupportedTypeConversion)
               ? (fieldType as SupportedTypeConversion)
               : null,
-          colour: this.parentCollection.getColour(),
+          colour: this.parentCollection.getColour(fieldName),
           pattern: matched,
         };
         this.fields.set(generatedId, fieldEntry);
@@ -338,14 +347,15 @@ export class GrokPattern {
 
           // This check is so we don't reprocess the field name replacements from resolveSubPatterns
           if (!matched[2].includes('_____GENERATED_CAPTURE_GROUP_____')) {
+            const resolvedFieldName = matched[3] ?? matched[2];
             this.fields.set(generatedId, {
-              name: matched[3] ?? matched[2],
+              name: resolvedFieldName,
               type:
                 matched[4] &&
                 SUPPORTED_TYPE_CONVERSIONS.includes(matched[4] as SupportedTypeConversion)
                   ? (matched[4] as SupportedTypeConversion)
                   : null,
-              colour: this.parentCollection.getColour(),
+              colour: this.parentCollection.getColour(resolvedFieldName),
               pattern: `${CUSTOM_NAMED_CAPTURE_PATTERN_PREFIX} ${escape(
                 String.raw`${matched[1]}`
               )}`,
