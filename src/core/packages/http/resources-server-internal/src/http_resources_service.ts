@@ -45,13 +45,13 @@ const mergeRenderHeaders = (
   optionsHeaders: ResponseHeaders = {}
 ): ResponseHeaders => {
   const setCookie = [
-    ...toArray(renderHeaders[set-cookie]),
-    ...toArray(optionsHeaders[set-cookie]),
+    ...toArray(renderHeaders['set-cookie']),
+    ...toArray(optionsHeaders['set-cookie']),
   ];
   return {
     ...renderHeaders,
     ...optionsHeaders,
-    ...(setCookie.length > 0 ? { set-cookie: setCookie } : {}),
+    ...(setCookie.length > 0 ? { 'set-cookie': setCookie } : {}),
   };
 };
 
