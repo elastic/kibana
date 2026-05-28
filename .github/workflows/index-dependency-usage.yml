@@ -35,10 +35,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - group: platform
+          - group: platform-plugins
             paths: >-
               x-pack/platform/plugins/shared
               x-pack/platform/plugins/private
+
+          - group: platform-packages
+            paths: >-
               x-pack/platform/packages/shared
               x-pack/platform/packages/private
 

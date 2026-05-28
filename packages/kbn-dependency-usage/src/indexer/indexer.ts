@@ -36,8 +36,10 @@ interface KibanaJsonc {
 function readKibanaJsonc(packagePath: string): KibanaJsonc | null {
   const filePath = nodePath.join(REPO_ROOT, packagePath, 'kibana.jsonc');
   try {
-    // Strip single-line // comments before parsing (JSONC extension).
-    const raw = readFileSync(filePath, 'utf8').replace(/\/\/[^\n]*/g, '');
+    // Strip single-line // comments and trailing commas before parsing (JSONC extension).
+    const raw = readFileSync(filePath, 'utf8')
+      .replace(/\/\/[^\n]*/g, '')
+      .replace(/,(\s*[}\]])/g, '$1');
     return JSON.parse(raw) as KibanaJsonc;
   } catch {
     return null;
@@ -137,7 +139,13 @@ function isTestFile(filePath: string): boolean {
  * React-ecosystem packages like react-redux, react-router-dom, @testing-library/react
  * are intentionally still indexed).
  */
-export const DEFAULT_EXCLUDED_DEPS = ['@elastic/', '@kbn/', '@testing-library/', 'react', 'react-dom'];
+export const DEFAULT_EXCLUDED_DEPS = [
+  '@elastic/',
+  '@kbn/',
+  '@testing-library/',
+  'react',
+  'react-dom',
+];
 
 export function isExcludedDep(dep: string, patterns: string[]): boolean {
   return patterns.some((p) => (p.endsWith('/') ? dep.startsWith(p) : dep === p));
