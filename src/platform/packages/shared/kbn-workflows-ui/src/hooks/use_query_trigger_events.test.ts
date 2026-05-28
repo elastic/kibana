@@ -10,7 +10,10 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useQueryTriggerEvents } from './use_query_trigger_events';
+import {
+  getWorkflowTriggerEventsLogQueryKey,
+  useQueryTriggerEvents,
+} from './use_query_trigger_events';
 import type { SearchTriggerEventLogResult } from '../api/types';
 import { createMockWorkflowApi } from '../api/workflows_api.mock';
 import { testQueryClientConfig } from '../test_utils';
@@ -28,6 +31,34 @@ const queryClient = new QueryClient(testQueryClientConfig);
 
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) =>
   React.createElement(QueryClientProvider, { client: queryClient }, children);
+
+describe('getWorkflowTriggerEventsLogQueryKey', () => {
+  it('returns the same key for equivalent param objects', () => {
+    const paramsA = { page: 1, size: 10, from: '2025-01-01', to: '2025-01-02', kql: 'triggerId: foo' };
+    const paramsB = {
+      kql: 'triggerId: foo',
+      from: '2025-01-01',
+      to: '2025-01-02',
+      page: 1,
+      size: 10,
+    };
+
+    expect(getWorkflowTriggerEventsLogQueryKey(paramsA)).toEqual(
+      getWorkflowTriggerEventsLogQueryKey(paramsB)
+    );
+  });
+
+  it('omits optional fields as undefined in the key tuple', () => {
+    expect(getWorkflowTriggerEventsLogQueryKey({ page: 2, size: 50 })).toEqual([
+      'workflowTriggerEventsLog',
+      undefined,
+      undefined,
+      undefined,
+      2,
+      50,
+    ]);
+  });
+});
 
 describe('useQueryTriggerEvents', () => {
   beforeEach(() => {
@@ -51,5 +82,29 @@ describe('useQueryTriggerEvents', () => {
 
     expect(mockWorkflowApi.searchTriggerEvents).toHaveBeenCalledWith(params);
     expect(result.current.data).toEqual(mockData);
+  });
+
+  it('does not refetch when params object identity changes but values are unchanged', async () => {
+    const mockData: SearchTriggerEventLogResult = {
+      hits: [],
+      total: 0,
+      page: 1,
+      size: 10,
+    };
+    mockWorkflowApi.searchTriggerEvents.mockResolvedValue(mockData);
+
+    const initialParams = { page: 1, size: 10, from: '2025-01-01', to: '2025-01-02' };
+    const { result, rerender } = renderHook(
+      ({ params }: { params: typeof initialParams }) => useQueryTriggerEvents(params),
+      { wrapper, initialProps: { params: initialParams } }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockWorkflowApi.searchTriggerEvents).toHaveBeenCalledTimes(1);
+
+    rerender({ params: { ...initialParams } });
+
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+    expect(mockWorkflowApi.searchTriggerEvents).toHaveBeenCalledTimes(1);
   });
 });

@@ -11,6 +11,30 @@ import { useQuery } from '@kbn/react-query';
 import type { SearchTriggerEventLogParams, SearchTriggerEventLogResult } from '../api/types';
 import { useWorkflowsApi } from '../api/use_workflows_api';
 
+export type WorkflowTriggerEventsLogQueryKey = readonly [
+  'workflowTriggerEventsLog',
+  string | undefined,
+  string | undefined,
+  string | undefined,
+  number | undefined,
+  number | undefined,
+];
+
+/**
+ * Primitive query-key parts so equivalent searches share a cache entry even when
+ * callers pass a new `params` object reference each render.
+ */
+export const getWorkflowTriggerEventsLogQueryKey = (
+  params: SearchTriggerEventLogParams
+): WorkflowTriggerEventsLogQueryKey => [
+  'workflowTriggerEventsLog',
+  params.kql,
+  params.from,
+  params.to,
+  params.page,
+  params.size,
+];
+
 export function useQueryTriggerEvents(
   params: SearchTriggerEventLogParams,
   options?: { enabled?: boolean }
@@ -19,7 +43,7 @@ export function useQueryTriggerEvents(
 
   return useQuery<SearchTriggerEventLogResult>({
     networkMode: 'always',
-    queryKey: ['workflowTriggerEventsLog', params],
+    queryKey: getWorkflowTriggerEventsLogQueryKey(params),
     queryFn: () => api.searchTriggerEvents(params),
     enabled: options?.enabled ?? true,
     keepPreviousData: true,
