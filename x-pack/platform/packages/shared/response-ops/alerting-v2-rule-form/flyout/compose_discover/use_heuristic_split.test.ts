@@ -148,6 +148,34 @@ describe('splitQuery', () => {
     });
   });
 
+  describe('round-trip idempotency (join + re-split)', () => {
+    it('round-trips a STATS + WHERE query through join and re-split', () => {
+      const { base, alertBlock } = splitQuery('FROM logs-* | STATS c = COUNT(*) | WHERE c > 5');
+      const reassembled = [base, alertBlock].filter(Boolean).join('\n');
+      const resplit = splitQuery(reassembled);
+      expect(resplit.base).toBe(base);
+      expect(resplit.alertBlock).toBe(alertBlock);
+    });
+
+    it('round-trips a multi-pipe query', () => {
+      const { base, alertBlock } = splitQuery(
+        'FROM logs-* | EVAL x = 1 | STATS c = COUNT(*) BY host | WHERE c > 10 | SORT c DESC'
+      );
+      const reassembled = [base, alertBlock].filter(Boolean).join('\n');
+      const resplit = splitQuery(reassembled);
+      expect(resplit.base).toBe(base);
+      expect(resplit.alertBlock).toBe(alertBlock);
+    });
+
+    it('round-trips a WHERE-only (no STATS) query', () => {
+      const { base, alertBlock } = splitQuery('FROM logs-* | EVAL x = 1 | WHERE x > 0');
+      const reassembled = [base, alertBlock].filter(Boolean).join('\n');
+      const resplit = splitQuery(reassembled);
+      expect(resplit.base).toBe(base);
+      expect(resplit.alertBlock).toBe(alertBlock);
+    });
+  });
+
   describe('reason field', () => {
     it('reason is no_stats when neither STATS nor WHERE found', () => {
       expect(splitQuery('FROM logs-*').reason).toBe('no_stats');
