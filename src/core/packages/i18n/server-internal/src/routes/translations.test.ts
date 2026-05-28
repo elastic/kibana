@@ -182,7 +182,7 @@ describe('registerTranslationsRoute', () => {
       expect(res.ok).not.toHaveBeenCalled();
     });
 
-test('streams translation file content without modifying it', async () => {
+    test('streams translation file content without modifying it', async () => {
       mockOpenWithContent('{}');
       const handler = buildHandler(defaultOpts);
       const res = makeResponse();
