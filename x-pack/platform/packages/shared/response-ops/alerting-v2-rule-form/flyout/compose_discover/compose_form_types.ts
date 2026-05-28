@@ -6,6 +6,7 @@
  */
 
 import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
+import type { RuleNotificationsValue } from '../../form/types';
 
 // ---------------------------------------------------------------------------
 // RuleQuery — the new composed/standalone query schema (#268984).
@@ -56,6 +57,12 @@ export function getRecoverQuery(query: RuleQuery | undefined): string {
 // types can be deleted without touching this file.
 // ---------------------------------------------------------------------------
 
+export interface ComposeRuleArtifact {
+  id: string;
+  type: string;
+  value: string;
+}
+
 export interface ComposeFormValues {
   kind: RuleKind;
   metadata: {
@@ -80,7 +87,10 @@ export interface ComposeFormValues {
   };
   stateTransitionAlertDelayMode: 'immediate' | 'breaches' | 'recoveries' | 'duration';
   stateTransitionRecoveryDelayMode: 'immediate' | 'breaches' | 'recoveries' | 'duration';
-  artifacts?: Array<{ id: string; type: string; value: string }>;
+  notifications?: RuleNotificationsValue;
+  artifacts?: ComposeRuleArtifact[];
+  runbookArtifacts?: ComposeRuleArtifact[];
+  dashboardArtifacts?: ComposeRuleArtifact[];
 }
 
 // Re-export for use by compose mappers
