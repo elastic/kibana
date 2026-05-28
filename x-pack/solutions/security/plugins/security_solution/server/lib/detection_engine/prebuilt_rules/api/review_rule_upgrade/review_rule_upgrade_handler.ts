@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  KibanaRequest,
-  KibanaResponseFactory,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
@@ -43,7 +38,7 @@ import { getPossibleUpgrades } from '../../logic/utils';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
 import { internalRuleToAPIResponse } from '../../../rule_management/logic/detection_rules_client/converters/internal_rule_to_api_response';
 import { buildGranularRulesKql } from '../../../rule_management/logic/search/build_granular_rules_kql';
-import { fetchGranularFacetCounts } from '../../../rule_management/logic/search/granular_facet_aggregations';
+import { fetchGranularFacetCountsChunked } from '../../../rule_management/logic/search/granular_facet_aggregations';
 import { narrowRuleResponseFields } from '../narrow_rule_response_fields';
 
 export const reviewRuleUpgradeHandler = async (
@@ -85,7 +80,6 @@ export const reviewRuleUpgradeHandler = async (
       counts,
     } = await calculateUpgradeableRulesDiff({
       rulesClient,
-      savedObjectsClient: soClient,
       ruleAssetsClient,
       ruleObjectsClient,
       mlAuthz,
@@ -132,7 +126,6 @@ export const reviewRuleUpgradeHandler = async (
 
 interface CalculateUpgradeableRulesDiffArgs {
   rulesClient: RulesClient;
-  savedObjectsClient: SavedObjectsClientContract;
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
   ruleObjectsClient: IPrebuiltRuleObjectsClient;
   mlAuthz: MlAuthz;
@@ -147,7 +140,6 @@ interface CalculateUpgradeableRulesDiffArgs {
 
 export async function calculateUpgradeableRulesDiff({
   rulesClient,
-  savedObjectsClient,
   ruleAssetsClient,
   ruleObjectsClient,
   mlAuthz,
@@ -214,8 +206,8 @@ export async function calculateUpgradeableRulesDiff({
   let counts: FacetCounts | undefined;
 
   if (categoryCounts.length > 0) {
-    counts = await fetchGranularFacetCounts({
-      savedObjectsClient,
+    counts = await fetchGranularFacetCountsChunked({
+      rulesClient,
       ruleIds: upgradeableSoIds,
       categories: categoryCounts,
     });

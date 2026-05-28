@@ -52,6 +52,7 @@ paths:
                     Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
                   items:
                     type: string
+                    maxLength: 256
       responses:
         '200':
           description: Indicates a successful call

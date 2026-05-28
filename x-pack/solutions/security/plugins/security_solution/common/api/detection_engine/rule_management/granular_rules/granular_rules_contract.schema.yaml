@@ -24,6 +24,7 @@ components:
       properties:
         term:
           type: string
+          maxLength: 10000
         mode:
           $ref: '#/components/schemas/GranularRulesSearchMode'
 
@@ -45,6 +46,7 @@ components:
       properties:
         term:
           type: string
+          maxLength: 10000
         mode:
           $ref: '#/components/schemas/GranularRulesFilterMode'
 

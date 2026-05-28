@@ -30,7 +30,7 @@ export type GranularRulesSearchMode = z.infer<typeof GranularRulesSearchMode>;
 export const GranularRulesSearch = lazySchema(() =>
   z
     .object({
-      term: z.string(),
+      term: z.string().max(10000),
       mode: GranularRulesSearchMode.optional(),
     })
     .strict()
@@ -51,7 +51,7 @@ export type GranularRulesFilterMode = z.infer<typeof GranularRulesFilterMode>;
 export const GranularRulesFilter = lazySchema(() =>
   z
     .object({
-      term: z.string(),
+      term: z.string().max(10000),
       mode: GranularRulesFilterMode.optional(),
     })
     .strict()
