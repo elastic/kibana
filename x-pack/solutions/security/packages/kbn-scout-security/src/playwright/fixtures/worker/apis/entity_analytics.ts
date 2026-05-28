@@ -8,7 +8,6 @@
 import type { EsClient, KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import type {
-  RiskEngineStatus,
   RiskEngineStatusResponse,
   GetEntityStoreStatusResponse,
   StoreStatus,
@@ -52,10 +51,6 @@ export interface EntityAnalyticsApiService {
   waitForEntityStoreStatusToChange: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreCleanup: (timeoutMs?: number) => Promise<GetEntityStoreStatusResponse>;
   waitForRiskEngineCleanup: (timeoutMs?: number) => Promise<RiskEngineStatusResponse>;
-  waitForRiskEngineStatus: (
-    expectedStatus: RiskEngineStatus,
-    timeoutMs?: number
-  ) => Promise<RiskEngineStatusResponse>;
   // v2 entity-store helpers (only relevant when `securitySolution:entityStoreEnableV2` is true)
   setEntityStoreV2Enabled: (enabled: boolean) => Promise<void>;
   uninstallEntityStoreV2: () => Promise<void>;
@@ -395,48 +390,6 @@ export const getEntityAnalyticsApiService = ({
 
           throw new Error(
             `Timeout waiting for risk engine cleanup (status 'NOT_INSTALLED') after ${timeoutMs}ms. Last status: ${JSON.stringify(
-              lastStatus
-            )}`
-          );
-        }
-      );
-    },
-
-    waitForRiskEngineStatus: async (
-      expectedStatus: RiskEngineStatus,
-      timeoutMs: number = 60000
-    ) => {
-      return measurePerformanceAsync(
-        log,
-        `security.entityAnalytics.waitForRiskEngineStatus [${expectedStatus}]`,
-        async () => {
-          const startTime = Date.now();
-          let lastStatus: RiskEngineStatusResponse | undefined;
-
-          while (Date.now() - startTime < timeoutMs) {
-            try {
-              const status = await service.getRiskEngineStatus();
-              lastStatus = status;
-
-              // NOT_INSTALLED is returned when the risk engine API is unavailable
-              // (Entity Store V2 FF on). Treat it as equivalent to DISABLED — both
-              // mean the risk engine is not running, so the UI combined-status will
-              // reflect "off".
-              if (
-                status.risk_engine_status === expectedStatus ||
-                (expectedStatus === 'DISABLED' && status.risk_engine_status === 'NOT_INSTALLED')
-              ) {
-                return status;
-              }
-            } catch (error) {
-              log.debug(`Error checking risk engine status: ${error}`);
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
-
-          throw new Error(
-            `Timeout waiting for risk engine status '${expectedStatus}' after ${timeoutMs}ms. Last status: ${JSON.stringify(
               lastStatus
             )}`
           );
