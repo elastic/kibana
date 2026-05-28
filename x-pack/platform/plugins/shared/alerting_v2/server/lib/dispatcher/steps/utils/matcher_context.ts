@@ -14,6 +14,7 @@ export function createMatcherContext(episode: AlertEpisode, rule: Rule): Matcher
     group_hash: episode.group_hash,
     episode_id: episode.episode_id,
     episode_status: episode.episode_status,
+    ...(episode.severity ? { severity: episode.severity } : {}),
     ...(episode.data ? { data: episode.data } : {}),
     rule: {
       id: rule.id,

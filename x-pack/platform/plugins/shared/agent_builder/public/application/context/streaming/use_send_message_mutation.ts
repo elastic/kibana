@@ -20,11 +20,12 @@ import type {
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type {
   Attachment,
-  AttachmentInput,
+  ConversationAttachment,
   ScreenContextAttachmentData,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { flattenAttachments } from '../conversation/flatten_attachments';
 import { queryKeys } from '../../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import type { StartServices } from '../../hooks/use_kibana';
@@ -51,7 +52,7 @@ export interface SendMessageVars {
   conversationId: string;
   agentId: string;
   connectorId?: string;
-  attachments?: AttachmentInput[];
+  attachments?: ConversationAttachment[];
   conversationAttachments?: VersionedAttachment[];
   lastRoundSteps?: ConversationRoundStep[];
   resetAttachments?: () => void;
@@ -194,7 +195,7 @@ export const useSendMessageMutation = ({
         });
         await streamActions.addOptimisticRound({
           userMessage: vars.message,
-          attachments: vars.attachments ?? [],
+          attachments: flattenAttachments(vars.attachments ?? []),
           agentId: vars.agentId,
         });
       }
@@ -218,7 +219,7 @@ export const useSendMessageMutation = ({
               agentId: vars.agentId,
               connectorId: vars.connectorId,
               attachments: [
-                ...(vars.attachments ?? []),
+                ...flattenAttachments(vars.attachments ?? []),
                 ...(await withScreenContextAttachment({
                   services,
                   conversationAttachments: vars.conversationAttachments,
