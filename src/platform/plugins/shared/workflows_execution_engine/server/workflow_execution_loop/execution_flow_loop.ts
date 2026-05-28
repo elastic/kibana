@@ -34,6 +34,8 @@ export async function executionFlowLoop(params: WorkflowExecutionLoopParams) {
       counter = 0;
     }
 
+    // if the same node is executed more than MAX_ITERATIONS times, it blocks event loop.
+    // so we count the number of executions of the same node and throw an error if it exceeds the limit.
     if (counter >= MAX_ITERATIONS) {
       throw new Error('Execution flow loop timed out');
     }
