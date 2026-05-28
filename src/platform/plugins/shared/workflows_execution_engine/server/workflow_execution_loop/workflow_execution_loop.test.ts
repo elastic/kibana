@@ -8,8 +8,8 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
 import { workflowExecutionLoop } from './workflow_execution_loop';
+import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
 import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
 
 jest.mock('elastic-apm-node', () => ({

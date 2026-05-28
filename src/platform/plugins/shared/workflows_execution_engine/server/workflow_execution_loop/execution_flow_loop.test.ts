@@ -8,8 +8,8 @@
  */
 
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
 import { executionFlowLoop } from './execution_flow_loop';
+import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
 
 jest.mock('./run_node', () => ({
   runNode: jest.fn().mockResolvedValue(undefined),

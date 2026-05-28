@@ -17,12 +17,12 @@ import { runNode } from './run_node';
 import * as runStackMonitorModule from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { CancellableNode, NodeImplementation } from '../step/node_implementation';
-import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import {
   createMockWorkflowExecutionDriver,
   type MockWorkflowExecutionDriver,
 } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
+import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 import { createMockWorkflowEventLogger } from '../workflow_event_logger/mocks';
 import { WorkflowTaskManagerAbortError } from '../workflow_task_shutdown';
@@ -35,7 +35,10 @@ const mockCatchError = catchErrorModule.catchError as jest.Mock;
 const mockHandleExecutionDelay = handleExecutionDelayModule.handleExecutionDelay as jest.Mock;
 const mockRunStackMonitor = runStackMonitorModule.runStackMonitor as jest.Mock;
 
-type RunNodeTestParams = Omit<jest.Mocked<WorkflowExecutionLoopParams>, 'workflowExecutionDriver'> & {
+type RunNodeTestParams = Omit<
+  jest.Mocked<WorkflowExecutionLoopParams>,
+  'workflowExecutionDriver'
+> & {
   workflowExecutionDriver: MockWorkflowExecutionDriver;
 };
 

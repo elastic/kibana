@@ -14,6 +14,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { MockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 

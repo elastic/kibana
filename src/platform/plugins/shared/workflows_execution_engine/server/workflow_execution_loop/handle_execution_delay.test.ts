@@ -12,9 +12,9 @@ import {
   WORKFLOW_EXECUTE_ASYNC_STEP_TYPE,
   WORKFLOW_EXECUTE_STEP_TYPE,
 } from '@kbn/workflows';
-import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
 import { handleExecutionDelay } from './handle_execution_delay';
 import type { WorkflowExecutionLoopParams } from './types';
+import { createMockWorkflowExecutionDriver } from '../workflow_context_manager/mocks/workflow_execution_driver.mock';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
   ({
