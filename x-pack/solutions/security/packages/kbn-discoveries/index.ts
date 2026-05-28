@@ -21,34 +21,12 @@ export {
   NodeType,
 } from './impl/lib/langchain';
 export { getDurationNanoseconds } from './impl/lib/persistence';
-export {
-  transformActionsFromApi,
-  transformActionsToApi,
-  transformCreatePropsFromApi,
-  transformScheduleToApi,
-  transformUpdatePropsFromApi,
-} from './impl/lib/schedules/transforms';
-export {
-  ATTACK_DISCOVERY_MISCONFIGURATION_EVENT,
-  ATTACK_DISCOVERY_SCHEDULE_ACTION_EVENT,
-  ATTACK_DISCOVERY_STEP_FAILURE_EVENT,
-  WORKFLOW_ATTACK_DISCOVERY_ERROR_EVENT,
-  WORKFLOW_ATTACK_DISCOVERY_SUCCESS_EVENT,
-} from './impl/lib/telemetry/event_based_telemetry';
-export type {
-  ErrorCategory,
-  MisconfigurationType,
-  StepFailureStep,
-} from './impl/lib/telemetry/event_based_telemetry';
 export { alertsToDocuments } from './impl/lib/types';
 export type {
   AttackDiscoveryGraphMetadata,
   AttackDiscoveryGraphState,
   BaseGraphState,
-  DefendInsightsGraphMetadata,
-  DefendInsightsGraphState,
   GetAttackDiscoveryGraph,
-  GetDefendInsightsGraph,
   GraphInsightTypes,
   GraphInvocationResult,
   InvokeGraphParams,
@@ -125,50 +103,7 @@ export {
   logUnverifiableDiscoveries,
 } from './impl/attack_discovery/hallucination_detection';
 export type { DiscoveryWithAlertIds } from './impl/attack_discovery/hallucination_detection';
-export {
-  ATTACK_DISCOVERY_EVENT_ACTIONS,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_CANCELED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED,
-  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED,
-  ATTACK_DISCOVERY_EVENT_PROVIDER,
-  writeAttackDiscoveryEvent,
-} from './impl/attack_discovery/persistence/event_logging';
-export type {
-  AttackDiscoverySource,
-  DiagnosticsConfig,
-  DiagnosticsContext,
-  DiagnosticsPreExecutionCheck,
-  DiagnosticsWorkflowIntegrity,
-  EventLogRefresher,
-  SourceMetadata,
-  WorkflowExecutionTracking,
-  WorkflowExecutionsTracking,
-} from './impl/attack_discovery/persistence/event_logging';
 
-// Defend Insights
-export {
-  DEFEND_INSIGHTS_GRAPH_RUN_NAME,
-  getDefaultDefendInsightsGraph,
-} from './impl/defend_insights/graphs';
-export type {
-  DefaultDefendInsightsGraph,
-  DefendInsightsCombinedPrompts,
-  DefendInsightsGenerationPrompts,
-  DefendInsightsGraphResult,
-  DefendInsightsPrompts,
-  GetDefaultDefendInsightsGraphParams,
-  IKnowledgeBaseDataClient,
-  InvokeDefendInsightsGraphWithDocs,
-  InvokeDefendInsightsGraphWithDocsParams,
-} from './impl/defend_insights/graphs';
+// Note: schedules/transforms, telemetry/event_based_telemetry,
+// attack_discovery/persistence/event_logging, and defend_insights/graphs are added
+// in later PRs alongside their source files.

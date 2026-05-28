@@ -38,6 +38,7 @@ paths:
                   - connector_id
                   - discoveries
                   - execution_uuid
+                  - loading_message
                   - start
                   - status
                 properties:
