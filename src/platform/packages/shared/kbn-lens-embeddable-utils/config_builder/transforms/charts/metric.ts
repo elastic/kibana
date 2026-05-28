@@ -187,10 +187,12 @@ function convertStylingToAPIFormat(
   visualization: MetricVisualizationState,
   hasSecondary: boolean
 ): MetricStyling {
+  const iconName = visualization.icon ? iconCompat.toAPI(visualization.icon) : undefined;
+
   return stripUndefined({
-    icon: visualization.icon
+    icon: iconName
       ? {
-          name: iconCompat.toAPI(visualization.icon),
+          name: iconName,
           alignment: visualization.iconAlign ?? DEFAULT_PRIMARY_ICON_ALIGNMENT,
         }
       : undefined,
@@ -274,7 +276,7 @@ function buildVisualizationState(config: MetricConfig): MetricVisualizationState
           maxCols: layer.breakdown_by.columns,
         }
       : {}),
-    collapseFn: layer.breakdown_by?.collapse_by,
+    ...(layer.breakdown_by?.collapse_by ? { collapseFn: layer.breakdown_by.collapse_by } : {}),
     ...(primaryMetric?.background_chart?.type === 'bar'
       ? {
           maxAccessor: getAccessorName('max'),
