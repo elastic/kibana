@@ -64,7 +64,6 @@ export class ExpressionLoader {
       syncCursor: params?.syncCursor,
       hasCompatibleActions: params?.hasCompatibleActions,
       getCompatibleCellValueActions: params?.getCompatibleCellValueActions,
-      panelHasConfiguredDrilldowns: params?.panelHasConfiguredDrilldowns,
       executionContext: params?.executionContext,
     });
     this.render$ = this.renderHandler.render$;

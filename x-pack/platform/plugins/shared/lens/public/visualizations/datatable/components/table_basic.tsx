@@ -343,8 +343,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         headerRowLines,
         columnCellValueActions,
         dataGridRef.current?.closeCellPopover,
-        props.columnFilterable,
-        props.panelHasConfiguredDrilldowns
+        props.columnFilterable
       ),
     [
       bucketedColumns,
@@ -361,7 +360,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       headerRowLines,
       columnCellValueActions,
       props.columnFilterable,
-      props.panelHasConfiguredDrilldowns,
     ]
   );
 
