@@ -42,8 +42,7 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
-    await pageObjects.discover.setQueryMode('classic');
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
     await pageObjects.discover.waitUntilSearchingHasFinished();
   });
 
