@@ -7,19 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import ALERT_VALIDATION_WORKFLOW_YAML from './security_solution_alert_validation_workflow.yaml';
-import type { ManagedWorkflowDefinition } from '../types';
+import { parseDocument } from 'yaml';
+import ALERT_VALIDATION_WORKFLOW_YAML = require('./security_solution_alert_validation_workflow.yaml');
+import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../types';
 
 export const SECURITY_ALERT_VALIDATION_WORKFLOW_ID = 'system-security-alert-validation';
 
-export const SECURITY_ALERT_VALIDATION_WORKFLOW: ManagedWorkflowDefinition = {
+export interface SecurityAlertValidationWorkflowTemplateValues
+  extends ManagedWorkflowTemplateValues {
+  autoCloseEnabled: boolean;
+  autoCloseConfidenceScoreMinThreshold: number;
+  autoCloseConfidenceScoreMaxThreshold: number;
+}
+
+const renderAlertValidationWorkflowYaml = ({
+  autoCloseEnabled,
+  autoCloseConfidenceScoreMinThreshold,
+  autoCloseConfidenceScoreMaxThreshold,
+}: SecurityAlertValidationWorkflowTemplateValues): string => {
+  const document = parseDocument(ALERT_VALIDATION_WORKFLOW_YAML);
+
+  document.setIn(['consts', 'auto_close_enabled'], autoCloseEnabled);
+  document.setIn(
+    ['consts', 'auto_close_confidence_score_min_threshold'],
+    autoCloseConfidenceScoreMinThreshold
+  );
+  document.setIn(
+    ['consts', 'auto_close_confidence_score_max_threshold'],
+    autoCloseConfidenceScoreMaxThreshold
+  );
+
+  return document.toString();
+};
+
+export const SECURITY_ALERT_VALIDATION_WORKFLOW = {
   id: SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
   pluginId: 'securitySolution',
   version: 1,
-  yaml: ALERT_VALIDATION_WORKFLOW_YAML,
+  yamlTemplate: renderAlertValidationWorkflowYaml,
   management: {
-    lifecycle: 'static',
-    versionStrategy: 'auto',
-    enablement: 'enforced',
+    lifecycle: 'dynamic',
+    versionStrategy: 'on_adopt',
+    enablement: 'restorable',
   },
-};
+} as const satisfies ManagedWorkflowDefinition<SecurityAlertValidationWorkflowTemplateValues>;

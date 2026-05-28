@@ -218,6 +218,12 @@ export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE =
   'securitySolution:defaultValueReportRate' as const;
 export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE =
   'securitySolution:defaultValueReportTitle' as const;
+export const SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED =
+  'securitySolution:alertValidationWorkflowAutoCloseEnabled' as const;
+export const SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD =
+  'securitySolution:alertValidationWorkflowAutoCloseConfidenceScoreMinThreshold' as const;
+export const SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD =
+  'securitySolution:alertValidationWorkflowAutoCloseConfidenceScoreMaxThreshold' as const;
 // Cases settings
 export const CASES_MAX_OPEN_CASES_PER_RULE_RUN_ID = 'cases:maxOpenCasesPerRuleRun' as const;
 

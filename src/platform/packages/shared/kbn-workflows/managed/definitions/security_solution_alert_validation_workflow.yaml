@@ -42,10 +42,6 @@ triggers:
   - type: alert
 
 settings:
-  concurrency: 
-    strategy: drop
-    max: 7
-    key: "alert.validation"
   on-failure:
     retry:
       max-attempts: 1
@@ -54,6 +50,7 @@ settings:
 # Configuration constants
 # ---------------------------------------------------------------------------
 # Adjust these values to tune workflow behaviour without editing step logic.
+
 consts:
   workflow_version: "v0.0.1"
 
@@ -1134,4 +1131,3 @@ steps:
                       signal_ids:
                         - '{{ foreach.item._id }}'
                       reason: 'false_positive'
-

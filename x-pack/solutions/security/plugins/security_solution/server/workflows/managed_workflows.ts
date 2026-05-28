@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import type { CoreStart, Logger } from '@kbn/core/server';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
-import { SECURITY_ALERT_VALIDATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
+  type ManagedWorkflowTemplateValuesForId,
+} from '@kbn/workflows/managed';
+import type { Logger } from '@kbn/core/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
-import {
-  APP_ID,
-  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-  MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT,
-} from '../../common/constants';
+import { APP_ID } from '../../common/constants';
+
+export type SecurityAlertValidationWorkflowSettings = ManagedWorkflowTemplateValuesForId<
+  typeof SECURITY_ALERT_VALIDATION_WORKFLOW_ID
+>;
+type SecurityManagedWorkflowsClient = Awaited<
+  ReturnType<WorkflowsExtensionsServerPluginStart['initManagedWorkflowsClient']>
+>;
 
 export const registerSecurityManagedWorkflowOwner = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup
@@ -24,34 +29,43 @@ export const registerSecurityManagedWorkflowOwner = (
   workflowsExtensions.registerManagedWorkflowOwner(APP_ID);
 };
 
-export const installSecurityManagedWorkflows = async ({
-  core,
+export const getSecurityAlertValidationWorkflowIdForSpace = (spaceId: string): string => {
+  return `${SECURITY_ALERT_VALIDATION_WORKFLOW_ID}-${spaceId}`;
+};
+
+export const installSecurityAlertValidationWorkflow = async ({
+  managedWorkflowsClient,
+  spaceId,
+  settings,
+}: {
+  managedWorkflowsClient: SecurityManagedWorkflowsClient;
+  spaceId: string;
+  settings: SecurityAlertValidationWorkflowSettings;
+}): Promise<void> => {
+  await managedWorkflowsClient.install(SECURITY_ALERT_VALIDATION_WORKFLOW_ID, {
+    spaceId,
+    workflowIdSuffix: spaceId,
+    values: settings,
+  });
+};
+
+export const initSecurityManagedWorkflowsClient = async (
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart
+): Promise<SecurityManagedWorkflowsClient> => {
+  return workflowsExtensions.initManagedWorkflowsClient(APP_ID);
+};
+
+export const markSecurityManagedWorkflowsReady = async ({
   workflowsExtensions,
   logger,
 }: {
-  core: CoreStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   logger: Logger;
 }): Promise<void> => {
   try {
-    const isEnabled = await core.featureFlags.getBooleanValue(
-      MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG,
-      MANAGED_ALERT_VALIDATION_WORKFLOW_FEATURE_FLAG_DEFAULT
-    );
-
-    if (!isEnabled) {
-      logger.debug('Security managed alert validation workflow installation is disabled');
-      return;
-    }
-
-    const managed = await workflowsExtensions.initManagedWorkflowsClient(APP_ID);
-    await managed.install(SECURITY_ALERT_VALIDATION_WORKFLOW_ID, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-    });
-    await managed.ready();
-
-    logger.info('Security managed alert validation workflow installed successfully');
+    const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(workflowsExtensions);
+    await managedWorkflowsClient.ready();
   } catch (error) {
-    logger.warn('Failed to install Security managed alert validation workflow', { error });
+    logger.warn('Failed to mark Security managed workflows ready', { error });
   }
 };

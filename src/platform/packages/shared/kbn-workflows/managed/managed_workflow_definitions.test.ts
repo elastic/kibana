@@ -11,7 +11,11 @@ import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById, TemplatedManagedWorkflowId } from '.';
-import { EXAMPLE_MANAGED_WORKFLOW_ID, SECURITY_ALERT_VALIDATION_WORKFLOW_ID } from './definitions';
+import {
+  EXAMPLE_MANAGED_WORKFLOW_ID,
+  SECURITY_ALERT_VALIDATION_WORKFLOW,
+  SECURITY_ALERT_VALIDATION_WORKFLOW_ID,
+} from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -34,6 +38,11 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
+  },
+  [SECURITY_ALERT_VALIDATION_WORKFLOW_ID]: {
+    autoCloseEnabled: true,
+    autoCloseConfidenceScoreMinThreshold: 0.85,
+    autoCloseConfidenceScoreMaxThreshold: 1,
   },
 };
 
@@ -112,6 +121,19 @@ describe('managedWorkflowDefinitions', () => {
   it('contains the Security alert validation workflow', () => {
     const ids = managedWorkflowDefinitions.map(({ id }) => id);
     expect(ids).toContain(SECURITY_ALERT_VALIDATION_WORKFLOW_ID);
+  });
+
+  it('renders the Security alert validation workflow with template values', () => {
+    const renderedYaml = SECURITY_ALERT_VALIDATION_WORKFLOW.yamlTemplate({
+      autoCloseEnabled: false,
+      autoCloseConfidenceScoreMinThreshold: 0.7,
+      autoCloseConfidenceScoreMaxThreshold: 0.9,
+    });
+
+    const workflow = parse(renderedYaml) as { consts: Record<string, unknown> };
+    expect(workflow.consts.auto_close_enabled).toBe(false);
+    expect(workflow.consts.auto_close_confidence_score_min_threshold).toBe(0.7);
+    expect(workflow.consts.auto_close_confidence_score_max_threshold).toBe(0.9);
   });
 
   it.each(managedDefinitionsById)('%s uses the reserved system- id prefix', (id) => {

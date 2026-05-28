@@ -170,7 +170,7 @@ import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capab
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import {
-  installSecurityManagedWorkflows,
+  markSecurityManagedWorkflowsReady,
   registerSecurityManagedWorkflowOwner,
 } from './workflows/managed_workflows';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
@@ -886,8 +886,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.ruleMonitoringService.start(core, plugins);
 
     if (plugins.workflowsExtensions) {
-      void installSecurityManagedWorkflows({
-        core,
+      void markSecurityManagedWorkflowsReady({
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
       });

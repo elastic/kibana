@@ -11,6 +11,9 @@ import { DEFAULT_EXCLUDED_GAP_REASONS, gapReasonType } from '@kbn/alerting-plugi
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD,
+  SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
@@ -510,6 +513,7 @@ export const initUiSettings = (
         { maxSize: Object.values(gapReasonType).length }
       ),
     },
+    ...getAlertValidationWorkflowSettings(),
     ...getDefaultValueReportSettings(),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
@@ -661,6 +665,75 @@ export const getDefaultColdAndFrozenTiersSettings = (): SettingsConfig => ({
     requiresPageReload: true,
     schema: schema.boolean(),
     solutionViews: ['classic', 'security'],
+  },
+});
+
+export const getAlertValidationWorkflowSettings = (): SettingsConfig => ({
+  [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_ENABLED]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseEnabledLabel',
+      {
+        defaultMessage: 'Auto-close alerts validated as false positives',
+      }
+    ),
+    value: true,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseEnabledDescription',
+      {
+        defaultMessage:
+          'Automatically closes alerts when the alert validation workflow classifies them as false positives within the configured confidence range.',
+      }
+    ),
+    type: 'boolean',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.boolean(),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+  },
+  [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MIN_THRESHOLD]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseMinThresholdLabel',
+      {
+        defaultMessage: 'Auto-close minimum confidence score',
+      }
+    ),
+    value: 0.85,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseMinThresholdDescription',
+      {
+        defaultMessage:
+          'The lowest false positive confidence score that can automatically close an alert.',
+      }
+    ),
+    type: 'number',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.number({ min: 0, max: 1 }),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
+  },
+  [SECURITY_SOLUTION_ALERT_VALIDATION_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD]: {
+    name: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseMaxThresholdLabel',
+      {
+        defaultMessage: 'Auto-close maximum confidence score',
+      }
+    ),
+    value: 1,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.alertValidationWorkflowAutoCloseMaxThresholdDescription',
+      {
+        defaultMessage:
+          'The highest false positive confidence score that can automatically close an alert.',
+      }
+    ),
+    type: 'number',
+    category: [APP_ID],
+    requiresPageReload: false,
+    schema: schema.number({ min: 0, max: 1 }),
+    solutionViews: ['classic', 'security'],
+    technicalPreview: true,
   },
 });
 
