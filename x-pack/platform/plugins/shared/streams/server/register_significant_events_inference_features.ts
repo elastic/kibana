@@ -25,7 +25,7 @@ const KI_EXTRACTION_RECOMMENDED_MODELS = [
 const KI_QUERY_GENERATION_RECOMMENDED_MODELS = [
   defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
   defaultInferenceEndpoints.OPENAI_GPT_5_4,
-  defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_OPUS,
+  defaultInferenceEndpoints.OPENAI_GPT_OSS_120B,
 ];
 
 const DISCOVERY_RECOMMENDED_MODELS = [
