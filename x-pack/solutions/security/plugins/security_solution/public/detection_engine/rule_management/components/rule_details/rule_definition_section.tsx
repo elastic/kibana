@@ -9,22 +9,19 @@ import React from 'react';
 import { isEmpty } from 'lodash/fp';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
-  EuiButtonIcon,
   EuiDescriptionList,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLoadingSpinner,
-  EuiPopover,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import useToggle from 'react-use/lib/useToggle';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   EqlOptionalFields,
@@ -281,29 +278,10 @@ interface UnavailableMlJobLinkProps {
 }
 
 const UnavailableMlJobLink: React.FC<UnavailableMlJobLinkProps> = ({ jobId }) => {
-  const [isPopoverOpen, togglePopover] = useToggle(false);
-
-  const button = (
-    <EuiToolTip content={i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE} disableScreenReaderOutput>
-      <EuiButtonIcon
-        iconType="question"
-        onClick={togglePopover}
-        aria-label={i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}
-      />
-    </EuiToolTip>
-  );
-
   return (
     <EuiText component="span" color="subdued" size="s">
       {jobId}
-      <EuiPopover
-        button={button}
-        isOpen={isPopoverOpen}
-        closePopover={togglePopover}
-        aria-label={i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}
-      >
-        {i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE}
-      </EuiPopover>
+      <EuiIconTip type="question" content={i18n.MACHINE_LEARNING_JOB_NOT_AVAILABLE} />
     </EuiText>
   );
 };

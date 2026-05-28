@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import useBoolean from 'react-use/lib/useBoolean';
