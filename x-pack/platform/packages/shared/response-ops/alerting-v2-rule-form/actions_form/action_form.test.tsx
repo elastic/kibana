@@ -341,7 +341,7 @@ describe('ActionForm', () => {
         source: 'inline' as const,
         stepType: 'email' as const,
         connectorId: 'email-1',
-        params: 'to: ""\n',
+        params: 'to: "user@example.com"\n',
       };
       renderForm([action], { isInvalid: true });
       expect(screen.queryByTestId(`actionRowInvalid-${action.id}`)).not.toBeInTheDocument();
