@@ -42,6 +42,7 @@ import {
   isAnswerAction,
   isBackgroundExecutionCompleteAction,
   isExecuteToolAction,
+  isHandoverAction,
   isStructuredAnswerAction,
   isToolCallAction,
   isToolPromptAction,
@@ -57,12 +58,15 @@ export const convertGraphEvents = ({
   pendingRound,
   logger,
   startTime,
+  singleAgentMode = false,
 }: {
   graphName: string;
   toolManager: ToolManager;
   pendingRound: ConversationRound | undefined;
   logger: Logger;
   startTime: Date;
+  /** When true, emit message events from the research agent's final turn instead of the answer agent. */
+  singleAgentMode?: boolean;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, string>();
@@ -100,11 +104,24 @@ export const convertGraphEvents = ({
           }
         }
 
-        // emit tool calls for research agent steps
+        // emit tool calls for research agent steps; in single-agent mode also emit the
+        // final answer when the research agent produces a handover (non-tool response).
         if (matchEvent(event, 'on_chain_end') && matchName(event, steps.researchAgent)) {
           const events: ConvertedEvents[] = [];
           const addedActions = (event.data.output as StateType).mainActions;
           const nextAction = addedActions[addedActions.length - 1];
+
+          // Single-agent mode: research handover is the user-visible final answer.
+          // Emit the same SSE events that the answer agent would normally produce so
+          // callers (round builder, UI) see the expected message_complete event.
+          if (singleAgentMode && isHandoverAction(nextAction)) {
+            if (!isThinkingComplete) {
+              events.push(createThinkingCompleteEvent(Date.now() - startTime.getTime()));
+              isThinkingComplete = true;
+            }
+            events.push(createMessageEvent(nextAction.message, { messageId }));
+            return of(...events);
+          }
 
           if (isToolCallAction(nextAction)) {
             const {

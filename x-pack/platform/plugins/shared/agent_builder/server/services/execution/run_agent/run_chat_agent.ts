@@ -303,6 +303,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       logger,
       startTime,
       pendingRound,
+      singleAgentMode: resolvedConfiguration.singleAgentMode,
     }),
     finalize(() => manualEvents$.complete())
   );

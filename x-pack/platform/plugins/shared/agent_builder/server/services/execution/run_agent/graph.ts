@@ -76,6 +76,7 @@ export const createAgentGraph = ({
   backgroundExecutionService?: BackgroundExecutionService;
   roundId: string;
 }) => {
+  const { singleAgentMode } = configuration;
   const init = async () => {
     return {};
   };
@@ -165,7 +166,8 @@ export const createAgentGraph = ({
         return steps.executeTool;
       }
     } else if (isHandoverAction(lastAction)) {
-      return steps.prepareToAnswer;
+      // Single-agent mode: research text is the final answer; skip the answer-agent call.
+      return singleAgentMode ? steps.finalize : steps.prepareToAnswer;
     }
 
     throw invalidState(`[researchAgentEdge] last action type was ${lastAction.type}}`);
@@ -287,6 +289,15 @@ export const createAgentGraph = ({
   };
 
   const finalize = async (state: StateType) => {
+    // Single-agent mode: research produced the answer directly (no answer-agent call).
+    // Read the handover message from mainActions instead of answerActions.
+    if (singleAgentMode && state.answerActions.length === 0) {
+      const lastMainAction = state.mainActions[state.mainActions.length - 1];
+      if (isHandoverAction(lastMainAction)) {
+        return { finalAnswer: lastMainAction.message };
+      }
+    }
+
     const answerAction = state.answerActions[state.answerActions.length - 1];
     if (isStructuredAnswerAction(answerAction)) {
       return {
@@ -322,13 +333,23 @@ export const createAgentGraph = ({
       [steps.researchAgent]: steps.researchAgent,
       [steps.executeTool]: steps.executeTool,
       [steps.prepareToAnswer]: steps.prepareToAnswer,
+      // single-agent mode: voluntary handover routes directly to finalize
+      [steps.finalize]: steps.finalize,
     })
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
       [steps.checkBackgroundWork]: steps.checkBackgroundWork,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,
     })
     .addEdge(steps.handleToolInterrupt, _END_)
-    .addEdge(steps.prepareToAnswer, steps.answerAgent)
+    // single-agent mode: forced handover (cycle limit) also routes to finalize
+    .addConditionalEdges(
+      steps.prepareToAnswer,
+      () => (singleAgentMode ? steps.finalize : steps.answerAgent),
+      {
+        [steps.answerAgent]: steps.answerAgent,
+        [steps.finalize]: steps.finalize,
+      }
+    )
     .addConditionalEdges(steps.answerAgent, answerAgentEdge, {
       [steps.answerAgent]: steps.answerAgent,
       [steps.finalize]: steps.finalize,
