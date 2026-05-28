@@ -7,25 +7,35 @@
 
 import React from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { CodeEditor, ESQL_LANG_ID } from '@kbn/code-editor';
+
+const defaultEmptyMessage = i18n.translate(
+  'xpack.alertingV2.composeDiscover.querySummary.noQueryDefined',
+  { defaultMessage: 'No query defined' }
+);
 
 interface QuerySummaryProps {
   query: string;
-  label?: string;
+  emptyMessage?: string;
   maxLines?: number;
 }
 
-export const QuerySummary: React.FC<QuerySummaryProps> = ({ query, label, maxLines = 5 }) => {
+export const QuerySummary: React.FC<QuerySummaryProps> = ({
+  query,
+  emptyMessage = defaultEmptyMessage,
+  maxLines = 5,
+}) => {
   const actualLines = query.split('\n').length;
-  const lineCount = Math.min(actualLines, maxLines);
-  const height = lineCount * 44 + 16;
+  const lineCount = Math.max(2, Math.min(actualLines, maxLines));
+  const height = lineCount * 18 + 16;
   const isScrollable = actualLines > maxLines;
 
   if (!query.trim()) {
     return (
       <EuiPanel color="subdued" paddingSize="s">
         <EuiText size="s" color="subdued">
-          {label ? `No ${label.toLowerCase()} defined` : 'No query defined'}
+          {emptyMessage}
         </EuiText>
       </EuiPanel>
     );

@@ -282,9 +282,9 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     return TAB_DEFINITIONS.filter((t) => tabs.includes(t.id));
   }, [tabs]);
 
-  const editorPanelStyles: React.CSSProperties = useMemo(
+  const editorPanelStyles = useMemo(
     () => ({
-      resize: 'vertical',
+      resize: 'vertical' as const,
       overflow: 'auto',
       height: INITIAL_EDITOR_HEIGHT,
       minHeight: MIN_EDITOR_HEIGHT,
@@ -299,6 +299,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       size="fill"
       onClose={onClose}
       aria-labelledby={QUERY_SANDBOX_TITLE_ID}
+      closeButtonProps={{ 'data-test-subj': 'querySandboxClose' }}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" id={QUERY_SANDBOX_TITLE_ID}>
@@ -381,7 +382,7 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
         <EuiSpacer size="s" />
 
         {/* ── 2. Editor — bordered panel ──────────────────────────────── */}
-        <EuiPanel hasBorder paddingSize="s" style={{ ...editorPanelStyles }}>
+        <EuiPanel paddingSize="s" style={{ ...editorPanelStyles }}>
           {tabs?.length ? (
             <ComposeDiscoverTabs
               baseQuery={queryFields.base}

@@ -894,9 +894,13 @@ groups:
         datatype: int
         default: 100000
         applies_to:
-          stack: ga
-          ech: ga
-          self: ga
+          - "stack: deprecated 8.3"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` instead."
+        note: |
+          :applies_to: stack: ga 9.4.0!-9.4.1!
+          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Migrate to `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` or upgrade to a later version.
 
       - setting: data.autocomplete.valueSuggestions.timeout
         description: |
@@ -904,9 +908,13 @@ groups:
         datatype: int
         default: 1000
         applies_to:
-          stack: ga
-          ech: ga
-          self: ga
+          - "stack: deprecated 8.3"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.timeout` instead."
+        note: |
+          :applies_to: stack: ga 9.4.0!-9.4.1!
+          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Migrate to `unifiedSearch.autocomplete.valueSuggestions.timeout` or upgrade to a later version.
 
       - setting: unifiedSearch.autocomplete.valueSuggestions.timeout
         description: |
@@ -914,7 +922,7 @@ groups:
         datatype: int
         default: 1000
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
 
@@ -924,7 +932,7 @@ groups:
         datatype: int
         default: 100000
         applies_to:
-          stack: ga
+          stack: ga 8.3
           ech: ga
           self: ga
         note: "To reload the logging settings, send a SIGHUP signal to {{kib}}. For more logging configuration options, see the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide."
