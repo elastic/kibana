@@ -111,6 +111,8 @@ export const stepWritesOrRemovesField = (step: StreamlangStep, fieldName: string
     }
     case 'dissect':
       return step.pattern.includes(`%{${fieldName}}`);
+    case 'registered_domain':
+      return fieldName === step.prefix || fieldName.startsWith(`${step.prefix}.`);
     case 'drop_document':
       return false;
     case 'manual_ingest_pipeline':
@@ -184,6 +186,12 @@ export const getStepWriteTargets = (step: StreamlangStep): string[] => {
       while ((match = re.exec(step.pattern)) !== null) targets.add(match[1]);
       return [...targets];
     }
+    case 'registered_domain':
+      return [
+        `${step.prefix}.registered_domain`,
+        `${step.prefix}.top_level_domain`,
+        `${step.prefix}.subdomain`,
+      ];
     case 'remove':
     case 'remove_by_prefix':
     case 'drop_document':
