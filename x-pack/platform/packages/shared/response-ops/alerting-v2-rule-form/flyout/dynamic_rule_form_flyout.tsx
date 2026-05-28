@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { RuleFormFlyout } from './rule_form_flyout';
-import { ConfirmRuleClose } from './confirm_rule_close';
 import { DynamicRuleForm } from '../form/dynamic_rule_form';
 import { useCreateRule } from '../form/hooks/use_create_rule';
 import { inlineEsqlVariables } from '../utils/esql_rule_utils';
@@ -65,11 +64,6 @@ const DynamicRuleFormFlyoutInner = ({
   esqlVariables,
   validationErrors,
 }: DynamicRuleFormFlyoutProps) => {
-  const [isFormDirty, setIsFormDirty] = useState(false);
-  const [isConfirmCloseModalVisible, setIsConfirmCloseModalVisible] = useState(false);
-  const confirmCloseRef = useRef(isConfirmCloseModalVisible);
-  confirmCloseRef.current = isConfirmCloseModalVisible;
-
   const inlineResult = useMemo(
     () => inlineEsqlVariables(query, esqlVariables),
     [query, esqlVariables]
@@ -89,71 +83,46 @@ const DynamicRuleFormFlyoutInner = ({
     createRule(values, { onSuccess: onClose });
   };
 
-  const handleRequestClose = useCallback(() => {
-    // Prevent re-entry when the confirm modal's ESC bubbles to the flyout's onClose
-    if (confirmCloseRef.current) return;
-    if (isFormDirty) {
-      setIsConfirmCloseModalVisible(true);
-    } else {
-      onClose?.();
-    }
-  }, [isFormDirty, onClose]);
-
-  const handleConfirmDiscard = useCallback(() => {
-    setIsConfirmCloseModalVisible(false);
-    onClose?.();
-  }, [onClose]);
-
-  const handleCancelDiscard = useCallback(() => {
-    setIsConfirmCloseModalVisible(false);
-  }, []);
-
   const hasValidationErrors = allErrors.length > 0;
 
   return (
-    <>
-      <RuleFormFlyout
-        push={push}
-        onClose={handleRequestClose}
-        isLoading={isLoading}
-        isSaveDisabled={hasValidationErrors}
-      >
-        {hasValidationErrors && (
-          <>
-            <EuiCallOut
-              announceOnMount
-              color="danger"
-              iconType="alert"
-              data-test-subj="ruleV2FlyoutValidationErrors"
-              title={i18n.translate('xpack.alertingV2.ruleForm.validationErrors.title', {
-                defaultMessage: 'Resolve issues before saving',
-              })}
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.alertingV2.ruleForm.validationErrors.description"
-                  defaultMessage="The following items must be resolved before this rule can be saved: {names}"
-                  values={{ names: allErrors.join(', ') }}
-                />
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <DynamicRuleForm
-          onSubmit={handleSubmit}
-          isSubmitting={isLoading}
-          query={inlineResult.query}
-          services={services}
-          layout="flyout"
-          includeYaml={includeYaml}
-          onDirtyChange={setIsFormDirty}
-        />
-      </RuleFormFlyout>
-      {isConfirmCloseModalVisible && (
-        <ConfirmRuleClose onCancel={handleCancelDiscard} onConfirm={handleConfirmDiscard} />
+    <RuleFormFlyout
+      push={push}
+      onClose={onClose}
+      isLoading={isLoading}
+      isSaveDisabled={hasValidationErrors}
+    >
+      {hasValidationErrors && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="danger"
+            iconType="alert"
+            data-test-subj="ruleV2FlyoutValidationErrors"
+            title={i18n.translate('xpack.alertingV2.ruleForm.validationErrors.title', {
+              defaultMessage: 'Resolve issues before saving',
+            })}
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.alertingV2.ruleForm.validationErrors.description"
+                defaultMessage="The following items must be resolved before this rule can be saved: {names}"
+                values={{ names: allErrors.join(', ') }}
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
       )}
-    </>
+      <DynamicRuleForm
+        onSubmit={handleSubmit}
+        isSubmitting={isLoading}
+        query={inlineResult.query}
+        services={services}
+        layout="flyout"
+        includeYaml={includeYaml}
+      />
+    </RuleFormFlyout>
   );
 };
 
