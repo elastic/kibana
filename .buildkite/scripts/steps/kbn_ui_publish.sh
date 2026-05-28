@@ -33,6 +33,9 @@ else
   .buildkite/scripts/bootstrap.sh
 fi
 
+echo "  NPM_REGISTRY=${NPM_REGISTRY}"
+echo "  NPM_TOKEN length: ${#NPM_TOKEN} chars (first 4: ${NPM_TOKEN:0:4}...)"
+
 # ---- Change detection ------------------------------------------------------
 
 # On a standard "merge to main" build, the commit under test is a merge or
@@ -105,6 +108,8 @@ if [[ -z "$NPM_REGISTRY" || -z "$NPM_TOKEN" ]]; then
   echo "ERROR: Artifactory credentials missing from vault." >&2
   exit 1
 fi
+echo "  NPM_REGISTRY=${NPM_REGISTRY}"
+echo "  NPM_TOKEN length: ${#NPM_TOKEN} chars (first 4: ${NPM_TOKEN:0:4}...)"
 
 # Scoped .npmrc for this run only; cleaned up on exit.
 NPMRC="$(mktemp)"
