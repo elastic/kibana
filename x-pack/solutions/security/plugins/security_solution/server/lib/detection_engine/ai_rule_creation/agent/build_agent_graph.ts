@@ -23,12 +23,14 @@ import { getTagsNode } from './nodes/get_tags';
 import { getEsqlQueryGraphWithTool } from './sub_graphs/esql_with_tool/esql_query_graph';
 import { addScheduleNode } from './nodes/add_schedule';
 import { addMitreMappingsNode } from './nodes/add_mitre_mappings';
+import { addSeverityAndRiskScoreNode } from './nodes/add_severity_and_risk_score';
 
 export const BUILD_AGENT_NODE_NAMES = {
   ESQL_QUERY_CREATION: 'esqlQueryCreation',
   GET_TAGS: 'getTags',
   CREATE_RULE_NAME_AND_DESCRIPTION: 'createRuleNameAndDescription',
   ADD_MITRE_MAPPINGS: 'addMitreMappings',
+  ADD_SEVERITY_AND_RISK_SCORE: 'addSeverityAndRiskScore',
   ADD_SCHEDULE: 'addSchedule',
 } as const;
 
@@ -37,6 +39,7 @@ const {
   GET_TAGS,
   CREATE_RULE_NAME_AND_DESCRIPTION,
   ADD_MITRE_MAPPINGS,
+  ADD_SEVERITY_AND_RISK_SCORE,
   ADD_SCHEDULE,
 } = BUILD_AGENT_NODE_NAMES;
 
@@ -79,6 +82,7 @@ export const getBuildAgent = async ({
     .addNode(GET_TAGS, getTagsNode({ rulesClient, savedObjectsClient, model, events }))
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model, events }))
     .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events }))
+    .addNode(ADD_SEVERITY_AND_RISK_SCORE, addSeverityAndRiskScoreNode({ model, events }))
     .addNode(ADD_SCHEDULE, addScheduleNode({ model, logger, events }))
     .addEdge(START, ESQL_QUERY_CREATION)
     .addConditionalEdges(ESQL_QUERY_CREATION, shouldContinue, {
@@ -90,7 +94,8 @@ export const getBuildAgent = async ({
       end: END,
     })
     .addEdge(GET_TAGS, ADD_MITRE_MAPPINGS)
-    .addEdge(ADD_MITRE_MAPPINGS, ADD_SCHEDULE)
+    .addEdge(ADD_MITRE_MAPPINGS, ADD_SEVERITY_AND_RISK_SCORE)
+    .addEdge(ADD_SEVERITY_AND_RISK_SCORE, ADD_SCHEDULE)
     .addEdge(ADD_SCHEDULE, END);
 
   const graph = buildAgentGraph.compile({ checkpointer: undefined });
