@@ -70,26 +70,23 @@ export function collectEsqlRegionsFromLookup(
  * order. Steps without a `with.query` value (e.g. the user just typed
  * `query:` without a body yet) are skipped.
  */
-export function findEsqlStepRegions(
-  document: Document | null | undefined,
-  modelText: string
-): EsqlStepRegion[] {
+export function findEsqlStepRegions(modelText: string): EsqlStepRegion[] {
+  // Prefer the lookup-based extraction (same as validators) to avoid walking every map node.
+  const lineCounter = new LineCounter();
+  const document = parseDocument(modelText, { lineCounter, keepSourceTokens: true });
+
   if (!document?.contents) {
     return [];
   }
 
-  // Prefer the lookup-based extraction (same as validators) to avoid walking every map node.
-  // We re-parse here with `lineCounter`/`keepSourceTokens` so the lookup has the data it needs.
-  const lineCounter = new LineCounter();
-  const fresh = parseDocument(modelText, { lineCounter, keepSourceTokens: true });
-  const workflowLookup = buildWorkflowLookup(fresh, lineCounter);
+  const workflowLookup = buildWorkflowLookup(document, lineCounter);
   return collectEsqlRegionsFromLookup(workflowLookup, modelText);
 }
 
 /** Convenience: parse + find in one call. Swallows parse errors. */
 export function findEsqlStepRegionsFromText(modelText: string): EsqlStepRegion[] {
   try {
-    return findEsqlStepRegions(parseDocument(modelText), modelText);
+    return findEsqlStepRegions(modelText);
   } catch {
     return [];
   }

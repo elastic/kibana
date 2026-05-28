@@ -107,7 +107,7 @@ describe('findEsqlStepRegions', () => {
       query: "FROM events | KEEP id"
 `;
     const fromLookup = regionsFromText(text);
-    const fromFind = findEsqlStepRegions(parseDocument(text), text);
+    const fromFind = findEsqlStepRegions(text);
 
     expect(fromFind).toHaveLength(fromLookup.length);
     for (let i = 0; i < fromLookup.length; i++) {
