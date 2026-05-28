@@ -167,12 +167,14 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
       <>
         <EuiPopover
           button={
-            <EuiButtonIcon
-              iconType="boxesVertical"
-              aria-label={kebabLabel}
-              onClick={toggle}
-              data-test-subj={`packQueriesTableKebab-${row.id ?? row.action_id}`}
-            />
+            <EuiToolTip content={kebabLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="boxesVertical"
+                aria-label={kebabLabel}
+                onClick={toggle}
+                data-test-subj={`packQueriesTableKebab-${row.id ?? row.action_id}`}
+              />
+            </EuiToolTip>
           }
           isOpen={isOpen}
           closePopover={close}
