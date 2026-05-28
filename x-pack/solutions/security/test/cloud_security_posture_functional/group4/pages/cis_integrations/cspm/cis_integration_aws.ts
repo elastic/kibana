@@ -144,12 +144,13 @@ export default function (providerContext: FtrProviderContext) {
           }
           expect(modal !== undefined).to.be(true);
         });
-
-        await cisIntegration.navigateToIntegrationCspList();
-        expect(
-          (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
-            roleArn
-        ).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await cisIntegration.navigateToIntegrationCspList();
+          expect(
+            (await cisIntegration.getFieldValueInEditPage(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN)) ===
+              roleArn
+          ).to.be(true);
+        });
       });
     });
 
