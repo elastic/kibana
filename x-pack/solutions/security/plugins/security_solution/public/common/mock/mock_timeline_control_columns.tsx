@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiPopoverTitle,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { ControlColumnProps } from '../../../common/types';
 
@@ -67,12 +68,14 @@ const TestTrailingColumn = () => {
       anchorPosition="upCenter"
       panelPaddingSize="s"
       button={
-        <EuiButtonIcon
-          aria-label="show actions"
-          iconType="boxesVertical"
-          color="text"
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-        />
+        <EuiToolTip content="show actions" disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label="show actions"
+            iconType="boxesVertical"
+            color="text"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          />
+        </EuiToolTip>
       }
       data-test-subj="test-trailing-column-popover-button"
       closePopover={() => setIsPopoverOpen(false)}
@@ -82,7 +85,9 @@ const TestTrailingColumn = () => {
         <button type="button" onClick={() => {}}>
           <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon aria-label="Pin selected items" iconType="pin" color="text" />
+              <EuiToolTip content="Pin selected items" disableScreenReaderOutput>
+                <EuiButtonIcon aria-label="Pin selected items" iconType="pin" color="text" />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem>{'Pin'}</EuiFlexItem>
           </EuiFlexGroup>
@@ -91,7 +96,9 @@ const TestTrailingColumn = () => {
         <button type="button" onClick={() => {}}>
           <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon aria-label="Delete selected items" iconType="trash" color="text" />
+              <EuiToolTip content="Delete selected items" disableScreenReaderOutput>
+                <EuiButtonIcon aria-label="Delete selected items" iconType="trash" color="text" />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem>{'Delete'}</EuiFlexItem>
           </EuiFlexGroup>

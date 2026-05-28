@@ -10,6 +10,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
@@ -40,14 +41,16 @@ export const RiskScoreInfoTooltip: React.FC<{
       anchorPosition={anchorPosition}
       aria-labelledby={popoverTitleId}
       button={
-        <EuiButtonIcon
-          color="text"
-          size="xs"
-          iconSize="m"
-          iconType="info"
-          aria-label={i18n.INFORMATION_ARIA_LABEL}
-          onClick={onClick}
-        />
+        <EuiToolTip content={i18n.INFORMATION_ARIA_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            color="text"
+            size="xs"
+            iconSize="m"
+            iconType="info"
+            aria-label={i18n.INFORMATION_ARIA_LABEL}
+            onClick={onClick}
+          />
+        </EuiToolTip>
       }
     >
       {toolTipTitle && <EuiPopoverTitle id={popoverTitleId}>{toolTipTitle}</EuiPopoverTitle>}

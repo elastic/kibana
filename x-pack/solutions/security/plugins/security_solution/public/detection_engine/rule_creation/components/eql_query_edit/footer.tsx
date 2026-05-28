@@ -18,6 +18,7 @@ import {
   EuiPopoverTitle,
   useEuiTheme,
   useGeneratedHtmlId,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
@@ -235,13 +236,15 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
                 <EuiFlexItem className={groupItemStyles} grow={false}>
                   <EuiPopover
                     button={
-                      <EuiButtonIcon
-                        onClick={openEqlSettingsHandler}
-                        iconType="controls"
-                        isDisabled={openEqlSettings}
-                        aria-label="eql settings"
-                        data-test-subj="eql-settings-trigger"
-                      />
+                      <EuiToolTip content="eql settings" disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          onClick={openEqlSettingsHandler}
+                          iconType="controls"
+                          isDisabled={openEqlSettings}
+                          aria-label="eql settings"
+                          data-test-subj="eql-settings-trigger"
+                        />
+                      </EuiToolTip>
                     }
                     isOpen={openEqlSettings}
                     closePopover={closeEqlSettingsHandler}
