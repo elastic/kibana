@@ -7,11 +7,10 @@
 
 import React from 'react';
 import type { EuiPageSectionProps } from '@elastic/eui';
-import { EuiPageTemplate, useEuiTheme } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { css as emotionCss } from '@emotion/react';
-import type { AppHeaderWithFallbackProps } from '@kbn/app-header';
-import { AppHeaderWithFallback } from '@kbn/app-header';
+import type { AppHeaderProps } from '@kbn/app-header';
+import { AppHeader } from '@kbn/app-header';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
   return (
@@ -28,29 +27,7 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
   );
 }
 
-export const StreamsAppHeader = ({ fallback, ...props }: AppHeaderWithFallbackProps) => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <AppHeaderWithFallback
-      fallback={
-        fallback === null
-          ? null
-          : {
-              paddingSize: 'l',
-              restrictWidth: false,
-              bottomBorder: 'extended',
-              color: 'plain',
-              css: emotionCss`
-                background: ${euiTheme.colors.backgroundBasePlain};
-              `,
-              ...fallback,
-            }
-      }
-      {...props}
-    />
-  );
-};
+export const StreamsAppHeader = (props: AppHeaderProps) => <AppHeader {...props} />;
 
 StreamsAppPageTemplate.Header = EuiPageTemplate.Header;
 StreamsAppPageTemplate.EmptyPrompt = EuiPageTemplate.EmptyPrompt;

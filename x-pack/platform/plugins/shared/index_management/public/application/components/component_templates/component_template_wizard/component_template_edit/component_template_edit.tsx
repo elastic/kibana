@@ -123,9 +123,6 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
           values: { name: decodedName },
         })}
         back="/app/management/data/index_management/component_templates"
-        fallback={{
-          'data-test-subj': 'pageTitle',
-        }}
       />
       <EuiSpacer size="l" />
 

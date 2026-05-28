@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBetaBadge,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTourStep,
-} from '@elastic/eui';
+import { EuiBetaBadge, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
@@ -36,7 +29,6 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { calculateDataQuality } from '../../../../util/calculate_data_quality';
 import {
   ClassicStreamBadge,
-  DiscoverBadgeButton,
   DraftStreamBadge,
   LifecycleBadge,
   TimeSeriesBadge,
@@ -44,14 +36,12 @@ import {
   useDiscoverLink,
 } from '../../../stream_badges';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
-import { TAB_TO_TOUR_STEP_ID, useStreamsTour } from '../../../streams_tour';
 
 export type ManagementTabs = Record<
   string,
   {
     content: JSX.Element;
     label: string;
-    fallbackLabel?: ReactNode;
   }
 >;
 
@@ -69,7 +59,6 @@ export function Wrapper({
   const router = useStreamsAppRouter();
   const { definition } = useStreamDetail();
   const { services } = useKibana();
-  const { getStepPropsByStepId } = useStreamsTour();
   const { rangeFrom, rangeTo } = useTimeRange();
 
   const lastTrackedRef = useRef<string | null>(null);
@@ -108,7 +97,6 @@ export function Wrapper({
             query: { rangeFrom, rangeTo },
           }),
           label: currentTab.label,
-          fallbackLabel: currentTab.fallbackLabel,
           content: currentTab.content,
         },
       ];
@@ -282,48 +270,6 @@ export function Wrapper({
         },
       }
     : undefined;
-  const fallbackRightSideItems =
-    discoverLink && Streams.ingest.all.GetResponse.is(definition)
-      ? [
-          <DiscoverBadgeButton
-            key="viewInDiscover"
-            stream={definition.stream}
-            hasDataStream={definition.data_stream_exists || isDraft}
-            indexMode={definition.index_mode ?? 'standard'}
-            spellOut
-          />,
-        ]
-      : undefined;
-  const fallbackTabs = Object.entries(tabMap).map(([tabKey, { label, fallbackLabel, href }]) => {
-    const tourStepId = TAB_TO_TOUR_STEP_ID[tabKey];
-    const stepProps = tourStepId ? getStepPropsByStepId(tourStepId) : undefined;
-
-    const wrappedLabel = stepProps ? (
-      <EuiTourStep
-        step={stepProps.step}
-        stepsTotal={stepProps.stepsTotal}
-        title={stepProps.title}
-        subtitle={stepProps.subtitle}
-        content={stepProps.content}
-        anchorPosition={stepProps.anchorPosition}
-        offset={stepProps.offset}
-        maxWidth={stepProps.maxWidth}
-        isStepOpen={stepProps.isStepOpen}
-        footerAction={stepProps.footerAction}
-        onFinish={stepProps.onFinish}
-      >
-        <span>{fallbackLabel ?? label}</span>
-      </EuiTourStep>
-    ) : (
-      fallbackLabel ?? label
-    );
-
-    return {
-      label: wrappedLabel,
-      href,
-      isSelected: tab === tabKey,
-    };
-  });
   const streamsBackLabel = i18n.translate('xpack.streams.streamDetailHeader.backToStreamsLabel', {
     defaultMessage: 'Streams',
   });
@@ -336,22 +282,6 @@ export function Wrapper({
         badges={appHeaderBadges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}
-        fallback={{
-          pageTitle: (
-            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" wrap>
-              <EuiFlexItem grow={false}>{streamId}</EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
-                {streamBadges.map(({ key, node }) => (
-                  <EuiFlexItem key={key} grow={false}>
-                    {node}
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexGroup>
-          ),
-          rightSideItems: fallbackRightSideItems,
-          tabs: fallbackTabs,
-        }}
       />
       <StreamsAppPageTemplate.Body noPadding={tab === 'partitioning' || tab === 'processing'}>
         {topContent}

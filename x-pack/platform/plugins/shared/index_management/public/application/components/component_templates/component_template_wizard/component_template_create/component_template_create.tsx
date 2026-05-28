@@ -137,9 +137,6 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
               })
         }
         back="/app/management/data/index_management/component_templates"
-        fallback={{
-          'data-test-subj': 'pageTitle',
-        }}
       />
       <EuiSpacer size="l" />
 

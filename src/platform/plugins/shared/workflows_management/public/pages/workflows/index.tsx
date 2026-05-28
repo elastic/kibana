@@ -8,8 +8,6 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,10 +16,9 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { AppHeaderWithFallback as PageHeader } from '@kbn/app-header';
+import { AppHeader as PageHeader } from '@kbn/app-header';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflows, useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -152,48 +149,6 @@ export function WorkflowsPage() {
         menu={appMenu}
         docLink={WORKFLOWS_DOCUMENTATION_URL}
         showAddIntegrations
-        fallback={{
-          paddingSize: 'l',
-          pageTitle: (
-            <FormattedMessage id="workflows.pageTitle" defaultMessage="Workflows" ignoreTag />
-          ),
-          rightSideItems: [
-            ...(canCreateWorkflow
-              ? [
-                  <EuiButton
-                    iconType="plusInCircle"
-                    color="primary"
-                    size="m"
-                    fill
-                    onClick={navigateToCreateWorkflow}
-                    data-test-subj="createWorkflowButton"
-                  >
-                    <FormattedMessage
-                      id="workflows.createWorkflowButton"
-                      defaultMessage="Create workflow"
-                      ignoreTag
-                    />
-                  </EuiButton>,
-                ]
-              : []),
-            ...(canImportWorkflows
-              ? [
-                  <EuiButtonEmpty
-                    iconType="importAction"
-                    size="m"
-                    onClick={() => setShowImportFlyout(true)}
-                    data-test-subj="importWorkflowsButton"
-                  >
-                    <FormattedMessage
-                      id="workflows.importWorkflowsButton"
-                      defaultMessage="Import"
-                      ignoreTag
-                    />
-                  </EuiButtonEmpty>,
-                ]
-              : []),
-          ],
-        }}
       />
       <EuiPageTemplate.Section restrictWidth={false}>
         {!shouldShowEmptyState && (

@@ -8,8 +8,7 @@
 import React, { useEffect } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
 import { PageHeader } from '../../components/page_header';
@@ -30,28 +29,6 @@ export const EnrichPolicyCreate: React.FunctionComponent<RouteComponentProps> = 
         back="/app/management/data/index_management/enrich_policies"
         padding={{ bleed: 'l' }}
         docLink={documentationService.getCreateEnrichPolicyLink()}
-        fallback={{
-          'data-test-subj': 'createEnrichPolicyHeaderContent',
-          description: (
-            <FormattedMessage
-              id="xpack.idxMgmt.enrichPolicyCreate.appDescription"
-              defaultMessage="Specify how to retrieve and enrich your incoming data."
-            />
-          ),
-          rightSideItems: [
-            <EuiButtonEmpty
-              href={documentationService.getCreateEnrichPolicyLink()}
-              target="_blank"
-              iconType="question"
-              data-test-subj="createEnrichPolicyDocumentationLink"
-            >
-              <FormattedMessage
-                id="xpack.idxMgmt.enrichPolicyCreate.titleDocsLinkText"
-                defaultMessage="Documentation"
-              />
-            </EuiButtonEmpty>,
-          ],
-        }}
       />
       <EuiSpacer size="l" />
 
