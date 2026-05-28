@@ -16,7 +16,7 @@ import { useSnoozeAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_
 import { useUnsnoozeAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_unsnooze_alert_instance';
 import type { SnoozeCondition } from '@kbn/response-ops-alerts-apis/types';
 import type { AdditionalContext, AlertActionsProps } from '../types';
-import { UNSNOOZE } from '../translations';
+import { UNMUTE, UNSNOOZE } from '../translations';
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
 import { useAlertSnoozedState } from '../hooks/use_alert_snoozed_state';
 import { typedMemo } from '../utils/react';
@@ -89,12 +89,8 @@ export const SnoozeAlertAction = typedMemo(
 
     if (isMuted || (isSnoozed && snoozedInstance)) {
       return (
-        <EuiContextMenuItem
-          data-test-subj="snooze-alert-action-unsnooze"
-          onClick={handleUnsnooze}
-          size="s"
-        >
-          {UNSNOOZE}
+        <EuiContextMenuItem data-test-subj="snooze-alert-action-unsnooze" onClick={handleUnsnooze}>
+          {isMuted ? UNMUTE : UNSNOOZE}
         </EuiContextMenuItem>
       );
     }
