@@ -13,10 +13,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
 
 const DEFAULT_VAULT_ADDR = 'https://secrets.elastic.co:8200';
+
 const getVaultAddr = (): string => process.env.VAULT_ADDR || DEFAULT_VAULT_ADDR;
 
 /**
- * Vault-backed config used by @kbn/evals CI.
+ * Vault-backed config used by @kbn/evals CI and local development.
  *
  * This is intentionally minimal: we store only the LiteLLM key + base URL,
  * and credentials for the centralized Elasticsearch cluster where eval results
@@ -25,13 +26,16 @@ const getVaultAddr = (): string => process.env.VAULT_ADDR || DEFAULT_VAULT_ADDR;
 
 export const KBN_EVALS_VAULT_ENV_VAR = 'KIBANA_EVALS_CI_CONFIG';
 
-type VaultType = 'ci-prod';
+export type VaultType = 'ci-prod' | 'dev';
+
+export const VAULT_TYPES: ReadonlyArray<VaultType> = ['ci-prod', 'dev'];
 
 const VAULT_PATHS: Record<VaultType, string> = {
   'ci-prod': 'secret/ci/elastic-kibana/kbn-evals',
+  dev: 'secret/kibana-issues/dev/kbn-evals/golden',
 };
 
-const getVaultPath = (vault: VaultType = 'ci-prod') => VAULT_PATHS[vault];
+export const getVaultPath = (vault: VaultType): string => VAULT_PATHS[vault];
 
 const KBN_EVALS_CONFIG_FIELD = 'config';
 
@@ -136,8 +140,8 @@ const ensureLocalConfigFileExists = (filePath: string) => {
   );
 };
 
-export const retrieveFromVault = async (vaultPath: string, filePath: string, field: string) => {
-  const { stdout } = await execa('vault', ['read', `-field=${field}`, vaultPath], {
+export const readConfigFromVaultPath = async (vaultPath: string): Promise<KbnEvalsCiConfig> => {
+  const { stdout } = await execa('vault', ['read', `-field=${KBN_EVALS_CONFIG_FIELD}`, vaultPath], {
     cwd: REPO_ROOT,
     buffer: true,
     env: {
@@ -148,13 +152,21 @@ export const retrieveFromVault = async (vaultPath: string, filePath: string, fie
 
   const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
   const parsed = JSON.parse(value);
-  const validated = validateKbnEvalsCiConfig(parsed);
+  return validateKbnEvalsCiConfig(parsed);
+};
+
+export const readConfigFromVault = async (vault: VaultType): Promise<KbnEvalsCiConfig> => {
+  return readConfigFromVaultPath(getVaultPath(vault));
+};
+
+export const retrieveFromVault = async (vaultPath: string, filePath: string, field: string) => {
+  const validated = await readConfigFromVaultPath(vaultPath);
   await writeFile(filePath, JSON.stringify(validated, null, 2));
   // eslint-disable-next-line no-console
   console.log(`Config written to: ${filePath}`);
 };
 
-export const retrieveConfigFromVault = async (vault: VaultType = 'ci-prod') => {
+export const retrieveConfigFromVault = async (vault: VaultType) => {
   await retrieveFromVault(getVaultPath(vault), KBN_EVALS_CONFIG_FILE, KBN_EVALS_CONFIG_FIELD);
 };
 
@@ -174,13 +186,13 @@ export const uploadToVault = async (vaultPath: string, filePath: string, field: 
   });
 };
 
-export const uploadConfigToVault = async (vault: VaultType = 'ci-prod') => {
+export const uploadConfigToVault = async (vault: VaultType) => {
   await uploadToVault(getVaultPath(vault), KBN_EVALS_CONFIG_FILE, KBN_EVALS_CONFIG_FIELD);
 };
 
 export const getCommand = async (
   format: 'vault-write' | 'env-var' = 'vault-write',
-  vault: VaultType = 'ci-prod'
+  vault: VaultType
 ) => {
   ensureLocalConfigFileExists(KBN_EVALS_CONFIG_FILE);
   const config = await readFile(KBN_EVALS_CONFIG_FILE, 'utf-8');

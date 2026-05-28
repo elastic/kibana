@@ -8,8 +8,18 @@
 import Fs from 'fs';
 import Path from 'path';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
+import { KBN_EVALS_DEV_VAULT_PATH, KBN_EVALS_VAULT_CONFIG_FIELD, safeExec } from './utils';
 
 export const VAULT_CONFIG_DIR = 'x-pack/platform/packages/shared/kbn-evals/scripts/vault';
+
+/**
+ * Virtual profile: load golden-cluster config from dev Vault at runtime (no config file).
+ * Use with `--datasets-profile dev-vault` or `--profile dev-vault`.
+ */
+export const DEV_VAULT_DATASETS_PROFILE = 'dev-vault';
+
+export const isDevVaultProfile = (profile?: string): boolean =>
+  profile?.trim() === DEV_VAULT_DATASETS_PROFILE;
 
 export const stripTrailingSlash = (url: string): string => url.replace(/\/$/, '');
 
@@ -71,18 +81,50 @@ export const defaultExportProfile = (repoRoot: string): string | undefined => {
   return Fs.existsSync(candidate) ? 'local' : undefined;
 };
 
-export const readVaultConfig = (repoRoot: string, profile?: string): VaultConfig | undefined => {
+export const readVaultConfigFromFile = (
+  repoRoot: string,
+  profile?: string
+): VaultConfig | undefined => {
   const filePath = resolveVaultConfigPath(repoRoot, profile);
   if (!Fs.existsSync(filePath)) return undefined;
   const raw = Fs.readFileSync(filePath, 'utf-8');
   return JSON.parse(raw) as VaultConfig;
 };
 
+export const readVaultConfigFromDevVault = (): VaultConfig | undefined => {
+  const stdout = safeExec('vault', [
+    'read',
+    `-field=${KBN_EVALS_VAULT_CONFIG_FIELD}`,
+    KBN_EVALS_DEV_VAULT_PATH,
+  ]);
+  if (!stdout) return undefined;
+
+  try {
+    return JSON.parse(Buffer.from(stdout, 'base64').toString('utf-8')) as VaultConfig;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Resolves golden-cluster config for CLI commands.
+ * Order: dev Vault (`dev-vault` profile) → config file (default: config.json).
+ */
+export const loadVaultConfig = (repoRoot: string, profile?: string): VaultConfig | undefined => {
+  if (isDevVaultProfile(profile)) {
+    return readVaultConfigFromDevVault();
+  }
+
+  return readVaultConfigFromFile(repoRoot, profile);
+};
+
+export const isDevVaultConfigReadable = (): boolean => readVaultConfigFromDevVault() !== undefined;
+
 export const envFromDatasetsProfile = (
   repoRoot: string,
   profile?: string
 ): Record<string, string> => {
-  const cfg = readVaultConfig(repoRoot, profile);
+  const cfg = loadVaultConfig(repoRoot, profile);
   const next: Record<string, string> = {};
 
   if (cfg?.evaluationsKbn) {
@@ -107,7 +149,7 @@ export const envFromExportProfile = (
   // Export profile must be explicitly selected (e.g. `local`, `ci`, `config`).
   if (!profile) return {};
 
-  const cfg = readVaultConfig(repoRoot, profile);
+  const cfg = loadVaultConfig(repoRoot, profile);
   if (!cfg) return {};
 
   const next: Record<string, string> = {};

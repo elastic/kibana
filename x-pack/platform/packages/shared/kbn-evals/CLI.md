@@ -25,9 +25,40 @@ node scripts/evals init
 node scripts/evals init --skip-discovery
 ```
 
-| Flag | Description |
-|------|-------------|
+| Flag               | Description                                                        |
+| ------------------ | ------------------------------------------------------------------ |
 | `--skip-discovery` | Skip EIS model discovery (reuse existing `target/eis_models.json`) |
+
+#### `init config` -- Vault config for golden cluster
+
+Create or verify golden cluster config setup (behavior depends on profile).
+
+```bash
+node scripts/evals init config
+node scripts/evals init config --profile dev-vault
+node scripts/evals init config --profile local
+```
+
+- **Default** — creates/updates `scripts/vault/config.json` interactively
+- **`--profile dev-vault`** — `vault login --method oidc` + verify dev Vault is readable
+- **`--profile local`** — creates `config.local.json` with localhost export URLs only
+
+#### Vault scripts
+
+All vault scripts require `--vault dev` or `--vault ci-prod`:
+
+| Script                              | Purpose                                           |
+| ----------------------------------- | ------------------------------------------------- |
+| `scripts/vault/retrieve_secrets.js` | Download config from Vault to local `config.json` |
+| `scripts/vault/upload_secrets.js`   | Upload local `config.json` to Vault               |
+| `scripts/vault/get_command.js`      | Print a `vault write` command                     |
+
+```bash
+export VAULT_ADDR=https://secrets.elastic.co:8200
+vault login --method oidc
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/retrieve_secrets.js --vault dev
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/get_command.js --vault ci-prod
+```
 
 ### `start` -- Start stack and run a suite
 
@@ -42,19 +73,19 @@ node scripts/evals start --suite agent-builder --grep "product documentation"
 node scripts/evals start --suite agent-builder --skip-server
 ```
 
-| Flag | Alias | Description |
-|------|-------|-------------|
-| `--suite <id>` | | Suite to run (interactive prompt if omitted) |
-| `--config <path>` | | Playwright config path (alternative to `--suite`) |
-| `--project <id>` | `--model` | Connector/model to evaluate (comma-separated for multiple) |
-| `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators |
-| `--profile <name>` | | Load both dataset + export settings from `config.<name>.json` in the vault config dir |
-| `--datasets-profile <name>` | | Load dataset settings from `config.<name>.json` (sets `EVALUATIONS_KBN_URL`/`EVALUATIONS_KBN_API_KEY`) |
-| `--export-profile <name>` | | Load export settings from `config.<name>.json` (sets `EVALUATIONS_ES_URL`, `TRACING_ES_URL`, and `TRACING_EXPORTERS`) |
-| `--grep <pattern>` | | Filter tests by name (passed to Playwright `--grep`) |
-| `--repetitions <n>` | | Number of times to repeat each example |
-| `--skip-server` | | Skip EDOT/Scout/EIS startup (use existing services) |
-| `--dry-run` | | Print configuration and exit without running |
+| Flag                             | Alias     | Description                                                                                                                                                     |
+| -------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--suite <id>`                   |           | Suite to run (interactive prompt if omitted)                                                                                                                    |
+| `--config <path>`                |           | Playwright config path (alternative to `--suite`)                                                                                                               |
+| `--project <id>`                 | `--model` | Connector/model to evaluate (comma-separated for multiple)                                                                                                      |
+| `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators                                                                                                                    |
+| `--profile <name>`               |           | Sets both datasets and export profiles (`config`/default -> `config.json`; `dev-vault` -> dev Vault; `local` -> `config.local.json`)                            |
+| `--datasets-profile <name>`      |           | Dataset settings: default `config.json`; `dev-vault` reads dev Vault; other names use `config.<name>.json`                                                      |
+| `--export-profile <name>`        |           | Export settings: `dev-vault` reads dev Vault; other names use `config.<name>.json`. If omitted, export defaults to `local` only when `config.local.json` exists |
+| `--grep <pattern>`               |           | Filter tests by name (passed to Playwright `--grep`)                                                                                                            |
+| `--repetitions <n>`              |           | Number of times to repeat each example                                                                                                                          |
+| `--skip-server`                  |           | Skip EDOT/Scout/EIS startup (use existing services)                                                                                                             |
+| `--dry-run`                      |           | Print configuration and exit without running                                                                                                                    |
 
 When flags are omitted and stdin is a TTY, `start` prompts interactively for suite, judge, and model selection.
 
@@ -67,8 +98,13 @@ Use profiles to fetch datasets from the golden cluster while exporting results a
 Create the profiles:
 
 ```bash
-# golden cluster config (datasets)
+# default: config.json (after retrieve_secrets.js, or copy from config.example.json)
 node scripts/evals init config
+
+# vault profile: no local secrets file
+export VAULT_ADDR=https://secrets.elastic.co:8200
+vault login --method oidc
+node scripts/evals init config --profile dev-vault
 
 # local export profile (results + traces to localhost:9200)
 node scripts/evals init config --profile local
@@ -78,6 +114,7 @@ Run:
 
 ```bash
 node scripts/evals start --suite attack-discovery --export-profile local
+node scripts/evals start --suite attack-discovery --datasets-profile dev-vault --export-profile local
 ```
 
 ### `stop` -- Stop background services
@@ -88,8 +125,8 @@ node scripts/evals stop --service scout
 node scripts/evals stop --service edot
 ```
 
-| Flag | Description |
-|------|-------------|
+| Flag               | Description                                     |
+| ------------------ | ----------------------------------------------- |
 | `--service <name>` | Stop only `edot` or `scout` (default: stop all) |
 
 ### `logs` -- Tail service logs
@@ -100,10 +137,10 @@ node scripts/evals logs --service scout
 node scripts/evals logs --service edot --from-start
 ```
 
-| Flag | Description |
-|------|-------------|
-| `--service <name>` | Tail only `edot` or `scout` (default: both) |
-| `--from-start` | Show logs from the beginning (default: tail from current position) |
+| Flag               | Description                                                        |
+| ------------------ | ------------------------------------------------------------------ |
+| `--service <name>` | Tail only `edot` or `scout` (default: both)                        |
+| `--from-start`     | Show logs from the beginning (default: tail from current position) |
 
 ### `scout` -- Start Scout standalone
 
@@ -126,25 +163,25 @@ node scripts/evals run --suite agent-builder --grep "product documentation"
 node scripts/evals run --suite streams --dry-run
 ```
 
-| Flag | Alias | Description |
-|------|-------|-------------|
-| `--suite <id>` | | Suite to run (interactive prompt if omitted) |
-| `--config <path>` | | Playwright config path (alternative to `--suite`) |
-| `--project <id>` | `--model` | Connector/model to evaluate |
-| `--evaluation-connector-id <id>` | `--judge` | Connector for LLM-as-a-judge evaluators |
-| `--grep <pattern>` | | Filter tests by name (passed to Playwright `--grep`) |
-| `--repetitions <n>` | | Repeat each example N times |
-| `--executor <name>` | | `kibana` (default) or `phoenix` |
-| `--profile <name>` | | Load both dataset + export settings from `config.<name>.json` |
-| `--datasets-profile <name>` | | Load dataset settings from `config.<name>.json` |
-| `--export-profile <name>` | | Load export settings from `config.<name>.json` |
-| `--trace-es-url <url>` | | Elasticsearch URL for trace queries |
-| `--trace-es-api-key <key>` | | API key for trace ES |
-| `--evaluations-es-url <url>` | | Elasticsearch URL for storing eval results |
-| `--evaluations-es-api-key <key>` | | API key for evaluations ES |
-| `--phoenix-base-url <url>` | | Phoenix API URL (when using `--executor phoenix`) |
-| `--phoenix-api-key <key>` | | Phoenix API key |
-| `--dry-run` | | Print the Playwright command and exit |
+| Flag                             | Alias     | Description                                                   |
+| -------------------------------- | --------- | ------------------------------------------------------------- |
+| `--suite <id>`                   |           | Suite to run (interactive prompt if omitted)                  |
+| `--config <path>`                |           | Playwright config path (alternative to `--suite`)             |
+| `--project <id>`                 | `--model` | Connector/model to evaluate                                   |
+| `--evaluation-connector-id <id>` | `--judge` | Connector for LLM-as-a-judge evaluators                       |
+| `--grep <pattern>`               |           | Filter tests by name (passed to Playwright `--grep`)          |
+| `--repetitions <n>`              |           | Repeat each example N times                                   |
+| `--executor <name>`              |           | `kibana` (default) or `phoenix`                               |
+| `--profile <name>`               |           | Load both dataset + export settings from `config.<name>.json` |
+| `--datasets-profile <name>`      |           | Load dataset settings from `config.<name>.json`               |
+| `--export-profile <name>`        |           | Load export settings from `config.<name>.json`                |
+| `--trace-es-url <url>`           |           | Elasticsearch URL for trace queries                           |
+| `--trace-es-api-key <key>`       |           | API key for trace ES                                          |
+| `--evaluations-es-url <url>`     |           | Elasticsearch URL for storing eval results                    |
+| `--evaluations-es-api-key <key>` |           | API key for evaluations ES                                    |
+| `--phoenix-base-url <url>`       |           | Phoenix API URL (when using `--executor phoenix`)             |
+| `--phoenix-api-key <key>`        |           | Phoenix API key                                               |
+| `--dry-run`                      |           | Print the Playwright command and exit                         |
 
 ### `list` -- List available suites
 
@@ -154,10 +191,10 @@ node scripts/evals list --refresh
 node scripts/evals list --json
 ```
 
-| Flag | Description |
-|------|-------------|
+| Flag        | Description                        |
+| ----------- | ---------------------------------- |
 | `--refresh` | Re-scan the repo for suite configs |
-| `--json` | Output as JSON |
+| `--json`    | Output as JSON                     |
 
 ### `doctor` -- Check prerequisites
 
@@ -166,8 +203,8 @@ node scripts/evals doctor
 node scripts/evals doctor --fix
 ```
 
-| Flag | Description |
-|------|-------------|
+| Flag    | Description                         |
+| ------- | ----------------------------------- |
 | `--fix` | Attempt to auto-fix detected issues |
 
 ### `compare` -- Compare eval runs
@@ -189,8 +226,8 @@ node scripts/evals ci-map
 node scripts/evals ci-map --json
 ```
 
-| Flag | Description |
-|------|-------------|
+| Flag     | Description    |
+| -------- | -------------- |
 | `--json` | Output as JSON |
 
 ## Tips

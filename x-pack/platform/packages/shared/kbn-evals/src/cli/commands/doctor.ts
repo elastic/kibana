@@ -13,7 +13,13 @@ import type { Command } from '@kbn/dev-cli-runner';
 import { parseConnectorsFromEnv, isTTY } from '../prompts';
 import { isServiceRunning, readState, startService, tailLog } from '../services';
 import { safeExec } from '../utils';
-import { defaultExportProfile, readVaultConfig, resolveVaultConfigPath } from '../profiles';
+import {
+  DEV_VAULT_DATASETS_PROFILE,
+  defaultExportProfile,
+  isDevVaultConfigReadable,
+  readVaultConfigFromFile,
+  resolveVaultConfigPath,
+} from '../profiles';
 
 const SCOUT_LOCAL_SERVER_CONFIG_PATH = '.scout/servers/local.json';
 
@@ -263,21 +269,36 @@ export const doctorCmd: Command<void> = {
     log.info('  node scripts/evals start --suite <suite-id>');
 
     // --- Profile hint: golden datasets + local export ---
-    const goldenConfigExists = readVaultConfig(repoRoot) !== undefined;
+    const configJsonReady = readVaultConfigFromFile(repoRoot) !== undefined;
+    const vaultProfileReady = isDevVaultConfigReadable();
     const localProfile = defaultExportProfile(repoRoot);
     const localConfigExists = localProfile != null;
-    if (goldenConfigExists) {
+    if (configJsonReady || vaultProfileReady) {
       log.info('');
       log.info('Tip: golden datasets + local export');
+      if (configJsonReady) {
+        log.info(`  (datasets from ${resolveVaultConfigPath(repoRoot)};`);
+      } else {
+        log.info(
+          `  (datasets via --datasets-profile ${DEV_VAULT_DATASETS_PROFILE}; run: node scripts/evals init config --profile ${DEV_VAULT_DATASETS_PROFILE})`
+        );
+      }
       log.info(
-        `  (datasets from ${resolveVaultConfigPath(repoRoot)}; export via ${
-          localConfigExists ? resolveVaultConfigPath(repoRoot, localProfile) : 'local defaults'
+        `   export via ${
+          localConfigExists
+            ? resolveVaultConfigPath(repoRoot, localProfile)
+            : 'local defaults or config.local.json'
         })`
       );
       if (!localConfigExists) {
         log.info('  Create local export profile: node scripts/evals init config --profile local');
       }
       log.info('  node scripts/evals start --suite attack-discovery --export-profile local');
+      if (vaultProfileReady && !configJsonReady) {
+        log.info(
+          `  Or with dev-vault profile: node scripts/evals start --suite attack-discovery --datasets-profile ${DEV_VAULT_DATASETS_PROFILE} --export-profile local`
+        );
+      }
     }
   },
 };
