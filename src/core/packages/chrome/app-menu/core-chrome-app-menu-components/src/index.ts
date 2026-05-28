@@ -40,4 +40,5 @@ export {
   getPopoverActionItems,
   getPopoverSwitchItems,
   getIsSelectedColor,
+  hasNonGlobalStaticItems,
 } from './utils';
