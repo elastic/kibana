@@ -67,7 +67,7 @@ export function transformSentinelMitreMapping(
 }
 
 function convertIsoDurationToDateMath(isoString: string): string | undefined {
-  const match = ISO_8601_DURATION_PATTERN.exec(isoString);
+  const match = isoString.match(ISO_8601_DURATION_PATTERN);
   if (!match?.groups) {
     return undefined;
   }
