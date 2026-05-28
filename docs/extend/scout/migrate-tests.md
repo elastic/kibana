@@ -61,7 +61,7 @@ Some helpful questions to ask while reviewing:
 
 ## Let your AI agent help [ai-assist]
 
-Agentic skills in Kibana can take most of the toil out of migration, but **always review their output manually**.
+Agentic skills in Kibana can take most of the toil out of migration. Your coding agent should pick up the skills below automatically. As always, **review the AI-generated output manually**.
 
 ### FTR → Scout
 
