@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { WorkflowsSearchParams } from '@kbn/workflows';
+
 export const ruleKeys = {
   all: ['rule'] as const,
   lists: () => [...ruleKeys.all, 'list'] as const,
@@ -26,7 +28,8 @@ export const workflowKeys = {
   details: () => [...workflowKeys.all, 'details'] as const,
   detail: (id: string) => [...workflowKeys.details(), id] as const,
   searches: () => [...workflowKeys.all, 'search'] as const,
-  search: (params: { query: string }) => [...workflowKeys.searches(), params] as const,
+  search: (params: Pick<WorkflowsSearchParams, 'query' | 'tags'>) =>
+    [...workflowKeys.searches(), params] as const,
 };
 
 export const matcherSuggestionKeys = {

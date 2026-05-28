@@ -326,6 +326,7 @@ async function getSuggestionsWithinCommandExpression(
     isCursorInSubquery: astContext.isCursorInSubquery,
     isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,
+    isTimeseriesSource: isTimeseriesSourceCommand(commands.filter((cmd) => cmd.type === 'command')),
   };
 
   // Wrap getColumnsByType so the fields browser option is injected from context;
