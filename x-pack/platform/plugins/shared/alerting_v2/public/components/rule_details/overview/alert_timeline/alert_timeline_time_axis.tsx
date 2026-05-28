@@ -73,7 +73,7 @@ const snapForward = (ms: number, step: StepDef): number => {
   return cursor;
 };
 
-const buildTicks = (gteMs: number, lteMs: number, locale: string): Tick[] => {
+const buildTicks = (gteMs: number, lteMs: number, locale: string, timeZone?: string): Tick[] => {
   if (!Number.isFinite(gteMs) || !Number.isFinite(lteMs) || lteMs <= gteMs) return [];
 
   const span = lteMs - gteMs;
@@ -81,7 +81,9 @@ const buildTicks = (gteMs: number, lteMs: number, locale: string): Tick[] => {
 
   const showDate = step.unit === 'day' || span > DAY_MS;
   const showTime = step.unit !== 'day';
+  const resolvedTz = timeZone && timeZone !== 'Browser' ? timeZone : undefined;
   const formatter = new Intl.DateTimeFormat(locale, {
+    timeZone: resolvedTz,
     month: showDate ? 'short' : undefined,
     day: showDate ? 'numeric' : undefined,
     hour: showTime ? '2-digit' : undefined,
@@ -110,6 +112,8 @@ const buildTicks = (gteMs: number, lteMs: number, locale: string): Tick[] => {
 export interface AlertTimelineTimeAxisProps {
   gteMs: number;
   lteMs: number;
+  /** Kibana `dateFormat:tz` setting. Pass `'Browser'` or omit to use the browser's local timezone. */
+  timeZone?: string;
 }
 
 /**
@@ -117,9 +121,16 @@ export interface AlertTimelineTimeAxisProps {
  * window, positioned by absolute percentage offset against the time domain
  * shared with the bars below.
  */
-export const AlertTimelineTimeAxis: React.FC<AlertTimelineTimeAxisProps> = ({ gteMs, lteMs }) => {
+export const AlertTimelineTimeAxis: React.FC<AlertTimelineTimeAxisProps> = ({
+  gteMs,
+  lteMs,
+  timeZone,
+}) => {
   const { euiTheme } = useEuiTheme();
-  const ticks = useMemo(() => buildTicks(gteMs, lteMs, i18n.getLocale()), [gteMs, lteMs]);
+  const ticks = useMemo(
+    () => buildTicks(gteMs, lteMs, i18n.getLocale(), timeZone),
+    [gteMs, lteMs, timeZone]
+  );
   const span = lteMs - gteMs;
 
   return (

@@ -99,7 +99,7 @@ export const AlertTimelineChart: React.FC<AlertTimelineChartProps> = ({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <AlertTimelineTimeAxis gteMs={gteMs} lteMs={lteMs} />
+        <AlertTimelineTimeAxis gteMs={gteMs} lteMs={lteMs} timeZone={timeZone} />
         {rows.map((row) => (
           <AlertTimelineRow
             key={row.groupHash}
