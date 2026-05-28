@@ -185,15 +185,16 @@ function GraphInner({
     },
     [onSearchQueryChange]
   );
-  const hasAnyViewFilter =
+  // Used to badge the controls toggle when the panel is collapsed but state is non-default.
+  // Persisted view filters / search query keep the map "the same view" — but the options panel
+  // itself stays closed on the dashboard (product feedback: it's an authoring affordance).
+  const hasActiveControls =
     viewFilters.alertStatusFilter.length > 0 ||
     viewFilters.sloStatusFilter.length > 0 ||
     viewFilters.connectionFilter.length > 0 ||
-    viewFilters.anomalySeverityFilter.length > 0;
-  const hasSearchQuery = searchQuery.trim().length > 0;
-  const [panelExpanded, setPanelExpanded] = useState(
-    !isEmbedded || hasAnyViewFilter || hasSearchQuery
-  );
+    viewFilters.anomalySeverityFilter.length > 0 ||
+    searchQuery.trim().length > 0;
+  const [panelExpanded, setPanelExpanded] = useState(!isEmbedded);
   const [internalOrientation, setInternalOrientation] = useState<ServiceMapOrientation>(
     controlledOrientation ?? 'horizontal'
   );
@@ -629,6 +630,7 @@ function GraphInner({
                 <ServiceMapOptionsPanelToggle
                   isExpanded={panelExpanded}
                   onExpandedChange={setPanelExpanded}
+                  hasActiveControls={hasActiveControls}
                 />
                 <EuiPanel
                   hasBorder
