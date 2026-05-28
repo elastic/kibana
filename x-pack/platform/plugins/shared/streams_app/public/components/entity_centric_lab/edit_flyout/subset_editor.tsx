@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -16,14 +16,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiPanel,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTextArea,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { FakeEntityType } from '../fake_entity_types';
 import type {
@@ -84,9 +87,6 @@ interface SubsetEditorBodyProps {
 export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorBodyProps) => {
   const detailsAccordionId = useGeneratedHtmlId({ prefix: 'subsetDetails' });
   const filterAccordionId = useGeneratedHtmlId({ prefix: 'subsetFilter' });
-  const healthAccordionId = useGeneratedHtmlId({ prefix: 'subsetHealth' });
-  const ownershipAccordionId = useGeneratedHtmlId({ prefix: 'subsetOwnership' });
-  const contentAccordionId = useGeneratedHtmlId({ prefix: 'subsetContent' });
 
   const updateFilter = useCallback(
     (next: FilterCondition[]) => {
@@ -237,80 +237,66 @@ export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorB
 
       <EuiSpacer size="m" />
 
-      <EuiAccordion
-        id={healthAccordionId}
-        initialIsOpen={subset.healthOverride.enabled}
-        buttonContent={
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate(
-                'xpack.streams.entityCentricLab.editFlyout.subsetEditor.healthTitle',
-                { defaultMessage: 'Health overrides' }
-              )}
-            </h3>
-          </EuiTitle>
+      <OverrideAccordion
+        title={i18n.translate(
+          'xpack.streams.entityCentricLab.editFlyout.subsetEditor.healthTitle',
+          { defaultMessage: 'Health overrides' }
+        )}
+        enabled={subset.healthOverride.enabled}
+        onToggleEnabled={(enabled) =>
+          onChange({
+            ...subset,
+            healthOverride: { ...subset.healthOverride, enabled },
+          })
         }
-        extraAction={
-          <EuiSwitch
-            showLabel={false}
-            label={i18n.translate(
-              'xpack.streams.entityCentricLab.editFlyout.subsetEditor.healthOverrideAriaLabel',
-              { defaultMessage: 'Override health settings' }
-            )}
-            checked={subset.healthOverride.enabled}
-            onChange={(event) =>
-              onChange({
-                ...subset,
-                healthOverride: { ...subset.healthOverride, enabled: event.target.checked },
-              })
-            }
-            data-test-subj="entityCentricLabEditFlyoutSubsetEditorHealthOverrideToggle"
-          />
-        }
-        paddingSize="m"
+        toggleAriaLabel={i18n.translate(
+          'xpack.streams.entityCentricLab.editFlyout.subsetEditor.healthOverrideAriaLabel',
+          { defaultMessage: 'Override health settings' }
+        )}
+        disabledHint={i18n.translate(
+          'xpack.streams.entityCentricLab.editFlyout.subsetEditor.healthDisabledHint',
+          {
+            defaultMessage:
+              'This subset inherits the entity-type health settings. Toggle the switch to override them.',
+          }
+        )}
+        dataTestSubj="entityCentricLabEditFlyoutSubsetEditorHealthOverride"
       >
         <HealthOverrideBody
-          disabled={!subset.healthOverride.enabled}
           signals={subset.healthOverride.signals}
           onChange={updateHealthSignals}
         />
-      </EuiAccordion>
+      </OverrideAccordion>
 
       <EuiSpacer size="m" />
 
-      <EuiAccordion
-        id={ownershipAccordionId}
-        initialIsOpen={subset.ownershipOverride.enabled}
-        buttonContent={
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate(
-                'xpack.streams.entityCentricLab.editFlyout.subsetEditor.ownershipTitle',
-                { defaultMessage: 'Ownership overrides' }
-              )}
-            </h3>
-          </EuiTitle>
+      <OverrideAccordion
+        title={i18n.translate(
+          'xpack.streams.entityCentricLab.editFlyout.subsetEditor.ownershipTitle',
+          { defaultMessage: 'Ownership overrides' }
+        )}
+        enabled={subset.ownershipOverride.enabled}
+        onToggleEnabled={(enabled) =>
+          onChange({
+            ...subset,
+            ownershipOverride: { ...subset.ownershipOverride, enabled },
+          })
         }
-        extraAction={
-          <EuiSwitch
-            showLabel={false}
-            label={i18n.translate(
-              'xpack.streams.entityCentricLab.editFlyout.subsetEditor.ownershipOverrideAriaLabel',
-              { defaultMessage: 'Override ownership settings' }
-            )}
-            checked={subset.ownershipOverride.enabled}
-            onChange={(event) =>
-              onChange({
-                ...subset,
-                ownershipOverride: { ...subset.ownershipOverride, enabled: event.target.checked },
-              })
-            }
-            data-test-subj="entityCentricLabEditFlyoutSubsetEditorOwnershipOverrideToggle"
-          />
-        }
-        paddingSize="m"
+        toggleAriaLabel={i18n.translate(
+          'xpack.streams.entityCentricLab.editFlyout.subsetEditor.ownershipOverrideAriaLabel',
+          { defaultMessage: 'Override ownership settings' }
+        )}
+        disabledHint={i18n.translate(
+          'xpack.streams.entityCentricLab.editFlyout.subsetEditor.ownershipDisabledHint',
+          {
+            defaultMessage:
+              'This subset inherits the entity-type ownership settings. Toggle the switch to override them.',
+          }
+        )}
+        dataTestSubj="entityCentricLabEditFlyoutSubsetEditorOwnershipOverride"
       >
         <EuiCallOut
+          announceOnMount={false}
           size="s"
           color="warning"
           iconType="info"
@@ -331,43 +317,37 @@ export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorB
             </p>
           </EuiText>
         </EuiCallOut>
-      </EuiAccordion>
+      </OverrideAccordion>
 
       <EuiSpacer size="m" />
 
-      <EuiAccordion
-        id={contentAccordionId}
-        initialIsOpen={subset.contentOverride.enabled}
-        buttonContent={
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate(
-                'xpack.streams.entityCentricLab.editFlyout.subsetEditor.contentTitle',
-                { defaultMessage: 'Content override' }
-              )}
-            </h3>
-          </EuiTitle>
+      <OverrideAccordion
+        title={i18n.translate(
+          'xpack.streams.entityCentricLab.editFlyout.subsetEditor.contentTitle',
+          { defaultMessage: 'Content override' }
+        )}
+        enabled={subset.contentOverride.enabled}
+        onToggleEnabled={(enabled) =>
+          onChange({
+            ...subset,
+            contentOverride: { ...subset.contentOverride, enabled },
+          })
         }
-        extraAction={
-          <EuiSwitch
-            showLabel={false}
-            label={i18n.translate(
-              'xpack.streams.entityCentricLab.editFlyout.subsetEditor.contentOverrideAriaLabel',
-              { defaultMessage: 'Override content settings' }
-            )}
-            checked={subset.contentOverride.enabled}
-            onChange={(event) =>
-              onChange({
-                ...subset,
-                contentOverride: { ...subset.contentOverride, enabled: event.target.checked },
-              })
-            }
-            data-test-subj="entityCentricLabEditFlyoutSubsetEditorContentOverrideToggle"
-          />
-        }
-        paddingSize="m"
+        toggleAriaLabel={i18n.translate(
+          'xpack.streams.entityCentricLab.editFlyout.subsetEditor.contentOverrideAriaLabel',
+          { defaultMessage: 'Override content settings' }
+        )}
+        disabledHint={i18n.translate(
+          'xpack.streams.entityCentricLab.editFlyout.subsetEditor.contentDisabledHint',
+          {
+            defaultMessage:
+              'This subset inherits the entity-type flyout content. Toggle the switch to override the tabs and their order.',
+          }
+        )}
+        dataTestSubj="entityCentricLabEditFlyoutSubsetEditorContentOverride"
       >
         <EuiCallOut
+          announceOnMount={false}
           size="s"
           color="warning"
           iconType="info"
@@ -388,7 +368,7 @@ export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorB
             </p>
           </EuiText>
         </EuiCallOut>
-      </EuiAccordion>
+      </OverrideAccordion>
 
       <EuiSpacer size="m" />
       <EuiText size="xs" color="subdued">
@@ -401,6 +381,97 @@ export const SubsetEditorBody = ({ entityType, subset, onChange }: SubsetEditorB
         </p>
       </EuiText>
     </div>
+  );
+};
+
+interface OverrideAccordionProps {
+  readonly title: string;
+  readonly enabled: boolean;
+  readonly onToggleEnabled: (enabled: boolean) => void;
+  readonly toggleAriaLabel: string;
+  readonly disabledHint: string;
+  readonly dataTestSubj: string;
+  readonly children: React.ReactNode;
+}
+
+/**
+ * Override section accordion. The header switch in `extraAction` is the
+ * source of truth for whether the override applies. Flipping it open or
+ * closed also expands/collapses the accordion body, but the user remains
+ * free to click the arrow to peek without changing the override state.
+ */
+const OverrideAccordion = ({
+  title,
+  enabled,
+  onToggleEnabled,
+  toggleAriaLabel,
+  disabledHint,
+  dataTestSubj,
+  children,
+}: OverrideAccordionProps) => {
+  const accordionId = useGeneratedHtmlId({ prefix: dataTestSubj });
+  const [forceState, setForceState] = useState<'open' | 'closed'>(enabled ? 'open' : 'closed');
+
+  useEffect(() => {
+    setForceState(enabled ? 'open' : 'closed');
+  }, [enabled]);
+
+  return (
+    <EuiAccordion
+      id={accordionId}
+      forceState={forceState}
+      onToggle={(isOpen) => setForceState(isOpen ? 'open' : 'closed')}
+      buttonContent={
+        <EuiTitle size="xs">
+          <h3>{title}</h3>
+        </EuiTitle>
+      }
+      extraAction={
+        <EuiSwitch
+          showLabel={false}
+          label={toggleAriaLabel}
+          checked={enabled}
+          onChange={(event) => onToggleEnabled(event.target.checked)}
+          data-test-subj={`${dataTestSubj}Toggle`}
+        />
+      }
+      paddingSize="m"
+      data-test-subj={dataTestSubj}
+    >
+      {enabled ? children : <OverrideDisabledHint hint={disabledHint} />}
+    </EuiAccordion>
+  );
+};
+
+const OverrideDisabledHint = ({ hint }: { hint: string }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="m"
+      color="subdued"
+      css={css`
+        border: 1px dashed ${euiTheme.colors.borderBaseSubdued};
+      `}
+      data-test-subj="entityCentricLabEditFlyoutSubsetEditorOverrideDisabledHint"
+    >
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow" iconType="lock">
+            {i18n.translate(
+              'xpack.streams.entityCentricLab.editFlyout.subsetEditor.overrideDisabledBadge',
+              { defaultMessage: 'Inherited' }
+            )}
+          </EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            <p>{hint}</p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
 
@@ -501,12 +572,11 @@ const ConditionRow = ({ condition, onUpdate, onRemove, disableRemove }: Conditio
 };
 
 interface HealthOverrideBodyProps {
-  readonly disabled: boolean;
   readonly signals: HealthSignals;
   readonly onChange: (next: HealthSignals) => void;
 }
 
-const HealthOverrideBody = ({ disabled, signals, onChange }: HealthOverrideBodyProps) => {
+const HealthOverrideBody = ({ signals, onChange }: HealthOverrideBodyProps) => {
   return (
     <div>
       <EuiText size="s">
@@ -533,12 +603,19 @@ const HealthOverrideBody = ({ disabled, signals, onChange }: HealthOverrideBodyP
             })}
           </EuiBadge>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="danger">
+            {i18n.translate(
+              'xpack.streams.entityCentricLab.editFlyout.subsetEditor.unhealthyBadge',
+              { defaultMessage: 'Unhealthy' }
+            )}
+          </EuiBadge>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiSwitch
-            disabled={disabled}
             label={i18n.translate(
               'xpack.streams.entityCentricLab.editFlyout.subsetEditor.healthActiveAlerts',
               { defaultMessage: 'Active alerts severity' }
@@ -562,7 +639,6 @@ const HealthOverrideBody = ({ disabled, signals, onChange }: HealthOverrideBodyP
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSwitch
-            disabled={disabled}
             label={i18n.translate(
               'xpack.streams.entityCentricLab.editFlyout.subsetEditor.healthAvailableSignals',
               { defaultMessage: 'Available signals' }
@@ -575,14 +651,16 @@ const HealthOverrideBody = ({ disabled, signals, onChange }: HealthOverrideBodyP
             <p>
               {i18n.translate(
                 'xpack.streams.entityCentricLab.editFlyout.subsetEditor.healthAvailableSignalsExplanation',
-                { defaultMessage: 'Explanations' }
+                {
+                  defaultMessage:
+                    'Roll up golden signals (latency, error rate, throughput) into the health indicator.',
+                }
               )}
             </p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSwitch
-            disabled={disabled}
             label={i18n.translate(
               'xpack.streams.entityCentricLab.editFlyout.subsetEditor.healthSecuritySignals',
               { defaultMessage: 'Security signals' }
@@ -595,7 +673,10 @@ const HealthOverrideBody = ({ disabled, signals, onChange }: HealthOverrideBodyP
             <p>
               {i18n.translate(
                 'xpack.streams.entityCentricLab.editFlyout.subsetEditor.healthSecuritySignalsExplanation',
-                { defaultMessage: 'Explanations' }
+                {
+                  defaultMessage:
+                    'Open security issues with high or critical severity downgrade the indicator.',
+                }
               )}
             </p>
           </EuiText>
