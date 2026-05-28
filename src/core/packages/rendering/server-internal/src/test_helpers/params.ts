@@ -16,6 +16,7 @@ import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mock
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
+import { userStorageServiceMock } from '@kbn/core-user-storage-server-mocks';
 
 const context = mockCoreContext.create();
 // Mock the airgapped config to return a boolean value
@@ -53,4 +54,5 @@ export const mockRenderingSetupDeps = {
 };
 export const mockRenderingStartDeps = {
   featureFlags: coreFeatureFlagsMock.createStart(),
+  userStorage: userStorageServiceMock.createStartContract(),
 };

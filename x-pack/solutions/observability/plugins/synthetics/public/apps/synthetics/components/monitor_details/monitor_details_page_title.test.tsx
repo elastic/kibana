@@ -9,14 +9,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MonitorDetailsPageTitle } from './monitor_details_page_title';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
-import { useGetUrlParams } from '../../hooks';
 
 jest.mock('./hooks/use_selected_monitor', () => ({
   useSelectedMonitor: jest.fn(),
-}));
-
-jest.mock('../../hooks', () => ({
-  useGetUrlParams: jest.fn(),
 }));
 
 jest.mock('./monitor_selector/monitor_selector', () => ({
@@ -24,20 +19,16 @@ jest.mock('./monitor_selector/monitor_selector', () => ({
 }));
 
 const mockUseSelectedMonitor = useSelectedMonitor as jest.MockedFunction<typeof useSelectedMonitor>;
-const mockUseGetUrlParams = useGetUrlParams as jest.MockedFunction<typeof useGetUrlParams>;
 
 describe('MonitorDetailsPageTitle', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('renders only the monitor name and no Remote badge for a local monitor', () => {
     mockUseSelectedMonitor.mockReturnValue({
       monitor: { name: 'My monitor' },
     } as ReturnType<typeof useSelectedMonitor>);
-  });
-
-  it('does not render the Remote badge for a local monitor', () => {
-    mockUseGetUrlParams.mockReturnValue({ remoteName: undefined } as ReturnType<
-      typeof useGetUrlParams
-    >);
 
     render(<MonitorDetailsPageTitle />);
 
@@ -45,14 +36,27 @@ describe('MonitorDetailsPageTitle', () => {
     expect(screen.queryByTestId('syntheticsRemoteBadge')).not.toBeInTheDocument();
   });
 
-  it('renders the Remote badge when the URL has a `remoteName` param', () => {
-    mockUseGetUrlParams.mockReturnValue({ remoteName: 'cluster-a' } as ReturnType<
-      typeof useGetUrlParams
-    >);
+  it('renders the Remote badge when the selected monitor exposes a `remote` field', () => {
+    mockUseSelectedMonitor.mockReturnValue({
+      monitor: {
+        name: 'My remote monitor',
+        remote: { remoteName: 'cluster-a' },
+      },
+    } as ReturnType<typeof useSelectedMonitor>);
 
     render(<MonitorDetailsPageTitle />);
 
-    expect(screen.getByText('My monitor')).toBeInTheDocument();
+    expect(screen.getByText('My remote monitor')).toBeInTheDocument();
     expect(screen.getByTestId('syntheticsRemoteBadge')).toBeInTheDocument();
+  });
+
+  it('does not render the Remote badge while the monitor is still loading', () => {
+    mockUseSelectedMonitor.mockReturnValue({
+      monitor: null,
+    } as ReturnType<typeof useSelectedMonitor>);
+
+    render(<MonitorDetailsPageTitle />);
+
+    expect(screen.queryByTestId('syntheticsRemoteBadge')).not.toBeInTheDocument();
   });
 });

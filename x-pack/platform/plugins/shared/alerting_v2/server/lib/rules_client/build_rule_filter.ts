@@ -10,6 +10,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toKqlExpression } from '@kbn/es-query';
 
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 
 /**
  * Mapping from clean API-facing field names to their saved-object KQL paths.
@@ -46,7 +47,11 @@ const rewriteFieldArg = (node: KueryNode): KueryNode => {
       throw Boom.badRequest(
         `Invalid filter field "${fieldArg.value}". Allowed fields: ${ALLOWED_FILTER_FIELDS.join(
           ', '
-        )}`
+        )}`,
+        {
+          code: ALERTING_V2_ERROR_CODES.INVALID_FILTER_FIELD,
+          details: { field: fieldArg.value, allowed_fields: ALLOWED_FILTER_FIELDS },
+        }
       );
     }
     return {
@@ -96,7 +101,10 @@ const rewriteNode = (node: KueryNode): KueryNode => {
       return rewriteFieldArg(node);
 
     default:
-      throw Boom.badRequest(`Unsupported KQL function "${node.function}" in filter`);
+      throw Boom.badRequest(`Unsupported KQL function "${node.function}" in filter`, {
+        code: ALERTING_V2_ERROR_CODES.UNSUPPORTED_FILTER_FUNCTION,
+        details: { function: node.function },
+      });
   }
 };
 
