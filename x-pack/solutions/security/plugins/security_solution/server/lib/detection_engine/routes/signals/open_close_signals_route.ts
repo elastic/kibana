@@ -190,16 +190,14 @@ export const setSignalsStatusRoute = (
  * serverless.
  *
  * When `runtimeMappings` are provided (the rule's source indices supplied at
- * least one runtime field), the function uses a two-step pattern:
- *   1. `_search` with `runtime_mappings` to collect the matching alert `_id`s.
- *   2. `_update_by_query` against those `_id`s.
+ * least one runtime field), they are attached to the `_update_by_query`
+ * request alongside the filter. ES evaluates the runtime scripts in the
+ * query's filter context against each candidate alert.
  *
- * Note that we can't tell from here whether the exception filter actually
- * references one of the runtime fields (parsing the DSL would be brittle), so
- * we take the safe path and pre-resolve to alert `_id`s via `_search` whenever
- * any runtime mappings are present. If none of the runtime fields are
- * referenced, the search still returns the correct ID set — we just pay an
- * extra round-trip.
+ * `runtime_mappings` is a valid top-level field on the `_update_by_query`
+ * wire protocol — confirmed with the ES Search team — but it isn't typed on
+ * `UpdateByQueryRequest` in the JS client (yet). We widen the request type
+ * inline rather than suppressing the type error.
  */
 const updateSignalsStatusByQuery = async (
   status: SetAlertsStatusRequestBody['status'],
@@ -215,73 +213,19 @@ const updateSignalsStatusByQuery = async (
   const index = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
   const hasRuntimeMappings = runtimeMappings != null && Object.keys(runtimeMappings).length > 0;
 
-  const effectiveQuery: estypes.QueryDslQueryContainer = hasRuntimeMappings
-    ? {
-        terms: {
-          _id: await collectMatchingAlertIds(esClient, index, query, runtimeMappings, logger),
-        },
-      }
-    : { bool: { filter: query as estypes.QueryDslQueryContainer | undefined } };
-
-  return esClient.updateByQuery({
+  const request: estypes.UpdateByQueryRequest & {
+    runtime_mappings?: estypes.MappingRuntimeFields;
+  } = {
     index,
     conflicts: options.conflicts,
     refresh: true,
     script: getUpdateSignalStatusScript(status, user, reason),
-    query: effectiveQuery,
+    query: { bool: { filter: query as estypes.QueryDslQueryContainer | undefined } },
     ignore_unavailable: true,
-  });
-};
+    ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+  };
 
-const MAX_ALERTS_TO_CLOSE_PER_REQUEST = 50_000;
-
-/**
- * Collect alert `_id`s matching the exception filter when runtime mappings
- * are required to evaluate it.
- */
-const collectMatchingAlertIds = async (
-  esClient: ElasticsearchClient,
-  index: string,
-  query: object | undefined,
-  runtimeMappings: estypes.MappingRuntimeFields,
-  logger: Logger
-): Promise<string[]> => {
-  const PAGE_SIZE = 10_000;
-  const KEEP_ALIVE = '1m';
-  const pit = await esClient.openPointInTime({ index, keep_alive: KEEP_ALIVE });
-
-  try {
-    const ids: string[] = [];
-    let searchAfter: estypes.SortResults | undefined;
-    const capReached = false;
-
-    while (!capReached) {
-      const remaining = MAX_ALERTS_TO_CLOSE_PER_REQUEST - ids.length;
-      const pageSize = Math.min(PAGE_SIZE, remaining);
-
-      const res = await esClient.search({
-        size: pageSize,
-        _source: false,
-        query: { bool: { filter: query as estypes.QueryDslQueryContainer | undefined } },
-        runtime_mappings: runtimeMappings,
-        sort: [{ _shard_doc: 'asc' }],
-        track_total_hits: false,
-        pit: { id: pit.id, keep_alive: KEEP_ALIVE },
-        ...(searchAfter ? { search_after: searchAfter } : {}),
-      });
-
-      const hits = res.hits.hits;
-      for (const hit of hits) {
-        if (hit._id != null) ids.push(hit._id);
-      }
-      if (hits.length < pageSize) break;
-      searchAfter = hits[hits.length - 1].sort;
-    }
-
-    return ids;
-  } finally {
-    await esClient.closePointInTime({ id: pit.id });
-  }
+  return esClient.updateByQuery(request);
 };
 
 /**
