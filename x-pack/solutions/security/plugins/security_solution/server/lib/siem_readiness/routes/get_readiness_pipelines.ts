@@ -41,7 +41,7 @@ export const getReadinessPipelinesRoute = (
 
           const payload = await getContinuity({ esClient, isServerless, logger });
 
-          return response.ok({ body: payload });
+          return response.ok({ body: payload.items });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error retrieving SIEM readiness pipelines: ${error.message}`);
