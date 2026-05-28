@@ -12,7 +12,8 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { last, merge, omit } from 'lodash';
 import type { Observable } from 'rxjs';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import {
   catchError,
   defer,
@@ -95,7 +96,7 @@ export class ObservabilityAIAssistantClient {
       core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
       actionsClient: PublicMethodsOf<ActionsClient>;
       uiSettingsClient: IUiSettingsClient;
-      namespace: string;
+      namespace: SpaceId;
       esClient: {
         asInternalUser: ElasticsearchClient;
         asCurrentUser: ElasticsearchClient;
@@ -234,10 +235,7 @@ export class ObservabilityAIAssistantClient {
 
       if (persist && !isConversationUpdate && kibanaPublicUrl) {
         const { namespace } = this.dependencies;
-        const spaceAwarePath =
-          namespace === DEFAULT_SPACE_ID
-            ? '/app/observabilityAIAssistant'
-            : `/s/${namespace}/app/observabilityAIAssistant`;
+        const spaceAwarePath = `${getSpaceUrlPrefix(namespace)}/app/observabilityAIAssistant`;
 
         const conversationUrl = `${kibanaPublicUrl}${spaceAwarePath}/conversations/${conversationId}`;
 
