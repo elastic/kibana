@@ -114,6 +114,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/workflows-yaml'
   - '@kbn/workflows-ui'
+  - '@kbn/triggers-actions-ui-plugin'
 tags:
   - plugin
   - prod
