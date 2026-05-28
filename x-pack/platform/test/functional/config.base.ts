@@ -161,6 +161,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       remoteClusters: {
         pathname: '/app/management/data/remote_clusters',
       },
+      crossClusterReplication: {
+        pathname: '/app/management/data/cross_cluster_replication',
+      },
       apm: {
         pathname: '/app/apm',
       },
