@@ -52,7 +52,11 @@ export function getPromqlHoverItem(
         }
       },
       visitPromqlLiteral: (literal) => {
-        if (literal.literalType !== 'string' && within(offset, literal)) {
+        if (
+          literal.literalType !== 'string' &&
+          literal.literalType !== 'param' &&
+          within(offset, literal)
+        ) {
           literalNode = literal;
         }
       },
