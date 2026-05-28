@@ -470,6 +470,15 @@ export class SearchInterceptor {
       catchError((e: Error) => {
         // If we aborted (search:timeout advanced setting) or the user canceled and there was a partial response, return it instead of just erroring out
         if (searchAbortController.isTimeout() || searchAbortController.isCanceled()) {
+          // If the async search ID has not been established yet, we cannot retrieve partial
+          // results. Fall through to the standard abort/error handling to avoid inadvertently
+          // starting a brand-new search with id === undefined.
+          if (!id) {
+            if (!isSavedToBackground) {
+              searchTracker?.error(e);
+            }
+            return throwError(e);
+          }
           if (searchAbortController.isTimeout()) {
             this.startRenderServices.analytics.reportEvent(EVENT_TYPE_DATA_SEARCH_TIMEOUT, {
               [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,

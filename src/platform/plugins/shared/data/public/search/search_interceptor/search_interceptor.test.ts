@@ -2216,6 +2216,46 @@ describe('SearchInterceptor', () => {
         expect(error).not.toHaveBeenCalled();
       });
 
+      test('should not request partial results and throw error if canceled before async search ID is established', async () => {
+        // Override: make the first HTTP response very slow so the abort fires first
+        mockCoreSetup.http.post.mockReturnValueOnce(
+          new Promise((resolve) =>
+            setTimeout(
+              () =>
+                resolve(
+                  getMockSearchResponse({
+                    id: '1',
+                    isPartial: true,
+                    isRunning: true,
+                    rawResponse: {},
+                  })
+                ),
+              200
+            )
+          )
+        );
+
+        const abortController = new AbortController();
+        // Abort immediately – before the first HTTP response arrives, so id is still undefined
+        setTimeout(() => {
+          abortController.abort(AbortReason.CANCELED);
+        }, 50);
+
+        const response = searchInterceptor.search(
+          {},
+          { abortSignal: abortController.signal, pollInterval: 100 }
+        );
+        response.subscribe({ next, error });
+
+        await timeTravel(50); // Trigger the abort before the first response
+
+        // Only one request should have been made (the initial POST) – no second request
+        // to retrieve partial results because id was undefined at abort time.
+        expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(1);
+        expect(next).not.toHaveBeenCalled();
+        expect(error).toHaveBeenCalled();
+      });
+
       test('should not request partial results and throw error if canceled for a reason other than CANCELED/TIMEOUT', async () => {
         const abortController = new AbortController();
         setTimeout(() => {
