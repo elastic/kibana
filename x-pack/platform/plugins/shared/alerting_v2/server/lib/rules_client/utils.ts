@@ -136,8 +136,7 @@ function resolveBuilderType(
   }
 
   const queryChanged =
-    updateData.evaluation?.query?.base != null &&
-    updateData.evaluation.query.base !== existingAttrs.evaluation.query.base;
+    updateData.query !== undefined && !isEqual(updateData.query, existingAttrs.query);
 
   if (queryChanged) {
     return undefined;

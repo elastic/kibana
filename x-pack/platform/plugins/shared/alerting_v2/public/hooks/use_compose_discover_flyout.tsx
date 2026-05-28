@@ -7,6 +7,7 @@
 
 import type { ComposeDiscoverMode, RuleFormServices } from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -131,7 +132,7 @@ export const useComposeDiscoverFlyout = ({
       setFlyoutMode(mode);
 
       if (rule.metadata.builder_type) {
-        const query = rule.evaluation?.query?.base;
+        const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
         const state = query ? tryParseBuilderState(rule.metadata.builder_type, query) : null;
         if (state && typeof state === 'object') {
           const stateWithTimeField = { ...state, timeField: rule.time_field ?? '@timestamp' };

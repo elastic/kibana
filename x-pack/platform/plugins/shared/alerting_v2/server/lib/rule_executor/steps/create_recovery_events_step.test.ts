@@ -498,9 +498,10 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
-          recovery_policy: {
-            type: 'query',
-            query: { base: 'FROM logs-* | WHERE invalid syntax' },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+            recovery: { strategy: 'query', query: 'FROM logs-* | WHERE invalid syntax' },
           },
         }),
         alertEventsBatch: [],
@@ -523,9 +524,10 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
-          recovery_policy: {
-            type: 'query',
-            query: { base: 'FROM logs-*' },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+            recovery: { strategy: 'query', query: 'FROM logs-*' },
           },
         }),
         alertEventsBatch: [],
@@ -546,9 +548,10 @@ describe('CreateRecoveryEventsStep', () => {
       const state = createRulePipelineState({
         rule: createRuleResponse({
           kind: 'alert',
-          recovery_policy: {
-            type: 'query',
-            query: { base: 'FROM logs-*' },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+            recovery: { strategy: 'query', query: 'FROM logs-*' },
           },
         }),
         alertEventsBatch: [],
