@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor, act, fireEvent } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
@@ -100,6 +100,7 @@ describe('StepDefinePackagePolicy', () => {
     description: null,
     additional_datastreams_permissions: null,
     namespace: null,
+    condition: null,
     inputs: {},
     vars: {
       'Required var': ['Required var is required'],
@@ -369,6 +370,82 @@ describe('StepDefinePackagePolicy', () => {
       await waitFor(() => {
         expect(renderResult.getByText('Invalid permission format')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('integration-level condition field', () => {
+    const renderWithCondition = (
+      policyOverrides: Record<string, unknown> = {},
+      propOverrides: Record<string, unknown> = {}
+    ) =>
+      (renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+          packageInfo={packageInfo}
+          packagePolicy={{ ...packagePolicy, ...policyOverrides }}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+          {...propOverrides}
+        />
+      ));
+
+    it('shows condition field in advanced options for a normal integration', async () => {
+      act(() => {
+        renderWithCondition();
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyConditionInput')).toBeInTheDocument();
+      });
+    });
+
+    it('hides condition field for agentless policy', async () => {
+      act(() => {
+        renderWithCondition({ supports_agentless: true }, { isAgentlessSelected: true });
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('packagePolicyConditionInput')).not.toBeInTheDocument();
+      });
+    });
+
+    it('hides condition field on edit page of an agentless policy', async () => {
+      act(() => {
+        renderWithCondition({ supports_agentless: true }, { isEditPage: true });
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('packagePolicyConditionInput')).not.toBeInTheDocument();
+      });
+    });
+
+    it('hides condition field when all inputs are otelcol', async () => {
+      act(() => {
+        renderWithCondition({
+          inputs: [{ enabled: true, type: 'otelcol', streams: [], policy_template: 'test' }],
+        });
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('packagePolicyConditionInput')).not.toBeInTheDocument();
+      });
+    });
+
+    it('calls updatePackagePolicy with condition value on change', async () => {
+      act(() => {
+        renderWithCondition();
+      });
+      await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyConditionInput')).toBeInTheDocument();
+      });
+      fireEvent.change(renderResult.getByTestId('packagePolicyConditionInput'), {
+        target: { value: "host.os.type == 'linux'" },
+      });
+      expect(mockUpdatePackagePolicy).toHaveBeenCalledWith(
+        expect.objectContaining({ condition: "host.os.type == 'linux'" })
+      );
     });
   });
 

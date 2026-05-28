@@ -123,7 +123,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         get(UserService),
         get(ApiKeyService),
         get(EncryptedSavedObjectsClientToken),
-        get(ActionPolicyNamespaceToken)
+        get(ActionPolicyNamespaceToken),
+        get(LoggerServiceToken)
       );
     })
     .inRequestScope();

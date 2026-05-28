@@ -7,14 +7,24 @@
 
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { type CommonSearchOptions } from '../query_utils';
-import { runLatestSourceEsqlQuery } from '../latest_source_query';
+import {
+  type CommonSearchOptions,
+  type PaginatedSearchOptions,
+  type PaginatedResponse,
+} from '../query_utils';
+import {
+  runLatestSourceEsqlQuery,
+  runPaginatedLatestSourceEsqlQuery,
+  runFindByIdEsqlQuery,
+  runFindByIdsEsqlQuery,
+} from '../latest_source_query';
 import {
   DISCOVERIES_DATA_STREAM,
   type Discovery,
   type StoredDiscovery,
   type discoveriesMappings,
 } from './data_stream';
+import { FIELD_DISCOVERY_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
 
 export type DiscoveryDataStreamClient = IDataStreamClient<
   typeof discoveriesMappings,
@@ -43,7 +53,49 @@ export class DiscoveryClient {
       space: this.clients.space,
       options,
       index: DISCOVERIES_DATA_STREAM,
-      groupBy: 'discovery_id',
+      groupBy: FIELD_DISCOVERY_ID,
+    });
+  }
+
+  async findLatestPaginated(
+    options: PaginatedSearchOptions = {}
+  ): Promise<PaginatedResponse<Discovery>> {
+    return runPaginatedLatestSourceEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      options,
+      index: DISCOVERIES_DATA_STREAM,
+      groupBy: FIELD_DISCOVERY_ID,
+    });
+  }
+
+  async findById(discoveryId: string): Promise<{ hits: Discovery[] }> {
+    return runFindByIdEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DISCOVERIES_DATA_STREAM,
+      idField: FIELD_DISCOVERY_ID,
+      idValue: discoveryId,
+    });
+  }
+
+  async findByIds(discoveryIds: string[]): Promise<{ hits: Discovery[] }> {
+    return runFindByIdsEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DISCOVERIES_DATA_STREAM,
+      idField: FIELD_DISCOVERY_ID,
+      idValues: discoveryIds,
+    });
+  }
+
+  async findBySlug(slug: string): Promise<{ hits: Discovery[] }> {
+    return runFindByIdEsqlQuery<Discovery>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DISCOVERIES_DATA_STREAM,
+      idField: FIELD_DISCOVERY_SLUG,
+      idValue: slug,
     });
   }
 }
