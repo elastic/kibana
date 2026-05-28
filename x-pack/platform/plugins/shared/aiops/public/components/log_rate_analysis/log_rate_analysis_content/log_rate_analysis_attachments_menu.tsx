@@ -24,6 +24,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
