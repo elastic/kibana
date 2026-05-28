@@ -101,6 +101,42 @@ describe('WorkspaceVolume', () => {
     });
   });
 
+  describe('capacity cap', () => {
+    it('writes through getFilesystem() throw ENOSPC when the cap is exceeded', async () => {
+      const v = new WorkspaceVolume({
+        workspaceClient: mockWorkspaceClient(),
+        capacityBytes: 50,
+      });
+      const fs = v.getFilesystem();
+      await fs.writeFile('/note.txt', 'x'.repeat(40));
+      await expect(fs.writeFile('/big.txt', 'y'.repeat(20))).rejects.toThrow(/ENOSPC/);
+    });
+
+    it('load() bypasses the cap (restoring persisted state)', async () => {
+      const client = mockWorkspaceClient();
+      // Persisted content is 60 bytes — would violate a 50-byte cap if it
+      // went through the wrapper. load() should restore it regardless.
+      client.load.mockResolvedValueOnce(
+        persistedDoc({
+          '/workspace/big.txt': {
+            content: Buffer.from('x'.repeat(60)).toString('base64'),
+            mode: 0o644,
+            mtime: '2025-01-01T00:00:00.000Z',
+          },
+        })
+      );
+      const v = new WorkspaceVolume({
+        workspaceClient: client,
+        initialWorkspaceId: 'ws-test',
+        capacityBytes: 50,
+      });
+      await v.load();
+      // Persisted file is there; new agent writes are still capped.
+      expect((await v.getFilesystem().readFile('/big.txt')).length).toBe(60);
+      await expect(v.getFilesystem().writeFile('/more.txt', 'y')).rejects.toThrow(/ENOSPC/);
+    });
+  });
+
   describe('flush', () => {
     it('is a no-op when no workspaceId is set', async () => {
       const client = mockWorkspaceClient();

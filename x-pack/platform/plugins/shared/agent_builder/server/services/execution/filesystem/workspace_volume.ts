@@ -9,13 +9,19 @@ import { v4 as uuidv4 } from 'uuid';
 import type { IFileSystem } from 'just-bash';
 import { InMemoryFs } from 'just-bash';
 import type { IWorkspaceClient, WorkspaceFile } from '../../workspaces';
+import { CapacityLimitedFs } from './capacity_limited_fs';
 
 const WORKSPACE_PREFIX = '/workspace';
+
+/** Hard cap on total bytes the agent can store in `/workspace`. */
+export const DEFAULT_WORKSPACE_CAPACITY_BYTES = 25 * 1024 * 1024; // 25 MiB
 
 export interface WorkspaceVolumeDeps {
   workspaceClient: IWorkspaceClient;
   /** Existing workspace id from the conversation, if any. */
   initialWorkspaceId?: string;
+  /** Maximum total bytes the workspace may hold. Defaults to 25 MiB. */
+  capacityBytes?: number;
   /** Test-only override for the UUID generator. */
   generateId?: () => string;
 }
@@ -30,13 +36,23 @@ export interface WorkspaceVolumeDeps {
  */
 export class WorkspaceVolume {
   private readonly deps: WorkspaceVolumeDeps;
+  /** Raw underlying fs. Internal `load()` and `snapshot()` use this directly,
+   * bypassing the capacity check (loading persisted state and reading should
+   * never trip the cap). */
   private readonly fs: InMemoryFs;
+  /** Capacity-enforced view exposed via `getFilesystem()` and mounted by
+   * `FilesystemService`. Writes from the agent go through this wrapper. */
+  private readonly capacityLimitedFs: IFileSystem;
   private workspaceId?: string;
   private loaded = false;
 
   constructor(deps: WorkspaceVolumeDeps) {
     this.deps = deps;
     this.fs = new InMemoryFs();
+    this.capacityLimitedFs = new CapacityLimitedFs(
+      this.fs,
+      deps.capacityBytes ?? DEFAULT_WORKSPACE_CAPACITY_BYTES
+    );
     this.workspaceId = deps.initialWorkspaceId;
   }
 
@@ -70,10 +86,12 @@ export class WorkspaceVolume {
   }
 
   /**
-   * The in-memory FS, suitable for mounting under `MountableFs`.
+   * The capacity-enforced in-memory FS, suitable for mounting under
+   * `MountableFs`. Writes that would push the workspace past its byte cap
+   * throw `ENOSPC`.
    */
   getFilesystem(): IFileSystem {
-    return this.fs;
+    return this.capacityLimitedFs;
   }
 
   /**
