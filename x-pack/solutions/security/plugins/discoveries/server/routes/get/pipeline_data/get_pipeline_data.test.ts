@@ -125,11 +125,6 @@ describe('registerGetPipelineDataRoute', () => {
     mockGetSpaceId.mockReturnValue('default');
   });
 
-  const mockWorkflowInitService = {
-    ensureWorkflowsForSpace: jest.fn().mockResolvedValue(null),
-    verifyAndRepairWorkflows: jest.fn(),
-  };
-
   const registerAndGetHandler = (workflowsManagement: unknown = mockWorkflowsManagementApi) => {
     const router = httpServiceMock.createRouter();
     const addVersionMock = jest.fn();
@@ -140,7 +135,6 @@ describe('registerGetPipelineDataRoute', () => {
     registerGetPipelineDataRoute(router, logger, {
       getEventLogIndex,
       getStartServices,
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: workflowsManagement as Parameters<
         typeof registerGetPipelineDataRoute
       >[2]['workflowsManagementApi'],
@@ -509,10 +503,12 @@ describe('registerGetPipelineDataRoute', () => {
     });
 
     expect(mockGetWorkflowExecution).toHaveBeenCalledWith('generation-run-id', 'default', {
+      includeInput: false,
       includeOutput: true,
     });
 
     expect(mockGetWorkflowExecution).toHaveBeenCalledWith('validation-run-id', 'default', {
+      includeInput: true,
       includeOutput: true,
     });
   });
@@ -690,6 +686,32 @@ describe('registerGetPipelineDataRoute', () => {
     });
   });
 
+  it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.get as jest.Mock).mockReturnValue({
+      addVersion: addVersionMock,
+    });
+
+    registerGetPipelineDataRoute(router, logger, {
+      getEventLogIndex,
+      getStartServices,
+      workflowsManagementApi: mockWorkflowsManagementApi as unknown as Parameters<
+        typeof registerGetPipelineDataRoute
+      >[2]['workflowsManagementApi'],
+    });
+
+    expect(router.versioned.get).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining(['securitySolution-attackDiscoveryAll']),
+          }),
+        }),
+      })
+    );
+  });
+
   it('registers the route with correct path and security', () => {
     const router = httpServiceMock.createRouter();
     const addVersionMock = jest.fn();
@@ -700,7 +722,6 @@ describe('registerGetPipelineDataRoute', () => {
     registerGetPipelineDataRoute(router, logger, {
       getEventLogIndex,
       getStartServices,
-      workflowInitService: mockWorkflowInitService,
       workflowsManagementApi: mockWorkflowsManagementApi as unknown as Parameters<
         typeof registerGetPipelineDataRoute
       >[2]['workflowsManagementApi'],
@@ -712,7 +733,7 @@ describe('registerGetPipelineDataRoute', () => {
         path: '/internal/attack_discovery/workflow/{workflow_id}/execution/{execution_id}',
         security: {
           authz: {
-            requiredPrivileges: ['securitySolution-attackDiscoveryAll'],
+            requiredPrivileges: ['securitySolution-attackDiscoveryAll', 'alerts-read'],
           },
         },
       })

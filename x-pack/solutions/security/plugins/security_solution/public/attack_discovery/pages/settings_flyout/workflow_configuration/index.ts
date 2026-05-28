@@ -11,8 +11,8 @@ import type { WorkflowConfiguration } from './types';
 export type { WorkflowConfiguration } from './types';
 
 const DEFAULT_WORKFLOW_CONFIGURATION: WorkflowConfiguration = {
-  alertRetrievalMode: 'custom_query',
   alertRetrievalWorkflowIds: [],
+  defaultAlertRetrievalMode: 'custom_query',
   validationWorkflowId: 'default',
 };
 

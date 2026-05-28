@@ -125,7 +125,7 @@ describe('registerUpdateScheduleRoute', () => {
   it('passes existing workflowConfig to transform when the schedule has one', async () => {
     const existingWorkflowConfig = {
       alertRetrievalWorkflowIds: ['workflow-1'],
-      defaultAlertRetrievalMode: 'custom_query' as const,
+      alertRetrievalMode: 'custom_query' as const,
       validationWorkflowId: 'default',
     };
 
@@ -245,6 +245,62 @@ describe('registerUpdateScheduleRoute', () => {
 
     expect(result).toEqual(mockNotFoundResponse);
     expect(response.ok).not.toHaveBeenCalled();
+  });
+
+  it('registers the route with ATTACK_DISCOVERY_API_ACTION_ALL in requiredPrivileges', () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
+
+    expect(router.versioned.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining(['securitySolution-attackDiscoveryAll']),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('registers the route with ATTACK_DISCOVERY_API_ACTION_UPDATE_ATTACK_DISCOVERY_SCHEDULE in requiredPrivileges', () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
+
+    expect(router.versioned.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining([
+              'securitySolution-updateAttackDiscoverySchedule',
+            ]),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('registers the route with ALERTS_API_READ in requiredPrivileges', () => {
+    const router = httpServiceMock.createRouter();
+    const addVersionMock = jest.fn();
+    (router.versioned.put as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
+
+    registerUpdateScheduleRoute(router, logger, { analytics: mockAnalytics, getStartServices });
+
+    expect(router.versioned.put).toHaveBeenCalledWith(
+      expect.objectContaining({
+        security: expect.objectContaining({
+          authz: expect.objectContaining({
+            requiredPrivileges: expect.arrayContaining(['alerts-read']),
+          }),
+        }),
+      })
+    );
   });
 
   it('returns a custom error when the update fails', async () => {

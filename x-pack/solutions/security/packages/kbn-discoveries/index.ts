@@ -104,6 +104,37 @@ export {
 } from './impl/attack_discovery/hallucination_detection';
 export type { DiscoveryWithAlertIds } from './impl/attack_discovery/hallucination_detection';
 
-// Note: schedules/transforms, telemetry/event_based_telemetry,
-// attack_discovery/persistence/event_logging, and defend_insights/graphs are added
-// in later PRs alongside their source files.
+// Event logging — introduced in this PR (Orchestration + Event Logging).
+export {
+  ATTACK_DISCOVERY_EVENT_ACTIONS,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_CANCELED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED,
+  ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED,
+  ATTACK_DISCOVERY_EVENT_PROVIDER,
+  writeAttackDiscoveryEvent,
+} from './impl/attack_discovery/persistence/event_logging';
+export type {
+  AttackDiscoverySource,
+  DiagnosticsConfig,
+  DiagnosticsContext,
+  DiagnosticsPreExecutionCheck,
+  DiagnosticsWorkflowIntegrity,
+  EventLogRefresher,
+  SourceMetadata,
+  WorkflowExecutionTracking,
+  WorkflowExecutionsTracking,
+} from './impl/attack_discovery/persistence/event_logging';
+
+// Note: schedules/transforms, telemetry/event_based_telemetry, and
+// defend_insights/graphs are added in later PRs alongside their source files.
