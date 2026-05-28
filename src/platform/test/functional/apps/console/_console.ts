@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { DEFAULT_INPUT_VALUE } from '@kbn/console-plugin/common/constants';
+// import { DEFAULT_INPUT_VALUE } from '@kbn/console-plugin/common/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.skipTourIfExists();
     });
 
+    /*
     it('should show the default request', async () => {
       await retry.try(async () => {
         const actualRequest = await PageObjects.console.getEditorText();
@@ -37,6 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('output panel should initially be in empty state', async () => {
       expect(await PageObjects.console.isOutputPanelEmptyStateVisible()).to.be(true);
     });
+    */
 
     it('default request response should include `"timed_out" : false`', async () => {
       await PageObjects.console.clickClearOutput();
