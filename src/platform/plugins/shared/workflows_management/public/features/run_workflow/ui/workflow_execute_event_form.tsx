@@ -33,6 +33,8 @@ export interface WorkflowExecuteEventFormProps {
   setErrors?: (errors: string | null) => void;
   /** Number of rows currently selected in the trigger-events table (checkbox selection). */
   onTriggerEventTableSelectionCountChange?: (selectedCount: number) => void;
+  /** Notifies the modal when UnifiedDataTable / EuiDataGrid fullscreen toggles. */
+  onEventGridFullScreenChange?: (isFullScreen: boolean) => void;
 }
 
 export const WorkflowExecuteEventForm = ({
@@ -42,6 +44,7 @@ export const WorkflowExecuteEventForm = ({
   errors,
   setErrors,
   onTriggerEventTableSelectionCountChange,
+  onEventGridFullScreenChange,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
   const { euiTheme } = useEuiTheme();
   const tableSurfaceColor = euiTheme.colors.backgroundBasePlain;
@@ -66,9 +69,13 @@ export const WorkflowExecuteEventForm = ({
   const triggerEventsSurfaceRef = useRef<HTMLDivElement | null>(null);
   const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
 
-  const handleDataGridFullScreenChange = useCallback((nextIsFullScreen: boolean) => {
-    setIsDataGridFullScreen(nextIsFullScreen);
-  }, []);
+  const handleDataGridFullScreenChange = useCallback(
+    (nextIsFullScreen: boolean) => {
+      setIsDataGridFullScreen(nextIsFullScreen);
+      onEventGridFullScreenChange?.(nextIsFullScreen);
+    },
+    [onEventGridFullScreenChange]
+  );
 
   const dataView = useWorkflowsEventsDataView({
     dataViews: services.dataViews,

@@ -761,6 +761,35 @@ describe('WorkflowExecuteModal', () => {
       expect(executeButton).toBeDisabled();
     });
 
+    it('hides trigger tabs and applies fullscreen modal class when the event grid enters fullscreen', () => {
+      const { getByTestId, getByText, queryByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByText('Event').closest('button')!);
+
+      const eventFormCalls = mockWorkflowExecuteEventForm.mock.calls;
+      const lastEventFormProps = eventFormCalls[eventFormCalls.length - 1]?.[0] as
+        | { onEventGridFullScreenChange?: (isFullScreen: boolean) => void }
+        | undefined;
+
+      expect(lastEventFormProps?.onEventGridFullScreenChange).toBeDefined();
+
+      act(() => {
+        lastEventFormProps!.onEventGridFullScreenChange!(true);
+      });
+
+      expect(queryByTestId('workflowExecuteModalTriggerTabs')).not.toBeInTheDocument();
+      expect(getByTestId('workflowExecuteModal').className).toContain(
+        'workflowExecuteModal--eventGridFullScreen'
+      );
+    });
+
     it('disables execute for test runs when the event trigger reports multiple table row selections', () => {
       const { getByTestId, getByText } = renderWithProviders(
         <WorkflowExecuteModal

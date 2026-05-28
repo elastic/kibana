@@ -39,6 +39,7 @@ import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteHistoricalForm } from './workflow_execute_historical_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
+import { getWorkflowExecuteModalGlobalStyles } from './workflow_execute_modal_global_styles';
 import {
   getFallbackTriggerTab,
   hasCustomEventTrigger,
@@ -104,6 +105,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     const [executionInput, setExecutionInput] = useState<string>('');
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
     const [eventTriggerTableSelectionCount, setEventTriggerTableSelectionCount] = useState(0);
+    const [isEventGridFullScreen, setIsEventGridFullScreen] = useState(false);
 
     const { euiTheme } = useEuiTheme();
 
@@ -204,6 +206,12 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     }, [shouldAutoRun, onSubmit, onClose]);
 
     useEffect(() => {
+      if (selectedTrigger !== 'event' && isEventGridFullScreen) {
+        setIsEventGridFullScreen(false);
+      }
+    }, [selectedTrigger, isEventGridFullScreen]);
+
+    useEffect(() => {
       setSelectedTrigger((current) => {
         if (current === 'alert' && !hasAlertRacAccess) {
           return getFallbackTriggerTab(normalizedInputs, definition, canReadWorkflowExecution);
@@ -302,150 +310,13 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
 
     return (
       <>
-        <Global
-          styles={css`
-            .euiOverlayMask:has(.workflowExecuteModal) {
-              z-index: 4000;
-            }
-            .workflowExecuteModal [data-test-subj='workflow-query-input'] {
-              position: relative;
-              z-index: 1;
-            }
-            .workflowExecuteModal .kbnQueryBar__textareaWrapOuter {
-              overflow: visible;
-            }
-            .workflowExecuteModal .kbnTypeahead,
-            .workflowExecuteModal .kbnTypeahead__popover {
-              z-index: 4002 !important;
-            }
-
-            #kibana-body
-              .workflowExecuteModal
-              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen) {
-              top: 0 !important;
-              height: 100dvh !important;
-              max-height: 100dvh !important;
-            }
-
-            .workflowExecuteModal .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen) {
-              position: fixed !important;
-              inset: 0 !important;
-              box-sizing: border-box !important;
-              width: 100vw !important;
-              height: 100dvh !important;
-              max-width: none !important;
-              max-height: 100dvh !important;
-              min-height: 0 !important;
-              z-index: 8001 !important;
-              margin: 0 !important;
-              border-radius: 0 !important;
-              display: flex !important;
-              flex-direction: column !important;
-              overflow-x: hidden !important;
-              overflow-y: auto !important;
-              padding-block-start: max(
-                calc(${euiTheme.size.xxl} * 2.25),
-                env(safe-area-inset-top, 0px)
-              ) !important;
-              padding-inline: ${euiTheme.size.m} !important;
-              padding-block-end: ${euiTheme.size.xs} !important;
-            }
-
-            .workflowExecuteModal:has(.euiDataGrid--fullScreen)
-              [data-test-subj='workflowExecuteModalTriggerTabs'] {
-              display: none !important;
-            }
-
-            .workflowExecuteModal:has(.euiDataGrid--fullScreen)
-              .euiModalBody
-              .euiModalBody__overflow {
-              overflow: visible !important;
-            }
-            .workflowExecuteModal:has(.euiDataGrid--fullScreen)
-              [data-test-subj='workflowExecuteModalBodyContent'] {
-              overflow: visible !important;
-            }
-            .workflowExecuteModal:has(.euiDataGrid--fullScreen)
-              .euiModalBody__overflow
-              > .euiFlexGroup {
-              overflow: visible !important;
-            }
-
-            .workflowExecuteModal
-              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen)
-              > .euiFlexItem:first-of-type {
-              flex-shrink: 0 !important;
-              min-height: min-content !important;
-              overflow: visible !important;
-            }
-
-            .workflowExecuteModal
-              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen)
-              .euiDataGrid.euiDataGrid--fullScreen {
-              position: relative !important;
-              inset: auto !important;
-              width: 100% !important;
-              height: 100% !important;
-              max-width: none !important;
-              max-height: none !important;
-              min-height: 0 !important;
-              flex: 1 1 auto !important;
-              z-index: auto !important;
-            }
-
-            .workflowExecuteModal
-              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen)
-              .unifiedDataTableToolbar,
-            .workflowExecuteModal
-              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen)
-              .unifiedDataTableToolbarBottom {
-              flex-shrink: 0 !important;
-            }
-
-            .workflowExecuteModal
-              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen)
-              .euiDataGrid__content {
-              flex: 1 1 auto !important;
-              min-height: 0 !important;
-            }
-
-            .workflowExecuteModal
-              .workflowTriggerEventsRoot:has(.euiDataGrid--fullScreen)
-              .euiDataGrid__focusWrap:has(.euiDataGrid--fullScreen) {
-              flex: 1 1 auto !important;
-              display: flex !important;
-              flex-direction: column !important;
-              min-height: 0 !important;
-              height: 100% !important;
-            }
-
-            .workflowExecuteModal:has(.euiDataGrid--fullScreen) .kbnTypeahead,
-            .workflowExecuteModal:has(.euiDataGrid--fullScreen) .kbnTypeahead__popover {
-              z-index: 9002 !important;
-            }
-
-            .euiOverlayMask:has(.workflowExecuteModal .euiDataGrid--fullScreen) {
-              padding: 0 !important;
-              align-items: stretch !important;
-            }
-            .euiOverlayMask:has(.workflowExecuteModal .euiDataGrid--fullScreen)
-              .workflowExecuteModal {
-              width: 100vw !important;
-              max-width: none !important;
-              height: 100dvh !important;
-              max-block-size: 100dvh !important;
-              min-block-size: 100dvh !important;
-              margin: 0 !important;
-              border-radius: 0 !important;
-            }
-
-            .workflowExecuteModal:has(.euiDataGrid--fullScreen) *:not(.euiDataGrid--fullScreen *) {
-              transform: none !important;
-            }
-          `}
-        />
+        <Global styles={getWorkflowExecuteModalGlobalStyles(euiTheme)} />
         <EuiModal
-          className="workflowExecuteModal"
+          className={
+            isEventGridFullScreen
+              ? 'workflowExecuteModal workflowExecuteModal--eventGridFullScreen'
+              : 'workflowExecuteModal'
+          }
           aria-labelledby={modalTitleId}
           maxWidth={false}
           onClose={onClose}
@@ -469,6 +340,10 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                 padding-inline: 0;
                 overflow: hidden;
               }
+
+              & .kbnQueryBar__textareaWrapOuter {
+                overflow: visible;
+              }
             `}
           >
             <EuiFlexGroup
@@ -479,128 +354,130 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                 min-height: 0;
               `}
             >
-              <EuiFlexItem
-                data-test-subj="workflowExecuteModalTriggerTabs"
-                grow={false}
-                css={css`
-                  padding: 0 ${euiTheme.size.l};
-                `}
-              >
-                <EuiFlexGroup direction="row" gutterSize="s" alignItems="stretch">
-                  {ENABLED_TRIGGER_TABS.map((trigger) => {
-                    let triggerDisabledTooltip: string | undefined;
-                    if (trigger === 'alert' && !hasAlertRacAccess) {
-                      triggerDisabledTooltip = alertTabDisabledTooltip;
-                    } else if (trigger === 'historical' && !canReadWorkflowExecution) {
-                      triggerDisabledTooltip = historicalTabDisabledTooltip;
-                    } else if (trigger === 'event') {
-                      if (!canReadWorkflowExecution) {
-                        triggerDisabledTooltip = eventTabExecutionReadDisabledTooltip;
-                      } else if (!eventDrivenExecutionEnabled) {
-                        triggerDisabledTooltip = eventTabEventDrivenDisabledTooltip;
+              {!isEventGridFullScreen ? (
+                <EuiFlexItem
+                  data-test-subj="workflowExecuteModalTriggerTabs"
+                  grow={false}
+                  css={css`
+                    padding: 0 ${euiTheme.size.l};
+                  `}
+                >
+                  <EuiFlexGroup direction="row" gutterSize="s" alignItems="stretch">
+                    {ENABLED_TRIGGER_TABS.map((trigger) => {
+                      let triggerDisabledTooltip: string | undefined;
+                      if (trigger === 'alert' && !hasAlertRacAccess) {
+                        triggerDisabledTooltip = alertTabDisabledTooltip;
+                      } else if (trigger === 'historical' && !canReadWorkflowExecution) {
+                        triggerDisabledTooltip = historicalTabDisabledTooltip;
+                      } else if (trigger === 'event') {
+                        if (!canReadWorkflowExecution) {
+                          triggerDisabledTooltip = eventTabExecutionReadDisabledTooltip;
+                        } else if (!eventDrivenExecutionEnabled) {
+                          triggerDisabledTooltip = eventTabEventDrivenDisabledTooltip;
+                        }
                       }
-                    }
-                    const isTriggerTabDisabled = triggerDisabledTooltip !== undefined;
-                    const triggerButton = (
-                      <EuiButton
-                        color={selectedTrigger === trigger ? 'primary' : 'text'}
-                        onClick={() => handleChangeTrigger(trigger)}
-                        isDisabled={isTriggerTabDisabled}
-                        iconSide="right"
-                        data-test-subj={`workflowExecuteModalTrigger-${trigger}`}
-                        contentProps={{
-                          style: {
-                            justifyContent: 'flex-start',
-                            flexDirection: 'column',
-                            alignItems: 'flex-start',
-                            textAlign: 'left',
-                          },
-                        }}
-                        css={css`
-                          width: 100%;
-                          flex: 1;
-                          min-height: 0;
-                          align-self: stretch;
-                          padding: ${euiTheme.size.m};
-                        `}
-                      >
-                        <EuiRadio
-                          name={TRIGGER_TABS_LABELS[trigger]}
-                          label={TRIGGER_TABS_LABELS[trigger]}
-                          id={trigger}
-                          checked={selectedTrigger === trigger}
-                          disabled={isTriggerTabDisabled}
-                          onChange={() => {}}
-                          css={{ fontWeight: euiTheme.font.weight.bold }}
-                        />
-                        <EuiText
-                          size="s"
+                      const isTriggerTabDisabled = triggerDisabledTooltip !== undefined;
+                      const triggerButton = (
+                        <EuiButton
+                          color={selectedTrigger === trigger ? 'primary' : 'text'}
+                          onClick={() => handleChangeTrigger(trigger)}
+                          isDisabled={isTriggerTabDisabled}
+                          iconSide="right"
+                          data-test-subj={`workflowExecuteModalTrigger-${trigger}`}
+                          contentProps={{
+                            style: {
+                              justifyContent: 'flex-start',
+                              flexDirection: 'column',
+                              alignItems: 'flex-start',
+                              textAlign: 'left',
+                            },
+                          }}
                           css={css`
-                            text-wrap: auto;
-                            margin-left: ${euiTheme.size.l};
+                            width: 100%;
+                            flex: 1;
+                            min-height: 0;
+                            align-self: stretch;
+                            padding: ${euiTheme.size.m};
                           `}
                         >
-                          {TRIGGER_TABS_DESCRIPTIONS[trigger]}
-                        </EuiText>
-                      </EuiButton>
-                    );
-
-                    return (
-                      <EuiFlexItem
-                        key={trigger}
-                        grow={true}
-                        css={css`
-                          display: flex;
-                          flex-direction: column;
-                          min-width: 0;
-                        `}
-                      >
-                        {triggerDisabledTooltip ? (
-                          <div
+                          <EuiRadio
+                            name={TRIGGER_TABS_LABELS[trigger]}
+                            label={TRIGGER_TABS_LABELS[trigger]}
+                            id={trigger}
+                            checked={selectedTrigger === trigger}
+                            disabled={isTriggerTabDisabled}
+                            onChange={() => {}}
+                            css={{ fontWeight: euiTheme.font.weight.bold }}
+                          />
+                          <EuiText
+                            size="s"
                             css={css`
-                              flex: 1;
-                              min-height: 0;
-                              width: 100%;
-                              display: flex;
-                              flex-direction: column;
+                              text-wrap: auto;
+                              margin-left: ${euiTheme.size.l};
                             `}
                           >
-                            <EuiToolTip
-                              content={triggerDisabledTooltip}
-                              position="top"
-                              display="block"
-                              anchorProps={{
-                                style: {
-                                  flex: 1,
-                                  minHeight: 0,
-                                  width: '100%',
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                },
-                              }}
+                            {TRIGGER_TABS_DESCRIPTIONS[trigger]}
+                          </EuiText>
+                        </EuiButton>
+                      );
+
+                      return (
+                        <EuiFlexItem
+                          key={trigger}
+                          grow={true}
+                          css={css`
+                            display: flex;
+                            flex-direction: column;
+                            min-width: 0;
+                          `}
+                        >
+                          {triggerDisabledTooltip ? (
+                            <div
+                              css={css`
+                                flex: 1;
+                                min-height: 0;
+                                width: 100%;
+                                display: flex;
+                                flex-direction: column;
+                              `}
                             >
-                              <span
-                                tabIndex={0}
-                                css={css`
-                                  display: flex;
-                                  flex-direction: column;
-                                  flex: 1;
-                                  min-height: 0;
-                                  width: 100%;
-                                `}
+                              <EuiToolTip
+                                content={triggerDisabledTooltip}
+                                position="top"
+                                display="block"
+                                anchorProps={{
+                                  style: {
+                                    flex: 1,
+                                    minHeight: 0,
+                                    width: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                  },
+                                }}
                               >
-                                {triggerButton}
-                              </span>
-                            </EuiToolTip>
-                          </div>
-                        ) : (
-                          triggerButton
-                        )}
-                      </EuiFlexItem>
-                    );
-                  })}
-                </EuiFlexGroup>
-              </EuiFlexItem>
+                                <span
+                                  tabIndex={0}
+                                  css={css`
+                                    display: flex;
+                                    flex-direction: column;
+                                    flex: 1;
+                                    min-height: 0;
+                                    width: 100%;
+                                  `}
+                                >
+                                  {triggerButton}
+                                </span>
+                              </EuiToolTip>
+                            </div>
+                          ) : (
+                            triggerButton
+                          )}
+                        </EuiFlexItem>
+                      );
+                    })}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              ) : null}
 
               <EuiFlexItem
                 data-test-subj="workflowExecuteModalBodyContent"
@@ -658,6 +535,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                     onTriggerEventTableSelectionCountChange={
                       handleEventTriggerTableSelectionCountChange
                     }
+                    onEventGridFullScreenChange={setIsEventGridFullScreen}
                   />
                 )}
                 {selectedTrigger === 'historical' && (
