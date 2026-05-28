@@ -10,11 +10,15 @@
 import { parse, stringify } from 'query-string';
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import type { LayoutDirection } from '@kbn/workflows';
 
 export type WorkflowUrlStateTabType = 'workflow' | 'executions';
+export type WorkflowEditorView = 'yaml' | 'graph';
 
 export interface WorkflowUrlState {
   tab?: WorkflowUrlStateTabType;
+  view?: WorkflowEditorView;
+  direction?: LayoutDirection;
   executionId?: string;
   stepExecutionId?: string;
   stepId?: string;
@@ -25,10 +29,20 @@ export function useWorkflowUrlState() {
   const history = useHistory();
   const location = useLocation();
 
-  const urlState = useMemo(() => {
+  const urlState = useMemo((): {
+    tab: WorkflowUrlStateTabType;
+    view: WorkflowEditorView;
+    direction: LayoutDirection;
+    executionId: string | undefined;
+    stepExecutionId: string | undefined;
+    stepId: string | undefined;
+    shouldAutoResume: boolean;
+  } => {
     const params = parse(location.search);
     return {
       tab: (params.tab as WorkflowUrlStateTabType) || 'workflow',
+      view: params.view === 'graph' ? 'graph' : 'yaml',
+      direction: params.direction === 'LR' ? 'LR' : 'TB',
       executionId: params.executionId as string | undefined,
       stepExecutionId: params.stepExecutionId as string | undefined,
       stepId: params.stepId as string | undefined,
@@ -113,9 +127,31 @@ export function useWorkflowUrlState() {
     updateUrlState({ resume: undefined });
   }, [updateUrlState]);
 
+  const setEditorView = useCallback(
+    (view: WorkflowEditorView) => {
+      updateUrlState({
+        // Omit default to keep the URL clean
+        view: view === 'yaml' ? undefined : view,
+        // Clear the flyout selection when switching views
+        stepId: undefined,
+      });
+    },
+    [updateUrlState]
+  );
+
+  const setGraphDirection = useCallback(
+    (direction: LayoutDirection) => {
+      // Omit default 'TB' to keep the URL clean
+      updateUrlState({ direction: direction === 'TB' ? undefined : direction });
+    },
+    [updateUrlState]
+  );
+
   return {
     // Current state
     activeTab: urlState.tab,
+    editorView: urlState.view,
+    graphDirection: urlState.direction,
     selectedExecutionId: urlState.executionId,
     selectedStepExecutionId: urlState.stepExecutionId,
     selectedStepId: urlState.stepId,
@@ -123,6 +159,8 @@ export function useWorkflowUrlState() {
 
     // State setters
     setActiveTab,
+    setEditorView,
+    setGraphDirection,
     setSelectedExecution,
     setSelectedStepExecution,
     setSelectedStep,

@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
-import {
-  SkipUnsavedRunConfirmationStorageKey,
-  WorkflowDetailHeader,
-  type WorkflowDetailHeaderProps,
-} from './workflow_detail_header';
+import { WorkflowDetailHeader, type WorkflowDetailHeaderProps } from './workflow_detail_header';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
   _clearComputedData,
@@ -177,21 +173,6 @@ describe('WorkflowDetailHeader', () => {
     expect(getByTestId('saveWorkflowHeaderButton')).not.toBeDisabled();
   });
 
-  it('disables run workflow button when yaml has syntax errors', () => {
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
-      isValid: false,
-    });
-    expect(result.getByTestId('runWorkflowHeaderButton')).toBeDisabled();
-  });
-
-  it('enables run workflow button when yaml has validation errors', () => {
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
-      isValid: true,
-      hasYamlSchemaValidationErrors: true,
-    });
-    expect(result.getByTestId('runWorkflowHeaderButton')).toBeEnabled();
-  });
-
   it('disables enabled toggle when yaml has validation errors', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       isValid: true,
@@ -210,66 +191,6 @@ describe('WorkflowDetailHeader', () => {
     expect(toggle).toBeDisabled();
   });
 
-  it('enables run workflow button when yaml is valid', () => {
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
-    const button = result.getByTestId('runWorkflowHeaderButton');
-    expect(button).toBeEnabled();
-  });
-
-  it('shows the unsaved changes confirmation when running with unsaved changes', () => {
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
-      hasChanges: true,
-    });
-
-    fireEvent.click(result.getByTestId('runWorkflowHeaderButton'));
-
-    expect(
-      result.getByTestId('runWorkflowWithUnsavedChangesConfirmationModal')
-    ).toBeInTheDocument();
-    expect(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain')).toBeInTheDocument();
-  });
-
-  it('stores the run confirmation preference when confirming with the checkbox selected', () => {
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
-      hasChanges: true,
-    });
-
-    fireEvent.click(result.getByTestId('runWorkflowHeaderButton'));
-    fireEvent.click(result.getByTestId('runWorkflowWithUnsavedChangesDontAskAgain'));
-    fireEvent.click(result.getByTestId('confirmModalConfirmButton'));
-
-    expect(localStorage.getItem(SkipUnsavedRunConfirmationStorageKey)).toBe('true');
-    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
-    expect(result.store.getState().detail.isTestModalOpen).toBe(true);
-  });
-
-  it('skips the unsaved changes confirmation when the preference is stored', () => {
-    localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
-      hasChanges: true,
-    });
-
-    fireEvent.click(result.getByTestId('runWorkflowHeaderButton'));
-
-    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
-    expect(result.store.getState().detail.isTestModalOpen).toBe(true);
-  });
-
-  it('disables run workflow button while save is in flight', () => {
-    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
-      hasChanges: true,
-      isSaving: true,
-    });
-
-    const runButton = result.getByTestId('runWorkflowHeaderButton');
-
-    expect(runButton).toBeDisabled();
-    fireEvent.click(runButton);
-
-    expect(result.queryByTestId('runWorkflowWithUnsavedChangesConfirmationModal')).toBeNull();
-    expect(result.store.getState().detail.isTestModalOpen).toBe(false);
-  });
-
   it('disables executions tab when user cannot read workflow executions', () => {
     mockUseWorkflowsCapabilities.mockReturnValue({
       ...defaultWorkflowsCapabilities,
@@ -284,7 +205,6 @@ describe('WorkflowDetailHeader', () => {
     interface MatrixRow {
       roleLabel: string;
       capabilities: Partial<WorkflowsManagementCapabilities>;
-      expectRunDisabled: boolean;
       expectSaveDisabled: boolean;
       expectEnabledSwitchDisabled: boolean;
       expectExecutionsTabDisabled: boolean;
@@ -302,7 +222,6 @@ describe('WorkflowDetailHeader', () => {
           canExecuteWorkflow: false,
           canCancelWorkflowExecution: false,
         },
-        expectRunDisabled: true,
         expectSaveDisabled: true,
         expectEnabledSwitchDisabled: true,
         expectExecutionsTabDisabled: false,
@@ -318,7 +237,6 @@ describe('WorkflowDetailHeader', () => {
           canExecuteWorkflow: true,
           canCancelWorkflowExecution: false,
         },
-        expectRunDisabled: false,
         expectSaveDisabled: true,
         expectEnabledSwitchDisabled: true,
         expectExecutionsTabDisabled: false,
@@ -334,7 +252,6 @@ describe('WorkflowDetailHeader', () => {
           canExecuteWorkflow: true,
           canCancelWorkflowExecution: false,
         },
-        expectRunDisabled: false,
         expectSaveDisabled: true,
         expectEnabledSwitchDisabled: false,
         expectExecutionsTabDisabled: false,
@@ -350,7 +267,6 @@ describe('WorkflowDetailHeader', () => {
           canExecuteWorkflow: true,
           canCancelWorkflowExecution: false,
         },
-        expectRunDisabled: false,
         expectSaveDisabled: true,
         expectEnabledSwitchDisabled: false,
         expectExecutionsTabDisabled: true,
@@ -358,10 +274,9 @@ describe('WorkflowDetailHeader', () => {
     ];
 
     it.each(matrix)(
-      '$roleLabel: run disabled=$expectRunDisabled, save=$expectSaveDisabled, enabled switch=$expectEnabledSwitchDisabled, executions tab=$expectExecutionsTabDisabled',
+      '$roleLabel: save=$expectSaveDisabled, enabled switch=$expectEnabledSwitchDisabled, executions tab=$expectExecutionsTabDisabled',
       ({
         capabilities,
-        expectRunDisabled,
         expectSaveDisabled,
         expectEnabledSwitchDisabled,
         expectExecutionsTabDisabled,
@@ -372,14 +287,8 @@ describe('WorkflowDetailHeader', () => {
         });
 
         const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
-        const runBtn = result.getByTestId('runWorkflowHeaderButton');
         const saveBtn = result.getByTestId('saveWorkflowHeaderButton');
 
-        if (expectRunDisabled) {
-          expect(runBtn).toBeDisabled();
-        } else {
-          expect(runBtn).not.toBeDisabled();
-        }
         if (expectSaveDisabled) {
           expect(saveBtn).toBeDisabled();
         } else {

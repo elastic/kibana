@@ -8,29 +8,60 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { monaco } from '@kbn/monaco';
+import { isMac } from '@kbn/shared-ux-utility';
 import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import {
+  ReactFlowProvider,
+  useWorkflowsCapabilities,
+  WorkflowDetailBottomBar,
+} from '@kbn/workflows-ui';
 import { useContextOverrideData } from './use_context_override_data';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
+import { SkipUnsavedRunConfirmationStorageKey } from './workflow_detail_header';
+import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import {
+  selectEditorWorkflowLookup,
+  selectHasChanges,
+  selectIsExecutionsTab,
+  selectIsSavingYaml,
+  selectIsYamlSyntaxValid,
   selectWorkflowId,
   selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { setTestStepModalOpenStepId } from '../../../entities/workflows/store/workflow_detail/slice';
+import {
+  HIGHLIGHTED_STEP_TRIGGER,
+  setHighlightedStepId,
+  setIsTestModalOpen,
+  setTestStepModalOpenStepId,
+} from '../../../entities/workflows/store/workflow_detail/slice';
 import { ExecutionGraph } from '../../../features/debug_graph/execution_graph';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { getTestRunTooltipContent } from '../../../shared/ui';
+import { EditorSettingsPopover } from '../../../widgets/workflow_yaml_editor/ui/editor_settings_popover';
+import { KeyboardShortcutsPopover } from '../../../widgets/workflow_yaml_editor/ui/keyboard_shortcuts_popover';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -51,10 +82,15 @@ interface WorkflowDetailEditorProps {
 export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ highlightDiff }) => {
   const styles = useMemoCss(componentStyles);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const openActionsRef = useRef<(() => void) | null>(null);
   const dispatch = useDispatch();
 
   const workflowYaml = useSelector(selectYamlString) ?? '';
   const workflowId = useSelector(selectWorkflowId);
+  const hasUnsavedChanges = useSelector(selectHasChanges);
+  const isExecutionsTab = useSelector(selectIsExecutionsTab);
+  const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
+  const isSaving = useSelector(selectIsSavingYaml);
   const getContextOverrideData = useContextOverrideData();
   const { runIndividualStep } = useWorkflowActions();
   const { notifications } = useKibana().services;
@@ -113,35 +149,233 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     ]
   );
 
-  // UI settings
-  const isVisualEditorEnabled = useKibana().services.uiSettings?.get<boolean>(
-    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
-    false
-  );
-  const isExecutionGraphEnabled = useKibana().services.uiSettings?.get<boolean>(
+  const [isExecutionGraphEnabled] = useUiSetting$<boolean>(
     WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
     false
   );
 
+  const [isVisualEditorEnabled] = useUiSetting$<boolean>(
+    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
+    false
+  );
+
+  const { editorView, setEditorView, graphDirection, setGraphDirection } = useWorkflowUrlState();
+  const showGraph = isVisualEditorEnabled && editorView === 'graph';
+
+  const workflowLookup = useSelector(selectEditorWorkflowLookup);
+
+  const handleEditorViewChange = useCallback(
+    (next: 'yaml' | 'graph') => {
+      if (!isVisualEditorEnabled) {
+        return;
+      }
+      // When switching from YAML to graph, focus the graph on whatever step
+      // the user's cursor is currently on. Looks up the step by the editor's
+      // current line in the workflow's lookup table.
+      if (next === 'graph' && editorRef.current && workflowLookup) {
+        const pos = editorRef.current.getPosition();
+        const line = pos?.lineNumber;
+        if (line != null) {
+          const tStart = workflowLookup.triggersLineStart;
+          // `triggersLineEnd` isn't tracked by WorkflowLookup; treat any line
+          // that falls before the first step (or at/past the trigger start)
+          // as being inside the triggers block.
+          const firstStepLine = Object.values(workflowLookup.steps).reduce<number | undefined>(
+            (min, info) => {
+              const { lineStart } = info;
+              return min == null || lineStart < min ? lineStart : min;
+            },
+            undefined
+          );
+          const tEnd = firstStepLine != null ? firstStepLine - 1 : undefined;
+          if (tStart != null && tEnd != null && line >= tStart && line <= tEnd) {
+            dispatch(setHighlightedStepId({ stepId: HIGHLIGHTED_STEP_TRIGGER }));
+          } else {
+            const found = Object.entries(workflowLookup.steps).find(
+              ([, info]) => info.lineStart <= line && line <= info.lineEnd
+            );
+            if (found) {
+              dispatch(setHighlightedStepId({ stepId: found[0] }));
+            }
+          }
+        }
+      }
+      setEditorView(next);
+    },
+    [dispatch, isVisualEditorEnabled, setEditorView, workflowLookup]
+  );
+
+  const openTestModal = useCallback(() => {
+    dispatch(setIsTestModalOpen(true));
+  }, [dispatch]);
+
+  const [showRunConfirmation, setShowRunConfirmation] = useState(false);
+  const [dontAskAgain, setDontAskAgain] = useState(false);
+
+  const handleRunClickWithUnsavedCheck = useCallback(() => {
+    const shouldSkipUnsavedRunConfirmation =
+      localStorage.getItem(SkipUnsavedRunConfirmationStorageKey) === 'true';
+    if (hasUnsavedChanges && !shouldSkipUnsavedRunConfirmation) {
+      setDontAskAgain(false);
+      setShowRunConfirmation(true);
+    } else {
+      openTestModal();
+    }
+  }, [hasUnsavedChanges, openTestModal]);
+
+  const handleConfirmRun = useCallback(() => {
+    if (dontAskAgain) {
+      localStorage.setItem(SkipUnsavedRunConfirmationStorageKey, 'true');
+    }
+    setShowRunConfirmation(false);
+    openTestModal();
+  }, [dontAskAgain, openTestModal]);
+
+  const handleCancelRun = useCallback(() => {
+    setDontAskAgain(false);
+    setShowRunConfirmation(false);
+  }, []);
+
+  const runWorkflowTooltipContent = useMemo(
+    () =>
+      getTestRunTooltipContent({
+        isExecutionsTab,
+        isValid: Boolean(isSyntaxValid),
+        canRunWorkflow: canExecuteWorkflow,
+        isSaving: Boolean(isSaving),
+      }),
+    [isExecutionsTab, isSyntaxValid, canExecuteWorkflow, isSaving]
+  );
+
+  const runDisabled = isExecutionsTab || !canExecuteWorkflow || !isSyntaxValid || isSaving;
+
+  const testWorkflowButton = (
+    <EuiToolTip content={runWorkflowTooltipContent}>
+      <EuiButton
+        color="success"
+        iconType="play"
+        size="m"
+        onClick={handleRunClickWithUnsavedCheck}
+        isDisabled={runDisabled}
+        data-test-subj="workflowBottomBarRunButton"
+      >
+        {i18n.translate('workflows.workflowDetailEditor.newRun', { defaultMessage: 'New run' })}
+      </EuiButton>
+    </EuiToolTip>
+  );
+
+  const testWorkflowButtonCompact = (
+    <EuiToolTip content={runWorkflowTooltipContent} disableScreenReaderOutput>
+      <EuiButtonIcon
+        color="success"
+        display="base"
+        iconType="play"
+        size="s"
+        onClick={handleRunClickWithUnsavedCheck}
+        disabled={runDisabled}
+        aria-label={i18n.translate('workflows.workflowDetailEditor.newRun', {
+          defaultMessage: 'New run',
+        })}
+        data-test-subj="workflowBottomBarRunButtonCompact"
+      />
+    </EuiToolTip>
+  );
+
+  const commandKey = isMac ? '⌘' : 'Ctrl';
+  const documentationLabel = i18n.translate('workflows.workflowDetailEditor.tools.documentation', {
+    defaultMessage: 'Documentation',
+  });
+  const actionsMenuLabel = i18n.translate('workflows.workflowDetailEditor.tools.actionsMenu', {
+    defaultMessage: 'Actions menu',
+  });
+
+  const toolsSlot = (
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={documentationLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="documentation"
+            href={WORKFLOWS_DOCUMENTATION_URL}
+            target="_blank"
+            color="text"
+            size="s"
+            aria-label={documentationLabel}
+            data-test-subj="workflowBottomBarDocumentation"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={`${actionsMenuLabel} (${commandKey}+K)`}>
+          <EuiButtonIcon
+            iconType="search"
+            color="text"
+            size="s"
+            onClick={() => openActionsRef.current?.()}
+            aria-label={actionsMenuLabel}
+            data-test-subj="workflowBottomBarActionsMenu"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <KeyboardShortcutsPopover />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EditorSettingsPopover
+          editorRef={editorRef}
+          graphDirection={graphDirection}
+          onGraphDirectionChange={setGraphDirection}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  // Keep the graph mounted for a moment after switching to YAML so the
+  // cross-fade animation can play out before unmounting it.
+  const [renderGraph, setRenderGraph] = useState(showGraph);
+  useEffect(() => {
+    if (showGraph) {
+      setRenderGraph(true);
+      return;
+    }
+    const t = setTimeout(() => setRenderGraph(false), 260);
+    return () => clearTimeout(t);
+  }, [showGraph]);
+
   return (
-    <>
+    <ReactFlowProvider>
       <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
         <EuiFlexItem css={styles.yamlEditor}>
+          {/*
+           * The YAML editor is always mounted so its validation pipeline keeps
+           * running. When in graph view, the editor swaps Monaco out for the
+           * visual editor in the same flex column so the validation accordion
+           * stays pinned at the bottom for both views.
+           */}
           <React.Suspense fallback={<EuiLoadingSpinner />}>
             <WorkflowYAMLEditor
               highlightDiff={highlightDiff}
               onStepRun={handleStepRun}
               editorRef={editorRef}
+              hideEditorBody={showGraph}
+              openActionsRef={openActionsRef}
+              onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
+              bodyOverride={
+                isVisualEditorEnabled && renderGraph ? (
+                  <React.Suspense fallback={<EuiLoadingSpinner />}>
+                    <WorkflowVisualEditor onStepRun={handleStepRun} direction={graphDirection} />
+                  </React.Suspense>
+                ) : null
+              }
             />
           </React.Suspense>
+          <WorkflowDetailBottomBar
+            editorView={editorView}
+            onEditorViewChange={handleEditorViewChange}
+            toolsSlot={toolsSlot}
+            testWorkflowButton={testWorkflowButton}
+            testWorkflowButtonCompact={testWorkflowButtonCompact}
+          />
         </EuiFlexItem>
-        {isVisualEditorEnabled && (
-          <EuiFlexItem css={styles.visualEditor}>
-            <React.Suspense fallback={<EuiLoadingSpinner />}>
-              <WorkflowVisualEditor />
-            </React.Suspense>
-          </EuiFlexItem>
-        )}
         {isExecutionGraphEnabled && (
           <EuiFlexItem css={styles.visualEditor}>
             <React.Suspense fallback={<EuiLoadingSpinner />}>
@@ -152,7 +386,44 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
       </EuiFlexGroup>
 
       <WorkflowDetailConnectorFlyout editorRef={editorRef} />
-    </>
+      {showRunConfirmation && (
+        <EuiConfirmModal
+          data-test-subj="runWorkflowWithUnsavedChangesConfirmationModal"
+          aria-label={i18n.translate('workflows.workflowDetailEditor.runWithUnsavedChangesLabel', {
+            defaultMessage: 'Run workflow with unsaved changes confirmation',
+          })}
+          title={i18n.translate('workflows.workflowDetailEditor.runWithUnsavedChangesQuestion', {
+            defaultMessage: 'Run workflow with unsaved changes?',
+          })}
+          onCancel={handleCancelRun}
+          onConfirm={handleConfirmRun}
+          cancelButtonText={i18n.translate('workflows.workflowDetailEditor.runWorkflowCancel', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('workflows.workflowDetailEditor.runWorkflow', {
+            defaultMessage: 'Run workflow',
+          })}
+          buttonColor="success"
+          defaultFocusedButton="confirm"
+        >
+          <p>
+            <FormattedMessage
+              id="workflows.workflowDetailEditor.runWithUnsavedChanges.message"
+              defaultMessage="You have unsaved changes. Running the workflow will not save your changes. Are you sure you want to continue?"
+            />
+          </p>
+          <EuiCheckbox
+            id="workflowsRunWithUnsavedChangesDontAskAgain"
+            data-test-subj="runWorkflowWithUnsavedChangesDontAskAgain"
+            label={i18n.translate('workflows.workflowDetailEditor.dontAskAgain', {
+              defaultMessage: "Don't ask again",
+            })}
+            checked={dontAskAgain}
+            onChange={(event) => setDontAskAgain(event.target.checked)}
+          />
+        </EuiConfirmModal>
+      )}
+    </ReactFlowProvider>
   );
 });
 WorkflowDetailEditor.displayName = 'WorkflowDetailEditor';
@@ -161,6 +432,7 @@ const componentStyles = {
   yamlEditor: css({
     flex: 1,
     overflow: 'hidden',
+    position: 'relative',
   }),
   visualEditor: ({ euiTheme }: UseEuiTheme) =>
     css({
