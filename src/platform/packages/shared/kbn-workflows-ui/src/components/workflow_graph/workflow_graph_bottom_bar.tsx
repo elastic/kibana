@@ -48,9 +48,9 @@ export interface WorkflowDetailBottomBarProps {
   bottomOffset?: number;
 }
 
-// Figma Shadow/X-large composite.
+// Figma Shadow/Medium composite.
 const BAR_SHADOW =
-  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 5px 16px 0 rgba(43, 57, 79, 0.14), 0 10px 20px 0 rgba(43, 57, 79, 0.08)';
+  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 4px 8px 0 rgba(43, 57, 79, 0.12), 0 8px 16px 0 rgba(43, 57, 79, 0.06)';
 
 // Subtle shadow for the active view-toggle button (Figma Shadow/X-small).
 const TOGGLE_ACTIVE_SHADOW =
@@ -209,7 +209,11 @@ function ViewToggle({
                 },
               }}
             >
-              <EuiIcon type={iconType} aria-hidden />
+              <EuiIcon
+                type={iconType}
+                aria-hidden
+                color={active ? euiTheme.colors.primaryText : euiTheme.colors.text}
+              />
             </button>
           </EuiToolTip>
         );
@@ -298,14 +302,14 @@ function CompactToolsMenu({
   );
 }
 
-function VerticalDivider() {
+function VerticalDivider({ fullHeight = false }: { fullHeight?: boolean }) {
   const { euiTheme } = useEuiTheme();
   return (
     <div
       aria-hidden
       css={{
         width: 1,
-        alignSelf: 'stretch',
+        height: fullHeight ? '100%' : 32,
         background: euiTheme.colors.borderBaseSubdued,
         marginInline: euiTheme.size.s,
       }}
@@ -338,22 +342,58 @@ export function WorkflowDetailBottomBar({
     return () => ro.disconnect();
   }, []);
 
+  const [isExpanded, setIsExpanded] = useState(true);
+  const isInitialPhaseRef = useRef(true);
+  const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      isInitialPhaseRef.current = false;
+      setIsExpanded(false);
+    }, 5000);
+    return () => {
+      clearTimeout(timer);
+      if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);
+    };
+  }, []);
+
+  const handleExpandedMouseEnter = useCallback(() => {
+    if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);
+  }, []);
+
+  const handleExpandedMouseLeave = useCallback(() => {
+    if (!isInitialPhaseRef.current) {
+      collapseTimerRef.current = setTimeout(() => setIsExpanded(false), 600);
+    }
+  }, []);
+
+  const handlePillMouseEnter = useCallback(() => {
+    if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);
+    setIsExpanded(true);
+  }, []);
+
   const barCss: CSSObject = {
     position: 'absolute',
-    left: 8,
-    right: 8,
-    bottom: 8 + bottomOffset,
+    left: -2,
+    right: -2,
+    bottom: 24 + bottomOffset,
     zIndex: euiTheme.levels.header,
     display: 'flex',
     justifyContent: 'center',
     pointerEvents: 'none',
   };
 
+  const pillLabel = i18n.translate('workflowsUi.bottomBar.expandControls', {
+    defaultMessage: 'Show toolbar',
+  });
+
   return (
     <div ref={containerRef} css={barCss} data-test-subj="workflowDetailBottomBar">
       <div
         css={{
-          pointerEvents: 'auto',
+          pointerEvents: isExpanded ? 'auto' : 'none',
+          opacity: isExpanded ? 1 : 0,
+          transition: 'opacity 200ms ease',
           background: euiTheme.colors.backgroundBasePlain,
           border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
           borderRadius: 12,
@@ -362,17 +402,23 @@ export function WorkflowDetailBottomBar({
           display: 'inline-flex',
           maxWidth: 'min(980px, 100%)',
         }}
+        onMouseEnter={handleExpandedMouseEnter}
+        onMouseLeave={handleExpandedMouseLeave}
       >
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap={false}>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" wrap={false}>
-              {editorView === 'graph' ? <ZoomControls /> : null}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {editorView === 'graph' && (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" wrap={false}>
+                  <ZoomControls />
+                </EuiFlexGroup>
+              </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <VerticalDivider />
-          </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <VerticalDivider />
+              </EuiFlexItem>
+            </>
+          )}
 
           {compact ? (
             <EuiFlexItem grow={false}>
@@ -390,9 +436,11 @@ export function WorkflowDetailBottomBar({
             <ViewToggle editorView={editorView} onEditorViewChange={onEditorViewChange} />
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <VerticalDivider />
-          </EuiFlexItem>
+          {testWorkflowButton ? (
+            <EuiFlexItem grow={false} css={{ alignSelf: 'stretch', display: 'flex', alignItems: 'stretch' }}>
+              <VerticalDivider fullHeight />
+            </EuiFlexItem>
+          ) : null}
 
           {testWorkflowButton ? (
             <EuiFlexItem grow={false}>
@@ -400,6 +448,42 @@ export function WorkflowDetailBottomBar({
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
+      </div>
+
+      {/* Collapsed pill — hover to expand */}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label={pillLabel}
+        css={{
+          position: 'absolute',
+          left: '50%',
+          bottom: 0,
+          transform: 'translateX(-50%)',
+          pointerEvents: isExpanded ? 'none' : 'auto',
+          opacity: isExpanded ? 0 : 1,
+          transition: 'opacity 200ms ease',
+          width: 64,
+          height: 24,
+          background: euiTheme.colors.primary,
+          borderRadius: 30,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: BAR_SHADOW,
+          cursor: 'pointer',
+        }}
+        onMouseEnter={handlePillMouseEnter}
+        onFocus={handlePillMouseEnter}
+        onBlur={handleExpandedMouseLeave}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handlePillMouseEnter();
+          }
+        }}
+      >
+        <EuiIcon type="boxesVertical" size="s" color={euiTheme.colors.emptyShade} css={{ transform: 'rotate(90deg)' }} aria-hidden />
       </div>
     </div>
   );
