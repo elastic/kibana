@@ -75,11 +75,11 @@ describe('registerCaseAttachments', () => {
     expect(framework.registerPersistableState).not.toHaveBeenCalled();
   });
 
-  it('registers exactly the two expected unified attachment types', () => {
+  it('registers exactly the three expected unified attachment types', () => {
     const framework = buildFramework();
 
     registerCaseAttachments(framework);
 
-    expect(framework.registerUnified).toHaveBeenCalledTimes(2);
+    expect(framework.registerUnified).toHaveBeenCalledTimes(3);
   });
 });
