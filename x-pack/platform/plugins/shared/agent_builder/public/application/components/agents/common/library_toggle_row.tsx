@@ -100,7 +100,15 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
               ) : undefined
             }
           >
-            <EuiBadge tabIndex={0} color="hollow">
+            <EuiBadge
+              tabIndex={0}
+              color="hollow"
+              aria-label={
+                [disabledBadgeLabel, disabledTooltipTitle, disabledTooltipBody]
+                  .filter(Boolean)
+                  .join('. ') || undefined
+              }
+            >
               {disabledBadgeLabel ?? 'Auto-included'}
             </EuiBadge>
           </EuiToolTip>
