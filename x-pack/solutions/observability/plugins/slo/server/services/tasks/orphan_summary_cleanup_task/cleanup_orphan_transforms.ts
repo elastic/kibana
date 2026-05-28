@@ -62,6 +62,10 @@ export async function cleanupOrphanTransforms(
           from,
           size: pageSize,
           allow_no_match: true,
+          // Only the id and state are read below; trimming the response server-side
+          // avoids transferring/parsing the per-transform checkpointing, stats and
+          // health blobs (multi-KB each at pageSize=100).
+          filter_path: 'count,transforms.id,transforms.state',
         },
         { signal: abortController.signal }
       );

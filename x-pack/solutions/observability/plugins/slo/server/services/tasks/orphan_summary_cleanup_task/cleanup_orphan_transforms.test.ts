@@ -227,12 +227,24 @@ describe('cleanupOrphanTransforms', () => {
     expect(esClient.transform.getTransformStats).toHaveBeenCalledTimes(2);
     expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(
       1,
-      { transform_id: 'slo-*', from: 0, size: 2, allow_no_match: true },
+      {
+        transform_id: 'slo-*',
+        from: 0,
+        size: 2,
+        allow_no_match: true,
+        filter_path: 'count,transforms.id,transforms.state',
+      },
       expect.objectContaining({ signal: abortController.signal })
     );
     expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(
       2,
-      { transform_id: 'slo-*', from: 2, size: 2, allow_no_match: true },
+      {
+        transform_id: 'slo-*',
+        from: 2,
+        size: 2,
+        allow_no_match: true,
+        filter_path: 'count,transforms.id,transforms.state',
+      },
       expect.objectContaining({ signal: abortController.signal })
     );
 
@@ -310,6 +322,26 @@ describe('cleanupOrphanTransforms', () => {
     expect(esClient.transform.deleteTransform).not.toHaveBeenCalled();
   });
 
+  it('should ask ES to trim the _stats response to only the fields the cleanup reads', async () => {
+    // Without filter_path, the response includes per-transform checkpointing,
+    // stats, health and reason blobs (multi-KB at pageSize=100). The task only
+    // reads id and state, so we trim server-side.
+    esClient.transform.getTransformStats.mockResolvedValueOnce({
+      count: 0,
+      transforms: [],
+    } as any);
+
+    await cleanupOrphanTransforms(
+      {},
+      { esClient, soClient: soClient as any, logger, abortController }
+    );
+
+    expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
+      expect.objectContaining({ filter_path: 'count,transforms.id,transforms.state' }),
+      expect.any(Object)
+    );
+  });
+
   it('should advance the cursor by the number of survivors so deleted transforms do not shift the page', async () => {
     // Page 1 has two orphans (deleted) and one valid transform.
     // After the deletes, the valid transform shifts to position 0 of the live list,
@@ -345,7 +377,13 @@ describe('cleanupOrphanTransforms', () => {
     expect(esClient.transform.deleteTransform).toHaveBeenCalledTimes(2);
     expect(esClient.transform.getTransformStats).toHaveBeenNthCalledWith(
       2,
-      { transform_id: 'slo-*', from: 1, size: 3, allow_no_match: true },
+      {
+        transform_id: 'slo-*',
+        from: 1,
+        size: 3,
+        allow_no_match: true,
+        filter_path: 'count,transforms.id,transforms.state',
+      },
       expect.objectContaining({ signal: abortController.signal })
     );
   });
@@ -363,7 +401,13 @@ describe('cleanupOrphanTransforms', () => {
 
     expect(result).toEqual({ aborted: false, completed: true });
     expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
-      { transform_id: 'slo-*', from: 50, size: 100, allow_no_match: true },
+      {
+        transform_id: 'slo-*',
+        from: 50,
+        size: 100,
+        allow_no_match: true,
+        filter_path: 'count,transforms.id,transforms.state',
+      },
       expect.objectContaining({ signal: abortController.signal })
     );
   });
