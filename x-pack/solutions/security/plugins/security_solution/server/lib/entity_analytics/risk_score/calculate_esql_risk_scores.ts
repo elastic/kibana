@@ -21,7 +21,10 @@ import {
 import { toEntries } from 'fp-ts/Record';
 
 import { euid } from '@kbn/entity-store/common/euid_helpers';
-import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
+import {
+  EntityTypeToIdentifierField,
+  type EntityType as EntityAnalyticsEntityType,
+} from '../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../common/search_strategy';
 import type { ExperimentalFeatures } from '../../../../common';
@@ -40,6 +43,11 @@ import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 import { filterFromRange } from './helpers';
 import { applyScoreModifiers } from './apply_score_modifiers';
 import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
+import {
+  getAlertContainsFilterForTarget,
+  getPropagationRulesForTarget,
+  getTargetAndPropagationSourceTypes,
+} from './maintainer/propagation/propagation_rules';
 
 type ESQLResults = Array<
   [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }]
@@ -543,41 +551,26 @@ export const getBaseScoreESQL = (
     throw new Error('Either lower or upper bound must be provided for EUID pagination');
   }
 
-  // Bounds come from composite-agg bucket keys derived from alert fields
-  // (host.id, user.name, ...) and may contain quotes, backslashes, or
-  // unsupported control characters. Validate + escape before interpolating
-  // into the double-quoted ES|QL literal — same pattern as
-  // getResolutionScoreESQLByIds.
-  const boundsToValidate = [bounds.lower, bounds.upper].filter(
-    (value): value is string => value !== undefined
-  );
-  assertEsqlInterpolatableIds(boundsToValidate);
-
-  const lower = bounds.lower ? `entity_id > "${escapeEsqlStringLiteral(bounds.lower)}"` : undefined;
-  const upper = bounds.upper
-    ? `entity_id <= "${escapeEsqlStringLiteral(bounds.upper)}"`
-    : undefined;
+  const lower = bounds.lower ? `entity_id > "${bounds.lower}"` : undefined;
+  const upper = bounds.upper ? `entity_id <= "${bounds.upper}"` : undefined;
   const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
 
-  // Filter on entity_id (computed from cheap field evals) BEFORE the
-  // CONCAT/base64 builders run, so non-matching alerts skip the per-row
-  // string-allocation work.
   const query = /* esql */ `
   SET unmapped_fields="nullify";
   FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
-    | EVAL entity_id = ${euidEval}
-    | WHERE ${rangeClause}
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    | EVAL rule_name_b64 = TO_BASE64(rule_name),
+    | EVAL entity_id = ${euidEval},
+           rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
+    | WHERE ${rangeClause}
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
@@ -585,6 +578,161 @@ export const getBaseScoreESQL = (
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = TOP(input, 10, "desc")
         BY entity_id
+    | SORT scores DESC
+    | LIMIT ${pageSize}
+  `;
+
+  return query;
+};
+
+const getFieldEvaluationsClauseForEntityTypes = (entityTypes: EntityType[]): string => {
+  const evaluations = [...new Set(entityTypes.map((entityType) => euid.esql.getFieldEvaluations(entityType)).filter(Boolean))];
+  return evaluations.length > 0 ? `| EVAL ${evaluations.join(',\n ')}` : '';
+};
+
+const getCrossTypeEuidEvaluation = (entityTypes: EntityType[]): string => {
+  if (entityTypes.length === 1) {
+    return euid.esql.getEuidEvaluation(entityTypes[0], { withTypeId: true });
+  }
+
+  const caseBranches = entityTypes
+    .map((entityType) => {
+      const containsFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
+      const euidEval = euid.esql.getEuidEvaluation(entityType, { withTypeId: true });
+      return `${containsFilter}, ${euidEval}`;
+    })
+    .join(',\n           ');
+
+  return `CASE(${caseBranches}, null)`;
+};
+
+const getPropagationScopeEntityTypes = (entityType: EntityType): EntityType[] =>
+  getTargetAndPropagationSourceTypes(entityType as EntityAnalyticsEntityType) as EntityType[];
+
+const getPropagationRelationshipTypeEvaluation = (entityType: EntityType): string => {
+  const propagationRules = getPropagationRulesForTarget(entityType as EntityAnalyticsEntityType);
+  if (propagationRules.length === 0) {
+    return 'relationship_type';
+  }
+
+  const propagationRuleCases = propagationRules
+    .map(
+      (rule) =>
+        `STARTS_WITH(entity_id, "${rule.sourceEntityType}:") AND STARTS_WITH(all_targets, "${rule.targetEntityType}:"), "${rule.id}"`
+    )
+    .join(',\n          ');
+
+  return `CASE(all_targets == entity_id, "self", ${propagationRuleCases}, relationship_type)`;
+};
+
+/**
+ * Base scoring filtered by an explicit `entity_id IN (...)` list. The IN-clause
+ * pushes down to Lucene so non-matching alerts are dropped at scan time; a
+ * LOOKUP JOIN against a large lookup index instead trips the request circuit
+ * breaker on alert-heavy workloads (~150K alerts, default heap).
+ *
+ * Caller sizes `entityIds` to stay within `index.max_terms_count` (65,536) and
+ * the 10,000 ES|QL row cap.
+ */
+export const getBaseScoreESQLByIds = (
+  entityType: EntityType,
+  entityIds: string[],
+  sampleSize: number,
+  pageSize: number,
+  alertsIndex: string
+): string => {
+  const euidEval = euid.esql.getEuidEvaluation(entityType, { withTypeId: true });
+  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
+  const fieldEvals = euid.esql.getFieldEvaluations(entityType);
+  const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
+
+  if (entityIds.length === 0) {
+    throw new Error('At least one entity ID must be provided for ID-based base scoring');
+  }
+
+  assertEsqlInterpolatableIds(entityIds);
+
+  const idsClause = entityIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
+
+  const query = /* esql */ `
+  SET unmapped_fields="nullify";
+  FROM ${alertsIndex} METADATA _index
+    | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
+    ${fieldEvalsClause}
+    | RENAME kibana.alert.risk_score as risk_score,
+             kibana.alert.rule.name as rule_name,
+             kibana.alert.rule.uuid as rule_id,
+             kibana.alert.uuid as alert_id,
+             event.kind as category,
+             @timestamp as time
+    | EVAL entity_id = ${euidEval},
+           rule_name_b64 = TO_BASE64(rule_name),
+           category_b64 = TO_BASE64(category)
+    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
+    | WHERE entity_id IN (${idsClause})
+    | STATS
+        alert_count = count(risk_score),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
+          sampleSize ?? 10000
+        }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        risk_inputs = TOP(input, 10, "desc")
+        BY entity_id
+    | SORT scores DESC
+    | LIMIT ${pageSize}
+  `;
+
+  return query;
+};
+
+export const getBaseScoreESQLByIdsWithPropagation = (
+  entityType: EntityType,
+  entityIds: string[],
+  sampleSize: number,
+  pageSize: number,
+  alertsIndex: string,
+  lookupIndex: string
+): string => {
+  if (entityIds.length === 0) {
+    throw new Error('At least one entity ID must be provided for ID-based base scoring');
+  }
+
+  assertEsqlInterpolatableIds(entityIds);
+
+  const propagationScopeEntityTypes = getPropagationScopeEntityTypes(entityType);
+  const entityIdEvaluation = getCrossTypeEuidEvaluation(propagationScopeEntityTypes);
+  const containsIdFilter = getAlertContainsFilterForTarget(entityType as EntityAnalyticsEntityType);
+  const fieldEvalsClause = getFieldEvaluationsClauseForEntityTypes(propagationScopeEntityTypes);
+  const relationshipTypeEvaluation = getPropagationRelationshipTypeEvaluation(entityType);
+  const idsClause = entityIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
+
+  const query = /* esql */ `
+  FROM ${alertsIndex} METADATA _index
+    | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
+    ${fieldEvalsClause}
+    | RENAME kibana.alert.risk_score as risk_score,
+             kibana.alert.rule.name as rule_name,
+             kibana.alert.rule.uuid as rule_id,
+             kibana.alert.uuid as alert_id,
+             event.kind as category,
+             @timestamp as time
+    | EVAL entity_id = ${entityIdEvaluation},
+           rule_name_b64 = TO_BASE64(rule_name),
+           category_b64 = TO_BASE64(category)
+    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "entity_id": \"""", entity_id, """\", "id": \"""", alert_id, """\" } """)
+    | LOOKUP JOIN ${lookupIndex} ON entity_id
+    | EVAL all_targets = MV_APPEND(entity_id, propagation_target_id)
+    | MV_EXPAND all_targets
+    | WHERE all_targets IN (${idsClause})
+    | EVAL effective_relationship_type = ${relationshipTypeEvaluation}
+    | EVAL entity_with_rel = CONCAT(entity_id, "|", effective_relationship_type)
+    | STATS
+        alert_count = count(risk_score),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
+          sampleSize ?? 10000
+        }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        risk_inputs = TOP(input, 10, "desc"),
+        contributing_entities_raw = VALUES(entity_with_rel)
+        BY all_targets
     | SORT scores DESC
     | LIMIT ${pageSize}
   `;
@@ -646,29 +794,25 @@ export const getResolutionScoreESQLByIds = (
 
   const idsClause = resolutionTargetIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
 
-  // Compute entity_id (cheap), then LOOKUP JOIN to recover
-  // resolution_target_id, then filter on resolution_target_id BEFORE the
-  // CONCAT/base64 builders run so per-row string-allocation work only
-  // happens for alerts that survive the IN-clause.
   const query = /* esql */ `
   SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
-    | EVAL entity_id = ${euidEval}
-    | LOOKUP JOIN ${lookupIndex} ON entity_id
-    | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
-           relationship_type = COALESCE(relationship_type, "self")
-    | WHERE resolution_target_id IN (${idsClause})
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    | EVAL rule_name_b64 = TO_BASE64(rule_name),
-           category_b64 = TO_BASE64(category)
+    | EVAL entity_id = ${euidEval},
+          rule_name_b64 = TO_BASE64(rule_name),
+          category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
+    | LOOKUP JOIN ${lookupIndex} ON entity_id
+    | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
+           relationship_type = COALESCE(relationship_type, "self")
+    | WHERE resolution_target_id IN (${idsClause})
     | EVAL entity_with_rel = CONCAT(entity_id, "|", relationship_type)
     | STATS
         alert_count = count(risk_score),

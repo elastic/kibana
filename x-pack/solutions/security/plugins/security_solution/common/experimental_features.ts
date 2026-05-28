@@ -252,6 +252,11 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsMlJobBehaviorMaintainer: false,
 
   /**
+   * Enables relationship-based risk propagation in the V2 maintainer.
+   */
+  entityAnalyticsRiskScorePropagationEnabled: false,
+
+  /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */

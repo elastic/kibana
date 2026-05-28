@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EntityType } from '../../../../../../common/entity_analytics/types';
+
 export interface LookupDocument {
   entity_id: string;
   resolution_target_id: string | null;
@@ -26,10 +28,20 @@ export const SELF_RELATIONSHIP_TYPE = 'self';
 export interface EntityStoreLookupSource {
   entity?: {
     id?: string;
+    type?: EntityType;
+    EngineMetadata?: {
+      Type?: EntityType;
+    };
     relationships?: {
       resolution?: {
         resolved_to?: string;
       };
+      [relationshipName: string]:
+        | {
+            ids?: string[];
+            resolved_to?: string;
+          }
+        | undefined;
     };
   };
 }

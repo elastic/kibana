@@ -15,6 +15,7 @@ export interface ParsedRiskScore {
   score: number;
   normalized_score: number;
   risk_inputs: SearchHitRiskInput[];
+  related_entities: ParsedRelatedEntity[];
 }
 
 export interface ParsedResolutionScore {
@@ -23,8 +24,60 @@ export interface ParsedResolutionScore {
   score: number;
   normalized_score: number;
   risk_inputs: SearchHitRiskInput[];
-  related_entities: Array<{ entity_id: string; relationship_type: string }>;
+  related_entities: ParsedRelatedEntity[];
 }
+
+export interface ParsedRelatedEntity {
+  entity_id: string;
+  relationship_type: string;
+}
+
+interface ParsedRiskInputPayload {
+  id?: string;
+  risk_score?: string;
+  time?: string;
+  rule_name?: string;
+  rule_name_b64?: string;
+  category?: string;
+  category_b64?: string;
+  entity_id?: string;
+}
+
+const parseRelatedEntitiesRaw = (
+  contributingEntitiesRaw: string | string[] | undefined
+): ParsedRelatedEntity[] => {
+  if (contributingEntitiesRaw === undefined) {
+    return [];
+  }
+
+  const dedupedEntities = new Map<string, ParsedRelatedEntity>();
+  for (const rawEntry of [contributingEntitiesRaw].flat()) {
+    if (typeof rawEntry !== 'string') {
+      continue;
+    }
+
+    const [entityId, relationshipType] = rawEntry.split('|', 2);
+    if (
+      typeof entityId !== 'string' ||
+      entityId.length === 0 ||
+      typeof relationshipType !== 'string' ||
+      relationshipType.length === 0 ||
+      relationshipType === 'self'
+    ) {
+      continue;
+    }
+
+    const dedupeKey = `${entityId}|${relationshipType}`;
+    if (!dedupedEntities.has(dedupeKey)) {
+      dedupedEntities.set(dedupeKey, {
+        entity_id: entityId,
+        relationship_type: relationshipType,
+      });
+    }
+  }
+
+  return [...dedupedEntities.values()];
+};
 
 /**
  * Parses one base-score ES|QL row for maintainer scoring.
@@ -34,17 +87,30 @@ export interface ParsedResolutionScore {
 export const parseEsqlBaseScoreRow =
   (index: string) =>
   (row: unknown[]): ParsedRiskScore => {
-    const [count, score, _inputs, entityId] = row as [number, number, string | string[], string];
+    const [count, score, _inputs, contributingEntitiesRawOrEntityId, maybeEntityId] = row as [
+      number,
+      number,
+      string | string[],
+      string | string[],
+      string | undefined
+    ];
+    const usesContributingEntityColumn = maybeEntityId !== undefined;
+    const entityId = usesContributingEntityColumn
+      ? (maybeEntityId as string)
+      : (contributingEntitiesRawOrEntityId as string);
+    const contributingEntitiesRaw = usesContributingEntityColumn
+      ? (contributingEntitiesRawOrEntityId as string | string[])
+      : undefined;
 
     const inputs = [_inputs]
       .flat()
       .map((input, i) => {
-        let parsedRiskInputData: Record<string, string> = {};
+        let parsedRiskInputData: ParsedRiskInputPayload = {};
         let ruleName: string | undefined;
         let category: string | undefined;
 
         try {
-          parsedRiskInputData = JSON.parse(input);
+          parsedRiskInputData = JSON.parse(input) as ParsedRiskInputPayload;
           ruleName = parsedRiskInputData.rule_name_b64
             ? Buffer.from(parsedRiskInputData.rule_name_b64, 'base64').toString('utf-8')
             : parsedRiskInputData.rule_name;
@@ -55,8 +121,8 @@ export const parseEsqlBaseScoreRow =
           return null;
         }
 
-        const value = parseFloat(parsedRiskInputData.risk_score);
-        if (Number.isNaN(value) || !parsedRiskInputData.id) {
+        const value = parseFloat(parsedRiskInputData.risk_score ?? '');
+        if (Number.isNaN(value) || typeof parsedRiskInputData.id !== 'string') {
           return null;
         }
         const currentScore = value / Math.pow(i + 1, RIEMANN_ZETA_S_VALUE);
@@ -76,6 +142,10 @@ export const parseEsqlBaseScoreRow =
           score: value,
           contribution: currentScore / RIEMANN_ZETA_VALUE,
           index,
+          entity_id:
+            typeof parsedRiskInputData.entity_id === 'string'
+              ? parsedRiskInputData.entity_id
+              : undefined,
         } as SearchHitRiskInput;
       })
       .filter((riskInput): riskInput is SearchHitRiskInput => riskInput !== null);
@@ -86,6 +156,7 @@ export const parseEsqlBaseScoreRow =
       score,
       normalized_score: score / RIEMANN_ZETA_VALUE,
       risk_inputs: inputs,
+      related_entities: parseRelatedEntitiesRaw(contributingEntitiesRaw),
     };
   };
 
@@ -102,29 +173,12 @@ export const parseEsqlResolutionScoreRow =
 
     const baseParsed = parseEsqlBaseScoreRow(index)([count, score, _inputs, resolutionTargetId]);
 
-    const parsedRelatedEntities = [contributingEntitiesRaw]
-      .flat()
-      .filter((entry): entry is string => typeof entry === 'string')
-      .map((entry) => {
-        const [entityId, relationshipType] = entry.split('|', 2);
-        return {
-          entity_id: entityId,
-          relationship_type: relationshipType,
-        };
-      })
-      .filter(
-        (entry) =>
-          entry.entity_id?.length > 0 &&
-          entry.relationship_type?.length > 0 &&
-          entry.relationship_type !== 'self'
-      );
-
     return {
       resolution_target_id: resolutionTargetId,
       alert_count: baseParsed.alert_count,
       score: baseParsed.score,
       normalized_score: baseParsed.normalized_score,
       risk_inputs: baseParsed.risk_inputs,
-      related_entities: parsedRelatedEntities,
+      related_entities: parseRelatedEntitiesRaw(contributingEntitiesRaw),
     };
   };

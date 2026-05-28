@@ -256,10 +256,9 @@ components:
           type: string
           enum:
             - base
-            - propagated
             - resolution
           description: >-
-            Distinguishes base, propagated, and resolution scores.
+            Distinguishes base and resolution scores.
         related_entities:
           type: array
           items:

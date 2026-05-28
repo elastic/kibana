@@ -14,6 +14,7 @@ import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_anal
 import {
   getEuidCompositeQuery,
   getBaseScoreESQL,
+  getBaseScoreESQLByIdsWithPropagation,
   type EuidCompositeAggregation,
 } from '../calculate_esql_risk_scores';
 import { parseEsqlBaseScoreRow } from '../maintainer/steps/parse_esql_row';
@@ -21,6 +22,7 @@ import { fetchEntitiesByIds } from '../maintainer/utils/fetch_entities_by_ids';
 import { applyScoreModifiersFromEntities } from '../modifiers/apply_modifiers_from_entities';
 import { fetchWatchlistConfigs } from '../maintainer/utils/fetch_watchlist_configs';
 import { buildCommonAlertFilters } from '../maintainer/steps/build_alert_filters';
+import { getLookupIndexName } from '../maintainer/lookup/lookup_index';
 
 interface CalculateScoresWithESQLV2Params extends CalculateScoresParams {
   esClient: ElasticsearchClient;
@@ -28,6 +30,7 @@ interface CalculateScoresWithESQLV2Params extends CalculateScoresParams {
   crudClient: EntityUpdateClient;
   soClient: SavedObjectsClientContract;
   namespace: string;
+  propagationEnabled: boolean;
 }
 
 const ENTITY_ID_FIELD = 'entity.id';
@@ -77,6 +80,7 @@ export const calculateScoresWithESQLV2 = async ({
   crudClient,
   soClient,
   namespace,
+  propagationEnabled,
 }: CalculateScoresWithESQLV2Params): Promise<RiskScoresPreviewResponse> => {
   const now = new Date().toISOString();
   const sampleSize = alertSampleSizePerShard ?? 10000;
@@ -84,6 +88,9 @@ export const calculateScoresWithESQLV2 = async ({
     ? [identifierType]
     : getEntityAnalyticsEntityTypes();
   const watchlistConfigs = await fetchWatchlistConfigs({ soClient, esClient, namespace, logger });
+  const lookupIndex = getLookupIndexName(namespace);
+  const propagationQueryEnabled =
+    propagationEnabled && (await esClient.indices.exists({ index: lookupIndex }));
 
   const response: RiskScoresPreviewResponse = { after_keys: {}, scores: {} };
 
@@ -118,14 +125,30 @@ export const calculateScoresWithESQLV2 = async ({
     if (buckets.length === 0) {
       response.scores[currentEntityType] = [];
     } else {
+      const pageEntityIds = buckets
+        .map((bucket) => bucket.key.entity_id)
+        .filter((entityId): entityId is string => typeof entityId === 'string');
+      if (propagationQueryEnabled && pageEntityIds.length === 0) {
+        response.scores[currentEntityType] = [];
+        continue;
+      }
       const upper = buckets[buckets.length - 1].key.entity_id;
-      const query = getBaseScoreESQL(
-        currentEntityType,
-        { lower: entityAfterKey?.entity_id, upper },
-        sampleSize,
-        pageSize,
-        index
-      );
+      const query = propagationQueryEnabled
+        ? getBaseScoreESQLByIdsWithPropagation(
+            currentEntityType,
+            pageEntityIds,
+            sampleSize,
+            pageSize,
+            index,
+            lookupIndex
+          )
+        : getBaseScoreESQL(
+            currentEntityType,
+            { lower: entityAfterKey?.entity_id, upper },
+            sampleSize,
+            pageSize,
+            index
+          );
       const esqlResponse = await esClient.esql.query({
         query,
         filter: { bool: { filter: entityFilters } },

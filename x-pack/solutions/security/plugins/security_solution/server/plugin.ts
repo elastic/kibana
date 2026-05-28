@@ -329,6 +329,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         auditLogger: plugins.security?.audit.withoutRequest,
         productFeaturesService,
         entityAnalyticsConfig: config.entityAnalytics,
+        riskScorePropagationEnabled:
+          experimentalFeatures.entityAnalyticsRiskScorePropagationEnabled,
         telemetry: core.analytics,
       });
       if (experimentalFeatures.entityAnalyticsMlJobBehaviorMaintainer) {

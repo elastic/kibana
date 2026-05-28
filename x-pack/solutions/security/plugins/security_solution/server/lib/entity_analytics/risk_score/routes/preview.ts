@@ -117,6 +117,9 @@ export const riskScorePreviewRoute = (
                 crudClient: securityContext.getEntityStoreUpdateClient(),
                 soClient,
                 namespace: securityContext.getSpaceId(),
+                propagationEnabled: Boolean(
+                  securityConfig.experimentalFeatures.entityAnalyticsRiskScorePropagationEnabled
+                ),
               })
             : await riskScoreService.calculateScores({
                 afterKeys,

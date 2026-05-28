@@ -232,6 +232,7 @@ const v2RiskScoreDocFactory =
       ...alertsRiskScoreFields,
       ...legacyCat2Fields,
       modifiers,
+      ...(score.related_entities.length > 0 ? { related_entities: score.related_entities } : {}),
       notes: [],
       inputs: score.risk_inputs.map((riskInput) => ({
         id: riskInput.id,
@@ -241,6 +242,7 @@ const v2RiskScoreDocFactory =
         risk_score: riskInput.score,
         timestamp: riskInput.time,
         contribution_score: riskInput.contribution,
+        ...(riskInput.entity_id !== undefined ? { entity_id: riskInput.entity_id } : {}),
       })),
     };
   };

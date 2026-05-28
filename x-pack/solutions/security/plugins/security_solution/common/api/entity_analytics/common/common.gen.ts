@@ -194,9 +194,9 @@ export const EntityRiskScoreRecord = lazySchema(() =>
       )
       .optional(),
     /**
-     * Distinguishes base, propagated, and resolution scores.
+     * Distinguishes base and resolution scores.
      */
-    score_type: z.enum(['base', 'propagated', 'resolution']).optional(),
+    score_type: z.enum(['base', 'resolution']).optional(),
     related_entities: z
       .array(
         z.object({

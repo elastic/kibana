@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { BulkOperationContainer, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
-import type { EntityType } from '../../../../../../common/entity_analytics/types';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { MAX_ENTITY_SEARCH_PAGE_SIZE } from '../../constants';
 import type { ScopedLogger } from '../utils/with_log_context';
 import {
@@ -17,6 +17,11 @@ import {
   type EntityStoreLookupSource,
   type LookupDocument,
 } from '../lookup/lookup_types';
+import {
+  getRelationshipFieldsForTarget,
+  getPropagationRulesForTarget,
+  getSourceIdsForRule,
+} from '../propagation/propagation_rules';
 
 export interface BuildLookupIndexParams {
   esClient: ElasticsearchClient;
@@ -26,11 +31,13 @@ export interface BuildLookupIndexParams {
   entityTypes: EntityType[];
   calculationRunId: string;
   now: string;
+  propagationEnabled: boolean;
   abortSignal?: AbortSignal;
 }
 
 export interface BuildLookupIndexResult {
   lookupRowsWritten: number;
+  propagationRowsWritten: number;
   entitiesIterated: number;
   pagesProcessed: number;
   bulkBatches: number;
@@ -40,12 +47,18 @@ export interface BuildLookupIndexResult {
 const LOOKUP_BUILD_PAGE_SIZE = MAX_ENTITY_SEARCH_PAGE_SIZE;
 const FAILURE_REASONS_CAP = 5;
 const UNKNOWN_BULK_ERROR_REASON = 'unknown_bulk_error';
+const BASE_LOOKUP_SOURCE_FIELDS = ['entity.id', 'entity.type', 'entity.EngineMetadata.Type'] as const;
+const RESOLUTION_RELATIONSHIP_SOURCE_FIELD = 'entity.relationships.resolution.resolved_to';
+const ENTITY_TYPE_SET = new Set<EntityType>(Object.values(EntityType));
 
 interface BulkSummary {
   successfulItems: number;
   failedItems: number;
   reasonsByCount: Map<string, number>;
 }
+
+const isEntityType = (value: EntityType | undefined): value is EntityType =>
+  value !== undefined && ENTITY_TYPE_SET.has(value);
 
 /**
  * One row per iterated entity, keyed by its own EUID:
@@ -56,19 +69,98 @@ interface BulkSummary {
  * Phase 2 ES|QL recovers their `resolution_target_id` via
  * `COALESCE(resolution_target_id, entity_id)` after the LOOKUP JOIN.
  */
-const buildLookupRowsForEntity = (
-  source: EntityStoreLookupSource,
-  { calculationRunId, now }: { calculationRunId: string; now: string }
-): LookupDocument[] => {
+const createSelfLookupRow = ({
+  entityId,
+  calculationRunId,
+  now,
+}: {
+  entityId: string;
+  calculationRunId: string;
+  now: string;
+}): LookupDocument => ({
+  entity_id: entityId,
+  resolution_target_id: entityId,
+  propagation_target_id: null,
+  relationship_type: SELF_RELATIONSHIP_TYPE,
+  calculation_run_id: calculationRunId,
+  '@timestamp': now,
+});
+
+const uniquePropagationTargets = (
+  values: Array<string[] | null | undefined>
+): string[] | null => {
+  const merged = new Set<string>();
+  for (const value of values) {
+    if (!Array.isArray(value)) {
+      continue;
+    }
+    for (const targetId of value) {
+      if (typeof targetId === 'string' && targetId.length > 0) {
+        merged.add(targetId);
+      }
+    }
+  }
+  return merged.size > 0 ? [...merged] : null;
+};
+
+const mergeLookupRows = (existing: LookupDocument, incoming: LookupDocument): LookupDocument => {
+  const shouldKeepExistingRelationship =
+    existing.relationship_type !== SELF_RELATIONSHIP_TYPE &&
+    incoming.relationship_type === SELF_RELATIONSHIP_TYPE;
+  const relationshipSource = shouldKeepExistingRelationship ? existing : incoming;
+
+  return {
+    ...incoming,
+    resolution_target_id: relationshipSource.resolution_target_id,
+    relationship_type: relationshipSource.relationship_type,
+    propagation_target_id: uniquePropagationTargets([
+      existing.propagation_target_id,
+      incoming.propagation_target_id,
+    ]),
+  };
+};
+
+const upsertLookupRow = ({
+  rowsByEntityId,
+  row,
+}: {
+  rowsByEntityId: Map<string, LookupDocument>;
+  row: LookupDocument;
+}) => {
+  const existing = rowsByEntityId.get(row.entity_id);
+  if (!existing) {
+    rowsByEntityId.set(row.entity_id, row);
+    return;
+  }
+
+  rowsByEntityId.set(row.entity_id, mergeLookupRows(existing, row));
+};
+
+const buildLookupRowsForEntity = ({
+  source,
+  rowsByEntityId,
+  propagationRowsTouched,
+  propagationEnabled,
+  calculationRunId,
+  now,
+}: {
+  source: EntityStoreLookupSource;
+  rowsByEntityId: Map<string, LookupDocument>;
+  propagationRowsTouched: Set<string>;
+  propagationEnabled: boolean;
+  calculationRunId: string;
+  now: string;
+}): void => {
   const entityId = source.entity?.id;
   if (!entityId) {
-    return [];
+    return;
   }
 
   const resolvedTo = source.entity?.relationships?.resolution?.resolved_to;
   if (resolvedTo) {
-    return [
-      {
+    upsertLookupRow({
+      rowsByEntityId,
+      row: {
         entity_id: entityId,
         resolution_target_id: resolvedTo,
         propagation_target_id: null,
@@ -76,19 +168,53 @@ const buildLookupRowsForEntity = (
         calculation_run_id: calculationRunId,
         '@timestamp': now,
       },
-    ];
+    });
+  } else {
+    upsertLookupRow({
+      rowsByEntityId,
+      row: createSelfLookupRow({ entityId, calculationRunId, now }),
+    });
   }
 
-  return [
-    {
-      entity_id: entityId,
-      resolution_target_id: entityId,
-      propagation_target_id: null,
-      relationship_type: SELF_RELATIONSHIP_TYPE,
-      calculation_run_id: calculationRunId,
-      '@timestamp': now,
-    },
-  ];
+  if (!propagationEnabled) {
+    return;
+  }
+
+  const targetEntityType =
+    source.entity?.EngineMetadata?.Type ??
+    source.entity?.type;
+
+  if (!isEntityType(targetEntityType)) {
+    return;
+  }
+
+  for (const rule of getPropagationRulesForTarget(targetEntityType)) {
+    const sourceIds = [...new Set(getSourceIdsForRule(source, rule))];
+    for (const sourceId of sourceIds) {
+      if (!sourceId) {
+        continue;
+      }
+
+      const existingRow = rowsByEntityId.get(sourceId);
+      const sourceRow = existingRow
+        ? {
+            ...existingRow,
+          }
+        : createSelfLookupRow({
+            entityId: sourceId,
+            calculationRunId,
+            now,
+          });
+
+      sourceRow.propagation_target_id = uniquePropagationTargets([
+        sourceRow.propagation_target_id,
+        [entityId],
+      ]);
+
+      upsertLookupRow({ rowsByEntityId, row: sourceRow });
+      propagationRowsTouched.add(sourceId);
+    }
+  }
 };
 
 /** Emits ES bulk action/document pairs keyed by `entity_id`. */
@@ -159,17 +285,99 @@ const fetchNextEntityStorePage = async ({
   crudClient,
   entityTypes,
   searchAfter,
+  propagationEnabled,
 }: {
   crudClient: EntityUpdateClient;
   entityTypes: EntityType[];
   searchAfter: Array<string | number> | undefined;
-}) =>
-  crudClient.listEntities({
+  propagationEnabled: boolean;
+}): Promise<{
+  entities: EntityStoreLookupSource[];
+  nextSearchAfter: Array<string | number> | undefined;
+}> => {
+  // Phase 0 always needs id + resolution link. Propagation additionally needs
+  // rule-specific relationship leaf fields from target entities.
+  const response = await crudClient.listEntities({
     filter: { terms: { 'entity.EngineMetadata.Type': entityTypes } },
     size: LOOKUP_BUILD_PAGE_SIZE,
     searchAfter,
-    source: ['entity.id', 'entity.relationships.resolution.resolved_to'],
+    source: [
+      ...BASE_LOOKUP_SOURCE_FIELDS,
+      RESOLUTION_RELATIONSHIP_SOURCE_FIELD,
+      ...(propagationEnabled
+        ? [
+            ...new Set(
+              entityTypes.flatMap((entityType) => getRelationshipFieldsForTarget(entityType))
+            ),
+          ]
+        : []),
+    ],
   });
+
+  return {
+    entities: response.entities as EntityStoreLookupSource[],
+    nextSearchAfter: response.nextSearchAfter,
+  };
+};
+
+const mergeWithCurrentRunRows = async ({
+  esClient,
+  lookupIndex,
+  rows,
+  calculationRunId,
+  propagationEnabled,
+}: {
+  esClient: ElasticsearchClient;
+  lookupIndex: string;
+  rows: LookupDocument[];
+  calculationRunId: string;
+  propagationEnabled: boolean;
+}): Promise<LookupDocument[]> => {
+  if (rows.length === 0) {
+    return [];
+  }
+
+  const entityIds = rows.map((row) => row.entity_id);
+  const existingResponse = await esClient.search<LookupDocument>({
+    index: lookupIndex,
+    size: entityIds.length,
+    track_total_hits: false,
+    _source: [
+      'entity_id',
+      'resolution_target_id',
+      'propagation_target_id',
+      'relationship_type',
+      'calculation_run_id',
+      '@timestamp',
+    ],
+    query: {
+      terms: {
+        entity_id: entityIds,
+      },
+    },
+  });
+  const existingRowsById = new Map<string, LookupDocument>();
+  for (const hit of existingResponse.hits.hits) {
+    const source = hit._source;
+    if (!source?.entity_id || source.calculation_run_id !== calculationRunId) {
+      continue;
+    }
+    existingRowsById.set(source.entity_id, source);
+  }
+
+  return rows.map((row) => {
+    const existing = existingRowsById.get(row.entity_id);
+    if (!existing) {
+      return row;
+    }
+
+    const merged = mergeLookupRows(existing, row);
+    return {
+      ...merged,
+      propagation_target_id: propagationEnabled ? merged.propagation_target_id : null,
+    };
+  });
+};
 
 export const buildLookupIndex = async ({
   esClient,
@@ -179,12 +387,14 @@ export const buildLookupIndex = async ({
   entityTypes,
   calculationRunId,
   now,
+  propagationEnabled,
   abortSignal,
 }: BuildLookupIndexParams): Promise<BuildLookupIndexResult> => {
   if (entityTypes.length === 0) {
     logger.debug('Lookup build skipped because no entity types are configured');
     return {
       lookupRowsWritten: 0,
+      propagationRowsWritten: 0,
       entitiesIterated: 0,
       pagesProcessed: 0,
       bulkBatches: 0,
@@ -197,6 +407,7 @@ export const buildLookupIndex = async ({
   let pagesProcessed = 0;
   let bulkBatches = 0;
   let lookupRowsFailed = 0;
+  const propagationRowsTouched = new Set<string>();
   let searchAfter: Array<string | number> | undefined;
   let previousSearchAfter: Array<string | number> | undefined;
   const failureReasons = new Map<string, number>();
@@ -206,6 +417,7 @@ export const buildLookupIndex = async ({
       logger.info('Lookup build aborted between pages');
       return {
         lookupRowsWritten,
+        propagationRowsWritten: propagationRowsTouched.size,
         entitiesIterated,
         pagesProcessed,
         bulkBatches,
@@ -217,6 +429,7 @@ export const buildLookupIndex = async ({
       crudClient,
       entityTypes,
       searchAfter,
+      propagationEnabled,
     });
     entitiesIterated += entities.length;
     searchAfter = nextSearchAfter;
@@ -233,9 +446,31 @@ export const buildLookupIndex = async ({
     previousSearchAfter = searchAfter;
     pagesProcessed += 1;
 
-    const docs = entities.flatMap((entity: EntityStoreLookupSource) =>
-      buildLookupRowsForEntity(entity, { calculationRunId, now })
-    );
+    const rowsByEntityId = new Map<string, LookupDocument>();
+    const pagePropagationRowsTouched = new Set<string>();
+
+    for (const entity of entities) {
+      buildLookupRowsForEntity({
+        source: entity,
+        rowsByEntityId,
+        propagationRowsTouched: pagePropagationRowsTouched,
+        propagationEnabled,
+        calculationRunId,
+        now,
+      });
+    }
+
+    for (const touchedEntityId of pagePropagationRowsTouched) {
+      propagationRowsTouched.add(touchedEntityId);
+    }
+
+    const docs = await mergeWithCurrentRunRows({
+      esClient,
+      lookupIndex,
+      rows: [...rowsByEntityId.values()],
+      calculationRunId,
+      propagationEnabled,
+    });
     const operations = toBulkIndexOperations(docs, lookupIndex);
     if (operations.length > 0) {
       bulkBatches += 1;
@@ -260,6 +495,7 @@ export const buildLookupIndex = async ({
 
   return {
     lookupRowsWritten,
+    propagationRowsWritten: propagationRowsTouched.size,
     entitiesIterated,
     pagesProcessed,
     bulkBatches,

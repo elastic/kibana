@@ -5,9 +5,33 @@
  * 2.0.
  */
 
-import { parseEsqlResolutionScoreRow } from './parse_esql_row';
+import { parseEsqlBaseScoreRow, parseEsqlResolutionScoreRow } from './parse_esql_row';
 
 describe('parseEsqlResolutionScoreRow', () => {
+  it('parses propagation attribution from base rows with contributing entities', () => {
+    const parseRow = parseEsqlBaseScoreRow('.alerts-security.alerts-default');
+    const row = [
+      2,
+      100,
+      [
+        '{ "risk_score": "60", "time": "2026-01-01T00:00:00.000Z", "index": ".alerts-security.alerts-default", "rule_name_b64": "VGVzdCBSdWxl", "category_b64": "c2lnbmFs", "entity_id": "host:host-1", "id": "alert-1" }',
+      ],
+      ['host:host-1|host_ownership', 'user:target-1|self'],
+      'user:target-1',
+    ];
+
+    const parsed = parseRow(row);
+
+    expect(parsed.entity_id).toBe('user:target-1');
+    expect(parsed.risk_inputs[0].entity_id).toBe('host:host-1');
+    expect(parsed.related_entities).toEqual([
+      {
+        entity_id: 'host:host-1',
+        relationship_type: 'host_ownership',
+      },
+    ]);
+  });
+
   it('parses resolution row and filters self related entities', () => {
     const parseRow = parseEsqlResolutionScoreRow('.alerts-security.alerts-default');
     const row = [

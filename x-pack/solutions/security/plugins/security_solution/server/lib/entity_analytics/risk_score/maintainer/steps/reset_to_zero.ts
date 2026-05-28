@@ -138,6 +138,7 @@ export const resetToZero = async ({
       score: 0,
       normalized_score: 0,
       risk_inputs: [],
+      related_entities: [],
     }));
 
   const entities = await fetchEntitiesByIds({

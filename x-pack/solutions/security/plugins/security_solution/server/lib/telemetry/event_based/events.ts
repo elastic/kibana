@@ -350,6 +350,7 @@ interface Phase0LookupBuildSummary extends StageSummaryBase {
   pagesProcessed?: number;
   entitiesIterated?: number;
   lookupRowsWritten?: number;
+  propagationRowsWritten?: number;
   bulkBatches?: number;
   lookupRowsFailed?: number;
 }
@@ -473,6 +474,13 @@ export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<RiskScoreM
       lookupRowsWritten: {
         type: 'long',
         _meta: { optional: true, description: 'Lookup rows written during lookup build' },
+      },
+      propagationRowsWritten: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: 'Lookup rows where propagation targets were written',
+        },
       },
       bulkBatches: {
         type: 'long',

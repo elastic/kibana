@@ -9,7 +9,8 @@ import { EntityType } from '../../../../common/search_strategy';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import {
   buildRiskScoreBucket,
-  getBaseScoreESQL,
+  getBaseScoreESQLByIds,
+  getBaseScoreESQLByIdsWithPropagation,
   getESQL,
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
@@ -71,6 +72,61 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
     });
 
+    it('builds a base score query with an entity_id IN clause from the supplied ids', () => {
+      const query = getBaseScoreESQLByIds(
+        EntityType.user,
+        ['user:a@okta', 'user:b@okta'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default'
+      );
+
+      expect(query).toContain('WHERE entity_id IN ("user:a@okta", "user:b@okta")');
+      expect(query).toContain('BY entity_id');
+      expect(query).not.toContain('LOOKUP JOIN');
+    });
+
+    it('throws when getBaseScoreESQLByIds is called with an empty id list', () => {
+      expect(() =>
+        getBaseScoreESQLByIds(EntityType.user, [], 5000, 1000, '.alerts-security.alerts-default')
+      ).toThrow('At least one entity ID must be provided');
+    });
+
+    it('builds a propagation-aware base query with lookup join and expanded targets', () => {
+      const query = getBaseScoreESQLByIdsWithPropagation(
+        EntityType.user,
+        ['user:a@okta', 'user:b@okta'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain(
+        'LOOKUP JOIN .entity_analytics.risk_score.lookup-default ON entity_id'
+      );
+      expect(query).toContain('EVAL all_targets = MV_APPEND(entity_id, propagation_target_id)');
+      expect(query).toContain('MV_EXPAND all_targets');
+      expect(query).toContain('WHERE all_targets IN ("user:a@okta", "user:b@okta")');
+      expect(query).toContain('effective_relationship_type');
+      expect(query).toContain('"host_ownership"');
+      expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
+      expect(query).toContain('BY all_targets');
+      expect(query).toContain('"entity_id"');
+    });
+
+    it('escapes quote and backslash characters in the base score id list', () => {
+      const query = getBaseScoreESQLByIds(
+        EntityType.user,
+        ['user:with"quote\\slash@okta'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default'
+      );
+
+      expect(query).toContain('"user:with\\"quote\\\\slash@okta"');
+    });
+
     it('escapes quote and backslash characters in resolution target ID list', () => {
       const query = getResolutionScoreESQLByIds(
         EntityType.user,
@@ -91,45 +147,13 @@ describe('Calculate risk scores with ESQL', () => {
       ['CR', '\u000D'],
       ['LS', '\u2028'],
       ['PS', '\u2029'],
-    ])('throws when resolution target id list contains %s control character', (_label, char) => {
+    ])('throws when base score id list contains %s control character', (_label, char) => {
       expect(() =>
-        getResolutionScoreESQLByIds(
+        getBaseScoreESQLByIds(
           EntityType.user,
-          ['user:target-a', `user:bad${char}@okta`],
+          ['user:good@okta', `user:bad${char}@okta`],
           5000,
           1000,
-          '.alerts-security.alerts-default',
-          '.entity_analytics.risk_score.lookup-default'
-        )
-      ).toThrow('Entity ID contains an unsupported control character');
-    });
-
-    it('escapes quote and backslash characters in getBaseScoreESQL bounds', () => {
-      const query = getBaseScoreESQL(
-        EntityType.host,
-        { lower: 'host:edge"with-quote', upper: 'host:edge\\with-slash' },
-        10000,
-        3500,
-        '.alerts-security.alerts-default'
-      );
-
-      expect(query).toContain('entity_id > "host:edge\\"with-quote"');
-      expect(query).toContain('entity_id <= "host:edge\\\\with-slash"');
-    });
-
-    it.each([
-      ['NUL', '\u0000'],
-      ['LF', '\u000A'],
-      ['CR', '\u000D'],
-      ['LS', '\u2028'],
-      ['PS', '\u2029'],
-    ])('throws when getBaseScoreESQL bounds contain %s control character', (_label, char) => {
-      expect(() =>
-        getBaseScoreESQL(
-          EntityType.host,
-          { lower: 'host:abel', upper: `host:bad${char}` },
-          10000,
-          3500,
           '.alerts-security.alerts-default'
         )
       ).toThrow('Entity ID contains an unsupported control character');

@@ -50,6 +50,7 @@ import { buildLookupIndex } from './steps/build_lookup_index';
 export interface RiskScoreMaintainerDeps {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   entityAnalyticsConfig: EntityAnalyticsConfig;
+  riskScorePropagationEnabled: boolean;
   kibanaVersion: string;
   logger: Logger;
   auditLogger: AuditLogger | undefined;
@@ -87,6 +88,7 @@ interface LoadedRunConfig {
   configuration: RiskEngineConfiguration;
   alertsIndex: string;
   idBasedRiskScoringEnabled: boolean;
+  propagationEnabled: boolean;
   watchlistConfigs: Awaited<ReturnType<typeof fetchWatchlistConfigs>>;
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
   sampleSize: number;
@@ -97,6 +99,7 @@ interface LoadedRunConfig {
 export const createRiskScoreMaintainer = ({
   getStartServices,
   entityAnalyticsConfig,
+  riskScorePropagationEnabled,
   kibanaVersion,
   logger,
   auditLogger,
@@ -163,6 +166,7 @@ export const createRiskScoreMaintainer = ({
         namespace: runContext.namespace,
         logger,
         entityAnalyticsConfig,
+        riskScorePropagationEnabled,
       });
 
       const calculationRunId = uuidv4();
@@ -183,10 +187,12 @@ export const createRiskScoreMaintainer = ({
           entityTypes: runConfig.entityTypes,
           calculationRunId,
           now: runNow,
+          propagationEnabled: runConfig.propagationEnabled,
           abortSignal: abortController.signal,
         });
         phase0LookupStage.success({
           lookupRowsWritten: phase0Summary.lookupRowsWritten,
+          propagationRowsWritten: phase0Summary.propagationRowsWritten,
           entitiesIterated: phase0Summary.entitiesIterated,
           pagesProcessed: phase0Summary.pagesProcessed,
           bulkBatches: phase0Summary.bulkBatches,
@@ -196,37 +202,24 @@ export const createRiskScoreMaintainer = ({
         phase0LookupStage.error({ errorKind: 'unexpected' });
         throw error;
       }
-      // Entity types are scored in parallel: each run reads alerts independently
-      // and writes to the same risk-score data stream and entity store, with no
-      // shared per-run state in this maintainer. A failure in one entity type
-      // is logged and isolated so the remaining types still complete.
-      await Promise.all(
-        runConfig.entityTypes.map(async (entityType) => {
-          if (abortController.signal.aborted) {
-            logger.info(
-              `Risk score maintainer run aborted before processing entity type "${entityType}"`
-            );
-            return;
-          }
-          try {
-            await executeEntityTypeRun({
-              entityType,
-              crudClient,
-              logger,
-              abortSignal: abortController.signal,
-              telemetryReporter,
-              metricsTracker,
-              runContext,
-              runConfig,
-              calculationRunId,
-              runNow,
-            });
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            logger.error(`Entity type "${entityType}" run failed: ${errorMessage}`);
-          }
-        })
-      );
+      for (const entityType of runConfig.entityTypes) {
+        if (abortController.signal.aborted) {
+          logger.info('Risk score maintainer run aborted before processing entity type');
+          break;
+        }
+        await executeEntityTypeRun({
+          entityType,
+          crudClient,
+          logger,
+          abortSignal: abortController.signal,
+          telemetryReporter,
+          metricsTracker,
+          runContext,
+          runConfig,
+          calculationRunId,
+          runNow,
+        });
+      }
 
       const maintainerRunDurationMs = Date.now() - maintainerRunStartedAtMs;
       logger.info(
@@ -362,6 +355,7 @@ const loadRunConfiguration = async ({
   namespace,
   logger,
   entityAnalyticsConfig,
+  riskScorePropagationEnabled,
 }: {
   coreStart: CoreStart;
   soClient: ReturnType<typeof buildScopedInternalSavedObjectsClientUnsafe>;
@@ -371,6 +365,7 @@ const loadRunConfiguration = async ({
   namespace: string;
   logger: Logger;
   entityAnalyticsConfig: EntityAnalyticsConfig;
+  riskScorePropagationEnabled: boolean;
 }): Promise<LoadedRunConfig> => {
   const configuration: RiskEngineConfiguration =
     (await getConfiguration({ savedObjectsClient: soClient, logger, namespace })) ??
@@ -399,6 +394,7 @@ const loadRunConfiguration = async ({
     configuration,
     alertsIndex,
     idBasedRiskScoringEnabled,
+    propagationEnabled: riskScorePropagationEnabled,
     watchlistConfigs,
     writer,
     sampleSize,
@@ -471,6 +467,8 @@ const executeEntityTypeRun = async ({
     const baseSummary = await scoreBaseEntities({
       alertFilters,
       alertsIndex: runConfig.alertsIndex,
+      lookupIndex: runContext.lookupIndex,
+      propagationEnabled: runConfig.propagationEnabled,
       crudClient,
       entityType,
       esClient: runContext.esClient,
