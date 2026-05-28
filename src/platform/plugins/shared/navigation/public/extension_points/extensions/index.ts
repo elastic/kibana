@@ -6,10 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { lazy } from 'react';
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import type { ExtensionPointRenderersFor } from './types';
+const recentDashboardsNavExtension = lazy(() =>
+  import('./recent_dashboards_section').then(({ RecentDashboardsSection }) => ({
+    default: RecentDashboardsSection,
+  }))
+);
 
-export const defineExtensionPointRenderers = <T extends NavigationTreeDefinition>(
-  renderers: ExtensionPointRenderersFor<T>
-): ExtensionPointRenderersFor<T> => renderers;
+export { recentDashboardsNavExtension };

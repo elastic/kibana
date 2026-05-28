@@ -8,7 +8,13 @@
  */
 
 export { Navigation, type NavigationProps } from './src/components/navigation';
-export { ExtensionPointRenderer } from './src/components/secondary_menu/extension_point_renderer';
+export {
+  ExtensionPointRenderer,
+  type SecondaryNavExtensionPointContext,
+  type ExtensionPointRendererProps,
+  type ExtensionPointRenderersMap,
+  type SecondaryNavExtensionPointLazy,
+} from './src/components/secondary_menu/extension_point_renderer';
 export { SecondaryMenu } from './src/components/secondary_menu';
 export { useNavigation } from './src/hooks/use_navigation';
 export { COLLAPSED_WIDTH, EXPANDED_WIDTH } from './src/hooks/use_layout_width';
@@ -18,6 +24,5 @@ export type {
   NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
-  SecondaryNavExtensionPointContext,
   SideNavLogo,
 } from './types';

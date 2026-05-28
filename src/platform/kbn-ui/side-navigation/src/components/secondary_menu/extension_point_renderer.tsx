@@ -10,16 +10,34 @@
 import React, { Suspense, type ComponentType, type LazyExoticComponent } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import type { SecondaryNavExtensionPointContext } from '../../../types';
+/**
+ * Context passed to lazy extension point renderers.
+ */
+export interface SecondaryNavExtensionPointContext {
+  extensionPointId: string;
+  solutionId: string;
+  primaryItemId: string;
+  sectionId: string;
+  surface: 'popover' | 'sidePanel' | 'overflow';
+  activeItemId?: string;
+}
 
+/**
+ * Lazy component for an extension point renderer.
+ */
 export type SecondaryNavExtensionPointLazy = LazyExoticComponent<
   ComponentType<SecondaryNavExtensionPointContext>
 >;
 
+/**
+ * Props for an extension point renderer.
+ */
 export interface ExtensionPointRendererProps {
   LazyComponent: SecondaryNavExtensionPointLazy;
   context: SecondaryNavExtensionPointContext;
 }
+
+export type ExtensionPointRenderersMap = Record<string, SecondaryNavExtensionPointLazy>;
 
 export const ExtensionPointRenderer = ({ LazyComponent, context }: ExtensionPointRendererProps) => {
   return (

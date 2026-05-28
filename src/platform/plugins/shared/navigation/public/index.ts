@@ -20,11 +20,14 @@ export type {
   NavigationPublicStart as NavigationPublicPluginStart,
   SolutionType,
   AddSolutionNavigationArg,
-  ExtensionPointRenderersFor,
-  SecondaryNavExtensionPointContext,
 } from './types';
-export type { ExtractExtensionPointIds } from './extension_point_ids';
-export { defineExtensionPointRenderers } from './define_extension_point_renderers';
+
+export {
+  recentDashboardsNavExtension,
+  defineExtensionPointRenderers,
+  type ExtensionPointRenderersFor,
+  type ExtractExtensionPointIds,
+} from './extension_points';
 
 export { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '../common';
 

@@ -585,25 +585,34 @@ const getPanelOpenerHref = (
   secondarySections: SecondaryMenuSection[],
   panelStateManager: PanelStateManager
 ): string => {
-  // Try to use last active item first
   const lastActiveHref = findItemByLastActive(navNode.id, secondarySections, panelStateManager);
-  if (lastActiveHref) return lastActiveHref;
 
-  // Fall back to first available href
-  const firstAvailableHref = findFirstAvailableHref(secondarySections);
-
-  // Warn if panel opener has its own href (which it shouldn't)
-  if (navNode.href) {
-    warnOnce(
-      `Panel opener node "${navNode.id}" has a href "${
-        navNode.href
-      }", but it should not. We're using it as a panel opener that contains sections with links and we use the first link inside the section as the href ${
-        firstAvailableHref ?? 'missing-href-😭'
-      }.`
-    );
+  if (lastActiveHref) {
+    if (navNode.href) {
+      warnOnce(
+        `Panel opener node "${navNode.id}" has a href "${navNode.href}", but it should not. Using last-active section href "${lastActiveHref}" instead.`
+      );
+    }
+    return lastActiveHref;
   }
 
-  return firstAvailableHref ?? 'missing-href-😭';
+  const firstAvailableHref = findFirstAvailableHref(secondarySections);
+  if (firstAvailableHref) {
+    if (navNode.href) {
+      warnOnce(
+        `Panel opener node "${navNode.id}" has a href "${navNode.href}", but it should not. Using first available section href "${firstAvailableHref}" instead.`
+      );
+    }
+    return firstAvailableHref;
+  }
+
+  // No section provides a static link (likely sections are extension points only).
+  // Fall back to the panel opener's own resolved href.
+  if (navNode.href) {
+    return navNode.href;
+  }
+
+  return 'missing-href-😭';
 };
 
 const getIcon = (node: ChromeProjectNavigationNode | null): string => {

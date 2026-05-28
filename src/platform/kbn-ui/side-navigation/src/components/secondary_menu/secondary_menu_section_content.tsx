@@ -9,12 +9,8 @@
 
 import React, { type ReactNode } from 'react';
 
-import type {
-  MenuItem,
-  SecondaryMenuItem,
-  SecondaryMenuSection,
-  SecondaryNavExtensionPointContext,
-} from '../../../types';
+import type { MenuItem, SecondaryMenuItem, SecondaryMenuSection } from '../../../types';
+import type { SecondaryNavExtensionPointContext } from './extension_point_renderer';
 import { SideNav } from '../side_nav';
 
 type SecondaryMenuSurface = SecondaryNavExtensionPointContext['surface'];
@@ -57,7 +53,7 @@ export const renderSecondaryMenuSection = ({
   onSecondaryItemClick,
   renderExtensionPoint,
 }: RenderSecondaryMenuSectionParams) => {
-  if (section.extensionPointId) {
+  if (section?.extensionPointId) {
     if (!renderExtensionPoint || !solutionId) {
       return null;
     }

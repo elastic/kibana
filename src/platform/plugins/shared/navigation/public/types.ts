@@ -14,10 +14,7 @@ import type {
   NavigationTreeDefinition,
   SolutionNavigationDefinition,
 } from '@kbn/core-chrome-browser';
-import type {
-  ExtensionPointRenderersMap,
-  SecondaryNavExtensionPointContext,
-} from '@kbn/core-chrome-browser-internal';
+import type { ExtensionPointRenderersMap } from '@kbn/ui-side-navigation';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -26,14 +23,7 @@ import type {
   createTopNav,
 } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
-import type { ExtractExtensionPointIds } from './extension_point_ids';
-
-export type { SecondaryNavExtensionPointContext };
-
-export type ExtensionPointRenderersFor<T extends NavigationTreeDefinition> = {
-  [K in ExtractExtensionPointIds<T>]: ExtensionPointRenderersMap[string];
-};
-
+import type { ExtensionPointRenderersFor } from './extension_points';
 export interface NavigationPublicSetup {
   /**
    * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead

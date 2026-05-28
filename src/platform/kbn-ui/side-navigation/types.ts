@@ -8,6 +8,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import type { ComponentType, LazyExoticComponent } from 'react';
 
 export type BadgeType = 'beta' | 'techPreview' | 'new';
 
@@ -42,20 +43,7 @@ export interface SecondaryMenuItem {
   isExternal?: boolean;
 }
 
-/**
- * A section grouping within a secondary menu.
- * Sections help organize related secondary menu items with optional headers.
- */
-export interface SecondaryNavExtensionPointContext {
-  extensionPointId: string;
-  solutionId: string;
-  primaryItemId: string;
-  sectionId: string;
-  surface: 'popover' | 'sidePanel' | 'overflow';
-  activeItemId?: string;
-}
-
-export interface SecondaryMenuSection {
+export type SecondaryMenuSection = {
   /**
    * The unique identifier of the secondary menu section.
    */
@@ -65,18 +53,25 @@ export interface SecondaryMenuSection {
    */
   label?: string;
   /**
-   * Static secondary menu items. Mutually exclusive with `extensionPointId`.
-   */
-  items?: SecondaryMenuItem[];
-  /**
-   * Named extension point rendered by a lazy component. Mutually exclusive with `items`.
-   */
-  extensionPointId?: string;
-  /**
    * When true, the section is only shown in the hover popover and never in the side panel.
    */
   popoverOnly?: boolean;
-}
+} & (
+  | {
+      /**
+       * Static secondary menu items. Mutually exclusive with `extensionPointId`.
+       */
+      items?: SecondaryMenuItem[];
+      extensionPointId?: never;
+    }
+  | {
+      /**
+       * Named extension point rendered by a lazy component. Mutually exclusive with `items`.
+       */
+      extensionPointId?: string;
+      items?: never;
+    }
+);
 
 /**
  * A primary navigation menu item that appears in the main navigation sidebar.
@@ -170,3 +165,33 @@ export interface SideNavLogo {
    */
   'data-test-subj'?: string;
 }
+
+/**
+ * Context passed to lazy extension point renderers.
+ */
+export interface SecondaryNavExtensionPointContext {
+  extensionPointId: string;
+  solutionId: string;
+  primaryItemId: string;
+  sectionId: string;
+  surface: 'popover' | 'sidePanel' | 'overflow';
+  activeItemId?: string;
+}
+
+/**
+ * Lazy component for an extension point renderer.
+ */
+export type SecondaryNavExtensionPointLazy = LazyExoticComponent<
+  ComponentType<SecondaryNavExtensionPointContext>
+>;
+
+/**
+ * Props for an extension point renderer.
+ */
+export interface ExtensionPointRendererProps {
+  LazyComponent: SecondaryNavExtensionPointLazy;
+  context: SecondaryNavExtensionPointContext;
+}
+
+/** @internal */
+export type ExtensionPointRenderersMap = Record<string, SecondaryNavExtensionPointLazy>;

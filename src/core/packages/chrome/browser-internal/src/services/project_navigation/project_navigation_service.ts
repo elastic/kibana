@@ -40,7 +40,7 @@ import type { Location, History } from 'history';
 import deepEqual from 'react-fast-compare';
 import type { Logger } from '@kbn/logging';
 
-import type { ExtensionPointRenderersMap } from '@kbn/core-chrome-browser-internal-types';
+import type { ExtensionPointRenderersMap } from '@kbn/ui-side-navigation';
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';

@@ -9,9 +9,3 @@
 
 export { ChromeService } from './src';
 export type { InternalChromeSetup, InternalChromeStart } from './src';
-export type {
-  ExtensionPointRenderersMap,
-  SecondaryNavExtensionPointContext,
-  SecondaryNavExtensionPointLazy,
-  SecondaryNavExtensionPointComponent,
-} from '@kbn/core-chrome-browser-internal-types';

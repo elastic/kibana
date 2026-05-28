@@ -13,13 +13,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 
-import type {
-  NavigationStructure,
-  SideNavLogo,
-  MenuItem,
-  SecondaryMenuItem,
-  SecondaryNavExtensionPointContext,
-} from '../../types';
+import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
 import {
   MAIN_PANEL_ID,
   MAX_FOOTER_ITEMS,
@@ -41,6 +35,7 @@ import { useNavigation } from '../hooks/use_navigation';
 import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 import { getHighContrastSeparator } from '../hooks/use_high_contrast_mode_styles';
+import type { SecondaryNavExtensionPointContext } from './secondary_menu/extension_point_renderer';
 
 const navigationWrapperStyles = css`
   display: flex;

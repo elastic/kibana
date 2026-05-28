@@ -11,6 +11,7 @@ import type {
   NavigationTreeDefinition,
   SolutionId,
 } from '@kbn/core-chrome-browser';
+import type { ExtensionPointRenderersMap } from '@kbn/ui-side-navigation';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
 import type { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
@@ -23,7 +24,11 @@ export interface ServerlessPluginStart {
     breadcrumbs: ChromeBreadcrumb | ChromeBreadcrumb[],
     params?: Partial<ChromeSetProjectBreadcrumbsParams>
   ) => void;
-  initNavigation(id: SolutionId, navigationTree$: Observable<NavigationTreeDefinition>): void;
+  initNavigation(
+    id: SolutionId,
+    navigationTree$: Observable<NavigationTreeDefinition>,
+    extensionPointRenderers?: ExtensionPointRenderersMap
+  ): void;
   getNavigationCards$(
     roleManagementEnabled?: boolean,
     extendCardNavDefinitions?: Record<string, CardNavExtensionDefinition>

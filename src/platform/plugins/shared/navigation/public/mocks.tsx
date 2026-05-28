@@ -50,6 +50,7 @@ const createStartContract = (): jest.Mocked<Start> => {
     },
     addSolutionNavigation: jest.fn(),
     isSolutionNavEnabled$: of(false),
+    getActiveExtensionPointRenderers$: jest.fn().mockReturnValue(of(undefined)),
   };
   return startContract;
 };

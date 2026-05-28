@@ -7,24 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  NavigationTreeDefinition,
+  RootNodeDefinition,
+  ExtensionPointNodeDefinition,
+} from '@kbn/core-chrome-browser';
 
-interface ExtensionPointNode {
-  renderAs: 'extensionPoint';
-  extensionPointId: string;
-}
-
-type ExtractFromNode<Node> = Node extends ExtensionPointNode
+type ExtractFromPanelOpenerChild<Node> = Node extends ExtensionPointNodeDefinition
   ? Node['extensionPointId']
-  : Node extends { children: infer Children extends readonly unknown[] }
-  ? ExtractExtensionPointIdsFromNodes<Children>
   : never;
 
-type ExtractExtensionPointIdsFromNodes<Nodes extends readonly unknown[]> = ExtractFromNode<
+type ExtractExtensionPointIdsFromPanelOpenerChildren<Children extends readonly unknown[]> =
+  ExtractFromPanelOpenerChild<Children[number]>;
+
+type ExtractFromRoot<Node> = Node extends Extract<
+  RootNodeDefinition,
+  { renderAs: 'panelOpener'; children: infer Children }
+>
+  ? ExtractExtensionPointIdsFromPanelOpenerChildren<Children>
+  : never;
+
+type ExtractExtensionPointIdsFromNodes<Nodes extends readonly unknown[]> = ExtractFromRoot<
   Nodes[number]
 >;
 
-/** Collects literal extensionPointId values from a navigation tree definition. */
+/** Collects literal extensionPointId values from panelOpener children in a navigation tree. */
 export type ExtractExtensionPointIds<T extends NavigationTreeDefinition> =
   | ExtractExtensionPointIdsFromNodes<T['body']>
   | (T['footer'] extends readonly unknown[]

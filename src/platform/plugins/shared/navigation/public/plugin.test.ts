@@ -74,7 +74,11 @@ describe('Navigation Plugin', () => {
       navigationTree$,
     });
 
-    expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('es', navigationTree$);
+    expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith(
+      'es',
+      navigationTree$,
+      undefined
+    );
   });
 
   it('should not load the active space on non authenticated pages', async () => {
@@ -142,7 +146,11 @@ describe('Navigation Plugin', () => {
         navigationTree$,
       });
 
-      expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('oblt', navigationTree$);
+      expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith(
+        'oblt',
+        navigationTree$,
+        undefined
+      );
     });
 
     it('should store extension point renderers when registering solution navigation', async () => {
@@ -170,8 +178,9 @@ describe('Navigation Plugin', () => {
         extensionPointRenderers: extensionPointRenderers as any,
       });
 
-      expect(coreStart.chrome.project.setExtensionPointRenderers).toHaveBeenCalledWith(
+      expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith(
         'security',
+        navigationTree$,
         extensionPointRenderers
       );
     });

@@ -9,8 +9,11 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { map } from 'rxjs';
-import { Navigation as NavigationComponent, ExtensionPointRenderer } from '@kbn/ui-side-navigation';
-import type { SecondaryNavExtensionPointContext } from '@kbn/ui-side-navigation/types';
+import {
+  Navigation as NavigationComponent,
+  ExtensionPointRenderer,
+  type SecondaryNavExtensionPointContext,
+} from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';

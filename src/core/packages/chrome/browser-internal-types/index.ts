@@ -31,20 +31,7 @@ import type {
   CloudURLs,
   SolutionId,
 } from '@kbn/core-chrome-browser';
-
-import type {
-  ExtensionPointRenderersMap,
-  SecondaryNavExtensionPointContext,
-  SecondaryNavExtensionPointLazy,
-  SecondaryNavExtensionPointComponent,
-} from './extension_points';
-
-export type {
-  ExtensionPointRenderersMap,
-  SecondaryNavExtensionPointContext,
-  SecondaryNavExtensionPointLazy,
-  SecondaryNavExtensionPointComponent,
-};
+import type { ExtensionPointRenderersMap } from '@kbn/ui-side-navigation';
 
 /** @internal */
 export type InternalChromeSetup = ChromeSetup;
@@ -113,7 +100,8 @@ export interface InternalChromeStart extends ChromeStart {
       ChildrenId extends string = Id
     >(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
+      extensionPointRenderers?: ExtensionPointRenderersMap
     ): void;
 
     /** Get an observable of the resolved project navigation tree and active nodes. */
@@ -137,12 +125,6 @@ export interface InternalChromeStart extends ChromeStart {
     setBreadcrumbs(
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
-    ): void;
-
-    /** Register lazy extension point renderers for a solution navigation. */
-    setExtensionPointRenderers(
-      id: SolutionId,
-      extensionPointRenderers: ExtensionPointRenderersMap
     ): void;
 
     /** Get lazy extension point renderers for the active solution navigation. */
