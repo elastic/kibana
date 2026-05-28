@@ -18,7 +18,7 @@ import { xpackMocks } from '../../mocks';
 import {
   checkExistingDataStreamsAreFromDifferentPackage,
   findDataStreamsFromDifferentPackages,
-  getDatasetName,
+  getCustomDatasetStreams,
   removeAssetsForInputPackagePolicy,
   isInputPackageDatasetUsedByMultiplePolicies,
 } from '../../services/epm/packages/input_type_packages';
@@ -42,7 +42,9 @@ jest.mock('../../services/package_policy', () => {
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
 const mockedGetPackageInfo = getPackageInfo as jest.Mock<ReturnType<typeof getPackageInfo>>;
-const mockedGetDatasetName = getDatasetName as jest.Mock<ReturnType<typeof getDatasetName>>;
+const mockedGetCustomDatasetStreams = getCustomDatasetStreams as jest.Mock<
+  ReturnType<typeof getCustomDatasetStreams>
+>;
 const mockedFindDataStreamsFromDifferentPackages =
   findDataStreamsFromDifferentPackages as jest.Mock<
     ReturnType<typeof findDataStreamsFromDifferentPackages>
@@ -122,7 +124,9 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       items: [packagePolicy1, testPackagePolicy],
     } as any);
 
-    mockedGetDatasetName.mockReturnValue('custom');
+    mockedGetCustomDatasetStreams.mockReturnValue([
+      { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
+    ]);
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
       existingDataStreams: [],
       dataStream: {},
@@ -205,7 +209,9 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       items: [packagePolicy1, testPackagePolicy],
     } as any);
 
-    mockedGetDatasetName.mockReturnValue('custom');
+    mockedGetCustomDatasetStreams.mockReturnValue([
+      { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
+    ]);
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
       existingDataStreams: [],
       dataStream: {},
@@ -276,7 +282,9 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       items: [testPackagePolicy, packagePolicy1],
     } as any);
 
-    mockedGetDatasetName.mockReturnValue('custom');
+    mockedGetCustomDatasetStreams.mockReturnValue([
+      { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
+    ]);
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
       existingDataStreams: [
         { name: 'datastream1', _meta: { package: { name: 'integration-test' } } },
@@ -322,7 +330,9 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       ],
     } as any);
 
-    mockedGetDatasetName.mockReturnValue('custom');
+    mockedGetCustomDatasetStreams.mockReturnValue([
+      { datasetName: 'custom', dataStreamType: 'logs', inputType: 'logfile' },
+    ]);
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
       existingDataStreams: [],
       dataStream: {},

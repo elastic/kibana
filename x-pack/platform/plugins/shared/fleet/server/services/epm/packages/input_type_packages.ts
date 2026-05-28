@@ -52,7 +52,7 @@ interface CustomDatasetStream {
 }
 
 export const getCustomDatasetStreams = (
-  packagePolicy: NewPackagePolicy,
+  packagePolicy: NewPackagePolicy | PackagePolicy,
   pkgInfo: PackageInfo
 ): CustomDatasetStream[] => {
   if (pkgInfo.type === 'input') {
@@ -143,21 +143,20 @@ export const checkExistingDataStreamsAreFromDifferentPackage = (
 export const isInputPackageDatasetUsedByMultiplePolicies = (
   packagePolicies: PackagePolicy[],
   datasetName: string,
-  pkgName: string
+  pkgName: string,
+  excludePolicyId?: string
 ) => {
-  const allStreams = packagePolicies
-    .filter(
-      (packagePolicy) =>
-        packagePolicy?.package?.name === pkgName || packagePolicy?.package?.type === 'input'
-    )
-    .flatMap((packagePolicy) => {
-      return packagePolicy?.inputs[0]?.streams ?? [];
-    });
-  const filtered = allStreams.filter(
-    (stream) => stream.vars?.[DATASET_VAR_NAME]?.value === datasetName
-  );
+  const matchingPolicies = packagePolicies.filter((packagePolicy) => {
+    if (packagePolicy?.package?.name !== pkgName) return false;
+    if (excludePolicyId && packagePolicy.id === excludePolicyId) return false;
+    return (packagePolicy?.inputs ?? []).some((input) =>
+      (input?.streams ?? []).some(
+        (stream) => stream.vars?.[DATASET_VAR_NAME]?.value === datasetName
+      )
+    );
+  });
 
-  return filtered.length > 1;
+  return matchingPolicies.length > 0;
 };
 
 export async function installAssetsForCustomDatasetPolicy(opts: {

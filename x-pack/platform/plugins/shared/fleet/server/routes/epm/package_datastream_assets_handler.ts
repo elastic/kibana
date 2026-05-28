@@ -15,7 +15,7 @@ import type { DeletePackageDatastreamAssetsRequestSchema, FleetRequestHandler } 
 import {
   checkExistingDataStreamsAreFromDifferentPackage,
   findDataStreamsFromDifferentPackages,
-  getDatasetName,
+  getCustomDatasetStreams,
   isInputPackageDatasetUsedByMultiplePolicies,
   removeAssetsForInputPackagePolicy,
 } from '../../services/epm/packages/input_type_packages';
@@ -57,42 +57,46 @@ export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
       throw new FleetNotFoundError(`Package policy with id ${packagePolicyId} not found`);
     }
 
-    const datasetName = getDatasetName(packagePolicy?.inputs);
-    const datasetNameUsedByMultiplePolicies = isInputPackageDatasetUsedByMultiplePolicies(
-      allPackagePolicies,
-      datasetName,
-      pkgName
-    );
+    const customDatasetStreams = getCustomDatasetStreams(packagePolicy, packageInfo);
 
-    if (datasetNameUsedByMultiplePolicies) {
-      throw new FleetError(
-        `Datastreams matching ${datasetName} are in use by other package policies and cannot be removed`
+    for (const { datasetName } of customDatasetStreams) {
+      const datasetNameUsedByMultiplePolicies = isInputPackageDatasetUsedByMultiplePolicies(
+        allPackagePolicies,
+        datasetName,
+        pkgName,
+        packagePolicyId
       );
-    }
 
-    const { existingDataStreams } = await findDataStreamsFromDifferentPackages(
-      datasetName,
-      packageInfo,
-      esClient
-    );
+      if (datasetNameUsedByMultiplePolicies) {
+        throw new FleetError(
+          `Datastreams matching ${datasetName} are in use by other package policies and cannot be removed`
+        );
+      }
 
-    const existingDataStreamsAreFromDifferentPackage =
-      checkExistingDataStreamsAreFromDifferentPackage(packageInfo, existingDataStreams);
-
-    if (existingDataStreamsAreFromDifferentPackage) {
-      throw new FleetError(
-        `Datastreams matching ${datasetName} exist on other packages and cannot be removed`
+      const { existingDataStreams } = await findDataStreamsFromDifferentPackages(
+        datasetName,
+        packageInfo,
+        esClient
       );
-    }
 
-    logger.info(`Removing datastreams matching ${datasetName}`);
-    await removeAssetsForInputPackagePolicy({
-      packageInfo,
-      logger,
-      datasetName,
-      esClient,
-      savedObjectsClient,
-    });
+      const existingDataStreamsAreFromDifferentPackage =
+        checkExistingDataStreamsAreFromDifferentPackage(packageInfo, existingDataStreams);
+
+      if (existingDataStreamsAreFromDifferentPackage) {
+        throw new FleetError(
+          `Datastreams matching ${datasetName} exist on other packages and cannot be removed`
+        );
+      }
+
+      logger.info(`Removing datastreams matching ${datasetName}`);
+      await removeAssetsForInputPackagePolicy({
+        packageInfo,
+        logger,
+        datasetName,
+        esClient,
+        savedObjectsClient,
+      });
+    }
 
     return response.ok({ body: { success: true } });
   } catch (error) {

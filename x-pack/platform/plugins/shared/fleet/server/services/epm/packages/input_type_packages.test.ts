@@ -1377,7 +1377,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
     };
 
     it('should return false if there are no other policies using the dataset', async () => {
-      const res = await isInputPackageDatasetUsedByMultiplePolicies(
+      const res = isInputPackageDatasetUsedByMultiplePolicies(
         [policy1, policy2] as any,
         'generic',
         'logs'
@@ -1385,8 +1385,8 @@ describe('removeAssetsForInputPackagePolicy', () => {
       expect(res).toEqual(false);
     });
 
-    it('should return true if there other policies using the same dataset ', async () => {
-      const res = await isInputPackageDatasetUsedByMultiplePolicies(
+    it('should return true if there other policies using the same dataset', async () => {
+      const res = isInputPackageDatasetUsedByMultiplePolicies(
         [
           {
             ...policy1,
@@ -1414,6 +1414,80 @@ describe('removeAssetsForInputPackagePolicy', () => {
         'logs'
       );
       expect(res).toEqual(true);
+    });
+
+    it('should return false when the only matching policy is excluded', () => {
+      const res = isInputPackageDatasetUsedByMultiplePolicies(
+        [
+          {
+            ...policy1,
+            inputs: [
+              {
+                streams: [
+                  { vars: { 'data_stream.dataset': { value: 'udp.generic', type: 'text' } } },
+                ],
+              },
+            ],
+          },
+        ] as any,
+        'udp.generic',
+        'logs',
+        'policy1'
+      );
+      expect(res).toEqual(false);
+    });
+
+    it('should return true when another policy uses the dataset even with exclusion', () => {
+      const res = isInputPackageDatasetUsedByMultiplePolicies(
+        [
+          {
+            ...policy1,
+            inputs: [
+              {
+                streams: [
+                  { vars: { 'data_stream.dataset': { value: 'udp.generic', type: 'text' } } },
+                ],
+              },
+            ],
+          },
+          {
+            ...policy2,
+            inputs: [
+              {
+                streams: [
+                  { vars: { 'data_stream.dataset': { value: 'udp.generic', type: 'text' } } },
+                ],
+              },
+            ],
+          },
+        ] as any,
+        'udp.generic',
+        'logs',
+        'policy1'
+      );
+      expect(res).toEqual(true);
+    });
+
+    it('should not false-positive when one policy has the dataset on multiple inputs', () => {
+      const res = isInputPackageDatasetUsedByMultiplePolicies(
+        [
+          {
+            ...policy1,
+            inputs: [
+              {
+                streams: [{ vars: { 'data_stream.dataset': { value: 'custom', type: 'text' } } }],
+              },
+              {
+                streams: [{ vars: { 'data_stream.dataset': { value: 'custom', type: 'text' } } }],
+              },
+            ],
+          },
+        ] as any,
+        'custom',
+        'logs',
+        'policy1'
+      );
+      expect(res).toEqual(false);
     });
   });
 
