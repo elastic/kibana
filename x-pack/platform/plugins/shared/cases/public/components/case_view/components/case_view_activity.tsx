@@ -346,9 +346,6 @@ export const CaseViewActivity = ({
               key={caseData.connector.id}
             />
           ) : null}
-          {isTemplatesV2Enabled && (
-            <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
-          )}
           <CustomFields
             isLoading={(isLoading && loadingKey === 'customFields') || isUpdatingCustomField}
             customFields={caseData.customFields}
@@ -356,7 +353,10 @@ export const CaseViewActivity = ({
             onSubmit={onSubmitCustomField}
           />
           {isTemplatesV2Enabled && (
-            <TemplateFields caseData={caseData} onUpdateField={onUpdateField} />
+            <>
+              <TemplateFields caseData={caseData} onUpdateField={onUpdateField} />
+              <GlobalCaseFields caseData={caseData} onUpdateField={onUpdateField} />
+            </>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
