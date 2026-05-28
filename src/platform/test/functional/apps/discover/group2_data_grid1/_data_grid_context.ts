@@ -83,6 +83,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(anchorTimestamp).to.be(firstTimestamp);
     });
 
+    it('should open the context view with the same columns', async () => {
+      const columnNames = await dataGrid.getHeaderFields();
+      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
+    });
+
     it('should open the context view with the filters disabled', async () => {
       let disabledFilterCounter = 0;
       for (const [_, value, columnId] of TEST_FILTER_COLUMN_NAMES) {
