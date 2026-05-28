@@ -26,7 +26,8 @@ import {
   EntityAlreadyExistsError,
   EntityStoreNotInstalledError,
 } from '../errors';
-import { validateAndTransformDoc } from './utils';
+import { buildEntityListSourceFilter } from '../../../common/domain/definitions/entity_list_source';
+import { validateAndTransformDoc, type ValidateAndTransformDocOptions } from './utils';
 import { runWithSpan } from '../../telemetry/traces';
 import {
   searchEntitiesV2,
@@ -49,6 +50,8 @@ export interface ListEntitiesParams {
   source?: string[] | undefined;
   searchAfter?: Array<string | number>;
   fields?: (QueryDslFieldAndFormat | string)[];
+  /** When true, return `entity.attributes.summary` in list/search hits (excluded by default). */
+  includeSummary?: boolean;
   /** Page/search mode (unified latest index); mutually exclusive with KQL `filter` / cursor params on the route. */
   entityTypes?: EntityType[];
   filterQuery?: string;
@@ -56,6 +59,10 @@ export interface ListEntitiesParams {
   perPage?: number;
   sortField?: string;
   sortOrder?: SortOrder;
+}
+
+export interface UpdateEntityOptions {
+  preserveTimestamp?: boolean;
 }
 
 export interface ListEntitiesResult {
@@ -126,7 +133,8 @@ export class CRUDClient {
     const tracedUpdateEntity = (
       entityType: EntityType,
       doc: Entity,
-      force: boolean
+      force: boolean,
+      options?: UpdateEntityOptions
     ): Promise<void> =>
       runWithSpan({
         name: 'entityStore.crud.update_entity',
@@ -136,7 +144,7 @@ export class CRUDClient {
           'entity_store.entity.type': entityType,
           'entity_store.force': force,
         },
-        cb: () => baseUpdateEntity(entityType, doc, force),
+        cb: () => baseUpdateEntity(entityType, doc, force, options),
       });
 
     Object.defineProperty(this, 'updateEntity', {
@@ -249,7 +257,12 @@ export class CRUDClient {
   // 2. ID and Identity - a valid ID and matching identifying data - provided
   // ID will be validated and used if correct
   // 3. Identity only - no ID and identifying data - ID will be generated
-  public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
+  public async updateEntity(
+    entityType: EntityType,
+    doc: Entity,
+    force: boolean,
+    options?: UpdateEntityOptions
+  ): Promise<void> {
     await this.assertInstalled();
     const generatedId = getEuidFromObject(entityType, doc);
     const valid = validateAndTransformDoc(
@@ -258,7 +271,8 @@ export class CRUDClient {
       this.namespace,
       doc,
       generatedId,
-      force
+      force,
+      options
     );
     try {
       const { result } = await this.esClient.update({
@@ -398,6 +412,7 @@ export class CRUDClient {
         perPage: p.perPage ?? 10,
         sortField: p.sortField ?? '@timestamp',
         sortOrder: p.sortOrder ?? 'desc',
+        includeSummary: p.includeSummary,
       });
       return {
         entities: records,
@@ -410,7 +425,7 @@ export class CRUDClient {
 
     this.logger.debug('Listing entities (cursor mode)');
 
-    const { filter, size, searchAfter, source, fields } = p;
+    const { filter, size, searchAfter, source, fields, includeSummary } = p;
 
     let query: QueryDslQueryContainer = { match_all: {} };
     if (filter) {
@@ -428,7 +443,10 @@ export class CRUDClient {
       sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],
       search_after: searchAfter,
       ...(fields && fields.length > 0 ? { fields } : {}),
-      ...(source && source.length > 0 ? { _source: source } : {}),
+      ...buildEntityListSourceFilter({
+        includeSummary,
+        sourceIncludes: source,
+      }),
     });
 
     const hits = resp.hits.hits;

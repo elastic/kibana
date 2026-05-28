@@ -140,6 +140,78 @@ export const EntityField = lazySchema(() =>
            * OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
            */
           oauth_consent_restriction: z.string().optional(),
+          /**
+           * Persisted AI-generated summary for this entity.
+           */
+          summary: z
+            .object({
+              /**
+               * Structured highlight sections produced by the LLM.
+               */
+              highlights: z.array(
+                z
+                  .object({
+                    /**
+                     * The title of the highlight section.
+                     */
+                    title: z.string(),
+                    /**
+                     * The detailed text content for this highlight section.
+                     */
+                    text: z.string(),
+                  })
+                  .strict()
+              ),
+              /**
+               * Actionable recommendations produced by the LLM.
+               */
+              recommendedActions: z.array(z.string()).nullable().optional(),
+              /**
+               * Unix timestamp (ms) of when the summary was generated.
+               */
+              generated_at: z.number().optional(),
+              /**
+               * Username of the user who triggered the summary generation.
+               */
+              generated_by: z.string().optional(),
+              /**
+               * Policy and snapshot for summary staleness checks.
+               */
+              staleness: z
+                .object({
+                  /**
+                   * Signal ids to compare when deciding if the summary is stale.
+                   */
+                  enabled_signals: z.array(
+                    z.enum(['risk_score', 'anomaly_job_ids', 'rule_names'])
+                  ),
+                  /**
+                   * Signal values captured at generation time. Property names must stay in sync with `enabled_signals` enum values — adding a signal to the enum requires a matching snapshot property here.
+                   */
+                  snapshot: z
+                    .object({
+                      /**
+                       * entity.risk.calculated_score_norm at generation time (flyout risk gauge).
+                       */
+                      risk_score: z.number().nullable().optional(),
+                      /**
+                       * entity.behaviors.anomaly_job_ids at generation time.
+                       */
+                      anomaly_job_ids: z.array(z.string()).nullable().optional(),
+                      /**
+                       * entity.behaviors.rule_names at generation time.
+                       */
+                      rule_names: z.array(z.string()).nullable().optional(),
+                    })
+                    .strict(),
+                })
+                .strict()
+                .nullable()
+                .optional(),
+            })
+            .strict()
+            .nullable()
+            .optional(),
         })
         .strict()
         .optional(),
@@ -728,3 +800,11 @@ export const EntityInternal = lazySchema(() =>
 
 export type Entity = z.infer<typeof EntityInternal>;
 export const Entity = EntityInternal as z.ZodType<Entity>;
+
+/**
+ * The shape of the persisted AI-generated summary stored under
+ * `entity.attributes.summary` in the entity store.
+ */
+export type EntitySummaryAttribute = NonNullable<
+  NonNullable<EntityField['attributes']>['summary']
+>;

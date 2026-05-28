@@ -13,10 +13,14 @@ import {
   ENTITY_STORE_ROUTES,
   FF_ENABLE_ENTITY_STORE_V2,
   type GetEntityMaintainersResponse,
+  type SaveEntityAiSummaryParams,
 } from '@kbn/entity-store/common';
 import { compact } from 'lodash';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
-import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
+import {
+  ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL,
+  ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL,
+} from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
   AssetCriticalityRecord,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -213,7 +217,7 @@ export const useEntityAnalyticsRoutes = () => {
       params,
     }: {
       signal?: AbortSignal;
-      params: FetchEntitiesListParams;
+      params: FetchEntitiesListParams & { includeSummary?: boolean };
     }) =>
       http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.public.CRUD_GET, {
         version: ENTITY_STORE_API_VERSIONS.public.v1,
@@ -225,6 +229,7 @@ export const useEntityAnalyticsRoutes = () => {
           page: params.page,
           per_page: params.perPage,
           filterQuery: params.filterQuery,
+          ...(params.includeSummary ? { include_summary: true } : {}),
         },
         signal,
       });
@@ -716,6 +721,15 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
+    const saveEntityAiSummary = (
+      params: SaveEntityAiSummaryParams
+    ): Promise<{ updated: boolean }> =>
+      http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+
     /**
      * List all watchlists
      */
@@ -958,6 +972,7 @@ export const useEntityAnalyticsRoutes = () => {
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
+      saveEntityAiSummary,
       fetchWatchlists,
       fetchLeads,
       fetchLeadGenerationStatus,

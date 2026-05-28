@@ -139,6 +139,12 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
+    /*
+     * NOTE: entity.attributes.summary is intentionally excluded from ESQL extraction.
+     * It is API-written only (crudClient.updateEntity with force=true).
+     * Application schema: entity.schema.yaml / entity.gen.ts.
+     * Elasticsearch mappings: entity_summary_index_mappings.ts (latest component templates).
+     */
 
     // LIFECYCLE ------------------------------------------------------------
     oldestValue({

@@ -135,6 +135,79 @@ components:
             oauth_consent_restriction:
               type: string
               description: OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
+            summary:
+              type: object
+              description: Persisted AI-generated summary for this entity.
+              additionalProperties: false
+              nullable: true
+              properties:
+                highlights:
+                  type: array
+                  description: Structured highlight sections produced by the LLM.
+                  items:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      title:
+                        type: string
+                        description: The title of the highlight section.
+                      text:
+                        type: string
+                        description: The detailed text content for this highlight section.
+                    required:
+                      - title
+                      - text
+                recommendedActions:
+                  type: array
+                  nullable: true
+                  description: Actionable recommendations produced by the LLM.
+                  items:
+                    type: string
+                generated_at:
+                  type: number
+                  description: Unix timestamp (ms) of when the summary was generated.
+                generated_by:
+                  type: string
+                  description: Username of the user who triggered the summary generation.
+                staleness:
+                  type: object
+                  nullable: true
+                  description: Policy and snapshot for summary staleness checks.
+                  additionalProperties: false
+                  properties:
+                    enabled_signals:
+                      type: array
+                      description: Signal ids to compare when deciding if the summary is stale.
+                      items:
+                        type: string
+                        enum:
+                          - risk_score
+                          - anomaly_job_ids
+                          - rule_names
+                    snapshot:
+                      type: object
+                      description: >
+                        Signal values captured at generation time. Property names must stay in
+                        sync with `enabled_signals` enum values — adding a signal to the enum
+                        requires a matching snapshot property here.
+                      additionalProperties: false
+                      properties:
+                        risk_score:
+                          type: number
+                          nullable: true
+                          description: entity.risk.calculated_score_norm at generation time (flyout risk gauge).
+                        anomaly_job_ids:
+                          type: array
+                          nullable: true
+                          description: entity.behaviors.anomaly_job_ids at generation time.
+                          items:
+                            type: string
+                        rule_names:
+                          type: array
+                          nullable: true
+                          description: entity.behaviors.rule_names at generation time.
+                          items:
+                            type: string
         behaviors:
           type: object
           description: Behavioral signals observed for the entity.

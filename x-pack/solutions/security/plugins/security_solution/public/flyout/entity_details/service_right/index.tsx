@@ -122,6 +122,7 @@ export const ServicePanel = memo(function ServicePanel({
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('service', {
     onSuccess: calculateEntityRiskScore,
+    refetchEntityRecord: entityFromStoreResult.refetch,
   });
 
   useQueryInspector({
@@ -217,6 +218,7 @@ export const ServicePanel = memo(function ServicePanel({
         ) : (
           <ServicePanelContent
             entityRecord={entityFromStoreResult.entityRecord ?? undefined}
+            refetchEntityRecord={entityFromStoreResult.refetch}
             serviceName={serviceName}
             observedService={observedService}
             riskScoreState={riskScoreState}

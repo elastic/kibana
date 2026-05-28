@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { ENTITY_ATTRIBUTES_SUMMARY_SOURCE_PATH } from '../../../common/domain/definitions/entity_list_source';
 import { searchEntitiesV2 } from './search_entities';
 
 describe('searchEntitiesV2', () => {
@@ -69,6 +70,7 @@ describe('searchEntitiesV2', () => {
         size: 5,
         from: 0,
         ignore_unavailable: true,
+        _source_excludes: [ENTITY_ATTRIBUTES_SUMMARY_SOURCE_PATH],
       })
     );
     expect(result.total).toBe(1);

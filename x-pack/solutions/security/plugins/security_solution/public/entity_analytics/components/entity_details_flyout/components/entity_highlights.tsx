@@ -10,6 +10,7 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiCallOut,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -19,6 +20,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiPanel,
+  EuiToolTip,
 } from '@elastic/eui';
 import { AiButton, AiIcon } from '@kbn/shared-ux-ai-components';
 import { useFetchAnonymizationFields, useMaybeAssistantContext } from '@kbn/elastic-assistant';
@@ -38,11 +40,22 @@ import { useHasEntityHighlightsLicense } from '../../../../common/hooks/use_has_
 import { useFetchEntityDetailsHighlights } from '../hooks/use_fetch_entity_details_highlights';
 import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
+import type { StalenessDisplayMode } from './entity_highlights_result';
+import type { Entity } from '../../../../../common/api/entity_analytics';
+import {
+  type EntitySummaryAttribute,
+  buildEntitySummaryStaleness,
+  computeEntitySummaryStalenessReasons,
+} from '@kbn/entity-store/common';
+import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
   entityType: EntityType;
-}> = ({ entityType, entityIdentifier }) => {
+  entityRecord?: Entity | null;
+  refetchEntityRecord?: () => void;
+}> = ({ entityType, entityIdentifier, entityRecord, refetchEntityRecord }) => {
   // Degrade gracefully on surfaces that render outside `AssistantProvider` (e.g. the Agent
   // Builder attachment Canvas). The Elastic Assistant–backed summary cannot work without it.
   const assistantContext = useMaybeAssistantContext();
@@ -94,17 +107,73 @@ export const EntityHighlightsAccordion: React.FC<{
     [setShowAnonymizedValues]
   );
 
+  // Demo toggle: switch between warning display modes. Remove before GA.
+  const [stalenessDisplayMode, setStalenessDisplayMode] = useState<StalenessDisplayMode>('banner');
+  const stalenessToggleButtons = useMemo(
+    () => [
+      { id: 'banner', label: 'Banner' },
+      { id: 'inline', label: 'Inline' },
+    ],
+    []
+  );
+
+  // Read the persisted summary from the entity store record (may be null if never generated)
+  const storedSummary = useMemo((): EntitySummaryAttribute | null => {
+    const summary = entityRecord?.entity?.attributes?.summary;
+    return summary ?? null;
+  }, [entityRecord]);
+
+  // Snapshot of current entity signals — passed to the hook so they are persisted
+  // alongside the summary at generation time for future staleness detection.
+  const entitySnapshot = useMemo(
+    () =>
+      buildEntitySummaryStalenessEntitySnapshot(
+        entityRecord ? (entityRecord as EntityStoreRecord) : null
+      ),
+    [entityRecord]
+  );
+
   const {
     fetchEntityHighlights,
     isChatLoading,
     result: assistantResult,
     error,
+    generationBaseline,
   } = useFetchEntityDetailsHighlights({
     connectorId,
     anonymizationFields: anonymizationFields?.data ?? [],
     entityType,
     entityIdentifier,
+    storedSummary,
+    entitySnapshot,
+    refetchEntityRecord,
   });
+
+  // Staleness check — compare stored snapshot against current entity signals.
+  // This is computed client-side using already-loaded entity data (no extra API call).
+  // NOTE: Per the RFC, this should move to a dedicated server-side endpoint
+  // before GA so all surfaces (Agent Builder, external clients) share the same logic.
+  const stalenessReasons = useMemo((): string[] => {
+    if (!storedSummary) return [];
+
+    // After in-session generation the entity record is not refetched immediately, so
+    // comparing the old persisted snapshot would false-positive. Suppress until live
+    // signals drift from the generation-time baseline.
+    if (generationBaseline) {
+      const driftSinceGeneration = computeEntitySummaryStalenessReasons(
+        {
+          ...storedSummary,
+          staleness: buildEntitySummaryStaleness(generationBaseline),
+        },
+        entitySnapshot
+      );
+      if (driftSinceGeneration.length === 0) {
+        return [];
+      }
+    }
+
+    return computeEntitySummaryStalenessReasons(storedSummary, entitySnapshot);
+  }, [storedSummary, entitySnapshot, generationBaseline]);
 
   const onAddConnectorClick = useCallback(() => {
     setIsConnectorModalVisible(true);
@@ -192,18 +261,37 @@ export const EntityHighlightsAccordion: React.FC<{
         data-test-subj="asset-criticality-selector"
         extraAction={
           (aiConnectors?.length ?? 0) > 0 && (
-            <EntityHighlightsSettings
-              assistantResult={assistantResult}
-              showAnonymizedValues={showAnonymizedValues}
-              onChangeShowAnonymizedValues={onChangeShowAnonymizedValues}
-              setConnectorId={setStoredConnectorId}
-              connectorId={connectorId}
-              connectorName={connectorName}
-              closePopover={closePopover}
-              openPopover={onButtonClick}
-              isLoading={isLoading}
-              isPopoverOpen={isPopoverOpen}
-            />
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              {stalenessReasons.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content="Demo toggle: switch between staleness warning styles">
+                    <EuiButtonGroup
+                      legend="Staleness display mode"
+                      options={stalenessToggleButtons}
+                      idSelected={stalenessDisplayMode}
+                      onChange={(id) => setStalenessDisplayMode(id as StalenessDisplayMode)}
+                      buttonSize="compressed"
+                      color="warning"
+                      data-test-subj="entity-highlights-staleness-mode-toggle"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EntityHighlightsSettings
+                  assistantResult={assistantResult}
+                  showAnonymizedValues={showAnonymizedValues}
+                  onChangeShowAnonymizedValues={onChangeShowAnonymizedValues}
+                  setConnectorId={setStoredConnectorId}
+                  connectorId={connectorId}
+                  connectorName={connectorName}
+                  closePopover={closePopover}
+                  openPopover={onButtonClick}
+                  isLoading={isLoading}
+                  isPopoverOpen={isPopoverOpen}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           )
         }
       >
@@ -254,6 +342,9 @@ export const EntityHighlightsAccordion: React.FC<{
             assistantResult={assistantResult}
             showAnonymizedValues={showAnonymizedValues}
             generatedAt={assistantResult?.generatedAt ?? null}
+            generatedBy={assistantResult?.generatedBy ?? ''}
+            stalenessReasons={stalenessReasons}
+            stalenessDisplayMode={stalenessDisplayMode}
             onRefresh={fetchEntityHighlights}
           />
         )}

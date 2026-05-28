@@ -7,8 +7,10 @@
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { entityDetailsHighlightsRoute } from './entity_details_highlight';
+import { entityDetailsAiSummaryRoute } from './entity_details_ai_summary';
 
 export const registerEntityDetailsRoutes = (routeDeps: EntityAnalyticsRoutesDeps) => {
   // Internal routes
   entityDetailsHighlightsRoute(routeDeps);
+  entityDetailsAiSummaryRoute(routeDeps);
 };
