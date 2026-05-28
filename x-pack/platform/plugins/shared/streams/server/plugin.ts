@@ -433,6 +433,10 @@ export class StreamsPlugin
         getScopedClients,
         continuousKiExtractionWorkflowService,
         streamsKIsOnboardingClient,
+        getSpaceId: async (request: KibanaRequest) => {
+          const [, pluginsStart] = await core.getStartServices();
+          return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+        },
       },
       core,
       logger: this.logger,
