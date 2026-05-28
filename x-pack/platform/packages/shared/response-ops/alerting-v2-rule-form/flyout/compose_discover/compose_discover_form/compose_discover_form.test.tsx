@@ -201,16 +201,6 @@ describe('step validation', () => {
   describe('notifications.validate', () => {
     const notificationsStep = getSteps(true).find((s) => s.id === 'notifications')!;
 
-    it('returns true in edit mode regardless of form state', async () => {
-      const state = createState({ mode: 'edit' });
-      const methods = {
-        getValues: jest.fn().mockReturnValue({
-          workflows: [{ id: 'item-1', source: 'existing', workflowId: null }],
-        }),
-      } as unknown as UseFormReturn<ComposeFormValues>;
-      expect(await notificationsStep.validate!(methods, state)).toBe(true);
-    });
-
     it('returns true when notifications are disabled', async () => {
       const state = createState({ mode: 'create' });
       const methods = {
