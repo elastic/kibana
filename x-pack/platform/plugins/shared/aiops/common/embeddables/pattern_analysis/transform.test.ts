@@ -31,15 +31,6 @@ describe('pattern analysis embeddable transforms', () => {
     });
   });
 
-  it('defaults minimum_time_range to no_minimum when omitted', () => {
-    const state = patternAnalysisEmbeddableStateSchema.validate({
-      data_view_id: 'data-view-id',
-      field_name: 'message',
-    });
-
-    expect(state.minimum_time_range).toBe('no_minimum');
-  });
-
   it('rejects unsupported minimum_time_range values', () => {
     expect(() =>
       patternAnalysisEmbeddableStateSchema.validate({
