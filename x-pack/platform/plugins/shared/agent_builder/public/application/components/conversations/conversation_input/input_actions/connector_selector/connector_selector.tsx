@@ -191,7 +191,6 @@ export const ConnectorSelector: React.FC<{}> = () => {
   const {
     data: aiConnectors,
     isLoading,
-    soEntryFound,
     refetch,
   } = useLoadConnectors({
     http,
@@ -286,20 +285,11 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
 
-  // The server places the SO-assigned connector first when soEntryFound is true.
-  // Reading connectors[0] directly avoids useDefaultConnector's global-default priority
-  // bias, which would otherwise mask the feature-specific assignment.
-  const soAssignedConnectorId = soEntryFound ? connectors[0]?.id : undefined;
-
   const previousDefaultRef = useRef(defaultConnectorId);
-  // null sentinel: ensures the SO branch fires on the first data load after mount/remount.
-  const previousSOAssignedRef = useRef<string | null>(null);
 
   useEffect(() => {
     const previousDefault = previousDefaultRef.current;
-    const previousSOAssigned = previousSOAssignedRef.current;
     previousDefaultRef.current = defaultConnectorId;
-    previousSOAssignedRef.current = soAssignedConnectorId ?? null;
 
     if (isLoading || !initialConnectorId) return;
 
@@ -331,20 +321,6 @@ export const ConnectorSelector: React.FC<{}> = () => {
       connectors.some((c) => c.id === defaultConnectorId)
     ) {
       onSelectConnector(defaultConnectorId);
-      return;
-    }
-
-    // Admin set or changed the feature-specific SO assignment. The server places the
-    // SO-assigned connector first (connectors[0]) when soEntryFound is true, so we read
-    // it directly rather than through useDefaultConnector (which would give the global
-    // default priority and mask the feature-specific assignment). previousSOAssigned is
-    // null on first load (sentinel), so this also fires on fresh mount/remount.
-    if (
-      soAssignedConnectorId &&
-      soAssignedConnectorId !== selectedConnectorId &&
-      (previousSOAssigned === null || soAssignedConnectorId !== previousSOAssigned)
-    ) {
-      onSelectConnector(soAssignedConnectorId);
     }
   }, [
     selectedConnectorId,
@@ -355,8 +331,6 @@ export const ConnectorSelector: React.FC<{}> = () => {
     defaultConnectorOnly,
     connectors,
     onSelectConnector,
-    soEntryFound,
-    soAssignedConnectorId,
   ]);
 
   const selectorListStyles = useSelectorListStyles({ listId: connectorListId });
