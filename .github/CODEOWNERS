@@ -1346,6 +1346,7 @@ x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting
 x-pack/solutions/security/packages/features @elastic/security-pds-deployment
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
+x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
