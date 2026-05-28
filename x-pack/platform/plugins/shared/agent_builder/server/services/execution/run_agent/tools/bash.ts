@@ -34,7 +34,7 @@ const description = [
   '',
   'Use exec_tool to invoke another Agent Builder tool from the shell:',
   "  exec_tool <tool_id> --args='{...}'",
-  "  exec_tool platform_core_generate_esql --args='{\"query\":\"...\"}' | jq",
+  '  exec_tool platform_core_generate_esql --args=\'{"query":"..."}\' | jq',
   '',
   'Both sanitized tool names (as listed in your tools) and underscore-namespaced internal IDs are accepted.',
   '',

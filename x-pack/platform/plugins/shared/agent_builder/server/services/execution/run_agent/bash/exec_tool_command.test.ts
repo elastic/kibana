@@ -6,11 +6,7 @@
  */
 
 import { Bash } from 'just-bash';
-import {
-  createExecToolCommand,
-  type ExecToolFn,
-  type ResolveToolIdFn,
-} from './exec_tool_command';
+import { createExecToolCommand, type ExecToolFn, type ResolveToolIdFn } from './exec_tool_command';
 
 const identityResolve: ResolveToolIdFn = (id) => id;
 
@@ -29,7 +25,7 @@ describe('exec_tool command', () => {
     const fn: ExecToolFn = jest
       .fn()
       .mockResolvedValue({ results: [{ type: 'other', data: { ok: true } }] });
-    const result = await runScript("exec_tool foo --args='{\"x\":1}'", fn);
+    const result = await runScript('exec_tool foo --args=\'{"x":1}\'', fn);
     expect(result.exitCode).toBe(0);
     expect(result.stdout.trim()).toBe(
       JSON.stringify({ results: [{ type: 'other', data: { ok: true } }] })

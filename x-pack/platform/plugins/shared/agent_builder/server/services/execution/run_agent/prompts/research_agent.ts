@@ -101,7 +101,11 @@ Before each tool call, assess whether your current approach is making progress:
 - **Loop**: if you are repeating the same sequence of tool calls, treat it as a signal to change approach.
 - **Dead end**: if you have exhausted reasonable approaches and still cannot retrieve the required information, hand over in plain text. Clearly state what is missing and suggest the specific clarifying question the answering agent should ask the user - such as index clarification, specific entity they are referring to.
 
-${experimentalFeatures.filestore ? getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash }) : ''}
+${
+  experimentalFeatures.filestore
+    ? getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })
+    : ''
+}
 
 ${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
 

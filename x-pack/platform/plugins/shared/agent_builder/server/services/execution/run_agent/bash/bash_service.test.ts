@@ -113,7 +113,7 @@ describe('BashService', () => {
     const { fsService, workspaceVolume } = await makeFixture();
     const execToolFn = jest.fn().mockResolvedValue({ ok: true });
     const bash = makeBash(fsService, workspaceVolume, { execToolFn });
-    const result = await bash.exec("exec_tool platform.foo --args='{\"a\":1}' | cat");
+    const result = await bash.exec('exec_tool platform.foo --args=\'{"a":1}\' | cat');
     expect(result.exit_code).toBe(0);
     expect(execToolFn).toHaveBeenCalledWith('platform.foo', { a: 1 });
     expect(result.stdout).toContain('"ok":true');

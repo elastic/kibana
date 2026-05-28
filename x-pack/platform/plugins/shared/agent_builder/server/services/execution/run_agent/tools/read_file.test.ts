@@ -26,9 +26,9 @@ const makeService = async () => {
   return service;
 };
 
-type StandardReturn = {
+interface StandardReturn {
   results: Array<{ type: string; data: { content?: string; path?: string; truncated?: boolean } }>;
-};
+}
 
 describe('read_file', () => {
   it('reads workspace files', async () => {
