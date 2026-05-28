@@ -400,7 +400,7 @@ describe('createValidateRuleTool', () => {
       if (!('results' in result)) return;
       expect(result.results[0].data).toMatchObject({
         error_type: 'authorization_error',
-        message: 'Authentication is required to run a rule validation.',
+        message: 'Authentication is required to run an emulation command.',
         status_code: 401,
       });
 
