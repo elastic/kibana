@@ -12,6 +12,7 @@ import {
   DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   EsqlControlType,
+  MAX_ESQL_CONTROL_QUERY_LENGTH,
   MAX_OPTIONS_LIST_REQUEST_SIZE,
 } from '@kbn/controls-constants';
 import { controlTitleSchema, dataControlSchema } from './control_schema';
@@ -94,6 +95,15 @@ export const optionsListSortSchema = schema.object(
 export const optionsListSelectionSchema = schema.oneOf([schema.string(), schema.number()], {
   meta: {
     description: 'A selected option value. Accepts a string or a number.',
+  },
+});
+
+export const esqlControlQuerySchema = schema.string({
+  minLength: 1,
+  maxLength: MAX_ESQL_CONTROL_QUERY_LENGTH,
+  meta: {
+    description:
+      'An ES|QL query whose results populate the list of available options in the control popover.',
   },
 });
 
@@ -207,12 +217,7 @@ export const optionsListESQLControlSchema = schema.discriminatedUnion('control_t
     {
       ...baseEsqlControlProps,
       control_type: schema.literal(EsqlControlType.VALUES_FROM_QUERY),
-      esql_query: schema.string({
-        meta: {
-          description:
-            'An ES|QL query whose results populate the list of available options in the control popover.',
-        },
-      }),
+      esql_query: esqlControlQuerySchema,
     },
     {
       meta: {

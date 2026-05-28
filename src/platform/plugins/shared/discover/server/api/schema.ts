@@ -16,45 +16,60 @@ import { timeRangeSchema } from '@kbn/es-query-server';
 import { classicTabSchema, esqlTabSchema } from '../embeddable/schema';
 
 const MAX_DISCOVER_SESSION_TABS = 25;
+const MAX_SESSION_TITLE_LENGTH = 256;
+const MAX_SESSION_DESCRIPTION_LENGTH = 2000;
+const MAX_TAB_LABEL_LENGTH = 120;
+const MAX_CHART_INTERVAL_LENGTH = 64;
+const MAX_BREAKDOWN_FIELD_LENGTH = 1000;
+const MAX_VIS_CONTEXT_SUGGESTION_TYPE_LENGTH = 64;
+const MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH = 256;
 
-const visContextRequestDataSchema = schema.object({
-  data_view_id: schema.maybe(
-    schema.string({
-      meta: { description: 'Data view ID used when the chart was created.' },
-    })
-  ),
-  time_field: schema.maybe(
-    schema.string({
-      meta: { description: 'Time field name used when the chart was created.' },
-    })
-  ),
-  time_interval: schema.maybe(
-    schema.string({
-      meta: { description: 'Time interval used when the chart was created.' },
-    })
-  ),
-  breakdown_field: schema.maybe(
-    schema.string({
-      meta: { description: 'Breakdown field name used when the chart was created.' },
-    })
-  ),
+const chartIntervalSchema = schema.string({
+  maxLength: MAX_CHART_INTERVAL_LENGTH,
+  meta: {
+    description:
+      'Time interval for the chart histogram, or the session default when set at the session level.',
+  },
 });
+
+const visContextRequestDataSchema = schema.object(
+  {
+    time_interval: schema.maybe(
+      schema.string({
+        maxLength: MAX_CHART_INTERVAL_LENGTH,
+        meta: { description: 'Time interval used when the chart was created.' },
+      })
+    ),
+  },
+  {
+    unknowns: 'ignore',
+    meta: {
+      description:
+        'Chart context captured when the visualization was saved. The data view, time field, and breakdown field are defined by the tab `data_source` and tab presentation fields.',
+    },
+  }
+);
 
 const visContextSchema = schema.oneOf([
   schema.object({
     suggestion_type: schema.string({
+      maxLength: MAX_VIS_CONTEXT_SUGGESTION_TYPE_LENGTH,
       meta: {
         description:
           'Lens suggestion type for the chart. Validated at the stable envelope level; inner Lens state is validated by the Lens embeddable transform registry.',
       },
     }),
     request_data: visContextRequestDataSchema,
-    attributes: schema.recordOf(schema.string(), schema.any(), {
-      meta: {
-        description:
-          'Opaque Lens visualization attributes. Validation is delegated to the Lens embeddable transform registry.',
-      },
-    }),
+    attributes: schema.recordOf(
+      schema.string({ maxLength: MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH }),
+      schema.any(),
+      {
+        meta: {
+          description:
+            'Opaque Lens visualization attributes. Validation is delegated to the Lens embeddable transform registry.',
+        },
+      }
+    ),
   }),
   schema.object(
     {},
@@ -82,14 +97,11 @@ const discoverSessionTabPresentationSchema = schema.object({
   ),
   breakdown_field: schema.maybe(
     schema.string({
+      maxLength: MAX_BREAKDOWN_FIELD_LENGTH,
       meta: { description: 'Field used to break down chart series.' },
     })
   ),
-  chart_interval: schema.maybe(
-    schema.string({
-      meta: { description: 'Time interval for the chart histogram.' },
-    })
-  ),
+  chart_interval: schema.maybe(chartIntervalSchema),
   time_restore: schema.boolean({
     defaultValue: false,
     meta: {
@@ -104,10 +116,9 @@ const discoverSessionTabPresentationSchema = schema.object({
 });
 
 const discoverSessionTabIdentitySchema = schema.object({
-  id: schema.string({
-    meta: { description: 'Unique identifier for the tab within the session.' },
-  }),
+  id: asCodeIdSchema,
   label: schema.string({
+    maxLength: MAX_TAB_LABEL_LENGTH,
     meta: { description: 'Human-readable label displayed on the tab.' },
   }),
 });
@@ -133,20 +144,15 @@ export const discoverSessionDataSchema = schema.object(
   {
     title: schema.string({
       minLength: 1,
+      maxLength: MAX_SESSION_TITLE_LENGTH,
       meta: { description: 'A human-readable title for the Discover session.' },
     }),
     description: schema.string({
       defaultValue: '',
+      maxLength: MAX_SESSION_DESCRIPTION_LENGTH,
       meta: { description: 'A short description of the Discover session.' },
     }),
-    chart_interval: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'Default time interval for charts across tabs when a tab does not specify `chart_interval`.',
-        },
-      })
-    ),
+    chart_interval: schema.maybe(chartIntervalSchema),
     tabs: schema.arrayOf(discoverSessionApiTabSchema, {
       minSize: 1,
       maxSize: MAX_DISCOVER_SESSION_TABS,

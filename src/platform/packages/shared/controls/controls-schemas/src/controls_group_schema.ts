@@ -14,6 +14,8 @@ import {
   CONTROL_WIDTH_SMALL,
   DEFAULT_PINNED_CONTROL_STATE,
   ESQL_CONTROL,
+  MAX_CONTROL_PANEL_ID_LENGTH,
+  MAX_CONTROLS_IN_GROUP,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
@@ -21,6 +23,12 @@ import {
 import { optionsListDSLControlSchema, optionsListESQLControlSchema } from './options_list_schema';
 import { rangeSliderControlSchema } from './range_slider_schema';
 import { timeSliderControlSchema } from './time_slider_schema';
+
+export const controlPanelIdSchema = schema.string({
+  minLength: 1,
+  maxLength: MAX_CONTROL_PANEL_ID_LENGTH,
+  meta: { description: 'The unique ID of the control panel.' },
+});
 
 export const controlWidthSchema = schema.oneOf(
   [
@@ -37,7 +45,7 @@ export const controlWidthSchema = schema.oneOf(
 );
 
 export const pinnedControlSchema = schema.object({
-  id: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
+  id: schema.maybe(controlPanelIdSchema),
   width: controlWidthSchema,
   grow: schema.boolean({
     defaultValue: DEFAULT_PINNED_CONTROL_STATE.grow,
@@ -119,7 +127,7 @@ export const getControlsGroupSchema = (isInternalReadRequest: boolean = false) =
     ]),
     {
       defaultValue: [],
-      maxSize: isInternalReadRequest ? Number.MAX_SAFE_INTEGER : 100,
+      maxSize: isInternalReadRequest ? Number.MAX_SAFE_INTEGER : MAX_CONTROLS_IN_GROUP,
       meta: { description: 'An array of control panels and their state in the control group.' },
     }
   );

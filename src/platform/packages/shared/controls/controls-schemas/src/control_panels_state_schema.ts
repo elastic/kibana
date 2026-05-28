@@ -9,7 +9,6 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  DEFAULT_PINNED_CONTROL_STATE,
   ESQL_CONTROL,
   EsqlControlType,
   MAX_OPTIONS_LIST_REQUEST_SIZE,
@@ -17,23 +16,19 @@ import {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import { controlWidthSchema } from './controls_group_schema';
-import { baseEsqlControlProps, optionsListDSLControlSchema } from './options_list_schema';
+import { controlPanelIdSchema, pinnedControlSchema } from './controls_group_schema';
+import {
+  baseEsqlControlProps,
+  esqlControlQuerySchema,
+  optionsListDSLControlSchema,
+} from './options_list_schema';
 import { rangeSliderControlSchema } from './range_slider_schema';
 import { timeSliderControlSchema } from './time_slider_schema';
 
 const controlPanelLayoutSchema = {
-  id: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control panel.' } })),
+  ...pinnedControlSchema.getPropSchemas(),
   order: schema.number({
     meta: { description: 'Display order of the control panel within the control group.' },
-  }),
-  width: controlWidthSchema,
-  grow: schema.boolean({
-    defaultValue: DEFAULT_PINNED_CONTROL_STATE.grow,
-    meta: {
-      description:
-        'When `true`, the control expands to fill any available horizontal space. Defaults to `false`.',
-    },
   }),
 };
 
@@ -55,12 +50,7 @@ const esqlControlPanelValuesFromQuerySchema = schema.object({
   ...controlPanelLayoutSchema,
   ...baseEsqlControlProps,
   control_type: schema.literal(EsqlControlType.VALUES_FROM_QUERY),
-  esql_query: schema.string({
-    meta: {
-      description:
-        'An ES|QL query whose results populate the list of available options in the control popover.',
-    },
-  }),
+  esql_query: esqlControlQuerySchema,
 });
 
 const esqlControlPanelVariantSchema = schema.discriminatedUnion('control_type', [
@@ -85,14 +75,7 @@ const esqlControlPanelSchema = schema.object(
         },
       })
     ),
-    esql_query: schema.maybe(
-      schema.string({
-        meta: {
-          description:
-            'An ES|QL query whose results populate the list of available options in the control popover.',
-        },
-      })
-    ),
+    esql_query: schema.maybe(esqlControlQuerySchema),
   },
   {
     validate: (value) => {
@@ -141,9 +124,7 @@ const controlPanelStateSchema = schema.discriminatedUnion('type', [
  * Unlike {@link getControlsGroupSchema}, panel config is flattened at the top level of each entry.
  */
 export const controlPanelsStateSchema = schema.recordOf(
-  schema.string({
-    meta: { description: 'The unique ID of the control panel.' },
-  }),
+  controlPanelIdSchema,
   controlPanelStateSchema,
   {
     defaultValue: {},

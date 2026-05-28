@@ -112,8 +112,7 @@ describe('discoverSessionDataSchema', () => {
           vis_context: {
             suggestion_type: 'line',
             request_data: {
-              data_view_id: 'logs-data-view',
-              time_field: '@timestamp',
+              time_interval: 'auto',
             },
             attributes: {
               visualizationType: 'lnsXY',
@@ -127,14 +126,102 @@ describe('discoverSessionDataSchema', () => {
     expect(validated.tabs[0].vis_context).toEqual({
       suggestion_type: 'line',
       request_data: {
-        data_view_id: 'logs-data-view',
-        time_field: '@timestamp',
+        time_interval: 'auto',
       },
       attributes: {
         visualizationType: 'lnsXY',
         state: { foo: 'bar' },
       },
     });
+  });
+
+  it('strips legacy request_data fields from vis_context', () => {
+    const validated = discoverSessionDataSchema.validate({
+      title: 'With legacy chart metadata',
+      tabs: [
+        {
+          ...classicTab,
+          vis_context: {
+            suggestion_type: 'line',
+            request_data: {
+              data_view_id: 'logs-data-view',
+              time_field: '@timestamp',
+              breakdown_field: 'host.name',
+              time_interval: 'auto',
+            },
+            attributes: {
+              visualizationType: 'lnsXY',
+              state: { foo: 'bar' },
+            },
+          },
+        },
+      ],
+    });
+
+    expect(validated.tabs[0].vis_context).toEqual({
+      suggestion_type: 'line',
+      request_data: {
+        time_interval: 'auto',
+      },
+      attributes: {
+        visualizationType: 'lnsXY',
+        state: { foo: 'bar' },
+      },
+    });
+  });
+
+  it('rejects oversized vis_context string fields', () => {
+    const oversizedString = 'a'.repeat(65);
+
+    expect(() =>
+      discoverSessionDataSchema.validate({
+        title: 'Oversized suggestion type',
+        tabs: [
+          {
+            ...classicTab,
+            vis_context: {
+              suggestion_type: oversizedString,
+              request_data: {},
+              attributes: {},
+            },
+          },
+        ],
+      })
+    ).toThrow();
+
+    expect(() =>
+      discoverSessionDataSchema.validate({
+        title: 'Oversized time interval',
+        tabs: [
+          {
+            ...classicTab,
+            vis_context: {
+              suggestion_type: 'line',
+              request_data: { time_interval: oversizedString },
+              attributes: {},
+            },
+          },
+        ],
+      })
+    ).toThrow();
+
+    expect(() =>
+      discoverSessionDataSchema.validate({
+        title: 'Oversized attribute key',
+        tabs: [
+          {
+            ...classicTab,
+            vis_context: {
+              suggestion_type: 'line',
+              request_data: {},
+              attributes: {
+                [`${'a'.repeat(257)}`]: 'value',
+              },
+            },
+          },
+        ],
+      })
+    ).toThrow();
   });
 
   it('rejects legacy stringified control group JSON', () => {
@@ -191,6 +278,59 @@ describe('discoverSessionDataSchema', () => {
       discoverSessionDataSchema.validate({
         title: 'Empty',
         tabs: [],
+      })
+    ).toThrow();
+  });
+
+  it('rejects oversized session and tab string fields', () => {
+    expect(() =>
+      discoverSessionDataSchema.validate({
+        title: 'a'.repeat(257),
+        tabs: [classicTab],
+      })
+    ).toThrow();
+
+    expect(() =>
+      discoverSessionDataSchema.validate({
+        title: 'Valid title',
+        description: 'a'.repeat(2001),
+        tabs: [classicTab],
+      })
+    ).toThrow();
+
+    expect(() =>
+      discoverSessionDataSchema.validate({
+        title: 'Valid title',
+        chart_interval: 'a'.repeat(65),
+        tabs: [classicTab],
+      })
+    ).toThrow();
+
+    expect(() =>
+      discoverSessionDataSchema.validate({
+        title: 'Valid title',
+        tabs: [{ ...classicTab, id: 'Invalid ID!' }],
+      })
+    ).toThrow();
+
+    expect(() =>
+      discoverSessionDataSchema.validate({
+        title: 'Valid title',
+        tabs: [{ ...classicTab, label: 'a'.repeat(121) }],
+      })
+    ).toThrow();
+
+    expect(() =>
+      discoverSessionDataSchema.validate({
+        title: 'Valid title',
+        tabs: [{ ...classicTab, chart_interval: 'a'.repeat(65) }],
+      })
+    ).toThrow();
+
+    expect(() =>
+      discoverSessionDataSchema.validate({
+        title: 'Valid title',
+        tabs: [{ ...classicTab, breakdown_field: 'a'.repeat(1001) }],
       })
     ).toThrow();
   });

@@ -23,6 +23,8 @@ export enum EsqlControlType {
   VALUES_FROM_QUERY = 'VALUES_FROM_QUERY',
 }
 
+export const MAX_ESQL_CONTROL_QUERY_LENGTH = 10000;
+
 export const DEFAULT_DATA_CONTROL_STATE = {
   use_global_filters: true,
   ignore_validations: false,
