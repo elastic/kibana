@@ -364,3 +364,25 @@ export const buildChangePointCards = (params: {
 
   return cards.length > 0 ? cards : undefined;
 };
+
+/**
+ * Finds the card in the given list that corresponds to a specific result row.
+ * Returns `undefined` when no match is found (e.g. the row belongs to a group
+ * that was filtered out by {@link buildChangePointCards}).
+ */
+export const getCardForRow = (
+  cards: ChangePointCardModel[],
+  row: Readonly<Record<string, unknown>>
+): ChangePointCardModel | undefined => {
+  const firstCard = cards[0];
+  if (!firstCard) return undefined;
+
+  const { byColumns } = firstCard;
+  if (!byColumns?.length) {
+    // No BY clause — exactly one card covers all rows.
+    return firstCard;
+  }
+
+  const entityLabel = byColumns.map((col) => `${col}=${serializeCell(row[col])}`).join(', ');
+  return cards.find((c) => c.id === `cp-card-${entityLabel}`);
+};
