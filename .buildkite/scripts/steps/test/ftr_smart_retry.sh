@@ -1,6 +1,9 @@
 # Sourced by ftr_configs.sh — do not execute directly.
-# Reads/writes globals: exitCode, failedConfigs, retry_recovered,
-# FAILED_TESTS_KEY, FAILED_CONFIGS_KEY, JOB, BUILDKITE_RETRY_COUNT.
+# Reads/writes globals: exitCode, failedConfigs,
+# FAILED_CONFIGS_KEY, JOB, BUILDKITE_RETRY_COUNT.
+
+FAILED_TESTS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}_failed_tests"
+retry_recovered=false
 
 # Called after attempt 1: stores failing test names so the retry can verify recovery.
 store_failing_tests() {

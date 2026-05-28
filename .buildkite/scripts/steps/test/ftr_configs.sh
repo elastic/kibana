@@ -18,11 +18,9 @@ test -z "$EXTRA_ARGS" || buildkite-agent meta-data set "ftr-extra-args" "$EXTRA_
 export JOB="$FTR_CONFIG_GROUP_KEY"
 
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}"
-FAILED_TESTS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}_failed_tests"
 
 # a FTR failure will result in the script returning an exit code of 10
 exitCode=0
-retry_recovered=false
 
 configs="${FTR_CONFIG:-}"
 
