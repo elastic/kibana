@@ -43,7 +43,7 @@ export const AlertTimelineSeriesLabel: React.FC<AlertTimelineSeriesLabelProps> =
   const href = useMemo(
     () =>
       basePath.prepend(
-        paths.alertEpisodesList({
+        paths.alertEpisodesListHref({
           filters: {
             ruleId,
             groupHash,

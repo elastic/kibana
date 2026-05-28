@@ -44,7 +44,7 @@ export interface AlertEpisodesListLinkOptions {
      */
     groupingValues?: Record<string, string | null>;
   };
-  /** Time range carried via the rison-encoded `_g` query param (Kibana global state). */
+  /** Time range embedded in `_a.episodesList.{timeFrom,timeTo}`. */
   timeRange?: { from: string; to: string };
 }
 
@@ -60,30 +60,42 @@ export const paths = {
   actionPolicyEdit: (id: string) =>
     `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
   actionPolicyList: ALERTING_V2_ACTION_POLICIES_BASE_PATH,
-  alertEpisodesList: (opts?: AlertEpisodesListLinkOptions): string => {
+  /** Plain base path — safe for `<Route path={...}>` definitions. */
+  alertEpisodesList: ALERTING_V2_EPISODES_BASE_PATH,
+  /**
+   * Builds a deep-link URL to the episodes list, optionally pre-seeding
+   * filters and time range via `_a.episodesList.*`.
+   *
+   * Shape MUST match what `readEpisodesListAppStateFromUrlStorage` reads:
+   * flat fields inside `_a.episodesList` (`ruleId`, `groupHash`,
+   * `groupingValues`, `timeFrom`, `timeTo`). Time is NOT put in `_g` —
+   * the episodes list reads time from `_a.episodesList.{timeFrom,timeTo}`
+   * so that no Kibana global-time sync fires on mount and pushes a spurious
+   * history entry.
+   */
+  alertEpisodesListHref: (opts?: AlertEpisodesListLinkOptions): string => {
     if (!opts) return ALERTING_V2_EPISODES_BASE_PATH;
+
+    const { filters, timeRange } = opts;
+    const episodesList = Object.fromEntries(
+      Object.entries({
+        ruleId: filters?.ruleId,
+        groupHash: filters?.groupHash,
+        status: filters?.status,
+        groupingValues:
+          filters?.groupingValues && Object.keys(filters.groupingValues).length > 0
+            ? filters.groupingValues
+            : undefined,
+        timeFrom: timeRange?.from,
+        timeTo: timeRange?.to,
+      }).filter(([_key, value]) => value != null)
+    );
+
+    if (Object.keys(episodesList).length === 0) return ALERTING_V2_EPISODES_BASE_PATH;
+
     const search = new URLSearchParams();
-    // Strip empty / nullish values to keep the URL compact. Empty objects
-    // (e.g. a rule with no grouping fields) are dropped too — they're noise.
-    const filters = opts.filters
-      ? Object.fromEntries(
-          Object.entries(opts.filters).filter(([, v]) => {
-            if (v == null || v === '') return false;
-            if (typeof v === 'object' && Object.keys(v).length === 0) return false;
-            return true;
-          })
-        )
-      : {};
-    // Shape MUST match what `useEpisodesUrlState` reads — `_a` carries
-    // `{ filters, sort }` and `_g` carries `{ time }` (Kibana global state).
-    if (Object.keys(filters).length > 0) {
-      search.set('_a', encodeRison({ filters }));
-    }
-    if (opts.timeRange) {
-      search.set('_g', encodeRison({ time: opts.timeRange }));
-    }
-    const qs = search.toString();
-    return qs ? `${ALERTING_V2_EPISODES_BASE_PATH}?${qs}` : ALERTING_V2_EPISODES_BASE_PATH;
+    search.set('_a', encodeRison({ episodesList }));
+    return `${ALERTING_V2_EPISODES_BASE_PATH}?${search.toString()}`;
   },
   alertEpisodeDetails: (episodeId: string) =>
     `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`,

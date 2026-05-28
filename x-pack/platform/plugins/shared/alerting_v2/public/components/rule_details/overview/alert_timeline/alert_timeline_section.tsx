@@ -134,7 +134,7 @@ export const AlertTimelineSection: React.FC = () => {
   const viewAllHref = useMemo(
     () =>
       http.basePath.prepend(
-        paths.alertEpisodesList({
+        paths.alertEpisodesListHref({
           filters: { ruleId: rule.id },
           timeRange: {
             from: new Date(gteMs).toISOString(),
