@@ -1,0 +1,68 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
+import { FilesystemService } from '../../filesystem';
+import { BashService } from '../../run_agent/bash';
+import { WorkspaceClient, createWorkspaceStorage } from '../../../workspaces';
+import type { RunnerManager } from '../runner';
+
+/**
+ * Build the agent's filesystem services for a single agent run:
+ *  - `FilesystemService` — always created; owns the unified `IFileSystem`.
+ *  - `BashService` — created only when `experimentalFeatures.bash` is on.
+ */
+export const createFilesystemServices = async ({
+  manager,
+  experimentalFeatures,
+  workspaceId,
+}: {
+  manager: RunnerManager;
+  experimentalFeatures: ExperimentalFeatures;
+  workspaceId?: string;
+}): Promise<{
+  filesystemService: FilesystemService;
+  bashService?: BashService;
+}> => {
+  const { elasticsearch, request, logger, resultStore, skillsStore, toolManager } = manager.deps;
+
+  const workspaceStorage = createWorkspaceStorage({
+    logger,
+    esClient: elasticsearch.client.asScoped(request).asInternalUser,
+  });
+  const workspaceClient = new WorkspaceClient({ storage: workspaceStorage });
+
+  const filesystemService = new FilesystemService({
+    toolResultsVolume: resultStore.getVolume(),
+    skillsVolume: skillsStore.getVolume(),
+    workspaceClient,
+    workspaceId,
+  });
+  await filesystemService.init();
+
+  if (!experimentalFeatures.bash) {
+    return { filesystemService };
+  }
+
+  const runner = manager.getRunner();
+  const bashService = new BashService({
+    filesystemService,
+    workspaceClient,
+    execToolFn: async (toolId, args) => {
+      return runner.runTool({
+        toolId,
+        toolParams: (args ?? {}) as Record<string, unknown>,
+        source: 'agent',
+      });
+    },
+    resolveToolId: (id) => toolManager.getToolIdMapping().get(id) ?? id,
+    abortSignal: manager.deps.abortSignal,
+    initialWorkspaceId: workspaceId,
+  });
+
+  return { filesystemService, bashService };
+};

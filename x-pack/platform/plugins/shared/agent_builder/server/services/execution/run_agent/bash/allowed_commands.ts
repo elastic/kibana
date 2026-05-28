@@ -15,14 +15,17 @@ import type { CommandName } from 'just-bash';
  *  - python, python3 — Python via CPython WASM; same WASM issue + security surface
  *  - js-exec, node — JS/TS via QuickJS; security surface, not needed
  *  - curl, html-to-markdown — network access, needs explicit security model
+ *  - ln, readlink — symlinks aren't persisted in the workspace document schema,
+ *    so they'd be silently dropped on flush. Footgun; re-enable when symlink
+ *    persistence is designed.
  */
 export const ALLOWED_BASH_COMMANDS: readonly CommandName[] = [
   'alias', 'awk', 'base64', 'basename', 'bash', 'cat', 'chmod', 'clear',
   'column', 'comm', 'cp', 'cut', 'date', 'diff', 'dirname', 'du',
   'echo', 'egrep', 'env', 'expand', 'expr', 'false', 'fgrep', 'file',
   'find', 'fold', 'grep', 'gunzip', 'gzip', 'head', 'help', 'history',
-  'hostname', 'join', 'jq', 'ln', 'ls', 'md5sum', 'mkdir', 'mv',
-  'nl', 'od', 'paste', 'printenv', 'printf', 'pwd', 'readlink', 'rev',
+  'hostname', 'join', 'jq', 'ls', 'md5sum', 'mkdir', 'mv',
+  'nl', 'od', 'paste', 'printenv', 'printf', 'pwd', 'rev',
   'rg', 'rm', 'rmdir', 'sed', 'seq', 'sh', 'sha1sum', 'sha256sum',
   'sleep', 'sort', 'split', 'stat', 'strings', 'tac', 'tail', 'tar',
   'tee', 'time', 'timeout', 'touch', 'tr', 'tree', 'true', 'unalias',

@@ -17,6 +17,13 @@ interface ParsedArgs {
   error?: string;
 }
 
+/**
+ * Hand-rolled argv parser for `exec_tool` — one positional + an optional
+ * `--args=<json>` flag. Kibana's prod CLI parsers (`commander`) are designed
+ * for full CLI apps with help text / sub-commands and don't fit this shape;
+ * `minimist` / `yargs` are dev-only deps. Manual parsing is the right call
+ * for this two-arg surface.
+ */
 const parseArgs = (argv: string[]): ParsedArgs => {
   if (argv.length === 0) {
     return { error: 'exec_tool: missing tool id argument' };

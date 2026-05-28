@@ -52,7 +52,7 @@ const anySignal = (signals: AbortSignal[]): AbortSignal => {
 
 export interface BashServiceDeps {
   filesystemService: FilesystemService;
-  workspaceClient?: IWorkspaceClient;
+  workspaceClient: IWorkspaceClient;
   execToolFn: ExecToolFn;
   resolveToolId: ResolveToolIdFn;
   abortSignal?: AbortSignal;
@@ -161,7 +161,6 @@ export class BashService implements IBashService {
   async flush(): Promise<void> {
     if (!this.touched) return;
     if (!this.workspaceId) return;
-    if (!this.deps.workspaceClient) return;
 
     const files = await this.deps.filesystemService.snapshotWorkspaceFiles();
     if (Object.keys(files).length === 0) {

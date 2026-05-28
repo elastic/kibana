@@ -28,9 +28,10 @@ const makeFsService = async (workspaceId?: string) => {
 
 describe('BashService', () => {
   it('exec runs a script in the unified FS, cwd is /tmp', async () => {
-    const { fsService } = await makeFsService();
+    const { fsService, workspaceClient } = await makeFsService();
     const bash = new BashService({
       filesystemService: fsService,
+      workspaceClient,
       execToolFn: jest.fn(),
       resolveToolId: (id) => id,
     });
@@ -40,9 +41,10 @@ describe('BashService', () => {
   });
 
   it('writes to /workspace persist across exec calls in the same run', async () => {
-    const { fsService } = await makeFsService();
+    const { fsService, workspaceClient } = await makeFsService();
     const bash = new BashService({
       filesystemService: fsService,
+      workspaceClient,
       execToolFn: jest.fn(),
       resolveToolId: (id) => id,
     });
@@ -97,9 +99,10 @@ describe('BashService', () => {
   });
 
   it('truncates large stdout', async () => {
-    const { fsService } = await makeFsService();
+    const { fsService, workspaceClient } = await makeFsService();
     const bash = new BashService({
       filesystemService: fsService,
+      workspaceClient,
       execToolFn: jest.fn(),
       resolveToolId: (id) => id,
     });
@@ -111,9 +114,10 @@ describe('BashService', () => {
   });
 
   it('returns exit_code 124 on wall-clock timeout', async () => {
-    const { fsService } = await makeFsService();
+    const { fsService, workspaceClient } = await makeFsService();
     const bash = new BashService({
       filesystemService: fsService,
+      workspaceClient,
       execToolFn: jest.fn(),
       resolveToolId: (id) => id,
       timeoutMs: 100,
@@ -124,10 +128,11 @@ describe('BashService', () => {
   });
 
   it('exec_tool inside the script invokes the supplied callback', async () => {
-    const { fsService } = await makeFsService();
+    const { fsService, workspaceClient } = await makeFsService();
     const execToolFn = jest.fn().mockResolvedValue({ ok: true });
     const bash = new BashService({
       filesystemService: fsService,
+      workspaceClient,
       execToolFn,
       resolveToolId: (id) => id,
     });
@@ -139,9 +144,10 @@ describe('BashService', () => {
 
   describe('getOrCreateWorkspaceId', () => {
     it('returns the existing id when one is set', async () => {
-      const { fsService } = await makeFsService();
+      const { fsService, workspaceClient } = await makeFsService();
       const bash = new BashService({
         filesystemService: fsService,
+        workspaceClient,
         execToolFn: jest.fn(),
         resolveToolId: (id) => id,
         initialWorkspaceId: 'existing',
@@ -150,9 +156,10 @@ describe('BashService', () => {
     });
 
     it('mints a new UUID when none is provided, and reuses it', async () => {
-      const { fsService } = await makeFsService();
+      const { fsService, workspaceClient } = await makeFsService();
       const bash = new BashService({
         filesystemService: fsService,
+        workspaceClient,
         execToolFn: jest.fn(),
         resolveToolId: (id) => id,
       });

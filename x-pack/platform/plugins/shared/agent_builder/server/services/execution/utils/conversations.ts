@@ -85,8 +85,7 @@ export const updateConversation$ = ({
         ? [...conversation.rounds.slice(0, -1), round]
         : [...conversation.rounds, round];
 
-      // Only set workspace_id if it's new (not already on the conversation).
-      // Idempotent: once set, subsequent rounds carry the same id.
+      // Only set workspace_id if it's new (once set it should not change).
       const newWorkspaceId =
         roundCompletedEvent.data.workspace_id && !conversation.workspace_id
           ? roundCompletedEvent.data.workspace_id

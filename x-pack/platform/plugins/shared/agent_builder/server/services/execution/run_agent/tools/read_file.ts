@@ -29,8 +29,7 @@ export const createReadFileTool = ({
 }): BuiltinToolDefinition<typeof schema> => {
   return {
     id: internalTools.readFile,
-    description:
-      'Read the content of a file from the unified VFS (/workspace, /tool_calls, /skills, etc.). Output is truncated past a token safeguard.',
+    description: 'Read the content of a file from the virtual file system (VFS).',
     type: ToolType.builtin,
     schema,
     tags: ['filesystem'],
@@ -50,9 +49,7 @@ export const createReadFileTool = ({
         truncated = true;
       }
       return {
-        results: [
-          createOtherResult({ path, content, ...(truncated ? { truncated: true } : {}) }),
-        ],
+        results: [createOtherResult({ path, content, ...(truncated ? { truncated: true } : {}) })],
       };
     },
   };

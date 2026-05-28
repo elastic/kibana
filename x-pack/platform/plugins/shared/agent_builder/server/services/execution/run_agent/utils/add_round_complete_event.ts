@@ -100,11 +100,7 @@ export const addRoundCompleteEvent = ({
   roundId?: string;
   /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
   initialTodos?: TodoItem[];
-  /**
-   * Returns the workspace_id used in this round, if any (set when the bash tool
-   * was invoked). The id is then propagated to the conversation document via
-   * the persistence pipeline.
-   */
+  /** Returns the workspace_id used in this round, if any */
   getWorkspaceId?: () => string | undefined;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {

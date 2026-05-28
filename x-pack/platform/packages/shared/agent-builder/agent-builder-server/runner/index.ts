@@ -73,3 +73,4 @@ export type {
 } from './filestore';
 export type { IFilesystemService } from './filesystem_service';
 export type { IBashService, BashExecResult } from './bash_service';
+export type { Volume, VolumeGlobOptions } from './volume';
