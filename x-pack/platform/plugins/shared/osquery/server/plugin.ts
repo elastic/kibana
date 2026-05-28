@@ -46,7 +46,7 @@ import { initializeTransforms } from './create_transforms/create_transforms';
 import { createDataViews } from './create_data_views';
 
 import { registerFeatures } from './utils/register_features';
-import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
+import { osqueryUnifiedAttachment } from './cases/attachments';
 import { createActionService } from './handlers/action/create_action_service';
 import { backfillScheduleIds } from './lib/backfill_schedule_ids';
 import { checkResponseActionAuthz } from './lib/check_response_action_authz';
@@ -145,7 +145,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       },
     });
 
-    plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
+    if (plugins.cases) {
+      plugins.cases.attachmentFramework.registerUnified(osqueryUnifiedAttachment);
+    }
 
     return {
       createActionService: this.createActionService,
