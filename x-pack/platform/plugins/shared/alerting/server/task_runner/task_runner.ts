@@ -39,6 +39,7 @@ import type { Result } from '../lib/result_type';
 import { asErr, asOk, isOk } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { partiallyUpdateRuleWithEs, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { AlertAuditAction, alertAuditSystemEvent } from '../lib/alert_audit_events';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -274,6 +275,39 @@ export class TaskRunner<
     }
   }
 
+  /**
+   * Emits one `alert_auto_unsnooze` audit event per per-alert snooze entry that
+   * the task runner has just decided to drop, attributed to `System` with the
+   * supplied reason. Wrapped defensively so a misconfigured audit sink can never
+   * break rule execution; failures are logged at warn level only.
+   */
+  private logAutoUnsnoozeAuditEvents(
+    instances: RawRuleSnoozedInstance[],
+    reason: 'ttl_expired' | 'condition_met',
+    rule: { id: string; name: string }
+  ): void {
+    if (instances.length === 0 || !this.context.auditService) {
+      return;
+    }
+    try {
+      for (const instance of instances) {
+        this.context.auditService.withoutRequest.log(
+          alertAuditSystemEvent({
+            action: AlertAuditAction.AUTO_UNSNOOZE,
+            id: instance.instanceId,
+            outcome: 'success',
+            reason,
+            ruleSavedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id, name: rule.name },
+          })
+        );
+      }
+    } catch (e) {
+      this.logger.warn(
+        `Failed to emit alert_auto_unsnooze audit event(s) for rule [id=${rule.id}]: ${e.message}`
+      );
+    }
+  }
+
   private async runRule({
     fakeRequest,
     rule,
@@ -281,7 +315,12 @@ export class TaskRunner<
     uiamApiKey,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
-    const { activeInstances } = evaluatePerAlertSnoozeExpiry(rule.snoozedInstances, this.runDate);
+    const { activeInstances, expiredInstances } = evaluatePerAlertSnoozeExpiry(
+      rule.snoozedInstances,
+      this.runDate
+    );
+
+    this.logAutoUnsnoozeAuditEvents(expiredInstances, 'ttl_expired', rule);
 
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
@@ -421,6 +460,8 @@ export class TaskRunner<
       activeInstances,
       alertAsDataByInstanceId
     );
+
+    this.logAutoUnsnoozeAuditEvents(conditionExpiredInstances, 'condition_met', rule);
 
     const conditionExpiredIds = new Set(conditionExpiredInstances.map((i) => i.instanceId));
     const updatedActiveInstances =
