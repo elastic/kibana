@@ -61,6 +61,8 @@ export const createConversationClientMock = (): ConversationClientMock => {
     update: jest.fn(),
     list: jest.fn(),
     delete: jest.fn(),
+    import: jest.fn(),
+    bulkDelete: jest.fn(),
   };
 };
 

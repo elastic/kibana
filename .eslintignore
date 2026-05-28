@@ -15,6 +15,9 @@ node_modules
 target
 snapshots.js
 
+# standalone external workspaces — these manage their own eslint config
+/memory-evals
+
 !/.eslintrc.js
 !.storybook
 !.buildkite

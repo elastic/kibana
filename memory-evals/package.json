@@ -1,0 +1,36 @@
+{
+  "name": "memory-evals",
+  "private": true,
+  "version": "0.1.0",
+  "description": "External evaluation runners for Agent Builder memory benchmarks. Standalone — not part of the Kibana monorepo.",
+  "workspaces": [
+    "_shared",
+    "longmemeval",
+    "locomo",
+    "memoryagentbench",
+    "mem2act",
+    "memground"
+  ],
+  "scripts": {
+    "longmemeval": "npm run -w longmemeval start --",
+    "locomo": "npm run -w locomo start --",
+    "memoryagentbench": "npm run -w memoryagentbench start --",
+    "mem2act": "npm run -w mem2act start --",
+    "memground": "npm run -w memground start --",
+    "test": "npm run -w @memory-evals/shared test",
+    "typecheck": "tsc -b _shared longmemeval locomo memoryagentbench mem2act memground",
+    "lint": "eslint --max-warnings=0 _shared/src longmemeval/src locomo/src memoryagentbench/src mem2act/src memground/src"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "eslint": "^8.57.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
