@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor, screen } from '@testing-library/react';
+import { waitFor, screen, within } from '@testing-library/react';
 import CreateConnectorFlyout from '.';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
@@ -96,6 +96,39 @@ describe('CreateConnectorFlyout', () => {
     );
 
     expect(await screen.findByTestId(`${actionTypeModel.id}-card`)).toBeInTheDocument();
+  });
+
+  it('renders the feature filter with options derived from loaded action types', async () => {
+    appMockRenderer.render(
+      <CreateConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        onConnectorCreated={onConnectorCreated}
+        onTestConnector={onTestConnector}
+      />
+    );
+
+    const comboBox = await screen.findByTestId('createConnectorsModalFeatureFilter');
+    await userEvent.click(within(comboBox).getByRole('combobox'));
+
+    expect(await screen.findByText('Alerting')).toBeInTheDocument();
+    expect(screen.getByText('Security Solution')).toBeInTheDocument();
+  });
+
+  it('pre-selects and disables the feature filter when featureId prop is provided', async () => {
+    appMockRenderer.render(
+      <CreateConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        onConnectorCreated={onConnectorCreated}
+        onTestConnector={onTestConnector}
+        featureId="alerting"
+      />
+    );
+
+    const comboBox = await screen.findByTestId('createConnectorsModalFeatureFilter');
+    expect(within(comboBox).getByTitle('Alerting')).toBeInTheDocument();
+    expect(within(comboBox).getByRole('combobox')).toBeDisabled();
   });
 
   it('shows the correct buttons without an action type selected', async () => {
