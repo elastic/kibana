@@ -24767,10 +24767,10 @@ ipaddr.js@1.9.1:
   resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-1.9.1.tgz#bff38543eeb8984825079ff3a2a8e6cbd46781b3"
   integrity sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==
 
-ipaddr.js@2.3.0, ipaddr.js@^2.1.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-2.3.0.tgz#71dce70e1398122208996d1c22f2ba46a24b1abc"
-  integrity sha512-Zv/pA+ciVFbCSBBjGfaKUya/CcGmUHzTydLMaTwrUUEM2DIEO3iZvueGxmacvmN50fGpGVKeTXpb2LcYQxeVdg==
+ipaddr.js@2.4.0, ipaddr.js@^2.1.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/ipaddr.js/-/ipaddr.js-2.4.0.tgz#038e9ceaf8219efc5bb76347b7eb787875d5095b"
+  integrity sha512-9VGk3HGanVE6JoZXHiCpnGy5X0jYDnN4EA4lntFPj+1vIWlFhIylq2CrrCOJH9EAhc5CYhq18F2Av2tgoAPsYQ==
 
 irregular-plurals@^3.2.0:
   version "3.2.0"
