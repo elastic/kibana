@@ -111,6 +111,7 @@ export const FlyoutTabsList = ({
             index={index}
             draggableId={`${droppableId}-${tab.id}`}
             spacing="m"
+            usePortal
             hasInteractiveChildren
             customDragHandle
           >
