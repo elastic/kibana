@@ -9,7 +9,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { getAlertSnoozeSnapshot } from './get_alert_snooze_snapshot';
 
 describe('getAlertSnoozeSnapshot', () => {
-  test('searches with the correct params', async () => {
+  test('searches with the correct params using the fields API', async () => {
     const logger = loggingSystemMock.createLogger();
     const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -26,7 +26,8 @@ describe('getAlertSnoozeSnapshot', () => {
       index: ['test-index'],
       allow_no_indices: true,
       size: 1,
-      _source: ['host.name', 'kibana.alert.severity'],
+      fields: ['host.name', 'kibana.alert.severity'],
+      _source: false,
       query: {
         bool: {
           must: [
@@ -39,7 +40,7 @@ describe('getAlertSnoozeSnapshot', () => {
     });
   });
 
-  test('returns the requested snapshot fields from the matching alert', async () => {
+  test('returns snapshot values from the fields API response', async () => {
     const logger = loggingSystemMock.createLogger();
     const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -50,9 +51,9 @@ describe('getAlertSnoozeSnapshot', () => {
           {
             _index: 'test-index',
             _id: 'test-alert-id',
-            _source: {
-              host: { name: 'web-01' },
-              kibana: { alert: { severity: 'high' } },
+            fields: {
+              'host.name': ['web-01'],
+              'kibana.alert.severity': ['high'],
             },
           },
         ],
@@ -114,8 +115,9 @@ describe('getAlertSnoozeSnapshot', () => {
           {
             _index: 'test-index',
             _id: 'test-alert-id',
-            _source: {
-              host: { name: 'web-01' },
+            // kibana.alert.severity not present in fields response
+            fields: {
+              'host.name': ['web-01'],
             },
           },
         ],
@@ -138,6 +140,40 @@ describe('getAlertSnoozeSnapshot', () => {
       'host.name': 'web-01',
       'kibana.alert.severity': null,
     });
+  });
+
+  test('preserves array for multi-value fields', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    clusterClient.search.mockResponseOnce({
+      hits: {
+        total: 1,
+        hits: [
+          {
+            _index: 'test-index',
+            _id: 'test-alert-id',
+            fields: {
+              tags: ['production', 'critical'],
+            },
+          },
+        ],
+      },
+      took: 0,
+      timed_out: false,
+      _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+    });
+
+    const result = await getAlertSnoozeSnapshot({
+      logger,
+      esClient: clusterClient,
+      indices: ['test-index'],
+      alertId: 'test-alert-id',
+      ruleId: 'test-rule-id',
+      fields: ['tags'],
+    });
+
+    expect(result).toEqual({ tags: ['production', 'critical'] });
   });
 
   test('logs an error when search fails with an Error instance', async () => {

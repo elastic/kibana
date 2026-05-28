@@ -57,6 +57,7 @@ describe('parseMetricsWithTelemetry', () => {
           data_streams: 0,
           field_types: 0,
           metric_types: 0,
+          units: 0,
         },
       },
     });
@@ -95,6 +96,7 @@ describe('parseMetricsWithTelemetry', () => {
           data_streams: 0,
           field_types: 0,
           metric_types: 0,
+          units: 0,
         },
       },
     });
@@ -141,6 +143,7 @@ describe('parseMetricsWithTelemetry', () => {
           data_streams: 1,
           field_types: 0,
           metric_types: 0,
+          units: 0,
         },
       },
     });
@@ -179,6 +182,7 @@ describe('parseMetricsWithTelemetry', () => {
           data_streams: 0,
           field_types: 0,
           metric_types: 0,
+          units: 0,
         },
       },
     });
@@ -217,9 +221,31 @@ describe('parseMetricsWithTelemetry', () => {
           data_streams: 0,
           field_types: 1,
           metric_types: 1,
+          units: 0,
         },
       },
     });
+  });
+
+  it('increments multi_value_counts.units when unit has more than one value', () => {
+    const response: MetricsESQLResponse[] = [
+      {
+        metric_name: 'cpu.usage',
+        data_stream: 'my-index',
+        unit: ['bytes', 'percent'],
+        metric_type: 'gauge',
+        field_type: ES_FIELD_TYPES.DOUBLE,
+        dimension_fields: ['host.name'],
+      },
+    ];
+    const result = parseMetricsWithTelemetry(response);
+    expect(result.telemetry.multi_value_counts).toEqual({
+      data_streams: 0,
+      field_types: 0,
+      metric_types: 0,
+      units: 1,
+    });
+    expect(result.telemetry.units).toEqual({ bytes: 1, percent: 1 });
   });
 
   it('returns allDimensions as union of all dimension_fields across rows with no duplicates', () => {
@@ -273,6 +299,7 @@ describe('parseMetricsWithTelemetry', () => {
         data_streams: 0,
         field_types: 0,
         metric_types: 0,
+        units: 0,
       },
     });
     const totalNumberOfMetrics = sum(Object.values(result.telemetry.metrics_by_type));

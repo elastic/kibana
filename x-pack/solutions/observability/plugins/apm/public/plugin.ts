@@ -109,6 +109,8 @@ import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/foc
 import { createLazyFullTraceWaterfallRenderer } from './components/shared/trace_waterfall/lazy_create_full_trace_waterfall_renderer';
 import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
 import { registerEmbeddables } from './embeddable/register_embeddables';
+import { registerServiceMapAttachment } from './agent_builder/attachment_types';
+import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -511,18 +513,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    import('./components/alerting/rule_types/register_apm_rule_types').then(
-      ({ registerApmRuleTypes }) => {
-        registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup, {
-          coreSetup: core,
-          pluginsSetup: plugins,
-          config,
-          kibanaEnvironment,
-          observabilityRuleTypeRegistry,
-          telemetry,
-        });
-      }
-    );
+    registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup, {
+      coreSetup: core,
+      pluginsSetup: plugins,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+      telemetry,
+    });
     registerEmbeddables({
       coreSetup: core,
       pluginsSetup: plugins,
@@ -556,9 +554,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       setApmInternalServices({});
     }
     if (plugins.agentBuilder) {
-      import('./agent_builder/attachment_types').then(({ registerServiceMapAttachment }) => {
-        registerServiceMapAttachment(plugins.agentBuilder!.attachments);
-      });
+      registerServiceMapAttachment(plugins.agentBuilder!.attachments);
     }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');

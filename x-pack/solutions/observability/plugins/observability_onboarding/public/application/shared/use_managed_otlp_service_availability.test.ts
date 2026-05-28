@@ -79,4 +79,21 @@ describe('useManagedOtlpServiceAvailability', () => {
 
     expect(result.current).toBe(true);
   });
+
+  it('reads the URL from the cloud plugin in preference to the observability fallback', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        featureFlags: {
+          getBooleanValue: () => true,
+        },
+        cloud: { managedOtlp: { url: 'https://from-cloud.example.com' } },
+        observability: { config: { managedOtlpServiceUrl: '' } },
+        context: { isServerless: false },
+      },
+    });
+
+    const { result } = renderHook(() => useManagedOtlpServiceAvailability());
+
+    expect(result.current).toBe(true);
+  });
 });

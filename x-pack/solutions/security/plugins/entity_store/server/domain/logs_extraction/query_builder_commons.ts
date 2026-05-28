@@ -33,6 +33,8 @@ import {
 } from '../../../common/domain/euid/esql';
 import { getFieldEvaluationsFromDefinition } from '../../../common/domain/euid/field_evaluations';
 
+export const MAX_COLLECTED_VALUES_PER_FIELD = 50;
+
 export const ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD =
   'entity.EngineMetadata.FirstSeenLogInPage';
 export const ENGINE_METADATA_UNTYPED_ID_FIELD = 'entity.EngineMetadata.UntypedId';
@@ -43,13 +45,14 @@ export const ENTITY_NAME_FIELD = 'entity.name';
 export const ENTITY_TYPE_FIELD = 'entity.type';
 export const TIMESTAMP_FIELD = '@timestamp';
 
-export const DOCUMENT_ID_FIELD = '_id';
-
-const METADATA_FIELDS = ['_index', '_id'];
-
 export interface PaginationParams {
   timestampCursor: string;
   idCursor: string;
+}
+
+/** Cursor for the log-slice outer loop: timestamp only. `_id` is excluded to avoid the expensive sort. */
+export interface LogSlicePaginationParams {
+  timestampCursor: string;
 }
 
 export interface PaginationFields {
@@ -66,24 +69,19 @@ export interface LogPageProbeSourceClauseParams {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
-  /** Exclusive lower bound on (@timestamp, _id) for log-slice pagination within the time window. */
-  logsPageCursorStart?: PaginationParams;
+  /** Inclusive lower bound on @timestamp for log-slice pagination within the time window. */
+  logsPageCursorStart?: LogSlicePaginationParams;
 }
 
-/** Bounded extraction: same as probe plus optional inclusive upper bound on (@timestamp, _id). */
+/** Bounded extraction: same as probe plus optional inclusive upper bound on @timestamp. */
 export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
-  logsPageCursorEnd?: PaginationParams;
+  logsPageCursorEnd?: LogSlicePaginationParams;
 };
 
 export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
   const { indexPatterns, type, fromDateISO, toDateISO, logsPageCursorStart } = params;
 
-  // Always use >= for the time-window start. When logsPageCursorStart is set its compound filter
-  // (@timestamp > T OR (@timestamp = T AND _id > id)) owns the exclusive lower bound. Using >
-  // here would drop documents with @timestamp = fromDateISO when the cursor timestamp equals
-  // fromDateISO (e.g. second recovery slice where all remaining logs share the same timestamp).
   const baseWhere = `FROM ${indexPatterns.join(', ')}
-    METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE
       ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
@@ -98,7 +96,7 @@ export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClausePa
 }
 
 export function buildExtractionSourceClause(
-  params: LogPageProbeSourceClauseParams & { logsPageCursorEnd?: PaginationParams }
+  params: LogPageProbeSourceClauseParams & { logsPageCursorEnd?: LogSlicePaginationParams }
 ): string {
   if (params.logsPageCursorEnd) {
     const { logsPageCursorEnd, ...probeParams } = params;
@@ -110,26 +108,12 @@ export function buildExtractionSourceClause(
   return buildLogPageProbeSourceClause(params);
 }
 
-function buildLogsPageStartFilter(cursor: PaginationParams): string {
-  const escapedId = escapeEsqlStringLiteral(cursor.idCursor);
-  return `(
-      ${TIMESTAMP_FIELD} > TO_DATETIME("${cursor.timestampCursor}")
-      OR (
-        ${TIMESTAMP_FIELD} == TO_DATETIME("${cursor.timestampCursor}")
-        AND \`${DOCUMENT_ID_FIELD}\` > "${escapedId}"
-      )
-    )`;
+function buildLogsPageStartFilter(cursor: LogSlicePaginationParams): string {
+  return `${TIMESTAMP_FIELD} >= TO_DATETIME("${cursor.timestampCursor}")`;
 }
 
-function buildLogsPageEndFilter(end: PaginationParams): string {
-  const escapedId = escapeEsqlStringLiteral(end.idCursor);
-  return `(
-      ${TIMESTAMP_FIELD} < TO_DATETIME("${end.timestampCursor}")
-      OR (
-        ${TIMESTAMP_FIELD} == TO_DATETIME("${end.timestampCursor}")
-        AND \`${DOCUMENT_ID_FIELD}\` <= "${escapedId}"
-      )
-    )`;
+function buildLogsPageEndFilter(end: LogSlicePaginationParams): string {
+  return `${TIMESTAMP_FIELD} <= TO_DATETIME("${end.timestampCursor}")`;
 }
 
 export function aggregationStats(fields: EntityField[], renameToRecent: boolean = true): string {
@@ -140,7 +124,7 @@ export function aggregationStats(fields: EntityField[], renameToRecent: boolean 
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${castedSrc} IS NOT NULL`;
+          return `${finalDest} = VALUES(${castedSrc})`;
         case 'prefer_newest_value':
           return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_oldest_value':

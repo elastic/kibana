@@ -71,7 +71,8 @@ import {
   getSchedule,
   getState,
   getTaskRunError,
-  evaluatePerAlertSnooze,
+  evaluatePerAlertSnoozeExpiry,
+  evaluatePerAlertSnoozeConditions,
 } from './lib';
 import {
   ErrorWithType,
@@ -280,7 +281,7 @@ export class TaskRunner<
     uiamApiKey,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
-    const { activeInstances } = evaluatePerAlertSnooze(rule.snoozedInstances, this.runDate);
+    const { activeInstances } = evaluatePerAlertSnoozeExpiry(rule.snoozedInstances, this.runDate);
 
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
@@ -407,6 +408,25 @@ export class TaskRunner<
     const alertsToUpdateWithMaintenanceWindows =
       await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
+    const alertAsDataByInstanceId = new Map<string, Record<string, unknown>>();
+    for (const instance of activeInstances) {
+      if (!instance.conditions?.length) continue;
+      const data = alertsClient.getBuiltActiveAlertDataByInstanceId(instance.instanceId);
+      if (data) {
+        alertAsDataByInstanceId.set(instance.instanceId, data);
+      }
+    }
+
+    const { conditionExpiredInstances } = evaluatePerAlertSnoozeConditions(
+      activeInstances,
+      alertAsDataByInstanceId
+    );
+
+    const conditionExpiredIds = new Set(conditionExpiredInstances.map((i) => i.instanceId));
+    const updatedActiveInstances =
+      conditionExpiredInstances.length > 0
+        ? activeInstances.filter((i) => !conditionExpiredIds.has(i.instanceId))
+        : activeInstances;
     const actionScheduler = new ActionScheduler({
       rule,
       ruleType: this.ruleType,
@@ -422,7 +442,7 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,
       alertsClient,
-      activeSnoozedIds: new Set(activeInstances.map((i) => i.instanceId)),
+      activeSnoozedIds: new Set(updatedActiveInstances.map((i) => i.instanceId)),
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
@@ -483,7 +503,9 @@ export class TaskRunner<
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
       prunedSnoozedInstances:
-        activeInstances.length < rule.snoozedInstances.length ? activeInstances : undefined,
+        updatedActiveInstances.length < rule.snoozedInstances.length
+          ? updatedActiveInstances
+          : undefined,
     };
   }
 

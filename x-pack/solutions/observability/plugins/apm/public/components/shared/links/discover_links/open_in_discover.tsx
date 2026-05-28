@@ -8,6 +8,8 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
+import type { EbtClickAttrs } from '@kbn/ebt-click';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import type { ESQLQueryParams } from './get_esql_query';
@@ -29,6 +31,7 @@ interface OpenInDiscoverProps {
   rangeFrom: string;
   rangeTo: string;
   queryParams: ESQLQueryParams;
+  ebt: Partial<EbtClickAttrs> & Pick<EbtClickAttrs, 'element'>;
 }
 
 export function OpenInDiscover({
@@ -39,6 +42,7 @@ export function OpenInDiscover({
   rangeFrom,
   rangeTo,
   queryParams,
+  ebt,
 }: OpenInDiscoverProps) {
   const { indexSettingsStatus } = useApmIndexSettingsContext();
 
@@ -50,6 +54,7 @@ export function OpenInDiscover({
   });
 
   const isDisabled = !discoverHref || indexSettingsStatus !== FETCH_STATUS.SUCCESS;
+  const ebtProps = ebt ? getEbtProps({ action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER, ...ebt }) : {};
 
   switch (variant) {
     case 'button':
@@ -61,6 +66,7 @@ export function OpenInDiscover({
           isDisabled={isDisabled}
           iconType="discoverApp"
           href={discoverHref}
+          {...ebtProps}
         >
           {label}
         </EuiButton>
@@ -74,6 +80,7 @@ export function OpenInDiscover({
           isDisabled={isDisabled}
           iconType="discoverApp"
           href={discoverHref}
+          {...ebtProps}
         >
           {label}
         </EuiButtonEmpty>
@@ -88,6 +95,7 @@ export function OpenInDiscover({
             isDisabled={isDisabled}
             iconType="discoverApp"
             href={discoverHref}
+            {...ebtProps}
           />
         </EuiToolTip>
       );
@@ -97,6 +105,7 @@ export function OpenInDiscover({
           data-test-subj={dataTestSubj}
           css={linkStyle}
           {...(isDisabled ? { disabled: true, color: 'subdued' } : { href: discoverHref })}
+          {...ebtProps}
         >
           {label}
         </EuiLink>

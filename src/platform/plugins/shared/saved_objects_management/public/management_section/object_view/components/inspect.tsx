@@ -58,6 +58,7 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
           languageId={XJsonLang.ID}
           value={objectAsJsonString}
           aria-label={codeEditorAriaLabel(title)}
+          enableFindAction
           options={{
             automaticLayout: false,
             fontSize: 12,

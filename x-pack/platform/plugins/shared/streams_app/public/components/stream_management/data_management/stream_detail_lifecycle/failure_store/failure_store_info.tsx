@@ -46,7 +46,6 @@ export const FailureStoreInfo = ({
           <RetentionCard
             openModal={openModal}
             canManageFailureStore={hasPrivileges}
-            streamName={definition.stream.name}
             failureStoreConfig={failureStoreConfig}
           />
         }

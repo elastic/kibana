@@ -9,10 +9,6 @@
 
 import type { PresentationUtilPluginStart } from './types';
 import { setStubKibanaServices } from './services/mocks';
-import {
-  getPanelPlacementSettings,
-  registerPanelPlacementSettings,
-} from './registries/panel_placement';
 
 const createStartContract = (): PresentationUtilPluginStart => {
   const startContract: PresentationUtilPluginStart = {
@@ -23,8 +19,6 @@ const createStartContract = (): PresentationUtilPluginStart => {
       reset: jest.fn(),
       setProjectStatus: jest.fn(),
     },
-    registerPanelPlacementSettings,
-    getPanelPlacementSettings,
   };
   return startContract;
 };

@@ -85,7 +85,7 @@ export const AlertCountByRuleByStatus = React.memo(
     entityRecord,
   }: AlertCountByStatusProps) => {
     const entityTypeCacheKey = entityType ?? 'generic';
-    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
     const euidApi = useEntityStoreEuidApi();
     const entityIdentifiersResolved = useMemo(
       () => resolveEntityIdentifiers(identityFields, entityFilter),
