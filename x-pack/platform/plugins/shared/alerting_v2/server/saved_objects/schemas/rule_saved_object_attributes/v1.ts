@@ -24,6 +24,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     description: schema.maybe(schema.string()),
     owner: schema.maybe(schema.string()),
     tags: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })),
+    builder_type: schema.maybe(schema.string()),
   }),
   time_field: schema.string(),
   schedule: schema.object({
@@ -87,6 +88,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
       { maxSize: 100 }
     )
   ),
+
   // Server-managed fields
   enabled: schema.boolean(),
   createdBy: schema.nullable(schema.string()),
