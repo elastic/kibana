@@ -11,6 +11,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/server';
 import { highlightTags } from './highlight_tags';
 import { getHighlightReact } from './highlight_react';
+import type { FieldFormatHighlightTags } from '../../types';
 
 /** Render the ReactNode to a plain HTML string for easy assertion.
  * &quot; is decoded back to " since both are valid HTML and the difference is
@@ -129,7 +130,7 @@ describe('getHighlightReact', () => {
     };
     const inline = (word: string) => `${defaultTags.preTag}${word}${defaultTags.postTag}`;
 
-    const check = (value: string, tags: ESQLHighlightTags, expected: string) => {
+    const check = (value: string, tags: FieldFormatHighlightTags, expected: string) => {
       expect(
         render(getHighlightReact(value, 'myField', { inline_highlights: { myField: tags } }))
       ).toBe(expected);
@@ -174,7 +175,7 @@ describe('getHighlightReact', () => {
     });
 
     test('uses custom pre_tag and post_tag from inline highlight config', () => {
-      const customTags: ESQLHighlightTags = { preTag: '<mark>', postTag: '</mark>' };
+      const customTags = { preTag: '<mark>', postTag: '</mark>' };
       check('foo <mark>bar</mark> baz', customTags, `foo ${mark('bar')} baz`);
     });
 
