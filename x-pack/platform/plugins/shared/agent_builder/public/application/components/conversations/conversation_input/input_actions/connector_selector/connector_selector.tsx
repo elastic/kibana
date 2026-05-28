@@ -15,7 +15,7 @@ import {
   EuiPopoverFooter,
   EuiSelectable,
 } from '@elastic/eui';
-import { useLoadConnectors } from '@kbn/inference-connectors';
+import { useLoadConnectors, INFERENCE_SETTINGS_SAVED_EVENT } from '@kbn/inference-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -198,8 +198,8 @@ export const ConnectorSelector: React.FC<{}> = () => {
   // Refetch immediately when the Feature Settings page saves inference settings so the
   // model list updates without requiring a page reload.
   useEffect(() => {
-    window.addEventListener('kibana:inference-settings-saved', refetch);
-    return () => window.removeEventListener('kibana:inference-settings-saved', refetch);
+    window.addEventListener(INFERENCE_SETTINGS_SAVED_EVENT, refetch);
+    return () => window.removeEventListener(INFERENCE_SETTINGS_SAVED_EVENT, refetch);
   }, [refetch]);
 
   const connectors = useMemo(() => aiConnectors ?? [], [aiConnectors]);

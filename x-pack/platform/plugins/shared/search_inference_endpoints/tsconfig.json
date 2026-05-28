@@ -44,6 +44,7 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-security-server",
     "@kbn/inference-common",
+    "@kbn/inference-connectors",
     "@kbn/inference-plugin",
     "@kbn/management-settings-ids",
     "@kbn/scout",

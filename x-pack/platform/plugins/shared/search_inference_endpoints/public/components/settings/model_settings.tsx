@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
+import { INFERENCE_SETTINGS_SAVED_EVENT } from '@kbn/inference-connectors';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { docLinks } from '../../../common/doc_links';
 import { FeatureSection } from './feature_section';
@@ -166,7 +167,7 @@ export const ModelSettings: React.FC = () => {
     if (allSavesSucceeded) {
       usageTracker.count(EventType.FEATURE_SETTINGS_SAVED);
       // Notify mounted connector-aware components (e.g. the Agent AI sidebar) to refetch.
-      window.dispatchEvent(new CustomEvent('kibana:inference-settings-saved'));
+      window.dispatchEvent(new CustomEvent(INFERENCE_SETTINGS_SAVED_EVENT));
     }
   }, [
     isFeatureDirty,

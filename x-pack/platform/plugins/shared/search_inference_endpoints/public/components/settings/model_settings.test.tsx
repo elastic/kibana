@@ -308,6 +308,64 @@ describe('ModelSettings', () => {
     });
   });
 
+  it('dispatches kibana:inference-settings-saved when all saves succeed', async () => {
+    const dispatchSpy = jest.spyOn(window, 'dispatchEvent');
+
+    mockUseModelSettingsForm.mockReturnValue({
+      ...defaultFormState,
+      isDirty: true,
+      save: jest.fn().mockResolvedValue(undefined),
+    });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('save-settings-button'));
+
+    await waitFor(() => {
+      const call = dispatchSpy.mock.calls.find(
+        ([event]) =>
+          event instanceof CustomEvent && event.type === 'kibana:inference-settings-saved'
+      );
+      expect(call).toBeDefined();
+    });
+
+    dispatchSpy.mockRestore();
+  });
+
+  it('does not dispatch kibana:inference-settings-saved when a save fails', async () => {
+    const dispatchSpy = jest.spyOn(window, 'dispatchEvent');
+
+    mockUseModelSettingsForm.mockReturnValue({
+      ...defaultFormState,
+      isDirty: true,
+      save: jest.fn().mockRejectedValue(new Error('save failed')),
+    });
+
+    render(
+      <Wrapper>
+        <ModelSettings />
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByTestId('save-settings-button'));
+
+    // Allow the async save to settle.
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    const call = dispatchSpy.mock.calls.find(
+      ([event]) => event instanceof CustomEvent && event.type === 'kibana:inference-settings-saved'
+    );
+    expect(call).toBeUndefined();
+
+    dispatchSpy.mockRestore();
+  });
+
   it('renders empty state when no sections are registered', () => {
     mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, sections: [] });
 

@@ -12,6 +12,7 @@ import type { AIConnector } from '@kbn/elastic-assistant';
 
 jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: jest.fn(),
+  INFERENCE_SETTINGS_SAVED_EVENT: 'kibana:inference-settings-saved',
 }));
 
 jest.mock('../../../../../hooks/use_kibana', () => ({
@@ -127,10 +128,12 @@ const setup = ({
     },
   } as any);
 
+  const refetch = jest.fn();
   mockUseLoadConnectors.mockReturnValue({
     data: connectors,
     isLoading,
     soEntryFound,
+    refetch,
   } as any);
 
   // Default: pick defaultConnectorId if it's in the list, otherwise fall back to the first connector.
@@ -157,6 +160,7 @@ const setup = ({
   return {
     ...utils,
     selectConnector,
+    refetch,
     // Helper to re-render with updated context (simulates admin changing a setting).
     updateContext: (next: Partial<RenderOptions>) => {
       if ('connectors' in next || 'soEntryFound' in next) {
@@ -164,6 +168,7 @@ const setup = ({
           data: next.connectors ?? connectors,
           isLoading: next.isLoading ?? isLoading,
           soEntryFound: 'soEntryFound' in next ? next.soEntryFound : soEntryFound,
+          refetch,
         } as any);
       }
       mockUseConnectorSelection.mockReturnValue({
@@ -258,6 +263,17 @@ describe('ConnectorSelector sync effect', () => {
     updateContext({ defaultConnectorId: undefined });
 
     expect(selectConnector).not.toHaveBeenCalled();
+  });
+
+  it('calls refetch when kibana:inference-settings-saved is dispatched', () => {
+    const connectors = [mkConnector('A')];
+    const { refetch } = setup({ connectors, selectedConnector: 'A', soEntryFound: false });
+
+    act(() => {
+      window.dispatchEvent(new CustomEvent('kibana:inference-settings-saved'));
+    });
+
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   it('switches to connectors[0] on mount even when the global default matches the stored selection', () => {

@@ -19,6 +19,13 @@ import type { AIConnector } from './types';
 const QUERY_KEY = ['kbn-inference-connectors', 'load-connectors'];
 
 /**
+ * Window CustomEvent type dispatched by the Feature Settings page after a successful save.
+ * Components that display connector/model lists can listen for this to refetch without
+ * requiring a page reload or window-focus change.
+ */
+export const INFERENCE_SETTINGS_SAVED_EVENT = 'kibana:inference-settings-saved';
+
+/**
  * Props for {@link useLoadConnectors}.
  *
  * The hook calls an internal HTTP route registered by the `searchInferenceEndpoints` plugin.
@@ -60,7 +67,6 @@ export const useLoadConnectors = ({
     },
     retry: false,
     keepPreviousData: true,
-    refetchOnWindowFocus: true,
     onError: (error: IHttpFetchError) => {
       if (error.name !== 'AbortError') {
         toasts?.addError(
