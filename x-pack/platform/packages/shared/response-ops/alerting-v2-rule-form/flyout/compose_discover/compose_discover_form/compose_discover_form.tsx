@@ -94,7 +94,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         <CentralizedActionPoliciesPanel http={props.services.http} />
         <EuiSpacer size="m" />
         <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
-        {props.state.mode !== 'edit' && (
+        {props.ruleId === undefined && (
           <>
             <EuiHorizontalRule margin="m" />
             <NotificationsStep />
@@ -102,8 +102,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         )}
       </>
     ),
-    validate: (methods, state) => {
-      if (state.mode === 'edit') return true;
+    validate: (methods) => {
       const notifs = methods.getValues('notifications');
       if (!notifs) return true;
       return notifs.workflows.every(isActionValid);

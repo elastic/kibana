@@ -46,6 +46,7 @@ export const ActionForm = ({ value, onChange, isInvalid }: ActionFormProps) => {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
   const addAction = (templateId: ActionTemplateId) => {
+    if (value.length >= MAX_ACTIONS) return;
     const newAction = buildActionFromTemplate(templateId);
     onChange([...value, newAction]);
     setExpandedId(newAction.id);

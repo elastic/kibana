@@ -92,7 +92,7 @@ jest.mock('@kbn/code-editor', () => ({
 }));
 
 jest.mock('./hooks/use_fetch_connectors_by_type', () => ({
-  ALL_CONNECTORS_KEY: ['alertingV2', 'actionForm', 'connectors'],
+  ALL_CONNECTORS_KEY: ['alertingV2', 'singleStepWorkflow', 'connectors'],
   useFetchConnectorsByType: ({ connectorTypeId }: { connectorTypeId: string | null }) => ({
     data:
       connectorTypeId === '.email'

@@ -15,7 +15,7 @@ import { useQuery } from '@kbn/react-query';
 import type { WorkflowListDto } from '@kbn/workflows';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface WorkflowReferenceSelectorProps {
   value: string | null;
@@ -59,6 +59,12 @@ export const WorkflowReferenceSelector = ({
   });
 
   const results = workflowsData?.results ?? [];
+
+  useEffect(() => {
+    if (!value) return;
+    const found = results.find((w) => w.id === value);
+    if (found) setSelectedWorkflow({ id: found.id, name: found.name });
+  }, [results, value]);
   const workflowOptions: Array<EuiComboBoxOptionOption<string>> = results.map((w) => ({
     label: w.name,
     value: w.id,
