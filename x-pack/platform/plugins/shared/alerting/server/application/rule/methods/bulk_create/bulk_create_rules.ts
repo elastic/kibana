@@ -350,9 +350,8 @@ async function runBatch<Params extends RuleParams>({
     let scheduledIds: string[] = [];
     const survivingEnabledIds = survivingEnabled.map((p) => p.id);
     try {
-      const scheduledTasks = await withSpan(
-        { name: 'runBatch.bulkSchedule', type: 'tasks' },
-        () => context.taskManager.bulkSchedule(tasksToSchedule)
+      const scheduledTasks = await withSpan({ name: 'runBatch.bulkSchedule', type: 'tasks' }, () =>
+        context.taskManager.bulkSchedule(tasksToSchedule)
       );
       scheduledIds = scheduledTasks.map((task) => task.id);
     } catch (error) {
@@ -421,13 +420,11 @@ async function runBatch<Params extends RuleParams>({
   const createTime = Date.now();
   let bulkResponse;
   try {
-    bulkResponse = await withSpan(
-      { name: 'runBatch.bulkCreateRulesSo', type: 'rules' },
-      () =>
-        bulkCreateRulesSo({
-          savedObjectsClient: context.unsecuredSavedObjectsClient,
-          bulkCreateRuleAttributes: bulkObjects,
-        })
+    bulkResponse = await withSpan({ name: 'runBatch.bulkCreateRulesSo', type: 'rules' }, () =>
+      bulkCreateRulesSo({
+        savedObjectsClient: context.unsecuredSavedObjectsClient,
+        bulkCreateRuleAttributes: bulkObjects,
+      })
     );
   } catch (error) {
     // Whole-call SO failure: invalidate keys, best-effort task cleanup.
