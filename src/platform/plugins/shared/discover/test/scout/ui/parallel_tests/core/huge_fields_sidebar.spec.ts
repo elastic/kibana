@@ -12,7 +12,7 @@
  */
 
 import { spaceTest, tags } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
+import { expect, scrollContainerUntilTargetIsVisible } from '@kbn/scout/ui';
 
 const HUGE_FIELDS_ARCHIVE_PATH = 'src/platform/test/functional/fixtures/es_archiver/huge_fields';
 const HUGE_FIELDS_DATA_VIEW = 'testhuge*';
@@ -80,7 +80,10 @@ spaceTest.describe('Discover huge field list virtualization', { tag: tags.statef
       await expect(virtualizedField).toBeHidden();
 
       // Scrolling down should render this field.
-      await pageObjects.discover.scrollSidebarAvailableFieldsUntilFieldIsVisible('myvar1050');
+      await scrollContainerUntilTargetIsVisible({
+        scrollContainer: page.testSubj.locator('fieldListGroupedFieldGroups'),
+        target: virtualizedField,
+      });
       await expect(virtualizedField).toBeVisible();
     }
   );

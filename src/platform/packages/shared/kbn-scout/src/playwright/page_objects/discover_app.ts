@@ -704,54 +704,6 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
-  /**
-   * Scroll the Discover "Available fields" virtualized sidebar list until the
-   * requested field is rendered.
-   */
-  async scrollSidebarAvailableFieldsUntilFieldIsVisible(
-    field: string,
-    {
-      maxScrollSteps = 40,
-      scrollStepPx = 1_200,
-    }: {
-      maxScrollSteps?: number;
-      scrollStepPx?: number;
-    } = {}
-  ) {
-    await this.waitUntilFieldListHasCountOfFields();
-
-    const scrollContainer = this.page.testSubj.locator('fieldListGroupedFieldGroups');
-    const targetField = this.page.testSubj.locator(`field-${field}`);
-
-    await expect(scrollContainer).toBeVisible();
-    await scrollContainer.evaluate((el) => {
-      el.scrollTop = 0;
-    });
-
-    for (let i = 0; i < maxScrollSteps; i++) {
-      if (await targetField.isVisible()) {
-        return;
-      }
-
-      const reachedBottom = await scrollContainer.evaluate((el, step) => {
-        const { scrollTop, scrollHeight, clientHeight } = el;
-        const atBottom = scrollTop + clientHeight >= scrollHeight;
-        if (atBottom) {
-          return true;
-        }
-
-        el.scrollBy(0, step);
-        return false;
-      }, scrollStepPx);
-
-      if (reachedBottom) {
-        break;
-      }
-    }
-
-    await expect(targetField).toBeVisible();
-  }
-
   private async waitUntilFieldPopoverIsLoaded() {
     await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
     await expect(this.page.locator('[data-test-subj*="-statsLoading"]')).toBeHidden();
