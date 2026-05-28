@@ -136,6 +136,7 @@ src/core/packages/capabilities/common @elastic/kibana-core
 src/core/packages/capabilities/server @elastic/kibana-core
 src/core/packages/capabilities/server-internal @elastic/kibana-core
 src/core/packages/capabilities/server-mocks @elastic/kibana-core
+src/core/packages/chrome/app-header @elastic/appex-sharedux
 src/core/packages/chrome/app-menu/core-chrome-app-menu @elastic/appex-sharedux
 src/core/packages/chrome/app-menu/core-chrome-app-menu-components @elastic/appex-sharedux
 src/core/packages/chrome/browser @elastic/appex-sharedux
@@ -2532,6 +2533,10 @@ x-pack/platform/plugins/shared/actions/server/lib/ears @elastic/workchat-eng
 x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.ts @elastic/workchat-eng @elastic/response-ops
 x-pack/platform/plugins/shared/actions/server/lib/axios_auth_strategies/ears_strategy.test.ts @elastic/workchat-eng @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs/src/auth_types/ears.ts @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/lib/ears_experimental_utils.ts @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/lib/ears_experimental_utils.test.ts @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema_from_spec.ts @elastic/workchat-eng @elastic/response-ops
+src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema_from_spec.test.ts @elastic/workchat-eng @elastic/response-ops
 
 
 # Connector Specs
