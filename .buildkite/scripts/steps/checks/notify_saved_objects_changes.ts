@@ -71,7 +71,7 @@ export interface SavedObjectsCheckReport {
 
 const COMMENT_CONTEXT = 'saved-objects-check';
 const DOCS_BASE_URL = 'https://www.elastic.co/docs/extend/kibana/saved-objects';
-const TROUBLESHOOTING_URL = `${DOCS_BASE_URL}/validate#troubleshooting`;
+const TROUBLESHOOTING_URL = `${DOCS_BASE_URL}/troubleshooting`;
 const MODEL_VERSIONS_URL = `${DOCS_BASE_URL}#defining-model-versions`;
 
 function hasSoChanges(report: SavedObjectsCheckReport): boolean {
