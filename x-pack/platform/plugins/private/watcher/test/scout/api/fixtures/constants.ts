@@ -6,9 +6,8 @@
  */
 
 import type { KibanaRole } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 
-export const WATCHER_API_TAGS = [...tags.stateful.classic];
+export const WATCHER_API_TAGS = ['@local-stateful-classic', '@cloud-stateful-classic'];
 
 export const API_PATHS = {
   INDEX_PATTERNS: 'api/watcher/indices/index_patterns',

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
-
-export const WATCHER_TAGS = [...tags.stateful.classic];
+export const WATCHER_TAGS = ['@local-stateful-classic', '@cloud-stateful-classic'];
 
 /**
  * Mirrors the built-in `watcher_admin` Elasticsearch role.

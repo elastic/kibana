@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
-
-export const CCR_TAGS = [...tags.stateful.classic];
+export const CCR_TAGS = ['@local-stateful-classic', '@cloud-stateful-classic'];
 
 export const CCR_ROLE = {
   elasticsearch: {
@@ -32,19 +30,6 @@ export const CCR_USER_ROLE = {
       feature: {
         dashboard: ['read'],
       },
-      spaces: ['*'],
-    },
-  ],
-};
-
-export const KIBANA_ADMIN_ROLE = {
-  elasticsearch: {
-    cluster: [],
-  },
-  kibana: [
-    {
-      base: ['all'],
-      feature: {},
       spaces: ['*'],
     },
   ],
