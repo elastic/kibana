@@ -2557,23 +2557,23 @@
   resolved "https://registry.yarnpkg.com/@elastic/prismjs-esql/-/prismjs-esql-1.1.2.tgz#0f16d98d73b49117b50a22f8a38a2938d34b7b05"
   integrity sha512-cW/fYEfB/mkqURmEhxz7AX1yqxexKNwSO2VQOAWCkwvXLQirg9AnjDgMZIVTsPc8s4JdI3grA5p5rUruJq9GpA==
 
-"@elastic/react-search-ui-views@1.24.1":
-  version "1.24.1"
-  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui-views/-/react-search-ui-views-1.24.1.tgz#d09b9e4ea99ee11b8cc20e645007df7917229fa1"
-  integrity sha512-OThWyEDNtFqpg9ywnyFXsYn3RzHxulrC6f9SBsMbPx/f4bxD804DcIUda1Rq9+i6Ldp9nQsGNvT8YyeeIM/Yog==
+"@elastic/react-search-ui-views@1.24.2":
+  version "1.24.2"
+  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui-views/-/react-search-ui-views-1.24.2.tgz#8914c0251e59942f12aacec3f528138601123dcf"
+  integrity sha512-knDMSaghU+ffceETgtIgd3B3QprsPiYW/wP7gEQ0JJFi0iS4sTg+aHDhHmGcsX8JTvErkTIch1tvVbgoMiwjBw==
   dependencies:
-    "@elastic/search-ui" "1.24.1"
+    "@elastic/search-ui" "1.24.2"
     downshift "^3.2.10"
     rc-pagination "^4.0.4"
     react-select "^5.10.1"
 
-"@elastic/react-search-ui@1.24.1":
-  version "1.24.1"
-  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui/-/react-search-ui-1.24.1.tgz#69be3fa990d401566e18f1dfd9290d352e32ba21"
-  integrity sha512-7xlaf5gIII/l54/yGQsihzWJcl8d8WVhRYX1m7SJCKX3V2Yr4oW+jTisVS4eUnD/er6mcX/56nV8v22/d0bmvA==
+"@elastic/react-search-ui@1.24.2":
+  version "1.24.2"
+  resolved "https://registry.yarnpkg.com/@elastic/react-search-ui/-/react-search-ui-1.24.2.tgz#08e65bf217380e5829b770d921473ca967738584"
+  integrity sha512-XeGspWelRQ7uqkF0MvCMSBqc1gMLvJdpPmtrK/hnEfwJY4uc/6TdllNGzj/NJEccbLJDKEy8/YWvrpDTGZYg9Q==
   dependencies:
-    "@elastic/react-search-ui-views" "1.24.1"
-    "@elastic/search-ui" "1.24.1"
+    "@elastic/react-search-ui-views" "1.24.2"
+    "@elastic/search-ui" "1.24.2"
 
 "@elastic/request-converter@9.4.0":
   version "9.4.0"
@@ -2603,18 +2603,28 @@
     "@elastic/app-search-javascript" "^8.1.2"
     "@elastic/search-ui" "1.24.1"
 
-"@elastic/search-ui-engines-connector@1.24.1":
-  version "1.24.1"
-  resolved "https://registry.yarnpkg.com/@elastic/search-ui-engines-connector/-/search-ui-engines-connector-1.24.1.tgz#6cf38e98a75d2cb67ad202398bd11cdaa22b58a6"
-  integrity sha512-+JMhb8lzceGZrcOyBXU1QMvfu7RwY8er33AQ4Jj/5P9r5LdnMSccUIqLb22BY7Kdo1hfDvQZiOMWjdSlTD5JMg==
+"@elastic/search-ui-engines-connector@1.24.2":
+  version "1.24.2"
+  resolved "https://registry.yarnpkg.com/@elastic/search-ui-engines-connector/-/search-ui-engines-connector-1.24.2.tgz#bb4c06a9b105db4d988f7a1d8e99f3c81e264521"
+  integrity sha512-iIMTYpJMkgjp1WOlBEWFDmjZscF70KiJBcM+++iIKDaUlrzp2f+KcqRx5H0u5bRU7oYBHTmRibxjbws1OWXpYw==
   dependencies:
-    "@elastic/search-ui" "1.24.1"
+    "@elastic/search-ui" "1.24.2"
     "@searchkit/sdk" "^3.0.0"
 
 "@elastic/search-ui@1.24.1":
   version "1.24.1"
   resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.24.1.tgz#d56e7fabf854f618af76164c6b6d2b0cfbccad95"
   integrity sha512-uXV1RM1FlSj2nfzDjc6Y4yg/QWf3gp4R5GYQ6PYUyZbj4AXT8HRtQGcSxQxTK7qZD8R/+Tpug784vldbHUz9Xw==
+  dependencies:
+    date-fns "^1.30.1"
+    deep-equal "^1.0.1"
+    history "^4.9.0"
+    qs "^6.9.7"
+
+"@elastic/search-ui@1.24.2":
+  version "1.24.2"
+  resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.24.2.tgz#a66c44d4c1a310226b8a3bef864b0050514dc8e9"
+  integrity sha512-fQ/BGEbh4EvX+IWw89xiSUXD3p3iDvZPA46WCHwH+jfEtKiC9P+274UiR32POI3znaWfZElxm9kIyNioVGin0Q==
   dependencies:
     date-fns "^1.30.1"
     deep-equal "^1.0.1"
@@ -22137,11 +22147,12 @@ fast-wrap-ansi@^0.2.0:
     fast-string-width "^3.0.2"
 
 fast-xml-builder@^1.1.4:
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/fast-xml-builder/-/fast-xml-builder-1.1.5.tgz#50188e1452a5fa095f415d3e63dcac0a1dbcbf11"
-  integrity sha512-4TJn/8FKLeslLAH3dnohXqE3QSoxkhvaMzepOIZytwJXZO69Bfz0HBdDHzOTOon6G59Zrk6VQ2bEiv1t61rfkA==
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/fast-xml-builder/-/fast-xml-builder-1.2.0.tgz#abd2363145a7625d9789ad96da375fabe3cff28c"
+  integrity sha512-00aAWieqff+ZJhsXA4g1g7M8k+7AYoMUUHF+/zFb5U6Uv/P0Vl4QZo84/IcufzYalLuEj9928bXN9PbbFzMF0Q==
   dependencies:
-    path-expression-matcher "^1.1.3"
+    path-expression-matcher "^1.5.0"
+    xml-naming "^0.1.0"
 
 fast-xml-parser@5.4.1, fast-xml-parser@5.5.7, fast-xml-parser@^5.5.1:
   version "5.5.7"
@@ -25792,7 +25803,7 @@ js-search@1.4.3:
   resolved "https://registry.yarnpkg.com/js-search/-/js-search-1.4.3.tgz#23a86d7e064ca53a473930edc48615b6b1c1954a"
   integrity sha512-Sny5pf00kX1sM1KzvUC9nGYWXOvBfy30rmvZWeRktpg+esQKedIXrXNee/I2CAnsouCyaTjitZpRflDACx4toA==
 
-js-sha256@0.11.1, js-sha256@^0.11.1:
+js-sha256@^0.11.1:
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/js-sha256/-/js-sha256-0.11.1.tgz#712262e8fc9569d6f7f6eea72c0d8e5ccc7c976c"
   integrity sha512-o6WSo/LUvY2uC4j7mO50a2ms7E/EAdbP0swigLV+nzHKTTaYnaLIWJ02VdXrsJX0vGedDESQnLsOekr94ryfjg==
@@ -29687,10 +29698,10 @@ path-exists@^5.0.0:
   resolved "https://registry.yarnpkg.com/path-exists/-/path-exists-5.0.0.tgz#a6aad9489200b21fab31e49cf09277e5116fb9e7"
   integrity sha512-RjhtfwJOxzcFmNOi6ltcbcu4Iu+FL3zEj83dk4kAS+fVpTxXLO1b38RvJgT/0QwvV/L3aY9TAnyv0EOqW4GoMQ==
 
-path-expression-matcher@^1.1.3:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/path-expression-matcher/-/path-expression-matcher-1.2.0.tgz#9bdae3787f43b0857b0269e9caaa586c12c8abee"
-  integrity sha512-DwmPWeFn+tq7TiyJ2CxezCAirXjFxvaiD03npak3cRjlP9+OjTmSy1EpIrEbh+l6JgUundniloMLDQ/6VTdhLQ==
+path-expression-matcher@^1.1.3, path-expression-matcher@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/path-expression-matcher/-/path-expression-matcher-1.5.0.tgz#3b98545dc88ffebb593e2d8458d0929da9275f4a"
+  integrity sha512-cbrerZV+6rvdQrrD+iGMcZFEiiSrbv9Tfdkvnusy6y0x0GKBXREFg/Y65GhIfm0tnLntThhzCnfKwp1WRjeCyQ==
 
 path-is-absolute@^1.0.0:
   version "1.0.1"
@@ -36954,6 +36965,11 @@ xml-name-validator@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/xml-name-validator/-/xml-name-validator-4.0.0.tgz#79a006e2e63149a8600f15430f0a4725d1524835"
   integrity sha512-ICP2e+jsHvAj2E2lIHxa5tjXRlKDJo4IdvPvCXbXQGdzSfmSpNVyIKMvoZHjDY9DP0zV17iI85o90vRFXNccRw==
+
+xml-naming@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/xml-naming/-/xml-naming-0.1.0.tgz#8ab7106c5b8d23caa2fabac1cadf17136379fbd8"
+  integrity sha512-k8KO9hrMyNk6tUWqUfkTEZbezRRpONVOzUTnc97VnCvyj6Tf9lyUR9EDAIeiVLv56jsMcoXEwjW8Kv5yPY52lw==
 
 xml-parser-xo@^4.1.5:
   version "4.1.5"
