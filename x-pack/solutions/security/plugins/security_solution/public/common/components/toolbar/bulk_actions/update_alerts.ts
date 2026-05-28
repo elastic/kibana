@@ -43,7 +43,7 @@ interface UpdatedAlertsProps {
  *
  * @throws An error if response is not OK
  */
-export const updateAlertStatus = ({
+export const updateAlertStatus = async ({
   status,
   query,
   signalIds,
@@ -52,21 +52,24 @@ export const updateAlertStatus = ({
   ruleStaticIds,
 }: UpdatedAlertsProps): Promise<UpdatedAlertsResponse> => {
   if (signalIds && signalIds.length > 0) {
-    return updateAlertStatusByIds({ status, signalIds, signal, reason }).then(({ updated }) => ({
+    const { updated } = await updateAlertStatusByIds({ status, signalIds, signal, reason });
+    return {
       updated: updated ?? 0,
       version_conflicts: 0,
-    }));
-  } else if (query) {
-    return updateAlertStatusByQuery({
+    };
+  }
+  if (query) {
+    const { updated, version_conflicts: conflicts } = await updateAlertStatusByQuery({
       status,
       query,
       signal,
       reason,
       ruleStaticIds,
-    }).then(({ updated, version_conflicts: conflicts }) => ({
+    });
+    return {
       updated: updated ?? 0,
       version_conflicts: conflicts,
-    }));
+    };
   }
   throw new Error('Either query or signalIds must be provided');
 };
