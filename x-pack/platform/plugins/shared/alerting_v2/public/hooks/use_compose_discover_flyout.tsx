@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { ComposeDiscoverMode, RuleFormServices } from '@kbn/alerting-v2-rule-form';
+import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import { PluginStart } from '@kbn/core-di';
-import { i18n } from '@kbn/i18n';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
-import type { ComposeDiscoverMode } from '@kbn/alerting-v2-rule-form';
+import {
+  SingleStepWorkflowForm,
+  type SingleStepWorkflowFormValue,
+} from '../components/single_step_workflow_form';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useCreateRule } from './use_create_rule';
+import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
 
 const tryParseBuilderState = (type: string, query: string): unknown | null => {
@@ -49,9 +54,26 @@ export const useComposeDiscoverFlyout = ({
   const [initialBuilderState, setInitialBuilderState] = useState<unknown>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
   const createRuleMutation = useCreateRule();
+  const setupNotificationsMutation = useSetupRuleNotifications();
   const updateRuleMutation = useUpdateRule();
-  const ruleFormServices = useMemo(
-    () => ({ http, data, dataViews, notifications, application, lens, uiActions }),
+  const ruleFormServices = useMemo<RuleFormServices<SingleStepWorkflowFormValue>>(
+    () => ({
+      http,
+      data,
+      dataViews,
+      notifications,
+      application,
+      lens,
+      workflowForm: {
+        Component: SingleStepWorkflowForm,
+        defaultValue: () => ({ mode: 'existing', workflowId: null }),
+        isValid: (value: SingleStepWorkflowFormValue) => {
+          if (value.mode === 'existing') return Boolean(value.workflowId);
+          return Boolean(value.typeId) && value.connectorId !== null && value.params.trim() !== '';
+        },
+      },
+      uiActions,
+    }),
     [http, data, dataViews, notifications, application, lens, uiActions]
   );
 
@@ -61,6 +83,13 @@ export const useComposeDiscoverFlyout = ({
     setBuilderType(null);
     setInitialBuilderState(undefined);
   }, []);
+
+  const closeAndRedirect = useCallback(() => {
+    setFlyoutOpen(false);
+    if (createSuccessRedirectPath) {
+      application.navigateToUrl(http.basePath.prepend(createSuccessRedirectPath));
+    }
+  }, [application, createSuccessRedirectPath, http]);
 
   const openCreateFlyout = useCallback(() => {
     setTargetRule(null);
@@ -140,7 +169,7 @@ export const useComposeDiscoverFlyout = ({
   );
 
   const flyout = flyoutOpen ? (
-    <ComposeDiscoverFlyout
+    <ComposeDiscoverFlyout<SingleStepWorkflowFormValue>
       historyKey={historyKey}
       mode={flyoutMode}
       rule={targetRule ?? undefined}
@@ -149,12 +178,16 @@ export const useComposeDiscoverFlyout = ({
       services={ruleFormServices}
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
-      onCreateRule={(payload) =>
+      onCreateRule={(payload, ruleNotifications) =>
         createRuleMutation.mutate(payload, {
-          onSuccess: () => {
-            setFlyoutOpen(false);
-            if (createSuccessRedirectPath) {
-              application.navigateToUrl(http.basePath.prepend(createSuccessRedirectPath));
+          onSuccess: (rule) => {
+            if (ruleNotifications) {
+              setupNotificationsMutation.mutate(
+                { rule, workflow: ruleNotifications.workflow },
+                { onSuccess: closeAndRedirect, onError: closeAndRedirect }
+              );
+            } else {
+              closeAndRedirect();
             }
           },
         })
@@ -167,7 +200,11 @@ export const useComposeDiscoverFlyout = ({
           }
         )
       }
-      isSaving={createRuleMutation.isLoading || updateRuleMutation.isLoading}
+      isSaving={
+        createRuleMutation.isLoading ||
+        setupNotificationsMutation.isLoading ||
+        updateRuleMutation.isLoading
+      }
     />
   ) : null;
 

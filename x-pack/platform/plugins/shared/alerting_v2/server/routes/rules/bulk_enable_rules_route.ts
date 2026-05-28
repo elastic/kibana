@@ -40,7 +40,7 @@ export class BulkEnableRulesRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => bulkOperationResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the result of the bulk enable operation.',
       },
       400: {
         body: () => errorResponseSchema,
