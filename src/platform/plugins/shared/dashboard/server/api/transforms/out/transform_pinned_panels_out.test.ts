@@ -8,10 +8,13 @@
  */
 
 import {
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
-  ESQL_CONTROL,
+  DEFAULT_RANGE_SLIDER_STATE,
+  DEFAULT_TIME_SLIDER_STATE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { getDashboardStateSchema } from '../../dashboard_state_schemas';
@@ -20,12 +23,14 @@ import {
   transformPinnedPanelProperties,
   transformPinnedPanelsObjectToArray,
   transformPinnedPanelsOut,
+  type StoredPinnedPanels,
 } from './transform_pinned_panels_out';
 
 jest.mock('../../../kibana_services', () => ({
-  ...jest.requireActual('../../../kibana_services'),
   embeddableService: {
-    getTransforms: jest.fn(),
+    getTransforms: jest.fn().mockImplementation((type) => {
+      return { transformOut: jest.fn().mockImplementation((val) => val) };
+    }),
     getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
   },
 }));
@@ -35,23 +40,23 @@ describe('pinned panels', () => {
     control1: {
       id: 'control1',
       type: 'optionsListControl',
-      width: 'medium',
-      config: { foo: 'bar' },
+      grow: true,
+      config: { data_view_id: 'dataViewId', field_name: 'fieldName' },
       order: 0,
     },
     control2: {
       id: 'control2',
-      type: 'rangeSliderControl',
+      type: RANGE_SLIDER_CONTROL,
       width: 'small',
-      config: { bizz: 'buzz' },
+      config: { data_view_id: 'dataViewId', field_name: 'fieldName', step: 2 },
       order: 1,
     },
     control3: {
       id: 'control3',
-      type: 'esqlControl',
+      type: TIME_SLIDER_CONTROL,
       grow: true,
-      config: { boo: 'bear' },
-      unsupportedProperty: 'unsupported',
+      width: 'large',
+      config: {},
       order: 2,
     },
   } as Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
@@ -60,26 +65,32 @@ describe('pinned panels', () => {
     {
       id: 'control1',
       type: OPTIONS_LIST_CONTROL,
-      width: DEFAULT_PINNED_CONTROL_STATE.width,
+      ...DEFAULT_PINNED_CONTROL_STATE,
+      grow: true,
       config: {
-        foo: 'bar',
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
+        data_view_id: 'dataViewId',
+        field_name: 'fieldName',
       },
     },
     {
       id: 'control2',
       type: RANGE_SLIDER_CONTROL,
+      ...DEFAULT_PINNED_CONTROL_STATE,
       width: 'small',
       config: {
-        bizz: 'buzz',
+        ...DEFAULT_RANGE_SLIDER_STATE,
+        data_view_id: 'dataViewId',
+        field_name: 'fieldName',
+        step: 2,
       },
     },
     {
       id: 'control3',
-      type: ESQL_CONTROL,
+      type: TIME_SLIDER_CONTROL,
       grow: true,
-      config: {
-        boo: 'bear',
-      },
+      width: 'large',
+      config: DEFAULT_TIME_SLIDER_STATE,
     },
   ] as unknown as DashboardState['pinned_panels'];
 
@@ -101,18 +112,82 @@ describe('pinned panels', () => {
     expect(result).toHaveProperty('2.id', 'control3');
   });
 
+  it('drops any invalid panels', () => {
+    const invalidPanel = {
+      type: 'does-not-exist',
+      grow: true,
+      config: { boo: 'bear' },
+      unsupportedProperty: 'unsupported',
+      order: 3,
+    };
+    const result = transformPinnedPanelsOut(
+      undefined,
+      {
+        panels: {
+          ...mockPinnedPanels,
+          invalidPanel,
+        },
+      } as DashboardSavedObjectAttributes['pinned_panels'],
+      [],
+      getDashboardStateSchema(false)
+    );
+    expect(result.panels).toEqual(transformedPinnedPanels);
+    expect(result.warnings).toEqual([
+      {
+        type: 'dropped_panel',
+        panel_type: invalidPanel.type,
+        panel_config: invalidPanel.config,
+        message: `Unable to transform pinned panel config. Error: expected "type" to be one of ["esql_control", "options_list_control", "range_slider_control", "time_slider_control"] but got ["does-not-exist"]`,
+      },
+    ]);
+  });
+
+  it('shows warning when over 100 panels', () => {
+    const panels: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'] = {};
+    for (let i = 0; i < 101; i++) {
+      panels[`control-${i}`] = {
+        order: i,
+        type: TIME_SLIDER_CONTROL,
+        grow: true,
+        width: 'large',
+        config: {},
+      };
+    }
+
+    const result = transformPinnedPanelsOut(
+      undefined,
+      {
+        panels,
+      } as DashboardSavedObjectAttributes['pinned_panels'],
+      [],
+      getDashboardStateSchema(false)
+    );
+    expect(result.warnings).toEqual([
+      {
+        type: 'schema_warning',
+        message: `Error: [pinned_panels]: array size is [101], but cannot be greater than [100]`,
+      },
+    ]);
+  });
+
   describe('transform <9.4 legacy controls', () => {
     it('should transform controls explicit input', () => {
-      const controlsArray = transformPinnedPanelsObjectToArray(mockPinnedPanels);
+      const controlsArray = transformPinnedPanelsObjectToArray({
+        ...mockPinnedPanels,
+        control3: {
+          ...mockPinnedPanels.control3,
+          unsupportedProperty: 'unsupported',
+        },
+      } as StoredPinnedPanels);
       const result = transformPinnedPanelProperties(controlsArray);
 
-      expect(result).toHaveProperty('0.config.foo', 'bar');
+      expect(result).toHaveProperty('0.config.data_view_id', 'dataViewId');
       expect(result).not.toHaveProperty('0.explicitInput');
 
-      expect(result).toHaveProperty('1.config.bizz', 'buzz');
+      expect(result).toHaveProperty('1.config.step', 2);
       expect(result).not.toHaveProperty('1.explicitInput');
 
-      expect(result).toHaveProperty('2.config.boo', 'bear');
+      expect(result).toHaveProperty('2.config');
       expect(result).not.toHaveProperty('2.explicitInput');
       expect(result).not.toHaveProperty('2.unsupportedProperty');
       expect(result).not.toHaveProperty('2.config.unsupportedProperty');

@@ -11,12 +11,13 @@ import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformPanelsOut } from './transform_panels_out';
 
 const mockGetTransforms = jest.fn();
+const mockGetAllEmbeddableSchemas = jest.fn().mockReturnValue({});
 
 beforeAll(() => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('../../../kibana_services').embeddableService = {
     getTransforms: mockGetTransforms,
-    getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
+    getAllEmbeddableSchemas: mockGetAllEmbeddableSchemas,
   };
 });
 
@@ -100,6 +101,121 @@ describe('transformPanelsOut', () => {
         ],
       }
     `);
+  });
+
+  it('drops any invalid panels', () => {
+    mockGetAllEmbeddableSchemas.mockReturnValue({
+      DASHBOARD_MARKDOWN: {
+        title: 'markdown',
+        schema: {
+          getSchema: jest.fn().mockReturnValue({}),
+          validate: jest.fn(),
+        },
+      },
+      invalidPanel: {
+        title: 'invalid',
+        schema: {
+          getSchema: jest.fn().mockReturnValue({}),
+          validate: jest.fn().mockImplementation(() => {
+            throw new Error('Boo!');
+          }),
+        },
+      },
+    });
+
+    const panelsJSON = JSON.stringify([
+      {
+        type: 'DASHBOARD_MARKDOWN',
+        embeddableConfig: { content: 'Markdown panel content' },
+        panelIndex: 'panel-1',
+        gridData: {
+          h: 15,
+          i: 'panel-1',
+          w: 24,
+          x: 0,
+          y: 0,
+        },
+      },
+      {
+        type: 'invalidPanel',
+        embeddableConfig: { invalid: true },
+        panelIndex: 'panel-2',
+        gridData: {
+          h: 15,
+          i: 'panel-2',
+          w: 24,
+          x: 24,
+          y: 0,
+        },
+      },
+    ]);
+
+    expect(transformPanelsOut(panelsJSON, [], [], false, getDashboardStateSchema(false)))
+      .toMatchInlineSnapshot(`
+      Object {
+        "panels": Array [
+          Object {
+            "config": Object {
+              "content": "Markdown panel content",
+            },
+            "grid": Object {
+              "h": 15,
+              "w": 24,
+              "x": 0,
+              "y": 0,
+            },
+            "id": "panel-1",
+            "type": "markdown",
+          },
+        ],
+        "warnings": Array [
+          Object {
+            "message": "Unable to transform panel config. Error: Boo!",
+            "panel_config": Object {
+              "invalid": true,
+            },
+            "panel_references": Array [],
+            "panel_type": "invalidPanel",
+            "type": "dropped_panel",
+          },
+        ],
+      }
+    `);
+
+    mockGetAllEmbeddableSchemas.mockReturnValue({});
+  });
+
+  it('shows warning when over 100 panels', () => {
+    const panels: any = [];
+    for (let i = 0; i < 101; i++) {
+      panels.push({
+        type: 'markdown',
+        embeddableConfig: { content: 'Markdown panel content' },
+        panelIndex: `panel-${i}`,
+        gridData: {
+          i: `panel-${i}`,
+          h: 1,
+          w: 1,
+          x: i,
+          y: 0,
+        },
+      });
+    }
+
+    const result = transformPanelsOut(
+      JSON.stringify(panels),
+      [],
+      [],
+      false,
+      getDashboardStateSchema(false)
+    );
+
+    expect(result.warnings).toEqual([
+      {
+        type: 'schema_warning',
+        message: `Error: [panels]: array size is [101], but cannot be greater than [100]`,
+      },
+    ]);
   });
 
   it('should combine panelsJSON and sections', () => {

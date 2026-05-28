@@ -23,7 +23,8 @@ import { embeddableService } from '../../../kibana_services';
 import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import type { Warnings } from '../../types';
 
-type StoredPinnedPanels = Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
+export type StoredPinnedPanels =
+  Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
 
 export function transformPinnedPanelsOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'], // legacy

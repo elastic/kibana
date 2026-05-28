@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Joi, { type ArraySchema } from 'joi';
 import { flow } from 'lodash';
 
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -15,7 +16,7 @@ import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-pub
 
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import { embeddableService } from '../../../kibana_services';
-import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
+import { type getDashboardStateSchema } from '../../dashboard_state_schemas';
 import type { DashboardPanel, DashboardSection, DashboardState, Warnings } from '../../types';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
@@ -86,14 +87,16 @@ export function transformPanelsOut(
   try {
     const result = strictValidationSchema
       .getSchema()
+      // allow all panel types through, since they have been validated above
+      .fork('panels', (schema) => (schema as ArraySchema<unknown>).items(Joi.object()))
       .extract('panels')
-      .options({ stripUnknown: { arrays: true } }) // allows all panel types through, since they have been validated above
       .validate(panels);
+
     if (result.error) throw result.error;
   } catch (e) {
     warnings.push({
       type: 'schema_warning',
-      message: `Error: ${e.message}`, // the size error message is already descriptive enough
+      message: `Error: [panels]: ${e.message}`, // the size error message is already descriptive enough
     });
   }
 
