@@ -58,6 +58,9 @@ const PROJECT_PERFORMANCE_TITLE = i18n.translate(
   }
 );
 
+export const RECENT_DASHBOARDS_EXTENSION_POINT_ID =
+  'xpack.serverlessSearch.nav.dashboards.extensions.recent';
+
 export function createNavigationTree({
   isAppRegistered,
   showAiAssistant = true,
@@ -84,9 +87,21 @@ export function createNavigationTree({
       {
         link: 'dashboards',
         icon: 'productDashboard',
+        renderAs: 'panelOpener',
         getIsActive: ({ pathNameSerialized, prepend, location }) =>
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
+        children: [
+          {
+            id: 'recent-dashboards',
+            title: i18n.translate('xpack.serverlessObservability.nav.dashboards.recentlyViewed', {
+              defaultMessage: 'Recently viewed',
+            }),
+            renderAs: 'extensionPoint',
+            extensionPointId: RECENT_DASHBOARDS_EXTENSION_POINT_ID,
+            popoverOnly: true,
+          },
+        ],
       },
       {
         icon: 'productAgent',
