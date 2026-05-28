@@ -13,8 +13,7 @@
  * An MCP-native v2 connector that connects to the remote Box MCP server
  * at https://mcp.box.com.
  *
- * Auth: Bearer token (OAuth access token or developer token)
- *       OAuth 2.0 Authorization Code flow
+ * Auth: OAuth 2.0 Authorization Code flow
  */
 
 import { i18n } from '@kbn/i18n';
@@ -251,7 +250,7 @@ export const Box: ConnectorSpec = {
     aiQaSingleFile: {
       isTool: true,
       description:
-        'Ask Box AI a question about a single file. Box AI reads the file and returns an answer with citations. Use this for targeted questions like "What is the contract renewal date?" or "Summarize the executive summary". Files must be under 1 MB in extracted text. For questions spanning multiple files, use aiQaMultiFile instead.',
+        'Ask Box AI a question about a single file. Box AI reads the file and returns an answer with citations. Use this for targeted questions like "What is the contract renewal date?" or "Summarize the executive summary". Files must have fewer than 1 MB of extracted text. For questions spanning multiple files, use aiQaMultiFile instead.',
       input: AiQaSingleFileInputSchema,
       handler: async (ctx, input: AiQaSingleFileInput) => {
         return callToolJson(ctx, 'ai_qa_single_file', {
@@ -290,7 +289,7 @@ export const Box: ConnectorSpec = {
     aiExtractFreeform: {
       isTool: true,
       description:
-        'Extract metadata from a Box file using a natural-language prompt. Box AI reads the file and returns structured key-value pairs matching the described fields. Use this when you need to pull specific data points from documents — for example, "Extract the vendor name, invoice date, and total amount" from an invoice. Files must be under 1 MB in extracted text.',
+        'Extract metadata from a Box file using a natural-language prompt. Box AI reads the file and returns structured key-value pairs matching the described fields. Use this when you need to pull specific data points from documents — for example, "Extract the vendor name, invoice date, and total amount" from an invoice. Files must have fewer than 1 MB of extracted text.',
       input: AiExtractFreeformInputSchema,
       handler: async (ctx, input: AiExtractFreeformInput) => {
         return callToolJson(ctx, 'ai_extract_freeform', {
