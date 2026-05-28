@@ -340,6 +340,26 @@ describe('WorkflowCrudService', () => {
       );
     });
 
+    it('does not generate a reserved workflow ID from the YAML name', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ hits: { hits: [] } });
+      const reservedNameYaml = validYaml.replace('name: My Workflow', 'name: system-workflow Copy');
+
+      const service = new WorkflowCrudService(deps);
+      const result = await service.createWorkflow({ yaml: reservedNameYaml }, 'default', request);
+
+      expect(result.id).toBe('workflow-system-workflow-copy');
+      expect(client.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'workflow-system-workflow-copy',
+          op_type: 'create',
+          document: expect.objectContaining({
+            name: 'system-workflow Copy',
+          }),
+        })
+      );
+    });
+
     it('throws WorkflowConflictError when a user-supplied id matches an existing workflow (including tombstones)', async () => {
       const { deps, client } = makeDeps();
       // checkExistingIds uses an ids query (no bool/must_not) and is index-wide
