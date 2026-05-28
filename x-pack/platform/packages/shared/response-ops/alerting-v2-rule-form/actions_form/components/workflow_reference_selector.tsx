@@ -11,9 +11,11 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import { useQuery } from '@kbn/react-query';
+import type { WorkflowListDto } from '@kbn/workflows';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import React, { useState } from 'react';
-import { useFetchWorkflows } from '../../../hooks/use_fetch_workflows';
 
 interface WorkflowReferenceSelectorProps {
   value: string | null;
@@ -30,6 +32,8 @@ export const WorkflowReferenceSelector = ({
 }: WorkflowReferenceSelectorProps) => {
   const application = useService(CoreStart('application'));
   const uiSettings = useService(CoreStart('uiSettings'));
+  const { toasts } = useService(CoreStart('notifications'));
+  const workflowsApi = useService(WorkflowApi);
   const isWorkflowsEnabled = uiSettings.get<boolean>(WORKFLOWS_UI_SETTING_ID);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,9 +42,20 @@ export const WorkflowReferenceSelector = ({
     null
   );
 
-  const { data: workflowsData, isLoading } = useFetchWorkflows({
-    query: debouncedQuery,
-    isEnabled: isWorkflowsEnabled,
+  const { data: workflowsData, isLoading } = useQuery<WorkflowListDto, Error>({
+    queryKey: ['alertingV2RuleForm', 'workflows', { query: debouncedQuery }],
+    queryFn: () => workflowsApi.getWorkflows({ query: debouncedQuery, size: 100, page: 1 }),
+    enabled: isWorkflowsEnabled,
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+    onError: (error: Error) => {
+      toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.actionForm.workflows.fetchError',
+          { defaultMessage: 'Failed to load workflows' }
+        ),
+      });
+    },
   });
 
   const results = workflowsData?.results ?? [];
@@ -65,21 +80,24 @@ export const WorkflowReferenceSelector = ({
     return (
       <EuiCallOut
         announceOnMount={false}
-        title={i18n.translate('xpack.alertingV2.actionForm.workflowsDisabled.title', {
-          defaultMessage: 'Workflows are not enabled',
-        })}
+        title={i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.actionForm.workflowsDisabled.title',
+          {
+            defaultMessage: 'Workflows are not enabled',
+          }
+        )}
         color="warning"
         iconType="warning"
         data-test-subj="singleStepWorkflowsDisabledCallout"
       >
         <FormattedMessage
-          id="xpack.alertingV2.actionForm.workflowsDisabled.description"
+          id="xpack.responseOps.alertingV2RuleForm.actionForm.workflowsDisabled.description"
           defaultMessage="Single-step workflows require the Workflows feature. Enable it in {advancedSettingsLink}, then refresh this page."
           values={{
             advancedSettingsLink: (
               <EuiLink href={settingsUrl} data-test-subj="singleStepWorkflowsDisabledSettingsLink">
                 <FormattedMessage
-                  id="xpack.alertingV2.actionForm.workflowsDisabled.advancedSettingsLink"
+                  id="xpack.responseOps.alertingV2RuleForm.actionForm.workflowsDisabled.advancedSettingsLink"
                   defaultMessage="Advanced Settings"
                 />
               </EuiLink>
@@ -92,9 +110,12 @@ export const WorkflowReferenceSelector = ({
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.alertingV2.actionForm.workflowReference.label', {
-        defaultMessage: 'Workflow',
-      })}
+      label={i18n.translate(
+        'xpack.responseOps.alertingV2RuleForm.actionForm.workflowReference.label',
+        {
+          defaultMessage: 'Workflow',
+        }
+      )}
       fullWidth
       isInvalid={!!isInvalid}
       error={errorMessage}
@@ -106,9 +127,12 @@ export const WorkflowReferenceSelector = ({
         isLoading={isLoading}
         isInvalid={!!isInvalid}
         data-test-subj="workflowReferenceSelector"
-        placeholder={i18n.translate('xpack.alertingV2.actionForm.workflowReference.placeholder', {
-          defaultMessage: 'Search for a workflow',
-        })}
+        placeholder={i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.actionForm.workflowReference.placeholder',
+          {
+            defaultMessage: 'Search for a workflow',
+          }
+        )}
         selectedOptions={selectedOptions}
         onSearchChange={setSearchQuery}
         onChange={(options) => {

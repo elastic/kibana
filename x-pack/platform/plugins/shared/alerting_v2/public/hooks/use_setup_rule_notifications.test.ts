@@ -17,7 +17,7 @@ import type { RuleApiResponse } from '../services/rules_api';
 jest.mock('@kbn/core-di-browser');
 jest.mock('@kbn/workflows-ui');
 jest.mock('../services/action_policies_api');
-jest.mock('../components/actions_form', () => ({
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
   buildInlineWorkflowYaml: jest.fn().mockReturnValue('workflow: yaml'),
 }));
 

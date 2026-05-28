@@ -103,7 +103,7 @@ export const ActionForm = ({ value, onChange, isInvalid }: ActionFormProps) => {
             onClick={() => setIsPickerOpen(true)}
             data-test-subj="actionFormAddAnother"
           >
-            {i18n.translate('xpack.alertingV2.actionForm.list.addAnother', {
+            {i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.list.addAnother', {
               defaultMessage: 'Add another action',
             })}
           </EuiButton>

@@ -19,6 +19,7 @@ import { getStepIds, getBuilderStepIds } from '../use_compose_discover_state';
 import type { ComposeFormValues } from '../compose_form_types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { RULE_BUILDER_REGISTRY } from '../rule_builder';
+import { isActionValid } from '../../../actions_form';
 import { AlertConditionStep } from './alert_condition_step';
 import { RecoveryConditionStep } from './recovery_condition_step';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
@@ -96,16 +97,16 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         {props.state.mode !== 'edit' && (
           <>
             <EuiHorizontalRule margin="m" />
-            <NotificationsStep services={props.services} />
+            <NotificationsStep />
           </>
         )}
       </>
     ),
-    validate: (methods, state, services) => {
+    validate: (methods, state) => {
       if (state.mode === 'edit') return true;
       const notifs = methods.getValues('notifications');
       if (!notifs) return true;
-      return services?.workflowForm?.isValid?.(notifs.workflows) ?? true;
+      return notifs.workflows.every(isActionValid);
     },
   },
 };

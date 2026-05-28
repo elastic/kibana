@@ -44,15 +44,18 @@ export const ActionRow = ({
   const iconType = card?.iconType ?? 'gear';
   const label = card?.label ?? templateId;
   const toggleLabel = isExpanded
-    ? i18n.translate('xpack.alertingV2.actionForm.list.collapseItem', {
+    ? i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.list.collapseItem', {
         defaultMessage: 'Collapse action',
       })
-    : i18n.translate('xpack.alertingV2.actionForm.list.expandItem', {
+    : i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.list.expandItem', {
         defaultMessage: 'Expand action',
       });
-  const removeLabel = i18n.translate('xpack.alertingV2.actionForm.list.removeItem', {
-    defaultMessage: 'Remove action',
-  });
+  const removeLabel = i18n.translate(
+    'xpack.responseOps.alertingV2RuleForm.actionForm.list.removeItem',
+    {
+      defaultMessage: 'Remove action',
+    }
+  );
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="s" data-test-subj={`actionRow-${action.id}`}>
@@ -71,9 +74,12 @@ export const ActionRow = ({
               type="warning"
               color="danger"
               size="s"
-              aria-label={i18n.translate('xpack.alertingV2.actionForm.list.itemInvalid', {
-                defaultMessage: 'This action is incomplete',
-              })}
+              aria-label={i18n.translate(
+                'xpack.responseOps.alertingV2RuleForm.actionForm.list.itemInvalid',
+                {
+                  defaultMessage: 'This action is incomplete',
+                }
+              )}
               data-test-subj={`actionRowInvalid-${action.id}`}
             />
           </EuiFlexItem>
@@ -111,9 +117,12 @@ export const ActionRow = ({
               isInvalid={isInvalid}
               errorMessage={
                 isInvalid
-                  ? i18n.translate('xpack.alertingV2.actionForm.list.workflowRequiredError', {
-                      defaultMessage: 'A workflow must be selected.',
-                    })
+                  ? i18n.translate(
+                      'xpack.responseOps.alertingV2RuleForm.actionForm.list.workflowRequiredError',
+                      {
+                        defaultMessage: 'A workflow must be selected.',
+                      }
+                    )
                   : undefined
               }
             />

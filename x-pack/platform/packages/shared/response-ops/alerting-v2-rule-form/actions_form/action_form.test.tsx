@@ -16,9 +16,30 @@ import type { ActionFormValue } from './types';
 jest.mock('@kbn/react-query', () => ({
   ...jest.requireActual('@kbn/react-query'),
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
+  useQuery: ({ queryKey }: { queryKey: readonly unknown[] }) => {
+    if (queryKey[0] === 'alertingV2RuleForm') {
+      return {
+        data: {
+          page: 1,
+          size: 100,
+          total: 2,
+          results: [
+            { id: 'wf-1', name: 'My first workflow' },
+            { id: 'wf-2', name: 'My second workflow' },
+          ],
+        },
+        isLoading: false,
+      };
+    }
+    return { data: undefined, isLoading: true };
+  },
 }));
 
 const mockGetAddConnectorFlyout = jest.fn().mockReturnValue(null);
+
+jest.mock('@kbn/workflows-ui', () => ({
+  WorkflowApi: 'mock.WorkflowApi',
+}));
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -36,6 +57,9 @@ jest.mock('@kbn/core-di-browser', () => ({
     }
     if (token === 'plugin.start.triggersActionsUi') {
       return { getAddConnectorFlyout: mockGetAddConnectorFlyout };
+    }
+    if (token === 'mock.WorkflowApi') {
+      return { getWorkflows: jest.fn() };
     }
     return {};
   },
@@ -65,21 +89,6 @@ jest.mock('@kbn/code-editor', () => ({
       onChange={(e) => onChange?.(e.target.value)}
     />
   ),
-}));
-
-jest.mock('../../hooks/use_fetch_workflows', () => ({
-  useFetchWorkflows: () => ({
-    data: {
-      page: 1,
-      size: 100,
-      total: 2,
-      results: [
-        { id: 'wf-1', name: 'My first workflow' },
-        { id: 'wf-2', name: 'My second workflow' },
-      ],
-    },
-    isLoading: false,
-  }),
 }));
 
 jest.mock('./hooks/use_fetch_connectors_by_type', () => ({

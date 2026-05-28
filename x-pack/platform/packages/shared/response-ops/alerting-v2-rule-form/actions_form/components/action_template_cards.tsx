@@ -23,12 +23,18 @@ interface ActionTemplateCard {
 export const ACTION_TEMPLATE_CARDS: readonly ActionTemplateCard[] = [
   {
     id: 'existing-workflow',
-    label: i18n.translate('xpack.alertingV2.actionForm.card.existingWorkflow.label', {
-      defaultMessage: 'Workflow',
-    }),
-    description: i18n.translate('xpack.alertingV2.actionForm.card.existingWorkflow.description', {
-      defaultMessage: 'Select an existing workflow',
-    }),
+    label: i18n.translate(
+      'xpack.responseOps.alertingV2RuleForm.actionForm.card.existingWorkflow.label',
+      {
+        defaultMessage: 'Workflow',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.responseOps.alertingV2RuleForm.actionForm.card.existingWorkflow.description',
+      {
+        defaultMessage: 'Select an existing workflow',
+      }
+    ),
     iconType: 'workflowsApp',
   },
   ...INLINE_ACTION_STEP_DEFINITIONS.map((definition) => ({
@@ -73,7 +79,7 @@ export const ActionTemplateCards = ({ onPick, onCancel }: ActionTemplateCardsPro
       <>
         <EuiSpacer size="s" />
         <EuiLink onClick={onCancel} data-test-subj="actionFormCancelPicker">
-          {i18n.translate('xpack.alertingV2.actionForm.list.cancelPicker', {
+          {i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.list.cancelPicker', {
             defaultMessage: 'Cancel',
           })}
         </EuiLink>

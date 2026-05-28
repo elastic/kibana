@@ -62,9 +62,12 @@ export const useFetchConnectorsByType = ({
     retry: false,
     onError: (error: Error) => {
       toasts.addError(error, {
-        title: i18n.translate('xpack.alertingV2.actionForm.connectors.fetchError', {
-          defaultMessage: 'Failed to load connectors',
-        }),
+        title: i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.actionForm.connectors.fetchError',
+          {
+            defaultMessage: 'Failed to load connectors',
+          }
+        ),
       });
     },
   });

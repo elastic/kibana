@@ -15,12 +15,6 @@ import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  ActionForm,
-  createInitialActionFormValue,
-  isActionValid,
-  type ActionFormValue,
-} from '../components/actions_form';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
@@ -58,7 +52,7 @@ export const useComposeDiscoverFlyout = ({
   const createRuleMutation = useCreateRule();
   const setupNotificationsMutation = useSetupRuleNotifications();
   const updateRuleMutation = useUpdateRule();
-  const ruleFormServices = useMemo<RuleFormServices<ActionFormValue>>(
+  const ruleFormServices = useMemo<RuleFormServices>(
     () => ({
       http,
       data,
@@ -66,11 +60,6 @@ export const useComposeDiscoverFlyout = ({
       notifications,
       application,
       lens,
-      workflowForm: {
-        Component: ActionForm,
-        defaultValue: createInitialActionFormValue,
-        isValid: (value: ActionFormValue) => value.every(isActionValid),
-      },
       uiActions,
     }),
     [http, data, dataViews, notifications, application, lens, uiActions]
@@ -168,7 +157,7 @@ export const useComposeDiscoverFlyout = ({
   );
 
   const flyout = flyoutOpen ? (
-    <ComposeDiscoverFlyout<ActionFormValue>
+    <ComposeDiscoverFlyout
       historyKey={historyKey}
       mode={flyoutMode}
       rule={targetRule ?? undefined}

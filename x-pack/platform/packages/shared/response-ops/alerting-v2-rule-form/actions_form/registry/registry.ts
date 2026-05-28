@@ -20,24 +20,30 @@ const SLACK_PARAMS_TEMPLATE = `message: ""
 export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition[] = [
   {
     id: 'email',
-    label: i18n.translate('xpack.alertingV2.actionForm.stepType.email.label', {
+    label: i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.stepType.email.label', {
       defaultMessage: 'Email',
     }),
-    description: i18n.translate('xpack.alertingV2.actionForm.stepType.email.description', {
-      defaultMessage: 'Send an email',
-    }),
+    description: i18n.translate(
+      'xpack.responseOps.alertingV2RuleForm.actionForm.stepType.email.description',
+      {
+        defaultMessage: 'Send an email',
+      }
+    ),
     iconType: 'email',
     connectorTypeId: '.email',
     paramsTemplate: EMAIL_PARAMS_TEMPLATE,
   },
   {
     id: 'slack',
-    label: i18n.translate('xpack.alertingV2.actionForm.stepType.slack.label', {
+    label: i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack.label', {
       defaultMessage: 'Slack',
     }),
-    description: i18n.translate('xpack.alertingV2.actionForm.stepType.slack.description', {
-      defaultMessage: 'Post a Slack message',
-    }),
+    description: i18n.translate(
+      'xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack.description',
+      {
+        defaultMessage: 'Post a Slack message',
+      }
+    ),
     iconType: 'logoSlack',
     connectorTypeId: '.slack',
     paramsTemplate: SLACK_PARAMS_TEMPLATE,

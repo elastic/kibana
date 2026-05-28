@@ -125,7 +125,7 @@ const getFlyoutTitle = (mode: ComposeDiscoverMode): string => {
 // These hooks live in the plugin, not the package — imported via the plugin's hook layer
 // when this flyout is rendered in the rules list page.
 // For now they are passed as props to keep the package boundary clean.
-export interface ComposeDiscoverFlyoutProps<TWorkflow extends object = object> {
+export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
   /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
@@ -133,16 +133,15 @@ export interface ComposeDiscoverFlyoutProps<TWorkflow extends object = object> {
   /** The ID of the rule being edited. Required when mode === 'edit'. */
   ruleId?: string;
   onClose: () => void;
-  services: RuleFormServices<TWorkflow>;
+  services: RuleFormServices;
   /**
    * Called with the create payload when the user submits in create mode. When the user
-   * enables the notifications step, `notifications` carries the captured workflow value;
-   * otherwise it is `undefined`. The cast to `RuleNotificationsValue<TWorkflow>` is safe
-   * because the workflow value was seeded by `services.workflowForm.defaultValue()`.
+   * enables the notifications step, `notifications` carries the captured action draft list;
+   * otherwise it is `undefined`.
    */
   onCreateRule: (
     payload: ReturnType<typeof composeFormToCreateRequest>,
-    notifications?: RuleNotificationsValue<TWorkflow>
+    notifications?: RuleNotificationsValue
   ) => void;
   /** Called with id + update payload when the user submits in edit mode. */
   onUpdateRule?: (id: string, payload: ReturnType<typeof composeFormToUpdateRequest>) => void;
@@ -224,7 +223,7 @@ const EMPTY_FORM_VALUES: ComposeFormValues = {
   dashboardArtifacts: [],
 };
 
-export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
+export function ComposeDiscoverFlyout({
   historyKey,
   mode = 'create',
   rule,
@@ -236,7 +235,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   isSaving = false,
   builderType,
   initialBuilderState,
-}: ComposeDiscoverFlyoutProps<TWorkflow>): React.ReactElement | null {
+}: ComposeDiscoverFlyoutProps): React.ReactElement | null {
   const isBuilderMode = Boolean(builderType);
   /*
    * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
@@ -245,9 +244,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
    * When the persisted rule has a custom recovery query, the initial state
    * infers that tracking was active and reconstructs the split.
    */
-  // Internal alias: typed-down to the base `RuleFormServices` for sub-components that
-  // don't need the concrete `TWorkflow`. The typed boundary lives in `onCreateRule`.
-  const baseServices = services as unknown as RuleFormServices;
+  const baseServices = services;
 
   const initialMapped =
     (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
@@ -464,10 +461,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
       }
     }
     if (isCreate) {
-      onCreateRule(
-        composeFormToCreateRequest(values, builderType),
-        values.notifications as RuleNotificationsValue<TWorkflow> | undefined
-      );
+      onCreateRule(composeFormToCreateRequest(values, builderType), values.notifications);
     } else if (ruleId && onUpdateRule) {
       onUpdateRule(ruleId, composeFormToUpdateRequest(values, builderType));
     }

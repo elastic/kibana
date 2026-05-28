@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { useMutation } from '@kbn/react-query';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { buildInlineWorkflowYaml, type ActionDraft } from '../components/actions_form';
+import { buildInlineWorkflowYaml, type ActionDraft } from '@kbn/alerting-v2-rule-form';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import type { RuleApiResponse } from '../services/rules_api';
 

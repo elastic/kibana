@@ -32,6 +32,12 @@
     "@kbn/code-editor",
     "@kbn/esql-language",
     "@kbn/core-http-browser",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/workflows",
+    "@kbn/workflows-ui",
+    "@kbn/workflows-yaml",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/core-di-browser",
+    "@kbn/core-di"
   ]
 }

@@ -46,10 +46,6 @@ export const createMockServices = (): RuleFormServices => ({
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
   lens: lensPluginMock.createStartContract(),
-  workflowForm: {
-    Component: () => null,
-    defaultValue: () => ({}),
-  },
   uiActions: uiActionsPluginMock.createStartContract(),
 });
 

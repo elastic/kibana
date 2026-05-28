@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { Suspense, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
+import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { ActionForm, createInitialActionFormValue, isActionValid } from '../../../actions_form';
 import type { ComposeFormValues } from '../compose_form_types';
 
 const notificationsTitle = i18n.translate(
@@ -25,19 +25,14 @@ const notificationsSubtext = i18n.translate(
   }
 );
 
-interface Props {
-  services: RuleFormServices;
-}
-
-export const NotificationsStep = ({ services }: Props) => {
+export const NotificationsStep = () => {
   const { watch, setValue } = useFormContext<ComposeFormValues>();
   const notifications = watch('notifications');
-  const { workflowForm } = services;
   const [touched, setTouched] = useState(false);
 
-  const defaultWorkflows = useMemo(() => workflowForm.defaultValue(), [workflowForm]);
+  const defaultWorkflows = useMemo(() => createInitialActionFormValue(), []);
   const workflows = notifications?.workflows ?? defaultWorkflows;
-  const isWorkflowInvalid = touched && !(workflowForm.isValid?.(workflows) ?? true);
+  const isWorkflowInvalid = touched && !workflows.every(isActionValid);
 
   return (
     <>
@@ -50,19 +45,13 @@ export const NotificationsStep = ({ services }: Props) => {
       </EuiText>
       <EuiSpacer size="m" />
 
-      {workflowForm.supported !== false && (
-        <div onBlur={() => setTouched(true)}>
-          <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-            <workflowForm.Component
-              value={workflows}
-              onChange={(next) =>
-                setValue('notifications', { workflows: next }, { shouldDirty: true })
-              }
-              isInvalid={isWorkflowInvalid}
-            />
-          </Suspense>
-        </div>
-      )}
+      <div onBlur={() => setTouched(true)}>
+        <ActionForm
+          value={workflows}
+          onChange={(next) => setValue('notifications', { workflows: next }, { shouldDirty: true })}
+          isInvalid={isWorkflowInvalid}
+        />
+      </div>
     </>
   );
 };
