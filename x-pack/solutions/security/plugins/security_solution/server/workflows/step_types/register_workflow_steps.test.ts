@@ -33,9 +33,9 @@ describe('registerWorkflowSteps (server)', () => {
     const { core } = buildCoreMock(true);
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions, core);
+    registerWorkflowSteps(workflowsExtensions, core, null);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(2);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(8);
     // getStartServices is called once eagerly to create the shared memoized promise
     expect(core.getStartServices).toHaveBeenCalledTimes(1);
   });
@@ -44,7 +44,7 @@ describe('registerWorkflowSteps (server)', () => {
     const { core } = buildCoreMock(true);
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions, core);
+    registerWorkflowSteps(workflowsExtensions, core, null);
 
     const [loader1, loader2] = workflowsExtensions.registerStepDefinition.mock.calls.map(
       ([arg]) => arg as StepLoader
@@ -58,7 +58,7 @@ describe('registerWorkflowSteps (server)', () => {
     const { core } = buildCoreMock(false);
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions, core);
+    registerWorkflowSteps(workflowsExtensions, core, null);
 
     const [loader1, loader2] = workflowsExtensions.registerStepDefinition.mock.calls.map(
       ([arg]) => arg as StepLoader
@@ -72,7 +72,7 @@ describe('registerWorkflowSteps (server)', () => {
     const { core, coreStart } = buildCoreMock(true);
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions, core);
+    registerWorkflowSteps(workflowsExtensions, core, null);
 
     const [loader1, loader2] = workflowsExtensions.registerStepDefinition.mock.calls.map(
       ([arg]) => arg as StepLoader

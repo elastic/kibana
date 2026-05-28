@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOW_STEP_ID_RENDER_ALERT_NARRATIVE } from '../../constants';
 
 export const renderAlertNarrativeInputSchema = z.object({
   alertId: z.string().describe('The alert ID'),
@@ -26,7 +27,7 @@ export const renderAlertNarrativeStepCommonDefinition: BaseStepDefinition<
   typeof renderAlertNarrativeInputSchema,
   typeof renderAlertNarrativeOutputSchema
 > = {
-  id: 'security.renderAlertNarrative',
+  id: WORKFLOW_STEP_ID_RENDER_ALERT_NARRATIVE,
   label: i18n.translate('xpack.securitySolution.workflows.steps.renderAlertNarrative.label', {
     defaultMessage: 'Render Alert Narrative',
   }),
@@ -53,7 +54,7 @@ export const renderAlertNarrativeStepCommonDefinition: BaseStepDefinition<
       `## Render an alert narrative
 \`\`\`yaml
 - name: render_alert_narrative
-  type: security.renderAlertNarrative
+  type: ${WORKFLOW_STEP_ID_RENDER_ALERT_NARRATIVE}
   with:
     alertId: "{{ variables.alert_id }}"
     alertIndex: "{{ variables.alert_index }}"

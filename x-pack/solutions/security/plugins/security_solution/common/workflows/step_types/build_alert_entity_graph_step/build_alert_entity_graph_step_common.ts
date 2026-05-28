@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOW_STEP_ID_BUILD_ALERT_ENTITY_GRAPH } from '../../constants';
 
 const DEFAULT_ENTITY_FIELDS = ['host.name', 'user.name', 'service.name'] as const;
 interface EntityFieldConfig {
@@ -157,7 +158,7 @@ export const buildAlertEntityGraphStepCommonDefinition: BaseStepDefinition<
   typeof buildAlertEntityGraphInputSchema,
   typeof buildAlertEntityGraphOutputSchema
 > = {
-  id: 'security.buildAlertEntityGraph',
+  id: WORKFLOW_STEP_ID_BUILD_ALERT_ENTITY_GRAPH,
   label: i18n.translate('xpack.securitySolution.workflows.steps.buildAlertEntityGraph.label', {
     defaultMessage: 'Build Alert Entity Graph',
   }),
@@ -188,7 +189,7 @@ export const buildAlertEntityGraphStepCommonDefinition: BaseStepDefinition<
       `## Build alert entity graph
 \`\`\`yaml
 - name: build_alert_entity_graph
-  type: security.buildAlertEntityGraph
+  type: ${WORKFLOW_STEP_ID_BUILD_ALERT_ENTITY_GRAPH}
   with:
     alertId: "{{ variables.alert_id }}"
     alertIndex: "{{ variables.alert_index }}"

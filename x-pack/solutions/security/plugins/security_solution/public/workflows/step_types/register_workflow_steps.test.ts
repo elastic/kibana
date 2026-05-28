@@ -35,7 +35,7 @@ describe('registerWorkflowSteps (public)', () => {
 
     registerWorkflowSteps(workflowsExtensions, core);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(2);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(8);
     // getStartServices is called once eagerly to create the shared memoized promise
     expect(core.getStartServices).toHaveBeenCalledTimes(1);
   });
