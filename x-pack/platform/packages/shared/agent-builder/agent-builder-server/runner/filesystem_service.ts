@@ -5,21 +5,17 @@
  * 2.0.
  */
 
+import type { IFileSystem } from 'just-bash';
+
 /**
  * Public contract for the agent's unified virtual filesystem service.
- *
- * Concrete implementation lives in the agent_builder plugin
- * (`services/filesystem/filesystem_service.ts`); this interface keeps the
- * contract reachable from the agent-builder-server package so it can appear
- * on `AgentHandlerContext`.
  */
 export interface IFilesystemService {
   /**
    * Returns the unified `IFileSystem` shared between `read_file` and `bash`.
-   * The result is the just-bash `IFileSystem` contract; we keep it untyped
-   * here to avoid pulling just-bash types into the public agent-builder API.
+   * The contract is just-bash's `IFileSystem` — POSIX-like, byte-level.
    */
-  getFilesystem(): unknown;
+  getFilesystem(): IFileSystem;
 
   /**
    * Snapshot the contents of `/workspace` for persistence to ES.

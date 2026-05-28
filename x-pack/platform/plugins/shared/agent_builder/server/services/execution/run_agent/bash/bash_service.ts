@@ -7,55 +7,48 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { Bash } from 'just-bash';
-import type { FilesystemService } from '../../../filesystem/filesystem_service';
+import type { BashExecResult, IBashService } from '@kbn/agent-builder-server/runner';
+import type { FilesystemService } from '../../filesystem/filesystem_service';
 import type { IWorkspaceClient } from '../../../workspaces';
-import {
-  createExecToolCommand,
-  type ExecToolFn,
-  type ResolveToolIdFn,
-} from './exec_tool_command';
+import { createExecToolCommand, type ExecToolFn, type ResolveToolIdFn } from './exec_tool_command';
 import { truncateBashOutput } from './output_truncation';
 import { ALLOWED_BASH_COMMANDS } from './allowed_commands';
 
 export const DEFAULT_BASH_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 export const DEFAULT_BASH_CWD = '/tmp';
 
+/**
+ * Execution caps for a single `bash` invocation. These are belt-and-suspenders
+ * — the 5-minute wall-clock timeout is the real safety net — but lower limits
+ * fail runaway scripts in milliseconds instead of minutes. Tuned conservatively
+ * for typical agent usage (short pipelines, hundreds of files at most). Revisit
+ * once we have production telemetry.
+ */
 export const DEFAULT_EXECUTION_LIMITS = {
-  maxCallDepth: 100,
-  maxCommandCount: 10_000,
-  maxLoopIterations: 10_000,
-  maxAwkIterations: 10_000,
-  maxSedIterations: 10_000,
+  maxCallDepth: 50, // recursion is unusual in agent-generated bash
+  maxCommandCount: 2_000, // ~5x typical heavy use
+  maxLoopIterations: 2_000, // same
+  maxAwkIterations: 5_000, // text processing legitimately runs higher
+  maxSedIterations: 5_000, // same
 };
 
 /**
- * Compose multiple AbortSignals into one. Uses `AbortSignal.any` when available
- * (Node 20+), otherwise manually relays the first abort through a new controller.
+ * Compose multiple AbortSignals into one. Native `AbortSignal.any` is available
+ * in Node 20+, but jsdom (used by Kibana's jest preset) ships an older
+ * `AbortSignal` polyfill without it, so we fall back manually for test parity.
  */
 const anySignal = (signals: AbortSignal[]): AbortSignal => {
-  const anyFn = (AbortSignal as unknown as { any?: (s: AbortSignal[]) => AbortSignal }).any;
-  if (typeof anyFn === 'function') return anyFn(signals);
+  if (typeof AbortSignal.any === 'function') return AbortSignal.any(signals);
   const controller = new AbortController();
-  const onAbort = (event: Event) => {
-    const target = event.target as AbortSignal;
-    controller.abort(target.reason);
-  };
   for (const s of signals) {
     if (s.aborted) {
       controller.abort(s.reason);
       return controller.signal;
     }
-    s.addEventListener('abort', onAbort, { once: true });
+    s.addEventListener('abort', () => controller.abort(s.reason), { once: true });
   }
   return controller.signal;
 };
-
-export interface BashExecResult {
-  stdout: string;
-  stderr: string;
-  exit_code: number;
-  truncated?: boolean;
-}
 
 export interface BashServiceDeps {
   filesystemService: FilesystemService;
@@ -75,7 +68,7 @@ export interface BashServiceDeps {
  * `experimentalFeatures.bash` is on. Holds the workspace id once bash has been
  * used at least once and flushes the workspace at end of round.
  */
-export class BashService {
+export class BashService implements IBashService {
   private readonly deps: BashServiceDeps;
   private workspaceId?: string;
   private touched = false;

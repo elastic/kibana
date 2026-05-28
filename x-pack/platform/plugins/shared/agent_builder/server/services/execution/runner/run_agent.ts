@@ -28,7 +28,7 @@ import {
   WorkspaceClient,
   createWorkspaceStorage,
 } from '../../workspaces';
-import { FilesystemService } from '../../filesystem';
+import { FilesystemService } from '../filesystem';
 import { BashService } from '../run_agent/bash';
 import type { Volume } from './store/filesystem/types';
 

@@ -8,7 +8,7 @@
 import type { ByteString, IFileSystem, FsStat } from 'just-bash';
 import { unsafeBytesFromLatin1 } from 'just-bash';
 import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
-import type { Volume } from '../execution/runner/store/filesystem/types';
+import type { Volume } from '../runner/store/filesystem/types';
 
 interface DirentEntry {
   name: string;

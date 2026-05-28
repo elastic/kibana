@@ -7,8 +7,9 @@
 
 import type { IFileSystem } from 'just-bash';
 import { InMemoryFs, MountableFs } from 'just-bash';
-import type { Volume } from '../execution/runner/store/filesystem/types';
-import type { IWorkspaceClient, WorkspaceFile } from '../workspaces';
+import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
+import type { Volume } from '../runner/store/filesystem/types';
+import type { IWorkspaceClient, WorkspaceFile } from '../../workspaces';
 import { VolumeBackedReadOnlyFs } from './volume_backed_read_only_fs';
 
 export interface FilesystemServiceDeps {
@@ -28,7 +29,7 @@ const WORKSPACE_PREFIX = '/workspace';
  *  - `/tool_calls`, `/skills`: read-only VolumeBackedReadOnlyFs adapters
  *  - `/tmp` and elsewhere: ephemeral base InMemoryFs
  */
-export class FilesystemService {
+export class FilesystemService implements IFilesystemService {
   private readonly deps: FilesystemServiceDeps;
   private fs?: MountableFs;
   private workspaceFs?: InMemoryFs;

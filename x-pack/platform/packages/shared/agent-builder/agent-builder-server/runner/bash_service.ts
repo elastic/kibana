@@ -13,10 +13,7 @@ export interface BashExecResult {
 }
 
 /**
- * Public contract for the bash runtime. Concrete implementation lives in the
- * agent_builder plugin (`services/execution/run_agent/bash/bash_service.ts`).
- * This interface lets the agent-builder-server package reference the service
- * on `AgentHandlerContext` without depending on the plugin.
+ * Public contract for the bash runtime.
  */
 export interface IBashService {
   exec(command: string): Promise<BashExecResult>;

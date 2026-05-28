@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { BashExecResult, IBashService } from '@kbn/agent-builder-server/runner';
 import { createBashTool } from './bash';
-import type { BashService, BashExecResult } from '../bash/bash_service';
 
 describe('bash tool', () => {
   it('delegates to BashService.exec with the command', async () => {
@@ -15,7 +15,7 @@ describe('bash tool', () => {
       stderr: '',
       exit_code: 0,
     });
-    const bashService = { exec } as unknown as BashService;
+    const bashService = { exec } as unknown as IBashService;
     const tool = createBashTool({ bashService });
     const handler = tool.handler;
     const result = (await handler({ command: 'echo ok' }, {} as never)) as {

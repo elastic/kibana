@@ -8,7 +8,6 @@
 export {
   BashService,
   type BashServiceDeps,
-  type BashExecResult,
   DEFAULT_BASH_TIMEOUT_MS,
   DEFAULT_BASH_CWD,
 } from './bash_service';

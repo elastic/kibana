@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { IFileSystem } from 'just-bash';
 import { createReadFileTool } from './read_file';
-import { FilesystemService } from '../../../filesystem/filesystem_service';
+import { FilesystemService } from '../../filesystem/filesystem_service';
 import { MemoryVolume } from '../../runner/store/filesystem/memory_volume';
 import type { IWorkspaceClient } from '../../../workspaces';
 
@@ -32,7 +31,7 @@ type StandardReturn = {
 describe('read_file', () => {
   it('reads workspace files', async () => {
     const service = await makeService();
-    await (service.getFilesystem() as IFileSystem).writeFile('/workspace/note.txt', 'hi there');
+    await service.getFilesystem().writeFile('/workspace/note.txt', 'hi there');
     const tool = createReadFileTool({ filesystemService: service });
     const out = (await tool.handler(
       { path: '/workspace/note.txt' },
@@ -55,10 +54,7 @@ describe('read_file', () => {
 
   it('truncates very large file contents', async () => {
     const service = await makeService();
-    await (service.getFilesystem() as IFileSystem).writeFile(
-      '/workspace/huge.txt',
-      'x'.repeat(200_000)
-    );
+    await service.getFilesystem().writeFile('/workspace/huge.txt', 'x'.repeat(200_000));
     const tool = createReadFileTool({ filesystemService: service });
     const out = (await tool.handler(
       { path: '/workspace/huge.txt' },

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MemoryVolume } from '../execution/runner/store/filesystem/memory_volume';
+import { MemoryVolume } from '../runner/store/filesystem/memory_volume';
 import { FilesystemService } from './filesystem_service';
-import type { IWorkspaceClient } from '../workspaces';
+import type { IWorkspaceClient } from '../../workspaces';
 
 const mockWorkspaceClient = (): jest.Mocked<IWorkspaceClient> => ({
   load: jest.fn().mockResolvedValue(undefined),

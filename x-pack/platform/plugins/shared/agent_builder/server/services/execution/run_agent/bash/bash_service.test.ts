@@ -6,7 +6,7 @@
  */
 
 import { BashService } from './bash_service';
-import { FilesystemService } from '../../../filesystem/filesystem_service';
+import { FilesystemService } from '../../filesystem/filesystem_service';
 import { MemoryVolume } from '../../runner/store/filesystem/memory_volume';
 import type { IWorkspaceClient } from '../../../workspaces';
 import { SAFEGUARD_TOKEN_COUNT } from './output_truncation';
