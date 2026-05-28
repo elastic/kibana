@@ -9,22 +9,41 @@ import React from 'react';
 import {
   EuiCallOut,
   EuiCodeBlock,
+  EuiFieldPassword,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiLink,
   EuiSkeletonRectangle,
   EuiSkeletonText,
   EuiSpacer,
-  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityOnboardingAppServices } from '../../../..';
-import { CopyToClipboardButton } from '../../../quickstart_flows/shared/copy_to_clipboard_button';
 import { useFleetManagedKubernetesState } from './use_fleet_managed_kubernetes_state';
 
-const KUBERNETES_APPLY_COMMAND = 'kubectl apply -f elastic-agent-managed-kubernetes.yml';
+const FLEET_SERVER_URL_PLACEHOLDER = '<YOUR_FLEET_SERVER_URL>';
+const ENROLLMENT_TOKEN_PLACEHOLDER = '<YOUR_ENROLLMENT_TOKEN>';
+const ADD_REPOSITORY_COMMAND = "helm repo add elastic 'https://helm.elastic.co' --force-update";
+
+const buildFleetManagedInstallCommand = ({
+  fleetServerUrl,
+  enrollmentToken,
+}: {
+  fleetServerUrl: string;
+  enrollmentToken: string;
+}) =>
+  [
+    'helm install elastic-agent elastic/elastic-agent \\',
+    '  -n kube-system \\',
+    '  --set agent.fleet.enabled=true \\',
+    `  --set agent.fleet.url="${fleetServerUrl || FLEET_SERVER_URL_PLACEHOLDER}" \\`,
+    `  --set agent.fleet.token="${enrollmentToken || ENROLLMENT_TOKEN_PLACEHOLDER}"`,
+  ].join('\n');
 
 export const FleetManagedKubernetesStep: React.FC = () => {
   const {
@@ -32,18 +51,18 @@ export const FleetManagedKubernetesStep: React.FC = () => {
   } = useKibana<ObservabilityOnboardingAppServices>();
   const {
     isLoadingDefaults,
-    isLoadingManifest,
     error,
     fleetServerUrl,
     enrollmentToken,
     agentPolicyId,
-    manifest,
-    downloadHref,
     setFleetServerUrl,
     setEnrollmentToken,
   } = useFleetManagedKubernetesState();
 
-  const showManifestContent = Boolean(manifest) && !isLoadingManifest;
+  const fleetManagedInstallCommand = buildFleetManagedInstallCommand({
+    fleetServerUrl,
+    enrollmentToken,
+  });
 
   const kubernetesIntegrationHref = application.getUrlForApp('fleet', {
     path: `/integrations/kubernetes/add-integration${
@@ -72,109 +91,90 @@ export const FleetManagedKubernetesStep: React.FC = () => {
         </>
       ) : null}
 
-      <EuiFormRow
-        label={i18n.translate(
-          'xpack.observability_onboarding.kubernetesV2.fleetManaged.fleetServerUrlLabel',
-          { defaultMessage: 'Fleet Server URL' }
-        )}
-        fullWidth
+      <EuiFlexGroup
+        data-test-subj="observabilityOnboardingKubernetesV2FleetConnectionInputs"
+        gutterSize="m"
       >
-        <EuiFieldText
-          fullWidth
-          value={fleetServerUrl}
-          onChange={(event) => setFleetServerUrl(event.target.value)}
-          data-test-subj="observabilityOnboardingKubernetesV2FleetServerUrlInput"
-        />
-      </EuiFormRow>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.observability_onboarding.kubernetesV2.fleetManaged.fleetServerUrlLabel',
+              { defaultMessage: 'Fleet Server URL' }
+            )}
+            fullWidth
+          >
+            <EuiFieldText
+              fullWidth
+              value={fleetServerUrl}
+              onChange={(event) => setFleetServerUrl(event.target.value)}
+              placeholder="https://fleet-server:8220"
+              data-test-subj="observabilityOnboardingKubernetesV2FleetServerUrlInput"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
 
-      <EuiFormRow
-        label={i18n.translate(
-          'xpack.observability_onboarding.kubernetesV2.fleetManaged.enrollmentTokenLabel',
-          { defaultMessage: 'Enrollment token' }
-        )}
-        fullWidth
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.observability_onboarding.kubernetesV2.fleetManaged.enrollmentTokenLabel',
+              { defaultMessage: 'Enrollment token' }
+            )}
+            fullWidth
+          >
+            <EuiFieldPassword
+              type="dual"
+              fullWidth
+              value={enrollmentToken}
+              onChange={(event) => setEnrollmentToken(event.target.value)}
+              placeholder={i18n.translate(
+                'xpack.observability_onboarding.kubernetesV2.fleetManaged.enrollmentTokenPlaceholder',
+                { defaultMessage: 'Enrollment token' }
+              )}
+              data-test-subj="observabilityOnboardingKubernetesV2FleetEnrollmentTokenInput"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer />
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate(
+            'xpack.observability_onboarding.kubernetesV2.fleetManaged.addRepositoryTitle',
+            { defaultMessage: 'Add the Elastic Helm repository' }
+          )}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiCodeBlock
+        language="bash"
+        paddingSize="m"
+        fontSize="s"
+        isCopyable={true}
+        data-test-subj="observabilityOnboardingKubernetesV2FleetAddRepositoryCommand"
       >
-        <EuiFieldText
-          fullWidth
-          value={enrollmentToken}
-          onChange={(event) => setEnrollmentToken(event.target.value)}
-          data-test-subj="observabilityOnboardingKubernetesV2FleetEnrollmentTokenInput"
-        />
-      </EuiFormRow>
+        {ADD_REPOSITORY_COMMAND}
+      </EuiCodeBlock>
 
-      {isLoadingManifest ? (
-        <div data-test-subj="observabilityOnboardingKubernetesV2FleetManifestLoading">
-          <EuiSpacer />
-          <EuiSkeletonText lines={4} />
-          <EuiSpacer />
-          <EuiSkeletonRectangle width="170px" height={40} />
-        </div>
-      ) : null}
-
-      {showManifestContent && manifest ? (
-        <>
-          <EuiSpacer />
-          <EuiText size="s">
-            <p>
-              {i18n.translate(
-                'xpack.observability_onboarding.kubernetesV2.fleetManaged.manifestDescription',
-                {
-                  defaultMessage:
-                    'Copy or download the Kubernetes manifest, then apply it to your cluster.',
-                }
-              )}
-            </p>
-          </EuiText>
-          <EuiSpacer />
-          <EuiCodeBlock
-            language="yaml"
-            paddingSize="m"
-            data-test-subj="observabilityOnboardingKubernetesV2FleetManifestPreview"
-          >
-            {manifest}
-          </EuiCodeBlock>
-          <EuiSpacer />
-          <CopyToClipboardButton
-            textToCopy={manifest}
-            data-test-subj="observabilityOnboardingKubernetesV2FleetManifestCopy"
-          />
-          {downloadHref ? (
-            <>
-              <EuiSpacer size="s" />
-              <EuiLink
-                href={downloadHref}
-                data-test-subj="observabilityOnboardingKubernetesV2FleetManifestDownload"
-              >
-                {i18n.translate(
-                  'xpack.observability_onboarding.kubernetesV2.fleetManaged.downloadManifestLabel',
-                  { defaultMessage: 'Download manifest' }
-                )}
-              </EuiLink>
-            </>
-          ) : null}
-          <EuiSpacer />
-          <EuiText size="s">
-            <p>
-              {i18n.translate(
-                'xpack.observability_onboarding.kubernetesV2.fleetManaged.applyCommandDescription',
-                {
-                  defaultMessage:
-                    'From the directory where the manifest is downloaded, run the apply command.',
-                }
-              )}
-            </p>
-          </EuiText>
-          <EuiSpacer />
-          <EuiCodeBlock
-            language="bash"
-            paddingSize="m"
-            isCopyable={true}
-            data-test-subj="observabilityOnboardingKubernetesV2FleetApplyCommand"
-          >
-            {KUBERNETES_APPLY_COMMAND}
-          </EuiCodeBlock>
-        </>
-      ) : null}
+      <EuiSpacer />
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate(
+            'xpack.observability_onboarding.kubernetesV2.fleetManaged.deployElasticAgentTitle',
+            { defaultMessage: 'Deploy Elastic Agent' }
+          )}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiCodeBlock
+        language="bash"
+        paddingSize="m"
+        fontSize="s"
+        isCopyable={true}
+        data-test-subj="observabilityOnboardingKubernetesV2FleetDeployCommand"
+      >
+        {fleetManagedInstallCommand}
+      </EuiCodeBlock>
 
       <EuiSpacer />
       <p>

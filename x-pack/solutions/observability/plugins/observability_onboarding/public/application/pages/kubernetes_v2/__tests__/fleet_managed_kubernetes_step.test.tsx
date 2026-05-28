@@ -39,26 +39,17 @@ const mockUseFleetManagedKubernetesState = useFleetManagedKubernetesState as jes
 >;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const SAMPLE_MANIFEST = `apiVersion: v1
-kind: Secret
-metadata:
-  name: elastic-agent-secret`;
-
-const APPLY_COMMAND = 'kubectl apply -f elastic-agent-managed-kubernetes.yml';
+const ADD_REPOSITORY_COMMAND = "helm repo add elastic 'https://helm.elastic.co' --force-update";
 
 const createMockState = (
   overrides: Partial<FleetManagedKubernetesState> = {}
 ): FleetManagedKubernetesState => ({
   isLoadingDefaults: false,
-  isLoadingManifest: false,
   fleetServerUrl: 'https://fleet.example.com',
   enrollmentToken: 'enrollment-token',
   agentPolicyId: 'fleet-first-agent-policy',
-  manifest: SAMPLE_MANIFEST,
-  downloadHref: '/base/api/fleet/kubernetes/download',
   setFleetServerUrl: jest.fn(),
   setEnrollmentToken: jest.fn(),
-  refreshManifest: jest.fn(),
   ...overrides,
 });
 
@@ -85,6 +76,9 @@ describe('FleetManagedKubernetesStep', () => {
 
     renderWithHostPageProviders(<FleetManagedKubernetesStep />);
 
+    expect(
+      screen.getByTestId('observabilityOnboardingKubernetesV2FleetConnectionInputs')
+    ).toBeInTheDocument();
     const fleetServerUrlInput = screen.getByTestId(
       'observabilityOnboardingKubernetesV2FleetServerUrlInput'
     );
@@ -96,6 +90,28 @@ describe('FleetManagedKubernetesStep', () => {
     expect(state.setFleetServerUrl).toHaveBeenCalled();
   });
 
+  it('shows placeholders when Fleet connection defaults are missing', () => {
+    setupMocks({
+      fleetServerUrl: '',
+      enrollmentToken: '',
+    });
+
+    renderWithHostPageProviders(<FleetManagedKubernetesStep />);
+
+    expect(
+      screen.getByTestId('observabilityOnboardingKubernetesV2FleetServerUrlInput')
+    ).toHaveAttribute('placeholder', 'https://fleet-server:8220');
+    expect(
+      screen.getByTestId('observabilityOnboardingKubernetesV2FleetEnrollmentTokenInput')
+    ).toHaveAttribute('placeholder', 'Enrollment token');
+    expect(
+      screen.getByTestId('observabilityOnboardingKubernetesV2FleetDeployCommand')
+    ).toHaveTextContent('--set agent.fleet.url="<YOUR_FLEET_SERVER_URL>"');
+    expect(
+      screen.getByTestId('observabilityOnboardingKubernetesV2FleetDeployCommand')
+    ).toHaveTextContent('--set agent.fleet.token="<YOUR_ENROLLMENT_TOKEN>"');
+  });
+
   it('allows editing the enrollment token input', async () => {
     const state = setupMocks();
 
@@ -105,6 +121,7 @@ describe('FleetManagedKubernetesStep', () => {
       'observabilityOnboardingKubernetesV2FleetEnrollmentTokenInput'
     );
     expect(enrollmentTokenInput).toHaveValue('enrollment-token');
+    expect(enrollmentTokenInput).toHaveAttribute('type', 'password');
 
     await userEvent.clear(enrollmentTokenInput);
     await userEvent.type(enrollmentTokenInput, 'custom-token');
@@ -141,46 +158,14 @@ describe('FleetManagedKubernetesStep', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('hides manifest preview and actions while a new manifest is loading', () => {
-    setupMocks({
-      isLoadingManifest: true,
-      manifest: SAMPLE_MANIFEST,
-      downloadHref: '/base/api/fleet/kubernetes/download',
-    });
-
-    renderWithHostPageProviders(<FleetManagedKubernetesStep />);
-
-    expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2FleetManifestLoading')
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesV2FleetManifestPreview')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesV2FleetManifestCopy')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesV2FleetManifestDownload')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('observabilityOnboardingKubernetesV2FleetApplyCommand')
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2FleetServerUrlInput')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2FleetEnrollmentTokenInput')
-    ).toBeInTheDocument();
-  });
-
   it('renders scoped errors inside the step while keeping inputs visible', () => {
     setupMocks({
-      error: new Error('Failed to load manifest'),
+      error: new Error('Failed to load Fleet defaults'),
     });
 
     renderWithHostPageProviders(<FleetManagedKubernetesStep />);
 
-    expect(screen.getByText('Failed to load manifest')).toBeInTheDocument();
+    expect(screen.getByText('Failed to load Fleet defaults')).toBeInTheDocument();
     expect(
       screen.getByTestId('observabilityOnboardingKubernetesV2FleetServerUrlInput')
     ).toBeInTheDocument();
@@ -190,41 +175,65 @@ describe('FleetManagedKubernetesStep', () => {
     expect(screen.queryByTestId('observabilityOnboardingEmptyPrompt')).not.toBeInTheDocument();
   });
 
-  it('renders the manifest preview as YAML when a manifest exists', () => {
-    setupMocks();
-
-    renderWithHostPageProviders(<FleetManagedKubernetesStep />);
-
-    const manifestPreview = screen.getByTestId(
-      'observabilityOnboardingKubernetesV2FleetManifestPreview'
-    );
-    expect(manifestPreview).toHaveTextContent('apiVersion: v1');
-    expect(manifestPreview).toHaveTextContent('kind: Secret');
-  });
-
-  it('shows copy and download actions when a manifest exists', () => {
+  it('renders Helm commands instead of a generated manifest', () => {
     setupMocks();
 
     renderWithHostPageProviders(<FleetManagedKubernetesStep />);
 
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2FleetManifestCopy')
-    ).toHaveAttribute('data-text-to-copy', SAMPLE_MANIFEST);
-    const downloadLink = screen.getByTestId(
-      'observabilityOnboardingKubernetesV2FleetManifestDownload'
+      screen.getByTestId('observabilityOnboardingKubernetesV2FleetAddRepositoryCommand')
+    ).toHaveTextContent(ADD_REPOSITORY_COMMAND);
+
+    const deployCommand = screen.getByTestId(
+      'observabilityOnboardingKubernetesV2FleetDeployCommand'
     );
-    expect(downloadLink).toHaveAttribute('href', '/base/api/fleet/kubernetes/download');
-    expect(downloadLink).not.toHaveAttribute('target', '_blank');
+    expect(deployCommand).toHaveTextContent('helm install elastic-agent elastic/elastic-agent');
+    expect(deployCommand).toHaveTextContent('--set agent.fleet.enabled=true');
+    expect(deployCommand).toHaveTextContent('--set agent.fleet.url="https://fleet.example.com"');
+    expect(deployCommand).toHaveTextContent('--set agent.fleet.token="enrollment-token"');
+    expect(
+      screen.queryByTestId('observabilityOnboardingKubernetesV2FleetManifestPreview')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('observabilityOnboardingKubernetesV2FleetManifestDownload')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('observabilityOnboardingKubernetesV2FleetApplyCommand')
+    ).not.toBeInTheDocument();
   });
 
-  it('shows the kubectl apply command when a manifest exists', () => {
+  it('shows command headings for the Fleet-managed Helm installation', () => {
+    setupMocks();
+
+    renderWithHostPageProviders(<FleetManagedKubernetesStep />);
+
+    expect(screen.getByText('Add the Elastic Helm repository')).toBeInTheDocument();
+    expect(screen.getByText('Deploy Elastic Agent')).toBeInTheDocument();
+  });
+
+  it('keeps the generated manifest details out of the Fleet-managed step', () => {
     setupMocks();
 
     renderWithHostPageProviders(<FleetManagedKubernetesStep />);
 
     expect(
-      screen.getByTestId('observabilityOnboardingKubernetesV2FleetApplyCommand')
-    ).toHaveTextContent(APPLY_COMMAND);
+      screen.queryByText('Copy or download the Kubernetes manifest, then apply it to your cluster.')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        'From the directory where the manifest is downloaded, run the apply command.'
+      )
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not render the old kubectl apply command', () => {
+    setupMocks();
+
+    renderWithHostPageProviders(<FleetManagedKubernetesStep />);
+
+    expect(
+      screen.queryByText('kubectl apply -f elastic-agent-managed-kubernetes.yml')
+    ).not.toBeInTheDocument();
   });
 
   it('links to the Fleet Kubernetes integration with the agent policy id', () => {

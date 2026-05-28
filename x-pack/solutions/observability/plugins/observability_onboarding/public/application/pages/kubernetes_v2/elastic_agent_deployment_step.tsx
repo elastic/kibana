@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiTabbedContent, type EuiTabbedContentTab } from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent, type EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import {
@@ -43,7 +43,12 @@ export const ElasticAgentDeploymentStep: React.FC<ElasticAgentDeploymentStepProp
         ),
         'data-test-subj':
           'observabilityOnboardingKubernetesV2ElasticAgentDeploymentTab-fleet-managed',
-        content: <FleetManagedKubernetesStep />,
+        content: (
+          <div data-test-subj="observabilityOnboardingKubernetesV2ElasticAgentDeploymentContent">
+            <EuiSpacer size="l" />
+            <FleetManagedKubernetesStep />
+          </div>
+        ),
       },
       {
         id: 'standalone',
@@ -53,13 +58,18 @@ export const ElasticAgentDeploymentStep: React.FC<ElasticAgentDeploymentStepProp
         ),
         'data-test-subj': 'observabilityOnboardingKubernetesV2ElasticAgentDeploymentTab-standalone',
         content: (
-          <KubernetesElasticAgentInstallStep
-            status={status}
-            data={data}
-            isMonitoringStepActive={isMonitoringStepActive}
-            ingestionMode={ingestionMode}
-            onIngestionModeChange={onIngestionModeChange}
-          />
+          <div data-test-subj="observabilityOnboardingKubernetesV2ElasticAgentDeploymentContent">
+            <EuiSpacer size="l" />
+            <KubernetesElasticAgentInstallStep
+              status={status}
+              data={data}
+              isMonitoringStepActive={isMonitoringStepActive}
+              ingestionMode={ingestionMode}
+              onIngestionModeChange={onIngestionModeChange}
+              useInlineCopyOnly={true}
+              useColoredSyntax={true}
+            />
+          </div>
         ),
       },
     ],

@@ -6,7 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonGroup, EuiFieldText, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFieldText,
+  EuiFormRow,
+  EuiLink,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { KubernetesV2CardOption } from './kubernetes_v2_card_selector';
@@ -25,6 +32,16 @@ const ELASTIC_APM_AGENT_DOCS_BY_LANGUAGE = {
   php: 'https://www.elastic.co/docs/reference/apm/agents/php',
 } as const;
 
+const ELASTIC_APM_AGENT_DOCS_LABEL_BY_LANGUAGE = {
+  nodejs: 'nodejs',
+  java: 'java',
+  python: 'python',
+  dotnet: '.NET',
+  go: 'go',
+  ruby: 'ruby',
+  php: 'php',
+} as const;
+
 const INSTRUMENTATION_OPTIONS: Array<KubernetesV2CardOption<ElasticAgentAppInstrumentationChoice>> =
   [
     {
@@ -33,12 +50,23 @@ const INSTRUMENTATION_OPTIONS: Array<KubernetesV2CardOption<ElasticAgentAppInstr
         'xpack.observability_onboarding.kubernetesV2.elasticAgentAppInstrumentation.yesCardLabel',
         { defaultMessage: 'Yes' }
       ),
+      description: i18n.translate(
+        'xpack.observability_onboarding.kubernetesV2.elasticAgentAppInstrumentation.yesCardDescription',
+        {
+          defaultMessage:
+            'Add APM agents or the OTel SDK to capture traces and application metrics.',
+        }
+      ),
     },
     {
       id: 'no',
       label: i18n.translate(
         'xpack.observability_onboarding.kubernetesV2.elasticAgentAppInstrumentation.noCardLabel',
         { defaultMessage: 'No, infrastructure only' }
+      ),
+      description: i18n.translate(
+        'xpack.observability_onboarding.kubernetesV2.elasticAgentAppInstrumentation.noCardDescription',
+        { defaultMessage: 'Skip app instrumentation and collect only logs and infra metrics.' }
       ),
     },
   ];
@@ -117,6 +145,15 @@ export const ElasticAgentAppInstrumentationStep: React.FC = () => {
       {instrumentationChoice === 'yes' ? (
         <>
           <EuiSpacer />
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate(
+                'xpack.observability_onboarding.kubernetesV2.elasticAgentAppInstrumentation.apmEndpointTitle',
+                { defaultMessage: 'APM endpoint' }
+              )}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiFormRow
             label={i18n.translate(
               'xpack.observability_onboarding.kubernetesV2.elasticAgentAppInstrumentation.apmServerUrlLabel',
@@ -128,10 +165,20 @@ export const ElasticAgentAppInstrumentationStep: React.FC = () => {
               fullWidth
               value={apmServerUrl}
               onChange={(event) => setApmServerUrl(event.target.value)}
+              placeholder="https://my-deployment.apm.io:8200"
               data-test-subj="observabilityOnboardingKubernetesV2ElasticAgentAppInstrumentationApmServerUrlInput"
             />
           </EuiFormRow>
           <EuiSpacer />
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate(
+                'xpack.observability_onboarding.kubernetesV2.elasticAgentAppInstrumentation.languageTitle',
+                { defaultMessage: 'Select language agent' }
+              )}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiButtonGroup
             legend={i18n.translate(
               'xpack.observability_onboarding.kubernetesV2.elasticAgentAppInstrumentation.languageSelectorLegend',
@@ -157,7 +204,12 @@ export const ElasticAgentAppInstrumentationStep: React.FC = () => {
                   >
                     {i18n.translate(
                       'xpack.observability_onboarding.kubernetesV2.elasticAgentAppInstrumentation.docsLinkLabel',
-                      { defaultMessage: 'Elastic APM agent documentation' }
+                      {
+                        defaultMessage: 'Elastic APM {language} agent docs',
+                        values: {
+                          language: ELASTIC_APM_AGENT_DOCS_LABEL_BY_LANGUAGE[languageId],
+                        },
+                      }
                     )}
                   </EuiLink>
                 ),

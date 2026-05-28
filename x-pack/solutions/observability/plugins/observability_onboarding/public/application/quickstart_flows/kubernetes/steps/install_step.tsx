@@ -25,11 +25,21 @@ export interface KubernetesElasticAgentInstallStepProps {
   isMonitoringStepActive: boolean;
   ingestionMode: IngestionMode;
   onIngestionModeChange: (mode: IngestionMode) => void;
+  useInlineCopyOnly?: boolean;
+  useColoredSyntax?: boolean;
 }
 
 export const KubernetesElasticAgentInstallStep: React.FC<
   KubernetesElasticAgentInstallStepProps
-> = ({ status, data, isMonitoringStepActive, ingestionMode, onIngestionModeChange }) => {
+> = ({
+  status,
+  data,
+  isMonitoringStepActive,
+  ingestionMode,
+  onIngestionModeChange,
+  useInlineCopyOnly = false,
+  useColoredSyntax = false,
+}) => {
   return (
     <>
       {status !== FETCH_STATUS.SUCCESS && (
@@ -48,6 +58,8 @@ export const KubernetesElasticAgentInstallStep: React.FC<
           isCopyPrimaryAction={!isMonitoringStepActive}
           ingestionMode={ingestionMode}
           onIngestionModeChange={onIngestionModeChange}
+          useInlineCopyOnly={useInlineCopyOnly}
+          useColoredSyntax={useColoredSyntax}
         />
       )}
     </>

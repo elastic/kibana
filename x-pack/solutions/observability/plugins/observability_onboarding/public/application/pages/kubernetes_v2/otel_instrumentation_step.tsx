@@ -6,9 +6,17 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonGroup, EuiCodeBlock, EuiLink, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSpacer,
+  EuiSwitch,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { OTEL_STACK_NAMESPACE } from '../../quickstart_flows/otel_kubernetes/constants';
 import type { KubernetesV2CardOption } from './kubernetes_v2_card_selector';
 import { KubernetesV2CardSelector } from './kubernetes_v2_card_selector';
@@ -111,17 +119,6 @@ export const OtelInstrumentationStep: React.FC = () => {
             </p>
           </EuiText>
           <EuiSpacer />
-          <EuiButtonGroup
-            legend={i18n.translate(
-              'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.languageSelectorLegend',
-              { defaultMessage: 'Select a programming language' }
-            )}
-            idSelected={languageId}
-            onChange={(optionId) => setLanguageId(optionId as OtelLanguageId)}
-            options={OTEL_LANGUAGE_OPTIONS}
-            data-test-subj="observabilityOnboardingKubernetesV2OtelInstrumentationLanguageSelector"
-          />
-          <EuiSpacer />
           <KubernetesV2CardSelector
             legend={i18n.translate(
               'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.annotationModeLegend',
@@ -132,6 +129,34 @@ export const OtelInstrumentationStep: React.FC = () => {
             onChange={setAnnotationMode}
             dataTestSubjPrefix="observabilityOnboardingKubernetesV2OtelAnnotationMode"
           />
+          <EuiSpacer />
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                legend={i18n.translate(
+                  'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.languageSelectorLegend',
+                  { defaultMessage: 'Programming language' }
+                )}
+                idSelected={languageId}
+                onChange={(optionId) => setLanguageId(optionId as OtelLanguageId)}
+                options={OTEL_LANGUAGE_OPTIONS}
+                data-test-subj="observabilityOnboardingKubernetesV2OtelInstrumentationLanguageSelector"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                href="https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/"
+                data-test-subj="observabilityOnboardingKubernetesV2OtelInstrumentationDocsLink"
+                target="_blank"
+                external
+              >
+                {i18n.translate(
+                  'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.docsLinkLabel',
+                  { defaultMessage: 'Other languages documentation' }
+                )}
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer />
           {annotationMode === 'pods' ? (
             <>
@@ -173,35 +198,18 @@ kubectl describe pod <myapp-pod-name> -n my-namespace`}
           ) : (
             <EuiCodeBlock
               paddingSize="m"
-              language="bash"
+              language="yaml"
               isCopyable={true}
               data-test-subj="observabilityOnboardingKubernetesV2OtelInstrumentationNamespaceSnippet"
             >
-              {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${languageId}="${OTEL_STACK_NAMESPACE}/elastic-instrumentation"`}
+              {`apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-namespace
+  annotations:
+    instrumentation.opentelemetry.io/inject-${languageId}: "${OTEL_STACK_NAMESPACE}/elastic-instrumentation"`}
             </EuiCodeBlock>
           )}
-          <EuiSpacer />
-          <p>
-            <FormattedMessage
-              id="xpack.observability_onboarding.kubernetesV2.otelInstrumentation.otherLanguagesDocs"
-              defaultMessage="For other languages where auto-instrumentation is not available, {link}"
-              values={{
-                link: (
-                  <EuiLink
-                    href="https://ela.st/8-16-otel-apm-instrumentation"
-                    data-test-subj="observabilityOnboardingKubernetesV2OtelInstrumentationDocsLink"
-                    target="_blank"
-                    external
-                  >
-                    {i18n.translate(
-                      'xpack.observability_onboarding.kubernetesV2.otelInstrumentation.docsLinkLabel',
-                      { defaultMessage: 'refer to the documentation' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
         </>
       ) : null}
     </>

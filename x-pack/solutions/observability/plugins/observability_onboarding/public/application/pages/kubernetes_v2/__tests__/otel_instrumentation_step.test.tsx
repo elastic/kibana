@@ -48,6 +48,15 @@ describe('OtelInstrumentationStep', () => {
       screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationLanguageSelector')
     ).toBeInTheDocument();
     expect(
+      screen
+        .getByTestId('observabilityOnboardingKubernetesV2OtelAnnotationMode-pods')
+        .compareDocumentPosition(
+          screen.getByTestId(
+            'observabilityOnboardingKubernetesV2OtelInstrumentationLanguageSelector'
+          )
+        )
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(
       screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationPodsSnippet')
     ).toHaveTextContent('instrumentation.opentelemetry.io/inject-nodejs');
     expect(
@@ -58,10 +67,14 @@ describe('OtelInstrumentationStep', () => {
     ).toHaveTextContent('kubectl rollout restart deployment myapp -n my-namespace');
     expect(
       screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationDocsLink')
-    ).toHaveAttribute('href', 'https://ela.st/8-16-otel-apm-instrumentation');
+    ).toHaveAttribute(
+      'href',
+      'https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/'
+    );
+    expect(screen.getByText('Other languages documentation')).toBeInTheDocument();
   });
 
-  it('shows only the namespace annotation command when namespace mode is selected', async () => {
+  it('shows only the namespace annotation manifest when namespace mode is selected', async () => {
     renderWithHostPageProviders(<OtelInstrumentationStep />);
 
     await userEvent.click(
@@ -80,7 +93,13 @@ describe('OtelInstrumentationStep', () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationNamespaceSnippet')
-    ).toHaveTextContent('kubectl annotate namespace my-namespace');
+    ).toHaveTextContent('apiVersion: v1');
+    expect(
+      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationNamespaceSnippet')
+    ).toHaveTextContent('kind: Namespace');
+    expect(
+      screen.getByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationNamespaceSnippet')
+    ).not.toHaveTextContent('kubectl annotate namespace my-namespace');
     expect(
       screen.queryByTestId('observabilityOnboardingKubernetesV2OtelInstrumentationRestartCommand')
     ).not.toBeInTheDocument();

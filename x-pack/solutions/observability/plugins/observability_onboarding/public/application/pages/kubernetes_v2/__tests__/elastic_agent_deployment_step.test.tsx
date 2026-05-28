@@ -27,12 +27,16 @@ jest.mock('../../../quickstart_flows/kubernetes/steps', () => ({
     isMonitoringStepActive,
     ingestionMode,
     onIngestionModeChange,
+    useInlineCopyOnly,
+    useColoredSyntax,
   }: {
     status: FETCH_STATUS;
     data?: KubernetesFlowData;
     isMonitoringStepActive: boolean;
     ingestionMode: IngestionMode;
     onIngestionModeChange: (mode: IngestionMode) => void;
+    useInlineCopyOnly?: boolean;
+    useColoredSyntax?: boolean;
   }) => (
     <div
       data-test-subj="kubernetesEaInstallStep"
@@ -41,6 +45,8 @@ jest.mock('../../../quickstart_flows/kubernetes/steps', () => ({
       data-is-monitoring-step-active={String(isMonitoringStepActive)}
       data-ingestion-mode={ingestionMode}
       data-has-on-ingestion-mode-change={String(typeof onIngestionModeChange === 'function')}
+      data-use-inline-copy-only={String(useInlineCopyOnly)}
+      data-use-colored-syntax={String(useColoredSyntax)}
     />
   ),
 }));
@@ -82,6 +88,9 @@ describe('ElasticAgentDeploymentStep', () => {
     ).toHaveAttribute('aria-selected', 'true');
     expect(
       screen.getByTestId('observabilityOnboardingKubernetesV2FleetManagedStep')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('observabilityOnboardingKubernetesV2ElasticAgentDeploymentContent')
     ).toBeInTheDocument();
     expect(screen.queryByTestId('kubernetesEaInstallStep')).not.toBeInTheDocument();
   });
@@ -131,5 +140,7 @@ describe('ElasticAgentDeploymentStep', () => {
     expect(installStep).toHaveAttribute('data-is-monitoring-step-active', 'true');
     expect(installStep).toHaveAttribute('data-ingestion-mode', 'wired');
     expect(installStep).toHaveAttribute('data-has-on-ingestion-mode-change', 'true');
+    expect(installStep).toHaveAttribute('data-use-inline-copy-only', 'true');
+    expect(installStep).toHaveAttribute('data-use-colored-syntax', 'true');
   });
 });
