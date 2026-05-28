@@ -359,6 +359,7 @@ const checkItemsAccess = async ({
 }): Promise<Map<string, boolean>> => {
   const accessMap = new Map<string, boolean>();
 
+  // When the security plugin is absent, grant access to all items.
   if (!securityAuthz) {
     for (const id of ids) {
       accessMap.set(id, true);
