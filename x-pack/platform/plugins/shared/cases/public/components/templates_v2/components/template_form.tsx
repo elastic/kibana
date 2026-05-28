@@ -135,7 +135,13 @@ export const TemplateYamlEditor = ({
         )}
         {!isSaving && isSaved && (
           <div css={styles.statusIndicator(euiTheme)}>
-            <EuiIconTip type="check" color="success" size="l" content="Template saved" />
+            <EuiIconTip
+              type="check"
+              color="success"
+              size="l"
+              content="Template saved"
+              anchorProps={{ 'data-test-subj': 'template-saved-icon' }}
+            />
           </div>
         )}
         <TemplateYamlEditorBase
