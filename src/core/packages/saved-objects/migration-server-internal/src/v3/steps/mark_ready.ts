@@ -10,6 +10,7 @@
 import type { IO, MarkReadyResponse } from '../io';
 import { appendLog, resetRetry, transitionTo, type BaseState } from '../state';
 import type { Step, SuccessorsOf } from '../types';
+import { assertNever } from '../assert_never';
 import * as DONE from './done';
 import * as FATAL from './fatal';
 
@@ -25,20 +26,23 @@ type Successors = SuccessorsOf<typeof Name>;
 export const step = (state: State, io: IO): Step<Successors, MarkReadyResponse> => ({
   action: () => io.markReady(state.targetIndex),
   transition: (response) => {
-    if (response.type === 'fatal_failure') {
-      return transitionTo(
-        appendLog(state, `v3 MARK_READY failed: ${response.reason}`),
-        FATAL.Name,
-        {
-          reason: response.reason,
-        }
-      );
+    switch (response.type) {
+      case 'ready':
+        return transitionTo(
+          resetRetry(appendLog(state, `v3 MARK_READY completed ${state.targetIndex}`)),
+          DONE.Name,
+          { targetIndex: state.targetIndex }
+        );
+      case 'fatal_failure':
+        return transitionTo(
+          appendLog(state, `v3 MARK_READY failed: ${response.reason}`),
+          FATAL.Name,
+          {
+            reason: response.reason,
+          }
+        );
+      default:
+        return assertNever(response);
     }
-
-    return transitionTo(
-      resetRetry(appendLog(state, `v3 MARK_READY completed ${state.targetIndex}`)),
-      DONE.Name,
-      { targetIndex: state.targetIndex }
-    );
   },
 });

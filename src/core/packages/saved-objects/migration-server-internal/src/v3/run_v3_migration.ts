@@ -8,6 +8,7 @@
  */
 
 import type { IO } from './io';
+import { assertInvariants } from './invariants';
 import { next } from './next';
 import { createInitialState, isTerminalState, type State, type TerminalState } from './state';
 
@@ -21,9 +22,13 @@ export const runV3Migration = async ({
   retryAttempts = 3,
 }: RunV3MigrationParams): Promise<TerminalState> => {
   let state: State = createInitialState(retryAttempts);
+  // Keep invariants always-on in this POC. Migrations run once per upgrade, and
+  // catching a malformed state is worth the tiny assertion cost.
+  assertInvariants(state);
 
   while (!isTerminalState(state)) {
     state = await next(state, io);
+    assertInvariants(state);
   }
 
   return state;

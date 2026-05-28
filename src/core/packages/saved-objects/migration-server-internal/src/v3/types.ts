@@ -14,6 +14,7 @@ import * as DONE from './steps/done';
 import * as FATAL from './steps/fatal';
 import * as INIT from './steps/init';
 import * as MARK_READY from './steps/mark_ready';
+export { assertNever } from './assert_never';
 
 export const SUCCESSORS = {
   [INIT.Name]: [CHECK_SOURCE.Name],
@@ -44,7 +45,3 @@ export const runStep = async <TNext extends StateName, TResponse>({
   action,
   transition,
 }: Step<TNext, TResponse>): Promise<StateOf<TNext>> => transition(await action());
-
-export const assertNever = (value: never): never => {
-  throw new Error(`Unexpected v3 migration state: ${JSON.stringify(value)}`);
-};

@@ -10,6 +10,7 @@
 import type { CreateTargetResponse, IO } from '../io';
 import { appendLog, incrementRetry, resetRetry, transitionTo, type BaseState } from '../state';
 import type { Step, SuccessorsOf } from '../types';
+import { assertNever } from '../assert_never';
 import * as FATAL from './fatal';
 import * as MARK_READY from './mark_ready';
 
@@ -25,34 +26,35 @@ type Successors = SuccessorsOf<typeof Name>;
 export const step = (state: State, io: IO): Step<Successors, CreateTargetResponse> => ({
   action: () => io.createTarget(state.sourceIndex),
   transition: (response) => {
-    if (response.type === 'target_created') {
-      return transitionTo(
-        resetRetry(appendLog(state, `v3 CREATE_TARGET created ${response.targetIndex}`)),
-        MARK_READY.Name,
-        { targetIndex: response.targetIndex }
-      );
-    }
+    switch (response.type) {
+      case 'target_created':
+        return transitionTo(
+          resetRetry(appendLog(state, `v3 CREATE_TARGET created ${response.targetIndex}`)),
+          MARK_READY.Name,
+          { targetIndex: response.targetIndex }
+        );
+      case 'retryable_failure':
+        if (state.retryCount >= state.retryAttempts) {
+          return transitionTo(
+            appendLog(state, `v3 CREATE_TARGET exhausted retries: ${response.message}`),
+            FATAL.Name,
+            { reason: response.message }
+          );
+        }
 
-    if (response.type === 'fatal_failure') {
-      return transitionTo(
-        appendLog(state, `v3 CREATE_TARGET failed: ${response.reason}`),
-        FATAL.Name,
-        { reason: response.reason }
-      );
+        return transitionTo(
+          incrementRetry(appendLog(state, `v3 CREATE_TARGET retrying: ${response.message}`)),
+          Name,
+          { sourceIndex: state.sourceIndex }
+        );
+      case 'fatal_failure':
+        return transitionTo(
+          appendLog(state, `v3 CREATE_TARGET failed: ${response.reason}`),
+          FATAL.Name,
+          { reason: response.reason }
+        );
+      default:
+        return assertNever(response);
     }
-
-    if (state.retryCount >= state.retryAttempts) {
-      return transitionTo(
-        appendLog(state, `v3 CREATE_TARGET exhausted retries: ${response.message}`),
-        FATAL.Name,
-        { reason: response.message }
-      );
-    }
-
-    return transitionTo(
-      incrementRetry(appendLog(state, `v3 CREATE_TARGET retrying: ${response.message}`)),
-      Name,
-      { sourceIndex: state.sourceIndex }
-    );
   },
 });

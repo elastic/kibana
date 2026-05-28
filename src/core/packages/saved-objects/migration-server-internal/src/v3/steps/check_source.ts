@@ -10,6 +10,7 @@
 import type { CheckSourceResponse, IO } from '../io';
 import { appendLog, resetRetry, transitionTo, type BaseState } from '../state';
 import type { Step, SuccessorsOf } from '../types';
+import { assertNever } from '../assert_never';
 import * as CREATE_TARGET from './create_target';
 import * as FATAL from './fatal';
 
@@ -24,22 +25,25 @@ type Successors = SuccessorsOf<typeof Name>;
 export const step = (state: State, io: IO): Step<Successors, CheckSourceResponse> => ({
   action: () => io.checkSource(),
   transition: (response) => {
-    if (response.type === 'source_missing') {
-      return transitionTo(
-        appendLog(state, `v3 CHECK_SOURCE failed: ${response.reason}`),
-        FATAL.Name,
-        {
-          reason: response.reason,
-        }
-      );
+    switch (response.type) {
+      case 'source_found':
+        return transitionTo(
+          resetRetry(appendLog(state, `v3 CHECK_SOURCE found ${response.sourceIndex}`)),
+          CREATE_TARGET.Name,
+          {
+            sourceIndex: response.sourceIndex,
+          }
+        );
+      case 'source_missing':
+        return transitionTo(
+          appendLog(state, `v3 CHECK_SOURCE failed: ${response.reason}`),
+          FATAL.Name,
+          {
+            reason: response.reason,
+          }
+        );
+      default:
+        return assertNever(response);
     }
-
-    return transitionTo(
-      resetRetry(appendLog(state, `v3 CHECK_SOURCE found ${response.sourceIndex}`)),
-      CREATE_TARGET.Name,
-      {
-        sourceIndex: response.sourceIndex,
-      }
-    );
   },
 });

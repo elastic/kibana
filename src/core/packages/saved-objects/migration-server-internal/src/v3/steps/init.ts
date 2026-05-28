@@ -10,6 +10,7 @@
 import type { InitResponse, IO } from '../io';
 import { appendLog, resetRetry, transitionTo, type BaseState } from '../state';
 import type { Step, SuccessorsOf } from '../types';
+import { assertNever } from '../assert_never';
 import * as CHECK_SOURCE from './check_source';
 
 export const Name = 'INIT' as const;
@@ -22,6 +23,16 @@ type Successors = SuccessorsOf<typeof Name>;
 
 export const step = (state: State, io: IO): Step<Successors, InitResponse> => ({
   action: () => io.init(),
-  transition: (_response) =>
-    transitionTo(resetRetry(appendLog(state, 'v3 INIT completed')), CHECK_SOURCE.Name, {}),
+  transition: (response) => {
+    switch (response.type) {
+      case 'started':
+        return transitionTo(
+          resetRetry(appendLog(state, 'v3 INIT completed')),
+          CHECK_SOURCE.Name,
+          {}
+        );
+    }
+
+    return assertNever(response.type);
+  },
 });

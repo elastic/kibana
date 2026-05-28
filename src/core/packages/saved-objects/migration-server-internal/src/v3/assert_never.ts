@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { runV3Migration } from './run_v3_migration';
-export { assertInvariants } from './invariants';
-export type { RunV3MigrationParams } from './run_v3_migration';
-export type { IO } from './io';
-export type { NonTerminalState, State, StateName, StateOf, TerminalState } from './state';
-export type { Step } from './types';
+export const assertNever = (value: never): never => {
+  throw new Error(`Unexpected v3 migration state: ${JSON.stringify(value)}`);
+};
