@@ -432,6 +432,10 @@ function createNavTree({
                   defaultMessage: 'Get started',
                 }),
               },
+              {
+                link: 'onboarding' as const,
+                sideNavStatus: 'hidden',
+              },
             ],
           }
         : {
@@ -440,6 +444,12 @@ function createNavTree({
             }),
             link: 'observabilityOnboarding' as const,
             icon: 'plusInCircle',
+            children: [
+              {
+                link: 'onboarding' as const,
+                sideNavStatus: 'hidden',
+              },
+            ],
           },
       {
         id: 'devTools',

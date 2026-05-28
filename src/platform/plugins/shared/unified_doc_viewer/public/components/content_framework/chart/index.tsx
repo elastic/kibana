@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
-import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { getUnifiedDocViewerServices } from '../../../plugin';
-import { OPEN_IN_DISCOVER_LABEL } from '../../observability/traces/common/constants';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 
 export interface ContentFrameworkChartProps {
   title: string;
   description?: string;
-  esqlQuery?: string;
   children: React.ReactNode;
   'data-test-subj': string;
 }
@@ -25,37 +21,8 @@ export function ContentFrameworkChart({
   'data-test-subj': contentFrameworkChartDataTestSubj,
   title,
   description,
-  esqlQuery,
   children,
 }: ContentFrameworkChartProps) {
-  const {
-    share: {
-      url: { locators },
-    },
-    data: {
-      query: {
-        timefilter: { timefilter },
-      },
-    },
-  } = getUnifiedDocViewerServices();
-  const discoverLocator = useMemo(() => locators.get(DISCOVER_APP_LOCATOR), [locators]);
-
-  const discoverUrl = useMemo(() => {
-    if (!discoverLocator) {
-      return undefined;
-    }
-
-    const url = discoverLocator.getRedirectUrl({
-      timeRange: timefilter.getAbsoluteTime(),
-      filters: [],
-      query: {
-        esql: esqlQuery,
-      },
-    });
-
-    return url;
-  }, [discoverLocator, esqlQuery, timefilter]);
-
   return (
     <EuiFlexGroup
       direction="column"
@@ -63,38 +30,21 @@ export function ContentFrameworkChart({
       data-test-subj={contentFrameworkChartDataTestSubj}
     >
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxs">
-                  <h3>{title}</h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              {description && (
-                <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    content={description}
-                    data-test-subj="ContentFrameworkChartDescription"
-                    size="s"
-                    color="subdued"
-                    aria-label={description}
-                  />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <EuiTitle size="xxs">
+              <h3>{title}</h3>
+            </EuiTitle>
           </EuiFlexItem>
-          {esqlQuery && discoverUrl && (
+          {description && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="discoverApp"
-                href={discoverUrl}
-                aria-label={OPEN_IN_DISCOVER_LABEL}
-                data-test-subj="ContentFrameworkChartOpenInDiscover"
-                size="xs"
-              >
-                {OPEN_IN_DISCOVER_LABEL}
-              </EuiButtonEmpty>
+              <EuiIconTip
+                content={description}
+                data-test-subj="ContentFrameworkChartDescription"
+                size="s"
+                color="subdued"
+                aria-label={description}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

@@ -18,6 +18,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -104,6 +106,11 @@ export const ConversationsPopoverView: React.FC<ConversationsPopoverViewProps> =
           css={agentRowStyles}
           onClick={onSwitchToAgents}
           data-test-subj="agentBuilderEmbeddableAgentRow"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.SWITCH_TO_AGENTS,
+            detail: 'conversation',
+          })}
         >
           {currentAgent && (
             <EuiFlexItem grow={false}>
@@ -142,6 +149,11 @@ export const ConversationsPopoverView: React.FC<ConversationsPopoverViewProps> =
               iconType="plus"
               onClick={handleNewChat}
               data-test-subj="agentBuilderEmbeddableNewChatButton"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.NEW_CHAT,
+                detail: 'conversation',
+              })}
             >
               {labels.newChat}
             </EuiButton>

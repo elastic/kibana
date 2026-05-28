@@ -33,6 +33,7 @@ export const flappingSchema = schema.object(
   {
     validate: validateFlappingV1,
     meta: {
+      id: 'rule_flapping',
       description:
         'When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.',
     },

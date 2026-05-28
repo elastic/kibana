@@ -16,21 +16,24 @@ import { artifactsSchemaV1 } from '../../../request';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
 import { flappingSchemaV2 } from '../../../common';
 
-export const actionFrequencySchema = schema.object({
-  summary: schema.boolean({
-    meta: { description: 'Indicates whether the action is a summary.' },
-  }),
-  notify_when: notifyWhenSchemaV1,
-  throttle: schema.nullable(
-    schema.string({
-      validate: validateDurationV1,
-      meta: {
-        description:
-          'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.',
-      },
-    })
-  ),
-});
+export const actionFrequencySchema = schema.object(
+  {
+    summary: schema.boolean({
+      meta: { description: 'Indicates whether the action is a summary.' },
+    }),
+    notify_when: notifyWhenSchemaV1,
+    throttle: schema.nullable(
+      schema.string({
+        validate: validateDurationV1,
+        meta: {
+          description:
+            'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.',
+        },
+      })
+    ),
+  },
+  { meta: { id: 'new_rule_action_frequency' } }
+);
 
 export const actionAlertsFilterSchema = schema.object(
   {
@@ -87,6 +90,7 @@ export const actionAlertsFilterSchema = schema.object(
   },
   {
     meta: {
+      id: 'new_rule_action_alerts_filter',
       description:
         'Conditions that affect whether the action runs. If you specify multiple conditions, all conditions must be met for the action to run. For example, if an alert occurs within the specified time frame and matches the query, the action runs.',
     },
@@ -129,7 +133,7 @@ export const actionSchema = schema.object(
     ),
   },
   {
-    meta: { description: 'An action that runs under defined conditions.' },
+    meta: { id: 'new_rule_action', description: 'An action that runs under defined conditions.' },
   }
 );
 
@@ -197,14 +201,17 @@ export const knownCreateBodySchema = schema.discriminatedUnion(
   ruleParamsSchemasForCreateV1(baseCreateBodyFields) as [ObjectType<any>]
 );
 
-export const fallbackCreateBodySchema = schema.object({
-  ...baseCreateBodyFields,
-  rule_type_id: schema.string({ meta: { description: 'The rule type identifier.' } }),
-  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), {
-    defaultValue: {},
-    meta: { description: 'The parameters for the rule.' },
-  }),
-});
+export const fallbackCreateBodySchema = schema.object(
+  {
+    ...baseCreateBodyFields,
+    rule_type_id: schema.string({ meta: { description: 'The rule type identifier.' } }),
+    params: schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+      defaultValue: {},
+      meta: { description: 'The parameters for the rule.' },
+    }),
+  },
+  { meta: { id: 'new_rule' } }
+);
 
 export const createBodySchema = schema.oneOf([knownCreateBodySchema, fallbackCreateBodySchema]);
 export const createParamsSchema = schema.object({

@@ -14,6 +14,7 @@ steps:
         required: true
 
   - name: 'Upload trigger steps'
+    checkout: none
     command: |
       VM_IMAGES_BRANCH="$$(buildkite-agent meta-data get "VM_IMAGES_BRANCH")"
       KIBANA_BRANCH="$$(buildkite-agent meta-data get "KIBANA_BRANCH")"

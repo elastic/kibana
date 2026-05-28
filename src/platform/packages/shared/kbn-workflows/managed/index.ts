@@ -24,15 +24,27 @@ type ManagedWorkflowDefinitionById = {
 export type ManagedWorkflowId = keyof ManagedWorkflowDefinitionById;
 type ManagedWorkflowDefinitionEntry = ManagedWorkflowDefinitionById[ManagedWorkflowId];
 
+type ManagedWorkflowTemplateValuesForDefinition<TDefinition> = TDefinition extends {
+  yamlTemplate: (values: infer TValues) => string;
+}
+  ? TValues
+  : never;
+
+export type TemplatedManagedWorkflowId = {
+  [TId in ManagedWorkflowId]: ManagedWorkflowTemplateValuesForDefinition<
+    ManagedWorkflowDefinitionById[TId]
+  > extends never
+    ? never
+    : TId;
+}[ManagedWorkflowId];
+
 export type ManagedWorkflowTemplateValuesById = {
-  [TId in ManagedWorkflowId]: ManagedWorkflowDefinitionById[TId] extends {
-    yamlTemplate: (values: infer TValues) => string;
-  }
-    ? TValues
-    : never;
+  [TId in TemplatedManagedWorkflowId]: ManagedWorkflowTemplateValuesForDefinition<
+    ManagedWorkflowDefinitionById[TId]
+  >;
 };
 
-export type ManagedWorkflowTemplateValuesForId<TId extends ManagedWorkflowId> =
+export type ManagedWorkflowTemplateValuesForId<TId extends TemplatedManagedWorkflowId> =
   ManagedWorkflowTemplateValuesById[TId];
 
 export const getManagedWorkflowDefinition = (id: string): ManagedWorkflowDefinition | undefined => {
