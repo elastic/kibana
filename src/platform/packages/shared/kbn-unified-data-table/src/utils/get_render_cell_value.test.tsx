@@ -161,7 +161,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord css-i1xbf4-popover\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-cxyb91-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord css-i1xbf4-popover\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><span id=\\"generated-id_euiToolTipAnchor\\" class=\\"euiToolTipAnchor css-jcaat8-euiToolTipAnchor-inlineBlock\\"><button class=\\"euiButtonIcon css-cxyb91-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></span></div></div>"`
     );
   });
 
@@ -188,7 +188,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord css-i1xbf4-popover\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-cxyb91-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord css-i1xbf4-popover\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><span id=\\"generated-id_euiToolTipAnchor\\" class=\\"euiToolTipAnchor css-jcaat8-euiToolTipAnchor-inlineBlock\\"><button class=\\"euiButtonIcon css-cxyb91-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></span></div></div>"`
     );
     findTestSubject(component, 'docTableClosePopover').simulate('click');
     expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
@@ -302,14 +302,19 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <SourcePopoverContent
         closeButton={
-          <EuiButtonIcon
-            aria-label="Close popover"
-            data-test-subj="docTableClosePopover"
-            iconSize="s"
-            iconType="cross"
-            onClick={[MockFunction]}
-            size="xs"
-          />
+          <EuiToolTip
+            content="Close popover"
+            disableScreenReaderOutput={true}
+          >
+            <EuiButtonIcon
+              aria-label="Close popover"
+              data-test-subj="docTableClosePopover"
+              iconSize="s"
+              iconType="cross"
+              onClick={[MockFunction]}
+              size="xs"
+            />
+          </EuiToolTip>
         }
         columnId="_source"
         row={
@@ -490,14 +495,19 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <SourcePopoverContent
         closeButton={
-          <EuiButtonIcon
-            aria-label="Close popover"
-            data-test-subj="docTableClosePopover"
-            iconSize="s"
-            iconType="cross"
-            onClick={[MockFunction]}
-            size="xs"
-          />
+          <EuiToolTip
+            content="Close popover"
+            disableScreenReaderOutput={true}
+          >
+            <EuiButtonIcon
+              aria-label="Close popover"
+              data-test-subj="docTableClosePopover"
+              iconSize="s"
+              iconType="cross"
+              onClick={[MockFunction]}
+              size="xs"
+            />
+          </EuiToolTip>
         }
         columnId="_source"
         row={
@@ -648,14 +658,19 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <SourcePopoverContent
         closeButton={
-          <EuiButtonIcon
-            aria-label="Close popover"
-            data-test-subj="docTableClosePopover"
-            iconSize="s"
-            iconType="cross"
-            onClick={[MockFunction]}
-            size="xs"
-          />
+          <EuiToolTip
+            content="Close popover"
+            disableScreenReaderOutput={true}
+          >
+            <EuiButtonIcon
+              aria-label="Close popover"
+              data-test-subj="docTableClosePopover"
+              iconSize="s"
+              iconType="cross"
+              onClick={[MockFunction]}
+              size="xs"
+            />
+          </EuiToolTip>
         }
         columnId="object"
         row={
@@ -896,14 +911,19 @@ describe('Unified data table cell rendering', function () {
         <EuiFlexItem
           grow={false}
         >
-          <EuiButtonIcon
-            aria-label="Close popover"
-            data-test-subj="docTableClosePopover"
-            iconSize="s"
-            iconType="cross"
-            onClick={[MockFunction]}
-            size="xs"
-          />
+          <EuiToolTip
+            content="Close popover"
+            disableScreenReaderOutput={true}
+          >
+            <EuiButtonIcon
+              aria-label="Close popover"
+              data-test-subj="docTableClosePopover"
+              iconSize="s"
+              iconType="cross"
+              onClick={[MockFunction]}
+              size="xs"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     `);
