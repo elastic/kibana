@@ -38,6 +38,7 @@ import type {
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import type { RRuleScheduleConfig } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { StartPlugins } from '../../types';
@@ -145,10 +146,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const intervalPresent = isRruleFeatureEnabled && rawInterval !== undefined;
         const rruleSchedulePresent = isRruleFeatureEnabled && rawRruleSchedule !== undefined;
 
-        const gatedQueries = isRruleFeatureEnabled
-          ? rawQueries
+        const gatedQueries: Record<string, PackQueryInput> | undefined = isRruleFeatureEnabled
+          ? (rawQueries as Record<string, PackQueryInput> | undefined)
           : rawQueries
-          ? mapValues(rawQueries, (rawQuery) => {
+          ? (mapValues(rawQueries, (rawQuery) => {
               const {
                 schedule_type: _scheduleType,
                 rrule_schedule: _rruleSchedule,
@@ -156,7 +157,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               } = rawQuery as PackQueryInput;
 
               return rest;
-            })
+            }) as Record<string, PackQueryInput>)
           : undefined;
 
         let currentPackSO;
@@ -181,6 +182,17 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           ),
           'id'
         );
+
+        // Broader index of every current SO query (regardless of
+        // `schedule_id` presence) — used to merge partial per-query
+        // `rrule_schedule` payloads against the existing per-query rrule
+        // on same-mode override edits. Without this, sending only
+        // `{ rrule_schedule: { rrule: '...' } }` on one query would
+        // overwrite its `start_date` / `splay` on the SO.
+        const existingQueriesById = keyBy(currentPackSO.attributes.queries ?? [], 'id') as Record<
+          string,
+          { rrule_schedule?: PackQueryInput['rrule_schedule'] }
+        >;
 
         const resolved = resolvePackScheduleForUpdate({
           current: {
@@ -225,8 +237,28 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 ? stripPriorModePerQueryFields(queryData, resolved.scheduleType)
                 : queryData;
 
+              // Mirror of the pack-level partial-merge in
+              // `resolvePackScheduleForUpdate`: on a same-mode rrule
+              // override edit, shallow-merge the request's per-query
+              // `rrule_schedule` over the existing one so the client can
+              // change just `splay` (or `rrule`) without restating the
+              // rest. Mode transitions skip the merge — they already had
+              // their prior-mode fields stripped by `carried`.
+              const existingRrule = existingQueriesById[queryId]?.rrule_schedule;
+              const merged =
+                !resolved.transitioned &&
+                resolved.scheduleType === 'rrule' &&
+                carried.schedule_type === 'rrule' &&
+                carried.rrule_schedule &&
+                existingRrule
+                  ? {
+                      ...carried,
+                      rrule_schedule: { ...existingRrule, ...carried.rrule_schedule },
+                    }
+                  : carried;
+
               return {
-                ...carried,
+                ...merged,
                 schedule_id: existing?.schedule_id ?? uuidv4(),
                 start_date: existing?.start_date ?? now,
               };
@@ -320,12 +352,13 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         // Build the schedule slice for the SO write. Honor read→merge→write
         // by only including a field on the patch when the request actually
-        // sent it (or when transitioning between modes).
-        const scheduleSoPatch: Partial<{
-          schedule_type: 'interval' | 'rrule' | null;
-          interval: number | null;
-          rrule_schedule: typeof rawRruleSchedule | null;
-        }> = {};
+        // sent it (or when transitioning between modes). The patch slot
+        // uses the SO's strict shape — the value comes from
+        // `resolved.rrule_schedule`, which is the post-merge object
+        // already gated through `validatePackScheduleFields`.
+        const scheduleSoPatch: Partial<
+          Pick<PackSavedObject, 'schedule_type' | 'interval' | 'rrule_schedule'>
+        > = {};
         if (isRruleFeatureEnabled) {
           if (scheduleTypePresent) {
             scheduleSoPatch.schedule_type = resolved.scheduleType ?? null;
@@ -336,7 +369,14 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           }
 
           if (resolved.transitioned || rruleSchedulePresent) {
-            scheduleSoPatch.rrule_schedule = resolved.rrule_schedule ?? null;
+            // Narrowing: `resolved.rrule_schedule` is typed as a partial
+            // because the request body may be partial. By the time we
+            // reach this write, `validatePackScheduleFields` has already
+            // 400'd any merged result that is not a full
+            // `RRuleScheduleConfig`, so the runtime value is either the
+            // strict shape, `null` (clear), or `undefined`.
+            scheduleSoPatch.rrule_schedule = (resolved.rrule_schedule ??
+              null) as RRuleScheduleConfig | null;
           }
         }
 

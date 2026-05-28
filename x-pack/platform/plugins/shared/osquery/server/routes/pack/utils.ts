@@ -526,7 +526,7 @@ export const isValidRfc3339 = (value: unknown): value is string => {
  *   cap is checked (backward-compatible behaviour).
  */
 export const validateRruleConfig = (
-  config: RRuleScheduleConfig,
+  config: Partial<RRuleScheduleConfig>,
   recurrenceSeconds?: number
 ): string | null => {
   if (!config || typeof config !== 'object') {
@@ -546,7 +546,7 @@ export const validateRruleConfig = (
     return `rrule_schedule.rrule is invalid: ${(error as Error).message}`;
   }
 
-  if (!isValidRfc3339(config.start_date)) {
+  if (typeof config.start_date !== 'string' || !isValidRfc3339(config.start_date)) {
     return 'rrule_schedule.start_date must be an RFC 3339 datetime (e.g. 2024-01-01T00:00:00Z)';
   }
 
@@ -608,7 +608,7 @@ export const validateRruleConfig = (
 export interface ResolvedPackSchedule {
   scheduleType: ScheduleType | undefined;
   interval: number | null | undefined;
-  rrule_schedule: RRuleScheduleConfig | null | undefined;
+  rrule_schedule: Partial<RRuleScheduleConfig> | null | undefined;
   transitioned: boolean;
 }
 
@@ -625,7 +625,7 @@ export const resolvePackScheduleForUpdate = ({
   request: {
     schedule_type?: ScheduleType | null;
     interval?: number | null;
-    rrule_schedule?: RRuleScheduleConfig | null;
+    rrule_schedule?: Partial<RRuleScheduleConfig> | null;
     scheduleTypePresent: boolean;
     intervalPresent: boolean;
     rruleSchedulePresent: boolean;
@@ -657,9 +657,18 @@ export const resolvePackScheduleForUpdate = ({
     interval = current.interval ?? undefined;
   }
 
-  let rruleSchedule: RRuleScheduleConfig | null | undefined;
+  let rruleSchedule: Partial<RRuleScheduleConfig> | null | undefined;
   if (request.rruleSchedulePresent) {
-    rruleSchedule = request.rrule_schedule ?? null;
+    if (
+      request.rrule_schedule &&
+      current.rrule_schedule &&
+      !transitioned &&
+      scheduleType === 'rrule'
+    ) {
+      rruleSchedule = { ...current.rrule_schedule, ...request.rrule_schedule };
+    } else {
+      rruleSchedule = request.rrule_schedule ?? null;
+    }
   } else if (transitioned && scheduleType !== 'rrule') {
     rruleSchedule = null;
   } else {
@@ -689,8 +698,15 @@ export const validatePackScheduleFields = ({
 }: {
   packScheduleType?: ScheduleType | null;
   packInterval?: number | null;
-  packRrule?: RRuleScheduleConfig | null;
-  queries?: Record<string, Pick<PackQueryInput, 'interval' | 'schedule_type' | 'rrule_schedule'>>;
+  packRrule?: Partial<RRuleScheduleConfig> | null;
+  queries?: Record<
+    string,
+    {
+      interval?: number;
+      schedule_type?: ScheduleType;
+      rrule_schedule?: Partial<RRuleScheduleConfig>;
+    }
+  >;
 }): string | null => {
   // Pack-level mutual exclusivity.
   if (packInterval != null && packRrule) {
@@ -704,7 +720,9 @@ export const validatePackScheduleFields = ({
       return 'Pack schedule_type "rrule" requires rrule_schedule';
     }
 
-    const packPeriodSeconds = safeDerivePeriodSeconds(packRrule.rrule);
+    const packPeriodSeconds = packRrule.rrule
+      ? safeDerivePeriodSeconds(packRrule.rrule)
+      : undefined;
     const error = validateRruleConfig(packRrule, packPeriodSeconds);
     if (error) return error;
   } else if (packScheduleType === 'interval') {
@@ -745,8 +763,9 @@ export const validatePackScheduleFields = ({
       }
 
       const queryPeriodSeconds =
-        safeDerivePeriodSeconds(query.rrule_schedule.rrule) ??
-        (packRrule ? safeDerivePeriodSeconds(packRrule.rrule) : undefined);
+        (query.rrule_schedule.rrule
+          ? safeDerivePeriodSeconds(query.rrule_schedule.rrule)
+          : undefined) ?? (packRrule?.rrule ? safeDerivePeriodSeconds(packRrule.rrule) : undefined);
       const error = validateRruleConfig(query.rrule_schedule, queryPeriodSeconds);
       if (error) return `Query "${queryId}": ${error}`;
     } else if (query.schedule_type === 'interval') {

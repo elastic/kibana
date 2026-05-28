@@ -731,6 +731,133 @@ describe('updatePackRoute', () => {
       expect(secondGetResult.attributes.rrule_schedule._unknown_subfield).toBe('preserved-value');
     });
 
+    it('partial same-mode rrule update — body sends only `rrule`, merge preserves start_date and splay (regression for PR#270639 r3313372939)', async () => {
+      // A client editing one knob of an existing pack-level RRULE
+      // (e.g. bumping `INTERVAL=2 → INTERVAL=3`) must be able to PATCH
+      // just `rrule_schedule.rrule` without restating `start_date` /
+      // `splay`. The strict io-ts variant (`rrule` + `start_date`
+      // required) would 400 such a body before the route's
+      // read → merge → write logic ran. The partial variant lets it
+      // through; `resolvePackScheduleForUpdate` merges against the
+      // current SO; `validatePackScheduleFields` enforces the strict
+      // shape on the merged result.
+      const existingRrule = {
+        rrule: 'FREQ=MINUTELY;INTERVAL=2',
+        start_date: '2026-01-01T00:00:00Z',
+        splay: '30s',
+      };
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          schedule_type: 'rrule' as const,
+          interval: null,
+          rrule_schedule: existingRrule,
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO, {});
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: {
+          rrule_schedule: { rrule: 'FREQ=MINUTELY;INTERVAL=3' },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      // The validator must NOT 400 the merged result.
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const updateCall = mockClient.update.mock.calls[0];
+      const patchedAttributes = updateCall[2];
+      // Merged result: new `rrule`, preserved `start_date` + `splay`.
+      expect(patchedAttributes.rrule_schedule).toEqual({
+        rrule: 'FREQ=MINUTELY;INTERVAL=3',
+        start_date: '2026-01-01T00:00:00Z',
+        splay: '30s',
+      });
+    });
+
+    it('partial same-mode rrule update — per-query body sends only `splay`, merge preserves rrule and start_date', async () => {
+      // Per-query mirror of the pack-level partial-merge case. A client
+      // bumping just `splay` on one query override must not have to
+      // restate the per-query `rrule` / `start_date`. The strict
+      // packQueryRecordRt would 400; the partial variant + per-query
+      // merge in update_pack_route lets it through.
+      const existingPackRrule = {
+        rrule: 'FREQ=MINUTELY;INTERVAL=10',
+        start_date: '2026-01-01T00:00:00Z',
+      };
+      const existingQueryRrule = {
+        rrule: 'FREQ=MINUTELY;INTERVAL=10',
+        start_date: '2026-01-01T00:00:00Z',
+        splay: '15s',
+      };
+      const currentSO = {
+        ...basePackSO,
+        attributes: {
+          ...basePackSO.attributes,
+          schedule_type: 'rrule' as const,
+          interval: null,
+          rrule_schedule: existingPackRrule,
+          queries: [
+            {
+              id: 'q1',
+              name: 'q1',
+              query: 'select 1;',
+              schedule_id: 'sched-1',
+              start_date: '2026-01-01T00:00:00Z',
+              schedule_type: 'rrule' as const,
+              rrule_schedule: existingQueryRrule,
+            },
+          ],
+        },
+      };
+      const mockClient = buildMockSavedObjectsClient(currentSO, {});
+
+      (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue(mockClient);
+
+      setupRoute(true);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { id: 'pack-id' },
+        body: {
+          queries: {
+            q1: {
+              query: 'select 1;',
+              schedule_type: 'rrule',
+              rrule_schedule: { splay: '90s' },
+            },
+          },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const updateCall = mockClient.update.mock.calls[0];
+      const writtenQueries = updateCall[2].queries as Array<{
+        id: string;
+        rrule_schedule?: typeof existingQueryRrule;
+      }>;
+      const q1Write = writtenQueries.find((q) => q.id === 'q1');
+      // Merged result on the per-query override: new `splay`, preserved
+      // `rrule` + `start_date` from the existing SO entry.
+      expect(q1Write?.rrule_schedule).toEqual({
+        rrule: 'FREQ=MINUTELY;INTERVAL=10',
+        start_date: '2026-01-01T00:00:00Z',
+        splay: '90s',
+      });
+    });
+
     it('same-mode update with only schedule_type sent — does not overwrite rrule_schedule, _unknown sub-fields survive', async () => {
       // Sending `schedule_type: 'rrule'` with no `rrule_schedule` in the body
       // is a same-mode, no-transition update. The patch must include

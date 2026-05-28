@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
-import { packQueryRecordRt, rruleScheduleConfigRt } from './shared_schemas';
+import { packQueryRecordPartialRt, rruleScheduleConfigPartialRt } from './shared_schemas';
 
 export const updatePacksRequestBodySchema = t.partial({
   name: t.string,
@@ -15,10 +15,10 @@ export const updatePacksRequestBodySchema = t.partial({
   enabled: t.boolean,
   policy_ids: t.array(t.string),
   shards: t.record(t.string, toNumberRt),
-  queries: packQueryRecordRt,
+  queries: packQueryRecordPartialRt,
   schedule_type: t.union([t.literal('interval'), t.literal('rrule'), t.null]),
   interval: t.union([toNumberRt, t.null]),
-  rrule_schedule: t.union([rruleScheduleConfigRt, t.null]),
+  rrule_schedule: t.union([rruleScheduleConfigPartialRt, t.null]),
 });
 
 export type UpdatePacksRequestBodySchema = t.OutputOf<typeof updatePacksRequestBodySchema>;
