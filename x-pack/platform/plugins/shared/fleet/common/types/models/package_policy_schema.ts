@@ -391,19 +391,14 @@ export const CreatePackagePolicyRequestBodySchema = schema.object(
           description: 'Package policy unique identifier',
         },
       })
-<<<<<<< HEAD
-    )
-  ),
-  create_dataset_templates: schema.maybe(
-    schema.boolean({
-      meta: {
-        description:
-          'When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.',
-      },
-    })
-  ),
-});
-=======
+    ),
+    create_dataset_templates: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.',
+        },
+      })
     ),
     force: schema.maybe(
       schema.boolean({
@@ -429,7 +424,6 @@ export const CreatePackagePolicyRequestBodySchema = schema.object(
   },
   { meta: { id: 'create_package_policy_request' } }
 );
->>>>>>> 07487ae143a593f4cd3a6d48fb5a2ec2b6a5715b
 
 export const SimplifiedVarsSchema = schema.recordOf(
   schema.string(),
@@ -617,72 +611,6 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
             deprecated: true,
           },
         })
-<<<<<<< HEAD
-      )
-    ),
-    create_dataset_templates: schema.maybe(
-      schema.boolean({
-        meta: {
-          description:
-            'When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.',
-        },
-      })
-    ),
-  });
-
-export const UpdatePackagePolicyRequestBodySchema = schema.object({
-  ...CreatePackagePolicyProps,
-  name: schema.maybe(schema.string()),
-  inputs: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        ...PackagePolicyInputsSchema,
-        streams: schema.maybe(
-          schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 })
-        ),
-      }),
-      { maxSize: 1000 }
-    )
-  ),
-  version: schema.maybe(schema.string()),
-  force: schema.maybe(schema.boolean()),
-});
-
-export const UpdatePackagePolicySchema = schema.object({
-  ...PackagePolicyBaseSchema,
-  version: schema.maybe(schema.string()),
-});
-
-export const PackagePolicySchema = schema.object({
-  ...PackagePolicyBaseSchema,
-  id: schema.string({
-    meta: {
-      description: 'Package policy unique identifier.',
-    },
-  }),
-  version: schema.maybe(
-    schema.string({
-      meta: {
-        description: 'Package policy ES version.',
-      },
-    })
-  ),
-  revision: schema.number({
-    meta: {
-      description: 'Package policy revision.',
-    },
-  }),
-  updated_at: schema.string(),
-  updated_by: schema.string(),
-  created_at: schema.string(),
-  created_by: schema.string(),
-  elasticsearch: schema
-    .maybe(
-      schema.object({
-        privileges: schema.maybe(
-          schema.object({
-            cluster: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-=======
       ),
       policy_ids: schema.maybe(
         schema.arrayOf(schema.string(), {
@@ -711,9 +639,16 @@ export const PackagePolicySchema = schema.object({
                 'Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.',
               deprecated: true,
             },
->>>>>>> 07487ae143a593f4cd3a6d48fb5a2ec2b6a5715b
           })
         )
+      ),
+      create_dataset_templates: schema.maybe(
+        schema.boolean({
+          meta: {
+            description:
+              'When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.',
+          },
+        })
       ),
     },
     { meta: { id: 'simplified_create_package_policy_request' } }
