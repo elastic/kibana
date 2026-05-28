@@ -14,7 +14,11 @@ Treat migration as a chance to revisit your tests and make them more robust, not
 
 ::::::::{step} Do your UI tests _really_ need to be UI tests?
 
-Many UI tests should be rewritten as API or component tests (see [Pick the right test type](./best-practices.md#pick-the-right-test-type)). <br><br>Whenever possible, prefer an **API test** over asserting on a rendered element. UI tests (the slowest, most expensive, and most brittle kind) should be reserved for full end-to-end user flows. Tests that only verify a component renders correctly belong as **RTL component tests**.
+We found that many UI tests should be rewritten as API or component tests (see [Pick the right test type](./best-practices.md#pick-the-right-test-type)).
+
+::::::{tip}
+Whenever possible, prefer an **API test** over asserting on a rendered element. UI tests (the slowest, most expensive, and most brittle kind) should be reserved for full end-to-end user flows. Tests that only verify a component renders correctly belong as **RTL component tests**.
+::::::
 
 ::::::::
 
@@ -40,7 +44,16 @@ Most FTR-era setups don't need a custom config in Scout:
 
 ::::::::{step} Be the driver: review and _understand_ your new tests
 
-We provide AI tooling to most of the toil out of migration, but **always review their AI-generated output manually**. _Understand_ the decisions the AI made for you as it will help you troubleshoot flaky tests down the road. <br><br> **Some helpful questions**: <br> • Did we lose or gain any test coverage with the migration?<br> • Should the new tests really be UI tests? Should they be made [parallel](./parallelism.md)?<br> • Are the [deployment tags](./deployment-tags.md) looking good? See [pick the right tags](./deployment-tags.md#scout-deployment-tags-pick).<br> • Is there any way tests can use Scout's default test servers config?
+We provide AI tooling to take most of the toil out of migration, but **always review the AI-generated output manually**. Understanding the decisions the AI made on your behalf will help you troubleshoot flaky tests down the road.
+
+::::::{tip}
+Some helpful questions to ask while reviewing:
+
+- Did we lose or gain any test coverage with the migration?
+- Should the new tests really be UI tests? Should they run in [parallel](./parallelism.md)?
+- Do the [deployment tags](./deployment-tags.md) look right? See [Pick the right tags](./deployment-tags.md#scout-deployment-tags-pick).
+- Can the tests reuse Scout's default test servers config?
+  ::::::
 
 ::::::::
 
