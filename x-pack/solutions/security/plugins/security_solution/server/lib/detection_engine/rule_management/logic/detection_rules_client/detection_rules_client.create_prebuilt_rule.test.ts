@@ -7,6 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import {
@@ -55,7 +56,9 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
   it('creates a rule with the correct parameters and options', async () => {
     const params = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'rule-id' };
 
-    await detectionRulesClient.createPrebuiltRule({ params });
+    await detectionRulesClient.createPrebuiltRule({
+      params,
+    });
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -66,6 +69,9 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
             ruleId: params.rule_id,
             immutable: true,
           }),
+        }),
+        changeTracking: expect.objectContaining({
+          action: SecurityRuleChangeTrackingAction.ruleInstall,
         }),
       })
     );
