@@ -139,6 +139,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       css`
         &:hover .${STATUS_INDICATOR_CLASS}, &:focus-within .${STATUS_INDICATOR_CLASS} {
           opacity: 0;
+          pointer-events: none;
         }
 
         &:hover .${ACTIONS_CLASS}, &:focus-within .${ACTIONS_CLASS} {
@@ -149,6 +150,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         css`
           .${STATUS_INDICATOR_CLASS} {
             opacity: 0;
+            pointer-events: none;
           }
           .${ACTIONS_CLASS} {
             opacity: 1;
@@ -157,6 +159,11 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       `}
     `;
   }, [euiTheme, isActive, isPopoverOpen, showActionsMenu, status]);
+
+  const isUnread =
+    status === ConversationDisplayStatus.unread ||
+    status === ConversationDisplayStatus.awaitingPrompt ||
+    status === ConversationDisplayStatus.error;
 
   const menuItems = useMemo(
     () => [
@@ -177,13 +184,13 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="read-status"
-        icon={status === ConversationDisplayStatus.unread ? 'eyeClosed' : 'eye'}
+        icon={isUnread ? 'eyeClosed' : 'eye'}
         data-test-subj={`agentBuilderSidebarConversation${
-          status === ConversationDisplayStatus.unread ? 'MarkRead' : 'MarkUnread'
+          isUnread ? 'MarkRead' : 'MarkUnread'
         }-${conversationId}`}
         onClick={() => {
           closePopover();
-          if (status === ConversationDisplayStatus.unread) {
+          if (isUnread) {
             markAsRead(conversationId);
           } else {
             markAsUnread(conversationId);
@@ -191,13 +198,12 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         }}
         {...getEbtProps({
           element: AGENT_BUILDER_UI_EBT.element.sidebar,
-          action:
-            status === ConversationDisplayStatus.unread
-              ? AGENT_BUILDER_UI_EBT.action.conversationList.MARK_AS_READ
-              : AGENT_BUILDER_UI_EBT.action.conversationList.MARK_AS_UNREAD,
+          action: isUnread
+            ? AGENT_BUILDER_UI_EBT.action.conversationList.MARK_AS_READ
+            : AGENT_BUILDER_UI_EBT.action.conversationList.MARK_AS_UNREAD,
         })}
       >
-        {status === ConversationDisplayStatus.unread ? labels.markAsRead : labels.markAsUnread}
+        {isUnread ? labels.markAsRead : labels.markAsUnread}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="delete"
@@ -218,7 +224,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
         {labels.delete}
       </EuiContextMenuItem>,
     ],
-    [closePopover, conversationId, euiTheme.colors.danger, markAsRead, markAsUnread, status]
+    [closePopover, conversationId, euiTheme.colors.danger, isUnread, markAsRead, markAsUnread]
   );
 
   const menuButton = (
