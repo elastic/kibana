@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
+      // debugger;
       await dashboard.navigateToApp();
       if (await testSubjects.exists('discard-unsaved-New-Dashboard')) {
         await testSubjects.click('discard-unsaved-New-Dashboard');
@@ -68,6 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reset to the previous state on edit inline', async () => {
+      // debugger;
       await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
