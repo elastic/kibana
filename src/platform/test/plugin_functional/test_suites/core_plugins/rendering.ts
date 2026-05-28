@@ -258,6 +258,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.serverless.orchestrator_target (string?)',
         'xpack.cloud.serverless.in_trial (boolean?)',
         'xpack.cloud.onboarding.default_solution (string?)',
+        'xpack.cloud.managed_otlp.url (string?)',
         'xpack.contentConnectors.ui.enabled (boolean?)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean?)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean?)',

@@ -10,7 +10,6 @@ import { getPivotTransformConfig } from '../helpers';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('for user with full transform access', function () {
@@ -54,7 +53,6 @@ export default function ({ getService }: FtrProviderContext) {
       const transformConfigWithPivot = getPivotTransformConfig(PREFIX, false);
 
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
         await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
         await transform.api.createAndRunTransform(

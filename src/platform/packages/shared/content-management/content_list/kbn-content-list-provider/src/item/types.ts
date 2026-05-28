@@ -101,11 +101,12 @@ export type ContentListItem<T = Record<string, unknown>> = T & {
  * Action identifiers known to the package.
  *
  * The package owns built-in action presets keyed by these IDs
- * ({@link ContentListActions.edit}, {@link ContentListActions.delete},
- * {@link ContentListActions.inspect}). Consumers may also invent custom
- * IDs; see {@link ActionId}.
+ * ({@link ContentListActions.edit}, {@link ContentListActions.delete}).
+ * The content editor (`<Action.ContentEditor />`) does not appear here —
+ * its handler lives on `features.contentEditor.open` rather than on
+ * `item.actions`. Consumers may also invent custom IDs; see {@link ActionId}.
  */
-export type KnownActionId = 'edit' | 'delete' | 'inspect';
+export type KnownActionId = 'edit' | 'delete';
 
 /**
  * Identifier for an action.

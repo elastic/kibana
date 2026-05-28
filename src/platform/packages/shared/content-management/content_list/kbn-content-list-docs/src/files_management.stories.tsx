@@ -32,7 +32,7 @@ import {
   ListingPageHeaderMock,
   StateDiagnosticPanel,
   createMockStoryFindItems,
-  useInspectFlyout,
+  useContentEditorFlyout,
 } from './stories_helpers';
 
 const meta: Meta = {
@@ -74,7 +74,7 @@ const emptyState = (
   />
 );
 
-const useFilesProviderProps = (onInspect?: (item: ContentListItem) => void) => {
+const useFilesProviderProps = (openContentEditor?: (item: ContentListItem) => void) => {
   const dataSource = useMemo(
     () => ({
       debounceMs: 0,
@@ -101,8 +101,10 @@ const useFilesProviderProps = (onInspect?: (item: ContentListItem) => void) => {
         ],
       },
       pagination: { initialPageSize: 50 },
+      // `<Action.ContentEditor />` self-skips when this is undefined.
+      ...(openContentEditor ? { contentEditor: { open: openContentEditor } } : {}),
     }),
-    []
+    [openContentEditor]
   );
 
   const item = useMemo(
@@ -113,18 +115,17 @@ const useFilesProviderProps = (onInspect?: (item: ContentListItem) => void) => {
             await wait(250);
           },
         },
-        ...(onInspect ? { inspect: { onItemAction: onInspect } } : {}),
       },
     }),
-    [onInspect]
+    []
   );
 
   return { dataSource, features, item };
 };
 
 const OriginalStory = () => {
-  const { onInspect, flyout } = useInspectFlyout();
-  const providerProps = useFilesProviderProps(onInspect);
+  const { open: openContentEditor, flyout } = useContentEditorFlyout();
+  const providerProps = useFilesProviderProps(openContentEditor);
 
   const pageElement = useMemo(
     () => (
@@ -149,7 +150,7 @@ const OriginalStory = () => {
               sortable
               render={(item) => (
                 <>
-                  <EuiLink onClick={() => onInspect(item)}>{item.title}</EuiLink>
+                  <EuiLink onClick={() => openContentEditor(item)}>{item.title}</EuiLink>
                   {item.description ? (
                     <EuiText size="s" color="subdued">
                       <p>{item.description}</p>
@@ -178,7 +179,7 @@ const OriginalStory = () => {
         {flyout}
       </>
     ),
-    [flyout, onInspect]
+    [flyout, openContentEditor]
   );
 
   return (
@@ -193,8 +194,8 @@ const OriginalStory = () => {
 };
 
 const ProposalStory = () => {
-  const { onInspect, flyout } = useInspectFlyout();
-  const providerProps = useFilesProviderProps(onInspect);
+  const { open: openContentEditor, flyout } = useContentEditorFlyout();
+  const providerProps = useFilesProviderProps(openContentEditor);
 
   const pageElement = useMemo(
     () => (
@@ -242,7 +243,7 @@ const ProposalStory = () => {
               />
               <Column.UpdatedAt />
               <Column.Actions>
-                <Action.Inspect />
+                <Action.ContentEditor />
                 <Action.Delete />
               </Column.Actions>
             </ContentListTable>
