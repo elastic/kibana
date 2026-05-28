@@ -372,16 +372,18 @@ export function QuickSearchVisor({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={styles.closeButtonWrapper}>
-        <EuiButtonIcon
-          color="text"
-          display="base"
-          size="s"
-          iconSize="m"
-          onClick={onToggleVisor}
-          iconType="cross"
-          aria-label={closeButtonAriaLabel}
-          css={styles.closeButton}
-        />
+        <EuiToolTip content={closeButtonAriaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            color="text"
+            display="base"
+            size="s"
+            iconSize="m"
+            onClick={onToggleVisor}
+            iconType="cross"
+            aria-label={closeButtonAriaLabel}
+            css={styles.closeButton}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
