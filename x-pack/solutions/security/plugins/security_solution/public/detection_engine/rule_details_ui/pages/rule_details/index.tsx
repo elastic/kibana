@@ -88,7 +88,12 @@ import {
   getStepsData,
   redirectToDetections,
 } from '../../../common/helpers';
-import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/rule_info';
+import {
+  CreatedBy,
+  UpdatedBy,
+  RuleVersion,
+  RuleRevision,
+} from '../../../../detections/components/rules/rule_info';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
@@ -132,7 +137,7 @@ import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/compo
 import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_with_fallback';
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
-import type { RuleResponse, Status } from '../../../../../common/api/detection_engine';
+import { type RuleResponse, type Status } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -408,6 +413,10 @@ export const RuleDetailsPage = connector(
             ) : (
               ''
             ),
+            ...(rule && rule.rule_source.type === 'external'
+              ? [<RuleVersion version={rule.version} />]
+              : []),
+            rule && <RuleRevision revision={rule.revision} />,
           ]
         ) : ruleLoading ? (
           <EuiLoadingSpinner size="m" />
