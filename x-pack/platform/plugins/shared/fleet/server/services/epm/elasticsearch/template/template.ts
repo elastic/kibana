@@ -459,21 +459,22 @@ function errorNeedRollover(err: any): boolean {
   return false;
 }
 
-const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
-  try {
-    // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
-    return esClient.transport.request({
-      method: 'POST',
-      path: `/${dataStreamName}/_rollover`,
-      querystring: {
-        lazy: true,
-      },
-    });
-  } catch (error) {
-    throw new PackageESError(
-      `Cannot rollover data stream [${dataStreamName}] due to error: ${error}`
-    );
-  }
+const rolloverDataStream = (
+  dataStreamName: string,
+  esClient: ElasticsearchClient,
+  logger: Logger
+) => {
+  return retryDataStreamUpdateOnClusterEventTimeout(
+    () =>
+      esClient.transport.request({
+        method: 'POST',
+        path: `/${dataStreamName}/_rollover`,
+        querystring: {
+          lazy: true,
+        },
+      }),
+    { logger, dataStreamName }
+  );
 };
 
 const updateAllDataStreams = async (
@@ -491,17 +492,13 @@ const updateAllDataStreams = async (
   await pMap(
     indexNameWithTemplates,
     (templateEntry) => {
-      return retryDataStreamUpdateOnClusterEventTimeout(
-        () =>
-          updateExistingDataStream({
-            esClient,
-            logger,
-            currentWriteIndex: templateEntry.currentWriteIndex,
-            dataStreamName: templateEntry.dataStreamName,
-            options,
-          }),
-        { logger, dataStreamName: templateEntry.dataStreamName }
-      );
+      return updateExistingDataStream({
+        esClient,
+        logger,
+        currentWriteIndex: templateEntry.currentWriteIndex,
+        dataStreamName: templateEntry.dataStreamName,
+        options,
+      });
     },
     {
       concurrency,
@@ -594,7 +591,7 @@ const updateExistingDataStream = async ({
         return;
       } else {
         logger.info(`Triggering a rollover for ${dataStreamName}`);
-        await rolloverDataStream(dataStreamName, esClient);
+        await rolloverDataStream(dataStreamName, esClient, logger);
         return;
       }
     }
@@ -651,7 +648,7 @@ const updateExistingDataStream = async ({
           ? `Dynamic dimension mappings changed for ${dataStreamName}, triggering a rollover`
           : `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
       );
-      await rolloverDataStream(dataStreamName, esClient);
+      await rolloverDataStream(dataStreamName, esClient, logger);
     }
   }
 
