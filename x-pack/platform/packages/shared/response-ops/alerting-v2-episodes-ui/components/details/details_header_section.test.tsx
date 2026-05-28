@@ -8,22 +8,18 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
 import { fetchEpisodeActions } from '../../apis/fetch_episode_actions';
 import { fetchGroupActions } from '../../apis/fetch_group_actions';
 import {
-  createMockSpaces,
+  createMockServices,
   createQueryClientWrapper,
   createTestQueryClient,
 } from '../../hooks/test_utils';
 import { AlertEpisodeDetailsHeaderSection } from './details_header_section';
-import type { AlertEpisodeDetailsServices } from './types';
 
 jest.mock('../../utils/run_esql_async_search');
 jest.mock('../../apis/fetch_episode_actions');
@@ -33,19 +29,8 @@ const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 const fetchEpisodeActionsMock = jest.mocked(fetchEpisodeActions);
 const fetchGroupActionsMock = jest.mocked(fetchGroupActions);
 
-const mockData = dataPluginMock.createStartContract();
 const mockHttp = httpServiceMock.createStartContract();
-const mockExpressions = {} as ExpressionsStart;
-const mockUserProfile = {} as UserProfileService;
-const mockSpaces = createMockSpaces();
-
-const mockServices: AlertEpisodeDetailsServices = {
-  data: mockData,
-  http: mockHttp,
-  expressions: mockExpressions,
-  userProfile: mockUserProfile,
-  spaces: mockSpaces,
-};
+const mockServices = createMockServices({ http: mockHttp });
 
 const mockRule = {
   id: 'rule-1',

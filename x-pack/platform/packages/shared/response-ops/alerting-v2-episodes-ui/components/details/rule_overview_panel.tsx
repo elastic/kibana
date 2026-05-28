@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  EuiAccordion,
   EuiBadge,
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -24,13 +23,11 @@ import * as i18n from './translations';
 
 export interface AlertEpisodeRuleOverviewPanelProps {
   rule: RuleResponse;
-  collapsible: boolean;
   ruleDetailsHref: string;
 }
 
 export const AlertEpisodeRuleOverviewPanel = ({
   rule,
-  collapsible,
   ruleDetailsHref,
 }: AlertEpisodeRuleOverviewPanelProps) => {
   const ruleKindLabel =
@@ -109,41 +106,25 @@ export const AlertEpisodeRuleOverviewPanel = ({
     </>
   );
 
-  if (!collapsible) {
-    return (
-      <>
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-          responsive={false}
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false}>{titleNode}</EuiFlexItem>
-          <EuiFlexItem grow={false}>{viewDetailsButton}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiPanel
-          hasBorder
-          paddingSize="m"
-          data-test-subj="alertingV2EpisodeDetailsRuleOverviewPanel"
-        >
-          {bodyInner}
-        </EuiPanel>
-      </>
-    );
-  }
-
   return (
-    <EuiAccordion
-      id="alertingV2EpisodeDetailsRuleOverviewAccordion"
-      data-test-subj="alertingV2EpisodeDetailsRuleOverviewAccordion"
-      buttonContent={titleNode}
-      extraAction={viewDetailsButton}
-      paddingSize="none"
-      initialIsOpen
-    >
-      <EuiSpacer size="s" />
-      {bodyInner}
-    </EuiAccordion>
+    <>
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
+        gutterSize="s"
+      >
+        <EuiFlexItem grow={false}>{titleNode}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{viewDetailsButton}</EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiPanel
+        hasBorder
+        paddingSize="m"
+        data-test-subj="alertingV2EpisodeDetailsRuleOverviewPanel"
+      >
+        {bodyInner}
+      </EuiPanel>
+    </>
   );
 };

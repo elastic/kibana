@@ -17,7 +17,7 @@ const AlertEpisodeLifecycleHeatmap = React.lazy(() =>
 
 export interface AlertEpisodeLifecycleHeatmapSectionProps {
   episodeId: string;
-  services: AlertEpisodeDetailsServices;
+  services: Pick<AlertEpisodeDetailsServices, 'data' | 'spaces'>;
 }
 
 export const AlertEpisodeLifecycleHeatmapSection = ({

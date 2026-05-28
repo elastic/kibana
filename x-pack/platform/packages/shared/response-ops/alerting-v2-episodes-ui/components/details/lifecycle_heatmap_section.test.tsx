@@ -8,18 +8,13 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
 import {
-  createMockSpaces,
+  createMockServices,
   createQueryClientWrapper,
   createTestQueryClient,
 } from '../../hooks/test_utils';
 import { AlertEpisodeLifecycleHeatmapSection } from './lifecycle_heatmap_section';
-import type { AlertEpisodeDetailsServices } from './types';
 
 jest.mock('../../utils/run_esql_async_search');
 
@@ -32,19 +27,7 @@ jest.mock('./lifecycle_heatmap', () => ({
 
 const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 
-const mockData = dataPluginMock.createStartContract();
-const mockHttp = httpServiceMock.createStartContract();
-const mockExpressions = {} as ExpressionsStart;
-const mockUserProfile = {} as UserProfileService;
-const mockSpaces = createMockSpaces();
-
-const mockServices: AlertEpisodeDetailsServices = {
-  data: mockData,
-  http: mockHttp,
-  expressions: mockExpressions,
-  userProfile: mockUserProfile,
-  spaces: mockSpaces,
-};
+const mockServices = createMockServices();
 
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);

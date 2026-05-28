@@ -16,7 +16,10 @@ import * as i18n from './translations';
 export interface AlertEpisodeActionsOverviewSectionProps {
   episodeId: string;
   groupHash: string | undefined;
-  services: AlertEpisodeDetailsServices;
+  services: Pick<
+    AlertEpisodeDetailsServices,
+    'expressions' | 'spaces' | 'uiSettings' | 'userProfile'
+  >;
 }
 
 export const AlertEpisodeActionsOverviewSection = ({
@@ -68,6 +71,7 @@ export const AlertEpisodeActionsOverviewSection = ({
       episodeAction={episodeAction}
       groupAction={groupAction}
       userProfile={services.userProfile}
+      dateFormat={services.uiSettings.get('dateFormat') ?? undefined}
     />
   );
 };

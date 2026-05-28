@@ -7,13 +7,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import { createMockSpaces } from '../../hooks/test_utils';
+import { createMockServices } from '../../hooks/test_utils';
 import { AlertEpisodeOverviewSection } from './overview_section';
-import type { AlertEpisodeDetailsServices } from './types';
 
 jest.mock('./metadata_details_list_section', () => ({
   AlertEpisodeMetadataDetailsListSection: jest.fn(() => (
@@ -39,23 +34,11 @@ jest.mock('./rule_overview_panel_section', () => ({
   )),
 }));
 
-const { AlertEpisodeRuleOverviewPanelSection } = jest.requireMock(
-  './rule_overview_panel_section'
-) as {
-  AlertEpisodeRuleOverviewPanelSection: jest.Mock;
-};
-
 const { AlertEpisodeActionsOverviewSection } = jest.requireMock('./actions_overview_section') as {
   AlertEpisodeActionsOverviewSection: jest.Mock;
 };
 
-const mockServices: AlertEpisodeDetailsServices = {
-  data: dataPluginMock.createStartContract(),
-  http: httpServiceMock.createStartContract(),
-  expressions: {} as ExpressionsStart,
-  userProfile: {} as UserProfileService,
-  spaces: createMockSpaces(),
-};
+const mockServices = createMockServices();
 
 describe('AlertEpisodeOverviewSection', () => {
   beforeEach(() => {
@@ -80,20 +63,6 @@ describe('AlertEpisodeOverviewSection', () => {
 
     expect(AlertEpisodeActionsOverviewSection).toHaveBeenCalledWith(
       expect.objectContaining({ episodeId: 'ep-1', groupHash: 'gh-1' }),
-      expect.anything()
-    );
-  });
-
-  it('passes collapsible=true to the rule overview panel section', () => {
-    render(
-      <AlertEpisodeOverviewSection episodeId="ep-1" groupHash="gh-1" services={mockServices} />
-    );
-
-    expect(AlertEpisodeRuleOverviewPanelSection).toHaveBeenCalledWith(
-      expect.objectContaining({
-        collapsible: true,
-        episodeId: 'ep-1',
-      }),
       expect.anything()
     );
   });

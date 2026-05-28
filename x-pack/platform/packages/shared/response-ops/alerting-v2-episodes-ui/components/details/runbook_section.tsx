@@ -15,7 +15,7 @@ import * as i18n from './translations';
 
 export interface AlertEpisodeRunbookSectionProps {
   episodeId: string;
-  services: AlertEpisodeDetailsServices;
+  services: Pick<AlertEpisodeDetailsServices, 'data' | 'http' | 'spaces'>;
 }
 
 export const AlertEpisodeRunbookSection = ({

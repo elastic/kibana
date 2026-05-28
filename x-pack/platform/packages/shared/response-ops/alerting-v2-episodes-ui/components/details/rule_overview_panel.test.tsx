@@ -22,14 +22,10 @@ const mockRule = {
 const mockRuleDetailsHref = '/rules/rule-1';
 
 describe('AlertEpisodeRuleOverviewPanel', () => {
-  it('renders the rule name, esql code block and view-rule-details link when not collapsible', () => {
+  it('renders the rule name, esql code block and view-rule-details link', () => {
     render(
       <I18nProvider>
-        <AlertEpisodeRuleOverviewPanel
-          rule={mockRule}
-          collapsible={false}
-          ruleDetailsHref={mockRuleDetailsHref}
-        />
+        <AlertEpisodeRuleOverviewPanel rule={mockRule} ruleDetailsHref={mockRuleDetailsHref} />
       </I18nProvider>
     );
 
@@ -39,21 +35,6 @@ describe('AlertEpisodeRuleOverviewPanel', () => {
     );
     const viewBtn = screen.getByTestId('alertingV2EpisodeDetailsViewRuleDetailsButton');
     expect(viewBtn).toHaveAttribute('href', '/rules/rule-1');
-    expect(
-      screen.queryByTestId('alertingV2EpisodeDetailsRuleOverviewAccordion')
-    ).not.toBeInTheDocument();
-  });
-
-  it('wraps the panel in an accordion when collapsible', () => {
-    render(
-      <I18nProvider>
-        <AlertEpisodeRuleOverviewPanel
-          rule={mockRule}
-          collapsible={true}
-          ruleDetailsHref={mockRuleDetailsHref}
-        />
-      </I18nProvider>
-    );
-    expect(screen.getByTestId('alertingV2EpisodeDetailsRuleOverviewAccordion')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')).toBeInTheDocument();
   });
 });

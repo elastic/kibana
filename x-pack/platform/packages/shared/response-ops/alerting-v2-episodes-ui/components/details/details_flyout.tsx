@@ -20,13 +20,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { alertEpisodeDetailsPath } from '../../constants';
+import { FLYOUT_FOOTER_OFFSET, getAlertEpisodeDetailsPath } from '../../constants';
 import { AlertEpisodeDetailsHeaderSection } from './details_header_section';
 import { AlertEpisodeOverviewSection } from './overview_section';
 import { AlertEpisodesRelatedSection } from './related_section';
 import { AlertEpisodeMetadataSection } from './metadata_section';
-import type { AlertEpisodeMetadataSectionServices } from './metadata_section';
 import { AlertEpisodeRunbookSection } from './runbook_section';
+import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
 type TabId = 'overview' | 'related' | 'metadata' | 'runbook';
@@ -35,7 +35,7 @@ export interface AlertEpisodeDetailsFlyoutProps {
   episodeId: string;
   groupHash: string | undefined;
   onClose: () => void;
-  services: AlertEpisodeMetadataSectionServices;
+  services: AlertEpisodeDetailsServices;
 }
 
 export const AlertEpisodeDetailsFlyout = ({
@@ -153,7 +153,7 @@ export const AlertEpisodeDetailsFlyout = ({
             // footer. Subtract the footer's approximate height (button +
             // top/bottom padding for the default `paddingSize="l"`) so the
             // table fits above the footer instead of extending past it.
-            decreaseAvailableHeightBy={80}
+            decreaseAvailableHeightBy={FLYOUT_FOOTER_OFFSET}
           />
         )}
         {tab === 'runbook' && (
@@ -174,7 +174,7 @@ export const AlertEpisodeDetailsFlyout = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              href={services.http.basePath.prepend(alertEpisodeDetailsPath(episodeId))}
+              href={services.http.basePath.prepend(getAlertEpisodeDetailsPath(episodeId))}
               data-test-subj="alertingV2EpisodeFlyoutViewDetailsButton"
               iconType="eye"
             >

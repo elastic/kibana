@@ -9,21 +9,19 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
-import { ruleDetailsPath } from '../../constants';
+import { getRuleDetailsPath } from '../../constants';
 import { AlertEpisodeRuleOverviewPanel } from './rule_overview_panel';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
 export interface AlertEpisodeRuleOverviewPanelSectionProps {
   episodeId: string;
-  services: AlertEpisodeDetailsServices;
-  collapsible?: boolean;
+  services: Pick<AlertEpisodeDetailsServices, 'data' | 'http' | 'spaces'>;
 }
 
 export const AlertEpisodeRuleOverviewPanelSection = ({
   episodeId,
   services,
-  collapsible,
 }: AlertEpisodeRuleOverviewPanelSectionProps) => {
   const {
     data: episode,
@@ -63,8 +61,7 @@ export const AlertEpisodeRuleOverviewPanelSection = ({
   return (
     <AlertEpisodeRuleOverviewPanel
       rule={rule}
-      collapsible={collapsible ?? false}
-      ruleDetailsHref={services.http.basePath.prepend(ruleDetailsPath(ruleId))}
+      ruleDetailsHref={services.http.basePath.prepend(getRuleDetailsPath(ruleId))}
     />
   );
 };

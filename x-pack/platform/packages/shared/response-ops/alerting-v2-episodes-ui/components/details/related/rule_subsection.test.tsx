@@ -63,7 +63,6 @@ describe('RelatedEpisodesRuleSubsection', () => {
           currentEpisodeId="ep-1"
           currentGroupHash="gh-1"
           rule={mockRule}
-          ruleId="rule-1"
           getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
         />
       </I18nProvider>
@@ -83,7 +82,6 @@ describe('RelatedEpisodesRuleSubsection', () => {
           currentEpisodeId="ep-1"
           currentGroupHash={undefined}
           rule={mockRule}
-          ruleId="rule-1"
           getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
         />
       </I18nProvider>
@@ -101,7 +99,6 @@ describe('RelatedEpisodesRuleSubsection', () => {
           currentEpisodeId="ep-1"
           currentGroupHash={undefined}
           rule={mockRule}
-          ruleId="rule-1"
           getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
         />
       </I18nProvider>

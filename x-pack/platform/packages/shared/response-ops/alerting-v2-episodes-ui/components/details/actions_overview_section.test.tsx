@@ -8,19 +8,14 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { fetchEpisodeActions } from '../../apis/fetch_episode_actions';
 import { fetchGroupActions } from '../../apis/fetch_group_actions';
 import {
-  createMockSpaces,
+  createMockServices,
   createQueryClientWrapper,
   createTestQueryClient,
 } from '../../hooks/test_utils';
 import { AlertEpisodeActionsOverviewSection } from './actions_overview_section';
-import type { AlertEpisodeDetailsServices } from './types';
 
 jest.mock('../../apis/fetch_episode_actions');
 jest.mock('../../apis/fetch_group_actions');
@@ -28,19 +23,7 @@ jest.mock('../../apis/fetch_group_actions');
 const fetchEpisodeActionsMock = jest.mocked(fetchEpisodeActions);
 const fetchGroupActionsMock = jest.mocked(fetchGroupActions);
 
-const mockData = dataPluginMock.createStartContract();
-const mockHttp = httpServiceMock.createStartContract();
-const mockExpressions = {} as ExpressionsStart;
-const mockUserProfile = {} as UserProfileService;
-const mockSpaces = createMockSpaces();
-
-const mockServices: AlertEpisodeDetailsServices = {
-  data: mockData,
-  http: mockHttp,
-  expressions: mockExpressions,
-  userProfile: mockUserProfile,
-  spaces: mockSpaces,
-};
+const mockServices = createMockServices();
 
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);

@@ -17,9 +17,17 @@ jest.mock('../assignee_cell', () => ({
   ),
 }));
 
-jest.mock('../grouping/grouping_fields', () => ({
-  AlertEpisodeGroupingFields: ({ fields }: { fields: string[] }) => (
-    <div data-test-subj="mockGroupingFields">{fields.join(',')}</div>
+jest.mock('../grouping/alerting_episode_grouping_tags', () => ({
+  AlertingEpisodeGroupingTags: ({
+    fields,
+    data,
+  }: {
+    fields: readonly string[];
+    data: Record<string, unknown>;
+  }) => (
+    <div data-test-subj="mockGroupingTags">
+      {fields.map((field) => `${field}=${String(data[field] ?? '')}`).join(',')}
+    </div>
   ),
 }));
 
@@ -30,8 +38,8 @@ describe('AlertEpisodeMetadataDetailsList', () => {
     render(
       <I18nProvider>
         <AlertEpisodeMetadataDetailsList
-          episodeId="ep-1"
           groupingFields={['host.name']}
+          groupingData={{ 'host.name': 'host-a' }}
           triggeredAt="2024-01-01T00:00:00.000Z"
           durationMs={5000}
           assigneeUid="user-1"
@@ -40,10 +48,8 @@ describe('AlertEpisodeMetadataDetailsList', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByText('Alert episode id')).toBeInTheDocument();
-    expect(screen.getByText('ep-1')).toBeInTheDocument();
     expect(screen.getByText('Grouping')).toBeInTheDocument();
-    expect(screen.getByTestId('mockGroupingFields')).toHaveTextContent('host.name');
+    expect(screen.getByTestId('mockGroupingTags')).toHaveTextContent('host.name=host-a');
     expect(screen.getByText('Triggered')).toBeInTheDocument();
     expect(screen.getByText('Duration')).toBeInTheDocument();
     expect(screen.getByText('Assignee')).toBeInTheDocument();
@@ -54,8 +60,8 @@ describe('AlertEpisodeMetadataDetailsList', () => {
     render(
       <I18nProvider>
         <AlertEpisodeMetadataDetailsList
-          episodeId="ep-1"
           groupingFields={[]}
+          groupingData={{}}
           triggeredAt={undefined}
           durationMs={undefined}
           assigneeUid={undefined}

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
-import { alertEpisodeDetailsPath } from '../../constants';
+import { getAlertEpisodeDetailsPath } from '../../constants';
 import { AlertEpisodesRelated } from './related/related';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
 export interface AlertEpisodesRelatedSectionProps {
   episodeId: string;
-  services: AlertEpisodeDetailsServices;
+  services: Pick<AlertEpisodeDetailsServices, 'data' | 'http' | 'spaces'>;
   showHeading?: boolean;
   compressed?: boolean;
 }
@@ -27,8 +27,10 @@ export const AlertEpisodesRelatedSection = ({
   showHeading,
   compressed,
 }: AlertEpisodesRelatedSectionProps) => {
-  const getEpisodeDetailsHref = (id: string) =>
-    services.http.basePath.prepend(alertEpisodeDetailsPath(id));
+  const getEpisodeDetailsHref = useCallback(
+    (id: string) => services.http.basePath.prepend(getAlertEpisodeDetailsPath(id)),
+    [services.http.basePath]
+  );
   const {
     data: episode,
     isLoading: isLoadingEpisode,
@@ -61,7 +63,6 @@ export const AlertEpisodesRelatedSection = ({
       currentEpisodeId={episodeId}
       groupHash={groupHash}
       rule={rule}
-      ruleId={ruleId}
       getEpisodeDetailsHref={getEpisodeDetailsHref}
       showHeading={showHeading}
       compressed={compressed}

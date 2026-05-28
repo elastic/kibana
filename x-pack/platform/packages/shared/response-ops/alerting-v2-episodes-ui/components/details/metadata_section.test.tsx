@@ -8,23 +8,18 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
 import {
-  createMockSpaces,
+  createMockServices,
   createQueryClientWrapper,
   createTestQueryClient,
 } from '../../hooks/test_utils';
 import { AlertEpisodeMetadataSection } from './metadata_section';
-import type { AlertEpisodeMetadataSectionServices } from './metadata_section';
 
 jest.mock('../../utils/run_esql_async_search');
 jest.mock('../../hooks/use_alerting_episode_source_data_view');
@@ -36,16 +31,6 @@ jest.mock('@kbn/discover-utils', () => ({
 const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 const useAlertingEpisodeSourceDataViewMock = jest.mocked(useAlertingEpisodeSourceDataView);
 
-const mockData = dataPluginMock.createStartContract();
-const mockHttp = httpServiceMock.createStartContract();
-const mockExpressions = {} as ExpressionsStart;
-const mockUserProfile = {} as UserProfileService;
-const mockSpaces = createMockSpaces();
-
-const mockUiSettings = {
-  get: jest.fn(() => 'YYYY-MM-DD HH:mm:ss'),
-} as unknown as IUiSettingsClient;
-
 const mockTableRender = jest.fn(() => <div data-test-subj="mock-doc-viewer-table" />);
 
 const mockUnifiedDocViewer = {
@@ -54,16 +39,11 @@ const mockUnifiedDocViewer = {
   },
 } as unknown as UnifiedDocViewerStart;
 
-const mockServices: AlertEpisodeMetadataSectionServices = {
-  data: mockData,
+const mockHttp = httpServiceMock.createStartContract();
+const mockServices = createMockServices({
   http: mockHttp,
-  expressions: mockExpressions,
-  userProfile: mockUserProfile,
-  spaces: mockSpaces,
-  dataViews: {} as never,
-  uiSettings: mockUiSettings,
   unifiedDocViewer: mockUnifiedDocViewer,
-};
+});
 
 const mockRule = {
   id: 'rule-1',

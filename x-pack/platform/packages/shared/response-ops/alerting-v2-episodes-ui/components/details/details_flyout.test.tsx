@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { createMockServices } from '../../hooks/test_utils';
 import { AlertEpisodeDetailsFlyout } from './details_flyout';
 
 jest.mock('./details_header_section', () => ({
@@ -27,12 +28,13 @@ jest.mock('./runbook_section', () => ({
 }));
 
 const mockHttp = httpServiceMock.createStartContract();
+const mockServices = createMockServices({ http: mockHttp });
 
 const baseProps = {
   episodeId: 'ep-1',
   groupHash: 'gh-1',
   onClose: jest.fn(),
-  services: { http: mockHttp } as any,
+  services: mockServices,
 };
 
 describe('AlertEpisodeDetailsFlyout', () => {

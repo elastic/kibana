@@ -29,7 +29,6 @@ describe('AlertEpisodesRelated', () => {
           currentEpisodeId="ep-1"
           groupHash={undefined}
           rule={mockRule}
-          ruleId="rule-1"
           getEpisodeDetailsHref={(id) => `/base/${id}`}
         />
       </I18nProvider>
@@ -48,7 +47,6 @@ describe('AlertEpisodesRelated', () => {
           currentEpisodeId="ep-1"
           groupHash="gh-1"
           rule={mockRule}
-          ruleId="rule-1"
           getEpisodeDetailsHref={(id) => `/base/${id}`}
         />
       </I18nProvider>

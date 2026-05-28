@@ -172,13 +172,6 @@ export const LIFECYCLE_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
 );
 
 /** --- Metadata details list --- */
-export const METADATA_LIST_EPISODE_ID_LABEL = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.metadataList.episodeIdLabel',
-  {
-    defaultMessage: 'Alert episode id',
-  }
-);
-
 export const METADATA_LIST_GROUPING_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.groupingLabel',
   {

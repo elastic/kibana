@@ -11,26 +11,22 @@ import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
+import { EMPTY_VALUE } from '../../constants';
+import { formatDateTime } from '../../utils/format_date_time';
 import * as i18n from './translations';
 
 export interface AlertEpisodeActionsOverviewProps {
   episodeAction: EpisodeActionState | undefined;
   groupAction: AlertEpisodeGroupAction | undefined;
   userProfile: UserProfileService;
+  dateFormat?: string;
 }
-
-const EMPTY_VALUE = '—';
-
-const formatSnoozeExpiry = (snoozeExpiry: string): string =>
-  new Date(snoozeExpiry).toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
 
 export const AlertEpisodeActionsOverview = ({
   episodeAction,
   groupAction,
   userProfile,
+  dateFormat,
 }: AlertEpisodeActionsOverviewProps) => {
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
@@ -95,7 +91,7 @@ export const AlertEpisodeActionsOverview = ({
               {
                 title: i18n.ACTIONS_OVERVIEW_SNOOZED_UNTIL,
                 description: groupAction?.snoozeExpiry
-                  ? formatSnoozeExpiry(groupAction.snoozeExpiry)
+                  ? formatDateTime(groupAction.snoozeExpiry, dateFormat)
                   : EMPTY_VALUE,
               },
             ]

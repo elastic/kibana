@@ -15,7 +15,7 @@ import type { AlertEpisodeDetailsServices } from './types';
 
 export interface AlertEpisodeDetailsHeaderSectionProps {
   episodeId: string;
-  services: AlertEpisodeDetailsServices;
+  services: Pick<AlertEpisodeDetailsServices, 'data' | 'http' | 'expressions' | 'spaces'>;
 }
 
 export const AlertEpisodeDetailsHeaderSection = ({

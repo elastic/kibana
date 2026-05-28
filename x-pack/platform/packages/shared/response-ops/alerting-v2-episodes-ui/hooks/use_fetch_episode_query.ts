@@ -29,7 +29,7 @@ export const useFetchEpisodeQuery = ({ episodeId, services }: UseFetchEpisodeQue
   const { data } = services;
   const spaceId = useSpaceId(services.spaces);
 
-  return useQuery<AlertEpisodeEsqlRow[], unknown, AlertEpisode | undefined>({
+  return useQuery({
     queryKey: queryKeys.episode(spaceId, episodeId ?? ''),
     queryFn: ({ signal }) =>
       runEsqlAsyncSearch({
@@ -39,9 +39,9 @@ export const useFetchEpisodeQuery = ({ episodeId, services }: UseFetchEpisodeQue
           time_zone: 'UTC',
         },
         abortSignal: signal,
-      }).then((raw) => esqlResponseToObjectRows<AlertEpisodeEsqlRow>(raw)),
+      }),
     select: (rows): AlertEpisode | undefined => {
-      const row = rows[0];
+      const row = esqlResponseToObjectRows<AlertEpisodeEsqlRow>(rows)[0];
       if (!row) return undefined;
       return { ...row, last_tags: normalizeTags(row.last_tags) };
     },

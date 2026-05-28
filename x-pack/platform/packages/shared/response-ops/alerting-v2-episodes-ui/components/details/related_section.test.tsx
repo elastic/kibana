@@ -8,20 +8,16 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
 import {
-  createMockSpaces,
+  createMockServices,
   createQueryClientWrapper,
   createTestQueryClient,
 } from '../../hooks/test_utils';
 import { AlertEpisodesRelatedSection } from './related_section';
-import type { AlertEpisodeDetailsServices } from './types';
 
 jest.mock('../../utils/run_esql_async_search');
 
@@ -35,19 +31,8 @@ const { AlertEpisodesRelated } = jest.requireMock('./related/related') as {
 
 const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 
-const mockData = dataPluginMock.createStartContract();
 const mockHttp = httpServiceMock.createStartContract();
-const mockExpressions = {} as ExpressionsStart;
-const mockUserProfile = {} as UserProfileService;
-const mockSpaces = createMockSpaces();
-
-const mockServices: AlertEpisodeDetailsServices = {
-  data: mockData,
-  http: mockHttp,
-  expressions: mockExpressions,
-  userProfile: mockUserProfile,
-  spaces: mockSpaces,
-};
+const mockServices = createMockServices({ http: mockHttp });
 
 const mockRule = {
   id: 'rule-1',
@@ -91,7 +76,6 @@ describe('AlertEpisodesRelatedSection', () => {
       expect.objectContaining({
         currentEpisodeId: 'ep-1',
         groupHash: 'gh-1',
-        ruleId: 'rule-1',
         rule: mockRule,
         getEpisodeDetailsHref: expect.any(Function),
       }),

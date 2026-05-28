@@ -16,7 +16,6 @@ export interface AlertEpisodesRelatedProps {
   currentEpisodeId: string | undefined;
   groupHash: string | undefined;
   rule: RuleResponse;
-  ruleId: string | undefined;
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**
    * Whether to render the "Related episodes" section heading. Defaults to `true`.
@@ -36,7 +35,6 @@ export function AlertEpisodesRelated({
   currentEpisodeId,
   groupHash,
   rule,
-  ruleId,
   getEpisodeDetailsHref,
   showHeading = true,
   compressed = false,
@@ -57,7 +55,6 @@ export function AlertEpisodesRelated({
             currentEpisodeId={currentEpisodeId}
             groupHash={groupHash}
             rule={rule}
-            ruleId={ruleId}
             getEpisodeDetailsHref={getEpisodeDetailsHref}
             compressed={compressed}
           />
@@ -68,7 +65,6 @@ export function AlertEpisodesRelated({
         currentEpisodeId={currentEpisodeId}
         currentGroupHash={groupHash}
         rule={rule}
-        ruleId={ruleId}
         getEpisodeDetailsHref={getEpisodeDetailsHref}
         compressed={compressed}
       />

@@ -8,34 +8,30 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import { AlertEpisodeGroupingFields } from '../grouping/grouping_fields';
+import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
+import { EMPTY_VALUE } from '../../constants';
+import { formatDateTime } from '../../utils/format_date_time';
 import * as i18n from './translations';
 
 export interface AlertEpisodeMetadataDetailsListProps {
-  episodeId: string;
   groupingFields: string[];
+  groupingData: Record<string, unknown>;
   triggeredAt: string | undefined;
   durationMs: number | undefined;
   assigneeUid: string | undefined;
   userProfile: UserProfileService;
+  dateFormat?: string;
 }
 
-const EMPTY_VALUE = '—';
-
-const formatTriggeredAt = (triggeredAt: string): string =>
-  new Date(triggeredAt).toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
-
 export const AlertEpisodeMetadataDetailsList = ({
-  episodeId,
   groupingFields,
+  groupingData,
   triggeredAt,
   durationMs,
   assigneeUid,
   userProfile,
+  dateFormat,
 }: AlertEpisodeMetadataDetailsListProps) => {
   return (
     <EuiDescriptionList
@@ -44,16 +40,18 @@ export const AlertEpisodeMetadataDetailsList = ({
       type="responsiveColumn"
       listItems={[
         {
-          title: i18n.METADATA_LIST_EPISODE_ID_LABEL,
-          description: episodeId ?? EMPTY_VALUE,
-        },
-        {
           title: i18n.METADATA_LIST_GROUPING_LABEL,
-          description: <AlertEpisodeGroupingFields fields={groupingFields} />,
+          description: (
+            <AlertingEpisodeGroupingTags
+              fields={groupingFields}
+              data={groupingData}
+              data-test-subj="alertingV2EpisodeDetailsMetadataListGroupingTags"
+            />
+          ),
         },
         {
           title: i18n.METADATA_LIST_TRIGGERED_LABEL,
-          description: triggeredAt ? formatTriggeredAt(triggeredAt) : EMPTY_VALUE,
+          description: triggeredAt ? formatDateTime(triggeredAt, dateFormat) : EMPTY_VALUE,
         },
         {
           title: i18n.METADATA_LIST_DURATION_LABEL,

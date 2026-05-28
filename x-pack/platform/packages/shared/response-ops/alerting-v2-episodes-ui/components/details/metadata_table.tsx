@@ -11,6 +11,7 @@ import moment from 'moment';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { css } from '@emotion/react';
+import { DEFAULT_DATE_FORMAT } from '../../constants';
 import * as i18n from './translations';
 
 export interface AlertEpisodeMetadataTableProps {
@@ -46,9 +47,7 @@ export const AlertEpisodeMetadataTable = ({
           iconType="clock"
           data-test-subj="alertingV2EpisodeMetadataTabStaleCallout"
           title={i18n.getMetadataTableStaleDataCallout(
-            dataTimestamp
-              ? moment(dataTimestamp).format(dateFormat ?? 'MMM D, YYYY @ HH:mm:ss.SSS')
-              : ''
+            dataTimestamp ? moment(dataTimestamp).format(dateFormat ?? DEFAULT_DATE_FORMAT) : ''
           )}
         />
       </EuiFlexItem>

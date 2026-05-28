@@ -9,13 +9,17 @@ import React from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { parseEpisodeDataJson } from '../../utils/episode_grouping_data';
 import { AlertEpisodeMetadataDetailsList } from './metadata_details_list';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
 export interface AlertEpisodeMetadataDetailsListSectionProps {
   episodeId: string;
-  services: AlertEpisodeDetailsServices;
+  services: Pick<
+    AlertEpisodeDetailsServices,
+    'data' | 'http' | 'spaces' | 'uiSettings' | 'userProfile'
+  >;
 }
 
 export const AlertEpisodeMetadataDetailsListSection = ({
@@ -60,16 +64,18 @@ export const AlertEpisodeMetadataDetailsListSection = ({
   }
 
   const groupingFields = rule?.grouping?.fields ?? [];
+  const groupingData = parseEpisodeDataJson(episode?.episode_data);
   const assigneeUid = episode?.last_assignee_uid ?? undefined;
 
   return (
     <AlertEpisodeMetadataDetailsList
-      episodeId={episodeId}
       groupingFields={groupingFields}
+      groupingData={groupingData}
       triggeredAt={triggeredAt}
       durationMs={durationMs}
       assigneeUid={assigneeUid}
       userProfile={services.userProfile}
+      dateFormat={services.uiSettings.get('dateFormat') ?? undefined}
     />
   );
 };

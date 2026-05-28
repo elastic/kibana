@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AlertEpisodeMetadataTable } from './metadata_table';
 
 const mockHit = { id: 'h1', raw: { _id: 'h1' }, flattened: {} } as unknown as DataTableRecord;
-const mockDataView = {} as DataView;
+const mockDataView = createStubDataView({ spec: { id: 'test-*', title: 'test-*' } });
 
 describe('AlertEpisodeMetadataTable', () => {
   it('renders the provided table render function output', () => {

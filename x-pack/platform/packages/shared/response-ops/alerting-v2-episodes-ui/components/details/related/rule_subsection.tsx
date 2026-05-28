@@ -39,7 +39,6 @@ export interface RelatedEpisodesRuleSubsectionProps {
   currentEpisodeId: string | undefined;
   currentGroupHash: string | undefined;
   rule: RuleResponse;
-  ruleId: string | undefined;
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**
    * When `true`, drop the inner horizontal padding so the subsection sits
@@ -56,7 +55,6 @@ export function RelatedEpisodesRuleSubsection({
   currentEpisodeId,
   currentGroupHash,
   rule,
-  ruleId,
   getEpisodeDetailsHref,
   compressed = false,
 }: RelatedEpisodesRuleSubsectionProps) {
@@ -73,7 +71,7 @@ export function RelatedEpisodesRuleSubsection({
 
   const { data: otherGroupRows = [], isLoading: isLoadingOtherGroupRows } =
     useFetchSameRuleEpisodesQuery({
-      ruleId,
+      ruleId: rule.id,
       excludeEpisodeId: currentEpisodeId,
       pageSize: RELATED_ALERT_EPISODES_PAGE_SIZE,
       currentGroupHash,

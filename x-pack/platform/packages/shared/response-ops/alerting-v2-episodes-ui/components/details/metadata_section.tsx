@@ -5,31 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchEpisodeEventDataQuery } from '../../hooks/use_fetch_episode_event_data_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
 import { AlertEpisodeMetadataTable } from './metadata_table';
+import type { AlertEpisodeMetadataTableProps } from './metadata_table';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
 
-export interface AlertEpisodeMetadataSectionServices extends AlertEpisodeDetailsServices {
-  dataViews: DataViewsPublicPluginStart;
-  uiSettings: IUiSettingsClient;
-  unifiedDocViewer: UnifiedDocViewerStart;
-  spaces: SpacesPluginStart;
-}
-
 export interface AlertEpisodeMetadataSectionProps {
   episodeId: string;
-  services: AlertEpisodeMetadataSectionServices;
+  services: Pick<
+    AlertEpisodeDetailsServices,
+    'data' | 'http' | 'spaces' | 'dataViews' | 'uiSettings' | 'unifiedDocViewer'
+  >;
   /**
    * Pixels to subtract from the table's available-height calculation. Use this
    * when rendering inside a container that has a footer/sibling element below
@@ -81,6 +74,12 @@ export const AlertEpisodeMetadataSection = ({
     return buildDataTableRecord({ _source: eventData.data }, dataView);
   }, [eventData, dataView]);
 
+  const renderTable = useCallback<AlertEpisodeMetadataTableProps['renderTable']>(
+    ({ hit: h, dataView: dv }) =>
+      tableDocView?.render?.({ hit: h, dataView: dv, decreaseAvailableHeightBy }) ?? null,
+    [decreaseAvailableHeightBy, tableDocView]
+  );
+
   if (isError) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="alertingV2EpisodeMetadataSectionError">
@@ -105,9 +104,7 @@ export const AlertEpisodeMetadataSection = ({
     <AlertEpisodeMetadataTable
       hit={hit}
       dataView={dataView}
-      renderTable={({ hit: h, dataView: dv }) =>
-        tableDocView?.render?.({ hit: h, dataView: dv, decreaseAvailableHeightBy }) ?? null
-      }
+      renderTable={renderTable}
       isStale={Boolean(eventData.isStale)}
       dataTimestamp={eventData.dataTimestamp}
       dateFormat={services.uiSettings.get('dateFormat') ?? undefined}

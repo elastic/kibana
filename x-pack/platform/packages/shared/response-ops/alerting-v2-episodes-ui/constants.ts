@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const EMPTY_VALUE = '—';
+
 export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
 export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
@@ -12,6 +14,8 @@ export const PAGE_SIZE_ESQL_VARIABLE = 'pageSize';
 export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
 export const QUERY_STALE_TIME = 30_000;
 export const TIME_FIELD = '@timestamp';
+export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+export const FLYOUT_FOOTER_OFFSET = 80;
 
 const ALERTING_V2_SECTION_ID = 'alertingV2';
 const ALERTING_V2_RULES_APP_ID = 'rules';
@@ -22,8 +26,8 @@ const ALERTING_V2_EPISODES_APP_ID = 'episodes';
 export const ALERTING_V2_RULES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
 export const ALERTING_V2_EPISODES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
 
-export const alertEpisodeDetailsPath = (episodeId: string) =>
+export const getAlertEpisodeDetailsPath = (episodeId: string) =>
   `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`;
 
-export const ruleDetailsPath = (ruleId: string) =>
+export const getRuleDetailsPath = (ruleId: string) =>
   `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(ruleId)}`;

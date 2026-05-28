@@ -16,7 +16,10 @@ import type { AlertEpisodeDetailsServices } from './types';
 export interface AlertEpisodeOverviewSectionProps {
   episodeId: string;
   groupHash: string | undefined;
-  services: AlertEpisodeDetailsServices;
+  services: Pick<
+    AlertEpisodeDetailsServices,
+    'data' | 'http' | 'expressions' | 'spaces' | 'uiSettings' | 'userProfile'
+  >;
 }
 
 export const AlertEpisodeOverviewSection = ({
@@ -35,6 +38,6 @@ export const AlertEpisodeOverviewSection = ({
     <EuiSpacer size="l" />
     <AlertEpisodeLifecycleHeatmapSection episodeId={episodeId} services={services} />
     <EuiSpacer size="l" />
-    <AlertEpisodeRuleOverviewPanelSection episodeId={episodeId} services={services} collapsible />
+    <AlertEpisodeRuleOverviewPanelSection episodeId={episodeId} services={services} />
   </>
 );

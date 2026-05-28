@@ -6,40 +6,25 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { runEsqlAsyncSearch } from '../../utils/run_esql_async_search';
 import {
-  createMockSpaces,
+  createMockServices,
   createQueryClientWrapper,
   createTestQueryClient,
 } from '../../hooks/test_utils';
 import { AlertEpisodeRunbookSection } from './runbook_section';
-import type { AlertEpisodeDetailsServices } from './types';
 
 jest.mock('../../utils/run_esql_async_search');
 
 const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 
-const mockData = dataPluginMock.createStartContract();
 const mockHttp = httpServiceMock.createStartContract();
-const mockExpressions = {} as ExpressionsStart;
-const mockUserProfile = {} as UserProfileService;
-const mockSpaces = createMockSpaces();
-
-const mockServices: AlertEpisodeDetailsServices = {
-  data: mockData,
-  http: mockHttp,
-  expressions: mockExpressions,
-  userProfile: mockUserProfile,
-  spaces: mockSpaces,
-};
+const mockServices = createMockServices({ http: mockHttp });
 
 const mockRuleWithRunbook = {
   id: 'rule-1',
@@ -107,8 +92,14 @@ describe('AlertEpisodeRunbookSection', () => {
     );
   });
 
-  it('renders the loading state while events are loading', () => {
-    runEsqlAsyncSearchMock.mockImplementation(() => new Promise(() => {}));
+  it('renders the loading state while events are loading', async () => {
+    let resolveSearch!: (value: typeof eventsResponse) => void;
+    runEsqlAsyncSearchMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveSearch = resolve;
+        })
+    );
 
     render(
       <I18nProvider>
@@ -118,6 +109,10 @@ describe('AlertEpisodeRunbookSection', () => {
     );
 
     expect(screen.getByTestId('alertingV2EpisodeRunbookSectionLoading')).toBeInTheDocument();
+
+    act(() => {
+      resolveSearch(eventsResponse);
+    });
   });
 
   it('renders the error state when the rule fails to load', async () => {

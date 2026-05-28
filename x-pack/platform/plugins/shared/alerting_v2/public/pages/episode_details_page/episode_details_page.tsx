@@ -98,18 +98,25 @@ export function EpisodeDetailsPage() {
       expressions: services.expressions,
       userProfile: services.userProfile,
       spaces: services.spaces,
+      uiSettings: services.uiSettings,
     }),
-    [services.data, services.http, services.expressions, services.userProfile, services.spaces]
+    [
+      services.data,
+      services.http,
+      services.expressions,
+      services.userProfile,
+      services.spaces,
+      services.uiSettings,
+    ]
   );
 
   const metadataServices = useMemo(
     () => ({
       ...detailsServices,
-      uiSettings: services.uiSettings,
       unifiedDocViewer: services.unifiedDocViewer,
       dataViews: services.dataViews,
     }),
-    [detailsServices, services.uiSettings, services.unifiedDocViewer, services.dataViews]
+    [detailsServices, services.unifiedDocViewer, services.dataViews]
   );
 
   const episodeActions: EpisodeAction[] = useMemo(
@@ -253,7 +260,6 @@ export function EpisodeDetailsPage() {
             <AlertEpisodeRuleOverviewPanelSection
               episodeId={episodeId}
               services={detailsServices}
-              collapsible={false}
             />
           </>
         ) : (
