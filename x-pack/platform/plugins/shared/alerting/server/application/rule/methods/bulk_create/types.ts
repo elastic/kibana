@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { IntervalSchedule } from '../../../../../common';
 import type { RuleParams } from '../../types';
 import type { CreateRuleData } from '../create/types';
@@ -52,6 +53,8 @@ export interface BulkCreateRulesParams<Params extends RuleParams = never> {
   batchSize?: number;
   /** If true, stop further batches on SO-level failure (whole-call throw or any per-row SO error). Phase 1/2/3 demotions never halt the loop. Defaults to false. */
   exitEarlyOnError?: boolean;
+  /** Rule change tracking context. `action` defaults to `RuleChangeTrackingAction.ruleCreate`; consumers can override. */
+  changeTracking?: RuleChangeTracking;
 }
 
 export type BulkCreateDisabledReason =

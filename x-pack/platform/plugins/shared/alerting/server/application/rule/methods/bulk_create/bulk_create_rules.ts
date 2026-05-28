@@ -8,8 +8,9 @@
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
 import { withSpan } from '@kbn/apm-utils';
-import type { SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import { RuleChangeTrackingAction, type RuleChangeTracking } from '@kbn/alerting-types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleCircuitBreakerErrorMessage, parseDuration } from '../../../../../common';
 import { addGeneratedActionValues, updateMeta } from '../../../../rules_client/lib';
@@ -44,12 +45,13 @@ import {
   flushKeysToInvalidate,
   prepareRule,
 } from './utils';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export async function bulkCreateRules<Params extends RuleParams = never>(
   context: RulesClientContext,
   params: BulkCreateRulesParams<Params>
 ): Promise<BulkCreateRulesResult> {
-  const { rules, exitEarlyOnError = false } = params;
+  const { rules, exitEarlyOnError = false, changeTracking } = params;
   const { logger } = context;
   const total = rules.length;
 
@@ -112,6 +114,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
       username,
       actionsClient,
       batch,
+      changeTracking,
     });
 
     successfulIds.push(...result.successfulIds);
@@ -255,6 +258,7 @@ interface RunBatchArgs<Params extends RuleParams> {
   username: string | null;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   batch: Array<{ id: string; rule: BulkCreateRulesItem<Params> }>;
+  changeTracking?: RuleChangeTracking;
 }
 
 async function runBatch<Params extends RuleParams>({
@@ -262,6 +266,7 @@ async function runBatch<Params extends RuleParams>({
   username,
   actionsClient,
   batch,
+  changeTracking,
 }: RunBatchArgs<Params>): Promise<BatchResult> {
   const { logger } = context;
 
@@ -413,6 +418,7 @@ async function runBatch<Params extends RuleParams>({
     })
   );
 
+  const createTime = Date.now();
   let bulkResponse;
   try {
     bulkResponse = await withSpan(
@@ -450,6 +456,7 @@ async function runBatch<Params extends RuleParams>({
   // Phase B4 per-row outcomes.
   const batchSuccessfulIds: string[] = [];
   const taskIdsToCleanUp: string[] = [];
+  const successfulSavedObjects: Array<SavedObject<RawRule>> = [];
   let perRowFailureOccurred = false;
 
   for (const so of bulkResponse.saved_objects) {
@@ -473,6 +480,7 @@ async function runBatch<Params extends RuleParams>({
       }
     } else {
       batchSuccessfulIds.push(so.id);
+      successfulSavedObjects.push(so as SavedObject<RawRule>);
       if (newlyScheduledTaskIds.has(so.id)) {
         // Audit per-rule ENABLE for the enabled subset (mirrors single-rule semantics).
         context.auditLogger?.log(
@@ -506,6 +514,19 @@ async function runBatch<Params extends RuleParams>({
 
   // Single per-batch flush for all collected key invalidations.
   await flushKeysToInvalidate(keysToInvalidate, context);
+
+  // Per-rule change-history entries for SOs that actually persisted.
+  if (successfulSavedObjects.length > 0) {
+    await logRuleChanges({
+      ruleSOs: successfulSavedObjects,
+      rulesClientContext: context,
+      changesContext: {
+        action: changeTracking?.action ?? RuleChangeTrackingAction.ruleCreate,
+        timestamp: createTime,
+        metadata: changeTracking?.metadata,
+      },
+    });
+  }
 
   return {
     successfulIds: batchSuccessfulIds,

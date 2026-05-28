@@ -934,4 +934,136 @@ describe('bulkCreateRules', () => {
       expect(result.errors.some((e) => e.disabledReason === 'schedule_limit_exceeded')).toBe(true);
     });
   });
+
+  describe('change tracking', () => {
+    const createChangeTrackingService = () => ({
+      log: jest.fn().mockResolvedValue(undefined),
+      logBulk: jest.fn().mockResolvedValue(undefined),
+      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
+    });
+
+    const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: '123',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+        executor: jest.fn(),
+        category: 'test',
+        validate: { params: { validate: (params: unknown) => params } },
+        solution: 'security',
+        validLegacyConsumers: [],
+        trackChanges: true,
+        ...overrides,
+      } as never);
+    };
+
+    test('logs every successfully created rule in a single bulk call with the requested action', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }])
+      );
+
+      await trackingClient.bulkCreateRules({
+        rules: [{ data: baseRule({ name: 'a' }) }, { data: baseRule({ name: 'b' }) }],
+        changeTracking: { action: 'rule_install', metadata: { bulkCount: 2 } },
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({ objectId: 'mock-id-1' }),
+          expect.objectContaining({ objectId: 'mock-id-2' }),
+        ],
+        expect.objectContaining({
+          action: 'rule_install',
+          data: { metadata: { bulkCount: 2 } },
+        })
+      );
+    });
+
+    test('defaults to ruleCreate when no action is provided', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([{ id: 'mock-id-1' }])
+      );
+
+      await trackingClient.bulkCreateRules({
+        rules: [{ data: baseRule({ name: 'a' }) }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        expect.any(Array),
+        expect.objectContaining({ action: 'rule_create' })
+      );
+    });
+
+    test('only logs successfully persisted SOs when bulk create has partial failures', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([
+          { id: 'mock-id-1' },
+          { id: 'mock-id-2', error: { message: 'conflict', statusCode: 409 } },
+          { id: 'mock-id-3' },
+        ])
+      );
+
+      await trackingClient.bulkCreateRules({
+        rules: [
+          { data: baseRule({ name: 'a' }) },
+          { data: baseRule({ name: 'b' }) },
+          { data: baseRule({ name: 'c' }) },
+        ],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({ objectId: 'mock-id-1' }),
+          expect.objectContaining({ objectId: 'mock-id-3' }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('does not call logBulk when the rule type opts out of tracking', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType({ trackChanges: false });
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([{ id: 'mock-id-1' }])
+      );
+
+      await trackingClient.bulkCreateRules({
+        rules: [{ data: baseRule({ name: 'a' }) }],
+      });
+
+      expect(changeTrackingService.logBulk).not.toHaveBeenCalled();
+    });
+
+    test('does not throw when no change tracking service is configured', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([{ id: 'mock-id-1' }])
+      );
+
+      await rulesClient.bulkCreateRules({
+        rules: [{ data: baseRule({ name: 'a' }) }],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalled();
+    });
+  });
 });
