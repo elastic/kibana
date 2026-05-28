@@ -132,6 +132,9 @@ const SLUG_FORMAT_ERROR = i18n.translate('xpack.fleet.addCollectorFlyout.slugFor
     'Must contain only lowercase letters, numbers, and hyphens, with no leading or trailing hyphens.',
 });
 
+const OTLP_MANAGED_EXPORTER = 'otlp/managed';
+const ELASTICSEARCH_OTEL_EXPORTER = 'elasticsearch/otel';
+
 // Validates that a value matches the slug format produced by slugify().
 function isValidSlug(value: string): boolean {
   return /^[a-z0-9]+([a-z0-9-]*[a-z0-9])?$/.test(value);
@@ -253,7 +256,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
       },
     };
 
-    const primaryExporter = motlpAvailable ? 'otlp/managed' : 'elasticsearch/otel';
+    const primaryExporter = motlpAvailable ? OTLP_MANAGED_EXPORTER : ELASTICSEARCH_OTEL_EXPORTER;
 
     const config = {
       extensions: {
@@ -283,7 +286,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
       exporters: {
         ...(motlpAvailable
           ? {
-              'otlp/managed': {
+              [OTLP_MANAGED_EXPORTER]: {
                 endpoint: motlpEndpoint,
                 headers: {
                   Authorization: `ApiKey ${apiKeyEncoded || '${API_KEY}'}`,
@@ -291,7 +294,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
               },
             }
           : {
-              'elasticsearch/otel': {
+              [ELASTICSEARCH_OTEL_EXPORTER]: {
                 endpoints: [defaultEsHost],
                 api_key: apiKeyEncoded || '${API_KEY}',
                 mapping: { mode: 'otel' },
