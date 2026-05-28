@@ -20,6 +20,7 @@ import {
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { VisualizationSavedObject } from '../../common/content_management';
 import { saveWithConfirmation } from './saved_objects_utils';
 import type { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
@@ -177,7 +178,7 @@ export async function findListItems(
 
   return {
     total,
-    hits: await asyncMap(savedObjects, async (savedObject: any) => {
+    hits: await asyncMap(savedObjects, async (savedObject: SavedObjectsFindResult) => {
       const config = extensionByType[savedObject.type];
       const { updated_at, updated_by, created_at, created_by, ...rest } = savedObject;
       const visObject = {
