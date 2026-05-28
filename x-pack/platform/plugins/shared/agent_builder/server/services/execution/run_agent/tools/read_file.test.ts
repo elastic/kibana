@@ -7,6 +7,7 @@
 
 import { createReadFileTool } from './read_file';
 import { FilesystemService } from '../../filesystem/filesystem_service';
+import { WorkspaceVolume } from '../../filesystem/workspace_volume';
 import { MemoryVolume } from '../../runner/store/filesystem/memory_volume';
 import type { IWorkspaceClient } from '../../../workspaces';
 
@@ -15,10 +16,11 @@ const makeService = async () => {
     load: jest.fn().mockResolvedValue(undefined),
     save: jest.fn().mockResolvedValue(undefined),
   };
+  const workspaceVolume = new WorkspaceVolume({ workspaceClient });
   const service = new FilesystemService({
+    workspaceVolume,
     toolResultsVolume: new MemoryVolume('tool_results'),
     skillsVolume: new MemoryVolume('skills'),
-    workspaceClient,
   });
   await service.init();
   return service;

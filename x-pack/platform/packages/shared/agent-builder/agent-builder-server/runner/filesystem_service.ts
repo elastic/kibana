@@ -16,11 +16,4 @@ export interface IFilesystemService {
    * The contract is just-bash's `IFileSystem` — POSIX-like, byte-level.
    */
   getFilesystem(): IFileSystem;
-
-  /**
-   * Snapshot the contents of `/workspace` for persistence to ES.
-   */
-  snapshotWorkspaceFiles(): Promise<
-    Record<string, { content: string; mode: number; mtime: string }>
-  >;
 }

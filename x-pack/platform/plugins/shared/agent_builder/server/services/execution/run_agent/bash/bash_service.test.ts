@@ -7,47 +7,55 @@
 
 import { BashService } from './bash_service';
 import { FilesystemService } from '../../filesystem/filesystem_service';
+import { WorkspaceVolume } from '../../filesystem/workspace_volume';
 import { MemoryVolume } from '../../runner/store/filesystem/memory_volume';
 import type { IWorkspaceClient } from '../../../workspaces';
 import { SAFEGUARD_TOKEN_COUNT } from './output_truncation';
 
-const makeFsService = async (workspaceId?: string) => {
+const makeFixture = async (opts?: { workspaceId?: string; generateId?: () => string }) => {
   const workspaceClient: jest.Mocked<IWorkspaceClient> = {
     load: jest.fn().mockResolvedValue(undefined),
     save: jest.fn().mockResolvedValue(undefined),
   };
+  const workspaceVolume = new WorkspaceVolume({
+    workspaceClient,
+    initialWorkspaceId: opts?.workspaceId,
+    generateId: opts?.generateId,
+  });
   const fsService = new FilesystemService({
+    workspaceVolume,
     toolResultsVolume: new MemoryVolume('tool_results'),
     skillsVolume: new MemoryVolume('skills'),
-    workspaceClient,
-    workspaceId,
   });
   await fsService.init();
-  return { fsService, workspaceClient };
+  return { fsService, workspaceVolume, workspaceClient };
 };
+
+const makeBash = (
+  fsService: FilesystemService,
+  workspaceVolume: WorkspaceVolume,
+  extra?: Partial<ConstructorParameters<typeof BashService>[0]>
+) =>
+  new BashService({
+    filesystemService: fsService,
+    workspaceVolume,
+    execToolFn: jest.fn(),
+    resolveToolId: (id) => id,
+    ...extra,
+  });
 
 describe('BashService', () => {
   it('exec runs a script in the unified FS, cwd is /tmp', async () => {
-    const { fsService, workspaceClient } = await makeFsService();
-    const bash = new BashService({
-      filesystemService: fsService,
-      workspaceClient,
-      execToolFn: jest.fn(),
-      resolveToolId: (id) => id,
-    });
+    const { fsService, workspaceVolume } = await makeFixture();
+    const bash = makeBash(fsService, workspaceVolume);
     const result = await bash.exec('pwd');
     expect(result.exit_code).toBe(0);
     expect(result.stdout.trim()).toBe('/tmp');
   });
 
   it('writes to /workspace persist across exec calls in the same run', async () => {
-    const { fsService, workspaceClient } = await makeFsService();
-    const bash = new BashService({
-      filesystemService: fsService,
-      workspaceClient,
-      execToolFn: jest.fn(),
-      resolveToolId: (id) => id,
-    });
+    const { fsService, workspaceVolume } = await makeFixture();
+    const bash = makeBash(fsService, workspaceVolume);
     await bash.exec('echo hi > /workspace/note.txt');
     const result = await bash.exec('cat /workspace/note.txt');
     expect(result.exit_code).toBe(0);
@@ -55,58 +63,38 @@ describe('BashService', () => {
   });
 
   it('flush() saves /workspace files to WorkspaceClient', async () => {
-    const { fsService, workspaceClient } = await makeFsService();
-    const bash = new BashService({
-      filesystemService: fsService,
-      workspaceClient,
-      execToolFn: jest.fn(),
-      resolveToolId: (id) => id,
-      getOrCreateWorkspaceIdHook: () => 'ws-test',
+    const { fsService, workspaceVolume, workspaceClient } = await makeFixture({
+      generateId: () => 'ws-test',
     });
+    const bash = makeBash(fsService, workspaceVolume);
     await bash.exec('echo data > /workspace/file.txt');
     await bash.flush();
     expect(workspaceClient.save).toHaveBeenCalledTimes(1);
     const [wsId, files] = workspaceClient.save.mock.calls[0];
     expect(wsId).toBe('ws-test');
-    expect(files['/workspace/file.txt']).toBeDefined();
     expect(Buffer.from(files['/workspace/file.txt'].content, 'base64').toString()).toBe('data\n');
   });
 
   it('flush() is a no-op when bash was never used in this run', async () => {
-    const { fsService, workspaceClient } = await makeFsService();
-    const bash = new BashService({
-      filesystemService: fsService,
-      workspaceClient,
-      execToolFn: jest.fn(),
-      resolveToolId: (id) => id,
-    });
+    const { fsService, workspaceVolume, workspaceClient } = await makeFixture();
+    const bash = makeBash(fsService, workspaceVolume);
     await bash.flush();
     expect(workspaceClient.save).not.toHaveBeenCalled();
   });
 
   it('flush() is a no-op when workspace is empty AND no doc exists', async () => {
-    const { fsService, workspaceClient } = await makeFsService();
-    const bash = new BashService({
-      filesystemService: fsService,
-      workspaceClient,
-      execToolFn: jest.fn(),
-      resolveToolId: (id) => id,
-      getOrCreateWorkspaceIdHook: () => 'ws-empty',
+    const { fsService, workspaceVolume, workspaceClient } = await makeFixture({
+      generateId: () => 'ws-empty',
     });
+    const bash = makeBash(fsService, workspaceVolume);
     await bash.exec('echo hello'); // touches but writes nothing under /workspace
     await bash.flush();
     expect(workspaceClient.save).not.toHaveBeenCalled();
   });
 
   it('truncates large stdout', async () => {
-    const { fsService, workspaceClient } = await makeFsService();
-    const bash = new BashService({
-      filesystemService: fsService,
-      workspaceClient,
-      execToolFn: jest.fn(),
-      resolveToolId: (id) => id,
-    });
-    // Produce ~5x the token-safeguard's worth of output (50k chars × 4 ≈ 50k tokens).
+    const { fsService, workspaceVolume } = await makeFixture();
+    const bash = makeBash(fsService, workspaceVolume);
     const chars = SAFEGUARD_TOKEN_COUNT * 20;
     const result = await bash.exec(`printf '%${chars}s' '' | tr ' ' x`);
     expect(result.exit_code).toBe(0);
@@ -114,28 +102,17 @@ describe('BashService', () => {
   });
 
   it('returns exit_code 124 on wall-clock timeout', async () => {
-    const { fsService, workspaceClient } = await makeFsService();
-    const bash = new BashService({
-      filesystemService: fsService,
-      workspaceClient,
-      execToolFn: jest.fn(),
-      resolveToolId: (id) => id,
-      timeoutMs: 100,
-    });
+    const { fsService, workspaceVolume } = await makeFixture();
+    const bash = makeBash(fsService, workspaceVolume, { timeoutMs: 100 });
     const result = await bash.exec('sleep 5');
     expect(result.exit_code).toBe(124);
     expect(result.stderr).toMatch(/timeout/i);
   });
 
   it('exec_tool inside the script invokes the supplied callback', async () => {
-    const { fsService, workspaceClient } = await makeFsService();
+    const { fsService, workspaceVolume } = await makeFixture();
     const execToolFn = jest.fn().mockResolvedValue({ ok: true });
-    const bash = new BashService({
-      filesystemService: fsService,
-      workspaceClient,
-      execToolFn,
-      resolveToolId: (id) => id,
-    });
+    const bash = makeBash(fsService, workspaceVolume, { execToolFn });
     const result = await bash.exec("exec_tool platform.foo --args='{\"a\":1}' | cat");
     expect(result.exit_code).toBe(0);
     expect(execToolFn).toHaveBeenCalledWith('platform.foo', { a: 1 });
@@ -144,25 +121,14 @@ describe('BashService', () => {
 
   describe('getOrCreateWorkspaceId', () => {
     it('returns the existing id when one is set', async () => {
-      const { fsService, workspaceClient } = await makeFsService();
-      const bash = new BashService({
-        filesystemService: fsService,
-        workspaceClient,
-        execToolFn: jest.fn(),
-        resolveToolId: (id) => id,
-        initialWorkspaceId: 'existing',
-      });
+      const { fsService, workspaceVolume } = await makeFixture({ workspaceId: 'existing' });
+      const bash = makeBash(fsService, workspaceVolume);
       expect(bash.getOrCreateWorkspaceId()).toBe('existing');
     });
 
     it('mints a new UUID when none is provided, and reuses it', async () => {
-      const { fsService, workspaceClient } = await makeFsService();
-      const bash = new BashService({
-        filesystemService: fsService,
-        workspaceClient,
-        execToolFn: jest.fn(),
-        resolveToolId: (id) => id,
-      });
+      const { fsService, workspaceVolume } = await makeFixture();
+      const bash = makeBash(fsService, workspaceVolume);
       const first = bash.getOrCreateWorkspaceId();
       expect(first).toMatch(/^[0-9a-f-]{36}$/);
       expect(bash.getOrCreateWorkspaceId()).toBe(first);

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { Bash } from 'just-bash';
 import type { BashExecResult, IBashService } from '@kbn/agent-builder-server/runner';
 import type { FilesystemService } from '../../filesystem/filesystem_service';
-import type { IWorkspaceClient } from '../../../workspaces';
+import type { WorkspaceVolume } from '../../filesystem/workspace_volume';
 import { createExecToolCommand, type ExecToolFn, type ResolveToolIdFn } from './exec_tool_command';
 import { truncateBashOutput } from './output_truncation';
 import { ALLOWED_BASH_COMMANDS } from './allowed_commands';
@@ -52,59 +51,43 @@ const anySignal = (signals: AbortSignal[]): AbortSignal => {
 
 export interface BashServiceDeps {
   filesystemService: FilesystemService;
-  workspaceClient: IWorkspaceClient;
+  workspaceVolume: WorkspaceVolume;
   execToolFn: ExecToolFn;
   resolveToolId: ResolveToolIdFn;
   abortSignal?: AbortSignal;
   timeoutMs?: number;
-  /** Initial workspace_id from the conversation document (if any). */
-  initialWorkspaceId?: string;
-  /** Test-only override for the UUID generator. */
-  getOrCreateWorkspaceIdHook?: () => string;
 }
 
 /**
  * Owns the just-bash runtime for a conversation run. Constructed only when
- * `experimentalFeatures.bash` is on. Holds the workspace id once bash has been
- * used at least once and flushes the workspace at end of round.
+ * `experimentalFeatures.bash` is on. Tracks whether bash was used at least
+ * once and asks the workspace volume to flush at end of round.
  */
 export class BashService implements IBashService {
   private readonly deps: BashServiceDeps;
-  private workspaceId?: string;
   private touched = false;
 
   constructor(deps: BashServiceDeps) {
     this.deps = deps;
-    this.workspaceId = deps.initialWorkspaceId;
   }
 
   /**
-   * Returns the existing workspace id if any, otherwise mints a new UUID and
-   * remembers it. Subsequent calls return the same id.
+   * Mint or return the existing workspace id. Delegates to the workspace volume,
+   * which owns the id state.
    */
-  getOrCreateWorkspaceId(existingId?: string): string {
-    const provided = existingId ?? this.workspaceId;
-    if (provided) {
-      this.workspaceId = provided;
-      return provided;
-    }
-    if (this.deps.getOrCreateWorkspaceIdHook) {
-      this.workspaceId = this.deps.getOrCreateWorkspaceIdHook();
-      return this.workspaceId;
-    }
-    this.workspaceId = uuidv4();
-    return this.workspaceId;
+  getOrCreateWorkspaceId(): string {
+    return this.deps.workspaceVolume.getOrCreateWorkspaceId();
   }
 
   /** Returns the workspace id if one has been minted/used in this run, else undefined. */
   getWorkspaceId(): string | undefined {
-    return this.workspaceId;
+    return this.deps.workspaceVolume.getWorkspaceId();
   }
 
   async exec(command: string): Promise<BashExecResult> {
-    // Mark touched on every exec. flush() runs unconditionally after that —
-    // snapshotting an empty /workspace is cheap.
     this.touched = true;
+    // Ensure a workspace_id exists once bash is actually used; surfaced via
+    // getWorkspaceId() for propagation to the conversation document.
     this.getOrCreateWorkspaceId();
 
     const fs = this.deps.filesystemService.getFilesystem();
@@ -153,20 +136,12 @@ export class BashService implements IBashService {
   }
 
   /**
-   * Persist the current /workspace contents to ES. No-op when bash was never
-   * used in this run, when no workspace client is configured (standalone mode),
-   * or when no workspace id has been minted. Also skips the ES write if the
-   * workspace is empty and the document doesn't exist yet.
+   * Persist the current workspace state. No-op when bash was never used in
+   * this run. Delegates to the workspace volume, which handles the empty-doc
+   * + no-existing-doc skip on its end.
    */
   async flush(): Promise<void> {
     if (!this.touched) return;
-    if (!this.workspaceId) return;
-
-    const files = await this.deps.filesystemService.snapshotWorkspaceFiles();
-    if (Object.keys(files).length === 0) {
-      const existing = await this.deps.workspaceClient.load(this.workspaceId);
-      if (!existing) return;
-    }
-    await this.deps.workspaceClient.save(this.workspaceId, files);
+    await this.deps.workspaceVolume.flush();
   }
 }

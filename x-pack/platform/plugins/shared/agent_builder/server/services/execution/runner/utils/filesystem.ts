@@ -6,7 +6,7 @@
  */
 
 import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
-import { FilesystemService } from '../../filesystem';
+import { FilesystemService, WorkspaceVolume } from '../../filesystem';
 import { BashService } from '../../run_agent/bash';
 import { WorkspaceClient, createWorkspaceStorage } from '../../../workspaces';
 import type { RunnerManager } from '../runner';
@@ -35,12 +35,15 @@ export const createFilesystemServices = async ({
     esClient: elasticsearch.client.asScoped(request).asInternalUser,
   });
   const workspaceClient = new WorkspaceClient({ storage: workspaceStorage });
+  const workspaceVolume = new WorkspaceVolume({
+    workspaceClient,
+    initialWorkspaceId: workspaceId,
+  });
 
   const filesystemService = new FilesystemService({
+    workspaceVolume,
     toolResultsVolume: resultStore.getVolume(),
     skillsVolume: skillsStore.getVolume(),
-    workspaceClient,
-    workspaceId,
   });
   await filesystemService.init();
 
@@ -51,7 +54,7 @@ export const createFilesystemServices = async ({
   const runner = manager.getRunner();
   const bashService = new BashService({
     filesystemService,
-    workspaceClient,
+    workspaceVolume,
     execToolFn: async (toolId, args) => {
       return runner.runTool({
         toolId,
@@ -61,7 +64,6 @@ export const createFilesystemServices = async ({
     },
     resolveToolId: (id) => toolManager.getToolIdMapping().get(id) ?? id,
     abortSignal: manager.deps.abortSignal,
-    initialWorkspaceId: workspaceId,
   });
 
   return { filesystemService, bashService };

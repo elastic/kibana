@@ -319,7 +319,6 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     filestore: createFileSystemStoreMock(),
     filesystemService: {
       getFilesystem: jest.fn(),
-      snapshotWorkspaceFiles: jest.fn().mockResolvedValue({}),
     },
     bashService: undefined,
     skills: createSkillsServiceMock(),

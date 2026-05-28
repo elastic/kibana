@@ -7,3 +7,4 @@
 
 export { FilesystemService, type FilesystemServiceDeps } from './filesystem_service';
 export { VolumeBackedReadOnlyFs } from './volume_backed_read_only_fs';
+export { WorkspaceVolume, type WorkspaceVolumeDeps } from './workspace_volume';

@@ -20,8 +20,7 @@ const storageSettings = {
       workspace_id: types.keyword({}),
       created_at: types.date({}),
       updated_at: types.date({}),
-      // File content is never queried into; disable dynamic mapping to avoid
-      // explosions from arbitrary path keys.
+      // Never queried - Disable dynamic mapping to avoid explosions from arbitrary path keys
       files: types.object({ dynamic: false, properties: {} }),
     },
   },

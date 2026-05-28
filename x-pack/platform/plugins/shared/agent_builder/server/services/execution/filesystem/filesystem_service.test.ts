@@ -7,6 +7,7 @@
 
 import { MemoryVolume } from '../runner/store/filesystem/memory_volume';
 import { FilesystemService } from './filesystem_service';
+import { WorkspaceVolume } from './workspace_volume';
 import type { IWorkspaceClient } from '../../workspaces';
 
 const mockWorkspaceClient = (): jest.Mocked<IWorkspaceClient> => ({
@@ -14,23 +15,28 @@ const mockWorkspaceClient = (): jest.Mocked<IWorkspaceClient> => ({
   save: jest.fn().mockResolvedValue(undefined),
 });
 
+const makeService = (workspaceClient: IWorkspaceClient, opts?: { workspaceId?: string }) => {
+  const workspaceVolume = new WorkspaceVolume({
+    workspaceClient,
+    initialWorkspaceId: opts?.workspaceId,
+  });
+  const service = new FilesystemService({
+    workspaceVolume,
+    toolResultsVolume: new MemoryVolume('tool_results'),
+    skillsVolume: new MemoryVolume('skills'),
+  });
+  return { service, workspaceVolume };
+};
+
 describe('FilesystemService', () => {
-  let toolResultsVolume: MemoryVolume;
-  let skillsVolume: MemoryVolume;
   let workspaceClient: jest.Mocked<IWorkspaceClient>;
 
   beforeEach(() => {
-    toolResultsVolume = new MemoryVolume('tool_results');
-    skillsVolume = new MemoryVolume('skills');
     workspaceClient = mockWorkspaceClient();
   });
 
   it('exposes /workspace and /tmp after init', async () => {
-    const service = new FilesystemService({
-      toolResultsVolume,
-      skillsVolume,
-      workspaceClient,
-    });
+    const { service } = makeService(workspaceClient);
     await service.init();
     const fs = service.getFilesystem();
     expect(await fs.exists('/workspace')).toBe(true);
@@ -38,7 +44,7 @@ describe('FilesystemService', () => {
   });
 
   it('writes to /workspace land in the workspace mount', async () => {
-    const service = new FilesystemService({ toolResultsVolume, skillsVolume, workspaceClient });
+    const { service } = makeService(workspaceClient);
     await service.init();
     const fs = service.getFilesystem();
     await fs.writeFile('/workspace/note.txt', 'hi');
@@ -46,13 +52,13 @@ describe('FilesystemService', () => {
   });
 
   it('writes to /tool_calls throw EROFS', async () => {
-    const service = new FilesystemService({ toolResultsVolume, skillsVolume, workspaceClient });
+    const { service } = makeService(workspaceClient);
     await service.init();
     const fs = service.getFilesystem();
     await expect(fs.writeFile('/tool_calls/x', 'y')).rejects.toThrow(/EROFS/);
   });
 
-  it('loads workspace from WorkspaceClient on init when workspaceId is set', async () => {
+  it('loads persisted workspace files on init when workspaceId is set', async () => {
     workspaceClient.load.mockResolvedValueOnce({
       workspace_id: 'ws-1',
       created_at: '2025-01-01T00:00:00.000Z',
@@ -66,44 +72,15 @@ describe('FilesystemService', () => {
       },
     });
 
-    const service = new FilesystemService({
-      toolResultsVolume,
-      skillsVolume,
-      workspaceClient,
-      workspaceId: 'ws-1',
-    });
+    const { service } = makeService(workspaceClient, { workspaceId: 'ws-1' });
     await service.init();
     const fs = service.getFilesystem();
     expect(await fs.readFile('/workspace/persisted.txt')).toBe('saved');
   });
 
   it('does not call WorkspaceClient.load when no workspaceId is provided', async () => {
-    const service = new FilesystemService({ toolResultsVolume, skillsVolume, workspaceClient });
+    const { service } = makeService(workspaceClient);
     await service.init();
     expect(workspaceClient.load).not.toHaveBeenCalled();
-  });
-
-  it('snapshotWorkspaceFiles returns base64-encoded content + mode + mtime', async () => {
-    const service = new FilesystemService({ toolResultsVolume, skillsVolume, workspaceClient });
-    await service.init();
-    const fs = service.getFilesystem();
-    await fs.writeFile('/workspace/a.txt', 'alpha');
-    await fs.writeFile('/workspace/sub/b.txt', 'beta');
-
-    const snapshot = await service.snapshotWorkspaceFiles();
-    expect(Object.keys(snapshot).sort()).toEqual(['/workspace/a.txt', '/workspace/sub/b.txt']);
-    expect(Buffer.from(snapshot['/workspace/a.txt'].content, 'base64').toString()).toBe('alpha');
-    expect(Buffer.from(snapshot['/workspace/sub/b.txt'].content, 'base64').toString()).toBe(
-      'beta'
-    );
-    expect(typeof snapshot['/workspace/a.txt'].mode).toBe('number');
-    expect(typeof snapshot['/workspace/a.txt'].mtime).toBe('string');
-  });
-
-  it('snapshotWorkspaceFiles on empty /workspace returns {}', async () => {
-    const service = new FilesystemService({ toolResultsVolume, skillsVolume, workspaceClient });
-    await service.init();
-    const snapshot = await service.snapshotWorkspaceFiles();
-    expect(snapshot).toEqual({});
   });
 });
