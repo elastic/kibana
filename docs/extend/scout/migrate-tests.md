@@ -46,7 +46,7 @@ Agentic skills in Kibana can take most of the toil out of migration, but **alway
 
 ### FTR → Scout
 
-The [`scout-migrate-from-ftr`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-migrate-from-ftr/SKILL.md) skill analyzes your FTR tests and drafts a migration plan. Review it, and the skill executes the migration.
+The [`scout-migrate-from-ftr`](https://github.com/elastic/kibana/blob/main/.agents/skills/scout-migrate-from-ftr/SKILL.md) skill analyzes your FTR tests and drafts a **migration plan**. Review it, and the skill executes the migration.
 
 ### Cypress → Scout
 
