@@ -11,13 +11,19 @@ import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { isFilterPinned, isOfAggregateQueryType } from '@kbn/es-query';
 import type { setStateToKbnUrl as setStateToKbnUrlCommon } from '@kbn/kibana-utils-plugin/common';
 import type {
+  DiscoverProfileUrlState,
   DiscoverAppLocatorGetLocation,
   DiscoverAppLocatorParams,
   MainHistoryLocationState,
 } from './app_locator';
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
-import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY, TAB_STATE_URL_KEY } from './constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+  TAB_STATE_URL_KEY,
+} from './constants';
 
 export const appLocatorGetLocationCommon = async (
   {
@@ -38,7 +44,7 @@ export const appLocatorGetLocationCommon = async (
     path = `${path}?searchSessionId=${searchSessionId}`;
   }
 
-  const { appState, globalState, state } = parseAppLocatorParams(params);
+  const { appState, globalState, profileUrlState, state } = parseAppLocatorParams(params);
 
   if (Object.keys(globalState).length) {
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>(
@@ -51,6 +57,10 @@ export const appLocatorGetLocationCommon = async (
 
   if (Object.keys(appState).length) {
     path = setStateToKbnUrl(APP_STATE_URL_KEY, appState, { useHash }, path);
+  }
+
+  if (profileUrlState && Object.keys(profileUrlState).length) {
+    path = setStateToKbnUrl(PROFILE_STATE_URL_KEY, profileUrlState, { useHash }, path);
   }
 
   if (tab?.id) {
@@ -91,10 +101,13 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
     sampleSize,
     isAlertResults,
     esqlControls,
+    profileUrlState,
   } = params;
 
   const appState: Partial<DiscoverAppState> = {};
   const globalState: GlobalQueryStateFromUrl = {};
+  const parsedProfileUrlState: DiscoverProfileUrlState | undefined =
+    profileUrlState && Object.keys(profileUrlState).length > 0 ? profileUrlState : undefined;
 
   if (query) appState.query = query;
   if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
@@ -123,5 +136,5 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
   if (isAlertResults) state.isAlertResults = isAlertResults;
   if (esqlControls) state.esqlControls = esqlControls;
 
-  return { appState, globalState, state };
+  return { appState, globalState, profileUrlState: parsedProfileUrlState, state };
 };

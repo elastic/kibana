@@ -45,6 +45,7 @@ import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fe
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState, getProfileStateSnapshot } from './utils/default_profile_state';
+import { getRestoredProfileUrlState } from './utils/get_profile_url_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
@@ -383,7 +384,39 @@ export function getDataStateContainer({
 
           // If the data source profile changed, we may need to restore previous profile state
           if (didProfileChange) {
-            const profileId = scopedProfilesManager.getContexts().dataSourceContext.profileId;
+            const { dataSourceContext } = scopedProfilesManager.getContexts();
+            const profileId = dataSourceContext.profileId;
+            const activeProfileStateDefinition = dataSourceContext.profileState;
+            const initialProfileUrlState = getCurrentTab().initialProfileUrlState;
+
+            if (isFirstResolution && initialProfileUrlState) {
+              if (activeProfileStateDefinition) {
+                const restoredProfileUrlState = getRestoredProfileUrlState({
+                  definition: activeProfileStateDefinition,
+                  profileStateRegistry: services.profileStateRegistry,
+                  profileUrlState: initialProfileUrlState,
+                });
+
+                if (restoredProfileUrlState) {
+                  internalState.dispatch(
+                    injectCurrentTab(internalStateActions.setProfileState)({
+                      key: activeProfileStateDefinition.key,
+                      profileState: {
+                        ...(getCurrentTab().profileState[activeProfileStateDefinition.key] ?? {}),
+                        ...restoredProfileUrlState,
+                      },
+                    })
+                  );
+                }
+              }
+
+              internalState.dispatch(
+                injectCurrentTab(internalStateActions.setInitialProfileUrlState)({
+                  initialProfileUrlState: undefined,
+                })
+              );
+            }
+
             const profileStateSnapshot =
               getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId];
             const profileStateUpdate = getProfileStateSnapshot(
@@ -428,6 +461,10 @@ export function getDataStateContainer({
                 injectCurrentTab(internalStateActions.syncProfileStateSnapshot)({})
               );
             }
+
+            await internalState.dispatch(
+              injectCurrentTab(internalStateActions.updateProfileUrlStateAndReplaceUrl)()
+            );
           }
 
           const dataView = currentDataView$.getValue();

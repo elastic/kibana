@@ -14,6 +14,7 @@ export const DEFAULT_EXPANDED_DOC_OWNER = 'discover_main_grid';
 
 export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   initializationState: { initializationStatus: TabInitializationStatus.NotStarted },
+  initialProfileUrlState: undefined,
   globalState: {},
   appState: {},
   previousAppState: {},

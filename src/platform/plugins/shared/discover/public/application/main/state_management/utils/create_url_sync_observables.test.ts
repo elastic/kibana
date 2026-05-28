@@ -42,6 +42,8 @@ describe('createUrlSyncObservables', () => {
         dispatch: toolkit.internalState.dispatch,
         getState: toolkit.internalState.getState,
         internalState$: from(toolkit.internalState),
+        runtimeStateManager: toolkit.runtimeStateManager,
+        profileStateRegistry: services.profileStateRegistry,
       }),
       internalState: toolkit.internalState,
       runtimeStateManager: toolkit.runtimeStateManager,
@@ -56,6 +58,8 @@ describe('createUrlSyncObservables', () => {
     expect(result.appState$).toBeDefined();
     expect(result.createAppStateContainer).toBeDefined();
     expect(result.globalStateContainer).toBeDefined();
+    expect(result.profileUrlState$).toBeDefined();
+    expect(result.setProfileUrlStateFromUrl).toBeDefined();
   });
 
   it('should allow appStateContainer to get and set app state', async () => {

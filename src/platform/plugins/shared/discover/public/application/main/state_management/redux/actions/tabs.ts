@@ -36,12 +36,14 @@ import {
   APP_STATE_URL_KEY,
   GLOBAL_STATE_URL_KEY,
   NEW_TAB_ID,
+  PROFILE_STATE_URL_KEY,
 } from '../../../../../../common/constants';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
+import { getProfileUrlState } from '../../utils/get_profile_url_state';
 import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
@@ -254,6 +256,16 @@ export const updateTabs: InternalStateThunkActionCreator<
       if (nextTab && nextTabDataStateContainer) {
         const { timeRange, refreshInterval, filters: globalFilters } = nextTab.globalState;
         const { filters: appFilters, query } = nextTab.appState;
+        const profileStateDefinition = nextTabRuntimeState?.scopedProfilesManager$
+          .getValue()
+          .getContexts().dataSourceContext.profileState;
+        const profileUrlState = profileStateDefinition
+          ? getProfileUrlState({
+              definition: profileStateDefinition,
+              profileState: nextTab.profileState,
+              profileStateRegistry: services.profileStateRegistry,
+            }) ?? null
+          : null;
 
         await Promise.all([
           urlStateStorage.set<QueryState>(
@@ -268,6 +280,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, nextTab.appState, {
             replace: true,
           }),
+          urlStateStorage.set(PROFILE_STATE_URL_KEY, profileUrlState, { replace: true }),
         ]);
 
         services.timefilter.setTime(timeRange ?? services.timefilter.getTimeDefaults());
@@ -305,6 +318,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         await Promise.all([
           urlStateStorage.set(GLOBAL_STATE_URL_KEY, null, { replace: true }),
           urlStateStorage.set(APP_STATE_URL_KEY, null, { replace: true }),
+          urlStateStorage.set(PROFILE_STATE_URL_KEY, null, { replace: true }),
         ]);
         searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
         services.data.search.session.reset();

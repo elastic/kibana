@@ -13,8 +13,10 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFormRow,
+  EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
@@ -121,16 +123,22 @@ export const createExampleDataSourceProfileProvider = (): ExampleDataSourceProfi
               order: 2,
               render: function Render() {
                 const colorState = useObservable(colorState$, stateAdapter.getState());
-                const favoriteColorOptions = [
-                  { value: 'default', text: 'None' },
+                const timestampColorOptions = [
+                  { value: 'neutral', text: 'None' },
                   { value: 'blue', text: 'Blue' },
                   { value: 'pink', text: 'Pink' },
                   { value: 'green', text: 'Green' },
                 ];
                 const rowControlColorOptions = [
-                  { value: 'default', text: 'None' },
+                  { value: 'neutral', text: 'None' },
                   { value: 'primary', text: 'Primary' },
                   { value: 'success', text: 'Success' },
+                  { value: 'danger', text: 'Danger' },
+                ];
+                const boxColorOptions = [
+                  { value: 'transparent', text: 'None' },
+                  { value: 'success', text: 'Success' },
+                  { value: 'warning', text: 'Warning' },
                   { value: 'danger', text: 'Danger' },
                 ];
 
@@ -142,14 +150,14 @@ export const createExampleDataSourceProfileProvider = (): ExampleDataSourceProfi
                         <h3>Extensible State Example</h3>
                       </EuiTitle>
                       <EuiFlexItem grow={false}>
-                        <EuiFormRow label="Favorite color (UI state)">
+                        <EuiFormRow label="Timestamp color (UI state)">
                           <EuiSelect
-                            options={favoriteColorOptions}
-                            value={colorState.favoriteColor}
+                            options={timestampColorOptions}
+                            value={colorState.timestampColor}
                             onChange={(e) => {
-                              stateAdapter.updateState({ favoriteColor: e.target.value });
+                              stateAdapter.updateState({ timestampColor: e.target.value });
                             }}
-                            aria-label="Select favorite color"
+                            aria-label="Select timestamp color"
                           />
                         </EuiFormRow>
                       </EuiFlexItem>
@@ -166,6 +174,34 @@ export const createExampleDataSourceProfileProvider = (): ExampleDataSourceProfi
                             aria-label="Select row control color"
                           />
                         </EuiFormRow>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiFormRow label="Box color (URL state)">
+                          <EuiSelect
+                            options={boxColorOptions}
+                            value={colorState.boxColor}
+                            onChange={(e) => {
+                              stateAdapter.updateState({
+                                boxColor: e.target.value as ColorState['boxColor'],
+                              });
+                            }}
+                            aria-label="Select box color"
+                          />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiPanel
+                          color={colorState.boxColor}
+                          css={{
+                            height: '100px',
+                            width: '100px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <EuiText color={colorState.boxColor}>{colorState.boxColor}</EuiText>
+                        </EuiPanel>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </>

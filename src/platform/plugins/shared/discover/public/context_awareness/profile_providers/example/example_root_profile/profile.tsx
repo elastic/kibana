@@ -31,7 +31,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
 
         return (
           <EuiBadge
-            color={colorState.favoriteColor}
+            color={colorState.timestampColor}
             title={timestamp}
             data-test-subj="exampleRootProfileTimestamp"
           >

@@ -429,6 +429,14 @@ export const internalStateSlice = createSlice({
         };
       }),
 
+    setInitialProfileUrlState: (
+      state,
+      action: TabAction<Pick<TabState, 'initialProfileUrlState'>>
+    ) =>
+      withTab(state, action.payload, (tab) => {
+        tab.initialProfileUrlState = action.payload.initialProfileUrlState;
+      }),
+
     setProfileState: (state, action: TabAction<{ key: string; profileState: object }>) =>
       withTab(state, { tabId: state.tabs.unsafeCurrentId }, (tab) => {
         tab.profileState[action.payload.key] = action.payload.profileState;

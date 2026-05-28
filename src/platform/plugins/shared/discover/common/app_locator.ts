@@ -19,6 +19,8 @@ import type { VIEW_MODE, NEW_TAB_ID } from './constants';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
+export type DiscoverProfileUrlState = Record<string, SerializableRecord>;
+
 export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Optionally set saved search ID.
@@ -74,6 +76,11 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Use `label` to set a fallback tab label if it was not defined before yet.
    */
   tab?: { id: typeof NEW_TAB_ID | string; label?: string };
+
+  /**
+   * Optionally set URL-synced profile state.
+   */
+  profileUrlState?: DiscoverProfileUrlState;
 
   /**
    * Columns displayed in the table

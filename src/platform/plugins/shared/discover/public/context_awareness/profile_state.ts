@@ -109,14 +109,16 @@ export const registerProfileStateDefinitions = (registry: ProfileStateRegistry) 
 };
 
 export interface ColorState {
-  favoriteColor: string;
-  rowControlColor: 'primary' | 'success' | 'danger';
+  timestampColor: string;
+  rowControlColor: 'neutral' | 'primary' | 'success' | 'danger';
+  boxColor: 'transparent' | 'success' | 'warning' | 'danger';
 }
 
 export const COLOR_STATE_DEF: ProfileStateDefinition<ColorState> = {
   key: 'colorState',
   descriptor: {
-    favoriteColor: { type: ProfileStateType.Ui },
+    timestampColor: { type: ProfileStateType.Ui },
     rowControlColor: { type: ProfileStateType.Persistent },
+    boxColor: { type: ProfileStateType.Url },
   },
 };
