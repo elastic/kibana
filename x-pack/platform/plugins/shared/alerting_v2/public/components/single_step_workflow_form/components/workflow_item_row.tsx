@@ -17,12 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { WORKFLOW_FORM_CARDS } from './workflow_cards';
-import { ConnectorSelector } from './connector_selector';
-import { ParamsEditor } from './params_editor';
-import { WorkflowReferenceSelector } from './workflow_reference_selector';
 import { getSingleStepWorkflowType } from '../registry';
 import type { ConnectorBackedItem, SingleStepWorkflowItem } from '../types';
+import { ConnectorSelector } from './connector_selector';
+import { ParamsEditor } from './params_editor';
+import { WORKFLOW_FORM_CARDS } from './workflow_cards';
+import { WorkflowReferenceSelector } from './workflow_reference_selector';
 
 interface WorkflowItemRowProps {
   item: SingleStepWorkflowItem;
@@ -44,6 +44,16 @@ export const WorkflowItemRow = ({
   const card = WORKFLOW_FORM_CARDS.find((c) => c.kind === item.kind);
   const iconType = card?.iconType ?? 'gear';
   const kindLabel = card?.label ?? item.kind;
+  const toggleLabel = isExpanded
+    ? i18n.translate('xpack.alertingV2.singleStepWorkflow.list.collapseItem', {
+        defaultMessage: 'Collapse action',
+      })
+    : i18n.translate('xpack.alertingV2.singleStepWorkflow.list.expandItem', {
+        defaultMessage: 'Expand action',
+      });
+  const removeLabel = i18n.translate('xpack.alertingV2.singleStepWorkflow.list.removeItem', {
+    defaultMessage: 'Remove action',
+  });
 
   return (
     <EuiPanel
@@ -75,47 +85,21 @@ export const WorkflowItemRow = ({
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={
-              isExpanded
-                ? i18n.translate('xpack.alertingV2.singleStepWorkflow.list.collapseItem', {
-                    defaultMessage: 'Collapse action',
-                  })
-                : i18n.translate('xpack.alertingV2.singleStepWorkflow.list.expandItem', {
-                    defaultMessage: 'Expand action',
-                  })
-            }
-            disableScreenReaderOutput
-          >
+          <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-              aria-label={
-                isExpanded
-                  ? i18n.translate('xpack.alertingV2.singleStepWorkflow.list.collapseItem', {
-                      defaultMessage: 'Collapse action',
-                    })
-                  : i18n.translate('xpack.alertingV2.singleStepWorkflow.list.expandItem', {
-                      defaultMessage: 'Expand action',
-                    })
-              }
+              aria-label={toggleLabel}
               onClick={() => onToggleExpand(item.id)}
               data-test-subj={`workflowItemRowToggle-${item.id}`}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.alertingV2.singleStepWorkflow.list.removeItem', {
-              defaultMessage: 'Remove action',
-            })}
-            disableScreenReaderOutput
-          >
+          <EuiToolTip content={removeLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="cross"
               color="danger"
-              aria-label={i18n.translate('xpack.alertingV2.singleStepWorkflow.list.removeItem', {
-                defaultMessage: 'Remove action',
-              })}
+              aria-label={removeLabel}
               onClick={() => onRemove(item.id)}
               data-test-subj={`workflowItemRowRemove-${item.id}`}
             />
@@ -142,12 +126,7 @@ export const WorkflowItemRow = ({
             />
           )}
           {(item.kind === 'slack' || item.kind === 'email') && (
-            <EuiPanel
-              hasShadow={false}
-              hasBorder
-              paddingSize="m"
-              data-test-subj="singleStepWorkflowSubform"
-            >
+            <>
               <ConnectorSelector
                 connectorTypeId={getSingleStepWorkflowType(item.kind)!.connectorTypeId}
                 value={item.connectorId}
@@ -161,7 +140,7 @@ export const WorkflowItemRow = ({
                 value={item.params}
                 onChange={(params) => onChange({ ...(item as ConnectorBackedItem), params })}
               />
-            </EuiPanel>
+            </>
           )}
         </>
       )}

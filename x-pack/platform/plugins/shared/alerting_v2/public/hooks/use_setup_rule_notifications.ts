@@ -84,7 +84,7 @@ export const useSetupRuleNotifications = () => {
         throw new Error(
           i18n.translate('xpack.alertingV2.useSetupRuleNotifications.partialFailureSummary', {
             defaultMessage:
-              '{successCount} of {total} action {total, plural, one {policy} other {policies}} created. Failures: {errors}',
+              '{successCount} of {total} action {successCount, plural, one {policy} other {policies}} created. Failures: {errors}',
             values: {
               successCount,
               total: results.length,

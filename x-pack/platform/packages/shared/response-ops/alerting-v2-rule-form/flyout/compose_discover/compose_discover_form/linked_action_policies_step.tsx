@@ -97,14 +97,6 @@ export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
 
   const { isLoading, error, items } = useMatchedActionPolicies({ http, ruleId, name, tags });
 
-  const itemsByCategory = items.reduce<Partial<Record<MatchedActionPolicyCategory, typeof items>>>(
-    (acc, item) => {
-      const bucket = acc[item.category] ?? [];
-      return { ...acc, [item.category]: [...bucket, item] };
-    },
-    {}
-  );
-
   return (
     <>
       <EuiTitle size="xs">
@@ -126,7 +118,7 @@ export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
           iconType="error"
           data-test-subj="linkedActionPoliciesError"
         >
-          <p aria-label={error.message}>{error.message}</p>
+          <p>{error.message}</p>
         </EuiCallOut>
       )}
 
@@ -138,7 +130,7 @@ export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
             </EuiText>
           )}
           {SECTION_CONFIG.map(({ category, title, description }) => {
-            const sectionItems = itemsByCategory[category] ?? [];
+            const sectionItems = items.filter((item) => item.category === category);
             if (sectionItems.length === 0) return null;
 
             const options: EuiSelectableOption[] = [
@@ -162,6 +154,13 @@ export const LinkedActionPoliciesStep = ({ http, ruleId }: Props) => {
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label={i18n.translate(
+                      'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.editPolicyLink',
+                      {
+                        defaultMessage: 'Edit {name}',
+                        values: { name: actionPolicy.name },
+                      }
+                    )}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <EuiIcon type="popout" size="s" aria-hidden={true} />

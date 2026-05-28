@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
@@ -35,7 +35,8 @@ export const NotificationsStep = ({ services }: Props) => {
   const { workflowForm } = services;
   const [touched, setTouched] = useState(false);
 
-  const workflows = notifications?.workflows ?? workflowForm.defaultValue();
+  const defaultWorkflows = useMemo(() => workflowForm.defaultValue(), [workflowForm]);
+  const workflows = notifications?.workflows ?? defaultWorkflows;
   const isWorkflowInvalid = touched && !(workflowForm.isValid?.(workflows) ?? true);
 
   return (

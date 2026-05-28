@@ -74,7 +74,11 @@ export const SingleStepWorkflowForm = ({
   }, []);
 
   if (value.length === 0) {
-    return <WorkflowCards onPick={addItem} data-test-subj="singleStepWorkflowForm" />;
+    return (
+      <div data-test-subj="singleStepWorkflowForm">
+        <WorkflowCards onPick={addItem} />
+      </div>
+    );
   }
 
   return (

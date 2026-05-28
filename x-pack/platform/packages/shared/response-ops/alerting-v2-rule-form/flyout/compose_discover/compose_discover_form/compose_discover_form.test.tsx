@@ -207,7 +207,7 @@ describe('step validation', () => {
     it('returns true in edit mode regardless of form state', async () => {
       const state = createState({ mode: 'edit' });
       const methods = {
-        getValues: jest.fn().mockReturnValue({ workflow: {} }),
+        getValues: jest.fn().mockReturnValue({ workflows: [] }),
       } as unknown as UseFormReturn<ComposeFormValues>;
       expect(
         await notificationsStep.validate!(
@@ -229,7 +229,9 @@ describe('step validation', () => {
     it('returns false when notifications enabled and isValid returns false', async () => {
       const state = createState({ mode: 'create' });
       const methods = {
-        getValues: jest.fn().mockReturnValue({ workflow: { mode: 'existing', workflowId: null } }),
+        getValues: jest
+          .fn()
+          .mockReturnValue({ workflows: [{ id: 'item-1', kind: 'workflow', workflowId: null }] }),
       } as unknown as UseFormReturn<ComposeFormValues>;
       expect(
         await notificationsStep.validate!(
@@ -245,7 +247,7 @@ describe('step validation', () => {
       const methods = {
         getValues: jest
           .fn()
-          .mockReturnValue({ workflow: { mode: 'existing', workflowId: 'wf-1' } }),
+          .mockReturnValue({ workflows: [{ id: 'item-1', kind: 'workflow', workflowId: 'wf-1' }] }),
       } as unknown as UseFormReturn<ComposeFormValues>;
       expect(
         await notificationsStep.validate!(
@@ -260,7 +262,7 @@ describe('step validation', () => {
       const state = createState({ mode: 'create' });
       const methods = {
         getValues: jest.fn().mockReturnValue({
-          workflow: { mode: 'create', connectorId: null, typeId: 'email', params: '' },
+          workflows: [{ id: 'item-1', kind: 'email', connectorId: null, params: '' }],
         }),
       } as unknown as UseFormReturn<ComposeFormValues>;
       expect(
@@ -275,7 +277,7 @@ describe('step validation', () => {
     it('returns true when notifications enabled but services.workflowForm.isValid is absent', async () => {
       const state = createState({ mode: 'create' });
       const methods = {
-        getValues: jest.fn().mockReturnValue({ workflow: {} }),
+        getValues: jest.fn().mockReturnValue({ workflows: [] }),
       } as unknown as UseFormReturn<ComposeFormValues>;
       expect(await notificationsStep.validate!(methods, state, makeServices())).toBe(true);
     });

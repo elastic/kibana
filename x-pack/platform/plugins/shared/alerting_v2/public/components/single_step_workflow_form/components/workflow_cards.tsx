@@ -52,7 +52,7 @@ export const WorkflowCards = ({ onPick, onCancel }: WorkflowCardsProps) => (
             display="plain"
             hasBorder
             titleSize="xs"
-            icon={<EuiIcon type={card.iconType} size="xl" aria-hidden={true} />}
+            icon={<EuiIcon type={card.iconType} size="l" aria-hidden={true} />}
             title={card.label}
             description={card.description}
             onClick={() => onPick(card.kind)}
