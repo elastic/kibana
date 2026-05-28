@@ -6,7 +6,7 @@
  */
 
 /** Stable saved object id for the managed Agent Builder overview dashboard. */
-export const AGENT_BUILDER_OVERVIEW_DASHBOARD_ID = 'agent-builder-token-usage';
+export const AGENT_BUILDER_OVERVIEW_DASHBOARD_ID = 'agent-builder-overview';
 
 /**
  * Bump when panel layout or visualization definitions change so startup reinstall
