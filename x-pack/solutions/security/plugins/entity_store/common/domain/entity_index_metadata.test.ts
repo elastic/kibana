@@ -9,9 +9,6 @@ import {
   ENTITY_LATEST,
   ENTITY_UPDATES,
   ENTITY_HISTORY,
-  // EMH Phase 1: this export must exist and equal 'metadata'.
-  // The Implementer adds it; currently this import will fail TS compilation.
-  // @ts-expect-error — ENTITY_METADATA does not exist yet (Phase 1 Implementer adds it)
   ENTITY_METADATA,
   getEntityIndexPattern,
 } from './entity_index';
@@ -33,7 +30,6 @@ describe('EMH Phase 1 — Dataset union extension', () => {
     // strict compilation. We assert here that it succeeds at both type
     // and runtime level (the function is pure string concatenation).
     const pattern = getEntityIndexPattern({
-      // @ts-expect-error — Dataset union does not yet include 'metadata' (Phase 1)
       dataset: ENTITY_METADATA,
       schemaVersion: 'v2',
       namespace: 'default',

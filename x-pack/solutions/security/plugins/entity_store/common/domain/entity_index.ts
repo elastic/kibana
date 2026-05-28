@@ -8,6 +8,7 @@
 export const ENTITY_LATEST = 'latest' as const;
 export const ENTITY_UPDATES = 'updates' as const;
 export const ENTITY_HISTORY = 'history' as const;
+export const ENTITY_METADATA = 'metadata' as const;
 
 export const ENTITY_BASE_PREFIX = 'entities';
 
@@ -17,7 +18,11 @@ export const ENTITY_SCHEMA_VERSION_V2 = 'v2';
 export const MAPPING_VERSION = 1;
 
 type SchemaVersion = `v${number}`;
-type Dataset = typeof ENTITY_LATEST | typeof ENTITY_UPDATES | typeof ENTITY_HISTORY;
+type Dataset =
+  | typeof ENTITY_LATEST
+  | typeof ENTITY_UPDATES
+  | typeof ENTITY_HISTORY
+  | typeof ENTITY_METADATA;
 
 interface IndexPatternOptions<TDataset extends Dataset> {
   dataset: TDataset;

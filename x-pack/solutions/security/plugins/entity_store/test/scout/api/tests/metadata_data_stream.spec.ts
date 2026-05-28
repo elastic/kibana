@@ -7,11 +7,7 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import {
-  PUBLIC_HEADERS,
-  ENTITY_STORE_ROUTES,
-  ENTITY_STORE_TAGS,
-} from '../fixtures/constants';
+import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
 // EMH Phase 1: these imports must resolve once the Implementer creates the
@@ -46,10 +42,7 @@ apiTest.describe(
         responseType: 'json',
         body: {},
       });
-      await esClient.indices.deleteDataStream(
-        { name: METADATA_DATA_STREAM },
-        { ignore: [404] }
-      );
+      await esClient.indices.deleteDataStream({ name: METADATA_DATA_STREAM }, { ignore: [404] });
       await clearEntityStoreIndices(esClient);
     });
 
@@ -66,7 +59,7 @@ apiTest.describe(
         const dataStreams = await esClient.indices.getDataStream({
           name: METADATA_DATA_STREAM,
         });
-        expect(dataStreams.data_streams.length).toBe(1);
+        expect(dataStreams.data_streams).toHaveLength(1);
         expect(dataStreams.data_streams[0].name).toBe(METADATA_DATA_STREAM);
 
         // Lifecycle must be DSL-based with a configured data_retention.
@@ -113,7 +106,7 @@ apiTest.describe(
           index: METADATA_DATA_STREAM,
           size: 1,
         });
-        expect(search.hits.hits.length).toBe(1);
+        expect(search.hits.hits).toHaveLength(1);
         const source = search.hits.hits[0]._source as {
           event?: { ingested?: string };
           'event.ingested'?: string;

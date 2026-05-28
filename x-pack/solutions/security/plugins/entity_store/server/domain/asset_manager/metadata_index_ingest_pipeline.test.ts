@@ -40,21 +40,13 @@ describe('EMH Phase 1 — metadata index ingest pipeline', () => {
     });
 
     it('includes a `set` processor that copies _ingest.timestamp into event.ingested', () => {
-      const setProcessor = body.processors.find(
-        (p: Record<string, unknown>) =>
-          typeof p === 'object' &&
-          p !== null &&
-          'set' in p &&
-          (p.set as { field?: string })?.field === 'event.ingested'
-      ) as { set: { field: string; value: string } } | undefined;
+      const setProcessor = body.processors?.find((p) => p?.set?.field === 'event.ingested');
       expect(setProcessor).toBeDefined();
-      expect(setProcessor?.set.value).toBe('{{_ingest.timestamp}}');
+      expect(setProcessor?.set?.value).toBe('{{_ingest.timestamp}}');
     });
 
     it('does NOT include a `dot_expander` processor (EMH callers send pre-nested JSON)', () => {
-      const dotExpander = body.processors.find(
-        (p: Record<string, unknown>) => typeof p === 'object' && p !== null && 'dot_expander' in p
-      );
+      const dotExpander = body.processors?.find((p) => p?.dot_expander !== undefined);
       expect(dotExpander).toBeUndefined();
     });
   });
