@@ -11,6 +11,8 @@ import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/e
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
+
 import { useConfirmForceInstall } from '../../../../../../../integrations/hooks';
 
 import { isVerificationError } from '../../../../../../../../services';
@@ -116,7 +118,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
       const newValidationResult = validatePackagePolicy(
         { ...packagePolicy, ...newPackagePolicy },
         packageInfo,
-        yaml.parse
+        { safeLoadYaml: yaml.parse, conditionValidator: validateAgentConditionExpression }
       );
       setValidationResults(newValidationResult);
       // eslint-disable-next-line no-console
@@ -156,7 +158,10 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   useEffect(() => {
     if (yaml && !yamlValidationRan.current) {
       yamlValidationRan.current = true;
-      const newValidationResults = validatePackagePolicy(packagePolicy, packageInfo, yaml.parse);
+      const newValidationResults = validatePackagePolicy(packagePolicy, packageInfo, {
+        safeLoadYaml: yaml.parse,
+        conditionValidator: validateAgentConditionExpression,
+      });
       setValidationResults(newValidationResults);
       const hasPackage = packagePolicy.package;
       const hasValidationErrors = validationHasErrors(newValidationResults);
