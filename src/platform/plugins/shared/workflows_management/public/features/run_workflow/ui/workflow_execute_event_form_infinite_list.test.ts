@@ -49,10 +49,7 @@ describe('useAccumulatedTriggerEventSearchPages', () => {
 
     const accumulatedBefore = result.current[0];
     rerender({
-      searchResult: searchResultForPage(
-        [hit('a', { x: 99 }), hit('b', { y: 99 })],
-        1
-      ),
+      searchResult: searchResultForPage([hit('a', { x: 99 }), hit('b', { y: 99 })], 1),
     });
 
     expect(result.current[0]).toBe(accumulatedBefore);

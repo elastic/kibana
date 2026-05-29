@@ -23,11 +23,11 @@ import type { ToastsStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_context';
 import type { DataTableContext } from '@kbn/unified-data-table/src/table_context';
+import { formatTriggerEventPayloadForCopy } from './trigger_event_payload_format';
 import {
   createTriggerEventSummaryCopyPayloadCellAction,
   withoutTrailingDefaultCopyCellAction,
 } from './trigger_event_summary_copy_payload_cell_action';
-import { formatTriggerEventPayloadForCopy } from './trigger_event_payload_format';
 
 describe('withoutTrailingDefaultCopyCellAction', () => {
   it('returns empty array for undefined or empty input', () => {
