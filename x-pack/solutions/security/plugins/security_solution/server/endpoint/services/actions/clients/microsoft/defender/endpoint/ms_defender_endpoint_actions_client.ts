@@ -28,6 +28,7 @@ import { Writable, type Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import pRetry from 'p-retry';
 import { v4 as uuidv4 } from 'uuid';
+import { isResponseActionCancelable } from '../../../../../../../../common/endpoint/service/response_actions/is_response_action_cancelable';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
@@ -626,10 +627,13 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         }
 
         // Check if we're trying to cancel a cancel action (business rule validation)
-        if (originalAction.command === 'cancel') {
+        if (!isResponseActionCancelable(originalAction.command, this.agentType)) {
           return {
             isValid: false,
-            error: new ResponseActionsClientError(`Cannot cancel a cancel action.`, 400),
+            error: new ResponseActionsClientError(
+              `[${originalAction.command}] response action cannot be canceled.`,
+              400
+            ),
           };
         }
       } catch (error) {

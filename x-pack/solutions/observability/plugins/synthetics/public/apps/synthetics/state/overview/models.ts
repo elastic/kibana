@@ -39,6 +39,13 @@ export interface MonitorOverviewState {
 }
 
 export interface GroupByState {
-  field: ConfigKey.TAGS | ConfigKey.PROJECT_ID | ConfigKey.MONITOR_TYPE | 'locationId' | 'none';
+  field:
+    | ConfigKey.TAGS
+    | ConfigKey.PROJECT_ID
+    | ConfigKey.MONITOR_TYPE
+    | 'locationId'
+    | 'monitor'
+    | 'remoteName'
+    | 'none';
   order: 'asc' | 'desc';
 }

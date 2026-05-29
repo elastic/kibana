@@ -9,12 +9,13 @@
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
-import { pipeCompleteItem, commaCompleteItem, buildSubqueryCompleteItem } from '../complete_items';
+import { pipeCompleteItem, commaCompleteItem, buildSubqueryCompleteItems } from '../complete_items';
 import {
   getSourcesFromCommands,
   getSourceSuggestions,
   additionalSourcesSuggestions,
   buildViewsDefinitions,
+  buildDatasetsDefinitions,
 } from '../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../options/recommended_queries';
@@ -26,6 +27,7 @@ import {
   getIndicesBrowserSuggestion,
   shouldSuggestIndicesBrowserAfterComma,
 } from '../../definitions/utils/autocomplete/resource_browser_suggestions';
+import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 const SOURCE_TYPE_INDEX = 'index';
 const METADATA_KEYWORD = 'METADATA';
@@ -66,11 +68,13 @@ async function handleFromAutocomplete(
   }
 
   // Extract text relative to command start (critical for subqueries)
-  // Use commandText for pattern matching (e.g., /METADATA\s+$/, /\s$/) because these
+  // Use commandText for pattern matching (e.g., /METADATA\s+$/ and trailing whitespace)
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
   const subquerySuggestion =
-    commandText.length > command.name.length ? buildSubqueryCompleteItem() : undefined;
+    commandText.length > command.name.length
+      ? buildSubqueryCompleteItems([command.name]).at(0)
+      : undefined;
   const indicesBrowserSuggestion = await getIndicesBrowserSuggestion({
     callbacks,
     context,
@@ -104,7 +108,7 @@ async function handleFromAutocomplete(
   }
 
   // Case 2: FROM index | (after space, suggest next actions)
-  if (/\s$/.test(commandText) && !isRestartingExpression(commandText)) {
+  if (endsWithWhitespace(commandText) && !isRestartingExpression(commandText)) {
     return suggestNextActions(context, callbacks);
   }
 
@@ -150,7 +154,8 @@ function suggestInitialSources(
     commandStart,
   });
   const viewSuggestions = buildViewsDefinitions(context?.views ?? [], []);
-  const suggestions = [...sourceSuggestions, ...viewSuggestions];
+  const datasetSuggestions = buildDatasetsDefinitions(context?.datasets ?? [], []);
+  const suggestions = [...sourceSuggestions, ...viewSuggestions, ...datasetSuggestions];
 
   if (subquerySuggestion && shouldSuggestSubquery(context)) {
     suggestions.push(subquerySuggestion);
@@ -218,6 +223,7 @@ async function suggestAdditionalSources(
     indexes.map(({ name }) => name),
     recommendedQueries,
     context?.views ?? [],
+    context?.datasets ?? [],
     canRewriteFromToTs ? sourceReplacementContext : undefined
   );
 

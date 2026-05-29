@@ -7,7 +7,6 @@
 
 import React, { lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -22,7 +21,6 @@ import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { RulesSettingsLink } from '../../components/rules_setting/rules_settings_link';
 import { RulesListDocLink } from '../rules_list/components/rules_list_doc_link';
-import { RulesPageTemplate } from './rules_page_template';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from '../../lib/breadcrumb';
 import { CreateRuleButton } from '../rules_list/components/create_rule_button';
@@ -132,21 +130,19 @@ const RulesPage = () => {
 
   const renderRulesList = useCallback(() => {
     return (
-      <KibanaPageTemplate.Section paddingSize="l" data-test-subj="rulesListWrapper">
-        <RulesList
-          rulesListKey="rules-page"
-          showCreateRuleButtonInPrompt={true}
-          navigateToEditRuleForm={navigateToEditRuleForm}
-          navigateToCreateRuleForm={navigateToCreateRuleForm}
-          ruleDetailsRoute={rulesAppDetailsRoute}
-        />
-      </KibanaPageTemplate.Section>
+      <RulesList
+        rulesListKey="rules-page"
+        showCreateRuleButtonInPrompt={true}
+        navigateToEditRuleForm={navigateToEditRuleForm}
+        navigateToCreateRuleForm={navigateToCreateRuleForm}
+        ruleDetailsRoute={rulesAppDetailsRoute}
+      />
     );
   }, [navigateToEditRuleForm, navigateToCreateRuleForm]);
 
   const renderLogsList = useCallback(() => {
     return (
-      <KibanaPageTemplate.Section grow={false} paddingSize="l">
+      <KibanaPageTemplate.Section grow={false} paddingSize="none">
         {suspendedComponentWithProps(
           LogsList,
           'xl'
@@ -171,40 +167,36 @@ const RulesPage = () => {
 
   return (
     <>
-      <RulesPageTemplate
-        pageHeader={{
-          paddingSize: 'm',
-          bottomBorder: true,
-          pageTitle: (
-            <span data-test-subj="appTitle">
-              <FormattedMessage
-                id="xpack.triggersActionsUI.rulesPage.pageTitle"
-                defaultMessage="Rules"
-              />
-            </span>
-          ),
-          rightSideItems: headerActions,
-          description: (
+      <KibanaPageTemplate.Header
+        paddingSize="none"
+        bottomBorder={true}
+        pageTitle={
+          <span data-test-subj="appTitle">
             <FormattedMessage
-              id="xpack.triggersActionsUI.rulesPage.pageDescription"
-              defaultMessage="Manage and monitor all of your rules in one place."
+              id="xpack.triggersActionsUI.rulesPage.pageTitle"
+              defaultMessage="Rules"
             />
-          ),
-          tabs: tabs.map((tab) => ({
-            label: tab.name,
-            onClick: () => onSectionChange(tab.id),
-            isSelected: tab.id === currentSection,
-            key: tab.id,
-            'data-test-subj': `${tab.id}Tab`,
-          })),
-        }}
-      >
-        <EuiSpacer size="l" />
-        <Routes>
-          <Route exact path="/logs" component={renderLogsList} />
-          <Route exact path="/" component={renderRulesList} />
-        </Routes>
-      </RulesPageTemplate>
+          </span>
+        }
+        rightSideItems={headerActions}
+        description={
+          <FormattedMessage
+            id="xpack.triggersActionsUI.rulesPage.pageDescription"
+            defaultMessage="Manage and monitor all of your rules in one place."
+          />
+        }
+        tabs={tabs.map((tab) => ({
+          label: tab.name,
+          onClick: () => onSectionChange(tab.id),
+          isSelected: tab.id === currentSection,
+          key: tab.id,
+          'data-test-subj': `${tab.id}Tab`,
+        }))}
+      />
+      <Routes>
+        <Route exact path="/logs" component={renderLogsList} />
+        <Route exact path="/" component={renderRulesList} />
+      </Routes>
       {ruleTypeModalVisible && (
         <RuleTypeModal
           onClose={() => setRuleTypeModalVisibility(false)}

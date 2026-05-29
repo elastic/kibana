@@ -11,7 +11,7 @@ import type { monaco } from '@kbn/monaco';
 import { LoopStepTypes } from '@kbn/workflows';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
-import { getCustomPropertySuggestions } from './custom_property/get_custom_property_suggestions';
+import { getEsqlQuerySuggestions } from './esql_query/get_esql_query_suggestions';
 import { getJsonSchemaSuggestions } from './json_schema/get_json_schema_suggestions';
 import {
   createLiquidBlockKeywordCompletions,
@@ -19,6 +19,8 @@ import {
   createLiquidSyntaxCompletions,
 } from './liquid/liquid_completions';
 import { getRRuleSchedulingSuggestions } from './rrule/get_rrule_scheduling_suggestions';
+import { getStepPropertySuggestions } from './step_property/get_step_property_suggestions';
+import type { GetStepPropertyHandler } from './step_property/get_step_property_suggestions';
 import { getTimezoneSuggestions } from './timezone/get_timezone_suggestions';
 import { getTriggerConditionKqlSuggestions } from './trigger_condition/get_trigger_condition_kql_suggestions';
 import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
@@ -26,14 +28,16 @@ import { getVariableSuggestions } from './variable/get_variable_suggestions';
 import { getWorkflowInputsSuggestions } from './workflow/get_workflow_inputs_suggestions';
 import { getWorkflowOutputsSuggestions } from './workflow/get_workflow_outputs_suggestions';
 import { getWorkflowSuggestions } from './workflow/get_workflow_suggestions';
+import type { WorkflowEsqlCompletionServices } from './workflow_esql_completion_services';
 import type { WorkflowKqlCompletionServices } from './workflow_kql_completion_services';
-import { getPropertyHandler } from '../../../../../../common/schema';
+import { getPropertyHandler as getPropertyHandlerFromSchema } from '../../../../../../common/schema';
 import type {
   AutocompleteContext,
   ExtendedAutocompleteContext,
 } from '../context/autocomplete.types';
 
 export type { WorkflowKqlCompletionServices } from './workflow_kql_completion_services';
+export type { WorkflowEsqlCompletionServices } from './workflow_esql_completion_services';
 
 const loopStepTypes = new Set<string>(LoopStepTypes);
 
@@ -161,7 +165,9 @@ async function handleMatchTypeSuggestions(
 
 export async function getSuggestions(
   autocompleteContext: ExtendedAutocompleteContext,
-  kqlServices?: WorkflowKqlCompletionServices
+  kqlServices?: WorkflowKqlCompletionServices,
+  getPropertyHandler?: GetStepPropertyHandler,
+  esqlServices?: WorkflowEsqlCompletionServices
 ): Promise<monaco.languages.CompletionItem[]> {
   if (
     kqlServices &&
@@ -171,6 +177,20 @@ export async function getSuggestions(
     autocompleteContext.triggerConditionDefinition
   ) {
     return getTriggerConditionKqlSuggestions(autocompleteContext, kqlServices);
+  }
+
+  // ES|QL completion takes ownership inside `with.query` of an
+  // `elasticsearch.esql.query` step. The helper returns `null` only when the
+  // cursor sits in a Liquid span (`{{ … }}` / `{% … %}`) — only then do we
+  // fall through to the variable-completion path. Any other ES|QL result
+  // (including an empty list) is final, so a literal `|` typed in ES|QL
+  // never accidentally surfaces Liquid filter completions like `abs`,
+  // `capitalize`, etc.
+  if (esqlServices && autocompleteContext.isInEsqlQueryField && autocompleteContext.esqlRegion) {
+    const esqlSuggestions = await getEsqlQuerySuggestions(autocompleteContext, esqlServices);
+    if (esqlSuggestions !== null) {
+      return esqlSuggestions;
+    }
   }
 
   // Check if we're in a scheduled trigger's with block for RRule suggestions
@@ -204,10 +224,7 @@ export async function getSuggestions(
     return jsonSchemaSuggestions;
   }
 
-  // Custom property completion for steps registered via workflows_extensions
-  return getCustomPropertySuggestions(
-    autocompleteContext,
-    (stepType: string, scope: 'config' | 'input', key: string) =>
-      getPropertyHandler(stepType, scope, key)
-  );
+  // Step property completion (extension-registered steps and internal step editor handlers)
+  const resolvePropertyHandler = getPropertyHandler ?? getPropertyHandlerFromSchema;
+  return getStepPropertySuggestions(autocompleteContext, resolvePropertyHandler);
 }

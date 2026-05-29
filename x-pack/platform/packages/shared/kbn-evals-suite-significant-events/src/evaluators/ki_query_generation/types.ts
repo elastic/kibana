@@ -33,7 +33,7 @@ export interface Query {
 }
 
 export interface KIQueryGenerationEvaluationExample {
-  input: { sample_logs: string[]; sample_docs?: Array<Record<string, unknown>> } & Record<
+  input: { sample_logs?: string[]; sample_docs?: Array<Record<string, unknown>> } & Record<
     string,
     unknown
   >;
@@ -48,6 +48,8 @@ interface KIQueryGenerationTaskOutput {
   queries: Query[];
   toolUsage?: SignificantEventsToolUsage;
   traceId?: string | null;
+  sample_logs?: string[];
+  sample_docs?: Array<Record<string, unknown>>;
 }
 
 export type KIQueryGenerationOutput = Query[] | KIQueryGenerationTaskOutput;
@@ -66,5 +68,5 @@ export type KIQueryGenerationEvaluator = Evaluator<
 
 export interface ScenarioCriteriaConfig {
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
-  criteria: EvaluationCriterion[];
+  criteria?: EvaluationCriterion[];
 }

@@ -57,6 +57,16 @@ describe('Grouping', () => {
     expect(screen.queryByTestId('empty-results-panel')).not.toBeInTheDocument();
   });
 
+  it('Keeps group panels mounted while loading when data exists', () => {
+    render(
+      <I18nProvider>
+        <Grouping {...testProps} isLoading />
+      </I18nProvider>
+    );
+    expect(screen.getByTestId('is-loading-grouping-table')).toBeInTheDocument();
+    expect(screen.getAllByTestId('grouping-accordion').length).toBe(3);
+  });
+
   it('Does not render group counts when groupsCount = 0', () => {
     const data = {
       groupsCount: {

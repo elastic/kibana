@@ -7,30 +7,28 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import * as rt from 'io-ts';
-import { isRight } from 'fp-ts/Either';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
-import type {
-  AttachmentType,
-  UnifiedValueAttachmentViewProps,
+import {
+  CommentAttachmentPayloadSchema,
+  type CommentAttachmentData,
+} from '../../../../common/types/domain_zod/attachment/comment/v2';
+import {
+  AttachmentActionType,
+  defineAttachment,
+  type UnifiedValueAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
-import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { COMMENT, ADDED_COMMENT, DELETE_COMMENT_SUCCESS_TITLE } from './translations';
 import { createCommentActionCss, hasDraftComment } from './utils';
 
-interface UnifiedCommentViewProps extends UnifiedValueAttachmentViewProps {
-  data: {
-    content: string;
-  };
-}
+type CommentViewProps = UnifiedValueAttachmentViewProps<CommentAttachmentData>;
 
 const CommentAttachmentChildrenLazy = React.lazy(async () => {
   const { CommentChildren } = await import('./comment_children');
 
-  const CommentAttachmentChildren: React.FC<UnifiedValueAttachmentViewProps> = (props) => (
+  const CommentAttachmentChildren: React.FC<CommentViewProps> = (props) => (
     <CommentChildren
       commentId={props.savedObjectId}
-      content={props.data.content as string}
+      content={props.data.content}
       caseId={props.caseData.id}
       version={props.version}
     />
@@ -52,7 +50,7 @@ const CommentActionsLazy = React.lazy(() =>
   }))
 );
 
-const getCommentClassName = (props: UnifiedCommentViewProps): string | undefined => {
+const getCommentClassName = (props: CommentViewProps): string | undefined => {
   if (!props.rowContext) return undefined;
 
   const { savedObjectId, caseData } = props;
@@ -72,9 +70,8 @@ const getCommentClassName = (props: UnifiedCommentViewProps): string | undefined
   });
 };
 
-const getCommentAttachmentViewObject = (props: UnifiedValueAttachmentViewProps) => {
-  const commentProps = props as UnifiedCommentViewProps;
-  const className = getCommentClassName(commentProps);
+const getCommentAttachmentViewObject = (props: CommentViewProps) => {
+  const className = getCommentClassName(props);
   const css = createCommentActionCss(props.rowContext.euiTheme);
 
   return {
@@ -86,7 +83,7 @@ const getCommentAttachmentViewObject = (props: UnifiedValueAttachmentViewProps) 
     ),
     children: CommentAttachmentChildrenLazy,
     hideDefaultActions: true,
-    getActions: (viewProps: UnifiedValueAttachmentViewProps) => [
+    getActions: (viewProps: CommentViewProps) => [
       {
         type: AttachmentActionType.CUSTOM as const,
         isPrimary: true,
@@ -95,7 +92,7 @@ const getCommentAttachmentViewObject = (props: UnifiedValueAttachmentViewProps) 
             <React.Suspense fallback={null}>
               <CommentActionsLazy
                 commentId={viewProps.savedObjectId}
-                content={viewProps.data.content as string}
+                content={viewProps.data.content}
               />
             </React.Suspense>
           );
@@ -107,24 +104,16 @@ const getCommentAttachmentViewObject = (props: UnifiedValueAttachmentViewProps) 
   };
 };
 
-const CommentDataRt = rt.strict({ data: rt.strict({ content: rt.string }) });
-
-const commentSchemaValidator = (attachment: unknown): void => {
-  const result = CommentDataRt.decode(attachment);
-  if (!isRight(result)) {
-    throw new Error('Invalid comment attachment data: expected { content: string }');
-  }
-};
-
 /**
  * Returns the comment (user) attachment type for registration with the unified registry.
  * Renders comment body via CommentChildren and uses CommentTimelineAvatar.
  */
-export const getCommentAttachmentType = (): AttachmentType<UnifiedValueAttachmentViewProps> => ({
-  id: COMMENT_ATTACHMENT_TYPE,
-  icon: 'editorComment',
-  displayName: COMMENT,
-  getAttachmentViewObject: (props) => getCommentAttachmentViewObject(props),
-  getAttachmentRemovalObject: () => ({ event: DELETE_COMMENT_SUCCESS_TITLE }),
-  schemaValidator: commentSchemaValidator,
-});
+export const getCommentAttachmentType = () =>
+  defineAttachment({
+    id: COMMENT_ATTACHMENT_TYPE,
+    icon: 'editorComment',
+    displayName: COMMENT,
+    getAttachmentViewObject: getCommentAttachmentViewObject,
+    getAttachmentRemovalObject: () => ({ event: DELETE_COMMENT_SUCCESS_TITLE }),
+    schema: CommentAttachmentPayloadSchema,
+  });

@@ -106,6 +106,7 @@
     "@kbn/cloud-plugin",
     "@kbn/search-inference-endpoints",
     "@kbn/controls-constants",
+    "@kbn/ai-assistant-common",
   ],
   "exclude": [
     "target/**/*",

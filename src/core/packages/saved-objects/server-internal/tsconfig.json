@@ -9,6 +9,8 @@
   },
   "include": [
     "**/*.ts",
+    "removed_types.json",
+    "wip_types.json",
   ],
   "kbn_references": [
     "@kbn/config-schema",

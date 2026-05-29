@@ -73,8 +73,16 @@ export default function (providerContext: FtrProviderContext) {
       attributes: {
         policy_ids: [id],
         name: 'Fleet Server',
+        enabled: true,
+        inputs: [],
+        revision: 1,
+        created_at: new Date().toISOString(),
+        created_by: 'system',
+        updated_at: new Date().toISOString(),
+        updated_by: 'system',
         package: {
           name: 'fleet_server',
+          version: '1.0.0',
         },
         latest_revision: true,
       },
@@ -193,10 +201,10 @@ export default function (providerContext: FtrProviderContext) {
             host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
             is_default: true,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
               es_certificate: 'path/to/EScert',
-              es_certificate_authorities: ['ES cert authorities'],
+              es_certificate_authorities: ['/path/to/es-cert-authority'],
             },
             secrets: { ssl: { key: 'KEY1', es_key: 'KEY2' } },
           })
@@ -238,10 +246,10 @@ export default function (providerContext: FtrProviderContext) {
             host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
             is_default: true,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
               es_certificate: 'path/to/EScert',
-              es_certificate_authorities: ['ES cert authorities'],
+              es_certificate_authorities: ['/path/to/es-cert-authority'],
             },
           })
           .expect(200);
@@ -297,10 +305,10 @@ export default function (providerContext: FtrProviderContext) {
             is_default: true,
             id,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
               es_certificate: 'path/to/EScert',
-              es_certificate_authorities: ['ES cert authorities'],
+              es_certificate_authorities: ['/path/to/es-cert-authority'],
               key: 'KEY',
             },
             secrets: { ssl: { key: 'KEY' } },
@@ -322,10 +330,10 @@ export default function (providerContext: FtrProviderContext) {
             is_default: true,
             id,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
               es_certificate: 'path/to/EScert',
-              es_certificate_authorities: ['ES cert authorities'],
+              es_certificate_authorities: ['/path/to/es-cert-authority'],
               es_key: 'KEY',
             },
             secrets: { ssl: { es_key: 'KEY' } },
@@ -346,10 +354,10 @@ export default function (providerContext: FtrProviderContext) {
             host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
             is_default: true,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
               es_certificate: 'path/to/EScert',
-              es_certificate_authorities: ['ES cert authorities'],
+              es_certificate_authorities: ['/path/to/es-cert-authority'],
             },
             secrets: { ssl: { key: 'KEY1', es_key: 'KEY2' } },
           })
@@ -394,10 +402,10 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             name: 'Default',
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
               es_certificate: 'path/to/EScert',
-              es_certificate_authorities: ['ES cert authorities'],
+              es_certificate_authorities: ['/path/to/es-cert-authority'],
             },
           })
           .expect(200);
@@ -409,9 +417,11 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(fleetServerHost.ssl.certificate).to.eql('path/to/cert');
-        expect(fleetServerHost.ssl.certificate_authorities).to.eql(['cert authorities']);
+        expect(fleetServerHost.ssl.certificate_authorities).to.eql(['/path/to/cert-authority']);
         expect(fleetServerHost.ssl.es_certificate).to.eql('path/to/EScert');
-        expect(fleetServerHost.ssl.es_certificate_authorities).to.eql(['ES cert authorities']);
+        expect(fleetServerHost.ssl.es_certificate_authorities).to.eql([
+          '/path/to/es-cert-authority',
+        ]);
       });
 
       it('should return a 404 when updating a non existing fleet server host', async function () {
@@ -435,10 +445,10 @@ export default function (providerContext: FtrProviderContext) {
             host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
             is_default: true,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
               es_certificate: 'path/to/EScert',
-              es_certificate_authorities: ['ES cert authorities'],
+              es_certificate_authorities: ['/path/to/es-cert-authority'],
             },
             secrets: { ssl: { key: 'KEY1', es_key: 'KEY2' } },
           })
@@ -457,10 +467,10 @@ export default function (providerContext: FtrProviderContext) {
             host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
             is_default: true,
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
               es_certificate: 'path/to/EScert',
-              es_certificate_authorities: ['ES cert authorities'],
+              es_certificate_authorities: ['/path/to/es-cert-authority'],
             },
             secrets: { ssl: { key: 'NEW_KEY' } },
           })
@@ -517,10 +527,10 @@ export default function (providerContext: FtrProviderContext) {
             name: `Default ${Date.now()}`,
             host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
             ssl: {
-              certificate_authorities: ['cert authorities'],
+              certificate_authorities: ['/path/to/cert-authority'],
               certificate: 'path/to/cert',
               es_certificate: 'path/to/EScert',
-              es_certificate_authorities: ['ES cert authorities'],
+              es_certificate_authorities: ['/path/to/es-cert-authority'],
             },
             secrets: { ssl: { es_key: 'KEY2' } },
           })

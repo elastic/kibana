@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/content-management-favorites-public'
   - '@kbn/user-profile-components'
   - '@kbn/content-management-user-profiles'
+  - '@kbn/shared-ux-router'
   - '@kbn/i18n'
 tags:
   - shared-browser

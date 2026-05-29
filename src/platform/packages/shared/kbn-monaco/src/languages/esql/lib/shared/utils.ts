@@ -10,7 +10,7 @@
 import { isArray } from 'lodash';
 import type { ISuggestionItem } from '@kbn/esql-language/src/commands/registry/types';
 import { monaco } from '../../../../monaco_imports';
-import type { MonacoMessage } from '../../language';
+import type { MonacoMessage } from '../providers/types';
 
 // From Monaco position to linear offset
 export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
@@ -32,7 +32,7 @@ export function monacoPositionToOffset(expression: string, position: monaco.Posi
  *
  * IMPORTANT NOTE:
  * offset ranges are ZERO-based and NOT end-inclusive — [start, end)
- * monaco ranges are ONE-based and ARE end-inclusive — [start, end]
+ * monaco ranges are ONE-based and NOT end-inclusive — [start, end)
  */
 export const offsetRangeToMonacoRange = (
   expression: string,
@@ -63,7 +63,7 @@ export const offsetRangeToMonacoRange = (
 
     if (i === range.start) {
       startColumn = i + 1 - startOfCurrentLine;
-      endColumn = startColumn + range.end - range.start - 1;
+      endColumn = startColumn + range.end - range.start;
       break;
     }
   }

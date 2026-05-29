@@ -148,6 +148,20 @@ describe('PROMQL Validation', () => {
         ['Unknown index "unknown_*"']
       );
     });
+
+    test('dot-prefixed backing index does not error', () => {
+      promqlExpectErrors(
+        'PROMQL index=.ds-metrics-x-default-000001 step=5m start=?_tstart end=?_tend (rate(counterIntegerField[5m]))',
+        []
+      );
+    });
+
+    test('truly unknown non-dot index still errors', () => {
+      promqlExpectErrors(
+        'PROMQL index=truly_unknown step=5m start=?_tstart end=?_tend (rate(counterIntegerField[5m]))',
+        ['Unknown index "truly_unknown"']
+      );
+    });
   });
 
   describe('query semantics', () => {
@@ -164,19 +178,8 @@ describe('PROMQL Validation', () => {
       );
     });
 
-    test.each([
-      [
-        'unknown metric name reports unknown column',
-        'PROMQL index=timeseries_index step=5m start=?_tstart end=?_tend (rate(bytess[5m]))',
-        ['Unknown column "bytess"'],
-      ],
-      [
-        'unknown metric name without index reports unknown column',
-        'PROMQL step=5m (rate(bytes))',
-        ['Unknown column "bytes"'],
-      ],
-    ])('%s', (_title, query, expected) => {
-      promqlExpectErrors(query, expected);
+    test('unknown metric name does not report an error', () => {
+      promqlExpectErrors('PROMQL step=5m start=?_tstart end=?_tend (rate(unknown_metric[5m]))', []);
     });
 
     test('grouping is not allowed on non-aggregation functions', () => {

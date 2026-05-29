@@ -54,7 +54,6 @@ export const serverless: Command = {
       --host              Publish ES docker container on additional host IP
       --port              The port to bind to on 127.0.0.1 [default: ${DEFAULT_PORT}]
       --ssl               Enable HTTP SSL on the ES cluster [default: true]
-      --kibanaUrl         Fully qualified URL where Kibana is hosted (including base path). [default: http://localhost:5601/]
       --skipTeardown      If this process exits, leave the ES cluster running in the background
       --waitForReady      Wait for the ES cluster to be ready to serve requests
       --resources         Overrides resources under ES 'config/' directory, which are by default
@@ -103,16 +102,7 @@ export const serverless: Command = {
         uiamOAuth: 'uiam-oauth',
       },
 
-      string: [
-        'esProjectType',
-        'tag',
-        'image',
-        'basePath',
-        'resources',
-        'host',
-        'kibanaUrl',
-        'dataPath',
-      ],
+      string: ['esProjectType', 'tag', 'image', 'basePath', 'resources', 'host', 'dataPath'],
       boolean: [
         'clean',
         'ssl',
@@ -126,7 +116,6 @@ export const serverless: Command = {
 
       default: {
         ...defaults,
-        kibanaUrl: 'http://localhost:5601/',
         dataPath: 'stateless',
         ssl: true,
         uiam: true,
@@ -158,6 +147,12 @@ export const serverless: Command = {
         `Invalid projectType '${options.esProjectType}', supported values: ${supportedProjectTypesStr}`
       );
     }
+
+    // Normalize 'elasticsearch' alias to 'elasticsearch_general_purpose'
+    if (options.esProjectType === 'elasticsearch') {
+      options.esProjectType = 'elasticsearch_general_purpose' as typeof options.esProjectType;
+    }
+
     // also provide the Kibana project type, e.g. for role file selection
     options.projectType = kbnProjectTypeFromEs.get(options.esProjectType) as ServerlessProjectType;
 

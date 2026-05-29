@@ -6,6 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { v4 as uuidV4 } from 'uuid';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -38,6 +39,7 @@ export class DispatcherService implements DispatcherServiceContract {
     // time is measured with a monotonic clock so tick and per-stage
     // durations share the same resolution and are immune to NTP jumps.
     const startedAtNs = startHrtime();
+    const executionUuid = uuidV4();
 
     let pipelineResult: DispatcherPipelineResult;
     try {
@@ -45,6 +47,7 @@ export class DispatcherService implements DispatcherServiceContract {
         startedAt,
         previousStartedAt,
         eventWatermark,
+        executionUuid,
       });
     } catch (err) {
       // The pipeline catches step exceptions internally and converts them

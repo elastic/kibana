@@ -1,5 +1,5 @@
 {
-  "sha1": "5047b9861a8abf19221dcf61b8deec3eeab7d82d",
+  "sha1": "6a811f9bb7f17f4684a110f9f4ec212aababc6f6",
   "tests": [
     {
       "id": "65fe2f541b6ad11-864f48536870f42",
@@ -491,7 +491,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
-        "line": 40,
+        "line": 54,
         "column": 10
       }
     },
@@ -517,7 +517,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
-        "line": 57,
+        "line": 71,
         "column": 10
       }
     },
@@ -543,7 +543,33 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
-        "line": 75,
+        "line": 89,
+        "column": 10
+      }
+    },
+    {
+      "id": "b501cf6f250d502-66e89ea11e47687",
+      "title": "dashboards - upsert should update existing dashboard access mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
+        "line": 108,
         "column": 10
       }
     },
@@ -569,7 +595,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
-        "line": 94,
+        "line": 146,
         "column": 10
       }
     },
@@ -595,13 +621,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
-        "line": 116,
+        "line": 168,
         "column": 10
       }
     },
     {
-      "id": "b501cf6f250d502-3a01e7d01b4e606",
-      "title": "dashboards - upsert validation - returns 400 when access_control is provided",
+      "id": "b501cf6f250d502-43bcd198cded2a7",
+      "title": "dashboards - upsert validation - returns 400 for invalid access_mode values",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -621,7 +647,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
-        "line": 135,
+        "line": 187,
         "column": 10
       }
     },
@@ -647,7 +673,85 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
-        "line": 153,
+        "line": 205,
+        "column": 10
+      }
+    },
+    {
+      "id": "b501cf6f250d502-08eab243cab0998",
+      "title": "dashboards - upsert authorization - does not apply state changes when access mode update fails",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
+        "line": 223,
+        "column": 10
+      }
+    },
+    {
+      "id": "b501cf6f250d502-36a9de318f5058c",
+      "title": "dashboards - upsert authorization - non-superuser cannot change access mode for a dashboard they do not own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
+        "line": 263,
+        "column": 10
+      }
+    },
+    {
+      "id": "b501cf6f250d502-53b48848e7de6e4",
+      "title": "dashboards - upsert access_control - omitting access_control preserves existing access mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
+        "line": 308,
         "column": 10
       }
     }

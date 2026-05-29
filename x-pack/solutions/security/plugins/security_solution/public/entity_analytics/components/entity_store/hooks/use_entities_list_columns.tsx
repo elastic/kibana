@@ -6,7 +6,7 @@
  */
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EuiButtonIcon, EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,7 +47,7 @@ export type EntitiesListColumns = [
 ];
 
 export const useEntitiesListColumns = (): EntitiesListColumns => {
-  const { openRightPanel } = useExpandableFlyoutApi();
+  const { openFlyout } = useExpandableFlyoutApi();
   const { euiTheme } = useEuiTheme();
 
   return [
@@ -67,13 +67,15 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
           const id = EntityPanelKeyByType[entityType];
 
           if (id) {
-            openRightPanel({
-              id,
-              params: {
-                [EntityPanelParamByType[entityType] ?? '']: value,
-                contextID: ENTITIES_LIST_TABLE_ID,
-                scopeId: ENTITIES_LIST_TABLE_ID,
-                entityId: record.entity.id,
+            openFlyout({
+              right: {
+                id,
+                params: {
+                  [EntityPanelParamByType[entityType] ?? '']: value,
+                  contextID: ENTITIES_LIST_TABLE_ID,
+                  scopeId: ENTITIES_LIST_TABLE_ID,
+                  entityId: record.entity.id,
+                },
               },
             });
           }
@@ -84,17 +86,28 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
         }
 
         return (
-          <EuiButtonIcon
-            iconType="maximize"
-            onClick={onClick}
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.entityPreview.ariaLabel',
               {
                 defaultMessage: 'Preview entity with name {name}',
                 values: { name: value },
               }
             )}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="maximize"
+              onClick={onClick}
+              aria-label={i18n.translate(
+                'xpack.securitySolution.entityAnalytics.entityStore.entitiesList.entityPreview.ariaLabel',
+                {
+                  defaultMessage: 'Preview entity with name {name}',
+                  values: { name: value },
+                }
+              )}
+            />
+          </EuiToolTip>
         );
       },
       width: '5%',

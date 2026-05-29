@@ -47,6 +47,7 @@ import {
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
+import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
 
@@ -125,7 +126,7 @@ const handleConversationExecution = async ({
   const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
 
   // Resolve scoped services
-  const { conversationClient, chatModel, selectedConnectorId } = await resolveServices({
+  const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
     agentId,
     connectorId,
     request,
@@ -167,7 +168,11 @@ const handleConversationExecution = async ({
   // Generate title (for CREATE) or use existing title (for UPDATE)
   const title$ =
     conversation.operation === 'CREATE'
-      ? generateTitle({ chatModel, conversation, nextInput })
+      ? generateTitle({
+          chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
+          conversation,
+          nextInput,
+        })
       : of(conversation.title);
 
   // Persist conversation (optional)
@@ -186,62 +191,76 @@ const handleConversationExecution = async ({
   // Merge all event streams
   const effectiveConversationId =
     conversation.operation === 'CREATE' ? conversation.id : conversationId;
-  const modelProvider = getConnectorProvider(chatModel.getConnector());
 
-  return withConverseSpan({ agentId, conversationId: effectiveConversationId }, () =>
-    merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
-      handleCancellation(abortSignal),
-      tap((event) => {
-        try {
-          if (isRoundCompleteEvent(event)) {
-            const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
-            const currentRoundCount = isReplacingRound
-              ? conversation.rounds.length
-              : (conversation.rounds?.length ?? 0) + 1;
+  const chatModel = (await modelProvider.getDefaultModel()).chatModel;
+  const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
-            // metering
-            meteringService
-              .reportExecution({
+  const { headers } = request;
+  const opikTraceId = headers.opik_trace_id as string | undefined;
+  const opikParentSpanId = headers.opik_parent_span_id as string | undefined;
+  const opikHeaders =
+    opikTraceId && opikParentSpanId
+      ? { opik_trace_id: opikTraceId, opik_parent_span_id: opikParentSpanId }
+      : undefined;
+
+  const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
+
+  return withConverseSpan(
+    { agentId, conversationId: effectiveConversationId, spaceId, opikHeaders },
+    () =>
+      merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+        handleCancellation(abortSignal),
+        tap((event) => {
+          try {
+            if (isRoundCompleteEvent(event)) {
+              const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
+              const currentRoundCount = isReplacingRound
+                ? conversation.rounds.length
+                : (conversation.rounds?.length ?? 0) + 1;
+
+              // metering
+              meteringService
+                .reportExecution({
+                  conversationId: effectiveConversationId,
+                  executionId: execution.executionId,
+                  roundCount: currentRoundCount,
+                  agentId,
+                  round: event.data.round,
+                  modelProvider: connectorProvider,
+                })
+                .catch((err) => {
+                  logger.warn(`Failed to report execution metering: ${err}`);
+                });
+
+              // snapshot telemetry tracking
+              if (effectiveConversationId) {
+                trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
+              }
+
+              // EBT tracking
+              analyticsService?.reportRoundComplete({
                 conversationId: effectiveConversationId,
                 executionId: execution.executionId,
                 roundCount: currentRoundCount,
                 agentId,
                 round: event.data.round,
-                modelProvider,
-              })
-              .catch((err) => {
-                logger.warn(`Failed to report execution metering: ${err}`);
+                modelProvider: connectorProvider,
               });
-
-            // snapshot telemetry tracking
-            if (effectiveConversationId) {
-              trackingService?.trackConversationRound(effectiveConversationId, currentRoundCount);
             }
-
-            // EBT tracking
-            analyticsService?.reportRoundComplete({
-              conversationId: effectiveConversationId,
-              executionId: execution.executionId,
-              roundCount: currentRoundCount,
-              agentId,
-              round: event.data.round,
-              modelProvider,
-            });
+          } catch (error) {
+            logger.error(`Failed to report round complete telemetry: ${error}`);
           }
-        } catch (error) {
-          logger.error(`Failed to report round complete telemetry: ${error}`);
-        }
-      }),
-      convertErrors({
-        agentId,
-        logger,
-        analyticsService,
-        trackingService,
-        modelProvider,
-        conversationId: effectiveConversationId,
-        executionId: execution.executionId,
-      })
-    )
+        }),
+        convertErrors({
+          agentId,
+          logger,
+          analyticsService,
+          trackingService,
+          modelProvider: connectorProvider,
+          conversationId: effectiveConversationId,
+          executionId: execution.executionId,
+        })
+      )
   );
 };
 
@@ -320,14 +339,38 @@ export const collectAndWriteEvents = ({
 /**
  * Converts an unknown error to a {@link SerializedExecutionError} for persistence.
  * - If the error is already an AgentBuilderError, serializes it using toJSON().
- * - Otherwise, wraps it as an internalError.
+ * - Otherwise, wraps it as an internalError, preserving the HTTP status from
+ *   Boom-style errors (or any error carrying a numeric `statusCode`) in
+ *   `meta.statusCode` so the route layer can return the correct code.
  */
 export const serializeExecutionError = (error: unknown): SerializedExecutionError => {
   if (isAgentBuilderError(error)) {
     return { code: error.code as AgentBuilderErrorCode, message: error.message, meta: error.meta };
   }
   const message = error instanceof Error ? error.message : String(error);
-  return { code: AgentBuilderErrorCode.internalError, message };
+  const statusCode = getHttpStatusFromError(error);
+  return {
+    code: AgentBuilderErrorCode.internalError,
+    message,
+    ...(statusCode !== undefined ? { meta: { statusCode } } : {}),
+  };
+};
+
+const getHttpStatusFromError = (error: unknown): number | undefined => {
+  if (typeof error !== 'object' || error === null) return undefined;
+  const { output, statusCode } = error as {
+    output?: { statusCode?: unknown };
+    statusCode?: unknown;
+  };
+  const candidate =
+    typeof output?.statusCode === 'number'
+      ? output.statusCode
+      : typeof statusCode === 'number'
+      ? statusCode
+      : undefined;
+  return typeof candidate === 'number' && candidate >= 400 && candidate < 600
+    ? candidate
+    : undefined;
 };
 
 const buildPersistenceEvents = ({

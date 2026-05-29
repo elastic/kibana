@@ -9,25 +9,24 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { TaskStatus } from '@kbn/streams-schema';
 import { CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
-import type { TaskClient } from '../tasks/task_client';
-import { FEATURES_IDENTIFICATION_TASK_TYPE } from '../tasks/task_definitions/features_identification';
+import type { StreamsKIsOnboardingClient } from './onboarding_workflow_client';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 import { pollUntil } from './poll_until';
 
 export interface ContinuousKiExtractionWorkflowService {
-  ensureWorkflow(params: {
-    enabled: boolean;
-    request: KibanaRequest;
-    taskClient: TaskClient<string>;
-  }): Promise<void>;
+  ensureWorkflow(params: { enabled: boolean; request: KibanaRequest }): Promise<void>;
 }
 
-export const createContinuousKiExtractionWorkflowService = (
-  logger: Logger,
-  managementApi: WorkflowsServerPluginSetup['management']
-): ContinuousKiExtractionWorkflowService => {
+export const createContinuousKiExtractionWorkflowService = ({
+  logger,
+  managementApi,
+  streamsKIsOnboardingClient,
+}: {
+  logger: Logger;
+  managementApi: WorkflowsServerPluginSetup['management'];
+  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
+}): ContinuousKiExtractionWorkflowService => {
   const log = logger.get('continuous-ki-extraction-workflow');
 
   const getNonTerminalExecutions = async () => {
@@ -59,23 +58,6 @@ export const createContinuousKiExtractionWorkflowService = (
     );
   };
 
-  const cancelRunningTasks = async (taskClient: TaskClient<string>) => {
-    const canceledIds = await taskClient.cancelByType(FEATURES_IDENTIFICATION_TASK_TYPE);
-    if (canceledIds.length === 0) {
-      return;
-    }
-
-    log.debug(() => `Requested cancellation for ${canceledIds.length} running task(s)`);
-
-    await pollUntil(
-      () => Promise.all(canceledIds.map((id) => taskClient.get(id))),
-      (tasks) =>
-        tasks.every(
-          ({ status }) => status !== TaskStatus.InProgress && status !== TaskStatus.BeingCanceled
-        )
-    );
-  };
-
   const hardDelete = async (request: KibanaRequest) => {
     await cancelAndAwaitTermination().catch((err) =>
       log.warn(`Failed to cancel running workflow executions: ${err}`)
@@ -99,7 +81,7 @@ export const createContinuousKiExtractionWorkflowService = (
   };
 
   return {
-    async ensureWorkflow({ enabled, request, taskClient }) {
+    async ensureWorkflow({ enabled, request }) {
       const existing = await managementApi.getWorkflow(
         CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
         DEFAULT_SPACE_ID
@@ -112,9 +94,13 @@ export const createContinuousKiExtractionWorkflowService = (
       }
 
       if (existing) {
-        await cancelRunningTasks(taskClient).catch((err) =>
-          log.warn(`Failed to cancel running tasks: ${err}`)
-        );
+        try {
+          await streamsKIsOnboardingClient.cancelAllRunning({ request });
+        } catch (err) {
+          throw new Error('Cannot delete workflow: failed to cancel running onboarding workflows', {
+            cause: err,
+          });
+        }
         await hardDelete(request);
       }
 

@@ -42,7 +42,7 @@ export function registerToolsRoutes({
       access: 'public',
       summary: 'List tools',
       description:
-        'List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
+        'List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements. To learn more about Agent Builder tools, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
@@ -78,7 +78,7 @@ export function registerToolsRoutes({
       access: 'public',
       summary: 'Get a tool by id',
       description:
-        'Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
+        'Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements. To learn more about Agent Builder tools, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
@@ -121,7 +121,7 @@ export function registerToolsRoutes({
       access: 'public',
       summary: 'Create a tool',
       description:
-        'Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
+        'Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents. To learn more about Agent Builder tools, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
@@ -207,7 +207,7 @@ export function registerToolsRoutes({
       access: 'public',
       summary: 'Update a tool',
       description:
-        "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).",
+        "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata. To learn more about Agent Builder tools, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).",
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
@@ -289,7 +289,7 @@ export function registerToolsRoutes({
       access: 'public',
       summary: 'Delete a tool',
       description:
-        'Delete a tool by ID. This action cannot be undone. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
+        'Delete a tool by ID. This action cannot be undone. To learn more about Agent Builder tools, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
@@ -387,7 +387,7 @@ export function registerToolsRoutes({
       access: 'public',
       summary: 'Run a tool',
       description:
-        'Run a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
+        'Run a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more about Agent Builder tools, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,

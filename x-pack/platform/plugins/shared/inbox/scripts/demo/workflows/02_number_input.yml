@@ -1,0 +1,23 @@
+# Inbox demo workflow — number input field
+name: inbox-demo-number
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: ask_severity_score
+    type: waitForInput
+    with:
+      message: "Assign a severity score (1-10) for this incident."
+      schema:
+        type: object
+        properties:
+          severity:
+            type: number
+            title: Severity score
+            description: Integer between 1 and 10
+        required:
+          - severity
+  - name: log_score
+    type: console
+    with:
+      message: "Severity = {{ steps.ask_severity_score.output.severity }}"

@@ -146,7 +146,7 @@ export const useActions = ({
           execute: async () => {
             inspectActionProps.handleInspectClick();
           },
-          disabled: inspectActionProps.isInspectButtonDisabled,
+          isDisabled: () => inspectActionProps.isInspectButtonDisabled,
           isCompatible: async () => withActions.includes(VisualizationContextMenuActions.inspect),
         }),
         createAction({
@@ -155,7 +155,7 @@ export const useActions = ({
             onAddToNewCaseClicked();
             topValuesPopover.closePopover();
           },
-          disabled: isAddToNewCaseDisabled,
+          isDisabled: () => isAddToNewCaseDisabled,
           isCompatible: async () =>
             withActions.includes(VisualizationContextMenuActions.addToNewCase),
         }),
@@ -164,7 +164,7 @@ export const useActions = ({
           execute: async () => {
             onAddToExistingCaseClicked();
           },
-          disabled: isAddToExistingCaseDisabled,
+          isDisabled: () => isAddToExistingCaseDisabled,
           isCompatible: async () =>
             withActions.includes(VisualizationContextMenuActions.addToExistingCase),
           order: 2,
@@ -174,7 +174,7 @@ export const useActions = ({
           execute: async () => {
             openSaveVisualizationFlyout();
           },
-          disabled: disableVisualizations,
+          isDisabled: () => disableVisualizations,
           isCompatible: async () =>
             withActions.includes(VisualizationContextMenuActions.saveToLibrary),
           order: 1,

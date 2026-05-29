@@ -325,7 +325,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                message: `error validating action params: ✖ Invalid input\n  → at subAction`,
+                message: `error validating action params: ✖ Invalid discriminator value. Expected 'pushToService'\n  → at subAction`,
                 errorSource: TaskErrorSource.USER,
               });
             });

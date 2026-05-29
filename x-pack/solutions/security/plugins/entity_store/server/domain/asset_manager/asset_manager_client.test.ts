@@ -14,6 +14,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AssetManagerClient } from './asset_manager_client';
+import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../saved_objects/global_state/constants';
 import {
   installSharedElasticsearchAssets,
   installIndicesAndDataStreams,
@@ -131,6 +132,9 @@ describe('AssetManagerClient', () => {
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+      ccsLogExtractionStateClient: {
+        delete: jest.fn().mockResolvedValue(undefined),
+      } as unknown as import('../saved_objects/ccs_log_extraction_state').CcsLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -160,5 +164,173 @@ describe('AssetManagerClient', () => {
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host');
     expect(mockInstallIndicesAndDataStreams).not.toHaveBeenCalled();
     expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+  });
+
+  describe('getPrivileges', () => {
+    let checkPrivilegesWithRequestMock: jest.Mock;
+    let getLocalIndexPatternsMock: jest.Mock;
+    let getPrivilegesClient: AssetManagerClient;
+
+    beforeEach(() => {
+      checkPrivilegesWithRequestMock = jest.fn().mockResolvedValue({});
+      getLocalIndexPatternsMock = jest.fn();
+
+      getPrivilegesClient = new AssetManagerClient({
+        logger: loggerMock.create(),
+        esClient: {} as jest.Mocked<ElasticsearchClient>,
+        taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+        engineDescriptorClient:
+          mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
+        globalStateClient:
+          mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+        ccsLogExtractionStateClient: {
+          delete: jest.fn().mockResolvedValue(undefined),
+        } as unknown as import('../saved_objects/ccs_log_extraction_state').CcsLogExtractionStateClient,
+        namespace,
+        isServerless: false,
+        logsExtractionClient: {
+          getLocalIndexPatterns: getLocalIndexPatternsMock,
+        } as unknown as import('../logs_extraction').LogsExtractionClient,
+        security: {
+          authz: {
+            checkPrivilegesDynamicallyWithRequest: jest
+              .fn()
+              .mockReturnValue(checkPrivilegesWithRequestMock),
+            actions: {
+              savedObject: {
+                get: jest.fn().mockReturnValue('some-kibana-privilege'),
+              },
+            },
+          },
+        } as unknown as SecurityPluginStart,
+        analytics: {
+          reportEvent: jest.fn(),
+        } as unknown as import('../../telemetry/events').TelemetryReporter,
+        savedObjectsClient: {} as SavedObjectsClientContract,
+      });
+    });
+
+    it('strips negative index patterns before forwarding to _has_privileges', async () => {
+      getLocalIndexPatternsMock.mockResolvedValue([
+        'logs-*',
+        '-logs-cloud_security_posture.*',
+        '.entities.entities-default',
+        '-logs-excluded-*',
+      ]);
+
+      await getPrivilegesClient.getPrivileges({} as KibanaRequest);
+
+      const [calledWith] = checkPrivilegesWithRequestMock.mock.calls[0];
+      const indexKeys = Object.keys(calledWith.elasticsearch.index);
+
+      expect(indexKeys.every((key) => !key.startsWith('-'))).toBe(true);
+      expect(indexKeys).toContain('logs-*');
+      expect(indexKeys).toContain('.entities.entities-default');
+      expect(indexKeys).not.toContain('-logs-cloud_security_posture.*');
+      expect(indexKeys).not.toContain('-logs-excluded-*');
+    });
+  });
+
+  describe('logsExtraction resolution on install', () => {
+    const existingLogsExtraction = {
+      additionalIndexPatterns: ['existing-*'],
+      fieldHistoryLength: 99,
+      lookbackPeriod: '12h',
+      delay: '5m',
+      docsLimit: 1234,
+      maxLogsPerPage: 5678,
+      timeout: '60s',
+      frequency: '2m',
+    };
+
+    it('fresh install with no params applies defaults', async () => {
+      mockGlobalStateClient.find.mockResolvedValue(undefined);
+
+      await client.init({} as KibanaRequest, ['host']);
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logsExtraction: expect.objectContaining({
+            additionalIndexPatterns: [],
+            fieldHistoryLength: 10,
+            lookbackPeriod: '3h',
+            delay: '1m',
+            frequency: '1m',
+            docsLimit: 10000,
+            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+            timeout: '59s',
+          }),
+        })
+      );
+    });
+
+    it('fresh install with params merges params with defaults', async () => {
+      mockGlobalStateClient.find.mockResolvedValue(undefined);
+
+      await client.init({} as KibanaRequest, ['host'], { delay: '2m', frequency: '1m' });
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logsExtraction: expect.objectContaining({
+            delay: '2m',
+            frequency: '1m',
+            lookbackPeriod: '3h',
+            fieldHistoryLength: 10,
+            additionalIndexPatterns: [],
+            docsLimit: 10000,
+            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+          }),
+        })
+      );
+    });
+
+    it('re-install with no params preserves existing config', async () => {
+      mockGlobalStateClient.find.mockResolvedValue({
+        historySnapshot: {},
+        logsExtraction: existingLogsExtraction,
+      });
+
+      await client.init({} as KibanaRequest, ['host']);
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({ logsExtraction: existingLogsExtraction })
+      );
+    });
+
+    it('re-install with empty params object preserves existing config', async () => {
+      mockGlobalStateClient.find.mockResolvedValue({
+        historySnapshot: {},
+        logsExtraction: existingLogsExtraction,
+      });
+
+      await client.init({} as KibanaRequest, ['host'], {});
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({ logsExtraction: existingLogsExtraction })
+      );
+    });
+
+    it('re-install with params overwrites existing config with parsed params', async () => {
+      mockGlobalStateClient.find.mockResolvedValue({
+        historySnapshot: {},
+        logsExtraction: existingLogsExtraction,
+      });
+
+      await client.init({} as KibanaRequest, ['host'], { delay: '2m' });
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logsExtraction: expect.objectContaining({
+            delay: '2m',
+            frequency: '1m',
+            lookbackPeriod: '3h',
+            fieldHistoryLength: 10,
+            additionalIndexPatterns: [],
+            docsLimit: 10000,
+            maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+          }),
+        })
+      );
+    });
   });
 });

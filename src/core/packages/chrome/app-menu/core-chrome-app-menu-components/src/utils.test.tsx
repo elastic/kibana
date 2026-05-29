@@ -15,12 +15,13 @@ import {
   getAppMenuItems,
   mapAppMenuItemToPanelItem,
   getPopoverActionItems,
+  getPopoverSwitchItems,
   getPopoverPanels,
   getIsSelectedColor,
   processStaticItems,
 } from './utils';
 import { APP_MENU_ITEM_LIMIT } from './constants';
-import type { AppMenuItemType, AppMenuPopoverItem } from './types';
+import type { AppMenuItemType, AppMenuPopoverItem, AppMenuSwitch } from './types';
 
 describe('utils', () => {
   describe('createReturnFocus', () => {
@@ -486,7 +487,40 @@ describe('utils', () => {
     });
   });
 
+  describe('getPopoverSwitchItems', () => {
+    const defaultSwitch: AppMenuSwitch = {
+      id: 'test-switch',
+      label: 'Test switch',
+      labelProps: {},
+      checked: false,
+      onChange: jest.fn(),
+    };
+
+    it('should return a separator and a switch item', () => {
+      const result = getPopoverSwitchItems({ switchConfig: defaultSwitch });
+
+      expect(result).toHaveLength(2);
+      expect(result[0].isSeparator).toBe(true);
+      expect(result[0].key).toBe('switch-separator');
+      expect(result[1].key).toBe('switch-test-switch');
+    });
+
+    it('should have a renderItem function for the switch item', () => {
+      const result = getPopoverSwitchItems({ switchConfig: defaultSwitch });
+
+      expect(result[1].renderItem).toBeDefined();
+    });
+  });
+
   describe('getPopoverPanels', () => {
+    const defaultSwitch: AppMenuSwitch = {
+      id: 'test-switch',
+      label: 'Test switch',
+      labelProps: {},
+      checked: false,
+      onChange: jest.fn(),
+    };
+
     it('should create single panel for flat items', () => {
       const items: AppMenuPopoverItem[] = [
         { id: '1', label: 'Item 1', run: jest.fn(), order: 1 },
@@ -635,7 +669,22 @@ describe('utils', () => {
       expect(mainPanel?.['data-test-subj']).toBeUndefined(); // Main panel has no test ID by default
     });
 
-    it('should append staticItems after regular items in the main panel', () => {
+    it('should not show a separator when only static items are present', () => {
+      const items: AppMenuPopoverItem[] = [];
+      const staticItems: AppMenuPopoverItem[] = [
+        { id: 'static1', label: 'Static 1', run: jest.fn(), order: 1 },
+        { id: 'static2', label: 'Static 2', run: jest.fn(), order: 2 },
+      ];
+
+      const panels = getPopoverPanels({ items, staticItems });
+
+      expect(panels).toHaveLength(1);
+      const panelItems = panels[0].items as Array<{ key?: string; isSeparator?: boolean }>;
+      expect(panelItems[0].isSeparator).not.toBe(true);
+      expect(panelItems.map((i) => i.key)).toEqual(['static1', 'static2']);
+    });
+
+    it('should add a separator between regular and static items', () => {
       const items: AppMenuPopoverItem[] = [
         { id: '1', label: 'Item 1', run: jest.fn(), order: 2 },
         { id: '2', label: 'Item 2', run: jest.fn(), order: 1 },
@@ -647,9 +696,9 @@ describe('utils', () => {
       const panels = getPopoverPanels({ items, staticItems });
 
       expect(panels).toHaveLength(1);
-      const panelItems = panels[0].items as Array<{ key?: string }>;
-      // Regular items sorted by order: Item 2 (order 1), Item 1 (order 2), then static
-      expect(panelItems.map((i) => i.key)).toEqual(['2', '1', 'static1']);
+      const panelItems = panels[0].items as Array<{ key?: string; isSeparator?: boolean }>;
+      expect(panelItems.map((i) => i.key)).toEqual(['2', '1', 'static-items-separator', 'static1']);
+      expect(panelItems[2].isSeparator).toBe(true);
     });
 
     it('should not re-sort staticItems together with regular items', () => {
@@ -704,6 +753,37 @@ describe('utils', () => {
       const staticIndex = panelItems.findIndex((i) => i.key === 'static1');
       const actionIndex = panelItems.findIndex((i) => i.key === 'action-items');
       expect(staticIndex).toBeLessThan(actionIndex);
+    });
+
+    it('should append switch items as the very last items in the panel', () => {
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+
+      const panels = getPopoverPanels({
+        items,
+        switchConfig: defaultSwitch,
+      });
+
+      const panelItems = panels[0].items as Array<{ key?: string; isSeparator?: boolean }>;
+      const switchIndex = panelItems.findIndex((i) => i.key === 'switch-test-switch');
+      expect(switchIndex).toBe(panelItems.length - 1);
+      // Separator should be right before the switch
+      expect(panelItems[switchIndex - 1].isSeparator).toBe(true);
+    });
+
+    it('should place switch after action items when both are present', () => {
+      const items: AppMenuPopoverItem[] = [{ id: '1', label: 'Item 1', run: jest.fn(), order: 1 }];
+
+      const panels = getPopoverPanels({
+        items,
+        primaryActionItem: { id: 'save', label: 'Save', run: jest.fn(), iconType: 'save' },
+        switchConfig: defaultSwitch,
+      });
+
+      const panelItems = panels[0].items as Array<{ key?: string }>;
+      const actionIndex = panelItems.findIndex((i) => i.key === 'action-items');
+      const switchIndex = panelItems.findIndex((i) => i.key === 'switch-test-switch');
+      expect(actionIndex).toBeLessThan(switchIndex);
+      expect(switchIndex).toBe(panelItems.length - 1);
     });
   });
 
@@ -789,7 +869,7 @@ describe('utils', () => {
       expect(result.every((item) => item.overflow === true)).toBe(true);
     });
 
-    it('should add separator "above" only to the first item', () => {
+    it('should not add separator to items', () => {
       const items = [
         createStaticItem({ id: 'a', order: 1 }),
         createStaticItem({ id: 'b', order: 2 }),
@@ -797,19 +877,19 @@ describe('utils', () => {
       ];
       const result = processStaticItems(items);
 
-      expect(result[0].separator).toBe('above');
+      expect(result[0].separator).toBeUndefined();
       expect(result[1].separator).toBeUndefined();
       expect(result[2].separator).toBeUndefined();
     });
 
-    it('should strip existing separator values from non-first items', () => {
+    it('should strip existing separator values from items', () => {
       const items = [
         createStaticItem({ id: 'a', order: 1, separator: 'below' }),
         createStaticItem({ id: 'b', order: 2, separator: 'above' }),
       ];
       const result = processStaticItems(items);
 
-      expect(result[0].separator).toBe('above');
+      expect(result[0].separator).toBeUndefined();
       expect(result[1].separator).toBeUndefined();
     });
 
@@ -824,7 +904,7 @@ describe('utils', () => {
       expect(result.map((item) => item.id)).toEqual(['a', 'b', 'c']);
     });
 
-    it('should add separator "above" to the first item after sorting', () => {
+    it('should not add separator to the first item after sorting', () => {
       const items = [
         createStaticItem({ id: 'c', order: 3 }),
         createStaticItem({ id: 'a', order: 1 }),
@@ -832,7 +912,7 @@ describe('utils', () => {
       const result = processStaticItems(items);
 
       expect(result[0].id).toBe('a');
-      expect(result[0].separator).toBe('above');
+      expect(result[0].separator).toBeUndefined();
     });
   });
 });

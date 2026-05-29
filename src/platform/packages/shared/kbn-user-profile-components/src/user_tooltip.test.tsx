@@ -28,7 +28,6 @@ describe('UserToolTip', () => {
           imageUrl: 'https://source.unsplash.com/64x64/?cat',
         }}
         position="top"
-        delay="regular"
       >
         <button>Toggle</button>
       </UserToolTip>

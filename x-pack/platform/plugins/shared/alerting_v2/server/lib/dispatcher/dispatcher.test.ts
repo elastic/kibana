@@ -34,7 +34,7 @@ import {
   TICK_LOOKBACK_CAP_MINUTES,
 } from './constants';
 import { DispatcherService } from './dispatcher';
-import { DispatcherPipeline } from './execution_pipeline';
+import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import {
   createAlertEpisodeSuppressionsResponse,
   createDispatchableAlertEventsResponse,
@@ -125,7 +125,7 @@ function buildDispatcherService(deps: {
     new ApplySuppressionStep(),
     new FetchRulesStep(deps.rulesSoService),
     new FetchPoliciesStep(deps.npSoService),
-    new EvaluateMatchersStep(),
+    new EvaluateMatchersStep(loggerService),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService, loggerService),
     new DispatchStep(loggerService, deps.workflowsManagement),
@@ -973,6 +973,53 @@ describe('DispatcherService', () => {
           error: expect.objectContaining({ type: 'dispatcher:pipeline' }),
         })
       );
+    });
+
+  describe('executionUuid', () => {
+    function buildMockPipeline(): jest.Mocked<DispatcherPipelineContract> {
+      return {
+        execute: jest.fn().mockResolvedValue({
+          completed: true,
+          haltReason: undefined,
+          stageTimings: [],
+          finalState: {
+            input: {
+              startedAt: new Date(),
+              previousStartedAt: new Date(),
+              executionUuid: 'unused-in-result',
+            },
+          },
+        }),
+      };
+    }
+
+    it('passes a UUID v4 to the pipeline on each run', async () => {
+      const { loggerService } = createLoggerService();
+      const mockPipeline = buildMockPipeline();
+      const service = new DispatcherService(mockPipeline, loggerService);
+
+      await service.run({ previousStartedAt: new Date() });
+
+      expect(mockPipeline.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          executionUuid: expect.stringMatching(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+          ),
+        })
+      );
+    });
+
+    it('generates a fresh UUID on every run', async () => {
+      const { loggerService } = createLoggerService();
+      const mockPipeline = buildMockPipeline();
+      const service = new DispatcherService(mockPipeline, loggerService);
+
+      await service.run({ previousStartedAt: new Date() });
+      await service.run({ previousStartedAt: new Date() });
+
+      const [firstCall] = mockPipeline.execute.mock.calls[0];
+      const [secondCall] = mockPipeline.execute.mock.calls[1];
+      expect(firstCall.executionUuid).not.toBe(secondCall.executionUuid);
     });
   });
 });

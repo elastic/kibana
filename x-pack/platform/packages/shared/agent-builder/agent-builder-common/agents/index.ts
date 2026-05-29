@@ -21,8 +21,26 @@ export {
   isAgentOwner,
   canChangeAgentVisibility,
   hasAgentReadAccess,
+  hasAgentUseAccess,
   hasAgentWriteAccess,
+  canDeleteAgent,
+  canManageAgentAcl,
+  getEffectiveAgentRole,
+  type EffectiveAgentRole,
+  type AgentAuthzArgs,
 } from './access_control';
+export {
+  AgentAclRole,
+  AGENT_ACL_MAX_ENTRIES,
+  AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH,
+  isAgentAclRole,
+  aclRoleMeets,
+  maxAclRole,
+  getEmptyAgentAcl,
+  type AgentAcl,
+  type AgentAclEntry,
+  type AgentAclPrincipalType,
+} from './acl';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export {
   type AgentCapabilities,
@@ -32,6 +50,12 @@ export {
 export { AgentExecutionErrorCode } from './execution_errors';
 export { AgentExecutionMode, SubagentExecutionMode } from './execution_mode';
 export { ExecutionStatus, type SerializedExecutionError } from './execution_status';
+export type {
+  AgentListOptions,
+  AgentCreateRequest,
+  AgentUpdateRequest,
+  AgentDeleteRequest,
+} from './crud';
 export {
   type ConfirmPromptColor,
   type ConfirmPromptDefinition,

@@ -19,6 +19,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { SplunkResourceType } from './vendor/common/splunk.gen';
 import { QradarResourceType } from './vendor/common/qradar.gen';
+import { SentinelResourceType } from './vendor/common/sentinel.gen';
 
 /**
  * The GenAI connector id to use.
@@ -61,7 +62,9 @@ export type LangSmithEvaluationOptions = z.infer<typeof LangSmithEvaluationOptio
 /**
  * The vendor identifier.
  */
-export const SiemMigrationVendor = lazySchema(() => z.enum(['splunk', 'qradar']));
+export const SiemMigrationVendor = lazySchema(() =>
+  z.enum(['splunk', 'qradar', 'microsoft-sentinel'])
+);
 export type SiemMigrationVendor = z.infer<typeof SiemMigrationVendor>;
 export type SiemMigrationVendorEnum = typeof SiemMigrationVendor.enum;
 export const SiemMigrationVendorEnum = SiemMigrationVendor.enum;
@@ -282,10 +285,13 @@ export const MigrationTaskStats = lazySchema(() =>
 );
 export type MigrationTaskStats = z.infer<typeof MigrationTaskStats>;
 
-export const SiemMigrationResourceType = lazySchema(() =>
-  z.union([SplunkResourceType, QradarResourceType])
+export const SiemMigrationResourceTypeInternal = lazySchema(() =>
+  z.union([SplunkResourceType, QradarResourceType, SentinelResourceType])
 );
-export type SiemMigrationResourceType = z.infer<typeof SiemMigrationResourceType>;
+
+export type SiemMigrationResourceType = z.infer<typeof SiemMigrationResourceTypeInternal>;
+export const SiemMigrationResourceType =
+  SiemMigrationResourceTypeInternal as z.ZodType<SiemMigrationResourceType>;
 
 /**
  * A resource of a migration

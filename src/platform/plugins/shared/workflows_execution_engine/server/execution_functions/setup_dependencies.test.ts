@@ -59,6 +59,9 @@ describe('setupDependencies', () => {
       allowedHosts: ['*'],
     },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
+    eviction: {
+      minPayloadSize: new ByteSizeValue(10 * 1024),
+    },
     collectQueueMetrics: false,
   };
 
@@ -199,6 +202,35 @@ describe('setupDependencies', () => {
         timeout: '6h',
       });
     });
+  });
+
+  it('throws when the workflow execution document is missing', async () => {
+    const mockFakeRequest = { headers: {} } as KibanaRequest;
+    mockWorkflowExecutionRepository.getWorkflowExecutionById = jest.fn().mockResolvedValue(null);
+
+    const mockScopedClient = {
+      search: jest.fn(),
+      index: jest.fn(),
+    } as unknown as ElasticsearchClient;
+    mockDependencies.coreStart.elasticsearch.client.asScoped = jest.fn().mockReturnValue({
+      asCurrentUser: mockScopedClient,
+    });
+
+    await expect(
+      setupDependencies(
+        workflowRunId,
+        spaceId,
+        mockLogger,
+        mockConfig,
+        mockDependencies,
+        mockFakeRequest
+      )
+    ).rejects.toThrow(`Workflow execution with ID ${workflowRunId} not found`);
+
+    expect(mockWorkflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+      workflowRunId,
+      spaceId
+    );
   });
 
   describe('workflowsExtensions', () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
@@ -161,7 +162,10 @@ describe('entity_explore_navigation', () => {
     });
   });
 
-  describe('search session clearing on cross-app navigation', () => {
+  describe('navigation helpers', () => {
+    const EA_HOME_PATH = '/app/security/entity_analytics_home_page';
+    const OTHER_PATH = '/app/security/alerts';
+
     const buildApplicationMock = (): jest.Mocked<ApplicationStart> =>
       ({
         navigateToApp: jest.fn(),
@@ -169,6 +173,23 @@ describe('entity_explore_navigation', () => {
 
     const buildSearchSessionMock = (): jest.Mocked<Pick<ISessionService, 'clear'>> => ({
       clear: jest.fn(),
+    });
+
+    const buildChromeMock = (sidebarAppId: string | null = 'agentBuilder') =>
+      ({
+        sidebar: { getCurrentAppId: () => sidebarAppId },
+      } as never);
+
+    const buildAgentBuilderNavigationMock = (): jest.Mocked<
+      Pick<AgentBuilderPluginStart, 'toggleChat' | 'openChat'>
+    > => ({
+      toggleChat: jest.fn(),
+      openChat: jest.fn(),
+    });
+
+    beforeEach(() => {
+      // Reset to a non-EA path so tests that set their own pathname don't bleed into each other.
+      window.history.replaceState({}, '', OTHER_PATH);
     });
 
     describe('navigateToEntityAnalyticsWithFlyoutInApp', () => {
@@ -179,7 +200,7 @@ describe('entity_explore_navigation', () => {
         window.history.replaceState(
           {},
           '',
-          `/app/security/entity_analytics_home_page?cspq=${encodeURIComponent(
+          `${EA_HOME_PATH}?cspq=${encodeURIComponent(
             risonQuery
           )}&watchlistId=wl-123&watchlistName=VIPs&groupBy=resolution`
         );
@@ -202,7 +223,7 @@ describe('entity_explore_navigation', () => {
         expect(params.get('flyout')).toContain('right');
       });
 
-      it('clears the search session before navigateToApp is called', () => {
+      it('clears the search session before navigateToApp is called (cross-app)', () => {
         const application = buildApplicationMock();
         const searchSession = buildSearchSessionMock();
 
@@ -232,10 +253,57 @@ describe('entity_explore_navigation', () => {
         ).not.toThrow();
         expect(application.navigateToApp).toHaveBeenCalledTimes(1);
       });
+
+      describe('when already on the EA home page', () => {
+        beforeEach(() => {
+          window.history.replaceState({}, '', EA_HOME_PATH);
+        });
+
+        it('still navigates to update the flyout URL param', () => {
+          const application = buildApplicationMock();
+
+          navigateToEntityAnalyticsWithFlyoutInApp({
+            application,
+            appId: 'securitySolutionUI',
+            flyout: { right: { id: 'host-panel', params: { hostName: 'web-01' } } },
+          });
+
+          expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+        });
+
+        it('does not close the sidebar', () => {
+          const application = buildApplicationMock();
+          const agentBuilder = buildAgentBuilderNavigationMock();
+
+          navigateToEntityAnalyticsWithFlyoutInApp({
+            application,
+            appId: 'securitySolutionUI',
+            flyout: { right: { id: 'host-panel', params: { hostName: 'web-01' } } },
+            agentBuilder: agentBuilder as unknown as AgentBuilderPluginStart,
+            chrome: buildChromeMock(),
+          });
+
+          expect(agentBuilder.toggleChat).not.toHaveBeenCalled();
+        });
+
+        it('does not clear the search session', () => {
+          const application = buildApplicationMock();
+          const searchSession = buildSearchSessionMock();
+
+          navigateToEntityAnalyticsWithFlyoutInApp({
+            application,
+            appId: 'securitySolutionUI',
+            flyout: { right: { id: 'host-panel', params: { hostName: 'web-01' } } },
+            searchSession: searchSession as unknown as ISessionService,
+          });
+
+          expect(searchSession.clear).not.toHaveBeenCalled();
+        });
+      });
     });
 
     describe('navigateToEntityAnalyticsHomePageInApp', () => {
-      it('clears the search session before navigateToApp is called', () => {
+      it('clears the search session before navigateToApp is called (cross-app)', () => {
         const application = buildApplicationMock();
         const searchSession = buildSearchSessionMock();
 
@@ -262,6 +330,102 @@ describe('entity_explore_navigation', () => {
           })
         ).not.toThrow();
         expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+      });
+
+      describe('fallback when openSidebarConversation is not provided', () => {
+        const AGENT_BUILDER_AGENT_ID_KEY = 'agentBuilder.agentId';
+
+        beforeEach(() => {
+          window.localStorage.removeItem(AGENT_BUILDER_AGENT_ID_KEY);
+        });
+
+        afterEach(() => {
+          jest.useRealTimers();
+        });
+
+        it('opens chat via agentBuilder.openChat with sessionTag: security and the stored agentId', () => {
+          jest.useFakeTimers();
+          const application = buildApplicationMock();
+          const agentBuilder = buildAgentBuilderNavigationMock();
+          const storedAgentId = 'my-agent';
+          window.localStorage.setItem(AGENT_BUILDER_AGENT_ID_KEY, JSON.stringify(storedAgentId));
+
+          navigateToEntityAnalyticsHomePageInApp({
+            application,
+            appId: 'securitySolutionUI',
+            agentBuilder: agentBuilder as unknown as AgentBuilderPluginStart,
+          });
+
+          jest.runAllTimers();
+
+          expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+          expect(agentBuilder.openChat).toHaveBeenCalledWith({
+            sessionTag: 'security',
+            newConversation: false,
+            agentId: storedAgentId,
+          });
+        });
+      });
+
+      describe('when already on the EA home page', () => {
+        beforeEach(() => {
+          window.history.replaceState({}, '', EA_HOME_PATH);
+        });
+
+        it('skips navigation entirely when no watchlist params are needed', () => {
+          const application = buildApplicationMock();
+
+          navigateToEntityAnalyticsHomePageInApp({
+            application,
+            appId: 'securitySolutionUI',
+          });
+
+          expect(application.navigateToApp).not.toHaveBeenCalled();
+        });
+
+        it('does not close the sidebar when no watchlist params are needed', () => {
+          const application = buildApplicationMock();
+          const agentBuilder = buildAgentBuilderNavigationMock();
+
+          navigateToEntityAnalyticsHomePageInApp({
+            application,
+            appId: 'securitySolutionUI',
+            agentBuilder: agentBuilder as unknown as AgentBuilderPluginStart,
+            chrome: buildChromeMock(),
+          });
+
+          expect(agentBuilder.toggleChat).not.toHaveBeenCalled();
+        });
+
+        it('still navigates when watchlist params are provided', () => {
+          const application = buildApplicationMock();
+
+          navigateToEntityAnalyticsHomePageInApp({
+            application,
+            appId: 'securitySolutionUI',
+            watchlistId: 'wl-1',
+            watchlistName: 'VIPs',
+          });
+
+          expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+          const [, options] = application.navigateToApp.mock.calls[0];
+          expect((options as { path?: string }).path).toContain('watchlistId=wl-1');
+        });
+
+        it('does not close the sidebar even when navigating for watchlist params', () => {
+          const application = buildApplicationMock();
+          const agentBuilder = buildAgentBuilderNavigationMock();
+
+          navigateToEntityAnalyticsHomePageInApp({
+            application,
+            appId: 'securitySolutionUI',
+            watchlistId: 'wl-1',
+            agentBuilder: agentBuilder as unknown as AgentBuilderPluginStart,
+            chrome: buildChromeMock(),
+          });
+
+          expect(agentBuilder.toggleChat).not.toHaveBeenCalled();
+        });
       });
     });
   });

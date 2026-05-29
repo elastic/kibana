@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
@@ -15,6 +17,7 @@ import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { inventoryTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
+import { InventoryHeaderContent } from './components/header_content';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { WaffleTimeProvider } from './hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
@@ -43,8 +46,17 @@ export const SnapshotPage = () => {
                   onboardingFlow={OnboardingFlow.Infra}
                   dataSourceAvailability="all"
                   pageHeader={{
-                    pageTitle: inventoryTitle,
-                    rightSideItems: [<SavedViews />],
+                    pageTitle: (
+                      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                        <EuiFlexItem grow={false}>{inventoryTitle}</EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <SavedViews />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ),
+                    rightSideItems: [],
+                    color: 'subdued' as unknown as EuiPageHeaderProps['color'],
+                    children: <InventoryHeaderContent />,
                   }}
                   pageSectionProps={{
                     contentProps: {

@@ -95,6 +95,37 @@ describe('ESQL routes', () => {
     });
   });
 
+  it('can load ES|QL datasets (GET /internal/esql/datasets)', async () => {
+    const url = '/internal/esql/datasets';
+    const result = await testbed.GET(url).send().expect(200);
+
+    expect(result.body).toHaveProperty('datasets');
+    expect(Array.isArray(result.body.datasets)).toBe(true);
+    result.body.datasets.forEach(
+      (dataset: {
+        name: string;
+        data_source: string;
+        resource: string;
+        description?: string;
+        settings?: Record<string, unknown>;
+      }) => {
+        expect(dataset).toHaveProperty('name');
+        expect(dataset).toHaveProperty('data_source');
+        expect(dataset).toHaveProperty('resource');
+        expect(typeof dataset.name).toBe('string');
+        expect(typeof dataset.data_source).toBe('string');
+        expect(typeof dataset.resource).toBe('string');
+        if (dataset.description !== undefined) {
+          expect(typeof dataset.description).toBe('string');
+        }
+        if (dataset.settings !== undefined) {
+          expect(typeof dataset.settings).toBe('object');
+          expect(Array.isArray(dataset.settings)).toBe(false);
+        }
+      }
+    );
+  });
+
   it('can load the inference endpoints by type', async () => {
     const url = '/internal/esql/autocomplete/inference_endpoints/rerank';
     const result = await testbed.GET(url).send().expect(200);

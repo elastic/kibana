@@ -144,6 +144,16 @@ function getEnvironmentOptions(environments: string[]) {
 const DEFAULT_RANGE_FROM = 'now-15m';
 const DEFAULT_RANGE_TO = 'now';
 
+/** Flex shell so header/body/footer lay out inside Core flyouts without changing `OverlayMountWrapper`. */
+const serviceMapFlyoutShellStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  flex: '1 1 0%',
+  minHeight: 0,
+  height: '100%',
+  overflow: 'hidden',
+};
+
 function getTimeRange(timeRange?: Partial<TimeRange>) {
   const rangeFrom = timeRange?.from ?? DEFAULT_RANGE_FROM;
   const rangeTo = timeRange?.to ?? DEFAULT_RANGE_TO;
@@ -229,6 +239,15 @@ export function ServiceMapEditorFlyout({
     setSelectedEnvironmentOption([ENVIRONMENT_ALL]);
   };
 
+  const onServiceNameCreateOption = (searchValue: string) => {
+    const value = searchValue.trim();
+    if (!value) {
+      return;
+    }
+
+    onServiceNameSelect([{ value, label: value }]);
+  };
+
   const onEnvironmentSelect = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     if (changedOptions.length === 1 && changedOptions[0].value) {
       setEnvironment(changedOptions[0].value as Environment);
@@ -246,7 +265,7 @@ export function ServiceMapEditorFlyout({
   }, [environment, kuery, serviceName, onSave]);
 
   return (
-    <>
+    <div style={serviceMapFlyoutShellStyle}>
       <EuiFlyoutHeader hasBorder data-test-subj="apmServiceMapEditorFlyout">
         <EuiTitle size="s">
           <h2 id={ariaLabelledBy}>
@@ -264,7 +283,7 @@ export function ServiceMapEditorFlyout({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody style={{ flex: '1 1 auto', minHeight: 0 }}>
         <EuiForm fullWidth>
           <EuiFormRow
             label={i18n.translate('xpack.apm.serviceMapEditor.serviceNameLabel', {
@@ -279,7 +298,9 @@ export function ServiceMapEditorFlyout({
             <EuiComboBox
               aria-label={i18n.translate(
                 'xpack.apm.serviceMapEditor.serviceNameComboBox.ariaLabel',
-                { defaultMessage: 'Select service name' }
+                {
+                  defaultMessage: 'Select service name',
+                }
               )}
               compressed
               fullWidth
@@ -292,9 +313,18 @@ export function ServiceMapEditorFlyout({
               options={serviceNameOptions}
               selectedOptions={selectedServiceOption}
               onChange={onServiceNameSelect}
+              onCreateOption={onServiceNameCreateOption}
               onSearchChange={onServiceNameSearchChange}
+              customOptionText={i18n.translate(
+                'xpack.apm.serviceMapEditor.serviceNameComboBox.customServiceNameFilterOptionLabel',
+                {
+                  defaultMessage: `Filter by service name '{searchValue}'`,
+                }
+              )}
               isLoading={isLoadingServiceNames}
-              data-test-subj="apmServiceMapEditorServiceNameComboBox"
+              data-test-subj={`apmServiceMapEditorServiceNameComboBox${
+                isLoadingServiceNames ? 'Loading' : ''
+              }`}
             />
           </EuiFormRow>
 
@@ -307,7 +337,9 @@ export function ServiceMapEditorFlyout({
             <EuiComboBox
               aria-label={i18n.translate(
                 'xpack.apm.serviceMapEditor.environmentComboBox.ariaLabel',
-                { defaultMessage: 'Select environment' }
+                {
+                  defaultMessage: 'Select environment',
+                }
               )}
               compressed
               fullWidth
@@ -322,7 +354,9 @@ export function ServiceMapEditorFlyout({
               onChange={onEnvironmentSelect}
               onSearchChange={onEnvironmentSearchChange}
               isLoading={isLoadingEnvironments}
-              data-test-subj="apmServiceMapEditorEnvironmentComboBox"
+              data-test-subj={`apmServiceMapEditorEnvironmentComboBox${
+                isLoadingEnvironments ? 'Loading' : ''
+              }`}
             />
           </EuiFormRow>
 
@@ -368,6 +402,6 @@ export function ServiceMapEditorFlyout({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </>
+    </div>
   );
 }

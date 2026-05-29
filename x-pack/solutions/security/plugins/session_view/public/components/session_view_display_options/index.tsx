@@ -9,6 +9,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiToolTip,
+  type EuiToolTipRef,
   EuiPopover,
   EuiSelectable,
   EuiPopoverTitle,
@@ -55,16 +56,16 @@ export const SessionViewDisplayOptions = ({
 }) => {
   const [isOptionDropdownOpen, setOptionDropdownOpen] = useState(false);
   const styles = useStyles();
-  const tooltipRef = useRef(null);
+  const tooltipRef = useRef<EuiToolTipRef>(null);
 
   useEffect(() => {
     if (tooltipRef.current) {
       setTimeout(() => {
         if (tooltipRef.current) {
-          (tooltipRef.current as EuiToolTip).onFocus();
+          tooltipRef.current.showToolTip();
           setTimeout(() => {
             if (tooltipRef.current) {
-              (tooltipRef.current as EuiToolTip).onBlur();
+              tooltipRef.current.hideToolTip();
             }
           }, TOOLTIP_HIDE_DELAY);
         }

@@ -11,6 +11,8 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ExternalServices } from './context/external_services';
+
 interface ChartSectionActions {
   openInNewTab?: (params: {
     query?: Query | AggregateQuery;
@@ -35,6 +37,11 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * Optional callback used to push toolbar breakdown selections back to Discover app state.
    */
   onBreakdownFieldChange?: (fieldName?: string) => void;
+  /**
+   * Optional external services injected by the host (e.g. Discover) to enable
+   * cross-plugin features such as the Streams flyout field section and ErrorCallout.
+   */
+  externalServices?: ExternalServices;
 }
 
 export interface Dimension {
@@ -60,7 +67,7 @@ export type NullableMetricUnit = MetricUnit | null;
 
 export interface MetricsESQLResponse {
   metric_name: string;
-  data_stream: string[] | string;
+  index_name: string[] | string;
   unit: MetricUnit[] | null;
   metric_type: MappingTimeSeriesMetricType[] | MappingTimeSeriesMetricType;
   field_type: ES_FIELD_TYPES[] | ES_FIELD_TYPES;
@@ -69,7 +76,7 @@ export interface MetricsESQLResponse {
 
 export interface ParsedMetricItem {
   metricName: string;
-  dataStream: string;
+  indexName: string;
   readonly units: NullableMetricUnit[];
   readonly metricTypes: MappingTimeSeriesMetricType[];
   readonly fieldTypes: ES_FIELD_TYPES[];
@@ -82,9 +89,10 @@ export interface MetricsTelemetry {
   metrics_by_type: Partial<Record<MappingTimeSeriesMetricType, number>>;
   units: Partial<Record<TelemetryUnitKey, number>>;
   multi_value_counts: {
-    data_streams: number;
+    index_names: number;
     field_types: number;
     metric_types: number;
+    units: number;
   };
 }
 
@@ -104,7 +112,7 @@ export interface ParsedMetricsWithTelemetry extends ParsedMetrics {
 }
 
 export interface Metric {
-  readonly dataStreams: string[];
+  readonly indexNames: string[];
   readonly units: NullableMetricUnit[];
   readonly metricTypes: MappingTimeSeriesMetricType[];
   readonly fieldTypes: ES_FIELD_TYPES[];

@@ -70,19 +70,23 @@ async function validateAst(
 
   const rootCommands = parsingResult.ast.commands;
 
-  const [sources, availablePolicies, joinIndices, timeSeriesSources, views] = await Promise.all([
-    shouldValidateCallback(callbacks, 'getSources')
-      ? retrieveSources(rootCommands, callbacks)
-      : new Set<string>(),
-    shouldValidateCallback(callbacks, 'getPolicies')
-      ? retrievePolicies(rootCommands, callbacks)
-      : new Map(),
-    shouldValidateCallback(callbacks, 'getJoinIndices') ? callbacks?.getJoinIndices?.() : undefined,
-    shouldValidateCallback(callbacks, 'getTimeseriesIndices')
-      ? callbacks?.getTimeseriesIndices?.()
-      : undefined,
-    shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
-  ]);
+  const [sources, availablePolicies, joinIndices, timeSeriesSources, views, datasets] =
+    await Promise.all([
+      shouldValidateCallback(callbacks, 'getSources')
+        ? retrieveSources(rootCommands, callbacks)
+        : new Set<string>(),
+      shouldValidateCallback(callbacks, 'getPolicies')
+        ? retrievePolicies(rootCommands, callbacks)
+        : new Map(),
+      shouldValidateCallback(callbacks, 'getJoinIndices')
+        ? callbacks?.getJoinIndices?.()
+        : undefined,
+      shouldValidateCallback(callbacks, 'getTimeseriesIndices')
+        ? callbacks?.getTimeseriesIndices?.()
+        : undefined,
+      shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
+      shouldValidateCallback(callbacks, 'getDatasets') ? callbacks?.getDatasets?.() : undefined,
+    ]);
 
   const sourceQuery = queryString.split('|')[0];
   const sourceFields = shouldValidateCallback(callbacks, 'getColumnsFor')
@@ -104,7 +108,9 @@ async function validateAst(
   }
 
   const license = await callbacks?.getLicense?.();
-  const hasMinimumLicenseRequired = license?.hasAtLeast;
+  const hasMinimumLicenseRequired = license
+    ? (minimumLicenseRequired: LicenseType) => license.hasAtLeast(minimumLicenseRequired)
+    : undefined;
 
   // Validate the header commands
   for (const command of headerCommands) {
@@ -116,6 +122,7 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
       views: views?.views ?? [],
+      datasets: datasets?.datasets ?? [],
     };
 
     const commandMessages = validateCommand(command, references, rootCommands, {
@@ -159,6 +166,7 @@ async function validateAst(
       joinIndices: joinIndices?.indices || [],
       timeSeriesSources: timeSeriesSources?.indices,
       views: views?.views ?? [],
+      datasets: datasets?.datasets ?? [],
     };
 
     const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
@@ -240,6 +248,7 @@ function validateCommand(
     joinSources: references.joinIndices,
     timeSeriesSources: references.timeSeriesSources,
     views: references.views,
+    datasets: references.datasets,
     unmappedFieldsStrategy,
   };
 

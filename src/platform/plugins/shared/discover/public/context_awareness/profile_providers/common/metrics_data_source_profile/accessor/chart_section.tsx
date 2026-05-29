@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
 import {
@@ -16,6 +16,7 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
+import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
@@ -30,12 +31,24 @@ const MetricsExperienceGridWrapper = (
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
+  const { discoverShared, dataViews, notifications, docLinks, logger } = useDiscoverServices();
 
   const onBreakdownFieldChange = useCallback(
     (nextBreakdownField?: string) => {
       dispatch(updateAppState({ appState: { breakdownField: nextBreakdownField } }));
     },
     [dispatch, updateAppState]
+  );
+
+  const externalServices = useMemo(
+    () => ({
+      discoverShared,
+      dataViews,
+      notifications,
+      docLinks,
+      logger: logger.get(METRICS_DATA_SOURCE_PROFILE_ID),
+    }),
+    [discoverShared, dataViews, notifications, docLinks, logger]
   );
 
   return (
@@ -45,6 +58,7 @@ const MetricsExperienceGridWrapper = (
       profileId={METRICS_DATA_SOURCE_PROFILE_ID}
       breakdownField={breakdownField}
       onBreakdownFieldChange={onBreakdownFieldChange}
+      externalServices={externalServices}
     />
   );
 };

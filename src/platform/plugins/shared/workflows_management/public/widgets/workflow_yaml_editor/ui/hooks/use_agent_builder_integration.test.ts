@@ -9,8 +9,8 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { useAgentBuilderIntegration } from './use_agent_builder_integration';
-import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '../../../../../common/agent_builder/constants';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 const mockDispatch = jest.fn();

@@ -37,6 +37,7 @@ import { resetSLORoute } from './reset_slo';
 import { repairSLORoute } from './repair_slo';
 import { fetchCompositeHistoricalSummaryRoute } from './composite_slo/fetch_composite_historical_summary';
 import { getCompositeSLOSuggestionsRoute } from './composite_slo/get_composite_slo_suggestions';
+import { postCompositeSloSummaryRefreshRoute } from './composite_slo/post_composite_slo_summary_refresh';
 import { updateCompositeSLORoute } from './composite_slo/update_composite_slo';
 import { updateSLORoute } from './update_slo';
 import { updateSloSettings } from './update_slo_settings';
@@ -50,13 +51,9 @@ import { searchSloDefinitionsRoute } from './search_slo_definitions';
 
 interface RouteRepositoryOptions {
   isServerless?: boolean;
-  isCompositeSloEnabled?: boolean;
 }
 
-export const getSloRouteRepository = ({
-  isServerless,
-  isCompositeSloEnabled,
-}: RouteRepositoryOptions = {}) => {
+export const getSloRouteRepository = ({ isServerless }: RouteRepositoryOptions = {}) => {
   return {
     ...fetchSloHealthRoute,
     ...getSloSettingsRoute,
@@ -92,13 +89,14 @@ export const getSloRouteRepository = ({
     ...findSLOTemplateTagsRoute,
     ...healthScanRoutes,
     ...searchSloDefinitionsRoute,
-    ...(isCompositeSloEnabled ? createCompositeSLORoute : {}),
-    ...(isCompositeSloEnabled ? getCompositeSLORoute : {}),
-    ...(isCompositeSloEnabled ? findCompositeSLORoute : {}),
-    ...(isCompositeSloEnabled ? updateCompositeSLORoute : {}),
-    ...(isCompositeSloEnabled ? deleteCompositeSLORoute : {}),
-    ...(isCompositeSloEnabled ? fetchCompositeHistoricalSummaryRoute : {}),
-    ...(isCompositeSloEnabled ? batchGetCompositeSLORoute : {}),
-    ...(isCompositeSloEnabled ? getCompositeSLOSuggestionsRoute : {}),
+    ...createCompositeSLORoute,
+    ...getCompositeSLORoute,
+    ...findCompositeSLORoute,
+    ...updateCompositeSLORoute,
+    ...deleteCompositeSLORoute,
+    ...fetchCompositeHistoricalSummaryRoute,
+    ...batchGetCompositeSLORoute,
+    ...getCompositeSLOSuggestionsRoute,
+    ...postCompositeSloSummaryRefreshRoute,
   };
 };

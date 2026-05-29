@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import {
   isContextLengthExceededAgentError,
   isHooksExecutionError,
@@ -16,14 +15,20 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { ContextExceededRoundError } from './context_exceeded_round_error';
 import { WorkflowError } from './workflow_error';
 import { HookError } from './hook_error';
 import { GenericRoundError } from './generic_round_error';
-import { RoundErrorThinkingPanel } from './round_error_thinking_panel';
-import { RoundSteps } from '../round_thinking/steps/round_steps';
+import { ReasoningErrorPanel } from './reasoning_error_panel';
 
-const shouldShowThinkingPanel = (error: unknown): boolean => {
+/**
+ * Returns `true` when the error should be rendered inside the generic
+ * `ReasoningErrorPanel` wrapper. Specialized error types (workflow, hook)
+ * have their own self-contained UI and skip the wrapper.
+ */
+const isReasoningError = (error: unknown): boolean => {
   return (
     !isWorkflowAbortedError(error) &&
     !isWorkflowExecutionError(error) &&
@@ -68,7 +73,6 @@ const renderErrorContent = (error: unknown): React.ReactNode => {
 
 interface RoundErrorProps {
   error: unknown;
-  errorSteps: ConversationRoundStep[];
   onRetry: () => void;
 }
 
@@ -81,7 +85,7 @@ const labels = {
   }),
 };
 
-export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRetry }) => {
+export const RoundError: React.FC<RoundErrorProps> = ({ error, onRetry }) => {
   const { euiTheme } = useEuiTheme();
 
   const errorContent = renderErrorContent(error);
@@ -93,11 +97,8 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRet
       responsive={false}
       data-test-subj="agentBuilderRoundError"
     >
-      {shouldShowThinkingPanel(error) ? (
-        <RoundErrorThinkingPanel>
-          <RoundSteps isLoading={false} steps={errorSteps} />
-          {errorContent}
-        </RoundErrorThinkingPanel>
+      {isReasoningError(error) ? (
+        <ReasoningErrorPanel>{errorContent}</ReasoningErrorPanel>
       ) : (
         errorContent
       )}
@@ -112,6 +113,11 @@ export const RoundError: React.FC<RoundErrorProps> = ({ error, errorSteps, onRet
             iconType="refresh"
             onClick={onRetry}
             aria-label={labels.retryAriaLabel}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.conversation.RETRY,
+              detail: 'conversation',
+            })}
           >
             {labels.tryAgain}
           </EuiButtonEmpty>
