@@ -42,7 +42,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
               const { insights, features, queries, _task } = runContext.taskInstance
                 .params as TaskParams<MemoryGenerationTaskParams>;
 
-              const { taskClient, inferenceClient, uiSettingsClient } =
+              const { taskClient, inferenceClient, uiSettingsClient, scopedClusterClient } =
                 await taskContext.getScopedClients({
                   request: runContext.fakeRequest,
                 });
@@ -77,7 +77,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                   {
                     inferenceClient,
                     connectorId,
-                    esClient: taskContext.getInternalEsClient(),
+                    esClient: scopedClusterClient.asCurrentUser,
                     logger: taskLogger,
                     signal: runContext.abortController.signal,
                   }
