@@ -480,7 +480,7 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object(
         meta: {
           description: 'Policy unique identifier.',
         },
-      }),
+      })
     ),
     name: schema.string({
       meta: {
