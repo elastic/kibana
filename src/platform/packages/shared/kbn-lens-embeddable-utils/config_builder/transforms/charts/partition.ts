@@ -88,7 +88,7 @@ type PartitionLensWithoutQueryAndFilters = Omit<PartitionLens, 'state'> & {
 const ACCESSOR = 'partition_value_accessor';
 
 export type AccessorType = 'group_by' | 'metric' | 'group_breakdown_by';
-export function getAccessorName(type: 'group_by' | 'metric' | 'group_breakdown_by', index: number) {
+export function getAccessorName(type: AccessorType, index: number) {
   return `${ACCESSOR}_${type}_${index}`;
 }
 
