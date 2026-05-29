@@ -110,7 +110,6 @@ export const EsAssetReferenceSchema = schema.object(
     ]),
     deferred: schema.maybe(schema.boolean()),
     version: schema.maybe(schema.string()),
-    customDataStreamOriginPath: schema.maybe(schema.string()),
     customDataStreamOriginDataset: schema.maybe(schema.string()),
     customDataStreamOriginType: schema.maybe(schema.string()),
   },

@@ -117,9 +117,7 @@ async function reinstallCustomDatasetTemplates({
   esReferences: EsAssetReference[];
 }): Promise<EsAssetReference[]> {
   const customDataStreamRefs = installedPkg.installed_es.filter(
-    (ref) =>
-      ref.type === 'index_template' &&
-      (ref.customDataStreamOriginDataset || ref.customDataStreamOriginPath)
+    (ref) => ref.type === 'index_template' && ref.customDataStreamOriginDataset
   );
 
   if (customDataStreamRefs.length === 0) return esReferences;
@@ -131,22 +129,15 @@ async function reinstallCustomDatasetTemplates({
   for (const ref of customDataStreamRefs) {
     const i = ref.id.indexOf('-');
     const dataset = i >= 0 ? ref.id.slice(i + 1) : ref.id;
-    const dataStreamType =
-      ref.customDataStreamOriginType ?? (i >= 0 ? ref.id.slice(0, i) : undefined);
-    const dedupeKey = `${dataset}:${dataStreamType}`;
+    const dedupeKey = `${dataset}:${ref.customDataStreamOriginType}`;
     if (seen.has(dedupeKey)) continue;
     seen.add(dedupeKey);
 
-    let templateDs: RegistryDataStream | undefined;
-    if (ref.customDataStreamOriginDataset) {
-      templateDs = (packageInfo.data_streams || []).find(
-        (ds) => ds.dataset === ref.customDataStreamOriginDataset && ds.type === dataStreamType
-      );
-    } else if (ref.customDataStreamOriginPath) {
-      templateDs = (packageInfo.data_streams || []).find(
-        (ds) => ds.path === ref.customDataStreamOriginPath && ds.type === dataStreamType
-      );
-    }
+    const templateDs = (packageInfo.data_streams || []).find(
+      (ds) =>
+        ds.dataset === ref.customDataStreamOriginDataset &&
+        ds.type === ref.customDataStreamOriginType
+    );
     if (templateDs) {
       customDataStreams.push({ ...templateDs, dataset });
       originInfo.set(dedupeKey, { dataset: templateDs.dataset, type: templateDs.type });
