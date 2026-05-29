@@ -202,6 +202,7 @@ const RELATIONSHIP_OBSERVATION_FIELD_PATHS = [
   'related.hosts',
   'Maintainer',
   'entity.relationships.accesses_frequently.target',
+  'entity.relationships.accesses_infrequently.target',
   'entity.relationships.communicates_with.target',
   'entity.relationships.administers.target',
   'entity.relationships.depends_on.target',

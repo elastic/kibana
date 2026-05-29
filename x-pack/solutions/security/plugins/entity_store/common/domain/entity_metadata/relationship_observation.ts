@@ -7,6 +7,7 @@
 
 export const RELATIONSHIP_KINDS = [
   'accesses_frequently',
+  'accesses_infrequently',
   'communicates_with',
   'administers',
   'depends_on',

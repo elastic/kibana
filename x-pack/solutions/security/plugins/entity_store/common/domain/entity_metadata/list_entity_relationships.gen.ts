@@ -40,6 +40,7 @@ export const ListEntityRelationshipsRequestQuery = lazySchema(() =>
     kind: z
       .enum([
         'accesses_frequently',
+        'accesses_infrequently',
         'communicates_with',
         'administers',
         'depends_on',
