@@ -14,7 +14,7 @@ import {
   createBadRequestError,
   isAgentNotFoundError,
 } from '@kbn/agent-builder-common';
-import type { WritableAgentProvider, AgentProviderFn } from '../agent_source';
+import type { GetAgentOptions, WritableAgentProvider, AgentProviderFn } from '../agent_source';
 import type { ToolsServiceStart } from '../../tools';
 import { createClient } from './client';
 import type { AgentClient } from './client';
@@ -76,9 +76,10 @@ const createPersistedProvider = async ({
       }
       return exists;
     },
-    get: async (agentId: string) => {
+    get: async (agentId: string, opts?: GetAgentOptions) => {
+      const access = opts?.access ?? 'read';
       try {
-        const definition = await client.get(agentId);
+        const definition = await client.getWithAccess(agentId, access);
         return toInternalDefinition({ definition });
       } catch (e) {
         if (agentId === agentBuilderDefaultAgentId && isAgentNotFoundError(e)) {
@@ -110,6 +111,13 @@ const createPersistedProvider = async ({
     },
     delete: (agentId: string) => {
       return client.delete({ id: agentId });
+    },
+    getAcl: async (agentId: string) => {
+      const result = await client.getAcl(agentId);
+      return { can_manage: result.canManage, acl: result.acl };
+    },
+    updateAcl: async (agentId, update) => {
+      return client.updateAcl(agentId, update);
     },
   };
 };

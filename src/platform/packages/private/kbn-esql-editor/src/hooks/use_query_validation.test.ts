@@ -65,7 +65,7 @@ const defaultParams = (
   overrides: Partial<UseQueryValidationParams> = {}
 ): UseQueryValidationParams => ({
   code: 'FROM logs',
-  codeWhenSubmitted: '',
+  lastErroredCode: undefined,
   editorRef: createMockEditorRef(),
   editorModel: createMockEditorModelRef(),
   esqlCallbacks: {} as ESQLCallbacks,
@@ -158,14 +158,14 @@ describe('useQueryValidation debounced validation', () => {
     expect(mockValidate).toHaveBeenCalledTimes(1);
   });
 
-  it('skips client side validations and shows server errors when code matches codeWhenSubmitted', async () => {
+  it('skips client side validations and shows server errors when code matches lastErroredCode', async () => {
     const serverErrors = [new Error('boom')];
 
     renderHook(() =>
       useQueryValidation(
         defaultParams({
           code: 'FROM logs',
-          codeWhenSubmitted: 'FROM logs',
+          lastErroredCode: 'FROM logs',
           serverErrors,
         })
       )

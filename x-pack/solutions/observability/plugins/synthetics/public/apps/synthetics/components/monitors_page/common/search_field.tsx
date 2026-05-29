@@ -15,11 +15,18 @@ export function SearchField() {
   const { query } = useGetUrlParams();
   const [_, updateUrlParams] = useUrlParams();
 
-  const [search, setSearch] = useState<undefined | string>('');
+  const [search, setSearch] = useState<undefined | string>(query ?? '');
+
+  // Remember the last value this component wrote to the URL so we can tell
+  // our own debounced writes apart from external updates (e.g. an Error
+  // Insights card click that rewrites the `query` param). External updates
+  // need to re-hydrate the input; our own writes do not.
+  const lastWrittenQueryRef = useRef<string | undefined>(query);
 
   useDebounce(
     () => {
       if (search !== query) {
+        lastWrittenQueryRef.current = search;
         updateUrlParams({ query: search });
       }
     },
@@ -27,15 +34,11 @@ export function SearchField() {
     [search]
   );
 
-  // Hydrate search input
-  const hasInputChangedRef = useRef(false);
   useEffect(() => {
-    if (query !== search && !hasInputChangedRef.current) {
-      setSearch(query);
+    if (query !== lastWrittenQueryRef.current) {
+      lastWrittenQueryRef.current = query;
+      setSearch(query ?? '');
     }
-
-    // Run only to sync url with input
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
   return (
@@ -45,7 +48,6 @@ export function SearchField() {
       placeholder={PLACEHOLDER_TEXT}
       value={search}
       onChange={(e) => {
-        hasInputChangedRef.current = true;
         setSearch(e.target.value ?? '');
       }}
       isClearable={true}
