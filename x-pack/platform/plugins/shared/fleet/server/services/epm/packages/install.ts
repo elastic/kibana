@@ -1360,9 +1360,9 @@ export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
   assetRefs: KibanaAssetReference[] | null,
+  spaceId: string,
   saveAsAdditionnalSpace = false,
-  append = false,
-  spaceId: string
+  append = false
 ) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',

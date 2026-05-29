@@ -1050,9 +1050,9 @@ describe('saveKibanaAssetsRefs', () => {
       soClient,
       'test-pkg',
       [{ id: 'new-template', type: 'alerting_rule_template' as any }],
+      'my-space',
       true,
-      true,
-      'my-space'
+      true
     );
 
     expect(soClient.update).toHaveBeenCalledWith(
@@ -1087,9 +1087,9 @@ describe('saveKibanaAssetsRefs', () => {
       soClient,
       'test-pkg',
       [{ id: 'existing-template', type: 'alerting_rule_template' as any }],
+      'my-space',
       true,
-      true,
-      'my-space'
+      true
     );
 
     const updateCall = soClient.update.mock.calls[0][2] as any;
@@ -1115,9 +1115,8 @@ describe('saveKibanaAssetsRefs', () => {
       soClient,
       'test-pkg',
       [{ id: 'new-dashboard', type: 'dashboard' as any }],
-      true,
-      false,
-      'my-space'
+      'my-space',
+      true
     );
 
     const updateCall = soClient.update.mock.calls[0][2] as any;
@@ -1145,9 +1144,8 @@ describe('saveKibanaAssetsRefs', () => {
       soClient,
       'test-pkg',
       [{ id: 'b-dash', type: 'dashboard' as any }],
-      true,
-      false,
-      'space-b'
+      'space-b',
+      true
     );
 
     const updateCall = soClient.update.mock.calls[0][2] as any;
@@ -1175,9 +1173,8 @@ describe('saveKibanaAssetsRefs', () => {
       soClient,
       'test-pkg',
       [{ id: 'some-dash', type: 'dashboard' as any }],
-      true,
-      false,
-      'my-space'
+      'my-space',
+      true
     );
 
     expect(soClient.update).not.toHaveBeenCalled();

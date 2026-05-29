@@ -224,14 +224,14 @@ async function pruneMisplacedAdditionalSpacesEntry({
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   installedPkg: SavedObject<Installation>;
-}): Promise<void> {
+}): Promise<SavedObject<Installation>> {
   const primarySpaceId = installedPkg.attributes.installed_kibana_space_id;
   if (!primarySpaceId) {
-    return;
+    return installedPkg;
   }
   const additionalSpaces = installedPkg.attributes.additional_spaces_installed_kibana ?? {};
   if (!(primarySpaceId in additionalSpaces)) {
-    return;
+    return installedPkg;
   }
   const pruned = omit(additionalSpaces, primarySpaceId);
   await savedObjectsClient.update<Installation>(
@@ -240,7 +240,10 @@ async function pruneMisplacedAdditionalSpacesEntry({
     { additional_spaces_installed_kibana: pruned },
     { refresh: false }
   );
-  installedPkg.attributes.additional_spaces_installed_kibana = pruned;
+  return {
+    ...installedPkg,
+    attributes: { ...installedPkg.attributes, additional_spaces_installed_kibana: pruned },
+  };
 }
 
 export async function installKibanaAssetsAndReferencesMultispace({
@@ -269,7 +272,11 @@ export async function installKibanaAssetsAndReferencesMultispace({
     : false;
 
   if (installedPkg) {
-    await pruneMisplacedAdditionalSpacesEntry({ savedObjectsClient, pkgName, installedPkg });
+    installedPkg = await pruneMisplacedAdditionalSpacesEntry({
+      savedObjectsClient,
+      pkgName,
+      installedPkg,
+    });
   }
 
   if (installedPkg && !installAsAdditionalSpace) {
@@ -377,11 +384,10 @@ export async function installKibanaAssetsAndReferences({
     savedObjectsClient,
     pkgName,
     assets,
+    spaceId,
     installedPkg && installedPkg.attributes.installed_kibana_space_id === spaceId
       ? false
-      : installAsAdditionalSpace,
-    false,
-    spaceId
+      : installAsAdditionalSpace
   );
 
   await withPackageSpan('Create and assign package tags', () =>
@@ -422,7 +428,7 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
     );
   }
   await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
-  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, true, false, spaceId);
+  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, spaceId, true);
 }
 
 const kibanaAssetTypes = Object.values(KibanaAssetType);

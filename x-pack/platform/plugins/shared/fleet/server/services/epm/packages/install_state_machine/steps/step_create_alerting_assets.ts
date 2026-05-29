@@ -207,9 +207,9 @@ export async function createInactivityMonitoringTemplate(
           savedObjectsClient,
           pkgName,
           [templateRef],
+          spaceId,
           installAsAdditionalSpace,
-          true,
-          spaceId
+          true
         );
         return templateRef;
       }
@@ -255,9 +255,9 @@ export async function createInactivityMonitoringTemplate(
         savedObjectsClient,
         pkgName,
         [templateRef],
+        spaceId,
         installAsAdditionalSpace,
-        true,
-        spaceId
+        true
       );
 
       return templateRef;
@@ -325,6 +325,6 @@ export async function stepCreateAlertingAssets(
       { concurrency: MAX_CONCURRENT_RULE_CREATION_OPERATIONS }
     );
 
-    await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, false, true, spaceId);
+    await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, spaceId, false, true);
   });
 }

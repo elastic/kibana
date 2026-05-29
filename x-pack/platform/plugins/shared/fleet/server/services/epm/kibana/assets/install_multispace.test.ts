@@ -88,7 +88,7 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
   });
 
   describe('when the requesting space is the primary (installed_kibana_space_id)', () => {
-    it('installs into the primary space with saveAsAdditionnalSpace=false', async () => {
+    it('installs into the primary space with saveAsAdditionalSpace=false', async () => {
       const installedPkg = makeInstalledPkg('default');
 
       await installKibanaAssetsAndReferencesMultispace({
@@ -98,12 +98,12 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
       });
 
       const primaryCall = mockSaveKibanaAssetsRefs.mock.calls.find(
-        ([, , , saveAsAdditional, , spaceId]) => !saveAsAdditional && spaceId === 'default'
+        ([, , , spaceId, saveAsAdditional]) => !saveAsAdditional && spaceId === 'default'
       );
       expect(primaryCall).toBeDefined();
     });
 
-    it('installs into each additional space with saveAsAdditionnalSpace=true', async () => {
+    it('installs into each additional space with saveAsAdditionalSpace=true', async () => {
       const installedPkg = makeInstalledPkg('default', ['space-a', 'space-b']);
 
       await installKibanaAssetsAndReferencesMultispace({
@@ -113,9 +113,9 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
       });
 
       const additionalCalls = mockSaveKibanaAssetsRefs.mock.calls.filter(
-        ([, , , saveAsAdditional]) => saveAsAdditional === true
+        ([, , , , saveAsAdditional]) => saveAsAdditional === true
       );
-      expect(additionalCalls.map(([, , , , , spaceId]) => spaceId)).toEqual(
+      expect(additionalCalls.map(([, , , spaceId]) => spaceId)).toEqual(
         expect.arrayContaining(['space-a', 'space-b'])
       );
     });
@@ -130,14 +130,14 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
       });
 
       const invalidCall = mockSaveKibanaAssetsRefs.mock.calls.find(
-        ([, , , saveAsAdditional, , spaceId]) => saveAsAdditional === true && spaceId === 'default'
+        ([, , , spaceId, saveAsAdditional]) => saveAsAdditional === true && spaceId === 'default'
       );
       expect(invalidCall).toBeUndefined();
     });
   });
 
   describe('when the requesting space is not the primary', () => {
-    it('installs only into the requesting space with saveAsAdditionnalSpace=true', async () => {
+    it('installs only into the requesting space with saveAsAdditionalSpace=true', async () => {
       const installedPkg = makeInstalledPkg('default');
 
       await installKibanaAssetsAndReferencesMultispace({
@@ -147,7 +147,7 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
       });
 
       expect(mockSaveKibanaAssetsRefs).toHaveBeenCalledTimes(1);
-      const [, , , saveAsAdditional, , spaceId] = mockSaveKibanaAssetsRefs.mock.calls[0];
+      const [, , , spaceId, saveAsAdditional] = mockSaveKibanaAssetsRefs.mock.calls[0];
       expect(saveAsAdditional).toBe(true);
       expect(spaceId).toBe('space-b');
     });
@@ -162,14 +162,14 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
       });
 
       const primaryOverwriteCall = mockSaveKibanaAssetsRefs.mock.calls.find(
-        ([, , , saveAsAdditional]) => saveAsAdditional === false
+        ([, , , , saveAsAdditional]) => saveAsAdditional === false
       );
       expect(primaryOverwriteCall).toBeUndefined();
     });
   });
 
   describe('when no package is installed yet (fresh install)', () => {
-    it('installs with saveAsAdditionnalSpace=false using the requesting space', async () => {
+    it('installs with saveAsAdditionalSpace=false using the requesting space', async () => {
       await installKibanaAssetsAndReferencesMultispace({
         ...baseArgs(),
         spaceId: 'default',
@@ -177,7 +177,7 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
       });
 
       expect(mockSaveKibanaAssetsRefs).toHaveBeenCalledTimes(1);
-      const [, , , saveAsAdditional, , spaceId] = mockSaveKibanaAssetsRefs.mock.calls[0];
+      const [, , , spaceId, saveAsAdditional] = mockSaveKibanaAssetsRefs.mock.calls[0];
       expect(saveAsAdditional).toBeFalsy();
       expect(spaceId).toBe('default');
     });
@@ -206,10 +206,10 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
       expect(Object.keys(updateArg)).toContain('space-b');
 
       const additionalCalls = mockSaveKibanaAssetsRefs.mock.calls.filter(
-        ([, , , saveAsAdditional]) => saveAsAdditional === true
+        ([, , , , saveAsAdditional]) => saveAsAdditional === true
       );
-      expect(additionalCalls.map(([, , , , , sid]) => sid)).toContain('space-b');
-      expect(additionalCalls.map(([, , , , , sid]) => sid)).not.toContain('default');
+      expect(additionalCalls.map(([, , , sid]) => sid)).toContain('space-b');
+      expect(additionalCalls.map(([, , , sid]) => sid)).not.toContain('default');
     });
 
     it('prunes the misplaced key when the request comes from a non-primary space', async () => {
@@ -232,7 +232,7 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
       expect(Object.keys(updateArg)).not.toContain('default');
 
       // The non-primary space is still installed as additional
-      const [, , , saveAsAdditional, , spaceId] = mockSaveKibanaAssetsRefs.mock.calls[0];
+      const [, , , spaceId, saveAsAdditional] = mockSaveKibanaAssetsRefs.mock.calls[0];
       expect(saveAsAdditional).toBe(true);
       expect(spaceId).toBe('space-b');
     });
@@ -254,7 +254,7 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
       expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
 
       expect(mockSaveKibanaAssetsRefs).toHaveBeenCalledTimes(1);
-      const [, , , saveAsAdditional] = mockSaveKibanaAssetsRefs.mock.calls[0];
+      const [, , , , saveAsAdditional] = mockSaveKibanaAssetsRefs.mock.calls[0];
       expect(saveAsAdditional).toBe(false);
     });
 

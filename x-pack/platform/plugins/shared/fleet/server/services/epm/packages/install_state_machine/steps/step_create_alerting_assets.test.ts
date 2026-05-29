@@ -234,9 +234,9 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       false,
-      true,
-      DEFAULT_SPACE_ID
+      true
     );
 
     expect(result).toEqual({
@@ -286,9 +286,9 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       false,
-      true,
-      DEFAULT_SPACE_ID
+      true
     );
     expect(result).toEqual({
       id: 'fleet-nginx-inactivity-monitoring',
@@ -349,9 +349,9 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       false,
-      true,
-      DEFAULT_SPACE_ID
+      true
     );
     expect(result).toEqual({
       id: 'fleet-nginx-inactivity-monitoring',
@@ -409,9 +409,9 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       false,
-      true,
-      DEFAULT_SPACE_ID
+      true
     );
     expect(result).toEqual({
       id: 'fleet-nginx-inactivity-monitoring',
@@ -461,9 +461,9 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      DEFAULT_SPACE_ID,
       true,
-      true,
-      DEFAULT_SPACE_ID
+      true
     );
   });
 
@@ -495,9 +495,9 @@ describe('createInactivityMonitoringTemplate', () => {
       savedObjectsClient,
       'nginx',
       [{ id: 'fleet-nginx-inactivity-monitoring-my-space', type: 'alerting_rule_template' }],
+      'my-space',
       false,
-      true,
-      'my-space'
+      true
     );
     expect(result).toEqual({
       id: 'fleet-nginx-inactivity-monitoring-my-space',
@@ -583,9 +583,9 @@ describe('stepCreateAlertingAssets', () => {
           deferred: false,
         },
       ],
+      DEFAULT_SPACE_ID,
       false,
-      true,
-      DEFAULT_SPACE_ID
+      true
     );
   });
 });

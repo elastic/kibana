@@ -107,7 +107,7 @@ export async function installKibanaAssetsWithStreaming({
   }
 
   // Update the installation saved object with installed kibana assets
-  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, false, false, spaceId);
+  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, assetRefs, spaceId);
 
   return assetRefs;
 }
