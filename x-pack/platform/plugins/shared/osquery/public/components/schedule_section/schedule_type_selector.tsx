@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiCheckableCard,
   EuiFlexGroup,
@@ -15,6 +14,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ScheduleType } from '../../../common/schedule';
+import { FULL_HEIGHT_CSS } from './checkable_card_styles';
 import {
   SCHEDULE_TYPE_INTERVAL_DESCRIPTION,
   SCHEDULE_TYPE_INTERVAL_LABEL,
@@ -22,9 +22,6 @@ import {
   SCHEDULE_TYPE_RECURRENCE_DESCRIPTION,
   SCHEDULE_TYPE_RECURRENCE_LABEL,
 } from './translations';
-
-const BOLD_LABEL_PROPS = { style: { fontWeight: 'bold' } } as const;
-const FULL_HEIGHT_CSS = css({ height: '100%' });
 
 export interface ScheduleTypeSelectorProps {
   value: ScheduleType;
@@ -36,15 +33,7 @@ export interface ScheduleTypeSelectorProps {
    */
   lockedScheduleType?: ScheduleType;
   disabled?: boolean;
-  /**
-   * Optional override for the generated id prefix. Tests pin this to keep
-   * radio ids stable across renders. In product code an auto-generated
-   * instance-scoped prefix is used (see {@link useGeneratedHtmlId}) so two
-   * ScheduleSection instances on the same page (pack form + open query
-   * flyout) don't share radio ids — a duplicate id makes `<label htmlFor>`
-   * activate the first matching radio in the document, leaking clicks
-   * across forms.
-   */
+  /** Test-only override; product code uses an instance-scoped `useGeneratedHtmlId` (see below). */
   idPrefix?: string;
 }
 
@@ -55,6 +44,8 @@ export const ScheduleTypeSelector = ({
   disabled,
   idPrefix: idPrefixProp,
 }: ScheduleTypeSelectorProps) => {
+  // Instance-scoped so a pack form + open query flyout on the same page don't
+  // share radio ids (a shared id makes `<label htmlFor>` toggle the wrong card).
   const generatedIdPrefix = useGeneratedHtmlId({ prefix: 'osquery-schedule-type' });
   const idPrefix = idPrefixProp ?? generatedIdPrefix;
   const isLocked = lockedScheduleType !== undefined;
@@ -74,18 +65,14 @@ export const ScheduleTypeSelector = ({
   const handleSelectRrule = useCallback(() => handleSelect('rrule'), [handleSelect]);
 
   return (
-    <EuiFormRow
-      helpText={isLocked ? SCHEDULE_TYPE_LOCKED_HELP : undefined}
-      fullWidth
-    >
+    <EuiFormRow helpText={isLocked ? SCHEDULE_TYPE_LOCKED_HELP : undefined} fullWidth>
       <EuiFlexGroup gutterSize="m" data-test-subj="osquery-schedule-type-selector">
         <EuiFlexItem>
           <EuiCheckableCard
             id={`${idPrefix}-interval`}
             name={idPrefix}
             css={FULL_HEIGHT_CSS}
-            label={SCHEDULE_TYPE_INTERVAL_LABEL}
-            labelProps={BOLD_LABEL_PROPS}
+            label={<strong>{SCHEDULE_TYPE_INTERVAL_LABEL}</strong>}
             checked={effectiveValue === 'interval'}
             disabled={!isInteractive}
             onChange={handleSelectInterval}
@@ -99,8 +86,7 @@ export const ScheduleTypeSelector = ({
             id={`${idPrefix}-rrule`}
             name={idPrefix}
             css={FULL_HEIGHT_CSS}
-            label={SCHEDULE_TYPE_RECURRENCE_LABEL}
-            labelProps={BOLD_LABEL_PROPS}
+            label={<strong>{SCHEDULE_TYPE_RECURRENCE_LABEL}</strong>}
             checked={effectiveValue === 'rrule'}
             disabled={!isInteractive}
             onChange={handleSelectRrule}

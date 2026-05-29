@@ -33,11 +33,6 @@ export const INTERVAL_FIELD_LABEL = i18n.translate(
   { defaultMessage: 'Intervals' }
 );
 
-export const INTERVAL_FIELD_HELP = i18n.translate(
-  'xpack.osquery.scheduleSection.intervalFieldHelp',
-  { defaultMessage: 'Run every N seconds (1 – 604,800).' }
-);
-
 export const INTERVAL_FIELD_UNIT = i18n.translate(
   'xpack.osquery.scheduleSection.intervalFieldUnit',
   { defaultMessage: 'second(s)' }
@@ -76,14 +71,6 @@ export const REPEAT_EVERY_LABEL = i18n.translate('xpack.osquery.scheduleSection.
   defaultMessage: 'Repeat every',
 });
 
-export const UNIT_MINUTES = i18n.translate('xpack.osquery.scheduleSection.unitMinutes', {
-  defaultMessage: 'Minute(s)',
-});
-
-export const UNIT_HOURS = i18n.translate('xpack.osquery.scheduleSection.unitHours', {
-  defaultMessage: 'Hour(s)',
-});
-
 export const UNIT_WEEKS = i18n.translate('xpack.osquery.scheduleSection.unitWeeks', {
   defaultMessage: 'Week(s)',
 });
@@ -112,51 +99,6 @@ export const DAY_SA = i18n.translate('xpack.osquery.scheduleSection.day.sa', {
 });
 export const DAY_SU = i18n.translate('xpack.osquery.scheduleSection.day.su', {
   defaultMessage: 'Sun',
-});
-
-export const DAY_OF_MONTH_LABEL = i18n.translate('xpack.osquery.scheduleSection.dayOfMonthLabel', {
-  defaultMessage: 'Day of month',
-});
-
-export const MONTH_LABEL = i18n.translate('xpack.osquery.scheduleSection.monthLabel', {
-  defaultMessage: 'Month',
-});
-
-export const MONTH_JAN = i18n.translate('xpack.osquery.scheduleSection.month.jan', {
-  defaultMessage: 'January',
-});
-export const MONTH_FEB = i18n.translate('xpack.osquery.scheduleSection.month.feb', {
-  defaultMessage: 'February',
-});
-export const MONTH_MAR = i18n.translate('xpack.osquery.scheduleSection.month.mar', {
-  defaultMessage: 'March',
-});
-export const MONTH_APR = i18n.translate('xpack.osquery.scheduleSection.month.apr', {
-  defaultMessage: 'April',
-});
-export const MONTH_MAY = i18n.translate('xpack.osquery.scheduleSection.month.may', {
-  defaultMessage: 'May',
-});
-export const MONTH_JUN = i18n.translate('xpack.osquery.scheduleSection.month.jun', {
-  defaultMessage: 'June',
-});
-export const MONTH_JUL = i18n.translate('xpack.osquery.scheduleSection.month.jul', {
-  defaultMessage: 'July',
-});
-export const MONTH_AUG = i18n.translate('xpack.osquery.scheduleSection.month.aug', {
-  defaultMessage: 'August',
-});
-export const MONTH_SEP = i18n.translate('xpack.osquery.scheduleSection.month.sep', {
-  defaultMessage: 'September',
-});
-export const MONTH_OCT = i18n.translate('xpack.osquery.scheduleSection.month.oct', {
-  defaultMessage: 'October',
-});
-export const MONTH_NOV = i18n.translate('xpack.osquery.scheduleSection.month.nov', {
-  defaultMessage: 'November',
-});
-export const MONTH_DEC = i18n.translate('xpack.osquery.scheduleSection.month.dec', {
-  defaultMessage: 'December',
 });
 
 export const AT_LEAST_ONE_DAY_ERROR = i18n.translate(

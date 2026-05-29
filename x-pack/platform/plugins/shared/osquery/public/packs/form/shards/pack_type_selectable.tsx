@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiCheckableCard,
   EuiFlexGroup,
@@ -15,9 +14,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-const BOLD_LABEL_PROPS = { style: { fontWeight: 'bold' } } as const;
-const FULL_HEIGHT_CSS = css({ height: '100%' });
+import { FULL_HEIGHT_CSS } from '../../../components/schedule_section/checkable_card_styles';
 
 interface PackTypeSelectableProps {
   packType: string;
@@ -45,17 +42,25 @@ const PackTypeSelectableComponent = ({
 
   return (
     <EuiFlexItem>
-      <EuiFormRow label="Type" fullWidth>
+      <EuiFormRow
+        label={i18n.translate('xpack.osquery.pack.form.typeLabel', {
+          defaultMessage: 'Type',
+        })}
+        fullWidth
+      >
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <EuiCheckableCard
               id={`${idPrefix}-policy`}
               name={idPrefix}
               css={FULL_HEIGHT_CSS}
-              label={i18n.translate('xpack.osquery.pack.form.policyLabel', {
-                defaultMessage: 'Policy',
-              })}
-              labelProps={BOLD_LABEL_PROPS}
+              label={
+                <strong>
+                  {i18n.translate('xpack.osquery.pack.form.policyLabel', {
+                    defaultMessage: 'Policy',
+                  })}
+                </strong>
+              }
               checked={packType === 'policy'}
               onChange={handleSelectPolicy}
               data-test-subj="osqueryPackTypePolicy"
@@ -70,10 +75,13 @@ const PackTypeSelectableComponent = ({
               id={`${idPrefix}-global`}
               name={idPrefix}
               css={FULL_HEIGHT_CSS}
-              label={i18n.translate('xpack.osquery.pack.form.globalLabel', {
-                defaultMessage: 'Global',
-              })}
-              labelProps={BOLD_LABEL_PROPS}
+              label={
+                <strong>
+                  {i18n.translate('xpack.osquery.pack.form.globalLabel', {
+                    defaultMessage: 'Global',
+                  })}
+                </strong>
+              }
               checked={packType === 'global'}
               onChange={handleSelectGlobal}
               data-test-subj="osqueryPackTypeGlobal"

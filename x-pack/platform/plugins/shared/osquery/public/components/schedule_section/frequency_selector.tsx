@@ -14,6 +14,7 @@ import {
   EuiFormRow,
   EuiPanel,
   EuiRadioGroup,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiCheckboxGroupOption, EuiRadioGroupOption } from '@elastic/eui';
@@ -43,24 +44,12 @@ export interface FrequencySelectorProps {
   disabled?: boolean;
   /** Validation flag — surfaces the "select at least one day" error in Custom. */
   weekdaysError?: boolean;
-  /**
-   * Optional override for the auto-generated id prefix. In product code an
-   * instance-scoped prefix from {@link useGeneratedHtmlId} is used so two
-   * ScheduleSection instances on the same page (pack form + open query
-   * flyout) don't share radio/checkbox ids — a duplicate id makes
-   * `<label htmlFor>` activate the first matching control in the document,
-   * leaking clicks across forms. Tests pin distinct prefixes to mirror that.
-   */
+  /** Test-only override; product code uses an instance-scoped `useGeneratedHtmlId` (see below). */
   idPrefix?: string;
 }
 
-// Daily + Custom (weekly) only for the initial release. Re-enable the other
-// frequencies by adding the corresponding entries here, the matching
-// FrequencyMode tokens in `./types`, and the dead JSX branches / handlers /
-// imports below. Option ids are instance-scoped (see `useGeneratedHtmlId`
-// inside the component) so multiple ScheduleSection instances on the same
-// page do not share radio ids — a duplicate id makes `<label htmlFor>`
-// activate the wrong radio.
+// Daily + Custom (weekly) only for the initial release. To re-enable the other
+// frequencies, add entries here plus the matching `FrequencyMode` tokens in `./types`.
 interface FrequencyOptionTemplate {
   suffix: string;
   label: string;
@@ -70,21 +59,6 @@ const FREQUENCY_OPTION_TEMPLATES: FrequencyOptionTemplate[] = [
   { suffix: 'daily', label: FREQUENCY_DAILY, mode: 'daily' },
   { suffix: 'custom', label: FREQUENCY_CUSTOM, mode: 'custom' },
 ];
-
-// MONTH_OPTIONS — unused until monthly/yearly are re-enabled.
-// const MONTH_OPTIONS: EuiSelectOption[] = [
-//   { value: 1, text: MONTH_JAN }, ..., { value: 12, text: MONTH_DEC },
-// ];
-
-// EUI's `EuiRadioGroup` / `EuiCheckboxGroup` apply `flex-direction: column` via
-// their own emotion `css` prop, so wrapping selectors lose the specificity tie
-// and the group renders vertically. Pass the override directly to the EUI
-// component's `css` prop so it merges last and wins.
-const HORIZONTAL_GROUP_CSS = {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-  gap: 16,
-} as const;
 
 const WEEKDAY_LABEL: Record<WeekdayStr, string> = {
   MO: DAY_MO,
@@ -114,14 +88,21 @@ export const FrequencySelector = ({
   weekdaysError,
   idPrefix,
 }: FrequencySelectorProps) => {
-  // Instance-scoped prefix so multiple ScheduleSection instances on the same
-  // page (pack form + open query flyout) don't share radio/checkbox ids — a
-  // shared `id` lets `<label htmlFor>` activate the first matching radio in
-  // the document, which leaks clicks across forms.
+  // Instance-scoped so a pack form + open query flyout on the same page don't
+  // share radio/checkbox ids (a shared id makes `<label htmlFor>` toggle the wrong one).
   const generatedIdPrefix = useGeneratedHtmlId({ prefix: 'osquery-frequency-selector' });
   const basePrefix = idPrefix ?? generatedIdPrefix;
   const frequencyIdPrefix = `${basePrefix}-option`;
   const weekdayIdPrefix = `${basePrefix}-weekday`;
+
+  // `EuiRadioGroup` / `EuiCheckboxGroup` hard-code `flex-direction: column` and
+  // expose no horizontal prop, so overriding their flex via the `css` prop is
+  // the only supported way to lay the options out in a row.
+  const { euiTheme } = useEuiTheme();
+  const horizontalGroupCss = useMemo(
+    () => ({ flexDirection: 'row', flexWrap: 'wrap', gap: euiTheme.size.base } as const),
+    [euiTheme.size.base]
+  );
 
   const frequencyOptions = useMemo<Array<EuiRadioGroupOption & { mode: FrequencyMode }>>(
     () =>
@@ -200,25 +181,6 @@ export const FrequencySelector = ({
     [onChange, tokenForWeekdayId, value]
   );
 
-  // Monthly/yearly handlers — unused until those modes are re-enabled.
-  // const handleMonthDayChange = useCallback(
-  //   (event: React.ChangeEvent<HTMLInputElement>) => {
-  //     const raw = Number(event.target.value);
-  //     const next = clampInt(raw, 1, 31, value.bymonthday);
-  //     onChange({ ...value, bymonthday: next });
-  //   },
-  //   [onChange, value]
-  // );
-  //
-  // const handleMonthChange = useCallback(
-  //   (event: React.ChangeEvent<HTMLSelectElement>) => {
-  //     const raw = Number(event.target.value);
-  //     const next = clampInt(raw, 1, 12, value.bymonth);
-  //     onChange({ ...value, bymonth: next });
-  //   },
-  //   [onChange, value]
-  // );
-
   const weekdayOptions = useMemo<EuiCheckboxGroupOption[]>(
     () =>
       WEEKDAY_TOKENS.map((token) => ({
@@ -238,26 +200,14 @@ export const FrequencySelector = ({
     return map;
   }, [value.byweekday, weekdayIdPrefix]);
 
-  const everyUnitLabel: string | null = (() => {
-    switch (value.frequency) {
-      // Minutely/hourly cases — unused until those modes are re-enabled.
-      // case 'minutely':
-      //   return UNIT_MINUTES;
-      // case 'hourly':
-      //   return UNIT_HOURS;
-      case 'custom':
-        return UNIT_WEEKS;
-      default:
-        return null;
-    }
-  })();
+  const everyUnitLabel: string | null = value.frequency === 'custom' ? UNIT_WEEKS : null;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="osquery-frequency-selector">
       <EuiFlexItem>
         <EuiFormRow label={FREQUENCY_LABEL} fullWidth>
           <EuiRadioGroup
-            css={HORIZONTAL_GROUP_CSS}
+            css={horizontalGroupCss}
             options={frequencyOptions.map(({ id, label, mode }) => ({
               id,
               label,
@@ -280,7 +230,7 @@ export const FrequencySelector = ({
               fullWidth
             >
               <EuiCheckboxGroup
-                css={HORIZONTAL_GROUP_CSS}
+                css={horizontalGroupCss}
                 options={weekdayOptions}
                 idToSelectedMap={weekdayIdToSelectedMap}
                 onChange={handleWeekdayToggle}
@@ -304,38 +254,6 @@ export const FrequencySelector = ({
           </EuiPanel>
         </EuiFlexItem>
       ) : null}
-
-      {/* Yearly month selector — unused until 'yearly' mode is re-enabled.
-      {value.frequency === 'yearly' ? (
-        <EuiFlexItem>
-          <EuiFormRow label={MONTH_LABEL} fullWidth>
-            <EuiSelect
-              options={MONTH_OPTIONS}
-              value={value.bymonth}
-              onChange={handleMonthChange}
-              disabled={disabled}
-              data-test-subj="osquery-frequency-selector-month"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      ) : null}
-
-      Monthly/yearly day-of-month selector — unused until those modes are re-enabled.
-      {value.frequency === 'monthly' || value.frequency === 'yearly' ? (
-        <EuiFlexItem>
-          <EuiFormRow label={DAY_OF_MONTH_LABEL} fullWidth>
-            <EuiFieldNumber
-              min={1}
-              max={31}
-              step={1}
-              value={value.bymonthday}
-              onChange={handleMonthDayChange}
-              disabled={disabled}
-              data-test-subj="osquery-frequency-selector-month-day"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      ) : null} */}
     </EuiFlexGroup>
   );
 };

@@ -112,8 +112,6 @@ export interface ScheduleFormData {
  */
 export const DEFAULT_INTERVAL_SECONDS = 3600;
 export const DEFAULT_RECURRENCE_INTERVAL = 1;
-export const DEFAULT_MONTH_DAY = 1;
-export const DEFAULT_MONTH = 1;
 export const DEFAULT_SPLAY_VALUE = 30;
 
 export const createDefaultRecurrence = (): RecurrenceFormState => ({
@@ -160,6 +158,4 @@ export const createDefaultScheduleFormData = (
 export const CALENDAR_ANCHORED_FREQUENCIES: ReadonlySet<FrequencyMode> = new Set([
   'daily',
   'custom',
-  // 'monthly',
-  // 'yearly',
 ]);
