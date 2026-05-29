@@ -191,6 +191,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       triggersActions: {
         pathname: '/app/management/insightsAndAlerting/triggersActions',
       },
+      rules: {
+        pathname: '/app/management/insightsAndAlerting/triggersActions',
+      },
+      rules_redirect: {
+        pathname: '/app/rules',
+      },
       maintenanceWindows: {
         pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
       },
