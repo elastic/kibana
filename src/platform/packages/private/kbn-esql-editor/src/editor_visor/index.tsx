@@ -40,6 +40,8 @@ export interface QuickSearchVisorProps {
   query: string;
   // Handling smaller space for the visor
   isSpaceReduced?: boolean;
+  // Whether the editor is rendered inline (controls placeholder length)
+  isInline?: boolean;
   // Whether the visor is visible
   isVisible: boolean;
   // Callback when the query is updated and submitted
@@ -53,8 +55,16 @@ export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlacehol
   defaultMessage: 'Filter your data using KQL',
 });
 
+const searchPlaceholderShort = i18n.translate('esqlEditor.visor.searchPlaceholderShort', {
+  defaultMessage: 'Filter using KQL',
+});
+
 const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
   defaultMessage: 'Describe the query you want in plain language',
+});
+
+const nlPlaceholderShort = i18n.translate('esqlEditor.visor.nlPlaceholderShort', {
+  defaultMessage: 'Describe in plain language',
 });
 
 const closeButtonAriaLabel = i18n.translate('esqlEditor.visor.closeButtonAriaLabel', {
@@ -68,6 +78,7 @@ const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip',
 export function QuickSearchVisor({
   query,
   isSpaceReduced,
+  isInline,
   isVisible,
   onUpdateAndSubmitQuery,
   onToggleVisor,
@@ -77,6 +88,7 @@ export function QuickSearchVisor({
   const { kql, core, data } = kibana.services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const euiThemeContext = useEuiTheme();
+  const useShortPlaceholder = useMemo(() => isInline || isSpaceReduced, [isInline, isSpaceReduced]);
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
@@ -328,7 +340,7 @@ export function QuickSearchVisor({
                       language: 'kuery',
                     }}
                     disableAutoFocus={false}
-                    placeholder={searchPlaceholder}
+                    placeholder={useShortPlaceholder ? searchPlaceholderShort : searchPlaceholder}
                     onChange={(newQuery) => {
                       onKqlValueChange(newQuery.query as string);
                     }}
@@ -349,7 +361,7 @@ export function QuickSearchVisor({
               ) : (
                 <NLInput
                   value={nlValue}
-                  placeholder={nlPlaceholder}
+                  placeholder={useShortPlaceholder ? nlPlaceholderShort : nlPlaceholder}
                   disabled={!isVisible || isNlLoading}
                   onChange={setNlValue}
                   onSubmit={onNlSubmit}
