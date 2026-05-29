@@ -11,7 +11,6 @@ import { BasicPrettyPrinter } from '@elastic/esql';
 import { getQueryForFields } from './get_query_for_fields';
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
 import { parseAutocompleteQuery } from './parse_for_autocomplete_query';
-import { correctQuerySyntax } from '../../commands/definitions/utils/ast';
 
 describe('getQueryForFields', () => {
   const assert = (queryBeforeCursor: string, expected: string) => {
@@ -56,13 +55,6 @@ describe('getQueryForFields', () => {
   });
 
   it('should not treat a comma inside an incomplete function call as an EVAL separator', () => {
-    const query = 'FROM index | EVAL result = ROUND(field, ';
-    const { root } = parseAutocompleteQuery(query, query.length);
-
-    const result = getQueryForFields(correctQuerySyntax(query), root);
-    const printedResult = BasicPrettyPrinter.print(result);
-
-    expect(printedResult).toEqual('FROM index');
-    expect(printedResult).not.toContain(EDITOR_MARKER);
+    assert('FROM index | EVAL result = ROUND(field, ', 'FROM index');
   });
 });

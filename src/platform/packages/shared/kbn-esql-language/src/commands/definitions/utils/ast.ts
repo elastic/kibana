@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isList, isOptionNode, PromQLParser, Walker } from '@elastic/esql';
-import type { PromQLAstNode, PromQLAstQueryExpression } from '@elastic/esql';
+import { isList, isOptionNode, Walker } from '@elastic/esql';
+import type { PromQLAstNode } from '@elastic/esql';
 import type {
   ESQLFunction,
   ESQLSingleAstItem,
@@ -68,6 +68,11 @@ export function removeAutocompleteMarkers<T>(value: T): T {
       .map((item) => removeAutocompleteMarkers(item)) as T;
   }
 
+  // Strip the marker from any string value, not only `text` (e.g. inline cast `castType`).
+  if (typeof value === 'string') {
+    return (value.includes(EDITOR_MARKER) ? value.replace(EDITOR_MARKER, '') : value) as T;
+  }
+
   if (!value || typeof value !== 'object') {
     return value;
   }
@@ -80,14 +85,6 @@ export function removeAutocompleteMarkers<T>(value: T): T {
 
   for (const [key, child] of Object.entries(value)) {
     cleanedValue[key as keyof typeof cleanedValue] = removeAutocompleteMarkers(child);
-  }
-
-  if (
-    'text' in cleanedValue &&
-    typeof cleanedValue.text === 'string' &&
-    cleanedValue.text.includes(EDITOR_MARKER)
-  ) {
-    cleanedValue.text = cleanedValue.text.replace(EDITOR_MARKER, '');
   }
 
   return cleanedValue;
@@ -273,19 +270,6 @@ export function correctPromqlQuerySyntax(input: string): string {
   }
 
   return query + getPromqlBracketsToClose(query);
-}
-
-export function parsePromqlAutocompleteQuery(query: string): {
-  correctedQuery: string;
-  root: PromQLAstQueryExpression;
-} {
-  const correctedQuery = correctPromqlQuerySyntax(query);
-  const { root } = PromQLParser.parse(correctedQuery);
-
-  return {
-    correctedQuery,
-    root: removeAutocompleteMarkers(root),
-  };
 }
 
 export function getPromqlBracketsToClose(text: string): string {

@@ -47,6 +47,7 @@ describe('getAutocompleteCursorContext', () => {
     ['timeseries source command after comma', 'TS timeseries_index, '],
     ['row assignment', 'ROW total = '],
     ['eval assignment', 'FROM employees | EVAL total = '],
+    ['inline cast type', 'FROM employees | EVAL casted = keywordField::'],
     ['function argument', 'FROM employees | EVAL total = ROUND(salary, '],
     ['where binary expression', 'FROM employees | WHERE age > '],
     ['where list value', 'FROM employees | WHERE age IN (1, '],
@@ -87,4 +88,15 @@ describe('getAutocompleteCursorContext', () => {
       assertNoMarker(astContext.containingFunction, query, 'containingFunction');
     }
   );
+
+  it.each([
+    'FROM employees | EVAL total = ',
+    'ROW total = ',
+    'FROM employees | EVAL total = ROUND(salary, ',
+    'FROM employees | WHERE age IN (1, ',
+  ])('resolves an expression context (not just marker-free) for %s', (query) => {
+    const { astContext } = getAutocompleteCursorContext(query, query.length);
+
+    expect(astContext.type).toBe('expression');
+  });
 });

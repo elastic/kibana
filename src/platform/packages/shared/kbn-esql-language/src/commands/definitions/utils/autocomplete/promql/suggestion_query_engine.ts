@@ -11,7 +11,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getQueryPosition } from './query_position';
 import { getPreGroupedAggregationName } from '../../promql';
-import { parsePromqlAutocompleteQuery } from '../../ast';
+import { parsePromqlAutocompleteQuery } from '../../../../../language/shared/parse_for_autocomplete_query';
 import { buildVectorSuggestions } from './query_positions/suggestion_helpers';
 import { positionHandlers } from './query_positions/dispatcher';
 

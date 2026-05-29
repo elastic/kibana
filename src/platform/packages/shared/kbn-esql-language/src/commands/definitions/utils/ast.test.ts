@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PromQLParser } from '@elastic/esql';
+import { Parser, PromQLParser, Walker } from '@elastic/esql';
+import type { ESQLAstItem, ESQLAstQueryExpression } from '@elastic/esql/types';
 import { EDITOR_MARKER } from '../constants';
 import {
   addAutocompleteMarker,
   correctPromqlQuerySyntax,
   correctQuerySyntax,
   getBracketsToClose,
+  isMarkerNode,
   removeAutocompleteMarkers,
 } from './ast';
 
@@ -132,5 +134,39 @@ describe('correctPromqlQuerySyntax', () => {
     const normalizedRoot = removeAutocompleteMarkers(root);
 
     expect(JSON.stringify(normalizedRoot)).not.toContain(EDITOR_MARKER);
+  });
+});
+
+describe('removeAutocompleteMarkers', () => {
+  const parseAutocomplete = (innerText: string): ESQLAstQueryExpression => {
+    const corrected = correctQuerySyntax(addAutocompleteMarker(innerText));
+    return Parser.parse(corrected, { withFormatting: true }).root;
+  };
+
+  const countMarkers = (node: ESQLAstQueryExpression): number => {
+    let count = 0;
+    Walker.walk(node, {
+      visitAny: (current) => {
+        if (isMarkerNode(current as ESQLAstItem)) {
+          count++;
+        }
+      },
+    });
+    return count;
+  };
+
+  it('drops marker-only nodes nested in args arrays', () => {
+    const root = parseAutocomplete('FROM index | EVAL result = ROUND(doubleField, ');
+
+    expect(countMarkers(root)).toBeGreaterThan(0);
+    expect(countMarkers(removeAutocompleteMarkers(root))).toBe(0);
+  });
+
+  it('strips the marker from the inline cast type, not only from text', () => {
+    const root = parseAutocomplete('FROM index | EVAL casted = keywordField::');
+
+    // Before cleaning, the marker leaks into inlineCast.castType (a plain string property).
+    expect(JSON.stringify(root)).toContain(EDITOR_MARKER);
+    expect(JSON.stringify(removeAutocompleteMarkers(root))).not.toContain(EDITOR_MARKER);
   });
 });
