@@ -10,12 +10,11 @@ import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
 import { ML_ANOMALIES_INDEX } from '../../../../../common/constants';
-import type { ESBoolQuery } from '../../../../../common/typed_json';
-import { useEsqlTimeRangeFilter } from '../../../../common/hooks/esql/use_esql_global_filter';
-import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import {
+  useEsqlFixedRangeFilterQuery,
+  useEsqlGlobalFilterQuery,
+} from '../../../../common/hooks/esql/use_esql_global_filter';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../common/hooks/use_error_toast';
@@ -37,86 +36,18 @@ interface FixedTimeRange {
   to: string;
 }
 
-// Upper bound on the number of entities resolved from the global search bar
-// filter and used to constrain anomaly records. Interactive filters normally
-// narrow to a handful of entities; this caps the `WHERE entity_id IN (...)`
-// list size for pathological "match everything" filters.
-const MAX_FILTERED_ENTITIES = 1000;
-
 /**
- * Time-range-only ES|QL filter for the ML anomalies source. The search bar on
- * the Entity Analytics home page targets the entity store data view, so its
- * field filters cannot be applied as a pre-filter on the ML anomalies index;
- * they are resolved separately via {@link useFilteredEntityIds}.
+ * Internal helper: pick between the global-date-picker filter and a fixed
+ * range filter. Both underlying hooks must be called unconditionally to obey
+ * the rules of hooks; only the selected value is returned.
  */
-const useRecentAnomaliesTimeFilter = (timeRange?: FixedTimeRange): ESBoolQuery => {
-  const { from: globalFrom, to: globalTo } = useGlobalTime();
-  const from = timeRange?.from ?? globalFrom;
-  const to = timeRange?.to ?? globalTo;
-  return useEsqlTimeRangeFilter(from, to);
-};
-
-const hasActiveFilter = (query?: ESBoolQuery): boolean => {
-  const bool = query?.bool;
-  if (!bool) {
-    return false;
-  }
-  const { must = [], filter = [], should = [], must_not: mustNot = [] } = bool;
-  return must.length + filter.length + should.length + mustNot.length > 0;
-};
-
-interface FilteredEntityIds {
-  /** `undefined` when no filter is active (do not constrain anomalies). */
-  entityIds: string[] | undefined;
-  isLoading: boolean;
-}
-
-/**
- * Resolves the entity IDs (EUIDs) matching the global search bar filter by
- * applying that filter to the entity store index, where the `entity.*` fields
- * the search bar targets actually exist. The recent anomalies queries then
- * constrain ML records to these entity IDs, fixing the case where filtering by
- * an entity returned no anomalies because the filter was (incorrectly) applied
- * to the ML anomalies index, which lacks those fields.
- */
-const useFilteredEntityIds = (spaceId?: string): FilteredEntityIds => {
-  const search = useKibana().services.data.search.search;
-  // Entity-only filter (KQL + filter pills), without any time range.
-  const { filterQuery } = useGlobalFilterQuery();
-  const isFilterActive = hasActiveFilter(filterQuery);
-
-  const esqlSource =
-    isFilterActive && spaceId
-      ? `FROM ${getLatestEntitiesIndexName(
-          spaceId
-        )} | WHERE entity.id IS NOT NULL | KEEP entity.id | SORT entity.id | LIMIT ${MAX_FILTERED_ENTITIES}`
-      : undefined;
-
-  const { data, isLoading } = useQuery(
-    ['recent-anomalies-filtered-entity-ids', esqlSource, filterQuery],
-    async ({ signal }) => {
-      if (!esqlSource) {
-        return [] as string[];
-      }
-      const esqlResult = await getESQLResults({
-        esqlQuery: esqlSource,
-        search,
-        signal,
-        filter: filterQuery,
-      });
-      return esqlResponseToRecords<{ 'entity.id': string }>(esqlResult?.response)
-        .map((record) => record['entity.id'])
-        .filter((id): id is string => Boolean(id));
-    },
-    { enabled: !!esqlSource }
+const useRecentAnomaliesFilterQuery = (timeRange?: FixedTimeRange) => {
+  const globalFilterQuery = useEsqlGlobalFilterQuery();
+  const fixedFilterQuery = useEsqlFixedRangeFilterQuery(
+    timeRange?.from ?? 'now-15m',
+    timeRange?.to ?? 'now'
   );
-
-  return {
-    entityIds: isFilterActive ? data ?? [] : undefined,
-    // Keep "loading" until the resolution finishes so the anomaly queries do
-    // not run unconstrained (and then re-run) while IDs are still resolving.
-    isLoading: isFilterActive && (isLoading || data === undefined),
-  };
+  return timeRange ? fixedFilterQuery : globalFilterQuery;
 };
 
 const useRecentAnomaliesTopRowsQuery = (params: {
@@ -131,33 +62,30 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   timeRange?: FixedTimeRange;
 }) => {
   const search = useKibana().services.data.search.search;
-  const timeFilter = useRecentAnomaliesTimeFilter(params.timeRange);
-  const { entityIds, isLoading: isEntityIdsLoading } = useFilteredEntityIds(params.spaceId);
-  const noFilterMatches = entityIds !== undefined && entityIds.length === 0;
+  const filterQuery = useRecentAnomaliesFilterQuery(params.timeRange);
   const rowField = params.viewBy === 'jobId' ? 'job_id' : 'entity_id';
 
   const topRowsEsqlSource = useRecentAnomaliesTopRowsEsqlSource({
     ...params,
     rowsLimit: 5,
-    entityIds,
   });
 
   const { isLoading, data, isError } = useQuery(
-    [timeFilter, topRowsEsqlSource, entityIds],
+    [filterQuery, topRowsEsqlSource],
     async ({ signal }) => {
-      if (!topRowsEsqlSource || noFilterMatches) return { records: [], rawResponse: undefined };
+      if (!topRowsEsqlSource) return { records: [], rawResponse: undefined };
       const esqlResult = await getESQLResults({
         esqlQuery: topRowsEsqlSource,
         search,
         signal,
-        filter: timeFilter,
+        filter: filterQuery,
       });
       return {
         records: esqlResponseToRecords<Record<string, string>>(esqlResult?.response),
         rawResponse: esqlResult?.response,
       };
     },
-    { enabled: !!topRowsEsqlSource && !isEntityIdsLoading }
+    { enabled: !!topRowsEsqlSource }
   );
 
   const records = data?.records;
@@ -175,7 +103,7 @@ const useRecentAnomaliesTopRowsQuery = (params: {
   );
 
   return {
-    isLoading: isLoading || isEntityIdsLoading,
+    isLoading,
     rowLabels: records?.map((each) => each[rowField]),
     entityMetadata,
     isError,
@@ -196,9 +124,7 @@ export const useRecentAnomaliesQuery = (params: {
   timeRange?: FixedTimeRange;
 }) => {
   const search = useKibana().services.data.search.search;
-  const timeFilter = useRecentAnomaliesTimeFilter(params.timeRange);
-  const { entityIds, isLoading: isEntityIdsLoading } = useFilteredEntityIds(params.spaceId);
-  const noFilterMatches = entityIds !== undefined && entityIds.length === 0;
+  const filterQuery = useRecentAnomaliesFilterQuery(params.timeRange);
 
   const {
     rowLabels,
@@ -212,7 +138,6 @@ export const useRecentAnomaliesQuery = (params: {
   const anomalyDataEsqlSource = useRecentAnomaliesDataEsqlSource({
     ...params,
     rowLabels,
-    entityIds,
     timeRange: params.timeRange,
   });
 
@@ -229,16 +154,16 @@ export const useRecentAnomaliesQuery = (params: {
     rowLabels: string[];
     rawResponse?: ESQLSearchResponse;
   }>(
-    [timeFilter, anomalyDataEsqlSource, rowLabels, entityIds],
+    [filterQuery, anomalyDataEsqlSource, rowLabels],
     async ({ signal }) => {
-      if (!anomalyDataEsqlSource || !hasAnomaliesData || noFilterMatches) {
+      if (!anomalyDataEsqlSource || !hasAnomaliesData) {
         return { anomalyRecords: [], rowLabels: [] };
       }
       const esqlResult = await getESQLResults({
         esqlQuery: anomalyDataEsqlSource,
         search,
         signal,
-        filter: timeFilter,
+        filter: filterQuery,
       });
       const anomalyRecords = esqlResponseToRecords<Record<string, string | number>>(
         esqlResult.response
@@ -253,7 +178,7 @@ export const useRecentAnomaliesQuery = (params: {
       };
     },
     {
-      enabled: !!anomalyDataEsqlSource && !!rowLabels && !isEntityIdsLoading,
+      enabled: !!anomalyDataEsqlSource && !!rowLabels,
       keepPreviousData: true,
     }
   );
