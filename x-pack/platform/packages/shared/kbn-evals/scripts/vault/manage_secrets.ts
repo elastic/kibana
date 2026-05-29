@@ -11,6 +11,7 @@ import Fs from 'fs';
 import { writeFile, readFile } from 'fs/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
+import { KBN_EVALS_VAULT_PATHS, type KbnEvalsVaultType } from '../../src/cli/utils';
 
 const DEFAULT_VAULT_ADDR = 'https://secrets.elastic.co:8200';
 
@@ -26,16 +27,7 @@ const getVaultAddr = (): string => process.env.VAULT_ADDR || DEFAULT_VAULT_ADDR;
 
 export const KBN_EVALS_VAULT_ENV_VAR = 'KIBANA_EVALS_CI_CONFIG';
 
-export type VaultType = 'ci-prod' | 'dev';
-
-export const VAULT_TYPES: ReadonlyArray<VaultType> = ['ci-prod', 'dev'];
-
-const VAULT_PATHS: Record<VaultType, string> = {
-  'ci-prod': 'secret/ci/elastic-kibana/kbn-evals',
-  dev: 'secret/kibana-issues/dev/kbn-evals/golden',
-};
-
-export const getVaultPath = (vault: VaultType): string => VAULT_PATHS[vault];
+export const getVaultPath = (vault: KbnEvalsVaultType): string => KBN_EVALS_VAULT_PATHS[vault];
 
 const KBN_EVALS_CONFIG_FIELD = 'config';
 
@@ -122,9 +114,9 @@ const configSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export type KbnEvalsCiConfig = ReturnType<typeof configSchema.validate>;
+export type KbnEvalsConfig = ReturnType<typeof configSchema.validate>;
 
-export const validateKbnEvalsConfig = (config: unknown): KbnEvalsCiConfig => {
+export const validateKbnEvalsConfig = (config: unknown): KbnEvalsConfig => {
   return configSchema.validate(config);
 };
 
@@ -140,7 +132,7 @@ const ensureLocalConfigFileExists = (filePath: string) => {
   );
 };
 
-export const readConfigFromVaultPath = async (vaultPath: string): Promise<KbnEvalsCiConfig> => {
+export const readConfigFromVaultPath = async (vaultPath: string): Promise<KbnEvalsConfig> => {
   const { stdout } = await execa('vault', ['read', `-field=${KBN_EVALS_CONFIG_FIELD}`, vaultPath], {
     cwd: REPO_ROOT,
     buffer: true,
@@ -155,7 +147,7 @@ export const readConfigFromVaultPath = async (vaultPath: string): Promise<KbnEva
   return validateKbnEvalsConfig(parsed);
 };
 
-export const readConfigFromVault = async (vault: VaultType): Promise<KbnEvalsCiConfig> => {
+export const readConfigFromVault = async (vault: KbnEvalsVaultType): Promise<KbnEvalsConfig> => {
   return readConfigFromVaultPath(getVaultPath(vault));
 };
 
@@ -166,7 +158,7 @@ export const retrieveFromVault = async (vaultPath: string, filePath: string) => 
   console.log(`Config written to: ${filePath}`);
 };
 
-export const retrieveConfigFromVault = async (vault: VaultType) => {
+export const retrieveConfigFromVault = async (vault: KbnEvalsVaultType) => {
   await retrieveFromVault(getVaultPath(vault), KBN_EVALS_CONFIG_FILE);
 };
 
@@ -186,13 +178,13 @@ export const uploadToVault = async (vaultPath: string, filePath: string, field: 
   });
 };
 
-export const uploadConfigToVault = async (vault: VaultType) => {
+export const uploadConfigToVault = async (vault: KbnEvalsVaultType) => {
   await uploadToVault(getVaultPath(vault), KBN_EVALS_CONFIG_FILE, KBN_EVALS_CONFIG_FIELD);
 };
 
 export const getCommand = async (
   format: 'vault-write' | 'env-var' = 'vault-write',
-  vault: VaultType
+  vault: KbnEvalsVaultType
 ) => {
   ensureLocalConfigFileExists(KBN_EVALS_CONFIG_FILE);
   const config = await readFile(KBN_EVALS_CONFIG_FILE, 'utf-8');
@@ -206,7 +198,7 @@ export const getCommand = async (
   return `${KBN_EVALS_VAULT_ENV_VAR}=${asB64}`;
 };
 
-export const getKbnEvalsConfigFromEnvVar = (): KbnEvalsCiConfig => {
+export const getKbnEvalsConfigFromEnvVar = (): KbnEvalsConfig => {
   const configValue = process.env[KBN_EVALS_VAULT_ENV_VAR];
   if (!configValue) {
     throw new Error(`Environment variable ${KBN_EVALS_VAULT_ENV_VAR} does not exist!`);

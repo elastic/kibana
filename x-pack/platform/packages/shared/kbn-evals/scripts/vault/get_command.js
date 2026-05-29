@@ -6,7 +6,8 @@
  */
 
 require('@kbn/babel-register').install();
-const { getCommand, VAULT_TYPES, getVaultPath } = require('./manage_secrets');
+const { getCommand, getVaultPath } = require('./manage_secrets');
+const { KBN_EVALS_VAULT_TYPES } = require('../../src/cli/utils');
 const minimist = require('minimist');
 
 async function run() {
@@ -14,9 +15,9 @@ async function run() {
   const format = argv.format || 'vault-write';
   const vault = argv.vault;
 
-  if (!vault || !VAULT_TYPES.includes(vault)) {
+  if (!vault || !KBN_EVALS_VAULT_TYPES.includes(vault)) {
     // eslint-disable-next-line no-console
-    console.error(`Error: --vault is required (${VAULT_TYPES.join(' | ')})`);
+    console.error(`Error: --vault is required (${KBN_EVALS_VAULT_TYPES.join(' | ')})`);
     process.exit(1);
   }
 

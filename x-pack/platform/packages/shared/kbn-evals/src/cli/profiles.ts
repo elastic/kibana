@@ -8,7 +8,8 @@
 import Fs from 'fs';
 import Path from 'path';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
-import { KBN_EVALS_DEV_VAULT_PATH, KBN_EVALS_VAULT_CONFIG_FIELD, safeExec } from './utils';
+import { KBN_EVALS_VAULT_PATHS, KBN_EVALS_VAULT_CONFIG_FIELD, safeExec } from './utils';
+import { validateKbnEvalsConfig } from '../../scripts/vault/manage_secrets';
 
 export const VAULT_CONFIG_DIR = 'x-pack/platform/packages/shared/kbn-evals/scripts/vault';
 
@@ -95,12 +96,14 @@ export const readVaultConfigFromDevVault = (): VaultConfig | undefined => {
   const stdout = safeExec('vault', [
     'read',
     `-field=${KBN_EVALS_VAULT_CONFIG_FIELD}`,
-    KBN_EVALS_DEV_VAULT_PATH,
+    KBN_EVALS_VAULT_PATHS.dev,
   ]);
   if (!stdout) return undefined;
 
   try {
-    return JSON.parse(Buffer.from(stdout, 'base64').toString('utf-8')) as VaultConfig;
+    const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
+    const parsed = JSON.parse(value);
+    return validateKbnEvalsConfig(parsed);
   } catch {
     return undefined;
   }
