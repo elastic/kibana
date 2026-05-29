@@ -94,6 +94,14 @@ export interface ChromeNext {
      */
     set(config?: GlobalSearchConfig): void;
   };
+  /** Context switcher content. */
+  contextSwitcher: {
+    /**
+     * Set the context switcher content for the Chrome-Next header.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
   appHeader: {
     /**
      * Set the app header configuration for the Chrome Next project header.
