@@ -109,11 +109,14 @@ const prReviewPublishFlag =
 const heredoc = /<<-?\s*['"\\]?\w/;
 
 /**
- * Shell-expansion characters that the hook cannot evaluate. A `--input` path
- * containing any of `$`, backtick, or a leading `~` would be expanded by the
- * shell at exec time but read literally by `readFileSync` here, leaving the
- * actual payload file unchecked. Single-quoted captures are exempt because
- * single quotes suppress shell expansion entirely.
+ * Characters that make the path the shell resolves differ from what
+ * `readFileSync` reads here, leaving the real payload file unchecked. `$` and
+ * backtick expand inside double quotes too, so they are always rejected via
+ * this regex. A leading `~`, a backslash escape, and process-substitution /
+ * redirection metacharacters (`<`, `>`, e.g. `<(...)` / `>(...)`) only carry
+ * special meaning unquoted, so those are rejected for bare captures only (see
+ * `analyzeCreationSegment`). Single-quoted captures are exempt entirely
+ * because single quotes suppress all shell processing.
  */
 const shellExpansionInPath = /[$`]/;
 
@@ -296,10 +299,13 @@ const analyzeCreationSegment = (segment, raw) => {
     const hasUnreadablePath =
       shellExpansionInPath.test(filePath) ||
       (filePathSource === 'bare' &&
-        (filePath.startsWith('~') || filePath.includes('\\')));
+        (filePath.startsWith('~') ||
+          filePath.includes('\\') ||
+          filePath.includes('<') ||
+          filePath.includes('>')));
     if (hasUnreadablePath) {
       return {
-        deny: 'The `--input` path contains shell expansion (`$VAR`, `$(...)`, backticks, a leading `~`) or a backslash escape (e.g. `path\\ with\\ spaces.json`) that the shell resolves but the hook reads literally. The hook would read the wrong path and the real request body would slip through unchecked. Pass an absolute, already-expanded path and quote it (single or double quotes) instead of backslash-escaping, so the file can be rewritten before submission.',
+        deny: 'The `--input` path contains a shell construct the hook cannot evaluate — shell expansion (`$VAR`, `$(...)`, backticks, a leading `~`), a backslash escape (e.g. `path\\ with\\ spaces.json`), or process substitution / redirection (`<(...)`, `>(...)`, `<`, `>`). The shell resolves these at exec time but the hook reads the literal path, so the real request body would slip through unchecked. Write the body to a plain file and pass an absolute, already-expanded path (single- or double-quoted), so the file can be rewritten before submission.',
       };
     }
   }
