@@ -33,6 +33,7 @@ import {
   getStringMeta,
   getToolCallSteps,
 } from '@kbn/evals';
+import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
 import { extractSearchRetrievedDocs } from './rag_extractor';
 
@@ -130,11 +131,17 @@ function configureExperiment({
         if (!expectedOnlyToolId) return { score: 1 };
 
         const toolCalls = getToolCallSteps(output as TaskOutput);
-        if (toolCalls.length === 0) {
+        // Filter out platform-internal tools (e.g. load_skill) — they are
+        // infrastructure calls, not model decisions, and must not count against
+        // the ToolUsageOnly constraint.
+        const userFacingToolCalls = toolCalls.filter(
+          (t) => t.tool_id && !isInternalTool(t.tool_id)
+        );
+        if (userFacingToolCalls.length === 0) {
           return { score: 0, metadata: { reason: 'No tool calls found', expectedOnlyToolId } };
         }
 
-        const usedToolIds = toolCalls.map((t) => t.tool_id).filter(Boolean);
+        const usedToolIds = userFacingToolCalls.map((t) => t.tool_id).filter(Boolean);
         const hasExpected = usedToolIds.includes(expectedOnlyToolId);
         const allExpected = usedToolIds.every((id) => id === expectedOnlyToolId);
 
