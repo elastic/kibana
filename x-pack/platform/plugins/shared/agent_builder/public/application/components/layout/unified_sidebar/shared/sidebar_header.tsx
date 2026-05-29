@@ -92,14 +92,6 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               onClick={onToggleCondensed}
             />
           </EuiToolTip>
-            <EuiButtonIcon
-              iconType="transitionLeftIn"
-              aria-label={labels.toggleSidebar}
-              color="text"
-              size="s"
-              onClick={onToggleCondensed}
-            />
-          </EuiToolTip>
         </EuiFlexItem>
         {sidebarView === 'conversation' && (
           <EuiFlexItem grow={false}>
