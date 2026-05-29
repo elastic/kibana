@@ -237,10 +237,11 @@ describe('ConfigPanel', () => {
         'state',
         'first',
         frame.dataViews.indexPatterns,
-        expect.objectContaining({
+        {
           groupId: 'a',
           columnId: 'newId',
           staticValue: 100,
+          activeVisualizationTypeId: 'testVis',
           visualizationGroups: [
             expect.objectContaining({
               accessors: [],
@@ -251,7 +252,7 @@ describe('ConfigPanel', () => {
               supportsMoreColumns: true,
             }),
           ],
-        })
+        }
       );
     });
   });

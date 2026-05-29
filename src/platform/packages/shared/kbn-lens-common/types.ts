@@ -700,12 +700,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
       visualizationGroups: VisualizationDimensionGroupConfig[];
       staticValue?: unknown;
       autoTimeField?: boolean;
-      /**
-       * Visualization type id (subtype-aware, as returned by
-       * `Visualization#getVisualizationTypeId`) of the active visualization at
-       * the moment the dimension is being initialized. Datasources may use it
-       * to apply per-visualization defaults when creating new columns.
-       */
+      /** Subtype-aware type id of the active visualization being initialized. */
       activeVisualizationTypeId?: string;
     }
   ) => T;
@@ -993,13 +988,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
       forceRender?: boolean;
     }
   >;
-  /**
-   * Visualization type id (subtype-aware, as returned by
-   * `Visualization#getVisualizationTypeId`) of the active visualization that
-   * the dimension belongs to. Datasources may use it to apply
-   * per-visualization defaults when the user picks or replaces an operation
-   * inside the dimension editor.
-   */
+  /** Subtype-aware type id of the visualization that owns this dimension. */
   activeVisualizationTypeId?: string;
   core: Pick<
     CoreStart,
@@ -1059,12 +1048,7 @@ export interface DatasourceDimensionDropHandlerProps<T> {
   source: DragDropIdentifier;
   dropType: DropType;
   indexPatterns: IndexPatternMap;
-  /**
-   * Visualization type id (subtype-aware, as returned by
-   * `Visualization#getVisualizationTypeId`) of the active visualization
-   * receiving the drop. Datasources may use it to apply per-visualization
-   * defaults when creating new columns from a dropped field.
-   */
+  /** Subtype-aware type id of the active visualization receiving the drop. */
   activeVisualizationTypeId?: string;
 }
 

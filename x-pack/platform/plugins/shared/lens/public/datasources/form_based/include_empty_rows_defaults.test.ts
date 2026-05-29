@@ -9,7 +9,10 @@ import {
   LENS_DATASOURCE_ID,
   LENS_DATATABLE_ID,
   LENS_GAUGE_ID,
+  LENS_HEATMAP_CHART_SHAPES,
   LENS_METRIC_ID,
+  PARTITION_CHART_TYPES,
+  SeriesTypes,
   type FormBasedPrivateState,
   type LensDocument,
 } from '@kbn/lens-common';
@@ -21,12 +24,12 @@ import {
 
 describe('getDefaultIncludeEmptyRows', () => {
   describe.each([
-    ['bar', false],
-    ['heatmap', false],
-    ['pie', false],
-    ['treemap', false],
-    ['mosaic', false],
-    ['waffle', false],
+    [SeriesTypes.BAR, false],
+    [LENS_HEATMAP_CHART_SHAPES.HEATMAP, false],
+    [PARTITION_CHART_TYPES.PIE, false],
+    [PARTITION_CHART_TYPES.TREEMAP, false],
+    [PARTITION_CHART_TYPES.MOSAIC, false],
+    [PARTITION_CHART_TYPES.WAFFLE, false],
     [LENS_METRIC_ID, false],
     ['lnsTagcloud', false],
   ])('OFF-by-default visualization type %s', (visualizationTypeId, expected) => {
@@ -38,8 +41,8 @@ describe('getDefaultIncludeEmptyRows', () => {
   describe.each([
     [LENS_DATATABLE_ID, true],
     // Line and area XY subtypes remain ON until #256104 changes them.
-    ['line', true],
-    ['area', true],
+    [SeriesTypes.LINE, true],
+    [SeriesTypes.AREA, true],
     // Mixed XY layers (multi-layer different seriesType) stay ON by default.
     ['mixed', true],
     // Visualizations not covered by the issue keep the historical default.
@@ -117,7 +120,7 @@ describe('applyEmptyRowsDefaultsToSuggestionState', () => {
     });
     const previous = makeState({ first: {} });
 
-    const next = applyEmptyRowsDefaultsToSuggestionState(suggestion, previous, 'bar');
+    const next = applyEmptyRowsDefaultsToSuggestionState(suggestion, previous, SeriesTypes.BAR);
 
     expect(next).not.toBe(suggestion);
     expect(
@@ -139,7 +142,11 @@ describe('applyEmptyRowsDefaultsToSuggestionState', () => {
       },
     });
 
-    const next = applyEmptyRowsDefaultsToSuggestionState(suggestion, previous, 'pie');
+    const next = applyEmptyRowsDefaultsToSuggestionState(
+      suggestion,
+      previous,
+      PARTITION_CHART_TYPES.PIE
+    );
 
     expect(
       (next.layers.first.columns.existing as { params?: { includeEmptyRows?: boolean } }).params
@@ -156,7 +163,9 @@ describe('applyEmptyRowsDefaultsToSuggestionState', () => {
       first: { col1: { operationType: 'terms' } },
     });
 
-    expect(applyEmptyRowsDefaultsToSuggestionState(suggestion, undefined, 'bar')).toBe(suggestion);
+    expect(applyEmptyRowsDefaultsToSuggestionState(suggestion, undefined, SeriesTypes.BAR)).toBe(
+      suggestion
+    );
   });
 });
 
@@ -225,14 +234,16 @@ describe('applyEmptyRowsDefaultsOnTypeSwitch', () => {
     } as unknown as LensDocument;
   }
 
-  it('forces the target default on a session-created column (no persisted doc)', () => {
+  it('retains a session-set value when there is no persisted baseline (never-saved viz)', () => {
+    // The user deliberately turned empty rows off; a type switch must not flip it
+    // back on just because the visualization was never saved.
     const suggestion = makeState({
-      first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
+      first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: false } } },
     });
 
-    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, undefined, 'bar');
+    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, undefined, LENS_DATATABLE_ID);
 
-    expect(next).not.toBe(suggestion);
+    expect(next).toBe(suggestion);
     expect(
       (next.layers.first.columns.col1 as { params?: { includeEmptyRows?: boolean } }).params
         ?.includeEmptyRows
@@ -247,7 +258,7 @@ describe('applyEmptyRowsDefaultsOnTypeSwitch', () => {
       first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
     });
 
-    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, persistedDoc, 'bar');
+    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, persistedDoc, SeriesTypes.BAR);
 
     expect(next).toBe(suggestion);
     expect(
@@ -265,7 +276,7 @@ describe('applyEmptyRowsDefaultsOnTypeSwitch', () => {
       first: { col1: { operationType: 'date_histogram' } },
     });
 
-    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, persistedDoc, 'bar');
+    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, persistedDoc, SeriesTypes.BAR);
 
     expect(next).toBe(suggestion);
   });
@@ -288,12 +299,17 @@ describe('applyEmptyRowsDefaultsOnTypeSwitch', () => {
     ).toBe(true);
   });
 
-  it('applies ON default when switching to a datatable for a session-created column', () => {
+  it('overrides a diverged value with the target default when switching to a datatable', () => {
+    // Saved as OFF, live value flipped to ON only by carrying over a previous
+    // series type's default -> datatable forces it back to its ON default.
     const suggestion = makeState({
       first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: false } } },
     });
+    const persistedDoc = makePersistedDoc({
+      first: { col1: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
+    });
 
-    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, undefined, LENS_DATATABLE_ID);
+    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, persistedDoc, LENS_DATATABLE_ID);
 
     expect(
       (next.layers.first.columns.col1 as { params?: { includeEmptyRows?: boolean } }).params
@@ -301,12 +317,19 @@ describe('applyEmptyRowsDefaultsOnTypeSwitch', () => {
     ).toBe(true);
   });
 
-  it('applies the same default to range (histogram) columns', () => {
+  it('applies the same divergence rule to range (histogram) columns', () => {
     const suggestion = makeState({
       first: { col1: { operationType: 'range', params: { includeEmptyRows: true } } },
     });
+    const persistedDoc = makePersistedDoc({
+      first: { col1: { operationType: 'range', params: { includeEmptyRows: false } } },
+    });
 
-    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, undefined, 'pie');
+    const next = applyEmptyRowsDefaultsOnTypeSwitch(
+      suggestion,
+      persistedDoc,
+      PARTITION_CHART_TYPES.PIE
+    );
 
     expect(
       (next.layers.first.columns.col1 as { params?: { includeEmptyRows?: boolean } }).params
@@ -319,12 +342,15 @@ describe('applyEmptyRowsDefaultsOnTypeSwitch', () => {
       first: { metric: { operationType: 'count' } },
     });
 
-    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, undefined, 'bar');
+    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, undefined, SeriesTypes.BAR);
 
     expect(next).toBe(suggestion);
   });
 
-  it('forces session-created columns OFF while retaining a persisted ON column in the same layer', () => {
+  it('retains a session-added column while overriding a diverged persisted column in the same layer', () => {
+    // `saved` was persisted ON but its live value diverged to OFF (carried over),
+    // so it is forced to bar's OFF default. `added` has no persisted baseline, so
+    // its session value is kept.
     const suggestion = makeState({
       first: {
         saved: { operationType: 'date_histogram', params: { includeEmptyRows: true } },
@@ -332,18 +358,18 @@ describe('applyEmptyRowsDefaultsOnTypeSwitch', () => {
       },
     });
     const persistedDoc = makePersistedDoc({
-      first: { saved: { operationType: 'date_histogram', params: { includeEmptyRows: true } } },
+      first: { saved: { operationType: 'date_histogram', params: { includeEmptyRows: false } } },
     });
 
-    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, persistedDoc, 'bar');
+    const next = applyEmptyRowsDefaultsOnTypeSwitch(suggestion, persistedDoc, SeriesTypes.BAR);
 
     expect(
       (next.layers.first.columns.saved as { params?: { includeEmptyRows?: boolean } }).params
         ?.includeEmptyRows
-    ).toBe(true);
+    ).toBe(false);
     expect(
       (next.layers.first.columns.added as { params?: { includeEmptyRows?: boolean } }).params
         ?.includeEmptyRows
-    ).toBe(false);
+    ).toBe(true);
   });
 });

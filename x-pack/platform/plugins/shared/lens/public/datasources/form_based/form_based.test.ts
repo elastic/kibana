@@ -11,6 +11,13 @@ import React from 'react';
 import type { Reference } from '@kbn/content-management-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import {
+  LENS_DATATABLE_ID,
+  LENS_HEATMAP_CHART_SHAPES,
+  LENS_METRIC_ID,
+  PARTITION_CHART_TYPES,
+  SeriesTypes,
+} from '@kbn/lens-common';
 import type {
   FormBasedPersistedState,
   FormBasedPrivateState,
@@ -4014,13 +4021,13 @@ describe('IndexPattern Data Source', () => {
         } as FormBasedPrivateState);
 
       it.each([
-        ['bar', false],
-        ['heatmap', false],
-        ['pie', false],
-        ['treemap', false],
-        ['mosaic', false],
-        ['waffle', false],
-        ['lnsMetric', false],
+        [SeriesTypes.BAR, false],
+        [LENS_HEATMAP_CHART_SHAPES.HEATMAP, false],
+        [PARTITION_CHART_TYPES.PIE, false],
+        [PARTITION_CHART_TYPES.TREEMAP, false],
+        [PARTITION_CHART_TYPES.MOSAIC, false],
+        [PARTITION_CHART_TYPES.WAFFLE, false],
+        [LENS_METRIC_ID, false],
         ['lnsTagcloud', false],
       ])(
         'defaults includeEmptyRows to false for visualization type "%s"',
@@ -4044,7 +4051,7 @@ describe('IndexPattern Data Source', () => {
         }
       );
 
-      it.each([['lnsDatatable'], ['line'], ['area'], ['mixed']])(
+      it.each([[LENS_DATATABLE_ID], [SeriesTypes.LINE], [SeriesTypes.AREA], ['mixed']])(
         'keeps includeEmptyRows on for visualization type "%s"',
         (visualizationTypeId) => {
           const next = FormBasedDatasource.initializeDimension!(

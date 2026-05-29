@@ -7,6 +7,13 @@
 
 import type { DropType } from '@kbn/dom-drag-drop';
 import { onDrop } from './on_drop_handler';
+import {
+  LENS_DATATABLE_ID,
+  LENS_HEATMAP_CHART_SHAPES,
+  LENS_METRIC_ID,
+  PARTITION_CHART_TYPES,
+  SeriesTypes,
+} from '@kbn/lens-common';
 import type {
   FormBasedPrivateState,
   OperationMetadata,
@@ -2250,13 +2257,13 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
     };
 
     it.each([
-      ['bar', false],
-      ['heatmap', false],
-      ['pie', false],
-      ['treemap', false],
-      ['mosaic', false],
-      ['waffle', false],
-      ['lnsMetric', false],
+      [SeriesTypes.BAR, false],
+      [LENS_HEATMAP_CHART_SHAPES.HEATMAP, false],
+      [PARTITION_CHART_TYPES.PIE, false],
+      [PARTITION_CHART_TYPES.TREEMAP, false],
+      [PARTITION_CHART_TYPES.MOSAIC, false],
+      [PARTITION_CHART_TYPES.WAFFLE, false],
+      [LENS_METRIC_ID, false],
       ['lnsTagcloud', false],
     ])(
       'creates date_histogram with includeEmptyRows=false for visualization type "%s"',
@@ -2269,7 +2276,7 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
       }
     );
 
-    it.each([['lnsDatatable'], ['line'], ['area'], ['mixed']])(
+    it.each([[LENS_DATATABLE_ID], [SeriesTypes.LINE], [SeriesTypes.AREA], ['mixed']])(
       'creates date_histogram with includeEmptyRows=true for visualization type "%s"',
       (visualizationTypeId) => {
         const newState = dropDateFieldOntoBucket(visualizationTypeId);

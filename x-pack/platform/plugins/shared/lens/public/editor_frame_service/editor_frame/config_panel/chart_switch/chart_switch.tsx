@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type {
   DatasourceMap,
   DatasourcePublicAPI,
-  FormBasedPrivateState,
   FramePublicAPI,
   Visualization,
   VisualizationMap,
@@ -19,7 +18,6 @@ import type {
   DatasourceStates,
   Suggestion,
 } from '@kbn/lens-common';
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { ExperimentalBadge } from '../../../../shared_components';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
@@ -34,7 +32,7 @@ import {
   selectDatasourceStates,
   selectPersistedDoc,
 } from '../../../../state_management';
-import { applyEmptyRowsDefaultsOnTypeSwitch } from '../../../../datasources/form_based/include_empty_rows_defaults';
+import { applyOpinionatedDatasourceDefaults } from '../../../../datasources/form_based/opinionated_defaults';
 import { generateId } from '../../../../id_generator/id_generator';
 import type { SelectableEntry } from './chart_switch_selectable';
 import { ChartSwitchSelectable } from './chart_switch_selectable';
@@ -117,48 +115,41 @@ export const ChartSwitch = memo(function ChartSwitch({
       {
         ...selection,
         visualizationState: newVisualizationState,
-        // A cross-visualization switch carries new datasource state. Re-apply
-        // the target type's opinionated `includeEmptyRows` default so the new
-        // chart type's preference wins over values not coming from a saved
-        // object.
-        datasourceState:
-          selection.datasourceId === LENS_DATASOURCE_ID.FORM_BASED
-            ? applyEmptyRowsDefaultsOnTypeSwitch(
-                selection.datasourceState as FormBasedPrivateState,
-                persistedDoc,
-                targetVisualizationTypeId
-              )
-            : selection.datasourceState,
+        // A cross-visualization switch carries new datasource state; reconcile
+        // the target type's opinionated defaults against the saved object.
+        datasourceState: applyOpinionatedDatasourceDefaults({
+          kind: 'typeSwitch',
+          datasourceId: selection.datasourceId,
+          datasourceState: selection.datasourceState,
+          persistedDoc,
+          targetVisualizationTypeId,
+        }),
       },
       { clearStagedPreview: true }
     );
 
-    // A same-visualization subtype switch (e.g. XY bar -> line) keeps the
-    // existing datasource state untouched, so the opinionated default must be
-    // re-applied through a follow-up datasource update.
-    if (
-      selection.sameDatasources &&
-      !selection.datasourceState &&
-      activeDatasourceId === LENS_DATASOURCE_ID.FORM_BASED
-    ) {
-      const currentState = datasourceStates[LENS_DATASOURCE_ID.FORM_BASED]?.state as
-        | FormBasedPrivateState
-        | undefined;
-      if (currentState) {
-        const nextState = applyEmptyRowsDefaultsOnTypeSwitch(
-          currentState,
-          persistedDoc,
-          targetVisualizationTypeId
+    // A same-visualization subtype switch (e.g. XY bar -> line) reuses the
+    // existing datasource state, so opinionated defaults are reconciled through
+    // a follow-up datasource update.
+    if (selection.sameDatasources && !selection.datasourceState) {
+      const currentState = activeDatasourceId
+        ? datasourceStates[activeDatasourceId]?.state
+        : undefined;
+      const nextState = applyOpinionatedDatasourceDefaults({
+        kind: 'typeSwitch',
+        datasourceId: activeDatasourceId ?? undefined,
+        datasourceState: currentState,
+        persistedDoc,
+        targetVisualizationTypeId,
+      });
+      if (currentState && nextState !== currentState) {
+        dispatchLens(
+          updateDatasourceState({
+            datasourceId: activeDatasourceId!,
+            newDatasourceState: nextState,
+            clearStagedPreview: true,
+          })
         );
-        if (nextState !== currentState) {
-          dispatchLens(
-            updateDatasourceState({
-              datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
-              newDatasourceState: nextState,
-              clearStagedPreview: true,
-            })
-          );
-        }
       }
     }
 

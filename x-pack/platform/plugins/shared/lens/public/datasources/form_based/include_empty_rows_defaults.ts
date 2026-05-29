@@ -7,8 +7,10 @@
 
 import {
   LENS_DATASOURCE_ID,
+  LENS_HEATMAP_CHART_SHAPES,
   LENS_METRIC_ID,
   PARTITION_CHART_TYPES,
+  SeriesTypes,
   type FormBasedPersistedState,
   type FormBasedPrivateState,
   type FormBasedLayer,
@@ -21,10 +23,7 @@ const BUCKET_OPERATIONS_WITH_EMPTY_ROWS: ReadonlySet<string> = new Set<string>([
   'range',
 ]);
 
-/**
- * The historical default applied by `buildColumn` when `includeEmptyRows` is
- * omitted, used to normalize stored values for equality comparisons.
- */
+/** Default `buildColumn` applies when `includeEmptyRows` is omitted. */
 const DEFAULT_INCLUDE_EMPTY_ROWS = true;
 
 function normalizeIncludeEmptyRows(value: boolean | undefined): boolean {
@@ -36,41 +35,25 @@ function getIncludeEmptyRows(column: GenericIndexPatternColumn): boolean | undef
 }
 
 /**
- * Visualization type ids (as returned by `Visualization#getVisualizationTypeId`)
- * for which a newly created `date_histogram` or `range` (histogram) column
- * should default `includeEmptyRows` to `false`.
- *
- * The list mirrors the scope of https://github.com/elastic/kibana/issues/254889.
- * Line and area XY subtypes are intentionally excluded because they are
- * handled by the follow-up https://github.com/elastic/kibana/issues/256104.
+ * Visualization type ids (per `Visualization#getVisualizationTypeId`) that
+ * default `includeEmptyRows` to `false` for new bucket columns.
  */
 const VIS_TYPES_WITH_EMPTY_ROWS_OFF_BY_DEFAULT: ReadonlySet<string> = new Set<string>([
-  // XY bar (all bar orientations and stacking modes collapse to 'bar')
-  'bar',
-  // Heatmap (state.shape === 'heatmap')
-  'heatmap',
-  // Partition subtypes (state.shape with 'donut' normalized to 'pie')
+  // XY bar collapses every orientation and stacking mode to this subtype id.
+  SeriesTypes.BAR,
+  LENS_HEATMAP_CHART_SHAPES.HEATMAP,
   PARTITION_CHART_TYPES.PIE,
   PARTITION_CHART_TYPES.TREEMAP,
   PARTITION_CHART_TYPES.MOSAIC,
   PARTITION_CHART_TYPES.WAFFLE,
-  // Standalone visualizations whose getVisualizationTypeId returns this.id
   LENS_METRIC_ID,
-  // Tagcloud has no exported id constant; the literal must match
-  // `getTagcloudVisualization().id` in
-  // x-pack/platform/plugins/shared/lens/public/visualizations/tagcloud/tagcloud_visualization.tsx
-  'lnsTagcloud',
+  'lnsTagcloud', // Mirrors `getTagcloudVisualization().id`.
 ]);
 
 /**
- * Returns the default value for `params.includeEmptyRows` on a newly created
- * `date_histogram` or `range` (histogram) column, given the active Lens
- * visualization type id.
- *
- * The id is the value returned by `Visualization#getVisualizationTypeId`
- * (visualization subtype where applicable, plain visualization id otherwise).
- * When no id is known (e.g. column created outside the Lens editor), the
- * function preserves the historical default of `true`.
+ * Default `includeEmptyRows` for a new bucket column, given the active
+ * visualization type id. Falls back to the historical `true` when the id is
+ * unknown (e.g. a column created outside the Lens editor).
  */
 export function getDefaultIncludeEmptyRows(visualizationTypeId?: string): boolean {
   if (!visualizationTypeId) {
@@ -80,10 +63,8 @@ export function getDefaultIncludeEmptyRows(visualizationTypeId?: string): boolea
 }
 
 /**
- * Returns per-visualization column param overrides for newly created columns,
- * or `undefined` when no override is needed for the given operation. Currently
- * scoped to `date_histogram` and `range` (histogram) buckets, both of which
- * own an `includeEmptyRows` switch.
+ * Per-visualization `buildColumn` param overrides for a new column, or
+ * `undefined` when the operation owns no opinionated default.
  */
 export function getColumnParamsForNewBucket(
   operationType: string,
@@ -107,9 +88,8 @@ function withIncludeEmptyRows(
 }
 
 /**
- * Rewrites the `date_histogram` / `range` (histogram) columns of a form-based
- * state according to a per-column decision callback, returning the same state
- * reference when nothing changed.
+ * Rewrites bucket columns via a per-column decision callback, returning the
+ * same state reference when nothing changed.
  */
 function mapBucketColumns(
   state: FormBasedPrivateState,
@@ -156,17 +136,11 @@ function mapBucketColumns(
 }
 
 /**
- * Walks the form-based suggestion state and applies `includeEmptyRows: false`
- * to any newly created `date_histogram` or `range` (histogram) columns when
- * the target visualization type defaults that switch to off.
+ * Applies the target visualization's `includeEmptyRows` default to columns that
+ * are new in the suggestion (their id is absent from the previous state),
+ * leaving already-configured columns untouched.
  *
- * "Newly created" means columns whose ids did not exist in the previous
- * datasource state. Columns that the user (or a prior step) already
- * configured are left untouched so chart edits never silently flip a
- * user-set switch.
- *
- * Returns the suggestion state unchanged when no adjustment is needed so the
- * common path stays allocation free.
+ * Returns the suggestion state unchanged when nothing needs to be rewritten.
  */
 export function applyEmptyRowsDefaultsToSuggestionState(
   suggestionState: FormBasedPrivateState,
@@ -183,11 +157,7 @@ export function applyEmptyRowsDefaultsToSuggestionState(
   });
 }
 
-/**
- * Reads the persisted (saved-object) form-based layers from the loaded Lens
- * document, or `undefined` when the document has no form-based datasource
- * state (e.g. a brand new, never-saved visualization).
- */
+/** Form-based layers from the saved object, or `undefined` when never saved. */
 function getPersistedFormBasedLayers(
   persistedDoc: LensDocument | undefined
 ): FormBasedPersistedState['layers'] | undefined {
@@ -198,16 +168,15 @@ function getPersistedFormBasedLayers(
 }
 
 /**
- * Re-applies the opinionated per-visualization `includeEmptyRows` default when
- * the user switches the visualization (chart type, XY series type, or adds a
- * layer through the chart switcher).
+ * Re-applies the target visualization's opinionated `includeEmptyRows` default
+ * when switching chart type (or XY series type) on a saved visualization.
  *
- * A column keeps its current value only when that value is the persisted
- * (saved-object) value; every other column — newly created in the session, or
- * one whose live value diverges from what was saved — is set to the target
- * visualization's opinionated default. This lets a deliberate switch adopt the
- * new chart type's default while still honoring values that came straight from
- * a saved object.
+ * The default is only forced onto a column whose live value diverges from the
+ * value stored in the saved object — i.e. a value the chart-type switch itself
+ * carried over rather than one the user persisted. A column matching its
+ * persisted value, or any column without a persisted baseline (a brand-new,
+ * never-saved visualization, or a column the user configured this session), is
+ * left untouched so a deliberate switch never silently overwrites a user choice.
  *
  * Returns the state reference unchanged when nothing needs to be rewritten.
  */
@@ -221,11 +190,12 @@ export function applyEmptyRowsDefaultsOnTypeSwitch(
 
   return mapBucketColumns(suggestionState, (layerId, columnId, column) => {
     const persistedColumn = persistedLayers?.[layerId]?.columns?.[columnId];
-    if (persistedColumn && BUCKET_OPERATIONS_WITH_EMPTY_ROWS.has(persistedColumn.operationType)) {
-      const persistedValue = normalizeIncludeEmptyRows(getIncludeEmptyRows(persistedColumn));
-      if (persistedValue === normalizeIncludeEmptyRows(getIncludeEmptyRows(column))) {
-        return undefined;
-      }
+    if (!persistedColumn || !BUCKET_OPERATIONS_WITH_EMPTY_ROWS.has(persistedColumn.operationType)) {
+      return undefined;
+    }
+    const persistedValue = normalizeIncludeEmptyRows(getIncludeEmptyRows(persistedColumn));
+    if (persistedValue === normalizeIncludeEmptyRows(getIncludeEmptyRows(column))) {
+      return undefined;
     }
     return targetDefault;
   });

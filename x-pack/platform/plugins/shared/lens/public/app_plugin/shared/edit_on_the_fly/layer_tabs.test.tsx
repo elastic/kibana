@@ -358,10 +358,11 @@ describe('LayerTabs', () => {
         {},
         'newId',
         frame.dataViews.indexPatterns,
-        expect.objectContaining({
+        {
           columnId: 'myColumn',
           groupId: 'testGroup',
           staticValue: 100,
+          activeVisualizationTypeId: 'testVis',
           visualizationGroups: [
             expect.objectContaining({
               accessors: [],
@@ -372,7 +373,7 @@ describe('LayerTabs', () => {
               supportsMoreColumns: true,
             }),
           ],
-        })
+        }
       );
     });
   });
