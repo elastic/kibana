@@ -247,6 +247,11 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsEntityStoreV2: true,
 
   /**
+   * Enables entity ML job behavior maintainer
+   */
+  entityAnalyticsMlJobBehaviorMaintainer: false,
+
+  /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */
@@ -261,6 +266,12 @@ export const allowedExperimentalValues = Object.freeze({
    * records. Both must be enabled for the API to return non-empty results.
    */
   ruleChangesHistoryEnabled: false,
+
+  /**
+   * Enables public Detection Engine attacks REST APIs
+   * (`/api/detection_engine/attacks/*`).
+   */
+  publicAttacksApiEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

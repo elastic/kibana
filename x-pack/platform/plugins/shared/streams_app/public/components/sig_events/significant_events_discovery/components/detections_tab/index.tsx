@@ -33,7 +33,6 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
     name: i18n.translate('xpack.streams.detectionsTab.timestampColumn', {
       defaultMessage: 'Timestamp',
     }),
-    sortable: true,
     render: (timestamp: string) => formatTimestamp(timestamp),
   },
   {
