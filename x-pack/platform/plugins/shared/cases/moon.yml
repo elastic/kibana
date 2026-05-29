@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/test-jest-helpers'
   - '@kbn/config-schema'
+  - '@kbn/config-schema-helpers'
   - '@kbn/task-manager-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/core-saved-objects-server'
