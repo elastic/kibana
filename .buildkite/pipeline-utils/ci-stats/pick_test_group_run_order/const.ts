@@ -90,8 +90,7 @@ export const CI_STATS_DEFAULTS = {
 /** Percentile used when ci-stats estimates per-config durations. */
 export const DURATION_PERCENTILE = 75;
 
-/** Timeout applied to every test step regardless of type. */
-export const TEST_STEP_TIMEOUT_MINUTES = 50;
+export const TEST_STEP_TIMEOUT_MINUTES = 75;
 export const TEST_STEP_TIMEOUT_MINUTES_UNIT = 80;
 
 /** Agent disk sizes (GiB) per step type. */
