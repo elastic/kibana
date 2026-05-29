@@ -12,7 +12,7 @@
  *
  * LayoutProperty is declared inline (not derived from React.CSSProperties) so
  * the published package has no React type dependency.
- * Build-time validation in type_validation.ts keeps this in sync with the source.
+ * No type_validation.ts here — the types are simple enough that tsc catches drift at build time.
  */
 
 export type LayoutComponent =
