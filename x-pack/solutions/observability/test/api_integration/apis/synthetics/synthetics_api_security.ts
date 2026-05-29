@@ -72,7 +72,9 @@ export default function ({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'true')
             .send({});
           expect(statusCodes.includes(resp.status)).to.eql(true, getStatusMessage(resp.status));
-          verifyPermissionsBody(resp, getBodyMessage('[uptime-read]'));
+          // GETs default to `[uptime-read]` but can opt into `writeAccess: true` and require both
+          // privileges (e.g. the diagnostics bundle); use the same computed tags as write methods.
+          verifyPermissionsBody(resp, getBodyMessage());
           break;
         case 'PUT':
           resp = await supertestWithoutAuth
