@@ -317,15 +317,9 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
             }, 0) || undefined
           : undefined;
 
-        // Sum only the alert-retrieval workflows actually shown in this phase
-        // (matched by workflowRunId). The server merges the generation-phase gate
-        // (skill) entry into `alert_retrieval` so its sub-step badge resolves, so
-        // summing the whole array would double-count those alerts under Generation.
         const combinedBadgeLabel = showCombinedEntry
           ? getCombinedAlertsCountBadgeLabel(
-              workflowGroups.map(
-                (group) => findAlertRetrieval(group[0].workflowRunId)?.alerts_context_count ?? null
-              )
+              (pipelineData?.alert_retrieval ?? []).map((entry) => entry.alerts_context_count)
             )
           : null;
 
@@ -411,31 +405,13 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
       const representativeStep = phaseSteps[0];
       const compositeStatus = getCompositeStatus(phaseSteps);
 
-      // The always-on gate (skill) completes DURING the Generation phase, before the
-      // real generate step's tracking entry is indexed. In that window the phase
-      // contains ONLY the completed gate sub-step (the running generation placeholder is
-      // suppressed because the gate already occupies the 'generate_discoveries' phase),
-      // so `getCompositeStatus` reports COMPLETED off the gate alone. The phase has a
-      // *real* generate step only when a sub-step has stepId 'generate_discoveries'
-      // (the managed generation workflow's step / its running placeholder); the gate
-      // never does. Without a real generate step, the phase is not actually complete.
-      const hasRealGenerationStep = phaseSteps.some(
-        (step) => step.stepId === 'generate_discoveries'
-      );
-
-      // When generation has started but the workflow engine hasn't created its internal
-      // step yet, the placeholder step has status PENDING. Override to RUNNING so the UI
-      // shows the generation phase as active rather than not-yet-started. Likewise, when
-      // only the completed gate is present (no real generate step yet), the phase is
-      // still in progress — override COMPLETED to RUNNING so it does not show a premature
-      // green checkmark. A genuine terminal failure (FAILED/TIMED_OUT/etc.) is preserved.
-      const generationLooksPrematurelyDone =
-        !hasRealGenerationStep && compositeStatus === ExecutionStatus.COMPLETED;
-
+      // When generation has started but the workflow engine hasn't created its internal step
+      // yet, the placeholder step has status PENDING. Override to RUNNING so the UI shows
+      // the generation phase as active rather than not-yet-started.
       const effectiveStatus =
         isGenerationStep(representativeStep) &&
         isGenerationStarted &&
-        (compositeStatus === ExecutionStatus.PENDING || generationLooksPrematurelyDone)
+        compositeStatus === ExecutionStatus.PENDING
           ? ExecutionStatus.RUNNING
           : compositeStatus;
 
@@ -467,8 +443,8 @@ const WorkflowPipelineMonitorComponent: React.FC<WorkflowPipelineMonitorProps> =
 
     return [...alertRetrievalStepItems, ...otherStepItems];
   }, [
-    findAlertRetrieval,
     isGenerationStep,
+    pipelineData,
     renderCombinedInspectButton,
     renderDiscoveryCountBadge,
     renderInspectButton,
