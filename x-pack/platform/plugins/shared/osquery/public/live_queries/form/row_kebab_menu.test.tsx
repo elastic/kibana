@@ -197,8 +197,6 @@ describe('RowKebabMenu — export branch', () => {
       fireEvent.click(screen.getByTestId('packQueriesTableKebab-row-1'));
       fireEvent.click(screen.getByTestId('osqueryExportResultsMenuItem'));
 
-      fireEvent.click(screen.getByTestId('osqueryExportFormatSelect'));
-      fireEvent.click(screen.getByText('CSV'));
       fireEvent.click(screen.getByTestId('osqueryExportConfirmButton'));
 
       expect(defaultExportMock.exportResults).toHaveBeenCalledWith('csv', {
