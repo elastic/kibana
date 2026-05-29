@@ -44,9 +44,8 @@ export const getQualityTool = (
       const [coreStart, startPlugins] = await core.getStartServices();
 
       // Phase 1: shared context (rules reverse map + categories) — lazy per-request
-      const { reverseMapResult, categoriesResult, indexToPlatform } = await getSiemReadinessSharedContext(
-        request,
-        async () => {
+      const { reverseMapResult, categoriesResult, indexToPlatform } =
+        await getSiemReadinessSharedContext(request, async () => {
           const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
           const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
             coreStart.savedObjects.getScopedClient(request),
@@ -58,8 +57,7 @@ export const getQualityTool = (
             dataViewsService,
             logger: handlerLogger,
           });
-        }
-      );
+        });
 
       // Phase 2: dimension-specific data (quality check results)
       const payload = await getQuality({

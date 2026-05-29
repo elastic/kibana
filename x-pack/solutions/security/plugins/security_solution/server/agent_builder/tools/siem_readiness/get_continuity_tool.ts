@@ -50,9 +50,8 @@ export const getContinuityTool = (
       const [coreStart, startPlugins] = await core.getStartServices();
 
       // Phase 1: shared context (rules reverse map + categories) — lazy per-request
-      const { reverseMapResult, categoriesResult, indexToPlatform } = await getSiemReadinessSharedContext(
-        request,
-        async () => {
+      const { reverseMapResult, categoriesResult, indexToPlatform } =
+        await getSiemReadinessSharedContext(request, async () => {
           const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
           const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
             coreStart.savedObjects.getScopedClient(request),
@@ -64,8 +63,7 @@ export const getContinuityTool = (
             dataViewsService,
             logger: handlerLogger,
           });
-        }
-      );
+        });
 
       // Phase 2: dimension-specific data (pipelines)
       const payload = await getContinuity({
