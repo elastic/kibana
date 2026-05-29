@@ -21,7 +21,7 @@ import { lazy } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { ExperimentalFeatures, SLOConfig } from '../common/config';
-import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
+import type { SLORouteRepository } from '../server/routes/utils/get_slo_server_route_repository';
 import { registerEmbeddables } from './register_embeddables';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
