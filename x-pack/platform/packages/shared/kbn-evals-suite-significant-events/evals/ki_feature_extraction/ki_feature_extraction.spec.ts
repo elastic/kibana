@@ -8,7 +8,7 @@
 import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { tags } from '@kbn/scout';
-import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
+import { getCurrentTraceId } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {

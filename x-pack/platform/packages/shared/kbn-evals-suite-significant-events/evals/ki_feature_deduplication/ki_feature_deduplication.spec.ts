@@ -8,7 +8,7 @@
 import { identifyFeatures, toPreviouslyIdentifiedFeature } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { tags } from '@kbn/scout';
-import { createSpanLatencyEvaluator, getCurrentTraceId } from '@kbn/evals';
+import { getCurrentTraceId } from '@kbn/evals';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/streams-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
