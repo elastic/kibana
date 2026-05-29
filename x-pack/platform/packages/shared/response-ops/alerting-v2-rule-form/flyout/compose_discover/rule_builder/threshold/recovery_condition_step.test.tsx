@@ -75,7 +75,7 @@ describe('BuilderRecoveryForm', () => {
       recovery: undefined,
     });
 
-    const { container } = render(
+    render(
       <Wrapper builderState={builderState} onBuilderStateChange={setBuilderState}>
         <BuilderRecoveryForm state={createState()} dispatch={dispatch} />
       </Wrapper>
