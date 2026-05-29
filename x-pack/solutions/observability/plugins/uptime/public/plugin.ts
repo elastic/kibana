@@ -130,7 +130,9 @@ export class UptimePlugin
       this.initContext.config.get().experimental || this.experimentalFeatures;
   }
 
-  private uptimeAppUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private uptimeAppUpdater = new BehaviorSubject<AppUpdater>(() => ({
+    status: AppStatus.inaccessible,
+  }));
   private experimentalFeatures: UptimeConfig['experimental'] = {
     ruleFormV2Enabled: false,
   };
