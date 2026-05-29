@@ -434,9 +434,8 @@ paths:
         - Security Lists API
   /api/lists/_find:
     get:
-      description: >-
-        Get a paginated subset of lists. By default, the first page is returned,
-        with 20 results per page.
+      description: Get a paginated subset of lists. By default, the first page is
+        returned, with 20 results per page.
       operationId: FindLists
       parameters:
         - description: The page number to return
@@ -725,8 +724,7 @@ paths:
           required: false
           schema:
             type: string
-        - description: >-
-            Determines when changes made by the request are made visible to
+        - description: Determines when changes made by the request are made visible to
             search
           in: query
           name: refresh
@@ -868,9 +866,8 @@ paths:
                 meta:
                   $ref: '#/components/schemas/ListItemMetadata'
                 refresh:
-                  description: >-
-                    Determines when changes made by the request are made visible
-                    to search
+                  description: Determines when changes made by the request are made visible to
+                    search
                   enum:
                     - 'true'
                     - 'false'
@@ -949,9 +946,8 @@ paths:
                 meta:
                   $ref: '#/components/schemas/ListItemMetadata'
                 refresh:
-                  description: >-
-                    Determines when changes made by the request are made visible
-                    to search
+                  description: Determines when changes made by the request are made visible to
+                    search
                   enum:
                     - 'true'
                     - 'false'
@@ -1284,8 +1280,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ListType'
-        - description: >-
-            Determines when changes made by the request are made visible to
+        - description: Determines when changes made by the request are made visible to
             search
           in: query
           name: refresh
@@ -1303,9 +1298,7 @@ paths:
               type: object
               properties:
                 file:
-                  description: >-
-                    A `.txt` or `.csv` file containing newline separated list
-                    items
+                  description: A `.txt` or `.csv` file containing newline separated list items
                   format: binary
                   type: string
         required: true

@@ -436,7 +436,7 @@ paths:
                     | STATS count = COUNT(*), min_timestamp = MIN(@timestamp)
 
                     | EVAL event_rate = count / DATE_DIFF("seconds",
-                    min_timestamp, NOW())
+                    min_timestamp, NOW()) 
 
                     | KEEP event_rate
               example6:
@@ -548,14 +548,7 @@ paths:
         ...
         ```
 
-
-        Additionally, you can set up notifications for when rules create alerts.
-        The notifications use the [Alerting and Actions
-        framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html).
-        Each action type requires a connector. Connectors store the information
-        required to send notifications via external systems. The following
-        connector types are supported for rule notifications:
-
+        Additionally, you can set up notifications for when rules create alerts. The notifications use the [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html). Each action type requires a connector. Connectors store the information required to send notifications via external systems. The following connector types are supported for rule notifications:
 
         * Slack
         * Email
@@ -568,28 +561,13 @@ paths:
         > info
         > For more information on PagerDuty fields, see [Send a v2 Event](https://developer.pagerduty.com/docs/events-api-v2/trigger-events/).
 
-        To retrieve connector IDs, which are required to configure rule notifications, call the [Find objects API](https://www.elastic.co/docs/api/doc/kibana/operation/operation-findsavedobjects) with `"type": "action"` in the request payload.
+        To retrieve connector IDs, which are required to configure rule notifications, call the [Find objects API](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-find.html) with `"type": "action"` in the request payload.
 
         For detailed information on Kibana actions and alerting, and additional API calls, see:
 
-        To retrieve connector IDs, which are required to configure rule
-        notifications, call the [Find objects
-        API](https://www.elastic.co/guide/en/kibana/current/saved-objects-api-find.html)
-        with `"type": "action"` in the request payload.
-
-
-        For detailed information on Kibana actions and alerting, and additional
-        API calls, see:
-
-
-        * [Alerting
-        API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
-
-        * [Alerting and Actions
-        framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
-
-        * [Connectors
-        API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
+        * [Alerting API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-alerting)
+        * [Alerting and Actions framework](https://www.elastic.co/guide/en/kibana/current/alerting-getting-started.html)
+        * [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
       operationId: CreateRule
       requestBody:
         content:
@@ -1479,7 +1457,7 @@ paths:
 
         The edit action allows you to add, delete, or set tags, index patterns,
         investigation fields, rule actions and schedules for multiple rules at
-        once.
+        once. 
 
         The edit action is idempotent, meaning that if you add a tag to a rule
         that already has that tag, no changes are made. The same is true for
@@ -2013,8 +1991,7 @@ paths:
                             max_signals: 100
                             name: DNS Tunneling [Duplicate]
                             references:
-                              - >-
-                                https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html
+                              - https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html
                             related_integrations: []
                             required_fields: []
                             risk_score: 21
@@ -2686,9 +2663,7 @@ paths:
                     interval: 5m
                     language: kuery
                     name: MS Office child process
-                    query: >-
-                      process.parent.name:EXCEL.EXE or
-                      process.parent.name:MSPUB.EXE or
+                    query: process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or
                       process.parent.name:OUTLOOK.EXE or
                       process.parent.name:POWERPNT.EXE or
                       process.parent.name:VISIO.EXE or
@@ -2750,8 +2725,7 @@ paths:
                   rule_id:
                     $ref: '#/components/schemas/RuleSignatureId'
               type: array
-        description: >-
-          A JSON array of `id` or `rule_id` fields of the rules you want to
+        description: A JSON array of `id` or `rule_id` fields of the rules you want to
           delete.
         required: true
       responses:
@@ -2809,8 +2783,7 @@ paths:
                   rule_id:
                     $ref: '#/components/schemas/RuleSignatureId'
               type: array
-        description: >-
-          A JSON array of `id` or `rule_id` fields of the rules you want to
+        description: A JSON array of `id` or `rule_id` fields of the rules you want to
           delete.
         required: true
       responses:
@@ -2935,11 +2908,10 @@ paths:
             examples:
               example1:
                 value:
-                  - description: >-
-                      Detects when a previously suspended user's account is
-                      renewed in Google Workspace. An adversary may renew a
-                      suspended user account to maintain access to the Google
-                      Workspace organization with a valid account.
+                  - description: Detects when a previously suspended user's account is renewed in
+                      Google Workspace. An adversary may renew a suspended user
+                      account to maintain access to the Google Workspace
+                      organization with a valid account.
                     id: 7d2f5ed8-6c05-44ab-81ce-9160ae147057
                     name: Updated Google Workspace Suspended User Account Renewed
                     risk_score: 21
@@ -2947,13 +2919,11 @@ paths:
                     tags:
                       - new_tag
                     type: query
-                  - description: >-
-                      Identifies the creation of an Amazon Redshift cluster.
-                      Unexpected creation of this cluster by a
-                      non-administrative user may indicate a permission or role
-                      issue with current users. If unexpected, the resource may
-                      not properly be configured and could introduce security
-                      vulnerabilities.
+                  - description: Identifies the creation of an Amazon Redshift cluster. Unexpected
+                      creation of this cluster by a non-administrative user may
+                      indicate a permission or role issue with current users. If
+                      unexpected, the resource may not properly be configured
+                      and could introduce security vulnerabilities.
                     id: 43b2dc3b-4f21-4a10-95e2-0dbc19e6e974
                     name: Updated AWS Redshift Cluster Creation
                     risk_score: 21
@@ -2995,24 +2965,9 @@ paths:
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-
-        > You can use Kibana’s [Saved
-        Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html)
-        UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs
-        (experimental) to
-        [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault)
-        and
-        [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault)
-        any necessary connectors before importing detection rules.
-
-
-        > Similarly, any value lists used for rule exceptions are not included
-        in rule exports or imports. Use the [Manage value
-        lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists)
-        UI (Rules → Detection rules (SIEM) → Manage value lists) to export and
-        import value lists separately.
+        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ExportRules
       parameters:
         - description: Determines whether a summary of the exported rules is returned.
@@ -3293,43 +3248,14 @@ paths:
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
-        > To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/docs/solutions/security/detect-and-alert/detections-privileges) for more information.
+        > To import rules with actions, you need at least Read privileges for the Action and Connectors feature. To overwrite or add new connectors, you need All privileges for the Actions and Connectors feature. To import rules without actions, you don’t need Actions and Connectors privileges. Refer to [Enable and access detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui) for more information.
 
         > info
         > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-        > To import rules with actions, you need at least Read privileges for
-        the Action and Connectors feature. To overwrite or add new connectors,
-        you need All privileges for the Actions and Connectors feature. To
-        import rules without actions, you don’t need Actions and Connectors
-        privileges. Refer to [Enable and access
-        detections](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html#enable-detections-ui)
-        for more information.
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
 
-
-        > info
-
-        > Rule actions and connectors are included in the exported file, but
-        sensitive information about the connector (such as authentication
-        credentials) is not included. You must re-add missing connector details
-        after importing detection rules.
-
-
-        > You can use Kibana’s [Saved
-        Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html)
-        UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs
-        (experimental) to
-        [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault)
-        and
-        [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault)
-        any necessary connectors before importing detection rules.
-
-
-        > Similarly, any value lists used for rule exceptions are not included
-        in rule exports or imports. Use the [Manage value
-        lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists)
-        UI (Rules → Detection rules (SIEM) → Manage value lists) to export and
-        import value lists separately.
+        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
       parameters:
         - description: Determines whether existing rules with the same `rule_id` are
@@ -3459,7 +3385,7 @@ paths:
 
 
         This endpoint allows you to install and update prebuilt detection rules
-        and Timelines provided by Elastic.
+        and Timelines provided by Elastic. 
 
         When you call this endpoint, it will:
 
@@ -3477,7 +3403,7 @@ paths:
 
 
         This ensures that your detection engine is always up-to-date with the
-        latest rules and Timelines,
+        latest rules and Timelines, 
 
         providing you with the most current and effective threat detection
         capabilities.
@@ -3527,7 +3453,7 @@ paths:
     get:
       description: >
         Retrieve the status of all Elastic prebuilt detection rules and
-        Timelines.
+        Timelines. 
 
 
         This endpoint provides detailed information about the number of custom
@@ -3638,9 +3564,8 @@ paths:
                     - $ref: '#/components/schemas/RulePreviewParams'
               discriminator:
                 propertyName: type
-        description: >-
-          An object containing tags to add or remove and alert ids the changes
-          will be applied
+        description: An object containing tags to add or remove and alert ids the
+          changes will be applied
         required: true
       responses:
         '200':
@@ -3915,8 +3840,7 @@ paths:
   /api/detection_engine/signals/migration_status:
     post:
       deprecated: true
-      description: >-
-        Retrieve indices that contain detection alerts of a particular age,
+      description: Retrieve indices that contain detection alerts of a particular age,
         along with migration information for each of those indices.
       operationId: ReadAlertsMigrationStatus
       parameters:
@@ -4111,9 +4035,8 @@ paths:
               required:
                 - ids
                 - tags
-        description: >-
-          An object containing tags to add or remove and alert ids the changes
-          will be applied
+        description: An object containing tags to add or remove and alert ids the
+          changes will be applied
         required: true
       responses:
         '200':
@@ -4342,15 +4265,10 @@ components:
       minimum: 0
       type: integer
     BuildingBlockType:
-      description: >
-        Determines if the rule acts as a building block. If yes, the value must
-        be `default`.
-
-        By default, building-block alerts are not displayed in the UI. These
-        rules are used as a foundation for other rules that do generate alerts.
-
-        For more information, refer to [About building block
-        rules](https://www.elastic.co/guide/en/security/current/building-block-rule.html).
+      description: |
+        Determines if the rule acts as a building block. If yes, the value must be `default`.
+        By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts.
+        For more information, refer to [About building block rules](https://www.elastic.co/guide/en/security/current/building-block-rule.html).
       type: string
     BulkActionEditPayload:
       anyOf:
@@ -4469,7 +4387,7 @@ components:
         - value
     BulkActionEditPayloadSchedule:
       description: >
-        Overwrites schedule of rules.
+        Overwrites schedule of rules. 
 
 
         - `set_schedule` sets a schedule for rules. If the same schedule already
@@ -6725,21 +6643,10 @@ components:
         - $ref: '#/components/schemas/MachineLearningRuleCreateFields'
     MaxSignals:
       default: 100
-      description: >
-        Maximum number of alerts the rule can create during a single run (the
-        rule’s Max alerts per run [advanced
-        setting](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-ui-advanced-params)
-        value).
-
+      description: |
+        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-ui-advanced-params) value).
         > info
-
-        > This setting can be superseded by the [Kibana configuration
-        setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings)
-        `xpack.alerting.rules.run.alerts.max`, which determines the maximum
-        alerts generated by any rule in the Kibana alerting framework. For
-        example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the
-        rule can generate no more than 1000 alerts even if `max_signals` is set
-        higher.
+        > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
       minimum: 1
       type: integer
     MigrationCleanupResult:
@@ -8294,7 +8201,7 @@ components:
         - params
     RuleActionAlertsFilter:
       additionalProperties: true
-      description: >
+      description: >+
         Object containing an action’s conditional filters.
 
 
@@ -8309,7 +8216,7 @@ components:
         gets applied to an action and determines whether the action should run.
             - `kql` (string, required): A KQL string.
             - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
-
+              
       type: object
     RuleActionFrequency:
       description: The action frequency defines when the action runs (for example,
@@ -8420,11 +8327,8 @@ components:
       required:
         - id
     RuleExceptionList:
-      description: >
-        Array of [exception
-        containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html),
-        which define exceptions that prevent the rule from generating alerts
-        even when its other criteria are met.
+      description: |
+        Array of [exception containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html), which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
       type: object
       properties:
         id:
@@ -8675,17 +8579,11 @@ components:
         - invocationCount
         - timeframeEnd
     RuleQuery:
-      description: >
-        [Query](https://www.elastic.co/guide/en/kibana/8.17/search.html) used by
-        the rule to create alerts.
+      description: |
+        [Query](https://www.elastic.co/guide/en/kibana/8.17/search.html) used by the rule to create alerts.
 
-
-        - For indicator match rules, only the query’s results are used to
-        determine whether an alert is generated.
-
-        - ES|QL rules have additional query requirements. Refer to [Create
-        ES|QL](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-esql-rule)
-        rules for more information.
+        - For indicator match rules, only the query’s results are used to determine whether an alert is generated.
+        - ES|QL rules have additional query requirements. Refer to [Create ES|QL](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-esql-rule) rules for more information.
       type: string
     RuleReferenceArray:
       description: Array containing notes about or references to relevant information
@@ -8767,9 +8665,9 @@ components:
         - For prebuilt rules it represents the version of the rule's content in
         the source [detection-rules](https://github.com/elastic/detection-rules)
         repository (and the corresponding `security_detection_engine` Fleet
-        package that is used for distributing prebuilt rules).
+        package that is used for distributing prebuilt rules). 
 
-        - For custom rules it is set to `1` when the rule is created.
+        - For custom rules it is set to `1` when the rule is created. 
 
         > info
 
@@ -8791,8 +8689,7 @@ components:
         - conflict
       type: string
     SavedQueryId:
-      description: >-
-        Kibana [saved
+      description: Kibana [saved
         search](https://www.elastic.co/guide/en/kibana/current/save-open-search.html)
         used by the rule to create alerts.
       type: string
@@ -9478,7 +9375,7 @@ components:
         - type: must be mapping
 
         - value: field from the Elasticsearch threat index
-
+          
         You can use Boolean and and or logic to define the conditions for when
         matching fields and values generate alerts. Sibling entries objects are
         evaluated using or logic, whereas multiple entries in a single entries

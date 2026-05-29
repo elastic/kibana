@@ -183,7 +183,7 @@ paths:
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
       description: >
-        Download a file from an endpoint.
+        Download a file from an endpoint. 
 
         > info
 
@@ -1696,8 +1696,7 @@ components:
       type: object
       properties:
         parameters:
-          description: >-
-            Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided.
+          description: Exactly one of 'Raw', 'HostPath', or 'CloudFile' must be provided.
             CommandLine and Timeout are optional for all.
           oneOf:
             - $ref: '#/components/schemas/RawScriptParameters'
@@ -1995,8 +1994,7 @@ components:
         - minLength: 1
           type: string
     WithOutputs:
-      description: >-
-        A list of action IDs that should include the complete output of the
+      description: A list of action IDs that should include the complete output of the
         action.
       example:
         - action-id-1

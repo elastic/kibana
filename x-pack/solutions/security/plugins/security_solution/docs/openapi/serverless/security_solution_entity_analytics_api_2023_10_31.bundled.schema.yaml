@@ -342,8 +342,7 @@ paths:
                   $ref: '#/components/schemas/IndexPattern'
                 lookbackPeriod:
                   default: 24h
-                  description: >-
-                    The amount of time the transform looks back to calculate the
+                  description: The amount of time the transform looks back to calculate the
                     aggregations.
                   pattern: '[smdh]$'
                   type: string
@@ -573,8 +572,7 @@ paths:
                   $ref: '#/components/schemas/IndexPattern'
                 lookbackPeriod:
                   default: 24h
-                  description: >-
-                    The amount of time the transform looks back to calculate the
+                  description: The amount of time the transform looks back to calculate the
                     aggregations.
                   pattern: '[smdh]$'
                   type: string
@@ -1491,9 +1489,8 @@ components:
         - service
       type: string
     HostEntity:
-      description: >-
-        An entity record representing a host, stored in the Entity Store latest
-        index.
+      description: An entity record representing a host, stored in the Entity Store
+        latest index.
       type: object
       properties:
         '@timestamp':
@@ -1663,8 +1660,7 @@ components:
         - description
         - category
     ServiceEntity:
-      description: >-
-        An entity record representing a service, stored in the Entity Store
+      description: An entity record representing a service, stored in the Entity Store
         latest index.
       type: object
       properties:
@@ -1732,9 +1728,8 @@ components:
         - status_code
         - message
     UserEntity:
-      description: >-
-        An entity record representing a user, stored in the Entity Store latest
-        index.
+      description: An entity record representing a user, stored in the Entity Store
+        latest index.
       type: object
       properties:
         '@timestamp':
