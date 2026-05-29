@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-views-plugin'
+  - '@kbn/as-code-data-views-schema'
+  - '@kbn/as-code-data-views-transforms'
 tags:
   - plugin
   - prod
