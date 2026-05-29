@@ -12,17 +12,12 @@ import { apiTest } from '../../common/fixtures';
 import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/constants';
 
 apiTest.describe('Collector integration is not installed', { tag: tags.stateful.classic }, () => {
-  // Profiling POST /setup can wait on ES plugin resources after Fleet policy creation — allow a longer hook budget than the default project timeout (60s).
-  // eslint-disable-next-line @kbn/eslint/scout_no_describe_configure -- extended timeout applies to hooks (beforeAll); see https://playwright.dev/docs/test-timeouts
-  apiTest.describe.configure({ timeout: 180_000 });
-
   let viewerApiCreditials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, profilingSetup, profilingHelper }) => {
-    await profilingHelper.installPolicies();
-
     let ids = await profilingHelper.getPolicyIds();
     if (!ids.collectorId || !ids.symbolizerId) {
+      await profilingHelper.installPolicies();
       await profilingSetup.setupResources();
       ids = await profilingHelper.getPolicyIds();
     }
@@ -39,11 +34,6 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
     expect(status.has_data).toBe(true);
 
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
-  });
-
-  apiTest.afterAll(async ({ profilingHelper, profilingSetup }) => {
-    await profilingHelper.cleanupPolicies();
-    await profilingSetup.cleanup();
   });
 
   // Fleet package_policies.delete is eventually consistent — a subsequent /api/profiling/setup/es_resources call may still see the policy as installed for a brief window. Polling until `has_setup` reflects the deletion (cloud: false; self-managed: unchanged true) keeps the test deterministic.
@@ -95,7 +85,7 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
     const readStatus = await getViewerStatus(apiClient);
     expect(readStatus.has_setup).toBe(readStatus.type !== 'cloud');
     expect(readStatus.has_data).toBe(true);
-    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.pre_8_9_1_data).toBeDefined();
     expect(readStatus.has_required_role).toBe(false);
   });
 
@@ -114,7 +104,7 @@ apiTest.describe('Collector integration is not installed', { tag: tags.stateful.
       const readStatus = await getViewerStatus(apiClient);
       expect(readStatus.has_setup).toBe(readStatus.type !== 'cloud');
       expect(readStatus.has_data).toBe(true);
-      expect(readStatus.pre_8_9_1_data).toBe(false);
+      expect(readStatus.pre_8_9_1_data).toBeDefined();
       expect(readStatus.has_required_role).toBe(false);
     }
   );

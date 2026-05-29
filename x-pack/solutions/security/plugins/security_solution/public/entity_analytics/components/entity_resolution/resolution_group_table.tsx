@@ -92,24 +92,28 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
           const isThisEntityRemoving = removingEntityId === entityId;
 
           const expandButton = (
-            <EuiButtonIcon
-              iconType="expand"
-              color={isCurrentEntity ? 'text' : 'primary'}
-              aria-label={EXPAND_ENTITY_BUTTON}
-              disabled={isCurrentEntity}
-              onClick={() => onEntityNameClick?.(entity)}
-            />
+            <EuiToolTip content={EXPAND_ENTITY_BUTTON} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="expand"
+                color={isCurrentEntity ? 'text' : 'primary'}
+                aria-label={EXPAND_ENTITY_BUTTON}
+                disabled={isCurrentEntity}
+                onClick={() => onEntityNameClick?.(entity)}
+              />
+            </EuiToolTip>
           );
 
           const removeButton = (
-            <EuiButtonIcon
-              iconType="cross"
-              color="primary"
-              aria-label={REMOVE_ENTITY_BUTTON}
-              disabled={isTarget || !!removingEntityId}
-              onClick={() => onRemoveEntity?.(entityId)}
-              isLoading={isThisEntityRemoving}
-            />
+            <EuiToolTip content={REMOVE_ENTITY_BUTTON} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                color="primary"
+                aria-label={REMOVE_ENTITY_BUTTON}
+                disabled={isTarget || !!removingEntityId}
+                onClick={() => onRemoveEntity?.(entityId)}
+                isLoading={isThisEntityRemoving}
+              />
+            </EuiToolTip>
           );
 
           return (
@@ -139,11 +143,11 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
 
           const nameContent =
             onEntityNameClick && !isCurrentEntity && !showActions ? (
-              <EuiText size="xs" css={truncatedCellCss}>
-                <EuiLink onClick={() => onEntityNameClick(entity)} title={name}>
-                  {name}
-                </EuiLink>
-              </EuiText>
+              <EuiToolTip content={name}>
+                <EuiText size="xs" css={truncatedCellCss}>
+                  <EuiLink onClick={() => onEntityNameClick(entity)}>{name}</EuiLink>
+                </EuiText>
+              </EuiToolTip>
             ) : (
               <EuiText size="xs" css={truncatedCellCss}>
                 {name}
