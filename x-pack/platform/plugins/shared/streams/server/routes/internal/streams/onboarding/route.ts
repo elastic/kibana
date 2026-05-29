@@ -32,7 +32,7 @@ export const onboardingExecuteRoute = createServerRoute({
     access: 'internal',
     summary: 'Onboard stream',
     description:
-      'Generate features and queries for a stream, the data that is necessary for insights discovery.',
+      'Generate features and queries for a stream as part of the significant events discovery workflow.',
   },
   security: {
     authz: {

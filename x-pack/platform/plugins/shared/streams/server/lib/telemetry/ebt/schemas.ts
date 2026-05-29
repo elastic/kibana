@@ -10,7 +10,6 @@ import type {
   StreamEndpointLatencyProps,
   StreamsDescriptionGeneratedProps,
   StreamsSignificantEventsQueriesGeneratedProps,
-  StreamsInsightsGeneratedProps,
   StreamsStateErrorProps,
   StreamsProcessingPipelineSuggestedProps,
   StreamsFeaturesIdentifiedProps,
@@ -18,6 +17,7 @@ import type {
   StreamsAgentToolKiIdentificationStartedProps,
   StreamsAgentToolEventCreateProps,
   StreamsAgentToolEventStatusUpdateProps,
+  StreamsSignificantEventsDiscoveryTriggeredProps,
 } from './types';
 
 const streamsEndpointLatencySchema: RootSchema<StreamEndpointLatencyProps> = {
@@ -181,28 +181,6 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
       },
     },
   };
-
-const streamsInsightsGeneratedSchema: RootSchema<StreamsInsightsGeneratedProps> = {
-  input_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of input tokens used for the generation request',
-    },
-  },
-  output_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of output tokens used for the generation request',
-    },
-  },
-  cached_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of cached tokens used for the generation request',
-      optional: true,
-    },
-  },
-};
 
 const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipelineSuggestedProps> =
   {
@@ -477,16 +455,32 @@ const streamsAgentToolEventStatusUpdateSchema: RootSchema<StreamsAgentToolEventS
     },
   };
 
+const streamsSignificantEventsDiscoveryTriggeredSchema: RootSchema<StreamsSignificantEventsDiscoveryTriggeredProps> =
+  {
+    triggered_by: {
+      type: 'keyword',
+      _meta: { description: 'What triggered the sig-events discovery pipeline' },
+    },
+    execution_id: {
+      type: 'keyword',
+      _meta: { description: 'Workflow execution ID returned by the orchestrator' },
+    },
+    space_id: {
+      type: 'keyword',
+      _meta: { description: 'Kibana space ID in which the pipeline was triggered' },
+    },
+  };
+
 export {
   streamsEndpointLatencySchema,
   streamsStateErrorSchema,
   streamsDescriptionGeneratedSchema,
   streamsSignificantEventsQueriesGeneratedSchema,
-  streamsInsightsGeneratedSchema,
   streamsProcessingPipelineSuggestedSchema,
   streamsFeaturesIdentifiedSchema,
   streamsAgentBuilderKnowledgeIndicatorCreatedSchema,
   streamsAgentToolKiIdentificationStartedSchema,
   streamsAgentToolEventCreateSchema,
   streamsAgentToolEventStatusUpdateSchema,
+  streamsSignificantEventsDiscoveryTriggeredSchema,
 };

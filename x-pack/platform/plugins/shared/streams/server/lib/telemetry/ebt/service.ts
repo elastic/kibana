@@ -11,13 +11,13 @@ import {
   streamsStateErrorEventType,
   streamsDescriptionGeneratedEventType,
   streamsSignificantEventsGeneratedEventType,
-  streamsInsightsGeneratedEventType,
   streamsProcessingPipelineSuggestedEventType,
   streamsFeaturesIdentifiedEventType,
   streamsAgentBuilderKnowledgeIndicatorCreatedEventType,
   streamsAgentToolKiIdentificationStartedEventType,
   streamsAgentToolEventCreateEventType,
   streamsAgentToolEventStatusUpdateEventType,
+  streamsSignificantEventsDiscoveryTriggeredEventType,
 } from './events';
 import { EbtTelemetryClient } from './client';
 
@@ -32,13 +32,13 @@ export class EbtTelemetryService {
     this.analytics.registerEventType(streamsStateErrorEventType);
     this.analytics.registerEventType(streamsDescriptionGeneratedEventType);
     this.analytics.registerEventType(streamsSignificantEventsGeneratedEventType);
-    this.analytics.registerEventType(streamsInsightsGeneratedEventType);
     this.analytics.registerEventType(streamsProcessingPipelineSuggestedEventType);
     this.analytics.registerEventType(streamsFeaturesIdentifiedEventType);
     this.analytics.registerEventType(streamsAgentBuilderKnowledgeIndicatorCreatedEventType);
     this.analytics.registerEventType(streamsAgentToolKiIdentificationStartedEventType);
     this.analytics.registerEventType(streamsAgentToolEventCreateEventType);
     this.analytics.registerEventType(streamsAgentToolEventStatusUpdateEventType);
+    this.analytics.registerEventType(streamsSignificantEventsDiscoveryTriggeredEventType);
   }
 
   public getClient() {

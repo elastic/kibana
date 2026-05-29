@@ -62,11 +62,10 @@ import type { FeatureClient } from './lib/streams/feature/feature_client';
 import type { QueryClient } from './lib/streams/assets/query/query_client';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
-import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
+import { MemoryTriggerRegistry } from './lib/memory/triggers';
 import { TaskService } from './lib/tasks/task_service';
 import { CONVERSATION_SCRAPER_TASK_TYPE } from './lib/tasks/task_definitions/conversation_scraper';
 import { MEMORY_CONSOLIDATION_TASK_TYPE } from './lib/tasks/task_definitions/memory_consolidation';
-import { InsightService } from './lib/sig_events/insights/client/insight_service';
 import {
   createSignificantEventsClients,
   createSignificantEventsServices,
@@ -159,7 +158,6 @@ export class StreamsPlugin
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const featureService = new FeatureService(core, this.logger);
-    const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
@@ -187,12 +185,11 @@ export class StreamsPlugin
         this.logger
       );
 
-      const [attachmentClient, insightClient, contentClient, tuningConfig] = await Promise.all([
+      const [attachmentClient, contentClient, tuningConfig] = await Promise.all([
         attachmentService.getClient({
           soClient,
           rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
         }),
-        insightService.getInternalClient(),
         contentService.getClient(),
         getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
@@ -298,7 +295,6 @@ export class StreamsPlugin
         streamsClient,
         getFeatureClient,
         ...significantEventsClients,
-        insightClient,
         inferenceClient,
         contentClient,
         getQueryClient,
@@ -599,9 +595,12 @@ export class StreamsPlugin
       this.server.taskManager = plugins.taskManager;
       this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
 
-      // Set up memory trigger registry with all built-in triggers
+      // Set up memory trigger registry
+      // TODO: Register a trigger that synthesizes memory from promoted significant events
+      // after the triage pipeline completes. The old `discoveryCompletedTrigger` was removed
+      // along with the Insights feature. A replacement trigger fed by the new managed workflows
+      // (significant events verdicts) will be wired here in a follow-up PR.
       const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
-      memoryTriggerRegistry.register(discoveryCompletedTrigger);
       this.server.memoryTriggerRegistry = memoryTriggerRegistry;
 
       // Set up recurring memory tasks (conversation scraper + consolidation).

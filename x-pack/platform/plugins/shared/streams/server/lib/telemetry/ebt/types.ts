@@ -38,12 +38,6 @@ interface StreamsSignificantEventsQueriesGeneratedProps {
   tool_usage: SignificantEventsToolUsage;
 }
 
-interface StreamsInsightsGeneratedProps {
-  input_tokens_used: number;
-  output_tokens_used: number;
-  cached_tokens_used?: number;
-}
-
 interface StreamsProcessingPipelineSuggestedProps {
   duration_ms: number;
   steps_used: number;
@@ -101,17 +95,22 @@ interface StreamsAgentToolEventStatusUpdateProps {
   status: SigEventStatus;
   error_message?: string;
 }
+interface StreamsSignificantEventsDiscoveryTriggeredProps {
+  triggered_by: 'manual' | 'cron';
+  execution_id: string;
+  space_id: string;
+}
 
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
   type StreamsDescriptionGeneratedProps,
   type StreamsSignificantEventsQueriesGeneratedProps,
-  type StreamsInsightsGeneratedProps,
   type StreamsProcessingPipelineSuggestedProps,
   type StreamsFeaturesIdentifiedProps,
   type StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
   type StreamsAgentToolKiIdentificationStartedProps,
   type StreamsAgentToolEventCreateProps,
   type StreamsAgentToolEventStatusUpdateProps,
+  type StreamsSignificantEventsDiscoveryTriggeredProps,
 };

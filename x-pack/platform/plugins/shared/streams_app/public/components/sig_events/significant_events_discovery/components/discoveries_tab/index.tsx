@@ -23,6 +23,9 @@ import {
 } from '../../../../../hooks/sig_events/use_fetch_discoveries_entities';
 import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
 import { DiscoveryFlyout } from './discovery_flyout';
+import { useDiscoveryWorkflow } from '../../../../../hooks/sig_events/use_discovery_workflow';
+import { RunDiscoveryEmptyPrompt } from '../shared/run_discovery_empty_prompt';
+import { DISCOVERIES_EMPTY_PROMPT_TITLE } from '../shared/translations';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { DISCOVERY_KIND_LABELS } from '../shared/translations';
 import { DISCOVERY_KIND_COLORS } from '../shared/constants';
@@ -106,6 +109,7 @@ const DEFAULT_DISCOVERIES_RANGE = { from: 'now-7d', to: 'now' };
 export const DiscoveriesTab = () => {
   const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
     useTabTimeRange(DEFAULT_DISCOVERIES_RANGE);
+  const { isRunning, handleRun } = useDiscoveryWorkflow();
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchDiscoveriesEntities({
     from: absoluteRange.from,
@@ -150,27 +154,38 @@ export const DiscoveriesTab = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBasicTable
-          tableCaption={i18n.translate('xpack.streams.discoveriesTab.tableCaption', {
-            defaultMessage: 'Discoveries',
-          })}
-          items={data?.hits ?? []}
-          columns={columns}
-          pagination={euiPagination}
-          onChange={onTableChange}
-          loading={isLoading}
-          noItemsMessage={i18n.translate('xpack.streams.discoveriesTab.emptyBody', {
-            defaultMessage: 'No discoveries found.',
-          })}
-          rowProps={(item) => ({
-            onClick: () => setSelectedDiscovery(item),
-            css: css`
-              cursor: pointer;
-            `,
-          })}
-        />
-      </EuiFlexItem>
+      {!isLoading && data?.total === 0 ? (
+        <EuiFlexItem>
+          <RunDiscoveryEmptyPrompt
+            title={DISCOVERIES_EMPTY_PROMPT_TITLE}
+            onRun={handleRun}
+            isRunning={isRunning}
+            runTestSubj="discoveries_run_discovery_empty_button"
+          />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <EuiBasicTable
+            tableCaption={i18n.translate('xpack.streams.discoveriesTab.tableCaption', {
+              defaultMessage: 'Discoveries',
+            })}
+            items={data?.hits ?? []}
+            columns={columns}
+            pagination={euiPagination}
+            onChange={onTableChange}
+            loading={isLoading}
+            noItemsMessage={i18n.translate('xpack.streams.discoveriesTab.emptyBody', {
+              defaultMessage: 'No discoveries found.',
+            })}
+            rowProps={(item) => ({
+              onClick: () => setSelectedDiscovery(item),
+              css: css`
+                cursor: pointer;
+              `,
+            })}
+          />
+        </EuiFlexItem>
+      )}
       {selectedDiscovery && (
         <DiscoveryFlyout
           discovery={selectedDiscovery}

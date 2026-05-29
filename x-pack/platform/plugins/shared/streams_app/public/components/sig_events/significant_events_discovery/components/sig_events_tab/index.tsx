@@ -10,6 +10,7 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import {
   EuiBasicTable,
   EuiBadge,
+  EuiButton,
   EuiCallOut,
   EuiFieldSearch,
   EuiFilterGroup,
@@ -29,10 +30,13 @@ import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useTimeRangeUpdate } from '../../../../../hooks/use_time_range_update';
 import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
+import { useDiscoveryWorkflow } from '../../../../../hooks/sig_events/use_discovery_workflow';
 import { SigEventFlyout } from './sig_event_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { FilterPopover } from './filter_popover';
 import { getStatusColor } from './filter_constants';
+import { RunDiscoveryEmptyPrompt } from '../shared/run_discovery_empty_prompt';
+import { FIND_SIGNIFICANT_EVENTS_LABEL } from '../shared/translations';
 
 const MAX_VISIBLE_STREAMS = 3;
 
@@ -58,6 +62,10 @@ const EMPTY_MESSAGE = i18n.translate('xpack.streams.sigEventsTab.emptyBody', {
 const MORE_LABEL = i18n.translate('xpack.streams.sigEventsTab.moreLabel', {
   defaultMessage: 'more',
 });
+const RUN_DISCOVERY_RUNNING_LABEL = i18n.translate(
+  'xpack.streams.sigEventsTab.runDiscoveryRunning',
+  { defaultMessage: 'Running discovery...' }
+);
 
 const columns: Array<EuiBasicTableColumn<SigEvent>> = [
   {
@@ -159,6 +167,7 @@ export const SigEventsTab = () => {
   const { rangeFrom, rangeTo } = useTimeRange();
   const { updateTimeRange } = useTimeRangeUpdate();
   const { filteredStreams } = useKiGeneration();
+  const { isRunning, handleRun } = useDiscoveryWorkflow();
 
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [streamFilter, setStreamFilter] = useState<string[]>([]);
@@ -269,6 +278,18 @@ export const SigEventsTab = () => {
               showUpdateButton="iconOnly"
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              iconType="sparkles"
+              onClick={handleRun}
+              isDisabled={isRunning}
+              isLoading={isRunning}
+              data-test-subj="sig_events_run_discovery_button"
+            >
+              {isRunning ? RUN_DISCOVERY_RUNNING_LABEL : FIND_SIGNIFICANT_EVENTS_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       {isError && (
@@ -282,26 +303,36 @@ export const SigEventsTab = () => {
           />
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
-        <EuiBasicTable<SigEvent>
-          tableCaption={TABLE_CAPTION}
-          items={data?.hits ?? []}
-          columns={columns}
-          pagination={{
-            pageIndex: pagination.page - 1,
-            pageSize: pagination.perPage,
-            totalItemCount: data?.total ?? 0,
-            pageSizeOptions: [10, 25, 50],
-          }}
-          onChange={onTableChange}
-          loading={isLoading}
-          rowProps={(item) => ({
-            onClick: () => setSelectedEvent(item),
-            css: clickableRowCss,
-          })}
-          noItemsMessage={isLoading ? LOADING_MESSAGE : EMPTY_MESSAGE}
-        />
-      </EuiFlexItem>
+      {!isLoading && data?.total === 0 ? (
+        <EuiFlexItem>
+          <RunDiscoveryEmptyPrompt
+            onRun={handleRun}
+            isRunning={isRunning}
+            runTestSubj="sig_events_run_discovery_empty_button"
+          />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <EuiBasicTable<SigEvent>
+            tableCaption={TABLE_CAPTION}
+            items={data?.hits ?? []}
+            columns={columns}
+            pagination={{
+              pageIndex: pagination.page - 1,
+              pageSize: pagination.perPage,
+              totalItemCount: data?.total ?? 0,
+              pageSizeOptions: [10, 25, 50],
+            }}
+            onChange={onTableChange}
+            loading={isLoading}
+            rowProps={(item) => ({
+              onClick: () => setSelectedEvent(item),
+              css: clickableRowCss,
+            })}
+            noItemsMessage={isLoading ? LOADING_MESSAGE : EMPTY_MESSAGE}
+          />
+        </EuiFlexItem>
+      )}
       {selectedEvent && (
         <SigEventFlyout event={selectedEvent} onClose={() => setSelectedEvent(undefined)} />
       )}

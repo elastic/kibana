@@ -8,7 +8,6 @@
 import type { Logger } from '@kbn/logging';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { InsightClient } from '../../sig_events/insights/client/insight_client';
 import type { MemoryService } from '../types';
 
 /**
@@ -47,10 +46,6 @@ export interface MemoryUpdateContext {
    * Elasticsearch client for triggers that need to run ES|QL or other queries.
    */
   esClient?: ElasticsearchClient;
-  /**
-   * Insight client for triggers that need to read insights/KIs.
-   */
-  insightClient?: InsightClient;
   /**
    * An optional AbortSignal that triggers can check to support task cancellation.
    */

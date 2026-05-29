@@ -100,46 +100,8 @@ export const ONBOARDING_FAILURE_TITLE = i18n.translate(
   }
 );
 
-export const DISCOVER_INSIGHTS_BUTTON_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsButtonLabel',
-  {
-    defaultMessage: 'Discover Insights',
-  }
-);
-
-export const INSIGHTS_SCHEDULING_FAILURE_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.insightsSchedulingErrorTitle',
-  {
-    defaultMessage: 'Could not start Insights generation',
-  }
-);
-
-export function getInsightsCompleteToastTitle(count: number): string {
-  return i18n.translate(
-    'xpack.streams.significantEventsDiscovery.streamsView.insightsCompleteToastTitle',
-    {
-      defaultMessage: '{count} {count, plural, one {Insight} other {Insights}} found',
-      values: { count },
-    }
-  );
-}
-
-export const INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.insightsCompleteToastViewButton',
-  {
-    defaultMessage: 'View Insights',
-  }
-);
-
-export const NO_INSIGHTS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.noInsightsToastTitle',
-  {
-    defaultMessage: 'No Insights found',
-  }
-);
-
 export const DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.streamsView.discoverInsightsConfigAriaLabel',
+  'xpack.streams.significantEventsDiscovery.streamsView.findSignificantEventsConfigAriaLabel',
   {
     defaultMessage: 'Configure discovery model',
   }

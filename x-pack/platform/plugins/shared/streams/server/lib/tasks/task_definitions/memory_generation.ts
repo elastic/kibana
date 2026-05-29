@@ -6,7 +6,7 @@
  */
 
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
-import type { BaseFeature, GeneratedSignificantEventQuery, Insight } from '@kbn/streams-schema';
+import type { BaseFeature, GeneratedSignificantEventQuery } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { isSignificantEventsMemoryEnabled } from '../../memory/is_significant_events_memory_enabled';
 import type { TaskContext } from '.';
@@ -17,7 +17,6 @@ import { resolveConnectorForSignificantEventsDiscovery } from '../../../routes/u
 import { generateMemory } from '../../sig_events/memory_generation';
 
 export interface MemoryGenerationTaskParams {
-  insights?: Insight[];
   features?: BaseFeature[];
   queries?: Array<{ streamName: string; query: GeneratedSignificantEventQuery }>;
 }
@@ -39,7 +38,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const { insights, features, queries, _task } = runContext.taskInstance
+              const { features, queries, _task } = runContext.taskInstance
                 .params as TaskParams<MemoryGenerationTaskParams>;
 
               const { taskClient, inferenceClient, scopedClusterClient } =
@@ -57,7 +56,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
                 taskLogger.info('Memory is disabled, skipping memory generation');
                 await taskClient.complete<MemoryGenerationTaskParams, MemoryGenerationTaskResult>(
                   _task,
-                  { insights, features, queries },
+                  { features, queries },
                   { streamsProcessed: 0 }
                 );
                 return;
@@ -73,7 +72,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
 
               try {
                 const result = await generateMemory(
-                  { insights, features, queries },
+                  { features, queries },
                   {
                     inferenceClient,
                     connectorId,
@@ -85,7 +84,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
 
                 await taskClient.complete<MemoryGenerationTaskParams, MemoryGenerationTaskResult>(
                   _task,
-                  { insights, features, queries },
+                  { features, queries },
                   { streamsProcessed: result.streamsProcessed }
                 );
               } catch (error) {
@@ -102,7 +101,7 @@ export function createStreamsMemoryGenerationTask(taskContext: TaskContext) {
 
                 await taskClient.fail<MemoryGenerationTaskParams>(
                   _task,
-                  { insights, features, queries },
+                  { features, queries },
                   errorMessage
                 );
 

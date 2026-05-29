@@ -260,7 +260,6 @@ export default function ({ getService }: FtrProviderContext) {
         'streams_conversation_scraper',
         'streams_description_generation',
         'streams_features_identification',
-        'streams_insights_discovery',
         'streams_memory_consolidation',
         'streams_memory_generation',
         'streams_memory_update',

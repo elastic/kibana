@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
-import type { BaseFeature, GeneratedSignificantEventQuery, Insight } from '@kbn/streams-schema';
+import type { BaseFeature, GeneratedSignificantEventQuery } from '@kbn/streams-schema';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { EMPTY_TOKENS, sumTokens } from '@kbn/streams-ai';
 import {
@@ -19,7 +19,6 @@ import {
 import { MemorySynthesisPrompt } from '../tasks/task_definitions/memory_generation_prompt';
 
 export interface MemoryGenerationParams {
-  insights?: Insight[];
   features?: BaseFeature[];
   queries?: Array<{ streamName: string; query: GeneratedSignificantEventQuery }>;
 }
@@ -37,7 +36,7 @@ interface MemoryGenerationDependencies {
   signal: AbortSignal;
 }
 
-type MemoryIndicator = Insight | BaseFeature | GeneratedSignificantEventQuery;
+type MemoryIndicator = BaseFeature | GeneratedSignificantEventQuery;
 
 interface StreamIndicatorsGroup {
   streamName: string;
@@ -49,9 +48,9 @@ export async function generateMemory(
   deps: MemoryGenerationDependencies
 ): Promise<MemoryGenerationResult> {
   const { inferenceClient, connectorId, esClient, logger, signal } = deps;
-  const { insights, features, queries } = params;
+  const { features, queries } = params;
 
-  const streamGroups = groupInputsByStream({ insights, features, queries });
+  const streamGroups = groupInputsByStream({ features, queries });
 
   if (streamGroups.length === 0) {
     logger.info('No inputs provided, skipping memory generation');
@@ -60,7 +59,6 @@ export async function generateMemory(
 
   logger.info(
     `Starting memory generation: ${streamGroups.length} stream(s), ` +
-      `${insights?.length ?? 0} insight(s), ` +
       `${features?.length ?? 0} feature(s), ` +
       `${queries?.length ?? 0} query/queries`
   );
@@ -155,10 +153,9 @@ export async function generateMemory(
 }
 
 const groupInputsByStream = ({
-  insights,
   features,
   queries,
-}: Pick<MemoryGenerationParams, 'insights' | 'features' | 'queries'>): StreamIndicatorsGroup[] => {
+}: Pick<MemoryGenerationParams, 'features' | 'queries'>): StreamIndicatorsGroup[] => {
   const byStream = new Map<string, MemoryIndicator[]>();
 
   const addToStream = (streamName: string, item: MemoryIndicator) => {
@@ -166,18 +163,6 @@ const groupInputsByStream = ({
     existing.push(item);
     byStream.set(streamName, existing);
   };
-
-  for (const insight of insights ?? []) {
-    const streamNames = new Set<string>();
-    for (const evidence of insight.evidence ?? []) {
-      if (evidence.stream_name) {
-        streamNames.add(evidence.stream_name);
-      }
-    }
-    for (const streamName of streamNames) {
-      addToStream(streamName, insight);
-    }
-  }
 
   for (const feature of features ?? []) {
     addToStream(feature.stream_name, feature);
@@ -196,11 +181,6 @@ const groupInputsByStream = ({
 const buildIndicatorSummaries = (indicators: MemoryIndicator[]): string => {
   return indicators
     .map((item, index) => {
-      if ('impact' in item && 'evidence' in item) {
-        const title = item.title ?? 'Untitled insight';
-        return `[${index}] **Insight** (${item.impact}): ${title}`;
-      }
-
       if ('type' in item && 'stream_name' in item && 'confidence' in item) {
         const title = item.title ?? item.id ?? 'Untitled feature';
         const subtype = item.subtype ? `/${item.subtype}` : '';

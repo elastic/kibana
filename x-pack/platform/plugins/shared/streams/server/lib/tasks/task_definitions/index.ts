@@ -11,7 +11,6 @@ import type { ReadOnlyConversationClient } from '@kbn/agent-builder-server';
 import type { GetScopedClients } from '../../../routes/types';
 import type { StreamsServer } from '../../../types';
 import { createStreamsDescriptionGenerationTask } from './description_generation';
-import { createStreamsInsightsDiscoveryTask } from '../../sig_events/tasks/insights_discovery';
 import { createStreamsSignificantEventsQueriesGenerationTask } from '../../sig_events/tasks/significant_events_queries_generation';
 import type { EbtTelemetryClient } from '../../telemetry';
 import { createStreamsFeaturesIdentificationTask } from './features_identification';
@@ -37,7 +36,6 @@ export function createTaskDefinitions(taskContext: TaskContext) {
     ...createStreamsDescriptionGenerationTask(taskContext),
     ...createStreamsSignificantEventsQueriesGenerationTask(taskContext),
     ...createStreamsFeaturesIdentificationTask(taskContext),
-    ...createStreamsInsightsDiscoveryTask(taskContext),
     ...createStreamsOnboardingTask(taskContext),
     ...createStreamsMemoryGenerationTask(taskContext),
     ...createStreamsMemoryUpdateTask(taskContext),

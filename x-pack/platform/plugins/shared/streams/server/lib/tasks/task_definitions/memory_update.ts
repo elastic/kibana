@@ -15,7 +15,6 @@ import { getErrorMessage } from '../../streams/errors/parse_error';
 import { resolveConnectorForSignificantEventsDiscovery } from '../../../routes/utils/resolve_connector_for_feature';
 import { MemoryServiceImpl } from '../../memory';
 import { MemoryTriggerRegistry } from '../../memory/triggers';
-import { discoveryCompletedTrigger } from '../../memory/triggers';
 
 export interface MemoryUpdateTaskParams {
   triggerId: string;
@@ -49,7 +48,7 @@ export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
                 `Starting memory update task for trigger "${triggerId}" (task ${runContext.taskInstance.id})`
               );
 
-              const { taskClient, inferenceClient, insightClient, scopedClusterClient } =
+              const { taskClient, inferenceClient, scopedClusterClient } =
                 await taskContext.getScopedClients({
                   request: runContext.fakeRequest,
                 });
@@ -85,7 +84,6 @@ export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
 
               // Create a local trigger registry for this task execution
               const registry = new MemoryTriggerRegistry({ logger: taskLogger });
-              registry.register(discoveryCompletedTrigger);
 
               try {
                 taskLogger.info(
@@ -99,7 +97,6 @@ export function createStreamsMemoryUpdateTask(taskContext: TaskContext) {
                   logger: taskLogger,
                   inferenceClient: boundInferenceClient,
                   esClient: scopedClusterClient.asCurrentUser,
-                  insightClient,
                   payload,
                   abortSignal: runContext.abortController.signal,
                 });

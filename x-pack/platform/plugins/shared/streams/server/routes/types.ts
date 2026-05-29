@@ -27,7 +27,6 @@ import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipeline
 import type { IPatternExtractionService } from '../lib/pattern_extraction/pattern_extraction_service';
 import type { TaskClient } from '../lib/tasks/task_client';
 import type { StreamsTaskType } from '../lib/tasks/task_definitions';
-import type { InsightClient } from '../lib/sig_events/insights/client/insight_client';
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
 import type { ContinuousKiExtractionWorkflowService } from '../lib/workflows/continuous_extraction_workflow';
 import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
@@ -44,7 +43,6 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
   getFeatureClient: () => Promise<FeatureClient>;
-  insightClient: InsightClient;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   getQueryClient: () => Promise<QueryClient>;
@@ -67,6 +65,7 @@ export interface RouteDependencies {
   patternExtractionService: IPatternExtractionService;
   continuousKiExtractionWorkflowService?: ContinuousKiExtractionWorkflowService;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
+  getSpaceId: (request: KibanaRequest) => Promise<string>;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;
