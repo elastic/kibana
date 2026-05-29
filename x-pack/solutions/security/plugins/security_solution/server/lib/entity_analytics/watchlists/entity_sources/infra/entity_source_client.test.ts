@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  httpServerMock,
+} from '@kbn/core/server/mocks';
 import type {
   MonitoringEntitySource,
   MonitoringEntitySourceAttributes,
@@ -13,13 +18,68 @@ import type {
 import { WatchlistEntitySourceClient } from './entity_source_client';
 import { watchlistEntitySourceTypeName } from './entity_source_type';
 
+const mockValidateIndexPermissions = jest.fn();
+const mockInvalidateEntitySourceApiKey = jest.fn();
+
+jest.mock('../entity_source_api_key', () => ({
+  validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
+  invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
+}));
+
 describe('WatchlistEntitySourceClient', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let mockSecurity: {
+    authc: {
+      getCurrentUser: jest.Mock;
+      apiKeys: {
+        grantAsInternalUser: jest.Mock;
+        cloneAsInternalUser: jest.Mock;
+        invalidateAsInternalUser: jest.Mock;
+      };
+    };
+  };
+  let mockGetStartServices: jest.Mock;
   let client: WatchlistEntitySourceClient;
+
+  const mockedApiKey = { id: 'new-kid', api_key: 'new-secret' };
 
   beforeEach(() => {
     soClient = savedObjectsClientMock.create();
-    client = new WatchlistEntitySourceClient({ soClient, namespace: 'default' });
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    logger = loggingSystemMock.createLogger();
+
+    mockSecurity = {
+      authc: {
+        getCurrentUser: jest.fn().mockReturnValue({ authentication_type: 'token' }),
+        apiKeys: {
+          grantAsInternalUser: jest.fn().mockResolvedValue(mockedApiKey),
+          cloneAsInternalUser: jest.fn(),
+          invalidateAsInternalUser: jest.fn(),
+        },
+      },
+    };
+    mockGetStartServices = jest.fn().mockResolvedValue([{ security: mockSecurity }]);
+
+    mockValidateIndexPermissions.mockReset().mockResolvedValue(undefined);
+    mockInvalidateEntitySourceApiKey.mockReset().mockResolvedValue(undefined);
+
+    // Default get mock: returns a non-index source without an API key
+    soClient.get.mockResolvedValue({
+      id: 'source-id',
+      type: watchlistEntitySourceTypeName,
+      references: [],
+      attributes: { type: 'store', name: 'Test' },
+    } as never);
+
+    client = new WatchlistEntitySourceClient({
+      soClient,
+      namespace: 'default',
+      esClient,
+      getStartServices: mockGetStartServices as never,
+      logger,
+    });
   });
 
   describe('create', () => {
@@ -59,6 +119,38 @@ describe('WatchlistEntitySourceClient', () => {
       await expect(client.create(attrs)).rejects.toThrow(
         'A watchlist entity source with the name "Duplicate" already exists.'
       );
+    });
+
+    it('grants an API key when creating an index-type source with a request', async () => {
+      const sourceAttributes = { type: 'index' as const, name: 'My Index Source' };
+      const mockRequest = httpServerMock.createKibanaRequest();
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+      soClient.create.mockResolvedValue({
+        id: 'new-id',
+        attributes: { ...sourceAttributes, managed: false },
+      } as never);
+
+      await client.create(sourceAttributes, mockRequest);
+
+      expect(mockSecurity.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+      expect(soClient.create).toHaveBeenCalledWith(
+        watchlistEntitySourceTypeName,
+        expect.objectContaining({ apiKeyId: mockedApiKey.id, apiKey: mockedApiKey.api_key }),
+        { refresh: 'wait_for' }
+      );
+    });
+
+    it('does not grant an API key when creating a source with type other than index', async () => {
+      const sourceAttributes = { type: 'store' as const, name: 'My Store Source' };
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+      soClient.create.mockResolvedValue({
+        id: 'new-id',
+        attributes: { ...sourceAttributes, managed: false },
+      } as never);
+
+      await client.create(sourceAttributes);
+
+      expect(mockSecurity.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
   });
 
@@ -158,6 +250,156 @@ describe('WatchlistEntitySourceClient', () => {
         'A watchlist entity source with the name "Taken" already exists.'
       );
     });
+
+    it('validates index permissions when the source type is index', async () => {
+      const sourceAttributes = {
+        type: 'index' as const,
+        name: 'My Source',
+        indexPattern: 'logs-*',
+      };
+      soClient.get.mockResolvedValue({
+        id: 'source-id',
+        type: watchlistEntitySourceTypeName,
+        references: [],
+        attributes: sourceAttributes,
+      } as never);
+      soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+      soClient.update.mockResolvedValue({
+        id: 'source-id',
+        attributes: sourceAttributes,
+      } as never);
+
+      await client.update({ id: 'source-id', name: 'New name' });
+
+      expect(mockValidateIndexPermissions).toHaveBeenCalledWith(esClient, 'logs-*');
+    });
+
+    describe('API key rotation on index pattern change', () => {
+      it('invalidates old key and grants a new one when the index pattern changes', async () => {
+        const sourceAttributes = {
+          type: 'index' as const,
+          name: 'My Source',
+          indexPattern: 'old-*',
+          apiKeyId: 'old-kid',
+        };
+        const newIndexPattern = 'new-*';
+        const sourceId = 'source-id';
+        const mockRequest = httpServerMock.createKibanaRequest();
+        soClient.get.mockResolvedValue({
+          id: sourceId,
+          type: watchlistEntitySourceTypeName,
+          references: [],
+          attributes: sourceAttributes,
+        } as never);
+        soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+        soClient.update.mockResolvedValue({
+          id: sourceId,
+          attributes: {
+            type: sourceAttributes.type,
+            name: sourceAttributes.name,
+            indexPattern: newIndexPattern,
+          },
+        } as never);
+
+        await client.update({ id: sourceId, indexPattern: newIndexPattern }, mockRequest);
+
+        expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(
+          mockSecurity,
+          sourceAttributes.apiKeyId,
+          logger
+        );
+        expect(mockSecurity.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+        const [, , savedAttrs] = (soClient.update as jest.Mock).mock.calls[0];
+        expect(savedAttrs).toMatchObject({
+          apiKeyId: mockedApiKey.id,
+          apiKey: mockedApiKey.api_key,
+        });
+      });
+
+      it('does not rotate key when the index pattern is unchanged', async () => {
+        const sourceId = 'source-id';
+        const newName = 'Renamed';
+        soClient.get.mockResolvedValue({
+          id: sourceId,
+          type: watchlistEntitySourceTypeName,
+          references: [],
+          attributes: {
+            type: 'index' as const,
+            name: 'My Source',
+            indexPattern: 'logs-*',
+            apiKeyId: 'kid',
+          },
+        } as never);
+        soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+        soClient.update.mockResolvedValue({
+          id: sourceId,
+          attributes: { type: 'index', name: newName },
+        } as never);
+
+        await client.update({ id: sourceId, name: newName });
+
+        expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+        expect(mockSecurity.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('index → non-index transition', () => {
+      it('invalidates old key and clears key fields', async () => {
+        const sourceAttributes = {
+          type: 'index' as const,
+          name: 'My Source',
+          indexPattern: 'logs-*',
+          apiKeyId: 'old-kid',
+        };
+        const sourceId = 'source-id';
+        soClient.get.mockResolvedValue({
+          id: sourceId,
+          type: watchlistEntitySourceTypeName,
+          references: [],
+          attributes: sourceAttributes,
+        } as never);
+        soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+        soClient.update.mockResolvedValue({
+          id: sourceId,
+          attributes: { type: 'store', name: 'My Source' },
+        } as never);
+
+        await client.update({ id: sourceId, type: 'store' });
+
+        expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(
+          mockSecurity,
+          sourceAttributes.apiKeyId,
+          logger
+        );
+        expect(mockSecurity.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+        const [, , savedAttrs] = (soClient.update as jest.Mock).mock.calls[0];
+        expect(savedAttrs).toMatchObject({ apiKeyId: null, apiKey: null });
+      });
+    });
+
+    describe('non-index → index transition', () => {
+      it('grants a new key without invalidating a previous one', async () => {
+        const sourceId = 'source-id';
+        const indexPattern = 'logs-*';
+        const mockRequest = httpServerMock.createKibanaRequest();
+        // Default get mock already returns type: 'store'
+        soClient.find.mockResolvedValue({ saved_objects: [], total: 0 } as never);
+        soClient.update.mockResolvedValue({
+          id: sourceId,
+          attributes: { type: 'index', name: 'Test', indexPattern },
+        } as never);
+
+        await client.update({ id: sourceId, type: 'index', indexPattern }, mockRequest);
+
+        expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+        expect(mockSecurity.authc.apiKeys.grantAsInternalUser).toHaveBeenCalled();
+        const [, , savedAttrs] = (soClient.update as jest.Mock).mock.calls[0];
+        expect(savedAttrs).toMatchObject({
+          apiKeyId: mockedApiKey.id,
+          apiKey: mockedApiKey.api_key,
+        });
+      });
+    });
   });
 
   describe('updateApiKeyFields', () => {
@@ -203,9 +445,26 @@ describe('WatchlistEntitySourceClient', () => {
   });
 
   describe('delete', () => {
-    it('delegates to soClient.delete', async () => {
+    it('delegates to soClient.delete and does not invalidate when there is no API key', async () => {
       await client.delete('source-id');
 
+      expect(soClient.delete).toHaveBeenCalledWith(watchlistEntitySourceTypeName, 'source-id');
+      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+    });
+
+    it('invalidates the API key before deleting a source that has one', async () => {
+      const sourceId = 'source-id';
+      const apiKeyId = 'kid-1';
+      soClient.get.mockResolvedValue({
+        id: sourceId,
+        type: watchlistEntitySourceTypeName,
+        references: [],
+        attributes: { type: 'index', name: 'My Source', apiKeyId },
+      } as never);
+
+      await client.delete(sourceId);
+
+      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(mockSecurity, apiKeyId, logger);
       expect(soClient.delete).toHaveBeenCalledWith(watchlistEntitySourceTypeName, 'source-id');
     });
   });

@@ -21,7 +21,8 @@ import { getRequestSavedObjectClient } from '../../../shared/utils';
 
 export const getEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .get({
@@ -56,6 +57,9 @@ export const getEntitySourceRoute = (
             const client = new WatchlistEntitySourceClient({
               soClient: getRequestSavedObjectClient(core),
               namespace: secSol.getSpaceId(),
+              getStartServices,
+              esClient: core.elasticsearch.client.asCurrentUser,
+              logger,
             });
             const body = await client.get(request.params.id);
             return response.ok({ body });

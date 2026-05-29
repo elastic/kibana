@@ -17,7 +17,8 @@ import { ensurePrebuiltWatchlists } from '../../migrations/install_prebuilt_watc
 
 export const installPrebuiltWatchlistsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .post({
@@ -42,11 +43,12 @@ export const installPrebuiltWatchlistsRoute = (
           const core = await context.core;
           const namespace = secSol.getSpaceId();
           const soClient = getRequestSavedObjectClient(core);
+          const esClient = core.elasticsearch.client.asCurrentUser;
 
           const watchlistClient = new WatchlistConfigClient({
             namespace,
             soClient,
-            esClient: core.elasticsearch.client.asCurrentUser,
+            esClient,
             internalEsClient: core.elasticsearch.client.asInternalUser,
             logger,
           });
@@ -54,7 +56,14 @@ export const installPrebuiltWatchlistsRoute = (
           logger.debug(
             `[WATCHLIST INSTALL ROUTE]Installing prebuilt watchlists for namespace: ${namespace} from watchlist install route`
           );
-          await ensurePrebuiltWatchlists({ watchlistClient, soClient, namespace, logger });
+          await ensurePrebuiltWatchlists({
+            watchlistClient,
+            soClient,
+            namespace,
+            logger,
+            esClient,
+            getStartServices,
+          });
 
           return response.ok({
             body: { acknowledged: true },

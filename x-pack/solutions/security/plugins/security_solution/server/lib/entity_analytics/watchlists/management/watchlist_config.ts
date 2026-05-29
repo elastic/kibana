@@ -181,31 +181,24 @@ export class WatchlistConfigClient {
   }
 
   async delete(id: string) {
-    const entitySourceIds = await this.getEntitySourceIds(id);
-
     const securityServiceStart = this.deps.securityServiceStart;
+
+    // Step 1: Fetch all entity source linked to the watchlist
+    const entitySourceIds = await this.getEntitySourceIds(id);
+    const indexSourcesApiKeyIdMap = new Map<string, string>();
     if (securityServiceStart && entitySourceIds.length > 0) {
       const soResults = await this.deps.soClient.bulkGet<MonitoringEntitySource>(
         entitySourceIds.map((sourceId) => ({ type: watchlistEntitySourceTypeName, id: sourceId }))
       );
 
-      await Promise.all(
-        soResults.saved_objects
-          .filter(
-            (so): so is SavedObject<MonitoringEntitySource & { apiKeyId: string }> =>
-              !so.error && !!so.attributes.apiKeyId
-          )
-          .map((so) =>
-            invalidateEntitySourceApiKey(
-              securityServiceStart,
-              so.attributes.apiKeyId,
-              this.deps.logger
-            )
-          )
-      );
+      soResults.saved_objects.forEach((so) => {
+        if (!so.error && so.attributes.type === 'index' && !!so.attributes.apiKeyId) {
+          indexSourcesApiKeyIdMap.set(so.id, so.attributes.apiKeyId);
+        }
+      });
     }
 
-    // Cascade-delete linked entity sources to prevent orphans
+    // Step 2: Cascade-delete linked entity sources to prevent orphans
     const results = await Promise.allSettled(
       entitySourceIds.map((sourceId) =>
         this.deps.soClient.delete(watchlistEntitySourceTypeName, sourceId, {
@@ -214,12 +207,28 @@ export class WatchlistConfigClient {
       )
     );
 
+    const successfullyDeletedSourceIds: string[] = [];
     for (const [i, result] of results.entries()) {
+      const sourceId = entitySourceIds[i];
       if (result.status === 'rejected') {
         this.deps.logger.warn(
-          `Failed to delete entity source '${entitySourceIds[i]}' while deleting watchlist '${id}': ${result.reason.message}`
+          `Failed to delete entity source '${sourceId}' while deleting watchlist '${id}': ${result.reason.message}`
         );
+      } else {
+        successfullyDeletedSourceIds.push(sourceId);
       }
+    }
+
+    // Step 3: Invalidate API keys for successfully deleted entity sources
+    if (securityServiceStart && successfullyDeletedSourceIds.length > 0) {
+      await Promise.allSettled(
+        successfullyDeletedSourceIds.flatMap((sourceId) => {
+          const apiKeyId = indexSourcesApiKeyIdMap.get(sourceId);
+          return apiKeyId
+            ? [invalidateEntitySourceApiKey(securityServiceStart, apiKeyId, this.deps.logger)]
+            : [];
+        })
+      );
     }
 
     return this.deps.soClient.delete(watchlistConfigTypeName, id, { refresh: 'wait_for' });

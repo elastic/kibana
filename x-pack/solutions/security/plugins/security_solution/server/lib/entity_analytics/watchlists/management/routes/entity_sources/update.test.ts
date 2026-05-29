@@ -18,25 +18,10 @@ jest.mock('../../../shared/utils', () => ({
   getRequestSavedObjectClient: jest.fn(() => 'mock-so-client'),
 }));
 
-const mockCheckIndexReadPrivilege = jest.fn();
-const mockGrantAndStoreIndexSourceApiKey = jest.fn();
-const mockInvalidateEntitySourceApiKey = jest.fn();
-
-jest.mock('../../../entity_sources/entity_source_api_key', () => ({
-  checkIndexReadPrivilege: (...args: unknown[]) => mockCheckIndexReadPrivilege(...args),
-  grantAndStoreIndexSourceApiKey: (...args: unknown[]) =>
-    mockGrantAndStoreIndexSourceApiKey(...args),
-  invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
-  INSUFFICIENT_INDEX_PRIVILEGES_ERROR:
-    'Insufficient privileges to read from the selected index pattern.',
-}));
-
-const { mockGetEntitySource, mockUpdateEntitySource, mockUpdateApiKeyFields } = jest.requireMock(
+const { mockUpdateEntitySource } = jest.requireMock(
   '../../../entity_sources/infra/entity_source_client'
 ) as {
-  mockGetEntitySource: jest.Mock;
   mockUpdateEntitySource: jest.Mock;
-  mockUpdateApiKeyFields: jest.Mock;
 };
 
 const mockGetStartServices = jest.fn();
@@ -58,12 +43,7 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
     const { context: ctx } = requestContextMock.createTools();
     context = requestContextMock.convertContext(ctx);
 
-    mockGetEntitySource.mockReset();
     mockUpdateEntitySource.mockReset();
-    mockUpdateApiKeyFields.mockReset();
-    mockCheckIndexReadPrivilege.mockReset().mockResolvedValue(true);
-    mockGrantAndStoreIndexSourceApiKey.mockReset().mockResolvedValue(undefined);
-    mockInvalidateEntitySourceApiKey.mockReset().mockResolvedValue(undefined);
 
     const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: jest.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
@@ -83,92 +63,28 @@ describe('PUT entity source route - updateEntitySourceRoute', () => {
       body,
     });
 
-  describe('index → index update', () => {
-    it('returns 403 when user lacks read access on the new index pattern', async () => {
-      mockGetEntitySource.mockResolvedValue({ id: SOURCE_ID, type: 'index', apiKeyId: 'old-kid' });
-      mockCheckIndexReadPrivilege.mockResolvedValue(false);
+  it('updates an entity source', async () => {
+    const updateBody = { name: 'updated-name' };
+    const updateResult = { id: SOURCE_ID, type: 'store', name: 'updated-name' };
+    mockUpdateEntitySource.mockResolvedValue(updateResult);
 
-      const response = await server.inject(buildRequest({ indexPattern: 'new-logs-*' }), context);
+    const response = await server.inject(buildRequest(updateBody), context);
 
-      expect(response.status).toEqual(403);
-      expect(mockUpdateEntitySource).not.toHaveBeenCalled();
-    });
-
-    it('invalidates old API key and mints a new one', async () => {
-      mockGetEntitySource.mockResolvedValue({ id: SOURCE_ID, type: 'index', apiKeyId: 'old-kid' });
-      mockUpdateEntitySource.mockResolvedValue({ id: SOURCE_ID, name: 'updated', type: 'index' });
-
-      const response = await server.inject(buildRequest({ indexPattern: 'logs-*' }), context);
-
-      expect(response.status).toEqual(200);
-      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(
-        expect.anything(),
-        'old-kid',
-        logger
-      );
-      expect(mockGrantAndStoreIndexSourceApiKey).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        { id: SOURCE_ID, name: 'updated' }
-      );
-    });
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual(updateResult);
+    expect(mockUpdateEntitySource).toHaveBeenCalledWith(
+      { ...updateBody, id: SOURCE_ID },
+      expect.anything()
+    );
   });
 
-  describe('index → non-index transition', () => {
-    it('invalidates old API key and clears key fields', async () => {
-      mockGetEntitySource.mockResolvedValue({ id: SOURCE_ID, type: 'index', apiKeyId: 'old-kid' });
-      mockUpdateEntitySource.mockResolvedValue({ id: SOURCE_ID, name: 'updated', type: 'store' });
+  it('fails when client.update fails', async () => {
+    const ERROR_MESSAGE = 'update failed';
+    mockUpdateEntitySource.mockRejectedValue(new Error(ERROR_MESSAGE));
 
-      const response = await server.inject(buildRequest({ type: 'store' }), context);
+    const response = await server.inject(buildRequest({ name: 'x' }), context);
 
-      expect(response.status).toEqual(200);
-      expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(
-        expect.anything(),
-        'old-kid',
-        logger
-      );
-      expect(mockGrantAndStoreIndexSourceApiKey).not.toHaveBeenCalled();
-      expect(mockUpdateApiKeyFields).toHaveBeenCalledWith(SOURCE_ID, {
-        apiKeyId: null,
-        apiKey: null,
-      });
-    });
-  });
-
-  describe('non-index → index transition', () => {
-    it('mints a new API key without trying to invalidate a previous one', async () => {
-      mockGetEntitySource.mockResolvedValue({ id: SOURCE_ID, type: 'store' });
-      mockUpdateEntitySource.mockResolvedValue({ id: SOURCE_ID, name: 'updated', type: 'index' });
-
-      const response = await server.inject(
-        buildRequest({ type: 'index', indexPattern: 'logs-*' }),
-        context
-      );
-
-      expect(response.status).toEqual(200);
-      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
-      expect(mockGrantAndStoreIndexSourceApiKey).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        { id: SOURCE_ID, name: 'updated' }
-      );
-    });
-  });
-
-  describe('non-index → non-index update', () => {
-    it('performs no key operations', async () => {
-      mockGetEntitySource.mockResolvedValue({ id: SOURCE_ID, type: 'store' });
-      mockUpdateEntitySource.mockResolvedValue({ id: SOURCE_ID, name: 'updated', type: 'store' });
-
-      const response = await server.inject(buildRequest({ name: 'new-name' }), context);
-
-      expect(response.status).toEqual(200);
-      expect(mockCheckIndexReadPrivilege).not.toHaveBeenCalled();
-      expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
-      expect(mockGrantAndStoreIndexSourceApiKey).not.toHaveBeenCalled();
-      expect(mockUpdateApiKeyFields).not.toHaveBeenCalled();
-    });
+    expect(response.status).toEqual(500);
+    expect(response.body).toEqual(expect.objectContaining({ message: ERROR_MESSAGE }));
   });
 });

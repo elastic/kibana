@@ -24,11 +24,7 @@ import {
   buildWatchlistApiCallSuccessFields,
   reportWatchlistApiCallError,
 } from './watchlist_ebt_helpers';
-import {
-  checkIndexReadPrivilege,
-  grantAndStoreIndexSourceApiKey,
-  INSUFFICIENT_INDEX_PRIVILEGES_ERROR,
-} from '../../entity_sources/entity_source_api_key';
+import { validateIndexPermissions } from '../../entity_sources/entity_source_api_key';
 
 export const createWatchlistRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -74,55 +70,45 @@ export const createWatchlistRoute = (
 
             const { entitySources: entitySourceInputs, ...watchlistInput } = request.body;
 
-            // Step 1: Create the watchlist
+            // Step 1: Validate index privileges
+            if (entitySourceInputs?.length) {
+              await Promise.all(
+                entitySourceInputs
+                  .filter(
+                    (input): input is typeof input & { indexPattern: string } =>
+                      input.type === 'index' && !!input.indexPattern
+                  )
+                  .map((input) =>
+                    validateIndexPermissions(
+                      core.elasticsearch.client.asCurrentUser,
+                      input.indexPattern
+                    )
+                  )
+              );
+            }
+
+            // Step 2: Create the watchlist
             const watchlist = await watchlistClient.create(watchlistInput);
             if (!watchlist.id) {
               throw new Error('Watchlist creation succeeded but no ID was returned');
             }
             const watchlistId = watchlist.id;
 
-            // Step 2: If entity sources were provided, create and link them (with rollback)
+            // Step 3: If entity sources were provided, create and link them (with rollback)
             if (entitySourceInputs?.length) {
               const sourceClient = new WatchlistEntitySourceClient({
                 soClient,
                 namespace,
+                getStartServices,
+                esClient: core.elasticsearch.client.asCurrentUser,
+                logger,
               });
 
               const createdSources = [];
               try {
                 for (const entitySourceInput of entitySourceInputs) {
-                  if (entitySourceInput.type === 'index' && entitySourceInput.indexPattern) {
-                    const hasPrivilege = await checkIndexReadPrivilege(
-                      core.elasticsearch.client.asCurrentUser,
-                      entitySourceInput.indexPattern
-                    );
-                    if (!hasPrivilege) {
-                      logger.error(
-                        `Insufficient privileges to read from index pattern: ${entitySourceInput.indexPattern}`
-                      );
-                      await watchlistClient.delete(watchlistId);
-                      return siemResponse.error({
-                        statusCode: 403,
-                        body: INSUFFICIENT_INDEX_PRIVILEGES_ERROR,
-                      });
-                    }
-                  }
-
-                  const entitySource = await sourceClient.create(entitySourceInput);
+                  const entitySource = await sourceClient.create(entitySourceInput, request);
                   await watchlistClient.addEntitySourceReference(watchlistId, entitySource.id);
-
-                  if (entitySourceInput.type === 'index' && entitySource.name) {
-                    const [coreStart] = await getStartServices();
-                    await grantAndStoreIndexSourceApiKey(
-                      coreStart.security,
-                      request,
-                      sourceClient,
-                      {
-                        id: entitySource.id,
-                        name: entitySource.name,
-                      }
-                    );
-                  }
 
                   createdSources.push(entitySource);
                 }

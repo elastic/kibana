@@ -17,8 +17,7 @@ const mockWatchlistClientCreate = jest.fn();
 const mockUpdateApiKeyFields = jest.fn();
 const mockAddEntitySourceReference = jest.fn();
 const mockSyncWatchlist = jest.fn();
-const mockCheckIndexReadPrivilege = jest.fn();
-const mockGrantAndStoreIndexSourceApiKey = jest.fn();
+const mockValidateIndexPermissions = jest.fn();
 const mockGetStartServices = jest.fn();
 
 jest.mock('../../watchlist_config', () => ({
@@ -37,11 +36,7 @@ jest.mock('../../../shared/utils', () => ({
 }));
 
 jest.mock('../../../entity_sources/entity_source_api_key', () => ({
-  checkIndexReadPrivilege: (...args: unknown[]) => mockCheckIndexReadPrivilege(...args),
-  grantAndStoreIndexSourceApiKey: (...args: unknown[]) =>
-    mockGrantAndStoreIndexSourceApiKey(...args),
-  INSUFFICIENT_INDEX_PRIVILEGES_ERROR:
-    'Insufficient privileges to read from the selected index pattern.',
+  validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
 }));
 
 jest.mock('../../../entity_sources/entity_sources_service', () => ({
@@ -77,8 +72,7 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
     mockUpdateApiKeyFields.mockReset();
     mockAddEntitySourceReference.mockReset();
     mockSyncWatchlist.mockReset();
-    mockCheckIndexReadPrivilege.mockReset().mockResolvedValue(true);
-    mockGrantAndStoreIndexSourceApiKey.mockReset().mockResolvedValue(undefined);
+    mockValidateIndexPermissions.mockReset().mockResolvedValue(undefined);
 
     const mockSecurity = { authc: { apiKeys: { grantAsInternalUser: jest.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
@@ -113,37 +107,32 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
       enabled: true,
     };
 
-    it('returns 403 when user lacks read access on the index pattern', async () => {
-      mockCheckIndexReadPrivilege.mockResolvedValue(false);
+    it('returns 500 when index permission validation fails', async () => {
+      mockValidateIndexPermissions.mockRejectedValue(new Error('Insufficient index privileges'));
 
       const response = await server.inject(buildRequest(indexSourceBody), context);
 
-      expect(response.status).toEqual(403);
+      expect(response.status).toEqual(500);
       expect(mockWatchlistClientCreate).not.toHaveBeenCalled();
     });
 
-    it('creates the source and mints an API key when privilege check passes', async () => {
+    it('creates the source when privilege check passes', async () => {
       const createdSource = { id: 'es-1', ...indexSourceBody };
       mockWatchlistClientCreate.mockResolvedValue(createdSource);
 
       const response = await server.inject(buildRequest(indexSourceBody), context);
 
       expect(response.status).toEqual(200);
-      expect(mockCheckIndexReadPrivilege).toHaveBeenCalledWith(
+      expect(mockValidateIndexPermissions).toHaveBeenCalledWith(
         expect.anything(),
         indexSourceBody.indexPattern
       );
-      expect(mockGrantAndStoreIndexSourceApiKey).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.anything(),
-        { id: createdSource.id, name: createdSource.name }
-      );
+      expect(mockWatchlistClientCreate).toHaveBeenCalledWith(indexSourceBody, expect.anything());
     });
   });
 
   describe('non-index source', () => {
-    it('does not check privileges or mint an API key for a store-type source', async () => {
+    it('does not validate permissions for a store-type source', async () => {
       const storeBody = {
         type: 'store' as const,
         name: 'store-source',
@@ -155,8 +144,7 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
       const response = await server.inject(buildRequest(storeBody), context);
 
       expect(response.status).toEqual(200);
-      expect(mockCheckIndexReadPrivilege).not.toHaveBeenCalled();
-      expect(mockGrantAndStoreIndexSourceApiKey).not.toHaveBeenCalled();
+      expect(mockValidateIndexPermissions).not.toHaveBeenCalled();
       expect(mockUpdateApiKeyFields).not.toHaveBeenCalled();
     });
   });
@@ -185,12 +173,15 @@ describe('POST /api/entity_analytics/watchlists/:watchlist_id/data_sources - cre
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(sourceResult);
-      expect(mockWatchlistClientCreate).toHaveBeenCalledWith({
-        type: 'index',
-        name: 'test-source',
-        indexPattern: 'logs-*',
-        enabled: true,
-      });
+      expect(mockWatchlistClientCreate).toHaveBeenCalledWith(
+        {
+          type: 'index',
+          name: 'test-source',
+          indexPattern: 'logs-*',
+          enabled: true,
+        },
+        expect.anything()
+      );
       expect(mockAddEntitySourceReference).toHaveBeenCalledWith(WATCHLIST_ID, 'es-1');
     });
 

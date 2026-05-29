@@ -18,8 +18,8 @@ export const registerEntitySourceRoutes = (
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   createEntitySourceRoute(router, logger, getStartServices);
-  getEntitySourceRoute(router, logger);
+  getEntitySourceRoute(router, logger, getStartServices);
   updateEntitySourceRoute(router, logger, getStartServices);
   deleteEntitySourceRoute(router, logger, getStartServices);
-  listEntitySourcesRoute(router, logger);
+  listEntitySourcesRoute(router, logger, getStartServices);
 };

@@ -18,12 +18,6 @@ import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
 import { getRequestSavedObjectClient } from '../../../shared/utils';
-import {
-  checkIndexReadPrivilege,
-  grantAndStoreIndexSourceApiKey,
-  invalidateEntitySourceApiKey,
-  INSUFFICIENT_INDEX_PRIVILEGES_ERROR,
-} from '../../../entity_sources/entity_source_api_key';
 
 export const updateEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -64,54 +58,12 @@ export const updateEntitySourceRoute = (
             const client = new WatchlistEntitySourceClient({
               soClient: getRequestSavedObjectClient(core),
               namespace: secSol.getSpaceId(),
+              esClient: core.elasticsearch.client.asCurrentUser,
+              getStartServices,
+              logger,
             });
 
-            const currentSource = await client.get(request.params.id);
-            const wasIndex = currentSource.type === 'index';
-            const newType = request.body.type ?? currentSource.type;
-            const isNowIndex = newType === 'index';
-
-            const indexPatternToCheck = isNowIndex
-              ? request.body.indexPattern ?? currentSource.indexPattern
-              : undefined;
-            if (indexPatternToCheck) {
-              const hasPrivilege = await checkIndexReadPrivilege(
-                core.elasticsearch.client.asCurrentUser,
-                indexPatternToCheck
-              );
-              if (!hasPrivilege) {
-                return siemResponse.error({
-                  statusCode: 403,
-                  body: INSUFFICIENT_INDEX_PRIVILEGES_ERROR,
-                });
-              }
-            }
-
-            const body = await client.update({ ...request.body, id: request.params.id });
-
-            if (wasIndex || isNowIndex) {
-              const [coreStart] = await getStartServices();
-
-              if (wasIndex && currentSource.apiKeyId) {
-                await invalidateEntitySourceApiKey(
-                  coreStart.security,
-                  currentSource.apiKeyId,
-                  logger
-                );
-              }
-
-              if (isNowIndex) {
-                await grantAndStoreIndexSourceApiKey(coreStart.security, request, client, {
-                  id: request.params.id,
-                  name: body.name ?? request.params.id,
-                });
-              } else {
-                await client.updateApiKeyFields(request.params.id, {
-                  apiKeyId: null,
-                  apiKey: null,
-                });
-              }
-            }
+            const body = await client.update({ ...request.body, id: request.params.id }, request);
 
             return response.ok({ body });
           } catch (e) {

@@ -97,8 +97,8 @@ export const createUpdateDetectionService = ({
   descriptorClient,
   watchlist,
 }: {
-  internalEsClient: ElasticsearchClient;
-  dataEsClient: ElasticsearchClient;
+  internalEsClient: ElasticsearchClient; // for writes to watchlist indices
+  dataEsClient: ElasticsearchClient; // for reads against the source data index
   crudClient: CRUDClient;
   logger: Logger;
   descriptorClient?: WatchlistEntitySourceClient;

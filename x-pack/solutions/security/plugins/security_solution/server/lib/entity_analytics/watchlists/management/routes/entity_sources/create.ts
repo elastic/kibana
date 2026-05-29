@@ -7,7 +7,7 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse, Logger, KibanaRequest } from '@kbn/core/server';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 import { APP_ID } from '@kbn/security-solution-features/constants';
 
@@ -27,11 +27,7 @@ import {
   oktaLastFullSyncMarkersIndex,
 } from '../../../entity_sources/infra';
 import type { IntegrationType } from '../../../entity_sources/infra';
-import {
-  checkIndexReadPrivilege,
-  grantAndStoreIndexSourceApiKey,
-  INSUFFICIENT_INDEX_PRIVILEGES_ERROR,
-} from '../../../entity_sources/entity_source_api_key';
+import { validateIndexPermissions } from '../../../entity_sources/entity_source_api_key';
 
 export const createEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -73,30 +69,19 @@ export const createEntitySourceRoute = (
             const client = new WatchlistEntitySourceClient({
               soClient: getRequestSavedObjectClient(core),
               namespace,
+              getStartServices,
+              esClient: core.elasticsearch.client.asCurrentUser,
+              logger,
             });
 
             if (monitoringSource.type === 'index' && monitoringSource.indexPattern) {
-              const hasPrivilege = await checkIndexReadPrivilege(
+              await validateIndexPermissions(
                 core.elasticsearch.client.asCurrentUser,
                 monitoringSource.indexPattern
               );
-              if (!hasPrivilege) {
-                return siemResponse.error({
-                  statusCode: 403,
-                  body: INSUFFICIENT_INDEX_PRIVILEGES_ERROR,
-                });
-              }
             }
 
-            const body = await createSourceForType(client, monitoringSource, namespace);
-
-            if (monitoringSource.type === 'index' && body.name) {
-              const [coreStart] = await getStartServices();
-              await grantAndStoreIndexSourceApiKey(coreStart.security, request, client, {
-                id: body.id,
-                name: body.name,
-              });
-            }
+            const body = await createSourceForType(client, monitoringSource, namespace, request);
 
             const watchlistClient = new WatchlistConfigClient({
               logger,
@@ -146,7 +131,8 @@ export const createEntitySourceRoute = (
 const createSourceForType = async (
   client: WatchlistEntitySourceClient,
   source: WatchlistDataSources.CreateWatchlistEntitySourceRequestBody,
-  namespace: string
+  namespace: string,
+  request: KibanaRequest
 ): Promise<WatchlistDataSources.CreateWatchlistEntitySourceResponse> => {
   if (source.type === 'entity_analytics_integration') {
     if (!validateIntegrationName(source.integrationName)) {
@@ -161,7 +147,7 @@ const createSourceForType = async (
     throw new Error('queryRule is required for store-type sources');
   }
 
-  return client.create(source);
+  return client.create(source, request);
 };
 
 const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType): string => {

@@ -104,7 +104,13 @@ export const createEntitySourcesService = ({
   getStartServices: StartServicesAccessor<StartPlugins>;
 }) => {
   const watchlistClient = new WatchlistConfigClient({ esClient, soClient, logger, namespace });
-  const descriptorClient = new WatchlistEntitySourceClient({ soClient, namespace });
+  const descriptorClient = new WatchlistEntitySourceClient({
+    soClient,
+    namespace,
+    esClient,
+    getStartServices,
+    logger,
+  });
   const crudClient = new CRUDClient({ logger, esClient, namespace });
   const watchlistEntitiesService = createWatchlistEntitiesService({
     esClient,

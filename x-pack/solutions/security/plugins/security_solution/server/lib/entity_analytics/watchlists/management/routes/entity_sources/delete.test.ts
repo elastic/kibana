@@ -25,11 +25,6 @@ jest.mock('../../../shared/utils', () => ({
   getRequestSavedObjectClient: jest.fn(() => 'mock-so-client'),
 }));
 
-const mockInvalidateEntitySourceApiKey = jest.fn();
-jest.mock('../../../entity_sources/entity_source_api_key', () => ({
-  invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
-}));
-
 const { mockGetEntitySource, mockDeleteEntitySource } = jest.requireMock(
   '../../../entity_sources/infra/entity_source_client'
 ) as {
@@ -59,7 +54,6 @@ describe('DELETE entity source route - deleteEntitySourceRoute', () => {
     mockGetEntitySource.mockReset();
     mockDeleteEntitySource.mockReset();
     mockRemoveEntitySourceReference.mockReset().mockResolvedValue(undefined);
-    mockInvalidateEntitySourceApiKey.mockReset().mockResolvedValue(undefined);
 
     const mockSecurity = { authc: { apiKeys: { invalidateAsInternalUser: jest.fn() } } };
     mockGetStartServices.mockResolvedValue([{ security: mockSecurity }]);
@@ -78,7 +72,7 @@ describe('DELETE entity source route - deleteEntitySourceRoute', () => {
       params: { watchlist_id: WATCHLIST_ID, id },
     });
 
-  it('invalidates the API key after deleting a source that has one', async () => {
+  it('deletes an index-type source', async () => {
     mockGetEntitySource.mockResolvedValue({
       id: SOURCE_ID,
       type: 'index',
@@ -90,14 +84,9 @@ describe('DELETE entity source route - deleteEntitySourceRoute', () => {
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ acknowledged: true });
     expect(mockDeleteEntitySource).toHaveBeenCalledWith(SOURCE_ID);
-    expect(mockInvalidateEntitySourceApiKey).toHaveBeenCalledWith(
-      expect.anything(),
-      'kid-1',
-      logger
-    );
   });
 
-  it('does not attempt invalidation for a non-index source', async () => {
+  it('deletes a non-index source', async () => {
     mockGetEntitySource.mockResolvedValue({
       id: SOURCE_ID,
       type: 'store',
@@ -106,6 +95,7 @@ describe('DELETE entity source route - deleteEntitySourceRoute', () => {
     const response = await server.inject(buildRequest(), context);
 
     expect(response.status).toEqual(200);
-    expect(mockInvalidateEntitySourceApiKey).not.toHaveBeenCalled();
+    expect(response.body).toEqual({ acknowledged: true });
+    expect(mockDeleteEntitySource).toHaveBeenCalledWith(SOURCE_ID);
   });
 });

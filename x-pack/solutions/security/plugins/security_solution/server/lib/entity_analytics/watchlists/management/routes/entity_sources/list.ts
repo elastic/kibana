@@ -23,7 +23,8 @@ import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
 
 export const listEntitySourcesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .get({
@@ -61,6 +62,9 @@ export const listEntitySourcesRoute = (
             const client = new WatchlistEntitySourceClient({
               soClient: getRequestSavedObjectClient(core),
               namespace: secSol.getSpaceId(),
+              esClient: core.elasticsearch.client.asCurrentUser,
+              getStartServices,
+              logger,
             });
 
             const watchlistClient = new WatchlistConfigClient({
