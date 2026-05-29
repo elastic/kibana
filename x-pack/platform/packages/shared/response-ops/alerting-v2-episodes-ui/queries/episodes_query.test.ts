@@ -27,6 +27,8 @@ describe('buildEpisodesBaseQuery', () => {
     expect(queryString).toContain('INLINE STATS');
     expect(queryString).toContain('first_timestamp = MIN(@timestamp)');
     expect(queryString).toContain('last_timestamp = MAX(@timestamp)');
+    expect(queryString).toContain('triggered_at = MIN(@timestamp) WHERE');
+    expect(queryString).toContain('"active"');
     expect(queryString).toContain('episode_data');
     expect(queryString).toContain('extracted_data = JSON_EXTRACT(_source, "data")');
     expect(queryString).toContain(
