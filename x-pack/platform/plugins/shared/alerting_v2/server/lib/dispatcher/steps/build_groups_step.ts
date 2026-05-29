@@ -9,8 +9,7 @@ import { injectable } from 'inversify';
 import { get } from 'lodash';
 import objectHash from 'object-hash';
 import type {
-  ActionGroup,
-  ActionPolicyWorkflowPayloadRule,
+  ActionGroup,  
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -30,19 +29,6 @@ export class BuildGroupsStep implements DispatcherStep {
 
     return { type: 'continue', data: { groups } };
   }
-}
-
-function buildRulesMap(
-  ruleIds: string[],
-  rules?: Map<RuleId, Rule>
-): Record<RuleId, ActionPolicyWorkflowPayloadRule> {
-  return Object.fromEntries(
-    ruleIds.flatMap((ruleId) => {
-      const rule = rules?.get(ruleId);
-      if (!rule) return [];
-      return [[ruleId, { name: rule.name }]];
-    })
-  );
 }
 
 export function buildActionGroups(
@@ -89,7 +75,10 @@ export function buildActionGroups(
 
     const group = groupMap.get(actionGroupId)!;
     group.episodes.push(episode);
-    group.rules = buildRulesMap([...new Set(group.episodes.map((e) => e.rule_id))], rules);
+    const rule = rules?.get(episode.rule_id);
+    if (rule) {
+      group.rules[episode.rule_id] = { name: rule.name };
+    }    
   }
 
   return [...groupMap.values()];
