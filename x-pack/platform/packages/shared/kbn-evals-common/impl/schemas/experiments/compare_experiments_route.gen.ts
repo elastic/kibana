@@ -18,9 +18,9 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const PairedTTestResult = lazySchema(() =>
   z.object({
-    datasetId: z.string(),
-    datasetName: z.string(),
-    evaluatorName: z.string(),
+    datasetId: z.string().max(1024),
+    datasetName: z.string().max(256),
+    evaluatorName: z.string().max(256),
     sampleSize: z.number().int(),
     meanA: z.number(),
     meanB: z.number(),
@@ -34,15 +34,15 @@ export const CompareExperimentsRequestQuery = lazySchema(() =>
     /**
      * Comparison type — compare individual experiments or suite executions
      */
-    type: z.enum(['experiment', 'execution']).default('experiment'),
+    type: z.enum(['experiment', 'execution']).optional().default('experiment'),
     /**
      * Baseline experiment or execution ID (depends on type)
      */
-    baseline_id: z.string(),
+    baseline_id: z.string().max(1024),
     /**
      * Target experiment or execution ID (depends on type)
      */
-    target_id: z.string(),
+    target_id: z.string().max(1024),
   })
 );
 export type CompareExperimentsRequestQuery = z.infer<typeof CompareExperimentsRequestQuery>;

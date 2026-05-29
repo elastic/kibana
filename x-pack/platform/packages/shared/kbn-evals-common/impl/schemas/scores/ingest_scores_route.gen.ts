@@ -20,19 +20,19 @@ import { Model, BuildkiteMetadata } from '../common_attributes.gen';
 
 export const IngestScoresRequestBody = lazySchema(() =>
   z.object({
-    experiment_id: z.string(),
-    experiment_name: z.string().optional(),
+    experiment_id: z.string().max(1024),
+    experiment_name: z.string().max(256).optional(),
     task_model: Model,
     evaluator_model: Model,
     metadata: z.object({
-      execution_id: z.string().optional(),
-      suite_id: z.string().optional(),
+      execution_id: z.string().max(1024).optional(),
+      suite_id: z.string().max(256).optional(),
       total_repetitions: z.number().int(),
-      hostname: z.string(),
+      hostname: z.string().max(256),
       git: z
         .object({
-          branch: z.string().nullable().optional(),
-          commit_sha: z.string().nullable().optional(),
+          branch: z.string().max(256).nullable().optional(),
+          commit_sha: z.string().max(256).nullable().optional(),
         })
         .optional(),
       ci: BuildkiteMetadata.optional(),
@@ -41,26 +41,26 @@ export const IngestScoresRequestBody = lazySchema(() =>
       .array(
         z.object({
           example: z.object({
-            id: z.string(),
+            id: z.string().max(1024),
             index: z.number().int(),
             input: z.object({}).catchall(z.unknown()).optional(),
             dataset: z.object({
-              id: z.string(),
-              name: z.string(),
+              id: z.string().max(1024),
+              name: z.string().max(256),
             }),
           }),
           task: z.object({
-            trace_id: z.string().optional(),
+            trace_id: z.string().max(256).optional(),
             repetition_index: z.number().int(),
             output: z.object({}).catchall(z.unknown()).optional(),
           }),
           evaluator: z.object({
-            name: z.string(),
+            name: z.string().max(256),
             score: z.number().nullable().optional(),
-            label: z.string().nullable().optional(),
-            explanation: z.string().nullable().optional(),
+            label: z.string().max(256).nullable().optional(),
+            explanation: z.string().max(4096).nullable().optional(),
             metadata: z.object({}).catchall(z.unknown()).optional(),
-            trace_id: z.string().nullable().optional(),
+            trace_id: z.string().max(256).nullable().optional(),
           }),
         })
       )
@@ -78,7 +78,7 @@ export const IngestScoresResponse = lazySchema(() =>
       z.object({
         index: z.number().int(),
         status: z.number().int(),
-        reason: z.string(),
+        reason: z.string().max(1024),
       })
     ),
   })

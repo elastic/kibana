@@ -20,18 +20,18 @@ import { Model, BuildkiteMetadata } from '../common_attributes.gen';
 
 export const EvaluationExperimentSummary = lazySchema(() =>
   z.object({
-    execution_id: z.string().optional(),
-    experiment_id: z.string(),
-    experiment_name: z.string().nullable().optional(),
+    execution_id: z.string().max(1024).optional(),
+    experiment_id: z.string().max(1024),
+    experiment_name: z.string().max(256).nullable().optional(),
     experiment_count: z.number().int().optional(),
-    timestamp: z.string(),
-    suite_id: z.string().optional(),
-    dataset_ids: z.array(z.string()).optional(),
-    dataset_names: z.array(z.string()).optional(),
+    timestamp: z.string().max(64),
+    suite_id: z.string().max(256).optional(),
+    dataset_ids: z.array(z.string().max(1024)).optional(),
+    dataset_names: z.array(z.string().max(256)).optional(),
     task_model: Model.optional(),
     evaluator_model: Model.optional(),
-    git_branch: z.string().nullable().optional(),
-    git_commit_sha: z.string().nullable().optional(),
+    git_branch: z.string().max(256).nullable().optional(),
+    git_commit_sha: z.string().max(256).nullable().optional(),
     total_repetitions: z.number().int().optional(),
     ci: BuildkiteMetadata.optional(),
   })
@@ -43,23 +43,23 @@ export const GetEvaluationExperimentsRequestQuery = lazySchema(() =>
     /**
      * Filter by suite ID
      */
-    suite_id: z.string().optional(),
+    suite_id: z.string().max(256).optional(),
     /**
      * Filter by task model ID
      */
-    model_id: z.string().optional(),
+    model_id: z.string().max(256).optional(),
     /**
      * Filter by git branch
      */
-    branch: z.string().optional(),
+    branch: z.string().max(256).optional(),
     /**
      * Filter by dataset ID
      */
-    dataset_id: z.string().optional(),
+    dataset_id: z.string().max(1024).optional(),
     /**
      * Filter by CI build ID (metadata.ci.build_id)
      */
-    build_id: z.string().optional(),
+    build_id: z.string().max(256).optional(),
     page: z.coerce.number().int().min(1).optional().default(1),
     per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
   })

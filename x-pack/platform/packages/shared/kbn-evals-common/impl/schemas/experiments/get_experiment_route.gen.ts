@@ -23,15 +23,15 @@ export const GetEvaluationExperimentRequestQuery = lazySchema(() =>
     /**
      * Filter stats by suite ID
      */
-    suite_id: z.string().optional(),
+    suite_id: z.string().max(256).optional(),
     /**
      * Filter stats by task model ID
      */
-    model_id: z.string().optional(),
+    model_id: z.string().max(256).optional(),
     /**
      * When provided, fetches all experiments in this execution instead of the single experiment from the path param
      */
-    execution_id: z.string().optional(),
+    execution_id: z.string().max(1024).optional(),
   })
 );
 export type GetEvaluationExperimentRequestQuery = z.infer<
@@ -43,7 +43,7 @@ export type GetEvaluationExperimentRequestQueryInput = z.input<
 
 export const GetEvaluationExperimentRequestParams = lazySchema(() =>
   z.object({
-    experimentId: z.string(),
+    experimentId: z.string().max(1024),
   })
 );
 export type GetEvaluationExperimentRequestParams = z.infer<
@@ -55,16 +55,19 @@ export type GetEvaluationExperimentRequestParamsInput = z.input<
 
 export const GetEvaluationExperimentResponse = lazySchema(() =>
   z.object({
-    experiment_id: z.string(),
-    experiment_name: z.string().nullable().optional(),
-    timestamp: z.string().optional(),
+    experiment_id: z.string().max(1024),
+    experiment_name: z.string().max(256).nullable().optional(),
+    timestamp: z.string().max(64).optional(),
     task_model: Model.optional(),
     evaluator_model: Model.optional(),
-    execution_id: z.string().optional(),
-    suite_id: z.string().nullable().optional(),
+    execution_id: z.string().max(1024).optional(),
+    /**
+     * The suite ID when this experiment belongs to a suite run
+     */
+    suite_id: z.string().max(256).nullable().optional(),
     total_repetitions: z.number().int().optional(),
-    git_branch: z.string().nullable().optional(),
-    git_commit_sha: z.string().nullable().optional(),
+    git_branch: z.string().max(256).nullable().optional(),
+    git_commit_sha: z.string().max(256).nullable().optional(),
     ci: BuildkiteMetadata.optional(),
     stats: z.array(EvaluatorStats),
   })

@@ -18,23 +18,27 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 1024
         - name: suite_id
           in: query
           required: false
           schema:
             type: string
+            maxLength: 256
           description: Filter by suite ID
         - name: model_id
           in: query
           required: false
           schema:
             type: string
+            maxLength: 256
           description: Filter by task model ID
         - name: execution_id
           in: query
           required: false
           schema:
             type: string
+            maxLength: 1024
           description: When provided, fetches scores for all experiments in this execution
       responses:
         '200':

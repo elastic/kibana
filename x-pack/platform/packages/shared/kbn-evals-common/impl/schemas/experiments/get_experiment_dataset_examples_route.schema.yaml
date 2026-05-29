@@ -18,16 +18,19 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 1024
         - name: datasetId
           in: path
           required: true
           schema:
             type: string
+            maxLength: 1024
         - name: execution_id
           in: query
           required: false
           schema:
             type: string
+            maxLength: 1024
           description: When provided, fetches examples for all experiments in this execution
       responses:
         '200':
@@ -50,6 +53,7 @@ components:
       properties:
         example_id:
           type: string
+          maxLength: 1024
         example_index:
           type: integer
           nullable: true

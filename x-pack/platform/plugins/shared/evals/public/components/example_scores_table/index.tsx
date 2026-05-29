@@ -19,6 +19,7 @@ import {
   EuiPagination,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';

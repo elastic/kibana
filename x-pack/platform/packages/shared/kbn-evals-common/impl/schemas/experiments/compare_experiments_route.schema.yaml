@@ -26,12 +26,14 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 1024
           description: Baseline experiment or execution ID (depends on type)
         - name: target_id
           in: query
           required: true
           schema:
             type: string
+            maxLength: 1024
           description: Target experiment or execution ID (depends on type)
       responses:
         '200':
@@ -77,10 +79,13 @@ components:
       properties:
         datasetId:
           type: string
+          maxLength: 1024
         datasetName:
           type: string
+          maxLength: 256
         evaluatorName:
           type: string
+          maxLength: 256
         sampleSize:
           type: integer
         meanA:

@@ -20,7 +20,7 @@ import { EvaluationScoreDocument } from '../common_attributes.gen';
 
 export const EvaluationExperimentDatasetExample = lazySchema(() =>
   z.object({
-    example_id: z.string(),
+    example_id: z.string().max(1024),
     example_index: z.number().int().nullable(),
     scores: z.array(EvaluationScoreDocument),
   })
@@ -32,7 +32,7 @@ export const GetEvaluationExperimentDatasetExamplesRequestQuery = lazySchema(() 
     /**
      * When provided, fetches examples for all experiments in this execution
      */
-    execution_id: z.string().optional(),
+    execution_id: z.string().max(1024).optional(),
   })
 );
 export type GetEvaluationExperimentDatasetExamplesRequestQuery = z.infer<
@@ -44,8 +44,8 @@ export type GetEvaluationExperimentDatasetExamplesRequestQueryInput = z.input<
 
 export const GetEvaluationExperimentDatasetExamplesRequestParams = lazySchema(() =>
   z.object({
-    experimentId: z.string(),
-    datasetId: z.string(),
+    experimentId: z.string().max(1024),
+    datasetId: z.string().max(1024),
   })
 );
 export type GetEvaluationExperimentDatasetExamplesRequestParams = z.infer<

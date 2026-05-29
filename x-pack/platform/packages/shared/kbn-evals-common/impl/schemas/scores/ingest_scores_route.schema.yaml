@@ -21,8 +21,10 @@ paths:
               properties:
                 experiment_id:
                   type: string
+                  maxLength: 1024
                 experiment_name:
                   type: string
+                  maxLength: 256
                 task_model:
                   $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
                 evaluator_model:
@@ -32,20 +34,25 @@ paths:
                   properties:
                     execution_id:
                       type: string
+                      maxLength: 1024
                     suite_id:
                       type: string
+                      maxLength: 256
                     total_repetitions:
                       type: integer
                     hostname:
                       type: string
+                      maxLength: 256
                     git:
                       type: object
                       properties:
                         branch:
                           type: string
+                          maxLength: 256
                           nullable: true
                         commit_sha:
                           type: string
+                          maxLength: 256
                           nullable: true
                     ci:
                       $ref: '../common_attributes.schema.yaml#/components/schemas/BuildkiteMetadata'
@@ -63,6 +70,7 @@ paths:
                         properties:
                           id:
                             type: string
+                            maxLength: 1024
                           index:
                             type: integer
                           input:
@@ -73,8 +81,10 @@ paths:
                             properties:
                               id:
                                 type: string
+                                maxLength: 1024
                               name:
                                 type: string
+                                maxLength: 256
                             required:
                               - id
                               - name
@@ -87,6 +97,7 @@ paths:
                         properties:
                           trace_id:
                             type: string
+                            maxLength: 256
                           repetition_index:
                             type: integer
                           output:
@@ -99,20 +110,24 @@ paths:
                         properties:
                           name:
                             type: string
+                            maxLength: 256
                           score:
                             type: number
                             nullable: true
                           label:
                             type: string
+                            maxLength: 256
                             nullable: true
                           explanation:
                             type: string
+                            maxLength: 4096
                             nullable: true
                           metadata:
                             type: object
                             additionalProperties: true
                           trace_id:
                             type: string
+                            maxLength: 256
                             nullable: true
                         required:
                           - name
@@ -149,6 +164,7 @@ paths:
                           type: integer
                         reason:
                           type: string
+                          maxLength: 1024
                       required:
                         - index
                         - status

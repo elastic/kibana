@@ -18,30 +18,35 @@ paths:
           required: false
           schema:
             type: string
+            maxLength: 256
           description: Filter by suite ID
         - name: model_id
           in: query
           required: false
           schema:
             type: string
+            maxLength: 256
           description: Filter by task model ID
         - name: branch
           in: query
           required: false
           schema:
             type: string
+            maxLength: 256
           description: Filter by git branch
         - name: dataset_id
           in: query
           required: false
           schema:
             type: string
+            maxLength: 1024
           description: Filter by dataset ID
         - name: build_id
           in: query
           required: false
           schema:
             type: string
+            maxLength: 256
           description: Filter by CI build ID (metadata.ci.build_id)
         - name: page
           in: query
@@ -83,34 +88,43 @@ components:
       properties:
         execution_id:
           type: string
+          maxLength: 1024
         experiment_id:
           type: string
+          maxLength: 1024
         experiment_name:
           type: string
+          maxLength: 256
           nullable: true
         experiment_count:
           type: integer
         timestamp:
           type: string
+          maxLength: 64
         suite_id:
           type: string
+          maxLength: 256
         dataset_ids:
           type: array
           items:
             type: string
+            maxLength: 1024
         dataset_names:
           type: array
           items:
             type: string
+            maxLength: 256
         task_model:
           $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
         evaluator_model:
           $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
         git_branch:
           type: string
+          maxLength: 256
           nullable: true
         git_commit_sha:
           type: string
+          maxLength: 256
           nullable: true
         total_repetitions:
           type: integer
