@@ -27,7 +27,7 @@ export const EVALS_DATASET_EXAMPLES_URL = `${EVALS_DATASET_URL}/examples` as con
 export const EVALS_DATASET_EXAMPLE_URL = `${EVALS_DATASET_EXAMPLES_URL}/{exampleId}` as const;
 export const EVALS_DATASET_UPSERT_URL = `${EVALS_DATASETS_URL}/_upsert` as const;
 
-const EVALUATION_INDEX_PREFIX = '.kibana-evaluation' as const;
+const EVALUATION_INDEX_PREFIX = '.evaluation' as const;
 
 export const EvaluationIndices = {
   SCORES: `${EVALUATION_INDEX_PREFIX}-scores`,
