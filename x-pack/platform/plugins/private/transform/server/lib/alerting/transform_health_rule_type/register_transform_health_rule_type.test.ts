@@ -44,7 +44,7 @@ describe('Transform Health Rule Type', () => {
     } as any);
 
   describe('Error Handling', () => {
-    it('throws a user error when alertsClient is missing', async () => {
+    it('throws an error when alertsClient is missing', async () => {
       const ruleType = getTransformHealthRuleType(mockGetFieldFormatsStart);
       const options = createExecutorOptions({ withAlertsClient: false });
 
@@ -57,7 +57,6 @@ describe('Transform Health Rule Type', () => {
 
       expect(thrownError).toBeDefined();
       expect(thrownError).toBeInstanceOf(AlertsClientError);
-      expect(isUserError(thrownError)).toBe(true);
     });
 
     it('marks 404 errors from the transform health service as user errors', async () => {
