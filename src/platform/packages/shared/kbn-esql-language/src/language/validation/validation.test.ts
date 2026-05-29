@@ -6,24 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { EsqlFieldType } from '@kbn/esql-types';
+import type { EsqlFieldType, ESQLCallbacks } from '@kbn/esql-types';
 import type { EditorError } from '@elastic/esql/types';
 import type { SupportedDataType, FunctionDefinition, ESQLMessage } from '../../..';
 import { timeUnitsToSuggest, dataTypes, getNoValidCallSignatureError } from '../../..';
 import { getFunctionSignatures } from '../../commands/definitions/utils';
 import { scalarFunctionDefinitions } from '../../commands/definitions/generated/scalar_functions';
 import { aggFunctionDefinitions } from '../../commands/definitions/generated/aggregation_functions';
-import { readFile, writeFile } from 'fs/promises';
 import { camelCase } from 'lodash';
-import { join } from 'path';
-import {
-  enrichFields,
-  fields,
-  getCallbackMocks,
-  indexes,
-  policies,
-  unsupported_field,
-} from '../../__tests__/language/helpers';
+import { getCallbackMocks } from '../../__tests__/language/helpers';
 import { setup } from './__tests__/helpers';
 import { validateQuery } from './validation';
 
@@ -168,36 +159,7 @@ function getFieldMapping(
 }
 
 describe('validation logic', () => {
-  const testCases: Array<{ query: string; error: string[]; warning: string[] }> = [];
-
   describe('Full validation performed', () => {
-    afterAll(async () => {
-      const targetFolder = join(__dirname, 'esql_validation_meta_tests.json');
-      try {
-        await writeFile(
-          targetFolder,
-          JSON.stringify(
-            {
-              indexes,
-              fields: fields.concat([
-                { name: policies[0].matchField, type: 'keyword', userDefined: false },
-              ]),
-              enrichFields: enrichFields.concat([
-                { name: policies[0].matchField, type: 'keyword', userDefined: false },
-              ]),
-              policies,
-              unsupported_field,
-              testCases,
-            },
-            null,
-            2
-          )
-        );
-      } catch (e) {
-        throw new Error(`Error writing test cases to ${targetFolder}: ${e.message}`);
-      }
-    });
-
     function testErrorsAndWarningsFn(
       statement: string,
       expectedErrors: string[] = [],
@@ -205,11 +167,6 @@ describe('validation logic', () => {
       { only, skip }: { only?: boolean; skip?: boolean } = {}
     ) {
       const testFn = only ? it.only : skip ? it.skip : it;
-      testCases.push({
-        query: statement,
-        error: expectedErrors,
-        warning: expectedWarnings,
-      });
 
       testFn(
         `${statement} => ${expectedErrors.length} errors, ${expectedWarnings.length} warnings`,
@@ -731,120 +688,72 @@ describe('validation logic', () => {
   });
 
   describe('Ignoring errors based on callbacks', () => {
-    interface Fixtures {
-      testCases: Array<{ query: string; error: string[] }>;
-    }
-
-    async function loadFixtures() {
-      // early exit if the testCases are already defined locally
-      const localTestCases: Array<{ query: string; error: string[] }> = [];
-      if (localTestCases.length) {
-        return { testCases: localTestCases };
-      }
-      const json = await readFile(join(__dirname, 'esql_validation_meta_tests.json'), 'utf8');
-      const esqlPackage = JSON.parse(json);
-      return esqlPackage as Fixtures;
-    }
-
-    function excludeErrorsByContent(excludedCallback: string[]) {
-      const contentByCallback = {
-        getSources: /Unknown (index|data source)/,
-        getPolicies: /Unknown policy/,
-        getColumnsFor: /Unknown column|Argument of|it is unsupported or not indexed/,
-        getPreferences: /Unknown/,
-        getFieldsMetadata: /Unknown/,
-        getVariables: /Unknown/,
-        canSuggestVariables: /Unknown/,
-      };
-      return excludedCallback.map((callback) => (contentByCallback as any)[callback]) || [];
-    }
-
-    function getPartialCallbackMocks(exclude?: string) {
-      return {
-        ...getCallbackMocks(),
-        ...(exclude ? { [exclude]: undefined } : {}),
-      };
-    }
-
-    let fixtures: Fixtures;
-
-    beforeAll(async () => {
-      fixtures = await loadFixtures();
+    const getPartialCallbackMocks = (exclude?: string): ESQLCallbacks => ({
+      ...getCallbackMocks(),
+      ...(exclude ? { [exclude]: undefined } : {}),
     });
 
-    it('should basically work when all callbacks are passed', async () => {
-      const allErrors = await Promise.all(
-        fixtures.testCases
-          .filter(({ query }) => query === 'from index METADATA _id, _source2')
-          .map(({ query }) => validateQuery(query, getCallbackMocks()))
-      );
-      for (const [index, { errors }] of Object.entries(allErrors)) {
-        expect(errors.map((e) => ('severity' in e ? e.message : e.text))).toEqual(
-          fixtures.testCases.filter(({ query }) => query === 'from index METADATA _id, _source2')[
-            Number(index)
-          ].error
-        );
-      }
-    });
+    const collectErrorCodes = async (query: string, callbacks: ESQLCallbacks) => {
+      const { errors } = await validateQuery(query, callbacks);
+      return errors.map((error) => error.code);
+    };
 
-    // test excluding one callback at the time
-    it.each(['getSources', 'getColumnsFor', 'getPolicies'])(
-      `should not error if %s is missing`,
-      async (excludedCallback) => {
-        const filteredTestCases = fixtures.testCases.filter((t) =>
-          t.error.some((message) =>
-            excludeErrorsByContent([excludedCallback]).every((regexp) => regexp?.test(message))
+    // Queries that produce errors which depend on a specific callback being available.
+    // When that callback is missing, the validator must suppress the related error codes.
+    const callbackScenarios = [
+      {
+        callback: 'getSources',
+        codes: ['unknownIndex', 'unknownDataSource'],
+        queries: ['FROM unknown_index', 'FROM index, unknown_index'],
+      },
+      {
+        callback: 'getColumnsFor',
+        codes: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
+        queries: [
+          'FROM index | KEEP unknownColumn',
+          'FROM index | EVAL rounded = ROUND(keywordField)',
+          'FROM index | KEEP unsupportedField',
+        ],
+      },
+      {
+        callback: 'getPolicies',
+        codes: ['unknownPolicy'],
+        queries: ['FROM index | ENRICH unknown_policy'],
+      },
+    ];
+
+    it.each(callbackScenarios)(
+      'suppresses $callback-dependent errors when $callback is missing',
+      async ({ callback, codes, queries }) => {
+        // Sanity: with all callbacks present, the scenario actually exercises its error codes.
+        const codesWithAllCallbacks = (
+          await Promise.all(queries.map((query) => collectErrorCodes(query, getCallbackMocks())))
+        ).flat();
+        expect(codes.some((code) => codesWithAllCallbacks.includes(code))).toBe(true);
+
+        // With the callback removed, none of the related codes must be reported.
+        const codesWithoutCallback = (
+          await Promise.all(
+            queries.map((query) => collectErrorCodes(query, getPartialCallbackMocks(callback)))
           )
-        );
-        const allErrors = await Promise.all(
-          filteredTestCases.map(({ query }) =>
-            validateQuery(query, getPartialCallbackMocks(excludedCallback))
-          )
-        );
-        for (const { errors } of allErrors) {
-          const errorCodes = errors.map((e) => e.code);
-          // Verify errors related to excluded callback are not present
-          if (excludedCallback === 'getSources') {
-            expect(
-              errorCodes.every((code) => code !== 'unknownIndex' && code !== 'unknownDataSource')
-            ).toBe(true);
-          } else if (excludedCallback === 'getColumnsFor') {
-            expect(
-              errorCodes.every(
-                (code) =>
-                  code !== 'unknownColumn' &&
-                  code !== 'wrongArgumentType' &&
-                  code !== 'unsupportedFieldType'
-              )
-            ).toBe(true);
-          } else if (excludedCallback === 'getPolicies') {
-            expect(errorCodes.every((code) => code !== 'unknownPolicy')).toBe(true);
-          }
+        ).flat();
+        for (const code of codes) {
+          expect(codesWithoutCallback).not.toContain(code);
         }
       }
     );
 
-    it('should work if no callback passed', async () => {
-      const excludedCallbacks = ['getSources', 'getPolicies', 'getColumnsFor'];
-      for (const testCase of fixtures.testCases.filter((t) =>
-        t.error.some((message) =>
-          excludeErrorsByContent(excludedCallbacks).every((regexp) => regexp?.test(message))
-        )
-      )) {
-        const { errors } = await validateQuery(testCase.query, {});
-        // Verify no callback-dependent errors are present
-        const errorCodes = errors.map((e) => e.code);
-        expect(
-          errorCodes.every(
-            (code) =>
-              code !== 'unknownIndex' &&
-              code !== 'unknownDataSource' &&
-              code !== 'unknownColumn' &&
-              code !== 'wrongArgumentType' &&
-              code !== 'unsupportedFieldType' &&
-              code !== 'unknownPolicy'
+    it('suppresses all callback-dependent errors when no callback is passed', async () => {
+      const allCodes = callbackScenarios.flatMap(({ codes }) => codes);
+      const reportedCodes = (
+        await Promise.all(
+          callbackScenarios.flatMap(({ queries }) =>
+            queries.map((query) => collectErrorCodes(query, {}))
           )
-        ).toBe(true);
+        )
+      ).flat();
+      for (const code of allCodes) {
+        expect(reportedCodes).not.toContain(code);
       }
     });
   });
