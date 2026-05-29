@@ -397,6 +397,7 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
   },
 });
 
+/** @deprecated Use GET /internal/streams/{name}/onboarding/_status instead. Will be removed in a follow-up. */
 export const featuresStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/features/_status',
   options: {
@@ -434,6 +435,7 @@ export const featuresStatusRoute = createServerRoute({
   },
 });
 
+/** @deprecated Use POST /internal/streams/{name}/onboarding/_execute instead. Will be removed in a follow-up. */
 export const featuresTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/features/_task',
   options: {

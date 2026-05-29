@@ -132,4 +132,35 @@ describe('fetchEsql', () => {
 
     expect(result.time).toEqual(absoluteTimeRange);
   });
+
+  it('should add inline_highlights to the raw record when inline highlights are present', async () => {
+    const hits = [
+      { _index: 'i', _id: '1', snippets: '<em>bar</em>' },
+      { _index: 'i', _id: '2', snippets: '<em>baz</em>' },
+    ] as unknown as EsHitRecord[];
+    const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
+    expressionsExecuteSpy.mockReturnValueOnce({
+      cancel: jest.fn(),
+      getData: jest.fn(() =>
+        of({
+          result: {
+            columns: ['_id', 'snippets'],
+            rows: hits,
+          },
+        })
+      ),
+    } as unknown as ExecutionContract);
+
+    const result = await fetchEsql({
+      ...fetchEsqlMockProps,
+      query: { esql: 'from * | EVAL snippets = TOP_SNIPPETS(foo, "bar", { "highlight": true })' },
+    });
+
+    expect(result.records[0].raw.inline_highlights).toEqual({
+      snippets: { preTag: '<em>', postTag: '</em>' },
+    });
+    expect(result.records[1].raw.inline_highlights).toEqual({
+      snippets: { preTag: '<em>', postTag: '</em>' },
+    });
+  });
 });

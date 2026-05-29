@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { TaskStatus } from '@kbn/streams-schema';
+import {
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+  type StreamsKIsOnboardingStatusResult,
+} from '@kbn/streams-schema';
 import pMap from 'p-map';
 import { useCallback, useRef } from 'react';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 
 type StreamOnboardingStatusUpdateCallback = (
   streamName: string,
-  status: TaskResult<OnboardingResult>
+  status: StreamsKIsOnboardingStatusResult
 ) => void;
 
 export function useOnboardingStatusUpdateQueue(
@@ -22,17 +24,17 @@ export function useOnboardingStatusUpdateQueue(
   const queue = useRef(new Set<string>([]));
   const isProcessing = useRef(false);
 
-  const { getOnboardingTaskStatus } = useOnboardingApi();
+  const { getOnboardingStatus } = useOnboardingApi();
 
   const updateStatuses = useCallback(async (): Promise<void> => {
     await pMap(
       queue.current,
       async (streamName) => {
-        const taskResult = await getOnboardingTaskStatus(streamName);
+        const statusResult = await getOnboardingStatus(streamName);
 
-        onStreamStatusUpdate(streamName, taskResult);
+        onStreamStatusUpdate(streamName, statusResult);
 
-        if (![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(taskResult.status)) {
+        if (!STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status)) {
           queue.current.delete(streamName);
         }
       },
@@ -43,7 +45,7 @@ export function useOnboardingStatusUpdateQueue(
       await new Promise((res) => setTimeout(res, 2000));
       await updateStatuses();
     }
-  }, [getOnboardingTaskStatus, onStreamStatusUpdate]);
+  }, [getOnboardingStatus, onStreamStatusUpdate]);
 
   const processStatusUpdateQueue = useCallback(async () => {
     if (isProcessing.current) {
