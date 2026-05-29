@@ -20,6 +20,19 @@ export const CCR_ROLE = {
   ],
 };
 
+export const KIBANA_ADMIN_ROLE = {
+  elasticsearch: {
+    cluster: [],
+  },
+  kibana: [
+    {
+      base: ['all'],
+      feature: {},
+      spaces: ['*'],
+    },
+  ],
+};
+
 export const CCR_USER_ROLE = {
   elasticsearch: {
     cluster: ['manage', 'manage_ccr'],
@@ -30,19 +43,6 @@ export const CCR_USER_ROLE = {
       feature: {
         dashboard: ['read'],
       },
-      spaces: ['*'],
-    },
-  ],
-};
-
-export const KIBANA_ADMIN_ROLE = {
-  elasticsearch: {
-    cluster: [],
-  },
-  kibana: [
-    {
-      base: ['all'],
-      feature: {},
       spaces: ['*'],
     },
   ],
