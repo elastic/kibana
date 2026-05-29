@@ -11,6 +11,7 @@ This guide covers:
 - workflow identity (custom id, suffix, the reserved `system-` prefix)
 - lifecycle policies (`lifecycle`, `versionStrategy`, `enablement`)
 - `yaml` vs `yamlTemplate`
+- checking managed workflow status
 - executing managed workflows
 
 ## Concepts
@@ -69,6 +70,7 @@ Client surface:
 
 - `install(id, options)` — no request required
 - `uninstall(id, options)` — no request required
+- `getWorkflowStatus(id, options)` — no request required
 - `execute(request, id, options)` — **request required** (used for attribution and space context)
 
 ## 3) When to install
@@ -420,7 +422,46 @@ Every managed definition declares a `version: number` (positive integer, startin
 - Consumers (and future APIs) can compare the installed `managedVersion` on a document against the registry definition's `version` to answer "is this workflow up to date?" without inspecting hashes.
 - `version` is not auto-derived from the hash — it is an explicit declaration that the owner controls.
 
-## 9) Executing managed workflows
+## 9) Checking managed workflow status
+
+Use `getWorkflowStatus` when a plugin needs a read-only pre-flight check before executing or depending on a managed workflow. The API is plugin-scoped: a plugin can only query definitions it owns. Unknown ids and ids owned by another plugin throw before workflow storage is queried.
+
+```ts
+const managed = await workflowsExtensions.initManagedWorkflowsClient(MY_PLUGIN_ID);
+
+const status = await managed.getWorkflowStatus(MY_WORKFLOW_ID, {
+  workflowIdSuffix: 'host-42',
+  spaceId: 'my-space',
+});
+
+if (status.status !== 'intact') {
+  logger.warn('Managed workflow is not ready', { status });
+  return;
+}
+```
+
+Status values:
+
+| Status | Meaning |
+|---|---|
+| `intact` | The document exists, is managed by this plugin, is valid, enabled, and matches the registered definition hash and version. |
+| `missing` | The document does not exist or is soft-deleted. |
+| `disabled` | The document exists and is valid, but `enabled === false`. |
+| `invalid` | The document exists but has no valid parsed workflow definition. |
+| `drifted` | The document exists, but its stored `definitionHash`, `managedVersion`, or origin definition id differs from the registered definition. |
+| `not_managed` | A workflow document exists at the resolved id, but it is not a managed workflow. |
+
+If multiple conditions apply, the API reports the first matching status in this priority order: `missing`, `not_managed`, `invalid`, `disabled`, `drifted`, `intact`.
+
+The status API accepts the same identity options as install/uninstall, except template `values` are not needed:
+
+- omit `workflowId` and `workflowIdSuffix` to check the fixed definition id
+- pass `workflowId` to check a known full persisted id
+- pass `workflowIdSuffix` to check a deterministic suffixed instance
+
+`getWorkflowStatus` does not mutate workflow state. To repair `missing` or `drifted` workflows, call `install` through the same plugin-scoped client.
+
+## 10) Executing managed workflows
 
 Execution always runs in the context of a `KibanaRequest`:
 
@@ -456,7 +497,7 @@ Global workflows (`spaceId: '*'`) are visible from any space, but each execution
 - the execution document is stamped with the `spaceId` you pass in `options` — pass the requesting user's space, not `'*'`.
 - consequence: results of a global workflow run are visible only inside the space that triggered the run.
 
-## 10) Global workflows: user-facing behavior
+## 11) Global workflows: user-facing behavior
 
 Global managed workflows (`spaceId: '*'`) are stored **once** but have important cross-space implications that affect both end-users and plugin authors:
 
@@ -477,7 +518,7 @@ Because there is a **single persisted document** for a global workflow, any edit
 
 > **Future consideration:** Per-space overrides (e.g., enabling a global workflow only in certain spaces) are not yet supported. If your workflow needs per-space enablement control, use space-scoped installs with one document per space instead.
 
-## 11) Rollout checklist
+## 12) Rollout checklist
 
 1. Add the definition in `@kbn/workflows/managed` with the correct `pluginId`, a `system-` id, and `version: 1`; export the id as a const.
 2. Add the definition to `managedWorkflowDefinitions` in `managed/definitions/index.ts`, and re-export the id from that definitions barrel.
@@ -490,4 +531,5 @@ Because there is a **single persisted document** for a global workflow, any edit
 9. Pick lifecycle policy intentionally (`static`/`dynamic`, `auto`/`on_adopt`, `enforced`/`restorable`).
 10. Use `yamlTemplate` only when install-time values are required.
 11. Bump `version` on the definition whenever you change the `yaml` or `yamlTemplate`.
-12. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.
+12. Use `managed.getWorkflowStatus(...)` for read-only pre-flight checks before execution.
+13. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.
