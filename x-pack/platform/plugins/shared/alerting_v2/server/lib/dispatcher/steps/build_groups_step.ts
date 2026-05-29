@@ -89,10 +89,7 @@ export function buildActionGroups(
 
     const group = groupMap.get(actionGroupId)!;
     group.episodes.push(episode);
-    group.rules = buildRulesMap(
-      [...new Set(group.episodes.map((e) => e.rule_id))],
-      rules
-    );
+    group.rules = buildRulesMap([...new Set(group.episodes.map((e) => e.rule_id))], rules);
   }
 
   return [...groupMap.values()];

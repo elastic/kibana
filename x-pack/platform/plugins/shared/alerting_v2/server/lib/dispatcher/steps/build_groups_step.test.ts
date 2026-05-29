@@ -302,8 +302,14 @@ describe('buildActionGroups', () => {
       ['r2', createRule({ id: 'r2', name: 'Cert expiry' })],
     ]);
     const matched = [
-      createMatchedPair({ episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }), policy }),
-      createMatchedPair({ episode: createAlertEpisode({ rule_id: 'r2', episode_id: 'e2' }), policy }),
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        policy,
+      }),
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r2', episode_id: 'e2' }),
+        policy,
+      }),
     ];
 
     const groups = buildActionGroups(matched, rules);
@@ -318,8 +324,14 @@ describe('buildActionGroups', () => {
     const policy = createActionPolicy({ id: 'p1' });
     const rules = new Map([['r1', createRule({ id: 'r1', name: 'CPU spike' })]]);
     const matched = [
-      createMatchedPair({ episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }), policy }),
-      createMatchedPair({ episode: createAlertEpisode({ rule_id: 'r-missing', episode_id: 'e2' }), policy }),
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        policy,
+      }),
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r-missing', episode_id: 'e2' }),
+        policy,
+      }),
     ];
 
     const groups = buildActionGroups(matched, rules);
@@ -331,7 +343,10 @@ describe('buildActionGroups', () => {
   it('returns empty rules map when state.rules is undefined', () => {
     const policy = createActionPolicy({ id: 'p1' });
     const matched = [
-      createMatchedPair({ episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }), policy }),
+      createMatchedPair({
+        episode: createAlertEpisode({ rule_id: 'r1', episode_id: 'e1' }),
+        policy,
+      }),
     ];
 
     const groups = buildActionGroups(matched);

@@ -215,7 +215,7 @@ describe('StoreExecutionHistoryStep', () => {
       episode_ids: ['ep-b1'],
       execution: { uuid: '00000000-0000-4000-8000-000000000000' },
     });
-    expect(eventB?.kibana?.saved_objects?.[0]?.type_id).toBe('signal');
+    expect(eventB?.kibana?.saved_objects?.[0]?.type_id).toBe('alert');
   });
 
   it('excludes episodes handled by dispatch or throttled from the unmatched set', async () => {
