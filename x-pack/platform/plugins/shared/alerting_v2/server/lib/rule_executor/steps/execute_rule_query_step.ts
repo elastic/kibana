@@ -6,6 +6,8 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { isEsqlUserError } from '../../errors/esql_user_error';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
 import {
@@ -81,28 +83,35 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           })}`,
       });
 
-      const esqlRowBatchStream = step.queryService.executeQueryStream({
-        query: effectiveQuery,
-        filter: composedFilter,
-        params: queryPayload.params,
-        abortSignal: input.executionContext.signal,
-      });
+      try {
+        const esqlRowBatchStream = step.queryService.executeQueryStream({
+          query: effectiveQuery,
+          filter: composedFilter,
+          params: queryPayload.params,
+          abortSignal: input.executionContext.signal,
+        });
 
-      let yielded = false;
+        let yielded = false;
 
-      for await (const batch of esqlRowBatchStream) {
-        yielded = true;
-        yield {
-          type: 'continue',
-          state: { ...state, queryPayload, esqlRowBatch: batch },
-        };
-      }
+        for await (const batch of esqlRowBatchStream) {
+          yielded = true;
+          yield {
+            type: 'continue',
+            state: { ...state, queryPayload, esqlRowBatch: batch },
+          };
+        }
 
-      if (!yielded) {
-        yield {
-          type: 'continue',
-          state: { ...state, queryPayload, esqlRowBatch: [] },
-        };
+        if (!yielded) {
+          yield {
+            type: 'continue',
+            state: { ...state, queryPayload, esqlRowBatch: [] },
+          };
+        }
+      } catch (error) {
+        if (isEsqlUserError(error)) {
+          throw createTaskRunError(error as Error, TaskErrorSource.USER);
+        }
+        throw error;
       }
     });
   }

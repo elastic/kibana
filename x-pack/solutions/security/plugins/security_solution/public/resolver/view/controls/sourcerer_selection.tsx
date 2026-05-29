@@ -58,6 +58,7 @@ export const SourcererButton = memo(
         isOpen={isOpen}
         closePopover={closePopover}
         anchorPosition="leftCenter"
+        aria-label={nodeLegendButtonTitle}
       >
         {newDataViewPickerEnabled ? (
           <DataViewPicker scope={PageScope.analyzer} onClosePopover={closePopover} />

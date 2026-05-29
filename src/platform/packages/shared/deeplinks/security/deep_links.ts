@@ -119,4 +119,9 @@ export enum SecurityPageName {
    */
   spaceRulesHealth = 'space-rules-health',
   ruleHealth = 'rule-health',
+
+  /**
+   * Ingest Hub Onboarding
+   */
+  onboarding = 'onboarding',
 }

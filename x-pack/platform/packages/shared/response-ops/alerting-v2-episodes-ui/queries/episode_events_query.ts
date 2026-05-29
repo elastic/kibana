@@ -40,9 +40,11 @@ const ALERT_EPISODE_EVENT_FIELDS = [
  * Uses `_source` metadata + JSON_EXTRACT to include the flattened `data` field
  * as a JSON string named `event_data` (ES|QL cannot KEEP flattened fields directly).
  */
-export const buildEpisodeEventsEsqlQuery = (episodeId: string) => {
+export const buildEpisodeEventsEsqlQuery = (spaceId: string, episodeId: string) => {
   // prettier-ignore
-  return esql.from([ALERT_EVENTS_DATA_STREAM], ['_source']).where`type == "alert"`
+  return esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
+    .where`space_id == ${spaceId}`
+    .where`type == "alert"`
     .where`episode.id == ${episodeId}`
     .pipe`EVAL event_data = JSON_EXTRACT(_source, "data")`
     .sort([TIME_FIELD, 'ASC'])

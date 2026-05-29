@@ -37,19 +37,40 @@ exports[`DateRangePicker renders 1`] = `
             id="generated-id-wrapper"
           >
             <button
-              class="euiButtonEmpty euiFormControlButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFormControlButton-compressed-fullWidth"
+              class="euiButtonEmpty euiFormControlButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFormControlButton-compressed-fullWidth-DateRangePickerControl"
               data-date-range="now-20m to now"
               data-test-subj="dateRangePickerControlButton"
               type="button"
-              value="Last 20 minutes"
             >
               <span
                 class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFormControlButton__content"
               >
-                <span
-                  class="eui-textTruncate css-z3gg36-textContent"
-                >
-                  Last 20 minutes
+                <span>
+                  <span
+                    class="eui-textTruncate css-rbdo33-root"
+                    data-test-subj="dateRangePickerValueDisplay"
+                  >
+                    <span
+                      class="css-1i6t4lm-part"
+                      data-test-subj="dateRangePickerDisplayPart"
+                    >
+                      Last
+                    </span>
+                     
+                    <span
+                      class="css-1i6t4lm-part"
+                      data-test-subj="dateRangePickerDisplayPart"
+                    >
+                      20
+                    </span>
+                     
+                    <span
+                      class="css-1i6t4lm-part"
+                      data-test-subj="dateRangePickerDisplayPart"
+                    >
+                      minutes
+                    </span>
+                  </span>
                 </span>
               </span>
             </button>

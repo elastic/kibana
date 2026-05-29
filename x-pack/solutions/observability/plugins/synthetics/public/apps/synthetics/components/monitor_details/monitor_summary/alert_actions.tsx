@@ -19,7 +19,7 @@ import rison from '@kbn/rison';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { toggleStatusAlert } from '../../../../../../common/runtime_types/monitor_management/alert_config';
 import { useMonitorAlertEnable } from '../../../hooks/use_monitor_alert_enable';
-import { ConfigKey } from '../../../../../../common/runtime_types';
+import { ConfigKey, isRemoteSyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import {
   DISABLE_STATUS_ALERT,
@@ -46,6 +46,12 @@ export const AlertActions = ({ from, to }: { from: string; to: string }) => {
 
   if (!monitor) {
     return <EuiSkeletonText lines={1} />;
+  }
+
+  // Alert config lives on the local saved object; remote monitors can only be
+  // managed from the source cluster, so hide the actions menu here entirely.
+  if (isRemoteSyntheticsMonitor(monitor)) {
+    return null;
   }
 
   const onToggleAlertClick = () => {

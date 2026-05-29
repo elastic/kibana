@@ -8,15 +8,10 @@ OLD_VERSION=$(buildkite-agent meta-data get "OLD_VERSION")
 
 echo "Reconciling labels from v${OLD_VERSION} to v${NEW_VERSION}"
 
-# Clone kibana-operations repo to get the label-reconcile script
-TEMP_DIR=$(mktemp -d)
-trap 'rm -rf "$TEMP_DIR"' EXIT
+SCRIPT_DIR=".buildkite/scripts/steps/version_bump"
 
-echo "Cloning elastic/kibana-operations..."
-git clone --depth 1 "https://x-access-token:${GITHUB_TOKEN}@github.com/elastic/kibana-operations.git" "$TEMP_DIR/kibana-operations"
-
-echo "Installing triage dependencies..."
-npm ci --prefix "$TEMP_DIR/kibana-operations/triage"
+echo "Installing dependencies..."
+npm ci --prefix "$SCRIPT_DIR"
 
 DRY_RUN_FLAG=""
 if [[ "${DRY_RUN:-false}" == "true" ]]; then
@@ -24,7 +19,7 @@ if [[ "${DRY_RUN:-false}" == "true" ]]; then
 fi
 
 echo "Running label-reconcile..."
-node "$TEMP_DIR/kibana-operations/triage/label-reconcile.js" \
+node "$SCRIPT_DIR/label_reconcile.js" \
   --shipped "v${OLD_VERSION}" \
   --upcoming "v${NEW_VERSION}" \
   ${DRY_RUN_FLAG}

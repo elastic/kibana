@@ -131,10 +131,12 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
  * then narrows to episode rows and derives `effective_status`.
  */
 export const buildEpisodesBaseQuery = (
+  spaceId: string,
   search?: string,
   includeBuildingBlocks = false
 ): ComposerQuery => {
-  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
+  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source'])
+    .where`space_id == ${spaceId}`;
 
   const trimmedSearch = search?.trim();
   if (trimmedSearch) {
@@ -168,6 +170,7 @@ export const buildEpisodesBaseQuery = (
  * is available for `assigneeUid` filtering.
  */
 export const buildEpisodesQuery = (
+  spaceId: string,
   sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
   filterState?: EpisodesFilterState
 ): ComposerQuery => {
@@ -176,6 +179,7 @@ export const buildEpisodesQuery = (
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
   const query = buildEpisodesBaseQuery(
+    spaceId,
     filterState?.queryString?.trim(),
     filterState?.includeBuildingBlocks ?? false
   );

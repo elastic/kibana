@@ -12,13 +12,15 @@ import type { DataViewsContract, RuntimeField } from '@kbn/data-views-plugin/pub
 import { useMemo } from 'react';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { buildEpisodesBaseQuery } from '../queries/episodes_query';
+import { useSpaceId } from './use_space_id';
 
 export interface UseAlertingEpisodesDataViewOptions {
-  query?: string;
   services: {
     dataViews: DataViewsContract;
     http: HttpStart;
+    spaces: SpacesPluginStart;
   };
 }
 
@@ -66,19 +68,17 @@ const computedFields: Record<string, RuntimeField> = {
   },
 };
 
-const defaultQuery = buildEpisodesBaseQuery().print('basic');
-
 /**
  * Creates an ad-hoc data view for the alerting episodes query, enriching
  * known fields with display names and value formats.
  */
-export const useAlertingEpisodesDataView = ({
-  query = defaultQuery,
-  services,
-}: UseAlertingEpisodesDataViewOptions) => {
+export const useAlertingEpisodesDataView = ({ services }: UseAlertingEpisodesDataViewOptions) => {
+  const spaceId = useSpaceId(services.spaces);
+  const query = buildEpisodesBaseQuery(spaceId).print('basic');
+
   const dataViewAsync = useAsync(
     () => getEsqlDataView({ esql: query }, undefined, services),
-    [services]
+    [query, services]
   );
 
   return useMemo(() => {

@@ -9,11 +9,11 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -51,7 +51,7 @@ apiTest.describe('Get rules bulk API', { tag: '@local-stateful-classic' }, () =>
   let readerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+    readerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_READ_ROLE);
     readerHeaders = { ...readerCredentials.apiKeyHeader };
   });
 
@@ -199,7 +199,9 @@ apiTest.describe('Get rules bulk API', { tag: '@local-stateful-classic' }, () =>
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'visible-to-writers' } })
       );
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+      const writerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_RULES_ALL_ROLE
+      );
       const response = await apiClient.get(getBulkUrl(rule.id), {
         headers: writerCredentials.apiKeyHeader,
       });

@@ -30,6 +30,7 @@ import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/
 import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/assignee_filter';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import useDebounce from 'react-use/lib/useDebounce';
 import deepEqual from 'fast-deep-equal';
 import { INCLUDE_BUILDING_BLOCKS_LABEL } from '../translations';
@@ -45,7 +46,7 @@ export interface EpisodesFilterBarProps {
   assigneeUids: string[];
   onRefresh?: () => void;
   isLoading?: boolean;
-  services: { http: HttpStart; expressions: ExpressionsStart };
+  services: { http: HttpStart; expressions: ExpressionsStart; spaces: SpacesPluginStart };
   includeBuildingBlocks?: boolean;
   onIncludeBuildingBlocksChange?: (value: boolean) => void;
 }
