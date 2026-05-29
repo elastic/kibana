@@ -296,7 +296,33 @@ describe('Workflow routes', () => {
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.updateWorkflow).toHaveBeenCalledWith('wf-1', body, 'default-space', request);
+      expect(mockApi.updateWorkflow).toHaveBeenCalledWith('wf-1', body, 'default-space', request, {
+        allowManagedWorkflowMutation: false,
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: updated });
+    });
+  });
+
+  describe('PUT:/api/workflows/managed/workflow/{id}', () => {
+    const key = 'PUT:/api/workflows/managed/workflow/{id}';
+
+    it('should register route handler', () => {
+      expect(routeHandlers[key]).toBeDefined();
+    });
+
+    it('should call api.updateWorkflow with managed mutation enabled', async () => {
+      const updated = { id: 'wf-1', name: 'U' };
+      mockApi.updateWorkflow.mockResolvedValue(updated);
+      const body = { name: 'U', enabled: true, tags: [], yaml: 'x' };
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' }, body });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.updateWorkflow).toHaveBeenCalledWith('wf-1', body, 'default-space', request, {
+        allowManagedWorkflowMutation: true,
+      });
       expect(response.ok).toHaveBeenCalledWith({ body: updated });
     });
   });

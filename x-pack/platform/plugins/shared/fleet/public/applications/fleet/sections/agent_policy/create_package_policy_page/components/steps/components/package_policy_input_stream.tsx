@@ -67,6 +67,7 @@ import { ExperimentalFeaturesService } from '../../../../../../services';
 
 import { useCreatePackagePolicyFormContext } from '../../../contexts/create_package_policy_form_context';
 
+import { PackagePolicyConditionField } from './package_policy_condition_field';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId, useVarGroupSelections } from './hooks';
 import { sortDatastreamsByDataset } from './sort_datastreams';
@@ -87,6 +88,7 @@ interface Props {
   forceShowErrors?: boolean;
   isEditPage?: boolean;
   isUpgrade?: boolean;
+  showConditionField?: boolean;
   hasStreamToggle?: boolean;
   varGroupSelections?: Record<string, string>;
   /** Parent input's `policy_template`; required for correct composable multi-template matching. */
@@ -103,6 +105,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     forceShowErrors,
     isEditPage,
     isUpgrade,
+    showConditionField = false,
     hasStreamToggle = true,
     varGroupSelections = {},
     inputPolicyTemplate,
@@ -276,8 +279,12 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(isDefaultDatastream);
     const hasAdvancedOptions = useMemo(() => {
-      return advancedVars.length > 0 || (isPackagePolicyEdit && showPipelinesAndMappings);
-    }, [advancedVars.length, isPackagePolicyEdit, showPipelinesAndMappings]);
+      return (
+        showConditionField ||
+        advancedVars.length > 0 ||
+        (isPackagePolicyEdit && showPipelinesAndMappings)
+      );
+    }, [advancedVars.length, isPackagePolicyEdit, showConditionField, showPipelinesAndMappings]);
 
     const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
     const flexWidth = isBiggerScreen ? 7 : 5;
@@ -593,6 +600,20 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                               name="dataStreamType"
                             />
                           </EuiFormRow>
+                        </EuiFlexItem>
+                      )}
+                      {isShowingAdvanced && showConditionField && (
+                        <EuiFlexItem>
+                          <PackagePolicyConditionField
+                            value={packagePolicyInputStream.condition ?? ''}
+                            onChange={(v) => updatePackagePolicyInputStream({ condition: v })}
+                            isInvalid={
+                              Boolean(forceShowErrors) &&
+                              Boolean(inputStreamValidationResults?.condition)
+                            }
+                            errors={inputStreamValidationResults?.condition ?? null}
+                            dataTestSubj="packagePolicyStreamConditionInput"
+                          />
                         </EuiFlexItem>
                       )}
                       {advancedVars.map((varDef) => {

@@ -19,6 +19,8 @@ import type {
 } from '@kbn/profiling-utils';
 import { withProfilingSpan } from './with_profiling_span';
 
+const PROFILING_STATUS_TIMEOUT_SECONDS = 60;
+
 export function cancelEsRequestOnAbort<T extends Promise<any>>(
   promise: T,
   request: KibanaRequest,
@@ -129,13 +131,15 @@ export function createProfilingEsClient({
             {
               method: 'GET',
               path: encodeURI(
-                `/_profiling/status?wait_for_resources_created=${waitForResourcesCreated}`
+                `/_profiling/status?wait_for_resources_created=${waitForResourcesCreated}&timeout=${
+                  PROFILING_STATUS_TIMEOUT_SECONDS + 5
+                }s`
               ),
             },
             {
               signal: controller.signal,
               meta: true,
-              requestTimeout: 60000,
+              requestTimeout: PROFILING_STATUS_TIMEOUT_SECONDS * 1000,
               maxRetries: 5,
               retryOnTimeout: true,
             }

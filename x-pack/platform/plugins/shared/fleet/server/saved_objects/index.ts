@@ -50,6 +50,7 @@ import {
   SettingsSchemaV8,
   PackagePolicySchemaV22,
   PackagePolicySchemaV24,
+  PackagePolicySchemaV25,
   CloudConnectorSchemaV4,
   CloudOnboardingDeploymentSchemaV1,
 } from '../types';
@@ -1194,6 +1195,13 @@ export const getSavedObjectTypes = (
             create: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '24': {
+          changes: [],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -1357,6 +1365,13 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
             create: PackagePolicySchemaV24.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '10': {
+          changes: [],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
           },
         },
       },

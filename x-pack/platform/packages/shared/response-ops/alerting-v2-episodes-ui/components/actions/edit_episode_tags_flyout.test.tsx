@@ -8,13 +8,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { HttpStart } from '@kbn/core-http-browser';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { MAX_TAG_LENGTH, MAX_TAGS_PER_EPISODE } from '@kbn/alerting-v2-constants';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeTagsFlyout } from './edit_episode_tags_flyout';
-import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
 import { useFetchAlertEpisodeTagSuggestions } from '../../hooks/use_fetch_alert_episode_tag_suggestions';
 import {
   createMockSpaces,
@@ -22,37 +18,26 @@ import {
   createQueryClientWrapper,
 } from '../../hooks/test_utils';
 
-jest.mock('../../hooks/use_create_alert_action');
 jest.mock('../../hooks/use_fetch_alert_episode_tag_suggestions');
 
-const useCreateAlertActionMock = jest.mocked(useCreateAlertAction);
 const useFetchAlertEpisodeTagSuggestionsMock = jest.mocked(useFetchAlertEpisodeTagSuggestions);
 
-const mockHttp: HttpStart = httpServiceMock.createStartContract();
 const mockExpressions = expressionsPluginMock.createStartContract();
 const mockSpaces = createMockSpaces();
 
 const queryClient = createTestQueryClient();
 const queryWrapper = createQueryClientWrapper(queryClient);
 
-const mutate = jest.fn();
-useCreateAlertActionMock.mockReturnValue({
-  mutate,
-  isLoading: false,
-} as unknown as ReturnType<typeof useCreateAlertAction>);
-
 describe('AlertEpisodeTagsFlyout', () => {
   const defaultProps = {
     isOpen: true,
     onClose: jest.fn(),
-    groupHash: 'gh-1',
+    onSave: jest.fn(),
     currentTags: [] as string[],
-    http: mockHttp,
     services: { expressions: mockExpressions, spaces: mockSpaces },
   };
 
   beforeEach(() => {
-    mutate.mockClear();
     useFetchAlertEpisodeTagSuggestionsMock.mockReturnValue({
       data: ['beta', 'gamma'],
       isLoading: false,
@@ -123,10 +108,14 @@ describe('AlertEpisodeTagsFlyout', () => {
 
   it('shows an error and disables save when a selected tag exceeds the max length', async () => {
     const user = userEvent.setup();
+    const mockOnSave = jest.fn();
     const longTag = 'x'.repeat(MAX_TAG_LENGTH + 1);
-    render(<AlertEpisodeTagsFlyout {...defaultProps} currentTags={[longTag]} />, {
-      wrapper: queryWrapper,
-    });
+    render(
+      <AlertEpisodeTagsFlyout {...defaultProps} onSave={mockOnSave} currentTags={[longTag]} />,
+      {
+        wrapper: queryWrapper,
+      }
+    );
 
     expect(
       await screen.findByTestId('alertingEpisodeTagsFlyoutTagTooLongError')
@@ -136,25 +125,28 @@ describe('AlertEpisodeTagsFlyout', () => {
 
     await user.click(screen.getByTestId('alertingEpisodeTagsFlyoutSave'));
 
-    expect(mutate).not.toHaveBeenCalled();
+    expect(mockOnSave).not.toHaveBeenCalled();
   });
 
-  it('calls createAlertAction on save with the current tag selection', async () => {
+  it('calls onSave with the current tag selection and closes on save', async () => {
     const user = userEvent.setup();
-    render(<AlertEpisodeTagsFlyout {...defaultProps} currentTags={['alpha']} />, {
-      wrapper: queryWrapper,
-    });
+    const mockOnSave = jest.fn();
+    const mockOnClose = jest.fn();
+
+    render(
+      <AlertEpisodeTagsFlyout
+        {...defaultProps}
+        onClose={mockOnClose}
+        currentTags={['alpha']}
+        onSave={mockOnSave}
+      />,
+      { wrapper: queryWrapper }
+    );
 
     await user.click(screen.getByTestId('alertingEpisodeTagsFlyoutSave'));
 
-    expect(mutate).toHaveBeenCalledWith(
-      {
-        groupHash: 'gh-1',
-        actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
-        body: { tags: ['alpha'] },
-      },
-      expect.any(Object)
-    );
+    expect(mockOnSave).toHaveBeenCalledWith(['alpha']);
+    expect(mockOnClose).toHaveBeenCalled();
   });
 
   it('invokes onClose when cancel is clicked', async () => {
@@ -167,43 +159,5 @@ describe('AlertEpisodeTagsFlyout', () => {
     await user.click(screen.getByTestId('alertingEpisodeTagsFlyoutCancel'));
 
     expect(onClose).toHaveBeenCalled();
-  });
-
-  it('invokes onClose when the mutation onSuccess callback runs', async () => {
-    const user = userEvent.setup();
-    const onClose = jest.fn();
-    mutate.mockImplementation((_payload, options?: { onSuccess?: () => void }) => {
-      options?.onSuccess?.();
-    });
-
-    render(<AlertEpisodeTagsFlyout {...defaultProps} onClose={onClose} currentTags={['alpha']} />, {
-      wrapper: queryWrapper,
-    });
-
-    await user.click(screen.getByTestId('alertingEpisodeTagsFlyoutSave'));
-
-    expect(onClose).toHaveBeenCalled();
-  });
-
-  it('calls onSave with selected tags and closes without calling the internal mutation when onSave is provided', async () => {
-    const user = userEvent.setup();
-    const mockOnSave = jest.fn();
-    const mockOnClose = jest.fn();
-
-    render(
-      <AlertEpisodeTagsFlyout
-        {...defaultProps}
-        onClose={mockOnClose}
-        currentTags={['tag-a']}
-        onSave={mockOnSave}
-      />,
-      { wrapper: queryWrapper }
-    );
-
-    await user.click(screen.getByTestId('alertingEpisodeTagsFlyoutSave'));
-
-    expect(mockOnSave).toHaveBeenCalledWith(['tag-a']);
-    expect(mockOnClose).toHaveBeenCalled();
-    expect(mutate).not.toHaveBeenCalled();
   });
 });
