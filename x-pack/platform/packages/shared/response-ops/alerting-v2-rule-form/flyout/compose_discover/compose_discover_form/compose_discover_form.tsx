@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useWatch } from 'react-hook-form';
+import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
@@ -22,16 +23,17 @@ import { AlertConditionStep } from './alert_condition_step';
 import { RecoveryConditionStep } from './recovery_condition_step';
 import { DetailsAndArtifactsStep } from './details_and_artifacts_step';
 import { NotificationsStep } from './notifications_step';
+import { LinkedActionPoliciesStep } from './linked_action_policies_step';
+import { CentralizedActionPoliciesPanel } from './centralized_action_policies_panel';
 
-interface ComposeDiscoverFormProps {
+interface Props {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
+  ruleId?: string;
   builderType?: string;
-  builderState?: unknown;
-  onBuilderStateChange?: (state: unknown) => void;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -82,9 +84,27 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   notifications: {
     id: 'notifications',
     title: i18n.translate('xpack.alertingV2.composeDiscover.notifications.stepTitle', {
-      defaultMessage: 'Notifications',
+      defaultMessage: 'Actions',
     }),
-    render: () => <NotificationsStep />,
+    render: (props) => (
+      <>
+        <CentralizedActionPoliciesPanel http={props.services.http} />
+        <EuiSpacer size="m" />
+        <LinkedActionPoliciesStep http={props.services.http} ruleId={props.ruleId} />
+        {props.state.mode !== 'edit' && (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <NotificationsStep services={props.services} />
+          </>
+        )}
+      </>
+    ),
+    validate: (methods, state, services) => {
+      if (state.mode === 'edit') return true;
+      const notifs = methods.getValues('notifications');
+      if (!notifs) return true;
+      return services?.workflowForm?.isValid?.(notifs.workflow) ?? true;
+    },
   },
 };
 
@@ -98,18 +118,14 @@ export const getSteps = (isAlert: boolean, builderType?: string): StepDefinition
         return {
           ...base,
           title: definition.stepTitle,
-          render: (props) => {
-            if (!props.builderState || !props.onBuilderStateChange) return null;
-            return definition.renderStep({
+          render: (props) =>
+            definition.renderStep({
               state: props.state,
               dispatch: props.dispatch,
               services: props.services,
-              builderState: props.builderState,
-              onBuilderStateChange: props.onBuilderStateChange,
-            });
-          },
+            }),
           validate: definition.validate
-            ? (_methods, s, bs) => definition.validate!(s, bs)
+            ? (_methods, s, _services, bs) => definition.validate!(s, bs)
             : base.validate,
         };
       }
@@ -118,16 +134,15 @@ export const getSteps = (isAlert: boolean, builderType?: string): StepDefinition
   });
 };
 
-export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
+export const ComposeDiscoverForm = ({
   state,
   dispatch,
   services,
   onRecoveryTypeChange,
   onKindChange,
+  ruleId,
   builderType,
-  builderState,
-  onBuilderStateChange,
-}) => {
+}: Props) => {
   const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const steps = getSteps(isAlert, builderType);
   return steps[state.step].render({
@@ -136,7 +151,6 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
     services,
     onRecoveryTypeChange,
     onKindChange,
-    builderState,
-    onBuilderStateChange,
+    ruleId,
   });
 };

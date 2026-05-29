@@ -20,8 +20,11 @@ import {
   PackName,
   PackDescriptionOrUndefined,
   ECSMappingArrayOrUndefined,
+  ScheduleTypeOrUndefined,
+  RRuleScheduleConfigOrUndefined,
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
+  PackIntervalOrUndefined,
 } from '../model/schema/common_attributes.gen';
 
 /**
@@ -51,6 +54,8 @@ export const CopyPacksResponse = lazySchema(() =>
             removed: z.boolean().optional(),
             timeout: z.number().int().optional(),
             ecs_mapping: ECSMappingArrayOrUndefined.optional(),
+            schedule_type: ScheduleTypeOrUndefined.optional(),
+            rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
           })
         )
         .optional(),
@@ -77,6 +82,9 @@ export const CopyPacksResponse = lazySchema(() =>
           })
         )
         .optional(),
+      schedule_type: ScheduleTypeOrUndefined.optional(),
+      interval: PackIntervalOrUndefined.optional(),
+      rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
     }),
   })
 );
