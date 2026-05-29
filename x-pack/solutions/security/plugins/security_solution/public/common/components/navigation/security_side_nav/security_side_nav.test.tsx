@@ -114,7 +114,7 @@ describe('SecuritySideNav', () => {
             position: 'top',
           },
         ],
-        categories: getNavCategories(false, false, false),
+        categories: getNavCategories(AIChatExperience.Classic, false, false, false),
         tracker: track,
       })
     );
