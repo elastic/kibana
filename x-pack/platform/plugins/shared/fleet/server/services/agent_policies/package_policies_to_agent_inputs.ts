@@ -81,7 +81,6 @@ export const storedPackagePolicyToAgentInputs = (
     return fullInputs;
   }
 
-  const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
   const isAgentless = packagePolicy.supports_agentless === true;
 
   packagePolicy.inputs.forEach((input) => {
@@ -90,7 +89,7 @@ export const storedPackagePolicyToAgentInputs = (
     }
 
     const integrationLevelCondition =
-      enableIntegrationConditions && !isAgentless && input.type !== OTEL_COLLECTOR_INPUT_TYPE
+      !isAgentless && input.type !== OTEL_COLLECTOR_INPUT_TYPE
         ? packagePolicy.condition
         : undefined;
 
@@ -198,14 +197,11 @@ export const getFullInputStreams = (
     userIntegrationCondition,
   }: GetFullInputStreamsOptions = {}
 ): FullAgentPolicyInputStream => {
-  const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
-
   const { condition: compiledInputCondition, ...compiledInputRest } = input.compiled_input || {};
-  const userInputCondition = enableIntegrationConditions ? input.condition : undefined;
   const inputCondition = combineConditions([
     userIntegrationCondition,
     compiledInputCondition,
-    userInputCondition,
+    input.condition,
   ]);
 
   return {
@@ -222,12 +218,9 @@ export const getFullInputStreams = (
                 condition: compiledStreamCondition,
                 ...compiledStream
               } = stream.compiled_stream ?? {};
-              const userStreamCondition = enableIntegrationConditions
-                ? stream.condition
-                : undefined;
               const streamCondition = combineConditions([
                 compiledStreamCondition,
-                userStreamCondition,
+                stream.condition,
               ]);
               const fullStream: FullAgentPolicyInputStream = {
                 id: streamId,
