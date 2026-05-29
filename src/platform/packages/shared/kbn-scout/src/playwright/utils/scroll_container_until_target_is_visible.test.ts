@@ -10,7 +10,7 @@
 import type { Locator } from '@playwright/test';
 
 const mockToBeVisible = jest.fn().mockResolvedValue(undefined);
-const mockPlaywrightExpect = jest.fn(() => ({
+const mockPlaywrightExpect = jest.fn((_value?: unknown) => ({
   toBeVisible: mockToBeVisible,
 }));
 
