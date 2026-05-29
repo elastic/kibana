@@ -10,19 +10,24 @@ import { EuiButtonIcon, EuiToolTip, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConversationInputShell } from '@kbn/agent-builder-plugin/public';
 
-import { NewConversationTextArea, NewConversationSendButton } from './styles';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { useOpenAgentBuilder } from '../../hooks/use_open_agent_builder';
+import { NewConversationTextArea, NewConversationSendButton } from './styles';
 
 export const ConversationPrompt = () => {
   const openAgentBuilder = useOpenAgentBuilder();
+  const usageTracker = useUsageTracker();
   const [initialMessage, setInitialMessage] = useState<string>('');
   const openConversation = () => {
     if (initialMessage.trim().length === 0) return;
+    usageTracker.click(AnalyticsEvents.startChat);
     openAgentBuilder(initialMessage);
   };
   const onInputKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === keys.ENTER && !event.shiftKey) {
       event.preventDefault();
+
       openConversation();
     }
   };
