@@ -45,7 +45,7 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { JSDOM } = require('jsdom') as typeof import('jsdom');
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const DOMPurify = require('dompurify') as typeof import('dompurify');
+    const DOMPurify = (require('dompurify') as typeof import('dompurify')).default;
     const window = new JSDOM('').window;
     const purify = DOMPurify(window);
 

@@ -2770,17 +2770,16 @@
       "@emotion/core": ["typings/@emotion"],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
-      "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
-      "@opentelemetry/semantic-conventions/incubating": [
-        "typings/@opentelemetry/semantic-conventions/incubating"
-      ],
+      // Packages whose "exports" map lacks a "types" condition. Bundler
+      // resolution can't find the types; redirect to the real .d.ts. Drop
+      // these once each package ships proper exports.types.
+      "piscina": ["node_modules/piscina/dist/src/index.d.ts"],
+      "canvg": ["node_modules/canvg/lib/index.d.ts"],
       "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
-      "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"],
-      "vega-lite": ["typings/vega/vega_lite"],
-      "vega-tooltip": ["typings/vega/vega_tooltip"],
       "zod": ["node_modules/zod/v4/index.d.ts"],
       "zod/v4": ["node_modules/zod/v4/index.d.ts"],
       "zod/v4/core": ["node_modules/zod/v4/core/index.d.ts"],
+      "zod/v4/core/json-schema": ["node_modules/zod/v4/core/json-schema.d.ts"],
       "@langchain/langgraph/prebuilt": ["node_modules/@langchain/langgraph/dist/prebuilt"],
       "@langchain/classic/chains": ["node_modules/@langchain/classic/dist/chains"],
       "@langchain/classic/evaluation": ["node_modules/@langchain/classic/dist/evaluation"],
@@ -2821,7 +2820,7 @@
     "target": "esnext",
     // Use commonjs for node, overridden in webpack to keep import statements
     // to maintain support for things like `await import()`
-    "module": "commonjs",
+    "module": "preserve",
     // Allows default imports from modules with no default export. This does not affect code emit, just type checking.
     // We have to enable this option explicitly since `esModuleInterop` doesn't enable it automatically when ES2015 or
     // ESNext module format is used.
@@ -2833,12 +2832,13 @@
     "allowJs": true,
     // Emits __importStar and __importDefault helpers for runtime babel ecosystem compatibility.
     "esModuleInterop": true,
-    // Resolve modules in the same way as Node.js. Aka make `require` works the
-    // same in TypeScript as it does in Node.js.
-    "moduleResolution": "node",
-    // Silence the TS 6.0 soft-deprecation diagnostics for options we still
-    // need (baseUrl, moduleResolution: node). These are removed in TS 7.0;
-    // we will land their replacements before bumping to 7.0 and drop this.
+    // Bundler-aware resolution — matches webpack/rspack/babel/jest behavior
+    // and is the replacement for the deprecated "node" (a.k.a. "node10")
+    // strategy. Requires `module: "preserve"` or es2015+.
+    "moduleResolution": "bundler",
+    // Silence the remaining TS 6.0 soft-deprecation diagnostic for baseUrl.
+    // baseUrl is removed in TS 7.0; we will normalize the paths map and drop
+    // this before that bump.
     "ignoreDeprecations": "6.0",
     // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
     "resolveJsonModule": true,

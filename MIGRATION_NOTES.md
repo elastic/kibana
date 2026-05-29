@@ -97,10 +97,45 @@ First full `node scripts/type_check` on TS 6.0.3 surfaced **56 errors**. Saved t
 
 - `x-pack/platform/plugins/shared/fleet/.../fleet_proxies.ts` `hasChanged()` contains typos (`existingProxy.name !== existingProxy.name`, `??` where `||` was likely intended). The `nullish()` helper carries pre-TS6 behavior verbatim; flag for fleet team.
 
+## Phase A3 — `moduleResolution` `"node"` → `"bundler"` (DONE 2026-05-29)
+
+Paired change: `module: "commonjs"` → `"preserve"`. Removes the largest TS 7.0 blocker (`node10`/`node` resolution is hard-removed there).
+
+### How bundler resolution changed Kibana
+
+`bundler` mode honors each package's `exports` map for both runtime *and* types lookup, whereas classic `node` mode reads `main`/`types` and ignores `exports`. That flipped four classes of behavior:
+
+1. **Stale type shims for OTel/A2A/Vega**. We had `typings/*` ambient `declare module` files paired with `paths` entries that worked under classic. Under bundler, TS resolves the real `exports` first and ignores the shim. The shims then re-exported from non-exported subpaths (`./types/sdk`, `./build`, etc.) → TS2305. **Fix:** delete the shims and the matching `paths` entries; the real `exports` are correct now.
+2. **CJS vs ESM type divergence for `@elastic/elasticsearch`**. The ESM index does not re-export `ClientOptions` (only the CJS one does). **Fix:** import from `@elastic/elasticsearch/lib/client` directly (the `./lib/*` subpath exports types regardless of condition).
+3. **`exports` maps without `"types"` condition**. Two packages (`piscina@3.2.0`, `canvg`) ship `exports` that don't include a `"types"` key, so bundler can't find types. **Fix:** `paths` redirects to the real `.d.ts`. Drop these when the packages ship proper exports (piscina ≥ 4 fixes this).
+4. **Default-vs-namespace import mismatches**. `import api from '@elastic/elasticsearch/lib/api/types'` works under CJS-classic but not under ESM-bundler (no default export). Same for `import DOMPurify from 'dompurify'` (ESM exports `default`). **Fix:** `import * as api` for namespace imports; `.default` for require'd ESM factories.
+5. **Deep `./dist/` imports**. `@langchain/core/dist/messages/tool`, `@langchain/google-common/dist/types`, `@opentelemetry/api/build/src/metrics/Metric` — none are in the packages' `exports`. **Fix:** import from the public subpath (`@langchain/core/messages/tool`, etc.) or the root.
+
+### Files touched
+
+- `tsconfig.base.json`: flipped `module` and `moduleResolution`; removed 4 obsolete `paths` entries (`@elastic/opentelemetry-node/sdk`, `@opentelemetry/semantic-conventions/incubating`, `@a2a-js/sdk/server`, `vega-lite`, `vega-tooltip`); added 3 (`piscina`, `canvg`, `zod/v4/core/json-schema`).
+- `typings/`: deleted 5 obsolete shim files.
+- 11 source files updated to use bundler-legal subpath imports.
+- 1 narrow-flow fix in `query_service.ts` (the `reader: ... | undefined` declaration needed an explicit narrow before the function call).
+- 1 inline narrow fix in `test_tools.tsx` (the now-correctly-resolved `zod` `JSONSchema` type required `'title' in schema` narrowing).
+- `dompurify` `.default` indirection in `kbn-fs/sanitizations/svg.ts`.
+
+### Smoke results
+
+- `src/core/packages/plugins/server-internal` (the original 121-error probe): green.
+- `src/core/packages/plugins/browser-internal`: green.
+- `x-pack/platform/plugins/shared/fleet`: green.
+- `x-pack/platform/plugins/shared/inference`: green.
+
+### Pending follow-ups
+
+- Upgrade `piscina` past 3.2.0; remove its `paths` workaround.
+- Upgrade `canvg`; remove its `paths` workaround.
+- Consider removing the explicit `zod/v4/core/json-schema` path entry once consumers consolidate on the namespace-qualified `JSONSchema.JSONSchema` shape.
+
 ## Phase D — TS 7.0 prep
 
-Not started. Sequence:
-1. Complete A3 (`moduleResolution: "bundler"` + `module: "preserve"`).
-2. Drop `baseUrl` from `tsconfig.base.json`; rewrite `paths` so they don't depend on a base URL (the auto-generated type-check base already uses `./`-prefixed paths).
-3. Remove `ignoreDeprecations: "6.0"`.
-4. Decide alerting_v2 decorator stance (freeze legacy or stage-3 migration).
+A3 unblocked. Remaining sequence:
+1. Drop `baseUrl` from `tsconfig.base.json`; rewrite `paths` so they don't depend on a base URL.
+2. Remove `ignoreDeprecations: "6.0"`.
+3. Decide alerting_v2 decorator stance (freeze legacy or stage-3 migration).
