@@ -10,6 +10,7 @@ import {
   EuiButtonIcon,
   EuiComboBox,
   EuiSuperSelect,
+  EuiToolTip,
   type EuiSuperSelectOption,
 } from '@elastic/eui';
 
@@ -91,13 +92,15 @@ const WorkflowPickerComponent: React.FC<WorkflowPickerProps> = ({
         aria-label={i18n.WORKFLOW_PICKER_ARIA_LABEL}
         append={
           isClearable ? (
-            <EuiButtonIcon
-              aria-label="Clear selection"
-              data-test-subj={`${dataTestSubj}ClearSelection`}
-              iconType="cross"
-              onClick={handleClearSelection}
-              size="s"
-            />
+            <EuiToolTip content="Clear selection" disableScreenReaderOutput>
+              <EuiButtonIcon
+                aria-label="Clear selection"
+                data-test-subj={`${dataTestSubj}ClearSelection`}
+                iconType="cross"
+                onClick={handleClearSelection}
+                size="s"
+              />
+            </EuiToolTip>
           ) : undefined
         }
         data-test-subj={dataTestSubj}
