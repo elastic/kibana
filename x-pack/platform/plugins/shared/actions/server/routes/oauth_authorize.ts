@@ -17,7 +17,11 @@ import type {
 } from '@kbn/core/server';
 import { getEarsEndpointsForProvider, resolveEarsUrl } from '../lib/ears';
 import type { ILicenseState } from '../lib';
-import { BASE_ACTION_API_PATH, INTERNAL_BASE_ACTION_API_PATH } from '../../common';
+import {
+  BASE_ACTION_API_PATH,
+  CONNECTOR_ID_MAX_LENGTH,
+  INTERNAL_BASE_ACTION_API_PATH,
+} from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { OAuthStateClient } from '../lib/oauth_state_client';
@@ -36,6 +40,7 @@ class OAuthRouteError extends Error {
 
 const paramsSchema = schema.object({
   connectorId: schema.string({
+    maxLength: CONNECTOR_ID_MAX_LENGTH,
     meta: { description: 'An identifier for the connector.' },
   }),
 });
