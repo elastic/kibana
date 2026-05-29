@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import {
+  getBehavioralAnomaliesTab,
   getRiskInputTab,
   getResolutionGroupTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
@@ -47,6 +48,8 @@ export const useTabs = (
           ]
         : [];
 
-    return [...riskTab, ...graphTab, ...resolutionTab];
+    const behavioralAnomaliesTab = [getBehavioralAnomaliesTab()];
+
+    return [...riskTab, ...behavioralAnomaliesTab, ...graphTab, ...resolutionTab];
   }, [name, scopeId, entityStoreEntityId, hasEntityResolutionLicense]);
 };

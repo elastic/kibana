@@ -19,6 +19,9 @@ import { RiskInputsTab } from './tabs/risk_inputs/risk_inputs_tab';
 import { InsightsTabCsp } from '../../../cloud_security_posture/components/csp_details/insights_tab_csp';
 import { ResolutionGroupTab } from '../entity_resolution/resolution_group_tab';
 import { RESOLUTION_GROUP_TAB_TEST_ID } from '../entity_resolution/test_ids';
+import { getBehavioralAnomaliesTab } from '../behavioral_anomalies/get_behavioral_anomalies_tab';
+
+export { getBehavioralAnomaliesTab };
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightInputsTab` as const;

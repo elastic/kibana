@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import {
+  getBehavioralAnomaliesTab,
   getRiskInputTab,
   getInsightsInputTab,
   getResolutionGroupTab,
@@ -103,7 +104,9 @@ export const useTabs = ({
           ]
         : [];
 
-    return [...riskScoreTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
+    const behavioralAnomaliesTab = [getBehavioralAnomaliesTab()];
+
+    return [...riskScoreTab, ...behavioralAnomaliesTab, ...insightsTab, ...graphViewTab, ...resolutionTab];
   }, [
     isRiskScoreExist,
     hostName,

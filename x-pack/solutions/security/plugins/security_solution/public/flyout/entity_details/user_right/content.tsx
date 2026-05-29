@@ -24,6 +24,7 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+import { BehavioralAnomaliesSection } from '../../../entity_analytics/components/behavioral_anomalies';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -95,6 +96,11 @@ export const UserPanelContent = ({
             <EuiHorizontalRule />
           </>
         )}
+      <BehavioralAnomaliesSection
+        entityId={entityRecord?.entity.id ?? userName}
+        isPreviewMode={isPreviewMode}
+        openDetailsPanel={openDetailsPanel}
+      />
       {entityStoreEntityId && (
         <>
           <VisualizationsSection

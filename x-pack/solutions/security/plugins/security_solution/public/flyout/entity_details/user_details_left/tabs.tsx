@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
+  getBehavioralAnomaliesTab,
   getInsightsInputTab,
   getResolutionGroupTab,
   getRiskInputTab,
@@ -58,6 +59,8 @@ export const useTabs = (
         })
       );
     }
+
+    tabs.push(getBehavioralAnomaliesTab());
 
     if (oktaManagedUser) {
       tabs.push(getOktaTab(oktaManagedUser));
