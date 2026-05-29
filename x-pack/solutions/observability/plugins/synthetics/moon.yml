@@ -134,6 +134,7 @@ dependsOn:
   - '@kbn/scout-oblt'
   - '@kbn/core-saved-objects-utils-server'
   - '@kbn/core-spaces-common'
+  - '@kbn/expect'
 tags:
   - plugin
   - prod

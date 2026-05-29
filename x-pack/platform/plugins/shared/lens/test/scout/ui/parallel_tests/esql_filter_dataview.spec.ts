@@ -60,7 +60,7 @@ spaceTest.describe.skip(
 
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
-          await dashboard.addNewPanel('ES|QL');
+          await dashboard.addNewESQLPanel();
 
           await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
         });
@@ -78,7 +78,7 @@ spaceTest.describe.skip(
         });
 
         await spaceTest.step('add a Lens chart panel using flights data view', async () => {
-          await dashboard.addNewPanel('Lens');
+          await dashboard.addNewLensPanel();
           await expect(page.testSubj.locator('lnsApp')).toBeVisible();
 
           await page.testSubj.click('lns-dataView-switch-link');
@@ -137,7 +137,7 @@ spaceTest.describe.skip(
 
         await spaceTest.step('create a new dashboard with an ES|QL panel', async () => {
           await dashboard.openNewDashboard();
-          await dashboard.addNewPanel('ES|QL');
+          await dashboard.addNewESQLPanel();
           await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
         });
 

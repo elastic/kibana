@@ -131,6 +131,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/core-analytics-browser",
     "@kbn/core-spaces-common",
-    "@kbn/inspector-plugin"
+    "@kbn/inspector-plugin",
+    "@kbn/core-feature-flags-server"
   ]
 }
