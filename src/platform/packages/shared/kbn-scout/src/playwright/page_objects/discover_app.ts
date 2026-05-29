@@ -143,9 +143,30 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('loadingSpinner', { state: 'hidden' });
   }
 
-  async saveSearch(name: string) {
-    await this.page.testSubj.click('discoverSaveButton');
+  async saveSearch(name: string, saveAsNew?: boolean) {
+    try {
+      await this.page.testSubj.click('discoverSaveButton');
+    } catch (e) {
+      const hint =
+        '\n💡 Hint: The Save button requires write permissions.\n' +
+        '   If you are using browserAuth.loginAsViewer(), the button will not be visible.\n' +
+        '   Try using browserAuth.loginAsPrivilegedUser() or browserAuth.loginAsEditor() instead.';
+      throw new Error(
+        `Failed to click the Save button in Discover.${hint}\n\nOriginal error: ${
+          e instanceof Error ? e.message : String(e)
+        }`
+      );
+    }
     await this.page.testSubj.fill('savedObjectTitle', name);
+
+    if (saveAsNew !== undefined) {
+      const checkbox = this.page.testSubj.locator('saveAsNewCheckbox');
+      const isChecked = await checkbox.isChecked();
+      if (isChecked !== saveAsNew) {
+        await checkbox.click();
+      }
+    }
+
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
     await this.page.testSubj.waitForSelector('savedObjectSaveModal', { state: 'hidden' });
   }

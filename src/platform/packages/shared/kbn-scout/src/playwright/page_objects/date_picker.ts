@@ -349,4 +349,15 @@ export class DatePicker {
       await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor({ state: 'hidden' });
     }
   }
+
+  async timePickerExists(): Promise<boolean> {
+    if (await this.isNewDateRangePicker()) {
+      return await this.page.testSubj
+        .locator('dateRangePickerControlButton')
+        .isVisible({ timeout: 1000 })
+        .catch(() => false);
+    } else {
+      return await this.quickMenuButton.isVisible({ timeout: 1000 }).catch(() => false);
+    }
+  }
 }
