@@ -20,6 +20,7 @@ import {
   MAX_GROUPING_FIELDS,
   MAX_NAME_LENGTH,
   MIN_SCHEDULE_INTERVAL,
+  VERSION_MAX_LENGTH,
 } from './constants';
 
 /** Primitives */
@@ -64,6 +65,13 @@ export const metadataSchema = z
       .min(1)
       .optional()
       .describe('Tags for categorization, e.g. ["production", "infra"].'),
+    builder_type: z
+      .string()
+      .max(64)
+      .optional()
+      .describe(
+        'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
+      ),
   })
   .strict()
   .describe('Rule metadata.');
@@ -294,7 +302,10 @@ export type ImmutableRuleField = (typeof IMMUTABLE_RULE_FIELDS)[number];
 
 export const updateRuleDataSchema = z
   .object({
-    metadata: metadataSchema.partial().optional(),
+    metadata: metadataSchema
+      .partial()
+      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),
     evaluation: z
@@ -319,6 +330,18 @@ export const updateRuleDataSchema = z
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 
+/** Update rule API body schema — adds OCC version on top of update data. */
+export const updateRuleBodySchema = updateRuleDataSchema.extend({
+  version: z
+    .string()
+    .min(1)
+    .max(VERSION_MAX_LENGTH)
+    .optional()
+    .describe('The current version of the rule, used for optimistic concurrency control.'),
+});
+
+export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
+
 /**
  * Schema for rule response data returned from the API.
  * Extends the base rule schema with server-generated fields.
@@ -330,6 +353,10 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
   createdAt: z.string().describe('ISO timestamp when the rule was created.'),
   updatedBy: z.string().nullable().describe('User who last updated the rule.'),
   updatedAt: z.string().describe('ISO timestamp when the rule was last updated.'),
+  version: z
+    .string()
+    .optional()
+    .describe('The version of the rule, used for optimistic concurrency control'),
 });
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
@@ -340,13 +367,13 @@ export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */
 export const findRulesParamsSchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return.'),
+  page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
   perPage: z.coerce
     .number()
     .min(1)
     .max(1000)
     .optional()
-    .describe('The number of rules to return per page.'),
+    .describe('The number of rules to return per page. Defaults to 20.'),
   filter: z.string().optional().describe('The filter to apply to the rules.'),
   sortField: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
   sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
