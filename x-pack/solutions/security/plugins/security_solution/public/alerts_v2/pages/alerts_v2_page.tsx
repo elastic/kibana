@@ -268,10 +268,11 @@ export const AlertsV2Page = () => {
         userProfile: services.userProfile,
         docLinks: services.docLinks,
         expressions: services.expressions,
+        spaces: services.spaces,
         queryClient,
         getEpisodeDetailsHref: () => '',
         getDiscoverHref: () => undefined,
-      }      ).filter(
+      }).filter(
         (a) =>
           a.id !== 'ALERTING_V2_RESOLVE_EPISODE' &&
           a.id !== 'ALERTING_V2_UNRESOLVE_EPISODE' &&

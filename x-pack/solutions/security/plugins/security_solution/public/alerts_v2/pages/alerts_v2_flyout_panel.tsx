@@ -308,7 +308,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
     data: eventRows = [],
     isLoading: isLoadingEvents,
     refetch: refetchEvents,
-  } = useFetchEpisodeEventsQuery({ episodeId, data: services.data });
+  } = useFetchEpisodeEventsQuery({ episodeId, services: { data: services.data, spaces: services.spaces } });
 
   const {
     data: episodeEventData,
@@ -316,7 +316,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
     isError: isEventDataError,
   } = useFetchEpisodeEventDataQuery({
     episodeId,
-    data: services.data,
+    services: { data: services.data, spaces: services.spaces },
   });
 
   const ruleId = useMemo(() => getRuleIdFromEpisodeRows(eventRows), [eventRows]);
@@ -327,12 +327,12 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
 
   const { data: episodeActionsMap, refetch: refetchEpisodeActions } = useFetchEpisodeActions({
     episodeIds: episodeId ? [episodeId] : [],
-    expressions: services.expressions,
+    services: { expressions: services.expressions, spaces: services.spaces },
   });
 
   const { data: groupActionsMap, refetch: refetchGroupActions } = useFetchGroupActions({
     groupHashes: groupHash ? [groupHash] : [],
-    expressions: services.expressions,
+    services: { expressions: services.expressions, spaces: services.spaces },
   });
 
   const { data: eventsLogEntries = [], isLoading: isLoadingEventsLog } =
@@ -385,6 +385,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
         userProfile: services.userProfile,
         docLinks: services.docLinks,
         expressions: services.expressions,
+        spaces: services.spaces,
         queryClient,
         getEpisodeDetailsHref: () => '',
         getDiscoverHref: () => undefined,

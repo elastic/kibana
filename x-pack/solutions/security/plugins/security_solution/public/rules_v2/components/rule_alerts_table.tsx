@@ -269,6 +269,7 @@ export const RuleAlertsTable: React.FC<RuleAlertsTableProps> = ({ ruleId }) => {
         userProfile: services.userProfile,
         docLinks: services.docLinks,
         expressions: services.expressions,
+        spaces: services.spaces,
         queryClient,
         getEpisodeDetailsHref: () => '',
         getDiscoverHref: () => undefined,
