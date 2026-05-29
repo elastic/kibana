@@ -7,6 +7,7 @@
 
 import { isObject, transform, snakeCase, isEmpty } from 'lodash';
 import type { ZodType } from '@kbn/zod/v4';
+import { stringifyZodError } from '@kbn/zod-helpers';
 
 import type { ToastInputFields } from '@kbn/core/public';
 import { builderMap as customFieldsBuilder } from '../components/custom_fields/builder';
@@ -56,14 +57,10 @@ export const covertToSnakeCase = (obj: Record<string, unknown>) =>
 
 export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
-const decodeWithToasterError = <T>(schema: ZodType<unknown>, value: T): NonNullable<T> => {
+export const decodeWithToasterError = <T>(schema: ZodType<unknown>, value: T): NonNullable<T> => {
   const result = schema.safeParse(value);
   if (result.success) return result.data as NonNullable<T>;
-  throw new ToasterError([
-    result.error.issues
-      .map((issue) => `${issue.path.join('.') || '<root>'}: ${issue.message}`)
-      .join(','),
-  ]);
+  throw new ToasterError([stringifyZodError(result.error)]);
 };
 
 export const decodeCaseResponse = (respCase?: Case) => decodeWithToasterError(CaseSchema, respCase);

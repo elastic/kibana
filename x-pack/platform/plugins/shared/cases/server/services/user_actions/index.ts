@@ -15,7 +15,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
 import { AttachmentType, UserActionActions, UserActionTypes } from '../../../common/types/domain';
-import type { UserActionAttributes } from '../../../common/types/domain';
 import { decodeOrThrowZod } from '../../common/runtime_types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -221,9 +220,7 @@ export class CaseUserActionService {
 
         const res = transformToExternalModel(doc);
 
-        const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(
-          res.attributes
-        ) as UserActionAttributes;
+        const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(res.attributes);
 
         const fieldsDoc = Object.assign(res, {
           attributes: decodeRes,
@@ -284,9 +281,7 @@ export class CaseUserActionService {
 
       const res = transformToExternalModel(userActions.saved_objects[0]);
 
-      const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(
-        res.attributes
-      ) as UserActionAttributes;
+      const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(res.attributes);
 
       return {
         ...res,
@@ -366,9 +361,7 @@ export class CaseUserActionService {
 
         const res = transformToExternalModel(doc);
 
-        const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(
-          res.attributes
-        ) as UserActionAttributes;
+        const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(res.attributes);
 
         fieldsDoc = { ...res, attributes: decodeRes };
       }
@@ -412,9 +405,7 @@ export class CaseUserActionService {
 
       const res = transformToExternalModel(doc);
 
-      const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(
-        res.attributes
-      ) as UserActionAttributes;
+      const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(res.attributes);
       return { ...res, attributes: decodeRes };
     }
   }
