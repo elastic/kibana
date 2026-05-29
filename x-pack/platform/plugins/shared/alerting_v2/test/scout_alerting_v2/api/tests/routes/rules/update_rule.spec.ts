@@ -249,6 +249,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.schedule).toStrictEqual(created.schedule);
     }
   );
+
   apiTest(
     'update: should return 409 when the request body version is stale',
     async ({ apiClient, apiServices }) => {
