@@ -16,6 +16,7 @@ import type {
   WorkflowsManagementApi,
 } from '../../../invoke_alert_retrieval_workflow';
 import { invokeCustomAlertRetrievalWorkflows } from '../../../invoke_custom_alert_retrieval_workflows';
+import type { AttackDiscoverySource } from '../../../../persistence/event_logging';
 import type { ParsedApiConfig, WorkflowConfig } from '../../../types';
 import { createLegacyRetrievalPromise } from './helpers/create_default_retrieval_promise';
 import { resolveCustomSettledResults } from './helpers/resolve_custom_settled_results';
@@ -36,6 +37,7 @@ export interface RetrievalStepParams {
   logger: Logger;
   request: KibanaRequest;
   size?: number;
+  source?: AttackDiscoverySource;
   spaceId: string;
   start?: string;
   workflowConfig: WorkflowConfig;
@@ -56,6 +58,7 @@ export const runRetrievalStep = async ({
   logger,
   request,
   size,
+  source,
   spaceId,
   start,
   workflowConfig,
@@ -67,7 +70,7 @@ export const runRetrievalStep = async ({
     connectorId: apiConfig.connector_id,
     customWorkflowIds: workflowConfig.alert_retrieval_workflow_ids,
     defaultAlertRetrievalWorkflowId,
-    retrievalMode: workflowConfig.default_alert_retrieval_mode,
+    retrievalMode: workflowConfig.alert_retrieval_mode,
   });
 
   const legacyPromise = createLegacyRetrievalPromise({
@@ -75,7 +78,7 @@ export const runRetrievalStep = async ({
     anonymizationFields,
     apiConfig,
     authenticatedUser,
-    defaultAlertRetrievalMode: workflowConfig.default_alert_retrieval_mode,
+    alertRetrievalMode: workflowConfig.alert_retrieval_mode,
     defaultAlertRetrievalWorkflowId,
     end,
     esqlQuery: workflowConfig.esql_query,
@@ -84,9 +87,9 @@ export const runRetrievalStep = async ({
     executionUuid,
     filter,
     logger,
-    providedContext: workflowConfig.provided_context,
     request,
     size,
+    source,
     spaceId,
     start,
     workflowsManagementApi,
@@ -104,12 +107,13 @@ export const runRetrievalStep = async ({
     logger,
     request,
     size,
+    source,
     spaceId,
     workflowIds: workflowConfig.alert_retrieval_workflow_ids,
     workflowsManagementApi,
   });
 
-  if (workflowConfig.default_alert_retrieval_mode === 'disabled') {
+  if (workflowConfig.alert_retrieval_mode === 'custom_only') {
     logger.info('Default alert retrieval disabled; skipping');
   }
 

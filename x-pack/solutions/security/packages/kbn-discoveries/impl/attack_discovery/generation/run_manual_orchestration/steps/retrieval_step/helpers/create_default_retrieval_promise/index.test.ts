@@ -60,7 +60,7 @@ describe('createLegacyRetrievalPromise', () => {
   it('invokes alert retrieval when mode is custom_query', async () => {
     const result = await createLegacyRetrievalPromise({
       ...baseParams,
-      defaultAlertRetrievalMode: 'custom_query' as const,
+      alertRetrievalMode: 'custom_query' as const,
     });
 
     expect(mockInvokeAlertRetrievalWorkflow).toHaveBeenCalledTimes(1);
@@ -72,10 +72,20 @@ describe('createLegacyRetrievalPromise', () => {
     );
   });
 
-  it('resolves to null when mode is disabled', async () => {
+  it('resolves to null when mode is custom_only', async () => {
     const result = await createLegacyRetrievalPromise({
       ...baseParams,
-      defaultAlertRetrievalMode: 'disabled' as const,
+      alertRetrievalMode: 'custom_only' as const,
+    });
+
+    expect(mockInvokeAlertRetrievalWorkflow).not.toHaveBeenCalled();
+    expect(result).toBeNull();
+  });
+
+  it('resolves to null when mode is provided', async () => {
+    const result = await createLegacyRetrievalPromise({
+      ...baseParams,
+      alertRetrievalMode: 'provided' as const,
     });
 
     expect(mockInvokeAlertRetrievalWorkflow).not.toHaveBeenCalled();
@@ -85,7 +95,7 @@ describe('createLegacyRetrievalPromise', () => {
   it('passes the correct workflowId to invokeAlertRetrievalWorkflow', async () => {
     await createLegacyRetrievalPromise({
       ...baseParams,
-      defaultAlertRetrievalMode: 'custom_query' as const,
+      alertRetrievalMode: 'custom_query' as const,
       defaultAlertRetrievalWorkflowId: 'custom-legacy-id',
     });
 
@@ -101,8 +111,8 @@ describe('createLegacyRetrievalPromise', () => {
 
     await createLegacyRetrievalPromise({
       ...baseParams,
+      alertRetrievalMode: 'custom_query' as const,
       anonymizationFields,
-      defaultAlertRetrievalMode: 'custom_query' as const,
     });
 
     expect(mockInvokeAlertRetrievalWorkflow).toHaveBeenCalledWith(
@@ -115,7 +125,7 @@ describe('createLegacyRetrievalPromise', () => {
   it('passes esqlQuery when mode is esql', async () => {
     await createLegacyRetrievalPromise({
       ...baseParams,
-      defaultAlertRetrievalMode: 'esql' as const,
+      alertRetrievalMode: 'esql' as const,
       esqlQuery: 'FROM .alerts | LIMIT 10',
     });
 
@@ -129,7 +139,7 @@ describe('createLegacyRetrievalPromise', () => {
   it('does NOT pass esqlQuery when mode is custom_query', async () => {
     await createLegacyRetrievalPromise({
       ...baseParams,
-      defaultAlertRetrievalMode: 'custom_query' as const,
+      alertRetrievalMode: 'custom_query' as const,
       esqlQuery: 'FROM .alerts | LIMIT 10',
     });
 
@@ -138,41 +148,5 @@ describe('createLegacyRetrievalPromise', () => {
         esqlQuery: undefined,
       })
     );
-  });
-
-  it('returns a synthetic AlertRetrievalResult when mode is provided', async () => {
-    const providedContext = ['alert context 1', 'alert context 2'];
-
-    const result = await createLegacyRetrievalPromise({
-      ...baseParams,
-      defaultAlertRetrievalMode: 'provided' as const,
-      providedContext,
-    });
-
-    expect(mockInvokeAlertRetrievalWorkflow).not.toHaveBeenCalled();
-    expect(result).toEqual({
-      alerts: providedContext,
-      alertsContextCount: 2,
-      anonymizedAlerts: [
-        { metadata: {}, page_content: 'alert context 1' },
-        { metadata: {}, page_content: 'alert context 2' },
-      ],
-      apiConfig: baseParams.apiConfig,
-      connectorName: '',
-      replacements: {},
-      workflowExecutions: [],
-      workflowId: 'provided',
-      workflowRunId: 'provided',
-    });
-  });
-
-  it('does NOT invoke alert retrieval when mode is provided', async () => {
-    await createLegacyRetrievalPromise({
-      ...baseParams,
-      defaultAlertRetrievalMode: 'provided' as const,
-      providedContext: ['context'],
-    });
-
-    expect(mockInvokeAlertRetrievalWorkflow).not.toHaveBeenCalled();
   });
 });
