@@ -9,7 +9,7 @@ import React from 'react';
 import type { IconSize } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import type { OAuthClientLogo } from '@kbn/agent-builder-common';
-import { i18n } from '@kbn/i18n';
+import { labels } from './translations';
 
 export interface McpClientLogoProps {
   clientLogo?: OAuthClientLogo;
@@ -21,15 +21,7 @@ export const McpClientLogo = ({ clientLogo, size = 'm' }: McpClientLogoProps) =>
     return null;
   }
 
-  const { media_type, data } = clientLogo;
-  const imageUrl = `data:${media_type};base64,${data}`;
-  return (
-    <EuiIcon
-      type={imageUrl}
-      size={size}
-      title={i18n.translate('xpack.agentBuilder.mcpClients.logoTitle', {
-        defaultMessage: 'MCP client logo',
-      })}
-    />
-  );
+  const { media_type: mediaType, data } = clientLogo;
+  const imageUrl = `data:${mediaType};base64,${data}`;
+  return <EuiIcon type={imageUrl} size={size} title={labels.logoTitle} />;
 };
