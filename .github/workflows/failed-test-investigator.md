@@ -27,6 +27,8 @@ concurrency:
 
 env:
   ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
+  # Lets the agent omit `-o elastic` on every `bk` invocation (see https://buildkite.com/docs/pipelines/configure/environment-variables)
+  BUILDKITE_ORGANIZATION_SLUG: elastic
 
 engine:
   id: claude
@@ -53,6 +55,7 @@ network:
     - defaults
     - buildkite.com
     - '*.buildkite.com'
+    - buildkiteartifacts.com
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
@@ -111,7 +114,7 @@ Investigate a failed-test issue, classify the failure, and propose a fix when ap
 
 ## Investigate
 
-Investigate the test failure(s) using the `flaky-test-investigator` skill.
+Investigate the test failure(s) using the `flaky-test-investigator` skill. Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.).
 
 Every conclusion must cite specific evidence. Do not guess.
 
@@ -161,9 +164,9 @@ No other side-effects beyond posting the comment and updating the label.
 
 ## Comment format
 
-Post exactly one comment on the issue. Keep it concise, actionable, and prioritize the most critical findings at the very top. Adapt the sections below to best fit the specific failure.
+Post exactly one comment on the issue. Keep it concise, actionable, and prioritize the most critical findings at the very top. Adapt the sections below to best fit the specific failure. **Use `####` for all subsections** (e.g., `#### Proposed Fix`, `#### Root Cause`).
 
-Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if it adds value.
+Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value. Do not also mention why the `ai:auto-flaky-fix` isn't added.
 
 ### 1. The TL;DR (Required)
 
@@ -199,4 +202,4 @@ Include the following only if they provide high-value, actionable signal:
 
 - **Ruled out:** a brief note on alternative hypotheses that were investigated and dismissed.
 - **Verification:** specific steps to reproduce the failure or confirm the fix.
-- **Open questions:** unresolved design or environmental issues blocking a definitive fix.
+- **Open questions:** unresolved design or environmental issues blocking a definitive fix ("a screenshot would have helped troubleshoot this" is a valid open question).
