@@ -109,6 +109,7 @@ export interface ActionGroup {
   destinations: ActionPolicyDestination[];
   groupKey: Record<string, unknown>;
   episodes: AlertEpisode[];
+  rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
 export interface ActionPolicyWorkflowPayloadRule {

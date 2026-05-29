@@ -122,6 +122,7 @@ export function createActionGroup(overrides: Partial<ActionGroup> = {}): ActionG
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupKey: {},
     episodes: [createAlertEpisode()],
+    rules: {},
     ...overrides,
   };
 }

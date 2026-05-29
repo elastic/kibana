@@ -13,7 +13,6 @@ import {
   createActionGroup,
   createActionPolicy,
   createAlertEpisode,
-  createRule,
 } from '../fixtures/test_utils';
 import { DispatchStep } from './dispatch_step';
 
@@ -309,20 +308,19 @@ describe('DispatchStep', () => {
     mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
     mockWfm.scheduleWorkflow.mockResolvedValue('exec-1');
 
-    const rule = createRule({ id: 'rule-1', name: 'CPU spike monitor' });
     const episode = createAlertEpisode({ rule_id: 'rule-1' });
     const group = createActionGroup({
       id: 'g1',
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
       episodes: [episode],
+      rules: { 'rule-1': { name: 'CPU spike monitor' } },
     });
     const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const state = createDispatcherPipelineState({
       dispatch: [group],
       policies: new Map([['p1', policy]]),
-      rules: new Map([['rule-1', rule]]),
     });
 
     await step.execute(state);
@@ -351,6 +349,7 @@ describe('DispatchStep', () => {
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
       episodes: [episode],
+      rules: {},
     });
     const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
