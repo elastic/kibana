@@ -156,6 +156,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     <Wrapper className={className}>
       {panels.value && panels.value.length > 0 && (
         <EuiPopover
+          aria-label={MORE_ACTIONS}
           button={button}
           isOpen={isPopoverOpen}
           closePopover={closePopover}

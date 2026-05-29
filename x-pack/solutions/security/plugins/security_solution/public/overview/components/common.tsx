@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+  EuiToolTip,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import * as i18n from './translations';
 import { EntityAnalyticsLearnMoreLink } from '../../entity_analytics/components/entity_analytics_learn_more_link';
@@ -17,6 +24,7 @@ export const RiskScoreInfoTooltip: React.FC<{
   anchorPosition?: EuiPopover['props']['anchorPosition'];
 }> = ({ toolTipContent, toolTipTitle, width = 270, anchorPosition = 'leftCenter' }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const onClick = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -31,6 +39,7 @@ export const RiskScoreInfoTooltip: React.FC<{
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition={anchorPosition}
+      aria-labelledby={popoverTitleId}
       button={
         <EuiToolTip content={i18n.INFORMATION_ARIA_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
@@ -44,7 +53,7 @@ export const RiskScoreInfoTooltip: React.FC<{
         </EuiToolTip>
       }
     >
-      {toolTipTitle && <EuiPopoverTitle>{toolTipTitle}</EuiPopoverTitle>}
+      {toolTipTitle && <EuiPopoverTitle id={popoverTitleId}>{toolTipTitle}</EuiPopoverTitle>}
       <EuiText size="s" style={{ width: `${width}px` }}>
         {toolTipContent}
       </EuiText>

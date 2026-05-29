@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -86,6 +87,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
+  const dataStatsTitleId = useGeneratedHtmlId();
 
   const [nonEmpty, formattedNonEmptyPercent] = useMemo(() => getAggregateData(data), [data]);
   const sourcererScopeId = useMemo(() => getSourcererScopeId(TableId.alertsOnAlertsPage), []);
@@ -104,7 +106,9 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
 
   const dataStatsMessage = (
     <DataStatsWrapper>
-      <EuiPopoverTitle>{i18n.DATA_STATISTICS_TITLE(formattedNonEmptyPercent)}</EuiPopoverTitle>
+      <EuiPopoverTitle id={dataStatsTitleId}>
+        {i18n.DATA_STATISTICS_TITLE(formattedNonEmptyPercent)}
+      </EuiPopoverTitle>
       <EuiText size="s">
         {i18n.DATA_STATISTICS_MESSAGE(groupBySelection)}
         <EuiLink
@@ -132,6 +136,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-labelledby={dataStatsTitleId}
             button={dataStatsButton}
             isOpen={isPopoverOpen}
             closePopover={closePopover}
