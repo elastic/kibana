@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { appContextService } from '../app_context';
@@ -160,7 +161,7 @@ async function _deleteExistingData(
   const { agents } = await getAgentsByKuery(esClient, soClient, {
     showInactive: true,
     perPage: SO_SEARCH_LIMIT,
-    kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
+    kuery: existingPolicies.map((policy) => `policy_id:"${escapeQuotes(policy.id)}"`).join(' or '),
   });
 
   // Delete
@@ -174,7 +175,7 @@ async function _deleteExistingData(
   const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
     perPage: SO_SEARCH_LIMIT,
     showInactive: true,
-    kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
+    kuery: existingPolicies.map((policy) => `policy_id:"${escapeQuotes(policy.id)}"`).join(' or '),
   });
 
   if (enrollmentApiKeys.length > 0) {
