@@ -223,7 +223,6 @@ export const VALIDATION_SECTION_TITLE = i18n.translate(
   }
 );
 
-
 export const GENERATION_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.attackDiscovery.workflowConfiguration.generationSectionTitle',
   {

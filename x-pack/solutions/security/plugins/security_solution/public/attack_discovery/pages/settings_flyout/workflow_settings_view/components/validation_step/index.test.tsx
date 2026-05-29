@@ -18,7 +18,9 @@ const mockUseWorkflowEditorLink = useWorkflowEditorLink as jest.Mock;
 
 const defaultEditorUrl = 'http://localhost:5601/s/default/app/workflows/workflow-123';
 
-const renderComponent = (validationPanel: React.ReactNode = <div data-test-subj="validationPanel" />) =>
+const renderComponent = (
+  validationPanel: React.ReactNode = <div data-test-subj="validationPanel" />
+) =>
   render(
     <TestProviders>
       <ValidationStep validationPanel={validationPanel} />

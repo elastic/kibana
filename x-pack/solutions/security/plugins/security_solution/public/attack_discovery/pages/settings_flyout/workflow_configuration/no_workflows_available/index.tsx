@@ -26,7 +26,7 @@ export const NoWorkflowsAvailable: React.FC<NoWorkflowsAvailableProps> = React.m
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon color="subdued" size="s" type="plusInCircle" />
+          <EuiIcon color="subdued" size="s" type="plusInCircle" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs">
