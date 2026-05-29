@@ -26,6 +26,7 @@ import type { AttributesNormalizer, NormalizerConfig } from './normalize';
 import type { IdRemapping } from './common';
 import {
   DEFAULT_LAYER_ID,
+  getColorMappingNormalizer,
   getCommonNormalizer,
   getFormBasedDatasourceState,
   getPaletteNormalizer,
@@ -468,6 +469,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
         if (col.colorMapping === null) {
           delete col.colorMapping;
         }
+
         // When palette is null, delete it
         if (col.palette === null) {
           delete col.palette;
@@ -559,6 +561,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     sortColumns,
     sortDatasourceColumns,
     alignLegacyTypes,
+    getColorMappingNormalizer<DatatableAttributes>('state.visualization.columns.*.colorMapping'),
     getPaletteNormalizer<DatatableAttributes>('state.visualization.columns.*.palette'),
   ])(attributes);
 };

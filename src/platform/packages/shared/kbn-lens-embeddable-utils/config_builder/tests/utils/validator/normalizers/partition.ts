@@ -20,7 +20,7 @@ import type { LensAttributes } from '../../../../types';
 import type { NormalizerConfig } from './normalize';
 import { mergeNormalizers } from './normalize';
 import type { IdRemapping } from './common';
-import { DEFAULT_LAYER_ID, getCommonNormalizer } from './common';
+import { DEFAULT_LAYER_ID, getColorMappingNormalizer, getCommonNormalizer } from './common';
 import type { AccessorType } from '../../../../transforms/charts/partition';
 import { getAccessorName, getGroups, getMetrics } from '../../../../transforms/charts/partition';
 
@@ -240,6 +240,7 @@ export const normalizePartition = mergeNormalizers<PartitionAttributes>(
     clearEmptySecondaryGroups,
     clearEmptyCollapseFns,
     alignLegacyTypes,
+    getColorMappingNormalizer<PartitionAttributes>('state.visualization.layers.*.colorMapping'),
   ],
   [
     // Re-apply at the end of the chain because alignLegacyTypes may inject a

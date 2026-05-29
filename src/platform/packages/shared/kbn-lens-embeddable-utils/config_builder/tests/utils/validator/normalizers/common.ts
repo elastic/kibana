@@ -9,7 +9,7 @@
 
 import { orderBy } from 'lodash';
 
-import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
   DataType,
@@ -666,5 +666,38 @@ export function getPaletteNormalizer<T extends LensAttributes>(
       'reverse', // typically unused or omitted
       'steps', // count of steps in original is not right
     ].map((param) => `${palettePath}.params.${param}`),
+  };
+}
+
+/**
+ * Returns a normalizer that pre-applies the lossy state -> API collapse that
+ * `fromRulesLensStateToAPI` performs on color-mapping rules.
+ *
+ * - `match` with `matchEntireWord: true` becomes a `raw` rule.
+ * - `match` with `matchEntireWord: false`, `regex`, and `range` rules are
+ *   runtime-dead (`getKey` returns `null`) and are stripped.
+ */
+export function getColorMappingNormalizer<T extends LensAttributes>(
+  colorMappingPath: string
+): NormalizerConfig<T> {
+  return {
+    original: (attributes: T) => {
+      const configs = getValues<ColorMapping.Config>(attributes, colorMappingPath).filter(Boolean);
+
+      configs.forEach((config) => {
+        for (const assignment of config.assignments) {
+          assignment.rules = assignment.rules.flatMap((rule): ColorMapping.ColorRule[] => {
+            if (rule.type === 'raw') return [rule];
+            if (rule.type === 'match' && rule.matchEntireWord === true) {
+              const value = rule.matchCase ? rule.pattern : rule.pattern.toLowerCase();
+              return [{ type: 'raw', value }];
+            }
+            return [];
+          });
+        }
+      });
+
+      return attributes;
+    },
   };
 }
