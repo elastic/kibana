@@ -102,6 +102,7 @@ export const WorkflowExecuteEventForm = ({
     tableLoadingState,
     handleQueryChange,
     handleQuerySubmit,
+    handleRefresh,
   } = useTriggerEventSearch({
     definition,
     customTriggerTypeIds,
@@ -173,6 +174,7 @@ export const WorkflowExecuteEventForm = ({
             disableSubscribingToGlobalDataServices={true}
             onQueryChange={handleQueryChange}
             onQuerySubmit={handleQuerySubmit}
+            onRefresh={handleRefresh}
             query={query}
             indexPatterns={dataView ? [dataView] : []}
             showDatePicker={true}

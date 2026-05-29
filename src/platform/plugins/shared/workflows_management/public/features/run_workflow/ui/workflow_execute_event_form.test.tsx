@@ -111,6 +111,7 @@ describe('WorkflowExecuteEventForm', () => {
       error: undefined,
       isSuccess: true,
       status: 'success',
+      refetch: jest.fn().mockResolvedValue(undefined),
     } as unknown as ReturnType<typeof useQueryTriggerEvents>);
     mockUseKibana.mockReturnValue({
       services: {

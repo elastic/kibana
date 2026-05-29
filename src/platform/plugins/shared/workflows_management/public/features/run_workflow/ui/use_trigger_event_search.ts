@@ -107,6 +107,7 @@ export function useTriggerEventSearch(options: UseTriggerEventSearchOptions) {
     isPreviousData,
     isError,
     error: searchError,
+    refetch: refetchTriggerEvents,
   } = useQueryTriggerEvents(searchParams, { enabled: queryEnabled });
 
   const [accumulatedHits, setAccumulatedHits] = useAccumulatedTriggerEventSearchPages(
@@ -187,15 +188,33 @@ export function useTriggerEventSearch(options: UseTriggerEventSearchOptions) {
 
   const handleQuerySubmit = useCallback(
     ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
+      const nextSubmittedQuery = newQuery ?? submittedQuery;
+      const searchIdentityChanged =
+        getTriggerEventSearchIdentity(nextSubmittedQuery, dateRange) !==
+        getTriggerEventSearchIdentity(submittedQuery, timeRange);
+
       if (newQuery) {
         setQuery(newQuery);
         setSubmittedQuery(newQuery);
       }
       setTimeRange(dateRange);
       setPageIndex(0);
-      setAccumulatedHits([]);
+
+      if (searchIdentityChanged || pageIndex !== 0) {
+        setAccumulatedHits([]);
+        return;
+      }
+
+      void refetchTriggerEvents();
     },
-    [setAccumulatedHits]
+    [submittedQuery, timeRange, pageIndex, setAccumulatedHits, refetchTriggerEvents]
+  );
+
+  const handleRefresh = useCallback(
+    ({ dateRange }: { dateRange: TimeRange }) => {
+      handleQuerySubmit({ query: submittedQuery, dateRange });
+    },
+    [handleQuerySubmit, submittedQuery]
   );
 
   return {
@@ -214,5 +233,6 @@ export function useTriggerEventSearch(options: UseTriggerEventSearchOptions) {
     tableLoadingState,
     handleQueryChange,
     handleQuerySubmit,
+    handleRefresh,
   };
 }

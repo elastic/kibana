@@ -47,11 +47,14 @@ const hit = (id: string) => ({
 const customTriggerTypeIds = ['custom.trigger'];
 
 describe('useTriggerEventSearch pagination', () => {
+  const refetch = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    refetch.mockResolvedValue(undefined);
   });
 
-  it('exposes onFetchMoreRecords when more hits are available', async () => {
+  const mockSearchResult = (overrides: Partial<ReturnType<typeof useQueryTriggerEvents>> = {}) => {
     mockUseQueryTriggerEvents.mockReturnValue({
       data: {
         hits: Array.from({ length: 50 }, (_, index) => hit(`evt-1-${index}`)),
@@ -64,7 +67,13 @@ describe('useTriggerEventSearch pagination', () => {
       isPreviousData: false,
       isError: false,
       error: undefined,
+      refetch,
+      ...overrides,
     } as unknown as ReturnType<typeof useQueryTriggerEvents>);
+  };
+
+  it('exposes onFetchMoreRecords when more hits are available', async () => {
+    mockSearchResult();
 
     const { result } = renderHook(() =>
       useTriggerEventSearch({
@@ -113,6 +122,7 @@ describe('useTriggerEventSearch pagination', () => {
         isPreviousData: false,
         isError: false,
         error: undefined,
+        refetch,
       } as unknown as ReturnType<typeof useQueryTriggerEvents>;
     });
 
@@ -148,19 +158,14 @@ describe('useTriggerEventSearch pagination', () => {
   });
 
   it('keeps onFetchMoreRecords when the capped total is reached but the page is full', async () => {
-    mockUseQueryTriggerEvents.mockReturnValue({
+    mockSearchResult({
       data: {
         hits: Array.from({ length: 50 }, (_, index) => hit(`evt-1-${index}`)),
         total: 10_000,
         page: 1,
         size: 50,
       },
-      isLoading: false,
-      isFetching: false,
-      isPreviousData: false,
-      isError: false,
-      error: undefined,
-    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
+    });
 
     const { result } = renderHook(() =>
       useTriggerEventSearch({
@@ -180,19 +185,9 @@ describe('useTriggerEventSearch pagination', () => {
   });
 
   it('clears onFetchMoreRecords while fetching the next page', async () => {
-    mockUseQueryTriggerEvents.mockReturnValue({
-      data: {
-        hits: Array.from({ length: 50 }, (_, index) => hit(`evt-1-${index}`)),
-        total: 100,
-        page: 1,
-        size: 50,
-      },
-      isLoading: false,
+    mockSearchResult({
       isFetching: true,
-      isPreviousData: false,
-      isError: false,
-      error: undefined,
-    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
+    });
 
     const { result } = renderHook(() =>
       useTriggerEventSearch({
@@ -209,5 +204,77 @@ describe('useTriggerEventSearch pagination', () => {
       expect(result.current.rows).toHaveLength(50);
     });
     expect(result.current.onFetchMoreRecords).toBeUndefined();
+  });
+
+  it('refetches without clearing rows when refresh is submitted with unchanged search identity', async () => {
+    mockSearchResult({
+      data: {
+        hits: [hit('evt-a'), hit('evt-b')],
+        total: 2,
+        page: 1,
+        size: 50,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useTriggerEventSearch({
+        definition: baseDefinition as never,
+        customTriggerTypeIds,
+        customTriggerIdsKey: 'custom.trigger',
+        queryEnabled: true,
+        isEventConfigLoading: false,
+        getTimeDefaults: () => TIMEPICKER_FALLBACK,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.rows).toHaveLength(2);
+    });
+
+    act(() => {
+      result.current.handleQuerySubmit({
+        query: result.current.query,
+        dateRange: result.current.timeRange,
+      });
+    });
+
+    expect(refetch).toHaveBeenCalledTimes(1);
+    expect(result.current.rows).toHaveLength(2);
+  });
+
+  it('clears rows when the submitted search identity changes', async () => {
+    mockSearchResult({
+      data: {
+        hits: [hit('evt-a'), hit('evt-b')],
+        total: 2,
+        page: 1,
+        size: 50,
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useTriggerEventSearch({
+        definition: baseDefinition as never,
+        customTriggerTypeIds,
+        customTriggerIdsKey: 'custom.trigger',
+        queryEnabled: true,
+        isEventConfigLoading: false,
+        getTimeDefaults: () => TIMEPICKER_FALLBACK,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.rows).toHaveLength(2);
+    });
+
+    act(() => {
+      result.current.handleQuerySubmit({
+        query: { query: 'eventId: "evt-a"', language: 'kuery' },
+        dateRange: result.current.timeRange,
+      });
+    });
+
+    expect(refetch).not.toHaveBeenCalled();
+    expect(result.current.rows).toHaveLength(0);
   });
 });
