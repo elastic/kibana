@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EbtClickAttrs } from '@kbn/ebt-click';
 import type { ActionGroups } from '../actions_context_menu';
 
 export interface TableActionItem<T> {
@@ -13,6 +14,7 @@ export interface TableActionItem<T> {
   onClick?: (item: T) => void;
   href?: (item: T) => string | undefined;
   icon?: string;
+  ebt?: EbtClickAttrs;
 }
 
 export type TableActionSubItem<T> = TableActionItem<T>;
@@ -39,12 +41,14 @@ export function resolveTableActions<T>(actions: TableActions<T>, item: T): Actio
       icon: action.icon,
       onClick: action.onClick ? () => action.onClick!(item) : undefined,
       href: action.href ? action.href(item) : undefined,
+      ebt: action.ebt,
       items: action.items?.map((subItem) => ({
         id: subItem.id,
         name: subItem.name,
         icon: subItem.icon,
         onClick: subItem.onClick ? () => subItem.onClick!(item) : undefined,
         href: subItem.href ? subItem.href(item) : undefined,
+        ebt: subItem.ebt,
       })),
     })),
   }));
