@@ -47,7 +47,7 @@ jest.mock('@kbn/workflows-ui', () => ({
   useRunWorkflow: () => mockUseRunWorkflow(),
   useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
   useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
-  useWorkflows: (...args: unknown[]) => mockUseWorkflows(...args),
+  useWorkflows: () => mockUseWorkflows(),
   WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
     <div data-test-subj="workflow-selector-mock">
       {'Workflow selector'}
