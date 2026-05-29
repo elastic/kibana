@@ -614,7 +614,7 @@ function generateAgentConfigTar(output: Output, installedIntegrations: Installed
       path: 'elastic-agent.yml',
       mode: 0o644,
       mtime: now,
-      data: dump({
+      data: stringify({
         outputs: {
           default: transformOutputToFullPolicyOutput(output, undefined, true),
         },
