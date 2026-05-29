@@ -45,7 +45,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
       await testSubjects.existOrFail('~breadcrumb-deepLinkId-dashboards');
       await testSubjects.existOrFail('emptyListPrompt');
-      await testSubjects.click('newItemButton');
+      await testSubjects.click('dashboardListingCreateButton');
+      await testSubjects.click('createDashboardButton');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         text: 'Editing New Dashboard',
       });

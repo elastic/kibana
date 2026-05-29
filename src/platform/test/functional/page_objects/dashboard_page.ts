@@ -458,7 +458,7 @@ export class DashboardPageObject extends FtrService {
         await this.common.clickConfirmOnModal();
       }
     }
-    await this.listingTable.clickNewButton();
+    await this.clickCreatePopoverItem('createDashboardButton');
     if (expectWarning) {
       await this.testSubjects.existOrFail('dashboardCreateConfirm');
     }
@@ -473,8 +473,23 @@ export class DashboardPageObject extends FtrService {
     await this.waitForRenderComplete();
   }
 
+  public async clickCreatePopoverItem(
+    itemTestSubj: 'createDashboardButton' | 'createVisualizationButton' | 'createAnnotationButton'
+  ) {
+    await this.testSubjects.click('dashboardListingCreateButton');
+    await this.testSubjects.click(itemTestSubj);
+  }
+
   public async clickCreateDashboardPrompt() {
-    await this.testSubjects.click('newItemButton');
+    await this.clickCreatePopoverItem('createDashboardButton');
+  }
+
+  public async expectCreateButtonExists() {
+    await this.testSubjects.existOrFail('dashboardListingCreateButton');
+  }
+
+  public async expectCreateButtonMissing() {
+    await this.testSubjects.missingOrFail('dashboardListingCreateButton');
   }
 
   public async getCreateDashboardPromptExists() {

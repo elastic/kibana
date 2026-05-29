@@ -17,11 +17,13 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 
+import { AppHeader } from '@kbn/app-header';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
-import type { DashboardListingProps } from './types';
+import type { DashboardListingProps, DashboardListingTab } from './types';
 
 export const DashboardListing = ({
   children,
@@ -86,19 +88,64 @@ export const DashboardListing = ({
     [tabs, activeTabId]
   );
 
+  const appMenu: AppMenuConfig = useMemo(() => {
+    const tabsByIdMap = new Map((tabs as DashboardListingTab[]).map((tab) => [tab.id, tab]));
+    return {
+      primaryActionItem: {
+        id: 'create',
+        testId: 'dashboardListingCreateButton',
+        iconType: 'plus',
+        label: i18n.translate('dashboard.listing.createButtonLabel', {
+          defaultMessage: 'Create',
+        }),
+        popoverWidth: 180,
+        items: [
+          {
+            id: 'createDashboard',
+            order: 1,
+            label: 'Dashboard',
+            iconType: 'productDashboard',
+            testId: 'createDashboardButton',
+            run: () => tabsByIdMap.get('dashboards')?.createAction?.(),
+          },
+          {
+            id: 'createVisualization',
+            order: 2,
+            label: 'Visualization',
+            iconType: 'chartBarVertical',
+            testId: 'createVisualizationButton',
+            run: () => tabsByIdMap.get('visualizations')?.createAction?.(),
+          },
+          {
+            id: 'createAnnotation',
+            order: 3,
+            label: 'Annotation',
+            iconType: 'flag',
+            testId: 'createAnnotationButton',
+            run: () => tabsByIdMap.get('annotations')?.createAction?.(),
+          },
+        ],
+      },
+    };
+  }, [tabs]);
+
   return (
     <I18nProvider>
       <QueryClientProvider client={dashboardQueryClient}>
         {children}
-        <TabbedTableListView
-          headingId="dashboardListingHeading"
+        <AppHeader
           title={i18n.translate('dashboard.listing.title', {
             defaultMessage: 'Dashboards',
           })}
+          menu={appMenu}
+        />
+        <TabbedTableListView
+          headingId="dashboardListingHeading"
           getBreadcrumbs={getBreadcrumbs}
           tabs={tabs}
           activeTabId={activeTabId}
           changeActiveTab={changeActiveTab}
+          showCreateButton={false}
         />
       </QueryClientProvider>
     </I18nProvider>

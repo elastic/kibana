@@ -127,6 +127,7 @@ dependsOn:
   - '@kbn/dashboard-navigation-options-components'
   - '@kbn/dashboard-navigation-options-schema'
   - '@kbn/as-code-shared-telemetry'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod

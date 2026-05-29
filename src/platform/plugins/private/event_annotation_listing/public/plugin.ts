@@ -8,6 +8,7 @@
  */
 
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import { firstValueFrom } from 'rxjs';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -101,7 +102,35 @@ export class EventAnnotationListingPlugin
       },
     };
     dependencies.visualizations.listingViewRegistry.add(annotationGroupsTabConfig);
-    dependencies.dashboard.registerListingPageTab(annotationGroupsTabConfig);
+    dependencies.dashboard.registerListingPageTab({
+      ...annotationGroupsTabConfig,
+      createAction: async () => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        const currentApp = await firstValueFrom(coreStart.application.currentAppId$);
+        if (!currentApp) return;
+        const stateTransfer = pluginsStart.embeddable.getStateTransfer();
+        const breadcrumbs = [
+          {
+            text: stateTransfer.getAppNameFromId(currentApp) ?? currentApp,
+            href: coreStart.application.getUrlForApp(currentApp),
+          },
+          {
+            text: tabTitle,
+            href: coreStart.application.getUrlForApp(currentApp, {
+              path: window.location.hash,
+            }),
+          },
+        ];
+        await stateTransfer.navigateToEditor('lens', {
+          path: '',
+          state: {
+            originatingApp: currentApp,
+            originatingPath: window.location.hash,
+            breadcrumbs,
+          },
+        });
+      },
+    });
   }
 
   public start(core: CoreStart, plugins: object): void {
