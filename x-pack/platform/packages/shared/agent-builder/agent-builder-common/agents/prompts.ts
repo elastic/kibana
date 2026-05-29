@@ -37,17 +37,8 @@ export enum ConfirmationStatus {
 }
 
 export enum AuthorizationStatus {
-  /**
-   * The authorization for the given ID wasn't prompted to the user yet
-   */
   unprompted = 'unprompted',
-  /**
-   * The user authorized the prompt
-   */
   authorized = 'authorized',
-  /**
-   * The user declined to authorize
-   */
   declined = 'declined',
 }
 
@@ -68,21 +59,13 @@ export interface ConfirmPromptDefinition {
   color?: ConfirmPromptColor;
 }
 
-/**
- * Authorization methods supported by {@link AuthorizationPromptDefinition}.
- */
 export type AuthorizationMethod = 'oauth_authorization_code';
 
 export interface AuthorizationPromptDefinition {
-  /** Unique id for the authorization request */
   id: string;
-  /** connector instance ID that needs re-authorization */
   connector_id: string;
-  /** connector name for the authorization card */
   connector_name: string;
-  /** Action type ID of the connector (e.g., '.slack2', '.mcp') */
   connector_type: string;
-  /** authentication method that needs to be re-completed */
   auth_method: AuthorizationMethod;
 }
 
