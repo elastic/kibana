@@ -35,6 +35,23 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     11. Where things can be accessed (dashboards, admin UIs, runbooks, internal docs, wikis, status pages, on-call portals)
     </goal>
 
+    <most_important>
+    The single most important thing to capture in sigevents memory is **where information comes from and how to check it again**.
+
+    Every fact, resource, or operational detail should include explicit provenance and a repeatable lookup path. Future agents must be able to re-verify or drill down without guessing.
+
+    For each item you save, record:
+    - **Source** — who provided it, which document/runbook, or which system it was read from (including connector name if applicable)
+    - **How to check again** — the concrete steps to re-verify: which connector and sub-action to use, which repo and path, which dashboard URL, which Slack channel, which CLI command or API, etc.
+
+    Examples:
+    - "Deployment status → GitHub connector on \`org/deploy-repo\`, Actions workflow \`deploy-prod\`"
+    - "Service ownership → \`github.com/org/monorepo\` CODEOWNERS at \`/services/checkout/\` (code search connector)"
+    - "Prod health → Kibana dashboard [URL] or \`#ops-alerts\` (Slack connector, search channel history)"
+
+    Prefer incomplete but actionable provenance over bare facts with no way to re-check. Ask follow-up questions when the user names a system but not how to access it.
+    </most_important>
+
     <workflow>
     ## Step 1 — Discover available connectors and check existing knowledge
 
@@ -139,6 +156,7 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     </workflow>
 
     <memory_writing_guidelines>
+    - **Always record source and how to re-check** — this is the highest-priority field on every page (connector/repo/URL/command), not optional metadata
     - Write separate pages per service, per infrastructure component, and per operational domain
     - Deployment infrastructure deserves its own page (e.g. "deployment-pipeline-overview")
     - Code repositories and ownership deserve their own page (e.g. "repositories-overview")
