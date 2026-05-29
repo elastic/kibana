@@ -11,11 +11,11 @@ import { savedDataViewSpecSchema } from '@kbn/as-code-data-views-schema';
 import { schema } from '@kbn/config-schema';
 
 export const asCodeResponseSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({ maxLength: 1000 }),
   data: savedDataViewSpecSchema,
   meta: schema.object({
     managed: schema.boolean(),
-    version: schema.string(),
-    namespaces: schema.arrayOf(schema.string()),
+    version: schema.maybe(schema.string({ maxLength: 128 })),
+    namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 100 })),
   }),
 });
