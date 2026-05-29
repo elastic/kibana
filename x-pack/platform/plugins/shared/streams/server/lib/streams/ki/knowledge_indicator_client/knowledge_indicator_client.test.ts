@@ -149,39 +149,77 @@ describe('KnowledgeIndicatorClient.bulk', () => {
   });
 
   describe('restore', () => {
-    it('appends a tombstone without a pre-read', async () => {
+    it('reads the latest revision and re-indexes with excluded cleared and fresh timestamps', async () => {
       const { client, create, runEsql } = makeClient();
+      const latest = createFeatureDoc({ id: 'feat-1', excluded: true });
+      runEsql.mockResolvedValueOnce({ hits: [latest] });
 
       const result = await client.bulk(STREAM, [{ restore: { id: 'feat-1' } }]);
 
       expect(result).toEqual({ applied: 1, skipped: 0 });
-      // No ES|QL probe.
-      expect(runEsql).not.toHaveBeenCalled();
+      expect(runEsql).toHaveBeenCalledTimes(1);
       expect(create).toHaveBeenCalledTimes(1);
       const [{ documents }] = create.mock.calls[0];
       expect(documents).toHaveLength(1);
-      const written = documents[0] as StoredTombstone;
+      const written = documents[0] as StoredFeatureKnowledgeIndicator;
       expect(written.id).toBe('feat-1');
       expect(written.type).toBe(KI_TYPE_FEATURE);
-      expect(written.deleted).toBe(true);
-      expect(written['stream.name']).toBe(STREAM);
+      expect(written.excluded).toBeUndefined();
+      // Payload preserved
+      expect(written.feature).toEqual(latest.feature);
+      expect(written.title).toBe(latest.title);
+      // Fresh @timestamp
+      expect(written['@timestamp']).not.toBe(latest['@timestamp']);
+    });
+
+    it('skips unknown ids', async () => {
+      const { client, create, runEsql } = makeClient();
+      runEsql.mockResolvedValueOnce({ hits: [] });
+
+      const result = await client.bulk(STREAM, [{ restore: { id: 'missing' } }]);
+
+      expect(result).toEqual({ applied: 0, skipped: 1 });
+      expect(create).not.toHaveBeenCalled();
+    });
+
+    it('skips computed features', async () => {
+      const { client, create, runEsql } = makeClient();
+      runEsql.mockResolvedValueOnce({ hits: [createComputedFeatureDoc()] });
+
+      const result = await client.bulk(STREAM, [{ restore: { id: 'computed-1' } }]);
+
+      expect(result).toEqual({ applied: 0, skipped: 1 });
+      expect(create).not.toHaveBeenCalled();
     });
   });
 
   describe('delete', () => {
-    it('appends a tombstone without a pre-read', async () => {
+    it('reads the latest revision and appends a tombstone for known ids', async () => {
       const { client, create, runEsql } = makeClient();
+      runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc({ id: 'feat-1' })] });
 
       const result = await client.bulk(STREAM, [
         { delete: { type: KI_TYPE_FEATURE, id: 'feat-1' } },
       ]);
 
       expect(result).toEqual({ applied: 1, skipped: 0 });
-      expect(runEsql).not.toHaveBeenCalled();
+      expect(runEsql).toHaveBeenCalledTimes(1);
       expect(create).toHaveBeenCalledTimes(1);
       const [{ documents }] = create.mock.calls[0];
       const written = documents[0] as StoredTombstone;
       expect(written.deleted).toBe(true);
+    });
+
+    it('skips unknown ids', async () => {
+      const { client, create, runEsql } = makeClient();
+      runEsql.mockResolvedValueOnce({ hits: [] });
+
+      const result = await client.bulk(STREAM, [
+        { delete: { type: KI_TYPE_FEATURE, id: 'non-existent' } },
+      ]);
+
+      expect(result).toEqual({ applied: 0, skipped: 1 });
+      expect(create).not.toHaveBeenCalled();
     });
   });
 });

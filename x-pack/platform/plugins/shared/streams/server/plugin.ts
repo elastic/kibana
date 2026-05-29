@@ -30,7 +30,6 @@ import {
 } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
-main;
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,

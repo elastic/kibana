@@ -10,7 +10,7 @@ import { isComputedFeature } from '@kbn/streams-schema';
 import { isConditionComplete } from '@kbn/streamlang';
 import type { StoredFeatureKnowledgeIndicator, StoredKnowledgeIndicator } from '../data_stream';
 import { inPredicate, IS_NOT_DELETED } from '../esql_helpers';
-import { KI_TYPE_FEATURE, STREAM_NAME } from '../fields';
+import { STREAM_NAME } from '../fields';
 import { fromStoredFeature, toStoredFeature, toStoredQuery, toTombstone } from './serializers';
 import {
   bulkCreateWithInferenceFallback,
@@ -82,23 +82,59 @@ export class IndicatorWriter {
       excludableLatest.push(latest);
     }
 
-    // Delete and restore both append a tombstone keyed on (type, id) without
-    // a pre-read. A tombstone carries identity only, not payload, so reading
-    // the latest revision adds no value — and tombstoning a non-existent id
-    // is harmless and idempotent.
-    const deleteOps = operations.filter(
-      (op): op is Extract<KIBulkOperation, { delete: unknown }> => 'delete' in op
-    );
+    // Restore requires a pre-read: the full feature payload is needed so we
+    // can re-index it with excluded cleared and fresh timestamps.
     const restoreOps = operations.filter(
       (op): op is Extract<KIBulkOperation, { restore: unknown }> => 'restore' in op
     );
+    const restoreIds = new Set(restoreOps.map((op) => op.restore.id));
+    const restoreLatest =
+      restoreIds.size > 0
+        ? await this.revisionReader.fetchLatestFeatures(stream, [...restoreIds])
+        : [];
+    const restorableLatest: StoredFeatureKnowledgeIndicator[] = [];
+    let restoreSkipped = 0;
+    for (const id of restoreIds) {
+      const latest = restoreLatest.find((doc) => doc.id === id);
+      if (!latest) {
+        restoreSkipped += 1;
+        continue;
+      }
+      const asFeature = fromStoredFeature(latest);
+      if (isComputedFeature(asFeature)) {
+        restoreSkipped += 1;
+        continue;
+      }
+      restorableLatest.push(latest);
+    }
+
+    // Delete requires a pre-read so we can skip unknown/non-existent IDs
+    // rather than writing tombstones for them (which would count as applied).
+    const deleteOps = operations.filter(
+      (op): op is Extract<KIBulkOperation, { delete: unknown }> => 'delete' in op
+    );
+    const deleteIds = new Set(deleteOps.map((op) => op.delete.id));
+    const deleteLatest =
+      deleteIds.size > 0
+        ? await this.revisionReader.fetchLatestFeatures(stream, [...deleteIds])
+        : [];
+    const deletableOps: Array<Extract<KIBulkOperation, { delete: unknown }>> = [];
+    let deleteSkipped = 0;
+    for (const op of deleteOps) {
+      if (deleteLatest.find((doc) => doc.id === op.delete.id)) {
+        deletableOps.push(op);
+      } else {
+        deleteSkipped += 1;
+      }
+    }
 
     const indexOpsCount = operations.filter((op) => 'index' in op).length;
-    const tombstoneCount = deleteOps.length + restoreOps.length;
-    const totalApplied = indexOpsCount + excludableLatest.length + tombstoneCount;
+    const totalApplied =
+      indexOpsCount + excludableLatest.length + restorableLatest.length + deletableOps.length;
+    const totalSkipped = excludeSkipped + restoreSkipped + deleteSkipped;
 
     if (totalApplied === 0) {
-      return { applied: 0, skipped: excludeSkipped };
+      return { applied: 0, skipped: totalSkipped };
     }
 
     await bulkCreateWithInferenceFallback(this.logger, ({ includeEmbedding }) => {
@@ -118,14 +154,19 @@ export class IndicatorWriter {
           toStoredFeature(stream, { ...feature, excluded: true }, includeEmbedding, this.ttlDays)
         );
       }
-      for (const op of deleteOps) {
-        docs.push(toTombstone(stream, { id: op.delete.id, type: op.delete.type }));
+      for (const latest of restorableLatest) {
+        const feature = fromStoredFeature(latest);
+        docs.push(
+          toStoredFeature(
+            stream,
+            { ...feature, excluded: undefined },
+            includeEmbedding,
+            this.ttlDays
+          )
+        );
       }
-      for (const op of restoreOps) {
-        // Restore is implemented as a tombstone: the append-only payload
-        // of an excluded feature can be stale, so we drop the lineage and
-        // let the LLM redrive the feature on the next extraction cycle.
-        docs.push(toTombstone(stream, { id: op.restore.id, type: KI_TYPE_FEATURE }));
+      for (const op of deletableOps) {
+        docs.push(toTombstone(stream, { id: op.delete.id, type: op.delete.type }));
       }
       return this.dataStreamClient.create({
         refresh: 'wait_for',
@@ -133,7 +174,7 @@ export class IndicatorWriter {
       });
     });
 
-    return { applied: totalApplied, skipped: excludeSkipped };
+    return { applied: totalApplied, skipped: totalSkipped };
   }
 
   async deleteIndicators(stream: string): Promise<void> {
