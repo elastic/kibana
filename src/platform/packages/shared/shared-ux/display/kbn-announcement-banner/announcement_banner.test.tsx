@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { fireEvent, renderHook, waitFor } from '@testing-library/react';
+import { fireEvent, renderHook } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { AnnouncementBanner } from './announcement_banner';
@@ -202,21 +202,5 @@ describe('AnnouncementBanner', () => {
 
     expect(getByTestId('hero')).toBeInTheDocument();
     expect(getByTestId('hero-title')).toBeInTheDocument();
-  });
-
-  describe('announceOnMount', () => {
-    it('does not render a live region by default', () => {
-      const { queryByRole } = renderWithEuiTheme(<AnnouncementBanner {...requiredProps} />);
-
-      expect(queryByRole('status')).toBeNull();
-    });
-
-    it('renders a live region when announceOnMount="true"', async () => {
-      const { getByRole } = renderWithEuiTheme(
-        <AnnouncementBanner {...requiredProps} title="Hello" text="World" announceOnMount />
-      );
-
-      await waitFor(() => expect(getByRole('status')).toHaveTextContent('Hello, World'));
-    });
   });
 });

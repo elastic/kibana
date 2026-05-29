@@ -90,7 +90,6 @@ const meta: Meta<StoryArgs> = {
     primaryAction: true,
     secondaryAction: true,
     onDismiss: true,
-    announceOnMount: false,
   },
   argTypes: {
     size: { control: { type: 'inline-radio' }, options: ['s', 'm'] },
