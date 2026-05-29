@@ -12,6 +12,7 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { catchError, from as fromRxjs, map } from 'rxjs';
+import { isSignificantEventsMemoryEnabled } from '../../../../lib/memory/is_significant_events_memory_enabled';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { PromptsConfigService } from '../../../../lib/sig_events/saved_objects/prompts_config_service';
 import { generateSignificantEventDefinitions } from '../../../../lib/sig_events/generate_significant_events';
@@ -28,6 +29,8 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { createConnectorSSEError } from '../../../utils/create_connector_sse_error';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
+import { MemoryServiceImpl } from '../../../../lib/memory';
+import { createMemoryDiscoveryTools } from '../../../../lib/sig_events/memory_discovery_tools';
 import { searchModeSchema } from '../../../utils/search_mode';
 
 // Make sure strings are expected for input, but still converted to a
@@ -301,6 +304,16 @@ const generateSignificantEventsRoute = createServerRoute({
       logger,
     });
 
+    const useMemory = await isSignificantEventsMemoryEnabled(server.core.featureFlags);
+    const memoryTools = useMemory
+      ? createMemoryDiscoveryTools({
+          memoryService: new MemoryServiceImpl({
+            logger: logger.get('memory'),
+            esClient: scopedClusterClient.asCurrentUser,
+          }),
+        })
+      : undefined;
+
     const [connector, definition, { significantEventsPromptOverride }, featureClient, queryClient] =
       await Promise.all([
         inferenceClient.getConnectorById(connectorId),
@@ -324,6 +337,7 @@ const generateSignificantEventsRoute = createServerRoute({
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
           esClient: scopedClusterClient.asCurrentUser,
+          memoryTools,
         }
       )
     ).pipe(

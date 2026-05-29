@@ -15,10 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
-  OBSERVABILITY_STREAMS_ENABLE_MEMORY,
-  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-} from '@kbn/management-settings-ids';
+import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
@@ -33,6 +30,7 @@ import {
 } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
@@ -92,6 +90,8 @@ import {
 } from './lib/workflows/continuous_extraction_workflow';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
+import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../common/feature_flags';
+import { distinctUntilChanged, filter, skip } from 'rxjs';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -599,32 +599,47 @@ export class StreamsPlugin
       );
     });
 
+    const installMemoryWorkflowsIfEnabled = async (
+      workflowsExtensions: WorkflowsExtensionsServerPluginStart
+    ) => {
+      if (!(await isSignificantEventsMemoryEnabled(core.featureFlags))) {
+        this.logger.debug('streams: memory is disabled, skipping memory workflow installation');
+        return;
+      }
+      await installMemoryWorkflows({ workflowsExtensions });
+    };
+
     if (plugins.workflowsExtensions) {
-      const workflowsExtensions = plugins.workflowsExtensions;
-      const soClient = core.savedObjects.getUnsafeInternalClient();
-      const uiSettings = core.uiSettings.asScopedToClient(soClient);
-      uiSettings
-        .get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY)
-        .then(async (memoryEnabled) => {
-          if (!memoryEnabled) {
-            this.logger.debug('streams: memory is disabled, skipping memory workflow installation');
-            return;
-          }
-          await installMemoryWorkflows({ workflowsExtensions });
-        })
-        .catch((error: unknown) => {
-          this.logger.error(
-            `streams: Failed to install memory managed workflows: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
+      const { workflowsExtensions } = plugins;
+
+      void installMemoryWorkflowsIfEnabled(workflowsExtensions).catch((error: unknown) => {
+        this.logger.error(
+          `streams: Failed to install memory managed workflows: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      });
+
+      core.featureFlags
+        .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
+        .pipe(
+          distinctUntilChanged(),
+          skip(1),
+          filter((enabled) => enabled)
+        )
+        .subscribe(() => {
+          void installMemoryWorkflowsIfEnabled(workflowsExtensions).catch((error: unknown) => {
+            this.logger.error(
+              `streams: Failed to install memory managed workflows after feature flag change: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+          });
         });
     }
 
     if (plugins.agentBuilder && this.server && this.streamsGetScopedClients) {
-      const soClient = core.savedObjects.getUnsafeInternalClient();
-      const uiSettings = core.uiSettings.asScopedToClient(soClient);
-      const isMemoryEnabled = () => uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+      const isMemoryEnabled = () => isSignificantEventsMemoryEnabled(core.featureFlags);
 
       const memoryToolsOptions = createMemoryToolsOptions({
         getScopedClients: this.streamsGetScopedClients,
@@ -638,10 +653,21 @@ export class StreamsPlugin
         logger: this.logger,
         isMemoryEnabled,
       })
-        .then(({ ensureMemorySkillRegistered }) => {
+        .then(({ ensureMemorySkillRegistered, onMemorySettingChanged }) => {
           if (this.server) {
             this.server.ensureMemorySkillRegistered = ensureMemorySkillRegistered;
           }
+
+          core.featureFlags
+            .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
+            .pipe(
+              distinctUntilChanged(),
+              skip(1),
+              filter((enabled) => enabled)
+            )
+            .subscribe(() => {
+              void onMemorySettingChanged();
+            });
         })
         .catch((err) => {
           this.logger.error(`Failed to register streams memory skills: ${err.message}`);

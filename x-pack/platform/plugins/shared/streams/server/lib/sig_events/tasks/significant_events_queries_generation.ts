@@ -86,6 +86,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                     featureClient,
                     queryClient,
                     esClient: scopedClusterClient.asCurrentUser,
+                    featureFlags: taskContext.server.core.featureFlags,
                     searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
                     request: fakeRequest,
                     logger: taskLogger,
