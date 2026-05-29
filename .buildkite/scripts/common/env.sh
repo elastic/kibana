@@ -84,8 +84,9 @@ if is_pr; then
     export ELASTIC_APM_SERVER_TIMEOUT=60s
     export ELASTIC_APM_KIBANA_FRONTEND_ACTIVE=true
   else
-    export ELASTIC_APM_ACTIVE=true
-    export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=true
+    # Without the `ci:collect-apm` label, keep APM off on PRs to avoid sending
+    # unwanted trace volume from CI. Context propagation is irrelevant when inactive.
+    export ELASTIC_APM_ACTIVE=false
   fi
 
   # value for security genai prompts evals
