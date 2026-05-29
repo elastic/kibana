@@ -18,9 +18,6 @@ import type { DataViewFieldBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_EVENTS_DATA_STREAM, WORKFLOWS_EVENTS_DATA_VIEW_FIELDS } from '@kbn/workflows';
 
-/** Fields hidden from KQL autocomplete (space is enforced server-side; `kibana.*` is index metadata). */
-const WORKFLOW_TRIGGER_EVENTS_KQL_SUPPRESSED_FIELD_NAMES = new Set(['spaceId', 'kibana.space_ids']);
-
 function workflowsEventsKqlFieldToFieldSpec(field: DataViewFieldBase): FieldSpec {
   const isObject = field.type === 'object';
   return {
@@ -32,24 +29,16 @@ function workflowsEventsKqlFieldToFieldSpec(field: DataViewFieldBase): FieldSpec
   };
 }
 
-const WORKFLOWS_EVENTS_KQL_FALLBACK_FIELDS: FieldSpec[] = WORKFLOWS_EVENTS_DATA_VIEW_FIELDS.map(
+const WORKFLOWS_EVENTS_KQL_CURATED_FIELDS: FieldSpec[] = WORKFLOWS_EVENTS_DATA_VIEW_FIELDS.map(
   workflowsEventsKqlFieldToFieldSpec
 );
 
-function stripWorkflowTriggerEventKqlSuppressedFields(dataView: DataView): void {
-  const toRemove = dataView.fields
-    .getAll()
-    .filter((field) => WORKFLOW_TRIGGER_EVENTS_KQL_SUPPRESSED_FIELD_NAMES.has(field.name));
-  for (const field of toRemove) {
-    dataView.fields.remove(field);
-  }
-}
-
-function applyWorkflowsEventsKqlFallbackFields(dataView: DataView): void {
-  if (!dataView.getFieldByName('triggerId')) {
-    dataView.fields.replaceAll(WORKFLOWS_EVENTS_KQL_FALLBACK_FIELDS);
-  }
-  stripWorkflowTriggerEventKqlSuppressedFields(dataView);
+/**
+ * Align KQL autocomplete with {@link WORKFLOWS_EVENTS_DATA_VIEW_FIELDS} used server-side for
+ * `toElasticsearchQuery`. The ad-hoc data view shell is kept for time field / index pattern wiring.
+ */
+export function applyWorkflowsEventsKqlCuratedFields(dataView: DataView): void {
+  dataView.fields.replaceAll(WORKFLOWS_EVENTS_KQL_CURATED_FIELDS);
 }
 
 export function useWorkflowsEventsDataView(options: {
@@ -78,32 +67,7 @@ export function useWorkflowsEventsDataView(options: {
         if (cancelled) {
           return;
         }
-        try {
-          await dataViews.refreshFields(created, false, true);
-        } catch {
-          if (cancelled) {
-            return;
-          }
-          toasts.addWarning({
-            title: i18n.translate(
-              'workflows.workflowExecuteEventTriggerForm.refreshFieldsWarningTitle',
-              {
-                defaultMessage: 'Limited field suggestions',
-              }
-            ),
-            text: i18n.translate(
-              'workflows.workflowExecuteEventTriggerForm.refreshFieldsWarningBody',
-              {
-                defaultMessage:
-                  'Could not refresh fields for .workflows-events. Type field names manually (e.g. triggerId, eventId, payload.*).',
-              }
-            ),
-          });
-        }
-        if (cancelled) {
-          return;
-        }
-        applyWorkflowsEventsKqlFallbackFields(created);
+        applyWorkflowsEventsKqlCuratedFields(created);
         setDataView(created);
       } catch (error) {
         if (cancelled) {

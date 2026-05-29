@@ -97,6 +97,7 @@ const buildTriggerEventLogQueryClauses = (
   const kql = params.kql?.trim();
   if (kql) {
     const node = fromKueryExpression(kql);
+    // Field list must stay aligned with WORKFLOWS_EVENTS_DATA_VIEW_FIELDS (see @kbn/workflows).
     must.push(toElasticsearchQuery(node, WORKFLOWS_EVENTS_DATA_VIEW));
   }
 

@@ -187,6 +187,28 @@ describe('Internal Routes', () => {
     });
   });
 
+  it('forwards payload.* KQL to the execution engine unchanged', async () => {
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({
+      body: { kql: 'payload.workflow.status : failed', page: 1, size: 10 },
+    });
+
+    await routeHandlers[`POST:/internal/workflows/trigger_events/_search`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockSearchTriggerEventLog).toHaveBeenCalledWith({
+      spaceId: 'default',
+      kql: 'payload.workflow.status : failed',
+      from: undefined,
+      to: undefined,
+      page: 1,
+      size: 10,
+    });
+  });
+
   it('returns 400 when trigger event log search throws KQLSyntaxError', async () => {
     const kqlError = new KQLSyntaxError(
       {

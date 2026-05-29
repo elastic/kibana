@@ -11,16 +11,27 @@ import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 export const WORKFLOWS_EVENTS_DATA_STREAM = '.workflows-events';
 
+/**
+ * KQL field metadata for `.workflows-events`, shared by server and client:
+ *
+ * - **Server** ({@link WORKFLOWS_EVENTS_DATA_VIEW}): passed to `toElasticsearchQuery` in the
+ *   execution engine. That path has no access to registered browser data views, so we use a static
+ *   `DataViewBase` built from this list.
+ * - **Client** (Event trigger picker): creates an ephemeral ad-hoc data view for the KQL bar, then
+ *   replaces its fields with this same list so autocomplete and server translation stay aligned.
+ *
+ * `spaceId` is intentionally omitted — the search API always scopes results to the request space.
+ */
 export const WORKFLOWS_EVENTS_DATA_VIEW_FIELDS: DataViewFieldBase[] = [
   { name: '@timestamp', type: 'date', esTypes: ['date'] },
   { name: 'eventId', type: 'string', esTypes: ['keyword'] },
   { name: 'triggerId', type: 'string', esTypes: ['keyword'] },
-  { name: 'spaceId', type: 'string', esTypes: ['keyword'] },
   { name: 'sourceExecutionId', type: 'string', esTypes: ['keyword'] },
   { name: 'subscriptions', type: 'string', esTypes: ['keyword'] },
   { name: 'payload', type: 'object', esTypes: ['object'] },
 ];
 
+/** Static data view used for server-side KQL → Elasticsearch translation. */
 export const WORKFLOWS_EVENTS_DATA_VIEW: DataViewBase = {
   title: WORKFLOWS_EVENTS_DATA_STREAM,
   fields: [...WORKFLOWS_EVENTS_DATA_VIEW_FIELDS],
