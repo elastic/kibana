@@ -67,6 +67,7 @@ export interface ConversationActions {
   }) => void;
   setAssistantMessage: ({ assistantMessage }: { assistantMessage: string }) => void;
   addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => void;
+  clearAssistantMessage: () => void;
   setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => void;
   addPendingPrompt: ({ prompt }: { prompt: PromptRequest }) => void;
   clearPendingPrompts: () => void;
@@ -291,6 +292,11 @@ export const createConversationActions = ({
     addAssistantMessageChunk: ({ messageChunk }: { messageChunk: string }) => {
       setCurrentRound((round) => {
         round.response.message += messageChunk;
+      });
+    },
+    clearAssistantMessage: () => {
+      setCurrentRound((round) => {
+        round.response.message = '';
       });
     },
     setTimeToFirstToken: ({ timeToFirstToken }: { timeToFirstToken: number }) => {
