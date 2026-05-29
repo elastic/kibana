@@ -66,6 +66,7 @@ export interface InternalInjectedMetadataSetup {
     | undefined;
   getUserStorage: () => {
     values: Record<string, unknown>;
+    available: boolean;
   };
 }
 

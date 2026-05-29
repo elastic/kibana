@@ -92,6 +92,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -186,6 +187,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -284,6 +286,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -378,6 +381,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -472,6 +476,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -570,6 +575,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -664,6 +670,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -758,6 +765,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -852,6 +860,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -946,6 +955,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1049,6 +1059,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1145,6 +1156,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1248,6 +1260,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1347,6 +1360,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1441,6 +1455,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1544,6 +1559,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1643,6 +1659,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1742,6 +1759,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1843,6 +1861,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1944,6 +1963,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,

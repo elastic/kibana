@@ -206,7 +206,7 @@ export class RenderingService {
       globalSettingsUserValues = {},
       userSettingDarkMode,
       userSettingLocale,
-      userStorageValues = {},
+      userStorageResult = { values: {}, available: false },
     ] = await Promise.all(
       isAnonymousPage
         ? [uiSettings.client?.getRegistered() ?? {}]
@@ -219,14 +219,14 @@ export class RenderingService {
             // locale
             userSettings?.getUserSettingLocale(request),
             // user storage
-            this.fetchUserStorageValues(request),
+            this.fetchUserStorage(request),
           ] as [
             ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<DarkModeValue> | undefined,
             Promise<string> | undefined,
-            Promise<Record<string, unknown>>
+            Promise<{ values: Record<string, unknown>; available: boolean }>
           ])
     );
 
@@ -404,7 +404,7 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
-        userStorage: { values: userStorageValues },
+        userStorage: userStorageResult,
       },
     };
 
@@ -420,15 +420,17 @@ export class RenderingService {
 
   public async stop() {}
 
-  private async fetchUserStorageValues(request: KibanaRequest): Promise<Record<string, unknown>> {
+  private async fetchUserStorage(
+    request: KibanaRequest
+  ): Promise<{ values: Record<string, unknown>; available: boolean }> {
     const userStorage = this.userStorageStart;
-    if (!userStorage) return {};
+    if (!userStorage) return { values: {}, available: false };
 
     const client = userStorage.asScoped(request);
-    if (!client) return {};
+    if (!client) return { values: {}, available: false };
 
     try {
-      return await client.getForInjection();
+      return { values: await client.getForInjection(), available: true };
     } catch (err) {
       // Authorization errors are expected for users whose auth realm does not
       // grant access to user-storage saved objects (e.g. certain SAML configs).
@@ -438,11 +440,11 @@ export class RenderingService {
         SavedObjectsErrorHelpers.isNotAuthorizedError(err)
       ) {
         this.logger.debug(`User storage preload skipped (not authorized): ${err.message}`);
-        return {};
+        return { values: {}, available: false };
       }
 
       this.logger.error(`User storage preload failed: ${err.message}`);
-      return {};
+      return { values: {}, available: false };
     }
   }
 }

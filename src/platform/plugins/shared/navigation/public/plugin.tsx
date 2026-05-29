@@ -121,7 +121,12 @@ export class NavigationPublicPlugin
         });
       }
 
-      if (security && !isServerless && getIsProjectNav(activeSpace?.solution)) {
+      if (
+        security &&
+        !isServerless &&
+        getIsProjectNav(activeSpace?.solution) &&
+        core.userStorage.isAvailable()
+      ) {
         security.navControlService.addUserMenuLinks([
           {
             iconType: 'controls',
@@ -152,7 +157,7 @@ export class NavigationPublicPlugin
       activeSpace$.pipe(take(1)).subscribe(initSolutionNavigation);
     }
 
-    if (this.isSolutionNavEnabled) {
+    if (this.isSolutionNavEnabled && core.userStorage.isAvailable()) {
       chrome.project.registerCustomizeNavigationHandler(openCustomizeNavigationModal);
     }
 
@@ -180,7 +185,7 @@ export class NavigationPublicPlugin
         });
     }
 
-    if (isServerless && !this.getIsUnauthenticated(core.http)) {
+    if (isServerless && !this.getIsUnauthenticated(core.http) && core.userStorage.isAvailable()) {
       // In serverless, the serverless plugin initializes project navigation directly,
       // bypassing this plugin's addSolutionNavigation flow. Listen for the navigation
       // to become available, then enable customization support.

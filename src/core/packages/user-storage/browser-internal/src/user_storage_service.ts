@@ -32,11 +32,12 @@ export class UserStorageService {
 
   public setup({ http, injectedMetadata }: UserStorageServiceDeps): IUserStorageClient {
     const api = new UserStorageApi(http);
-    const initialValues = injectedMetadata.getUserStorage().values;
+    const { values: initialValues, available } = injectedMetadata.getUserStorage();
 
     this.client = new UserStorageClient({
       api,
       initialValues,
+      available,
       done$: this.done$,
     });
 
