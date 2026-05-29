@@ -248,20 +248,11 @@ export function useAppMenu() {
 }
 
 /**
- * Returns the current legacy action menu mount point, or `undefined` if none is set.
- * @deprecated Legacy action menus use imperative mount points. Prefer `chrome.setAppMenu()`.
- */
-export function useCurrentActionMenu(): MountPoint | undefined {
-  const { application } = useChromeComponentsDeps();
-  return useObservable(application.currentActionMenu$, undefined);
-}
-
-/**
  * Whether a legacy action menu mount point is currently set.
  * @deprecated Legacy action menus use imperative mount points. Prefer `chrome.setAppMenu()`.
  */
 export function useHasLegacyActionMenu(): boolean {
-  return !!useCurrentActionMenu();
+  return !!useInternalLegacyActionMenu();
 }
 
 /** Whether the current app menu (registered via `chrome.setAppMenu()`) has items configured. */
@@ -297,4 +288,9 @@ export function useHasInlineAppHeader(): boolean {
   const chrome = useChromeService();
   const inlineAppHeader$ = useMemo(() => chrome.next.inlineAppHeader.get$(), [chrome]);
   return useObservable(inlineAppHeader$, false);
+}
+
+export function useInternalLegacyActionMenu(): MountPoint | undefined {
+  const { legacyActionMenu$ } = useChromeService().componentDeps;
+  return useObservable(legacyActionMenu$, undefined);
 }
