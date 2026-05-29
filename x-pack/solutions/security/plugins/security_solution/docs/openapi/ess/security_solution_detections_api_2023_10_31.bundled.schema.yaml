@@ -481,7 +481,7 @@ paths:
                     | STATS count = COUNT(*), min_timestamp = MIN(@timestamp)
 
                     | EVAL event_rate = count / DATE_DIFF("seconds",
-                    min_timestamp, NOW())
+                    min_timestamp, NOW()) 
 
                     | KEEP event_rate
               example6:
@@ -1502,7 +1502,7 @@ paths:
 
         The edit action allows you to add, delete, or set tags, index patterns,
         investigation fields, rule actions and schedules for multiple rules at
-        once.
+        once. 
 
         The edit action is idempotent, meaning that if you add a tag to a rule
         that already has that tag, no changes are made. The same is true for
@@ -3114,7 +3114,7 @@ paths:
 
 
         This endpoint allows you to install and update prebuilt detection rules
-        and Timelines provided by Elastic.
+        and Timelines provided by Elastic. 
 
         When you call this endpoint, it will:
 
@@ -3132,7 +3132,7 @@ paths:
 
 
         This ensures that your detection engine is always up-to-date with the
-        latest rules and Timelines,
+        latest rules and Timelines, 
 
         providing you with the most current and effective threat detection
         capabilities.
@@ -3182,7 +3182,7 @@ paths:
     get:
       description: >
         Retrieve the status of all Elastic prebuilt detection rules and
-        Timelines.
+        Timelines. 
 
 
         This endpoint provides detailed information about the number of custom
@@ -3293,9 +3293,8 @@ paths:
                     - $ref: '#/components/schemas/RulePreviewParams'
               discriminator:
                 propertyName: type
-        description: >-
-          An object containing tags to add or remove and alert ids the changes
-          will be applied
+        description: An object containing tags to add or remove and alert ids the
+          changes will be applied
         required: true
       responses:
         '200':
@@ -3368,7 +3367,7 @@ paths:
                     deleted: 0,
                     failures: []
                     noops: 0,
-                    requests_per_second: '-1,'
+                    requests_per_second: -1,
                     retries:
                       - bulk: 0,
                       - search: 0
@@ -3629,8 +3628,7 @@ paths:
   /api/detection_engine/signals/migration_status:
     get:
       deprecated: true
-      description: >-
-        Retrieve indices that contain detection alerts of a particular age,
+      description: Retrieve indices that contain detection alerts of a particular age,
         along with migration information for each of those indices.
       operationId: ReadAlertsMigrationStatus
       parameters:
@@ -4363,7 +4361,7 @@ components:
         - value
     BulkActionEditPayloadSchedule:
       description: >
-        Overwrites schedule of rules.
+        Overwrites schedule of rules. 
 
 
         - `set_schedule` sets a schedule for rules. If the same schedule already
@@ -8882,9 +8880,9 @@ components:
         - For prebuilt rules it represents the version of the rule's content in
         the source [detection-rules](https://github.com/elastic/detection-rules)
         repository (and the corresponding `security_detection_engine` Fleet
-        package that is used for distributing prebuilt rules).
+        package that is used for distributing prebuilt rules). 
 
-        - For custom rules it is set to `1` when the rule is created.
+        - For custom rules it is set to `1` when the rule is created. 
 
         > info
 
@@ -9669,7 +9667,7 @@ components:
         - type: must be mapping
 
         - value: field from the Elasticsearch threat index
-
+          
         You can use Boolean and and or logic to define the conditions for when
         matching fields and values generate alerts. Sibling entries objects are
         evaluated using or logic, whereas multiple entries in a single entries

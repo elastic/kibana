@@ -1454,9 +1454,8 @@ paths:
               schema:
                 example:
                   error: Bad Request
-                  message: >-
-                    [request query]: namespace_type.0: Invalid enum value.
-                    Expected 'agnostic' | 'single', received 'blob'
+                  message: "[request query]: namespace_type.0: Invalid enum value. Expected
+                    'agnostic' | 'single', received 'blob'"
                   statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
