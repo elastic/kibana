@@ -18,7 +18,6 @@ import type { ScheduleType } from '../../../common/schedule';
 import {
   SCHEDULE_TYPE_INTERVAL_DESCRIPTION,
   SCHEDULE_TYPE_INTERVAL_LABEL,
-  SCHEDULE_TYPE_LABEL,
   SCHEDULE_TYPE_LOCKED_HELP,
   SCHEDULE_TYPE_RECURRENCE_DESCRIPTION,
   SCHEDULE_TYPE_RECURRENCE_LABEL,
@@ -76,7 +75,6 @@ export const ScheduleTypeSelector = ({
 
   return (
     <EuiFormRow
-      // label={SCHEDULE_TYPE_LABEL}
       helpText={isLocked ? SCHEDULE_TYPE_LOCKED_HELP : undefined}
       fullWidth
     >

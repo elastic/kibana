@@ -11,11 +11,6 @@ export const SCHEDULE_SECTION_TITLE = i18n.translate('xpack.osquery.scheduleSect
   defaultMessage: 'Schedule',
 });
 
-export const SCHEDULE_TYPE_LABEL = i18n.translate(
-  'xpack.osquery.scheduleSection.scheduleTypeLabel',
-  { defaultMessage: 'Schedule type' }
-);
-
 export const SCHEDULE_TYPE_INTERVAL_LABEL = i18n.translate(
   'xpack.osquery.scheduleSection.scheduleTypeIntervalLabel',
   { defaultMessage: 'Interval' }
