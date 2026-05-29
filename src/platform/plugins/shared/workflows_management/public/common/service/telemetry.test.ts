@@ -788,7 +788,8 @@ describe('WorkflowsBaseTelemetry', () => {
         inputCount: 2,
         editorType: 'both',
         origin: 'workflow_detail',
-        triggerTab: 'alert',
+        triggerTab: 'event',
+        hasCustomEventTrigger: true,
       });
 
       expect(mockClient.reportEvent).toHaveBeenCalledWith(
@@ -800,7 +801,8 @@ describe('WorkflowsBaseTelemetry', () => {
           inputCount: 2,
           editorType: 'both',
           origin: 'workflow_detail',
-          triggerTab: 'alert',
+          triggerTab: 'event',
+          hasCustomEventTrigger: true,
           result: 'success',
         })
       );

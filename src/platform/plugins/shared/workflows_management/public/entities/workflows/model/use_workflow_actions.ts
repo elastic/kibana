@@ -253,7 +253,10 @@ export function useWorkflowActions() {
     },
   });
 
-  const runWorkflow = useRunWorkflow<{ triggerTab?: WorkflowTriggerTab }>({
+  const runWorkflow = useRunWorkflow<{
+    triggerTab?: WorkflowTriggerTab;
+    hasCustomEventTrigger?: boolean;
+  }>({
     onSuccess: (_, variables) => {
       const inputCount = Object.keys(variables.inputs || {}).length;
 
@@ -265,6 +268,7 @@ export function useWorkflowActions() {
         origin: 'workflow_list',
         error: undefined,
         triggerTab: variables.triggerTab,
+        hasCustomEventTrigger: variables.hasCustomEventTrigger,
       });
 
       // FIX: ensure workflow execution document is created at the end of the mutation
@@ -284,6 +288,7 @@ export function useWorkflowActions() {
         origin: 'workflow_list',
         error: errorObj,
         triggerTab: variables.triggerTab,
+        hasCustomEventTrigger: variables.hasCustomEventTrigger,
       });
     },
   });
