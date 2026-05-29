@@ -49,6 +49,8 @@ ES|QL uses pipes (`|`) to chain commands:
 >   features from development — if a query fails with an unknown function/command, it may simply not have landed yet.
 >   Elastic employees commonly use snapshot builds for testing.
 
+<!-- begin-partial: preamble -->
+
 ## Environment Configuration
 
 This skill executes Elasticsearch operations through the `elastic` CLI. Before running any other step, confirm the
@@ -59,13 +61,15 @@ This skill executes Elasticsearch operations through the `elastic` CLI. Before r
 
 Wait for the user's response. Do not guess credentials, call the HTTP API directly, or attempt other workarounds.
 
-This skill references operations in HTTP-shorthand form (e.g., `GET /`, `GET /_cat/indices`, `GET /<index>/_mapping`,
-`GET /<index>/_settings/index.mode`, `POST /_query`). The [Operations](#operations) table at the end of this document
+This skill references operations in HTTP-shorthand form (e.g., `GET /`, `GET /_cat/indices`, `GET /{index}/_mapping`,
+`GET /{index}/_settings/index.mode`, `POST /_query`). The [Operations](#operations) table at the end of this document
 maps each shorthand to the equivalent `elastic` CLI command — always use the CLI rather than calling the HTTP API
 directly.
 
 Verify the connection by calling `GET /`. If verification fails, point the user to the
 [CLI configuration instructions](https://github.com/elastic/cli#configuration).
+
+<!-- end-partial: preamble -->
 
 ## Guidelines
 
@@ -75,7 +79,7 @@ Verify the connection by calling `GET /`. If verification fails, point the user 
    and use all ES|QL features freely.
 
 2. **Discover schema** (required — never guess index or field names): list matching indices
-   (`GET /_cat/indices/<pattern>`), then fetch the field mappings for the chosen index (`GET /<index>/_mapping`).
+   (`GET /_cat/indices/{pattern}`), then fetch the field mappings for the chosen index (`GET /{index}/_mapping`).
 
    Always run schema discovery before generating queries. Index names and field names vary across deployments and cannot
    be reliably guessed. Even common-sounding data (e.g., "logs") may live in indices named `logs-test`, `logs-app-*`, or
@@ -87,11 +91,11 @@ Verify the connection by calling `GET /`. If verification fails, point the user 
    index for the question. When multiple indices contain similar data, prefer the one with the most complete schema for
    the task at hand.
 
-   `GET /<index>/_mapping` reports the index mode. If it shows `Index mode: time_series`, the output includes the data
+   `GET /{index}/_mapping` reports the index mode. If it shows `Index mode: time_series`, the output includes the data
    stream name and copy-pasteable TS syntax — use `TS <data-stream>` (not `FROM`), `TBUCKET(interval)` (not
    `DATE_TRUNC`), and wrap counter fields with `SUM(RATE(...))`. Read the full TS section in
    [Generation Tips](references/generation-tips.md) before writing any time series query. You can also check the index
-   mode directly via `GET /<index>/_settings/index.mode`.
+   mode directly via `GET /{index}/_settings/index.mode`.
 
    For TSDS indices on 9.4+, prefer the in-language discovery commands `METRICS_INFO` and `TS_INFO` (both GA) over
    inspecting mappings — they enumerate the metric catalogue and the dimension labels of each time series directly. Both
@@ -353,6 +357,7 @@ For complete ES|QL syntax including all commands, functions, and operators, read
 - [Time Series Queries](references/time-series-queries.md) - TS command, time series aggregation functions, TBUCKET
 - [PROMQL Command](references/promql-command.md) - PromQL source command for TSDS indices (9.4+ preview)
 - [DSL to ES|QL Migration](references/dsl-to-esql-migration.md) - Convert Query DSL to ES|QL
+- [Environment Setup](references/fallback-environment-setup.md) - Connection configuration options
 
 ## Error Handling
 
@@ -364,7 +369,7 @@ When query execution fails, the script returns:
 
 **Common issues:**
 
-- Field doesn't exist → Always use `GET /<index>/_mapping` and `GET /_cat/indices` before writing a query. Never guess
+- Field doesn't exist → Always use `GET /{index}/_mapping` and `GET /_cat/indices` before writing a query. Never guess
   field or index names — they vary across deployments.
 - Type mismatch → Use type conversion functions (TO_STRING, TO_INTEGER, etc.)
 - Syntax error → Review ES|QL reference for correct syntax. Always use **double quotes** for strings, never single
@@ -388,9 +393,9 @@ discover the matching command and its flags.
 | ----------------------------------- | --------------------------------------------------------------------- |
 | `GET /`                             | `elastic es info`                                                     |
 | `GET /_cat/indices`                 | `elastic es cat indices`                                              |
-| `GET /_cat/indices/<pattern>`       | `elastic es cat indices --index '<pattern>'`                          |
-| `GET /<pattern>`                    | `elastic es indices get --index '<pattern>'`                          |
-| `GET /<index>/_mapping`             | `elastic es indices get-mapping --index '<index>'`                    |
-| `GET /<index>/_settings/index.mode` | `elastic es indices get-settings --name index.mode --index '<index>'` |
-| `POST /_query`                      | `elastic es esql query --query "<esql>"`                              |
-| `POST /_query?format=tsv`           | `elastic es esql query --format tsv --query "<esql>"`                 |
+| `GET /_cat/indices/{pattern}`       | `elastic es cat indices --index '{pattern}'`                          |
+| `GET /{pattern}`                    | `elastic es indices get --index '{pattern}'`                          |
+| `GET /{index}/_mapping`             | `elastic es indices get-mapping --index '{index}'`                    |
+| `GET /{index}/_settings/index.mode` | `elastic es indices get-settings --name index.mode --index '{index}'` |
+| `POST /_query`                      | `elastic es esql query --query "{esql}"`                              |
+| `POST /_query?format=tsv`           | `elastic es esql query --format tsv --query "{esql}"`                 |
