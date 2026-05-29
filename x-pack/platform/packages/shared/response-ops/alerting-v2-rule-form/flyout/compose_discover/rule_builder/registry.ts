@@ -17,9 +17,8 @@ import { RuleBuilderAlertConditionStep } from './threshold/alert_condition_step'
 import { parseThresholdEsql } from './threshold/parse_esql';
 import { THRESHOLD_STEP_TITLE } from './threshold/translations';
 
-const defineBuilder = <TState>(def: RuleBuilderDefinition<TState>): RuleBuilderDefinition => {
-  return def as RuleBuilderDefinition;
-};
+const defineBuilder = <TState>(def: RuleBuilderDefinition<TState>): RuleBuilderDefinition =>
+  def as RuleBuilderDefinition;
 
 const isThresholdFormValid = (values: ThresholdFormValues): boolean => {
   if (!values.indexPattern.trim()) return false;
@@ -55,8 +54,6 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
       state: props.state,
       dispatch: props.dispatch,
       services: props.services,
-      builderState: props.builderState,
-      onBuilderStateChange: props.onBuilderStateChange,
     }),
   validate: (state, builderState) =>
     state.queryCommitted && (builderState ? isThresholdFormValid(builderState) : true),
