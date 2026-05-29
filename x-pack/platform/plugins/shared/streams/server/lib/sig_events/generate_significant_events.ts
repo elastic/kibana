@@ -13,6 +13,7 @@ import { generateSignificantEvents } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { FeatureClient } from '../streams/feature/feature_client';
 import type { QueryClient } from '../streams/assets/query/query_client';
+import type { MemoryDiscoveryTools } from './memory_discovery_tools';
 
 interface Params {
   definition: Streams.all.Definition;
@@ -28,6 +29,7 @@ interface Dependencies {
   logger: Logger;
   signal: AbortSignal;
   esClient: ElasticsearchClient;
+  memoryTools?: MemoryDiscoveryTools;
 }
 
 export async function generateSignificantEventDefinitions(
@@ -39,7 +41,8 @@ export async function generateSignificantEventDefinitions(
   toolUsage: SignificantEventsToolUsage;
 }> {
   const { definition, connectorId, systemPrompt, maxExistingQueriesForContext } = params;
-  const { inferenceClient, featureClient, queryClient, logger, signal, esClient } = dependencies;
+  const { inferenceClient, featureClient, queryClient, logger, signal, esClient, memoryTools } =
+    dependencies;
 
   const { [definition.name]: existingLinks } = await queryClient.getStreamToQueryLinksMap([
     definition.name,
@@ -64,11 +67,13 @@ export async function generateSignificantEventDefinitions(
     inferenceClient: boundInferenceClient,
     logger,
     signal,
-    systemPrompt,
+    systemPrompt: memoryTools ? `${systemPrompt}\n${memoryTools.promptSnippet}` : systemPrompt,
     getFeatures: async (filters) => {
       const response = await featureClient.getFeatures(definition.name, filters);
       return response.hits;
     },
+    additionalTools: memoryTools?.tools,
+    additionalToolCallbacks: memoryTools?.callbacks,
     existingQueries,
     maxExistingQueriesForContext,
   });

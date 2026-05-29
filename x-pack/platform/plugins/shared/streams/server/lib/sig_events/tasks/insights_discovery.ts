@@ -12,7 +12,7 @@ import { isInferenceProviderError } from '@kbn/inference-common';
 import { type Insight, getImpactLevel } from '@kbn/streams-schema';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
+import { isSignificantEventsMemoryEnabled } from '../../memory/is_significant_events_memory_enabled';
 import type { TaskContext } from '../../tasks/task_definitions';
 import { cancellableTask } from '../../tasks/cancellable_task';
 import type { TaskParams } from '../../tasks/types';
@@ -80,8 +80,8 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               taskLogger.debug(`Using connector ${connectorId} for discovery`);
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
 
-              const useMemory = await uiSettingsClient.get<boolean>(
-                OBSERVABILITY_STREAMS_ENABLE_MEMORY
+              const useMemory = await isSignificantEventsMemoryEnabled(
+                taskContext.server.core.featureFlags
               );
 
               try {

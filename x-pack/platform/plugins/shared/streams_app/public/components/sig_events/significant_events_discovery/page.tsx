@@ -76,7 +76,7 @@ export function SignificantEventsDiscoveryPage() {
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
 
-  const onTaskFailed = useCallback(
+  const onOnboardingFailed = useCallback(
     (error: string) => {
       toasts.addError(getFormattedError(new Error(error)), {
         title: ONBOARDING_FAILURE_TITLE,
@@ -85,7 +85,7 @@ export function SignificantEventsDiscoveryPage() {
     [toasts]
   );
 
-  const { isMemoryEnabled, isLoading: isSettingsLoading } = useDiscoverySettings();
+  const { isMemoryEnabled } = useDiscoverySettings();
 
   const handleOpenSystemOnboarding = useCallback(() => {
     agentBuilder?.openChat({
@@ -181,9 +181,6 @@ export function SignificantEventsDiscoveryPage() {
   }
 
   if (tab === 'memory' && !isMemoryEnabled) {
-    if (isSettingsLoading) {
-      return <EuiLoadingElastic size="xxl" />;
-    }
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }
 
@@ -237,7 +234,7 @@ export function SignificantEventsDiscoveryPage() {
         }
         tabs={tabs}
       />
-      <KiGenerationProvider onTaskFailed={onTaskFailed}>
+      <KiGenerationProvider onFailed={onOnboardingFailed}>
         <StreamsAppPageTemplate.Body grow>
           {tab === 'streams' && <StreamsView />}
           {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}

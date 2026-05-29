@@ -16,10 +16,10 @@ import {
 } from '@kbn/streams-schema/src/insights';
 import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-  OBSERVABILITY_STREAMS_ENABLE_MEMORY,
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
 } from '@kbn/management-settings-ids';
+import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../../../../common/feature_flags';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
 
@@ -339,16 +339,28 @@ export function getStreamsTestApiService({
 
     async enableMemory() {
       await measurePerformanceAsync(log, 'streamsTestApi.enableMemory', async () => {
-        await kbnClient.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_MEMORY]: true,
+        await kbnClient.request({
+          path: '/internal/core/_settings',
+          method: 'PUT',
+          body: {
+            'feature_flags.overrides': {
+              [STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: true,
+            },
+          },
         });
       });
     },
 
     async disableMemory() {
       await measurePerformanceAsync(log, 'streamsTestApi.disableMemory', async () => {
-        await kbnClient.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_MEMORY]: false,
+        await kbnClient.request({
+          path: '/internal/core/_settings',
+          method: 'PUT',
+          body: {
+            'feature_flags.overrides': {
+              [STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: false,
+            },
+          },
         });
       });
     },

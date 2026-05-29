@@ -10,7 +10,9 @@ import type { Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
+import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
 import { MemoryServiceImpl } from '../lib/memory';
+import type { MemoryToolsOptions } from './tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { createSigEventsOnboardingSkill } from './skills/sigevents_onboarding_skill';
@@ -40,21 +42,15 @@ const gapDetectorAgent: AgentDefinition = {
   },
 };
 
-export const registerStreamsAgentBuilder = async ({
-  agentBuilder,
+export const createMemoryToolsOptions = ({
   getScopedClients,
   server,
   logger,
-  telemetry,
-  isMemoryEnabled,
 }: {
-  agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
-  telemetry: EbtTelemetryClient;
-  isMemoryEnabled: () => Promise<boolean>;
-}) => {
+}): MemoryToolsOptions => {
   const getMemoryService = (
     esClient: import('@kbn/core-elasticsearch-server').ElasticsearchClient
   ) =>
@@ -63,13 +59,33 @@ export const registerStreamsAgentBuilder = async ({
       esClient,
     });
 
-  const memoryToolsOptions = {
+  return {
     getMemoryService,
     getSecurity: () => server.core.security,
     getScopedClients,
     server,
     logger,
   };
+};
+
+export const registerStreamsAgentBuilder = async ({
+  agentBuilder,
+  getScopedClients,
+  server,
+  logger,
+  telemetry,
+  isMemoryEnabled,
+  streamsKIsOnboardingClient,
+}: {
+  agentBuilder: AgentBuilderPluginSetup;
+  getScopedClients: GetScopedClients;
+  server: StreamsServer;
+  logger: Logger;
+  telemetry: EbtTelemetryClient;
+  isMemoryEnabled: () => Promise<boolean>;
+  streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
+}) => {
+  const memoryToolsOptions = createMemoryToolsOptions({ getScopedClients, server, logger });
 
   await registerAgentBuilderTools({
     agentBuilder,
@@ -78,7 +94,12 @@ export const registerStreamsAgentBuilder = async ({
     logger,
     telemetry,
   });
-  registerAgentBuilderSkills({ agentBuilder, getScopedClients, telemetry, memoryToolsOptions });
+  registerAgentBuilderSkills({
+    agentBuilder,
+    telemetry,
+    memoryToolsOptions,
+    streamsKIsOnboardingClient,
+  });
 
   agentBuilder.agents.register(systemOnboardingAgent);
   agentBuilder.agents.register(gapDetectorAgent);
@@ -93,7 +114,9 @@ export const registerStreamsAgentBuilder = async ({
     memorySkillRegistered = true;
     agentBuilder.skills.register(createSigEventsMemorySkill(memoryToolsOptions));
     agentBuilder.skills.register(createSigEventsOnboardingSkill(memoryToolsOptions));
-    logger.info('Memory skill registered (observability:streamsEnableMemory is enabled)');
+    logger.info(
+      'Memory skill registered (streams.significantEventsMemoryEnabled feature flag is enabled)'
+    );
   };
 
   if (await isMemoryEnabled()) {
