@@ -99,9 +99,13 @@ mutations directly. All write operations belong to `tune-rule`.
 
 Emit a `proposed_changes` payload when:
 
-- A concrete, actionable fix has been identified (exception, query change,
-  threshold change).
+- A concrete, actionable fix has been identified (exception, threshold change,
+  schedule change, or index pattern correction).
 - The user has confirmed they want to proceed with the proposed change.
+
+If the identified fix requires a full query rewrite rather than a field-level
+patch, refer to `detection-rule-edit` instead of emitting a `proposed_changes`
+payload.
 
 Never call mutation tools directly. The payload format is:
 
