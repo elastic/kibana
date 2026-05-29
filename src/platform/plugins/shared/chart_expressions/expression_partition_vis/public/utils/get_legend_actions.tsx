@@ -69,24 +69,27 @@ export const getLegendActions = (
     );
     const [ref, onClose] = useLegendAction<HTMLDivElement>();
 
-    if (columnIndex === -1) {
-      return null;
-    }
-
     const isEsqlMode = visData.meta?.type === ESQL_TABLE_TYPE;
-    const column = visData.columns[columnIndex];
-    const warningMessage: string | undefined = isEsqlMode
-      ? getComputedColumnWarningForColumns([column])
-      : undefined;
+    // column may be undefined when columnIndex === -1; the early return below ensures it is
+    // non-null for the rest of the component.
+    const column = columnIndex !== -1 ? visData.columns[columnIndex] : undefined;
+    const warningMessage: string | undefined =
+      isEsqlMode && column ? getComputedColumnWarningForColumns([column]) : undefined;
 
     useEffect(() => {
       if (!canFilter || !filterData || warningMessage) {
         setIsFilterable(false);
         return;
       }
-
+      // Reset to true before the async check so we don't show a stale disabled state
+      // while the promise is in flight.
+      setIsFilterable(true);
       (async () => setIsFilterable(await canFilter(filterData)))();
     }, [filterData, warningMessage]);
+
+    if (columnIndex === -1 || !column) {
+      return null;
+    }
 
     const title = getFilterPopoverTitle(
       visParams,
