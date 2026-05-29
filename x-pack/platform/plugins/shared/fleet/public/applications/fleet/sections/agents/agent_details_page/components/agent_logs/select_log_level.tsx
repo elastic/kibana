@@ -38,8 +38,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
       true
     );
 
-    const reportedLogLevel =
-      agent.local_metadata?.elastic?.agent?.log_level ?? agentPolicyLogLevel;
+    const reportedLogLevel = agent.local_metadata?.elastic?.agent?.log_level ?? agentPolicyLogLevel;
 
     const [agentLogLevel, setAgentLogLevel] = useState(reportedLogLevel);
     const [selectedLogLevel, setSelectedLogLevel] = useState(agentLogLevel);
@@ -54,27 +53,15 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
       if (selectedLogLevel !== agentLogLevel) {
         return;
       }
-      if (
-        pendingLogLevelRef.current !== null &&
-        reportedLogLevel !== pendingLogLevelRef.current
-      ) {
+      if (pendingLogLevelRef.current !== null && reportedLogLevel !== pendingLogLevelRef.current) {
         return;
       }
-      if (
-        pendingLogLevelRef.current !== null &&
-        reportedLogLevel === pendingLogLevelRef.current
-      ) {
+      if (pendingLogLevelRef.current !== null && reportedLogLevel === pendingLogLevelRef.current) {
         pendingLogLevelRef.current = null;
       }
       setAgentLogLevel(reportedLogLevel);
       setSelectedLogLevel(reportedLogLevel);
-    }, [
-      reportedLogLevel,
-      isSetLevelLoading,
-      isResetLevelLoading,
-      selectedLogLevel,
-      agentLogLevel,
-    ]);
+    }, [reportedLogLevel, isSetLevelLoading, isResetLevelLoading, selectedLogLevel, agentLogLevel]);
 
     const resetLogLevel = useCallback(() => {
       setIsResetLevelLoading(true);

@@ -10,11 +10,7 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { createFleetTestRendererMock } from '../../../../../../../mock';
-import {
-  sendPostAgentAction,
-  useAuthz,
-  useStartServices,
-} from '../../../../../hooks';
+import { sendPostAgentAction, useAuthz, useStartServices } from '../../../../../hooks';
 
 import { SelectLogLevel } from './select_log_level';
 
@@ -41,7 +37,7 @@ const createAgent = (logLevel?: string) =>
         },
       },
     },
-  }) as any;
+  } as any);
 
 describe('SelectLogLevel', () => {
   beforeEach(() => {
@@ -99,9 +95,7 @@ describe('SelectLogLevel', () => {
 
     expect(result.getByTestId('selectAgentLogLevel')).toHaveValue('info');
 
-    result.rerender(
-      <SelectLogLevel agent={createAgent('debug')} agentPolicyLogLevel="warning" />
-    );
+    result.rerender(<SelectLogLevel agent={createAgent('debug')} agentPolicyLogLevel="warning" />);
 
     expect(result.getByTestId('selectAgentLogLevel')).toHaveValue('debug');
   });
