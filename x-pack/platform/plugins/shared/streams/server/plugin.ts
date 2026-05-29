@@ -30,6 +30,7 @@ import {
 } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { distinctUntilChanged, filter, skip } from 'rxjs';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
 import type { StreamsConfig } from '../common/config';
 import {
@@ -91,7 +92,6 @@ import {
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../common/feature_flags';
-import { distinctUntilChanged, filter, skip } from 'rxjs';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 

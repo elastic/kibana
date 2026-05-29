@@ -444,8 +444,8 @@ const createWorkflowTriggerRoute = (
       logger,
       getScopedClients,
     }): Promise<{ executionId: string }> => {
-      const { uiSettingsClient } = await getScopedClients({ request });
-      await assertMemoryEnabled(uiSettingsClient);
+      const { licensing, uiSettingsClient } = await getScopedClients({ request });
+      await assertMemoryEnabled({ server, licensing, uiSettingsClient });
 
       const wfMgmt = server.workflowsManagement;
       if (!wfMgmt) {
