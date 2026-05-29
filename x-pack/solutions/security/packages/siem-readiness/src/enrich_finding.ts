@@ -205,12 +205,20 @@ export const enrichFinding = (
   });
 
   // 4. Derive platform from the actual index data (ECS fields).
-  //    Two-step lookup handles both data stream names and backing index names:
-  //      Step 1: direct lookup by finding.resource (data stream name)
-  //      Step 2: parse backing index → data stream name, then look up
+  //    For quality/retention, finding.resource IS the index name → direct lookup.
+  //    For continuity, finding.resource is a pipeline name → resolve via pipelineToIndices first.
+  //    For coverage, finding.resource is a category name → resolve via categoryToIndices first.
+  //    Then a two-step lookup handles both data stream names and backing index names.
+  let platformLookupIndex = finding.resource;
+  if (ctx.dimension === 'continuity') {
+    platformLookupIndex = ctx.pipelineToIndices.get(finding.resource)?.[0] ?? finding.resource;
+  } else if (ctx.dimension === 'coverage') {
+    platformLookupIndex = ctx.categoryToIndices.get(finding.resource)?.[0] ?? finding.resource;
+  }
+
   const affectedPlatform =
-    ctx.indexToPlatform.get(finding.resource) ??
-    ctx.indexToPlatform.get(extractDataStreamName(finding.resource) ?? '');
+    ctx.indexToPlatform.get(platformLookupIndex) ??
+    ctx.indexToPlatform.get(extractDataStreamName(platformLookupIndex) ?? '');
 
   // 5. Build dimension-specific recommended actions
   const recommendedActions = buildRecommendedActionsForFinding(finding, ctx.dimension);
