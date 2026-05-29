@@ -218,7 +218,6 @@ export class DashboardPageObject extends FtrService {
   public async onDashboardLandingPage() {
     this.log.debug(`onDashboardLandingPage`);
     const currentUrl = await this.browser.getCurrentUrl();
-    this.log.debug(`currentUrl: `, currentUrl);
     return currentUrl.includes('dashboards#/list');
   }
 
@@ -238,18 +237,13 @@ export class DashboardPageObject extends FtrService {
     );
   }
 
-  public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
+  public async gotoDashboardLandingPage() {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
 
-    await this.common.navigateToUrlWithBrowserHistory(DASHBOARD_APP_ID, '/list');
-    const warning = await this.testSubjects.exists('confirmModalTitleText');
-    if (warning) {
-      await this.testSubjects.click(
-        ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
-      );
-    }
-    await this.expectExistsDashboardLandingPage();
+    await this.common.navigateToApp(DASHBOARD_APP_ID, {
+      hash: 'list'
+    });
   }
 
   public async duplicateDashboard(dashboardNameOverride?: string) {
