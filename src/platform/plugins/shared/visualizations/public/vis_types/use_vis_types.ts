@@ -26,6 +26,8 @@ export function useVisTypes(visTypesRegistry: TypesStart) {
         }
       })
       .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.warn('Unable to load visTypes, error: ', error);
         if (!canceled) {
           setIsLoading(false);
           setVisTypes([]);

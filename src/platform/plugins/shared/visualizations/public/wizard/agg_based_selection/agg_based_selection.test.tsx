@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import type { TypesStart, BaseVisType } from '../../vis_types';
 import { VisGroups } from '../../vis_types';
 import { AggBasedSelection } from './agg_based_selection';
 import type { VisParams } from '@kbn/visualizations-common';
+import { act } from 'react-dom/test-utils';
 
 describe('AggBasedSelection', () => {
   const defaultVisTypeParams = {
@@ -101,7 +102,10 @@ describe('AggBasedSelection', () => {
         />
       );
 
-      await new Promise((resolve) => process.nextTick(resolve));
+      await act(async () => {
+        await nextTick();
+      });
+      wrapper.update();
 
       const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');
       searchBox.simulate('change', { target: { value: 'with' } });

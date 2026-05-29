@@ -190,7 +190,7 @@ function GroupSelection({
         <EuiSkeletonText isLoading={isLoading}>
           <>
             {shouldDisplayLegacyTab && (
-              <div className="visNewVisDialogGroupSelection__visGroups">
+              <div css={styles.visGroups}>
                 <EuiTabs>
                   {tabs.map((t) => (
                     <EuiTab
@@ -206,7 +206,7 @@ function GroupSelection({
               </div>
             )}
 
-            <div className="visNewVisDialogGroupSelection__visGroups">
+            <div css={styles.visGroups}>
               <EuiSpacer size="s" />
               {tab === 'recommended' ? (
                 <EuiFlexGrid columns={2} data-test-subj="visNewDialogGroups">

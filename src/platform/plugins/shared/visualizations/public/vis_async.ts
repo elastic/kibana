@@ -16,7 +16,6 @@ export const createVisAsync = async <TVisParams extends VisParams = VisParams>(
   visTypeName: string,
   visState: SerializedVis<TVisParams> = {} as any
 ) => {
-  const { Vis } = await import('./vis');
   const visType = await getTypes().get<TVisParams>(visTypeName);
   if (!visType) {
     throw new Error(
@@ -28,6 +27,8 @@ export const createVisAsync = async <TVisParams extends VisParams = VisParams>(
       })
     );
   }
+
+  const { Vis } = await import('./vis');
   const vis = new Vis(visType, visState);
 
   await vis.setState(visState);

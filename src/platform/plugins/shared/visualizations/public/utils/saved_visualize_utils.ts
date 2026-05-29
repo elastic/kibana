@@ -89,12 +89,13 @@ async function mapHitSource(
     }
   }
 
-  if (!typeName || !visTypes.get(typeName as string)) {
+  const visType = typeName ? await visTypes.get(typeName) : undefined;
+  if (!typeName || !visType) {
     newAttributes.error = 'Unknown visualization type';
     return newAttributes;
   }
 
-  newAttributes.type = await visTypes.get(typeName as string);
+  newAttributes.type = visType;
   newAttributes.savedObjectType = 'visualization';
   newAttributes.icon = newAttributes.type?.icon;
   newAttributes.image = newAttributes.type?.image;
