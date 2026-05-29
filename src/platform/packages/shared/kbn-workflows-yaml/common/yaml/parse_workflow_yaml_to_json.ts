@@ -8,7 +8,7 @@
  */
 
 import type { Document } from 'yaml';
-import type { ZodSafeParseResult, ZodType } from '@kbn/zod/v4';
+import type { output, ZodSafeParseSuccess, ZodType } from '@kbn/zod/v4';
 import { ZodError } from '@kbn/zod/v4';
 import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
 import { getYamlDocumentErrors } from './validate_yaml_document';
@@ -17,10 +17,9 @@ import { isDynamicValue, isLiquidTagValue, isVariableValue } from '../regex';
 import type { ConnectorParamsSchemaResolver } from '../zod/enrich_error_message';
 import { formatZodError } from '../zod/format_zod_error';
 
-export type ParseWorkflowYamlToJSONResult<T extends ZodType> = (
-  | ZodSafeParseResult<T>
-  | { success: false; error: Error }
-) & { document: Document };
+export type ParseWorkflowYamlToJSONResult<T extends ZodType> =
+  | (ZodSafeParseSuccess<output<T>> & { document: Document })
+  | { success: false; data?: never; error: Error; document: Document };
 
 export interface ParseWorkflowYamlToJSONOptions {
   /** Optional resolver for connector-specific params schemas, injected from the host plugin */
@@ -77,9 +76,9 @@ export function parseWorkflowYamlToJSON<T extends ZodType>(
     if (filteredIssues.length === 0) {
       return {
         success: true,
-        data: parseResult.json,
+        data: parseResult.json as output<T>,
         document,
-      } as ParseWorkflowYamlToJSONResult<T>;
+      };
     }
 
     // Use custom error formatter for better user experience
@@ -95,5 +94,5 @@ export function parseWorkflowYamlToJSON<T extends ZodType>(
       document,
     };
   }
-  return { ...result, document } as ParseWorkflowYamlToJSONResult<T>;
+  return { ...result, document };
 }

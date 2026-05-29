@@ -27,6 +27,7 @@
     "@kbn/config",
     "@kbn/dev-utils",
     "@kbn/projects-solutions-groups",
+    "@kbn/workflows-examples-cli",
   ],
   "exclude": [
     "target/**/*",
