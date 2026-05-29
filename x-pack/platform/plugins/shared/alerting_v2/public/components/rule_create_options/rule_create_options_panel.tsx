@@ -25,12 +25,14 @@ interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
   layout?: 'vertical' | 'horizontal';
   onCreateWithAgent: () => void;
+  onCreateThresholdAlert?: () => void;
 }
 
 export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   layout = 'horizontal',
   onCreateWithAgent,
+  onCreateThresholdAlert,
 }) => {
   const { euiTheme } = useEuiTheme();
   const isVerticalLayout = layout === 'vertical';
@@ -143,19 +145,13 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
         </EuiTitle>
         <EuiSpacer size="l" />
         <EuiFlexGroup justifyContent="center">
-          {/* TODO: Add the other rule builders here */}
           <EuiFlexItem css={{ width: '100%' }}>
             <EuiCard
-              betaBadgeProps={{
-                label: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.comingSoonLabel', {
-                  defaultMessage: 'Coming soon',
-                }),
-                color: 'hollow',
-                size: 'm',
-              }}
               layout="horizontal"
+              display="plain"
               titleElement="h3"
               titleSize="xs"
+              hasBorder={true}
               title={i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertTitle', {
                 defaultMessage: 'Threshold Alert',
               })}
@@ -166,12 +162,9 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
                     'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
                 }
               )}
+              onClick={onCreateThresholdAlert}
               icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
-              aria-disabled={true}
-              display="subdued"
               css={{
-                cursor: 'default',
-                pointerEvents: 'none',
                 width: isVerticalLayout ? '100%' : '50%',
                 margin: isVerticalLayout ? 0 : '0 auto',
               }}

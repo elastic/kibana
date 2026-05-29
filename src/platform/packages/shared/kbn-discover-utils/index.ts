@@ -19,6 +19,7 @@ export {
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
   MAX_DOC_FIELDS_DISPLAYED,
   MODIFY_COLUMNS_ON_SWITCH,
+  OPEN_IN_DISCOVER_TAB_LABEL,
   ROW_HEIGHT_OPTION,
   SAMPLE_ROWS_PER_PAGE_SETTING,
   SAMPLE_SIZE_SETTING,
@@ -56,6 +57,7 @@ export {
   getLogEventTypeFieldWithFallback,
   getLogExceptionTypeFieldWithFallback,
   getShouldShowFieldHandler,
+  isEsqlSavedSearch,
   isNestedFieldParent,
   usePager,
   calcFieldCounts,
@@ -98,6 +100,7 @@ export type {
   SortInput,
   SortPair,
   ErrorCalloutProps,
+  DiscoverSessionFinderAttributes,
 } from './src';
 
 export * from './src/types';
