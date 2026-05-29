@@ -58,7 +58,7 @@ describe('useIndicateRelatedPanelsSelector', () => {
       const subscribeSpy = jest.spyOn(mockParentApi.indicateRelatedPanelsId$, 'subscribe');
       const api = createMockApi({ publishesRelatedPanels: false });
 
-      renderHook(() => useIndicateRelatedPanelsSelector(api, true));
+      renderHook(() => useIndicateRelatedPanelsSelector(api));
 
       expect(subscribeSpy).not.toHaveBeenCalled();
     });
@@ -72,7 +72,7 @@ describe('useIndicateRelatedPanelsSelector', () => {
         relatedPanels$: new BehaviorSubject<string[]>([]),
       };
 
-      const { result } = renderHook(() => useIndicateRelatedPanelsSelector(api, true));
+      const { result } = renderHook(() => useIndicateRelatedPanelsSelector(api));
 
       expect(result.current.isIndicatingRelatedPanels).toBe(false);
       act(() => result.current.onToggleIndicateRelatedPanels());
@@ -85,7 +85,7 @@ describe('useIndicateRelatedPanelsSelector', () => {
       const parentApi = createMockParentApi({ indicateRelatedPanelsId: undefined });
       const api = createMockApi({ parentApi });
 
-      const { result } = renderHook(() => useIndicateRelatedPanelsSelector(api, true));
+      const { result } = renderHook(() => useIndicateRelatedPanelsSelector(api));
 
       expect(result.current.isIndicatingRelatedPanels).toBe(false);
 
@@ -102,7 +102,7 @@ describe('useIndicateRelatedPanelsSelector', () => {
       const parentApi = createMockParentApi();
       const api = createMockApi({ parentApi });
 
-      const { result } = renderHook(() => useIndicateRelatedPanelsSelector(api, true));
+      const { result } = renderHook(() => useIndicateRelatedPanelsSelector(api));
 
       await waitFor(() => expect(result.current.isIndicatingRelatedPanels).toBe(false));
 
@@ -116,7 +116,7 @@ describe('useIndicateRelatedPanelsSelector', () => {
       });
       const api = createMockApi({ parentApi });
 
-      const { result } = renderHook(() => useIndicateRelatedPanelsSelector(api, true));
+      const { result } = renderHook(() => useIndicateRelatedPanelsSelector(api));
 
       await waitFor(() => expect(result.current.isIndicatingRelatedPanels).toBe(true));
 

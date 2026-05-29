@@ -18,10 +18,7 @@ import {
 import type { Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
 
-export const useIndicateRelatedPanelsSelector = (
-  api: unknown,
-  skipDebounce?: boolean // For faster testing
-) => {
+export const useIndicateRelatedPanelsSelector = (api: unknown) => {
   const parentApi = api && apiHasParentApi(api) ? api.parentApi : null;
   const parentApiLoaded =
     parentApi && apiCanIndicateRelatedChildren(parentApi) && apiPublishesViewMode(parentApi)
@@ -54,7 +51,7 @@ export const useIndicateRelatedPanelsSelector = (
       parentApiSubscription.current = sub;
     }
     return () => parentApiSubscription.current?.unsubscribe();
-  }, [parentApiLoaded, id, api, skipDebounce]);
+  }, [parentApiLoaded, id, api]);
 
   const canIndicateRelatedPanels = useMemo(
     () => Boolean(viewMode === 'edit' && id && apiCanIndicateRelatedSiblings(api)),
