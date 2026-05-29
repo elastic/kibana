@@ -150,19 +150,27 @@ describe('entityStoreConditionToESQL', () => {
       );
     });
 
-    it('renders gt/gte/lt/lte comparisons (default TO_STRING cast)', () => {
-      expect(entityStoreConditionToESQL({ field: 'count', gt: 5 })).toBe('TO_STRING(count) > 5');
-      expect(entityStoreConditionToESQL({ field: 'count', gte: 5 })).toBe('TO_STRING(count) >= 5');
-      expect(entityStoreConditionToESQL({ field: 'count', lt: 10 })).toBe('TO_STRING(count) < 10');
-      expect(entityStoreConditionToESQL({ field: 'count', lte: 10 })).toBe(
-        'TO_STRING(count) <= 10'
+    it('renders gt/gte/lt/lte comparisons using the declared field type', () => {
+      // host.disk.read.bytes is declared as long → TO_LONG cast, not TO_STRING
+      expect(entityStoreConditionToESQL({ field: 'host.disk.read.bytes', gt: 5 })).toBe(
+        'TO_LONG(host.disk.read.bytes) > 5'
+      );
+      expect(entityStoreConditionToESQL({ field: 'host.disk.read.bytes', gte: 5 })).toBe(
+        'TO_LONG(host.disk.read.bytes) >= 5'
+      );
+      expect(entityStoreConditionToESQL({ field: 'host.disk.read.bytes', lt: 10 })).toBe(
+        'TO_LONG(host.disk.read.bytes) < 10'
+      );
+      expect(entityStoreConditionToESQL({ field: 'host.disk.read.bytes', lte: 10 })).toBe(
+        'TO_LONG(host.disk.read.bytes) <= 10'
       );
     });
 
-    it('renders range as AND-chain (default TO_STRING cast)', () => {
-      expect(entityStoreConditionToESQL({ field: 'age', range: { gte: 18, lt: 65 } })).toBe(
-        'TO_STRING(age) >= 18 AND TO_STRING(age) < 65'
-      );
+    it('renders range as AND-chain using the declared field type', () => {
+      // host.disk.read.bytes is declared as long → TO_LONG cast, not TO_STRING
+      expect(
+        entityStoreConditionToESQL({ field: 'host.disk.read.bytes', range: { gte: 0, lt: 1000 } })
+      ).toBe('TO_LONG(host.disk.read.bytes) >= 0 AND TO_LONG(host.disk.read.bytes) < 1000');
     });
 
     it('renders always as TRUE', () => {
