@@ -4505,19 +4505,9 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
   oldPackagePolicy: PackagePolicy;
   packagePolicyUpdate: UpdatePackagePolicy;
 }) {
-  const { pkgInfo, oldPackagePolicy, packagePolicyUpdate } = opts;
+  const { oldPackagePolicy, packagePolicyUpdate } = opts;
 
-  if (pkgInfo.type !== 'input') return;
-
-  const { namespace, inputs } = packagePolicyUpdate;
-  if (namespace && namespace !== oldPackagePolicy.namespace) {
-    throw new PackagePolicyValidationError(
-      i18n.translate('xpack.fleet.updatePackagePolicy.namespaceCannotBeModified', {
-        defaultMessage:
-          'Package policy namespace cannot be modified for input only packages, please create a new package policy.',
-      })
-    );
-  }
+  const { inputs } = packagePolicyUpdate;
 
   if (inputs) {
     for (const input of inputs) {
@@ -4534,7 +4524,6 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             oldStream?.vars?.[DATASET_VAR_NAME] &&
             oldStream?.vars[DATASET_VAR_NAME]?.value !== stream?.vars?.[DATASET_VAR_NAME]?.value
           ) {
-            // seeing this error in dev? Package policy must be called with prepareInputPackagePolicyDataset function first in UI code
             appContextService
               .getLogger()
               .debug(
@@ -4546,7 +4535,7 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {
                 defaultMessage:
-                  'Package policy dataset cannot be modified for input only packages, please create a new package policy.',
+                  'Package policy dataset cannot be modified, please create a new package policy.',
               })
             );
           }
@@ -4557,7 +4546,6 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             oldStream?.vars[DATA_STREAM_TYPE_VAR_NAME]?.value !==
               stream?.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value
           ) {
-            // seeing this error in dev? Package policy must be called with prepareInputPackagePolicyDataset function first in UI code
             appContextService
               .getLogger()
               .debug(
@@ -4569,7 +4557,7 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.dataStreamTypeCannotBeModified', {
                 defaultMessage:
-                  'Package policy data stream type cannot be modified for input only packages, please create a new package policy.',
+                  'Package policy data stream type cannot be modified, please create a new package policy.',
               })
             );
           }

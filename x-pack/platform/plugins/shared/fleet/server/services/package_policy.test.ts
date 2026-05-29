@@ -13468,26 +13468,6 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
     ).not.toThrow();
   });
 
-  it('should throw if namespace is modified', () => {
-    const oldPackagePolicy = createInputPkgPolicy({
-      namespace: 'default',
-      dataset: 'custom_logs.logs',
-    });
-    const newPackagePolicy = createInputPkgPolicy({
-      namespace: 'new-namespace',
-      dataset: 'custom_logs.logs',
-    });
-    expect(() =>
-      _validateRestrictedFieldsNotModifiedOrThrow({
-        oldPackagePolicy,
-        packagePolicyUpdate: newPackagePolicy,
-        pkgInfo,
-      })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Package policy namespace cannot be modified for input only packages, please create a new package policy."`
-    );
-  });
-
   it('should throw if dataset is modified', () => {
     const oldPackagePolicy = createInputPkgPolicy({
       namespace: 'default',
@@ -13504,11 +13484,11 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
         pkgInfo,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Package policy dataset cannot be modified for input only packages, please create a new package policy."`
+      `"Package policy dataset cannot be modified, please create a new package policy."`
     );
   });
 
-  it('should not throw if dataset is modified but package is integration package', () => {
+  it('should throw if dataset is modified for integration package', () => {
     const oldPackagePolicy = createInputPkgPolicy({
       namespace: 'default',
       dataset: 'custom_logs.logs',
@@ -13521,6 +13501,36 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
       _validateRestrictedFieldsNotModifiedOrThrow({
         oldPackagePolicy,
         packagePolicyUpdate: newPackagePolicy,
+        pkgInfo: { ...pkgInfo, type: 'integration' },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Package policy dataset cannot be modified, please create a new package policy."`
+    );
+  });
+
+  it('should not throw if stream has no dataset var', () => {
+    const oldPackagePolicy = {
+      ...createInputPkgPolicy({ namespace: 'default', dataset: 'custom_logs.logs' }),
+      inputs: [
+        {
+          type: 'logfile',
+          policy_template: 'logs',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'custom_logs.logs' },
+              vars: {},
+              id: 'logfile-custom_logs.logs-1',
+            },
+          ],
+        },
+      ],
+    };
+    expect(() =>
+      _validateRestrictedFieldsNotModifiedOrThrow({
+        oldPackagePolicy,
+        packagePolicyUpdate: oldPackagePolicy,
         pkgInfo: { ...pkgInfo, type: 'integration' },
       })
     ).not.toThrow();
@@ -13556,7 +13566,7 @@ describe('_validateRestrictedFieldsNotModifiedOrThrow()', () => {
         pkgInfo,
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Package policy data stream type cannot be modified for input only packages, please create a new package policy."`
+      `"Package policy data stream type cannot be modified, please create a new package policy."`
     );
   });
 
