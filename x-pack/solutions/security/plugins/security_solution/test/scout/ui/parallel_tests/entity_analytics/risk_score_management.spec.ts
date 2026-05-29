@@ -22,6 +22,8 @@ spaceTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+      await apiServices.entityAnalytics.uninstallEntityStoreV2();
+      await apiServices.entityAnalytics.setEntityStoreV2Enabled(false);
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
       await apiServices.detectionRule.deleteAll();
 
@@ -34,6 +36,7 @@ spaceTest.describe(
     });
 
     spaceTest.afterEach(async ({ apiServices }) => {
+      await apiServices.entityAnalytics.uninstallEntityStoreV2();
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
       await apiServices.detectionRule.deleteAll();
     });

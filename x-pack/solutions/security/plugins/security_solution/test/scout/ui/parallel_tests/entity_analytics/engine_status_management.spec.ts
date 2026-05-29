@@ -13,11 +13,13 @@ spaceTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
+      await apiServices.entityAnalytics.uninstallEntityStoreV2();
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
       await browserAuth.loginAsAdmin();
     });
 
     spaceTest.afterEach(async ({ apiServices }) => {
+      await apiServices.entityAnalytics.uninstallEntityStoreV2();
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
     });
 
