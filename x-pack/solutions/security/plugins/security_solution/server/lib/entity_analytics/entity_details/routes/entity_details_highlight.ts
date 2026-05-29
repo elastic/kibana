@@ -32,8 +32,8 @@ export const entityDetailsHighlightsRoute = ({
 }: EntityAnalyticsRoutesDeps) => {
   router.versioned
     .post({
-      access: 'internal',
-      path: ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL,
+      access: 'public',
+      path: `/api/entity_details/highlights`, // This is the public route that the UI will call
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -42,7 +42,7 @@ export const entityDetailsHighlightsRoute = ({
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(EntityDetailsHighlightsRequestBody),

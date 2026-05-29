@@ -252,6 +252,11 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsMlJobBehaviorMaintainer: false,
 
   /**
+   * Enables the enriched entity API endpoint.
+   */
+  enrichedEntityApiEnabled: false,
+
+  /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */

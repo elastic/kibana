@@ -10,7 +10,7 @@ import type { EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { ANOMALY_SEARCH_PAGE_SIZE, MAX_ALLOWED_ITERS, ML_AD_LOOKBACK } from './constants';
-import { getSecurityMlJobIds } from './get_security_ml_job_ids';
+import { getSecurityMlJobs } from './get_security_ml_job_ids';
 import type { AnomalyHit } from './types';
 
 interface RawAnomalyRecord {
@@ -34,6 +34,7 @@ interface StreamAnomaliesForEntityBatchOpts {
   anomalyThreshold: number;
   entityType: EntityType;
   entityIds: string[];
+  jobIds: Set<string>;
   logger: Logger;
   ml: MlPluginSetup;
   soClient: SavedObjectsClientContract;
@@ -43,6 +44,7 @@ export async function* streamAnomaliesForEntityBatch({
   anomalyThreshold,
   entityType,
   entityIds,
+  jobIds,
   logger,
   ml,
   soClient,
@@ -50,7 +52,6 @@ export async function* streamAnomaliesForEntityBatch({
   if (entityIds.length === 0) return;
 
   const mlSystem = ml.mlSystemProvider({} as KibanaRequest, soClient);
-  const jobIds = await getSecurityMlJobIds({ ml, soClient });
   let searchAfter: unknown[] | undefined;
   let iters = 0;
 
@@ -95,7 +96,7 @@ export async function* streamAnomaliesForEntityBatch({
             hit._source?.typical?.[0] != null &&
             hit._source?.detector_index != null &&
             hit._source?.job_id != null &&
-            jobIds.includes(hit._source.job_id) &&
+            jobIds.has(hit._source.job_id) &&
             (hit.fields?.entity_id as string[] | undefined)?.[0] != null
         )
         .map((hit) => {
@@ -147,6 +148,11 @@ export interface EntityAnomalies {
   };
 }
 
+export interface FetchAnomaliesResult {
+  anomaliesByEntity: Map<string, EntityAnomalies>;
+  jobNameById: Map<string, string>;
+}
+
 /**
  * Fetches all anomaly records for a batch of entity IDs and returns them grouped by entity and job.
  *
@@ -161,21 +167,26 @@ export interface EntityAnomalies {
  *
  * Anomalies are sorted in ascending order by timestamp,
  */
-export async function fetchAnomaliesForEntityBatch(
-  opts: StreamAnomaliesForEntityBatchOpts
-): Promise<Map<string, EntityAnomalies>> {
-  const result = new Map<string, EntityAnomalies>();
+type FetchAnomaliesForEntityBatchOpts = Omit<StreamAnomaliesForEntityBatchOpts, 'jobIds'>;
 
-  for await (const page of streamAnomaliesForEntityBatch(opts)) {
+export async function fetchAnomaliesForEntityBatch(
+  opts: FetchAnomaliesForEntityBatchOpts
+): Promise<FetchAnomaliesResult> {
+  const securityJobs = await getSecurityMlJobs({ ml: opts.ml, soClient: opts.soClient });
+  const jobNameById = new Map(securityJobs.map((j) => [j.id, j.name]));
+  const jobIds = new Set(securityJobs.map((j) => j.id));
+  const anomaliesByEntity = new Map<string, EntityAnomalies>();
+
+  for await (const page of streamAnomaliesForEntityBatch({ ...opts, jobIds })) {
     for (const anomaly of page) {
-      const byJob = result.get(anomaly.entityId) ?? {};
+      const byJob = anomaliesByEntity.get(anomaly.entityId) ?? {};
       byJob[anomaly.jobId] = {
         anomalies: [...(byJob[anomaly.jobId]?.anomalies ?? []), anomaly],
         baselineBehaviors: byJob[anomaly.jobId]?.baselineBehaviors ?? [],
       };
-      result.set(anomaly.entityId, byJob);
+      anomaliesByEntity.set(anomaly.entityId, byJob);
     }
   }
 
-  return result;
+  return { anomaliesByEntity, jobNameById };
 }

@@ -39,10 +39,10 @@ import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_clien
 import type { EntityDetailsHighlightsRequestBody } from '../../../../common/api/entity_analytics/entity_details/highlights.gen';
 import { getThreshold } from '../../../../common/utils/ml';
 import { isSecurityJob } from '../../../../common/machine_learning/is_security_job';
-import {
+import type {
   EntityType,
   EntityTypeToIdentifierField,
-  type EntityIdentifierFields,
+  EntityIdentifierFields,
 } from '../../../../common/entity_analytics/types';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
@@ -128,6 +128,9 @@ export const entityDetailsHighlightsServiceFactory = ({
       pagination: { querySize: 1, cursorStart: 0 },
     });
     latestRiskScore = riskScore[0];
+    console.log(
+      `Latest risk score for ${entityType} ${entityIdentifier}: ${JSON.stringify(latestRiskScore)}`
+    );
 
     const anonymizedRiskScore = latestRiskScore
       ? [
@@ -145,6 +148,12 @@ export const entityDetailsHighlightsServiceFactory = ({
           },
         ]
       : [];
+
+    console.log(
+      `Anonymized risk score for ${entityType} ${entityIdentifier}: ${JSON.stringify(
+        anonymizedRiskScore
+      )}`
+    );
 
     return anonymizedRiskScore;
   };
@@ -195,6 +204,11 @@ export const entityDetailsHighlightsServiceFactory = ({
   };
 
   const getAssetCriticalityFromEntityStore = async (entityFields?: SearchHit['fields']) => {
+    console.log(
+      `Asset criticality - entity fields from entity store: ${JSON.stringify(
+        getRawDataOrDefault(omit(entityFields, '_id'))
+      )}`
+    );
     const assetCriticalityAnonymized = transformRawDataToRecord({
       anonymizationFields,
       currentReplacements: localReplacements,
@@ -202,6 +216,10 @@ export const entityDetailsHighlightsServiceFactory = ({
       onNewReplacements: localOnNewReplacements,
       rawData: getRawDataOrDefault(omit(entityFields, '_id')), // We need to exclude _id because asset criticality id contains user data
     });
+
+    console.log(
+      `Asset criticality - anonymized data: ${JSON.stringify(assetCriticalityAnonymized)}`
+    );
 
     return assetCriticalityAnonymized ? [assetCriticalityAnonymized] : [];
   };
@@ -222,7 +240,7 @@ export const entityDetailsHighlightsServiceFactory = ({
       const jobs: MlSummaryJob[] = await ml.jobServiceProvider(request, soClient).jobsSummary();
       const securityJobIds = jobs.filter(isSecurityJob).map((j) => j.id);
       const { getAnomaliesTableData } = ml.resultsServiceProvider(request, soClient);
-      const anomalyScore = await uiSettingsClient.get<number>(DEFAULT_ANOMALY_SCORE);
+      const anomalyScore = 0; // await uiSettingsClient.get<number>(DEFAULT_ANOMALY_SCORE);
 
       const anomaliesData = await getAnomaliesTableData(
         securityJobIds,
@@ -237,6 +255,8 @@ export const entityDetailsHighlightsServiceFactory = ({
         10,
         influencersFilterQuery
       );
+
+      console.log(`Anomalies data: ${JSON.stringify(anomaliesData.anomalies, null, 2)}`);
 
       const jobNameById = jobs.reduce<Record<string, { name: string; description: string }>>(
         (acc, job) => {
@@ -257,6 +277,11 @@ export const entityDetailsHighlightsServiceFactory = ({
           'entityValue',
         ]);
 
+        console.log(`formatted anomaly before anonymization: ${JSON.stringify(formattedAnomaly)}`);
+        console.log(
+          `raw data for anonymization: ${JSON.stringify(getRawDataOrDefault(formattedAnomaly))}`
+        );
+
         // the only ECS fields inside anomalies are entities data (user, host, ip)
         const relatedEntities = getAnonymizedData({
           anonymizationFields,
@@ -265,6 +290,8 @@ export const entityDetailsHighlightsServiceFactory = ({
           getAnonymizedValue,
           getAnonymizedValues,
         });
+
+        console.log(`Related entities anonymized: ${JSON.stringify(relatedEntities, null, 2)}`);
         localOnNewReplacements(relatedEntities.replacements);
 
         return flattenObject({
@@ -274,6 +301,8 @@ export const entityDetailsHighlightsServiceFactory = ({
           entities: relatedEntities.anonymizedData,
         });
       });
+
+      console.log(`Anomalies anonymized: ${JSON.stringify(anomaliesAnonymized, null, 2)}`);
     }
     return anomaliesAnonymized;
   };
@@ -286,12 +315,12 @@ export const entityDetailsHighlightsServiceFactory = ({
       };
     }
   ) => {
-    if (entityType !== EntityType.host) {
-      return {
-        vulnerabilitiesAnonymized: [],
-        vulnerabilitiesTotal: getEmptyVulnerabilitiesTotal(),
-      };
-    }
+    // if (entityType !== EntityType.host) {
+    //   return {
+    //     vulnerabilitiesAnonymized: [],
+    //     vulnerabilitiesTotal: getEmptyVulnerabilitiesTotal(),
+    //   };
+    // }
 
     const vulnerabilitiesQuery = getVulnerabilitiesQuery({
       query,
@@ -299,6 +328,10 @@ export const entityDetailsHighlightsServiceFactory = ({
       enabled: true,
       pageSize: 1,
     });
+
+    console.log(
+      `Vulnerabilities query for ${entityType}: ${JSON.stringify(vulnerabilitiesQuery, null, 2)}`
+    );
     const vulnerabilities = await esClient.search<
       unknown,
       { count: { buckets: AggregationBucket[] } }
@@ -390,6 +423,9 @@ export const entityDetailsHighlightsServiceFactory = ({
     const anonymizedRiskScore = await getRiskScoreData(entityType, entityIdentifier, false);
 
     const entityResult = await getEntityFromEntityStore(entityIdentifier);
+    console.log(
+      `Entity store result for ${entityType} ${entityIdentifier}: ${JSON.stringify(entityResult)}`
+    );
     if (!entityResult) {
       return {
         riskScore: anonymizedRiskScore ?? undefined,

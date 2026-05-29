@@ -29,8 +29,13 @@ jest.mock('./constants', () => ({
 }));
 
 jest.mock('./get_security_ml_job_ids', () => ({
-  getSecurityMlJobIds: jest.fn().mockResolvedValue(['security-job-1', 'security-job-2']),
+  getSecurityMlJobs: jest.fn().mockResolvedValue([
+    { id: 'security-job-1', name: 'Security Job 1' },
+    { id: 'security-job-2', name: 'Security Job 2' },
+  ]),
 }));
+
+const securityJobIds = new Set(['security-job-1', 'security-job-2']);
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
@@ -68,6 +73,7 @@ describe('streamAnomaliesForEntityBatch', () => {
         anomalyThreshold: 50,
         entityType: 'user',
         entityIds: [],
+        jobIds: securityJobIds,
         logger,
         ml: mockMl,
         soClient,
@@ -86,6 +92,7 @@ describe('streamAnomaliesForEntityBatch', () => {
         anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice', 'user:bob'],
+        jobIds: securityJobIds,
         logger,
         ml: mockMl,
         soClient,
@@ -137,6 +144,7 @@ describe('streamAnomaliesForEntityBatch', () => {
         anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice'],
+        jobIds: securityJobIds,
         logger,
         ml: mockMl,
         soClient,
@@ -199,6 +207,7 @@ describe('streamAnomaliesForEntityBatch', () => {
         anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice'],
+        jobIds: securityJobIds,
         logger,
         ml: mockMl,
         soClient,
@@ -216,6 +225,7 @@ describe('streamAnomaliesForEntityBatch', () => {
         anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice'],
+        jobIds: securityJobIds,
         logger,
         ml: mockMl,
         soClient,
@@ -235,6 +245,7 @@ describe('streamAnomaliesForEntityBatch', () => {
         anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice'],
+        jobIds: securityJobIds,
         logger,
         ml: mockMl,
         soClient,
@@ -252,6 +263,7 @@ describe('streamAnomaliesForEntityBatch', () => {
         anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice'],
+        jobIds: securityJobIds,
         logger,
         ml: mockMl,
         soClient,
@@ -279,6 +291,7 @@ describe('streamAnomaliesForEntityBatch', () => {
         anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice', 'user:bob', 'user:carol'],
+        jobIds: securityJobIds,
         logger,
         ml: mockMl,
         soClient,
@@ -310,6 +323,7 @@ describe('streamAnomaliesForEntityBatch', () => {
         anomalyThreshold: 50,
         entityType: 'user',
         entityIds: ['user:alice', 'user:bob'],
+        jobIds: securityJobIds,
         logger,
         ml: mockMl,
         soClient,
@@ -330,6 +344,7 @@ describe('streamAnomaliesForEntityBatch', () => {
         anomalyThreshold: 50,
         entityType: 'host',
         entityIds: ['host:web-01'],
+        jobIds: securityJobIds,
         logger,
         ml: mockMl,
         soClient,
@@ -345,7 +360,7 @@ describe('streamAnomaliesForEntityBatch', () => {
 
 describe('fetchAnomaliesForEntityBatch', () => {
   it('returns an empty map when entityIds is empty', async () => {
-    const result = await fetchAnomaliesForEntityBatch({
+    const { anomaliesByEntity: result } = await fetchAnomaliesForEntityBatch({
       anomalyThreshold: 50,
       entityType: 'user',
       entityIds: [],
@@ -361,7 +376,7 @@ describe('fetchAnomaliesForEntityBatch', () => {
   it('returns an empty map when there are no matching anomalies', async () => {
     mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([]));
 
-    const result = await fetchAnomaliesForEntityBatch({
+    const { anomaliesByEntity: result } = await fetchAnomaliesForEntityBatch({
       anomalyThreshold: 50,
       entityType: 'user',
       entityIds: ['user:alice'],
@@ -381,7 +396,7 @@ describe('fetchAnomaliesForEntityBatch', () => {
       ])
     );
 
-    const result = await fetchAnomaliesForEntityBatch({
+    const { anomaliesByEntity: result } = await fetchAnomaliesForEntityBatch({
       anomalyThreshold: 50,
       entityType: 'user',
       entityIds: ['user:alice'],
@@ -451,7 +466,7 @@ describe('fetchAnomaliesForEntityBatch', () => {
       ])
     );
 
-    const result = await fetchAnomaliesForEntityBatch({
+    const { anomaliesByEntity: result } = await fetchAnomaliesForEntityBatch({
       anomalyThreshold: 50,
       entityType: 'user',
       entityIds: ['user:alice'],
@@ -514,7 +529,7 @@ describe('fetchAnomaliesForEntityBatch', () => {
       .mockResolvedValueOnce(makeResponse(page1))
       .mockResolvedValueOnce(makeResponse(page2));
 
-    const result = await fetchAnomaliesForEntityBatch({
+    const { anomaliesByEntity: result } = await fetchAnomaliesForEntityBatch({
       anomalyThreshold: 50,
       entityType: 'user',
       entityIds: ['user:alice', 'user:bob'],
@@ -560,7 +575,7 @@ describe('fetchAnomaliesForEntityBatch', () => {
       .mockResolvedValueOnce(makeResponse(page1))
       .mockResolvedValueOnce(makeResponse(page2));
 
-    const result = await fetchAnomaliesForEntityBatch({
+    const { anomaliesByEntity: result } = await fetchAnomaliesForEntityBatch({
       anomalyThreshold: 50,
       entityType: 'user',
       entityIds: ['user:alice'],
