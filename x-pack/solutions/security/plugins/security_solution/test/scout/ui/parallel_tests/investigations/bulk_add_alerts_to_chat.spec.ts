@@ -80,40 +80,6 @@ spaceTest.describe(
       async ({ pageObjects, llmProxy }) => {
         const { alertsTablePage, agentBuilderPage } = pageObjects;
 
-        // Set up LLM mock interceptors before triggering the chat so no call goes unanswered.
-        // The agent builder makes three sequential calls: title generation, handover, and final answer.
-        void llmProxy
-          .intercept({
-            name: 'set_title',
-            when: (body) => {
-              const sys = body.messages.find((m) => m.role === 'system');
-              return String(sys?.content ?? '').includes('You are a title-generation utility');
-            },
-            responseMock: createToolCallMessage('set_title', { title: 'Alert triage' }),
-          })
-          .completeAfterIntercept();
-
-        void llmProxy
-          .intercept({
-            name: 'handover-to-answer',
-            when: (body) => {
-              const sys = body.messages.find((m) => m.role === 'system');
-              return String(sys?.content ?? '').includes(
-                'This response will serve as a handover note for the answering agent'
-              );
-            },
-            responseMock: 'ready to answer',
-          })
-          .completeAfterIntercept();
-
-        void llmProxy
-          .intercept({
-            name: 'final-answer',
-            when: () => true,
-            responseMock: 'Here is the alert triage summary.',
-          })
-          .completeAfterIntercept();
-
         await alertsTablePage.navigate();
 
         // Wait for the first rule's alert to appear — this proves Sourcerer has initialized
@@ -143,6 +109,41 @@ spaceTest.describe(
         );
 
         await spaceTest.step('send message and verify LLM received multiple alerts', async () => {
+          // Register interceptors here — immediately before submit — so the 30s proxy
+          // timeout doesn't expire during the earlier waitForRuleAlert / waitForAttachmentPillsRow
+          // steps. autoSendInitialMessage: false guarantees no LLM call fires before this point.
+          void llmProxy
+            .intercept({
+              name: 'set_title',
+              when: (body) => {
+                const sys = body.messages.find((m) => m.role === 'system');
+                return String(sys?.content ?? '').includes('You are a title-generation utility');
+              },
+              responseMock: createToolCallMessage('set_title', { title: 'Alert triage' }),
+            })
+            .completeAfterIntercept();
+
+          void llmProxy
+            .intercept({
+              name: 'handover-to-answer',
+              when: (body) => {
+                const sys = body.messages.find((m) => m.role === 'system');
+                return String(sys?.content ?? '').includes(
+                  'This response will serve as a handover note for the answering agent'
+                );
+              },
+              responseMock: 'ready to answer',
+            })
+            .completeAfterIntercept();
+
+          void llmProxy
+            .intercept({
+              name: 'final-answer',
+              when: () => true,
+              responseMock: 'Here is the alert triage summary.',
+            })
+            .completeAfterIntercept();
+
           await agentBuilderPage.submitButton.click();
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
