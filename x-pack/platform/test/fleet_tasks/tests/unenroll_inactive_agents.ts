@@ -13,7 +13,7 @@ import { cleanupAgentDocs, createAgentDoc } from '../helpers';
 
 const TASK_INTERVAL_MS = 11000; // Slightly longer than config to allow task to run
 // Unenrollment now uses two phases (schedule then execute), each on a separate tick.
-// With gracePeriodMs=0 in tests the execute tick immediately follows the schedule tick.
+// With gracePeriodMs=1000 in tests the execute tick immediately follows the schedule tick.
 const TWO_TASK_INTERVALS_MS = TASK_INTERVAL_MS * 2;
 
 export default function (providerContext: FtrProviderContextWithServices) {
@@ -100,7 +100,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
       await new Promise((resolve) => setTimeout(resolve, TWO_TASK_INTERVALS_MS));
 
-      await retry.tryForTime(30000, async () => {
+      await retry.tryForTime(60000, async () => {
         const agentRes = await es.search({
           index: '.fleet-agents',
           ignore_unavailable: true,

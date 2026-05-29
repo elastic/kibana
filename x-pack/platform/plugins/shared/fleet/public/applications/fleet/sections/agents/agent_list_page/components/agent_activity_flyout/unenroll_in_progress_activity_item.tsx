@@ -80,11 +80,9 @@ export const UnenrollInProgressActivityItem: React.FunctionComponent<{
                 {isScheduled ? (
                   <FormattedMessage
                     id="xpack.fleet.agentActivityFlyout.unenrollScheduledTitle"
-                    defaultMessage="{nbAgents} {agents} scheduled to be unenrolled"
+                    defaultMessage="{nbAgents, plural, one {# agent scheduled to be unenrolled} other {# agents scheduled to be unenrolled}}"
                     values={{
                       nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
-                      agents:
-                        action.nbAgentsActioned - action.nbAgentsAck === 1 ? 'agent' : 'agents',
                     }}
                   />
                 ) : (
