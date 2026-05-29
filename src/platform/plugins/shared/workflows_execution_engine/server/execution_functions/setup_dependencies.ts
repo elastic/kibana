@@ -199,5 +199,6 @@ export async function setupDependencies(
     workflowExecutionRepository,
     esClient,
     telemetryClient,
+    workflowExecutionCursor,
   };
 }

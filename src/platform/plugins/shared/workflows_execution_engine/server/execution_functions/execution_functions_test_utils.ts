@@ -106,7 +106,6 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
   taskAbortController: AbortController;
 }) => ({
   workflowRuntime: options.workflowRuntime,
-  workflowExecutionCursor: options.workflowRuntime.executionCursor,
   stepExecutionRuntimeFactory: {},
   workflowExecutionState: expect.any(Object),
   workflowExecutionRepository: options.workflowExecutionRepository,

@@ -14,6 +14,7 @@ import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
+import type { WorkflowExecutionCursor } from './workflow_execution_cursor';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
@@ -30,6 +31,7 @@ interface StepExecutionRuntimeInit {
   stepExecutionId: string;
   node: GraphNodeUnion;
   stackFrames: StackFrame[];
+  workflowExecutionCursor: WorkflowExecutionCursor;
 }
 
 /**
@@ -55,6 +57,7 @@ export class StepExecutionRuntime {
   private workflowExecutionState: WorkflowExecutionState;
   private stepIoService: StepIoService;
   private workflowGraph: WorkflowGraph;
+  private workflowExecutionCursor: WorkflowExecutionCursor;
   private stackFrames: StackFrame[];
 
   public contextManager: WorkflowContextManager;
@@ -106,6 +109,7 @@ export class StepExecutionRuntime {
     this.node = stepExecutionRuntimeInit.node;
     this.stepExecutionId = stepExecutionRuntimeInit.stepExecutionId;
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
+    this.workflowExecutionCursor = stepExecutionRuntimeInit.workflowExecutionCursor;
   }
 
   public get error(): ExecutionError | undefined {
@@ -213,7 +217,6 @@ export class StepExecutionRuntime {
    */
   public failStep(error: Error): void {
     const executionError = ExecutionError.fromError(error);
-    const serializedError = executionError.toSerializableObject();
 
     this.workflowExecutionState.setLastFailedStepContext({
       stepId: this.node.stepId,
@@ -227,17 +230,14 @@ export class StepExecutionRuntime {
       ? new Date(finishedAt).getTime() - new Date(startedStepExecution.startedAt).getTime()
       : undefined;
 
-    this.workflowExecutionState.updateWorkflowExecution({
-      error: serializedError,
-    });
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       stepId: this.node.stepId,
       stepType: this.node.stepType,
       status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
+      error: executionError.toSerializableObject(),
       finishedAt,
-      error: serializedError,
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
     // `null` is the FAILED-step sentinel — distinct from `undefined`
