@@ -71,8 +71,8 @@ const baseParams = {
   request: {} as never,
   spaceId: 'default',
   workflowConfig: {
+    alert_retrieval_mode: 'custom_query' as const,
     alert_retrieval_workflow_ids: [],
-    default_alert_retrieval_mode: 'custom_query' as const,
     validation_workflow_id: 'default',
   },
   workflowsManagementApi: {} as never,
@@ -120,7 +120,7 @@ describe('runRetrievalStep', () => {
     expect(mockCreateLegacyRetrievalPromise).toHaveBeenCalledWith(
       expect.objectContaining({
         alertsIndexPattern: '.alerts',
-        defaultAlertRetrievalMode: 'custom_query' as const,
+        alertRetrievalMode: 'custom_query' as const,
         defaultAlertRetrievalWorkflowId: 'legacy',
       })
     );
@@ -147,7 +147,7 @@ describe('runRetrievalStep', () => {
       ...baseParams,
       workflowConfig: {
         ...baseParams.workflowConfig,
-        default_alert_retrieval_mode: 'disabled' as const,
+        alert_retrieval_mode: 'custom_only' as const,
       },
     });
 
@@ -180,26 +180,6 @@ describe('runRetrievalStep', () => {
 
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining('Combined alert retrieval completed:')
-    );
-  });
-
-  it('passes provided_context to createLegacyRetrievalPromise when mode is provided', async () => {
-    const providedContext = ['alert context 1', 'alert context 2'];
-
-    await runRetrievalStep({
-      ...baseParams,
-      workflowConfig: {
-        ...baseParams.workflowConfig,
-        default_alert_retrieval_mode: 'provided' as const,
-        provided_context: providedContext,
-      },
-    });
-
-    expect(mockCreateLegacyRetrievalPromise).toHaveBeenCalledWith(
-      expect.objectContaining({
-        defaultAlertRetrievalMode: 'provided',
-        providedContext,
-      })
     );
   });
 });

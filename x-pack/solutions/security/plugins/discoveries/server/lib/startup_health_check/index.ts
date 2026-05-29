@@ -8,9 +8,9 @@
 import type { Logger } from '@kbn/core/server';
 
 export interface StartupHealthCheckParams {
-  failedStepIds: string[];
+  expectedWorkflowIds: readonly string[];
+  failedWorkflowIds: string[];
   logger: Logger;
-  registeredStepCount: number;
   workflowsManagementApiAvailable: boolean;
 }
 
@@ -21,23 +21,28 @@ export interface StartupHealthCheckParams {
  * Logs INFO when all checks pass, WARN when any issues are detected.
  */
 export const logStartupHealthCheck = ({
-  failedStepIds,
+  expectedWorkflowIds,
+  failedWorkflowIds,
   logger,
-  registeredStepCount,
   workflowsManagementApiAvailable,
 }: StartupHealthCheckParams): void => {
+  const installedCount = expectedWorkflowIds.length - failedWorkflowIds.length;
+  const totalCount = expectedWorkflowIds.length;
+
   const issues: string[] = [
-    ...(failedStepIds.length > 0
-      ? [`${failedStepIds.length} workflow step(s) failed to register: ${failedStepIds.join(', ')}`]
+    ...(failedWorkflowIds.length > 0
+      ? [
+          `${failedWorkflowIds.length} managed workflow(s) not installed: ${failedWorkflowIds.join(
+            ', '
+          )}`,
+        ]
       : []),
     ...(!workflowsManagementApiAvailable ? ['WorkflowsManagement API is not available'] : []),
   ];
 
   if (issues.length === 0) {
-    logger.info(
-      `Startup health check passed: ${registeredStepCount} workflow step(s) registered, WorkflowsManagement API available`
-    );
+    logger.info(`AD 2.0 managed workflows installed: ${installedCount}/${totalCount}`);
   } else {
-    logger.warn(`Startup health check found issues: ${issues.join('; ')}`);
+    logger.warn(`AD 2.0 managed workflows: ${issues.join('; ')}`);
   }
 };

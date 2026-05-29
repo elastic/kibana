@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALERTS_INDEX_PATTERN_ERROR = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.errorAlertsIndexPattern',
-  {
-    defaultMessage: 'Alerts index pattern is required to generate attack discoveries',
-  }
-);
-
 export const CONNECTOR_ERROR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.errorConnector',
   {
