@@ -18,6 +18,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getEbtProps } from '@kbn/ebt-click';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { labels } from '../../../utils/i18n';
 
 export interface LibraryToggleRowProps {
@@ -31,6 +33,7 @@ export interface LibraryToggleRowProps {
   disabledBadgeLabel?: string;
   disabledTooltipTitle?: string;
   disabledTooltipBody?: string;
+  ebtEntityType?: string;
 }
 
 const EUI_TEXT_STYLES = css`
@@ -50,6 +53,7 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
   disabledBadgeLabel,
   disabledTooltipTitle,
   disabledTooltipBody,
+  ebtEntityType,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -100,7 +104,15 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
               ) : undefined
             }
           >
-            <EuiBadge tabIndex={0} color="hollow">
+            <EuiBadge
+              tabIndex={0}
+              color="hollow"
+              aria-label={
+                [disabledBadgeLabel, disabledTooltipTitle, disabledTooltipBody]
+                  .filter(Boolean)
+                  .join('. ') || undefined
+              }
+            >
               {disabledBadgeLabel ?? 'Auto-included'}
             </EuiBadge>
           </EuiToolTip>
@@ -109,7 +121,18 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
             label={name}
             showLabel={false}
             checked={isActive}
-            onChange={(e) => onToggle(e.target.checked)}
+            onChange={(e) => {
+              onToggle(e.target.checked);
+            }}
+            {...(ebtEntityType
+              ? getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: isActive
+                    ? AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_REMOVE
+                    : AGENT_BUILDER_UI_EBT.action.agentCustomization.ENTITY_ADD_FROM_LIBRARY,
+                  detail: ebtEntityType,
+                })
+              : {})}
           />
         )}
       </EuiFlexItem>

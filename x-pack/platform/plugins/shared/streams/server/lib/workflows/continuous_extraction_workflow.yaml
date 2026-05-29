@@ -3,8 +3,8 @@
 # Runs on a schedule and orchestrates feature identification across managed streams:
 #   1. Fetches eligible streams from the _eligible API endpoint (respects
 #      interval, exclusions, concurrency).
-#   2. Schedules ALL candidate streams, confirming each reaches in_progress
-#      before moving to the next.
+#   2. Schedules ALL candidate streams via the onboarding route (with skipQueries),
+#      confirming each reaches in_progress before moving to the next.
 #   3. Polls each stream sequentially until it reaches a terminal state
 #      (completed/failed), then captures the result.
 #
@@ -19,6 +19,9 @@ tags:
   - streams
   - knowledge-indicators
   - continuous-extraction
+consts:
+  maxScheduledStreams: 5
+  lookbackHours: 24
 settings:
   # Timeout is 1 minute shorter than the schedule to avoid overlapping runs.
   timeout: "9m"
@@ -54,7 +57,7 @@ steps:
     with:
       method: GET
       path: |-
-        /internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours }}
+        /internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams | default: consts.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours | default: consts.lookbackHours }}
         {%- if inputs.extractionIntervalHours %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}
         {%- if inputs.excludedStreamPatterns %}&excludedStreamPatterns={{ inputs.excludedStreamPatterns }}{% endif -%}
       headers:
@@ -77,17 +80,21 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
-          - name: schedule_task
+          # TODO: migrate this workflow to managed workflows and invoke the
+          # onboarding workflow directly instead of going through the HTTP API.
+          - name: schedule_onboarding
             type: kibana.request
             with:
               method: POST
-              path: "/internal/streams/{{ foreach.item.streamName }}/features/_task"
+              path: "/internal/streams/{{ foreach.item.streamName }}/onboarding/_execute"
               headers:
                 x-elastic-internal-origin: "kibana"
               body:
                 action: "schedule"
                 from: "${{ steps.get_eligible.output.timeRange.from }}"
                 to: "${{ steps.get_eligible.output.timeRange.to }}"
+                steps:
+                  - "features_identification"
             on-failure:
               retry:
                 max-attempts: 3
@@ -95,18 +102,18 @@ steps:
                 strategy: exponential
           - name: await_in_progress
             type: while
-            condition: "steps.verify_status.output.status:not_started"
+            condition: "${{ steps.verify_status.output.status == 'not_started' }}"
             steps:
               - name: verify_status
                 type: kibana.request
                 with:
                   method: GET
-                  path: "/internal/streams/{{ foreach.item.streamName }}/features/_status"
+                  path: "/internal/streams/{{ foreach.item.streamName }}/onboarding/_status"
                   headers:
                     x-elastic-internal-origin: "kibana"
               - name: if_not_started_delay
                 type: if
-                condition: "steps.verify_status.output.status:not_started"
+                condition: "${{ steps.verify_status.output.status == 'not_started' }}"
                 steps:
                   - name: startup_delay
                     type: wait
@@ -120,15 +127,15 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
-          - name: poll_task
+          - name: poll_onboarding
             type: while
-            condition: "steps.check_status.output.status:in_progress"
+            condition: "${{ steps.check_status.output.status == 'in_progress' }}"
             steps:
               - name: check_status
                 type: kibana.request
                 with:
                   method: GET
-                  path: "/internal/streams/{{ foreach.item.streamName }}/features/_status"
+                  path: "/internal/streams/{{ foreach.item.streamName }}/onboarding/_status"
                   headers:
                     x-elastic-internal-origin: "kibana"
                 on-failure:
@@ -136,22 +143,23 @@ steps:
                     max-attempts: 3
                     delay: "5s"
                     strategy: exponential
-              # Only wait if the task is still running; skip the delay on terminal status.
+              # Only wait if onboarding is still running; skip the delay on terminal status.
               - name: if_poll_delay
                 type: if
-                condition: "steps.check_status.output.status:in_progress"
+                condition: "${{ steps.check_status.output.status == 'in_progress' }}"
                 steps:
                   - name: poll_delay
                     type: wait
                     with:
                       duration: "5s"
-          # Capture the final task result for this stream.
-          - name: task_result
+          # Capture the final onboarding result for this stream.
+          - name: onboarding_result
             type: data.set
             with:
               streamName: "{{ foreach.item.streamName }}"
               status: "${{ steps.check_status.output.status }}"
-              durationMs: "${{ steps.check_status.output.durationMs }}"
-              features: "${{ steps.check_status.output.features }}"
-              iterations: "${{ steps.check_status.output.iterations }}"
-              totalTokensUsed: "${{ steps.check_status.output.totalTokensUsed }}"
+              features:
+                skipped: "${{ steps.check_status.output.features.skipped }}"
+                discovered: "${{ steps.check_status.output.features.discovered }}"
+                connectorUsed: "${{ steps.check_status.output.features.connectorUsed }}"
+                tokensUsed: "${{ steps.check_status.output.features.tokensUsed }}"

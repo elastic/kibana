@@ -26,6 +26,7 @@ import type {
   IngestFlow,
 } from './types';
 import { INGEST_HUB_ENABLED_FLAG } from '../common/constants';
+import { registerOnboardingApp } from './onboarding';
 
 const IngestHubApp = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.IngestHubApp }))
@@ -107,6 +108,8 @@ export class IngestHubPlugin
         return () => root.unmount();
       },
     });
+
+    registerOnboardingApp(coreSetup, startServicesPromise);
 
     return {};
   }
