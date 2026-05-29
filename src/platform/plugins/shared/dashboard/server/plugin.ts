@@ -17,6 +17,7 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
+  SavedObjectsClientContract,
   UiSettingsParams,
 } from '@kbn/core/server';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
