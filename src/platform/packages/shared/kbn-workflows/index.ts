@@ -40,7 +40,7 @@ export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';
 export * from './common/workflows_events';
-export * from './common/event_trigger_replay';
+export type * from './common/event_trigger_replay';
 export * from './common/well_known_trigger_sources';
 export type { WorkflowExecutionEventDispatchMetadata } from './common/workflow_execution_schedule_metadata';
 export * from './common/privileges';
