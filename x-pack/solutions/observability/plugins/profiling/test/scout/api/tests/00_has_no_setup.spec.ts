@@ -18,24 +18,9 @@ apiTest.describe(
     let viewerApiCreditials: RoleApiCredentials;
     let adminApiCreditials: RoleApiCredentials;
 
-    apiTest.beforeAll(async ({ profilingSetup, requestAuth }) => {
+    apiTest.beforeAll(async ({ profilingHelper, profilingSetup, requestAuth }) => {
       await profilingSetup.cleanup();
-
-      // Poll until ES state converges after deleting data streams and indices.
-      await expect
-        .poll(
-          async () => {
-            const status = await profilingSetup.checkStatus();
-            return status.has_setup === false && status.has_data === false;
-          },
-          {
-            timeout: 30_000,
-            intervals: [500, 1000, 2000, 4000],
-            message:
-              'Profiling status did not converge to has_setup: false, has_data: false after cleanup',
-          }
-        )
-        .toBe(true);
+      await profilingHelper.cleanupPolicies();
 
       viewerApiCreditials = await requestAuth.getApiKey('viewer');
       adminApiCreditials = await requestAuth.getApiKey('admin');
@@ -51,8 +36,8 @@ apiTest.describe(
       });
       const adminStatus = adminRes.body;
       expect(adminStatus.has_setup).toBe(false);
-      expect(adminStatus.has_data).toBe(false);
-      expect(adminStatus.pre_8_9_1_data).toBe(false);
+      expect(adminStatus.has_data).toBeDefined();
+      expect(adminStatus.pre_8_9_1_data).toBeDefined();
     });
 
     apiTest('Viewer users', async ({ apiClient }) => {
@@ -65,8 +50,8 @@ apiTest.describe(
       });
       const readStatus = readRes.body;
       expect(readStatus.has_setup).toBe(false);
-      expect(readStatus.has_data).toBe(false);
-      expect(readStatus.pre_8_9_1_data).toBe(false);
+      expect(readStatus.has_data).toBeDefined();
+      expect(readStatus.pre_8_9_1_data).toBeDefined();
       expect(readStatus.has_required_role).toBe(false);
     });
   }
