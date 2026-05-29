@@ -15,3 +15,5 @@ export const BAGGAGE_TRACKING_BEACON_VALUE = '1';
  * and then propagated through tracing context.
  */
 export const EVAL_RUN_ID_BAGGAGE_KEY = 'kibana.evals.run_id';
+
+export const CONVERSATION_ID_BAGGAGE_KEY = 'gen_ai.conversation.id';

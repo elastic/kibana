@@ -6,6 +6,7 @@
  */
 
 import type { Span } from '@opentelemetry/api';
+import { SpanKind } from '@opentelemetry/api';
 import { isPromise } from 'util/types';
 import { safeJsonStringify } from '@kbn/std';
 import type { WithActiveSpanOptions } from '@kbn/tracing-utils';
@@ -34,6 +35,7 @@ export function withExecuteToolSpan<T>(
     `execute_tool ${toolName}`,
     {
       ...options,
+      kind: SpanKind.INTERNAL,
       attributes: {
         ...options.attributes,
         [GenAISemanticConventions.GenAIToolName]: toolName,

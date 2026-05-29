@@ -40,7 +40,6 @@ export enum GenAISemanticConventions {
 export enum ElasticGenAIAttributes {
   InferenceSpanKind = 'elastic.inference.span.kind',
   ToolChoice = 'elastic.llm.toolChoice',
-  AgentConfig = 'elastic.agent.config',
 }
 
 export interface GenAISemConvAttributes {
@@ -71,7 +70,6 @@ export interface GenAISemConvAttributes {
   [GenAISemanticConventions.GenAIWorkflowName]?: string;
   [ElasticGenAIAttributes.InferenceSpanKind]?: 'CHAIN' | 'AGENT' | 'LLM' | 'TOOL';
   [ElasticGenAIAttributes.ToolChoice]?: string;
-  [ElasticGenAIAttributes.AgentConfig]?: string;
 }
 
 interface GenAISemConvEvent<

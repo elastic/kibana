@@ -9,7 +9,7 @@ import type { api } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import { GenAISemanticConventions } from '@kbn/inference-tracing';
 import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
-import { normalizeAgentIdForTelemetry, toCustomHashedId } from '../telemetry/utils';
+import { normalizeAgentIdForTelemetry, toHashedId } from '../telemetry/utils';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 
@@ -36,17 +36,17 @@ function hashSensitiveAttributes(
 
   const conversationId = result[GenAISemanticConventions.GenAIConversationId];
   if (conversationId != null) {
-    result[GenAISemanticConventions.GenAIConversationId] = toCustomHashedId(String(conversationId));
+    result[GenAISemanticConventions.GenAIConversationId] = toHashedId(String(conversationId));
   }
 
   const workflowId = result['elastic.workflow.id'];
   if (workflowId != null) {
-    result['elastic.workflow.id'] = toCustomHashedId(String(workflowId));
+    result['elastic.workflow.id'] = toHashedId(String(workflowId));
   }
 
   const workflowExecId = result['elastic.workflow.execution_id'];
   if (workflowExecId != null) {
-    result['elastic.workflow.execution_id'] = toCustomHashedId(String(workflowExecId));
+    result['elastic.workflow.execution_id'] = toHashedId(String(workflowExecId));
   }
 
   return result;
@@ -83,6 +83,7 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
 
     const {
       [SHOULD_TRACK_ATTR]: _,
+      _should_track: __,
       [DATA_STREAM_NAMESPACE_ATTR]: namespace,
       ...cleanAttributes
     } = span.attributes;

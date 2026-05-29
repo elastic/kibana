@@ -367,7 +367,7 @@ describe('AgentBuilderSpanProcessor', () => {
 
       const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
       expect(exported.attributes[GenAISemanticConventions.GenAIConversationId]).toMatch(
-        /^custom-/
+        /^[a-f0-9]{16}$/
       );
       expect(exported.attributes[GenAISemanticConventions.GenAIConversationId]).not.toBe(
         'conv-uuid-123'
@@ -389,9 +389,9 @@ describe('AgentBuilderSpanProcessor', () => {
       processor.onEnd(readable);
 
       const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
-      expect(exported.attributes['elastic.workflow.id']).toMatch(/^custom-/);
+      expect(exported.attributes['elastic.workflow.id']).toMatch(/^[a-f0-9]{16}$/);
       expect(exported.attributes['elastic.workflow.id']).not.toBe('workflow-uuid-456');
-      expect(exported.attributes['elastic.workflow.execution_id']).toMatch(/^custom-/);
+      expect(exported.attributes['elastic.workflow.execution_id']).toMatch(/^[a-f0-9]{16}$/);
       expect(exported.attributes['elastic.workflow.execution_id']).not.toBe('exec-uuid-789');
     });
 

@@ -12,7 +12,6 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   ElasticGenAIAttributes,
-  GenAISemanticConventions,
   withActiveInferenceSpan,
 } from '@kbn/inference-tracing';
 import type { Conversation, ConversationRound, ConverseInput } from '@kbn/agent-builder-common';
@@ -53,11 +52,10 @@ const generateConversationTitle = async ({
   chatModel: InferenceChatModel;
 }) => {
   return withActiveInferenceSpan(
-    'GenerateTitle',
+    'generate_title',
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
-        [GenAISemanticConventions.GenAIOperationName]: 'invoke_agent',
       },
     },
     async (span) => {

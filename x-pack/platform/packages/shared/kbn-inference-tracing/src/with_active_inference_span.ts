@@ -10,8 +10,9 @@ import { createWithActiveSpan, withActiveSpan } from '@kbn/tracing-utils';
 import { propagation } from '@opentelemetry/api';
 import { createInferenceContext } from './create_inference_context';
 import { getInferenceTracer } from './inference_tracer_provider';
-import { EVAL_RUN_ID_BAGGAGE_KEY } from './baggage';
+import { CONVERSATION_ID_BAGGAGE_KEY, EVAL_RUN_ID_BAGGAGE_KEY } from './baggage';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
+import { GenAISemanticConventions } from './types';
 
 /**
  * Creates an active "inference"-scoped span, that is, every span created in this
@@ -25,7 +26,9 @@ export const withActiveInferenceSpan = createWithActiveSpan({}, (name, opts, ctx
   }
 
   const { context: parentContext, isRoot } = createInferenceContext();
-  const evalRunId = propagation.getBaggage(parentContext)?.getEntry(EVAL_RUN_ID_BAGGAGE_KEY)?.value;
+  const baggage = propagation.getBaggage(parentContext);
+  const evalRunId = baggage?.getEntry(EVAL_RUN_ID_BAGGAGE_KEY)?.value;
+  const conversationId = baggage?.getEntry(CONVERSATION_ID_BAGGAGE_KEY)?.value;
 
   return withActiveSpan(
     name,
@@ -33,9 +36,12 @@ export const withActiveInferenceSpan = createWithActiveSpan({}, (name, opts, ctx
       ...opts,
       tracer: getInferenceTracer(),
       attributes: {
-        ...opts.attributes,
         [IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME]: isRoot,
         ...(evalRunId ? { [EVAL_RUN_ID_BAGGAGE_KEY]: evalRunId } : {}),
+        ...(conversationId
+          ? { [GenAISemanticConventions.GenAIConversationId]: conversationId }
+          : {}),
+        ...opts.attributes,
       },
     },
     parentContext,

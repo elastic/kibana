@@ -6,6 +6,7 @@
  */
 
 import type { Span } from '@opentelemetry/api';
+import { SpanKind } from '@opentelemetry/api';
 import type { Observable } from 'rxjs';
 import {
   withActiveInferenceSpan,
@@ -37,6 +38,7 @@ export function withConverseSpan(
       withActiveInferenceSpan(
         `invoke_agent ${agentName}`,
         {
+          kind: SpanKind.INTERNAL,
           attributes: {
             [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
             [GenAISemanticConventions.GenAIOperationName]: 'invoke_agent',
@@ -58,6 +60,6 @@ export function withConverseSpan(
           return cb(span);
         }
       ),
-    { spaceId }
+    { spaceId, conversationId }
   );
 }

@@ -11,6 +11,7 @@ import type {
   RunAgentReturn,
   ExperimentalFeatures,
 } from '@kbn/agent-builder-server';
+import { getConnectorProvider } from '@kbn/inference-common';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
@@ -150,18 +151,24 @@ export const runAgent = async ({
   };
   manager.deps.agentConfiguration = effectiveConfiguration;
 
-  const agentResult = await withAgentSpan({ agent, conversationId: agentParams.conversation?.id }, async () => {
-    const agentHandler = createAgentHandler({ agent, effectiveConfiguration });
-    const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
-    return await agentHandler(
-      {
-        runId: manager.context.runId,
-        agentParams,
-        abortSignal: manager.deps.abortSignal,
-      },
-      agentHandlerContext
-    );
-  });
+  const chatModel = (await manager.deps.modelProvider.getDefaultModel()).chatModel;
+  const providerName = getConnectorProvider(chatModel.getConnector());
+
+  const agentResult = await withAgentSpan(
+    { agent, conversationId: agentParams.conversation?.id, providerName },
+    async () => {
+      const agentHandler = createAgentHandler({ agent, effectiveConfiguration });
+      const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
+      return await agentHandler(
+        {
+          runId: manager.context.runId,
+          agentParams,
+          abortSignal: manager.deps.abortSignal,
+        },
+        agentHandlerContext
+      );
+    }
+  );
 
   return {
     result: agentResult.result,

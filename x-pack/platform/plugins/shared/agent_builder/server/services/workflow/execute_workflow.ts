@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { SpanKind } from '@opentelemetry/api';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ElasticGenAIAttributes, GenAISemanticConventions, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import { toWorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
@@ -39,6 +40,7 @@ export const executeWorkflow = async ({
   return withActiveInferenceSpan(
     `invoke_workflow ${workflowId}`,
     {
+      kind: SpanKind.INTERNAL,
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
         [GenAISemanticConventions.GenAIOperationName]: 'invoke_workflow',
@@ -60,10 +62,9 @@ export const executeWorkflow = async ({
         span?.setAttribute('elastic.workflow.execution_id', executeResult.workflowExecutionId);
 
         if (executeResult.execution) {
-          span?.setAttribute(
-            GenAISemanticConventions.GenAIWorkflowName,
-            executeResult.execution.workflowDefinition.name
-          );
+          const workflowName = executeResult.execution.workflowDefinition.name;
+          span?.setAttribute(GenAISemanticConventions.GenAIWorkflowName, workflowName);
+          span?.updateName(`invoke_workflow ${workflowName}`);
           const result: WorkflowExecutionResult = {
             success: true,
             execution: toWorkflowExecutionState(executeResult.execution),

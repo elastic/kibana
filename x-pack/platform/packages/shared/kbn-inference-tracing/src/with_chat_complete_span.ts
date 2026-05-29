@@ -23,6 +23,7 @@ import {
   isChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
 import type { Span } from '@opentelemetry/api';
+import { SpanKind } from '@opentelemetry/api';
 import { isObservable, tap } from 'rxjs';
 import { isPromise } from 'util/types';
 import { withActiveInferenceSpan } from './with_active_inference_span';
@@ -180,6 +181,7 @@ export function withChatCompleteSpan(
   const next = withActiveInferenceSpan(
     `chat ${modelId}`,
     {
+      kind: SpanKind.CLIENT,
       attributes: {
         ...attributes,
         [GenAISemanticConventions.GenAIOperationName]: 'chat',

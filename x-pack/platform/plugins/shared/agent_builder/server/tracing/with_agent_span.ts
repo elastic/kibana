@@ -6,7 +6,7 @@
  */
 
 import type { Span } from '@opentelemetry/api';
-import { safeJsonStringify } from '@kbn/std';
+import { SpanKind } from '@opentelemetry/api';
 import {
   withActiveInferenceSpan,
   ElasticGenAIAttributes,
@@ -18,23 +18,25 @@ import type { AgentHandlerReturn } from '@kbn/agent-builder-server';
 interface WithAgentSpanOptions {
   agent: AgentDefinition;
   conversationId?: string;
+  providerName?: string;
 }
 
 export function withAgentSpan(
-  { agent, conversationId }: WithAgentSpanOptions,
+  { agent, conversationId, providerName }: WithAgentSpanOptions,
   cb: (span?: Span) => Promise<AgentHandlerReturn>
 ): Promise<AgentHandlerReturn> {
-  const { id: agentId, configuration, name } = agent;
+  const { id: agentId, name } = agent;
   return withActiveInferenceSpan(
     `invoke_agent ${name}`,
     {
+      kind: SpanKind.INTERNAL,
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'AGENT',
         [GenAISemanticConventions.GenAIOperationName]: 'invoke_agent',
         [GenAISemanticConventions.GenAIAgentId]: agentId,
         [GenAISemanticConventions.GenAIAgentName]: name,
+        [GenAISemanticConventions.GenAIProviderName]: providerName,
         [GenAISemanticConventions.GenAIConversationId]: conversationId,
-        [ElasticGenAIAttributes.AgentConfig]: safeJsonStringify(configuration),
       },
     },
     (span) => {

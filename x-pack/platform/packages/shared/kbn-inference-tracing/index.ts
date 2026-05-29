@@ -13,6 +13,7 @@ export {
   BAGGAGE_TRACKING_BEACON_KEY,
   BAGGAGE_TRACKING_BEACON_VALUE,
   EVAL_RUN_ID_BAGGAGE_KEY,
+  CONVERSATION_ID_BAGGAGE_KEY,
 } from './src/baggage';
 
 export { isInferenceSpan } from './src/is_inference_span';
