@@ -32,6 +32,7 @@ import {
   getPromqlMatchingSignatures,
   getPromqlSignatureMismatch,
 } from '../../definitions/utils/validation/function';
+import { isDotPrefixedSource } from '../../definitions/utils/validation/sources';
 import {
   getUsedPromqlParamNames,
   IDENTIFIER_PATTERN,
@@ -302,7 +303,7 @@ function validateIndexSources(
         continue;
       }
 
-      if (indexName && !sourceExists(indexName, sourcesSet)) {
+      if (indexName && !sourceExists(indexName, sourcesSet) && !isDotPrefixedSource(indexName)) {
         messages.push(errors.byId('unknownIndex', source.location, { name: indexName }));
       }
     }
@@ -315,7 +316,7 @@ function validateIndexSources(
   if (indexParam && indexParam.value) {
     const indexName = stripQuotes(indexParam.value);
 
-    if (!sourceExists(indexName, sourcesSet)) {
+    if (!sourceExists(indexName, sourcesSet) && !isDotPrefixedSource(indexName)) {
       messages.push(errors.byId('unknownIndex', indexParam.location, { name: indexName }));
     }
 

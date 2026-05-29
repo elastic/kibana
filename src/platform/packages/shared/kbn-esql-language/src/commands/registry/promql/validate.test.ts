@@ -170,6 +170,20 @@ describe('PROMQL Validation', () => {
         ['Unknown index "unknown_*"']
       );
     });
+
+    test('dot-prefixed backing index does not error', () => {
+      promqlExpectErrors(
+        'PROMQL index=.ds-metrics-x-default-000001 step=5m start=?_tstart end=?_tend (rate(counterIntegerField[5m]))',
+        []
+      );
+    });
+
+    test('truly unknown non-dot index still errors', () => {
+      promqlExpectErrors(
+        'PROMQL index=truly_unknown step=5m start=?_tstart end=?_tend (rate(counterIntegerField[5m]))',
+        ['Unknown index "truly_unknown"']
+      );
+    });
   });
 
   describe('query semantics', () => {

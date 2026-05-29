@@ -151,8 +151,7 @@ describe('WorkflowExecutionList (stateful)', () => {
   it('calls useWorkflowExecutions with the workflowId', () => {
     renderComponent('wf-123');
     expect(mockUseWorkflowExecutions).toHaveBeenCalledWith(
-      expect.objectContaining({ workflowId: 'wf-123' }),
-      expect.any(Object)
+      expect.objectContaining({ workflowId: 'wf-123' })
     );
   });
 
