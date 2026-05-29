@@ -93,7 +93,7 @@ ajv-formats@2.1.1
 ajv-keywords@3.5.2
 ajv-keywords@5.1.0
 ajv@6.14.0
-ajv@8.18.0
+ajv@8.20.0
 aria-hidden@1.2.2
 array-union@1.0.2
 array-uniq@1.0.3
