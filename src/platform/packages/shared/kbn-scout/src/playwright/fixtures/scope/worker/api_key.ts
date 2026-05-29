@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreWorkerFixtures } from './core_fixtures';
+import { coreWorkerFixtures } from './saml_auth';
 import type { ApiClientFixture } from './api_client';
 import type { DefaultRolesFixture } from './default_roles';
 import type { ElasticsearchRoleDescriptor, KibanaRole } from '../../../../common';

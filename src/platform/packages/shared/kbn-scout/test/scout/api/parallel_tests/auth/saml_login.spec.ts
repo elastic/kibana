@@ -24,5 +24,14 @@ apiTest.describe(
       expect(adminApiCredentials.apiKey.id).toBeDefined();
       expect(adminApiCredentials.apiKey.name).toBeDefined();
     });
+
+    apiTest(
+      `should create a session for a built-in ES role via setBuiltinRole`,
+      async ({ samlAuth }) => {
+        await samlAuth.setBuiltinRole('kibana_admin');
+        const credentials = await samlAuth.asInteractiveUser(samlAuth.customRoleName);
+        expect(credentials.cookieValue).toBeDefined();
+      }
+    );
   }
 );
