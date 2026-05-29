@@ -17,7 +17,7 @@ import { transformDashboardOut } from './transform_dashboard_out';
 jest.mock('../../../kibana_services', () => ({
   ...jest.requireActual('../../../kibana_services'),
   embeddableService: {
-    getTransforms: jest.fn(),
+    getTransforms: jest.fn().mockReturnValue({ transformOut: (val: any) => val }), // pass through transform
     getAllEmbeddableSchemas: jest.fn().mockReturnValue({}),
   },
 }));

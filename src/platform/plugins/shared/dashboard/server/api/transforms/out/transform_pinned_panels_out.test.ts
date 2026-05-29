@@ -17,7 +17,6 @@ import {
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
-import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import type { DashboardState } from '../../types';
 import {
   transformPinnedPanelProperties,
@@ -95,12 +94,7 @@ describe('pinned panels', () => {
   ] as unknown as DashboardState['pinned_panels'];
 
   it('should transform pinned panels object to array with all transformations applied', () => {
-    const result = transformPinnedPanelsOut(
-      undefined,
-      { panels: mockPinnedPanels },
-      [],
-      getDashboardStateSchema(false)
-    );
+    const result = transformPinnedPanelsOut(undefined, { panels: mockPinnedPanels }, []);
     expect(result.panels).toEqual(transformedPinnedPanels);
   });
 
@@ -128,8 +122,7 @@ describe('pinned panels', () => {
           invalidPanel,
         },
       } as DashboardSavedObjectAttributes['pinned_panels'],
-      [],
-      getDashboardStateSchema(false)
+      []
     );
     expect(result.panels).toEqual(transformedPinnedPanels);
     expect(result.warnings).toEqual([
@@ -167,12 +160,7 @@ describe('pinned panels', () => {
 
     it('should transform serialized control state to array with all transformations applied', () => {
       const serializedControlState = { panelsJSON: JSON.stringify(mockPinnedPanels) };
-      const result = transformPinnedPanelsOut(
-        serializedControlState,
-        undefined,
-        [],
-        getDashboardStateSchema(false)
-      );
+      const result = transformPinnedPanelsOut(serializedControlState, undefined, []);
       expect(result.panels).toEqual(transformedPinnedPanels);
     });
   });

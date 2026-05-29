@@ -42,8 +42,7 @@ describe('transformPanelsOut', () => {
       },
     ]);
 
-    expect(transformPanelsOut(panelsJSON, [], [], false, getDashboardStateSchema(false)))
-      .toMatchInlineSnapshot(`
+    expect(transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
       Object {
         "panels": Array [],
         "warnings": Array [
@@ -83,8 +82,7 @@ describe('transformPanelsOut', () => {
       },
     ]);
 
-    expect(transformPanelsOut(panelsJSON, [], [], false, getDashboardStateSchema(false)))
-      .toMatchInlineSnapshot(`
+    expect(transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
       Object {
         "panels": Array [],
         "warnings": Array [
@@ -149,8 +147,7 @@ describe('transformPanelsOut', () => {
       },
     ]);
 
-    expect(transformPanelsOut(panelsJSON, [], [], false, getDashboardStateSchema(false)))
-      .toMatchInlineSnapshot(`
+    expect(transformPanelsOut(panelsJSON, [], [], false)).toMatchInlineSnapshot(`
       Object {
         "panels": Array [
           Object {
@@ -195,13 +192,7 @@ describe('transformPanelsOut', () => {
         },
       },
     ];
-    const panelsOut = transformPanelsOut(
-      panelsJSON,
-      sections,
-      [],
-      false,
-      getDashboardStateSchema(false)
-    );
+    const panelsOut = transformPanelsOut(panelsJSON, sections, [], false);
     getDashboardStateSchema(true).validate({ title: 'My dashboard', panels: panelsOut.panels });
     expect(panelsOut).toMatchInlineSnapshot(`
       Object {

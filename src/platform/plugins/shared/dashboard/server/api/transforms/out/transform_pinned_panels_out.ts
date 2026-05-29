@@ -20,7 +20,6 @@ import { transformType } from '@kbn/embeddable-plugin/server';
 import type { DashboardPinnedPanel, DashboardPinnedPanelsState } from '../../../../common';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { embeddableService } from '../../../kibana_services';
-import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import type { Warnings } from '../../types';
 
 export type StoredPinnedPanels =
@@ -29,8 +28,7 @@ export type StoredPinnedPanels =
 export function transformPinnedPanelsOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'], // legacy
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
-  containerReferences: Reference[] = [],
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
+  containerReferences: Reference[] = []
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   const pinnedPanelSchema = getControlsSchemas();
   let warnings: Warnings = [];

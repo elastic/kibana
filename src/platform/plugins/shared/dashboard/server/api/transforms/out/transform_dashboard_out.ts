@@ -56,15 +56,13 @@ export function transformDashboardOut(
     panelsJSON,
     sections,
     references,
-    isDashboardAppRequest,
-    schema
+    isDashboardAppRequest
   );
 
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
     legacyControls,
     pinned_panels,
-    references,
-    schema
+    references
   );
 
   const timeRange =

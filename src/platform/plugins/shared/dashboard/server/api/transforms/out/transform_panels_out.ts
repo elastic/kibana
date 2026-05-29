@@ -15,7 +15,6 @@ import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-pub
 
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import { embeddableService } from '../../../kibana_services';
-import { type getDashboardStateSchema } from '../../dashboard_state_schemas';
 import type { DashboardPanel, DashboardSection, DashboardState, Warnings } from '../../types';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
@@ -24,8 +23,7 @@ export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
   containerReferences: SavedObjectReference[] = [],
-  isDashboardAppRequest: boolean = false,
-  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>
+  isDashboardAppRequest: boolean = false
 ): { panels: DashboardState['panels']; warnings: Warnings } {
   const topLevelPanels: DashboardPanel[] = [];
   const warnings: Warnings = [];
