@@ -59,7 +59,7 @@ export const useFetchVerdicts = ({ from, to }: UseFetchVerdictsParams) => {
   return { ...query, pagination, setPagination };
 };
 
-export const useFetchVerdictHistory = (discoveryId: string | undefined) => {
+export const useFetchVerdictHistory = (discoverySlug: string | undefined) => {
   const {
     dependencies: {
       start: {
@@ -70,17 +70,17 @@ export const useFetchVerdictHistory = (discoveryId: string | undefined) => {
   const showFetchErrorToast = useFetchErrorToast();
 
   return useQuery<{ hits: Verdict[] }, Error>({
-    queryKey: ['verdictHistory', discoveryId],
+    queryKey: ['verdictHistory', discoverySlug],
     queryFn: async ({ signal }) => {
       return streamsRepositoryClient.fetch(
         'GET /internal/sig_events/verdicts/{discoveryId}/history',
         {
-          params: { path: { discoveryId: discoveryId! } },
+          params: { path: { discoveryId: discoverySlug! } },
           signal: signal ?? null,
         }
       );
     },
-    enabled: !!discoveryId,
+    enabled: !!discoverySlug,
     onError: showFetchErrorToast,
   });
 };

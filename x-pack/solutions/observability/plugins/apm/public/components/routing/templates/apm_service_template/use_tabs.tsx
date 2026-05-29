@@ -25,7 +25,6 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useProfilingPluginSetting } from '../../../../hooks/use_profiling_integration_setting';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
-import { BetaBadge } from '../../../shared/beta_badge';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 
 export type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
@@ -166,7 +165,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <BetaBadge icon="beta" />,
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
