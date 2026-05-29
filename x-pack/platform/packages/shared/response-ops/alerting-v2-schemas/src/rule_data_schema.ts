@@ -20,6 +20,7 @@ import {
   MAX_GROUPING_FIELDS,
   MAX_NAME_LENGTH,
   MIN_SCHEDULE_INTERVAL,
+  VERSION_MAX_LENGTH,
 } from './constants';
 
 /** Primitives */
@@ -334,7 +335,7 @@ export const updateRuleBodySchema = updateRuleDataSchema.extend({
   version: z
     .string()
     .min(1)
-    .max(256)
+    .max(VERSION_MAX_LENGTH)
     .optional()
     .describe('The current version of the rule, used for optimistic concurrency control.'),
 });

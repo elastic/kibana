@@ -42,11 +42,13 @@ export interface RulesFindAllResultItem {
   namespaces?: string[];
 }
 
+interface RuleWriteResult {
+  id: string;
+  version?: string;
+}
+
 export interface RulesSavedObjectServiceContract {
-  create(params: {
-    attrs: RuleSavedObjectAttributes;
-    id?: string;
-  }): Promise<{ id: string; version?: string }>;
+  create(params: { attrs: RuleSavedObjectAttributes; id?: string }): Promise<RuleWriteResult>;
   get(
     id: string,
     spaceId?: string
@@ -57,7 +59,7 @@ export interface RulesSavedObjectServiceContract {
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
-  }): Promise<{ id: string; version?: string }>;
+  }): Promise<RuleWriteResult>;
   bulkUpdate(
     items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
   ): Promise<BulkUpdateResultItem[]>;
@@ -92,7 +94,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   }: {
     attrs: RuleSavedObjectAttributes;
     id?: string;
-  }): Promise<{ id: string; version?: string }> {
+  }): Promise<RuleWriteResult> {
     const ruleId = id ?? SavedObjectsUtils.generateId();
     const result = await this.client.create<RuleSavedObjectAttributes>(
       RULE_SAVED_OBJECT_TYPE,
@@ -176,7 +178,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
-  }): Promise<{ id: string; version?: string }> {
+  }): Promise<RuleWriteResult> {
     const result = await this.client.update<RuleSavedObjectAttributes>(
       RULE_SAVED_OBJECT_TYPE,
       id,
