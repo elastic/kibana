@@ -7,7 +7,9 @@
 
 import type { api } from '@elastic/opentelemetry-node/sdk';
 import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
+import { GenAISemanticConventions } from '@kbn/inference-tracing';
 import { DATA_STREAM_NAMESPACE_ATTR, isAgentBuilderSpan } from './agent_builder_context';
+import { normalizeAgentIdForTelemetry, toCustomHashedId } from '../telemetry/utils';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 
@@ -15,6 +17,39 @@ interface AgentBuilderSpanProcessorOpts {
   exporter: tracing.SpanExporter;
   scheduledDelayMillis: number;
   isEnabled?: () => boolean;
+}
+
+/**
+ * Hashes security-sensitive identifiers on span attributes before export.
+ * Built-in agent IDs are kept in plain text; user-owned IDs are hashed
+ * using the same scheme as EBT telemetry (SHA-256, 16-char hex prefix).
+ */
+function hashSensitiveAttributes(
+  attributes: Record<string, unknown>
+): Record<string, unknown> {
+  const result = { ...attributes };
+
+  const agentId = result[GenAISemanticConventions.GenAIAgentId];
+  if (agentId != null) {
+    result[GenAISemanticConventions.GenAIAgentId] = normalizeAgentIdForTelemetry(String(agentId));
+  }
+
+  const conversationId = result[GenAISemanticConventions.GenAIConversationId];
+  if (conversationId != null) {
+    result[GenAISemanticConventions.GenAIConversationId] = toCustomHashedId(String(conversationId));
+  }
+
+  const workflowId = result['elastic.workflow.id'];
+  if (workflowId != null) {
+    result['elastic.workflow.id'] = toCustomHashedId(String(workflowId));
+  }
+
+  const workflowExecId = result['elastic.workflow.execution_id'];
+  if (workflowExecId != null) {
+    result['elastic.workflow.execution_id'] = toCustomHashedId(String(workflowExecId));
+  }
+
+  return result;
 }
 
 /**
@@ -52,6 +87,8 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
       ...cleanAttributes
     } = span.attributes;
 
+    const hashedAttributes = hashSensitiveAttributes(cleanAttributes);
+
     const datasetResource = resources.resourceFromAttributes({
       'data_stream.dataset': 'agent_builder',
       ...(typeof namespace === 'string' ? { [DATA_STREAM_NAMESPACE_ATTR]: namespace } : {}),
@@ -63,7 +100,7 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
         enumerable: true,
       },
       attributes: {
-        value: cleanAttributes,
+        value: hashedAttributes,
         enumerable: true,
       },
     });

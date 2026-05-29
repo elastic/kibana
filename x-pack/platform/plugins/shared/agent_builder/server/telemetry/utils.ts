@@ -30,7 +30,7 @@ function sha256Hex(value: string): string {
   return createHash('sha256').update(value).digest('hex');
 }
 
-function toCustomHashedId(value: string): string {
+export function toCustomHashedId(value: string): string {
   return `${CUSTOM_HASH_PREFIX}${sha256Hex(value).slice(0, CUSTOM_HASH_HEX_LENGTH)}`;
 }
 
