@@ -74,14 +74,14 @@ jest.mock('@kbn/cell-actions', () => ({
   CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-const setFiltersMock = jest.fn();
-const clearFiltersMock = jest.fn();
+const mockSetFilters = jest.fn();
+const mockClearFilters = jest.fn();
 
 jest.mock('./export_filters_context', () => ({
   useExportFiltersContext: () => ({
     getFilters: jest.fn(),
-    setFilters: setFiltersMock,
-    clearFilters: clearFiltersMock,
+    setFilters: mockSetFilters,
+    clearFilters: mockClearFilters,
     subscribe: jest.fn(() => () => undefined),
   }),
 }));
@@ -323,7 +323,7 @@ describe('UnifiedResultsTable', () => {
 
       render(<UnifiedResultsTable {...defaultProps} />);
 
-      expect(setFiltersMock).toHaveBeenLastCalledWith(
+      expect(mockSetFilters).toHaveBeenLastCalledWith(
         'test-action-id',
         expect.objectContaining({ total: undefined })
       );
@@ -339,7 +339,7 @@ describe('UnifiedResultsTable', () => {
 
       render(<UnifiedResultsTable {...defaultProps} />);
 
-      expect(setFiltersMock).toHaveBeenLastCalledWith(
+      expect(mockSetFilters).toHaveBeenLastCalledWith(
         'test-action-id',
         expect.objectContaining({ total: undefined })
       );
@@ -355,7 +355,7 @@ describe('UnifiedResultsTable', () => {
 
       render(<UnifiedResultsTable {...defaultProps} />);
 
-      expect(setFiltersMock).toHaveBeenLastCalledWith(
+      expect(mockSetFilters).toHaveBeenLastCalledWith(
         'test-action-id',
         expect.objectContaining({ total: 0 })
       );
@@ -371,7 +371,7 @@ describe('UnifiedResultsTable', () => {
 
       render(<UnifiedResultsTable {...defaultProps} />);
 
-      expect(setFiltersMock).toHaveBeenLastCalledWith(
+      expect(mockSetFilters).toHaveBeenLastCalledWith(
         'test-action-id',
         expect.objectContaining({ total: 7 })
       );
