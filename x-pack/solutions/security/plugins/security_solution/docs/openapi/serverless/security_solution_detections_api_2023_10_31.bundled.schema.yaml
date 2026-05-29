@@ -4585,7 +4585,10 @@ components:
             anomaly results index). Server-side resolution ensures users cannot
             supply arbitrary index patterns.
           items:
+            maxLength: 255
+            minLength: 1
             type: string
+          maxItems: 100
           type: array
         status:
           enum:
@@ -9017,7 +9020,10 @@ components:
             anomaly results index). Server-side resolution ensures users cannot
             supply arbitrary index patterns.
           items:
+            maxLength: 255
+            minLength: 1
             type: string
+          maxItems: 100
           type: array
         status:
           $ref: '#/components/schemas/AlertStatusExceptClosed'
