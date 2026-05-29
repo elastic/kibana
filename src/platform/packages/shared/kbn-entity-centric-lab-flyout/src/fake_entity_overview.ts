@@ -17,6 +17,7 @@ import {
   buildKindTemplate,
   entityTypeToKind,
   inferEntityKind,
+  normalizeEntityHealth,
   type EntityKind,
 } from './kind_templates';
 
@@ -117,24 +118,26 @@ export interface EntityOverview {
  *   1. PayFlow story — curated overview for the 4 click-path entities
  *      (`payments-service`, `checkout-service`, `payments-pod-7f9b2`,
  *      `node-prod-eu-04`).
- *   2. Per-kind template — when the entity's kind can be resolved (either
- *      passed in via `entityType` from the caller, or inferred from the
- *      name), return a kind-shaped overview (service / host / pod / node /
- *      cluster / namespace / database / cloud / middleware / llm).
+ *   2. Per-kind + per-health template — when the entity's kind can be
+ *      resolved (passed in via `entityType` from the caller, or inferred
+ *      from the name), return a kind-shaped overview (service / host / pod /
+ *      node / cluster / namespace / database / cloud / middleware / llm)
+ *      tinted by `entityHealth` (healthy / atRisk / unhealthy).
  *   3. Generic fallback — last-resort mock that mirrors the original design
  *      mockup; mostly never reached now that the kind templates cover the
  *      common shapes.
  */
 export const buildFakeEntityOverview = (
   entityName: string,
-  entityType?: string
+  entityType?: string,
+  entityHealth?: string
 ): EntityOverview => {
   const storyOverview = getStoryOverview(entityName);
   if (storyOverview) {
     return storyOverview;
   }
   const kind: EntityKind | undefined = entityTypeToKind(entityType) ?? inferEntityKind(entityName);
-  const kindTemplate = buildKindTemplate(entityName, kind);
+  const kindTemplate = buildKindTemplate(entityName, kind, normalizeEntityHealth(entityHealth));
   if (kindTemplate) {
     return kindTemplate.overview;
   }

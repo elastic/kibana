@@ -77,22 +77,25 @@ export const AllEntitiesView = () => {
     });
   }, [dataset.entities, search, activeTagFilters]);
 
-  // Resolve the clicked entity's `type` from the dataset so the shared flyout
-  // can pick the right kind template (service / host / pod / node / cluster
-  // / namespace / database / cloud / middleware / llm). When the user keeps
+  // Resolve the clicked entity's `type` and `health` from the dataset so the
+  // shared flyout can pick the right kind template (service / host / pod /
+  // node / cluster / namespace / database / cloud / middleware / llm) and the
+  // right health variant (healthy / atRisk / unhealthy). When the user keeps
   // navigating from inside the flyout (Dependencies row clicks), the new
-  // name may not be in the dataset — in that case `selectedEntityType` is
-  // undefined and the shared package falls back to name-based inference.
-  const entityTypeByName = useMemo(() => {
-    const map = new Map<string, string>();
+  // name may not be in the dataset — in that case both lookups return
+  // undefined and the shared package falls back to name-based inference +
+  // the `'healthy'` health variant.
+  const entityByName = useMemo(() => {
+    type DatasetEntity = (typeof dataset.entities)[number];
+    const map = new Map<string, DatasetEntity>();
     for (const entity of dataset.entities) {
-      map.set(entity.name, entity.type);
+      map.set(entity.name, entity);
     }
     return map;
-  }, [dataset.entities]);
-  const selectedEntityType = selectedEntityName
-    ? entityTypeByName.get(selectedEntityName)
-    : undefined;
+  }, [dataset]);
+  const selectedEntity = selectedEntityName ? entityByName.get(selectedEntityName) : undefined;
+  const selectedEntityType = selectedEntity?.type;
+  const selectedEntityHealth = selectedEntity?.health;
 
   // `agentBuilder` is intentionally undefined: streams_app does not declare it
   // as a start dependency. The shared flyout hides the "Add to chat" button
@@ -221,6 +224,7 @@ export const AllEntitiesView = () => {
           <EntityFlyout
             entityName={selectedEntityName}
             entityType={selectedEntityType}
+            entityHealth={selectedEntityHealth}
             onClose={() => setSelectedEntityName(null)}
             onSelectEntity={setSelectedEntityName}
           />

@@ -50,5 +50,5 @@ export {
   buildEntityFlyoutInitialMessage,
 } from './src/build_entity_flyout_attachment';
 
-export { entityTypeToKind, inferEntityKind } from './src/kind_templates';
-export type { EntityKind } from './src/kind_templates';
+export { entityTypeToKind, inferEntityKind, normalizeEntityHealth } from './src/kind_templates';
+export type { EntityKind, EntityHealthVariant } from './src/kind_templates';

@@ -19,6 +19,7 @@ import {
   buildKindTemplate,
   entityTypeToKind,
   inferEntityKind,
+  normalizeEntityHealth,
   type EntityKind,
 } from './kind_templates';
 import { INCIDENT_X_DOMAIN } from './time_domain';
@@ -181,20 +182,22 @@ const series = (id: string, label: string, ys: readonly number[]) => ({
  * Dispatch order mirrors `buildFakeEntityOverview`:
  *
  *   1. PayFlow story — curated tabs for the 4 click-path entities.
- *   2. Per-kind template — kind-shaped tabs (service / host / pod / node /
- *      cluster / namespace / database / cloud / middleware / llm).
+ *   2. Per-kind + per-health template — kind-shaped tabs (service / host /
+ *      pod / node / cluster / namespace / database / cloud / middleware /
+ *      llm) tinted by `entityHealth` (healthy / atRisk / unhealthy).
  *   3. Generic fallback — last-resort mock, mostly never reached.
  */
 export const buildFakeEntityTabsData = (
   entityName: string,
-  entityType?: string
+  entityType?: string,
+  entityHealth?: string
 ): EntityTabsData => {
   const storyTabs = getStoryTabsData(entityName);
   if (storyTabs) {
     return storyTabs;
   }
   const kind: EntityKind | undefined = entityTypeToKind(entityType) ?? inferEntityKind(entityName);
-  const kindTemplate = buildKindTemplate(entityName, kind);
+  const kindTemplate = buildKindTemplate(entityName, kind, normalizeEntityHealth(entityHealth));
   if (kindTemplate) {
     return kindTemplate.tabs;
   }

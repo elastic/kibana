@@ -62,6 +62,16 @@ interface EntityFlyoutProps {
    */
   readonly entityType?: string;
   /**
+   * Optional entity-health hint that drives the variant of the per-kind
+   * template (healthy / at-risk / unhealthy). Free-form string —
+   * Streams uses `'healthy' | 'atRisk' | 'unhealthy'`, related-entity rows
+   * use `'Healthy' | 'At risk' | 'Unhealthy'`, alerting backends sometimes
+   * use `'critical' | 'warning' | 'ok'`. All of these resolve to the
+   * canonical `EntityHealthVariant` internally; missing or unrecognised
+   * values default to `'healthy'`.
+   */
+  readonly entityHealth?: string;
+  /**
    * Optional callback fired when the user clicks a related entity name from
    * inside the flyout (e.g. a row in the Dependencies tab). When supplied,
    * the host application is expected to swap the flyout content to the
@@ -75,6 +85,7 @@ type TabId = 'overview' | 'metrics' | 'logs' | 'alerts' | 'relationships' | 'sec
 export const EntityFlyout = ({
   entityName,
   entityType,
+  entityHealth,
   onClose,
   onSelectEntity,
 }: EntityFlyoutProps) => {
@@ -144,12 +155,12 @@ export const EntityFlyout = ({
   }, [onSelectEntity]);
 
   const overview = useMemo(
-    () => buildFakeEntityOverview(entityName, entityType),
-    [entityName, entityType]
+    () => buildFakeEntityOverview(entityName, entityType, entityHealth),
+    [entityName, entityType, entityHealth]
   );
   const tabsData = useMemo(
-    () => buildFakeEntityTabsData(entityName, entityType),
-    [entityName, entityType]
+    () => buildFakeEntityTabsData(entityName, entityType, entityHealth),
+    [entityName, entityType, entityHealth]
   );
 
   const chatAttachment = useMemo(
