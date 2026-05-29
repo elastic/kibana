@@ -235,8 +235,20 @@ apiTest.describe(
       expect(findCount(facets.monitorTypes, 'http')).toBe(3);
       expect(findCount(facets.tags, TEST_TAG)).toBe(3);
 
-      // No browser network events were indexed, so browser-only facets are empty/zero.
-      expect(facets.resourceTypes).toStrictEqual([]);
+      // Resource-type categories are always reported (derived from
+      // `http.response.mime_type` via the shared mime taxonomy); with no browser
+      // network events indexed, every category — and both origins — is zero.
+      expect(facets.resourceTypes.map((entry) => entry.value)).toStrictEqual([
+        'html',
+        'stylesheet',
+        'font',
+        'script',
+        'image',
+        'media',
+        'xhr',
+        'other',
+      ]);
+      expect(facets.resourceTypes.every((entry) => entry.count === 0)).toBe(true);
       expect(findCount(facets.party, 'first_party')).toBe(0);
       expect(findCount(facets.party, 'third_party')).toBe(0);
 

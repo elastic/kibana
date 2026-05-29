@@ -13,6 +13,7 @@ import {
   getRangeFilter,
 } from '../constants/client_defaults';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../constants';
+import { selectedMimeCategoriesQuery } from '../constants/mime_types';
 import type { CertificatesResults } from '../../server/queries/get_certs';
 import type { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
@@ -35,10 +36,38 @@ export const DEFAULT_TO = 'now';
 export const CERT_HASH_SHA256 = 'tls.server.hash.sha256';
 export const CERT_SUBJECT_COMMON_NAME = 'tls.server.x509.subject.common_name';
 
-// Values used by the browser-cert "party" quick filter (first- vs third-party,
-// derived from `http.request.is_same_site`). Shared with the UI control.
+// Values used by the browser-cert "party" quick filter (first- vs third-party).
+// Shared with the UI control.
 export const FIRST_PARTY = 'first_party';
 export const THIRD_PARTY = 'third_party';
+
+// Origin is derived from the browser-emitted `Sec-Fetch-Site` fetch-metadata
+// header (captured at `http.request.headers.sec_fetch_site`). The legacy
+// `http.request.is_same_site` boolean is no longer collected by the synthetics
+// agent, so we read the header instead. It lives only in `_source` (request
+// headers are not indexed), hence the no-script runtime field below — the same
+// pattern the step waterfall uses for `synthetics.payload.transfer_size`.
+export const SEC_FETCH_SITE_FIELD = 'http.request.headers.sec_fetch_site';
+
+// `same-origin`/`same-site` are the monitored site itself; `none` is the
+// user-initiated top-level navigation (the page's own document). `cross-site`
+// is a different registrable domain, i.e. a third-party resource (CDN, ads…).
+export const FIRST_PARTY_SEC_FETCH_VALUES = ['same-origin', 'same-site', 'none'] as const;
+export const THIRD_PARTY_SEC_FETCH_VALUES = ['cross-site'] as const;
+
+export const PARTY_RUNTIME_MAPPINGS: estypes.MappingRuntimeFields = {
+  [SEC_FETCH_SITE_FIELD]: { type: 'keyword' },
+};
+
+export const partyQuery = (
+  party: typeof FIRST_PARTY | typeof THIRD_PARTY
+): estypes.QueryDslQueryContainer => ({
+  terms: {
+    [SEC_FETCH_SITE_FIELD]: [
+      ...(party === FIRST_PARTY ? FIRST_PARTY_SEC_FETCH_VALUES : THIRD_PARTY_SEC_FETCH_VALUES),
+    ],
+  },
+});
 
 function absoluteDate(relativeDate: string) {
   return DateMath.parse(relativeDate)?.valueOf() ?? relativeDate;
@@ -72,15 +101,19 @@ export const getCertsRequestBody = ({
   // on a runtime field, which has no doc_values).
   const certIdField = includeBrowserCerts ? CERT_SUBJECT_COMMON_NAME : CERT_HASH_SHA256;
 
-  // Browser-only quick filters. These fields (`synthetics.payload.type`,
-  // `http.request.is_same_site`) only exist on browser network events.
+  // Browser-only quick filters, derived from fields that only exist on browser
+  // network events. Origin maps the `Sec-Fetch-Site` header (read via the
+  // `SEC_FETCH_SITE_FIELD` runtime field) onto first-/third-party; resource type
+  // maps the indexed `http.response.mime_type` onto the shared mime categories
+  // (the browser engine's own `synthetics.payload.type` is stored unindexed, so
+  // it is not queryable — see common/constants/mime_types.ts).
   const wantsFirstParty = party?.includes(FIRST_PARTY);
   const wantsThirdParty = party?.includes(THIRD_PARTY);
   const partyFilter =
     wantsFirstParty && !wantsThirdParty
-      ? [{ term: { 'http.request.is_same_site': true } }]
+      ? [partyQuery(FIRST_PARTY)]
       : wantsThirdParty && !wantsFirstParty
-      ? [{ term: { 'http.request.is_same_site': false } }]
+      ? [partyQuery(THIRD_PARTY)]
       : [];
   const hasResourceTypeFilter = Boolean(browserResourceTypes && browserResourceTypes.length > 0);
 
@@ -88,9 +121,7 @@ export const getCertsRequestBody = ({
     { term: { 'synthetics.type': 'journey/network_info' } },
     { exists: { field: CERT_SUBJECT_COMMON_NAME } },
     { exists: { field: 'tls.server.x509.not_after' } },
-    ...(hasResourceTypeFilter
-      ? [{ terms: { 'synthetics.payload.type': browserResourceTypes } }]
-      : []),
+    ...(hasResourceTypeFilter ? [selectedMimeCategoriesQuery(browserResourceTypes ?? [])] : []),
     ...partyFilter,
   ];
 
@@ -125,6 +156,10 @@ export const getCertsRequestBody = ({
   return createEsQuery({
     from: (pageIndex ?? 0) * size,
     size,
+    // The origin filter reads `Sec-Fetch-Site` from `_source`; the runtime field
+    // is only declared when that filter is active so other callers (e.g. the TLS
+    // alert rule) skip the per-doc evaluation entirely.
+    ...(partyFilter.length > 0 ? { runtime_mappings: PARTY_RUNTIME_MAPPINGS } : {}),
     sort: asMutableArray([
       {
         [sort]: {

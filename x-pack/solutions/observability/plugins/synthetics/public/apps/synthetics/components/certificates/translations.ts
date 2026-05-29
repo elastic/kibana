@@ -90,17 +90,19 @@ export const PARTY_FILTER_THIRD_TOOLTIP = i18n.translate(
   }
 );
 
-export const RESOURCE_TYPE_TOOLTIP_DOCUMENT = i18n.translate(
-  'xpack.synthetics.certs.resourceTypeFilter.document.tooltip',
+// Resource categories are derived from the response content type
+// (`http.response.mime_type`), matching the step waterfall's resource taxonomy.
+export const RESOURCE_TYPE_TOOLTIP_HTML = i18n.translate(
+  'xpack.synthetics.certs.resourceTypeFilter.html.tooltip',
   {
-    defaultMessage: 'Top-level page and iframe HTML documents.',
+    defaultMessage: 'HTML documents (text/html).',
   }
 );
 
 export const RESOURCE_TYPE_TOOLTIP_SCRIPT = i18n.translate(
   'xpack.synthetics.certs.resourceTypeFilter.script.tooltip',
   {
-    defaultMessage: 'JavaScript files loaded by the page.',
+    defaultMessage: 'JavaScript files.',
   }
 );
 
@@ -135,28 +137,14 @@ export const RESOURCE_TYPE_TOOLTIP_MEDIA = i18n.translate(
 export const RESOURCE_TYPE_TOOLTIP_XHR = i18n.translate(
   'xpack.synthetics.certs.resourceTypeFilter.xhr.tooltip',
   {
-    defaultMessage: 'XMLHttpRequest API calls.',
-  }
-);
-
-export const RESOURCE_TYPE_TOOLTIP_FETCH = i18n.translate(
-  'xpack.synthetics.certs.resourceTypeFilter.fetch.tooltip',
-  {
-    defaultMessage: 'Fetch API requests.',
-  }
-);
-
-export const RESOURCE_TYPE_TOOLTIP_PING = i18n.translate(
-  'xpack.synthetics.certs.resourceTypeFilter.ping.tooltip',
-  {
-    defaultMessage: 'Beacon and ping requests, often used for analytics.',
+    defaultMessage: 'XHR and fetch calls, such as JSON responses.',
   }
 );
 
 export const RESOURCE_TYPE_TOOLTIP_OTHER = i18n.translate(
   'xpack.synthetics.certs.resourceTypeFilter.other.tooltip',
   {
-    defaultMessage: "Requests that don't match any other resource type.",
+    defaultMessage: "Responses whose content type doesn't match any other category.",
   }
 );
 

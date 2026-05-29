@@ -7,6 +7,8 @@
 
 import { MonitorTypeEnum } from '../../../../../common/runtime_types';
 import { FIRST_PARTY, THIRD_PARTY } from '../../../../../common/requests/get_certs_request_body';
+import { MimeType } from '../../../../../common/constants/mime_types';
+import { MIME_FILTERS } from '../step_details_page/common/network_data/types';
 import type { QuickFilterOption } from './cert_quick_filter';
 import * as labels from './translations';
 
@@ -18,20 +20,27 @@ export const MONITOR_TYPE_FILTER_OPTIONS: QuickFilterOption[] = [
   { value: MonitorTypeEnum.BROWSER, label: labels.MONITOR_TYPE_FILTER_BROWSER },
 ];
 
-// Chrome DevTools Protocol resource types, as indexed in `synthetics.payload.type`
-// on browser network events. Labels are technical proper nouns shown verbatim.
-export const BROWSER_RESOURCE_TYPE_OPTIONS: QuickFilterOption[] = [
-  { value: 'Document', label: 'Document', tooltip: labels.RESOURCE_TYPE_TOOLTIP_DOCUMENT },
-  { value: 'Script', label: 'Script', tooltip: labels.RESOURCE_TYPE_TOOLTIP_SCRIPT },
-  { value: 'Stylesheet', label: 'Stylesheet', tooltip: labels.RESOURCE_TYPE_TOOLTIP_STYLESHEET },
-  { value: 'Image', label: 'Image', tooltip: labels.RESOURCE_TYPE_TOOLTIP_IMAGE },
-  { value: 'Font', label: 'Font', tooltip: labels.RESOURCE_TYPE_TOOLTIP_FONT },
-  { value: 'Media', label: 'Media', tooltip: labels.RESOURCE_TYPE_TOOLTIP_MEDIA },
-  { value: 'XHR', label: 'XHR', tooltip: labels.RESOURCE_TYPE_TOOLTIP_XHR },
-  { value: 'Fetch', label: 'Fetch', tooltip: labels.RESOURCE_TYPE_TOOLTIP_FETCH },
-  { value: 'Ping', label: 'Ping', tooltip: labels.RESOURCE_TYPE_TOOLTIP_PING },
-  { value: 'Other', label: 'Other', tooltip: labels.RESOURCE_TYPE_TOOLTIP_OTHER },
-];
+const RESOURCE_TYPE_TOOLTIPS: Record<MimeType, string> = {
+  [MimeType.Html]: labels.RESOURCE_TYPE_TOOLTIP_HTML,
+  [MimeType.Stylesheet]: labels.RESOURCE_TYPE_TOOLTIP_STYLESHEET,
+  [MimeType.Font]: labels.RESOURCE_TYPE_TOOLTIP_FONT,
+  [MimeType.Script]: labels.RESOURCE_TYPE_TOOLTIP_SCRIPT,
+  [MimeType.Image]: labels.RESOURCE_TYPE_TOOLTIP_IMAGE,
+  [MimeType.Media]: labels.RESOURCE_TYPE_TOOLTIP_MEDIA,
+  [MimeType.XHR]: labels.RESOURCE_TYPE_TOOLTIP_XHR,
+  [MimeType.Other]: labels.RESOURCE_TYPE_TOOLTIP_OTHER,
+};
+
+// Resource categories derived from the response content type
+// (`http.response.mime_type`). Reuses the step waterfall's mime taxonomy and
+// ordering so both views label resources the same way.
+export const BROWSER_RESOURCE_TYPE_OPTIONS: QuickFilterOption[] = MIME_FILTERS.map(
+  ({ label, mimeType }) => ({
+    value: mimeType,
+    label,
+    tooltip: RESOURCE_TYPE_TOOLTIPS[mimeType],
+  })
+);
 
 // Datemath windows passed to the `notValidAfter` param (cert `not_after <= now+N`).
 // These intentionally include already-expired certs, which are the most urgent.

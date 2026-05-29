@@ -14,18 +14,19 @@ import {
 } from '../constants/client_defaults';
 import type { CertFacets } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
+import { MIME_TYPE_CATEGORIES, mimeCategoryQuery } from '../constants/mime_types';
 import {
   CERT_HASH_SHA256,
   CERT_SUBJECT_COMMON_NAME,
   FIRST_PARTY,
   THIRD_PARTY,
+  PARTY_RUNTIME_MAPPINGS,
+  partyQuery,
   DEFAULT_FROM,
   DEFAULT_TO,
 } from './get_certs_request_body';
 
 const BROWSER_NETWORK_INFO = 'journey/network_info';
-const RESOURCE_TYPE_FIELD = 'synthetics.payload.type';
-const SAME_SITE_FIELD = 'http.request.is_same_site';
 const NOT_AFTER_FIELD = 'tls.server.x509.not_after';
 
 // Distinct certificates are deduped on the subject common name on the certificates
@@ -91,24 +92,32 @@ export const getCertsFacetsRequestBody = ({
       terms: { field: 'tags', size: 1000 },
       aggs: distinctAgg,
     },
-    // Resource type and origin only exist on browser network events.
+    // Resource type and origin only exist on browser network events. Resource type
+    // buckets distinct certs into the shared mime categories (one filter each),
+    // mirroring the certificates page resource quick filter.
     resourceTypes: {
       filter: { term: { 'synthetics.type': BROWSER_NETWORK_INFO } },
       aggs: {
-        byType: {
-          terms: { field: RESOURCE_TYPE_FIELD, size: 50 },
+        byCategory: {
+          filters: {
+            filters: Object.fromEntries(
+              MIME_TYPE_CATEGORIES.map((category) => [category, mimeCategoryQuery(category)])
+            ),
+          },
           aggs: distinctAgg,
         },
       },
     },
+    // Origin buckets distinct certs by `Sec-Fetch-Site` (via the runtime field),
+    // mapping same-site/same-origin/none → first-party and cross-site → third-party.
     party: {
       filter: { term: { 'synthetics.type': BROWSER_NETWORK_INFO } },
       aggs: {
         byParty: {
           filters: {
             filters: {
-              [FIRST_PARTY]: { term: { [SAME_SITE_FIELD]: true } },
-              [THIRD_PARTY]: { term: { [SAME_SITE_FIELD]: false } },
+              [FIRST_PARTY]: partyQuery(FIRST_PARTY),
+              [THIRD_PARTY]: partyQuery(THIRD_PARTY),
             },
           },
           aggs: distinctAgg,
@@ -123,6 +132,9 @@ export const getCertsFacetsRequestBody = ({
 
   return createEsQuery({
     size: 0,
+    // Origin facet reads `Sec-Fetch-Site` from `_source` (request headers are not
+    // indexed), so it is exposed through a no-script runtime field.
+    runtime_mappings: PARTY_RUNTIME_MAPPINGS,
     query: {
       bool: {
         filter: [
@@ -153,7 +165,7 @@ interface DistinctBucket {
 interface CertsFacetsAggs {
   monitorTypes: { buckets: DistinctBucket[] };
   tags: { buckets: DistinctBucket[] };
-  resourceTypes: { byType: { buckets: DistinctBucket[] } };
+  resourceTypes: { byCategory: { buckets: Record<string, { distinct: { value: number } }> } };
   party: { byParty: { buckets: Record<string, { distinct: { value: number } }> } };
   expiringWithin: { buckets: Record<string, { distinct: { value: number } }> };
 }
@@ -171,7 +183,9 @@ export const processCertsFacetsResult = (aggregations?: CertsFacetsAggs): CertFa
   return {
     monitorTypes: toCounts(aggregations?.monitorTypes.buckets),
     tags: toCounts(aggregations?.tags.buckets),
-    resourceTypes: toCounts(aggregations?.resourceTypes.byType.buckets),
+    resourceTypes: aggregations
+      ? fromKeyedBuckets(aggregations.resourceTypes.byCategory.buckets, MIME_TYPE_CATEGORIES)
+      : [],
     party: aggregations
       ? fromKeyedBuckets(aggregations.party.byParty.buckets, [FIRST_PARTY, THIRD_PARTY])
       : [],
