@@ -22,10 +22,12 @@ spaceTest.describe(
     const ruleNames: string[] = [];
 
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
-      // Defensive cleanup from any prior failed run
+      // Defensive cleanup from any prior failed run.
+      // Note: cleanStandardList() is intentionally omitted here — it deletes saved objects
+      // of type 'action', which would destroy the .gen-ai connector created by the
+      // worker-scoped llmProxy fixture and make the bulk "Add to chat" action disappear.
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
-      await scoutSpace.savedObjects.cleanStandardList();
 
       ruleNames.length = 0;
       for (let i = 0; i < ALERT_COUNT; i++) {
@@ -40,10 +42,9 @@ spaceTest.describe(
       await browserAuth.loginWithCustomRole(FULL_KIBANA_SECURITY_ROLE);
     });
 
-    spaceTest.afterEach(async ({ apiServices, scoutSpace }) => {
+    spaceTest.afterEach(async ({ apiServices }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
-      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest(
