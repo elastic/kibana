@@ -21,29 +21,32 @@ const REMOTES_URL = '/internal/evals/remotes' as const;
 const REMOTE_URL = '/internal/evals/remotes/{remoteId}' as const;
 const REMOTES_TEST_URL = '/internal/evals/remotes/_test' as const;
 
-const RemoteIdParamSchema = schema.object({ remoteId: schema.string({ minLength: 1 }) });
+const RemoteIdParamSchema = schema.object({
+  remoteId: schema.string({ minLength: 1, maxLength: 256 }),
+});
 
 const elasticCloudUrlSchema = schema.string({
   minLength: 1,
+  maxLength: 2048,
   validate: (value) => validateElasticCloudUrl(value),
 });
 
 const CreateRemoteBodySchema = schema.object({
-  displayName: schema.string({ minLength: 1 }),
+  displayName: schema.string({ minLength: 1, maxLength: 256 }),
   url: elasticCloudUrlSchema,
-  apiKey: schema.string({ minLength: 1 }),
+  apiKey: schema.string({ minLength: 1, maxLength: 256 }),
 });
 
 const UpdateRemoteBodySchema = schema.object({
-  displayName: schema.maybe(schema.string({ minLength: 1 })),
+  displayName: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
   url: schema.maybe(elasticCloudUrlSchema),
-  apiKey: schema.maybe(schema.string({ minLength: 1 })),
+  apiKey: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
 });
 
 const TestRemoteBodySchema = schema.object({
   url: schema.maybe(elasticCloudUrlSchema),
-  apiKey: schema.maybe(schema.string({ minLength: 1 })),
-  remoteId: schema.maybe(schema.string({ minLength: 1 })),
+  apiKey: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
+  remoteId: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
 });
 
 const TEST_TIMEOUT_MS = 15_000;

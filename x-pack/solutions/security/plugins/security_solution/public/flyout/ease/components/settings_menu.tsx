@@ -64,6 +64,7 @@ export const AlertSummaryOptionsMenu = memo(({ hasAlertSummary }: AlertSummaryOp
   );
   return (
     <EuiPopover
+      aria-label={OPTIONS_MENU}
       button={button}
       isOpen={isPopoverOpen}
       closePopover={togglePopover}
