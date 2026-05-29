@@ -298,8 +298,9 @@ export function AddCisIntegrationFormPageProvider({
     await retry.waitFor('Add Agent button to appear', async () => {
       return await testSubjects.exists(TEST_IDS.ADD_AGENT_BUTTON);
     });
+    await PageObjects.header.waitUntilLoadingHasFinished();
     await testSubjects.click(TEST_IDS.ADD_AGENT_BUTTON);
-    await retry.waitFor('Agent enrollment flyout to render', async () => {
+    await retry.waitForWithTimeout('Agent enrollment flyout to render', 30_000, async () => {
       return await testSubjects.exists(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
     });
   };
