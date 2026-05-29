@@ -8,6 +8,7 @@
 import { v5 } from 'uuid';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { KbnClientRequesterError } from '@kbn/kbn-client';
 import {
   createConnectorFixture,
   getConnectorIdAsUuid,
