@@ -116,7 +116,7 @@ const defaultTransform = (
 function transformPanel(
   panel: SavedDashboardPanel,
   panelReferences: SavedObjectReference[],
-  containerReferences?: SavedObjectReference[],
+  containerReferences: SavedObjectReference[] = [],
   isDashboardAppRequest: boolean = false
 ) {
   const { embeddableConfig, gridData, panelIndex, type } = panel;
@@ -133,10 +133,8 @@ function transformPanel(
     transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
     defaultTransform(embeddableConfig);
 
-  const registeredSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
-  if (registeredSchemas[transformType]?.schema) {
-    transformedPanelConfig =
-      registeredSchemas[transformType].schema.validate(transformedPanelConfig);
+  if (transforms?.schema) {
+    transformedPanelConfig = transforms.schema.validate(transformedPanelConfig);
   }
 
   return {
