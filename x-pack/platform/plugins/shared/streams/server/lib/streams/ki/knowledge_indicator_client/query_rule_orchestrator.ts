@@ -91,8 +91,6 @@ export class QueryRuleOrchestrator {
         demotedToStats.some((d) => d.query.id === link.query.id)
     );
 
-    await uninstallQueries(this.rulesClient, this.logger, toUninstall);
-
     try {
       await installQueries(this.rulesClient, toCreate, toUpdate, definition);
     } catch (installError) {
@@ -108,6 +106,11 @@ export class QueryRuleOrchestrator {
       });
       throw installError;
     }
+
+    // Install succeeded — safe to remove stale and replaced rules now.
+    // Doing this after install preserves monitoring coverage during ESQL-change
+    // transitions: the old rule keeps firing until the new one is ready.
+    await uninstallQueries(this.rulesClient, this.logger, toUninstall);
 
     // Append revisions for every next query and a tombstone for every
     // current link that's no longer in the input set.

@@ -79,7 +79,6 @@ export async function persistQueries(
   // full next state by merging existing queries with the rule-eligible ones.
   const standardOps: KIBulkOperation[] = [];
   const ruleQueries: StreamQuery[] = [];
-  const replacedRuleQueryIds = new Set<string>();
   const persistedQueries: Array<GeneratedSignificantEventQuery & { id: string }> = [];
   const skippedQueries: GeneratedSignificantEventQuery[] = [];
 
@@ -100,9 +99,6 @@ export async function persistQueries(
     if (replaces && existingById.has(replaces)) {
       id = replaces;
       routeToRules = ruleBackedIds.has(replaces);
-      if (routeToRules) {
-        replacedRuleQueryIds.add(replaces);
-      }
     } else {
       id = v4();
       routeToRules = isRuleEligible(query);

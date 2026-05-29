@@ -23,6 +23,8 @@ import {
 } from '../../../sig_events/latest_source_query';
 import { ID, KI_TYPE_FEATURE, STREAM_NAME, TYPE } from '../fields';
 
+const REVISION_SIZE_LIMIT = 10_000;
+
 export class RevisionReader {
   constructor(private readonly esClient: ElasticsearchClient) {}
 
@@ -36,7 +38,7 @@ export class RevisionReader {
     query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
     query = withWhere(query, postGroupingWhere);
     query = withSort(query, sort);
-    query = query.keep('_source');
+    query = query.keep('_source').limit(REVISION_SIZE_LIMIT);
 
     const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
     return hits;
