@@ -55,16 +55,6 @@ interface ToolCallStepProps {
   step: ToolCallStepData;
 }
 
-/**
- * Renders a `ToolCallStep`. Clickable to expand into:
- *   - A "Parameters sent" accordion (JSON)
- *   - Each progression message as a plain text row
- *   - A "Response returned" section that renders one of three forms:
- *      1. Sub-agent call → inline "View execution" link → SubAgentExecutionFlyout
- *      2. Any inline-renderable results (query / esqlResults / error) →
- *         accordion with chevron; body shows results rendered inline
- *      3. Only "other" results → inline "View JSON" link → ToolResponseFlyout
- */
 export const ToolCallStep: React.FC<ToolCallStepProps> = ({ step }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const onToggle = () => setIsExpanded((v) => !v);
@@ -210,13 +200,6 @@ const ParametersAccordion: React.FC<{
   );
 };
 
-/**
- * Accordion form of "Response returned" — used when the tool call has at
- * least one inline-renderable result (`query` / `esqlResults` / `error`).
- * Body renders all results through the `ToolResult` dispatcher; inline-
- * renderable types use their purpose-built renderers, anything else falls
- * through to `JsonCodeBlock`.
- */
 const ResponseAccordion: React.FC<{
   stepId: string;
   results: ToolResultData[];
@@ -265,11 +248,6 @@ const ResponseAccordion: React.FC<{
   );
 };
 
-/**
- * Inline-link form of "Response returned" — used for sub-agent calls
- * ("View execution" → `SubAgentExecutionFlyout`) and for tool calls whose
- * results are all "other" types ("View JSON" → `ToolResponseFlyout`).
- */
 const ResponseLink: React.FC<{
   step: ToolCallStepData;
   isSubAgentCall: boolean;
@@ -344,11 +322,6 @@ interface SubAgentResultData {
   agent_execution_id?: string;
 }
 
-/**
- * Extracts the sub-agent execution id from a tool-call step. Looks in results
- * first (populated after the tool completes), then falls back to progression
- * metadata (set during execution by tool-progress events).
- */
 const getSubAgentExecutionId = (step: ToolCallStepData): string | undefined => {
   const fromResults = step.results.find(
     (r) => (r.data as SubAgentResultData | undefined)?.agent_execution_id

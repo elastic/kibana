@@ -23,10 +23,6 @@ interface ToolErrorResultProps {
   result: ErrorResult;
 }
 
-/**
- * Renders an `error` ToolResult as a red-bordered error block inside the
- * `ToolResponseFlyout`'s body, dispatched by `tool_result.tsx`.
- */
 export const ToolErrorResult: React.FC<ToolErrorResultProps> = ({ result: { data } }) => (
   <EuiSplitPanel.Outer hasBorder hasShadow={false}>
     <EuiSplitPanel.Inner color="danger" grow={false} paddingSize="m">

@@ -23,10 +23,6 @@ interface QueryResultProps {
   result: QueryResultData;
 }
 
-/**
- * Renders a `query` ToolResult as an ESQL code block inside the
- * `ToolResponseFlyout`'s body, dispatched by `tool_result.tsx`.
- */
 export const QueryResult: React.FC<QueryResultProps> = ({ result: { data } }) => (
   <EuiSplitPanel.Outer hasBorder hasShadow={false}>
     <EuiSplitPanel.Inner color="plain" grow={false} paddingSize="m">

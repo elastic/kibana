@@ -33,9 +33,6 @@ interface MasterToggleProps {
   onToggle: () => void;
 }
 
-/**
- * Round-level master toggle for the entire steps block.
- */
 export const MasterToggle: React.FC<MasterToggleProps> = ({ expanded, onToggle }) => {
   const { euiTheme } = useEuiTheme();
 

@@ -20,9 +20,6 @@ interface RoundTraceButtonProps {
   traceId: string;
 }
 
-/**
- * Icon button that opens `RoundTraceFlyout` for the given `traceId`.
- */
 export const RoundTraceButton: React.FC<RoundTraceButtonProps> = ({ traceId }) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 

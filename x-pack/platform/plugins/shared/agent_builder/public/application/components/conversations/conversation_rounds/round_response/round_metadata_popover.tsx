@@ -50,10 +50,6 @@ interface RoundMetadataPopoverProps {
   rawRound: ConversationRound;
 }
 
-/**
- * Renders nothing until `time_to_last_token` has a value — i.e. the round has
- * finished streaming. Trigger sits at the end of `RoundResponseActions`.
- */
 export const RoundMetadataPopover: React.FC<RoundMetadataPopoverProps> = ({ rawRound }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isJsonFlyoutOpen, setIsJsonFlyoutOpen] = useState(false);

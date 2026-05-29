@@ -16,30 +16,13 @@ type ConversationAction =
   (typeof AGENT_BUILDER_UI_EBT.action.conversation)[keyof typeof AGENT_BUILDER_UI_EBT.action.conversation];
 
 interface StepLayoutProps {
-  /** Top-level row content (the headline label) */
   label: ReactNode;
-  /**
-   * When provided, the row is clickable to toggle expansion.
-   * Omit for steps without sub-fields (reasoning, compaction) — those steps
-   * are static rows.
-   */
   onClick?: () => void;
-  /** Controlled expansion state — only meaningful when onClick is provided */
   isExpanded?: boolean;
-  /** Sub-field content shown indented when isExpanded is true */
   expansion?: ReactNode;
-  /**
-   * EBT click-telemetry action for the row's expand/collapse click. Required
-   * when `onClick` is provided so every clickable step row reports an event;
-   * caller passes the appropriate step-type action (e.g.
-   * `EXPAND_TOOL_CALL_STEP`).
-   */
   ebtAction?: ConversationAction;
 }
 
-/**
- * Shared layout for a single step row in the events block.
- */
 export const StepLayout: React.FC<StepLayoutProps> = ({
   label,
   onClick,
@@ -50,14 +33,6 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
   const { euiTheme } = useEuiTheme();
   const isClickable = !!onClick;
 
-  // Base text color for every step row:
-  //   - collapsed / non-clickable  → textDisabled
-  //   - expanded                   → textParagraph (stays "active" while open)
-  //   - hover (clickable only)     → textParagraph
-  //
-  // Steps that need to break out of this (e.g. a tool call whose result is an
-  // error) do so by setting `color="danger"` on the EuiText inside their
-  // `label` prop — that overrides the inherited color from this wrapper.
   const rowStyles = css`
     color: ${isExpanded ? euiTheme.colors.textParagraph : euiTheme.colors.textDisabled};
     ${isClickable

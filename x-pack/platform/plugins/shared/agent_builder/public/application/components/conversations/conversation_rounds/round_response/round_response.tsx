@@ -50,18 +50,6 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
 }) => {
   const hasMessage = Boolean(response.message);
 
-  // Render precedence. Mutually exclusive — `latestStep` is computed in
-  // `RoundLayout` to be {undefined} whenever `hasMessage` is true, so the
-  // streaming-text and live-step branches can never both be true at once.
-  //   1. Streaming text chunks are filling the buffer → {StreamingText}
-  //      (text_chunk content is always shown live).
-  //   2. A step is the latest event → render the full {StepItem} inline,
-  //      clickable to expand into its sub-fields just like in the events
-  //      panel above. When another event becomes the latest, this same step
-  //      moves up into the panel and its local expansion state resets on
-  //      remount.
-  //   3. Round complete → {ChatMessageText} with the final answer.
-  //   4. Otherwise (very initial moment, no chunks, no steps) → nothing.
   const showStreamingText = isLoading && hasMessage;
   const liveStep = isLoading ? latestStep : undefined;
   const showCompletedAnswer = !isLoading;

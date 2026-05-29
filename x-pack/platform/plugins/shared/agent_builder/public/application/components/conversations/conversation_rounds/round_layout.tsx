@@ -92,12 +92,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     resumeRound,
     isResuming,
   } = useConversationStream();
-  // HITL Approve / Cancel is per-conversation: streamActions are closure-bound to
-  // vars.conversationId, so other in-flight conversations cannot corrupt this cache.
-  // Use `isStreaming` (not `isResponseLoading`) so the buttons stay disabled during the
-  // window where the send mutation has emitted `pending_prompt` (round is now
-  // `awaitingPrompt`) but `mutationFn` hasn't reached its `finally` yet — clicking
-  // Approve there would race the still-in-flight send mutation.
   const isHitlDisabled = isStreaming && !isResuming;
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
@@ -113,12 +107,6 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
 
   const hasMessage = Boolean(response?.message);
 
-  // While the round is streaming, the latest non-todos step is held back from
-  // the events panel and rendered inline in the response body as the live
-  // indicator. TodosStep is filtered out — it has its own dedicated panel and
-  // shouldn't act as the live indicator. Once the round completes (or text
-  // chunks start filling the buffer — StreamingText takes precedence in the
-  // response body), `latestStep` is undefined and all steps show in the panel.
   const { latestStep, displayedSteps } = useMemo(() => {
     if (!isLoadingCurrentRound || hasMessage) {
       return { latestStep: undefined, displayedSteps: steps };

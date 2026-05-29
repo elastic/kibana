@@ -18,10 +18,6 @@ interface EsqlResultsProps {
   result: EsqlResultsData;
 }
 
-/**
- * Renders an `esqlResults` ToolResult as a "Found N results" link to Discover
- * inside the `ToolResponseFlyout`'s body, dispatched by `tool_result.tsx`.
- */
 export const EsqlResults: React.FC<EsqlResultsProps> = ({ result: { data } }) => {
   const {
     startDependencies: { share },

@@ -15,12 +15,6 @@ interface CompactionStepProps {
   step: CompactionStepData;
 }
 
-/**
- * Renders a `CompactionStep` as a static row.
- *
- * - In progress (`token_count_after === 0`): "Compacting context"
- * - Complete: "Context condensed: {before} → {after} tokens, {N} round(s)"
- */
 export const CompactionStep: React.FC<CompactionStepProps> = ({ step }) => {
   const isInProgress = step.token_count_after === 0;
 

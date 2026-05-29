@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiCodeBlock, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -21,40 +21,37 @@ interface RoundJsonFlyoutProps {
   onClose: () => void;
 }
 
-/**
- * Flyout that dumps the entire `ConversationRound` as pretty-printed JSON.
- *
- * Opened from the "View response JSON" button inside `RoundMetadataPopover`.
- * Replaces the old `round_thinking/round_flyout.tsx` with the same behaviour —
- * a single copyable `EuiCodeBlock` of `JSON.stringify(rawRound, null, 2)`.
- */
-export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({ rawRound, onClose }) => (
-  <EuiFlyout
-    onClose={onClose}
-    aria-labelledby="agentBuilderRoundJsonFlyoutTitle"
-    size="m"
-    ownFocus={false}
-    css={css`
-      z-index: ${euiThemeVars.euiZFlyout + 4};
-    `}
-  >
-    <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="m">
-        <h2 id="agentBuilderRoundJsonFlyoutTitle">{title}</h2>
-      </EuiTitle>
-    </EuiFlyoutHeader>
-    <EuiFlyoutBody>
-      <EuiCodeBlock
-        language="json"
-        fontSize="s"
-        paddingSize="m"
-        isCopyable
-        css={css`
-          overflow: auto;
-        `}
-      >
-        {JSON.stringify(rawRound, null, 2)}
-      </EuiCodeBlock>
-    </EuiFlyoutBody>
-  </EuiFlyout>
-);
+export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({ rawRound, onClose }) => {
+  const formattedJson = useMemo(() => JSON.stringify(rawRound, null, 2), [rawRound]);
+
+  return (
+    <EuiFlyout
+      onClose={onClose}
+      aria-labelledby="agentBuilderRoundJsonFlyoutTitle"
+      size="m"
+      ownFocus={false}
+      css={css`
+        z-index: ${euiThemeVars.euiZFlyout + 4};
+      `}
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id="agentBuilderRoundJsonFlyoutTitle">{title}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiCodeBlock
+          language="json"
+          fontSize="s"
+          paddingSize="m"
+          isCopyable
+          css={css`
+            overflow: auto;
+          `}
+        >
+          {formattedJson}
+        </EuiCodeBlock>
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};

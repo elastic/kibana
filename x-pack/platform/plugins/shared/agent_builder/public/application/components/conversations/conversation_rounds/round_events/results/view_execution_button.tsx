@@ -18,18 +18,9 @@ const buttonLabel = i18n.translate('xpack.agentBuilder.roundEvents.results.viewE
 
 interface ViewExecutionButtonProps {
   executionId: string;
-  /**
-   * Optional originating tool-call params (description / effort / prompt).
-   * Rendered as a JSON block at the top of the flyout for context. Omit when
-   * opening the flyout from a `BackgroundAgentCompleteStep` that doesn't have
-   * direct access to the tool-call params.
-   */
   params?: Record<string, unknown>;
 }
 
-/**
- * Button that opens `SubAgentExecutionFlyout` for a sub-agent execution.
- */
 export const ViewExecutionButton: React.FC<ViewExecutionButtonProps> = ({
   executionId,
   params,

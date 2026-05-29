@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiCodeBlock, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -15,6 +15,7 @@ interface JsonCodeBlockProps {
 
 export const JsonCodeBlock: React.FC<JsonCodeBlockProps> = ({ data }) => {
   const { euiTheme } = useEuiTheme();
+  const formattedJson = useMemo(() => JSON.stringify(data, null, 2), [data]);
   const styles = css`
     word-break: break-word;
     border: 1px solid ${euiTheme.colors.borderBaseSubdued};
@@ -23,7 +24,7 @@ export const JsonCodeBlock: React.FC<JsonCodeBlockProps> = ({ data }) => {
   `;
   return (
     <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable lineNumbers css={styles}>
-      {JSON.stringify(data, null, 2)}
+      {formattedJson}
     </EuiCodeBlock>
   );
 };

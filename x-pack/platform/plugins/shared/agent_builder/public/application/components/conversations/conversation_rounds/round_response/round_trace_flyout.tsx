@@ -22,9 +22,6 @@ interface RoundTraceFlyoutProps {
   onClose: () => void;
 }
 
-/**
- * Flyout that renders an LLM trace waterfall for the round's `trace_id`.
- */
 export const RoundTraceFlyout: React.FC<RoundTraceFlyoutProps> = ({ traceId, onClose }) => {
   const { services } = useKibana();
   const { data } = services.plugins;
