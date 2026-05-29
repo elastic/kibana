@@ -70,6 +70,15 @@ const context = {
 } as unknown as RulesClientContext;
 
 describe('validate unsnooze params', () => {
+  beforeEach(() => {
+    savedObjectsMock.update = jest.fn().mockResolvedValue({
+      id: '123',
+      type: 'alert',
+      attributes: { snoozeSchedule: [] },
+      references: [],
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -212,7 +221,12 @@ describe('unsnoozeRule change tracking', () => {
   beforeEach(() => {
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
     unsecuredSavedObjectsClient.get.mockResolvedValue(existingRuleSO);
-    unsecuredSavedObjectsClient.update.mockResolvedValue(updatedRuleSO);
+    unsecuredSavedObjectsClient.update.mockResolvedValue({
+      id: 'rule-1',
+      type: 'alert',
+      attributes: { snoozeSchedule: updatedRuleSO.attributes.snoozeSchedule },
+      references: [],
+    });
     setRuleType();
   });
 
@@ -229,7 +243,6 @@ describe('unsnoozeRule change tracking', () => {
       {
         action: 'rule_unsnooze',
         spaceId: 'default',
-        data: { metadata: { bulkCount: 1 } },
       }
     );
   });

@@ -274,6 +274,10 @@ const parseConfigDirectives = (cspConfig: CspConfigType): CspConfigDirectives =>
     reportOnlyDirectives.set('object-src', cspConfig.report_only?.object_src);
   }
 
+  if (cspConfig.report_only?.connect_src?.length) {
+    reportOnlyDirectives.set('connect-src', cspConfig.report_only?.connect_src);
+  }
+
   return {
     enforceDirectives,
     reportOnlyDirectives,

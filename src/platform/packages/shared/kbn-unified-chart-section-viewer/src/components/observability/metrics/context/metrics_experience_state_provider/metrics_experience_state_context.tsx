@@ -11,6 +11,8 @@ import React, { useCallback } from 'react';
 import { createContext } from 'react';
 import type { Dimension } from '../../../../../types';
 import {
+  type FlyoutState,
+  type FlyoutTabId,
   type MetricsExperienceRestorableState,
   useRestorableState,
 } from '../../../../../restorable_state';
@@ -21,6 +23,8 @@ export interface MetricsExperienceStateContextValue extends MetricsExperienceRes
   onDimensionsChange: (value: Dimension[]) => void;
   onSearchTermChange: (value: string) => void;
   onToggleFullscreen: () => void;
+  onFlyoutStateChange: (value: FlyoutState | undefined) => void;
+  onFlyoutSelectedTabChange: (value: FlyoutTabId) => void;
 }
 
 export const MetricsExperienceStateContext =
@@ -37,21 +41,30 @@ export function MetricsExperienceStateProvider({
   const [selectedDimensions, setSelectedDimensions] = useRestorableState('selectedDimensions', []);
   const [searchTerm, setSearchTerm] = useRestorableState('searchTerm', '');
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
+  const [flyoutState, setFlyoutState] = useRestorableState('flyoutState', undefined);
 
   const onDimensionsChange = useCallback(
     (nextDimensions: Dimension[]) => {
-      setCurrentPage(0);
       setSelectedDimensions(nextDimensions);
     },
-    [setCurrentPage, setSelectedDimensions]
+    [setSelectedDimensions]
   );
 
-  const onPageChange = useCallback((page: number) => setCurrentPage(page), [setCurrentPage]);
+  const onPageChange = useCallback(
+    (page: number) => {
+      setCurrentPage(page);
+    },
+    [setCurrentPage]
+  );
 
   const onSearchTermChange = useCallback(
     (term: string) => {
-      setCurrentPage(0);
-      setSearchTerm(term);
+      setSearchTerm((prevTerm) => {
+        if (prevTerm !== term) {
+          setCurrentPage(0);
+        }
+        return term;
+      });
     },
     [setSearchTerm, setCurrentPage]
   );
@@ -59,6 +72,20 @@ export function MetricsExperienceStateProvider({
   const onToggleFullscreen = useCallback(() => {
     setIsFullscreen((prev) => !prev);
   }, [setIsFullscreen]);
+
+  const onFlyoutStateChange = useCallback(
+    (nextFlyoutState: FlyoutState | undefined) => {
+      setFlyoutState(nextFlyoutState);
+    },
+    [setFlyoutState]
+  );
+
+  const onFlyoutSelectedTabChange = useCallback(
+    (nextTabId: FlyoutTabId) => {
+      setFlyoutState((prev) => (prev ? { ...prev, selectedTabId: nextTabId } : prev));
+    },
+    [setFlyoutState]
+  );
 
   return (
     <MetricsExperienceStateContext.Provider
@@ -68,10 +95,13 @@ export function MetricsExperienceStateProvider({
         isFullscreen,
         searchTerm,
         selectedDimensions,
+        flyoutState,
         onPageChange,
         onDimensionsChange,
         onSearchTermChange,
         onToggleFullscreen,
+        onFlyoutStateChange,
+        onFlyoutSelectedTabChange,
       }}
     >
       {children}

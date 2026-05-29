@@ -24,6 +24,8 @@ import { AddTagsFlyout } from '../../actions/components/add_tags_flyout';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
 import { useKibana } from '../../common/lib/kibana';
+import { ExportResultsButton } from '../../results/export_results_button';
+import { useExportFilters } from '../../results/export_filters_context';
 import type { AddToTimelineHandler } from '../../types';
 
 const ADD_TAGS_LABEL = i18n.translate('xpack.osquery.packResultsHeader.addTagsLabel', {
@@ -43,6 +45,8 @@ interface PackResultsHeadersProps {
   agentIds?: string[];
   addToTimeline?: AddToTimelineHandler;
   isScheduled?: boolean;
+  scheduleId?: string;
+  executionCount?: number;
   onSaveQuery?: () => void;
 }
 
@@ -62,12 +66,30 @@ const actionsGroupCss = {
 };
 
 export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
-  ({ actionId, agentIds, queryIds, addToTimeline, isScheduled, onSaveQuery }) => {
+  ({
+    actionId,
+    agentIds,
+    queryIds,
+    addToTimeline,
+    isScheduled,
+    scheduleId,
+    executionCount,
+    onSaveQuery,
+  }) => {
     const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' } as const), []);
     const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
+    const isExportEnabled = useIsExperimentalFeatureEnabled('exportResults');
     const permissions = useKibana().services.application.capabilities.osquery;
     const canEditTags = !!permissions.writeLiveQueries;
     const showAddTags = isHistoryEnabled && canEditTags && !!actionId;
+
+    // Export is supported only when this header represents a single query
+    // (live single-query view or scheduled execution). The pack overview has
+    // multiple queries with different actionIds and per-query export remains
+    // available via the row kebab menu.
+    const exportQueryId = queryIds.length === 1 ? queryIds[0] : undefined;
+    const showExport = isHistoryEnabled && isExportEnabled && !!exportQueryId;
+    const exportFilters = useExportFilters(exportQueryId);
 
     const { data: liveQueryDetails } = useLiveQueryDetails({
       actionId,
@@ -100,6 +122,21 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
             {actionId && (
               <EuiFlexItem grow={false} css={actionsGroupCss}>
                 <EuiFlexGroup gutterSize="s" alignItems="center">
+                  {showExport && exportQueryId && (
+                    <EuiFlexItem grow={false}>
+                      <ExportResultsButton
+                        actionId={exportQueryId}
+                        isLive={!scheduleId}
+                        liveQueryId={actionId}
+                        scheduleId={scheduleId}
+                        executionCount={executionCount}
+                        kuery={exportFilters?.kuery}
+                        activeFilters={exportFilters?.activeFilters}
+                        filteredTotal={exportFilters?.filteredTotal}
+                        total={exportFilters?.total}
+                      />
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem grow={false}>
                     <AddToCaseWrapper
                       actionId={actionId}

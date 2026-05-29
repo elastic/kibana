@@ -187,7 +187,6 @@ export function SloItemActions({
       isOpen={isActionsPopoverOpen}
     >
       <EuiContextMenuPanel
-        size="m"
         items={[
           <EuiContextMenuItem
             key="view"

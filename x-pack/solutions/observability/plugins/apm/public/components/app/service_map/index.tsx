@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import React, { useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { cx } from '@emotion/css';
+import type { BoolQuery } from '@kbn/es-query';
 import {
   useServiceMapFullScreen,
   applyServiceMapFullScreenBodyClasses,
@@ -36,7 +37,8 @@ import { useServiceMap } from './use_service_map';
 import { useServiceMapBadges } from './use_service_map_badges';
 import { getServiceMapBadgesEnd } from './get_service_map_badges_end';
 import { ServiceMapGraph } from './graph';
-import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
+import { ServiceMapSloFlyoutProvider } from '../../shared/service_map/service_map_slo_flyout_context';
+import { useServiceMapSearchContext } from './service_map_search_context';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -57,6 +59,8 @@ export function ServiceMapHome() {
     query: { environment, kuery, rangeFrom, rangeTo, serviceGroup },
   } = useApmParams('/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { esQuery } = useServiceMapSearchContext();
+
   return (
     <ServiceMap
       environment={environment}
@@ -64,6 +68,7 @@ export function ServiceMapHome() {
       start={start}
       end={end}
       serviceGroupId={serviceGroup}
+      esQuery={esQuery ?? undefined}
     />
   );
 }
@@ -76,8 +81,17 @@ export function ServiceMapServiceDetail() {
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { esQuery } = useServiceMapSearchContext();
 
-  return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
+  return (
+    <ServiceMap
+      environment={environment}
+      kuery={kuery}
+      start={start}
+      end={end}
+      esQuery={esQuery ?? undefined}
+    />
+  );
 }
 
 export function ServiceMap({
@@ -86,12 +100,14 @@ export function ServiceMap({
   start,
   end,
   serviceGroupId,
+  esQuery,
 }: {
   environment: Environment;
   kuery: string;
   start: string;
   end: string;
   serviceGroupId?: string;
+  esQuery?: { bool: BoolQuery };
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
@@ -109,7 +125,9 @@ export function ServiceMap({
             rangeFrom: query.rangeFrom,
             rangeTo: query.rangeTo,
             environment: query.environment,
-            kuery: query.kuery,
+            // Drop kuery when navigating to the full map — filtering moves to
+            // the Controls API / filter bar on the destination page.
+            kuery: '',
             comparisonEnabled: query.comparisonEnabled,
             offset: query.offset,
             serviceGroup: 'serviceGroup' in query ? query.serviceGroup ?? '' : '',
@@ -127,6 +145,7 @@ export function ServiceMap({
     end,
     serviceGroupId,
     serviceName,
+    esQuery,
   });
 
   const { ref, height } = useRefDimensions();

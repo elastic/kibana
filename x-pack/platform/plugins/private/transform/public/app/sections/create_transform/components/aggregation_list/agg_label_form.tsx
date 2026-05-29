@@ -87,6 +87,9 @@ export const AggLabelForm: React.FC<Props> = ({
           <EuiPopover
             id="transformFormPopover"
             ownFocus
+            aria-label={i18n.translate('xpack.transform.aggLabelForm.editAggPopoverAriaLabel', {
+              defaultMessage: 'Edit aggregation',
+            })}
             button={
               <EuiButtonIcon
                 aria-label={i18n.translate('xpack.transform.aggLabelForm.editAggAriaLabel', {

@@ -42,7 +42,6 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
         unifiedAttachmentTypeRegistry,
         getFilesClient,
         owner: [APP_OWNER],
-        useFetchAlertData: () => [false, {}],
         permissions: userCapabilities.generalCasesV3,
         basePath: '/',
         features: {

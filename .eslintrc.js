@@ -190,6 +190,7 @@ const DEV_PATTERNS = [
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
   'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
+  'src/platform/kbn-ui/_tooling/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -410,20 +411,15 @@ const RESTRICTED_IMPORTS = [
 const AXIOS_LEGACY_CONSUMERS = [
   '.buildkite/**/*.{js,mjs,ts,tsx,jsx}',
   'packages/kbn-ci-stats-performance-metrics/**/*.{js,mjs,ts,tsx}',
-  'packages/kbn-failed-test-reporter-cli/**/*.{js,mjs,ts,tsx}',
   'packages/kbn-generate/**/*.{js,mjs,ts,tsx}',
   'src/dev/build/lib/**/*.{js,mjs,ts,tsx}',
   'src/dev/build/tasks/**/*.{js,mjs,ts,tsx}',
   'src/dev/prs/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/private/kbn-ci-stats-reporter/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/private/kbn-journeys/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-cypress-test-helper/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-dev-utils/src/axios/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-kbn-client/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-mcp-dev-server/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-test-saml-auth/**/*.{js,mjs,ts,tsx}',
-  'src/platform/test/api_integration/apis/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/examples/alerting_example/server/rule_types/**/*.{js,mjs,ts,tsx}',
   'x-pack/packages/kbn-synthetics-private-location/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/packages/shared/kbn-data-forge/**/*.{js,mjs,ts,tsx}',
@@ -447,7 +443,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts',
   'x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/tests/alerting/mustache_templates.ts',
   'x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/mustache_templates.ts',
-  'x-pack/platform/test/api_integration/services/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/test/fleet_api_integration/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/test/fleet_cypress/agent.ts',
   'x-pack/platform/test/fleet_cypress/artifact_manager.ts',
@@ -1027,6 +1022,7 @@ module.exports = {
       rules: {
         '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
+        '@kbn/eslint/no_npx_playwright': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': [
           'warn',
@@ -2996,6 +2992,7 @@ module.exports = {
         'src/platform/kbn-ui/**/__stories__/**',
         'src/platform/kbn-ui/**/__tests__/**',
         'src/platform/kbn-ui/**/packaging/**',
+        'src/platform/kbn-ui/_tooling/**',
       ],
       rules: {
         'no-restricted-imports': [
@@ -3005,8 +3002,8 @@ module.exports = {
               '@kbn/*',
               '!@kbn/i18n',
               '!@kbn/i18n-react',
-              '!@kbn/core-chrome-layout-constants',
-              '!@kbn/core-chrome-layout-utils',
+              '!@kbn/ui-chrome-layout-constants',
+              '!@kbn/ui-chrome-layout-utils',
             ],
           },
         ],
@@ -3027,6 +3024,19 @@ module.exports = {
           'error',
           ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
         ],
+      },
+    },
+    {
+      // These files are allowed to reference 'npx playwright' — either because they define
+      // the rule itself, test it with invalid-code fixtures, or mention it in an error message
+      // to explain what went wrong.
+      files: [
+        'src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts',
+        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.js',
+        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.test.js',
+      ],
+      rules: {
+        '@kbn/eslint/no_npx_playwright': 'off',
       },
     },
   ],

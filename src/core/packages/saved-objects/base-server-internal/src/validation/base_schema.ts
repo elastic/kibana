@@ -32,7 +32,10 @@ export const baseConfigSchema = schema.object({
       type: schema.string(),
       id: schema.string(),
     }),
-    { defaultValue: [], maxSize: 1000 }
+    {
+      defaultValue: [],
+      maxSize: 10_000, // needed to allow importing dashboards with duplicate references,
+    }
   ),
   namespace: schema.maybe(schema.string()),
   namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
@@ -71,7 +74,7 @@ export const baseZodSchema = z.object({
         id: z.string(),
       })
     )
-    .max(1000)
+    .max(10_000) // needed to allow importing dashboards with duplicate references,
     .default([]),
   namespace: z.string().optional(),
   namespaces: z.array(z.string()).max(100).optional(),

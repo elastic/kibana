@@ -347,6 +347,54 @@ fields:
     expect(result).toContain('default: new value # important comment');
     expect(result).not.toContain('old value');
   });
+
+  describe('$ref entries', () => {
+    it('adds metadata.default to a $ref entry matched by its $ref name', () => {
+      const yaml = `name: T
+fields:
+  - $ref: my_field
+`;
+      const result = updateYamlFieldDefault(yaml, 'my_field', 'hello');
+      expect(result).toContain('$ref: my_field');
+      expect(result).toContain('metadata:');
+      expect(result).toContain('default: hello');
+    });
+
+    it('adds metadata.default to a $ref entry matched by its alias name', () => {
+      const yaml = `name: T
+fields:
+  - name: my_alias
+    $ref: my_field
+`;
+      const result = updateYamlFieldDefault(yaml, 'my_alias', 'hello');
+      expect(result).toContain('default: hello');
+      // Untouched ref should remain
+      expect(result).toContain('$ref: my_field');
+    });
+
+    it('updates an existing metadata.default on a $ref entry', () => {
+      const yaml = `name: T
+fields:
+  - $ref: my_field
+    metadata:
+      default: old
+`;
+      const result = updateYamlFieldDefault(yaml, 'my_field', 'new');
+      expect(result).toContain('default: new');
+      expect(result).not.toContain('default: old');
+    });
+
+    it('does not match a $ref entry by its raw $ref when an alias is set', () => {
+      const yaml = `name: T
+fields:
+  - name: my_alias
+    $ref: my_field
+`;
+      // Effective name is `my_alias`; `my_field` should not match.
+      const result = updateYamlFieldDefault(yaml, 'my_field', 'hello');
+      expect(result).toBe(yaml);
+    });
+  });
 });
 
 describe('removeYamlFieldDefault', () => {
@@ -480,6 +528,33 @@ fields:
     expect(result).toContain('# field comment');
     expect(result).not.toContain('default:');
   });
+
+  describe('$ref entries', () => {
+    it('removes metadata.default from a $ref entry matched by $ref name', () => {
+      const yaml = `name: T
+fields:
+  - $ref: my_field
+    metadata:
+      default: hello
+`;
+      const result = removeYamlFieldDefault(yaml, 'my_field');
+      expect(result).toContain('$ref: my_field');
+      expect(result).not.toContain('default:');
+    });
+
+    it('removes metadata.default from a $ref entry matched by alias name', () => {
+      const yaml = `name: T
+fields:
+  - name: my_alias
+    $ref: my_field
+    metadata:
+      default: hello
+`;
+      const result = removeYamlFieldDefault(yaml, 'my_alias');
+      expect(result).not.toContain('default:');
+      expect(result).toContain('$ref: my_field');
+    });
+  });
 });
 
 describe('hasFieldDefault', () => {
@@ -605,5 +680,37 @@ fields:
 `;
 
     expect(hasFieldDefault(yaml, 'systems')).toBe(true);
+  });
+
+  describe('$ref entries', () => {
+    it('returns true for a $ref entry with metadata.default matched by $ref name', () => {
+      const yaml = `name: T
+fields:
+  - $ref: my_field
+    metadata:
+      default: hello
+`;
+      expect(hasFieldDefault(yaml, 'my_field')).toBe(true);
+    });
+
+    it('returns false for a $ref entry without metadata.default', () => {
+      const yaml = `name: T
+fields:
+  - $ref: my_field
+`;
+      expect(hasFieldDefault(yaml, 'my_field')).toBe(false);
+    });
+
+    it('matches by alias name when set on the $ref entry', () => {
+      const yaml = `name: T
+fields:
+  - name: my_alias
+    $ref: my_field
+    metadata:
+      default: hello
+`;
+      expect(hasFieldDefault(yaml, 'my_alias')).toBe(true);
+      expect(hasFieldDefault(yaml, 'my_field')).toBe(false);
+    });
   });
 });

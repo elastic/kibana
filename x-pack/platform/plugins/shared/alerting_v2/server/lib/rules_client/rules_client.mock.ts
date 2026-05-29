@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { createUserService } from '../services/user_service/user_service.mock';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { RulesClient } from './rules_client';
+import type { ActionPolicyClient } from '../action_policy_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
+import { createUserService } from '../services/user_service/user_service.mock';
+import { RulesClient } from './rules_client';
 
 export function createRulesClient(): {
   rulesClient: RulesClient;
@@ -20,9 +21,14 @@ export function createRulesClient(): {
   const request = httpServerMock.createKibanaRequest();
   const taskManager = taskManagerMock.createStart();
   const { userService } = createUserService();
+  const actionPolicyClient = {
+    deleteActionPoliciesByFilter: jest
+      .fn()
+      .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
+  } as unknown as ActionPolicyClient;
 
   const rulesClient = new RulesClient({
-    services: { request, rulesSavedObjectService, taskManager, userService },
+    services: { request, rulesSavedObjectService, taskManager, userService, actionPolicyClient },
     options: { spaceId: 'default' },
   });
 

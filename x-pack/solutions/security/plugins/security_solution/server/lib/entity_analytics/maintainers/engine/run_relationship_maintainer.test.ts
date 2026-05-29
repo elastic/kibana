@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { runGenericMaintainer } from './run_relationship_maintainer';
+import { runRelationshipMaintainer } from './run_relationship_maintainer';
 import { COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
 import type { RelationshipIntegrationConfig } from './types';
 
@@ -110,13 +110,13 @@ const aborted = () => {
   return ac;
 };
 
-describe('runGenericMaintainer', () => {
+describe('runRelationshipMaintainer', () => {
   describe('namespace boundary validation (defense-in-depth)', () => {
     it('throws InvalidNamespaceError before issuing any ES request when namespace is malformed', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, bulkUpdate } = makeCrudClient();
       await expect(
-        runGenericMaintainer({
+        runRelationshipMaintainer({
           esClient,
           logger: loggerMock.create(),
           namespace: 'bad/value',
@@ -135,7 +135,7 @@ describe('runGenericMaintainer', () => {
       search.mockResolvedValue(successResponse([]));
       const { crudClient } = makeCrudClient();
       await expect(
-        runGenericMaintainer({
+        runRelationshipMaintainer({
           esClient,
           logger: loggerMock.create(),
           namespace: 'default',
@@ -164,7 +164,7 @@ describe('runGenericMaintainer', () => {
       });
       // bulkUpdate returns one 404 and one 500.
       const { crudClient } = makeCrudClient([{ status: 404 }, { status: 500 }]);
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -179,7 +179,7 @@ describe('runGenericMaintainer', () => {
       const { esClient, search } = makeEsClient();
       search.mockResolvedValue(successResponse([]));
       const { crudClient } = makeCrudClient();
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -198,7 +198,7 @@ describe('runGenericMaintainer', () => {
         return successResponse([]);
       });
       const { crudClient } = makeCrudClient();
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -214,7 +214,7 @@ describe('runGenericMaintainer', () => {
   it('returns zeros when no integrations are provided', async () => {
     const { esClient } = makeEsClient();
     const { crudClient, bulkUpdate } = makeCrudClient();
-    const result = await runGenericMaintainer({
+    const result = await runRelationshipMaintainer({
       esClient,
       logger: loggerMock.create(),
       namespace: 'default',
@@ -232,7 +232,7 @@ describe('runGenericMaintainer', () => {
     const { esClient } = makeEsClient();
     const { crudClient } = makeCrudClient();
     const before = new Date().toISOString();
-    const { lastRunTimestamp } = await runGenericMaintainer({
+    const { lastRunTimestamp } = await runRelationshipMaintainer({
       esClient,
       logger: loggerMock.create(),
       namespace: 'default',
@@ -249,7 +249,7 @@ describe('runGenericMaintainer', () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient } = makeCrudClient();
       search.mockResolvedValueOnce(successResponse([]));
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -280,7 +280,7 @@ describe('runGenericMaintainer', () => {
         ],
         values: [],
       });
-      await runGenericMaintainer({
+      await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -309,7 +309,7 @@ describe('runGenericMaintainer', () => {
         columns: [{ name: 'actorUserId', type: 'keyword' }],
         values: [],
       });
-      await runGenericMaintainer({
+      await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -331,7 +331,7 @@ describe('runGenericMaintainer', () => {
       search.mockResolvedValue(successResponse(fullPage, { 'user.name': 'never-ends' }));
       esql.mockResolvedValue({ columns: [], values: [] });
       const logger = loggerMock.create();
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger,
         namespace: 'default',
@@ -355,7 +355,7 @@ describe('runGenericMaintainer', () => {
       const { crudClient, bulkUpdate } = makeCrudClient();
       search.mockRejectedValueOnce(indexNotFoundError());
       const logger = loggerMock.create();
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger,
         namespace: 'default',
@@ -376,7 +376,7 @@ describe('runGenericMaintainer', () => {
       search.mockRejectedValueOnce(responseErrorWithType('cluster_block_exception'));
       const logger = loggerMock.create();
       await expect(
-        runGenericMaintainer({
+        runRelationshipMaintainer({
           esClient,
           logger,
           namespace: 'default',
@@ -397,7 +397,7 @@ describe('runGenericMaintainer', () => {
       search.mockRejectedValueOnce(duckTyped);
       const logger = loggerMock.create();
       await expect(
-        runGenericMaintainer({
+        runRelationshipMaintainer({
           esClient,
           logger,
           namespace: 'default',
@@ -416,7 +416,7 @@ describe('runGenericMaintainer', () => {
         throw new Error('aborted');
       });
       const logger = loggerMock.create();
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger,
         namespace: 'default',
@@ -438,7 +438,7 @@ describe('runGenericMaintainer', () => {
       search.mockRejectedValueOnce(realEsError());
       const logger = loggerMock.create();
       await expect(
-        runGenericMaintainer({
+        runRelationshipMaintainer({
           esClient,
           logger,
           namespace: 'default',
@@ -463,7 +463,7 @@ describe('runGenericMaintainer', () => {
         throw new Error('aborted');
       });
       const logger = loggerMock.create();
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger,
         namespace: 'default',
@@ -487,7 +487,7 @@ describe('runGenericMaintainer', () => {
       esql.mockRejectedValueOnce(new Error('parsing_exception: line 1, column 5'));
       const logger = loggerMock.create();
       await expect(
-        runGenericMaintainer({
+        runRelationshipMaintainer({
           esClient,
           logger,
           namespace: 'default',
@@ -512,7 +512,7 @@ describe('runGenericMaintainer', () => {
         );
         esql.mockResolvedValueOnce({ values: [['user:alice@corp']] } as unknown as EsqlResponse);
         const logger = loggerMock.create();
-        const result = await runGenericMaintainer({
+        const result = await runRelationshipMaintainer({
           esClient,
           logger,
           namespace: 'default',
@@ -535,7 +535,7 @@ describe('runGenericMaintainer', () => {
           columns: [{ name: 'actorUserId', type: 'keyword' }],
         } as unknown as EsqlResponse);
         const logger = loggerMock.create();
-        const result = await runGenericMaintainer({
+        const result = await runRelationshipMaintainer({
           esClient,
           logger,
           namespace: 'default',
@@ -556,7 +556,7 @@ describe('runGenericMaintainer', () => {
         );
         esql.mockResolvedValueOnce({} as unknown as EsqlResponse);
         await expect(
-          runGenericMaintainer({
+          runRelationshipMaintainer({
             esClient,
             logger: loggerMock.create(),
             namespace: 'default',
@@ -572,7 +572,7 @@ describe('runGenericMaintainer', () => {
     it('does not call any ES API when aborted before the first integration', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, bulkUpdate } = makeCrudClient();
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -601,7 +601,7 @@ describe('runGenericMaintainer', () => {
       // Integration #2 should never reach the ES client. If it does, this
       // unmocked call would return undefined and the test would crash with
       // a TypeError — making the regression highly visible.
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -628,7 +628,7 @@ describe('runGenericMaintainer', () => {
         ac.abort();
         throw new Error('aborted');
       });
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -675,7 +675,7 @@ describe('runGenericMaintainer', () => {
         ],
         values: [['user:carol@okta', ['user:dave@okta']]],
       });
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -707,7 +707,7 @@ describe('runGenericMaintainer', () => {
       });
       // oktaConfig: 0 buckets — no records produced.
       search.mockResolvedValueOnce(successResponse([]));
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -739,7 +739,7 @@ describe('runGenericMaintainer', () => {
         ac.abort();
         return [];
       });
-      const result = await runGenericMaintainer({
+      const result = await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -761,7 +761,7 @@ describe('runGenericMaintainer', () => {
       const { crudClient } = makeCrudClient();
       search.mockResolvedValue(successResponse([]));
       esql.mockResolvedValue({ columns: [], values: [] });
-      await runGenericMaintainer({
+      await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'prod',
@@ -781,7 +781,7 @@ describe('runGenericMaintainer', () => {
         successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
       );
       esql.mockResolvedValueOnce({ columns: [], values: [] });
-      await runGenericMaintainer({
+      await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -800,7 +800,7 @@ describe('runGenericMaintainer', () => {
       );
       esql.mockResolvedValueOnce({ columns: [], values: [] });
       const ac = new AbortController();
-      await runGenericMaintainer({
+      await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',
@@ -821,7 +821,7 @@ describe('runGenericMaintainer', () => {
         successResponse([{ key: { 'user.name': 'alice' }, doc_count: 1 }])
       );
       esql.mockResolvedValueOnce({ columns: [], values: [] });
-      await runGenericMaintainer({
+      await runRelationshipMaintainer({
         esClient,
         logger: loggerMock.create(),
         namespace: 'default',

@@ -40,14 +40,18 @@ describe('generateSchema', () => {
         version: '1',
         enabled: true,
         steps: [],
-        triggers: [{ type: 'manual' }],
-        inputs: [
+        triggers: [
           {
-            name: 'tool_name',
-            type: 'choice' as const,
-            options: ['search_code', 'search_repositories'],
-            description: 'Tool to use',
-            required: true,
+            type: 'manual',
+            inputs: [
+              {
+                name: 'tool_name',
+                type: 'choice' as const,
+                options: ['search_code', 'search_repositories'],
+                description: 'Tool to use',
+                required: true,
+              },
+            ],
           },
         ],
       } as WorkflowDetailDto['definition'],
@@ -70,12 +74,16 @@ describe('generateSchema', () => {
         version: '1',
         enabled: true,
         steps: [],
-        triggers: [{ type: 'manual' }],
-        inputs: [
+        triggers: [
           {
-            name: 'query',
-            type: 'string' as const,
-            required: false,
+            type: 'manual',
+            inputs: [
+              {
+                name: 'query',
+                type: 'string' as const,
+                required: false,
+              },
+            ],
           },
         ],
       } as WorkflowDetailDto['definition'],
@@ -95,16 +103,20 @@ describe('generateSchema', () => {
         version: '1',
         enabled: true,
         steps: [],
-        triggers: [{ type: 'manual' }],
-        inputs: {
-          properties: {
-            status: {
-              type: 'string',
-              enum: ['active', 'inactive'],
+        triggers: [
+          {
+            type: 'manual',
+            inputs: {
+              properties: {
+                status: {
+                  type: 'string',
+                  enum: ['active', 'inactive'],
+                },
+              },
+              required: ['status'],
             },
           },
-          required: ['status'],
-        },
+        ],
       },
     });
 

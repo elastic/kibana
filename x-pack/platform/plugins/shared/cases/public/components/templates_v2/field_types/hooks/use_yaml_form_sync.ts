@@ -7,7 +7,7 @@
 
 import { useEffect, useRef } from 'react';
 import moment from 'moment-timezone';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { UseFormReturn } from 'react-hook-form';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../common/utils';
 import { getYamlDefaultAsString } from '../../utils';
@@ -24,8 +24,10 @@ export interface FieldInfo {
 
 export type OnFieldDefaultChange = (fieldName: string, value: string, control: string) => void;
 
+type FormSlice = Record<string, Record<string, unknown>>;
+
 export const useYamlToFormSync = (
-  form: FormHook,
+  form: UseFormReturn,
   parsedFields: FieldInfo[],
   syncingFromYamlRef: React.MutableRefObject<boolean>,
   lastSyncedYamlDefaultRef: React.MutableRefObject<Record<string, string>>
@@ -48,7 +50,11 @@ export const useYamlToFormSync = (
     syncingFromYamlRef.current = true;
     for (const { path, name, yamlDefault } of fieldsToSync) {
       lastSyncedYamlDefaultRef.current[name] = yamlDefault;
-      form.setFieldValue(path, yamlDefault);
+      form.setValue(path, yamlDefault, {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      });
     }
 
     setTimeout(() => {
@@ -65,7 +71,7 @@ const serializeFormValue = (rawValue: unknown): string => {
 };
 
 export const useFormToYamlSync = (
-  form: FormHook,
+  form: UseFormReturn,
   parsedFields: FieldInfo[],
   syncingFromYamlRef: React.MutableRefObject<boolean>,
   yamlDefaultsRef: React.MutableRefObject<Record<string, string>>,
@@ -75,14 +81,12 @@ export const useFormToYamlSync = (
   onFieldDefaultChangeRef.current = onFieldDefaultChange;
 
   useEffect(() => {
-    const subscription = form.subscribe(({ data }) => {
+    const subscription = form.watch((values) => {
       if (syncingFromYamlRef.current) {
         return;
       }
 
-      const extendedFields = (data.internal as Record<string, Record<string, unknown>>)?.[
-        CASE_EXTENDED_FIELDS
-      ];
+      const extendedFields = (values as FormSlice)?.[CASE_EXTENDED_FIELDS];
       if (!extendedFields) return;
 
       for (const field of parsedFields) {
@@ -97,7 +101,7 @@ export const useFormToYamlSync = (
       }
     });
 
-    return subscription.unsubscribe;
+    return () => subscription.unsubscribe();
   }, [form, parsedFields, syncingFromYamlRef, yamlDefaultsRef]);
 };
 
@@ -109,7 +113,7 @@ export const useFormToYamlSync = (
  * - Prevents feedback loops by tracking synced values
  */
 export const useYamlFormSync = (
-  form: FormHook,
+  form: UseFormReturn,
   parsedFields: FieldInfo[],
   onFieldDefaultChange?: OnFieldDefaultChange
 ) => {

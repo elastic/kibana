@@ -198,25 +198,23 @@ describe('getIndexFields', () => {
     ]);
   });
 
-  it('returns rawMapping for a data-stream input, keyed by the user-supplied name', async () => {
+  it('uses _field_caps for a data-stream input, keyed by the user-supplied name', async () => {
     const resolveIndex = jest.fn().mockResolvedValue({
       indices: [],
       aliases: [],
       data_streams: [{ name: 'metrics-k8sclusterreceiver.otel-default' }],
     });
-    const transport = jest.fn().mockResolvedValue({
-      data_streams: [
-        {
-          name: 'metrics-k8sclusterreceiver.otel-default',
-          effective_mappings: {
-            _doc: {
-              properties: { 'k8s.cluster.name': { type: 'keyword' } },
-            },
+    const esClient = createEsClient({
+      resolveIndex,
+      fieldCapsResponse: {
+        indices: ['.ds-metrics-k8sclusterreceiver.otel-default-001'],
+        fields: {
+          'k8s.cluster.name': {
+            keyword: { type: 'keyword', searchable: true, aggregatable: true },
           },
         },
-      ],
+      },
     });
-    const esClient = createEsClient({ resolveIndex, transport });
 
     const result = await getIndexFields({
       indices: ['metrics-k8sclusterreceiver.otel-default'],
@@ -229,21 +227,20 @@ describe('getIndexFields', () => {
         allow_no_indices: true,
       })
     );
-    expect(transport).toHaveBeenCalledWith(
-      expect.objectContaining({
-        path: '/_data_stream/metrics-k8sclusterreceiver.otel-default/_mappings',
-        method: 'GET',
-      })
-    );
+    // Data streams use _field_caps (not _data_stream/_mappings) so that
+    // dynamically-added fields under passthrough properties are included.
+    expect(esClient.fieldCaps).toHaveBeenCalledWith({
+      index: 'metrics-k8sclusterreceiver.otel-default',
+      fields: ['*'],
+    });
+    expect(esClient.transport.request).not.toHaveBeenCalled();
     expect(getIndexMappingsMock).not.toHaveBeenCalled();
 
     // Attribution: the key is the caller's input, not some backing .ds-* name.
     const entry = result['metrics-k8sclusterreceiver.otel-default'];
     expect(entry).toBeDefined();
     expect(entry.type).toBe('dataStream');
-    expect(entry.rawMapping).toEqual({
-      properties: { 'k8s.cluster.name': { type: 'keyword' } },
-    });
+    expect(entry.rawMapping).toBeUndefined();
     expect(entry.fields).toEqual([
       { path: 'k8s.cluster.name', type: 'keyword', meta: {}, searchable: true },
     ]);
@@ -439,29 +436,28 @@ describe('getIndexFields', () => {
         data_streams: [{ name: name[0] }],
       });
     });
-    const transport = jest.fn().mockImplementation(({ path }: { path: string }) => {
-      const match = path.match(/^\/_data_stream\/([^/]+)\/_mappings$/);
-      const names = match ? match[1].split(',') : [];
-      return Promise.resolve({
-        data_streams: names.map((name) => ({
-          name,
-          effective_mappings: {
-            _doc: { properties: { [`field_for_${name}`]: { type: 'keyword' } } },
+    const esClient = createEsClient({ resolveIndex });
+    // Per-input field_caps mock: each data stream returns its own dynamic field.
+    (esClient.fieldCaps as jest.Mock).mockImplementation(({ index }: { index: string }) =>
+      Promise.resolve({
+        indices: [`.ds-${index}-001`],
+        fields: {
+          [`field_for_${index}`]: {
+            keyword: { type: 'keyword', searchable: true, aggregatable: true },
           },
-        })),
-      });
-    });
-    const esClient = createEsClient({ resolveIndex, transport });
+        },
+      })
+    );
 
     const result = await getIndexFields({ indices: inputs, esClient });
 
     expect(resolveIndex).toHaveBeenCalledTimes(4);
+    expect(esClient.fieldCaps).toHaveBeenCalledTimes(4);
     for (const input of inputs) {
       expect(result[input]).toBeDefined();
       expect(result[input].type).toBe('dataStream');
-      expect(result[input].rawMapping).toEqual({
-        properties: { [`field_for_${input}`]: { type: 'keyword' } },
-      });
+      // _field_caps doesn't expose raw mappings.
+      expect(result[input].rawMapping).toBeUndefined();
       expect(result[input].fields).toEqual([
         { path: `field_for_${input}`, type: 'keyword', meta: {}, searchable: true },
       ]);

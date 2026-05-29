@@ -8,7 +8,6 @@
 import React, { Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { DynamicRuleFormProps } from './dynamic_rule_form';
-import type { StandaloneRuleFormProps } from './standalone_rule_form';
 
 // Lazy load form components
 const LazyDynamicRuleForm = React.lazy(() =>
@@ -17,21 +16,9 @@ const LazyDynamicRuleForm = React.lazy(() =>
   }))
 );
 
-const LazyStandaloneRuleForm = React.lazy(() =>
-  import('./standalone_rule_form').then((module) => ({
-    default: module.StandaloneRuleForm,
-  }))
-);
-
 export const DynamicRuleForm = (props: DynamicRuleFormProps) => (
   <Suspense fallback={<EuiLoadingSpinner size="l" />}>
     <LazyDynamicRuleForm {...props} />
-  </Suspense>
-);
-
-export const StandaloneRuleForm = (props: StandaloneRuleFormProps) => (
-  <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-    <LazyStandaloneRuleForm {...props} />
   </Suspense>
 );
 
@@ -48,11 +35,20 @@ export const RuleResultsPreview = () => (
   </Suspense>
 );
 
-export type { FormValues, StateTransitionDelayMode } from './types';
+export type {
+  FormValues,
+  StateTransitionDelayMode,
+  WorkflowFormComponentProps,
+  RuleNotificationsValue,
+} from './types';
 export type { DynamicRuleFormProps } from './dynamic_rule_form';
-export type { StandaloneRuleFormProps } from './standalone_rule_form';
 export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
-export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './contexts';
+export {
+  RuleFormProvider,
+  useRuleFormServices,
+  useRuleFormMeta,
+  NOOP_WORKFLOW_FORM,
+} from './contexts';
 export {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,

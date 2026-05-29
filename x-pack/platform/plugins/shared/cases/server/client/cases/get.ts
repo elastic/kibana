@@ -46,6 +46,8 @@ import {
 } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
+import { getOwnersFilter } from '../../authorization/utils';
+import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
 import type {
@@ -88,8 +90,11 @@ export const getCasesByAlertID = async (
   try {
     const queryParams = decodeWithExcessOrThrow(CasesByAlertIDRequestRt)(options);
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.getCaseIDsByAlertID);
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectsAreAuthorized,
+      authorizedOwners,
+    } = await authorization.getAuthorizationFilter(Operations.getCaseIDsByAlertID);
 
     const filter = combineAuthorizedAndOwnerFilter(
       queryParams.owner,
@@ -97,11 +102,28 @@ export const getCasesByAlertID = async (
       Operations.getCaseIDsByAlertID.savedObjectType
     );
 
+    /**
+     * The authorization filter above is scoped to `cases-comments` (the operation's saved object
+     * type). When the unified attachments feature flag is on we also need to query
+     * `cases-attachments`, so build an equivalent owner-scoped filter for that type using the
+     * same authorized owners.
+     */
+    const unifiedAuthorizationFilter =
+      authorizedOwners && authorizedOwners.length > 0
+        ? getOwnersFilter(CASE_ATTACHMENT_SAVED_OBJECT, authorizedOwners)
+        : undefined;
+    const unifiedFilter = combineAuthorizedAndOwnerFilter(
+      queryParams.owner,
+      unifiedAuthorizationFilter,
+      CASE_ATTACHMENT_SAVED_OBJECT
+    );
+
     // This will likely only return one comment saved object, the response aggregation will contain
     // the keys we need to retrieve the cases
     const commentsWithAlert = await caseService.getCaseIdsByAlertId({
       alertId: alertID,
       filter,
+      unifiedFilter,
     });
 
     // make sure the comments returned have the right owner

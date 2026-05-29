@@ -610,8 +610,9 @@ describe('extractSchemaCore', () => {
 
       const { schema: unwrapped } = extractSchemaCore(defaultSchema, meta);
 
-      expect(getMeta(unwrapped).label).toBe('Test URL');
-      expect(getMeta(unwrapped).placeholder).toBe('https://');
+      const schemaMeta = getMeta(unwrapped);
+      expect(schemaMeta.label).toBe('Test URL');
+      expect(schemaMeta.placeholder).toBe('https://');
     });
 
     it('should preserve meta when meta exists on both wrapper and inner schema', () => {

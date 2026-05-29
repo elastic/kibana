@@ -13,12 +13,10 @@ import {
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('wizard max_page_search_size reset', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await transform.testResources.setKibanaTimeZoneToUTC();
       await transform.securityUI.loginAsTransformPowerUser();

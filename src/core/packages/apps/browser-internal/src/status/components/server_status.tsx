@@ -15,7 +15,7 @@ import type { StatusState } from '../lib';
 import { StatusBadge } from './status_badge';
 
 interface ServerStateProps {
-  name: string;
+  name?: string;
   serverState: StatusState;
 }
 
@@ -36,10 +36,12 @@ export const ServerStatus: FunctionComponent<ServerStateProps> = ({ name, server
         </h2>
       </EuiTitle>
     </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText>
-        <p>{name}</p>
-      </EuiText>
-    </EuiFlexItem>
+    {name ? (
+      <EuiFlexItem grow={false}>
+        <EuiText>
+          <p>{name}</p>
+        </EuiText>
+      </EuiFlexItem>
+    ) : null}
   </EuiFlexGroup>
 );

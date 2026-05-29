@@ -133,3 +133,10 @@ export const PROXY_VERIFICATION_MODE_FULL = i18n.translate(
   'xpack.stackConnectors.components.http.proxyVerificationModeFullLabel',
   { defaultMessage: 'Full' }
 );
+
+export const QUERY_PARAMS_SWITCH = i18n.translate(
+  'xpack.stackConnectors.components.http.viewQueryParamsSwitch',
+  {
+    defaultMessage: 'Add query parameters',
+  }
+);

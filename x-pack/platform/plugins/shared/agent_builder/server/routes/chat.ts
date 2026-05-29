@@ -123,6 +123,21 @@ export function registerChatRoutes({
                 meta: { description: 'When true, the attachment will not be displayed in the UI.' },
               })
             ),
+            description: schema.maybe(
+              schema.string({
+                maxLength: 1024,
+                meta: { description: 'Human-readable label for the attachment.' },
+              })
+            ),
+            group_id: schema.maybe(
+              schema.string({
+                maxLength: 256,
+                meta: {
+                  description:
+                    'Stable identifier for the logical group this attachment belongs to. Attachments sharing the same group_id were submitted together as a single logical entity.',
+                },
+              })
+            ),
           },
           {
             validate: (attachment) => {
@@ -328,7 +343,7 @@ export function registerChatRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
+        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more about agent chat, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,

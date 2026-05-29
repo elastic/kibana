@@ -148,7 +148,7 @@ test.describe(
       await expect(suggestWidget).toBeVisible();
 
       await expect(suggestWidget.getByRole('option', { name: 'consts' })).toBeVisible();
-      await expect(suggestWidget.getByRole('option', { name: 'inputs' })).toBeVisible();
+      await expect(suggestWidget.getByRole('option', { name: 'tags' })).toBeVisible();
       await expect(suggestWidget.getByRole('option', { name: 'outputs' })).toBeVisible();
     });
 
