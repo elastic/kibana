@@ -50,7 +50,9 @@ const deleteRuleById = async (kbnClient: KbnClient, id: string) => {
 const deleteRulesByPrefix = async (kbnClient: KbnClient, prefix: string) => {
   const res = await kbnClient.request<RuleFindResponse>({
     method: 'GET',
-    path: `/api/alerting/rules/_find?search=${encodeURIComponent(prefix)}&search_fields=name&per_page=100`,
+    path: `/api/alerting/rules/_find?search=${encodeURIComponent(
+      prefix
+    )}&search_fields=name&per_page=100`,
     headers: { 'kbn-xsrf': 'scout' },
   });
   const stale = res.data?.data?.filter((r) => r.name.startsWith(prefix)) ?? [];
