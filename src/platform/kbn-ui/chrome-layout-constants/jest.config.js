@@ -9,6 +9,8 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/core/packages/chrome/layout/core-chrome-layout-constants'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/platform/kbn-ui/chrome-layout-constants'],
+  setupFilesAfterEnv: [],
+  modulePathIgnorePatterns: ['<rootDir>/src/platform/kbn-ui/chrome-layout-constants/packaging'],
 };
