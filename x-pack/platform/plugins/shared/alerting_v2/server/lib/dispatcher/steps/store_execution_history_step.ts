@@ -142,7 +142,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
         return ruleRef({
           id,
           spaceId: rule?.spaceId ?? summary.spaceId,
-          kind: rule?.kind,
+          kind: 'alert',
         });
       }),
     ];
@@ -188,7 +188,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
         executionUuid,
         action: ACTION_POLICY_EVENT_ACTIONS.UNMATCHED,
         spaceId: rule?.spaceId ?? 'default',
-        savedObjects: [ruleRef({ id: ruleId, spaceId: rule?.spaceId, kind: rule?.kind })],
+        savedObjects: [ruleRef({ id: ruleId, spaceId: rule?.spaceId, kind: 'alert' })],
         dispatcherFields: {
           episode_count: episodeIds.size,
           episode_ids: Array.from(episodeIds),
@@ -254,7 +254,7 @@ function ruleRef({
 }: {
   id: string;
   spaceId: string | undefined;
-  kind: Rule['kind'] | undefined;
+  kind: 'alert' | undefined;
 }): SavedObjectRef {
   return {
     type: RULE_SAVED_OBJECT_TYPE,

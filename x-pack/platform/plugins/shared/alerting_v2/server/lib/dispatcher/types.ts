@@ -54,13 +54,8 @@ export interface DispatcherTaskState {
 export interface Rule {
   id: RuleId;
   spaceId: string;
-  kind: 'alert' | 'signal';
   name: string;
-  description: string;
   tags: string[];
-  enabled: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 interface BaseActionPolicy {
@@ -117,7 +112,7 @@ export interface ActionGroup {
 }
 
 export interface ActionPolicyWorkflowPayloadRule {
-  name: string;  
+  name: string;
 }
 
 export interface ActionPolicyWorkflowPayload {
