@@ -6,25 +6,21 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonIcon, EuiCallOut, EuiCopy, EuiFlexGroup } from '@elastic/eui';
-import { OAuthClientType } from '@kbn/agent-builder-common';
+import { EuiButtonIcon, EuiCallOut, EuiCopy, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
+import type { OAuthClient } from '@kbn/agent-builder-common';
+import { MCP_SERVER_PATH, OAuthClientType } from '@kbn/agent-builder-common';
 import fileSaver from 'file-saver';
 import { isEmpty } from 'lodash';
 import useToggle from 'react-use/lib/useToggle';
-import type {
-  CreateOAuthClientResponse,
-  GetOAuthClientResponse,
-} from '../../../../common/http_api/oauth_clients';
-import { MCP_SERVER_PATH } from '../../../../common/mcp';
-import { labels } from '../../utils/i18n';
+import { labels } from './translations';
 import { McpClientDetailsField } from './mcp_client_details_field';
 
 export type McpClientDetailsPresentation = 'modal' | 'flyout';
-export type McpClientDetailsData = CreateOAuthClientResponse | GetOAuthClientResponse;
+export type McpClientDetailsData = OAuthClient & { client_secret?: string };
 
 const hasClientSecret = (
   details: McpClientDetailsData
-): details is CreateOAuthClientResponse & { client_secret: string } =>
+): details is McpClientDetailsData & { client_secret: string } =>
   'client_secret' in details && !isEmpty(details.client_secret);
 
 const isConfidentialClient = (details: McpClientDetailsData): boolean =>
@@ -46,9 +42,8 @@ export const McpClientDetailsContent = ({
 }: McpClientDetailsContentProps) => {
   const [isSecretVisible, toggleSecretVisibility] = useToggle(false);
 
-  const { client_name, id, resource } = clientDetails;
+  const { client_name: clientName, id, resource } = clientDetails;
 
-  const clientName = client_name;
   const mcpServerUrl = buildMcpServerUrl(resource);
   const showSecretField = presentation === 'modal' && hasClientSecret(clientDetails);
   const showSecretRequiredCallout =
@@ -63,16 +58,18 @@ export const McpClientDetailsContent = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <McpClientDetailsField
-        label={labels.tools.mcpClients.details.clientIdLabel}
+        label={labels.details.clientIdLabel}
         actions={[
           <EuiCopy textToCopy={id}>
             {(copy) => (
-              <EuiButtonIcon
-                iconType="copy"
-                color="text"
-                aria-label={labels.tools.mcpClients.details.copyClientId}
-                onClick={copy}
-              />
+              <EuiToolTip content={labels.details.copyClientId} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="copy"
+                  color="text"
+                  aria-label={labels.details.copyClientId}
+                  onClick={copy}
+                />
+              </EuiToolTip>
             )}
           </EuiCopy>,
         ]}
@@ -80,16 +77,18 @@ export const McpClientDetailsContent = ({
         {id}
       </McpClientDetailsField>
       <McpClientDetailsField
-        label={labels.tools.mcpClients.details.serverUrlLabel}
+        label={labels.details.serverUrlLabel}
         actions={[
           <EuiCopy textToCopy={mcpServerUrl}>
             {(copy) => (
-              <EuiButtonIcon
-                iconType="copy"
-                color="text"
-                aria-label={labels.tools.mcpClients.details.copyServerUrl}
-                onClick={copy}
-              />
+              <EuiToolTip content={labels.details.copyServerUrl} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="copy"
+                  color="text"
+                  aria-label={labels.details.copyServerUrl}
+                  onClick={copy}
+                />
+              </EuiToolTip>
             )}
           </EuiCopy>,
         ]}
@@ -98,28 +97,37 @@ export const McpClientDetailsContent = ({
       </McpClientDetailsField>
       {showSecretField && (
         <McpClientDetailsField
-          label={labels.tools.mcpClients.details.modal.clientSecretLabel}
+          label={labels.details.modal.clientSecretLabel}
           actions={[
-            <EuiButtonIcon
-              iconType="download"
-              color="text"
-              aria-label={labels.tools.mcpClients.details.modal.downloadSecret}
-              onClick={handleDownloadSecret}
-            />,
-            <EuiButtonIcon
-              iconType={isSecretVisible ? 'eyeClosed' : 'eye'}
-              color="text"
-              aria-label={labels.tools.mcpClients.details.modal.toggleSecretVisibility}
-              onClick={toggleSecretVisibility}
-            />,
+            <EuiToolTip content={labels.details.modal.downloadSecret} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="download"
+                color="text"
+                aria-label={labels.details.modal.downloadSecret}
+                onClick={handleDownloadSecret}
+              />
+            </EuiToolTip>,
+            <EuiToolTip
+              content={labels.details.modal.toggleSecretVisibility}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType={isSecretVisible ? 'eyeClosed' : 'eye'}
+                color="text"
+                aria-label={labels.details.modal.toggleSecretVisibility}
+                onClick={toggleSecretVisibility}
+              />
+            </EuiToolTip>,
             <EuiCopy textToCopy={clientDetails.client_secret}>
               {(copy) => (
-                <EuiButtonIcon
-                  iconType="copy"
-                  color="text"
-                  aria-label={labels.tools.mcpClients.details.modal.copySecret}
-                  onClick={copy}
-                />
+                <EuiToolTip content={labels.details.modal.copySecret} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="copy"
+                    color="text"
+                    aria-label={labels.details.modal.copySecret}
+                    onClick={copy}
+                  />
+                </EuiToolTip>
               )}
             </EuiCopy>,
           ]}
@@ -128,7 +136,7 @@ export const McpClientDetailsContent = ({
               announceOnMount
               color="warning"
               size="s"
-              title={labels.tools.mcpClients.details.modal.secretWarning}
+              title={labels.details.modal.secretWarning}
             />
           }
         >
@@ -139,9 +147,9 @@ export const McpClientDetailsContent = ({
         <EuiCallOut
           announceOnMount={false}
           color="warning"
-          title={labels.tools.mcpClients.details.flyout.clientSecretRequiredTitle}
+          title={labels.details.flyout.clientSecretRequiredTitle}
         >
-          <p>{labels.tools.mcpClients.details.flyout.clientSecretRequiredBody}</p>
+          <p>{labels.details.flyout.clientSecretRequiredBody}</p>
         </EuiCallOut>
       )}
     </EuiFlexGroup>

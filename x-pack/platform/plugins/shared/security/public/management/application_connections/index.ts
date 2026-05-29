@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { publicApiPath } from './constants';
-
-export const MCP_SERVER_PATH = `${publicApiPath}/mcp`;
+export { applicationConnectionsManagementApp } from './application_connections_management_app';
