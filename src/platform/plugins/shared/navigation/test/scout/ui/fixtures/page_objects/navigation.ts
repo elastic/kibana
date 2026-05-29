@@ -31,4 +31,17 @@ export class Navigation {
   getBreadcrumbByText(text: string) {
     return this.page.locator('.euiBreadcrumb', { hasText: text });
   }
+
+  async openUserMenu() {
+    await this.page.testSubj.click('userMenuButton');
+    await this.page.testSubj.locator('userMenu').waitFor({ state: 'visible' });
+  }
+
+  getCustomizeNavLink() {
+    return this.page.testSubj.locator('customizeNavigationUserMenuLink');
+  }
+
+  getCustomizeNavModal() {
+    return this.page.testSubj.locator('customizeNavigationModal');
+  }
 }
