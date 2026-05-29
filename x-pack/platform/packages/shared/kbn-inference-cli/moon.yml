@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/telemetry'
   - '@kbn/inference-tracing'
   - '@kbn/logging'
+  - '@kbn/es'
 tags:
   - shared-common
   - package

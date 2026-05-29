@@ -7,10 +7,15 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
-import type { FieldSchema } from '../../../../common/types/domain/template/fields';
+import { isRefField } from '../../../../common/types/domain/template/fields';
+import type { Field } from '../../../../common/types/domain/template/fields';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
-type Field = z.infer<typeof FieldSchema>;
+
+// Identity for merging: inline fields use `name`; `$ref` fields fall back to `$ref`
+// when no local alias is provided.
+const getFieldKey = (field: Field): string =>
+  isRefField(field) ? field.name ?? field.$ref : field.name;
 
 /**
  * Merge parent and child template definitions for single-level inheritance.
@@ -25,10 +30,10 @@ export const mergeTemplateDefinitions = (
   const merged = new Map<string, Field>();
 
   for (const field of parent.fields) {
-    merged.set(field.name, field);
+    merged.set(getFieldKey(field), field);
   }
   for (const field of child.fields) {
-    merged.set(field.name, field);
+    merged.set(getFieldKey(field), field);
   }
 
   return {

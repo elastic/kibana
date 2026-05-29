@@ -8,18 +8,19 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getIsSelectedColor } from '../utils';
 import { AppMenuPopover } from './app_menu_popover';
-import type { AppMenuItemType, AppMenuPrimaryActionItem } from '../types';
+import type { AppMenuItemType, AppMenuPrimaryActionItem, AppMenuSwitch } from '../types';
 
 interface AppMenuShowMoreButtonProps {
   items: AppMenuItemType[];
   staticItems?: AppMenuItemType[];
   isPopoverOpen: boolean;
   primaryActionItem?: AppMenuPrimaryActionItem;
+  switchConfig?: AppMenuSwitch;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
 }
@@ -29,12 +30,13 @@ export const AppMenuOverflowButton = ({
   staticItems,
   isPopoverOpen,
   primaryActionItem,
+  switchConfig,
   onPopoverToggle,
   onPopoverClose,
 }: AppMenuShowMoreButtonProps) => {
   const { euiTheme } = useEuiTheme();
 
-  if (items.length === 0 && (!staticItems || staticItems.length === 0)) {
+  if (items.length === 0 && (!staticItems || staticItems.length === 0) && !switchConfig) {
     return null;
   }
 
@@ -53,19 +55,26 @@ export const AppMenuOverflowButton = ({
   `;
 
   const button = (
-    <EuiButtonIcon
-      iconType="ellipsis"
-      size="s"
-      aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
+    <EuiToolTip
+      content={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
         defaultMessage: 'More',
       })}
-      color="text"
-      aria-haspopup="menu"
-      onClick={handleClick}
-      isSelected={isPopoverOpen}
-      css={buttonCss}
-      data-test-subj="app-menu-overflow-button"
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="ellipsis"
+        size="s"
+        aria-label={i18n.translate('core.chrome.appMenu.showMoreButtonLabel', {
+          defaultMessage: 'More',
+        })}
+        color="text"
+        aria-haspopup="menu"
+        onClick={handleClick}
+        isSelected={isPopoverOpen}
+        css={buttonCss}
+        data-test-subj="app-menu-overflow-button"
+      />
+    </EuiToolTip>
   );
 
   return (
@@ -78,6 +87,7 @@ export const AppMenuOverflowButton = ({
       })}
       isOpen={isPopoverOpen}
       primaryActionItem={primaryActionItem}
+      switchConfig={switchConfig}
       onClose={onPopoverClose}
       onCloseOverflowButton={onPopoverClose}
     />

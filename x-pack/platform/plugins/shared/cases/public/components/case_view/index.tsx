@@ -28,16 +28,7 @@ export const CaseViewLoading = () => (
 );
 
 export const CaseView = React.memo(
-  ({
-    actionsNavigation,
-    ruleDetailsNavigation,
-    showAlertDetails,
-    timelineIntegration,
-    useFetchAlertData,
-    onAlertsTableLoaded,
-    refreshRef,
-    renderAlertsTable,
-  }: CaseViewProps) => {
+  ({ actionsNavigation, timelineIntegration, refreshRef }: CaseViewProps) => {
     const { spaces: spacesApi } = useKibana().services;
     const { detailName: caseId } = useCaseViewParams();
     const { basePath } = useCasesContext();
@@ -86,12 +77,7 @@ export const CaseView = React.memo(
           caseData={data.case}
           fetchCase={refetch}
           actionsNavigation={actionsNavigation}
-          ruleDetailsNavigation={ruleDetailsNavigation}
-          showAlertDetails={showAlertDetails}
-          useFetchAlertData={useFetchAlertData}
-          onAlertsTableLoaded={onAlertsTableLoaded}
           refreshRef={refreshRef}
-          renderAlertsTable={renderAlertsTable}
         />
       </CasesTimelineIntegrationProvider>
     ) : null;

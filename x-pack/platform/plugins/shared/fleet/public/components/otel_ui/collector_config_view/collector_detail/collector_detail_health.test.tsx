@@ -79,6 +79,48 @@ describe('CollectorDetailHealth', () => {
     expect(panel.textContent).toContain('connection refused');
   });
 
+  it('resolves connector health when an exporter id appears in config.connectors', () => {
+    const connectorConfig: OTelCollectorConfig = {
+      receivers: { otlp: {} },
+      processors: { batch: {} },
+      connectors: { 'forward/connector': {} },
+      exporters: { 'elasticsearch/default': {} },
+      service: {
+        pipelines: {
+          'logs/default': {
+            receivers: ['otlp'],
+            processors: ['batch'],
+            exporters: ['forward/connector'],
+          },
+        },
+      },
+    };
+
+    const health: ComponentHealth = {
+      healthy: true,
+      status: 'StatusOK',
+      component_health_map: {
+        'pipeline:logs/default': {
+          healthy: true,
+          status: 'StatusOK',
+          component_health_map: {
+            'receiver:otlp': { healthy: true, status: 'StatusOK' },
+            'processor:batch': { healthy: true, status: 'StatusOK' },
+            // health is keyed as connector, not exporter
+            'connector:forward/connector': { healthy: true, status: 'StatusOK' },
+          },
+        },
+      },
+    };
+
+    const result = testRenderer.render(
+      <CollectorDetailHealth health={health} config={connectorConfig} />
+    );
+
+    const pipeline = result.getByTestId('collectorHealthPipeline-logs/default');
+    expect(pipeline.textContent).toContain('3 healthy');
+  });
+
   it('renders pipeline component breakdown when config is provided', () => {
     const health: ComponentHealth = {
       healthy: true,

@@ -24,10 +24,12 @@ export const platformCoreTools = {
   getIndexMapping: platformCoreTool('get_index_mapping'),
   getDocumentById: platformCoreTool('get_document_by_id'),
   generateEsql: platformCoreTool('generate_esql'),
+  generateWorkflow: platformCoreTool('generate_workflow'),
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
+  listWorkflowExecutions: platformCoreTool('list_workflow_executions'),
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
@@ -68,9 +70,10 @@ export const filestoreTools = {
 };
 
 export const internalTools = {
-  subAgentTool: 'run_subagent',
-  sleepTool: 'sleep',
-  writeTodosTool: 'write_todos',
+  runSubagent: 'run_subagent',
+  sleep: 'sleep',
+  writeTodos: 'write_todos',
+  loadSkill: 'load_skill',
 };
 
 export const isAttachmentTool = (toolName: string) =>
@@ -103,6 +106,7 @@ export const defaultAgentToolIds = [
   platformCoreTools.getDocumentById,
   platformCoreTools.getWorkflowExecutionStatus,
   platformCoreTools.resumeWorkflowExecution,
+  platformCoreTools.listWorkflowExecutions,
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,

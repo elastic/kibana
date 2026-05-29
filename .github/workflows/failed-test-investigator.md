@@ -1,6 +1,6 @@
 ---
 name: Failed Test Investigator
-description: Investigate failed-test issues, classify whether the flakiness is in the test or underlying code, and propose the most likely fix.
+description: Investigate a failed-test issue, classify the failure, and propose a fix when appropriate.
 on:
   workflow_dispatch:
     inputs:
@@ -22,18 +22,21 @@ permissions:
 if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test')) }}"
 
 concurrency:
-  group: "failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}"
+  group: 'failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}'
   cancel-in-progress: true
+
+env:
+  ISSUE_NUMBER: &issue_number ${{ github.event.issue.number || github.event.inputs.issue_number }}
 
 engine:
   id: claude
-  version: "2.1.111"
+  version: '2.1.111'
   model: opus
   max-turns: 120
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
     ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
-    ENABLE_PROMPT_CACHING_1H: "1"
+    ENABLE_PROMPT_CACHING_1H: '1'
     ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
     ANTHROPIC_DEFAULT_HAIKU_MODEL: llm-gateway/claude-haiku-4-5
     ANTHROPIC_DEFAULT_SONNET_MODEL: llm-gateway/claude-sonnet-4-6
@@ -49,21 +52,27 @@ network:
   allowed:
     - defaults
     - buildkite.com
-    - "*.buildkite.com"
+    - '*.buildkite.com'
     - ci-stats.kibana.dev
     - github.com
     - api.github.com
     - chatgpt.com
     - elastic.litellm-prod.ai
 sandbox:
-  agent: awf  # Migrated from deprecated network setting
+  agent: awf # Migrated from deprecated network setting
 safe-outputs:
+  noop:
+    report-as-issue: false
   activation-comments: false
   report-failure-as-issue: false
   add-comment:
     max: 1
-    target: "*"
+    target: *issue_number
     hide-older-comments: true
+  add-labels:
+    allowed: [ai:auto-flaky-fix]
+    max: 1
+    target: *issue_number
 
 strict: false
 timeout-minutes: 20
@@ -71,105 +80,91 @@ timeout-minutes: 20
 
 # Failed Test Investigator
 
-Investigate a failed-test issue selected by the trigger.
+Investigate a failed-test issue, classify the failure, and propose a fix when appropriate.
 
-## Target Issue Selection
+## Target issue
 
-- If triggered by `issues`, use the triggering issue. This path should only run for non-PR issues labeled `failed-test`.
-- If triggered by `workflow_dispatch`, use issue number `${{ github.event.inputs.issue_number }}` in the current repository as the target issue.
-- In manual mode, fetch that issue explicitly with GitHub tools before doing any analysis.
-- In manual mode, post the final comment back to that selected issue, not to the workflow run or any other issue.
+- **`issues` trigger**: use the triggering issue (non-PR, labeled `failed-test`).
+- **`workflow_dispatch`**: use issue `${{ github.event.inputs.issue_number }}`. Fetch it explicitly before analysis, and post the final comment there.
 
-Your job is to determine:
+## Investigate
 
-- the most likely root cause
-- whether the flakiness is more likely in the test, in the underlying product code, due to an external cause, or inconclusive
-- the smallest credible fix to try next
+Investigate the test failure(s) using the `flaky-test-investigator` skill.
 
-## What to inspect
+Every conclusion must cite specific evidence. Do not guess.
 
-1. Read the target issue title, body, labels, and all comments.
-2. Parse any hidden failed-test metadata from the issue body when present:
-   `test.class`, `test.name`, `test.type`, and `test.failCount`.
-3. Extract CI evidence from the issue body and comments, especially:
-   - Buildkite build and job URLs
-   - `ci-stats.kibana.dev` links
-   - Scout config paths, module IDs, locations, owners, targets, and attachments
-   - stack traces, failure snippets, and "New error message" blocks
-4. Inspect the relevant repository files.
-   - For Scout failures, start from the reported location, config path, module, and nearby fixtures or helpers.
-   - For FTR and other failures, infer the test file from the issue title and repository search results.
-5. Check recent git history and blame for the likely test file and any closely related product code that could explain the failure.
+## Classify
 
+Set `classification` based on where the evidence points:
 
-## Classification rules
+- **`test-design`**: issue lives in the test code — timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape.
+- **`test-environment`**: test code is fine, but its surroundings are wrong — leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference.
+- **`application`**: real product bug exposed by the test — race, regression, broken contract, feature-flag bug.
+- **`external`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry. Failures on `local-*` targets are less likely to be external; weigh that when classifying.
+- **`inconclusive`**: evidence does not support a defensible call.
 
-- Classify as `test` when the evidence points to timing, waits, selectors, fixtures, retries, setup or teardown, test data coupling, cleanup, or isolation problems in the test harness.
-- Classify as `code` when the evidence is more consistent with a real product bug, broken contract, regression, or race in app, server, or shared code outside the test harness.
-- Classify as `external` when the failure appears to be caused by something outside the specific test and product code under investigation, such as CI instability, a downed dependency or service, environment provisioning failures, credentials, networking, storage, or other unrelated platform incidents.
-- Classify as `inconclusive` only when the available evidence does not support a defensible call.
-- Do not guess. Every classification must be tied to specific evidence.
+Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong inference from converging signals), or `low` (plausible but underspecified).
 
-## Fix proposal rules
+## Assign label `ai:auto-flaky-fix` in specific cases
 
-- Propose a fix only when you can point to the likely file or code area.
+Apply the `ai:auto-flaky-fix` label to the triggering issue **only** when **all** of these conditions hold:
+
+- The GitHub issue represents a Scout test failure (it has the `scout-playwright` label)
+- The test failed in the `kibana-on-merge` pipeline
+- `classification` is `test-design`, `test-environment`, or `application`
+- A concrete fix has been identified.
+
+No other side-effects beyond posting the comment and updating the label.
+
+## Fix proposal
+
+- Propose a fix only when you can point to a likely file or code area.
 - Prefer the smallest plausible change.
-- If the likely fix is in the test, say which assertion, wait condition, fixture, setup, teardown, or helper should change.
-- If the likely fix is in product code, say which module, API, or behavior looks wrong and why.
+- For test fixes: name the assertion, wait, fixture, setup/teardown, or helper to change.
+- For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
 
-## Attribution rules
+## Attribution
 
-- If the evidence strongly points to a commit or small set of commits from the past 3 months, mention that explicitly in the comment.
-- When possible, identify the author using their GitHub handle and mention them with `@username`.
-- Only mention a person when the attribution is evidence-based, such as blame, commit history, or a directly implicated change.
-- Do not mention people speculatively or as a fallback when the evidence is weak.
+- Mention a commit (or small set of commits, last 3 months) only when evidence strongly implicates it.
+- Never speculate or use attribution as a fallback for weak evidence.
 
-## Reference formatting rules
+## References
 
-- When referencing a repository file, use a Markdown link to the file on GitHub, not a bare path.
-- Prefer blob links with line anchors, for example: `[x-pack/.../file.ts](https://github.com/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/x-pack/.../file.ts#L123-L140)`.
-- If the evidence depends on a specific historical revision, use a commit link instead of the default branch blob link.
-- When referencing a commit, use a GitHub commit link, not just a short SHA.
-- Bare paths like `file.ts:123` are allowed only as a supplement to a GitHub link, never as the only reference.
+- Link repository files with Markdown GitHub links — never bare paths.
+- Prefer blob links with line anchors: `[path/to/file.ts](https://github.com/${{ github.repository }}/blob/${{ github.event.repository.default_branch }}/path/to/file.ts#L123-L140)`.
+- For historical evidence, use a commit link instead of the default-branch blob link.
+- Always link commits — never bare SHAs.
+- Bare paths (`file.ts:123`) are allowed only as a supplement to a link.
 
 ## Comment format
 
-Post exactly one concise comment on the target issue with this structure:
+Post exactly one comment. Keep the visible portion very short and easy to read:
 
-### Investigation Summary
+1. **One-line bold headline** stating the result kind and one identifying detail.
+2. **Diagnosis** (≤5 concise bullet points): what broke and where, the most likely root cause.
+3. **Next steps** (≤5 concise bullet points).
 
-One short paragraph with the current best explanation.
+Put the full `flaky-test-investigator` skill output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion). Open the block with a `#### Findings` subsection containing exactly these four bullets in this order — downstream tooling parses them, so preserve keys, casing, and `` - `key`: value `` shape. These bullets must live **inside `<details>`**, never in the visible portion:
 
-### Flakiness Finding
-
-- `classification`: `test` | `code` | `external` | `inconclusive`
+- `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
 - `confidence`: `high` | `medium` | `low`
+- `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
+- `test.file`: repo-relative path, or `unknown`
 
-### Suspected Root Cause
+The skill's "Reporting" subsections should also be inside the collapsible section:
 
-Use 2 to 5 bullets tied to evidence.
-- If a recent commit appears causal, include the commit link and mention the author when justified.
+- What the test does
+- What failed and when
+- Where it ran
+- Root cause hypothesis
+- Evidence
+- Failure screenshot
+- Recommended next step
+- Open questions
 
-### Proposed Fix
+Blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
 
-- Provide one focused fix proposal when justified.
-- Include the exact file, function, assertion, wait condition, fixture, selector, API, or behavior that should change.
-- Include GitHub links to the most relevant files or commits.
-- State the exact change or investigation a human should make next.
-- Be specific enough that an engineer could begin implementing it without re-deriving the plan.
-- If you can justify a likely code change, include a small diff-style snippet showing the suggested edit.
-- Only include a diff when it is grounded in the evidence you collected.
-- If no credible fix is available, say that clearly and explain what evidence is missing.
+End the comment with this footer line (verbatim, on its own line after the `</details>` block):
 
-### Evidence Used
-
-List the key issue comments, file paths, commits, or links that drove the conclusion.
-
-## Constraints
-
-- Keep the comment actionable and specific.
-- Be explicit when evidence is missing or inaccessible.
-- Do not speculate beyond the evidence you collected.
-- Use GitHub links for repository files and commits wherever you cite concrete code evidence.
-- If manually dispatched, ensure the final safe-output comment targets issue `${{ github.event.inputs.issue_number }}` in the current repository.
+`<sup>AI-generated, share feedback in [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3)</sup>`

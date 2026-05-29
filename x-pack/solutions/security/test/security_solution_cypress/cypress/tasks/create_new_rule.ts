@@ -693,7 +693,7 @@ export const fillAboutSpecificEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) 
  * which row is valid or not.
  *
  * There are special tricks below with Eui combo box:
- * cy.get(`button[title="${indexField}"]`)
+ * cy.get(`.euiComboBoxOption[title="${indexField}"]`)
  * .should('be.visible')
  * .then(([e]) => e.click());
  *
@@ -724,14 +724,14 @@ export const fillIndicatorMatchRow = ({
     .eq(0)
     .type(indexField);
   if (computedValueRows === 'indexField' || computedValueRows === 'both') {
-    cy.get(`button[title="${indexField}"]`).then(([e]) => e.click());
+    cy.get(`.euiComboBoxOption[title="${indexField}"]`).then(([e]) => e.click());
   }
   cy.get(THREAT_MAPPING_COMBO_BOX_INPUT)
     .eq(computedRowNumber * 2 - 1)
     .type(indicatorIndexField);
 
   if (computedValueRows === 'indicatorField' || computedValueRows === 'both') {
-    cy.get(`button[title="${indicatorIndexField}"]`).then(([e]) => e.click());
+    cy.get(`.euiComboBoxOption[title="${indicatorIndexField}"]`).then(([e]) => e.click());
   }
 
   if (doesNotMatch) {
@@ -901,6 +901,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
     () => {
       cy.log('Waiting for alerts to appear');
       refreshPage();
+      cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
       cy.get([EMPTY_ALERT_TABLE, ALERTS_TABLE_COUNT].join(', '));
       return cy.root().then(($el) => {
         const emptyTableState = $el.find(EMPTY_ALERT_TABLE);

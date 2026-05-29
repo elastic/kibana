@@ -12,6 +12,7 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
+import { DEFAULT_RISK_SCORE_PAGE_SIZE } from '../../../../../common/constants';
 import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
@@ -34,7 +35,7 @@ export const getDefaultRiskEngineConfiguration = ({
   filter: {},
   identifierType: undefined,
   interval: '1h',
-  pageSize: 10_000,
+  pageSize: DEFAULT_RISK_SCORE_PAGE_SIZE,
   range: { start: 'now-30d', end: 'now' },
   enableResetToZero: true,
   excludeAlertStatuses: ['closed'],
@@ -163,7 +164,7 @@ const adoptLegacyConfigurationSavedObject = async ({
   const adoptedConfiguration = await createConfigurationSavedObject({
     savedObjectsClient,
     namespace,
-    attributes: { ...chosenConfiguration.attributes, pageSize: 10_000 },
+    attributes: { ...chosenConfiguration.attributes, pageSize: DEFAULT_RISK_SCORE_PAGE_SIZE },
   });
 
   for (const legacy of allLegacyConfigurations) {

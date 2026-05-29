@@ -456,7 +456,8 @@ const TakeActionComponent: React.FC<Props> = ({
   return (
     <>
       <EuiPopover
-        anchorPosition="downCenter"
+        aria-label={i18n.TAKE_ACTION}
+        anchorPosition="upCenter"
         button={button}
         closePopover={closePopover}
         data-test-subj="takeAction"
@@ -464,7 +465,7 @@ const TakeActionComponent: React.FC<Props> = ({
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
       >
-        <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
+        <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
 
       {pendingAction != null && !hasSearchAILakeConfigurations && (

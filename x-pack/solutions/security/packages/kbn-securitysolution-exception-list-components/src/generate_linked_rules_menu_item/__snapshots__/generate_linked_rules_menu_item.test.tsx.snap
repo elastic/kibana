@@ -3,37 +3,41 @@
 exports[`generateLinedRulesMenuItems should render the first linked rules with left icon and does not apply the css if the length is 1 1`] = `
 <div>
   <div
-    class="euiContextMenuItem ee8mt0m0 emotion-euiContextMenuItem-m-center-LinkedRulesMenuItem"
+    class="euiListItemLayout euiContextMenuItem ee8mt0m0 emotion-euiListItemLayout-euiContextMenuItem-center-LinkedRulesMenuItem"
     data-test-subj="generateLinedRulesMenuItemsTestActionItem1a2b3c"
   >
     <span
-      class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
+      class="euiListItemLayout__content emotion-euiListItemLayout__content"
     >
-      <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+      <span
+        class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
       >
         <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
-          data-test-subj="generateLinedRulesMenuItemsTestLeftIcon"
-        >
-          <span
-            data-euiicon-type="check"
-          />
-        </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
         >
           <div
-            data-test-subj="securityLinkAnchorComponent"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+            data-test-subj="generateLinedRulesMenuItemsTestLeftIcon"
           >
-            <a
-              href="1a2b3c"
+            <span
+              data-euiicon-type="check"
+            />
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
+          >
+            <div
+              data-test-subj="securityLinkAnchorComponent"
             >
-              Simple Rule Query
-            </a>
+              <a
+                href="1a2b3c"
+              >
+                Simple Rule Query
+              </a>
+            </div>
           </div>
         </div>
-      </div>
+      </span>
     </span>
   </div>
 </div>
@@ -42,29 +46,33 @@ exports[`generateLinedRulesMenuItems should render the first linked rules with l
 exports[`generateLinedRulesMenuItems should render the second linked rule and apply the css when the length is > 1 1`] = `
 <div>
   <div
-    class="euiContextMenuItem ee8mt0m0 emotion-euiContextMenuItem-m-center-LinkedRulesMenuItem"
+    class="euiListItemLayout euiContextMenuItem ee8mt0m0 emotion-euiListItemLayout-euiContextMenuItem-center-LinkedRulesMenuItem"
     data-test-subj="generateLinedRulesMenuItemsTestActionItem2a2b3c"
   >
     <span
-      class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
+      class="euiListItemLayout__content emotion-euiListItemLayout__content"
     >
-      <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
+      <span
+        class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
       >
         <div
-          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
         >
           <div
-            data-test-subj="securityLinkAnchorComponent"
+            class="euiFlexItem emotion-euiFlexItem-grow-1"
           >
-            <a
-              href="2a2b3c"
+            <div
+              data-test-subj="securityLinkAnchorComponent"
             >
-              Simple Rule Query 2
-            </a>
+              <a
+                href="2a2b3c"
+              >
+                Simple Rule Query 2
+              </a>
+            </div>
           </div>
         </div>
-      </div>
+      </span>
     </span>
   </div>
 </div>

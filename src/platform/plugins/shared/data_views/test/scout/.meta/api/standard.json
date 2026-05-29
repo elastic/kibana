@@ -1,5 +1,5 @@
 {
-  "sha1": "a847385bdddae38937c15386092e8affdd99b24b",
+  "sha1": "dfc2f3f740332a594f47d95b52a6ef26dbdbce50",
   "tests": [
     {
       "id": "6a1a7d28753a6bb-37b3571f127ad93",
@@ -1089,7 +1089,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/default_data_view.spec.ts",
-        "line": 68,
+        "line": 71,
         "column": 12
       }
     },
@@ -1115,7 +1115,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/default_data_view.spec.ts",
-        "line": 89,
+        "line": 92,
         "column": 12
       }
     },
@@ -1141,7 +1141,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/default_data_view.spec.ts",
-        "line": 120,
+        "line": 123,
         "column": 12
       }
     },
@@ -2591,6 +2591,76 @@
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/existing_indices_route/response.spec.ts",
         "line": 46,
         "column": 12
+      }
+    },
+    {
+      "id": "c5d1b61ef00886d-30f8a2b9622c659",
+      "title": "Data Views feature controls indexPatterns all privileges expose save and management capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 31,
+        "column": 10
+      }
+    },
+    {
+      "id": "c5d1b61ef00886d-33df3c5cb64c8ed",
+      "title": "Data Views feature controls indexPatterns read privileges expose management without save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 46,
+        "column": 10
+      }
+    },
+    {
+      "id": "c5d1b61ef00886d-aaea5e8560ea4ca",
+      "title": "Data Views feature controls users without indexPatterns privileges cannot access data view management",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 61,
+        "column": 10
+      }
+    },
+    {
+      "id": "c5d1b61ef00886d-02e3af5dcce4cdf",
+      "title": "Data Views feature controls space with Data Views enabled exposes indexPatterns management capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
+      "id": "c5d1b61ef00886d-b59fa2d95a9637b",
+      "title": "Data Views feature controls space with Data Views disabled hides indexPatterns management capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 92,
+        "column": 10
       }
     },
     {
@@ -4201,7 +4271,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/default_index_pattern.spec.ts",
-        "line": 70,
+        "line": 73,
         "column": 12
       }
     },
@@ -4227,7 +4297,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/default_index_pattern.spec.ts",
-        "line": 91,
+        "line": 94,
         "column": 12
       }
     },
@@ -4253,7 +4323,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/default_index_pattern.spec.ts",
-        "line": 125,
+        "line": 128,
         "column": 12
       }
     },

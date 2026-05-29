@@ -511,7 +511,6 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                 path="indexMode"
                 componentProps={{
                   euiFieldProps: {
-                    hasDividers: true,
                     'data-test-subj': indexMode.testSubject,
                     options: indexMode.options,
                   },

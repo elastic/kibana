@@ -7,24 +7,24 @@
 
 import { v4 } from 'uuid';
 import { ToolType } from '@kbn/agent-builder-common';
-import type { ToolHandlerContext } from '@kbn/agent-builder-server';
-import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
-import { z } from '@kbn/zod/v4';
-import {
-  WORKFLOW_YAML_ATTACHMENT_TYPE,
-  WORKFLOW_YAML_CHANGED_EVENT,
-  WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
-} from '@kbn/workflows/common/constants';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { EditResult, StepDefinition } from './yaml_edit_utils';
+import type { ToolHandlerContext, AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import {
   deleteStep,
   insertStep,
   modifyStep,
   modifyStepProperty,
   modifyWorkflowProperty,
-} from './yaml_edit_utils';
+  parseYamlToJSONWithoutValidation,
+  type EditResult,
+  type StepDefinition,
+} from '@kbn/workflows-yaml';
+import {
+  WORKFLOW_YAML_ATTACHMENT_TYPE,
+  WORKFLOW_YAML_CHANGED_EVENT,
+  WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
+} from '@kbn/workflows/common/constants';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { z } from '@kbn/zod/v4';
 import { workflowTools } from '../../common/constants';
 import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
 
@@ -436,10 +436,21 @@ export function registerWorkflowEditTools(
     schema: z.object({
       ...baseWorkflowEditSchema.shape,
       yaml: z.string().describe('The complete new workflow YAML content'),
+      workflowId: z
+        .string()
+        .optional()
+        .describe(
+          'A unique workflow ID (lowercase alphanumeric and hyphens, 3-255 chars, matching /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/). ' +
+            'When provided, this ID is stored with the attachment and used as the persisted workflow ID on save. ' +
+            'Use this when the workflow will be referenced by other resources (e.g. action policy destinations).'
+        ),
     }),
     tags: ['workflows', 'yaml', 'edit'],
     experimental: true,
-    handler: async ({ attachmentId: targetAttachmentId, yaml, description }, context) => {
+    handler: async (
+      { attachmentId: targetAttachmentId, yaml, workflowId, description },
+      context
+    ) => {
       const attachment = findWorkflowYamlAttachment(context, targetAttachmentId);
       const proposalId = v4();
 
@@ -452,7 +463,7 @@ export function registerWorkflowEditTools(
 
         const newAttachment = await context.attachments.add({
           type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          data: { yaml, name: workflowName },
+          data: { yaml, name: workflowName, ...(workflowId ? { workflowId } : {}) },
           description: description ?? 'New workflow',
         });
 
@@ -475,6 +486,7 @@ export function registerWorkflowEditTools(
                 created: true,
                 proposalId,
                 attachmentId: newAttachment.id,
+                ...(workflowId ? { workflowId } : {}),
                 toolId: workflowTools.setYaml,
                 description: description ?? 'New workflow created',
                 ...(validation ? { validation } : {}),

@@ -4,7 +4,7 @@ navigation_title: Validate type changes
 
 # Validate changes in Saved Object types [saved-objects-validate]
 
-This page covers testing model versions, ensuring safe **Saved Object type** definition changes, and troubleshooting validation failures. It applies to type definitions (the code you register), not to validating Saved Object instances at runtime.
+This page covers testing model versions and ensuring safe **Saved Object type** definition changes. For troubleshooting validation failures, see [Troubleshooting](troubleshooting.md). It applies to type definitions (the code you register), not to validating Saved Object instances at runtime.
 
 ## Testing model versions [_testing_model_versions]
 
@@ -148,7 +148,7 @@ git merge-base -a <lastCommitId> main
 node scripts/check_saved_objects --baseline <mergeBase> --fix
 ```
 
-If you get validation errors, see [Troubleshooting](#troubleshooting) below.
+If you get validation errors, see [Troubleshooting](troubleshooting.md).
 
 ### Saved Object type validation rules
 
@@ -210,69 +210,44 @@ Matchers compose naturally with the rest of the fixture: you can use them at any
 
 When the check fails and reports a diff, fields covered by a passing matcher are omitted from the diff output (they are silently substituted with the actual value). Fields covered by a failing matcher appear as `<any uuid>`, `<any string>`, etc., so the diff still points directly at the real problem.
 
-## Troubleshooting
+## Work-in-progress Saved Object types [saved-objects-wip-types]
 
-### CI is failing for my PR
+If you are building a new Saved Object type whose schema and mappings are still evolving, the standard immutability constraints can slow down early iteration. The WIP types mechanism lets you iterate freely during development and then graduate the type to full constraints when it is production-ready.
 
-CI validates Saved Object type definitions. When you add or change a type, the *Check changes in saved objects* step may fail. Use the errors below to identify the cause.
+There are two approaches depending on how the owning plugin is deployed.
 
-```shell
-❌ Modifications have been detected in the '<soType>.migrations'. This property is deprected and no modifications are allowed.
+### Scenario A — Plugin disabled by default; type registered unconditionally [saved-objects-wip-types-scenario-a]
+
+Use this when the feature and its plugin are only enabled in dedicated dev or QA environments and are not deployed to production or Serverless by default.
+
+**Workflow:**
+
+1. Open a PR adding the type name to `src/core/packages/saved-objects/server-internal/wip_types.json` (reviewed by `@elastic/kibana-core`). This file is the gate that Core team reviews.
+
+2. Add the type name to `migrations.allowWipTypes` in every `kibana.yml` where the plugin is enabled. Kibana will fail to start if the type is registered but absent from this list:
+
+   ```yaml
+   migrations.allowWipTypes:
+     - my_new_type
+   ```
+
+3. Iterate freely. The CI SO check treats the type as perpetually new on every PR — the same checks that apply when first introducing a type always apply, but history-based immutability constraints (e.g. "existing model versions cannot change") are never enforced.
+
+4. **Graduation**: when the type is stable and production-ready, open a PR removing it from `wip_types.json` and from all `migrations.allowWipTypes` entries. Full immutability constraints apply from that point forward.
+
+### Scenario B — Plugin enabled everywhere; type registered conditionally [saved-objects-wip-types-scenario-b]
+
+Use this when the plugin is always enabled (including in Serverless production), but the SO type should only be registered when a feature flag or configuration option is turned on.
+
+The `no_conditional_saved_object_type_registration` ESLint rule normally forbids conditional registration to avoid migration ON/OFF conflicts. For WIP types, suppress it with an inline comment and a TODO to remove it at graduation:
+
+```typescript
+if (config.featureFlags.myFeatureEnabled) {
+  // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove once my_new_type graduates from WIP
+  core.savedObjects.registerType(myNewType);
+}
 ```
 
-**Problem:** The deprecated `migrations` property cannot be modified. Existing `migrations` must remain for importing old documents.
-**Solution:** Do not change `migrations`. If you did not change it, rebase and ensure your branch is up to date.
+Because the type is only registered when the flag is on, it is never registered in environments where the flag is off — so the CI SO check never sees it, and no `wip_types.json` entry or `migrations.allowWipTypes` config is needed.
 
-```shell
-❌ Some modelVersions have been updated for SO type '<soType>' after they were defined: 5.
-```
-
-**Problem:** Existing `modelVersions` cannot be mutated; that would cause inconsistencies between deployments.
-
-**Scenario 1:** You are adding a new model version, but someone else already added one that was released in Serverless (the comparison baseline).
-**Scenario 2:** You are fixing a bug in an existing version. Once a version is merged and released (e.g. in Serverless), it may already be in use. You generally need to add a new model version instead of editing the existing one.
-
-```shell
-❌ Some model versions have been deleted for SO type '<soType>'.
-```
-
-**Problem:** Model versions cannot be deleted. Your branch may be behind the current Serverless release and missing recent versions.
-**Solution:** Rebase and pull the latest SO type definitions.
-
-```shell
-❌ Invalid model version 'five' for SO type '<soType>'. Model versions must be consecutive integer numbers starting at 1.
-❌ The '<soType>' SO type is missing model version '4'. Model versions defined: 1,2,3,5.
-```
-
-**Problem:** Version keys must be consecutive numeric strings (e.g. '1', '2', '3').
-**Solution:** Use consecutive integers starting at 1 with no gaps.
-
-```shell
-❌ The '<soType>' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.
-```
-
-**Problem:** Mapping changes must be declared in a model version so the migration logic can update the SO index.
-**Solution:** Add a new model version that includes a `mappings_addition` change and the corresponding `schemas.forwardCompatibility` (and `create` if applicable).
-
-```shell
-❌ The SO type '<soType>' is defining two (or more) new model versions.
-```
-
-**Problem:** Only one new model version per type per PR is allowed to support safe, incremental rollouts.
-
-**Scenario 1:** You have several unrelated changes. If they do not require a multi-step rollout, combine them into a single model version.
-**Scenario 2:** You only added one new version but CI still fails. Validation uses two baselines: your PR merge-base (usually stable) and the **current Serverless release**. If Serverless was rolled back, the “current release” baseline may make your PR look like it defines multiple new versions. Wait for the release state to normalize, or contact the {{kib}} Core team.
-
-```shell
-❌ The following SO types are no longer registered: '<soType>'. Please run with --fix to update 'removed_types.json'.
-```
-
-**Problem:** A Saved Object type was removed but `removed_types.json` was not updated.
-**Solution:** Run `node scripts/check_saved_objects --baseline <mergeBase> --fix`, then commit the updated `removed_types.json`. See [Delete](delete.md) for how to get the merge-base.
-
-```shell
-❌ Cannot re-register previously removed type(s): <soType>. Please use a different name.
-```
-
-**Problem:** The type name was used before and then removed. Type names in `removed_types.json` cannot be reused.
-**Solution:** Choose a different type name. Names in `packages/kbn-check-saved-objects-cli/removed_types.json` are permanently reserved.
+**Graduation**: remove the conditional and the ESLint suppression. The type becomes unconditionally registered and is subject to full SO type constraints from that point forward.

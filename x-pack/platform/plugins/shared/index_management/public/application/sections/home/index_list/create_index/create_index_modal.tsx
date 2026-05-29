@@ -206,7 +206,6 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
               >
                 <EuiSuperSelect
                   fullWidth
-                  hasDividers
                   name="indexMode"
                   valueOfSelected={indexMode}
                   onChange={(mode) => setIndexMode(mode)}

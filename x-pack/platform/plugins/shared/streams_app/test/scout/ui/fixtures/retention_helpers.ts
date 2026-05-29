@@ -396,19 +396,49 @@ export async function setFailureStoreRetention(
   await expect(page.getByRole('dialog')).toBeHidden();
 }
 
+export async function disableInheritFailureStoreIfEnabled(page: ScoutPage): Promise<void> {
+  const inheritSwitch = page.getByTestId('inheritFailureStoreSwitch');
+  if (await inheritSwitch.isVisible()) {
+    const isInheritOn = await inheritSwitch.getAttribute('aria-checked');
+    if (isInheritOn === 'true') {
+      await inheritSwitch.click();
+    }
+  }
+}
+
 /**
  * Toggles failure store enabled/disabled
  */
 export async function toggleFailureStore(page: ScoutPage, enabled: boolean): Promise<void> {
-  if (enabled) {
-    await page.getByTestId('streamsAppFailureStoreEnableButton').click();
-  } else {
-    await page.getByTestId('streamFailureStoreEditRetention').click();
+  const enableButton = page.getByTestId('streamsAppFailureStoreEnableButton');
+  const editButton = page.getByTestId('streamFailureStoreEditRetention');
+
+  // The UI renders either:
+  // - disabled panel with "Enable failure store" button, or
+  // - enabled state with "Edit" button.
+  // Rendering is async, so we must wait for whichever appears.
+  const modalOpener = await Promise.any([
+    enableButton.waitFor({ state: 'visible', timeout: 10_000 }).then(() => enableButton),
+    editButton.waitFor({ state: 'visible', timeout: 10_000 }).then(() => editButton),
+  ]);
+
+  await modalOpener.click();
+
+  const toggle = page.getByTestId('enableFailureStoreToggle');
+  await toggle.waitFor({ state: 'visible' });
+  const isChecked = await toggle.isChecked();
+  if (isChecked === enabled) {
+    // No changes to apply; close the modal.
+    await page.getByTestId('failureStoreModalCancelButton').click();
+    await expect(page.getByRole('dialog')).toBeHidden();
+    return;
   }
 
-  // Wait for toggle to be enabled after modal opens
-  await waitForElementToBeEnabled(page, 'enableFailureStoreToggle');
-  await page.getByTestId('enableFailureStoreToggle').click();
+  // If we're changing state, ensure editing isn't blocked by inherit mode.
+  await disableInheritFailureStoreIfEnabled(page);
+
+  await expect(toggle).toBeEnabled();
+  await toggle.click();
   await saveFailureStoreChanges(page);
   await expect(page.getByRole('dialog')).toBeHidden();
 }

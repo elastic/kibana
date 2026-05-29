@@ -44,6 +44,7 @@ import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { upsertDataStream } from './data_streams/manage_data_streams';
+import { shouldExcludeFromStreamsList } from './data_streams/should_exclude_from_streams_list';
 import type { FeatureClient } from './feature';
 
 interface AcknowledgeResponse<TResult extends Result> {
@@ -738,44 +739,11 @@ export class StreamsClient {
       };
     }
 
+    const privileges = await this.checkIndexPrivileges(names);
+
     const isServerless = this.dependencies.isServerless;
-    const REQUIRED_MANAGE_PRIVILEGES = [
-      'manage_index_templates',
-      'manage_ingest_pipelines',
-      'manage_pipeline',
-      'read_pipeline',
-    ];
-
-    if (!isServerless) {
-      REQUIRED_MANAGE_PRIVILEGES.push('monitor_text_structure');
-    }
-
+    const REQUIRED_MANAGE_PRIVILEGES = this.getRequiredManagePrivileges();
     const CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/repository/put';
-
-    const REQUIRED_INDEX_PRIVILEGES = [
-      'read',
-      'write',
-      'create',
-      'manage',
-      'monitor',
-      'view_index_metadata',
-      'manage_data_stream_lifecycle',
-      'read_failure_store',
-      'manage_failure_store',
-    ];
-    if (!isServerless) {
-      REQUIRED_INDEX_PRIVILEGES.push('manage_ilm');
-    }
-
-    const privileges = await this.dependencies.esClient.security.hasPrivileges({
-      cluster: [...REQUIRED_MANAGE_PRIVILEGES, CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE],
-      index: [
-        {
-          names,
-          privileges: REQUIRED_INDEX_PRIVILEGES,
-        },
-      ],
-    });
 
     return {
       manage:
@@ -785,7 +753,6 @@ export class StreamsClient {
         ),
       monitor: names.every((name) => privileges.index[name].monitor),
       view_index_metadata: names.every((name) => privileges.index[name].view_index_metadata),
-      // on serverless, there is no ILM, so we map lifecycle to true if the user has manage_data_stream_lifecycle
       lifecycle: isServerless
         ? names.every((name) => privileges.index[name].manage_data_stream_lifecycle)
         : names.every(
@@ -795,7 +762,6 @@ export class StreamsClient {
           ),
       simulate:
         privileges.cluster.read_pipeline && names.every((name) => privileges.index[name].create),
-      // text structure is always available for the internal user, but not for the current user
       text_structure: isServerless ? true : privileges.cluster.monitor_text_structure,
       read_failure_store: names.every((name) => privileges.index[name].read_failure_store),
       manage_failure_store: names.every((name) => privileges.index[name].manage_failure_store),
@@ -808,7 +774,6 @@ export class StreamsClient {
     names: string[]
   ): Promise<Record<string, { read_failure_store: boolean }>> {
     if (!this.dependencies.isSecurityEnabled) {
-      // Security disabled - all streams have all privileges
       const result: Record<string, { read_failure_store: boolean }> = {};
       names.forEach((name) => {
         result[name] = { read_failure_store: true };
@@ -816,14 +781,7 @@ export class StreamsClient {
       return result;
     }
 
-    const privileges = await this.dependencies.esClient.security.hasPrivileges({
-      index: [
-        {
-          names,
-          privileges: ['read_failure_store'],
-        },
-      ],
-    });
+    const privileges = await this.checkIndexPrivileges(names);
 
     const result: Record<string, { read_failure_store: boolean }> = {};
     names.forEach((name) => {
@@ -833,6 +791,48 @@ export class StreamsClient {
     });
 
     return result;
+  }
+
+  private getRequiredManagePrivileges(): string[] {
+    const privileges = [
+      'manage_index_templates',
+      'manage_ingest_pipelines',
+      'manage_pipeline',
+      'read_pipeline',
+    ];
+    if (!this.dependencies.isServerless) {
+      privileges.push('monitor_text_structure');
+    }
+    return privileges;
+  }
+
+  private getRequiredIndexPrivileges(): string[] {
+    const privileges = [
+      'read',
+      'write',
+      'create',
+      'manage',
+      'monitor',
+      'view_index_metadata',
+      'manage_data_stream_lifecycle',
+      'read_failure_store',
+      'manage_failure_store',
+    ];
+    if (!this.dependencies.isServerless) {
+      privileges.push('manage_ilm');
+    }
+    return privileges;
+  }
+
+  private async checkIndexPrivileges(names: string[]) {
+    const CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/repository/put';
+    return this.dependencies.esClient.security.hasPrivileges({
+      cluster: [
+        ...this.getRequiredManagePrivileges(),
+        CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE,
+      ],
+      index: [{ names, privileges: this.getRequiredIndexPrivileges() }],
+    });
   }
 
   /**
@@ -946,19 +946,21 @@ export class StreamsClient {
 
     const now = new Date().toISOString();
 
-    return response.data_streams.map((dataStream) => ({
-      type: 'classic' as const,
-      name: dataStream.name,
-      description: '',
-      updated_at: now,
-      ingest: {
-        lifecycle: { inherit: {} },
-        processing: { steps: [], updated_at: now },
-        settings: {},
-        classic: {},
-        failure_store: { inherit: {} },
-      },
-    }));
+    return response.data_streams
+      .filter((dataStream) => !shouldExcludeFromStreamsList(dataStream))
+      .map((dataStream) => ({
+        type: 'classic' as const,
+        name: dataStream.name,
+        description: '',
+        updated_at: now,
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: now },
+          settings: {},
+          classic: {},
+          failure_store: { inherit: {} },
+        },
+      }));
   }
 
   /**

@@ -23,7 +23,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { MetricsDashboardProps } from './helper';
-import { convertSavedDashboardToPanels } from './helper';
+import { convertSavedDashboardToPanels, getDashboardFileNameFromProps } from './helper';
 
 export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>(undefined);
@@ -50,8 +50,11 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
     dashboard.setFilters(dataView ? getFilters(serviceName, environment, dataView) : []);
   }, [dataView, serviceName, environment, dashboard]);
 
+  const dashboardFileName = getDashboardFileNameFromProps(dashboardProps);
+
   return (
     <DashboardRenderer
+      key={dashboardFileName}
       getCreationOptions={() => getCreationOptions(dashboardProps, notifications)}
       onApiAvailable={setDashboard}
     />

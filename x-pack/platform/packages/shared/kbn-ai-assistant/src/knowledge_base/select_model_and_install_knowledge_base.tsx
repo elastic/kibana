@@ -165,7 +165,6 @@ export function SelectModelAndInstallKnowledgeBase({
           >
             <EuiSuperSelect
               fullWidth
-              hasDividers
               isLoading={isLoadingEndpoints}
               options={superSelectOptions}
               valueOfSelected={selectedInferenceId}

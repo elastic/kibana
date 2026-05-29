@@ -41,7 +41,7 @@ describe('EditLifecycleModal', () => {
           lifecycle: ingestLifecycle,
           processing: { steps: [], updated_at: new Date().toISOString() },
           settings: {},
-          wired: { fields: {}, routing: [] },
+          ...(isWired ? { wired: { fields: {}, routing: [] } } : {}),
           failure_store: { inherit: {} },
         },
       },

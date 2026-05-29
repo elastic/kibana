@@ -16,18 +16,37 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQuery } from '@kbn/streams-schema';
-import React from 'react';
+import type { Feature, StreamQuery } from '@kbn/streams-schema';
+import { COMPUTED_FEATURE_TYPES } from '@kbn/streams-schema';
+import React, { useMemo } from 'react';
 import { SeverityBadge } from '../../significant_events_discovery/components/severity_badge/severity_badge';
 import { InfoPanel } from '../../../info_panel';
 import { SparkPlot } from '../../../spark_plot';
 
+const COMPUTED_FEATURE_TYPE_SET = new Set<string>(COMPUTED_FEATURE_TYPES);
+
 interface Props {
   query: StreamQuery;
   occurrences?: Array<{ x: number; y: number }>;
+  streamFeatures?: Feature[];
 }
 
-export function KnowledgeIndicatorQueryDetailsContent({ query, occurrences }: Props) {
+export function KnowledgeIndicatorQueryDetailsContent({
+  query,
+  occurrences,
+  streamFeatures = [],
+}: Props) {
+  const featureIdSet = useMemo(() => new Set(streamFeatures.map((f) => f.id)), [streamFeatures]);
+
+  const inferredFeatureIds = useMemo(
+    () =>
+      (query.features ?? [])
+        .map((f) => f.id)
+        .filter((id) => !COMPUTED_FEATURE_TYPE_SET.has(id) && featureIdSet.has(id)),
+    [query.features, featureIdSet]
+  );
+  const hasFeatureIds = inferredFeatureIds.length > 0;
+
   const listItems = [
     {
       title: DETAILS_TYPE_LABEL,
@@ -68,6 +87,19 @@ export function KnowledgeIndicatorQueryDetailsContent({ query, occurrences }: Pr
           ))}
         </InfoPanel>
       </EuiFlexItem>
+      {hasFeatureIds && (
+        <EuiFlexItem>
+          <InfoPanel title={SOURCE_FEATURES_LABEL}>
+            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+              {inferredFeatureIds.map((featureId) => (
+                <EuiFlexItem grow={false} key={featureId}>
+                  <EuiBadge color="hollow">{featureId}</EuiBadge>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </InfoPanel>
+        </EuiFlexItem>
+      )}
       {occurrences ? (
         <EuiFlexItem>
           <InfoPanel title={OCCURRENCES_LABEL}>
@@ -133,3 +165,8 @@ const QUERY_BADGE_LABEL = i18n.translate(
 const EMPTY_VALUE = i18n.translate('xpack.streams.knowledgeIndicatorDetails.emptyValue', {
   defaultMessage: '-',
 });
+
+const SOURCE_FEATURES_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicatorDetails.sourceFeaturesLabel',
+  { defaultMessage: 'Source KI features' }
+);
