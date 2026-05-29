@@ -159,14 +159,20 @@ export const preventPrebuiltRulesPackageInstallation = () => {
       return;
     }
 
-    // Forward only non-package flows to the server
+    // Forward only non-package flows to the server, then merge mock package
+    // results into the real response. `req.on('response')` is used instead of
+    // `req.continue(callback)` because the callback form raises a test failure
+    // when the upstream connection is canceled mid-response (e.g., the test
+    // navigates away before init finishes) — see cypress-io/cypress#26248. The
+    // event-emitter style simply does not fire on cancellation, absorbing the
+    // transient error silently.
     req.body.flows = serverFlows;
-    req.continue((res) => {
-      // Merge mock package results into the real server response
-      for (const id of mockedFlows) {
-        res.body.flows[id] = MOCK_PACKAGE_FLOW_RESULTS[id];
+    req.on('response', (res) => {
+      if (res.body && typeof res.body === 'object' && res.body.flows) {
+        for (const id of mockedFlows) {
+          res.body.flows[id] = MOCK_PACKAGE_FLOW_RESULTS[id];
+        }
       }
-      res.send();
     });
   });
 };

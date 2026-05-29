@@ -111,6 +111,10 @@ export function MemoryTab() {
                 isDisabled={!canManage}
                 onClick={() => scrapeConversations.mutate()}
                 data-test-subj="streamsMemoryScrapeButton"
+                title={i18n.translate('xpack.streams.memory.scrapeButtonTitle', {
+                  defaultMessage:
+                    'Scrape agent conversations and extract durable knowledge into memory pages.',
+                })}
               >
                 {i18n.translate('xpack.streams.memory.scrapeButton', {
                   defaultMessage: 'Scrape Conversations',
