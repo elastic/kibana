@@ -11,9 +11,11 @@ import type { EditorError } from '@elastic/esql/types';
 import type { ESQLMessage } from '../../../commands';
 import { createValidationTestSetup, type Setup } from '../__tests__/helpers';
 import { runColumnExistenceValidationSuite } from '../__tests__/column_existence_suite';
+import { runCommandsValidationSuite } from '../__tests__/commands_suite';
 import { runFieldsAndVariablesValidationSuite } from '../__tests__/fields_and_variables_suite';
 import { runFunctionsValidationSuite } from '../__tests__/functions_suite';
 import { runInlineCastValidationSuite } from '../__tests__/inline_cast_suite';
+import { runSourcesValidationSuite } from '../__tests__/sources_suite';
 import { runSubqueriesValidationSuite } from '../__tests__/subqueries_suite';
 import { runValidationCommandsLicenseSuite } from '../__tests__/validation_commands_license_suite';
 import { runValidationParamsSuite } from '../__tests__/validation_params_suite';
@@ -68,7 +70,9 @@ describe('ES|QL validation integration suites', () => {
   });
 
   runColumnExistenceValidationSuite(setup);
+  runCommandsValidationSuite(setup);
   runFieldsAndVariablesValidationSuite(setup);
+  runSourcesValidationSuite(setup);
   runFunctionsValidationSuite(setup);
   runInlineCastValidationSuite(setup);
   runSubqueriesValidationSuite(setup);
