@@ -107,17 +107,15 @@ export async function bulkCreateWithInferenceFallback(
     const total = response.items?.length ?? 0;
 
     if (inference === 0) {
-      // Non-inference errors — return the response so the caller can decide
-      // (matches the data stream client's contract of not throwing on partial
-      // failure). Subsequent retries would not help.
-      return response;
+      throw new Error(
+        `Bulk write failed with ${other} non-inference error(s) out of ${total} items — not retrying`
+      );
     }
 
     if (other > 0) {
-      logger.warn(
-        `Bulk write failed with mixed errors (${inference} inference + ${other} other out of ${total} items) -- not retrying`
+      throw new Error(
+        `Bulk write failed with mixed errors (${inference} inference + ${other} other out of ${total} items) — not retrying`
       );
-      return response;
     }
 
     const isLastAttempt = attemptNumber === MAX_INFERENCE_ATTEMPTS;

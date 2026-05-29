@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { isUnknownIndexEsqlError } from './is_unknown_index_esql_error';
+import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 
 /**
  * Runs an ES|QL query and returns `undefined` when the target index or data
@@ -20,7 +20,7 @@ export const runEsqlQuery = async (
   try {
     return (await esClient.esql.query({ query })) as ESQLSearchResponse;
   } catch (error) {
-    if (isUnknownIndexEsqlError(error)) {
+    if (isEsqlUnknownIndexError(error)) {
       return undefined;
     }
     throw error;
