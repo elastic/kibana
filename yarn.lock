@@ -4865,6 +4865,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/attack-discovery-schedules-common@link:x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/audit-log-plugin@link:x-pack/platform/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""
