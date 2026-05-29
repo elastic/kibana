@@ -21,9 +21,10 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 const LOCAL_STORAGE_KEY = 'kibana.observability.hosts.poc_settings';
 
 // Each flag corresponds to exactly one proposal in
-// `/tmp/hosts-perf/PROPOSALS.md`. The keys are deliberately tied to the
-// proposal IDs (P15a, P15c, P16-A, …) rather than a behavioural name so
-// the link stays obvious as the proposals evolve.
+// `../../../../../docs/hosts_perf_poc/PROPOSALS.md`. The keys are
+// deliberately tied to the proposal IDs (P15a, P15c, P16-A, …) rather
+// than a behavioural name so the link stays obvious as the proposals
+// evolve.
 interface PocSettings {
   // Metrics tab section
   // P16-A. ON → render every Metrics-tab tile through a Lens xy embeddable
