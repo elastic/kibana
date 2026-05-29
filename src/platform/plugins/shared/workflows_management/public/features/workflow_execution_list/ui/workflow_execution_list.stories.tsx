@@ -10,7 +10,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React, { useCallback, useState } from 'react';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
-import { parseDuration } from '@kbn/workflows-execution-engine/server/utils/parse-duration/parse-duration';
+import { parseDuration } from '@kbn/workflows-execution-engine-utils';
 import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
 import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';

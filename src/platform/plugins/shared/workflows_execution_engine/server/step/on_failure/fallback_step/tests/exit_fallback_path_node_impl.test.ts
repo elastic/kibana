@@ -8,8 +8,8 @@
  */
 
 import type { ExitFallbackPathNode } from '@kbn/workflows/graph';
+import { ExitFallbackPathNodeImpl } from '@kbn/workflows-execution-engine-core';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { ExitFallbackPathNodeImpl } from '../exit_fallback_path_node_impl';
 
 describe('ExitFallbackPathNodeImpl', () => {
   let underTest: ExitFallbackPathNodeImpl;

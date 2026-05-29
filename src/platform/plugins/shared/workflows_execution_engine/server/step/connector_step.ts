@@ -11,13 +11,13 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
 import { ExecutionError } from '@kbn/workflows/server';
+import { ResponseSizeLimitError } from '@kbn/workflows-execution-engine-core';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import { ActionsResponseContentLengthLimitError } from './actions_response_content_length_limit_error';
-import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 /**
@@ -85,7 +85,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
     step: ConnectorStep,
     stepExecutionRuntime: StepExecutionRuntime,
     connectorExecutor: ConnectorExecutor,
-    workflowState: WorkflowExecutionRuntimeManager,
+    workflowState: IWorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {
     super(step, stepExecutionRuntime, connectorExecutor, workflowState);

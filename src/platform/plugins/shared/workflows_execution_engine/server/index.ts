@@ -32,4 +32,4 @@ export type {
 
 export type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
-export { resolveWorkflowEventsModeFromOn } from './trigger_events/lib/resolve_workflow_events_mode_from_on';
+export { resolveWorkflowEventsModeFromOn } from '@kbn/workflows-execution-engine-utils';

@@ -20,6 +20,7 @@ jest.mock('./workflow_event_logger_service', () => ({
 
 export const createMockWorkflowEventLogger = (): jest.Mocked<IWorkflowEventLogger> => {
   return {
+    logEvent: jest.fn(),
     logInfo: jest.fn(),
     logError: jest.fn(),
     logWarn: jest.fn(),

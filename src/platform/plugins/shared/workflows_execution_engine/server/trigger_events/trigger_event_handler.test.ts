@@ -15,9 +15,15 @@ import { TriggerEventHandler, type TriggerEventHandlerDeps } from './trigger_eve
 
 const mockClassifyWorkflowTriggerMatch = jest.fn().mockReturnValue('matched');
 
-jest.mock('./filter_workflows_by_trigger_condition', () => ({
-  classifyWorkflowTriggerMatch: (...args: unknown[]) => mockClassifyWorkflowTriggerMatch(...args),
-}));
+jest.mock('@kbn/workflows-execution-engine-utils', () => {
+  // Pull through the rest of the package so trigger-event-stats and telemetry
+  // exports remain real; only stub the trigger matcher.
+  const actual = jest.requireActual('@kbn/workflows-execution-engine-utils');
+  return {
+    ...actual,
+    classifyWorkflowTriggerMatch: (...args: unknown[]) => mockClassifyWorkflowTriggerMatch(...args),
+  };
+});
 
 jest.mock('./event_logs', () => ({
   initializeTriggerEventsClient: jest.fn().mockResolvedValue(null),

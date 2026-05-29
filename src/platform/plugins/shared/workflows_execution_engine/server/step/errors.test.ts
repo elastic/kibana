@@ -8,8 +8,13 @@
  */
 
 import { Readable } from 'stream';
+import {
+  formatBytes,
+  parseByteSize,
+  ResponseSizeLimitError,
+  safeOutputSize,
+} from '@kbn/workflows-execution-engine-core';
 import { ActionsResponseContentLengthLimitError } from './actions_response_content_length_limit_error';
-import { formatBytes, parseByteSize, ResponseSizeLimitError, safeOutputSize } from './errors';
 
 describe('formatBytes', () => {
   it('should format 0 bytes', () => {

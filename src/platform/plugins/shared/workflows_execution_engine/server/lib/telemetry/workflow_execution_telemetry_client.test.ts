@@ -14,7 +14,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import { WorkflowExecutionTelemetryEventTypes } from './events/workflows_execution/types';
+import { WorkflowExecutionTelemetryEventTypes } from '@kbn/workflows-execution-engine-utils';
 import { WorkflowExecutionTelemetryClient } from './workflow_execution_telemetry_client';
 
 describe('WorkflowExecutionTelemetryClient', () => {

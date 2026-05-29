@@ -8,7 +8,7 @@
  */
 
 import type { StackFrame } from '@kbn/workflows';
-import { type ScopeData, WorkflowScopeStack } from '../workflow_scope_stack';
+import { type ScopeData, WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 
 describe('WorkflowScopeStack', () => {
   const createMockEnterScopeData = (

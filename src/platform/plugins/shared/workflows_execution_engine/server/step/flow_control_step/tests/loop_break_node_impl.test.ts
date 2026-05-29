@@ -8,12 +8,12 @@
  */
 
 import type { LoopBreakNode, WorkflowGraph } from '@kbn/workflows/graph';
+import { LoopBreakNodeImpl } from '@kbn/workflows-execution-engine-core';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
 import type { StepIoService } from '../../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import { LoopBreakNodeImpl } from '../loop_break_node_impl';
 
 describe('LoopBreakNodeImpl', () => {
   let node: LoopBreakNode;

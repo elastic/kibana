@@ -110,6 +110,7 @@
     "@kbn/esql-utils",
     "@kbn/inbox-plugin",
     "@kbn/inbox-common",
+    "@kbn/workflows-execution-engine-utils",
     "@kbn/datemath"
   ],
   "exclude": ["target/**/*"]

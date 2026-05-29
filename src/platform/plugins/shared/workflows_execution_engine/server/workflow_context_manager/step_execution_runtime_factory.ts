@@ -11,12 +11,13 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { IStepExecutionRuntimeFactory } from '@kbn/workflows-execution-engine-core';
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import { StepExecutionRuntime } from './step_execution_runtime';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { WorkflowScopeStack } from './workflow_scope_stack';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -83,7 +84,7 @@ function removeCurrentNodeFromStackFrames(nodeId: string, stackFrames: StackFram
  * });
  * ```
  */
-export class StepExecutionRuntimeFactory {
+export class StepExecutionRuntimeFactory implements IStepExecutionRuntimeFactory {
   constructor(
     private params: {
       workflowExecutionState: WorkflowExecutionState;

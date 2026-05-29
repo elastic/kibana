@@ -8,7 +8,7 @@
  */
 
 import { ExecutionStatus } from '@kbn/workflows';
-import { WorkflowOutputStepImpl } from './workflow_output_step_impl';
+import { WorkflowOutputStepImpl } from '@kbn/workflows-execution-engine-core';
 
 const createRuntime = () => {
   const scopeStack = {

@@ -18,14 +18,17 @@ import {
 } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import type {
+  IStepExecutionRuntimeFactory,
+  IWorkflowExecutionRuntimeManager,
+  ScopeData,
+} from '@kbn/workflows-execution-engine-core';
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import { getAlertingRuleId, getTraceId, setCurrentTransaction } from './apm_internal';
 import { buildWorkflowContext } from './build_workflow_context';
-import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import type { ScopeData } from './workflow_scope_stack';
-import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
@@ -60,7 +63,7 @@ interface WorkflowExecutionRuntimeManagerInit {
  * and uses topological sorting to determine execution order.
  */
 
-export class WorkflowExecutionRuntimeManager {
+export class WorkflowExecutionRuntimeManager implements IWorkflowExecutionRuntimeManager {
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;
@@ -270,7 +273,7 @@ export class WorkflowExecutionRuntimeManager {
    * - workflow.output / workflow.fail — unwind the entire stack (no predicate)
    */
   public unwindScopes(
-    stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    stepExecutionRuntimeFactory: IStepExecutionRuntimeFactory,
     shouldStop?: (scope: ScopeData) => boolean,
     { inclusive = false }: { inclusive?: boolean } = {}
   ): void {

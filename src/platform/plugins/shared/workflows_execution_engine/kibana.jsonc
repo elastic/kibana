@@ -4,7 +4,7 @@
   "owner": ["@elastic/workflows-eng"],
   "group": "platform",
   "visibility": "shared",
-  "description": "Stateless execution engine for workflows.",
+  "description": "Stateful execution engine for workflows. Pure flow-control logic and collaborator interfaces are in @kbn/workflows-execution-engine-core; utility helpers are in @kbn/workflows-execution-engine-utils.",
   "plugin": {
     "configPath": ["workflowsExecutionEngine"],
     "id": "workflowsExecutionEngine",

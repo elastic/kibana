@@ -19,6 +19,8 @@
     "@kbn/actions-plugin",
     "@kbn/connector-specs",
     "@kbn/workflows",
+    "@kbn/workflows-execution-engine-core",
+    "@kbn/workflows-execution-engine-utils",
     "@kbn/task-manager-plugin",
     "@kbn/es-query",
     "@kbn/eval-kql",
@@ -33,7 +35,6 @@
     "@kbn/licensing-plugin",
     "@kbn/usage-api-plugin",
     "@kbn/logging-mocks",
-    "@kbn/crypto",
     "@kbn/es-errors",
     "@kbn/spaces-plugin",
     "@kbn/spaces-utils"
