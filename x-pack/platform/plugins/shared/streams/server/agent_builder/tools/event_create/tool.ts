@@ -28,14 +28,14 @@ const createEventSchema = z.object({
       defaultMessage: 'Verdict for the new event.',
     })
   ),
-  title: z.string(),
-  summary: z.string(),
-  root_cause: z.string(),
-  stream_names: z.array(z.string()).min(1),
+  title: z.string().max(500),
+  summary: z.string().max(4000),
+  root_cause: z.string().max(4000),
+  stream_names: z.array(z.string().max(255)).min(1).max(100),
   criticality: z.number().min(0).max(100),
   impact: sigEventImpactSchema,
   confidence: z.number().min(0).max(1),
-  recommendations: z.array(z.string()),
+  recommendations: z.array(z.string().max(1000)).min(1).max(50),
 });
 
 export function createEventTool({
