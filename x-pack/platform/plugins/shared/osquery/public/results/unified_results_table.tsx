@@ -101,7 +101,11 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [euiTheme.size.m, euiTheme.colors.body]
   );
 
-  const { data: actionResultsData, isFetched: actionResultsFetched } = useActionResults({
+  const {
+    data: actionResultsData,
+    isFetched: actionResultsFetched,
+    isError: actionResultsErrored,
+  } = useActionResults({
     actionId,
     startDate,
     activePage: 0,
@@ -242,13 +246,17 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   // button and row kebab menu can read them. The store does not re-render this
   // tree on writes; only subscribers of this `actionId` re-render.
   const exportFiltersStore = useExportFiltersContext();
-  // Keep `total` undefined until the first real fetch completes, so the
-  // export controls can distinguish "still loading" from "loaded, zero rows".
-  // `useActionResults` ships with `initialData.aggregations.totalRowCount = 0`,
-  // so reading the value unconditionally would conflate the two states.
-  const unfilteredTotal = actionResultsFetched
-    ? actionResultsData?.aggregations?.totalRowCount
-    : undefined;
+  // Only publish the row count once a fetch has actually succeeded. React
+  // Query flips `isFetched` to true on both success and failure, and
+  // `useActionResults` seeds `initialData.aggregations.totalRowCount = 0`,
+  // so gating on `isFetched` alone would treat a failed initial fetch as
+  // "loaded, zero rows" and disable the export action with the empty-state
+  // tooltip. Excluding the error case keeps `total` as `undefined` until
+  // the consumer (`ExportResultsButton`) can render its loading state.
+  const unfilteredTotal =
+    actionResultsFetched && !actionResultsErrored
+      ? actionResultsData?.aggregations?.totalRowCount
+      : undefined;
   useEffect(() => {
     exportFiltersStore?.setFilters(actionId, {
       kuery: userKuery,
