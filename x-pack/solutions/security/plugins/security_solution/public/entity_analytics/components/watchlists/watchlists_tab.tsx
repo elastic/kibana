@@ -22,7 +22,7 @@ import { Watchlists } from '.';
 export const WatchlistsTab: React.FC = () => {
   const { openFlyout } = useExpandableFlyoutApi();
   const spaceId = useSpaceId();
-  const isEntityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) === true;
+  const isEntityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
   const entityStoreStatusQuery = useEntityStoreStatus({
     enabled: isEntityStoreV2Enabled,
   });
