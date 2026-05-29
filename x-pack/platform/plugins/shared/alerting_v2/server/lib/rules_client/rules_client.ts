@@ -297,7 +297,10 @@ export class RulesClient {
       rulesById.set(doc.id, transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes));
     }
 
-    return ids.map((id) => rulesById.get(id)!);
+    return ids.flatMap((id) => {
+      const rule = rulesById.get(id);
+      return rule ? [rule] : [];
+    });
   }
 
   @withApm
