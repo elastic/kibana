@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { ONBOARDING_IN_PROGRESS_STATUSES, type OnboardingStatusResult } from '@kbn/streams-schema';
+import {
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+  type StreamsKIsOnboardingStatusResult,
+} from '@kbn/streams-schema';
 import pMap from 'p-map';
 import { useCallback, useRef } from 'react';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 
 type StreamOnboardingStatusUpdateCallback = (
   streamName: string,
-  status: OnboardingStatusResult
+  status: StreamsKIsOnboardingStatusResult
 ) => void;
 
 export function useOnboardingStatusUpdateQueue(
@@ -31,7 +34,7 @@ export function useOnboardingStatusUpdateQueue(
 
         onStreamStatusUpdate(streamName, statusResult);
 
-        if (!ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status)) {
+        if (!STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(statusResult.status)) {
           queue.current.delete(streamName);
         }
       },

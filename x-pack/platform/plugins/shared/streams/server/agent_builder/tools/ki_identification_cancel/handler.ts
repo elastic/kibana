@@ -6,31 +6,31 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { OnboardingStatus } from '@kbn/streams-schema';
-import type { OnboardingWorkflowClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 interface CancelKiIdentificationHandlerParams {
   streamName: string;
-  onboardingClient: OnboardingWorkflowClient;
+  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
   request: KibanaRequest;
 }
 
 interface CancelKiIdentificationHandlerResult {
   stream_name: string;
   execution_id: string | null;
-  status: OnboardingStatus.Canceled;
+  status: StreamsKIsOnboardingStatus.Canceled;
 }
 
 export async function cancelKiIdentificationToolHandler({
   streamName,
-  onboardingClient,
+  streamsKIsOnboardingClient,
   request,
 }: CancelKiIdentificationHandlerParams): Promise<CancelKiIdentificationHandlerResult> {
-  const executionId = await onboardingClient.cancel({ streamName, request });
+  const executionId = await streamsKIsOnboardingClient.cancel({ streamName, request });
 
   return {
     stream_name: streamName,
     execution_id: executionId,
-    status: OnboardingStatus.Canceled,
+    status: StreamsKIsOnboardingStatus.Canceled,
   };
 }

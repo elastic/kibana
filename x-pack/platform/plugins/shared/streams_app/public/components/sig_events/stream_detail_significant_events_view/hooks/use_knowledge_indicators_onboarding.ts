@@ -9,9 +9,9 @@ import { useMutation, useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useRef, useState } from 'react';
 import {
-  OnboardingStatus,
-  ONBOARDING_IN_PROGRESS_STATUSES,
-  type OnboardingStatusResult,
+  StreamsKIsOnboardingStatus,
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+  type StreamsKIsOnboardingStatusResult,
 } from '@kbn/streams-schema';
 import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { getFormattedError } from '../../../../util/errors';
@@ -20,16 +20,24 @@ import { useKibana } from '../../../../hooks/use_kibana';
 interface Props {
   streamName: string;
   onComplete: (
-    completedState: Extract<OnboardingStatusResult, { status: OnboardingStatus.Completed }>
+    completedState: Extract<
+      StreamsKIsOnboardingStatusResult,
+      { status: StreamsKIsOnboardingStatus.Completed }
+    >
   ) => void;
   onError: (
-    failedState: Extract<OnboardingStatusResult, { status: OnboardingStatus.Failed }>
+    failedState: Extract<
+      StreamsKIsOnboardingStatusResult,
+      { status: StreamsKIsOnboardingStatus.Failed }
+    >
   ) => void;
 }
 
 export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onError }: Props) {
-  const previousStatusRef = useRef<OnboardingStatus | null>(null);
-  const [onboardingState, setOnboardingState] = useState<OnboardingStatusResult | null>(null);
+  const previousStatusRef = useRef<StreamsKIsOnboardingStatus | null>(null);
+  const [onboardingState, setOnboardingState] = useState<StreamsKIsOnboardingStatusResult | null>(
+    null
+  );
 
   const {
     core: {
@@ -57,7 +65,8 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
   });
 
   const isPending =
-    onboardingState !== null && ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingState.status);
+    onboardingState !== null &&
+    STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingState.status);
 
   const fetchStatus = useCallback(async () => {
     const state = await getOnboardingStatus(streamName);
@@ -69,8 +78,8 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
     // To fix, the workflow engine should expose `cancelRequested` in
     // WorkflowExecutionDto so the server can return BeingCanceled.
     const shouldPreserveBeingCanceled =
-      previousStatusRef.current === OnboardingStatus.BeingCanceled &&
-      state.status === OnboardingStatus.InProgress;
+      previousStatusRef.current === StreamsKIsOnboardingStatus.BeingCanceled &&
+      state.status === StreamsKIsOnboardingStatus.InProgress;
 
     if (shouldPreserveBeingCanceled) {
       return state;
@@ -88,16 +97,16 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
      */
     if (
       previousStatusRef.current !== null &&
-      previousStatusRef.current !== OnboardingStatus.Completed &&
-      state.status === OnboardingStatus.Completed
+      previousStatusRef.current !== StreamsKIsOnboardingStatus.Completed &&
+      state.status === StreamsKIsOnboardingStatus.Completed
     ) {
       onComplete(state);
     }
 
     if (
       previousStatusRef.current !== null &&
-      previousStatusRef.current !== OnboardingStatus.Failed &&
-      state.status === OnboardingStatus.Failed
+      previousStatusRef.current !== StreamsKIsOnboardingStatus.Failed &&
+      state.status === StreamsKIsOnboardingStatus.Failed
     ) {
       onError(state);
     }
@@ -107,7 +116,7 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
     return state;
   }, [getOnboardingStatus, streamName, onComplete, onError]);
 
-  useQuery<OnboardingStatusResult, Error>({
+  useQuery<StreamsKIsOnboardingStatusResult, Error>({
     queryKey: ['knowledgeIndicatorsOnboardingStatus', streamName],
     queryFn: fetchStatus,
     enabled: !isScheduleLoading && !isCancelLoading,
@@ -115,13 +124,13 @@ export function useKnowledgeIndicatorsOnboarding({ streamName, onComplete, onErr
   });
 
   const scheduleKnowledgeIndicatorsOnboarding = useCallback(() => {
-    setOnboardingState({ status: OnboardingStatus.InProgress });
+    setOnboardingState({ status: StreamsKIsOnboardingStatus.InProgress });
     scheduleMutate(streamName);
   }, [scheduleMutate, streamName]);
 
   const cancelKnowledgeIndicatorsOnboarding = useCallback(() => {
-    setOnboardingState({ status: OnboardingStatus.BeingCanceled });
-    previousStatusRef.current = OnboardingStatus.BeingCanceled;
+    setOnboardingState({ status: StreamsKIsOnboardingStatus.BeingCanceled });
+    previousStatusRef.current = StreamsKIsOnboardingStatus.BeingCanceled;
     cancelMutate(streamName);
   }, [cancelMutate, streamName]);
 

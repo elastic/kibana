@@ -11,7 +11,7 @@ import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { OnboardingStatus, type OnboardingStatusResult } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStatus, type StreamsKIsOnboardingStatusResult } from '@kbn/streams-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 /**
@@ -19,7 +19,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
  * Required fields drive the two main steps (features identification and queries
  * generation); optional fields override tuning knobs that default inside the YAML.
  */
-export interface OnboardingWorkflowInputs {
+export interface StreamsKIsOnboardingInputs {
   streamName: string;
   skipFeatures: boolean;
   skipQueries: boolean;
@@ -42,7 +42,7 @@ export interface OnboardingWorkflowInputs {
  * Shape of the `context.output` object produced by a completed onboarding
  * workflow execution. Used to extract summary counts for the status response.
  */
-export interface OnboardingWorkflowOutput {
+export interface StreamsKIsOnboardingOutput {
   streamName: string;
   featuresSkipped: boolean;
   featuresConnectorUsed: string;
@@ -77,25 +77,25 @@ export const parseStreamNameFromConcurrencyKey = (key: string): string | null =>
 const mapExecutionToOnboardingStatus = (
   status: ExecutionStatus
 ):
-  | OnboardingStatus.InProgress
-  | OnboardingStatus.Completed
-  | OnboardingStatus.Failed
-  | OnboardingStatus.Canceled => {
+  | StreamsKIsOnboardingStatus.InProgress
+  | StreamsKIsOnboardingStatus.Completed
+  | StreamsKIsOnboardingStatus.Failed
+  | StreamsKIsOnboardingStatus.Canceled => {
   switch (status) {
     case ExecutionStatus.PENDING:
     case ExecutionStatus.RUNNING:
     case ExecutionStatus.WAITING:
     case ExecutionStatus.WAITING_FOR_INPUT:
     case ExecutionStatus.WAITING_FOR_CHILD:
-      return OnboardingStatus.InProgress;
+      return StreamsKIsOnboardingStatus.InProgress;
     case ExecutionStatus.COMPLETED:
-      return OnboardingStatus.Completed;
+      return StreamsKIsOnboardingStatus.Completed;
     case ExecutionStatus.FAILED:
     case ExecutionStatus.TIMED_OUT:
-      return OnboardingStatus.Failed;
+      return StreamsKIsOnboardingStatus.Failed;
     case ExecutionStatus.CANCELLED:
     case ExecutionStatus.SKIPPED:
-      return OnboardingStatus.Canceled;
+      return StreamsKIsOnboardingStatus.Canceled;
     default:
       const _exhaustiveCheck: never = status;
       return _exhaustiveCheck;
@@ -104,28 +104,28 @@ const mapExecutionToOnboardingStatus = (
 
 /**
  * Converts a workflow execution (optionally enriched with `context.output`)
- * into the public {@link OnboardingStatusResult} shape returned by the API.
+ * into the public {@link StreamsKIsOnboardingStatusResult} shape returned by the API.
  * For completed executions the output is unpacked into summary counts;
  * for failures the error message is extracted.
  */
 const mapExecutionToStatusResult = (
   execution: WorkflowExecutionListItemDto
-): OnboardingStatusResult => {
+): StreamsKIsOnboardingStatusResult => {
   const onboardingStatus = mapExecutionToOnboardingStatus(execution.status);
 
-  if (onboardingStatus === OnboardingStatus.Failed) {
+  if (onboardingStatus === StreamsKIsOnboardingStatus.Failed) {
     const errorMessage =
       execution.status === ExecutionStatus.TIMED_OUT
         ? 'Onboarding workflow timed out'
         : execution.error?.message ?? 'Unknown error';
-    return { status: OnboardingStatus.Failed, error: errorMessage };
+    return { status: StreamsKIsOnboardingStatus.Failed, error: errorMessage };
   }
 
-  if (onboardingStatus === OnboardingStatus.Completed) {
-    const ctx = (execution.context ?? {}) as { output?: Partial<OnboardingWorkflowOutput> };
+  if (onboardingStatus === StreamsKIsOnboardingStatus.Completed) {
+    const ctx = (execution.context ?? {}) as { output?: Partial<StreamsKIsOnboardingOutput> };
     const output = ctx.output ?? {};
     return {
-      status: OnboardingStatus.Completed,
+      status: StreamsKIsOnboardingStatus.Completed,
       featuresSkipped: output.featuresSkipped === true,
       discoveredFeatures: Array.isArray(output.discoveredFeatures) ? output.discoveredFeatures : [],
       featuresConnectorUsed: output.featuresConnectorUsed ?? '',
@@ -149,7 +149,7 @@ const MAX_STREAMS_PER_QUERY = 10000;
  * Each stream's onboarding execution is keyed by a concurrency group derived
  * from the stream name, so at most one onboarding run is active per stream.
  */
-export class OnboardingWorkflowClient {
+export class StreamsKIsOnboardingClient {
   private readonly managementApi: WorkflowsServerPluginSetup['management'];
 
   constructor({ managementApi }: { managementApi: WorkflowsServerPluginSetup['management'] }) {
@@ -167,7 +167,7 @@ export class OnboardingWorkflowClient {
     inputs,
     request,
   }: {
-    inputs: OnboardingWorkflowInputs;
+    inputs: StreamsKIsOnboardingInputs;
     request: KibanaRequest;
   }): Promise<void> {
     const workflow = await this.managementApi.getWorkflow(
@@ -198,7 +198,7 @@ export class OnboardingWorkflowClient {
     streamName,
   }: {
     streamName: string;
-  }): Promise<OnboardingStatusResult & { executionId: string | null }> {
+  }): Promise<StreamsKIsOnboardingStatusResult & { executionId: string | null }> {
     const { results } = await this.managementApi.getWorkflowExecutions(
       {
         workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
@@ -209,7 +209,7 @@ export class OnboardingWorkflowClient {
     );
 
     if (results.length === 0) {
-      return { status: OnboardingStatus.NotStarted, executionId: null };
+      return { status: StreamsKIsOnboardingStatus.NotStarted, executionId: null };
     }
 
     const execution = results[0];

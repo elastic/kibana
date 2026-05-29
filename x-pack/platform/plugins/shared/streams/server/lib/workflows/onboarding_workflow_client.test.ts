@@ -7,14 +7,14 @@
 
 import { parse } from 'yaml';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { OnboardingStatus } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   STREAMS_KI_ONBOARDING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
-  OnboardingWorkflowClient,
+  StreamsKIsOnboardingClient,
   buildConcurrencyKey,
   parseStreamNameFromConcurrencyKey,
 } from './onboarding_workflow_client';
@@ -36,11 +36,11 @@ const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => (
 
 const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
-  const client = new OnboardingWorkflowClient({ managementApi: managementApi as never });
+  const client = new StreamsKIsOnboardingClient({ managementApi: managementApi as never });
   return { client, managementApi };
 };
 
-describe('OnboardingWorkflowClient', () => {
+describe('StreamsKIsOnboardingClient', () => {
   describe('buildConcurrencyKey', () => {
     it('prepends the prefix to the stream name', () => {
       expect(buildConcurrencyKey('my-stream')).toBe('streams-ki-onboarding-my-stream');
@@ -157,7 +157,7 @@ describe('OnboardingWorkflowClient', () => {
 
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
-      expect(result).toEqual({ status: OnboardingStatus.NotStarted, executionId: null });
+      expect(result).toEqual({ status: StreamsKIsOnboardingStatus.NotStarted, executionId: null });
     });
 
     it('returns InProgress for a running execution', async () => {
@@ -169,7 +169,7 @@ describe('OnboardingWorkflowClient', () => {
 
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
-      expect(result).toEqual({ status: OnboardingStatus.InProgress, executionId: 'exec-1' });
+      expect(result).toEqual({ status: StreamsKIsOnboardingStatus.InProgress, executionId: 'exec-1' });
     });
 
     it('returns Completed with output details for a completed execution', async () => {
@@ -196,7 +196,7 @@ describe('OnboardingWorkflowClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: OnboardingStatus.Completed,
+        status: StreamsKIsOnboardingStatus.Completed,
         executionId: 'exec-1',
         featuresSkipped: false,
         discoveredFeatures: ['f1', 'f2'],
@@ -220,7 +220,7 @@ describe('OnboardingWorkflowClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: OnboardingStatus.Completed,
+        status: StreamsKIsOnboardingStatus.Completed,
         executionId: 'exec-1',
         featuresSkipped: false,
         discoveredFeatures: [],
@@ -249,7 +249,7 @@ describe('OnboardingWorkflowClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: OnboardingStatus.Failed,
+        status: StreamsKIsOnboardingStatus.Failed,
         executionId: 'exec-1',
         error: 'something broke',
       });
@@ -265,7 +265,7 @@ describe('OnboardingWorkflowClient', () => {
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
       expect(result).toEqual({
-        status: OnboardingStatus.Failed,
+        status: StreamsKIsOnboardingStatus.Failed,
         executionId: 'exec-1',
         error: 'Onboarding workflow timed out',
       });
@@ -280,7 +280,7 @@ describe('OnboardingWorkflowClient', () => {
 
       const result = await client.getStatus({ streamName: 'logs.nginx' });
 
-      expect(result).toEqual({ status: OnboardingStatus.Canceled, executionId: 'exec-1' });
+      expect(result).toEqual({ status: StreamsKIsOnboardingStatus.Canceled, executionId: 'exec-1' });
     });
 
     it('queries with the correct concurrency group key', async () => {

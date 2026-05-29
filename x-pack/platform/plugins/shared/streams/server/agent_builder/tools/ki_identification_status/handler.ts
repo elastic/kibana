@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import type { OnboardingWorkflowClient } from '../../../lib/workflows/onboarding_workflow_client';
+import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 interface GetKiIdentificationStatusHandlerParams {
   streamName: string;
-  onboardingClient: OnboardingWorkflowClient;
+  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
 }
 
 export async function getKiIdentificationStatusToolHandler({
   streamName,
-  onboardingClient,
+  streamsKIsOnboardingClient,
 }: GetKiIdentificationStatusHandlerParams) {
-  const { executionId, ...statusResult } = await onboardingClient.getStatus({ streamName });
+  const { executionId, ...statusResult } = await streamsKIsOnboardingClient.getStatus({
+    streamName,
+  });
 
   return {
     stream_name: streamName,

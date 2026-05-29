@@ -6,13 +6,13 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import type { OnboardingStep } from '@kbn/streams-schema';
+import type { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
 export interface ScheduleOnboardingOptions {
-  steps?: OnboardingStep[];
+  steps?: StreamsKIsOnboardingStep[];
   connectors?: {
     features?: string;
     queries?: string;

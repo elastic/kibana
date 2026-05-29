@@ -91,7 +91,7 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
-import { OnboardingWorkflowClient } from './lib/workflows/onboarding_workflow_client';
+import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -323,8 +323,8 @@ export class StreamsPlugin
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
-    const onboardingClient = plugins.workflowsManagement
-      ? new OnboardingWorkflowClient({ managementApi: plugins.workflowsManagement.management })
+    const streamsKIsOnboardingClient = plugins.workflowsManagement
+      ? new StreamsKIsOnboardingClient({ managementApi: plugins.workflowsManagement.management })
       : undefined;
 
     if (plugins.agentBuilder) {
@@ -334,7 +334,7 @@ export class StreamsPlugin
         server: this.server,
         logger: this.logger,
         telemetry: telemetryClient,
-        onboardingClient,
+        streamsKIsOnboardingClient,
         isMemoryEnabled: async () => {
           try {
             const [coreStart] = await core.getStartServices();
@@ -356,11 +356,11 @@ export class StreamsPlugin
 
     let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
 
-    if (plugins.workflowsManagement && onboardingClient) {
+    if (plugins.workflowsManagement && streamsKIsOnboardingClient) {
       continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService({
         logger: this.logger,
         managementApi: plugins.workflowsManagement.management,
-        onboardingClient,
+        streamsKIsOnboardingClient,
       });
     }
 
@@ -441,7 +441,7 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
         continuousKiExtractionWorkflowService,
-        onboardingClient,
+        streamsKIsOnboardingClient,
       },
       core,
       logger: this.logger,

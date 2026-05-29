@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { OnboardingStatus } from '@kbn/streams-schema';
-import { OnboardingWorkflowClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { getKiIdentificationStatusToolHandler } from './handler';
 
 describe('getKiIdentificationStatusToolHandler', () => {
   it('returns stream_name alongside the onboarding status', async () => {
-    const onboardingClient = new OnboardingWorkflowClient({
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
       managementApi: {
         getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
         getWorkflowExecution: jest.fn().mockResolvedValue(null),
@@ -20,13 +20,13 @@ describe('getKiIdentificationStatusToolHandler', () => {
 
     const result = await getKiIdentificationStatusToolHandler({
       streamName: 'logs.nginx',
-      onboardingClient,
+      streamsKIsOnboardingClient,
     });
 
     expect(result).toEqual({
       stream_name: 'logs.nginx',
       execution_id: null,
-      status: OnboardingStatus.NotStarted,
+      status: StreamsKIsOnboardingStatus.NotStarted,
     });
   });
 });

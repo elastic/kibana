@@ -7,8 +7,8 @@
 
 import { createKiIdentificationStartTool } from './tool';
 import { createMockToolContext } from '../../utils/test_helpers';
-import { OnboardingStep } from '@kbn/streams-schema';
-import { OnboardingWorkflowClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 describe('createKiIdentificationStartTool', () => {
   const telemetry = {
@@ -26,13 +26,13 @@ describe('createKiIdentificationStartTool', () => {
       }),
       runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
     };
-    const onboardingClient = new OnboardingWorkflowClient({
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
       managementApi: managementApi as never,
     });
 
     const tool = createKiIdentificationStartTool({
       telemetry: telemetry as never,
-      onboardingClient,
+      streamsKIsOnboardingClient,
     });
     const context = createMockToolContext();
 
@@ -45,7 +45,10 @@ describe('createKiIdentificationStartTool', () => {
     const result = await tool.handler(
       {
         stream_name: 'logs.nginx',
-        steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
+        steps: [
+          StreamsKIsOnboardingStep.FeaturesIdentification,
+          StreamsKIsOnboardingStep.QueriesGeneration,
+        ],
       },
       context
     );
@@ -75,7 +78,10 @@ describe('createKiIdentificationStartTool', () => {
     const result = await tool.handler(
       {
         stream_name: 'logs.nginx',
-        steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
+        steps: [
+          StreamsKIsOnboardingStep.FeaturesIdentification,
+          StreamsKIsOnboardingStep.QueriesGeneration,
+        ],
       },
       context
     );

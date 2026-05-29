@@ -6,20 +6,20 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { OnboardingStep, OnboardingStatus, type OnboardingStatusResult } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStep, StreamsKIsOnboardingStatus, type StreamsKIsOnboardingStatusResult } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
-import type { OnboardingWorkflowInputs } from '../../../../lib/workflows/onboarding_workflow_client';
+import type { StreamsKIsOnboardingInputs } from '../../../../lib/workflows/onboarding_workflow_client';
 
 const timestampFromString = z.string().transform((input) => new Date(input).getTime());
 
 const mapStepsToSkipFlags = (
-  steps: OnboardingStep[]
+  steps: StreamsKIsOnboardingStep[]
 ): { skipFeatures: boolean; skipQueries: boolean } => ({
-  skipFeatures: !steps.includes(OnboardingStep.FeaturesIdentification),
-  skipQueries: !steps.includes(OnboardingStep.QueriesGeneration),
+  skipFeatures: !steps.includes(StreamsKIsOnboardingStep.FeaturesIdentification),
+  skipQueries: !steps.includes(StreamsKIsOnboardingStep.QueriesGeneration),
 });
 
 export const onboardingExecuteRoute = createServerRoute({
@@ -43,9 +43,9 @@ export const onboardingExecuteRoute = createServerRoute({
         from: timestampFromString,
         to: timestampFromString,
         steps: z
-          .array(z.enum(OnboardingStep))
+          .array(z.enum(StreamsKIsOnboardingStep))
           .optional()
-          .default([OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration])
+          .default([StreamsKIsOnboardingStep.FeaturesIdentification, StreamsKIsOnboardingStep.QueriesGeneration])
           .describe(
             'Optional list of steps to perform as part of stream onboarding in the specified sequence. By default it will execute all steps.'
           ),
@@ -77,9 +77,9 @@ export const onboardingExecuteRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    onboardingClient,
-  }): Promise<OnboardingStatusResult> => {
-    if (!onboardingClient) {
+    streamsKIsOnboardingClient,
+  }): Promise<StreamsKIsOnboardingStatusResult> => {
+    if (!streamsKIsOnboardingClient) {
       throw new StatusError('Workflows management is not available', 503);
     }
 
@@ -94,7 +94,7 @@ export const onboardingExecuteRoute = createServerRoute({
     if (body.action === 'schedule') {
       const { skipFeatures, skipQueries } = mapStepsToSkipFlags(body.steps);
 
-      const inputs: OnboardingWorkflowInputs = {
+      const inputs: StreamsKIsOnboardingInputs = {
         streamName,
         skipFeatures,
         skipQueries,
@@ -104,15 +104,15 @@ export const onboardingExecuteRoute = createServerRoute({
         ...(body.connectors?.queries && { queriesConnectorId: body.connectors.queries }),
       };
 
-      await onboardingClient.run({ inputs, request });
+      await streamsKIsOnboardingClient.run({ inputs, request });
 
-      return { status: OnboardingStatus.InProgress };
+      return { status: StreamsKIsOnboardingStatus.InProgress };
     }
 
     // action === 'cancel'
-    await onboardingClient.cancel({ streamName, request });
+    await streamsKIsOnboardingClient.cancel({ streamName, request });
 
-    return { status: OnboardingStatus.Canceled };
+    return { status: StreamsKIsOnboardingStatus.Canceled };
   },
 });
 
@@ -136,9 +136,9 @@ export const onboardingStatusRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    onboardingClient,
-  }): Promise<OnboardingStatusResult> => {
-    if (!onboardingClient) {
+    streamsKIsOnboardingClient,
+  }): Promise<StreamsKIsOnboardingStatusResult> => {
+    if (!streamsKIsOnboardingClient) {
       throw new StatusError('Workflows management is not available', 503);
     }
 
@@ -149,7 +149,7 @@ export const onboardingStatusRoute = createServerRoute({
       path: { streamName },
     } = params;
 
-    const { executionId: _, ...statusResult } = await onboardingClient.getStatus({ streamName });
+    const { executionId: _, ...statusResult } = await streamsKIsOnboardingClient.getStatus({ streamName });
     return statusResult;
   },
 });

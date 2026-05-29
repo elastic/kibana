@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { OnboardingStatus } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
-import { OnboardingWorkflowClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationCancelTool } from './tool';
 import { createMockToolContext } from '../../utils/test_helpers';
 
@@ -19,12 +19,12 @@ describe('createKiIdentificationCancelTool', () => {
       }),
       cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     };
-    const onboardingClient = new OnboardingWorkflowClient({
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
       managementApi: managementApi as never,
     });
 
     const tool = createKiIdentificationCancelTool({
-      onboardingClient,
+      streamsKIsOnboardingClient,
     });
     const context = createMockToolContext();
     return { tool, context, managementApi };
@@ -46,7 +46,7 @@ describe('createKiIdentificationCancelTool', () => {
       expect(result.results[0].data).toEqual({
         stream_name: 'logs.nginx',
         execution_id: 'exec-1',
-        status: OnboardingStatus.Canceled,
+        status: StreamsKIsOnboardingStatus.Canceled,
       });
     }
   });

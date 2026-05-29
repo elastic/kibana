@@ -19,13 +19,13 @@ import type {
 
 /**
  * @deprecated Legacy onboarding result shape used by the task-based implementation.
- * The new workflow-based implementation uses the flat OnboardingResult from @kbn/streams-schema.
+ * The new workflow-based implementation uses the flat StreamsKIsOnboardingResult from @kbn/streams-schema.
  */
 interface LegacyOnboardingResult {
   featuresTaskResult?: TaskResult<IdentifyFeaturesResult>;
   queriesTaskResult?: TaskResult<SignificantEventsQueriesGenerationResult>;
 }
-import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LogMeta } from '@kbn/logging';
@@ -54,7 +54,7 @@ export interface OnboardingTaskParams {
   streamName: string;
   from: number;
   to: number;
-  steps: OnboardingStep[];
+  steps: StreamsKIsOnboardingStep[];
   connectors?: {
     features?: string;
     queries?: string;
@@ -106,10 +106,11 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
 
                 for (const step of steps) {
                   switch (step) {
-                    case OnboardingStep.FeaturesIdentification: {
+                    case StreamsKIsOnboardingStep.FeaturesIdentification: {
                       const featuresTaskId = getFeaturesIdentificationTaskId(streamName);
                       const isFeaturesOnlyStep =
-                        steps.length === 1 && steps[0] === OnboardingStep.FeaturesIdentification;
+                        steps.length === 1 &&
+                        steps[0] === StreamsKIsOnboardingStep.FeaturesIdentification;
 
                       if (!isFeaturesOnlyStep) {
                         const { shouldIdentify } = await shouldIdentifyFeatures({
@@ -145,7 +146,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                       break;
                     }
 
-                    case OnboardingStep.QueriesGeneration:
+                    case StreamsKIsOnboardingStep.QueriesGeneration:
                       const queriesTaskId = await scheduleQueriesGenerationTask(
                         {
                           start: from,

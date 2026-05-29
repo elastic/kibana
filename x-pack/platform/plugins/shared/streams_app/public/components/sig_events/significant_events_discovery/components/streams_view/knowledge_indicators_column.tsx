@@ -7,13 +7,13 @@
 
 import { EuiI18nNumber, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { Streams, OnboardingStatusResult } from '@kbn/streams-schema';
+import type { Streams, StreamsKIsOnboardingStatusResult } from '@kbn/streams-schema';
 import React from 'react';
 import { useStreamFeatures } from '../../../../../hooks/sig_events/use_stream_features';
 
 interface KnowledgeIndicatorsColumnProps {
   stream: Streams.all.Definition;
-  streamOnboardingResult?: OnboardingStatusResult;
+  streamOnboardingResult?: StreamsKIsOnboardingStatusResult;
 }
 
 export function KnowledgeIndicatorsColumn({

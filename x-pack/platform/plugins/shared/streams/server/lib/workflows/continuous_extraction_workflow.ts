@@ -10,7 +10,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
-import type { OnboardingWorkflowClient } from './onboarding_workflow_client';
+import type { StreamsKIsOnboardingClient } from './onboarding_workflow_client';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 import { pollUntil } from './poll_until';
 
@@ -21,11 +21,11 @@ export interface ContinuousKiExtractionWorkflowService {
 export const createContinuousKiExtractionWorkflowService = ({
   logger,
   managementApi,
-  onboardingClient,
+  streamsKIsOnboardingClient,
 }: {
   logger: Logger;
   managementApi: WorkflowsServerPluginSetup['management'];
-  onboardingClient: OnboardingWorkflowClient;
+  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
 }): ContinuousKiExtractionWorkflowService => {
   const log = logger.get('continuous-ki-extraction-workflow');
 
@@ -95,7 +95,7 @@ export const createContinuousKiExtractionWorkflowService = ({
 
       if (existing) {
         try {
-          await onboardingClient.cancelAllRunning({ request });
+          await streamsKIsOnboardingClient.cancelAllRunning({ request });
         } catch (err) {
           throw new Error('Cannot delete workflow: failed to cancel running onboarding workflows', {
             cause: err,

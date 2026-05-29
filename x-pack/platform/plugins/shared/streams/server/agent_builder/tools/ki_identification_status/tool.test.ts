@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { OnboardingStatus } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
-import { OnboardingWorkflowClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationStatusTool } from './tool';
 import { createMockToolContext } from '../../utils/test_helpers';
 
@@ -38,12 +38,12 @@ describe('createKiIdentificationStatusTool', () => {
         },
       }),
     };
-    const onboardingClient = new OnboardingWorkflowClient({
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
       managementApi: managementApi as never,
     });
 
     const tool = createKiIdentificationStatusTool({
-      onboardingClient,
+      streamsKIsOnboardingClient,
     });
     const context = createMockToolContext();
     return { tool, context, managementApi };
@@ -59,7 +59,7 @@ describe('createKiIdentificationStatusTool', () => {
       expect(result.results[0].data).toEqual(
         expect.objectContaining({
           stream_name: 'logs.nginx',
-          status: OnboardingStatus.Completed,
+          status: StreamsKIsOnboardingStatus.Completed,
         })
       );
     }

@@ -7,7 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
-import type { OnboardingWorkflowClient } from '../../lib/workflows/onboarding_workflow_client';
+import type { StreamsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
 import { streamsManagementSkill } from './streams_management_skill';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
@@ -15,11 +15,11 @@ import { createKiIdentificationManagementSkill } from './ki_identification_manag
 export const registerAgentBuilderSkills = ({
   agentBuilder,
   telemetry,
-  onboardingClient,
+  streamsKIsOnboardingClient,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   telemetry: EbtTelemetryClient;
-  onboardingClient?: OnboardingWorkflowClient;
+  streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
 }): void => {
   if (!agentBuilder) {
     return;
@@ -28,8 +28,8 @@ export const registerAgentBuilderSkills = ({
   const streamsSkills = [
     streamsManagementSkill,
     knowledgeIndicatorsManagementSkill,
-    ...(onboardingClient
-      ? [createKiIdentificationManagementSkill({ telemetry, onboardingClient })]
+    ...(streamsKIsOnboardingClient
+      ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
       : []),
   ];
 

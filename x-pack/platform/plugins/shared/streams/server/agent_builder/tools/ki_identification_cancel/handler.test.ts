@@ -6,9 +6,9 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { OnboardingStatus } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStatus } from '@kbn/streams-schema';
 import { ExecutionStatus } from '@kbn/workflows';
-import { OnboardingWorkflowClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { cancelKiIdentificationToolHandler } from './handler';
 
 describe('cancelKiIdentificationToolHandler', () => {
@@ -19,14 +19,14 @@ describe('cancelKiIdentificationToolHandler', () => {
       }),
       cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     };
-    const onboardingClient = new OnboardingWorkflowClient({
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
       managementApi: managementApi as never,
     });
     const request = httpServerMock.createKibanaRequest();
 
     const result = await cancelKiIdentificationToolHandler({
       streamName: 'logs.nginx',
-      onboardingClient,
+      streamsKIsOnboardingClient,
       request,
     });
 
@@ -38,7 +38,7 @@ describe('cancelKiIdentificationToolHandler', () => {
     expect(result).toEqual({
       stream_name: 'logs.nginx',
       execution_id: 'exec-1',
-      status: OnboardingStatus.Canceled,
+      status: StreamsKIsOnboardingStatus.Canceled,
     });
   });
 
@@ -47,14 +47,14 @@ describe('cancelKiIdentificationToolHandler', () => {
       getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [] }),
       cancelWorkflowExecution: jest.fn(),
     };
-    const onboardingClient = new OnboardingWorkflowClient({
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
       managementApi: managementApi as never,
     });
     const request = httpServerMock.createKibanaRequest();
 
     const result = await cancelKiIdentificationToolHandler({
       streamName: 'logs.nginx',
-      onboardingClient,
+      streamsKIsOnboardingClient,
       request,
     });
 
@@ -62,7 +62,7 @@ describe('cancelKiIdentificationToolHandler', () => {
     expect(result).toEqual({
       stream_name: 'logs.nginx',
       execution_id: null,
-      status: OnboardingStatus.Canceled,
+      status: StreamsKIsOnboardingStatus.Canceled,
     });
   });
 });

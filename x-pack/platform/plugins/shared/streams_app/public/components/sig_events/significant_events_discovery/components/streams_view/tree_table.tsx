@@ -24,9 +24,9 @@ import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import {
   Streams,
-  OnboardingStatus,
-  ONBOARDING_IN_PROGRESS_STATUSES,
-  type OnboardingStatusResult,
+  StreamsKIsOnboardingStatus,
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+  type StreamsKIsOnboardingStatusResult,
 } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
@@ -67,7 +67,7 @@ export function StreamsTreeTable({
   onStopOnboardingActionClick,
 }: {
   streams?: ListStreamDetail[];
-  streamOnboardingResultMap: Record<string, OnboardingStatusResult>;
+  streamOnboardingResultMap: Record<string, StreamsKIsOnboardingStatusResult>;
   loading?: boolean;
   searchQuery?: Query;
   selection: EuiTableSelectionType<TableRow>;
@@ -359,17 +359,17 @@ export function StreamsTreeTable({
                 }
 
                 switch (onboardingResult.status) {
-                  case OnboardingStatus.InProgress:
-                  case OnboardingStatus.BeingCanceled:
+                  case StreamsKIsOnboardingStatus.InProgress:
+                  case StreamsKIsOnboardingStatus.BeingCanceled:
                     return <EuiLoadingSpinner size="m" />;
-                  case OnboardingStatus.NotStarted:
-                  case OnboardingStatus.Canceled:
+                  case StreamsKIsOnboardingStatus.NotStarted:
+                  case StreamsKIsOnboardingStatus.Canceled:
                     return '-';
-                  case OnboardingStatus.Completed:
+                  case StreamsKIsOnboardingStatus.Completed:
                     return (
                       <EuiIcon type="checkCircleFill" color="success" size="m" aria-hidden={true} />
                     );
-                  case OnboardingStatus.Failed:
+                  case StreamsKIsOnboardingStatus.Failed:
                     return (
                       <EuiIconTip
                         size="m"
@@ -431,7 +431,7 @@ export function StreamsTreeTable({
               render: (_: unknown, item: TableRow) => {
                 const onboardingResult = streamOnboardingResultMap[item.stream.name];
 
-                if (ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
+                if (STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
                   return (
                     <EuiToolTip
                       position="top"
@@ -442,7 +442,9 @@ export function StreamsTreeTable({
                       <EuiButtonIcon
                         iconType="stop"
                         aria-label={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
-                        disabled={onboardingResult.status === OnboardingStatus.BeingCanceled}
+                        disabled={
+                          onboardingResult.status === StreamsKIsOnboardingStatus.BeingCanceled
+                        }
                         onClick={() => onStopOnboardingActionClick(item.stream.name)}
                       />
                     </EuiToolTip>

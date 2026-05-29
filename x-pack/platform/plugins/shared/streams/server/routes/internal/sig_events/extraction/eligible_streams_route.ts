@@ -89,9 +89,9 @@ const eligibleStreamsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    onboardingClient,
+    streamsKIsOnboardingClient,
   }): Promise<EligibleStreamsResponse> => {
-    if (!onboardingClient) {
+    if (!streamsKIsOnboardingClient) {
       throw new StatusError('Workflows management is not available', 503);
     }
 
@@ -129,7 +129,7 @@ const eligibleStreamsRoute = createServerRoute({
         featureName: 'knowledge indicator extraction',
         request,
       }),
-      onboardingClient.getRecentExecutions(),
+      streamsKIsOnboardingClient.getRecentExecutions(),
       streamsClient.listStreams(),
     ]);
 

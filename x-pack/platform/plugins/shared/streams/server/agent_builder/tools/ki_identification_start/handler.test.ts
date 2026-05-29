@@ -7,8 +7,8 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { startKiIdentificationToolHandler } from './handler';
-import { OnboardingStep } from '@kbn/streams-schema';
-import { OnboardingWorkflowClient } from '../../../lib/workflows/onboarding_workflow_client';
+import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 describe('startKiIdentificationToolHandler', () => {
   const setup = () => {
@@ -22,24 +22,27 @@ describe('startKiIdentificationToolHandler', () => {
       }),
       runWorkflow: jest.fn().mockResolvedValue('execution-id-123'),
     };
-    const onboardingClient = new OnboardingWorkflowClient({
+    const streamsKIsOnboardingClient = new StreamsKIsOnboardingClient({
       managementApi: managementApi as never,
     });
 
     return {
       managementApi,
-      onboardingClient,
+      streamsKIsOnboardingClient,
       request: httpServerMock.createKibanaRequest(),
     };
   };
 
   it('triggers onboarding workflow and returns tracking Kibana path', async () => {
-    const { managementApi, onboardingClient, request } = setup();
+    const { managementApi, streamsKIsOnboardingClient, request } = setup();
 
     const result = await startKiIdentificationToolHandler({
       streamName: 'logs.nginx',
-      steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
-      onboardingClient,
+      steps: [
+        StreamsKIsOnboardingStep.FeaturesIdentification,
+        StreamsKIsOnboardingStep.QueriesGeneration,
+      ],
+      streamsKIsOnboardingClient,
       request,
     });
 
@@ -61,14 +64,14 @@ describe('startKiIdentificationToolHandler', () => {
   });
 
   it('throws when workflow is not found', async () => {
-    const { managementApi, onboardingClient, request } = setup();
+    const { managementApi, streamsKIsOnboardingClient, request } = setup();
     managementApi.getWorkflow.mockResolvedValue(null);
 
     await expect(
       startKiIdentificationToolHandler({
         streamName: 'logs.nginx',
-        steps: [OnboardingStep.FeaturesIdentification],
-        onboardingClient,
+        steps: [StreamsKIsOnboardingStep.FeaturesIdentification],
+        streamsKIsOnboardingClient,
         request,
       })
     ).rejects.toThrow(/Onboarding workflow .+ not found/);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface OnboardingResult {
+export interface StreamsKIsOnboardingResult {
   featuresSkipped: boolean;
   discoveredFeatures: unknown[];
   featuresConnectorUsed: string;
@@ -16,12 +16,12 @@ export interface OnboardingResult {
   queriesTokensUsed: Record<string, unknown>;
 }
 
-export enum OnboardingStep {
+export enum StreamsKIsOnboardingStep {
   FeaturesIdentification = 'features_identification',
   QueriesGeneration = 'queries_generation',
 }
 
-export enum OnboardingStatus {
+export enum StreamsKIsOnboardingStatus {
   NotStarted = 'not_started',
   InProgress = 'in_progress',
   /** Client-only optimistic state; the server never returns this value. */
@@ -31,19 +31,19 @@ export enum OnboardingStatus {
   Completed = 'completed',
 }
 
-export type OnboardingStatusResult =
+export type StreamsKIsOnboardingStatusResult =
   | {
       status:
-        | OnboardingStatus.NotStarted
-        | OnboardingStatus.InProgress
-        | OnboardingStatus.BeingCanceled
-        | OnboardingStatus.Canceled;
+        | StreamsKIsOnboardingStatus.NotStarted
+        | StreamsKIsOnboardingStatus.InProgress
+        | StreamsKIsOnboardingStatus.BeingCanceled
+        | StreamsKIsOnboardingStatus.Canceled;
     }
-  | { status: OnboardingStatus.Failed; error: string }
-  | ({ status: OnboardingStatus.Completed } & OnboardingResult);
+  | { status: StreamsKIsOnboardingStatus.Failed; error: string }
+  | ({ status: StreamsKIsOnboardingStatus.Completed } & StreamsKIsOnboardingResult);
 
 /** Statuses that indicate the onboarding pipeline is still active (running or pending cancel). */
-export const ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<OnboardingStatus> = new Set([
-  OnboardingStatus.InProgress,
-  OnboardingStatus.BeingCanceled,
+export const STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES: ReadonlySet<StreamsKIsOnboardingStatus> = new Set([
+  StreamsKIsOnboardingStatus.InProgress,
+  StreamsKIsOnboardingStatus.BeingCanceled,
 ]);

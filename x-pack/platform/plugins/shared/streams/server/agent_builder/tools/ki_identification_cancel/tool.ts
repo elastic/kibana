@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import dedent from 'dedent';
-import type { OnboardingWorkflowClient } from '../../../lib/workflows/onboarding_workflow_client';
+import type { StreamsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { classifyError } from '../../utils/error_utils';
 import { cancelKiIdentificationToolHandler } from './handler';
 
@@ -22,9 +22,9 @@ const cancelSchema = z.object({
 });
 
 export const createKiIdentificationCancelTool = ({
-  onboardingClient,
+  streamsKIsOnboardingClient,
 }: {
-  onboardingClient: OnboardingWorkflowClient;
+  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
 }): BuiltinSkillBoundedTool<typeof cancelSchema> => ({
   id: STREAMS_KI_IDENTIFICATION_CANCEL_TOOL_ID,
   type: ToolType.builtin,
@@ -43,7 +43,7 @@ export const createKiIdentificationCancelTool = ({
     try {
       const data = await cancelKiIdentificationToolHandler({
         streamName,
-        onboardingClient,
+        streamsKIsOnboardingClient,
         request,
       });
 

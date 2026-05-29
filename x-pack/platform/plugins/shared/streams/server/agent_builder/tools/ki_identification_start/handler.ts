@@ -6,23 +6,23 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { OnboardingStep } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
 import { getStreamsLocation } from '../../../../common/get_streams_location/get_streams_location';
 import type {
-  OnboardingWorkflowClient,
-  OnboardingWorkflowInputs,
+  StreamsKIsOnboardingClient,
+  StreamsKIsOnboardingInputs,
 } from '../../../lib/workflows/onboarding_workflow_client';
 
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
 interface StartKiIdentificationHandlerParams {
   streamName: string;
-  steps: OnboardingStep[];
+  steps: StreamsKIsOnboardingStep[];
   connectors?: {
     features?: string;
     queries?: string;
   };
-  onboardingClient: OnboardingWorkflowClient;
+  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
   request: KibanaRequest;
 }
 
@@ -34,14 +34,14 @@ export async function startKiIdentificationToolHandler({
   streamName,
   steps,
   connectors,
-  onboardingClient,
+  streamsKIsOnboardingClient,
   request,
 }: StartKiIdentificationHandlerParams): Promise<StartKiIdentificationHandlerResult> {
   const now = Date.now();
-  const skipFeatures = !steps.includes(OnboardingStep.FeaturesIdentification);
-  const skipQueries = !steps.includes(OnboardingStep.QueriesGeneration);
+  const skipFeatures = !steps.includes(StreamsKIsOnboardingStep.FeaturesIdentification);
+  const skipQueries = !steps.includes(StreamsKIsOnboardingStep.QueriesGeneration);
 
-  const inputs: OnboardingWorkflowInputs = {
+  const inputs: StreamsKIsOnboardingInputs = {
     streamName,
     skipFeatures,
     skipQueries,
@@ -51,7 +51,7 @@ export async function startKiIdentificationToolHandler({
     ...(connectors?.queries && { queriesConnectorId: connectors.queries }),
   };
 
-  await onboardingClient.run({ inputs, request });
+  await streamsKIsOnboardingClient.run({ inputs, request });
 
   const location = getStreamsLocation({
     name: streamName,

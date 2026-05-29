@@ -13,7 +13,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   TaskStatus,
-  ONBOARDING_IN_PROGRESS_STATUSES,
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
 } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -92,7 +92,7 @@ export function StreamsView() {
     (streamName: string) => {
       if (generatingStreamNames.includes(streamName)) return false;
       const result = streamStatusMap[streamName];
-      return !!result && !ONBOARDING_IN_PROGRESS_STATUSES.has(result.status);
+      return !!result && !STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(result.status);
     },
     [generatingStreamNames, streamStatusMap]
   );
