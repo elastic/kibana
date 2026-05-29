@@ -19,7 +19,6 @@ import {
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
