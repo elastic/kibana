@@ -110,9 +110,6 @@ Populate event properties with care:
 - `impact`:
   - Always set to exactly one of: `critical`, `high`, `medium`, `low`.
 
-- `recommended_action`:
-  - Required. Short next operator action, ideally a single word (for example: `escalate`).
-
 - `recommendations`:
   - Required. List of descriptive, detailed mitigation steps.
 </sig_event_property_guidance>
@@ -151,7 +148,6 @@ Tool: `event_create`
   "criticality": 86,
   "confidence": 0.84,
   "impact": "high",
-  "recommended_action": "Scale checkout pods and increase upstream timeout budget temporarily.",
   "recommendations": [
     "Add alert on upstream latency threshold breach",
     "Review timeout configuration for checkout service"

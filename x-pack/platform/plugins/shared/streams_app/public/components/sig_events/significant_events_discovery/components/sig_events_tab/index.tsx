@@ -126,9 +126,12 @@ const columns: Array<EuiBasicTableColumn<SigEvent>> = [
       defaultMessage: 'Action',
     }),
     width: '100px',
-    render: (action: string) => (
-      <EuiBadge color={action === 'escalate' ? 'danger' : 'hollow'}>{action}</EuiBadge>
-    ),
+    render: (action?: string) =>
+      action ? (
+        <EuiBadge color={action === 'escalate' ? 'danger' : 'hollow'}>{action}</EuiBadge>
+      ) : (
+        '-'
+      ),
   },
 ];
 

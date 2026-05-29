@@ -18,7 +18,6 @@ export interface EventCreateInput {
   criticality: number;
   impact: SigEventImpact;
   confidence: number;
-  recommended_action: string;
   recommendations: string[];
 }
 
@@ -44,7 +43,6 @@ export async function createEventToolHandler({
     root_cause: eventInput.root_cause,
     criticality: eventInput.criticality,
     confidence: eventInput.confidence,
-    recommended_action: eventInput.recommended_action,
     impact: eventInput.impact,
     recommendations: eventInput.recommendations,
   };

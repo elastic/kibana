@@ -62,7 +62,6 @@ describe('event_create tool', () => {
         criticality: 40,
         impact: 'high',
         confidence: 0.8,
-        recommended_action: 'escalate',
         recommendations: ['open incident'],
       },
       createMockToolContext()

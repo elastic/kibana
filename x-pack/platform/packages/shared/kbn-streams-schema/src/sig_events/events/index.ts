@@ -38,7 +38,7 @@ export const sigEventSchema = z.object({
   root_cause: z.string(),
   criticality: z.number(),
   confidence: z.number(),
-  recommended_action: z.string(),
+  recommended_action: z.string().optional(),
   impact: sigEventImpactSchema,
   recommendations: z.array(z.string()),
   dependency_edges: z.array(dependencyEdgeSchema).optional(),

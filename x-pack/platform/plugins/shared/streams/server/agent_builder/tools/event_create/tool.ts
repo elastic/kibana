@@ -35,7 +35,6 @@ const createEventSchema = z.object({
   criticality: z.number().min(0).max(100),
   impact: sigEventImpactSchema,
   confidence: z.number().min(0).max(1),
-  recommended_action: z.string(),
   recommendations: z.array(z.string()),
 });
 

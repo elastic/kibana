@@ -23,7 +23,6 @@ describe('createEventToolHandler', () => {
         criticality: 60,
         impact: 'high',
         confidence: 0.7,
-        recommended_action: 'escalate',
         recommendations: ['create incident'],
       },
     });
