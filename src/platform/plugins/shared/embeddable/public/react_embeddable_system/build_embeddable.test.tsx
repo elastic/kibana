@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
 import type { EmbeddablePublicDefinition } from './types';
 import { buildEmbeddable } from './build_embeddable';
 import { PhaseTracker } from './phase_tracker';
