@@ -62,6 +62,21 @@ describe('useHasChromeAppHeaderContent', () => {
     expect(screen.getByText('has content')).toBeInTheDocument();
   });
 
+  it('detects metadata-only registered content', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.next.appHeader.set({
+      metadata: [{ type: 'text', label: 'Created by: analyst' }],
+    });
+
+    render(
+      <TestChromeProviders chrome={chrome}>
+        <HasContent />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByText('has content')).toBeInTheDocument();
+  });
+
   it('detects legacy badge fallback content', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getBadge$.mockReturnValue(
