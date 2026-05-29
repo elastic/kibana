@@ -18,6 +18,8 @@ import {
   EuiPopoverTitle,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
@@ -57,6 +59,7 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
   const [openEqlSettings, setIsOpenEqlSettings] = useState(false);
   const [localSize, setLocalSize] = useState<number>(eqlOptions?.size ?? 100);
   const debounceSize = useRef<DebouncedFunc<SizeVoidFunc>>();
+  const eqlSettingsTitleId = useGeneratedHtmlId();
 
   const { euiTheme } = useEuiTheme();
   const containerStyles = useMemo(
@@ -248,8 +251,11 @@ export const EqlQueryBarFooter: FC<EqlQueryBarFooterProps> = ({
                     closePopover={closeEqlSettingsHandler}
                     anchorPosition="downCenter"
                     ownFocus={false}
+                    aria-labelledby={eqlSettingsTitleId}
                   >
-                    <EuiPopoverTitle>{i18n.EQL_SETTINGS_TITLE}</EuiPopoverTitle>
+                    <EuiPopoverTitle id={eqlSettingsTitleId}>
+                      {i18n.EQL_SETTINGS_TITLE}
+                    </EuiPopoverTitle>
                     <div css={{ width: '300px' }}>
                       {!isSizeOptionDisabled && (
                         <EuiFormRow

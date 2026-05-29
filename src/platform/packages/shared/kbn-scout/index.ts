@@ -49,7 +49,6 @@ export {
   CopySavedObjectsToSpaceFlyout,
   buildContentListSearch,
   buildContentListUrlRegex,
-  DataViewsManagementPage,
   ListingTable,
   SavedObjectsManagementPage,
 } from './src/playwright/page_objects';
