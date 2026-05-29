@@ -422,10 +422,3 @@ export const ATTACK_DISCOVERY_STEP_FAILURE_EVENT: EventTypeOpts<{
     },
   },
 };
-
-// Stub: the real (narrow) union types are added by the Telemetry PR (PR5)
-// alongside the EBT event schemas. PR4's orchestration code references
-// MisconfigurationType to type its check->misconfiguration map, so the alias
-// must exist here to type-check. Using `string` is broader than the eventual
-// union but FF-off safe — no telemetry is emitted unless the FF is ON.
-export type MisconfigurationType = string;
