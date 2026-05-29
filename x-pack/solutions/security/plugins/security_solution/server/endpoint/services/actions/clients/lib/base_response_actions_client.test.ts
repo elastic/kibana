@@ -48,6 +48,7 @@ import {
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
 } from '../../../../../lib/telemetry/event_based/events';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { resetCcsCache } from '../../../../utils/ccs_utils';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -84,6 +85,7 @@ describe('ResponseActionsClientImpl base class', () => {
   let logger: Logger;
 
   beforeEach(async () => {
+    resetCcsCache();
     constructorOptions = responseActionsClientMock.createConstructorOptions();
 
     esClient = constructorOptions.esClient;
