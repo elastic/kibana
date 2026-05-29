@@ -1773,7 +1773,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       expect(esIndexPatterns).toHaveProperty('my_custom_access');
     });
 
-    it('should pass customDataStreamOriginPath to installIndexTemplatesAndPipelines', async () => {
+    it('should pass customDataStreamOriginDataset and customDataStreamOriginType to installIndexTemplatesAndPipelines', async () => {
       jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
       jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
       jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
@@ -1819,7 +1819,8 @@ describe('removeAssetsForInputPackagePolicy', () => {
 
       expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalledTimes(1);
       const installCall = jest.mocked(installIndexTemplatesAndPipelines).mock.calls[0][0];
-      expect(installCall.customDataStreamOriginPath).toBe('access');
+      expect(installCall.customDataStreamOriginDataset).toBe('nginx.access');
+      expect(installCall.customDataStreamOriginType).toBe('logs');
     });
 
     it('should not apply applyTimeSeriesIndexMode for integration packages', async () => {

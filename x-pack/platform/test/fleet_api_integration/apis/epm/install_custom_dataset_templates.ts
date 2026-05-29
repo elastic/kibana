@@ -200,11 +200,12 @@ export default function (providerContext: FtrProviderContext) {
         ]);
 
         // The index template installed for a custom dataset on an integration package is
-        // annotated with the origin data stream path it was derived from.
+        // annotated with the origin data stream dataset and type.
         const indexTemplateAsset = installation.installed_es.find(
           (asset: any) => asset.id === `logs-${dataset}` && asset.type === 'index_template'
         );
-        expect(indexTemplateAsset?.customDataStreamOriginPath).to.eql('log');
+        expect(indexTemplateAsset?.customDataStreamOriginDataset).to.eql(`${INTEGRATION_PKG}.log`);
+        expect(indexTemplateAsset?.customDataStreamOriginType).to.eql('logs');
 
         expect(await getIndexTemplate(`logs-${dataset}`)).not.to.eql(null);
         expect(await getComponentTemplate(`logs-${dataset}@package`)).not.to.eql(null);

@@ -697,7 +697,8 @@ describe('stepInstallIndexTemplatePipelines', () => {
         {
           id: 'logs-my_custom_access',
           type: ElasticsearchAssetType.indexTemplate,
-          customDataStreamOriginPath: 'access',
+          customDataStreamOriginDataset: 'test-package.access',
+          customDataStreamOriginType: 'logs',
         },
       ];
 
@@ -718,7 +719,8 @@ describe('stepInstallIndexTemplatePipelines', () => {
         {
           id: 'logs-my_custom_access',
           type: ElasticsearchAssetType.indexTemplate,
-          customDataStreamOriginPath: 'access',
+          customDataStreamOriginDataset: 'test-package.access',
+          customDataStreamOriginType: 'logs',
         },
       ]);
 
@@ -743,7 +745,8 @@ describe('stepInstallIndexTemplatePipelines', () => {
       expect(secondCall.onlyForDataStreams![0].dataset).toBe('my_custom_access');
       expect(secondCall.onlyForDataStreams![0].type).toBe('logs');
       expect(secondCall.onlyForDataStreams![0].path).toBe('access');
-      expect(secondCall.customDataStreamOriginPath).toBe('access');
+      expect(secondCall.customDataStreamOriginDataset).toBe('test-package.access');
+      expect(secondCall.customDataStreamOriginType).toBe('logs');
 
       expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
         soClient,
@@ -787,7 +790,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       expect(mockedInstallIndexTemplatesAndPipelines).toHaveBeenCalledTimes(1);
     });
 
-    it('should skip if package has no matching data stream for the origin path', async () => {
+    it('should skip if package has no matching data stream for the origin dataset', async () => {
       const dataStreams = [{ dataset: 'test-package.other', type: 'metrics', path: 'other' }];
 
       mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
@@ -799,7 +802,8 @@ describe('stepInstallIndexTemplatePipelines', () => {
         {
           id: 'logs-my_custom_access',
           type: ElasticsearchAssetType.indexTemplate,
-          customDataStreamOriginPath: 'access',
+          customDataStreamOriginDataset: 'test-package.access',
+          customDataStreamOriginType: 'logs',
         },
       ]);
 
@@ -834,7 +838,8 @@ describe('stepInstallIndexTemplatePipelines', () => {
         {
           id: 'logs-my_custom_access',
           type: ElasticsearchAssetType.indexTemplate,
-          customDataStreamOriginPath: 'access',
+          customDataStreamOriginDataset: 'test-package.access',
+          customDataStreamOriginType: 'logs',
         },
       ]);
 

@@ -889,7 +889,10 @@ export interface EsAssetReference {
   id: string;
   type: ElasticsearchAssetType;
   deferred?: boolean;
+  /** @deprecated Use customDataStreamOriginDataset + customDataStreamOriginType */
   customDataStreamOriginPath?: string;
+  customDataStreamOriginDataset?: string;
+  customDataStreamOriginType?: string;
 }
 
 export interface PackageAssetReference {

@@ -31,7 +31,8 @@ export async function installIndexTemplatesAndPipelines({
   esClient,
   logger,
   onlyForDataStreams,
-  customDataStreamOriginPath,
+  customDataStreamOriginDataset,
+  customDataStreamOriginType,
 }: {
   installedPkg?: Installation;
   packageInstallContext: PackageInstallContext;
@@ -40,7 +41,8 @@ export async function installIndexTemplatesAndPipelines({
   esClient: ElasticsearchClient;
   logger: Logger;
   onlyForDataStreams?: RegistryDataStream[];
-  customDataStreamOriginPath?: string;
+  customDataStreamOriginDataset?: string;
+  customDataStreamOriginType?: string;
 }) {
   /**
    * In order to install assets in parallel, we need to split the preparation step from the installation step. This
@@ -105,11 +107,14 @@ export async function installIndexTemplatesAndPipelines({
       ...preparedIngestPipelines.assetsToAdd,
       ...preparedIndexTemplates.assetsToAdd,
     ];
-    const annotatedAssets = customDataStreamOriginPath
-      ? assetsToAdd.map((ref) =>
-          ref.type === 'index_template' ? { ...ref, customDataStreamOriginPath } : ref
-        )
-      : assetsToAdd;
+    const annotatedAssets =
+      customDataStreamOriginDataset && customDataStreamOriginType
+        ? assetsToAdd.map((ref) =>
+            ref.type === 'index_template'
+              ? { ...ref, customDataStreamOriginDataset, customDataStreamOriginType }
+              : ref
+          )
+        : assetsToAdd;
     newEsReferences = await optimisticallyAddEsAssetReferences(
       savedObjectsClient,
       packageInstallContext.packageInfo.name,

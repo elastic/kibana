@@ -49,6 +49,7 @@ interface CustomDatasetStream {
   dataStreamType: string;
   inputType: string;
   resolvedDataStream?: RegistryDataStream;
+  originDataset?: string;
 }
 
 export const getCustomDatasetStreams = (
@@ -107,6 +108,7 @@ export const getCustomDatasetStreams = (
         dataStreamType,
         inputType: input.type,
         resolvedDataStream: templateDs ? { ...templateDs, dataset: datasetVarValue } : undefined,
+        originDataset: templateDs ? stream.data_stream.dataset : undefined,
       });
     }
   }
@@ -172,7 +174,13 @@ export async function installAssetsForCustomDatasetPolicy(opts: {
   const customStreams = getCustomDatasetStreams(packagePolicy, pkgInfo);
   if (customStreams.length === 0) return;
 
-  for (const { datasetName, dataStreamType, inputType, resolvedDataStream } of customStreams) {
+  for (const {
+    datasetName,
+    dataStreamType,
+    inputType,
+    resolvedDataStream,
+    originDataset,
+  } of customStreams) {
     await installAssetsForDataStreamType({
       pkgInfo,
       logger,
@@ -183,6 +191,7 @@ export async function installAssetsForCustomDatasetPolicy(opts: {
       soClient,
       force,
       resolvedDataStream,
+      originDataset,
     });
   }
 }
@@ -208,6 +217,7 @@ async function installAssetsForDataStreamType(opts: {
   soClient: SavedObjectsClientContract;
   force: boolean;
   resolvedDataStream?: RegistryDataStream;
+  originDataset?: string;
 }) {
   const {
     pkgInfo,
@@ -219,6 +229,7 @@ async function installAssetsForDataStreamType(opts: {
     soClient,
     force,
     resolvedDataStream,
+    originDataset,
   } = opts;
 
   let dataStream: RegistryDataStream;
@@ -354,7 +365,8 @@ async function installAssetsForDataStreamType(opts: {
       esClient,
       logger,
       onlyForDataStreams: [dataStream],
-      customDataStreamOriginPath: resolvedDataStream ? dataStream.path : undefined,
+      customDataStreamOriginDataset: resolvedDataStream ? originDataset : undefined,
+      customDataStreamOriginType: resolvedDataStream ? dataStreamType : undefined,
     });
 
     // Update ES index patterns — use datasetName as the map key
