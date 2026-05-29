@@ -128,6 +128,7 @@ export interface FleetConfigType {
   };
   unenrollInactiveAgents?: {
     taskInterval?: string;
+    gracePeriodMs?: number;
   };
 }
 

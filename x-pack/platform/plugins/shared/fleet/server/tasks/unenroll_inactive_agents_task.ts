@@ -45,6 +45,7 @@ export const UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS = 60 * 60 * 1000; // 1 hou
 
 interface UnenrollInactiveAgentsTaskConfig {
   taskInterval?: string;
+  gracePeriodMs?: number;
 }
 
 interface UnenrollInactiveAgentsTaskSetupContract {
@@ -64,6 +65,7 @@ export class UnenrollInactiveAgentsTask {
   private wasStarted: boolean = false;
   private unenrollBatchSize: number;
   private taskInterval: string;
+  private gracePeriodMs: number;
   // Tracks action IDs already processed by the execute phase so stale action docs
   // in the append-only .fleet-actions index are not re-processed on every tick.
   // Cleared only on Kibana restart; stale docs from previous sessions get one
@@ -76,6 +78,7 @@ export class UnenrollInactiveAgentsTask {
     this.unenrollBatchSize =
       unenrollBatchSize !== undefined ? unenrollBatchSize : UNENROLLMENT_BATCHSIZE;
     this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
+    this.gracePeriodMs = config.gracePeriodMs ?? UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -233,9 +236,7 @@ export class UnenrollInactiveAgentsTask {
         return;
       }
 
-      const startTime = new Date(
-        Date.now() + UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS
-      ).toISOString();
+      const startTime = new Date(Date.now() + this.gracePeriodMs).toISOString();
       const actionId = `${SCHEDULED_UNENROLL_ACTION_ID_PREFIX}${uuidv4()}`;
 
       const scheduledBatch = await unenrollBatch(soClient, esClient, agentsToSchedule, {
@@ -289,7 +290,7 @@ export class UnenrollInactiveAgentsTask {
     // scheduled unenrollments must have been created within the grace period window,
     // so anything older than grace_period + one task interval cannot match a due action.
     const cancelWindowStart = new Date(
-      Date.now() - UNENROLL_INACTIVE_AGENTS_GRACE_PERIOD_MS - 10 * 60 * 1000
+      Date.now() - this.gracePeriodMs - 10 * 60 * 1000
     ).toISOString();
     const cancelRes = await esClient.search<FleetServerAgentAction>({
       index: AGENT_ACTIONS_INDEX,

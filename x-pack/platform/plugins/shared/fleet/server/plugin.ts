@@ -725,6 +725,7 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
       config: {
         taskInterval: config.unenrollInactiveAgents?.taskInterval,
+        gracePeriodMs: config.unenrollInactiveAgents?.gracePeriodMs,
       },
     });
     this.deleteUnenrolledAgentsTask = new DeleteUnenrolledAgentsTask({
