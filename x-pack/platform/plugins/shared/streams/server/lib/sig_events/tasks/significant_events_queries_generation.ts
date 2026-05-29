@@ -64,7 +64,6 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 soClient,
                 getKnowledgeIndicatorClient,
                 scopedClusterClient,
-                uiSettingsClient,
               } = await taskContext.getScopedClients({
                 request: fakeRequest,
               });
@@ -82,7 +81,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                     soClient,
                     kiClient,
                     esClient: scopedClusterClient.asCurrentUser,
-                    uiSettingsClient,
+                    featureFlags: taskContext.server.core.featureFlags,
                     searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
                     request: fakeRequest,
                     logger: taskLogger,
