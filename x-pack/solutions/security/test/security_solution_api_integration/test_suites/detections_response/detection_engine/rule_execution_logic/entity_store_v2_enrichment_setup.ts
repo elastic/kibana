@@ -71,7 +71,7 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
       if (res.body.status === 'error') {
         throw new Error(`Entity Store V2 install errored: ${JSON.stringify(res.body)}`);
       }
-      return res.body.status === 'running' || res.body.status === 'stopped';
+      return res.body.status === 'stopped';
     });
 
     for (const hostConfig of enrichmentConfig.hosts ?? []) {
