@@ -1,6 +1,6 @@
 # PII Anonymization — Requirements
 
-Anonymize text sent to external LLMs via `inference.chatComplete`. Built on the [Workflow Lifecycle Hooks proposal](./workflows-aop-proposal.md) (`invokeHook`, sync mode, by-value I/O). Engine design rationale: [design evolution](./design_evolution.md).
+Anonymize text sent to external LLMs via `inference.chatComplete`. Built on the [Workflow Lifecycle Hooks proposal](./workflows-aop-proposal.md): sync `invokeHook`, subscribed YAML workflows from the management store, by-value I/O. Engine design rationale: [design evolution](./design_evolution.md).
 
 **Problem:** Regulated customers need AI on sensitive data without shipping PII to external models. One integration point must cover Agent Builder and all other `chatComplete` consumers.
 
@@ -36,6 +36,7 @@ Anonymize text sent to external LLMs via `inference.chatComplete`. Built on the 
 - Token map via capabilities side-channel (workflow data only; `proceedFn` only for `call_site.proceed`)
 - Workflow YAML allowlist for which tools get deanonymized args
 - A standalone inline executor that duplicates step dispatch, templating, or validation outside the workflow engine
+- In-memory hook handlers (`registerHookHandler`) as a product path for lifecycle hooks — hooks are workflows from the management store, executed by the engine
 
 ---
 
@@ -228,16 +229,51 @@ Defer full `aroundCompletion` with `call_site.proceed` to Phase 2 unless product
 
 Sync lifecycle hooks are a **first-class execution mode** of the regular workflow engine — not a parallel executor, not a PoC shortcut. Anonymization is the first consumer; the engine work must be general and durable.
 
+### `invokeHook` execution model
+
+Any trigger with a `sync` block follows one product path when called via `invokeHook`:
+
+```mermaid
+flowchart LR
+  subgraph management [Management]
+    Store["Workflow definitions\n(.kibana-workflows)"]
+  end
+  subgraph execution [Execution — sync mode]
+    Engine["Workflow engine\n(StepDispatcher)"]
+  end
+  Caller --> invokeHook
+  invokeHook --> Store
+  Store --> Engine
+  Engine --> Caller
+```
+
+1. **`invokeHook(triggerId, payload)`** blocks the caller until the hook completes
+2. **Management** — load enabled workflows subscribed to `triggerId` in the current space
+3. **Execution** — run each workflow via **sync execution mode** (in-process, same step dispatch as async, non-durable)
+4. **Return** — chained output (when `sync.chained: true`) or `pass_through` / `failed` per failure semantics
+
+There is **no opt-in flag** and **no alternate in-memory handler path** for product lifecycle hooks. Admins configure behavior in the Workflows UI; the engine executes subscribed YAML. This matches the [AOP proposal](./workflows-aop-proposal.md) model: *single `invokeHook` call — engine resolves all subscribers.*
+
+| API | Execution | What runs |
+| --- | --------- | --------- |
+| `emitEvent()` | Async — Task Manager | Background workflows |
+| `invokeHook()` | Sync — blocks caller | Enabled YAML workflows via sync execution mode |
+
+**Not in scope for product hooks:** plugin-registered TypeScript handlers as a parallel backend. If the platform retains an internal handler registry, it is for tests/bootstrap only — not documented as a lifecycle-hook customization path.
+
+**Management / execution separation (desired state):** workflow definitions live in the management store; execution happens in sync engine mode at invoke time. Sync runs are non-durable (no execution saved object, no Task Manager) — that is an accepted tradeoff for the hot path, not a reason to bypass the engine.
+
 ### Blocking prerequisites (workflows team)
 
 1. **Same engine, same dispatch** — sync runs use `StepDispatcher`, step registry, templating, and input validation — identical code path to async runs
-2. **Observability parity** — APM spans, workflow event log, EBT; every entry tagged `mode: sync` and `triggerId`
+2. **Observability parity** — APM spans, workflow event log; every entry tagged `mode: sync` and `triggerId`
 3. **Non-durable by design** — sync runs use synthetic execution IDs (`sync_<uuid>`); no Task Manager, no ES execution documents, no retries, no cross-node resume
-4. **Caller-owned timeout** — trigger `maxTimeout` + `chatComplete` timeout are the only backstops; a slow step blocks the LLM call
+4. **Caller-owned timeout** — per-workflow `maxTimeout` plus a documented **chain budget** when multiple workflows subscribe to one trigger; a slow step blocks the LLM call
 5. **Save-time validation** — linear topology only; structural branching/parallel/loops rejected at install; capability subset checked at registration
 6. **Chained I/O validation** — when `sync.chained: true`, save-time check that each workflow's output schema is compatible with the next workflow's expected input
 7. **PII-safe logging** — event logger redacts known sensitive fields (`tokenMap`, step inputs/outputs for PII steps) before write
-8. `**inlineExecution` opt-in** — only triggers that declare `sync.inlineExecution: true` use the sync YAML execution path; other triggers are unaffected
+8. **Deterministic multi-workflow order** — explicit ordering (e.g. priority field or stable install order), not implicit sort by `updated_at`
+9. **`invokeHook` contract** — sync triggers always resolve and execute subscribed YAML workflows; no dual execution backends
 
 ### Accepted tradeoffs (explicit)
 
@@ -262,33 +298,38 @@ Each inference lifecycle trigger declares:
 
 ```ts
 sync: {
-  maxTimeout: '15s',           // before/after; 30s for around
+  maxTimeout: '15s',           // per workflow; before/after — 30s for around
   failurePolicy: 'closed',     // anonymization must not silently pass raw PII
   chained: true,               // before/after; false for around
-  inlineExecution: true,       // opt into sync YAML path
+  outputSchema: /* … */,       // declared on trigger; single source of truth
 }
 providesCapabilities: [],      // before/after — empty
 // aroundCompletion only:
 providesCapabilities: ['proceedFn'],
 ```
 
+All inference lifecycle triggers use the same `invokeHook` → subscribed YAML → sync engine path. No per-trigger execution backend switch.
+
 ### Composability
 
-- Multiple enabled workflows per trigger execute in registration order
+- Multiple enabled workflows per trigger execute in **deterministic order** (explicit priority or stable install order — not `updated_at`)
 - `sync.chained: true`: previous workflow's `output` becomes the next workflow's `event` input
-- Each workflow must end with `workflow.output` declaring its schema
+- Each workflow must end with `workflow.output` declaring its schema (or match implicit input/output schema when shapes align)
 - Custom workflows can chain library workflows (e.g. redact SSN → anonymize remainder)
 
 ### Failure semantics
 
 
-| Scenario                                                  | Behavior                                                                         |
-| --------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Hook step throws / times out                              | Fail-closed → `chatComplete` error (unless `allow_unsafe`)                       |
-| Workflows plugin unavailable                              | Fail-closed when anonymization is enabled for the space — **not** `pass_through` |
-| No workflows enabled for trigger                          | Fail-closed when anonymization is enabled — silent pass-through sends raw PII    |
-| `afterCompletion` disabled but `beforeCompletion` ran     | Fail-closed — never return tokenized text to user                                |
-| `beforeCompletion` disabled but `afterCompletion` enabled | No-op restore (empty `tokenMap`)                                                 |
+| Scenario | Behavior |
+| -------- | -------- |
+| Hook step throws / times out | Fail-closed → `chatComplete` error (unless `allow_unsafe`) |
+| Workflows plugin unavailable | Fail-closed when anonymization is enabled for the space — **not** `pass_through` |
+| No workflows enabled for trigger | Fail-closed when anonymization is enabled — silent pass-through sends raw PII |
+| `afterCompletion` disabled but `beforeCompletion` ran | Fail-closed — never return tokenized text to user |
+| `beforeCompletion` disabled but `afterCompletion` enabled | No-op restore (empty `tokenMap`) |
+| Anonymization disabled / hook not required | `pass_through` acceptable — caller receives unmodified payload |
+
+**Layering:** trigger `failurePolicy: 'closed'` governs workflow step failures; inference `failureMode: 'block' \| 'allow_unsafe'` governs how the caller handles hook errors. When anonymization is active, both must fail closed — `pass_through` is not a silent success.
 
 
 ### Performance
@@ -327,6 +368,7 @@ Before + after workflows are a known operational footgun. Requirements:
 | Seeded default workflows                                                         | `@kbn/default-anonymization-workflows`                                   |
 | `chatComplete` wrap, `tokenMap` hold, streaming transform, tool arg restore      | Inference plugin                                                         |
 | Sync execution mode, `invokeHook`, chained semantics, save-time validation       | Workflows engine (`workflows_management` + `workflows_execution_engine`) |
+| Trigger event/output schemas (single source of truth)                            | `@kbn/workflows-extensions/common` (imported by inference + inference_workflows) |
 | `KnownCapabilities` registry                                                     | Workflows engine                                                         |
 
 
@@ -343,8 +385,8 @@ Before + after workflows are a known operational footgun. Requirements:
 ## Phase 2 (later)
 
 - NER via `ai.ner` step; opt-in; benchmark latency vs hook timeout
-- `aroundCompletion` with `call_site.proceed` ? (accepts non-streaming tradeoff)
-- Per-agent enablement UI ? (workflow `if:` guards sufficient in Phase 1)
+- `aroundCompletion` with `call_site.proceed` (accepts non-streaming tradeoff)
+- Per-agent enablement UI (workflow `if:` guards sufficient in Phase 1)
 - Cross-node sync / encrypted ephemeral store for token map (only if multi-node sync hooks are required)
 
 ---
@@ -365,12 +407,13 @@ Before + after workflows are a known operational footgun. Requirements:
 ### Workflow engine
 
 - Sync runs use same `StepDispatcher` as async — no forked executor
-- Sync runs observable in APM + event log with `mode: sync` tag
+- `invokeHook` on sync triggers always executes subscribed YAML workflows via sync execution mode
+- Sync runs observable in APM + event log with `mode: sync` and `triggerId` tags
 - `tokenMap` redacted in all observability sinks
 - Save-time rejection of non-linear sync workflows and capability mismatches
 - Chained workflow I/O validated at save time
+- Deterministic multi-workflow execution order
 - `pass_through` never used when anonymization is enabled
-- `inlineExecution` gates sync path to declared triggers only
 - Workflows team sign-off on non-durable sync semantics
 - Production-scale latency benchmarked (hook overhead + ES lookup × 2)
 
