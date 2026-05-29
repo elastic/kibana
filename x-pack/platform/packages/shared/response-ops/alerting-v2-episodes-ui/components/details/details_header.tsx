@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
@@ -20,6 +21,7 @@ export interface AlertEpisodeDetailsHeaderProps {
   status: AlertEpisodeStatus | undefined;
   episodeAction: EpisodeActionState | undefined;
   groupAction: AlertEpisodeGroupAction | undefined;
+  titleSize?: EuiTitleSize;
 }
 
 export const AlertEpisodeDetailsHeader = ({
@@ -29,13 +31,14 @@ export const AlertEpisodeDetailsHeader = ({
   status,
   episodeAction,
   groupAction,
+  titleSize = 'l',
 }: AlertEpisodeDetailsHeaderProps) => {
   const showTags = tags.length > 0;
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiTitle size="l">
+          <EuiTitle size={titleSize}>
             <h1
               data-test-subj={
                 title

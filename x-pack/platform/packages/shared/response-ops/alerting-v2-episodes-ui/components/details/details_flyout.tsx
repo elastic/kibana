@@ -5,29 +5,37 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
+  EuiPanel,
   EuiTab,
   EuiTabs,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
+import { useInvalidateEpisodeQueries } from '../../hooks/use_invalidate_episode_queries';
 import { FLYOUT_FOOTER_OFFSET, getAlertEpisodeDetailsPath } from '../../constants';
 import { AlertEpisodeDetailsHeaderSection } from './details_header_section';
 import { AlertEpisodeOverviewSection } from './overview_section';
 import { AlertEpisodesRelatedSection } from './related_section';
 import { AlertEpisodeMetadataSection } from './metadata_section';
 import { AlertEpisodeRunbookSection } from './runbook_section';
+import type { EpisodeAction } from '../../actions/types';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
+import { EpisodeActionsBar } from '../episode_actions_bar';
 
 type TabId = 'overview' | 'related' | 'metadata' | 'runbook';
 
@@ -36,6 +44,7 @@ export interface AlertEpisodeDetailsFlyoutProps {
   groupHash: string | undefined;
   onClose: () => void;
   services: AlertEpisodeDetailsServices;
+  actions?: EpisodeAction[];
 }
 
 export const AlertEpisodeDetailsFlyout = ({
@@ -43,56 +52,114 @@ export const AlertEpisodeDetailsFlyout = ({
   groupHash,
   onClose,
   services,
+  actions,
 }: AlertEpisodeDetailsFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<TabId>('overview');
+  const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
+
+  const { data: episode } = useFetchEpisodeQuery({ episodeId, services });
+  const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
+  const compatibleActions = useMemo(
+    () => (actions && episodes.length ? actions.filter((a) => a.isCompatible({ episodes })) : []),
+    [actions, episodes]
+  );
 
   return (
     <EuiFlyout
-      onClose={onClose}
       type="push"
+      hasAnimation
+      hideCloseButton
+      onClose={onClose}
       pushMinBreakpoint="m"
       data-test-subj="alertingV2EpisodeFlyout"
+      paddingSize="none"
       size="35%"
       aria-label={i18n.FLYOUT_ARIA_LABEL}
     >
+      <EuiPanel
+        paddingSize="xs"
+        hasShadow={false}
+        hasBorder={false}
+        borderRadius="none"
+        color="transparent"
+      >
+        <EuiFlexGroup
+          justifyContent="flexEnd"
+          gutterSize="s"
+          responsive={false}
+          alignItems="center"
+        >
+          {compatibleActions.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EpisodeActionsBar
+                actions={compatibleActions}
+                episodes={episodes}
+                onSuccess={invalidateEpisodeQueries}
+                iconOnly
+              />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={i18n.FLYOUT_CLOSE} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                color="text"
+                onClick={onClose}
+                aria-label={i18n.FLYOUT_CLOSE}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      <EuiHorizontalRule margin="none" />
       <EuiFlyoutHeader hasBorder>
-        <AlertEpisodeDetailsHeaderSection episodeId={episodeId} services={services} />
-        <EuiTabs
-          bottomBorder={false}
+        <EuiPanel
+          paddingSize="m"
+          hasShadow={false}
+          hasBorder={false}
+          borderRadius="none"
+          color="transparent"
           css={css`
-            margin-bottom: -${euiTheme.size.l};
+            padding-block-end: 0;
           `}
         >
-          <EuiTab
-            isSelected={tab === 'overview'}
-            onClick={() => setTab('overview')}
-            data-test-subj="alertingV2EpisodeFlyoutTabOverview"
-          >
-            {i18n.FLYOUT_TAB_OVERVIEW}
-          </EuiTab>
-          <EuiTab
-            isSelected={tab === 'related'}
-            onClick={() => setTab('related')}
-            data-test-subj="alertingV2EpisodeFlyoutTabRelated"
-          >
-            {i18n.FLYOUT_TAB_RELATED}
-          </EuiTab>
-          <EuiTab
-            isSelected={tab === 'metadata'}
-            onClick={() => setTab('metadata')}
-            data-test-subj="alertingV2EpisodeFlyoutTabMetadata"
-          >
-            {i18n.FLYOUT_TAB_METADATA}
-          </EuiTab>
-          <EuiTab
-            isSelected={tab === 'runbook'}
-            onClick={() => setTab('runbook')}
-            data-test-subj="alertingV2EpisodeFlyoutTabRunbook"
-          >
-            {i18n.FLYOUT_TAB_RUNBOOK}
-          </EuiTab>
-        </EuiTabs>
+          <AlertEpisodeDetailsHeaderSection
+            episodeId={episodeId}
+            services={services}
+            titleSize="m"
+          />
+          <EuiTabs bottomBorder={false}>
+            <EuiTab
+              isSelected={tab === 'overview'}
+              onClick={() => setTab('overview')}
+              data-test-subj="alertingV2EpisodeFlyoutTabOverview"
+            >
+              {i18n.FLYOUT_TAB_OVERVIEW}
+            </EuiTab>
+            <EuiTab
+              isSelected={tab === 'related'}
+              onClick={() => setTab('related')}
+              data-test-subj="alertingV2EpisodeFlyoutTabRelated"
+            >
+              {i18n.FLYOUT_TAB_RELATED}
+            </EuiTab>
+            <EuiTab
+              isSelected={tab === 'metadata'}
+              onClick={() => setTab('metadata')}
+              data-test-subj="alertingV2EpisodeFlyoutTabMetadata"
+            >
+              {i18n.FLYOUT_TAB_METADATA}
+            </EuiTab>
+            <EuiTab
+              isSelected={tab === 'runbook'}
+              onClick={() => setTab('runbook')}
+              data-test-subj="alertingV2EpisodeFlyoutTabRunbook"
+            >
+              {i18n.FLYOUT_TAB_RUNBOOK}
+            </EuiTab>
+          </EuiTabs>
+        </EuiPanel>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         // The metadata tab should fill the body edge-to-edge with no flyout
@@ -126,7 +193,9 @@ export const AlertEpisodeDetailsFlyout = ({
                   padding-inline: ${euiTheme.size.m};
                 }
               `
-            : undefined
+            : css`
+                padding: ${euiTheme.size.m};
+              `
         }
       >
         {tab === 'overview' && (
@@ -161,27 +230,35 @@ export const AlertEpisodeDetailsFlyout = ({
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onClose}
-              data-test-subj="alertingV2EpisodeFlyoutCloseButton"
-              flush="left"
-            >
-              {i18n.FLYOUT_CLOSE}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              href={services.http.basePath.prepend(getAlertEpisodeDetailsPath(episodeId))}
-              data-test-subj="alertingV2EpisodeFlyoutViewDetailsButton"
-              iconType="eye"
-            >
-              {i18n.FLYOUT_VIEW_DETAILS}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiPanel
+          paddingSize="m"
+          hasShadow={false}
+          hasBorder={false}
+          borderRadius="none"
+          color="transparent"
+        >
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={onClose}
+                data-test-subj="alertingV2EpisodeFlyoutCloseButton"
+                flush="left"
+              >
+                {i18n.FLYOUT_CLOSE}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                href={services.http.basePath.prepend(getAlertEpisodeDetailsPath(episodeId))}
+                data-test-subj="alertingV2EpisodeFlyoutViewDetailsButton"
+                iconType="eye"
+              >
+                {i18n.FLYOUT_VIEW_DETAILS}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

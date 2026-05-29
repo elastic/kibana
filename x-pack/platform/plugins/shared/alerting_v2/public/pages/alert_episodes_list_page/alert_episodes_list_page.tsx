@@ -131,27 +131,6 @@ export const AlertEpisodesListPage = () => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
 
-  const renderDocumentView = useCallback<RenderDocumentViewCallback>(
-    (hit) => (
-      <AlertEpisodeDetailsFlyout
-        episodeId={hit.flattened['episode.id'] as string}
-        groupHash={hit.flattened.group_hash as string | undefined}
-        onClose={closeFlyout}
-        services={{
-          data: services.data,
-          http: services.http,
-          expressions: services.expressions,
-          userProfile: services.userProfile,
-          spaces: services.spaces,
-          uiSettings: services.uiSettings,
-          unifiedDocViewer: services.unifiedDocViewer,
-          dataViews: services.dataViews,
-        }}
-      />
-    ),
-    [closeFlyout, services]
-  );
-
   const {
     data: episodesData,
     dataView,
@@ -228,6 +207,28 @@ export const AlertEpisodesListPage = () => {
           }),
       }),
     [services, queryClient, rulesCache]
+  );
+
+  const renderDocumentView = useCallback<RenderDocumentViewCallback>(
+    (hit) => (
+      <AlertEpisodeDetailsFlyout
+        episodeId={hit.flattened['episode.id'] as string}
+        groupHash={hit.flattened.group_hash as string | undefined}
+        onClose={closeFlyout}
+        actions={episodeActions}
+        services={{
+          data: services.data,
+          http: services.http,
+          expressions: services.expressions,
+          userProfile: services.userProfile,
+          spaces: services.spaces,
+          uiSettings: services.uiSettings,
+          unifiedDocViewer: services.unifiedDocViewer,
+          dataViews: services.dataViews,
+        }}
+      />
+    ),
+    [closeFlyout, episodeActions, services]
   );
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(

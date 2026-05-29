@@ -7,6 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
+/** --- Episode actions bar --- */
+export const EPISODE_ACTIONS_BAR_MORE_ACTIONS = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodeActionsBar.moreActionsButtonAriaLabel',
+  { defaultMessage: 'More actions' }
+);
+
 /** --- Assignee cell --- */
 export const ASSIGNEE_CELL_EMPTY = i18n.translate('xpack.alertingV2EpisodesUi.assigneeCell.empty', {
   defaultMessage: '—',

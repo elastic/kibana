@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { EuiTitleSize } from '@elastic/eui';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchEpisodeActions } from '../../hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '../../hooks/use_fetch_group_actions';
@@ -16,11 +17,13 @@ import type { AlertEpisodeDetailsServices } from './types';
 export interface AlertEpisodeDetailsHeaderSectionProps {
   episodeId: string;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'http' | 'expressions' | 'spaces'>;
+  titleSize?: EuiTitleSize;
 }
 
 export const AlertEpisodeDetailsHeaderSection = ({
   episodeId,
   services,
+  titleSize,
 }: AlertEpisodeDetailsHeaderSectionProps) => {
   const { data: episode } = useFetchEpisodeQuery({ episodeId, services });
 
@@ -50,6 +53,7 @@ export const AlertEpisodeDetailsHeaderSection = ({
       status={lastStatus}
       episodeAction={episodeAction}
       groupAction={groupAction}
+      titleSize={titleSize}
     />
   );
 };
