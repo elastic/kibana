@@ -9,7 +9,7 @@ import { injectable } from 'inversify';
 import { get } from 'lodash';
 import objectHash from 'object-hash';
 import type {
-  ActionGroup,  
+  ActionGroup,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -78,7 +78,7 @@ export function buildActionGroups(
     const rule = rules?.get(episode.rule_id);
     if (rule) {
       group.rules[episode.rule_id] = { name: rule.name };
-    }    
+    }
   }
 
   return [...groupMap.values()];
