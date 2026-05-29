@@ -10,6 +10,7 @@
 import { useContext, useEffect, useRef } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_context';
+import type { TriggerEventReplaySource } from '@kbn/workflows';
 import { buildTriggerEventReplayInputs } from './workflow_execute_event_replay_inputs';
 
 interface TriggerEventRunPayloadSelectionSyncProps {
@@ -48,7 +49,7 @@ export const TriggerEventRunPayloadSelectionSync = ({
       setValue('');
       return;
     }
-    const source = (record.raw._source ?? {}) as Record<string, unknown>;
+    const source = (record.raw._source ?? {}) as TriggerEventReplaySource;
     setValue(JSON.stringify(buildTriggerEventReplayInputs(source, replaySpaceId), null, 2));
     setErrors?.(null);
   }, [dataTableRows, docIdsKey, replaySpaceId, setErrors, setValue]);

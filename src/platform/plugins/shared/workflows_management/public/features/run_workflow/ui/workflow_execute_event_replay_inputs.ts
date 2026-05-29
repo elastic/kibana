@@ -7,23 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function buildTriggerEventReplayInputs(
-  source: Record<string, unknown>,
-  currentSpaceId: string
-): Record<string, unknown> {
-  const rawPayload = source.payload;
-  const payload =
-    rawPayload !== null && typeof rawPayload === 'object' && !Array.isArray(rawPayload)
-      ? { ...(rawPayload as Record<string, unknown>) }
-      : {};
+import type {
+  EventTriggerReplayEvent,
+  EventTriggerReplayInput,
+  TriggerEventReplaySource,
+} from '@kbn/workflows';
 
-  return {
-    event: {
-      ...payload,
-      timestamp: new Date().toISOString(),
-      spaceId: currentSpaceId,
-      eventChainDepth: 0,
-      eventChainVisitedWorkflowIds: [] as string[],
-    },
-  };
+function readTriggerEventPayload(source: TriggerEventReplaySource): Record<string, unknown> {
+  const rawPayload = source.payload;
+  if (rawPayload !== null && typeof rawPayload === 'object' && !Array.isArray(rawPayload)) {
+    return { ...(rawPayload as Record<string, unknown>) };
+  }
+  return {};
 }
+
+export function buildTriggerEventReplayInputs(
+  source: TriggerEventReplaySource,
+  currentSpaceId: string
+): EventTriggerReplayInput {
+  const payload = readTriggerEventPayload(source);
+
+  const event: EventTriggerReplayEvent = {
+    ...payload,
+    timestamp: new Date().toISOString(),
+    spaceId: currentSpaceId,
+    eventChainDepth: 0,
+    eventChainVisitedWorkflowIds: [],
+  };
+
+  return { event };
+}
+
+export type {
+  EventTriggerReplayEvent,
+  EventTriggerReplayInput,
+  EventTriggerReplayPlatformFields,
+  TriggerEventReplaySource,
+  WorkflowsEventsLogDocumentSource,
+} from '@kbn/workflows';

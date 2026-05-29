@@ -19,10 +19,7 @@ import { useQueryTriggerEvents } from '@kbn/workflows-ui';
 import { testQueryClientConfig } from '@kbn/workflows-ui/src/test_utils';
 import { TIMEPICKER_FALLBACK } from './constants';
 import { MockSearchBar } from './test_utils/workflow_form_test_setup';
-import {
-  buildTriggerEventReplayInputs,
-  WorkflowExecuteEventForm,
-} from './workflow_execute_event_form';
+import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { useKibana } from '../../../hooks/use_kibana';
 
 const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
@@ -76,60 +73,6 @@ const baseDefinition = {
   triggers: [{ type: 'custom.trigger' }],
   steps: [],
 };
-
-describe('buildTriggerEventReplayInputs', () => {
-  beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: false });
-    jest.setSystemTime(new Date('2025-06-15T10:00:00.000Z'));
-  });
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('merges payload with timestamp, spaceId, and default chain fields', () => {
-    expect(
-      buildTriggerEventReplayInputs(
-        {
-          '@timestamp': '2025-01-01T12:00:00.000Z',
-          eventId: 'e1',
-          triggerId: 'custom.trigger',
-          spaceId: 'logged-space',
-          payload: { foo: 'bar', nested: { n: 1 } },
-        },
-        'default'
-      )
-    ).toEqual({
-      event: {
-        foo: 'bar',
-        nested: { n: 1 },
-        timestamp: '2025-06-15T10:00:00.000Z',
-        spaceId: 'default',
-        eventChainDepth: 0,
-        eventChainVisitedWorkflowIds: [],
-      },
-    });
-  });
-
-  it('treats non-object payload as empty', () => {
-    expect(
-      buildTriggerEventReplayInputs(
-        {
-          '@timestamp': '2025-01-01T12:00:00.000Z',
-          spaceId: 'logged-space',
-          payload: null,
-        },
-        'acme'
-      )
-    ).toEqual({
-      event: {
-        timestamp: '2025-06-15T10:00:00.000Z',
-        spaceId: 'acme',
-        eventChainDepth: 0,
-        eventChainVisitedWorkflowIds: [],
-      },
-    });
-  });
-});
 
 describe('WorkflowExecuteEventForm', () => {
   const mockSetValue = jest.fn();

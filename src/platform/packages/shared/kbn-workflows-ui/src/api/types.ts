@@ -14,6 +14,7 @@ import type {
   WorkflowDetailDto,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
+  WorkflowsEventsLogDocumentSource,
 } from '@kbn/workflows';
 
 export interface BulkCreateWorkflowsParams {
@@ -151,7 +152,7 @@ export interface SearchTriggerEventLogParams {
 
 export interface SearchTriggerEventLogHit {
   id: string;
-  source: Record<string, unknown>;
+  source: WorkflowsEventsLogDocumentSource;
 }
 
 export interface SearchTriggerEventLogResult {
