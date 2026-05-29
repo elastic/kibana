@@ -1234,7 +1234,7 @@ describe('TaskScheduling', () => {
       );
     });
 
-    test('ignores 409 conflict errors', async () => {
+    test('reports 409 conflict errors via the conflict flag without throwing', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
@@ -1244,7 +1244,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
 
       const result = await taskScheduling.runSoon(id);
-      expect(result).toEqual({ id, forced: false });
+      expect(result).toEqual({ id, forced: false, conflict: true });
       expect(taskSchedulingOpts.logger.debug).toHaveBeenCalledWith(
         'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon due to conflict (409)'
       );
