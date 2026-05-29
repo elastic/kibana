@@ -207,6 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:delete-unenrolled-agents-task',
         'fleet:deploy_agent_policies',
         'fleet:migrate_action:retry',
+        'fleet:otel_permission_verifier_status_change',
         'fleet:packages-bulk-operations',
         'fleet:policy-revisions-cleanup-task',
         'fleet:privilege_level_change:retry',

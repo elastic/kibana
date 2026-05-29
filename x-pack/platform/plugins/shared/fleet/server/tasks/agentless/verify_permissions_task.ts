@@ -45,6 +45,16 @@ const RECENT_VERIFICATION_WINDOW_MS = 60 * 60 * 1000;
  *  the verifier-policy cleanup task reliably sees the just-created verifier as expired on the
  *  next fire (protects against clock skew and task-manager polling jitter). */
 const RESCHEDULE_BUFFER_MS = 30 * 1000;
+/**
+ * Cap on package-policy SO query results when collecting cloud-connector-using
+ * integrations. Derived from the Cloud agentless deployment limit (5 concurrent
+ * agentless agent policies). Cloud connectors require agentless mode, so at most
+ * 5 agent policies can host cloud-connector-using integrations at one time.
+ * Assuming up to ~5 integrations per agent policy share a connector
+ * (multi-integration support from Story 1), 25 = 5 × 5 gives a comfortable
+ * ceiling. Revisit when the agentless concurrency limit grows.
+ */
+const MAX_CLOUD_CONNECTOR_PACKAGE_POLICIES = 25;
 
 export function registerVerifyPermissionsTask(taskManager: TaskManagerSetupContract) {
   taskManager.registerTaskDefinitions({
@@ -327,12 +337,8 @@ interface ConnectorVerificationInfo {
 async function getPackagePoliciesByConnector(
   soClient: SavedObjectsClientContract
 ): Promise<Map<string, VerifiedPackagePolicy[]>> {
-  // Cap derived from the Cloud agentless deployment limit (5 concurrent agentless
-  // agent policies). Cloud connectors require agentless mode, so at most 5 agent
-  // policies can host cloud-connector-using integrations at one time. Assuming up
-  // to ~5 integrations per agent policy share a connector (multi-integration support
-  // from Story 1), 25 = 5 × 5 gives a comfortable ceiling. Revisit when the
-  // agentless concurrency limit grows.
+  // perPage is capped at MAX_CLOUD_CONNECTOR_PACKAGE_POLICIES — see its definition
+  // for the agentless-concurrency rationale.
   const packagePolicies = await soClient.find<{
     cloud_connector_id?: string;
     policy_ids?: string[];
@@ -341,7 +347,7 @@ async function getPackagePoliciesByConnector(
   }>({
     type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id: *`,
-    perPage: 25,
+    perPage: MAX_CLOUD_CONNECTOR_PACKAGE_POLICIES,
   });
 
   // Gather distinct agent policy ids referenced by these PPs and resolve their names

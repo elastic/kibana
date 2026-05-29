@@ -27,24 +27,8 @@
       },
       "created_at": "2024-01-01T00:00:00.000Z",
       "updated_at": "2024-01-01T00:00:00.000Z",
-      "verification_status": "success",
-      "verification_started_at": "2024-01-01T00:00:00.000Z",
-      "verification_permissions": [
-        {
-          "package_policy_id": "abc-123",
-          "policy_id": "def-456",
-          "policy_template": "cspm",
-          "package_name": "cloud_security_posture",
-          "last_verified_at": "2024-01-01T00:00:00.000Z",
-          "permissions": [
-            {
-              "action": "arn:aws:iam::aws:policy/SecurityAudit",
-              "status": "verified",
-              "required": true
-            }
-          ]
-        }
-      ]
+      "verification_status": "pending",
+      "verification_started_at": "2024-01-01T00:00:00.000Z"
     }
   ]
 }
