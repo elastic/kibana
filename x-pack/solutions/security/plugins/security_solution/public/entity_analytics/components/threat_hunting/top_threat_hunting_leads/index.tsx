@@ -116,11 +116,11 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
     <EuiPanel hasBorder data-test-subj="topThreatHuntingLeads" color="subdued">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={isOpen ? 'Collapse' : 'Expand'} disableScreenReaderOutput>
+          <EuiToolTip content={isOpen ? i18n.COLLAPSE : i18n.EXPAND} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType={isOpen ? 'arrowDown' : 'arrowRight'}
               onClick={toggleOpen}
-              aria-label={isOpen ? 'Collapse' : 'Expand'}
+              aria-label={isOpen ? i18n.COLLAPSE : i18n.EXPAND}
               color="text"
               size="xs"
             />

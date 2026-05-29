@@ -40,23 +40,23 @@ export const ToolTipFooterComponent = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <span>
-            <EuiToolTip content="Next" disableScreenReaderOutput>
+            <EuiToolTip content={i18n.PREVIOUS} disableScreenReaderOutput>
               <EuiButtonIcon
                 data-test-subj={'previous-feature-button'}
                 color={'text'}
                 onClick={previousFeature}
                 iconType="chevronSingleLeft"
-                aria-label="Next"
+                aria-label={i18n.PREVIOUS}
                 isDisabled={featureIndex <= 0}
               />
             </EuiToolTip>
-            <EuiToolTip content="Next" disableScreenReaderOutput>
+            <EuiToolTip content={i18n.NEXT} disableScreenReaderOutput>
               <EuiButtonIcon
                 data-test-subj={'next-feature-button'}
                 color={'text'}
                 onClick={nextFeature}
                 iconType="chevronSingleRight"
-                aria-label="Next"
+                aria-label={i18n.NEXT}
                 isDisabled={featureIndex >= totalFeatures - 1}
               />
             </EuiToolTip>

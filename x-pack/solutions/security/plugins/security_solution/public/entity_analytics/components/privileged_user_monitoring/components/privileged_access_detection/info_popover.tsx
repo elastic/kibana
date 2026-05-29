@@ -19,6 +19,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { useIntegrationLinkState } from '../../../../../common/hooks/integrations/use_integration_link_state';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../../../common/constants';
@@ -47,8 +48,21 @@ export const PrivilegedAccessInfoPopover = () => {
   }, [navigateTo, padPackage, state]);
 
   const button = (
-    <EuiToolTip content={'oi'} disableScreenReaderOutput>
-      <EuiButtonIcon iconType="info" onClick={togglePopover} aria-label={'oi'} />
+    <EuiToolTip
+      content={i18n.translate(
+        'xpack.securitySolution.entityAnalytics.privilegedAccessDetection.infoPopover.buttonTooltip',
+        { defaultMessage: 'More information' }
+      )}
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="info"
+        onClick={togglePopover}
+        aria-label={i18n.translate(
+          'xpack.securitySolution.entityAnalytics.privilegedAccessDetection.infoPopover.buttonAriaLabel',
+          { defaultMessage: 'More information' }
+        )}
+      />
     </EuiToolTip>
   );
 
