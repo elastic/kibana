@@ -15,6 +15,7 @@ import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common/schedule';
 import type { Shard } from '../../../common/utils/converters';
 import type { ScheduleFormData } from '../../components/schedule_section/types';
+import { deserializeSchedule, serializeSchedule } from '../form/schedule_serializer';
 
 export interface UsePackQueryFormProps {
   uniqueQueryIds: string[];
@@ -88,27 +89,28 @@ const deserializer = (
 ): PackQueryFormData => {
   const hasOverride = payload.schedule_type !== undefined;
 
-  return {  id: payload.id,
-  query: payload.query,
-  interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
-  timeout: payload.timeout || QUERY_TIMEOUT.DEFAULT,
-  snapshot: payload.snapshot,
-  removed: payload.removed,
-  platform: payload.platform || DEFAULT_PLATFORM,
-  version: payload.version ? [payload.version] : [],
-  ecs_mapping: payload.ecs_mapping ?? {},
-  override_pack_schedule: hasOverride,
-  schedule: hasOverride
-    ? deserializeSchedule({
-      schedule_type: payload.schedule_type,
-      interval: payload.interval ? parseInt(payload.interval, 10) : undefined,
-      rrule_schedule: payload.rrule_schedule,
-    })
-    : deserializeSchedule({
-      schedule_type: packSchedule?.schedule_type,
-      interval: packSchedule?.interval,
-      rrule_schedule: packSchedule?.rrule_schedule,
-    }),
+  return {
+    id: payload.id,
+    query: payload.query,
+    interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+    timeout: payload.timeout || QUERY_TIMEOUT.DEFAULT,
+    snapshot: payload.snapshot,
+    removed: payload.removed,
+    platform: payload.platform || DEFAULT_PLATFORM,
+    version: payload.version ? [payload.version] : [],
+    ecs_mapping: payload.ecs_mapping ?? {},
+    override_pack_schedule: hasOverride,
+    schedule: hasOverride
+      ? deserializeSchedule({
+          schedule_type: payload.schedule_type,
+          interval: payload.interval ? parseInt(payload.interval, 10) : undefined,
+          rrule_schedule: payload.rrule_schedule,
+        })
+      : deserializeSchedule({
+          schedule_type: packSchedule?.schedule_type,
+          interval: packSchedule?.interval,
+          rrule_schedule: packSchedule?.rrule_schedule,
+        }),
   };
 };
 
