@@ -62,6 +62,8 @@ fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
+    - .storybook/**/*.ts
+    - .storybook/**/*.tsx
     - '!target/**/*'
   jest-config:
     - jest.config.js
