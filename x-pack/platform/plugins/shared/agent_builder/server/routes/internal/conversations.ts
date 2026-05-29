@@ -65,7 +65,7 @@ export function registerInternalConversationRoutes({
       path: `${internalApiPath}/conversations/{conversation_id}/_mark_read`,
       validate: {
         params: schema.object({
-          conversation_id: schema.string(),
+          conversation_id: schema.string({ maxLength: 256 }),
         }),
         body: schema.object({
           read: schema.boolean(),
