@@ -11,11 +11,11 @@ import moment from 'moment';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
+import { transformOut } from '../../common/embeddables/single_metric_viewer/transform_out';
 import type { SingleMetricViewerSharedComponent } from '../shared_components/single_metric_viewer';
 
 export const initComponent = memoize(
@@ -28,13 +28,23 @@ export const initComponent = memoize(
         const { caseData } = props;
         const attachmentState = props.data.state as Record<string, unknown>;
 
-        const inputProps = transformTimeRangeOut(
+        const embeddableState = transformOut(
           attachmentState as unknown as SingleMetricViewerEmbeddableState
         );
 
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
         });
+
+        const {
+          job_ids: jobIds,
+          time_range: timeRange,
+          selected_detector_index: selectedDetectorIndex,
+          selected_entities: selectedEntities,
+          function_description: functionDescription,
+          forecast_id: forecastId,
+        } = embeddableState;
+        const selectedJobId = jobIds[0];
 
         const listItems = [
           {
@@ -44,7 +54,7 @@ export const initComponent = memoize(
                 defaultMessage="Job ID"
               />
             ),
-            description: inputProps.jobIds.join(', '),
+            description: jobIds.join(', '),
           },
           {
             title: (
@@ -54,25 +64,10 @@ export const initComponent = memoize(
               />
             ),
             description: `${dataFormatter.convertToText(
-              inputProps.time_range!.from
-            )} - ${dataFormatter.convertToText(inputProps.time_range!.to)}`,
+              timeRange!.from
+            )} - ${dataFormatter.convertToText(timeRange!.to)}`,
           },
         ];
-
-        if (typeof inputProps.query?.query === 'string' && inputProps.query?.query !== '') {
-          listItems.push({
-            title: (
-              <FormattedMessage
-                id="xpack.ml.cases.singleMetricViewer.description.queryLabel"
-                defaultMessage="Query"
-              />
-            ),
-            description: inputProps.query?.query,
-          });
-        }
-
-        const { jobIds, time_range: timeRange, ...rest } = inputProps;
-        const selectedJobId = jobIds[0];
 
         return (
           <>
@@ -82,7 +77,10 @@ export const initComponent = memoize(
               lastRefresh={Date.now()}
               selectedJobId={selectedJobId}
               uuid={caseData.id}
-              {...rest}
+              forecastId={forecastId}
+              selectedDetectorIndex={selectedDetectorIndex}
+              selectedEntities={selectedEntities}
+              functionDescription={functionDescription}
             />
           </>
         );
