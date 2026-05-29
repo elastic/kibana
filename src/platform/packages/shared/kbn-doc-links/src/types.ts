@@ -578,6 +578,7 @@ export interface DocLinks {
     agentPolicy: string;
     agentlessIntegrations: string;
     api: string;
+    managedOtlp: string;
     uninstallAgent: string;
     installAndUninstallIntegrationAssets: string;
     elasticAgentInputConfiguration: string;

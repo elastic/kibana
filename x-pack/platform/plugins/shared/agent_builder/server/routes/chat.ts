@@ -123,6 +123,21 @@ export function registerChatRoutes({
                 meta: { description: 'When true, the attachment will not be displayed in the UI.' },
               })
             ),
+            description: schema.maybe(
+              schema.string({
+                maxLength: 1024,
+                meta: { description: 'Human-readable label for the attachment.' },
+              })
+            ),
+            group_id: schema.maybe(
+              schema.string({
+                maxLength: 256,
+                meta: {
+                  description:
+                    'Stable identifier for the logical group this attachment belongs to. Attachments sharing the same group_id were submitted together as a single logical entity.',
+                },
+              })
+            ),
           },
           {
             validate: (attachment) => {
