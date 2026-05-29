@@ -100,6 +100,7 @@ DispatcherPipeline
    +--> FetchSuppressionsStep
    +--> ApplySuppressionStep
    +--> FetchRulesStep
+   +--> ApplyMaintenanceWindowStep
    +--> EvaluateMatchersStep
    +--> BuildGroupsStep
    +--> ApplyThrottlingStep
@@ -174,11 +175,12 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | 2 | `FetchSuppressionsStep` | Load alert-action facts needed for suppression decisions. |
 | 3 | `ApplySuppressionStep` | Mark each episode as dispatchable or suppressed, preserving reasons. |
 | 4 | `FetchRulesStep` | Load rule metadata for the remaining dispatchable set. |
-| 5 | `EvaluateMatchersStep` | Evaluate each policy matcher against each episode context. |
-| 6 | `BuildGroupsStep` | Build `NotificationGroup` objects based on policy grouping settings. |
-| 7 | `ApplyThrottlingStep` | Compare candidate groups with notification history and split them into dispatch vs throttled. |
-| 8 | `DispatchStep` | Perform delivery side effects for eligible groups. |
-| 9 | `StoreActionsStep` | Persist the execution outcome to `.alert-actions`. |
+| 5 | `ApplyMaintenanceWindowStep` | Suppress dispatchable episodes whose timestamp falls within an active maintenance window in the same space. |
+| 6 | `EvaluateMatchersStep` | Evaluate each policy matcher against each episode context. |
+| 7 | `BuildGroupsStep` | Build `NotificationGroup` objects based on policy grouping settings. |
+| 8 | `ApplyThrottlingStep` | Compare candidate groups with notification history and split them into dispatch vs throttled. |
+| 9 | `DispatchStep` | Perform delivery side effects for eligible groups. |
+| 10 | `StoreActionsStep` | Persist the execution outcome to `.alert-actions`. |
 
 ## Halt reasons
 

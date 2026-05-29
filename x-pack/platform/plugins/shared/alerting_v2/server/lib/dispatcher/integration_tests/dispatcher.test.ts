@@ -61,6 +61,7 @@ import {
   FetchSuppressionsStep,
   ApplySuppressionStep,
   FetchRulesStep,
+  ApplyMaintenanceWindowStep,
   FetchPoliciesStep,
   EvaluateMatchersStep,
   BuildGroupsStep,
@@ -68,6 +69,7 @@ import {
   DispatchStep,
   StoreActionsStep,
 } from '../steps';
+import { createMaintenanceWindowServiceMock } from '../../services/maintenance_window_service/maintenance_window_service.mock';
 import { waitForDataStreamsReady } from './helpers/wait';
 import { setupTestServers } from './setup_test_servers';
 
@@ -548,6 +550,7 @@ describe('DispatcherService integration tests', () => {
       new FetchSuppressionsStep(queryService),
       new ApplySuppressionStep(),
       new FetchRulesStep(rulesSoService),
+      new ApplyMaintenanceWindowStep(createMaintenanceWindowServiceMock()),
       new FetchPoliciesStep(npSoService),
       new EvaluateMatchersStep(),
       new BuildGroupsStep(),

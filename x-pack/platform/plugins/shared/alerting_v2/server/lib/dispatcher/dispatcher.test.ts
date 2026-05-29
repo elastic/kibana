@@ -46,6 +46,7 @@ import {
   FetchSuppressionsStep,
   ApplySuppressionStep,
   FetchRulesStep,
+  ApplyMaintenanceWindowStep,
   FetchPoliciesStep,
   EvaluateMatchersStep,
   BuildGroupsStep,
@@ -53,6 +54,7 @@ import {
   DispatchStep,
   StoreActionsStep,
 } from './steps';
+import { createMaintenanceWindowServiceMock } from '../services/maintenance_window_service/maintenance_window_service.mock';
 import type { AlertEpisode, AlertEpisodeSuppression } from './types';
 
 interface TimestampRange {
@@ -124,6 +126,7 @@ function buildDispatcherService(deps: {
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
     new FetchRulesStep(deps.rulesSoService),
+    new ApplyMaintenanceWindowStep(createMaintenanceWindowServiceMock()),
     new FetchPoliciesStep(deps.npSoService),
     new EvaluateMatchersStep(loggerService),
     new BuildGroupsStep(),
@@ -716,6 +719,7 @@ describe('DispatcherService', () => {
         'fetch_suppressions',
         'apply_suppression',
         'fetch_rules',
+        'apply_maintenance_window',
         'fetch_policies',
         'evaluate_matchers',
         'build_groups',

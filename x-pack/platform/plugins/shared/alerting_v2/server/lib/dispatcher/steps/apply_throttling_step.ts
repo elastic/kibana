@@ -91,7 +91,8 @@ export function applyThrottling(
   const throttled: ActionGroup[] = [];
 
   for (const group of groups) {
-    const policy = policies.get(group.policyId)!;
+    const policy = policies.get(group.policyId);
+    if (!policy) continue;
     const bucket = shouldDispatch(group, policy, lastNotifiedMap.get(group.id), now)
       ? dispatch
       : throttled;
