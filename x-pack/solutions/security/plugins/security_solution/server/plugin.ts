@@ -934,6 +934,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       connectorActions: plugins.actions,
       spacesService: plugins.spaces?.spacesService,
       agentBuilder: plugins.agentBuilder,
+      getExceptionListClient: this.lists?.getExceptionListClient,
     });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
