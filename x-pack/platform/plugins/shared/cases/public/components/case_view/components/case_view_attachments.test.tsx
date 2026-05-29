@@ -111,6 +111,44 @@ describe('Case View Attachments tab', () => {
     });
   });
 
+  it('shows the update button as "needs update" when input differs from the applied search', async () => {
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        searchTerm=""
+        onUpdateField={onUpdateFieldMock}
+      />
+    );
+
+    // When the input matches the applied search term, the button renders the
+    // "Refresh" label. Once the input diverges, EuiSuperUpdateButton switches
+    // to a filled success "Update" label.
+    expect(screen.getByTestId('cases-attachments-update-button')).toHaveTextContent('Refresh');
+
+    await userEvent.type(screen.getByTestId('cases-files-search'), 'foo');
+
+    expect(screen.getByTestId('cases-attachments-update-button')).toHaveTextContent('Update');
+  });
+
+  it('calls onSearch with the typed value when clicking the update button while dirty', async () => {
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseData}
+        onSearch={onSearchMock}
+        searchTerm=""
+        onUpdateField={onUpdateFieldMock}
+      />
+    );
+
+    await userEvent.type(screen.getByTestId('cases-files-search'), 'bar');
+    await userEvent.click(screen.getByTestId('cases-attachments-update-button'));
+
+    await waitFor(() => {
+      expect(onSearchMock).toHaveBeenCalledWith('bar');
+    });
+  });
+
   it('does not render an observables accordion when license is basic', async () => {
     renderWithTestingProviders(
       <CaseViewAttachments

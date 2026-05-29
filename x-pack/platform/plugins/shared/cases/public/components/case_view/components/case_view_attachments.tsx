@@ -12,9 +12,11 @@ import {
   EuiFlexGroup,
   EuiImage,
   EuiSpacer,
+  EuiSuperUpdateButton,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 import noResultsIllustration from '../../../assets/illustration_product_no_results_magnifying_glass.svg';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
@@ -97,6 +99,21 @@ export const CaseViewAttachments = ({
     [searchTerm, attachmentSections.length, showObservables, filteredObservables.length]
   );
 
+  const [inputValue, setInputValue] = useState(searchTerm ?? '');
+  useEffect(() => {
+    setInputValue(searchTerm ?? '');
+  }, [searchTerm]);
+
+  const refreshCaseView = useRefreshCaseViewPage();
+  const isDirty = inputValue !== (searchTerm ?? '');
+  const onClickUpdate = useCallback(() => {
+    if (isDirty) {
+      onSearch(inputValue);
+    } else {
+      refreshCaseView();
+    }
+  }, [isDirty, inputValue, onSearch, refreshCaseView]);
+
   return (
     <>
       <EuiFlexItem grow={6} data-test-subj="case-view-attachments">
@@ -110,9 +127,19 @@ export const CaseViewAttachments = ({
           <EuiFlexItem grow>
             <EuiFieldSearch
               placeholder={SEARCH_PLACEHOLDER}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
               onSearch={onSearch}
               data-test-subj="cases-files-search"
               fullWidth
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSuperUpdateButton
+              fill={false}
+              needsUpdate={isDirty}
+              onClick={onClickUpdate}
+              data-test-subj="cases-attachments-update-button"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
