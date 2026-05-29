@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Stub for `@kbn/core-chrome-layout-constants`.
- *
- * Provides the same constants exported by the Kibana package so that source
- * files can be bundled without modification. Consumers of the standalone
- * package should ensure their application provides matching DOM elements.
- */
+export { layoutVar, layoutVarName } from './src/css_variables';
+export type {
+  LayoutVarName,
+  CSSVarName,
+  LayoutComponent,
+  LayoutProperty,
+  ApplicationComponent,
+  ApplicationVarName,
+} from './src/css_variables';
+export { layoutLevels } from './src/levels';
 
 export const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll';
 
 export const APP_FIXED_VIEWPORT_ID = 'app-fixed-viewport';
+
+export const FLYOUT_SELECTOR = '.euiFlyout[role="dialog"]';
 
 export const MAIN_CONTENT_SELECTORS = ['main', '[role="main"]', '.kbnAppWrapper'];
 
@@ -29,10 +34,3 @@ export const euiIncludeSelectorInFocusTrap = {
   },
   selector: `[data-eui-includes-in-flyout-focus-trap="true"]`,
 };
-
-/**
- * No-op stubs for CSS variable helpers that are not needed outside Kibana.
- */
-export const layoutVar = (_component: string, _property: string) => '';
-export const layoutVarName = (_component: string, _property: string) => '';
-export const layoutLevels = {};

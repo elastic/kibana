@@ -20,6 +20,7 @@ import {
   MAX_GROUPING_FIELDS,
   MAX_NAME_LENGTH,
   MIN_SCHEDULE_INTERVAL,
+  VERSION_MAX_LENGTH,
 } from './constants';
 
 /** Primitives */
@@ -329,6 +330,18 @@ export const updateRuleDataSchema = z
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 
+/** Update rule API body schema — adds OCC version on top of update data. */
+export const updateRuleBodySchema = updateRuleDataSchema.extend({
+  version: z
+    .string()
+    .min(1)
+    .max(VERSION_MAX_LENGTH)
+    .optional()
+    .describe('The current version of the rule, used for optimistic concurrency control.'),
+});
+
+export type UpdateRuleBody = z.infer<typeof updateRuleBodySchema>;
+
 /**
  * Schema for rule response data returned from the API.
  * Extends the base rule schema with server-generated fields.
@@ -340,6 +353,10 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
   createdAt: z.string().describe('ISO timestamp when the rule was created.'),
   updatedBy: z.string().nullable().describe('User who last updated the rule.'),
   updatedAt: z.string().describe('ISO timestamp when the rule was last updated.'),
+  version: z
+    .string()
+    .optional()
+    .describe('The version of the rule, used for optimistic concurrency control'),
 });
 
 export type RuleResponse = z.infer<typeof ruleResponseSchema>;
