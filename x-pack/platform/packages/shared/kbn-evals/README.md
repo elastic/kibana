@@ -115,49 +115,44 @@ The fastest way to go from zero to running evals locally:
 node scripts/evals start
 ```
 
-From a clean state (no config, no connectors), `start` handles everything:
+When no `--profile` is specified, `start` prompts you to choose an infrastructure target:
 
-1. **Config setup**: if `config.json` (or `config.<profile>.json`) is missing, prompts to create it
-2. **Connector setup**: prompts for connector source (EIS / `kibana.dev.yml` / existing `KIBANA_TESTING_AI_CONNECTORS`)
-3. Starts the EDOT collector (Docker) for trace capture -- exports traces to the configured tracing Elasticsearch cluster (via `TRACING_ES_URL`)
-4. Starts Scout (ES + Kibana with `evals_tracing` config)
-5. Enables EIS CCM on the Scout ES cluster (if using EIS connectors)
-6. Runs the Playwright eval suite with all traces going to the predefined tracing export destination.
+- **Local** -- uses hardcoded localhost defaults (writes `config.local.json`)
+- **Golden cluster** -- reads config from Vault at runtime (no file needed, requires `vault login --method oidc`)
+- **Custom** -- runs an interactive wizard to create a config file with your own URLs
+
+From there, `start` handles everything:
+
+1. **Connector setup**: prompts for connector source (EIS / `kibana.dev.yml` / existing `KIBANA_TESTING_AI_CONNECTORS`)
+2. Starts the EDOT collector (Docker) for trace capture -- exports traces to the configured tracing Elasticsearch cluster (via `TRACING_ES_URL`)
+3. Starts Scout (ES + Kibana with `evals_tracing` config)
+4. Enables EIS CCM on the Scout ES cluster (if using EIS connectors)
+5. Runs the Playwright eval suite with all traces going to the predefined tracing export destination.
 
 EDOT and Scout run as **persistent background daemons** -- they stay alive between eval runs for faster iteration. Use `node scripts/evals stop` to shut them down when you're done.
 
 `start` prompts interactively when flags are omitted (suite, connector, model). Pass `--skip-server` to skip EDOT/Scout startup if you already have them running, or `--skip-init` to bypass the config and connector setup checks.
 
-> **Note:** `evals init` is still available if you prefer to run setup separately (e.g. to set up connectors once and export `KIBANA_TESTING_AI_CONNECTORS` to your shell for use across terminals). It is no longer required before `start`.
+> **Note:** `evals init` is still available if you prefer to create a custom config file separately (e.g. to set up connectors once and export `KIBANA_TESTING_AI_CONNECTORS` to your shell for use across terminals). It is no longer required before `start`.
 
-#### Profiles: golden datasets + local export (recommended for UI iteration)
+#### Profiles
 
-For iterating on the Evals UI (runs list / run detail pages), it’s often useful to:
+| `--profile` value               | Behavior                                                                                      |
+| ------------------------------- | --------------------------------------------------------------------------------------------- |
+| `dev-vault` or `golden-cluster` | Read config from Vault at runtime (no file needed). Requires `vault login --method oidc`.     |
+| `local`                         | Use `config.local.json` (written automatically with hardcoded localhost defaults if missing). |
+| `<name>`                        | Use `config.<name>.json`. If missing + TTY, runs the custom config wizard for that profile.   |
+| _(omitted)_                     | Interactive prompt: local / golden-cluster / custom. Required in non-interactive mode.        |
 
-- **Read datasets from the golden cluster** (shared, curated datasets)
+#### Golden datasets + local export (recommended for UI iteration)
+
+For iterating on the Evals UI, it is often useful to:
+
+- **Read datasets from the golden cluster** (via Vault)
 - **Write results + traces to your local Elasticsearch/Kibana** (`http://localhost:9200` / `http://localhost:5601`)
 
-The Evals CLI supports this via **vault config profiles** in:
-
-- `x-pack/platform/packages/shared/kbn-evals/scripts/vault/`
-- `config.json` (default)
-- `config.<profile>.json` (e.g. `config.local.json`)
-
-`init config` is an interactive wizard that prompts for an infrastructure target -- **golden cluster** (shared `kbn-evals-serverless`), **local** (localhost), or **custom** (any URLs you provide) -- and then fills in the associated secrets. `--profile local` pre-selects the local target, but you can override interactively.
-
-Create the profiles explicitly, or let `start` prompt you when a profile config is missing:
-
 ```bash
-# Explicit setup (optional -- start --profile <name> will prompt if the config is missing)
-node scripts/evals init config                   # default profile (golden cluster pre-selected)
-node scripts/evals init config --profile local   # local profile (local target pre-selected)
-node scripts/evals init config --profile <name>  # named profile
-```
-
-Run a suite using golden datasets but exporting locally:
-
-```bash
-node scripts/evals start --suite attack-discovery --export-profile local
+node scripts/evals start --suite attack-discovery --profile dev-vault --export-profile local
 ```
 
 Notes:
@@ -730,7 +725,7 @@ When `EVALUATIONS_KBN_API_KEY` is provided, requests use `Authorization: ApiKey 
 
 ##### Golden cluster Kibana API key for dataset operations
 
-The recommended approach is to run `node scripts/evals init config`, which creates a single unified API key covering both dataset operations and evaluation result export. See [Golden cluster API key privileges](#golden-cluster-api-key-privileges-required) for details.
+The recommended approach is to use `--profile dev-vault`, which reads the golden cluster config (including API keys) directly from Vault. See [Golden cluster API key privileges](#golden-cluster-api-key-privileges-required) for details.
 
 In CI, these values are automatically sourced from the vault config field `evaluationsKbn`.
 
@@ -788,17 +783,17 @@ A single API key can cover **all** golden cluster operations: evaluation result 
 
 When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, `@kbn/evals` does **not** attempt to create/update templates or create the data stream. Instead it runs an export **preflight check** (sentinel write + best-effort cleanup) to fail fast when the cluster is misconfigured (missing data stream, incompatible mappings, missing write privileges, etc).
 
-**Automatic setup (recommended):**
+**Recommended setup (Vault):**
 
 ```bash
-node scripts/evals init config
+node scripts/evals start --profile dev-vault
 ```
 
-This interactive wizard opens your browser to the golden cluster Dev Tools, copies the API key creation payload to your clipboard, and walks you through pasting the result back. The single `encoded` key is applied to all four config fields (`evaluationsEs.apiKey`, `tracingEs.apiKey`, `evaluationsKbn.apiKey`, and the tracing exporter `Authorization` header).
+When using `--profile dev-vault`, the golden cluster API keys are read directly from Vault at runtime -- no local config file or manual API key creation needed.
 
 **Manual setup:**
 
-In the golden cluster Kibana Dev Tools, run `POST kbn:/internal/security/api_key` with the privilege payload defined in [`src/api_key/golden_cluster_privileges.json`](src/api_key/golden_cluster_privileges.json). The `init config` wizard builds this request automatically, filling your email from `git config user.email`.
+In the golden cluster Kibana Dev Tools, run `POST kbn:/internal/security/api_key` with the privilege payload defined in [`src/api_key/golden_cluster_privileges.json`](src/api_key/golden_cluster_privileges.json).
 
 For manual use, add a `"name"` (e.g. `"kbn-evals-<your-email>"`) and `"expiration"` (e.g. `"90d"`) alongside the `kibana_role_descriptors` and `metadata` from that JSON file.
 

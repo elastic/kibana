@@ -20,11 +20,11 @@ EDOT and Scout run as **persistent background daemons**. They survive between `s
 
 ## Commands
 
-### `init` -- Set up connectors (optional)
+### `init` -- Set up custom config and connectors (optional)
 
-Interactive wizard that discovers EIS models or validates existing connectors in `kibana.dev.yml`. Running `init` separately is **optional** -- `start` auto-triggers the same setup when config or connectors are missing.
+Interactive wizard that creates a custom config file and discovers EIS models or validates existing connectors. Running `init` separately is **optional** -- `start` auto-triggers setup when config or connectors are missing.
 
-Use `init` when you want to run setup in isolation, e.g. to export `KIBANA_TESTING_AI_CONNECTORS` to your shell before running `start` or `run` in another terminal.
+Use `init` when you want to create a config file for a bespoke (non-golden-cluster, non-local) setup, or to export `KIBANA_TESTING_AI_CONNECTORS` to your shell.
 
 ```bash
 node scripts/evals init
@@ -35,55 +35,65 @@ node scripts/evals init --skip-discovery
 | ------------------ | ------------------------------------------------------------------ |
 | `--skip-discovery` | Skip EIS model discovery (reuse existing `target/eis_models.json`) |
 
-#### `init config` -- Create a config profile
+#### `init config` -- Create a custom config file
 
-Creates a config profile (`config.json` or `config.<profile>.json`) by prompting for an infrastructure target -- **golden cluster**, **local**, or **custom** -- and the associated secrets (API keys, LiteLLM key, GCS credentials).
-
-`--profile local` pre-selects the local target; otherwise golden cluster is the default.
+Creates a config file (`config.json` or `config.<profile>.json`) by prompting for custom URLs and API keys. Use this for bespoke setups only -- golden cluster and local are handled directly by the `start` command's `--profile` flag.
 
 ```bash
-node scripts/evals init config                   # default profile (golden cluster pre-selected)
-node scripts/evals init config --profile local   # local profile (local target pre-selected)
-node scripts/evals init config --profile <name>  # named profile
+node scripts/evals init config                       # writes config.json
+node scripts/evals init config --profile mysetup     # writes config.mysetup.json
 ```
 
 ### `start` -- Start stack and run a suite
 
-The main command. On first run, auto-detects missing config and connectors and prompts for setup. Then starts EDOT + Scout as background daemons, enables EIS CCM if needed, and runs a Playwright eval suite.
+The main command. Starts EDOT + Scout as background daemons, enables EIS CCM if needed, and runs a Playwright eval suite.
+
+When no `--profile` is specified and stdin is a TTY, `start` prompts you to choose an infrastructure target:
+
+```
+? How do you want to run evals?
+  > Local (localhost ES/Kibana)
+    Golden cluster (uses Vault -- no config file needed)
+    Custom (create a config file with your own URLs)
+```
 
 ```bash
 node scripts/evals start
-node scripts/evals start --suite agent-builder
-node scripts/evals start --suite agent-builder --model eis-gpt-4.1 --judge eis-claude-4-5-sonnet
-node scripts/evals start --suite agent-builder --model eis-gpt-4.1,eis-claude-4-sonnet
-node scripts/evals start --suite agent-builder --grep "product documentation"
-node scripts/evals start --suite agent-builder --skip-server
+node scripts/evals start --profile dev-vault --suite agent-builder
+node scripts/evals start --profile local --suite agent-builder
+node scripts/evals start --profile mysetup --suite agent-builder
 node scripts/evals start --skip-init --suite agent-builder
 ```
 
-| Flag                             | Alias     | Description                                                                                                                                                     |
-| -------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--suite <id>`                   |           | Suite to run (interactive prompt if omitted)                                                                                                                    |
-| `--config <path>`                |           | Playwright config path (alternative to `--suite`)                                                                                                               |
-| `--project <id>`                 | `--model` | Connector/model to evaluate (comma-separated for multiple)                                                                                                      |
-| `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators                                                                                                                    |
-| `--profile <name>`               |           | Sets both datasets and export profiles (`config`/default -> `config.json`; `dev-vault` -> dev Vault; `local` -> `config.local.json`)                            |
-| `--datasets-profile <name>`      |           | Dataset settings: default `config.json`; `dev-vault` reads dev Vault; other names use `config.<name>.json`                                                      |
-| `--export-profile <name>`        |           | Export settings: `dev-vault` reads dev Vault; other names use `config.<name>.json`. If omitted, export defaults to `local` only when `config.local.json` exists |
-| `--grep <pattern>`               |           | Filter tests by name (passed to Playwright `--grep`)                                                                                                            |
-| `--repetitions <n>`              |           | Number of times to repeat each example                                                                                                                          |
-| `--skip-server`                  |           | Skip EDOT/Scout/EIS startup (use existing services)                                                                                                             |
-| `--dry-run`                      |           | Print configuration and exit without running                                                                                                                    |
+#### Profile resolution
 
-When flags are omitted and stdin is a TTY, `start` prompts interactively for suite, judge, model selection, and first-run config/connector setup. In non-TTY environments (e.g. CI), missing config or connectors cause a fast failure with an actionable error message.
+| `--profile` value               | Behavior                                                                                      |
+| ------------------------------- | --------------------------------------------------------------------------------------------- |
+| `dev-vault` or `golden-cluster` | Read config from Vault at runtime (no file needed). Requires `vault login --method oidc`.     |
+| `local`                         | Use `config.local.json` (written automatically with hardcoded localhost defaults if missing). |
+| `<name>`                        | Use `config.<name>.json`. If missing + TTY, runs the custom config wizard for that profile.   |
+| _(omitted)_                     | Interactive prompt: local / golden-cluster / custom. Required in non-interactive mode.        |
+
+| Flag                             | Alias     | Description                                                                                 |
+| -------------------------------- | --------- | ------------------------------------------------------------------------------------------- |
+| `--suite <id>`                   |           | Suite to run (interactive prompt if omitted)                                                |
+| `--config <path>`                |           | Playwright config path (alternative to `--suite`)                                           |
+| `--project <id>`                 | `--model` | Connector/model to evaluate (comma-separated for multiple)                                  |
+| `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators                                                |
+| `--profile <name>`               |           | Profile for config resolution (see table above)                                             |
+| `--datasets-profile <name>`      |           | Override dataset settings (sets `EVALUATIONS_KBN_URL`/`EVALUATIONS_KBN_API_KEY`)            |
+| `--export-profile <name>`        |           | Override export settings (sets `EVALUATIONS_ES_URL`, `TRACING_ES_URL`, `TRACING_EXPORTERS`) |
+| `--grep <pattern>`               |           | Filter tests by name (passed to Playwright `--grep`)                                        |
+| `--repetitions <n>`              |           | Number of times to repeat each example                                                      |
+| `--skip-server`                  |           | Skip EDOT/Scout/EIS startup (use existing services)                                         |
+| `--skip-init`                    |           | Skip automatic config and connector setup                                                   |
+| `--dry-run`                      |           | Print configuration and exit without running                                                |
 
 Traces are exported by EDOT to the export cluster (controlled by `--export-profile` / `TRACING_ES_URL`), and `TRACING_ES_URL` is set so trace-based evaluators query the right cluster.
 
-#### Golden dataset + local export (profiles)
+#### Example: golden datasets + local export
 
-Use profiles to fetch datasets from the golden cluster while exporting results and traces to your local Elasticsearch/Kibana (default: `http://localhost:9200` / `http://localhost:5601`).
-
-Create the profiles explicitly (see [`init config`](#init-config----create-a-config-profile) above), or let `start --profile <name>` prompt you when the config is missing:
+Use `--profile dev-vault` for datasets and `--export-profile local` to export results locally:
 
 ```bash
 node scripts/evals init config                   # default profile (golden cluster pre-selected)

@@ -8,6 +8,7 @@
 import Fs from 'fs';
 import Path from 'path';
 import { spawn } from 'child_process';
+import inquirer from 'inquirer';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -36,9 +37,10 @@ import {
   stripTrailingSlash,
   probeHttp,
   isExportProfileImplicitLocal,
-  VAULT_CONFIG_DIR,
+  isDevVaultProfile,
+  resolveVaultConfigPath,
 } from '../profiles';
-import { runConfigInit, runConnectorSetup } from './init';
+import { runConfigInit, runConnectorSetup, ensureVaultAuth, ensureLocalConfig } from './init';
 
 const SCOUT_LOCAL_CONFIG = '.scout/servers/local.json';
 const SCOUT_READY_POLL_INTERVAL_MS = 3000;
@@ -225,21 +227,56 @@ export const startCmd: Command<void> = {
   },
   run: async ({ log, flagsReader }) => {
     const repoRoot = process.cwd();
-    const profile = flagsReader.string('profile') ?? undefined;
+    let profile = flagsReader.string('profile') ?? undefined;
 
     if (!flagsReader.boolean('skip-init')) {
-      const configFileName = profile ? `config.${profile}.json` : 'config.json';
-      const vaultConfigPath = Path.join(repoRoot, VAULT_CONFIG_DIR, configFileName);
-      if (!Fs.existsSync(vaultConfigPath)) {
+      if (!profile) {
         if (!isTTY()) {
           throw createFlagError(
-            `No config found (${configFileName}). Run \`node scripts/evals init config\` to set up, or use --skip-init to bypass.`
+            '--profile is required in non-interactive mode (e.g. --profile dev-vault, --profile local).'
           );
         }
 
-        log.info('No config found — running first-time setup...');
-        log.info('');
-        await runConfigInit(repoRoot, log, { profile });
+        type InfraChoice = 'local' | 'golden-cluster' | 'custom';
+        const { choice } = await inquirer.prompt<{ choice: InfraChoice }>({
+          type: 'list',
+          name: 'choice',
+          message: 'How do you want to run evals and export results and traces?',
+          choices: [
+            { name: 'Local (localhost ES/Kibana)', value: 'local' },
+            {
+              name: 'Golden cluster (uses Vault -- no config file needed)',
+              value: 'golden-cluster',
+            },
+            { name: 'Custom (create a config file with your own URLs)', value: 'custom' },
+          ],
+        });
+
+        if (choice === 'local') {
+          ensureLocalConfig(repoRoot, log);
+          profile = 'local';
+        } else if (choice === 'golden-cluster') {
+          await ensureVaultAuth(log);
+          profile = 'dev-vault';
+        } else {
+          await runConfigInit(repoRoot, log);
+        }
+      } else if (isDevVaultProfile(profile)) {
+        await ensureVaultAuth(log);
+      } else if (profile === 'local') {
+        ensureLocalConfig(repoRoot, log);
+      } else {
+        const configPath = resolveVaultConfigPath(repoRoot, profile);
+        if (!Fs.existsSync(configPath)) {
+          if (!isTTY()) {
+            throw createFlagError(
+              `Config not found: ${configPath}. Run \`node scripts/evals init config --profile ${profile}\` to create it.`
+            );
+          }
+          log.info(`Config file for profile "${profile}" not found. Running setup wizard...`);
+          log.info('');
+          await runConfigInit(repoRoot, log, { profile });
+        }
       }
 
       if (getAllAvailableConnectors(repoRoot).length === 0) {
@@ -325,7 +362,10 @@ export const startCmd: Command<void> = {
 
     // Best-effort default: if we implicitly resolved an export profile, don't fail the run when the
     // export ES isn't reachable. Instead, warn and continue without export (preflight won't run).
-    if (isExportProfileImplicitLocal(flagsReader, exportProfile)) {
+    // When the user actively chose a profile (via CLI flag or wizard), trust their config.
+    const exportProfileIsImplicit =
+      !profile && isExportProfileImplicitLocal(flagsReader, exportProfile);
+    if (exportProfileIsImplicit) {
       const evaluationsEsUrl = profileEnvOverrides.EVALUATIONS_ES_URL;
       const tracingEsUrl = profileEnvOverrides.TRACING_ES_URL;
 
