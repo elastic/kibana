@@ -840,7 +840,6 @@
         "@hapi/cookie",
         "@hapi/h2o2",
         "@hapi/hapi",
-        "@hapi/hoek",
         "@hapi/inert",
         "@hapi/iron",
         "@hapi/wreck",
