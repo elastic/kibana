@@ -92,6 +92,7 @@ import type {
 
 export * from './events/rule_creation/types';
 export * from './events/app/types';
+export * from './events/attack_discovery/types';
 export * from './events/attacks/types';
 export * from './events/attack_discovery_schedules/types';
 export * from './events/alerts_grouping/types';
