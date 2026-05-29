@@ -8,7 +8,7 @@ Companion to [PR #270425](https://github.com/elastic/kibana/pull/270425). Captur
 - [`ESQL_CAVEATS.md`](./ESQL_CAVEATS.md) — the ES|QL footguns we ran into while building P15b/c and P16-A (filter-in-aggregation cost, `TS` command limitations, `SET approximate`, trendline support, etc.). Worth reading if you're building anything else on ES|QL inside Kibana.
 - [`kpi_bench_v2.mjs`](./kpi_bench_v2.mjs) — the server-side bench script. Runs six query shapes (legacy DSL with/without trendline, four ES|QL variants) against a populated cluster, clears caches between runs, reports wall + ES `took_sum` medians. Used to isolate which ES|QL feature actually moves the needle.
 - [`metrics/`](./metrics) — raw output captured during the final local benchmark pass:
-  - `bench_v2_local_1500x24h.log` — server-side bench (`kpi_bench_v2.mjs`) output.
+  - `bench_v2_local_1500x24h.txt` — server-side bench (`kpi_bench_v2.mjs`) output.
   - `journey_<scenario>.txt` — one file per synthtrace scenario, contains only the `[journey-metric]` lines emitted by [`infra_hosts_view_tier1_poc.ts`][journey] (the perf-mark instrumentation in `kpi_charts.tsx`, `use_hosts_kpis.ts`, `use_hosts_view.ts`, `use_host_count.ts`).
 
 ## How to reproduce

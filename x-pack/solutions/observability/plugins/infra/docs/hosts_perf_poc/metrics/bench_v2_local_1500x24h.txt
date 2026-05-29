@@ -1,0 +1,64 @@
+ES endpoint   : localhost
+Date range    : 2026-05-27T13:30:00Z → 2026-05-28T13:00:00Z
+Hosts (limit) : 1500
+Runs / scenario: 5
+Trendline interval (Scenario A): 47m
+Host names fetched: 1500
+
+--- A: legacy w/ trendline (4× parallel DSL) ---
+  run 1: wall=136ms  ES took_sum=509ms
+  run 2: wall=142ms  ES took_sum=511ms
+  run 3: wall=142ms  ES took_sum=519ms
+  run 4: wall=142ms  ES took_sum=530ms
+  run 5: wall=387ms  ES took_sum=1491ms
+
+--- B: P15a — no trendline (4× parallel DSL) ---
+  run 1: wall=66ms  ES took_sum=236ms
+  run 2: wall=63ms  ES took_sum=224ms
+  run 3: wall=63ms  ES took_sum=234ms
+  run 4: wall=76ms  ES took_sum=271ms
+  run 5: wall=72ms  ES took_sum=261ms
+
+--- C: P15b — host.name IN inline (current handler) ---
+  run 1: wall=97ms  ES took_sum=95ms
+  run 2: wall=108ms  ES took_sum=106ms
+  run 3: wall=92ms  ES took_sum=90ms
+  run 4: wall=85ms  ES took_sum=83ms
+  run 5: wall=122ms  ES took_sum=120ms
+
+--- D: P15b — host.name in request filter (P15c shape) ---
+  run 1: wall=87ms  ES took_sum=85ms
+  run 2: wall=85ms  ES took_sum=83ms
+  run 3: wall=81ms  ES took_sum=79ms
+  run 4: wall=85ms  ES took_sum=83ms
+  run 5: wall=84ms  ES took_sum=82ms
+
+--- E: P15b — host.name inline + pre-STATS WHERE state IN (...) ---
+  run 1: wall=80ms  ES took_sum=78ms
+  run 2: wall=75ms  ES took_sum=73ms
+  run 3: wall=73ms  ES took_sum=71ms
+  run 4: wall=67ms  ES took_sum=65ms
+  run 5: wall=70ms  ES took_sum=68ms
+
+--- F: P15b — two-stage STATS BY host.name | SORT | LIMIT (final) ---
+  run 1: wall=111ms  ES took_sum=108ms
+  run 2: wall=102ms  ES took_sum=99ms
+  run 3: wall=95ms  ES took_sum=93ms
+  run 4: wall=88ms  ES took_sum=86ms
+  run 5: wall=86ms  ES took_sum=84ms
+
+--- summary (median across cold runs) ---
+A. legacy (trendline)        : wall=   142ms   ES took=   519ms
+B. P15a (no trendline)       : wall=    66ms   ES took=   236ms
+C. P15b inline IN            : wall=    97ms   ES took=    95ms
+D. P15b request-filter       : wall=    85ms   ES took=    83ms
+E. P15b inline + state-WHERE : wall=    73ms   ES took=    71ms
+F. P15b two-stage (final)    : wall=    95ms   ES took=    93ms
+
+P15a saving vs legacy:                 wall 53.6%   ES took 54.5%
+P15b inline saving vs legacy:          wall 31.7%   ES took 81.7%
+P15b request-filter saving vs legacy:  wall 40.4%   ES took 84.0%
+P15b state-WHERE saving vs legacy:     wall 48.5%   ES took 86.3%
+P15b request-filter saving vs C (inline IN): wall 12.7%   ES took 12.6%
+P15b two-stage (final) saving vs legacy:     wall 33.0%   ES took 82.1%
+P15b two-stage (final) saving vs C inline:   wall 2.0%   ES took 2.1%
