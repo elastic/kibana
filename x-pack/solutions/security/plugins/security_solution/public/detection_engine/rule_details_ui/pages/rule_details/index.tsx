@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiToolTip,
   EuiWindowEvent,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { Route, Routes } from '@kbn/shared-ux-router';
@@ -319,6 +320,7 @@ export const RuleDetailsPage = connector(
 
     const pageTabs = useRuleDetailsTabs({ rule, ruleId, isExistingRule, canReadAlerts });
 
+    const confirmModalTitleId = useGeneratedHtmlId();
     const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
       useBoolState();
 
@@ -463,14 +465,16 @@ export const RuleDetailsPage = connector(
             </EuiFlexItem>
           ) : (
             <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
-              <EuiButtonIcon
-                data-test-subj="ruleLastExecutionStatusRefreshButton"
-                color="primary"
-                onClick={refreshRule}
-                iconType="refresh"
-                aria-label={ruleI18n.REFRESH}
-                isDisabled={!isExistingRule}
-              />
+              <EuiToolTip content={ruleI18n.REFRESH} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  data-test-subj="ruleLastExecutionStatusRefreshButton"
+                  color="primary"
+                  onClick={refreshRule}
+                  iconType="refresh"
+                  aria-label={ruleI18n.REFRESH}
+                  isDisabled={!isExistingRule}
+                />
+              </EuiToolTip>
             </RuleStatus>
           )}
           <EuiFlexItem grow={false}>
@@ -668,6 +672,8 @@ export const RuleDetailsPage = connector(
             buttonColor="danger"
             defaultFocusedButton="confirm"
             data-test-subj="deleteRulesConfirmationModal"
+            aria-labelledby={confirmModalTitleId}
+            titleProps={{ id: confirmModalTitleId }}
           >
             {i18n.DELETE_CONFIRMATION_BODY}
           </EuiConfirmModal>
