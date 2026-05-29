@@ -12,6 +12,7 @@
     "@kbn/charts-theme",
     "@kbn/apm-types-shared",
     "@kbn/custom-icons",
+    "@kbn/ebt-click",
     // TODO: LatencyAggregationType lives in x-pack — evaluate whether it should
     // move to @kbn/apm-types-shared (a src package) before this stabilises.
     "@kbn/apm-types",
