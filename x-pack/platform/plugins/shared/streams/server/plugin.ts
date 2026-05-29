@@ -8,6 +8,7 @@
 import type {
   CoreSetup,
   CoreStart,
+  FeatureFlagsStart,
   KibanaRequest,
   Logger,
   Plugin,
@@ -68,7 +69,6 @@ import type { FeatureClient } from './lib/streams/feature/feature_client';
 import type { QueryClient } from './lib/streams/assets/query/query_client';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
-import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
 import { TaskService } from './lib/tasks/task_service';
 import { InsightService } from './lib/sig_events/insights/client/insight_service';
 import {
@@ -89,6 +89,7 @@ import {
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
+import { MemoryTriggerRegistry, discoveryCompletedTrigger } from './lib/memory/triggers';
 import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../common/feature_flags';
 
@@ -613,26 +614,18 @@ export class StreamsPlugin
       );
     });
 
-    const installMemoryWorkflowsIfEnabled = async (
-      workflowsExtensions: WorkflowsExtensionsServerPluginStart
-    ) => {
-      if (!(await isSignificantEventsMemoryEnabled(core.featureFlags))) {
-        this.logger.debug('streams: memory is disabled, skipping memory workflow installation');
-        return;
-      }
-      await installMemoryWorkflows({ workflowsExtensions });
-    };
-
     if (plugins.workflowsExtensions) {
       const { workflowsExtensions } = plugins;
 
-      void installMemoryWorkflowsIfEnabled(workflowsExtensions).catch((error: unknown) => {
-        this.logger.error(
-          `streams: Failed to install memory managed workflows: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      });
+      void this.installManagedWorkflows(workflowsExtensions, core.featureFlags).catch(
+        (error: unknown) => {
+          this.logger.error(
+            `streams: Failed to install managed workflows: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      );
 
       core.featureFlags
         .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
@@ -642,13 +635,15 @@ export class StreamsPlugin
           filter((enabled) => enabled)
         )
         .subscribe(() => {
-          void installMemoryWorkflowsIfEnabled(workflowsExtensions).catch((error: unknown) => {
-            this.logger.error(
-              `streams: Failed to install memory managed workflows after feature flag change: ${
-                error instanceof Error ? error.message : String(error)
-              }`
-            );
-          });
+          void this.installMemoryWorkflowsIfEnabled(workflowsExtensions, core.featureFlags).catch(
+            (error: unknown) => {
+              this.logger.error(
+                `streams: Failed to install memory managed workflows after feature flag change: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            }
+          );
         });
     }
 
@@ -665,17 +660,30 @@ export class StreamsPlugin
         });
     }
 
-    if (plugins.workflowsExtensions) {
-      void this.installManagedWorkflows(plugins.workflowsExtensions);
-    }
-
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
     return {};
   }
 
+  private async installMemoryWorkflowsIfEnabled(
+    workflowsExtensions: WorkflowsExtensionsServerPluginStart,
+    featureFlags: FeatureFlagsStart
+  ): Promise<void> {
+    if (!(await isSignificantEventsMemoryEnabled(featureFlags))) {
+      this.logger.debug('streams: memory is disabled, skipping memory workflow installation');
+      return;
+    }
+
+    const client = await workflowsExtensions.initManagedWorkflowsClient(
+      STREAMS_MANAGED_WORKFLOW_OWNER
+    );
+    await installMemoryWorkflows({ client });
+    await client.ready();
+  }
+
   private async installManagedWorkflows(
-    workflowsExtensions: WorkflowsExtensionsServerPluginStart
+    workflowsExtensions: WorkflowsExtensionsServerPluginStart,
+    featureFlags: FeatureFlagsStart
   ): Promise<void> {
     try {
       const client = await workflowsExtensions.initManagedWorkflowsClient(
@@ -694,12 +702,16 @@ export class StreamsPlugin
         }),
       ]);
 
+      if (await isSignificantEventsMemoryEnabled(featureFlags)) {
+        await installMemoryWorkflows({ client });
+      }
+
       await client.ready();
 
-      this.logger.info('Streams KI managed workflows installed');
+      this.logger.info('Streams managed workflows installed');
     } catch (error) {
       this.logger.warn(
-        `Failed to install streams KI managed workflows: ${
+        `Failed to install streams managed workflows: ${
           error instanceof Error ? error.message : String(error)
         }`
       );

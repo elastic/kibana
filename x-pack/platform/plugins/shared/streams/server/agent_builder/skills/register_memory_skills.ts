@@ -33,8 +33,7 @@ export const registerStreamsMemoryAgentBuilder = async ({
   logger: Logger;
   isMemoryEnabled: () => Promise<boolean>;
 }): Promise<{
-  ensureMemorySkillRegistered: () => void;
-  onMemorySettingChanged: () => Promise<void>;
+  onMemoryEnabled: () => Promise<void>;
 }> => {
   let memorySkillsRegistered = false;
 
@@ -84,9 +83,6 @@ export const registerStreamsMemoryAgentBuilder = async ({
   await ensureMemorySkillsRegistered();
 
   return {
-    ensureMemorySkillRegistered: () => {
-      void ensureMemorySkillsRegistered();
-    },
-    onMemorySettingChanged: ensureMemorySkillsRegistered,
+    onMemoryEnabled: ensureMemorySkillsRegistered,
   };
 };
