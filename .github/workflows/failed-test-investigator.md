@@ -143,28 +143,17 @@ Post exactly one comment. Keep the visible portion very short and easy to read:
 
 1. **One-line bold headline** stating the result kind and one identifying detail.
 2. **Diagnosis** (≤5 concise bullet points): what broke and where, the most likely root cause.
-3. **Next steps** (≤5 concise bullet points).
+3. **Recommended next steps** (≤5 concise bullet points).
 
-Put the full `flaky-test-investigator` skill output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion). Open the block with a `#### Findings` subsection containing exactly these four bullets in this order — downstream tooling parses them, so preserve keys, casing, and `` - `key`: value `` shape. These bullets must live **inside `<details>`**, never in the visible portion:
-
-- `classification`: `test-design` | `test-environment` | `application` | `external` | `inconclusive`
-- `confidence`: `high` | `medium` | `low`
-- `test.type`: `scout` (if `scout-playwright` label) | `ftr` | `jest` | `unknown`
-- `test.file`: repo-relative path, or `unknown`
+Put the full `flaky-test-investigator` skill output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion).
 
 The skill's "Reporting" subsections should also be inside the collapsible section:
 
 - What the test does
-- What failed and when
 - Where it ran
 - Root cause hypothesis
 - Evidence
-- Failure screenshot
-- Recommended next step
+- Failure screenshot (omit this section if not available)
 - Open questions
 
 Blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
-
-End the comment with this footer line (verbatim, on its own line after the `</details>` block):
-
-`<sup>AI-generated, share feedback in [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3)</sup>`
