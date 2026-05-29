@@ -692,12 +692,28 @@ export const getEndpointConsoleCommands = ({
           mustHaveValue: 'truthy',
           SelectorComponent: CancelablePendingActionsSelector,
         },
+        ...(agentType === 'endpoint'
+          ? {
+              force: {
+                required: false,
+                allowMultiples: false,
+                about: i18n.translate(
+                  'xpack.securitySolution.endpointConsoleCommands.cancel.force.about',
+                  {
+                    defaultMessage:
+                      'Forcefully cancel the action, even if it is already in progress.',
+                  }
+                ),
+                mustHaveValue: false,
+              },
+            }
+          : {}),
         ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 10,
-      helpDisabled: !isSupported,
+      helpDisabled: !isSupported || !doesEndpointSupportCommand('cancel'),
       helpHidden: !isSupported,
       validate: capabilitiesAndPrivilegesValidator(agentType),
     });
