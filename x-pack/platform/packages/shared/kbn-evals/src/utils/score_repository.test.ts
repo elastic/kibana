@@ -617,6 +617,30 @@ describe('EvaluationScoreRepository', () => {
     });
   });
 
+  describe('refresh gap after 409-only export', () => {
+    it('exportScores refresh:wait_for covers zero docs when every write is a 409 conflict', async () => {
+      // Scenario: indexSingleScore already wrote all docs. A subsequent
+      // exportScores re-creates them, gets 409 on each, and its
+      // refresh:'wait_for' only waits for *newly created* docs (none).
+      // Callers must issue an explicit indices.refresh() before querying.
+      mockEsClient.helpers.bulk.mockImplementation(async (options: any) => {
+        options.onDrop?.({
+          status: 409,
+          error: { type: 'version_conflict_engine_exception', reason: 'already exists' },
+        });
+        return { total: 1, failed: 1, successful: 0 } as any;
+      });
+
+      await repository.exportScores([createMockScoreDocument()]);
+
+      // The bulk call still requests refresh:'wait_for', but with 0 successful
+      // creates ES has nothing new to make visible.
+      const bulkCall = mockEsClient.helpers.bulk.mock.calls[0][0];
+      expect(bulkCall.refresh).toBe('wait_for');
+      expect(bulkCall.datasource).toHaveLength(1);
+    });
+  });
+
   describe('computeScoreDocumentId', () => {
     it('builds a deterministic id from document key fields', () => {
       const doc = createMockScoreDocument();

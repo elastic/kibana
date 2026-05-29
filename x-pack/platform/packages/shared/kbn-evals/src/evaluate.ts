@@ -396,6 +396,11 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         throw error;
       }
 
+      // indexSingleScore uses refresh:false; the bulk re-export may 409-conflict
+      // on those docs so its refresh:'wait_for' won't cover them. Force a refresh
+      // to make every score visible before the stats query.
+      await evaluationsEsClient.indices.refresh({ index: 'kibana-evaluations' }).catch(() => {});
+
       await reportModelScore(scoreRepository, currentRunId, log, {
         taskModelId: model.id,
         suiteId: process.env.EVAL_SUITE_ID,
