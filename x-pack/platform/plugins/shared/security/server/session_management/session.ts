@@ -214,7 +214,7 @@ export class Session {
       sessionLogger.warn(
         `Unable to decrypt session content, session will be invalidated: ${err.message}`
       );
-      this.invalidationLogger.debug('Invalidating session: content decryption failed.');
+      this.invalidationLogger.warn('Invalidating session: content decryption failed.');
       await this.invalidate(request, { match: 'current' });
       return { error: new SessionUnexpectedError(), value: null };
     }
@@ -235,7 +235,7 @@ export class Session {
       sessionLogger.warn(
         'Session is outside the concurrent session limit and will be invalidated.'
       );
-      this.invalidationLogger.debug('Invalidating session: concurrent session limit exceeded.');
+      this.invalidationLogger.warn('Invalidating session: concurrent session limit exceeded.');
       await this.invalidate(request, { match: 'current' });
       return { error: new SessionConcurrencyLimitError(), value: null };
     }

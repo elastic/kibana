@@ -757,7 +757,7 @@ export class Authenticator {
       this.logger.warn(
         `Attempted to retrieve session for the "${existingSession.value.provider.type}/${existingSession.value.provider.name}" provider, but it is not configured.`
       );
-      this.sessionInvalidationLogger.debug(
+      this.sessionInvalidationLogger.warn(
         `Invalidating session: provider "${existingSession.value.provider.type}/${existingSession.value.provider.name}" is no longer configured.`
       );
       await this.invalidateSessionValue({ request, sessionValue: existingSession.value });
@@ -838,7 +838,7 @@ export class Authenticator {
     if (authenticationResult.failed()) {
       if (ownsSession && getErrorStatusCode(authenticationResult.error) === 401) {
         this.logger.warn('Authentication attempt failed, existing session will be invalidated.');
-        this.sessionInvalidationLogger.debug(
+        this.sessionInvalidationLogger.warn(
           'Invalidating session: 401 authentication failure for session-owning provider.'
         );
         await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
@@ -878,7 +878,7 @@ export class Authenticator {
       this.logger.warn(
         'Authentication provider has changed, existing session will be invalidated.'
       );
-      this.sessionInvalidationLogger.debug(
+      this.sessionInvalidationLogger.warn(
         'Invalidating session: authentication provider changed since session was created.'
       );
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
@@ -907,7 +907,7 @@ export class Authenticator {
       existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.warn('Username has changed, existing session will be invalidated.');
-      this.sessionInvalidationLogger.debug(
+      this.sessionInvalidationLogger.warn(
         'Invalidating session: authenticated username changed from previous session.'
       );
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
