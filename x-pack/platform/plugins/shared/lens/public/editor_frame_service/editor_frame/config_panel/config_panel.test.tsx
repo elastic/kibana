@@ -237,7 +237,7 @@ describe('ConfigPanel', () => {
         'state',
         'first',
         frame.dataViews.indexPatterns,
-        {
+        expect.objectContaining({
           groupId: 'a',
           columnId: 'newId',
           staticValue: 100,
@@ -251,7 +251,7 @@ describe('ConfigPanel', () => {
               supportsMoreColumns: true,
             }),
           ],
-        }
+        })
       );
     });
   });

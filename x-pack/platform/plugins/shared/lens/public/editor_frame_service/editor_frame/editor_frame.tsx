@@ -24,6 +24,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
+import type { FormBasedPrivateState } from '@kbn/lens-common';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { useAddLayerButton } from '../../app_plugin/shared/edit_on_the_fly/use_add_layer_button';
@@ -50,6 +51,7 @@ import { getLongMessage } from '../../user_messages_utils';
 import { useEditorFrameService } from '../editor_frame_service_context';
 import { VisualizationToolbarWrapper } from './visualization_toolbar';
 import { LayerTabsWrapper } from '../../app_plugin/shared/edit_on_the_fly/layer_tabs';
+import { applyEmptyRowsDefaultsToSuggestionState } from '../../datasources/form_based/include_empty_rows_defaults';
 
 export interface EditorFrameProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -113,10 +115,25 @@ export function EditorFrame(props: EditorFrameProps) {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
         trackUiCounterEvents('drop_onto_workspace');
-        switchToSuggestion(dispatchLens, suggestion, { clearStagedPreview: true });
+        const adjustedSuggestion =
+          suggestion.datasourceId === 'formBased' && visualizationMap[suggestion.visualizationId]
+            ? {
+                ...suggestion,
+                datasourceState: applyEmptyRowsDefaultsToSuggestionState(
+                  suggestion.datasourceState as FormBasedPrivateState,
+                  datasourceStates[suggestion.datasourceId]?.state as
+                    | FormBasedPrivateState
+                    | undefined,
+                  visualizationMap[suggestion.visualizationId].getVisualizationTypeId(
+                    suggestion.visualizationState
+                  )
+                ),
+              }
+            : suggestion;
+        switchToSuggestion(dispatchLens, adjustedSuggestion, { clearStagedPreview: true });
       }
     },
-    [getSuggestionForField, dispatchLens]
+    [getSuggestionForField, dispatchLens, visualizationMap, datasourceStates]
   );
 
   const onError = useCallback((error: Error) => {

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   DatasourceMap,
   DatasourcePublicAPI,
+  FormBasedPrivateState,
   FramePublicAPI,
   Visualization,
   VisualizationMap,
@@ -18,18 +19,22 @@ import type {
   DatasourceStates,
   Suggestion,
 } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
 import { ExperimentalBadge } from '../../../../shared_components';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
 import {
   insertLayer,
   removeLayers,
+  updateDatasourceState,
   useLensDispatch,
   useLensSelector,
   selectActiveDatasourceId,
   selectVisualization,
   selectDatasourceStates,
+  selectPersistedDoc,
 } from '../../../../state_management';
+import { applyEmptyRowsDefaultsOnTypeSwitch } from '../../../../datasources/form_based/include_empty_rows_defaults';
 import { generateId } from '../../../../id_generator/id_generator';
 import type { SelectableEntry } from './chart_switch_selectable';
 import { ChartSwitchSelectable } from './chart_switch_selectable';
@@ -95,18 +100,67 @@ export const ChartSwitch = memo(function ChartSwitch({
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const visualization = useLensSelector(selectVisualization);
   const datasourceStates = useLensSelector(selectDatasourceStates);
+  const persistedDoc = useLensSelector(selectPersistedDoc);
 
   const [searchTerm, setSearchTerm] = useState('');
 
   const commitSelection = (selection: VisualizationSelection) => {
+    const newVisualizationState = selection.getVisualizationState();
+    const targetVisualizationTypeId = getVisualizationTypeId(
+      visualizationMap[selection.visualizationId],
+      newVisualizationState,
+      layerId
+    );
+
     switchToSuggestion(
       dispatchLens,
       {
         ...selection,
-        visualizationState: selection.getVisualizationState(),
+        visualizationState: newVisualizationState,
+        // A cross-visualization switch carries new datasource state. Re-apply
+        // the target type's opinionated `includeEmptyRows` default so the new
+        // chart type's preference wins over values not coming from a saved
+        // object.
+        datasourceState:
+          selection.datasourceId === LENS_DATASOURCE_ID.FORM_BASED
+            ? applyEmptyRowsDefaultsOnTypeSwitch(
+                selection.datasourceState as FormBasedPrivateState,
+                persistedDoc,
+                targetVisualizationTypeId
+              )
+            : selection.datasourceState,
       },
       { clearStagedPreview: true }
     );
+
+    // A same-visualization subtype switch (e.g. XY bar -> line) keeps the
+    // existing datasource state untouched, so the opinionated default must be
+    // re-applied through a follow-up datasource update.
+    if (
+      selection.sameDatasources &&
+      !selection.datasourceState &&
+      activeDatasourceId === LENS_DATASOURCE_ID.FORM_BASED
+    ) {
+      const currentState = datasourceStates[LENS_DATASOURCE_ID.FORM_BASED]?.state as
+        | FormBasedPrivateState
+        | undefined;
+      if (currentState) {
+        const nextState = applyEmptyRowsDefaultsOnTypeSwitch(
+          currentState,
+          persistedDoc,
+          targetVisualizationTypeId
+        );
+        if (nextState !== currentState) {
+          dispatchLens(
+            updateDatasourceState({
+              datasourceId: LENS_DATASOURCE_ID.FORM_BASED,
+              newDatasourceState: nextState,
+              clearStagedPreview: true,
+            })
+          );
+        }
+      }
+    }
 
     if (
       (!selection.datasourceId && !selection.sameDatasources) ||

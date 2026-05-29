@@ -194,6 +194,12 @@ export interface FieldInputProps<C> {
   operationSupportMatrix: OperationSupportMatrix;
   helpMessage?: React.ReactNode;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
+  /**
+   * Visualization type id of the currently active visualization.
+   * Used to derive per-visualization defaults when creating new columns
+   * (e.g. `includeEmptyRows` for date histogram and range buckets).
+   */
+  activeVisualizationTypeId?: string;
 }
 
 export interface HelpProps<C> {

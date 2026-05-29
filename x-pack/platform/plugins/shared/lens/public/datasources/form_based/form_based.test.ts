@@ -3991,6 +3991,81 @@ describe('IndexPattern Data Source', () => {
         },
       });
     });
+
+    describe('per-visualization includeEmptyRows default for autoTimeField', () => {
+      const buildAutoTimeFieldState = (): FormBasedPrivateState =>
+        ({
+          currentIndexPatternId: '1',
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: ['metric'],
+              columns: {
+                metric: {
+                  label: 'Count of records',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: '___records___',
+                  operationType: 'count',
+                },
+              },
+            },
+          },
+        } as FormBasedPrivateState);
+
+      it.each([
+        ['bar', false],
+        ['heatmap', false],
+        ['pie', false],
+        ['treemap', false],
+        ['mosaic', false],
+        ['waffle', false],
+        ['lnsMetric', false],
+        ['lnsTagcloud', false],
+      ])(
+        'defaults includeEmptyRows to false for visualization type "%s"',
+        (visualizationTypeId, expected) => {
+          const next = FormBasedDatasource.initializeDimension!(
+            buildAutoTimeFieldState(),
+            'first',
+            indexPatterns,
+            {
+              columnId: 'newTime',
+              groupId: 'a',
+              autoTimeField: true,
+              visualizationGroups: [],
+              activeVisualizationTypeId: visualizationTypeId,
+            }
+          );
+          expect(next.layers.first.columns.newTime).toMatchObject({
+            operationType: 'date_histogram',
+            params: { includeEmptyRows: expected },
+          });
+        }
+      );
+
+      it.each([['lnsDatatable'], ['line'], ['area'], ['mixed']])(
+        'keeps includeEmptyRows on for visualization type "%s"',
+        (visualizationTypeId) => {
+          const next = FormBasedDatasource.initializeDimension!(
+            buildAutoTimeFieldState(),
+            'first',
+            indexPatterns,
+            {
+              columnId: 'newTime',
+              groupId: 'a',
+              autoTimeField: true,
+              visualizationGroups: [],
+              activeVisualizationTypeId: visualizationTypeId,
+            }
+          );
+          expect(next.layers.first.columns.newTime).toMatchObject({
+            operationType: 'date_histogram',
+            params: { includeEmptyRows: true },
+          });
+        }
+      );
+    });
   });
 
   describe('#syncColumns', () => {

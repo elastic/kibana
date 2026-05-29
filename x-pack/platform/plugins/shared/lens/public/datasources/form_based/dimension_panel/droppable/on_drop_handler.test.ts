@@ -2213,4 +2213,79 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
       });
     });
   });
+
+  describe('per-visualization includeEmptyRows default on field drop', () => {
+    const dateField = {
+      field: { type: 'date', name: 'timestamp', aggregatable: true },
+      indexPatternId: 'first',
+      id: 'timestamp-drag',
+      humanData: { label: 'timestampLabel' },
+    };
+
+    const baseBucketTarget: DatasourceDimensionDropHandlerProps<FormBasedPrivateState>['target'] = {
+      layerId: 'first',
+      groupId: 'a',
+      columnId: 'newDateHistogram',
+      filterOperations: (op: OperationMetadata) => op.isBucketed,
+      indexPatternId: 'first',
+    };
+
+    const dropDateFieldOntoBucket = (activeVisualizationTypeId?: string) => {
+      const emptyState: FormBasedPrivateState = {
+        ...state,
+        layers: {
+          ...state.layers,
+          first: { ...state.layers.first, columnOrder: [], columns: {} },
+        },
+      };
+      return onDrop({
+        ...defaultProps,
+        state: emptyState,
+        source: dateField,
+        dropType: 'field_add' as DropType,
+        target: baseBucketTarget,
+        targetLayerDimensionGroups: dimensionGroups,
+        activeVisualizationTypeId,
+      });
+    };
+
+    it.each([
+      ['bar', false],
+      ['heatmap', false],
+      ['pie', false],
+      ['treemap', false],
+      ['mosaic', false],
+      ['waffle', false],
+      ['lnsMetric', false],
+      ['lnsTagcloud', false],
+    ])(
+      'creates date_histogram with includeEmptyRows=false for visualization type "%s"',
+      (visualizationTypeId, expected) => {
+        const newState = dropDateFieldOntoBucket(visualizationTypeId);
+        expect(newState?.layers.first.columns.newDateHistogram).toMatchObject({
+          operationType: 'date_histogram',
+          params: { includeEmptyRows: expected },
+        });
+      }
+    );
+
+    it.each([['lnsDatatable'], ['line'], ['area'], ['mixed']])(
+      'creates date_histogram with includeEmptyRows=true for visualization type "%s"',
+      (visualizationTypeId) => {
+        const newState = dropDateFieldOntoBucket(visualizationTypeId);
+        expect(newState?.layers.first.columns.newDateHistogram).toMatchObject({
+          operationType: 'date_histogram',
+          params: { includeEmptyRows: true },
+        });
+      }
+    );
+
+    it('falls back to includeEmptyRows=true when no activeVisualizationTypeId is provided', () => {
+      const newState = dropDateFieldOntoBucket(undefined);
+      expect(newState?.layers.first.columns.newDateHistogram).toMatchObject({
+        operationType: 'date_histogram',
+        params: { includeEmptyRows: true },
+      });
+    });
+  });
 });

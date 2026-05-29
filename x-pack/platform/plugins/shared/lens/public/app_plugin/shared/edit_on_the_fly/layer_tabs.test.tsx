@@ -358,7 +358,7 @@ describe('LayerTabs', () => {
         {},
         'newId',
         frame.dataViews.indexPatterns,
-        {
+        expect.objectContaining({
           columnId: 'myColumn',
           groupId: 'testGroup',
           staticValue: 100,
@@ -372,7 +372,7 @@ describe('LayerTabs', () => {
               supportsMoreColumns: true,
             }),
           ],
-        }
+        })
       );
     });
   });
