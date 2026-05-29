@@ -28,10 +28,6 @@ const buildDef = (ids: string[]) => ({
   body: ids.map((id) => ({ id, title: id.toUpperCase(), href: `https://localhost/app/${id}` })),
 });
 
-/** Extract top-level body IDs from the parsed UI tree (includes hidden/home/no-leaf nodes). */
-const bodyIds = (result: ReturnType<typeof applyCustomization>): string[] =>
-  result.treeUI.body.map((n) => n.id);
-
 /** Extract the render-ready IDs (home, definition-hidden, and no-leaf nodes pruned). */
 const renderableIds = (result: ReturnType<typeof applyCustomization>): string[] =>
   result.renderableNodes.map((n) => n.id);
