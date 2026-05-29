@@ -2533,8 +2533,14 @@ export default ({ getService }: FtrProviderContext) => {
           ],
           users: [
             {
+              // Indicator match alerts come from auditbeat events that carry host.id,
+              // triggering the local-namespace user EUID: user:<name>@<host.id>@local.
               user: { name: ENRICHMENT_USER_NAME },
-              entity: { id: `user:${ENRICHMENT_USER_NAME}@unknown`, type: 'user' },
+              host: { id: [ENRICHMENT_HOST_ID] },
+              entity: {
+                id: `user:${ENRICHMENT_USER_NAME}@${ENRICHMENT_HOST_ID}@local`,
+                type: 'user',
+              },
               asset: { criticality: 'extreme_impact' },
             },
           ],
