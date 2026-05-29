@@ -39,7 +39,7 @@ import type {
   FindRulesResponse,
   FindRulesSortField,
   RuleResponse,
-  UpdateRuleData,
+  UpdateRuleParams,
 } from './types';
 import {
   assertImmutableUnchanged,
@@ -172,9 +172,9 @@ export class RulesClient {
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
-  }): Promise<void> {
+  }): Promise<{ id: string; version?: string }> {
     try {
-      await this.rulesSavedObjectService.update({ id, attrs, version });
+      return await this.rulesSavedObjectService.update({ id, attrs, version });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`, {
@@ -203,9 +203,9 @@ export class RulesClient {
       updatedAt: nowIso,
     });
 
-    let id: string;
+    let created: { id: string; version?: string };
     try {
-      id = await this.rulesSavedObjectService.create({
+      created = await this.rulesSavedObjectService.create({
         attrs: ruleAttributes,
         id: params.options?.id,
       });
@@ -220,6 +220,8 @@ export class RulesClient {
       throw e;
     }
 
+    const { id, version } = created;
+
     try {
       await this.scheduleRuleExecutorTask({
         ruleId: id,
@@ -231,17 +233,11 @@ export class RulesClient {
       throw e;
     }
 
-    return transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes);
+    return transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
   }
 
   @withApm
-  public async updateRule({
-    id,
-    data,
-  }: {
-    id: string;
-    data: UpdateRuleData;
-  }): Promise<RuleResponse> {
+  public async updateRule({ id, data, options }: UpdateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
 
@@ -273,15 +269,19 @@ export class RulesClient {
       scheduleEvery: nextAttrs.schedule.every,
     });
 
-    await this.writeRuleAttrs({ id, attrs: nextAttrs, version: existingVersion });
+    const { version: newVersion } = await this.writeRuleAttrs({
+      id,
+      attrs: nextAttrs,
+      version: options?.version ?? existingVersion,
+    });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
+    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
   }
 
   @withApm
   public async getRule({ id }: { id: string }): Promise<RuleResponse> {
-    const { attrs } = await this.getExistingRule(id);
-    return transformRuleSoAttributesToRuleApiResponse(id, attrs);
+    const { attrs, version } = await this.getExistingRule(id);
+    return transformRuleSoAttributesToRuleApiResponse(id, attrs, version);
   }
 
   @withApm
@@ -357,9 +357,13 @@ export class RulesClient {
       scheduleEvery: nextAttrs.schedule.every,
     });
 
-    await this.writeRuleAttrs({ id, attrs: nextAttrs, version: existingVersion });
+    const { version: newVersion } = await this.writeRuleAttrs({
+      id,
+      attrs: nextAttrs,
+      version: existingVersion,
+    });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
+    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
   }
 
   @withApm
@@ -381,9 +385,13 @@ export class RulesClient {
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
-    await this.writeRuleAttrs({ id, attrs: nextAttrs, version: existingVersion });
+    const { version: newVersion } = await this.writeRuleAttrs({
+      id,
+      attrs: nextAttrs,
+      version: existingVersion,
+    });
 
-    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
+    return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
   }
 
   @withApm
@@ -411,7 +419,7 @@ export class RulesClient {
 
     return {
       items: res.saved_objects.map((so) =>
-        transformRuleSoAttributesToRuleApiResponse(so.id, so.attributes)
+        transformRuleSoAttributesToRuleApiResponse(so.id, so.attributes, so.version)
       ),
       total: res.total,
       page,
@@ -560,7 +568,7 @@ export class RulesClient {
 
       if (doc.attributes.enabled) {
         // Already enabled — include in response without updating
-        rules.push(transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes));
+        rules.push(transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes, doc.version));
         continue;
       }
 
@@ -663,7 +671,7 @@ export class RulesClient {
 
       if (!doc.attributes.enabled) {
         // Already disabled — include in response without updating
-        rules.push(transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes));
+        rules.push(transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes, doc.version));
         continue;
       }
 
@@ -754,10 +762,14 @@ export class RulesClient {
       scheduleEvery: nextAttrs.schedule.every,
     });
 
-    await this.writeRuleAttrs({ id, attrs: nextAttrs, version: existingVersion });
+    const { version: newVersion } = await this.writeRuleAttrs({
+      id,
+      attrs: nextAttrs,
+      version: existingVersion,
+    });
 
     return {
-      rule: transformRuleSoAttributesToRuleApiResponse(id, nextAttrs),
+      rule: transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion),
       created: false,
     };
   }
