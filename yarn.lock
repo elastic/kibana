@@ -6435,6 +6435,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-views-as-code-plugin@link:src/platform/plugins/shared/data_views_as_code":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-views-plugin@link:src/platform/plugins/shared/data_views":
   version "0.0.0"
   uid ""
