@@ -39,5 +39,6 @@ export interface AgentBuilderInternalService {
   accessChecker: AgentBuilderAccessChecker;
   eventsService: EventsService;
   isEarsEnabled: boolean;
+  isEarsExperimentalEnabled: boolean;
   openSidebarConversation: (options?: OpenSidebarInternalOptions) => OpenConversationSidebarReturn;
 }

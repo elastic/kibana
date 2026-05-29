@@ -6,12 +6,14 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { CONNECTORS_APP_PATH, CONNECTORS_LIST_SELECTORS } from '../constants';
 
 export class ConnectorFlyoutPage {
   constructor(public readonly page: ScoutPage) {}
 
   public async gotoConnectorsList() {
-    await this.page.gotoApp('management/insightsAndAlerting/triggersActionsConnectors');
+    await this.page.gotoApp(CONNECTORS_APP_PATH);
+    await this.page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
   }
 
   public get queryParamsToggle(): Locator {
@@ -42,8 +44,8 @@ export class ConnectorFlyoutPage {
     return this.page.testSubj.locator('edit-connector-flyout-save-btn');
   }
 
-  public async openEditConnectorFlyout(connectorName: string) {
-    await this.page.locator(`button:has-text("${connectorName}")`).click();
+  public async openEditConnectorFlyout(connectorId: string) {
+    await this.page.testSubj.click(`edit${connectorId}`);
     await this.page.testSubj.waitForSelector('edit-connector-flyout', { state: 'visible' });
   }
 
