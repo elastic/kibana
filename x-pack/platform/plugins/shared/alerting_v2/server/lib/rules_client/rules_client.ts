@@ -607,7 +607,7 @@ export class RulesClient {
           continue;
         }
 
-        rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs, undefined));
+        rules.push(transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs));
 
         tasksToSchedule.push({
           id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
