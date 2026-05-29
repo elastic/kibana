@@ -8,7 +8,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
@@ -97,6 +98,31 @@ export class StepExecutionRepository {
       }
     }
     return stepExecutions;
+  }
+
+  /**
+   * Marks non-terminal step executions for a workflow run as FAILED (e.g. after interrupt recovery).
+   */
+  public async markNonTerminalStepsFailed(
+    workflowExecutionId: string,
+    error: SerializedError
+  ): Promise<void> {
+    const stepExecutions = await this.searchStepExecutionsByExecutionId(workflowExecutionId);
+    const nonTerminalSteps = stepExecutions.filter((step) => !isTerminalStatus(step.status));
+
+    if (nonTerminalSteps.length === 0) {
+      return;
+    }
+
+    const finishedAt = new Date().toISOString();
+    await this.bulkUpsert(
+      nonTerminalSteps.map((step) => ({
+        id: step.id,
+        status: ExecutionStatus.FAILED,
+        error,
+        finishedAt,
+      }))
+    );
   }
 
   public async bulkUpsert(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {
