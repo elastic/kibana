@@ -65,11 +65,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
-    it('should open the context view with the same columns', async () => {
-      const columnNames = await dataGrid.getHeaderFields();
-      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
-    });
-
     it('should open the context view with the selected document as anchor', async () => {
       // get the timestamp of the first row
       const discoverFields = await dataGrid.getFields();
@@ -80,6 +75,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rowActions = await dataGrid.getRowActions();
       await rowActions[1].click();
       await context.waitUntilContextLoadingHasFinished();
+
+      const columnNames = await dataGrid.getHeaderFields();
+      expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
 
       await dataGrid.clickRowToggle({ isAnchorRow: true });
       await dataGrid.isShowingDocViewer();
