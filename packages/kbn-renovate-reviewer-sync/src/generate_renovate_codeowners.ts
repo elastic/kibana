@@ -13,10 +13,11 @@ import { resolve as pathResolve, join, extname } from 'path';
 import { cpus } from 'os';
 
 import chalk from 'chalk';
+import { modify, applyEdits } from 'jsonc-parser';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import type { RenovateConfig } from './reviewer_sync';
+import type { RenovateConfig, ReviewerSyncReport } from './reviewer_sync';
 import { syncReviewersInConfig } from './reviewer_sync';
 import type { WorkerPoolLike } from './worker_pool';
 import { WorkerPool } from './worker_pool';
@@ -97,6 +98,33 @@ export function diffTeamSets(
     removed: before.filter((t) => !afterSet.has(t)),
     kept: after.filter((t) => beforeSet.has(t)),
   };
+}
+
+/**
+ * Apply only the managed reviewer changes back into the original `renovate.json`
+ * text, preserving the file's existing hand-maintained formatting.
+ *
+ * A full `JSON.parse` -> `JSON.stringify(..., null, 2)` round-trip rewrites the
+ * whole file (the source keeps many arrays compact on one line; pretty-printing
+ * expands them all), which would turn every no-op scan into a formatting-only
+ * diff and trip the weekly job's `git diff --quiet renovate.json` gate. Instead
+ * we surgically replace just the `packageRules[i].reviewers` arrays that changed,
+ * via `jsonc-parser` edits, leaving every other byte untouched.
+ *
+ * Pure (text in, text out) so it can be unit-tested without touching disk.
+ */
+export function applyReviewerEditsToConfigText(
+  originalText: string,
+  managedRuleDrift: ReviewerSyncReport['managedRuleDrift']
+): string {
+  let text = originalText;
+  for (const { index, after } of managedRuleDrift) {
+    const edits = modify(text, ['packageRules', index, 'reviewers'], after, {
+      formattingOptions: { insertSpaces: true, tabSize: 2 },
+    });
+    text = applyEdits(text, edits);
+  }
+  return text;
 }
 
 /**
@@ -641,7 +669,8 @@ export async function generateRenovateCodeowners(
   log.info(`✓ Found ${packagesWithoutUsage} packages not found in code\n`);
 
   const reportStartedMs = Date.now();
-  const renovateConfig: RenovateConfig = JSON.parse(readFile(renovateConfigPath));
+  const renovateConfigText = readFile(renovateConfigPath);
+  const renovateConfig: RenovateConfig = JSON.parse(renovateConfigText);
 
   const report = syncReviewersInConfig({
     renovateConfig,
@@ -723,7 +752,11 @@ export async function generateRenovateCodeowners(
   }
 
   if (applyChanges) {
-    writeFile(renovateConfigPath, JSON.stringify(renovateConfig, null, 2) + '\n');
+    // Format-preserving write: only rewrite the reviewer arrays that actually changed,
+    // so a clean scan leaves renovate.json byte-identical and the weekly job's
+    // `git diff --quiet` gate doesn't open formatting-only bot PRs.
+    const updatedText = applyReviewerEditsToConfigText(renovateConfigText, report.managedRuleDrift);
+    writeFile(renovateConfigPath, updatedText);
     log.success(`✅ Updated reviewers in ${renovateConfigPath}`);
   } else {
     log.success(`✅ Dry run complete (no files written)`);

@@ -18,6 +18,7 @@ import {
   discoverFilesViaGitGrep,
   formatRuleHeader,
   diffTeamSets,
+  applyReviewerEditsToConfigText,
   generateRenovateCodeowners,
   GENERATE_RENOVATE_CODEOWNERS_MODES,
 } from './generate_renovate_codeowners';
@@ -323,6 +324,74 @@ describe('diffTeamSets', () => {
     const { added, removed, kept } = diffTeamSets(before, after);
     expect(kept.length + removed.length).toEqual(before.length);
     expect(kept.length + added.length).toEqual(after.length);
+  });
+});
+
+describe('applyReviewerEditsToConfigText', () => {
+  // Hand-formatted source with compact single-line arrays, mirroring how the real
+  // renovate.json is maintained. A full JSON.stringify round-trip would expand all of
+  // these; the helper must touch only the targeted reviewers arrays.
+  const source = [
+    '{',
+    '  "packageRules": [',
+    '    {',
+    '      "groupName": "lodash",',
+    '      "matchDepNames": ["lodash", "@types/lodash"],',
+    '      "reviewers": ["team:kibana-core"],',
+    '      "enabled": true',
+    '    },',
+    '    {',
+    '      "groupName": "redux",',
+    '      "matchDepNames": ["redux"],',
+    '      "reviewers": ["team:search-kibana"],',
+    '      "enabled": true',
+    '    }',
+    '  ]',
+    '}',
+    '',
+  ].join('\n');
+
+  it('SHOULD leave the text byte-identical when there is no managed drift', () => {
+    expect(applyReviewerEditsToConfigText(source, [])).toEqual(source);
+  });
+
+  it('SHOULD update only the targeted rule and preserve every other line', () => {
+    const out = applyReviewerEditsToConfigText(source, [
+      {
+        index: 0,
+        packages: ['lodash'],
+        before: ['team:kibana-core'],
+        after: ['team:kibana-core', 'vigneshshanmugam'],
+      },
+    ]);
+    const reparsed = JSON.parse(out);
+    expect(reparsed.packageRules[0].reviewers).toEqual(['team:kibana-core', 'vigneshshanmugam']);
+    // Untouched rule keeps its compact single-line array verbatim.
+    expect(out).toContain('"reviewers": ["team:search-kibana"]');
+    // The other rule's matchDepNames compact array is untouched too.
+    expect(out).toContain('"matchDepNames": ["lodash", "@types/lodash"]');
+  });
+
+  it('SHOULD normalize individual users as bare usernames in the written array', () => {
+    const out = applyReviewerEditsToConfigText(source, [
+      { index: 0, packages: ['lodash'], before: ['team:kibana-core'], after: ['markov00'] },
+    ]);
+    expect(JSON.parse(out).packageRules[0].reviewers).toEqual(['markov00']);
+  });
+
+  it('SHOULD apply multiple managed-rule edits in one pass', () => {
+    const out = applyReviewerEditsToConfigText(source, [
+      { index: 0, packages: ['lodash'], before: ['team:kibana-core'], after: ['team:kibana-core'] },
+      {
+        index: 1,
+        packages: ['redux'],
+        before: ['team:search-kibana'],
+        after: ['team:search-kibana', 'dej611'],
+      },
+    ]);
+    const reparsed = JSON.parse(out);
+    expect(reparsed.packageRules[0].reviewers).toEqual(['team:kibana-core']);
+    expect(reparsed.packageRules[1].reviewers).toEqual(['team:search-kibana', 'dej611']);
   });
 });
 
