@@ -14,7 +14,7 @@ import type { XOR } from '../../../../../../common/utility_types';
  * (e.g., a v2 flyout link). Receives the field name and value, and may render `children`
  * as the visible content.
  */
-export type EntityTableLinkRenderer = ComponentType<{
+export type FieldLinkRenderer = ComponentType<{
   field: string;
   value: string;
   children?: ReactNode;

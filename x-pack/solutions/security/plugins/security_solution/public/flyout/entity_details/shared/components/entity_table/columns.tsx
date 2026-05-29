@@ -14,7 +14,7 @@ import {
   toFieldRendererItems,
 } from '../../../../../timelines/components/field_renderers/default_renderer';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import type { BasicEntityData, EntityTableColumns, EntityTableLinkRenderer } from './types';
+import type { BasicEntityData, EntityTableColumns, FieldLinkRenderer } from './types';
 import { isFlyoutLink } from '../../../../shared/utils/link_utils';
 import { PreviewLink } from '../../../../shared/components/preview_link';
 
@@ -22,7 +22,7 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
   contextID: string,
   scopeId: string,
   data: T,
-  linkRenderer?: EntityTableLinkRenderer
+  linkRenderer?: FieldLinkRenderer
 ): EntityTableColumns<T> => [
   {
     name: (

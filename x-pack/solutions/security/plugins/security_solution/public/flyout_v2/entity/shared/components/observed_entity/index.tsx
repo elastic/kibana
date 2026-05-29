@@ -11,7 +11,7 @@ import React from 'react';
 import { EntityTable } from '../../../../../flyout/entity_details/shared/components/entity_table';
 import { InspectButtonContainer } from '../../../../../common/components/inspect';
 import type {
-  EntityTableLinkRenderer,
+  FieldLinkRenderer,
   EntityTableRows,
 } from '../../../../../flyout/entity_details/shared/components/entity_table/types';
 import type { ObservedEntityData } from './types';
@@ -27,7 +27,7 @@ export const ObservedEntity = <T,>({
   contextID: string;
   scopeId: string;
   observedFields: EntityTableRows<ObservedEntityData<T>>;
-  linkRenderer?: EntityTableLinkRenderer;
+  linkRenderer?: FieldLinkRenderer;
 }) => {
   return (
     <InspectButtonContainer>

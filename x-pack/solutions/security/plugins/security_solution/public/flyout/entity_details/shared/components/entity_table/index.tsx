@@ -8,14 +8,14 @@
 import React, { useMemo } from 'react';
 import { BasicTable } from '../../../../../common/components/ml/tables/basic_table';
 import { getEntityTableColumns } from './columns';
-import type { BasicEntityData, EntityTableLinkRenderer, EntityTableRows } from './types';
+import type { BasicEntityData, FieldLinkRenderer, EntityTableRows } from './types';
 
 interface EntityTableProps<T extends BasicEntityData> {
   contextID: string;
   scopeId: string;
   data: T;
   entityFields: EntityTableRows<T>;
-  linkRenderer?: EntityTableLinkRenderer;
+  linkRenderer?: FieldLinkRenderer;
 }
 
 export const EntityTable = <T extends BasicEntityData>({

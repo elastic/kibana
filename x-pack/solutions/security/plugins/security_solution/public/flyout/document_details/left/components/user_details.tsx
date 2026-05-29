@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FieldLinkRenderer } from '../../../entity_details/shared/components/entity_table/types';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuid } from 'uuid';
@@ -126,6 +127,22 @@ export interface UserDetailsProps {
    * Set for attack flyout entity panels; omit in document details flyout.
    */
   isAttackDetails?: boolean;
+  /**
+   * When provided, opens the user flyout using the v2 system-flyout pattern instead of
+   * the expandable-flyout preview panel. Use when this component is rendered inside a v2
+   * system flyout where the expandable-flyout API dispatches into an isolated provider.
+   */
+  onPreviewEntity?: () => void;
+  /**
+   * When provided, opens the CSP detail panel (alerts / misconfigurations) using the v2
+   * system-flyout pattern instead of `openLeftPanel`. Use alongside `onPreviewEntity`.
+   */
+  onShowDetailsPanel?: (subTab: CspInsightLeftPanelSubTab) => void;
+  /**
+   * When provided, wraps host-name and IP cell values in the Related Hosts table using
+   * this renderer instead of the v1 `PreviewLink`. Use alongside `onPreviewEntity`.
+   */
+  linkRenderer?: FieldLinkRenderer;
 }
 
 /**
@@ -138,6 +155,9 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   scopeId,
   expandedOnFirstRender = true,
   isAttackDetails = false,
+  onPreviewEntity,
+  onShowDetailsPanel,
+  linkRenderer: LinkRenderer,
 }) => {
   const EntityCellActions = isAttackDetails ? AttackDetailsCellActions : DocumentDetailsCellActions;
 
@@ -195,6 +215,10 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   const euidApi = useEntityStoreEuidApi();
 
   const openUserPreview = useCallback(() => {
+    if (onPreviewEntity) {
+      onPreviewEntity();
+      return;
+    }
     openPreviewPanel({
       id: UserPreviewPanelKey,
       params: {
@@ -208,7 +232,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
       location: scopeId,
       panel: 'preview',
     });
-  }, [openPreviewPanel, userName, entityId, scopeId, telemetry]);
+  }, [onPreviewEntity, openPreviewPanel, userName, entityId, scopeId, telemetry]);
 
   const entityFromStoreResult = useEntityFromStore({
     entityId,
@@ -334,13 +358,19 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
         render: (host: string) => (
           <EuiText grow={false} size="xs">
             <EntityCellActions field={HOST_NAME_FIELD_NAME} value={host}>
-              <PreviewLink
-                field={HOST_NAME_FIELD_NAME}
-                value={host}
-                entityId={entityId}
-                scopeId={scopeId}
-                data-test-subj={USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID}
-              />
+              {LinkRenderer ? (
+                <LinkRenderer field={HOST_NAME_FIELD_NAME} value={host}>
+                  {host}
+                </LinkRenderer>
+              ) : (
+                <PreviewLink
+                  field={HOST_NAME_FIELD_NAME}
+                  value={host}
+                  entityId={entityId}
+                  scopeId={scopeId}
+                  data-test-subj={USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID}
+                />
+              )}
             </EntityCellActions>
           </EuiText>
         ),
@@ -362,6 +392,10 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
               render={(ip) =>
                 ip == null ? (
                   getEmptyTagValue()
+                ) : LinkRenderer ? (
+                  <LinkRenderer field={HOST_IP_FIELD_NAME} value={ip}>
+                    {ip}
+                  </LinkRenderer>
                 ) : (
                   <PreviewLink
                     field={HOST_IP_FIELD_NAME}
@@ -394,7 +428,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           ]
         : []),
     ],
-    [EntityCellActions, isEntityAnalyticsAuthorized, scopeId, entityId]
+    [EntityCellActions, isEntityAnalyticsAuthorized, scopeId, entityId, LinkRenderer]
   );
 
   const relatedHostsCount = useMemo(
@@ -491,6 +525,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
             jobNameById={jobNameById}
             scopeId={scopeId}
             isFlyoutOpen={true}
+            linkRenderer={LinkRenderer}
             riskScoreState={userRiskScoreStateFromEntityStore}
             firstSeenFromEntityStore={
               entityStoreV2Enabled ? observedUser.firstSeen?.date ?? undefined : undefined
@@ -511,10 +546,12 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           queryId={`${USER_DETAILS_INSIGHTS_ID}-alerts-by-status`}
           direction="column"
           onShowAlertCountDetails={() =>
-            openDetailsPanel({
-              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-              subTab: CspInsightLeftPanelSubTab.ALERTS,
-            })
+            onShowDetailsPanel
+              ? onShowDetailsPanel(CspInsightLeftPanelSubTab.ALERTS)
+              : openDetailsPanel({
+                  tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+                  subTab: CspInsightLeftPanelSubTab.ALERTS,
+                })
           }
           data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
         />
@@ -522,10 +559,12 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
           identityFields={userIdentityFields ?? {}}
           direction="column"
           onShowMisconfigurationsDetails={() =>
-            openDetailsPanel({
-              tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-              subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
-            })
+            onShowDetailsPanel
+              ? onShowDetailsPanel(CspInsightLeftPanelSubTab.MISCONFIGURATIONS)
+              : openDetailsPanel({
+                  tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+                  subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+                })
           }
           data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
           telemetryKey={MISCONFIGURATION_INSIGHT_USER_DETAILS}
