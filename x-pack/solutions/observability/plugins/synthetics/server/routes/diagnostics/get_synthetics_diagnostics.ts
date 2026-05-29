@@ -27,6 +27,7 @@ import { OverviewStatusService } from '../overview_status/overview_status_servic
 import type { SyntheticsEsClient } from '../../lib';
 import { getPrivateLocationsAndAgentPolicies } from '../settings/private_locations/get_private_locations';
 import { getAgentPoliciesAsInternalUser } from '../settings/private_locations/get_agent_policies';
+import type { ServiceLocationErrors } from '../../../common/runtime_types';
 import {
   countMonitorsByLocationId,
   redactMonitorAttributesForDiagnostics,
@@ -148,6 +149,38 @@ const fetchIndicesDiagnostics = async (syntheticsEsClient: SyntheticsEsClient) =
   }
 };
 
+/**
+ * Filters synthetics service sync errors so that only `failed_monitors` belonging to
+ * monitors visible in the current space are surfaced. Service-level errors that are not
+ * tied to any specific monitor are kept as-is — they describe location-wide infrastructure
+ * issues rather than per-space data.
+ */
+const filterSyncErrorsToCurrentSpace = (
+  syncErrors: ServiceLocationErrors | null | undefined,
+  monitorIdsInSpace: Set<string>
+): ServiceLocationErrors | null | undefined => {
+  if (!syncErrors) {
+    return syncErrors;
+  }
+  const filtered: ServiceLocationErrors = [];
+  for (const entry of syncErrors) {
+    const failedMonitors = entry.error.failed_monitors;
+    if (!failedMonitors) {
+      filtered.push(entry);
+      continue;
+    }
+    const monitorsInSpace = failedMonitors.filter((fm) => monitorIdsInSpace.has(fm.id));
+    if (monitorsInSpace.length === 0) {
+      continue;
+    }
+    filtered.push({
+      ...entry,
+      error: { ...entry.error, failed_monitors: monitorsInSpace },
+    });
+  }
+  return filtered;
+};
+
 const getOverviewStatusForDiagnostics = async (
   routeContext: RouteContext,
   monitorSavedObjects: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>
@@ -169,7 +202,9 @@ export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () =
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_DIAGNOSTICS,
   validate: {},
-  writeAccess: false,
+  // Diagnostics bundles include broad metadata; require the same `uptime-write`
+  // privilege as monitor edits so only operators with full Synthetics access can pull them.
+  writeAccess: true,
   handler: async (routeContext) => {
     const {
       monitorConfigRepository,
@@ -204,7 +239,9 @@ export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () =
     );
 
     const referencedPackagePolicyIds = new Set<string>();
+    const monitorIdsInSpace = new Set<string>();
     for (const so of monitorSavedObjects) {
+      monitorIdsInSpace.add(so.id);
       for (const ref of so.references ?? []) {
         if (ref.id && PACKAGE_POLICY_REFERENCE_TYPES.has(ref.type)) {
           referencedPackagePolicyIds.add(ref.id);
@@ -242,7 +279,10 @@ export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () =
       globalParams,
       dynamicSettings,
       indices,
-      syntheticsServiceSyncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
+      syntheticsServiceSyncErrors: filterSyncErrorsToCurrentSpace(
+        syntheticsMonitorClient.syntheticsService.syncErrors,
+        monitorIdsInSpace
+      ),
     };
   },
 });

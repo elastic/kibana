@@ -23,6 +23,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useCanEditSynthetics } from '../../../../hooks/use_capabilities';
+import { NoPermissionsTooltip } from '../common/components/permissions';
 import { fetchSyntheticsDiagnostics } from './hooks/api';
 import { getDiagnosticsSectionKeysInOrder } from './synthetics_diagnostics_utils';
 import {
@@ -93,6 +95,7 @@ const yieldToBrowserForPaint = (): Promise<void> =>
   });
 
 export function SyntheticsDiagnosticsFlyoutLauncher() {
+  const canEditSynthetics = useCanEditSynthetics();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [zipExporting, setZipExporting] = useState(false);
@@ -133,6 +136,9 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
   }, []);
 
   const onOpen = () => {
+    if (!canEditSynthetics) {
+      return;
+    }
     setIsOpen(true);
     void loadDiagnostics();
   };
@@ -161,16 +167,19 @@ export function SyntheticsDiagnosticsFlyoutLauncher() {
 
   return (
     <>
-      <EuiButtonEmpty
-        data-test-subj="syntheticsDiagnosticsOpenButton"
-        iconType="inspect"
-        size="s"
-        onClick={onOpen}
-      >
-        {i18n.translate('xpack.synthetics.diagnostics.openButton', {
-          defaultMessage: 'Diagnostics bundle',
-        })}
-      </EuiButtonEmpty>
+      <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+        <EuiButtonEmpty
+          data-test-subj="syntheticsDiagnosticsOpenButton"
+          iconType="inspect"
+          size="s"
+          onClick={onOpen}
+          isDisabled={!canEditSynthetics}
+        >
+          {i18n.translate('xpack.synthetics.diagnostics.openButton', {
+            defaultMessage: 'Diagnostics bundle',
+          })}
+        </EuiButtonEmpty>
+      </NoPermissionsTooltip>
       {isOpen ? (
         <EuiFlyout
           ownFocus
