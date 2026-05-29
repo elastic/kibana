@@ -119,6 +119,45 @@ describe('generateWorkflowTool', () => {
     expect(result.data.comment).toBe('created the workflow');
   });
 
+  it('persists a provided workflowId on creation: both diff and workflow attachments carry it', async () => {
+    generateWorkflowMock.mockResolvedValueOnce({
+      workflow: generatedWorkflow,
+      response: 'created',
+    } as any);
+
+    const context = buildContext();
+    const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
+    await tool.handler({ query: 'a workflow', workflowId: 'my-custom-id' } as any, context);
+
+    expect(context.attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
+        data: expect.objectContaining({ workflowId: 'my-custom-id' }),
+      })
+    );
+    expect(context.attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+        data: expect.objectContaining({ workflowId: 'my-custom-id', name: 'foo' }),
+      })
+    );
+  });
+
+  it('rejects invalid workflowId values via the zod schema', () => {
+    const tool = generateWorkflowTool({ workflowsManagement, aiTelemetryClient });
+
+    expect(tool.schema.safeParse({ query: 'q', workflowId: 'UPPER-CASE' }).success).toBe(false);
+    expect(tool.schema.safeParse({ query: 'q', workflowId: 'has spaces' }).success).toBe(false);
+    expect(tool.schema.safeParse({ query: 'q', workflowId: '-leading-hyphen' }).success).toBe(
+      false
+    );
+    expect(tool.schema.safeParse({ query: 'q', workflowId: 'trailing-' }).success).toBe(false);
+    expect(tool.schema.safeParse({ query: 'q', workflowId: 'ab' }).success).toBe(false);
+
+    expect(tool.schema.safeParse({ query: 'q', workflowId: 'my-workflow-123' }).success).toBe(true);
+    expect(tool.schema.safeParse({ query: 'q' }).success).toBe(true);
+  });
+
   it('updates an existing attachment: updates (not adds) workflow attachment, emits diff, reports telemetry', async () => {
     generateWorkflowMock.mockResolvedValueOnce({
       workflow: generatedWorkflow,
