@@ -24,6 +24,7 @@ export interface HostEntityConfig {
 
 export interface UserEntityConfig {
   user: Record<string, unknown>;
+  host?: Record<string, unknown>;
   entity?: Record<string, unknown>;
   asset?: Record<string, unknown>;
 }

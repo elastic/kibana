@@ -44,11 +44,8 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
 
-// host.id values for auditbeat hosts that meet the threshold of 100 docs.
 // Sorted by host.name: suricata-sensor-london < suricata-zeek-sensor-toronto.
-const LONDON_HOST_ID = '6608e786b11a45ea991cb473a4c3d554';
 const LONDON_HOST_NAME = 'suricata-sensor-london';
-const TORONTO_HOST_ID = '8cc95778cce5407c809480e8e32ad76b';
 const TORONTO_HOST_NAME = 'suricata-zeek-sensor-toronto';
 
 export default ({ getService }: FtrProviderContext) => {
