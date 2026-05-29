@@ -107,8 +107,6 @@ interface RecoveryConditionStepProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   onRecoveryTypeChange: (type: RecoveryType) => void;
-  builderState?: unknown;
-  onBuilderStateChange?: (state: unknown) => void;
   renderBuilderRecovery?: (props: RuleBuilderRecoveryProps) => React.ReactNode;
 }
 
@@ -116,15 +114,13 @@ export function RecoveryConditionStep({
   state,
   dispatch,
   onRecoveryTypeChange,
-  builderState,
-  onBuilderStateChange,
   renderBuilderRecovery,
 }: RecoveryConditionStepProps) {
   const query = useWatch<ComposeFormValues, 'query'>({ name: 'query' });
   const baseQuery = query?.format === 'composed' ? query.base : '';
   const recoveryBlock = query?.format === 'composed' ? query.blocks.recover ?? '' : '';
 
-  const isBuilderMode = Boolean(renderBuilderRecovery && builderState && onBuilderStateChange);
+  const isBuilderMode = Boolean(renderBuilderRecovery);
   const hasValidRecoveryBlock = Boolean(recoveryBlock.trim());
 
   return (
@@ -144,8 +140,6 @@ export function RecoveryConditionStep({
             renderBuilderRecovery!({
               state,
               dispatch,
-              builderState: builderState!,
-              onBuilderStateChange: onBuilderStateChange!,
             })
           ) : (
             <>

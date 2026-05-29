@@ -17,7 +17,10 @@ export interface RuleBuilderStepProps {
   services: RuleFormServices;
 }
 
-export type RuleBuilderRecoveryProps = Omit<RuleBuilderStepProps, 'services'>;
+export interface RuleBuilderRecoveryProps {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+}
 
 export interface RuleBuilderDefinition<TState = BuilderState> {
   type: string;

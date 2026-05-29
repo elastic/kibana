@@ -67,8 +67,6 @@ const thresholdDefinition = defineBuilder<ThresholdFormValues>({
     React.createElement(BuilderRecoveryForm, {
       state: props.state,
       dispatch: props.dispatch,
-      builderState: props.builderState,
-      onBuilderStateChange: props.onBuilderStateChange,
     }),
   validate: (state, builderState) =>
     state.queryCommitted && (builderState ? isThresholdFormValid(builderState) : true),

@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ComposeFormValues } from '../../compose_form_types';
 import type { RuleBuilderRecoveryProps } from '../types';
+import { useBuilderState } from '../builder_state_context';
 import type { ThresholdFormValues, RecoveryCondition, RecoveryConfig } from './form_types';
 import {
   Comparator,
@@ -35,12 +36,9 @@ import {
 import { COMPARATOR_OPTIONS, CONDITION_OPERATOR_OPTIONS } from './translations';
 import { buildRecoveryBlock } from './build_esql';
 
-export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps<ThresholdFormValues>> = ({
-  state,
-  dispatch,
-  builderState,
-  onBuilderStateChange,
-}) => {
+export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state, dispatch }) => {
+  const { state: builderState, setState: onBuilderStateChange } =
+    useBuilderState<ThresholdFormValues>();
   const { setValue, getValues } = useFormContext<ComposeFormValues>();
   const initialized = useRef(false);
 
