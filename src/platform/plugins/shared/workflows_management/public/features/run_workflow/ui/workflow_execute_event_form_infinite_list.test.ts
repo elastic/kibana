@@ -8,12 +8,25 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import type { WorkflowsEventsLogDocumentSource } from '@kbn/workflows';
 import type { SearchTriggerEventLogHit, SearchTriggerEventLogResult } from '@kbn/workflows-ui';
 import { useAccumulatedTriggerEventSearchPages } from './workflow_execute_event_form_infinite_list';
 
-const hit = (id: string, source: Record<string, unknown> = {}): SearchTriggerEventLogHit => ({
+const defaultSource = (): WorkflowsEventsLogDocumentSource => ({
+  '@timestamp': '',
+  eventId: '',
+  triggerId: '',
+  spaceId: '',
+  subscriptions: [],
+  payload: {},
+});
+
+const hit = (
+  id: string,
+  sourceOverrides: Partial<WorkflowsEventsLogDocumentSource> = {}
+): SearchTriggerEventLogHit => ({
   id,
-  source,
+  source: { ...defaultSource(), ...sourceOverrides },
 });
 
 const searchResultForPage = (
@@ -37,7 +50,7 @@ describe('useAccumulatedTriggerEventSearchPages', () => {
   });
 
   it('no-ops page 0 update when hit ids are unchanged', () => {
-    const initialHits = [hit('a', { x: 1 }), hit('b', { y: 2 })];
+    const initialHits = [hit('a', { payload: { x: 1 } }), hit('b', { payload: { y: 2 } })];
     const { result, rerender } = renderHook(
       ({ searchResult }) => useAccumulatedTriggerEventSearchPages(searchResult, 0, false),
       {
@@ -50,7 +63,7 @@ describe('useAccumulatedTriggerEventSearchPages', () => {
     const accumulatedBefore = result.current[0];
     rerender({
       searchResult: searchResultForPage(
-        [hit('a', { x: 99 }), hit('b', { y: 99 })],
+        [hit('a', { payload: { x: 99 } }), hit('b', { payload: { y: 99 } })],
         1
       ),
     });

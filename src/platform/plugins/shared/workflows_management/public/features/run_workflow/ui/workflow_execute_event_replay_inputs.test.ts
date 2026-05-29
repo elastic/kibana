@@ -8,6 +8,7 @@
  */
 
 import type { EventTriggerReplayInput } from '@kbn/workflows';
+import type { TriggerEventReplaySource } from '@kbn/workflows';
 import { buildTriggerEventReplayInputs } from './workflow_execute_event_replay_inputs';
 
 describe('buildTriggerEventReplayInputs', () => {
@@ -63,7 +64,7 @@ describe('buildTriggerEventReplayInputs', () => {
           '@timestamp': '2025-01-01T12:00:00.000Z',
           spaceId: 'logged-space',
           payload: null,
-        },
+        } as unknown as TriggerEventReplaySource,
         'acme'
       )
     ).toEqual({

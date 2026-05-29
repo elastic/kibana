@@ -143,7 +143,7 @@ export function useTriggerEventSearch(options: UseTriggerEventSearchOptions) {
       return [];
     }
     return accumulatedHits.map((hit) => {
-      const source = hit.source as Record<string, unknown>;
+      const source: Record<string, unknown> = { ...hit.source };
       return {
         id: hit.id,
         source,
