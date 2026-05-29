@@ -26,8 +26,11 @@ import type {
   WorkflowsManagementApi,
 } from '../invoke_alert_retrieval_workflow';
 import type { GenerationWorkflowResult } from '../invoke_generation_workflow';
-import { buildExecutionSummaryLog, type StepStatus } from './helpers/build_execution_summary_log';
+import { buildExecutionSummaryLog } from './helpers/build_execution_summary_log';
+import { getStepStatuses } from './helpers/get_step_statuses';
+import { mapFailedStepToTelemetry } from './helpers/map_failed_step_to_telemetry';
 import { PipelineStepError } from './helpers/pipeline_step_error';
+import { resolveFailedStep } from './helpers/resolve_failed_step';
 import { runGenerationStep } from './steps/generation_step';
 import { runRetrievalStep } from './steps/retrieval_step';
 import { type ManualOrchestrationOutcome, runValidationStep } from './steps/validation_step';
@@ -39,6 +42,7 @@ export { PipelineStepError } from './helpers/pipeline_step_error';
 const DEFAULT_PIPELINE_TIMEOUT_MS = 10 * 60 * 1000;
 
 export const runManualOrchestration = async ({
+  alerts,
   alertsIndexPattern,
   analytics,
   anonymizationFields,
@@ -52,7 +56,6 @@ export const runManualOrchestration = async ({
   executionUuid,
   filter,
   logger,
-  persist,
   pipelineTimeoutMs = DEFAULT_PIPELINE_TIMEOUT_MS,
   request,
   size,
@@ -63,6 +66,12 @@ export const runManualOrchestration = async ({
   workflowConfig,
   workflowsManagementApi,
 }: {
+  /**
+   * Pre-provided alert strings for `provided` mode. When `workflowConfig.alert_retrieval_mode`
+   * is `'provided'` and this array is non-empty, the retrieval step is skipped and a synthetic
+   * AlertRetrievalResult is constructed from these alerts instead.
+   */
+  alerts?: string[];
   alertsIndexPattern: string;
   analytics?: AnalyticsServiceSetup;
   anonymizationFields: AnonymizationFieldResponse[];
@@ -76,7 +85,6 @@ export const runManualOrchestration = async ({
   executionUuid: string;
   filter?: Record<string, unknown>;
   logger: Logger;
-  persist?: boolean;
   pipelineTimeoutMs?: number;
   request: KibanaRequest;
   size?: number;
@@ -95,29 +103,42 @@ export const runManualOrchestration = async ({
 
   logger.debug(
     () =>
-      `Starting manual orchestration: default_mode=${
-        workflowConfig.default_alert_retrieval_mode
+      `Starting manual orchestration: alert_retrieval_mode=${
+        workflowConfig.alert_retrieval_mode
       }, custom_workflow_ids=${JSON.stringify(
         workflowConfig.alert_retrieval_workflow_ids
       )}, pipelineTimeoutMs=${pipelineTimeoutMs}`
   );
 
   const orchestrationStart = Date.now();
-  // Timing markers and step results are declared outside the try block so the
-  // catch and finally blocks can reference them for telemetry and summary logging.
-  let retrievalStartMs = 0;
-  let generationStartMs = 0;
-  let validationStartMs = 0;
 
-  const stepTimings = { generation: 0, retrieval: 0, validation: 0 };
+  const validationWorkflowId = workflowConfig.validation_workflow_id ?? defaultValidationWorkflowId;
 
-  let alertRetrievalResult: AlertRetrievalResult | undefined;
-  let generationResult: GenerationWorkflowResult | undefined;
-  let outcome: ManualOrchestrationOutcome | undefined;
-  let failedStep: 'generation' | 'retrieval' | undefined;
-  let failureError: string | undefined;
+  // Mutable execution state — a single const object used by try/catch/finally
+  // to share the partial results and failure context across all three blocks.
+  const state: {
+    alertRetrievalResult: AlertRetrievalResult | undefined;
+    failedStep: 'generation' | 'retrieval' | 'validation' | undefined;
+    failureError: string | undefined;
+    generationResult: GenerationWorkflowResult | undefined;
+    outcome: ManualOrchestrationOutcome | undefined;
+  } = {
+    alertRetrievalResult: undefined,
+    failedStep: undefined,
+    failureError: undefined,
+    generationResult: undefined,
+    outcome: undefined,
+  };
 
-  const validationWorkflowId = workflowConfig.validation_workflow_id || defaultValidationWorkflowId;
+  // Step-level timing markers.  Each start marker is set immediately before
+  // the corresponding async call so that catch/finally can measure duration
+  // even when a step fails partway through.
+  const timings = {
+    generationStart: 0,
+    retrievalStart: 0,
+    steps: { generation: 0, retrieval: 0, validation: 0 },
+    validationStart: 0,
+  };
 
   const getRemainingBudgetMs = (): number =>
     Math.max(0, pipelineTimeoutMs - (Date.now() - orchestrationStart));
@@ -134,33 +155,54 @@ export const runManualOrchestration = async ({
   };
 
   try {
-    retrievalStartMs = Date.now();
-    alertRetrievalResult = await runRetrievalStep({
-      alertsIndexPattern,
-      anonymizationFields,
-      apiConfig,
-      authenticatedUser,
-      defaultAlertRetrievalWorkflowId,
-      end,
-      eventLogger,
-      eventLogIndex,
-      executionUuid,
-      filter,
-      logger,
-      request,
-      size,
-      spaceId,
-      start,
-      workflowConfig,
-      workflowsManagementApi,
-    });
-    stepTimings.retrieval = Date.now() - retrievalStartMs;
+    timings.retrievalStart = Date.now();
+
+    if (workflowConfig.alert_retrieval_mode === 'provided' && alerts != null && alerts.length > 0) {
+      // Skip the retrieval step: construct a synthetic AlertRetrievalResult from pre-provided alerts
+      logger.info(
+        `Provided mode: skipping alert retrieval, using ${alerts.length} pre-provided alerts`
+      );
+      state.alertRetrievalResult = {
+        alerts,
+        alertsContextCount: alerts.length,
+        anonymizedAlerts: [],
+        apiConfig,
+        connectorName: '',
+        replacements: {},
+        workflowExecutions: [],
+        workflowId: 'provided',
+        workflowRunId: 'provided',
+      };
+    } else {
+      state.alertRetrievalResult = await runRetrievalStep({
+        alertsIndexPattern,
+        anonymizationFields,
+        apiConfig,
+        authenticatedUser,
+        defaultAlertRetrievalWorkflowId,
+        end,
+        eventLogger,
+        eventLogIndex,
+        executionUuid,
+        filter,
+        logger,
+        request,
+        size,
+        source,
+        spaceId,
+        start,
+        workflowConfig,
+        workflowsManagementApi,
+      });
+    }
+
+    timings.steps.retrieval = Date.now() - timings.retrievalStart;
 
     assertBudgetRemaining('generation');
 
-    generationStartMs = Date.now();
-    generationResult = await runGenerationStep({
-      alertRetrievalResult,
+    timings.generationStart = Date.now();
+    state.generationResult = await runGenerationStep({
+      alertRetrievalResult: state.alertRetrievalResult,
       alertsIndexPattern,
       apiConfig,
       authenticatedUser,
@@ -181,60 +223,55 @@ export const runManualOrchestration = async ({
       workflowConfig,
       workflowsManagementApi,
     });
-    stepTimings.generation = Date.now() - generationStartMs;
+    timings.steps.generation = Date.now() - timings.generationStart;
 
     assertBudgetRemaining('validation');
 
-    validationStartMs = Date.now();
-    outcome = await runValidationStep({
-      alertRetrievalResult,
+    timings.validationStart = Date.now();
+    state.outcome = await runValidationStep({
+      alertRetrievalResult: state.alertRetrievalResult,
       authenticatedUser,
       defaultValidationWorkflowId,
       eventLogger,
       eventLogIndex,
       executionUuid,
+      generationResult: state.generationResult,
       logger,
-      generationResult,
       maxWaitMs: getRemainingBudgetMs(),
-      persist,
       request,
+      source,
       spaceId,
       workflowConfig,
       workflowsManagementApi,
     });
-    stepTimings.validation = Date.now() - validationStartMs;
+    timings.steps.validation = Date.now() - timings.validationStart;
 
-    if (outcome.outcome === 'validation_failed' && analytics != null) {
-      reportStepFailure({
-        analytics,
-        logger,
-        params: {
-          duration_ms: stepTimings.validation,
-          error_category: 'validation_error',
-          execution_uuid: executionUuid,
-          step: 'validation',
-          workflow_id: validationWorkflowId,
-        },
-      });
-    }
-
-    return outcome;
+    return state.outcome;
   } catch (error) {
-    failureError = error instanceof Error ? error.message : String(error);
+    state.failureError = error instanceof Error ? error.message : String(error);
 
-    if (alertRetrievalResult == null) {
-      failedStep = 'retrieval';
-      stepTimings.retrieval = Date.now() - retrievalStartMs;
-    } else {
-      failedStep = 'generation';
-      stepTimings.generation = Date.now() - generationStartMs;
-    }
+    const { durationMs, failedStep } = resolveFailedStep({
+      alertRetrievalResult: state.alertRetrievalResult,
+      generationResult: state.generationResult,
+      generationStartMs: timings.generationStart,
+      retrievalStartMs: timings.retrievalStart,
+      validationStartMs: timings.validationStart,
+    });
 
-    const telemetryStep = failedStep === 'retrieval' ? 'alert_retrieval' : 'generation';
-    const telemetryDurationMs =
-      failedStep === 'retrieval' ? stepTimings.retrieval : stepTimings.generation;
-    const telemetryWorkflowId =
-      failedStep === 'retrieval' ? defaultAlertRetrievalWorkflowId : generationWorkflowId;
+    state.failedStep = failedStep;
+    timings.steps[failedStep] = durationMs;
+
+    const {
+      durationMs: telemetryDurationMs,
+      step: telemetryStep,
+      workflowId: telemetryWorkflowId,
+    } = mapFailedStepToTelemetry({
+      defaultAlertRetrievalWorkflowId,
+      failedStep,
+      generationWorkflowId,
+      stepTimings: timings.steps,
+      validationWorkflowId,
+    });
 
     if (analytics != null) {
       reportStepFailure({
@@ -258,71 +295,66 @@ export const runManualOrchestration = async ({
       durationMs: telemetryDurationMs,
       errorCategory,
       failedWorkflowId,
-      message: failureError,
+      message: state.failureError,
       step: telemetryStep,
     });
   } finally {
     const totalDurationMs = Date.now() - orchestrationStart;
 
-    const retrievalStatus: StepStatus =
-      alertRetrievalResult != null
-        ? 'succeeded'
-        : failedStep === 'retrieval'
-        ? 'failed'
-        : 'not_started';
-    const generationStatus: StepStatus =
-      generationResult != null
-        ? 'succeeded'
-        : failedStep === 'generation'
-        ? 'failed'
-        : 'not_started';
-    const validationStatus: StepStatus =
-      outcome?.outcome === 'validation_succeeded'
-        ? 'succeeded'
-        : outcome?.outcome === 'validation_failed'
-        ? 'failed'
-        : 'not_started';
+    const { generationStatus, retrievalStatus, validationStatus } = getStepStatuses({
+      alertRetrievalResult: state.alertRetrievalResult,
+      failedStep: state.failedStep,
+      generationResult: state.generationResult,
+      outcome: state.outcome,
+    });
+
+    const persistedCount =
+      state.outcome?.outcome === 'validation_succeeded'
+        ? state.outcome.validationResult.validationSummary.persistedCount
+        : 0;
+
+    const generationExecutions =
+      state.generationResult != null
+        ? [
+            {
+              workflowId: state.generationResult.workflowId,
+              workflowRunId: state.generationResult.workflowRunId,
+            },
+          ]
+        : [];
+
+    const validationExecutions =
+      state.outcome?.outcome === 'validation_succeeded'
+        ? [
+            {
+              workflowId: state.outcome.validationResult.workflowId,
+              workflowRunId: state.outcome.validationResult.workflowRunId,
+            },
+          ]
+        : [];
 
     logger.info(
       buildExecutionSummaryLog({
-        alertsContextCount: alertRetrievalResult?.alertsContextCount ?? 0,
+        alertsContextCount: state.alertRetrievalResult?.alertsContextCount ?? 0,
         basePath,
-        persistedCount:
-          outcome?.outcome === 'validation_succeeded'
-            ? outcome.validationResult.validationSummary.persistedCount
-            : 0,
         generationStep: {
-          durationMs: stepTimings.generation,
-          error: failedStep === 'generation' ? failureError : undefined,
-          executions:
-            generationResult != null
-              ? [
-                  {
-                    workflowId: generationResult.workflowId,
-                    workflowRunId: generationResult.workflowRunId,
-                  },
-                ]
-              : [],
+          durationMs: timings.steps.generation,
+          error: state.failedStep === 'generation' ? state.failureError : undefined,
+          executions: generationExecutions,
           status: generationStatus,
         },
+        persistedCount,
         retrievalStep: {
-          durationMs: stepTimings.retrieval,
-          error: failedStep === 'retrieval' ? failureError : undefined,
-          executions: alertRetrievalResult?.workflowExecutions ?? [],
+          durationMs: timings.steps.retrieval,
+          error: state.failedStep === 'retrieval' ? state.failureError : undefined,
+          executions: state.alertRetrievalResult?.workflowExecutions ?? [],
           status: retrievalStatus,
         },
         totalDurationMs,
         validationStep: {
-          durationMs: stepTimings.validation,
-          executions:
-            outcome?.outcome === 'validation_succeeded'
-              ? [
-                  {
-                    workflowId: outcome.validationResult.workflowId,
-                    workflowRunId: outcome.validationResult.workflowRunId,
-                  },
-                ]
-              : [],
+          durationMs: timings.steps.validation,
+          error: state.failedStep === 'validation' ? state.failureError : undefined,
+          executions: validationExecutions,
           status: validationStatus,
         },
       })

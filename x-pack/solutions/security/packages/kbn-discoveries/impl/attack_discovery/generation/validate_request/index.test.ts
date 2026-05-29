@@ -40,8 +40,8 @@ describe('validateRequest', () => {
       requestBody: {
         ...validRequestBody,
         workflow_config: {
+          alert_retrieval_mode: 'custom_only',
           alert_retrieval_workflow_ids: [],
-          default_alert_retrieval_mode: 'disabled',
           validation_workflow_id: 'default',
         },
       },
@@ -50,7 +50,7 @@ describe('validateRequest', () => {
     expect(result).toEqual({
       body: {
         message:
-          'At least one alert retrieval method must be specified: either set default_alert_retrieval_mode to a value other than "disabled", or provide alert_retrieval_workflow_ids',
+          'At least one alert retrieval method must be specified: either set alert_retrieval_mode to a value other than "custom_only", or provide alert_retrieval_workflow_ids',
       },
       ok: false,
     });
@@ -72,70 +72,6 @@ describe('validateRequest', () => {
     });
   });
 
-  it('returns a failure when provided mode is used without provided_context', () => {
-    const result = validateRequest({
-      requestBody: {
-        ...validRequestBody,
-        workflow_config: {
-          alert_retrieval_workflow_ids: [],
-          default_alert_retrieval_mode: 'provided',
-          validation_workflow_id: 'default',
-        },
-      },
-    });
-
-    expect(result).toEqual({
-      body: {
-        message:
-          'provided_context is required in workflow_config when default_alert_retrieval_mode is "provided"',
-      },
-      ok: false,
-    });
-  });
-
-  it('returns a failure when provided mode is used with an empty provided_context', () => {
-    const result = validateRequest({
-      requestBody: {
-        ...validRequestBody,
-        workflow_config: {
-          alert_retrieval_workflow_ids: [],
-          default_alert_retrieval_mode: 'provided',
-          provided_context: [],
-          validation_workflow_id: 'default',
-        },
-      },
-    });
-
-    expect(result.ok).toBe(false);
-  });
-
-  it('returns success when provided mode has valid provided_context', () => {
-    const result = validateRequest({
-      requestBody: {
-        ...validRequestBody,
-        workflow_config: {
-          alert_retrieval_workflow_ids: [],
-          default_alert_retrieval_mode: 'provided',
-          provided_context: ['alert context string 1', 'alert context string 2'],
-          validation_workflow_id: 'default',
-        },
-      },
-    });
-
-    expect(result).toEqual({
-      ok: true,
-      requestBody: expect.objectContaining({
-        alerts_index_pattern: '.alerts-security.alerts-default',
-      }),
-      workflowConfig: {
-        alert_retrieval_workflow_ids: [],
-        default_alert_retrieval_mode: 'provided',
-        provided_context: ['alert context string 1', 'alert context string 2'],
-        validation_workflow_id: 'default',
-      },
-    });
-  });
-
   it('returns validated requestBody and normalized workflowConfig', () => {
     const result = validateRequest({ requestBody: validRequestBody });
 
@@ -145,8 +81,8 @@ describe('validateRequest', () => {
         alerts_index_pattern: '.alerts-security.alerts-default',
       }),
       workflowConfig: {
+        alert_retrieval_mode: 'custom_query',
         alert_retrieval_workflow_ids: [],
-        default_alert_retrieval_mode: 'custom_query',
         validation_workflow_id: 'default',
       },
     });

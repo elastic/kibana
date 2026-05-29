@@ -37,7 +37,7 @@ import type {
 } from './types';
 
 /** Step type identifier used by the generation step in the workflow engine */
-const GENERATION_STEP_TYPE = 'attack-discovery.generate';
+const GENERATION_STEP_TYPE = 'security.attack-discovery.generate';
 
 /**
  * Result returned from the generation workflow.
@@ -177,7 +177,7 @@ const buildWorkflowInputs = ({
     end: end ?? undefined,
     esql_query: workflowConfig.esql_query,
     filter: filter ?? undefined,
-    default_alert_retrieval_mode: workflowConfig.default_alert_retrieval_mode,
+    alert_retrieval_mode: workflowConfig.alert_retrieval_mode,
     replacements: alertRetrievalResult.replacements,
     validation_workflow_id: workflowConfig.validation_workflow_id,
     size: size ?? 100,
@@ -265,7 +265,11 @@ const extractGenerationWorkflowResult = ({
   return {
     alertsContextCount: output.alerts_context_count ?? 0,
     attackDiscoveries: output.attack_discoveries ?? [],
-    executionUuid: output.execution_uuid ?? executionUuid,
+    // Always use the orchestration UUID passed to invokeGenerationWorkflow, not the
+    // workflow run ID that the generate step emits as output.execution_uuid. The
+    // orchestration UUID is what the event log and the UI both track, so it must
+    // flow through to the persisted discovery documents as ALERT_RULE_EXECUTION_UUID.
+    executionUuid,
     replacements: parsedReplacements,
   };
 };
@@ -347,6 +351,8 @@ const writeGenerateStepStartedEvent = async ({
   eventLogIndex,
   executionUuid,
   logger,
+  providedAlerts,
+  source,
   spaceId,
   startTime,
   workflowId,
@@ -360,6 +366,13 @@ const writeGenerateStepStartedEvent = async ({
   eventLogIndex: string;
   executionUuid: string;
   logger: Logger;
+  /**
+   * Pre-provided alert strings for 'provided' mode. Stored in event.reference
+   * so the pipeline_data route can surface them during the running state, before
+   * the workflow engine populates step.input.
+   */
+  providedAlerts?: string[];
+  source?: AttackDiscoverySource;
   spaceId: string;
   startTime: Date;
   workflowId: string;
@@ -377,6 +390,8 @@ const writeGenerateStepStartedEvent = async ({
       eventLogIndex,
       executionUuid,
       message: `Attack discovery generate step ${executionUuid} started`,
+      providedAlerts,
+      source,
       spaceId,
       start: startTime,
       workflowId,
@@ -404,6 +419,7 @@ const writeGenerateStepSucceededEvent = async ({
   eventLogIndex,
   executionUuid,
   logger,
+  source,
   spaceId,
   startTime,
   workflowId,
@@ -418,6 +434,7 @@ const writeGenerateStepSucceededEvent = async ({
   eventLogIndex: string;
   executionUuid: string;
   logger: Logger;
+  source?: AttackDiscoverySource;
   spaceId: string;
   startTime: Date;
   workflowId: string;
@@ -438,6 +455,7 @@ const writeGenerateStepSucceededEvent = async ({
       executionUuid,
       message: `Attack discovery generate step ${executionUuid} succeeded`,
       outcome: 'success',
+      source,
       spaceId,
       workflowId,
       workflowExecutions,
@@ -465,6 +483,7 @@ const writeGenerateStepFailedEvent = async ({
   eventLogIndex,
   executionUuid,
   logger,
+  source,
   spaceId,
   startTime,
   workflowId,
@@ -480,6 +499,7 @@ const writeGenerateStepFailedEvent = async ({
   eventLogIndex: string;
   executionUuid: string;
   logger: Logger;
+  source?: AttackDiscoverySource;
   spaceId: string;
   startTime: Date;
   workflowId: string;
@@ -501,6 +521,7 @@ const writeGenerateStepFailedEvent = async ({
       message: `Attack discovery generate step ${executionUuid} failed`,
       outcome: 'failure',
       reason: errorMessage,
+      source,
       spaceId,
       workflowId,
       workflowExecutions,
@@ -555,6 +576,9 @@ export const invokeGenerationWorkflow = async ({
   // Captured outside the try block so the catch block can reference it when writing
   // the generate-step-failed event after the workflow fails mid-execution.
   let generateStepStartTime: Date | undefined;
+  // Captured outside the try block so the catch block can include the human-readable
+  // workflow name in the failure tracker entry (falls back to undefined pre-validation).
+  let workflowName: string | undefined;
 
   logger.info(`Invoking generation workflow: ${workflowId}`);
 
@@ -562,7 +586,7 @@ export const invokeGenerationWorkflow = async ({
     // Step 1: Get and validate the workflow
     const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
     const validatedWorkflow = validateWorkflow(rawWorkflow, workflowId);
-    const workflowName = validatedWorkflow.name;
+    workflowName = validatedWorkflow.name;
 
     // Step 2: Build workflow inputs
     const workflowInputs = buildWorkflowInputs({
@@ -586,7 +610,7 @@ export const invokeGenerationWorkflow = async ({
             action_type_id: apiConfig.action_type_id,
             connector_id: apiConfig.connector_id,
           },
-          defaultAlertRetrievalMode: workflowConfig.default_alert_retrieval_mode,
+          alertRetrievalMode: workflowConfig.alert_retrieval_mode,
           end,
           filter: filter ? 'present' : 'absent',
           size,
@@ -594,7 +618,21 @@ export const invokeGenerationWorkflow = async ({
         })}`
     );
 
-    // Step 3: Run the workflow
+    // Step 3: Schedule the workflow to acquire the execution ID BEFORE the workflow runs.
+    //
+    // `runWorkflow` blocks synchronously when called from a fake-request context
+    // (e.g. the attack-discovery.run workflow step), because the execution engine
+    // detects `request.isFakeRequest === true` and runs the workflow inline rather
+    // than dispatching it to the task manager.  With `runWorkflow` the execution ID
+    // is only returned *after* the full LLM call completes (~158 s), so the
+    // `generate-step-started` event would be written too late for the 60-second
+    // tracking polling window in the flyout.
+    //
+    // `scheduleWorkflow` always dispatches via the task manager and returns the
+    // execution ID immediately, before the workflow actually starts running.  We
+    // can therefore write the `generate-step-started` event with the real
+    // execution ID while generation is still in progress, allowing the flyout to
+    // show a link to the running generation workflow.
     const workflowToRun: WorkflowExecutionEngineModel = {
       definition: validatedWorkflow.definition,
       enabled: validatedWorkflow.enabled,
@@ -603,15 +641,17 @@ export const invokeGenerationWorkflow = async ({
       yaml: validatedWorkflow.yaml,
     };
 
-    workflowRunId = await workflowsManagementApi.runWorkflow(
+    workflowRunId = await workflowsManagementApi.scheduleWorkflow(
       workflowToRun,
       spaceId,
       workflowInputs,
-      request
+      request,
+      'attack-discovery-pipeline'
     );
 
     const workflowExecution: WorkflowExecutionTracking = {
       workflowId,
+      ...(workflowName != null ? { workflowName } : {}),
       workflowRunId,
     };
 
@@ -626,7 +666,9 @@ export const invokeGenerationWorkflow = async ({
 
     logger.info(`Generation workflow started (workflowRunId: ${workflowRunId})`);
 
-    // Write generate-step-started event (best-effort)
+    // Write generate-step-started event (best-effort).
+    // For 'provided' mode, include the alert strings so the pipeline_data route
+    // can surface them during the running state (before step.input is populated).
     generateStepStartTime = new Date();
     await writeGenerateStepStartedEvent({
       alertsContextCount: alertRetrievalResult.alertsContextCount,
@@ -636,6 +678,11 @@ export const invokeGenerationWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      ...(workflowConfig.alert_retrieval_mode === 'provided' &&
+      alertRetrievalResult.alerts.length > 0
+        ? { providedAlerts: alertRetrievalResult.alerts }
+        : {}),
+      source,
       spaceId,
       startTime: generateStepStartTime,
       workflowId,
@@ -691,6 +738,7 @@ export const invokeGenerationWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      source,
       spaceId,
       startTime: generateStepStartTime ?? startTime,
       workflowId,
@@ -738,6 +786,7 @@ export const invokeGenerationWorkflow = async ({
 
     const workflowExecution: WorkflowExecutionTracking = {
       workflowId,
+      ...(workflowName != null ? { workflowName } : {}),
       workflowRunId,
     };
 
@@ -765,6 +814,7 @@ export const invokeGenerationWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      source,
       spaceId,
       startTime: generateStepStartTime ?? startTime,
       workflowId,

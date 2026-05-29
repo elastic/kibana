@@ -11,6 +11,7 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 
 import type { WorkflowsManagementApi } from '../invoke_alert_retrieval_workflow';
+import type { AttackDiscoverySource } from '../../persistence/event_logging';
 import { AttackDiscoveryError } from '../../../lib/errors/attack_discovery_error';
 import {
   type ValidatedWorkflow,
@@ -41,6 +42,7 @@ export interface InvokeCustomAlertRetrievalParams {
   logger: Logger;
   request: KibanaRequest;
   size?: number;
+  source?: AttackDiscoverySource;
   spaceId: string;
   workflowIds: string[];
   workflowsManagementApi: WorkflowsManagementApi;
@@ -96,6 +98,7 @@ const invokeSingleCustomWorkflow = async ({
   logger,
   request,
   size,
+  source,
   spaceId,
   workflowId,
   workflowsManagementApi,
@@ -111,6 +114,7 @@ const invokeSingleCustomWorkflow = async ({
   logger: Logger;
   request: KibanaRequest;
   size?: number;
+  source?: AttackDiscoverySource;
   spaceId: string;
   workflowId: string;
   workflowsManagementApi: WorkflowsManagementApi;
@@ -187,6 +191,7 @@ const invokeSingleCustomWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      source,
       spaceId,
       startTime,
       workflowExecutions,
@@ -230,6 +235,7 @@ const invokeSingleCustomWorkflow = async ({
       eventLogIndex,
       executionUuid,
       logger,
+      source,
       spaceId,
       startTime,
       workflowExecutions,
@@ -262,6 +268,7 @@ const invokeSingleCustomWorkflow = async ({
       executionUuid,
       failedWorkflowId,
       logger,
+      source,
       spaceId,
       startTime,
       workflowExecutions,
@@ -291,6 +298,7 @@ export const invokeCustomAlertRetrievalWorkflows = async ({
   logger,
   request,
   size,
+  source,
   spaceId,
   workflowIds,
   workflowsManagementApi,
@@ -319,6 +327,7 @@ export const invokeCustomAlertRetrievalWorkflows = async ({
         logger,
         request,
         size,
+        source,
         spaceId,
         workflowId,
         workflowsManagementApi,
