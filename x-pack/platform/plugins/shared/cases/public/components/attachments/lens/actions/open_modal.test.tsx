@@ -25,6 +25,8 @@ import { LENS_ATTACHMENT_TYPE } from '../../../../../common/constants/attachment
 const element = document.createElement('div');
 document.body.appendChild(element);
 
+const mockDescription = mockLensAttributes.description as string;
+
 jest.mock('../../../all_cases/selector_modal/use_cases_add_to_existing_case_modal', () => ({
   useCasesAddToExistingCaseModal: jest.fn(),
 }));
@@ -108,6 +110,7 @@ describe('openModal', () => {
               from: '2023-12-31T00:00:00.000Z',
               to: '2024-01-01T00:00:00.000Z',
             },
+            metadata: { description: mockDescription },
           },
         },
       },
@@ -198,6 +201,7 @@ describe('openModal', () => {
               from: '2024-01-09T00:00:00.000Z',
               to: '2024-01-10T00:00:00.000Z',
             },
+            metadata: { description: mockDescription },
           },
         },
       },
@@ -229,6 +233,7 @@ describe('openModal', () => {
               from: '2023-12-01T00:00:00.000Z',
               to: '2024-01-01T00:00:00.000Z',
             },
+            metadata: { description: mockDescription },
           },
         },
       },
