@@ -12,29 +12,6 @@ import { schema } from '@kbn/config-schema';
 import { isNil } from 'lodash';
 import { serializedValueSchema } from './serializedValue';
 
-const colorMappingPatternSchema = schema.object(
-  {
-    type: schema.literal('pattern'),
-    value: schema.string(),
-  },
-  {
-    meta: {
-      id: 'colorMappingPattern',
-      title: 'Color Mapping Pattern',
-      description: 'String pattern to match against. Case sensitive and entire word.',
-    },
-  }
-);
-
-/**
- * A single entry in a categorical/gradient color mapping's `values` array — either
- * a 'raw' domain value to color, or a tagged `pattern` to color by string equality.
- */
-const colorMappingAssignedValueSchema = schema.oneOf([
-  serializedValueSchema,
-  colorMappingPatternSchema,
-]);
-
 const colorByValueStepSchema = schema.object(
   {
     /**
@@ -301,7 +278,7 @@ const categoricalColorMappingSchema = schema.object(
     }),
     mapping: schema.arrayOf(
       schema.object({
-        values: schema.arrayOf(colorMappingAssignedValueSchema, { maxSize: 1000 }),
+        values: schema.arrayOf(serializedValueSchema, { maxSize: 1000 }),
         color: colorDefSchema,
       }),
       { maxSize: 1000 }
@@ -335,7 +312,7 @@ const gradientColorMappingSchema = schema.object(
     mapping: schema.maybe(
       schema.arrayOf(
         schema.object({
-          values: schema.arrayOf(colorMappingAssignedValueSchema, { maxSize: 100 }),
+          values: schema.arrayOf(serializedValueSchema, { maxSize: 100 }),
         }),
         { maxSize: 100 }
       )
@@ -408,8 +385,6 @@ export const allColoringTypeSchema = schema.oneOf(
   }
 );
 
-export type ColorMappingPatternType = TypeOf<typeof colorMappingPatternSchema>;
-export type ColorMappingAssignedValueType = TypeOf<typeof colorMappingAssignedValueSchema>;
 export type StaticColorType = TypeOf<typeof staticColorSchema>;
 export type ColorByValueType = TypeOf<typeof colorByValueSchema>;
 export type ColorByValueAbsolute =

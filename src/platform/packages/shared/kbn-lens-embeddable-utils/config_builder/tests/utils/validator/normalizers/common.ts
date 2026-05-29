@@ -670,16 +670,12 @@ export function getPaletteNormalizer<T extends LensAttributes>(
 }
 
 /**
- *  Normalized the colorMapping params provided a string path to the colorMapping(s) in the attributes
+ * Returns a normalizer that pre-applies the lossy state -> API collapse that
+ * `fromRulesLensStateToAPI` performs on color-mapping rules.
  *
- * - `match` with `matchEntireWord: true, matchCase: false` is canonicalized to
- *   `matchCase: true` with a lowercased pattern. We do not add a case_sensitivity param
- *   to API because it is not yet configurable in the UI. It may only exist in converted color mappings.
+ * - `match` with `matchEntireWord: true` becomes a `raw` rule.
  * - `match` with `matchEntireWord: false`, `regex`, and `range` rules are
- *   runtime-dead (`getKey` returns `null`) and are stripped. The transform
- *   drops them too.
- *
- * `match { matchEntireWord: true, matchCase: true }` and `raw` rules round-trip losslessly
+ *   runtime-dead (`getKey` returns `null`) and are stripped.
  */
 export function getColorMappingNormalizer<T extends LensAttributes>(
   colorMappingPath: string
@@ -693,17 +689,10 @@ export function getColorMappingNormalizer<T extends LensAttributes>(
           assignment.rules = assignment.rules.flatMap((rule): ColorMapping.ColorRule[] => {
             if (rule.type === 'raw') return [rule];
             if (rule.type === 'match' && rule.matchEntireWord === true) {
-              if (rule.matchCase) return [rule];
-              return [
-                {
-                  type: 'match',
-                  matchEntireWord: true,
-                  matchCase: true,
-                  pattern: rule.pattern.toLowerCase(),
-                },
-              ];
+              const value = rule.matchCase ? rule.pattern : rule.pattern.toLowerCase();
+              return [{ type: 'raw', value }];
             }
-            return [rule]; // return the rule as is to see whether other runtime dead rules are present (e.g., regex, range)
+            return [];
           });
         }
       });

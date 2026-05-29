@@ -15,11 +15,9 @@ import type {
   ColorByValueAbsolute,
   ColorByValueStep,
   ColorByValueType,
-  ColorMappingAssignedValueType,
   ColorMappingCategoricalType,
   ColorMappingColorDefType,
   ColorMappingGradientType,
-  ColorMappingPatternType,
   ColorMappingType,
   NoColorType,
   StaticColorType,
@@ -268,22 +266,38 @@ function mapSerializedValueFromAPI(value: SerializableValueType): unknown {
 
 /**
  * Mirrors the renderable rule shapes from `ColorAssignmentMatcher#getKey`:
- *   - `raw` -> serialized value (raw domain value).
- *   - `match` with `matchEntireWord: true` -> tagged `{ type: 'pattern', value }`,
- *     where `value` is the matcher's key (pattern as-is when `matchCase`,
- *     lowercased otherwise — the matcher lowercases the rule side on lookup).
- * Other shapes (`match` with `matchEntireWord: false`, `regex`, `range`) are
- * not renderable and are silently dropped.
+ *   - `raw` -> serialized value.
+ *   - `match` with `matchEntireWord: true` -> bare pattern string; lowercased
+ *     when `matchCase` is falsy (matcher lowercases the rule side on lookup).
+ * Other shapes (`match` with `matchEntireWord: false`, `regex`, `range`) are not
+ * renderable and are silently dropped.=
+ *
+ * Round-trip rebuilds everything as `type: 'raw'` (see `fromRulesAPIToLensState`).
+ * Render-equivalent for editor-produced match rules, since both reduce to the
+ * same `String(rawValue)` lookup.
  */
-function fromRulesLensStateToAPI(rules: ColorMapping.ColorRule[]): ColorMappingAssignedValueType[] {
-  return rules.flatMap((rule): ColorMappingAssignedValueType[] => {
-    if (rule.type === 'raw') return [mapSerializedValueToAPI(rule.value)];
-    if (rule.type === 'match' && rule.matchEntireWord === true) {
-      const value = rule.matchCase ? rule.pattern : rule.pattern.toLowerCase();
-      return [{ type: 'pattern', value }];
-    }
-    return [];
-  });
+function fromRulesLensStateToAPI(rules: ColorMapping.ColorRule[]): SerializableValueType[] {
+  const isRawRule = (
+    rule: ColorMapping.ColorRule
+  ): rule is Extract<ColorMapping.ColorRule, { type: 'raw' }> => rule.type === 'raw';
+
+  const isRenderableMatchRule = (
+    rule: ColorMapping.ColorRule
+  ): rule is Extract<ColorMapping.ColorRule, { type: 'match' }> =>
+    rule.type === 'match' && rule.matchEntireWord === true;
+
+  return rules
+    .filter(
+      (rule): rule is Extract<ColorMapping.ColorRule, { type: 'raw' | 'match' }> =>
+        isRawRule(rule) || isRenderableMatchRule(rule)
+    )
+    .map((rule) =>
+      isRawRule(rule)
+        ? mapSerializedValueToAPI(rule.value)
+        : rule.matchCase
+        ? rule.pattern
+        : rule.pattern.toLowerCase()
+    );
 }
 
 function isLensStateCategoricalConfigColorMapping(
@@ -365,17 +379,12 @@ function fromColorDefAPIToLensState(
   };
 }
 
-const isPatternValue = (value: ColorMappingAssignedValueType): value is ColorMappingPatternType =>
-  typeof value === 'object' && value !== null && 'type' in value && value.type === 'pattern';
-
-function fromRulesAPIToLensState(
-  values: ColorMappingAssignedValueType[]
-): ColorMapping.ColorRule[] {
+function fromRulesAPIToLensState(values: SerializableValueType[]): ColorMapping.ColorRule[] {
   return values.map((value): ColorMapping.ColorRule => {
-    if (isPatternValue(value)) {
-      return { type: 'match', matchEntireWord: true, matchCase: true, pattern: value.value };
-    }
-    return { type: 'raw', value: mapSerializedValueFromAPI(value) };
+    return {
+      type: 'raw',
+      value: mapSerializedValueFromAPI(value),
+    };
   });
 }
 
