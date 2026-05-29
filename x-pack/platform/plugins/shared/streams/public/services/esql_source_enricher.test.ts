@@ -194,7 +194,7 @@ describe('createStreamsSourceEnricher', () => {
     // Second call adds a new source 'metrics'
     client.fetch.mockResolvedValue({
       streams: [{ name: 'metrics', type: 'classic', description: 'Metrics' }],
-    });
+    } as unknown as Awaited<ReturnType<typeof client.fetch>>);
     await enricher([makeSource('logs'), makeSource('metrics')]);
 
     expect(client.fetch).toHaveBeenCalledTimes(1);
