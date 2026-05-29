@@ -180,6 +180,7 @@ export class DetectionsAttackDiscoveryPage {
       throw new Error('No attack details expand button found');
     }
 
+    await firstExpandAttackButton.scrollIntoViewIfNeeded();
     await firstExpandAttackButton.click();
     await this.attackDetailsFlyoutBody.waitFor({ state: 'visible' });
   }
@@ -191,6 +192,7 @@ export class DetectionsAttackDiscoveryPage {
       throw new Error('No schedule button found');
     }
 
+    await firstScheduleButton.scrollIntoViewIfNeeded();
     await firstScheduleButton.click();
     await this.scheduleDetailsFlyout.waitFor({ state: 'visible' });
   }
