@@ -206,25 +206,24 @@ export const fetchRulesReverseMap = async ({
 
       if (ruleType === 'machine_learning') {
         mlRules.push(entry);
-        continue;
-      }
+      } else {
+        const indices = await resolveRuleIndices(rule.params, esClient, dataViewsService, logger);
 
-      const indices = await resolveRuleIndices(rule.params, esClient, dataViewsService, logger);
+        for (const index of indices) {
+          const existing = indexToRules.get(index) ?? [];
+          existing.push(entry);
+          indexToRules.set(index, existing);
+        }
 
-      for (const index of indices) {
-        const existing = indexToRules.get(index) ?? [];
-        existing.push(entry);
-        indexToRules.set(index, existing);
-      }
-
-      if (ruleType === 'threat_match') {
-        const threatIndex = (rule.params as { threatIndex?: string[] }).threatIndex;
-        if (threatIndex && threatIndex.length > 0) {
-          const threatIndices = await resolvePatterns(threatIndex, esClient, logger);
-          for (const index of threatIndices) {
-            const existing = indexToRules.get(index) ?? [];
-            existing.push(entry);
-            indexToRules.set(index, existing);
+        if (ruleType === 'threat_match') {
+          const threatIndex = (rule.params as { threatIndex?: string[] }).threatIndex;
+          if (threatIndex && threatIndex.length > 0) {
+            const threatIndices = await resolvePatterns(threatIndex, esClient, logger);
+            for (const index of threatIndices) {
+              const existing = indexToRules.get(index) ?? [];
+              existing.push(entry);
+              indexToRules.set(index, existing);
+            }
           }
         }
       }

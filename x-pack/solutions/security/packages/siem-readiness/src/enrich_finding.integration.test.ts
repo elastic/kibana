@@ -41,7 +41,6 @@ describe('enrichFinding integration', () => {
       { id: 'TA0001', name: 'Initial Access' },
       { id: 'TA0005', name: 'Defense Evasion' },
     ],
-    platform: 'Endpoint',
     enabled: true,
   };
 
@@ -49,7 +48,6 @@ describe('enrichFinding integration', () => {
     id: 'rule-2',
     name: 'AWS CloudTrail Rule',
     tactics: [{ id: 'TA0001', name: 'Initial Access' }],
-    platform: 'AWS',
     enabled: true,
   };
 
@@ -57,7 +55,6 @@ describe('enrichFinding integration', () => {
     id: 'rule-3',
     name: 'Threat Intel Match',
     tactics: [{ id: 'TA0003', name: 'Persistence' }],
-    platform: undefined,
     enabled: true,
   };
 
@@ -84,15 +81,25 @@ describe('enrichFinding integration', () => {
     ['TA0005', { id: 'TA0005', name: 'Defense Evasion', totalRules: 8 }],
   ]);
 
+  // Platform derived from data (ECS fields) — not from rule metadata
+  const indexToPlatform = new Map<string, string>([
+    ['logs-endpoint.events-default', 'Windows Endpoints'],
+    ['logs-aws.cloudtrail-default', 'AWS account 123456789012'],
+  ]);
+
   const createContext = (dimension: Dimension): EnrichmentContext => ({
     indexToRules,
     pipelineToIndices,
     categoryToIndices,
     tacticTotals,
+    indexToPlatform,
     dimension,
   });
 
-  const createFinding = (resource: string, severity: 'CRITICAL' | 'WARNING' = 'WARNING'): ActionableFinding => ({
+  const createFinding = (
+    resource: string,
+    severity: 'CRITICAL' | 'WARNING' = 'WARNING'
+  ): ActionableFinding => ({
     severity,
     message: `Finding for ${resource}`,
     resource,
@@ -111,7 +118,7 @@ describe('enrichFinding integration', () => {
       expect(result.affectedTactics?.find((t) => t.id === 'TA0001')?.affectedRulesCount).toBe(1);
       expect(result.affectedTactics?.find((t) => t.id === 'TA0005')?.affectedRulesCount).toBe(1);
 
-      expect(result.affectedPlatform).toBe('Endpoint');
+      expect(result.affectedPlatform).toBe('Windows Endpoints');
     });
   });
 
@@ -128,7 +135,7 @@ describe('enrichFinding integration', () => {
       expect(result.affectedTactics?.[0].id).toBe('TA0001');
       expect(result.affectedTactics?.[0].totalRules).toBe(10);
 
-      expect(result.affectedPlatform).toBe('AWS');
+      expect(result.affectedPlatform).toBe('AWS account 123456789012');
     });
   });
 
@@ -142,7 +149,7 @@ describe('enrichFinding integration', () => {
       expect(result.affectedRules?.[0].name).toBe('Endpoint Process Rule');
 
       expect(result.affectedTactics).toHaveLength(2);
-      expect(result.affectedPlatform).toBe('Endpoint');
+      expect(result.affectedPlatform).toBe('Windows Endpoints');
     });
 
     it('should find Rule 2 via aws-pipeline to logs-aws.cloudtrail-default lookup', () => {
@@ -154,7 +161,7 @@ describe('enrichFinding integration', () => {
       expect(result.affectedRules?.[0].name).toBe('AWS CloudTrail Rule');
 
       expect(result.affectedTactics).toHaveLength(1);
-      expect(result.affectedPlatform).toBe('AWS');
+      expect(result.affectedPlatform).toBe('AWS account 123456789012');
     });
   });
 
@@ -168,7 +175,7 @@ describe('enrichFinding integration', () => {
       expect(result.affectedRules?.[0].name).toBe('Endpoint Process Rule');
 
       expect(result.affectedTactics).toHaveLength(2);
-      expect(result.affectedPlatform).toBe('Endpoint');
+      expect(result.affectedPlatform).toBe('Windows Endpoints');
     });
 
     it('should return no rules for detection_rules literal', () => {
@@ -189,7 +196,7 @@ describe('enrichFinding integration', () => {
       expect(result.affectedRules).toHaveLength(1);
       expect(result.affectedRules?.[0].name).toBe('AWS CloudTrail Rule');
 
-      expect(result.affectedPlatform).toBe('AWS');
+      expect(result.affectedPlatform).toBe('AWS account 123456789012');
     });
   });
 
