@@ -23,6 +23,9 @@ dependsOn:
   - '@kbn/workflows-yaml'
   - '@kbn/tooling-log'
   - '@kbn/zod'
+  - '@kbn/workflows-extensions'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/cases-plugin'
 tags:
   - shared-common
   - package
