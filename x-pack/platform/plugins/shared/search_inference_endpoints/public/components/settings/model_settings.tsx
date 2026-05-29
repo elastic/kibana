@@ -224,9 +224,7 @@ export const ModelSettings: React.FC = () => {
             fill
             onClick={handleSave}
             isLoading={isFeatureSaving}
-            isDisabled={
-              !hasAdvancedSettingsSavePermission || !isDirty || !defaultModelValidation.isValid
-            }
+            isDisabled={!isDirty || !defaultModelValidation.isValid}
             data-test-subj="save-settings-button"
           >
             {i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
