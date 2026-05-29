@@ -17,6 +17,8 @@ import { pciComplianceTool } from './pci_compliance_tool';
 import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
 import { registerSiemReadinessTools } from './siem_readiness';
+import { runRulePreviewTool } from './run_rule_preview_tool';
+import type { RunRulePreviewDeps } from '../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -30,12 +32,14 @@ export const registerTools = async (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
   experimentalFeatures: ExperimentalFeatures,
+  rulePreviewDeps: RunRulePreviewDeps,
   isServerless: boolean = false
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));
   agentBuilder.tools.register(alertsTool(core, logger));
   agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
