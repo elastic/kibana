@@ -126,7 +126,7 @@ export const VerdictsTab = () => {
               end={pickerRange.to}
               onTimeChange={handleTimeChange}
               onRefresh={() => {
-                setAbsoluteRange(getAbsoluteTimeRange(pickerRange, { forceNow: new Date() }));
+                refreshAbsoluteRange();
                 refetch();
               }}
               compressed

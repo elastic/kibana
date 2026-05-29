@@ -7,15 +7,11 @@
 
 import { useState } from 'react';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-
-interface TimeRange {
-  from: string;
-  to: string;
-}
+import type { TimeRange } from '@kbn/es-query';
 
 interface UseTabTimeRangeResult {
   pickerRange: TimeRange;
-  absoluteRange: { from: number; to: number };
+  absoluteRange: TimeRange;
   handleTimeChange: ({ start, end }: { start: string; end: string }) => void;
   refreshAbsoluteRange: () => void;
 }
@@ -26,7 +22,9 @@ interface UseTabTimeRangeResult {
  * it is decoupled from the global Kibana timefilter so tab queries are not
  * affected by automatic refreshes from unrelated parts of the UI.
  */
-export const useTabTimeRange = (defaultRange: TimeRange): UseTabTimeRangeResult => {
+export const useTabTimeRange = (
+  defaultRange: Pick<TimeRange, 'from' | 'to'>
+): UseTabTimeRangeResult => {
   const [pickerRange, setPickerRange] = useState(defaultRange);
   const [absoluteRange, setAbsoluteRange] = useState(() =>
     getAbsoluteTimeRange(defaultRange, { forceNow: new Date() })

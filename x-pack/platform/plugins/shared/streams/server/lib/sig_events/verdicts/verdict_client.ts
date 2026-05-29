@@ -25,21 +25,9 @@ import {
   type verdictsMappings,
 } from './data_stream';
 import { FIELD_DISCOVERY_ID, FIELD_DISCOVERY_SLUG } from '../field_names';
+import { enrichFromEvidences } from '../utils';
 
 export type VerdictDataStreamClient = IDataStreamClient<typeof verdictsMappings, StoredVerdict>;
-
-function enrichFromEvidences(v: Verdict): Verdict {
-  const evidences = v.evidences ?? [];
-  const streamNames = v.stream_names?.length
-    ? v.stream_names
-    : [...new Set(evidences.map((e) => e.stream_name).filter((s): s is string => !!s))];
-  const ruleNames = v.rule_names?.length
-    ? v.rule_names
-    : [...new Set(evidences.map((e) => e.rule_name).filter((s): s is string => !!s))];
-
-  if (streamNames === v.stream_names && ruleNames === v.rule_names) return v;
-  return { ...v, stream_names: streamNames, rule_names: ruleNames };
-}
 
 export class VerdictClient {
   constructor(
