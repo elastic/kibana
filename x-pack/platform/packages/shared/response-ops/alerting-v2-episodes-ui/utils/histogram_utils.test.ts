@@ -104,12 +104,21 @@ describe('computeOverlapCounts', () => {
     expect(counts[0].count).toBe(0);
   });
 
-  it('counts active episodes in all buckets from first_timestamp onward', () => {
-    // active episodes have no meaningful last_timestamp — treated as Infinity
+  it('counts active episodes in all buckets from first_timestamp onward up to now', () => {
     const episodes = [active(t0 + 30 * MIN)];
     const counts = computeOverlapCounts(episodes, [BUCKET_1, BUCKET_2]);
     expect(counts[0].count).toBe(1); // started within bucket 1
     expect(counts[1].count).toBe(1); // still active in bucket 2
+  });
+
+  it('does not count active episodes in buckets that start after now', () => {
+    // "now" is set to t0+1h so that BUCKET_2 (t0+1h to t0+2h) starts exactly at now —
+    // an active episode capped at nowMs must not bleed into that future bucket.
+    const nowMs = t0 + HOUR;
+    const episodes = [active(t0)];
+    const counts = computeOverlapCounts(episodes, [BUCKET_1, BUCKET_2], undefined, nowMs);
+    expect(counts[0].count).toBe(1); // bucket 1 ends at nowMs — episode is present
+    expect(counts[1].count).toBe(0); // bucket 2 starts at nowMs — episode has already ended
   });
 
   it('does not count an active episode that has not yet started in a bucket', () => {
@@ -119,9 +128,9 @@ describe('computeOverlapCounts', () => {
     expect(counts[1].count).toBe(1);
   });
 
-  it('treats a manually deactivated episode (episode.status=active, effective_status=inactive) as still ongoing', () => {
+  it('treats a manually deactivated episode (episode.status=active, effective_status=inactive) as still ongoing up to now', () => {
     // episode.status is 'active' in the events index — no recovery event was fired.
-    // The episode extends to Infinity so it appears in all buckets (including future ones),
+    // The episode is capped at nowMs so it appears in buckets up to the current time,
     // letting breakdown-by-effective_status show it as 'inactive' near the right edge.
     const deactivated: HistogramEpisodeRow = {
       first_timestamp: new Date(t0).toISOString(),

@@ -68,19 +68,21 @@ export const generateTimeBuckets = (
 
 /**
  * For each bucket, counts episodes whose [first_timestamp, last_timestamp] overlaps with
- * [bucket.start, bucket.end]. Active episodes (status = 'active') have no end — treated
- * as ongoing.
+ * [bucket.start, bucket.end]. Active episodes (status = 'active') have no recovery event yet —
+ * their effective end is capped at nowMs (defaults to Date.now()) so they don't bleed into
+ * future buckets when the selected time range extends beyond the current moment.
  * When breakdownField is provided, produces one entry per (bucket, breakdown value) pair.
  */
 export const computeOverlapCounts = (
   episodes: HistogramEpisodeRow[],
   buckets: TimeBucket[],
-  breakdownField?: string
+  breakdownField?: string,
+  nowMs: number = Date.now()
 ): HistogramBucketCount[] => {
   const parsed = episodes.map((ep) => ({
     ep,
     firstMs: new Date(ep.first_timestamp).getTime(),
-    lastMs: ep['episode.status'] === 'active' ? Infinity : new Date(ep.last_timestamp).getTime(),
+    lastMs: ep['episode.status'] === 'active' ? nowMs : new Date(ep.last_timestamp).getTime(),
   }));
 
   return buckets.flatMap(({ start, end }) => {
