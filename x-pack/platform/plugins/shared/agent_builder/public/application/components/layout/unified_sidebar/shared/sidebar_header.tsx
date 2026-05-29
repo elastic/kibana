@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiToolTip,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -86,6 +87,15 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
             <EuiButtonIcon
               iconType="transitionLeftIn"
               aria-label={labels.toggleSidebar}
+              aria-expanded={false}
+              color="text"
+              size="s"
+              onClick={onToggleCondensed}
+            />
+          </EuiToolTip>
+            <EuiButtonIcon
+              iconType="transitionLeftIn"
+              aria-label={labels.toggleSidebar}
               color="text"
               size="s"
               onClick={onToggleCondensed}
@@ -150,6 +160,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               <EuiButtonIcon
                 iconType="transitionLeftOut"
                 aria-label={labels.toggleSidebar}
+                aria-expanded={true}
                 color="text"
                 size="s"
                 onClick={onToggleCondensed}
