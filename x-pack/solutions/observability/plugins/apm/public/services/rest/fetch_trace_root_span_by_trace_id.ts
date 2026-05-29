@@ -7,10 +7,13 @@
 
 import type { APIReturnType } from './create_call_apm_api';
 import { callApmApi } from './create_call_apm_api';
+import { reportFetchError } from './report_fetch_error';
 
 type TraceRootSpan = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/root_span'>;
 
-export const fetchRootSpanByTraceId = (
+export const FETCH_TRACE_ROOT_SPAN_OPERATION_ID = 'fetch-trace-root-span';
+
+export const fetchRootSpanByTraceId = async (
   {
     traceId,
     start,
@@ -21,14 +24,20 @@ export const fetchRootSpanByTraceId = (
     end: string;
   },
   signal: AbortSignal
-): Promise<TraceRootSpan | undefined> =>
-  callApmApi('GET /internal/apm/unified_traces/{traceId}/root_span', {
-    params: {
-      path: { traceId },
-      query: {
-        start,
-        end,
+): Promise<TraceRootSpan | undefined> => {
+  try {
+    return await callApmApi('GET /internal/apm/unified_traces/{traceId}/root_span', {
+      params: {
+        path: { traceId },
+        query: {
+          start,
+          end,
+        },
       },
-    },
-    signal,
-  });
+      signal,
+    });
+  } catch (error) {
+    reportFetchError({ error, operationId: FETCH_TRACE_ROOT_SPAN_OPERATION_ID });
+    throw error;
+  }
+};
