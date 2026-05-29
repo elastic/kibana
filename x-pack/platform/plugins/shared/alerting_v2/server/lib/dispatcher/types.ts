@@ -199,6 +199,16 @@ export type DispatcherStepHaltReason = 'no_episodes' | 'no_actions';
  */
 export type DispatcherHaltReason = DispatcherStepHaltReason | 'step_error';
 
+/**
+ * Halt reasons that allow the event watermark to advance. Defined here,
+ * next to the halt-reason types, so adding a new controlled reason only
+ * requires a single change.
+ */
+export const CLEAN_HALT_REASONS: ReadonlySet<DispatcherHaltReason> = new Set<DispatcherHaltReason>([
+  'no_episodes',
+  'no_actions',
+]);
+
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }
   | {

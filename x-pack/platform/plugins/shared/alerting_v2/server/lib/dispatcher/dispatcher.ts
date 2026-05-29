@@ -17,6 +17,7 @@ import {
   type DispatcherPipelineResult,
 } from './execution_pipeline';
 import { buildTickSummary, emitTickSummary, startHrtime } from './telemetry';
+import { CLEAN_HALT_REASONS } from './types';
 import type { DispatcherExecutionParams, DispatcherExecutionResult } from './types';
 
 export interface DispatcherServiceContract {
@@ -99,12 +100,8 @@ export class DispatcherService implements DispatcherServiceContract {
  * data loss.
  */
 function extractAdvanceableWatermark(result: DispatcherPipelineResult): string | undefined {
-  if (
-    !result.completed &&
-    result.haltReason !== 'no_episodes' &&
-    result.haltReason !== 'no_actions'
-  ) {
-    return undefined;
-  }
-  return result.finalState.nextEventWatermark;
+  const isClean =
+    result.completed ||
+    (result.haltReason !== undefined && CLEAN_HALT_REASONS.has(result.haltReason));
+  return isClean ? result.finalState.nextEventWatermark : undefined;
 }

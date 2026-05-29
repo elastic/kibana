@@ -34,7 +34,9 @@ export function computeStateCounts(state: DispatcherPipelineState): DispatcherSt
  * APM-facing shapes are allowed to drift independently.
  */
 export function toSpanLabels(counts: DispatcherStageCounts): Record<string, number> {
-  return Object.fromEntries(
-    Object.entries(counts).map(([key, value]) => [`count_${key}`, value as number])
-  );
+  const labels: Record<string, number> = {};
+  for (const key of Object.keys(counts) as Array<keyof DispatcherStageCounts>) {
+    labels[`count_${key}`] = counts[key];
+  }
+  return labels;
 }

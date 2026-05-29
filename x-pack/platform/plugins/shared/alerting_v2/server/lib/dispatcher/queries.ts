@@ -145,20 +145,16 @@ export const getAlertEpisodeSuppressionsQueries = (
 ): EsqlRequest[] => {
   if (alertEpisodes.length === 0) return [];
 
-  const minLastEventTimestamp =
-    alertEpisodes.reduce<string | undefined>((min, ep) => {
-      const parsedTimestamp = new Date(ep.last_event_timestamp);
-      if (Number.isNaN(parsedTimestamp.getTime())) {
-        return min;
-      }
-
-      const normalizedTimestamp = parsedTimestamp.toISOString();
-      return min === undefined || normalizedTimestamp < min ? normalizedTimestamp : min;
-    }, undefined) ?? new Date(0).toISOString();
-
-  const uniquePairKeys = [
-    ...new Set(alertEpisodes.map((ep) => `${ep.rule_id}${PAIR_SEPARATOR}${ep.group_hash}`)),
-  ];
+  let minLastEventTimestamp: string | undefined;
+  const uniquePairKeySet = new Set<string>();
+  for (const ep of alertEpisodes) {
+    if (minLastEventTimestamp === undefined || ep.last_event_timestamp < minLastEventTimestamp) {
+      minLastEventTimestamp = ep.last_event_timestamp;
+    }
+    uniquePairKeySet.add(`${ep.rule_id}${PAIR_SEPARATOR}${ep.group_hash}`);
+  }
+  const uniquePairKeys = [...uniquePairKeySet];
+  const minTs = minLastEventTimestamp ?? new Date(0).toISOString();
 
   return chunkInClauseLiterals(uniquePairKeys).map((chunk) => {
     const pairValues = chunk.map((key) => esql.str(key));
@@ -167,7 +163,7 @@ export const getAlertEpisodeSuppressionsQueries = (
         | EVAL _pair_key = CONCAT(rule_id, ${PAIR_SEPARATOR}, group_hash)
         | WHERE _pair_key IN (${pairValues})
         | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
-        | WHERE action_type != "snooze" OR expiry > ${minLastEventTimestamp}::datetime
+        | WHERE action_type != "snooze" OR expiry > ${minTs}::datetime
         | INLINE STATS
             last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze")
             BY rule_id, group_hash

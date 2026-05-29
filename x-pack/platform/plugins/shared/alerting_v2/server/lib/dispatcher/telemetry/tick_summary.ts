@@ -56,7 +56,7 @@ export function buildTickSummary({
     completed,
     halt_reason: haltReason,
     stages,
-    totals: stages.length === 0 ? ZERO_COUNTS : stages[stages.length - 1].counts,
+    totals: stages.at(-1)?.counts ?? ZERO_COUNTS,
   };
 }
 
