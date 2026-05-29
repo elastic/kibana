@@ -17,10 +17,10 @@ export const VAULT_CONFIG_DIR = 'x-pack/platform/packages/shared/kbn-evals/scrip
  * Virtual profile: load golden-cluster config from dev Vault at runtime (no config file).
  * Use with `--datasets-profile dev-vault` or `--profile dev-vault`.
  */
-export const DEV_VAULT_DATASETS_PROFILE = 'dev-vault';
+export const DEV_VAULT_PROFILE = 'dev-vault';
 
 export const isDevVaultProfile = (profile?: string): boolean =>
-  profile?.trim() === DEV_VAULT_DATASETS_PROFILE;
+  profile?.trim() === DEV_VAULT_PROFILE;
 
 export const stripTrailingSlash = (url: string): string => url.replace(/\/$/, '');
 
