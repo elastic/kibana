@@ -72,7 +72,7 @@ steps:
       url="https://github.com/buildkite/cli/releases/download/v${BK_VERSION}/bk_${BK_VERSION}_linux_amd64.tar.gz"
       curl -fsSL --retry 3 --retry-delay 2 "${url}" -o "${tmp}/bk.tgz"
       echo "${BK_SHA256}  ${tmp}/bk.tgz" | sha256sum -c -
-      tar -xzf "${tmp}/bk.tgz" -C "${tmp}" bk
+      tar -xzf "${tmp}/bk.tgz" -C "${tmp}" --strip-components=1 "bk_${BK_VERSION}_linux_amd64/bk"
       install -d "${RUNNER_TEMP}/gh-aw/mcp-cli/bin"
       install -m 0755 "${tmp}/bk" "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk"
       "${RUNNER_TEMP}/gh-aw/mcp-cli/bin/bk" --version
@@ -161,21 +161,42 @@ No other side-effects beyond posting the comment and updating the label.
 
 ## Comment format
 
-Post exactly one comment. Keep the visible portion very short and easy to read:
+Post exactly one comment on the issue. Keep it concise, actionable, and prioritize the most critical findings at the very top. Adapt the sections below to best fit the specific failure.
 
-1. **One-line bold headline** stating the result kind and one identifying detail.
-2. **Diagnosis** (≤5 concise bullet points): what broke and where, the most likely root cause.
-3. **Recommended next steps** (≤5 concise bullet points).
+Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if it adds value.
 
-Put the full `flaky-test-investigator` skill output inside a collapsed `<details><summary>Investigation details</summary> ... </details>` block (not in the visible portion).
+### 1. The TL;DR (Required)
 
-The skill's "Reporting" subsections should also be inside the collapsible section:
+Start with a clear heading, essential metadata, and a brief summary of the failure, followed by a horizontal rule.
 
-- What the test does
-- Where it ran
-- Root cause hypothesis
-- Evidence
-- Failure screenshot (omit this section if not available)
-- Open questions
+```
+## {Classification}: {One-line description of what broke}
 
-Blank lines around `</summary>` and `</details>` are required for the inner markdown to render.
+## **Classification:** {type} | **Confidence:** {level} | **Introduced by:** {commit/PR if known}
+
+**Summary:** One or two sentences explaining the exact failure point.
+```
+
+### 2. Proposed fix (required)
+
+Provide the most direct path to resolution immediately after the summary.
+
+- **Single file:** lead directly with the suggested code diff or specific action.
+- **Multiple files:** use a brief table to list affected files, followed by the necessary changes.
+- **No concrete fix:** clearly state what additional evidence or investigation is needed to propose one.
+
+### 3. Root Cause & Evidence (required)
+
+Explain _why_ the failure occurred, citing specific evidence. Choose the format that best fits the complexity of the bug:
+
+- Use concise paragraphs with inline Markdown links pointing to specific code lines, commits, or files.
+- Use an ASCII timeline diagram for race conditions, multi-component bugs, or complex state leaks.
+- Fold relevant evidence (like missing `data-test-subj` attributes, failing network calls, or screenshot descriptions) directly into this narrative.
+
+### 4. Additional context (optional)
+
+Include the following only if they provide high-value, actionable signal:
+
+- **Ruled out:** a brief note on alternative hypotheses that were investigated and dismissed.
+- **Verification:** specific steps to reproduce the failure or confirm the fix.
+- **Open questions:** unresolved design or environmental issues blocking a definitive fix.
