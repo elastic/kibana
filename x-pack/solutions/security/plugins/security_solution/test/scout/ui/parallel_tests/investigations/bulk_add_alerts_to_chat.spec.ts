@@ -135,7 +135,7 @@ spaceTest.describe(
           'verify conversation opens with attachment chip and pre-filled prompt',
           async () => {
             await expect(agentBuilderPage.conversation).toBeVisible();
-            await expect(agentBuilderPage.attachmentPillsRow).toBeVisible();
+            await agentBuilderPage.waitForAttachmentPillsRow();
             await expect(agentBuilderPage.inputEditor).toContainText(
               'Triage and prioritize these security alerts'
             );
