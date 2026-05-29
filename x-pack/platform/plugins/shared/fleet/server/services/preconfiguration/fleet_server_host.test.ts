@@ -631,14 +631,18 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         is_preconfigured: true,
       },
     ]);
-    expect(mockedFleetServerHostService.create).toBeCalledWith(
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).toBeCalledWith(
       expect.anything(),
       expect.anything(),
-      expect.objectContaining({
-        name: 'TEST_1',
-      }),
-      expect.anything()
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'TEST_1',
+          id: 'new-fleet-server-host',
+        }),
+      ]),
+      { fromPreconfiguration: true }
     );
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
     expect(mockedFleetServerHostService.update).not.toBeCalled();
   });
 
@@ -663,21 +667,24 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         },
       },
     ]);
-    expect(mockedFleetServerHostService.create).toBeCalledWith(
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).toBeCalledWith(
       expect.anything(),
       expect.anything(),
-      expect.objectContaining({
-        name: 'TEST_1',
-        secrets: {
-          ssl: {
-            key: 'unsecureKey1',
-            es_key: 'unsecureKey2',
-            agent_key: 'unsecureKey3',
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'TEST_1',
+          secrets: {
+            ssl: {
+              key: 'unsecureKey1',
+              es_key: 'unsecureKey2',
+              agent_key: 'unsecureKey3',
+            },
           },
-        },
-      }),
-      expect.anything()
+        }),
+      ]),
+      { fromPreconfiguration: true }
     );
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
     expect(mockedFleetServerHostService.update).not.toBeCalled();
   });
 
@@ -696,7 +703,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
       expect.anything(),
@@ -723,7 +730,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
       expect.anything(),
@@ -751,7 +758,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
       expect.anything(),
@@ -783,7 +790,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
       expect.anything(),
@@ -821,7 +828,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
       expect.anything(),
@@ -860,7 +867,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
       expect.anything(),
@@ -892,7 +899,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         is_preconfigured: true,
       },
     ]);
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
     expect(mockedFleetServerHostService.update).not.toBeCalled();
   });
 
@@ -915,7 +922,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         },
       },
     ]);
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.bulkCreateForPreconfiguration).not.toBeCalled();
     expect(mockedFleetServerHostService.update).not.toBeCalled();
   });
 });

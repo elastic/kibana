@@ -8,9 +8,8 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
-import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+import { errorResponseSchema, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -31,16 +30,17 @@ export class GetRuleRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Get a rule',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      params: buildRouteValidationWithZod(ruleIdParamsSchema),
+      params: ruleIdParamsSchema,
     },
     response: {
       200: {
         body: () => ruleResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the requested rule.',
       },
       404: {
+        body: () => errorResponseSchema,
         description: 'Indicates a rule with the given ID does not exist.',
       },
     },

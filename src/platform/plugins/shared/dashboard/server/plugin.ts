@@ -17,7 +17,6 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
-  RequestHandlerContext,
   UiSettingsParams,
 } from '@kbn/core/server';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
@@ -200,8 +199,8 @@ export class DashboardPlugin
     return {
       scanDashboards,
       client: {
-        read: async (requestCtx: RequestHandlerContext, id: string) =>
-          (await read(requestCtx, getCachedDashboardStateSchema(), id)).body,
+        read: async (savedObjectsClient: SavedObjectsClientContract, id: string) =>
+          (await read(savedObjectsClient, getCachedDashboardStateSchema(), id)).body,
       },
     };
   }

@@ -13,6 +13,8 @@ export type {
   ProcessorSuggestionsResponse,
 } from './ingest_processor_suggestions';
 
+export { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from './feature_flags';
+
 export {
   STREAMS_TIERED_FEATURES,
   STREAMS_TIERED_ML_FEATURE,
@@ -48,3 +50,4 @@ export {
 } from './get_streams_location/get_streams_location';
 
 export type { StreamSummary } from './stream_summary';
+export type { PaginatedResponse } from './pagination';
