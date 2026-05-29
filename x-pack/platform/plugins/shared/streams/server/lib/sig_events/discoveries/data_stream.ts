@@ -39,7 +39,7 @@ export const discoveriesDataStream: DataStreamDefinition<
   StoredDiscovery
 > = {
   name: DISCOVERIES_DATA_STREAM,
-  version: 2,
+  version: 3,
   hidden: true,
   template: {
     priority: 500,

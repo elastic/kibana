@@ -150,7 +150,7 @@ export class DetectionClient {
       index: DETECTIONS_DATA_STREAM,
       where: this.buildWhere(options),
       groupBy: FIELD_DETECTION_ID,
-      sort: [['detected_at', 'DESC']],
+      sort: [['@timestamp', 'DESC']],
     });
 
     const processedIds = await this.getProcessedIds(
@@ -172,8 +172,10 @@ export class DetectionClient {
       idField: FIELD_DETECTION_ID,
       idValue: detectionId,
     });
-    // History returns all doc kinds including kind:handled.
-    // Mark each hit processed=true if it is itself a handled doc.
+    // History returns all raw docs for a detection_id (including kind:handled stamps).
+    // `processed` here means "this specific doc is a handled stamp", not "is the detection
+    // currently processed" — intentionally different from the list path which uses
+    // getProcessedIds to compare timestamps across the full doc set.
     return { hits: result.hits.map((raw) => this.toDetection(raw, raw.kind === KIND_HANDLED)) };
   }
 }

@@ -27,6 +27,8 @@ import {
   type StoredDiscovery,
   type discoveriesMappings,
 } from './data_stream';
+
+const CLEARED_IDS_CHUNK_SIZE = 250;
 import {
   FIELD_DISCOVERY_ID,
   FIELD_DISCOVERY_SLUG,
@@ -91,21 +93,49 @@ export class DiscoveryClient {
     };
   }
 
-  // Returns the set of finding IDs that have been cleared, querying by closes_discovery_id —
-  // the field the workflow writes on clearance docs, consistent with how verdict checks clearances.
+  // Returns the set of finding IDs that have been cleared.
+  // Mirrors getProcessedIds in detection_client: a finding is cleared only when the latest
+  // clearance doc timestamp is on or after the latest finding doc timestamp, so re-opened
+  // findings (no newer clearance) are not reported as cleared.
+  // Chunked at CLEARED_IDS_CHUNK_SIZE to match the getProcessedIds IN-clause guard.
   private async getClearedIds(findingIds: string[]): Promise<Set<string>> {
     if (!findingIds.length) return new Set();
-    const idLiterals = findingIds.map((id) => esql.str(id));
-    const query = esql`FROM ${DISCOVERIES_DATA_STREAM}
-      | WHERE ${esql.col('kibana.space_ids')} == ${esql.str(this.clients.space)} OR ${esql.col(
-      'kibana.space_ids'
-    )} IS NULL
-      | WHERE ${esql.col('kind')} == ${esql.str('clearance')}
-      | WHERE ${esql.col('closes_discovery_id')} IN (${idLiterals})
-      | KEEP ${esql.col('closes_discovery_id')}`;
-    const response = await queryEsql({ esClient: this.clients.esClient, query });
-    const rows = esqlToObjects<{ closes_discovery_id: string }>(response);
-    return new Set(rows.map((r) => r.closes_discovery_id));
+
+    const cleared = new Set<string>();
+    for (let i = 0; i < findingIds.length; i += CLEARED_IDS_CHUNK_SIZE) {
+      const batch = findingIds.slice(i, i + CLEARED_IDS_CHUNK_SIZE);
+      const idLiterals = batch.map((id) => esql.str(id));
+      const kindFinding = esql.str('finding');
+      const kindClearance = esql.str('clearance');
+      // Use EVAL to normalize both doc types to the same "finding ID" for grouping:
+      // finding docs: unified_id = discovery_id
+      // clearance docs: unified_id = closes_discovery_id (references the original finding)
+      const query = esql`FROM ${DISCOVERIES_DATA_STREAM}
+        | WHERE ${esql.col('kibana.space_ids')} == ${esql.str(this.clients.space)} OR ${esql.col(
+        'kibana.space_ids'
+      )} IS NULL
+        | WHERE ${esql.col('kind')} IN (${[kindFinding, kindClearance]})
+        | WHERE ${esql.col('discovery_id')} IN (${idLiterals}) OR ${esql.col(
+        'closes_discovery_id'
+      )} IN (${idLiterals})
+        | EVAL unified_id = CASE(${esql.col('kind')} == ${kindFinding}, ${esql.col(
+        'discovery_id'
+      )}, ${esql.col('closes_discovery_id')})
+        | STATS max_finding_ts = MAX(CASE(${esql.col('kind')} == ${kindFinding}, @timestamp, null)),
+                max_clearance_ts = MAX(CASE(${esql.col(
+                  'kind'
+                )} == ${kindClearance}, @timestamp, null))
+          BY unified_id
+        | WHERE max_clearance_ts >= max_finding_ts OR max_finding_ts IS NULL
+        | WHERE unified_id IS NOT NULL
+        | KEEP unified_id`;
+      const response = await queryEsql({ esClient: this.clients.esClient, query });
+      const rows = esqlToObjects<{ unified_id: string }>(response);
+      for (const r of rows) {
+        if (r.unified_id) cleared.add(r.unified_id);
+      }
+    }
+    return cleared;
   }
 
   async findById(discoveryId: string): Promise<{ hits: Discovery[] }> {

@@ -15,9 +15,9 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Verdict } from '@kbn/streams-schema';
+import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
 import {
   useFetchVerdicts,
   useFetchVerdictHistory,
@@ -97,15 +97,8 @@ const columns: Array<EuiBasicTableColumn<Verdict>> = [
 const DEFAULT_VERDICTS_RANGE = { from: 'now-7d', to: 'now' };
 
 export const VerdictsTab = () => {
-  const [pickerRange, setPickerRange] = useState(DEFAULT_VERDICTS_RANGE);
-  const [absoluteRange, setAbsoluteRange] = useState(() =>
-    getAbsoluteTimeRange(DEFAULT_VERDICTS_RANGE, { forceNow: new Date() })
-  );
-
-  const handleTimeChange = ({ start: s, end: e }: { start: string; end: string }) => {
-    setPickerRange({ from: s, to: e });
-    setAbsoluteRange(getAbsoluteTimeRange({ from: s, to: e }, { forceNow: new Date() }));
-  };
+  const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
+    useTabTimeRange(DEFAULT_VERDICTS_RANGE);
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchVerdicts({
     from: absoluteRange.from,

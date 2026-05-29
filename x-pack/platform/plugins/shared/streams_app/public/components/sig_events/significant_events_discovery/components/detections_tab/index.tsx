@@ -15,10 +15,10 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Detection } from '@kbn/streams-schema';
 import { useFetchDetections } from '../../../../../hooks/sig_events/use_fetch_detections';
+import { useTabTimeRange } from '../../../../../hooks/sig_events/use_tab_time_range';
 import { DetectionFlyout } from './detection_flyout';
 import { formatTimestamp } from '../../../../../util/formatters';
 import { CHANGE_TYPE_LABELS, DETECTION_KIND_LABELS } from '../shared/translations';
@@ -54,8 +54,8 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
   },
   {
     field: 'kind',
-    name: i18n.translate('xpack.streams.detectionsTab.statusColumn', {
-      defaultMessage: 'Status',
+    name: i18n.translate('xpack.streams.detectionsTab.kindColumn', {
+      defaultMessage: 'Kind',
     }),
     width: '100px',
     render: (kind: Detection['kind']) => (
@@ -94,7 +94,8 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
       if (detection.processed) {
         return <EuiBadge color="success">{DISCOVERY_STATUS_LABELS.processed}</EuiBadge>;
       }
-      const docAgeMs = Date.now() - new Date(detection['@timestamp']).getTime();
+      const docAgeMs =
+        Date.now() - new Date(detection.detected_at ?? detection['@timestamp']).getTime();
       if (docAgeMs > DISCOVERY_LOOKBACK_MS) {
         return <EuiBadge color="warning">{DISCOVERY_STATUS_LABELS.missed}</EuiBadge>;
       }
@@ -106,15 +107,8 @@ const columns: Array<EuiBasicTableColumn<Detection>> = [
 const DEFAULT_DETECTIONS_RANGE = { from: 'now-24h', to: 'now' };
 
 export const DetectionsTab = () => {
-  const [pickerRange, setPickerRange] = useState(DEFAULT_DETECTIONS_RANGE);
-  const [absoluteRange, setAbsoluteRange] = useState(() =>
-    getAbsoluteTimeRange(DEFAULT_DETECTIONS_RANGE, { forceNow: new Date() })
-  );
-
-  const handleTimeChange = ({ start: s, end: e }: { start: string; end: string }) => {
-    setPickerRange({ from: s, to: e });
-    setAbsoluteRange(getAbsoluteTimeRange({ from: s, to: e }, { forceNow: new Date() }));
-  };
+  const { pickerRange, absoluteRange, handleTimeChange, refreshAbsoluteRange } =
+    useTabTimeRange(DEFAULT_DETECTIONS_RANGE);
 
   const { data, isLoading, refetch, pagination, setPagination } = useFetchDetections({
     from: absoluteRange.from,
@@ -145,7 +139,7 @@ export const DetectionsTab = () => {
               end={pickerRange.to}
               onTimeChange={handleTimeChange}
               onRefresh={() => {
-                setAbsoluteRange(getAbsoluteTimeRange(pickerRange, { forceNow: new Date() }));
+                refreshAbsoluteRange();
                 refetch();
               }}
               compressed

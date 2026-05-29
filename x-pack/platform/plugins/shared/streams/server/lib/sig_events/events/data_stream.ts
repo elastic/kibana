@@ -33,7 +33,7 @@ export type { SigEvent };
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  version: 3,
+  version: 4,
   hidden: true,
   template: {
     priority: 500,
