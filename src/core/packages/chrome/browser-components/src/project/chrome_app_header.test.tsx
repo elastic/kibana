@@ -50,7 +50,11 @@ describe('useHasChromeAppHeaderContent', () => {
   it('detects favorite-only registered content', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.next.appHeader.set({
-      favorite: <EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />,
+      favorite: (
+        <EuiToolTip content="Favorite" disableScreenReaderOutput>
+          <EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />
+        </EuiToolTip>
+      ),
     });
 
     render(

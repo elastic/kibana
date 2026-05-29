@@ -56,7 +56,11 @@ describe('AppHeaderView', () => {
   it('renders when the only content is a favorite action', () => {
     renderAppHeader(
       <AppHeaderView
-        favorite={<EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />}
+        favorite={
+          <EuiToolTip content="Favorite" disableScreenReaderOutput>
+            <EuiButtonIcon aria-label="Favorite" iconType="starEmpty" onClick={jest.fn()} />
+          </EuiToolTip>
+        }
       />
     );
 
