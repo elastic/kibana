@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type {
@@ -40,6 +40,7 @@ import type {
 
 import type { EmbeddableDeps } from '../types';
 import { ApmEmbeddableContext } from '../embeddable_context';
+import type { ServiceMapViewFilters } from '../../components/app/service_map/apply_service_map_visibility';
 import { ServiceMapEmbeddable } from './service_map_embeddable';
 import { ServiceMapEditorFlyout } from './service_map_editor_flyout';
 import { APM_SERVICE_MAP_EMBEDDABLE } from './constants';
@@ -51,6 +52,13 @@ const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   kuery: undefined,
   service_name: undefined,
   service_group_id: undefined,
+  map_orientation: 'horizontal',
+  sync_with_dashboard_filters: false,
+  alert_status_filter: undefined,
+  slo_status_filter: undefined,
+  connection_filter: undefined,
+  anomaly_severity_filter: undefined,
+  find_query: undefined,
 };
 
 const customStateComparators: StateComparators<ServiceMapCustomState> = {
@@ -58,6 +66,13 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   kuery: 'referenceEquality',
   service_name: 'referenceEquality',
   service_group_id: 'referenceEquality',
+  map_orientation: 'referenceEquality',
+  sync_with_dashboard_filters: 'referenceEquality',
+  alert_status_filter: 'referenceEquality',
+  slo_status_filter: 'referenceEquality',
+  connection_filter: 'referenceEquality',
+  anomaly_severity_filter: 'referenceEquality',
+  find_query: 'referenceEquality',
 };
 
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
@@ -124,6 +139,13 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           kuery: state.kuery,
           service_name: state.service_name,
           service_group_id: state.service_group_id,
+          map_orientation: state.map_orientation,
+          sync_with_dashboard_filters: state.sync_with_dashboard_filters,
+          alert_status_filter: state.alert_status_filter,
+          slo_status_filter: state.slo_status_filter,
+          connection_filter: state.connection_filter,
+          anomaly_severity_filter: state.anomaly_severity_filter,
+          find_query: state.find_query,
         },
         defaultCustomState
       );
@@ -199,6 +221,11 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                       }
                       customStateManager.api.setKuery(newState.kuery);
                       customStateManager.api.setServiceName(newState.service_name);
+                      // map_orientation is managed via the in-panel options toggle, not the
+                      // editor flyout; leave the persisted value untouched.
+                      customStateManager.api.setSyncWithDashboardFilters(
+                        newState.sync_with_dashboard_filters
+                      );
                       closeFlyout();
                     }}
                   />
@@ -228,15 +255,75 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             };
           }, []);
 
-          const [environment, kuery, serviceName, serviceGroupId] = useBatchedPublishingSubjects(
+          const [
+            environment,
+            kuery,
+            serviceName,
+            serviceGroupId,
+            mapOrientation,
+            syncWithDashboardFilters,
+            alertStatusFilter,
+            sloStatusFilter,
+            connectionFilter,
+            anomalySeverityFilter,
+            findQuery,
+          ] = useBatchedPublishingSubjects(
             customStateManager.api.environment$,
             customStateManager.api.kuery$,
             customStateManager.api.serviceName$,
-            customStateManager.api.serviceGroupId$
+            customStateManager.api.serviceGroupId$,
+            customStateManager.api.mapOrientation$,
+            customStateManager.api.syncWithDashboardFilters$,
+            customStateManager.api.alertStatusFilter$,
+            customStateManager.api.sloStatusFilter$,
+            customStateManager.api.connectionFilter$,
+            customStateManager.api.anomalySeverityFilter$,
+            customStateManager.api.findQuery$
           );
 
-          const { timeRange } = useFetchContext(api);
-          const effectiveTimeRange = timeRange ?? DEFAULT_TIME_RANGE;
+          // Schema literals (`'critical' | 'major' | ...`) and the runtime enums consumed by
+          // ServiceMapViewFilters share string values, so a single cast preserves the shape.
+          const viewFilters = useMemo(
+            () =>
+              ({
+                alertStatusFilter: alertStatusFilter ?? [],
+                sloStatusFilter: sloStatusFilter ?? [],
+                connectionFilter: connectionFilter ?? [],
+                anomalySeverityFilter: anomalySeverityFilter ?? [],
+              } as ServiceMapViewFilters),
+            [alertStatusFilter, sloStatusFilter, connectionFilter, anomalySeverityFilter]
+          );
+
+          // Push in-panel edits back to the state manager so the controlled `viewFilters` /
+          // `searchQuery` reflect changes; without these the chips/search would feel locked.
+          // Empty arrays / empty strings are normalized to `undefined` so saved state stays tidy.
+          const onViewFiltersChange = useCallback((next: ServiceMapViewFilters) => {
+            customStateManager.api.setAlertStatusFilter(
+              next.alertStatusFilter.length ? next.alertStatusFilter : undefined
+            );
+            customStateManager.api.setSloStatusFilter(
+              next.sloStatusFilter.length ? next.sloStatusFilter : undefined
+            );
+            customStateManager.api.setConnectionFilter(
+              next.connectionFilter.length ? next.connectionFilter : undefined
+            );
+            customStateManager.api.setAnomalySeverityFilter(
+              next.anomalySeverityFilter.length ? next.anomalySeverityFilter : undefined
+            );
+          }, []);
+
+          const onSearchQueryChange = useCallback((next: string) => {
+            customStateManager.api.setFindQuery(next.trim() ? next : undefined);
+          }, []);
+
+          const fetchContext = useFetchContext(api);
+          const effectiveTimeRange = fetchContext.timeRange ?? DEFAULT_TIME_RANGE;
+
+          // Parent dashboard filters/query are merged into fetchContext by `useFetchContext`.
+          // Only forward them when the panel opts in via `sync_with_dashboard_filters`; otherwise
+          // the panel stays isolated (preserves back-compat for panels added from the dashboard menu).
+          const parentFilters = syncWithDashboardFilters ? fetchContext.filters : undefined;
+          const parentQuery = syncWithDashboardFilters ? fetchContext.query : undefined;
 
           return (
             <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -255,6 +342,14 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                   serviceGroupId={serviceGroupId ?? undefined}
                   core={deps.coreStart}
                   onBlockingError={(error) => blockingError$.next(error)}
+                  mapOrientation={mapOrientation ?? 'horizontal'}
+                  onMapOrientationChange={customStateManager.api.setMapOrientation}
+                  parentFilters={parentFilters}
+                  parentQuery={parentQuery}
+                  viewFilters={viewFilters}
+                  onViewFiltersChange={onViewFiltersChange}
+                  searchQuery={findQuery ?? undefined}
+                  onSearchQueryChange={onSearchQueryChange}
                 />
               </ApmEmbeddableContext>
             </div>

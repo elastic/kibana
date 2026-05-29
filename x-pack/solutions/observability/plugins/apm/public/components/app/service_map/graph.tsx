@@ -62,6 +62,7 @@ import {
   type ServiceMapOrientation,
 } from './service_map_options_panel';
 import { ServiceMapLegend } from './service_map_legend';
+import { AddToDashboardButton } from './add_to_dashboard_button';
 import type { Environment } from '../../../../common/environment_rt';
 import {
   isServiceNode,
@@ -106,6 +107,20 @@ interface GraphProps {
    * (frame, fill, primary node ring). Blue edges/markers remain tied to explicit selection only.
    */
   highlightedServiceName?: string;
+  /** Controlled initial / current orientation when supplied. Falls back to internal `useState` otherwise. */
+  mapOrientation?: ServiceMapOrientation;
+  /** Called when orientation changes (Options panel or any other host control). */
+  onMapOrientationChange?: (next: ServiceMapOrientation) => void;
+  /** Controlled view filters when supplied (e.g. embeddable hydrating from persisted state). */
+  viewFilters?: ServiceMapViewFilters;
+  /** Called when view filters change in the options panel. */
+  onViewFiltersChange?: (next: ServiceMapViewFilters) => void;
+  /** Controlled find-in-page query when supplied (e.g. embeddable hydrating from persisted state). */
+  searchQuery?: string;
+  /** Called when the user edits the find-in-page search field. */
+  onSearchQueryChange?: (next: string) => void;
+  /** Optional service group filter — forwarded to the "Add to dashboard" panel state. */
+  serviceGroupId?: string;
 }
 
 function GraphInner({
@@ -125,6 +140,13 @@ function GraphInner({
   alwaysNavigateOnPopoverFocus,
   clearKueryOnPopoverNavigation,
   highlightedServiceName,
+  mapOrientation: controlledOrientation,
+  onMapOrientationChange,
+  viewFilters: controlledViewFilters,
+  onViewFiltersChange,
+  searchQuery: controlledSearchQuery,
+  onSearchQueryChange,
+  serviceGroupId,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
@@ -139,11 +161,50 @@ function GraphInner({
   const serviceMapId = useGeneratedHtmlId({ prefix: 'serviceMap' });
   const mapRegionRef = useRef<HTMLDivElement | null>(null);
 
-  const [viewFilters, setViewFilters] = useState<ServiceMapViewFilters>(
-    DEFAULT_SERVICE_MAP_VIEW_FILTERS
+  const [internalViewFilters, setInternalViewFilters] = useState<ServiceMapViewFilters>(
+    controlledViewFilters ?? DEFAULT_SERVICE_MAP_VIEW_FILTERS
   );
-  const [panelExpanded, setPanelExpanded] = useState(true);
-  const [mapOrientation, setMapOrientation] = useState<ServiceMapOrientation>('horizontal');
+  const viewFilters = controlledViewFilters ?? internalViewFilters;
+  const setViewFilters = useCallback(
+    (updater: ServiceMapViewFilters | ((prev: ServiceMapViewFilters) => ServiceMapViewFilters)) => {
+      setInternalViewFilters((prev) => {
+        const next = typeof updater === 'function' ? updater(prev) : updater;
+        onViewFiltersChange?.(next);
+        return next;
+      });
+    },
+    [onViewFiltersChange]
+  );
+  const [internalSearchQuery, setInternalSearchQuery] = useState(controlledSearchQuery ?? '');
+  const searchQuery = controlledSearchQuery ?? internalSearchQuery;
+  const setSearchQuery = useCallback(
+    (next: string) => {
+      setInternalSearchQuery(next);
+      onSearchQueryChange?.(next);
+    },
+    [onSearchQueryChange]
+  );
+  // Used to badge the controls toggle when the panel is collapsed but state is non-default.
+  // Persisted view filters / search query keep the map "the same view" — but the options panel
+  // itself stays closed on the dashboard (product feedback: it's an authoring affordance).
+  const hasActiveControls =
+    viewFilters.alertStatusFilter.length > 0 ||
+    viewFilters.sloStatusFilter.length > 0 ||
+    viewFilters.connectionFilter.length > 0 ||
+    viewFilters.anomalySeverityFilter.length > 0 ||
+    searchQuery.trim().length > 0;
+  const [panelExpanded, setPanelExpanded] = useState(!isEmbedded);
+  const [internalOrientation, setInternalOrientation] = useState<ServiceMapOrientation>(
+    controlledOrientation ?? 'horizontal'
+  );
+  const mapOrientation = controlledOrientation ?? internalOrientation;
+  const setMapOrientation = useCallback(
+    (next: ServiceMapOrientation) => {
+      setInternalOrientation(next);
+      onMapOrientationChange?.(next);
+    },
+    [onMapOrientationChange]
+  );
 
   // Track the current selected node for use in layout effect without triggering re-layout
   const selectedNodeIdRef = useRef<string | null>(null);
@@ -565,12 +626,11 @@ function GraphInner({
             <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
             <Panel position="top-left" css={topLeftToolbarStyles}>
               <div css={topLeftToolbarColumnStyles}>
-                {!isEmbedded && (
-                  <ServiceMapOptionsPanelToggle
-                    isExpanded={panelExpanded}
-                    onExpandedChange={setPanelExpanded}
-                  />
-                )}
+                <ServiceMapOptionsPanelToggle
+                  isExpanded={panelExpanded}
+                  onExpandedChange={setPanelExpanded}
+                  hasActiveControls={hasActiveControls}
+                />
                 <EuiPanel
                   hasBorder
                   hasShadow={false}
@@ -610,19 +670,17 @@ function GraphInner({
                       data-test-subj="serviceMapZoomOutButton"
                       css={mapToolbarControlIconCss}
                     />
-                    {!isEmbedded && (
-                      <EuiButtonIcon
-                        display="empty"
-                        color="text"
-                        size="s"
-                        iconType="crosshair"
-                        onClick={() => fitView(getFitViewOptions())}
-                        title={fitViewLabel}
-                        aria-label={fitViewLabel}
-                        data-test-subj="serviceMapFitViewButton"
-                        css={mapToolbarControlIconCss}
-                      />
-                    )}
+                    <EuiButtonIcon
+                      display="empty"
+                      color="text"
+                      size="s"
+                      iconType="crosshair"
+                      onClick={() => fitView(getFitViewOptions())}
+                      title={fitViewLabel}
+                      aria-label={fitViewLabel}
+                      data-test-subj="serviceMapFitViewButton"
+                      css={mapToolbarControlIconCss}
+                    />
                     {fullMapHref && (
                       <EuiButtonIcon
                         display="empty"
@@ -661,7 +719,7 @@ function GraphInner({
                   <ServiceMapLegend controlIconCss={mapToolbarControlIconCss} />
                 </EuiPanel>
               </div>
-              {!isEmbedded && panelExpanded && (
+              {panelExpanded && (
                 <ServiceMapOptionsPanel
                   nodes={nodesAfterFilters}
                   filterOptionCounts={filterOptionCounts}
@@ -683,9 +741,26 @@ function GraphInner({
                   }
                   mapOrientation={mapOrientation}
                   onMapOrientationChange={setMapOrientation}
+                  searchQuery={searchQuery}
+                  onSearchQueryChange={setSearchQuery}
                 />
               )}
             </Panel>
+            {!isEmbedded && (
+              <Panel position="top-right">
+                <AddToDashboardButton
+                  environment={environment}
+                  kuery={kuery}
+                  start={start}
+                  end={end}
+                  serviceName={serviceName}
+                  serviceGroupId={serviceGroupId}
+                  mapOrientation={mapOrientation}
+                  viewFilters={viewFilters}
+                  searchQuery={searchQuery}
+                />
+              </Panel>
+            )}
             {!isEmbedded && <ServiceMapMinimap />}
           </ReactFlow>
           <MapPopover

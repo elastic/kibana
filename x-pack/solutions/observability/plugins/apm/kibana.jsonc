@@ -32,6 +32,7 @@
       "unifiedSearch",
       "kql",
       "dataViews",
+      "presentationUtil",
       "lens",
       "maps",
       "uiActions",

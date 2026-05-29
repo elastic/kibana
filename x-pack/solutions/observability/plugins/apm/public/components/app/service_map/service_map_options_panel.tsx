@@ -149,6 +149,8 @@ const ANOMALY_SEVERITY_OPTIONS: { value: ML_ANOMALY_SEVERITY; label: string }[] 
 export interface ServiceMapOptionsPanelToggleProps {
   isExpanded: boolean;
   onExpandedChange: (next: boolean) => void;
+  /** When true, show a small dot on the toggle indicating filters or a search query are active. */
+  hasActiveControls?: boolean;
 }
 
 export interface ServiceMapOptionsPanelProps {
@@ -164,6 +166,10 @@ export interface ServiceMapOptionsPanelProps {
   onAnomalySeverityFilterChange: (next: ML_ANOMALY_SEVERITY[]) => void;
   mapOrientation: ServiceMapOrientation;
   onMapOrientationChange: (next: ServiceMapOrientation) => void;
+  /** Pass-through to ServiceMapFindInPage for controlled search query. */
+  searchQuery?: string;
+  /** Pass-through to ServiceMapFindInPage; called whenever the user edits the search field. */
+  onSearchQueryChange?: (next: string) => void;
 }
 
 /** Same hit target as map zoom / fit controls in graph.tsx (2 × base size). */
@@ -187,16 +193,50 @@ const useToolbarToggleIconCss = () => {
 export function ServiceMapOptionsPanelToggle({
   isExpanded,
   onExpandedChange,
+  hasActiveControls = false,
 }: ServiceMapOptionsPanelToggleProps) {
   const mapToolbarToggleIconCss = useToolbarToggleIconCss();
+  const { euiTheme } = useEuiTheme();
 
-  const toggleLabel = isExpanded
+  // Only badge while collapsed — once open the chips themselves communicate the same thing.
+  const showBadge = hasActiveControls && !isExpanded;
+
+  const baseLabel = isExpanded
     ? i18n.translate('xpack.apm.serviceMap.controls.hideControls', {
         defaultMessage: 'Hide controls',
       })
     : i18n.translate('xpack.apm.serviceMap.controls.showControls', {
         defaultMessage: 'Show controls',
       });
+
+  const toggleLabel = showBadge
+    ? i18n.translate('xpack.apm.serviceMap.controls.showControlsWithActiveFilters', {
+        defaultMessage: '{baseLabel} (filters active)',
+        values: { baseLabel },
+      })
+    : baseLabel;
+
+  const panelWrapperCss = useMemo(
+    () => css`
+      position: relative;
+    `,
+    []
+  );
+
+  const badgeCss = useMemo(
+    () => css`
+      position: absolute;
+      top: -${euiTheme.size.xs};
+      right: -${euiTheme.size.xs};
+      width: ${euiTheme.size.s};
+      height: ${euiTheme.size.s};
+      border-radius: 50%;
+      background-color: ${euiTheme.colors.accent};
+      border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.emptyShade};
+      pointer-events: none;
+    `,
+    [euiTheme]
+  );
 
   return (
     <EuiPanel
@@ -206,6 +246,7 @@ export function ServiceMapOptionsPanelToggle({
       paddingSize="none"
       borderRadius="m"
       grow={false}
+      css={panelWrapperCss}
     >
       <EuiFlexGroup
         justifyContent="center"
@@ -228,6 +269,13 @@ export function ServiceMapOptionsPanelToggle({
           }
         />
       </EuiFlexGroup>
+      {showBadge && (
+        <span
+          css={badgeCss}
+          data-test-subj="serviceMapOptionsPanelToggleActiveIndicator"
+          aria-hidden="true"
+        />
+      )}
     </EuiPanel>
   );
 }
@@ -245,6 +293,8 @@ export function ServiceMapOptionsPanel({
   onAnomalySeverityFilterChange,
   mapOrientation,
   onMapOrientationChange,
+  searchQuery,
+  onSearchQueryChange,
 }: ServiceMapOptionsPanelProps) {
   const connectionCounts = filterOptionCounts.connection;
   const alertCounts = filterOptionCounts.alerts;
@@ -378,7 +428,11 @@ export function ServiceMapOptionsPanel({
       grow={false}
       css={panelSizingCss}
     >
-      <ServiceMapFindInPage nodes={nodes} />
+      <ServiceMapFindInPage
+        nodes={nodes}
+        searchQuery={searchQuery}
+        onSearchQueryChange={onSearchQueryChange}
+      />
 
       <EuiHorizontalRule margin="m" />
 

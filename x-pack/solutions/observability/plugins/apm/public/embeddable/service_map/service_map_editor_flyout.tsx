@@ -18,6 +18,7 @@ import {
   EuiFormRow,
   EuiLink,
   EuiSkeletonText,
+  EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -177,6 +178,9 @@ export function ServiceMapEditorFlyout({
   );
   const [kuery, setKuery] = useState(initialState?.kuery ?? '');
   const [serviceName, setServiceName] = useState(initialState?.service_name ?? '');
+  const [syncWithDashboardFilters, setSyncWithDashboardFilters] = useState<boolean>(
+    initialState?.sync_with_dashboard_filters ?? false
+  );
 
   const [selectedServiceOption, setSelectedServiceOption] = useState<
     Array<EuiComboBoxOptionOption<string>>
@@ -251,9 +255,10 @@ export function ServiceMapEditorFlyout({
       environment,
       kuery: kuery.trim() ? kuery : undefined,
       service_name: serviceName || undefined,
+      sync_with_dashboard_filters: syncWithDashboardFilters,
     };
     onSave(state);
-  }, [environment, kuery, serviceName, onSave]);
+  }, [environment, kuery, serviceName, syncWithDashboardFilters, onSave]);
 
   return (
     <div style={serviceMapFlyoutShellStyle}>
@@ -341,6 +346,23 @@ export function ServiceMapEditorFlyout({
           </EuiFormRow>
 
           <KueryInput kuery={kuery} onChange={setKuery} deps={deps} />
+
+          <EuiFormRow
+            helpText={i18n.translate('xpack.apm.serviceMapEditor.syncFiltersHelpText', {
+              defaultMessage:
+                "When on, the panel responds to the dashboard's global filters and search. Time range is not synced — it stays panel-owned.",
+            })}
+            fullWidth
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.apm.serviceMapEditor.syncFiltersLabel', {
+                defaultMessage: 'Sync with dashboard filters',
+              })}
+              checked={syncWithDashboardFilters}
+              onChange={(e) => setSyncWithDashboardFilters(e.target.checked)}
+              data-test-subj="apmServiceMapEditorSyncFiltersToggle"
+            />
+          </EuiFormRow>
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
