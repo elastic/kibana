@@ -59,8 +59,13 @@ echo "--- Load previous snapshot for trend comparison"
 IS_WEEKLY_PIPELINE="${BUILDKITE_PIPELINE_SLUG:-}" && [ "$IS_WEEKLY_PIPELINE" = "kibana-code-quality-fallow" ] && IS_WEEKLY_PIPELINE=true || IS_WEEKLY_PIPELINE=false
 
 TREND_FLAG=""
-SAVE_SNAPSHOT_FLAG=""
 PREV_BUILD=""
+
+# Always pass --save-snapshot so fallow knows where to read/write the snapshot.
+# If the snapshot file already exists (downloaded below), fallow will use it as a baseline.
+# Artifact upload is conditional on IS_WEEKLY_PIPELINE (see below).
+mkdir -p "$SNAPSHOT_DIR"
+SAVE_SNAPSHOT_FLAG="--save-snapshot ${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
 
 if [ -n "${BUILDKITE_API_TOKEN:-}" ]; then
   PREV_BUILD=$(curl -sf \
@@ -70,7 +75,6 @@ if [ -n "${BUILDKITE_API_TOKEN:-}" ]; then
 fi
 
 if [ -n "$PREV_BUILD" ]; then
-  mkdir -p "$SNAPSHOT_DIR"
   if buildkite-agent artifact download "$SNAPSHOT_FILE" "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}" --build "$PREV_BUILD" 2>/dev/null; then
     echo "Loaded snapshot from weekly build #${PREV_BUILD} — trend comparison enabled"
     TREND_FLAG="--trend"
@@ -79,11 +83,6 @@ if [ -n "$PREV_BUILD" ]; then
   fi
 else
   echo "No previous weekly build found"
-fi
-
-if [ "$IS_WEEKLY_PIPELINE" = "true" ]; then
-  echo "Weekly pipeline — snapshot will be saved for next run"
-  SAVE_SNAPSHOT_FLAG="--save-snapshot ${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
 fi
 
 echo "--- Run fallow analysis"
