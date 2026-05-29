@@ -26,6 +26,9 @@ const SLO_HISTORY_PARAMS = {
   _a: SLO_HISTORY_APP_STATE,
 };
 
+// SLO details + history charts can exceed the default 10s expect timeout on cloud CI.
+const SLO_PANEL_VISIBLE_TIMEOUT = 30_000;
+
 spaceTest.describe(
   'Traces in Discover - Explore from SLO',
   {
@@ -55,7 +58,9 @@ spaceTest.describe(
           await page.gotoApp(`slo/${sloIds.latency}/history`, {
             params: SLO_HISTORY_PARAMS,
           });
-          await expect(page.testSubj.locator('eventsChartPanel')).toBeVisible();
+          await expect(page.testSubj.locator('eventsChartPanel')).toBeVisible({
+            timeout: SLO_PANEL_VISIBLE_TIMEOUT,
+          });
         });
 
         await spaceTest.step('"View events" link opens traces experience in Discover', async () => {
@@ -79,7 +84,9 @@ spaceTest.describe(
           await page.gotoApp(`slo/${sloIds.availability}/history`, {
             params: SLO_HISTORY_PARAMS,
           });
-          await expect(page.testSubj.locator('eventsChartPanel')).toBeVisible();
+          await expect(page.testSubj.locator('eventsChartPanel')).toBeVisible({
+            timeout: SLO_PANEL_VISIBLE_TIMEOUT,
+          });
         });
 
         await spaceTest.step('"View events" link opens traces experience in Discover', async () => {
@@ -103,7 +110,9 @@ spaceTest.describe(
           await page.gotoApp(`slo/${sloIds.latency}/history`, {
             params: SLO_HISTORY_PARAMS,
           });
-          await expect(page.testSubj.locator('sliChartPanel')).toBeVisible();
+          await expect(page.testSubj.locator('sliChartPanel')).toBeVisible({
+            timeout: SLO_PANEL_VISIBLE_TIMEOUT,
+          });
         });
 
         await spaceTest.step('open SLI chart actions and click "Traces in Discover"', async () => {
