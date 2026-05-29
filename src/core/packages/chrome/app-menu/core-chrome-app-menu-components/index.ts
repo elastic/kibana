@@ -37,4 +37,5 @@ export {
   getPopoverPanels,
   getPopoverActionItems,
   getIsSelectedColor,
+  hasNonGlobalStaticItems,
 } from './src';

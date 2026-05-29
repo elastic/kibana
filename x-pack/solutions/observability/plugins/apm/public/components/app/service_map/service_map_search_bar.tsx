@@ -64,12 +64,19 @@ export function ServiceMapSearchBar() {
   );
 
   // Persist filter-bar pills and control selections in the URL (_a) so they survive refresh.
-  const { persistControlSelections, getRestoredControlSelections } = useFilterUrlSync();
+  const { initialAppFilters, persistControlSelections, getRestoredControlSelections } =
+    useFilterUrlSync();
+
+  const getFilterBarFilters = useCallback(
+    () => [...filterManager.getGlobalFilters(), ...filterManager.getAppFilters()],
+    [filterManager]
+  );
 
   // Mirror filterManager state so filter-bar pill changes trigger a re-render.
-  const [filterBarFilters, setFilterBarFilters] = useState<Filter[]>(() =>
-    filterManager.getFilters()
-  );
+  const [filterBarFilters, setFilterBarFilters] = useState<Filter[]>(() => [
+    ...filterManager.getGlobalFilters(),
+    ...initialAppFilters,
+  ]);
 
   // Controls API selections — set by onFiltersChange.
   const [panelFilters, setPanelFilters] = useState<Filter[]>([]);
@@ -81,10 +88,10 @@ export function ServiceMapSearchBar() {
   // Keep filterBarFilters in sync with Kibana's filterManager.
   useEffect(() => {
     const sub = filterManager.getUpdates$().subscribe(() => {
-      setFilterBarFilters(filterManager.getFilters());
+      setFilterBarFilters(getFilterBarFilters());
     });
     return () => sub.unsubscribe();
-  }, [filterManager]);
+  }, [filterManager, getFilterBarFilters]);
 
   // When Controls fire, record that they have and update panel filters.
   const handlePanelFiltersChange = useCallback((filters: Filter[]) => {
