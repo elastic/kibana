@@ -100,9 +100,7 @@ const buildTriggerEventLogQueryClauses = (
     // Field list must stay aligned with WORKFLOWS_EVENTS_DATA_VIEW_FIELDS (see @kbn/workflows).
     // Trigger ids are camelCase in _source (e.g. cases.caseCreated) but keyword terms are indexed
     // lowercase; case-insensitive term/wildcard queries match UI scope KQL and user input.
-    must.push(
-      toElasticsearchQuery(node, WORKFLOWS_EVENTS_DATA_VIEW, { caseInsensitive: true })
-    );
+    must.push(toElasticsearchQuery(node, WORKFLOWS_EVENTS_DATA_VIEW, { caseInsensitive: true }));
   }
 
   return { must, filter };

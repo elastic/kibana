@@ -188,7 +188,7 @@ export const WorkflowExecuteEventForm = ({
                 defaultMessage: 'Filter using KQL (e.g. triggerId: my.trigger or eventId: abc)',
               }
             )}
-            data-test-subj="workflow-trigger-events-query-input"
+            dataTestSubj="workflow-trigger-events-query-input"
             displayStyle="inPage"
           />
         </EuiFlexItem>
