@@ -72,7 +72,15 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
     );
   });
 
-  it('calls the task scheduling endpoint', () => {
-    assertYamlContains('features/_task');
+  it('calls the onboarding scheduling endpoint', () => {
+    assertYamlContains('onboarding/_execute');
+  });
+
+  it('calls the onboarding status endpoint', () => {
+    assertYamlContains('onboarding/_status');
+  });
+
+  it('passes features_identification step', () => {
+    assertYamlContains('features_identification');
   });
 });
