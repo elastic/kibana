@@ -8,7 +8,9 @@
     "@kbn/core",
     "@kbn/data-views-plugin",
     "@kbn/as-code-data-views-schema",
-    "@kbn/as-code-data-views-transforms"
+    "@kbn/as-code-data-views-transforms",
+    "@kbn/config-schema",
+    "@kbn/kibana-utils-plugin"
   ],
   "exclude": ["target/**/*"]
 }
