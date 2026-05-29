@@ -160,4 +160,13 @@ describe('composeEsqlQuery', () => {
     const result = composeEsqlQuery('FROM metrics-*', 'WHERE cpu > 0.9');
     expect(validateEsqlQuery(result)).toBeUndefined();
   });
+
+  it.each([
+    ['| WHERE cpu > 0.9'],
+    [' |WHERE cpu > 0.9'],
+    ['  |  WHERE cpu > 0.9'],
+    ['\n|\tWHERE cpu > 0.9'],
+  ])('tolerates a leading pipe in the segment ("%s")', (segment) => {
+    expect(composeEsqlQuery('FROM metrics-*', segment)).toBe('FROM metrics-* | WHERE cpu > 0.9');
+  });
 });

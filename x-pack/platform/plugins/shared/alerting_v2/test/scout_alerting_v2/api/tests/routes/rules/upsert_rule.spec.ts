@@ -257,23 +257,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
-    'validation: should reject upsert with a composed segment starting with a leading pipe',
-    async ({ apiClient }) => {
-      const response = await apiClient.put(getRuleUrl('upsert-leading-pipe'), {
-        headers: writerHeaders,
-        body: buildCreateRuleData({
-          query: {
-            format: 'composed',
-            base: 'FROM metrics-*',
-            breach: { segment: '| WHERE cpu > 0.9' },
-          },
-        }),
-      });
-      expect(response).toHaveStatusCode(400);
-    }
-  );
-
-  apiTest(
     'authorization: should return 201 for a user with full alerting_v2 privileges',
     async ({ apiClient }) => {
       const response = await apiClient.put(getRuleUrl('writer-can-upsert'), {

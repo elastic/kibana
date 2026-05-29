@@ -419,26 +419,6 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
-    'validation: rejects a patch that introduces a composed segment starting with a leading pipe',
-    async ({ apiClient, apiServices }) => {
-      const created = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-leading-pipe' } })
-      );
-      const response = await apiClient.patch(getRuleUrl(created.id), {
-        headers: writerHeaders,
-        body: {
-          query: {
-            format: 'composed',
-            base: 'FROM metrics-*',
-            breach: { segment: '| WHERE cpu > 0.9' },
-          },
-        },
-      });
-      expect(response).toHaveStatusCode(400);
-    }
-  );
-
-  apiTest(
     'authorization: should return 200 for a user with full alerting_v2 privileges',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(

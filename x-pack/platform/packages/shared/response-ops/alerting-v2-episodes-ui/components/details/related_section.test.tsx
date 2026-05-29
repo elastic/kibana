@@ -37,7 +37,7 @@ const mockServices = createMockServices({ http: mockHttp });
 const mockRule = {
   id: 'rule-1',
   metadata: { name: 'My rule' },
-  evaluation: { query: { base: 'FROM logs' } },
+  query: { format: 'standalone', breach: { query: 'FROM logs' } },
 } as unknown as RuleResponse;
 
 const mockEpisodeEventsResponse = {

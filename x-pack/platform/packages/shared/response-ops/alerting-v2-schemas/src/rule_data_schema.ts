@@ -115,20 +115,17 @@ export const noDataBehavior = noDataBehaviorSchema.enum;
 export type NoDataBehavior = z.infer<typeof noDataBehaviorSchema>;
 
 /**
- * Appendable ES|QL segment (e.g. `WHERE …`) — a bare command without a
- * leading pipe. Not a complete program on its own, so we only enforce
- * structural bounds here (length, non-empty, no leading pipe). Full
- * parser validation only runs when the segment is composed with its
- * `base` via `composeEsqlQuery`.
+ * Appendable ES|QL segment (e.g. `WHERE …`). Conceptually a bare command,
+ * but a leading `|` is also tolerated — `composeEsqlQuery` strips it before
+ * splicing the segment onto `base`. We only enforce structural bounds here
+ * (length, non-empty). Full parser validation only runs when the segment is
+ * composed with its `base` via `composeEsqlQuery`.
  */
 export const esqlQuerySegmentSchema = z
   .string()
   .min(1)
   .max(10000)
-  .refine((s) => s.trim().length > 0, { message: 'Segment must not be whitespace-only' })
-  .refine((s) => !s.trimStart().startsWith('|'), {
-    message: 'Segment must not start with a leading "|"; the pipe is prepended automatically.',
-  });
+  .refine((s) => s.trim().length > 0, { message: 'Segment must not be whitespace-only' });
 
 /** Composed wrappers (segment-based, appended to `base`). */
 

@@ -410,56 +410,6 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it.each([['| WHERE cpu > 0.9'], ['  | WHERE cpu > 0.9'], ['\n|WHERE cpu > 0.9']] as const)(
-      'rejects a composed breach segment that starts with "%s"',
-      (segment) => {
-        const result = createRuleDataSchema.safeParse({
-          ...validCreateData,
-          query: {
-            format: 'composed',
-            base: 'FROM metrics-*',
-            breach: { segment },
-          },
-        });
-        expect(result.success).toBe(false);
-        if (!result.success) {
-          expect(result.error.issues[0].message).toMatch(/leading "\|"/);
-        }
-      }
-    );
-
-    it('rejects a composed recovery segment that starts with a leading pipe', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        query: {
-          format: 'composed',
-          base: 'FROM metrics-*',
-          breach: { segment: 'WHERE cpu > 0.9' },
-          recovery: { strategy: 'query', segment: '| WHERE cpu <= 0.9' },
-        },
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toMatch(/leading "\|"/);
-      }
-    });
-
-    it('rejects a composed no_data segment that starts with a leading pipe', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        query: {
-          format: 'composed',
-          base: 'FROM metrics-*',
-          breach: { segment: 'WHERE cpu > 0.9' },
-          no_data: { segment: '| WHERE host IS NULL', behavior: 'emit' },
-        },
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toMatch(/leading "\|"/);
-      }
-    });
-
     it('accepts a composed query with recovery strategy "no_breach"', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -1385,7 +1335,7 @@ describe('bulkGetRulesResponseSchema', () => {
     metadata: { name: 'r' },
     time_field: '@timestamp',
     schedule: { every: '5m' },
-    evaluation: { query: { base: 'FROM logs-* | LIMIT 1' } },
+    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
     enabled: true,
     createdBy: 'user-a',
     createdAt: '2026-01-01T00:00:00.000Z',

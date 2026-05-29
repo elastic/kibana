@@ -22,12 +22,23 @@ import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
  *   want. Tests that care about the lifecycle override it explicitly. Signal
  *   rules must opt out via `state_transition: undefined` because the schema
  *   forbids state_transition for `kind: 'signal'`.
+ * - `query.recovery: { strategy: 'no_breach' }` so that, by default, rules
+ *   recover whenever a previously-breaching group stops appearing in the
+ *   breach query results. Signal rules must opt out by passing
+ *   `query: { ..., recovery: undefined }` because the schema forbids
+ *   `recovery`/`no_data` on `kind: 'signal'`. Tests that override `query`
+ *   should include `recovery: { strategy: 'no_breach' }` (or another valid
+ *   recovery) if they want the executor to emit recovery events.
  */
 const DEFAULTS: CreateRuleData = {
   kind: 'alert',
   metadata: { name: 'scout-rule' },
   schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+  query: {
+    format: 'standalone',
+    breach: { query: 'FROM logs-* | LIMIT 10' },
+    recovery: { strategy: 'no_breach' },
+  },
   time_field: '@timestamp',
   grouping: { fields: ['host.name'] },
   state_transition: { pending_count: 0, recovering_count: 0 },
@@ -44,6 +55,7 @@ export type BuildCreateRuleDataInput = Partial<CreateRuleData>;
 export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => ({
   ...DEFAULTS,
   ...input,
+  ...(input.kind === 'signal' ? { recovery: undefined } : {}),
 });
 
 export type BuildCreateActionPolicyDataInput = Partial<CreateActionPolicyDataInput>;

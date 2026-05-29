@@ -72,17 +72,17 @@ export function validateEsqlQuery(query: string): string | void {
 }
 
 /**
- * Compose a base ES|QL query with a pipe-less segment to avoid fragile string
- * concatenation. The segment is a bare command (e.g. `WHERE x > 0`) without
- * a leading pipe operator — the pipe is added internally.
+ * Compose a base ES|QL query with an appendable segment to avoid fragile
+ * string concatenation. The segment is typically a bare command (e.g.
+ * `WHERE x > 0`); a leading pipe is tolerated and stripped so the pipe is
+ * always supplied internally.
  */
 export function composeEsqlQuery(base: string, segment: string): string {
-  // validate the ES|QL queries
+  const normalizedSegment = segment.replace(/^\s*\|\s*/, '');
   const { root: baseRoot } = Parser.parse(base);
-  const { root: segmentRoot } = Parser.parse('FROM _\n| ' + segment);
+  const { root: segmentRoot } = Parser.parse('FROM _\n| ' + normalizedSegment);
   // drop the "FROM _" from the validated block command
   const segmentCommands = segmentRoot.commands.slice(1);
-  // concatenate the queries
   const composedRoot = {
     ...baseRoot,
     commands: [...baseRoot.commands, ...segmentCommands],
