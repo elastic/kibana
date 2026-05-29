@@ -88,8 +88,6 @@ describe('ExportResultsButton', () => {
 
       fireEvent.click(screen.getByTestId('osqueryExportResultsButton'));
 
-      fireEvent.click(screen.getByTestId('osqueryExportFormatSelect'));
-      fireEvent.click(screen.getByText('CSV'));
       fireEvent.click(screen.getByTestId('osqueryExportConfirmButton'));
 
       expect(defaultExportMock.exportResults).toHaveBeenCalledWith('csv', undefined);

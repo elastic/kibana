@@ -97,8 +97,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-agent-builder",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/core-user-profile-browser",
-    "@kbn/user-profile-components",
     "@kbn/maintenance-windows-plugin",
     "@kbn/esql-types",
     "@kbn/agent-builder-plugin",
@@ -108,7 +106,8 @@
     "@kbn/agent-context-layer-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-elasticsearch-server",
-    "@kbn/workflows-ui",
+    "@kbn/core-user-profile-browser",
+    "@kbn/workflows-ui"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }
