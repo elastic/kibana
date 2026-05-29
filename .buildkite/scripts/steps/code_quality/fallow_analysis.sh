@@ -54,25 +54,36 @@ npm ci --prefix .buildkite
 .buildkite/node_modules/.bin/fallow --version
 
 echo "--- Load previous snapshot for trend comparison"
+# Snapshots are saved only from the weekly standalone pipeline (kibana-code-quality-fallow).
+# PR runs and local runs do not save snapshots.
+IS_WEEKLY_PIPELINE="${BUILDKITE_PIPELINE_SLUG:-}" && [ "$IS_WEEKLY_PIPELINE" = "kibana-code-quality-fallow" ] && IS_WEEKLY_PIPELINE=true || IS_WEEKLY_PIPELINE=false
+
 TREND_FLAG=""
+SAVE_SNAPSHOT_FLAG=""
 PREV_BUILD=""
-if [ -n "${BUILDKITE_API_TOKEN:-}" ] && [ -n "${BUILDKITE_PIPELINE_SLUG:-}" ]; then
+
+if [ -n "${BUILDKITE_API_TOKEN:-}" ]; then
   PREV_BUILD=$(curl -sf \
     -H "Authorization: Bearer ${BUILDKITE_API_TOKEN}" \
-    "https://api.buildkite.com/v2/organizations/elastic/pipelines/${BUILDKITE_PIPELINE_SLUG}/builds?state=passed&branch=main&per_page=1" \
+    "https://api.buildkite.com/v2/organizations/elastic/pipelines/kibana-code-quality-fallow/builds?state=passed&branch=main&per_page=1" \
     | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['number'] if d else '')" 2>/dev/null || true)
 fi
 
 if [ -n "$PREV_BUILD" ]; then
   mkdir -p "$SNAPSHOT_DIR"
   if buildkite-agent artifact download "$SNAPSHOT_FILE" "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}" --build "$PREV_BUILD" 2>/dev/null; then
-    echo "Loaded snapshot from build #${PREV_BUILD} — trend comparison enabled"
+    echo "Loaded snapshot from weekly build #${PREV_BUILD} — trend comparison enabled"
     TREND_FLAG="--trend"
   else
-    echo "No snapshot in build #${PREV_BUILD} — this run will create the first baseline"
+    echo "No snapshot found in build #${PREV_BUILD}"
   fi
 else
-  echo "No previous build found — this run will create the first baseline"
+  echo "No previous weekly build found"
+fi
+
+if [ "$IS_WEEKLY_PIPELINE" = "true" ]; then
+  echo "Weekly pipeline — snapshot will be saved for next run"
+  SAVE_SNAPSHOT_FLAG="--save-snapshot ${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
 fi
 
 echo "--- Run fallow analysis"
@@ -96,7 +107,7 @@ FALLOW_OUTPUT=$(.buildkite/node_modules/.bin/fallow \
   --format human \
   --quiet \
   --score \
-  --save-snapshot "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}" \
+  $SAVE_SNAPSHOT_FLAG \
   $TREND_FLAG \
   2>&1)
 set -e
@@ -116,8 +127,10 @@ echo "--- Health scores (complexity + maintainability, 0-100)"
 echo "Columns: score | grade | files analyzed | hotspots (high complexity + high churn) | p90 cyclomatic"
 printf '%s\n' "$FALLOW_OUTPUT" | awk '/^● Per-owner health/,0'
 
-echo "--- Save snapshot for next run"
-buildkite-agent artifact upload "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
+if [ "$IS_WEEKLY_PIPELINE" = "true" ]; then
+  echo "--- Save snapshot for next run"
+  buildkite-agent artifact upload "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
+fi
 
 echo "--- Post Buildkite annotation"
 
