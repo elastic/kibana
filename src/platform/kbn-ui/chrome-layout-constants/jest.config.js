@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginFunctionalProviderContext } from '../../services';
-
-export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
-  describe('SharedUX', () => {
-    loadTestFile(require.resolve('./eui_provider'));
-  });
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/platform/kbn-ui/chrome-layout-constants'],
+  setupFilesAfterEnv: [],
+  modulePathIgnorePatterns: ['<rootDir>/src/platform/kbn-ui/chrome-layout-constants/packaging'],
+};
