@@ -6,9 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { safeJsonStringify } from '@kbn/std';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
+import { ElasticGenAIAttributes, GenAISemanticConventions, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import { toWorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
 import type { WorkflowExecutionResult } from './types';
 
@@ -38,12 +37,12 @@ export const executeWorkflow = async ({
   metadata,
 }: ExecuteWorkflowParams): Promise<WorkflowExecutionResult> => {
   return withActiveInferenceSpan(
-    `Workflow: ${workflowId}`,
+    `invoke_workflow ${workflowId}`,
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+        [GenAISemanticConventions.GenAIOperationName]: 'invoke_workflow',
         'elastic.workflow.id': workflowId,
-        'input.value': safeJsonStringify(workflowParams) ?? '{}',
       },
     },
     async (span) => {
@@ -62,14 +61,13 @@ export const executeWorkflow = async ({
 
         if (executeResult.execution) {
           span?.setAttribute(
-            'elastic.workflow.name',
+            GenAISemanticConventions.GenAIWorkflowName,
             executeResult.execution.workflowDefinition.name
           );
           const result: WorkflowExecutionResult = {
             success: true,
             execution: toWorkflowExecutionState(executeResult.execution),
           };
-          span?.setAttribute('output.value', safeJsonStringify(result) ?? 'unknown');
           return result;
         }
 
@@ -77,14 +75,12 @@ export const executeWorkflow = async ({
           success: false,
           error: `Workflow '${workflowId}' executed but execution not found after ${completionTimeoutSec}s.`,
         };
-        span?.setAttribute('output.value', safeJsonStringify(result) ?? 'unknown');
         return result;
       } catch (e) {
         const result: WorkflowExecutionResult = {
           success: false,
           error: e instanceof Error ? e.message : String(e),
         };
-        span?.setAttribute('output.value', safeJsonStringify(result) ?? 'unknown');
         return result;
       }
     }

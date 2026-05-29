@@ -43,7 +43,7 @@ const PROMOTED_KEYS = new Set([
   'gen_ai.usage.input_tokens',
   'gen_ai.usage.output_tokens',
   'gen_ai.usage.total_tokens',
-  'elastic.tool.parameters',
+  'gen_ai.tool.call.arguments',
   'tool.parameters',
   'output.value',
   'gen_ai.prompt.id',
@@ -69,7 +69,7 @@ const categorizeAttributes = (attrs: Record<string, unknown>): CategorizedAttrs 
       result.tokens.output = value as number;
     } else if (key === 'gen_ai.usage.total_tokens') {
       result.tokens.total = value as number;
-    } else if (key === 'elastic.tool.parameters' || key === 'tool.parameters') {
+    } else if (key === 'gen_ai.tool.call.arguments' || key === 'tool.parameters') {
       result.toolInput = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
     } else if (key === 'output.value') {
       result.toolOutput =

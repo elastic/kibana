@@ -10,7 +10,11 @@ import { defer, shareReplay } from 'rxjs';
 import { z } from '@kbn/zod/v4';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
+import {
+  ElasticGenAIAttributes,
+  GenAISemanticConventions,
+  withActiveInferenceSpan,
+} from '@kbn/inference-tracing';
 import type { Conversation, ConversationRound, ConverseInput } from '@kbn/agent-builder-common';
 import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 
@@ -50,7 +54,12 @@ const generateConversationTitle = async ({
 }) => {
   return withActiveInferenceSpan(
     'GenerateTitle',
-    { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
+    {
+      attributes: {
+        [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+        [GenAISemanticConventions.GenAIOperationName]: 'invoke_agent',
+      },
+    },
     async (span) => {
       const structuredModel = chatModel.withStructuredOutput(
         z
@@ -80,8 +89,6 @@ Now, generate a title for the following conversation.`,
       ];
 
       const { title } = await structuredModel.invoke(prompt);
-
-      span?.setAttribute('output.value', title);
 
       return title;
     }

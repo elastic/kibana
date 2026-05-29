@@ -17,20 +17,23 @@ import type { AgentHandlerReturn } from '@kbn/agent-builder-server';
 
 interface WithAgentSpanOptions {
   agent: AgentDefinition;
+  conversationId?: string;
 }
 
 export function withAgentSpan(
-  { agent }: WithAgentSpanOptions,
+  { agent, conversationId }: WithAgentSpanOptions,
   cb: (span?: Span) => Promise<AgentHandlerReturn>
 ): Promise<AgentHandlerReturn> {
-  const { id: agentId, configuration } = agent;
+  const { id: agentId, configuration, name } = agent;
   return withActiveInferenceSpan(
-    'ExecuteAgent',
+    `invoke_agent ${name}`,
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'AGENT',
-        [ElasticGenAIAttributes.AgentId]: agentId,
+        [GenAISemanticConventions.GenAIOperationName]: 'invoke_agent',
         [GenAISemanticConventions.GenAIAgentId]: agentId,
+        [GenAISemanticConventions.GenAIAgentName]: name,
+        [GenAISemanticConventions.GenAIConversationId]: conversationId,
         [ElasticGenAIAttributes.AgentConfig]: safeJsonStringify(configuration),
       },
     },
@@ -39,11 +42,7 @@ export function withAgentSpan(
         return cb();
       }
 
-      const res = cb(span);
-      return res.then((agentReturn) => {
-        span.setAttribute('output.value', safeJsonStringify(agentReturn) ?? 'unknown');
-        return agentReturn;
-      });
+      return cb(span);
     }
   );
 }

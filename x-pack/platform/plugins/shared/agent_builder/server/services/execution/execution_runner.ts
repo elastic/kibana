@@ -123,7 +123,8 @@ const handleConversationExecution = async ({
     action,
   } = execution.agentParams;
 
-  const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
+  const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
+    deps;
 
   // Resolve scoped services
   const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
@@ -195,6 +196,9 @@ const handleConversationExecution = async ({
   const chatModel = (await modelProvider.getDefaultModel()).chatModel;
   const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
+  const agentRegistry = await agentService.getRegistry({ request });
+  const { name: agentName } = await agentRegistry.get(agentId);
+
   const { headers } = request;
   const opikTraceId = headers.opik_trace_id as string | undefined;
   const opikParentSpanId = headers.opik_parent_span_id as string | undefined;
@@ -206,7 +210,14 @@ const handleConversationExecution = async ({
   const spaceId = getCurrentSpaceId({ request, spaces: deps.spaces });
 
   return withConverseSpan(
-    { agentId, conversationId: effectiveConversationId, spaceId, opikHeaders },
+    {
+      agentId,
+      agentName,
+      providerName: connectorProvider,
+      conversationId: effectiveConversationId,
+      spaceId,
+      opikHeaders,
+    },
     () =>
       merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
         handleCancellation(abortSignal),

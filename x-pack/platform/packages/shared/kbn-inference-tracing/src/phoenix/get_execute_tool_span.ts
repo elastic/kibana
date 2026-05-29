@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { SemanticConventions } from '@arizeai/openinference-semantic-conventions';
+import { OUTPUT_VALUE, SemanticConventions } from '@arizeai/openinference-semantic-conventions';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
-import { ElasticGenAIAttributes } from '../types';
+import { GenAISemanticConventions } from '../types';
 
 export function getExecuteToolSpan(span: tracing.ReadableSpan) {
   span.attributes[SemanticConventions.TOOL_PARAMETERS] =
-    span.attributes[ElasticGenAIAttributes.ToolParameters];
+    span.attributes[GenAISemanticConventions.GenAIToolCallArguments];
   span.attributes[SemanticConventions.TOOL_DESCRIPTION] =
-    span.attributes[ElasticGenAIAttributes.ToolDescription];
+    span.attributes[GenAISemanticConventions.GenAIToolDescription];
+
+  const toolResult = span.attributes[GenAISemanticConventions.GenAIToolCallResult];
+  if (toolResult) {
+    span.attributes[OUTPUT_VALUE] = toolResult;
+  }
 
   return span;
 }
