@@ -6,9 +6,15 @@
  */
 
 import type { WaitForActiveAlertDiagnostics } from '../wait_for_active_alert';
-import type { AlertRuleConfig } from './types';
+import type { AlertRuleConfig, CustomThresholdRuleCreateRequest } from './types';
 
 const CUSTOM_THRESHOLD_RULE_TYPE_ID = 'observability.rules.custom_threshold';
+
+function isCustomThresholdRuleCreateRequest(
+  ruleParams: AlertRuleConfig['ruleParams']
+): ruleParams is CustomThresholdRuleCreateRequest {
+  return ruleParams.rule_type_id === CUSTOM_THRESHOLD_RULE_TYPE_ID;
+}
 
 function extractServiceNameFromKuery(query: string): string | undefined {
   const match = query.match(/service\.name:\s*"?(?<name>[^"\s]+)"?/);
@@ -21,7 +27,7 @@ export function getAlertRuleDiagnostics(
 ): WaitForActiveAlertDiagnostics {
   const { rule_type_id: ruleTypeId } = ruleParams;
 
-  if (ruleTypeId === CUSTOM_THRESHOLD_RULE_TYPE_ID) {
+  if (isCustomThresholdRuleCreateRequest(ruleParams)) {
     const criteria = ruleParams.params.criteria[0];
     const query = ruleParams.params.searchConfiguration.query.query;
 

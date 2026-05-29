@@ -293,7 +293,9 @@ async function appendApmDataDiagnostics({
   const timeFilter = { range: { '@timestamp': { gte: timeGte, lte: 'now' } } };
   const serviceFilter = { term: { 'service.name': serviceName } };
 
-  const isTransactionDurationRule = diagnostics.ruleTypeId === 'apm.transaction_duration';
+  const isCustomThresholdRule = diagnostics.ruleTypeId === 'observability.rules.custom_threshold';
+  const isMetricsLatencyRule =
+    diagnostics.ruleTypeId === 'apm.transaction_duration' || isCustomThresholdRule;
   const isErrorRateRule = diagnostics.ruleTypeId === 'apm.error_rate';
 
   if (isMetricsLatencyRule) {
