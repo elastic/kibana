@@ -9667,6 +9667,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ui-chrome-layout-constants@link:src/platform/kbn-ui/chrome-layout-constants":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ui-chrome-layout-utils@link:src/platform/kbn-ui/chrome-layout-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-chrome-layout@link:src/platform/kbn-ui/chrome-layout":
   version "0.0.0"
   uid ""
