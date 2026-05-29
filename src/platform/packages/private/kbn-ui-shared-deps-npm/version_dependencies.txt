@@ -27,7 +27,7 @@
 @emotion/memoize@0.9.0
 @emotion/react@11.14.0
 @emotion/serialize@1.3.3
-@emotion/sheet@1.4.0
+@emotion/sheet@1.4.1
 @emotion/stylis@0.8.5
 @emotion/unitless@0.10.0
 @emotion/unitless@0.7.5
@@ -94,7 +94,7 @@ ajv-formats@2.1.1
 ajv-keywords@3.5.2
 ajv-keywords@5.1.0
 ajv@6.14.0
-ajv@8.20.0
+ajv@8.18.0
 aria-hidden@1.2.2
 array-union@1.0.2
 array-uniq@1.0.3
@@ -127,7 +127,7 @@ buffer@5.7.1
 builtin-status-codes@3.0.0
 call-bind-apply-helpers@1.0.2
 call-bind@1.0.8
-call-bound@1.0.3
+call-bound@1.0.4
 callsites@3.1.0
 camelize@1.0.0
 caniuse-lite@1.0.30001781
@@ -210,7 +210,7 @@ evp_bytestokey@1.0.3
 extend@3.0.2
 fast-deep-equal@3.1.3
 fast-json-stable-stringify@2.1.0
-fast-uri@3.1.2
+fast-uri@3.0.3
 fastest-levenshtein@1.0.16
 file-selector@0.4.0
 find-root@1.1.0
