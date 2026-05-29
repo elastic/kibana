@@ -11,6 +11,7 @@ import type { KnowledgeIndicatorFeature, KnowledgeIndicatorQuery } from './types
 export const featureToKnowledgeIndicatorFeature = (feature: Feature): KnowledgeIndicatorFeature => {
   return {
     kind: 'feature',
+    stream_name: feature.stream_name,
     feature,
   };
 };

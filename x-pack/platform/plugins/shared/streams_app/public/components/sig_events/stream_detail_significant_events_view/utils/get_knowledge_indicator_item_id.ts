@@ -7,7 +7,19 @@
 
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 
-export const getKnowledgeIndicatorItemId = (knowledgeIndicator: KnowledgeIndicator): string =>
-  knowledgeIndicator.kind === 'feature'
-    ? knowledgeIndicator.feature.id
-    : knowledgeIndicator.query.id;
+/**
+ * Stable, globally-unique identifier for a knowledge indicator row.
+ *
+ * Identity in the unified data stream is `(stream.name, type, id)` — the bare
+ * `id` is only unique within a single stream, so it must be qualified by the
+ * stream name (and kind). Using `id` alone collides across streams in the
+ * multi-stream table, producing duplicated/ghost rows on re-render and broken
+ * selection/expansion state.
+ */
+export const getKnowledgeIndicatorItemId = (knowledgeIndicator: KnowledgeIndicator): string => {
+  const localId =
+    knowledgeIndicator.kind === 'feature'
+      ? knowledgeIndicator.feature.id
+      : knowledgeIndicator.query.id;
+  return `${knowledgeIndicator.stream_name}:${knowledgeIndicator.kind}:${localId}`;
+};

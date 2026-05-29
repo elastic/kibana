@@ -26,7 +26,8 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
 }
 
 function makeFeatureKI(overrides: Partial<Feature> = {}): KnowledgeIndicator {
-  return { kind: 'feature', feature: makeFeature(overrides) };
+  const feature = makeFeature(overrides);
+  return { kind: 'feature', stream_name: feature.stream_name, feature };
 }
 
 function makeQueryKI(

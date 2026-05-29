@@ -29,6 +29,7 @@ export function useFetchKnowledgeIndicators() {
   const knowledgeIndicators = useMemo<KnowledgeIndicator[]>(() => {
     const featureKnowledgeIndicators = (featuresData?.features ?? []).map((feature) => ({
       kind: 'feature' as const,
+      stream_name: feature.stream_name,
       feature,
     }));
 

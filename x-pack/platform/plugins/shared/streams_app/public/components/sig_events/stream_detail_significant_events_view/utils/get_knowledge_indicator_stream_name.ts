@@ -8,6 +8,4 @@
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 
 export const getKnowledgeIndicatorStreamName = (knowledgeIndicator: KnowledgeIndicator): string =>
-  knowledgeIndicator.kind === 'feature'
-    ? knowledgeIndicator.feature.stream_name
-    : knowledgeIndicator.stream_name;
+  knowledgeIndicator.stream_name;

@@ -41,15 +41,18 @@ export type KnowledgeIndicator = KnowledgeIndicatorFeature | KnowledgeIndicatorQ
 
 export interface KnowledgeIndicatorFeature {
   kind: 'feature';
+  // Stream that owns this indicator. Root-level on both variants so consumers
+  // can read `ki.stream_name` uniformly — identity is (stream_name, kind, id).
+  stream_name: string;
   feature: Feature;
 }
 
 export interface KnowledgeIndicatorQuery {
   kind: 'query';
+  stream_name: string;
   query: StreamQuery;
   rule: {
     backed: boolean;
     id: string;
   };
-  stream_name: string;
 }

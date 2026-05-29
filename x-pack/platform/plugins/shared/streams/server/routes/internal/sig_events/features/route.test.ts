@@ -52,11 +52,22 @@ describe('bulkFeaturesBodySchema', () => {
 });
 
 describe('bulkFeaturesAcrossStreamsBodySchema', () => {
-  it('accepts exclude/restore/delete', () => {
+  it('accepts stream-qualified exclude/restore/delete', () => {
     const result = bulkFeaturesAcrossStreamsBodySchema.safeParse({
-      operations: [{ exclude: { id: 'a' } }, { restore: { id: 'b' } }, { delete: { id: 'c' } }],
+      operations: [
+        { exclude: { id: 'a', stream_name: 'logs.a' } },
+        { restore: { id: 'b', stream_name: 'logs.b' } },
+        { delete: { id: 'c', stream_name: 'logs.c' } },
+      ],
     });
     expect(result.success).toBe(true);
+  });
+
+  it('rejects operations missing stream_name', () => {
+    const result = bulkFeaturesAcrossStreamsBodySchema.safeParse({
+      operations: [{ exclude: { id: 'a' } }],
+    });
+    expect(result.success).toBe(false);
   });
 
   it('rejects index operations (cross-stream is not for upserts)', () => {

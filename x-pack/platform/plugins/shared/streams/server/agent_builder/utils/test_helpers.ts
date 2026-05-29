@@ -80,7 +80,7 @@ export const createMockGetScopedClients = () => {
   > = {
     getQueryLinks: jest.fn().mockResolvedValue([]),
     getStreamToQueryLinksMap: jest.fn().mockResolvedValue({}),
-    getFeatures: jest.fn().mockResolvedValue({ hits: [], total: 0 }),
+    getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
   };
 
   const getKnowledgeIndicatorClient = jest.fn().mockResolvedValue(kiClient);

@@ -14,8 +14,20 @@ export interface BulkOperationResult {
   failedCount: number;
 }
 
+// Identity is (stream_name, id): an id can repeat across streams, so every
+// cross-stream op must carry its owning stream. The server dispatches by
+// (stream, id) rather than resolving the id globally.
+type CrossStreamOp =
+  | { delete: { id: string; stream_name: string } }
+  | { exclude: { id: string; stream_name: string } }
+  | { restore: { id: string; stream_name: string } };
+
+type BuildOp = (feature: Feature) => CrossStreamOp;
+
 interface DiscoveryFeaturesApi {
   deleteFeaturesInBulk: (features: Feature[]) => Promise<BulkOperationResult>;
+  excludeFeaturesInBulk: (features: Feature[]) => Promise<BulkOperationResult>;
+  restoreFeaturesInBulk: (features: Feature[]) => Promise<BulkOperationResult>;
 }
 
 export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
@@ -28,22 +40,35 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
   } = useKibana();
 
   return useMemo(() => {
-    return {
-      deleteFeaturesInBulk: async (features: Feature[]): Promise<BulkOperationResult> => {
-        if (features.length === 0) {
-          return { succeededCount: 0, failedCount: 0 };
+    // All three methods share the same cross-stream endpoint. signal: null so
+    // unmount does not abort a partially-applied mutation.
+    const runBulk = async (features: Feature[], buildOp: BuildOp): Promise<BulkOperationResult> => {
+      if (features.length === 0) {
+        return { succeededCount: 0, failedCount: 0 };
+      }
+      const { succeeded, failed } = await streamsRepositoryClient.fetch(
+        'POST /internal/streams/features/_bulk',
+        {
+          signal: null,
+          params: { body: { operations: features.map(buildOp) } },
         }
-        const { succeeded, failed } = await streamsRepositoryClient.fetch(
-          'POST /internal/streams/features/_bulk',
-          {
-            signal: null,
-            params: {
-              body: { operations: features.map((feature) => ({ delete: { id: feature.id } })) },
-            },
-          }
-        );
-        return { succeededCount: succeeded, failedCount: failed };
-      },
+      );
+      return { succeededCount: succeeded, failedCount: failed };
+    };
+
+    return {
+      deleteFeaturesInBulk: (features) =>
+        runBulk(features, (feature) => ({
+          delete: { id: feature.id, stream_name: feature.stream_name },
+        })),
+      excludeFeaturesInBulk: (features) =>
+        runBulk(features, (feature) => ({
+          exclude: { id: feature.id, stream_name: feature.stream_name },
+        })),
+      restoreFeaturesInBulk: (features) =>
+        runBulk(features, (feature) => ({
+          restore: { id: feature.id, stream_name: feature.stream_name },
+        })),
     };
   }, [streamsRepositoryClient]);
 }

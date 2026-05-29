@@ -60,7 +60,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
 
     kiClient.getFeatures = jest
       .fn()
-      .mockResolvedValue({ hits: [makeFeature({ id: 'f1', confidence: 80 })], total: 1 });
+      .mockResolvedValue({ hits: [makeFeature({ id: 'f1', confidence: 80 })] });
 
     kiClient.getQueryLinks = jest.fn().mockResolvedValue([
       {
@@ -149,7 +149,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       .fn()
       .mockResolvedValue([{ name: 'logs.allowed' } as Streams.all.Definition]);
 
-    kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [], total: 0 });
+    kiClient.getFeatures = jest.fn().mockResolvedValue({ hits: [] });
     kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);
 
     await searchKnowledgeIndicatorsToolHandler({
@@ -178,7 +178,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       if (streamName === 'logs.bad') {
         return Promise.reject(new Error('boom'));
       }
-      return Promise.resolve({ hits: [makeFeature({ id: 'ok' })], total: 1 });
+      return Promise.resolve({ hits: [makeFeature({ id: 'ok' })] });
     });
 
     kiClient.getQueryLinks = jest.fn().mockResolvedValue([]);

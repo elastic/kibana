@@ -47,8 +47,16 @@ export function useFetchKnowledgeIndicators(
     }));
 
     return [
-      ...features.map((feature) => ({ kind: 'feature' as const, feature })),
-      ...excludedFeatures.map((feature) => ({ kind: 'feature' as const, feature })),
+      ...features.map((feature) => ({
+        kind: 'feature' as const,
+        stream_name: feature.stream_name,
+        feature,
+      })),
+      ...excludedFeatures.map((feature) => ({
+        kind: 'feature' as const,
+        stream_name: feature.stream_name,
+        feature,
+      })),
       ...queryKnowledgeIndicators,
     ];
   }, [excludedFeatures, features, queriesFetchState.data?.queries]);

@@ -134,6 +134,15 @@ export async function bulkCreateWithInferenceFallback(
   }
 
   const fallback = await attempt({ includeEmbedding: false });
+  if (fallback.errors) {
+    // The underlying client does not throw on partial failure, so an errored
+    // fallback would otherwise be silently reported as success. Surface it.
+    const { inference, other } = countRawBulkInferenceErrors(fallback);
+    const total = fallback.items?.length ?? 0;
+    throw new Error(
+      `Bulk write fallback without embedding failed (${inference + other}/${total} items errored)`
+    );
+  }
   logger.debug('Bulk write fallback without embedding succeeded');
   return fallback;
 }

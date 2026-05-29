@@ -12,7 +12,10 @@ import type { StoredFeatureKnowledgeIndicator, StoredKnowledgeIndicator } from '
 import { inPredicate, IS_NOT_DELETED } from '../esql_helpers';
 import { KI_TYPE_FEATURE, STREAM_NAME } from '../fields';
 import { fromStoredFeature, toStoredFeature, toStoredQuery, toTombstone } from './serializers';
-import { bulkCreateWithInferenceFallback } from './bulk_with_inference_fallback';
+import {
+  bulkCreateWithInferenceFallback,
+  countRawBulkInferenceErrors,
+} from './bulk_with_inference_fallback';
 import { StatusError } from '../../errors/status_error';
 import type { RevisionReader } from './revision_reader';
 import type { KIBulkOperation, KnowledgeIndicatorDataStreamClient } from './types';
@@ -142,9 +145,19 @@ export class IndicatorWriter {
       return;
     }
     const tombstones = latest.map((doc) => toTombstone(stream, doc));
-    await this.dataStreamClient.create({
+    const response = await this.dataStreamClient.create({
       refresh: 'wait_for',
       documents: tombstones as Array<StoredKnowledgeIndicator & Record<string, unknown>>,
     });
+    if (response.errors) {
+      // The underlying client does not throw on partial failure; without this
+      // check a failed tombstone write would resolve as a successful delete.
+      const { inference, other } = countRawBulkInferenceErrors(response);
+      throw new Error(
+        `Failed to delete indicators for stream "${stream}": ${inference + other}/${
+          tombstones.length
+        } tombstone writes errored`
+      );
+    }
   }
 }

@@ -88,11 +88,11 @@ export class KnowledgeIndicatorClient {
       includeExcluded?: boolean;
       sort?: ComposerSortShorthand[];
     }
-  ): Promise<{ hits: Feature[]; total: number }> {
+  ): Promise<{ hits: Feature[] }> {
     return this.reader.getFeatures(streams, options);
   }
 
-  getExcludedFeatures(stream: string): Promise<{ hits: Feature[]; total: number }> {
+  getExcludedFeatures(stream: string): Promise<{ hits: Feature[] }> {
     return this.reader.getExcludedFeatures(stream);
   }
 
@@ -139,7 +139,7 @@ export class KnowledgeIndicatorClient {
       limit?: number;
       includeExcluded?: boolean;
     }
-  ): Promise<{ hits: KnowledgeIndicator[]; total: number }> {
+  ): Promise<{ hits: KnowledgeIndicator[] }> {
     return this.searcher.findIndicators(streams, query, options);
   }
 
@@ -147,7 +147,7 @@ export class KnowledgeIndicatorClient {
     streams: string | string[],
     query: string,
     options?: { searchMode?: SearchMode; limit?: number; includeExcluded?: boolean }
-  ): Promise<{ hits: Feature[]; total: number }> {
+  ): Promise<{ hits: Feature[] }> {
     return this.searcher.findFeatures(streams, query, options);
   }
 

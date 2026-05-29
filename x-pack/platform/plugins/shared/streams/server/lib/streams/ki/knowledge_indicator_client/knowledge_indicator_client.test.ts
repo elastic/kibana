@@ -22,11 +22,15 @@ jest.mock('../../../sig_events/latest_source_query', () => {
   };
 });
 
-jest.mock('./bulk_with_inference_fallback', () => ({
-  bulkCreateWithInferenceFallback: jest.fn(async (_logger, attempt) =>
-    attempt({ includeEmbedding: true })
-  ),
-}));
+jest.mock('./bulk_with_inference_fallback', () => {
+  const actual = jest.requireActual('./bulk_with_inference_fallback');
+  return {
+    ...actual,
+    bulkCreateWithInferenceFallback: jest.fn(async (_logger, attempt) =>
+      attempt({ includeEmbedding: true })
+    ),
+  };
+});
 
 import { executeAndDecodeSource } from '../../../sig_events/latest_source_query';
 
@@ -179,6 +183,46 @@ describe('KnowledgeIndicatorClient.bulk', () => {
       const written = documents[0] as StoredTombstone;
       expect(written.deleted).toBe(true);
     });
+  });
+});
+
+describe('KnowledgeIndicatorClient.deleteIndicators', () => {
+  it('tombstones every active revision when the create succeeds', async () => {
+    const { client, create, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({
+      hits: [createFeatureDoc({ id: 'feat-1' }), createFeatureDoc({ id: 'feat-2' })],
+    });
+
+    await client.deleteIndicators(STREAM);
+
+    expect(create).toHaveBeenCalledTimes(1);
+    const [{ documents }] = create.mock.calls[0];
+    expect(documents).toHaveLength(2);
+    expect(documents.every((d: StoredTombstone) => d.deleted === true)).toBe(true);
+  });
+
+  it('throws when the tombstone write reports errors', async () => {
+    const { client, create, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc({ id: 'feat-1' })] });
+    create.mockResolvedValueOnce({
+      errors: true,
+      items: [
+        {
+          create: { status: 500, error: { type: 'es_rejected_execution_exception', reason: 'x' } },
+        },
+      ],
+    });
+
+    await expect(client.deleteIndicators(STREAM)).rejects.toThrow(/Failed to delete indicators/);
+  });
+
+  it('is a no-op when there are no active revisions', async () => {
+    const { client, create, runEsql } = makeClient();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await client.deleteIndicators(STREAM);
+
+    expect(create).not.toHaveBeenCalled();
   });
 });
 
@@ -419,5 +463,81 @@ describe('KnowledgeIndicatorClient.findIndicators keyword search', () => {
     expect(fields).not.toContain('feature.type');
     expect(fields).not.toContain('feature.subtype');
     expect(fields).not.toContain('tags');
+  });
+
+  it('dedupes ranked rows to one per group and emits the phase-1 latest payload', async () => {
+    const { client, runEsql, search } = makeClientWithSearch();
+
+    const latestTs = '2026-03-01T00:00:00.000Z';
+    const olderTs = '2026-01-01T00:00:00.000Z';
+
+    // Phase 1: the authoritative latest revision for the group.
+    runEsql.mockResolvedValueOnce({
+      hits: [
+        createFeatureDoc({ id: 'feat-1', '@timestamp': latestTs, title: 'authoritative-latest' }),
+      ],
+    });
+
+    // Phase 2: ES ranks several rows for the same group — two share the latest
+    // timestamp (a tie) with different payloads, one is an older revision. The
+    // result must be a single hit carrying the phase-1 payload regardless of
+    // which row ranked first.
+    search.mockResolvedValueOnce({
+      hits: {
+        total: { value: 3 },
+        hits: [
+          {
+            _id: 'aaa',
+            _source: createFeatureDoc({ id: 'feat-1', '@timestamp': latestTs, title: 'tie-a' }),
+          },
+          {
+            _id: 'zzz',
+            _source: createFeatureDoc({ id: 'feat-1', '@timestamp': latestTs, title: 'tie-b' }),
+          },
+          {
+            _id: 'mmm',
+            _source: createFeatureDoc({ id: 'feat-1', '@timestamp': olderTs, title: 'stale' }),
+          },
+        ],
+      },
+    });
+
+    const { hits } = await client.findIndicators(STREAM, 'checkout', {
+      types: [KI_TYPE_FEATURE],
+      searchMode: 'keyword',
+    });
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0].type).toBe('feature');
+    expect(hits[0].type === 'feature' && hits[0].feature.title).toBe('authoritative-latest');
+  });
+
+  it('drops a group whose latest revision did not match the query', async () => {
+    const { client, runEsql, search } = makeClientWithSearch();
+
+    // Phase 1 latest is newer than any matching ranked row below.
+    runEsql.mockResolvedValueOnce({
+      hits: [createFeatureDoc({ id: 'feat-1', '@timestamp': '2026-03-01T00:00:00.000Z' })],
+    });
+
+    // Only a stale revision matched the query — the group must not resurface.
+    search.mockResolvedValueOnce({
+      hits: {
+        total: { value: 1 },
+        hits: [
+          {
+            _id: 'old',
+            _source: createFeatureDoc({ id: 'feat-1', '@timestamp': '2026-01-01T00:00:00.000Z' }),
+          },
+        ],
+      },
+    });
+
+    const { hits } = await client.findIndicators(STREAM, 'checkout', {
+      types: [KI_TYPE_FEATURE],
+      searchMode: 'keyword',
+    });
+
+    expect(hits).toHaveLength(0);
   });
 });

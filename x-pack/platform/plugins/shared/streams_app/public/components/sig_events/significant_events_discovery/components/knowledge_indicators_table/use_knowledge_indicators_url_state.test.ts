@@ -32,6 +32,7 @@ function makeFeatureKI(
 ): KnowledgeIndicator {
   return {
     kind: 'feature',
+    stream_name: overrides.stream_name,
     feature: {
       type: 'entity',
       id: overrides.uuid,
@@ -167,21 +168,21 @@ describe('useKnowledgeIndicatorsUrlState', () => {
       expect(result.current.selectedKnowledgeIndicator).toBeNull();
     });
 
-    it('finds matching feature by uuid', () => {
+    it('finds matching feature by composite id', () => {
       const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
       const knowledgeIndicators = [ki];
-      mockQuery = { selectedItem: 'f1' };
+      mockQuery = { selectedItem: 's1:feature:f1' };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
       );
       expect(result.current.selectedKnowledgeIndicator).toBe(ki);
-      expect(result.current.selectedKnowledgeIndicatorId).toBe('f1');
+      expect(result.current.selectedKnowledgeIndicatorId).toBe('s1:feature:f1');
     });
 
-    it('finds matching query by id', () => {
+    it('finds matching query by composite id', () => {
       const ki = makeQueryKI({ id: 'q1', stream_name: 's1' });
       const knowledgeIndicators = [ki];
-      mockQuery = { selectedItem: 'q1' };
+      mockQuery = { selectedItem: 's1:query:q1' };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
       );
@@ -271,14 +272,14 @@ describe('useKnowledgeIndicatorsUrlState', () => {
       });
       expect(mockPush).toHaveBeenCalledWith('/_discovery/{tab}', {
         path: { tab: 'knowledge_indicators' },
-        query: expect.objectContaining({ selectedItem: 'f1' }),
+        query: expect.objectContaining({ selectedItem: 's1:feature:f1' }),
       });
     });
 
     it('toggleSelectedKnowledgeIndicator closes flyout for already-open item', () => {
       const ki = makeFeatureKI({ uuid: 'f1', stream_name: 's1' });
       const knowledgeIndicators = [ki];
-      mockQuery = { selectedItem: 'f1' };
+      mockQuery = { selectedItem: 's1:feature:f1' };
       const { result } = renderHook(() =>
         useKnowledgeIndicatorsUrlState({ ...defaultParams, knowledgeIndicators })
       );

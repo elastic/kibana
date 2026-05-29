@@ -50,10 +50,10 @@ export class IndicatorSearcher {
       limit?: number;
       includeExcluded?: boolean;
     } = {}
-  ): Promise<{ hits: KnowledgeIndicator[]; total: number }> {
+  ): Promise<{ hits: KnowledgeIndicator[] }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
     if (streamNames.length === 0) {
-      return { hits: [], total: 0 };
+      return { hits: [] };
     }
 
     return searchWithKeywordFallback(
@@ -67,14 +67,13 @@ export class IndicatorSearcher {
     streams: string | string[],
     query: string,
     options: { searchMode?: SearchMode; limit?: number; includeExcluded?: boolean } = {}
-  ): Promise<{ hits: Feature[]; total: number }> {
-    const { hits, total } = await this.findIndicators(streams, query, {
+  ): Promise<{ hits: Feature[] }> {
+    const { hits } = await this.findIndicators(streams, query, {
       ...options,
       types: [KI_TYPE_FEATURE],
     });
     return {
       hits: hits.flatMap((h) => (h.type === 'feature' ? [h.feature] : [])),
-      total,
     };
   }
 
@@ -103,7 +102,7 @@ export class IndicatorSearcher {
     streamNames: string[],
     queryText: string,
     options: { types?: KnowledgeIndicatorType[]; limit?: number; includeExcluded?: boolean }
-  ): Promise<{ hits: KnowledgeIndicator[]; total: number }> {
+  ): Promise<{ hits: KnowledgeIndicator[] }> {
     // Phase 1: ES|QL latest-per-group reduction.
     const where = combineWhere(
       inPredicate(STREAM_NAME, streamNames),
@@ -124,7 +123,7 @@ export class IndicatorSearcher {
     // we got back from phase 1. The data stream client doesn't expose the
     // raw ES client `_id` filter directly, so we scope by id terms.
     if (docById.size === 0) {
-      return { hits: [], total: 0 };
+      return { hits: [] };
     }
 
     const ids = Array.from(new Set(docs.map((d) => d.id)));
@@ -198,32 +197,35 @@ export class IndicatorSearcher {
       retriever,
     });
 
+    // Walk the ranked rows and surface each group once, in rank order. A row
+    // only counts if its @timestamp matches the group's latest revision — that
+    // keeps the search scoped to current state (a stale revision matching the
+    // query must not resurface its group). We emit the authoritative latest doc
+    // from phase 1 rather than the matched row, so a same-timestamp tie can't
+    // surface a non-latest payload. A Set is enough to dedupe.
+    const seen = new Set<string>();
     const hits: KnowledgeIndicator[] = [];
     for (const hit of response.hits.hits) {
       const source = hit._source as StoredKnowledgeIndicator | undefined;
       if (!source) continue;
-      // Only surface the latest revision for each group — drop ranked rows
-      // whose latest revision is missing or does not match this hit.
-      const latest = docById.get(`${source['stream.name']}:${source.type}:${source.id}`);
+      const key = `${source['stream.name']}:${source.type}:${source.id}`;
+      if (seen.has(key)) continue;
+      const latest = docById.get(key);
       if (
         !latest ||
         new Date(latest['@timestamp']).getTime() !== new Date(source['@timestamp']).getTime()
       ) {
         continue;
       }
-      if (isStoredFeatureKnowledgeIndicator(source)) {
-        hits.push({ type: 'feature', feature: fromStoredFeature(source) });
-      } else if (isStoredQueryKnowledgeIndicator(source)) {
-        hits.push({ type: 'query', query: fromStoredQuery(source) });
+      seen.add(key);
+      if (isStoredFeatureKnowledgeIndicator(latest)) {
+        hits.push({ type: 'feature', feature: fromStoredFeature(latest) });
+      } else if (isStoredQueryKnowledgeIndicator(latest)) {
+        hits.push({ type: 'query', query: fromStoredQuery(latest) });
       }
     }
 
-    const total =
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? hits.length;
-
-    return { hits, total };
+    return { hits };
   }
 
   private buildKeywordQuery(

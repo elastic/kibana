@@ -52,6 +52,16 @@ jest.mock('../../../../../hooks/sig_events/use_fetch_knowledge_indicators', () =
   }),
 }));
 
+const mockExcludeFeaturesInBulk = jest.fn();
+const mockRestoreFeaturesInBulk = jest.fn();
+
+jest.mock('../../../../../hooks/sig_events/use_discovery_features_api', () => ({
+  useDiscoveryFeaturesApi: () => ({
+    excludeFeaturesInBulk: mockExcludeFeaturesInBulk,
+    restoreFeaturesInBulk: mockRestoreFeaturesInBulk,
+  }),
+}));
+
 const mockPromote = jest.fn();
 
 jest.mock('../../../../../hooks/sig_events/use_queries_api', () => ({
@@ -118,7 +128,8 @@ function makeFeature(
 function makeFeatureKI(
   overrides: Partial<Feature> & { id: string; stream_name: string } & Record<string, unknown>
 ): KnowledgeIndicator {
-  return { kind: 'feature', feature: makeFeature(overrides) };
+  const feature = makeFeature(overrides);
+  return { kind: 'feature', stream_name: feature.stream_name, feature };
 }
 
 function makeQueryKI(opts: {

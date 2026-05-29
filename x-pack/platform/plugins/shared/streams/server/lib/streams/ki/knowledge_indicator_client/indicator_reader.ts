@@ -51,10 +51,10 @@ export class IndicatorReader {
       includeExpired?: boolean;
       sort?: ComposerSortShorthand[];
     } = {}
-  ): Promise<{ hits: Feature[]; total: number }> {
+  ): Promise<{ hits: Feature[] }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
     if (streamNames.length === 0) {
-      return { hits: [], total: 0 };
+      return { hits: [] };
     }
 
     const minConfidenceFilter =
@@ -83,14 +83,14 @@ export class IndicatorReader {
     const docs = await this.revisionReader.fetchLatestRevisions(
       where,
       postGroupingWhere,
-      options.sort ?? [['feature.confidence', 'DESC']]
+      options.sort ?? [['feature.confidence', 'DESC']],
+      options.limit
     );
-    const features = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
-    const limited = options.limit !== undefined ? features.slice(0, options.limit) : features;
-    return { hits: limited, total: features.length };
+    const hits = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
+    return { hits };
   }
 
-  async getExcludedFeatures(stream: string): Promise<{ hits: Feature[]; total: number }> {
+  async getExcludedFeatures(stream: string): Promise<{ hits: Feature[] }> {
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
       inPredicate(STREAM_NAME, [stream])
@@ -98,8 +98,8 @@ export class IndicatorReader {
     const docs = await this.revisionReader.fetchLatestRevisions(where, esql.exp`excluded == true`, [
       ['@timestamp', 'DESC'],
     ]);
-    const features = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
-    return { hits: features, total: features.length };
+    const hits = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
+    return { hits };
   }
 
   async getFeature(stream: string, id: string): Promise<Feature> {

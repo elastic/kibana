@@ -44,9 +44,9 @@ const featureBulkOperationSchema = z.union([
 ]);
 
 const featureBulkAcrossStreamsOperationSchema = z.union([
-  z.object({ delete: z.object({ id: z.string() }) }),
-  z.object({ exclude: z.object({ id: z.string() }) }),
-  z.object({ restore: z.object({ id: z.string() }) }),
+  z.object({ delete: z.object({ id: z.string(), stream_name: z.string() }) }),
+  z.object({ exclude: z.object({ id: z.string(), stream_name: z.string() }) }),
+  z.object({ restore: z.object({ id: z.string(), stream_name: z.string() }) }),
 ]);
 
 export const bulkFeaturesBodySchema = z.object({
@@ -319,9 +319,9 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
     access: 'internal',
     summary: 'Bulk feature operations across streams',
     description:
-      'Performs bulk delete operations on features across multiple streams in a single request. ' +
-      'Client sends flat operations keyed by feature id; the server resolves stream ownership ' +
-      'via kiClient.findFeatures and delegates per-stream to kiClient.bulk.',
+      'Performs bulk delete/exclude/restore operations on features across multiple streams in a ' +
+      'single request. Each operation is stream-qualified by the client (identity is ' +
+      '(stream_name, id)); the server groups by stream and delegates to kiClient.bulk.',
   },
   security: {
     authz: {
@@ -347,51 +347,40 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     const kiClient = await getKnowledgeIndicatorClient();
 
-    // Index requested ops by id so each id can be resolved to its stream
-    // and dispatched with the right verb. Excluded features must be visible
-    // to resolution: pass `includeExcluded=true` so a restore/delete on an
-    // already-excluded feature still finds the owning stream.
-    type FeatureBulkOp =
-      | { delete: { id: string } }
-      | { exclude: { id: string } }
-      | { restore: { id: string } };
-    const opById = new Map<string, FeatureBulkOp>();
-    for (const op of params.body.operations) {
-      const id = 'delete' in op ? op.delete.id : 'exclude' in op ? op.exclude.id : op.restore.id;
-      // Last write wins on duplicates — same as queries endpoint pattern.
-      opById.set(id, op);
-    }
-    const requestedIds = Array.from(opById.keys());
+    // Operations are stream-qualified by the client. Group them by their owning
+    // stream and dispatch per-stream — identity is (stream_name, id), so an id
+    // must never be resolved globally (it can exist in multiple streams).
+    // Scope to streams the caller can see; ops targeting others are skipped.
     const streams = await streamsClient.listStreams();
-    const streamNames = streams.map((s) => s.name);
-    const { hits: resolved } = await kiClient.getFeatures(streamNames, {
-      id: requestedIds,
-      includeExcluded: true,
-    });
+    const accessibleStreams = new Set(streams.map((s) => s.name));
 
-    const resolvedIds = new Set(resolved.map((f) => f.id));
-    const skippedFromLookup = requestedIds.length - resolvedIds.size;
-
-    const byStream = resolved.reduce<Record<string, string[]>>((acc, feature) => {
-      if (!acc[feature.stream_name]) {
-        acc[feature.stream_name] = [];
+    const opsByStream = new Map<string, Map<string, KIBulkOperation>>();
+    let skipped = 0;
+    for (const op of params.body.operations) {
+      const target = 'delete' in op ? op.delete : 'exclude' in op ? op.exclude : op.restore;
+      if (!accessibleStreams.has(target.stream_name)) {
+        // Stream not visible to the caller — skip rather than touch it.
+        skipped += 1;
+        continue;
       }
-      acc[feature.stream_name].push(feature.id);
-      return acc;
-    }, {});
+      const kiOp: KIBulkOperation =
+        'delete' in op
+          ? { delete: { type: 'feature', id: target.id } }
+          : 'exclude' in op
+          ? { exclude: { id: target.id } }
+          : { restore: { id: target.id } };
+      const streamOps = opsByStream.get(target.stream_name) ?? new Map<string, KIBulkOperation>();
+      // Last write wins per (stream, id) so duplicate ops don't double-apply.
+      streamOps.set(target.id, kiOp);
+      opsByStream.set(target.stream_name, streamOps);
+    }
 
     let succeeded = 0;
     let failed = 0;
-    let skipped = skippedFromLookup;
 
-    for (const [streamName, ids] of Object.entries(byStream)) {
+    for (const [streamName, streamOps] of opsByStream) {
+      const ops = [...streamOps.values()];
       try {
-        const ops: KIBulkOperation[] = ids.map((id) => {
-          const op = opById.get(id)!;
-          if ('exclude' in op) return { exclude: { id } };
-          if ('restore' in op) return { restore: { id } };
-          return { delete: { type: 'feature', id } };
-        });
         const { applied, skipped: streamSkipped } = await kiClient.bulk(streamName, ops);
         succeeded += applied;
         skipped += streamSkipped;
@@ -401,7 +390,7 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
             error instanceof Error ? error.message : String(error)
           }`
         );
-        failed += ids.length;
+        failed += ops.length;
       }
     }
 

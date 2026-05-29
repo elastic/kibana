@@ -176,7 +176,7 @@ export const BULK_EXCLUDE_ERROR_TOAST_TITLE = i18n.translate(
 
 export const BULK_RESTORE_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.streams.knowledgeIndicators.bulkRestoreSuccessToastTitle',
-  { defaultMessage: 'Knowledge indicators restored' }
+  { defaultMessage: 'Selected features will be re-evaluated on the next extraction' }
 );
 
 export const BULK_RESTORE_PARTIAL_TOAST_TITLE = i18n.translate(

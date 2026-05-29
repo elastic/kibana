@@ -31,14 +31,17 @@ export class RevisionReader {
   async fetchLatestRevisions(
     where?: LatestSourceWhereCondition,
     postGroupingWhere?: LatestSourceWhereCondition,
-    sort?: ComposerSortShorthand[]
+    sort?: ComposerSortShorthand[],
+    limit: number = REVISION_SIZE_LIMIT
   ): Promise<StoredKnowledgeIndicator[]> {
     let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']);
     query = withWhere(query, where);
     query = pickLatestPerGroup(query, ['stream.name', 'type', 'id']);
     query = withWhere(query, postGroupingWhere);
     query = withSort(query, sort);
-    query = query.keep('_source').limit(REVISION_SIZE_LIMIT);
+    // Cap at REVISION_SIZE_LIMIT regardless of the requested limit so a large
+    // caller-supplied value can't fetch an unbounded result set.
+    query = query.keep('_source').limit(Math.min(limit, REVISION_SIZE_LIMIT));
 
     const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
     return hits;
