@@ -78,3 +78,8 @@ export const MIN_EXTRACTION_INTERVAL_HOURS = 0;
 export const MAX_SCHEDULED_STREAMS = 5;
 
 export const POLL_DELAY_SECONDS = 5;
+
+/**
+ * Sigevents memory data stream backing MemoryServiceImpl.
+ */
+export const MEMORIES_DATA_STREAM = '.significant_events-memories';
