@@ -29,10 +29,20 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       search: schema.maybe(schema.string()),
       from: schema.maybe(schema.string()),
       to: schema.maybe(schema.string()),
+      // Comma-separated filters (e.g. `http,browser`) sent as strings to avoid
+      // query-array serialization edge cases. `monitorTypes` scopes by monitor
+      // type; `browserResourceTypes` and `party` are browser-only quick filters;
+      // `tags` scopes by monitor tag.
+      monitorTypes: schema.maybe(schema.string()),
+      browserResourceTypes: schema.maybe(schema.string()),
+      party: schema.maybe(schema.string()),
+      tags: schema.maybe(schema.string()),
     }),
   },
   handler: async ({ request, syntheticsEsClient, monitorConfigRepository }) => {
-    const queryParams = request.query;
+    const { monitorTypes, browserResourceTypes, party, tags, ...queryParams } = request.query;
+
+    const toList = (value?: string) => (value ? value.split(',').filter(Boolean) : undefined);
 
     const monitors = await monitorConfigRepository.getAll({
       filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,
@@ -51,8 +61,15 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
 
     const data = await getSyntheticsCerts({
       ...queryParams,
+      monitorTypes: toList(monitorTypes),
+      browserResourceTypes: toList(browserResourceTypes),
+      party: toList(party),
+      tags: toList(tags),
       syntheticsEsClient,
       monitorIds: enabledMonitorQueryIds,
+      // The certificates page lists certs from every enabled monitor, including
+      // the certificate captured on a browser monitor's navigation request.
+      includeBrowserCerts: true,
     });
     return { data };
   },

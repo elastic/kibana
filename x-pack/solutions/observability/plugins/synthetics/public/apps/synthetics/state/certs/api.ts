@@ -9,14 +9,30 @@ import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import type { CertResult, GetCertsParams } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service/api_service';
 
+const toParam = (values?: string[]) => (values && values.length > 0 ? values.join(',') : undefined);
+
 export const getCertsList = async (queryParams: GetCertsParams): Promise<CertResult> => {
-  const { pageIndex, size, search, sortBy, direction } = queryParams;
+  const {
+    pageIndex,
+    size,
+    search,
+    sortBy,
+    direction,
+    monitorTypes,
+    browserResourceTypes,
+    party,
+    tags,
+  } = queryParams;
   const result = (await apiService.get(SYNTHETICS_API_URLS.CERTS, {
     pageIndex,
     size,
     search,
     sortBy,
     direction,
+    monitorTypes: toParam(monitorTypes),
+    browserResourceTypes: toParam(browserResourceTypes),
+    party: toParam(party),
+    tags: toParam(tags),
   })) as {
     data: CertResult;
   };

@@ -6,11 +6,21 @@
  */
 
 import { useDispatch } from 'react-redux';
-import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { MonitorTypeEnum } from '../../../../../common/runtime_types';
 import { setCertificatesTotalAction } from '../../state/certificates/certificates';
+import { useFilters } from '../monitors_page/common/monitor_filters/use_filters';
 import { CertificateSearch } from './cert_search';
+import { CertQuickFilter } from './cert_quick_filter';
+import type { QuickFilterOption } from './cert_quick_filter';
+import {
+  BROWSER_RESOURCE_TYPE_OPTIONS,
+  MONITOR_TYPE_FILTER_OPTIONS,
+  PARTY_FILTER_OPTIONS,
+} from './cert_filter_options';
+import * as labels from './translations';
 import { useCertSearch } from './use_cert_search';
 import type { CertSort } from './certificates_list';
 import { CertificateList } from './certificates_list';
@@ -38,8 +48,25 @@ export const CertificatesPage: React.FC = () => {
     direction: 'asc',
   });
   const [search, setSearch] = useState('');
+  const [monitorTypes, setMonitorTypes] = useState<string[]>([]);
+  const [browserResourceTypes, setBrowserResourceTypes] = useState<string[]>([]);
+  const [party, setParty] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
 
   const dispatch = useDispatch();
+
+  const filters = useFilters();
+  const tagOptions: QuickFilterOption[] = useMemo(
+    () => (filters?.tags ?? []).map(({ label }) => ({ value: label, label })),
+    [filters?.tags]
+  );
+
+  // Browser-specific filters are only meaningful when browser certs can appear,
+  // i.e. when no monitor-type filter is set (all types) or browser is selected.
+  const isBrowserIncluded =
+    monitorTypes.length === 0 || monitorTypes.includes(MonitorTypeEnum.BROWSER);
+
+  const resetToFirstPage = () => setPage((prevPage) => ({ ...prevPage, index: 0 }));
 
   const certificates = useCertSearch({
     search,
@@ -47,6 +74,10 @@ export const CertificatesPage: React.FC = () => {
     pageIndex: page.index,
     sortBy: sort.field,
     direction: sort.direction,
+    monitorTypes,
+    browserResourceTypes: isBrowserIncluded ? browserResourceTypes : undefined,
+    party: isBrowserIncluded ? party : undefined,
+    tags,
   });
 
   useEffect(() => {
@@ -56,7 +87,66 @@ export const CertificatesPage: React.FC = () => {
   return (
     <>
       <EuiSpacer size="m" />
-      <CertificateSearch setSearch={setSearch} />
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem>
+          <CertificateSearch setSearch={setSearch} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CertQuickFilter
+            label={labels.MONITOR_TYPE_FILTER}
+            dataTestSubj="certMonitorTypeFilterButton"
+            options={MONITOR_TYPE_FILTER_OPTIONS}
+            selectedValues={monitorTypes}
+            onChange={(types) => {
+              setMonitorTypes(types);
+              resetToFirstPage();
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CertQuickFilter
+            label={labels.RESOURCE_TYPE_FILTER}
+            dataTestSubj="certResourceTypeFilterButton"
+            options={BROWSER_RESOURCE_TYPE_OPTIONS}
+            selectedValues={browserResourceTypes}
+            isDisabled={!isBrowserIncluded}
+            disabledTooltip={labels.BROWSER_FILTER_DISABLED_TOOLTIP}
+            onChange={(types) => {
+              setBrowserResourceTypes(types);
+              resetToFirstPage();
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CertQuickFilter
+            label={labels.PARTY_FILTER}
+            dataTestSubj="certPartyFilterButton"
+            options={PARTY_FILTER_OPTIONS}
+            selectedValues={party}
+            isDisabled={!isBrowserIncluded}
+            disabledTooltip={labels.BROWSER_FILTER_DISABLED_TOOLTIP}
+            onChange={(values) => {
+              setParty(values);
+              resetToFirstPage();
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <CertQuickFilter
+            label={labels.TAGS_FILTER}
+            dataTestSubj="certTagsFilterButton"
+            options={tagOptions}
+            selectedValues={tags}
+            searchable
+            isDisabled={tagOptions.length === 0}
+            disabledTooltip={labels.TAGS_FILTER_NO_TAGS}
+            onChange={(values) => {
+              setTags(values);
+              resetToFirstPage();
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <CertificateList
         page={page}

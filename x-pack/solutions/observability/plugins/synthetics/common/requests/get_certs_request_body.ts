@@ -12,6 +12,7 @@ import {
   FINAL_SUMMARY_FILTER,
   getRangeFilter,
 } from '../constants/client_defaults';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../constants';
 import type { CertificatesResults } from '../../server/queries/get_certs';
 import type { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
@@ -31,6 +32,14 @@ export const DEFAULT_SIZE = 20;
 export const DEFAULT_FROM = 'now-20m';
 export const DEFAULT_TO = 'now';
 
+const CERT_HASH_SHA256 = 'tls.server.hash.sha256';
+const CERT_SUBJECT_COMMON_NAME = 'tls.server.x509.subject.common_name';
+
+// Values used by the browser-cert "party" quick filter (first- vs third-party,
+// derived from `http.request.is_same_site`). Shared with the UI control.
+export const FIRST_PARTY = 'first_party';
+export const THIRD_PARTY = 'third_party';
+
 function absoluteDate(relativeDate: string) {
   return DateMath.parse(relativeDate)?.valueOf() ?? relativeDate;
 }
@@ -47,8 +56,70 @@ export const getCertsRequestBody = ({
   sortBy = DEFAULT_SORT,
   direction = DEFAULT_DIRECTION,
   filters,
+  monitorTypes,
+  browserResourceTypes,
+  party,
+  tags,
+  includeBrowserCerts = false,
 }: GetCertsParams) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
+
+  // The collapse/dedupe key. For the lightweight-only query we keep using the
+  // indexed sha256 fingerprint. When browser certs are included we dedupe on the
+  // certificate subject common name instead, because browser network events do
+  // not index a `tls.server.hash.sha256` fingerprint (and `collapse` cannot run
+  // on a runtime field, which has no doc_values).
+  const certIdField = includeBrowserCerts ? CERT_SUBJECT_COMMON_NAME : CERT_HASH_SHA256;
+
+  // Browser-only quick filters. These fields (`synthetics.payload.type`,
+  // `http.request.is_same_site`) only exist on browser network events.
+  const wantsFirstParty = party?.includes(FIRST_PARTY);
+  const wantsThirdParty = party?.includes(THIRD_PARTY);
+  const partyFilter =
+    wantsFirstParty && !wantsThirdParty
+      ? [{ term: { 'http.request.is_same_site': true } }]
+      : wantsThirdParty && !wantsFirstParty
+      ? [{ term: { 'http.request.is_same_site': false } }]
+      : [];
+  const hasResourceTypeFilter = Boolean(browserResourceTypes && browserResourceTypes.length > 0);
+
+  const browserBranchFilter = [
+    { term: { 'synthetics.type': 'journey/network_info' } },
+    { exists: { field: CERT_SUBJECT_COMMON_NAME } },
+    { exists: { field: 'tls.server.x509.not_after' } },
+    ...(hasResourceTypeFilter
+      ? [{ terms: { 'synthetics.payload.type': browserResourceTypes } }]
+      : []),
+    ...partyFilter,
+  ];
+
+  const lightweightBranchFilter = [FINAL_SUMMARY_FILTER, { exists: { field: CERT_HASH_SHA256 } }];
+
+  // Resource type and origin are browser-only concepts: a lightweight HTTP/TCP
+  // cert has no resource type or same-site flag, so when either filter is active
+  // we must exclude the lightweight branch entirely. Otherwise lightweight certs
+  // would leak through unfiltered (and inconsistently disappear once the user
+  // also narrows monitor type to browser).
+  const browserOnlyFilterActive = hasResourceTypeFilter || partyFilter.length > 0;
+
+  // Restricts which documents carry a certificate. Lightweight monitors expose
+  // the cert on their summary ping; browser monitors expose it on every network
+  // event (one per resource), so the certificates page lists all of them.
+  const certTypeFilter = !includeBrowserCerts
+    ? lightweightBranchFilter
+    : browserOnlyFilterActive
+    ? browserBranchFilter
+    : [
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              { bool: { filter: lightweightBranchFilter } },
+              { bool: { filter: browserBranchFilter } },
+            ],
+          },
+        },
+      ];
 
   return createEsQuery({
     from: (pageIndex ?? 0) * size,
@@ -83,15 +154,17 @@ export const getCertsRequestBody = ({
             }
           : {}),
         filter: [
-          FINAL_SUMMARY_FILTER,
+          ...certTypeFilter,
           EXCLUDE_RUN_ONCE_FILTER,
           ...(filters ? [filters] : []),
           ...(monitorIds && monitorIds.length > 0 ? [{ terms: { 'monitor.id': monitorIds } }] : []),
-          {
-            exists: {
-              field: 'tls.server.hash.sha256',
-            },
-          },
+          ...(monitorTypes && monitorTypes.length > 0
+            ? [{ terms: { 'monitor.type': monitorTypes } }]
+            : []),
+          // Tags are stamped on every event a monitor emits (lightweight summary
+          // pings and browser network events alike), so this applies uniformly
+          // across both branches regardless of monitor type.
+          ...(tags && tags.length > 0 ? [{ terms: { tags } }] : []),
           // fetch large enough date range to cover the last 7 days, no particular reason for 7 days
           getRangeFilter({
             from: 'now-7d',
@@ -160,11 +233,11 @@ export const getCertsRequestBody = ({
       'error',
     ],
     collapse: {
-      field: 'tls.server.hash.sha256',
+      field: certIdField,
       inner_hits: {
         size: 100,
         _source: {
-          includes: ['monitor.id', 'monitor.name', 'url.full', 'config_id'],
+          includes: ['monitor.id', 'monitor.name', 'monitor.type', 'url.full', 'config_id'],
         },
         collapse: {
           field: 'monitor.id',
@@ -176,8 +249,26 @@ export const getCertsRequestBody = ({
     aggs: {
       total: {
         cardinality: {
-          field: 'tls.server.hash.sha256',
+          field: certIdField,
         },
+      },
+      // Distinct-cert counts for the page summary header. They run in the same
+      // filter context, so they reflect the active quick filters. `not_after`
+      // is fixed per certificate, so each cert falls into exactly one bucket.
+      expired: {
+        filter: { range: { 'tls.server.x509.not_after': { lt: 'now' } } },
+        aggs: { count: { cardinality: { field: certIdField } } },
+      },
+      expiringSoon: {
+        filter: {
+          range: {
+            'tls.server.x509.not_after': {
+              gte: 'now',
+              lt: `now+${DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}d`,
+            },
+          },
+        },
+        aggs: { count: { cardinality: { field: certIdField } } },
       },
     },
   });
@@ -203,6 +294,7 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
         id: monitorPing?.monitor.id,
         configId: monitorPing?.config_id,
         url: monitorPing?.url?.full,
+        type: monitorPing?.monitor?.type,
       };
     });
 
@@ -210,7 +302,7 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       monitors,
       issuer,
       sha1,
-      sha256: sha256 as string,
+      sha256,
       not_after: notAfter,
       not_before: notBefore,
       common_name: commonName,
@@ -231,5 +323,9 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
     };
   });
   const total = result.aggregations?.total?.value ?? 0;
-  return { certs, total };
+  const stats = {
+    expired: result.aggregations?.expired?.count?.value ?? 0,
+    expiringSoon: result.aggregations?.expiringSoon?.count?.value ?? 0,
+  };
+  return { certs, total, stats };
 };

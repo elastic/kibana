@@ -13,7 +13,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import * as labels from './translations';
 
 const WrapFieldSearch = styled('div')`
-  max-width: 700px;
+  width: 100%;
 `;
 
 interface Props {
