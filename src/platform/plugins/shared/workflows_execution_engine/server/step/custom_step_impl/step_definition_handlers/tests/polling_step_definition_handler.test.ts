@@ -221,8 +221,7 @@ describe('PollPolicyStepHandler', () => {
         message: 'The step did not complete within the allowed time.',
       });
       expect(mocks.workflowLogger.logWarn).toHaveBeenCalledWith(
-        'Poll step attempt ceiling exceeded',
-        expect.objectContaining({ attempt: 5, maxAttempts: 5 })
+        'Poll step attempt ceiling exceeded 5'
       );
       expect(mocks.stepExecutionRuntime.enterWaitUntil).not.toHaveBeenCalled();
     });
