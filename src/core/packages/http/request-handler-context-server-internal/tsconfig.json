@@ -30,6 +30,9 @@
     "@kbn/core-feature-flags-server-internal",
     "@kbn/core-feature-flags-server",
     "@kbn/core-feature-flags-server-mocks",
+    "@kbn/core-i18n-server",
+    "@kbn/core-i18n-server-internal",
+    "@kbn/core-i18n-server-mocks",
   ],
   "exclude": [
     "target/**/*",

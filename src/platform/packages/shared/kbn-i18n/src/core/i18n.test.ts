@@ -8,6 +8,7 @@
  */
 
 import type * as i18nModule from './i18n';
+import { createScopedTranslator } from './i18n';
 import type { Translation, TranslationInput } from '../translation';
 import type { Formats } from './formats';
 import { defaultEnFormats } from './formats';
@@ -25,6 +26,74 @@ const createExpectedTranslations = (
     locale,
   };
 };
+
+describe('createScopedTranslator', () => {
+  test('returns the locale it was built for', () => {
+    const t = createScopedTranslator({ locale: 'fr-FR', messages: {} });
+    expect(t.getLocale()).toBe('fr-fr');
+  });
+
+  test('throws when locale is empty', () => {
+    expect(() => createScopedTranslator({ locale: '', messages: {} })).toThrow(
+      '[I18n] A `locale` must be a non-empty string to create a scoped translator.'
+    );
+  });
+
+  test('translates a message using its own messages map', () => {
+    const t = createScopedTranslator({
+      locale: 'fr-FR',
+      messages: { 'test.hello': 'Bonjour {name}' },
+    });
+    expect(
+      t.translate('test.hello', { defaultMessage: 'Hello {name}', values: { name: 'World' } })
+    ).toBe('Bonjour World');
+  });
+
+  test('falls back to defaultMessage when id is missing from messages', () => {
+    const t = createScopedTranslator({ locale: 'fr-FR', messages: {} });
+    expect(t.translate('missing.key', { defaultMessage: 'Fallback message' })).toBe(
+      'Fallback message'
+    );
+  });
+
+  test('two instances with different locales do not bleed messages', () => {
+    const fr = createScopedTranslator({
+      locale: 'fr-FR',
+      messages: { 'shared.key': 'Version française' },
+    });
+    const de = createScopedTranslator({
+      locale: 'de-DE',
+      messages: { 'shared.key': 'Deutsche Version' },
+    });
+
+    expect(fr.translate('shared.key', { defaultMessage: 'English' })).toBe('Version française');
+    expect(de.translate('shared.key', { defaultMessage: 'English' })).toBe('Deutsche Version');
+  });
+
+  test('does not affect the singleton translate function', () => {
+    const i18nModule = jest.requireActual('./i18n') as typeof import('./i18n');
+
+    createScopedTranslator({
+      locale: 'fr-FR',
+      messages: { 'singleton.key': 'Should not appear in singleton' },
+    });
+
+    // The singleton should still return its own state (defaultMessage fallback when not initialized)
+    const singletonResult = i18nModule.translate('singleton.key', {
+      defaultMessage: 'Singleton fallback',
+    });
+    expect(singletonResult).toBe('Singleton fallback');
+  });
+
+  test('formatList uses the scoped locale', () => {
+    const t = createScopedTranslator({ locale: 'en', messages: {} });
+    const result = t.formatList('conjunction', ['a', 'b', 'c']);
+    expect(typeof result).toBe('string');
+    expect(result).toContain('a');
+    expect(result).toContain('b');
+    expect(result).toContain('c');
+  });
+});
 
 // TODO: Unskip with the i18n tooling upgrade.
 // Currently skipped due to not throwing on i18n errors inside the error_handler until the tooling is fixed.

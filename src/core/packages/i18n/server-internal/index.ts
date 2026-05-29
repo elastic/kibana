@@ -7,8 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { I18nConfigType, InternalI18nServicePreboot } from './src';
-export { config, I18nService } from './src';
+export type {
+  I18nConfigType,
+  InternalI18nServicePreboot,
+  InternalI18nServiceStart,
+  ResolveRequestLocaleArgs,
+} from './src';
+export {
+  config,
+  I18nService,
+  KBN_LOCALE_COOKIE_NAME,
+  readCookie,
+  pickFromAcceptLanguage,
+  resolveRequestLocale,
+} from './src';
 export {
   discoverAllTranslationPaths,
   getKibanaTranslationFiles,

@@ -17,6 +17,7 @@ export {
   translate,
   formatList,
   getIsInitialized,
+  createScopedTranslator,
 } from './i18n';
-export type { TranslateArguments } from './i18n';
+export type { TranslateArguments, ScopedTranslator } from './i18n';
 export { handleIntlError } from './error_handler';

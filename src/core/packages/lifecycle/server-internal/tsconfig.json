@@ -22,6 +22,7 @@
     "@kbn/core-capabilities-server",
     "@kbn/core-doc-links-server",
     "@kbn/core-i18n-server",
+    "@kbn/core-i18n-server-internal",
     "@kbn/core-environment-server-internal",
     "@kbn/core-execution-context-server-internal",
     "@kbn/core-deprecations-server-internal",
