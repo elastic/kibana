@@ -437,20 +437,23 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with host risk index', () => {
       before(async () => {
+        // Threshold alerts aggregate by host.name and may not carry host.id in their source,
+        // so the EUID is name-based (host:<host.name>). Omit host.id to ensure the entity EUID
+        // matches what the detection engine computes from the threshold alert.
         await entityStoreV2.setup({
           hosts: [
             {
-              host: { name: LONDON_HOST_NAME, id: [LONDON_HOST_ID] },
+              host: { name: LONDON_HOST_NAME },
               entity: {
-                id: `host:${LONDON_HOST_ID}`,
+                id: `host:${LONDON_HOST_NAME}`,
                 type: 'host',
                 risk: { calculated_level: 'Low', calculated_score_norm: 20 },
               },
             },
             {
-              host: { name: TORONTO_HOST_NAME, id: [TORONTO_HOST_ID] },
+              host: { name: TORONTO_HOST_NAME },
               entity: {
-                id: `host:${TORONTO_HOST_ID}`,
+                id: `host:${TORONTO_HOST_NAME}`,
                 type: 'host',
                 risk: { calculated_level: 'Critical', calculated_score_norm: 96 },
               },
@@ -484,11 +487,12 @@ export default ({ getService }: FtrProviderContext) => {
     describe('with asset criticality', () => {
       before(async () => {
         // Only the first alert (sorted by host.name) is asserted on — suricata-sensor-london.
+        // Use name-based EUID for the same reason as the risk index describe above.
         await entityStoreV2.setup({
           hosts: [
             {
-              host: { name: LONDON_HOST_NAME, id: [LONDON_HOST_ID] },
-              entity: { id: `host:${LONDON_HOST_ID}`, type: 'host' },
+              host: { name: LONDON_HOST_NAME },
+              entity: { id: `host:${LONDON_HOST_NAME}`, type: 'host' },
               asset: { criticality: 'high_impact' },
             },
           ],
