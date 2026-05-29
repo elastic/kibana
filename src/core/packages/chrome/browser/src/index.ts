@@ -12,7 +12,14 @@ export type {
   ChromeBreadcrumb,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
-export type { ChromeNext } from './chrome_next';
+export type {
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderBadgeItem,
+  AppHeaderConfig,
+  AppHeaderTab,
+  ChromeNext,
+} from './chrome_next';
 export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
@@ -59,3 +66,5 @@ export type {
   SidebarSetup,
   SidebarStart,
 } from './sidebar';
+
+export type { GlobalSearchConfig } from './chrome_next/global_search';
