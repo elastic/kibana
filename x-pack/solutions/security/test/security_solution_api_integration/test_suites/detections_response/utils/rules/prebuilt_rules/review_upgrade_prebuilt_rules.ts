@@ -7,25 +7,32 @@
 
 import type { PartialThreeWayRuleDiff } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { REVIEW_RULE_UPGRADE_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/urls';
-import type { ReviewRuleUpgradeResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route';
+import type {
+  ReviewRuleUpgradeRequestBody,
+  ReviewRuleUpgradeResponseBody,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route';
 import type SuperTest from 'supertest';
 
 /**
  * Returns prebuilt rules that are available to Upgrade
  *
  * @param supertest SuperTest instance
+ * @param body optional request body
+ * @param expectedStatusCode defaults to 200
  * @returns Review Upgrade prebuilt rules response
  */
 export const reviewPrebuiltRulesToUpgrade = async (
-  supertest: SuperTest.Agent
+  supertest: SuperTest.Agent,
+  body?: Partial<ReviewRuleUpgradeRequestBody>,
+  expectedStatusCode: number = 200
 ): Promise<ReviewRuleUpgradeResponseBody> => {
   const response = await supertest
     .post(REVIEW_RULE_UPGRADE_URL)
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '1')
     .set('x-elastic-internal-origin', 'securitySolution')
-    .send()
-    .expect(200);
+    .send(body)
+    .expect(expectedStatusCode);
 
   return response.body;
 };
