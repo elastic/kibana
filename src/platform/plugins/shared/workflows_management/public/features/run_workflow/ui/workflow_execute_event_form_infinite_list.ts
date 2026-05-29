@@ -11,6 +11,21 @@ import type { Dispatch, RefObject, SetStateAction } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import type { SearchTriggerEventLogHit, SearchTriggerEventLogResult } from '@kbn/workflows-ui';
 
+function haveSameTriggerEventHitIds(
+  previousHits: SearchTriggerEventLogHit[],
+  nextHits: SearchTriggerEventLogHit[]
+): boolean {
+  if (previousHits.length !== nextHits.length) {
+    return false;
+  }
+  for (let index = 0; index < previousHits.length; index += 1) {
+    if (previousHits[index].id !== nextHits[index].id) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export function useAccumulatedTriggerEventSearchPages(
   searchResult: SearchTriggerEventLogResult | undefined,
   pageIndex: number,
@@ -27,7 +42,11 @@ export function useAccumulatedTriggerEventSearchPages(
       return;
     }
     if (pageIndex === 0) {
-      setAccumulatedHits(searchResult.hits);
+      setAccumulatedHits((previousHits) =>
+        haveSameTriggerEventHitIds(previousHits, searchResult.hits)
+          ? previousHits
+          : searchResult.hits
+      );
       return;
     }
     setAccumulatedHits((prev) => {
