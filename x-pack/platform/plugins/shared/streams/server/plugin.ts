@@ -30,6 +30,7 @@ import {
 } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import { distinctUntilChanged, filter, skip } from 'rxjs';
 import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
 import type { StreamsConfig } from '../common/config';
 import {
@@ -54,7 +55,7 @@ import {
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
-import type { RouteHandlerScopedClients } from './routes/types';
+import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
 import type {
   StreamsPluginSetupDependencies,
   StreamsPluginStartDependencies,
@@ -89,6 +90,7 @@ import {
 } from './lib/workflows/continuous_extraction_workflow';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
+import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../common/feature_flags';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 
@@ -114,6 +116,7 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
+  private streamsGetScopedClients?: GetScopedClients;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -170,7 +173,7 @@ export class StreamsPlugin
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
-    const getScopedClients = async ({
+    this.streamsGetScopedClients = async ({
       request,
       rulesClientOptions,
     }: {
@@ -365,7 +368,7 @@ export class StreamsPlugin
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(STREAMS_MANAGED_WORKFLOW_OWNER);
 
     taskService.registerTasks({
-      getScopedClients,
+      getScopedClients: this.streamsGetScopedClients,
       logger: this.logger,
       telemetry: telemetryClient,
       getInternalEsClient: () => this.server!.core.elasticsearch.client.asInternalUser,
@@ -437,7 +440,7 @@ export class StreamsPlugin
         telemetry: telemetryClient,
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
-        getScopedClients,
+        getScopedClients: this.streamsGetScopedClients,
         continuousKiExtractionWorkflowService,
         streamsKIsOnboardingClient,
       },
@@ -580,39 +583,6 @@ export class StreamsPlugin
   }
 
   public start(core: CoreStart, plugins: StreamsPluginStartDependencies): StreamsPluginStart {
-    initializeSignificantEventsTemplates({
-      esClient: core.elasticsearch.client.asInternalUser,
-      logger: this.logger,
-    }).catch((error) => {
-      this.logger.error(
-        `Failed to initialize significant events templates: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    });
-
-    if (plugins.workflowsExtensions) {
-      const workflowsExtensions = plugins.workflowsExtensions;
-      const soClient = core.savedObjects.getUnsafeInternalClient();
-      const uiSettings = core.uiSettings.asScopedToClient(soClient);
-      uiSettings
-        .get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY)
-        .then(async (memoryEnabled) => {
-          if (!memoryEnabled) {
-            this.logger.debug('streams: memory is disabled, skipping memory workflow installation');
-            return;
-          }
-          await installMemoryWorkflows({ workflowsExtensions });
-        })
-        .catch((error: unknown) => {
-          this.logger.error(
-            `streams: Failed to install memory managed workflows: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-        });
-    }
-
     if (this.server) {
       this.server.core = core;
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
@@ -630,6 +600,69 @@ export class StreamsPlugin
       const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
       memoryTriggerRegistry.register(discoveryCompletedTrigger);
       this.server.memoryTriggerRegistry = memoryTriggerRegistry;
+    }
+
+    initializeSignificantEventsTemplates({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to initialize significant events templates: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
+
+    const installMemoryWorkflowsIfEnabled = async (
+      workflowsExtensions: WorkflowsExtensionsServerPluginStart
+    ) => {
+      if (!(await isSignificantEventsMemoryEnabled(core.featureFlags))) {
+        this.logger.debug('streams: memory is disabled, skipping memory workflow installation');
+        return;
+      }
+      await installMemoryWorkflows({ workflowsExtensions });
+    };
+
+    if (plugins.workflowsExtensions) {
+      const { workflowsExtensions } = plugins;
+
+      void installMemoryWorkflowsIfEnabled(workflowsExtensions).catch((error: unknown) => {
+        this.logger.error(
+          `streams: Failed to install memory managed workflows: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      });
+
+      core.featureFlags
+        .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
+        .pipe(
+          distinctUntilChanged(),
+          skip(1),
+          filter((enabled) => enabled)
+        )
+        .subscribe(() => {
+          void installMemoryWorkflowsIfEnabled(workflowsExtensions).catch((error: unknown) => {
+            this.logger.error(
+              `streams: Failed to install memory managed workflows after feature flag change: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+          });
+        });
+    }
+
+    if (this.server?.ensureMemorySkillRegistered) {
+      core.featureFlags
+        .getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG, false)
+        .pipe(
+          distinctUntilChanged(),
+          skip(1),
+          filter((enabled) => enabled)
+        )
+        .subscribe(() => {
+          this.server?.ensureMemorySkillRegistered?.();
+        });
     }
 
     if (plugins.workflowsExtensions) {
