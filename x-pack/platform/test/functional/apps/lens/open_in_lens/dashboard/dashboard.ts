@@ -26,7 +26,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const panelActions = getService('dashboardPanelActions');
   const filterBar = getService('filterBar');
 
-  describe('Convert to Lens action on dashboard', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/271816
+  describe.skip('Convert to Lens action on dashboard', function describeIndexTests() {
     before(async () => {
       await dashboard.initTests();
       await header.waitUntilLoadingHasFinished();
