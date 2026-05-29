@@ -62,8 +62,6 @@ export class DashboardPageObject extends FtrService {
     ? 'src/platform/test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
     : 'src/platform/test/functional/fixtures/kbn_archiver/dashboard/legacy/legacy.json';
 
-  public readonly APP_ID = 'dashboards';
-
   async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
     await this.kibanaServer.savedObjects.cleanStandardList();
@@ -73,7 +71,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async navigateToApp() {
-    await this.common.navigateToApp(this.APP_ID);
+    await this.common.navigateToApp(DASHBOARD_APP_ID);
   }
 
   public async navigateToAppFromAppsMenu() {
