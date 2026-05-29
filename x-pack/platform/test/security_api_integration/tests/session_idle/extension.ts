@@ -7,9 +7,9 @@
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const saveCookie = async (response: any) => {
       // save the response cookie, and pass back the result
-      sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
+      sessionCookie = findSessionCookie(response.headers['set-cookie']);
       return response;
     };
     const getSessionInfo = async () => {
