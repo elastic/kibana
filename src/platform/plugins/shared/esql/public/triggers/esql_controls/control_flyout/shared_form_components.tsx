@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { EsqlControlType } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/controls-constants';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import {

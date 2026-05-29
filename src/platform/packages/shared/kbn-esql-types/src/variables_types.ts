@@ -26,8 +26,6 @@ export enum ESQLVariableType {
   FUNCTIONS = 'functions',
 }
 
-export { EsqlControlType };
-
 export type StaticESQLControl = Extract<
   OptionsListESQLControlState,
   { control_type: 'STATIC_VALUES' }

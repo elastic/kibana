@@ -15,17 +15,13 @@ import {
 } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import {
-  ControlTriggerSource,
-  ESQLVariableType,
-  EsqlControlType,
-  apiPublishesESQLVariables,
-} from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType, apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import {
   ACTION_CREATE_ESQL_CONTROL,
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   ESQL_CONTROL,
+  EsqlControlType,
 } from '@kbn/controls-constants';
 import { ADD_PANEL_CONTROL_GROUP } from './constants';
 import { uiActionsService } from '../services/kibana_services';

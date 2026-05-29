@@ -9,7 +9,6 @@
 
 export {
   ESQLVariableType,
-  EsqlControlType,
   VariableNamePrefix,
   type ESQLControlVariable,
   type PublishesESQLVariable,

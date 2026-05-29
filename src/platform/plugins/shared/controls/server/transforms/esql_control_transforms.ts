@@ -15,7 +15,7 @@ import {
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-import { EsqlControlType } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/controls-constants';
 
 export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerEmbeddableServerDefinition(ESQL_CONTROL, {

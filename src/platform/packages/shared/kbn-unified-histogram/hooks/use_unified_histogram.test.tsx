@@ -8,7 +8,8 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { type ESQLControlVariable, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/controls-constants';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { act } from 'react-dom/test-utils';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';

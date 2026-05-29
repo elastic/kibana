@@ -8,8 +8,8 @@
  */
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
+import { ESQL_CONTROL, EsqlControlType } from '@kbn/controls-constants';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { PresentationContainer } from '@kbn/presentation-publishing';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { getAllEsqlControls, getEsqlControls } from './get_esql_controls';

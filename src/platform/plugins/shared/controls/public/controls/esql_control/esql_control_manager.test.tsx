@@ -8,7 +8,8 @@
  */
 
 import { waitFor } from '@testing-library/react';
-import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/controls-constants';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { initializeESQLControlManager } from './esql_control_manager';

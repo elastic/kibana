@@ -21,12 +21,12 @@ import { css } from '@emotion/react';
 import type { TimeRange } from '@kbn/es-query';
 import {
   ESQLVariableType,
-  EsqlControlType,
   TIMEFIELD_ROUTE,
   isQueryESQLControl,
   isStaticESQLControl,
   type ESQLControlVariable,
 } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import {
   appendStatsByToQuery,

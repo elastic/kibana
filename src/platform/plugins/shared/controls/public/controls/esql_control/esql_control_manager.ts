@@ -27,13 +27,9 @@ import type {
   OptionsListSelection,
 } from '@kbn/controls-schemas';
 import type { TimeRange } from '@kbn/es-query';
+import { EsqlControlType } from '@kbn/controls-constants';
 import type { ESQLControlVariable, QueryESQLControl } from '@kbn/esql-types';
-import {
-  EsqlControlType,
-  ESQLVariableType,
-  isQueryESQLControl,
-  isStaticESQLControl,
-} from '@kbn/esql-types';
+import { ESQLVariableType, isQueryESQLControl, isStaticESQLControl } from '@kbn/esql-types';
 import { getESQLQueryVariables, hasStartEndParams } from '@kbn/esql-utils';
 import {
   apiHasSections,

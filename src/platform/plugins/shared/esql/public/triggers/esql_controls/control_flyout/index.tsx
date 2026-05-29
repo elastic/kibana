@@ -13,13 +13,13 @@ import type { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import type { TimeRange } from '@kbn/es-query';
 import {
   ESQLVariableType,
-  EsqlControlType,
   VariableNamePrefix,
   TelemetryControlCancelledReason,
   type ESQLControlVariable,
   type ControlTriggerSource,
   isQueryESQLControl,
 } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
 import type { ISearchGeneric } from '@kbn/search-types';

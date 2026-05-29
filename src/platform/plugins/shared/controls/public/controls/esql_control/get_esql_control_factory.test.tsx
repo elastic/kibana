@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/controls-constants';
+import { ESQLVariableType } from '@kbn/esql-types';
 import {
   optionsListESQLControlSchema,
   type OptionsListESQLControlState,

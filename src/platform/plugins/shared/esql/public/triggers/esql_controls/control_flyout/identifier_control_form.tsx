@@ -16,9 +16,9 @@ import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/
 import type { monaco } from '@kbn/code-editor';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLControlVariable, StaticESQLControl } from '@kbn/esql-types';
-import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
+import { DEFAULT_ESQL_OPTIONS_LIST_STATE, EsqlControlType } from '@kbn/controls-constants';
 import { aggFunctionDefinitions } from '@kbn/esql-language/src/commands/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { ControlLabel } from './shared_form_components';

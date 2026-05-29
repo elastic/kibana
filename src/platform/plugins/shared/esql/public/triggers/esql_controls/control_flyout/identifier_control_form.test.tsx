@@ -15,7 +15,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { monaco } from '@kbn/code-editor';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/controls-constants';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import { ESQLControlsFlyout } from '.';
 import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import {

@@ -13,7 +13,7 @@ import {
   DEFAULT_ESQL_OPTIONS_LIST_STATE,
   DEFAULT_PINNED_CONTROL_STATE,
 } from '@kbn/controls-constants';
-import { EsqlControlType } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/controls-constants';
 
 export const mockControlState: ControlPanelsState<OptionsListESQLControlState> = {
   panel1: {
