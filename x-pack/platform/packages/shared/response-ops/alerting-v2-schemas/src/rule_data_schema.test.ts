@@ -15,6 +15,7 @@ import {
   createRuleDataSchema,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
+  updateRuleBodySchema,
 } from './rule_data_schema';
 
 const validCreateData = {
@@ -915,6 +916,37 @@ describe('updateRuleDataSchema', () => {
 
       expect(result.success).toBe(false);
     });
+  });
+});
+
+describe('updateRuleBodySchema', () => {
+  it('accepts a payload without version', () => {
+    const result = updateRuleBodySchema.parse({});
+    expect(result).toEqual({});
+  });
+
+  it('accepts a payload with version', () => {
+    const result = updateRuleBodySchema.parse({ version: 'WzEsMV0=' });
+    expect(result.version).toBe('WzEsMV0=');
+  });
+
+  it('accepts version alongside data fields', () => {
+    const result = updateRuleBodySchema.parse({
+      version: 'WzEsMV0=',
+      metadata: { name: 'updated name' },
+    });
+    expect(result).toEqual({
+      version: 'WzEsMV0=',
+      metadata: { name: 'updated name' },
+    });
+  });
+
+  it('rejects an empty string version', () => {
+    expect(() => updateRuleBodySchema.parse({ version: '' })).toThrow();
+  });
+
+  it('rejects a version longer than 256 characters', () => {
+    expect(() => updateRuleBodySchema.parse({ version: 'x'.repeat(257) })).toThrow();
   });
 });
 

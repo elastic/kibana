@@ -69,7 +69,7 @@ export function SignificantEventsDiscoveryPage() {
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
 
-  const onTaskFailed = useCallback(
+  const onOnboardingFailed = useCallback(
     (error: string) => {
       toasts.addError(getFormattedError(new Error(error)), {
         title: ONBOARDING_FAILURE_TITLE,
@@ -236,7 +236,7 @@ export function SignificantEventsDiscoveryPage() {
         }
         tabs={tabs}
       />
-      <KiGenerationProvider onTaskFailed={onTaskFailed}>
+      <KiGenerationProvider onFailed={onOnboardingFailed}>
         <StreamsAppPageTemplate.Body grow>
           {tab === 'streams' && <StreamsView />}
           {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
