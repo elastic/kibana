@@ -7,7 +7,6 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
-import type { SavedObject } from '@kbn/core/server';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { ruleSnoozeScheduleSchema } from '../../../../../common/routes/rule/request';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
