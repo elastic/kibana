@@ -67,7 +67,7 @@ export async function cleanupOrphanPipelines(
     // walk through the list in `pageSize` chunks so the task can stop at
     // `maxPages` and resume from the same cursor on the next run.
     const response = await esClient.ingest.getPipeline(
-      { id: SLO_PIPELINE_PATTERN },
+      { id: SLO_PIPELINE_PATTERN, summary: true },
       { ignore: [404], signal: abortController.signal }
     );
 

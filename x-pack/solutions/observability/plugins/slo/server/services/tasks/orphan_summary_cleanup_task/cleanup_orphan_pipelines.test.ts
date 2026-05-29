@@ -114,7 +114,7 @@ describe('cleanupOrphanPipelines', () => {
 
     expect(result).toEqual({ aborted: false, completed: true });
     expect(esClient.ingest.getPipeline).toHaveBeenCalledWith(
-      { id: '.slo-observability.*.pipeline-*' },
+      { id: '.slo-observability.*.pipeline-*', summary: true },
       expect.objectContaining({ ignore: [404], signal: abortController.signal })
     );
     expect(soClient.find).not.toHaveBeenCalled();
