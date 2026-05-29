@@ -22,9 +22,10 @@ NODE_HELPERS_SCRIPT="${SCRIPT_DIR}/renovate_review_sync/helpers.js"
 PR_TITLE='[Renovate] Sync reviewers for managed rules'
 
 # Hidden HTML-comment marker embedded in the bot PR body; lets the next weekly run see
-# which teams the bot itself previously requested as reviewers, so removed teams can be
-# cleaned up symmetrically without touching humans (or teams that humans manually added).
-# Format: `<!-- bot-managed-reviewer-teams: elastic/team-a elastic/team-b -->`
+# which reviewers the bot itself previously requested (teams as `elastic/<slug>`, individual
+# CODEOWNERS owners as bare usernames), so reviewers the bot dropped can be cleaned up
+# symmetrically without touching humans (or reviewers that humans manually added).
+# Format: `<!-- bot-managed-reviewer-teams: elastic/team-a markov00 -->`
 BOT_MANAGED_REVIEWERS_MARKER_PREFIX="<!-- bot-managed-reviewer-teams:"
 BOT_MANAGED_REVIEWERS_MARKER_SUFFIX="-->"
 
@@ -151,17 +152,18 @@ compute_requested_stale_team_reviewers_to_remove () {
     return 0
   fi
 
-  # Remove only teams that are both stale according to the marker and currently requested
-  # on GitHub. If a team already reviewed, was dismissed, or was manually removed, including
-  # it in the DELETE payload could make the whole best-effort cleanup fail.
+  # Remove only reviewers that are both stale according to the marker and currently requested
+  # on GitHub. If a reviewer already reviewed, was dismissed, or was manually removed, including
+  # it in the removal payload could make the whole best-effort cleanup fail. Both `elastic/<slug>`
+  # teams and bare individual usernames flow through here (the marker stores both shapes), so the
+  # removal step below dispatches each kind to the right GitHub call.
   # shellcheck disable=SC2086
   comm -12 \
     <(printf '%s\n' ${stale_teams:-} | sort -u | sed '/^$/d') \
-    <(printf '%s\n' ${existing_reviewers:-} | sort -u | sed '/^$/d') | \
-    sed -n '/^elastic\//p'
+    <(printf '%s\n' ${existing_reviewers:-} | sort -u | sed '/^$/d')
 }
 
-best_effort_remove_team_reviewers () {
+best_effort_remove_reviewers () {
   local pr_number="$1"
   shift
 
@@ -169,40 +171,50 @@ best_effort_remove_team_reviewers () {
     return 0
   fi
 
-  # Strip the `elastic/` prefix; the GitHub API expects bare team slugs in `team_reviewers`.
-  # Defensive: skip anything that isn't `elastic/<slug>`. The bot only ever manages teams,
-  # so this guard ensures we never accidentally remove a user-level reviewer here.
+  # Split stale reviewers by shape: `elastic/<slug>` are teams (removed via the API
+  # `team_reviewers` payload, which expects bare slugs), everything else is an individual
+  # user login (removed via `gh pr edit --remove-reviewer`). The bot manages both since the
+  # marker now stores team slugs and usernames alike.
   local slugs=()
+  local users=()
   for r in "$@"; do
     case "$r" in
       elastic/*)
         slugs+=("${r#elastic/}")
         ;;
       *)
-        echo "WARN: ignoring non-team reviewer '$r' in stale-reviewer removal"
+        users+=("$r")
         ;;
     esac
   done
 
-  if [ "${#slugs[@]}" -eq 0 ]; then
-    return 0
+  if [ "${#slugs[@]}" -gt 0 ]; then
+    echo "--- Removing stale team reviewers (best-effort): ${slugs[*]}"
+
+    # Build the JSON payload via jq so unusual characters in slugs are escaped correctly.
+    # GitHub's DELETE endpoint requires `reviewers`, even when only teams are removed.
+    local payload
+    payload="$(printf '%s\n' "${slugs[@]}" | jq -R . | jq -s '{reviewers: [], team_reviewers: .}')"
+
+    if printf '%s' "$payload" | gh api \
+      --method DELETE \
+      "/repos/{owner}/{repo}/pulls/${pr_number}/requested_reviewers" \
+      --input - >/dev/null 2>&1; then
+      echo "Removed stale team reviewers: ${slugs[*]}"
+    else
+      echo "WARN: Failed to remove stale team reviewers (continuing)"
+    fi
   fi
 
-  echo "--- Removing stale team reviewers (best-effort): ${slugs[*]}"
-
-  # Build the JSON payload via jq so unusual characters in slugs are escaped correctly.
-  # GitHub's DELETE endpoint requires `reviewers`, even when only teams are removed.
-  local payload
-  payload="$(printf '%s\n' "${slugs[@]}" | jq -R . | jq -s '{reviewers: [], team_reviewers: .}')"
-
-  if printf '%s' "$payload" | gh api \
-    --method DELETE \
-    "/repos/{owner}/{repo}/pulls/${pr_number}/requested_reviewers" \
-    --input - >/dev/null 2>&1; then
-    echo "Removed stale team reviewers: ${slugs[*]}"
-  else
-    echo "WARN: Failed to remove stale team reviewers (continuing)"
-  fi
+  # Remove individual users one at a time so a single non-removable login (already reviewed,
+  # manually removed) doesn't fail the cleanup for the rest.
+  for user in "${users[@]}"; do
+    if gh pr edit "$pr_number" --remove-reviewer "$user" >/dev/null 2>&1; then
+      echo "Removed stale reviewer $user"
+    else
+      echo "WARN: Failed to remove stale reviewer $user (continuing)"
+    fi
+  done
 }
 
 maybe_close_stale_bot_pr () {
@@ -434,16 +446,16 @@ main () {
     best_effort_request_reviewers "$pr_number" $reviewers_to_request
   fi
 
-  # Symmetric counterpart: drop teams the bot itself previously requested but that are no
+  # Symmetric counterpart: drop reviewers the bot itself previously requested but that are no
   # longer in the computed set. The previous-run marker defines what the bot owns; the
-  # current GitHub requested-reviewer list keeps the DELETE payload to reviewers that are
-  # still pending. That avoids touching humans / human-added teams and avoids failing the
-  # whole best-effort DELETE because one stale team already reviewed or was removed.
+  # current GitHub requested-reviewer list keeps the removal payload to reviewers that are
+  # still pending. That avoids touching humans / human-added reviewers and avoids failing the
+  # whole best-effort cleanup because one stale reviewer already reviewed or was removed.
   if [ -n "${existing_pr_number:-}" ] && [ -n "${previous_managed_teams:-}" ]; then
-    teams_to_remove="$(compute_requested_stale_team_reviewers_to_remove "$pr_number" "$previous_managed_teams" "${reviewers:-}" || true)"
-    if [ -n "${teams_to_remove:-}" ]; then
+    reviewers_to_remove="$(compute_requested_stale_team_reviewers_to_remove "$pr_number" "$previous_managed_teams" "${reviewers:-}" || true)"
+    if [ -n "${reviewers_to_remove:-}" ]; then
       # shellcheck disable=SC2086
-      best_effort_remove_team_reviewers "$pr_number" $teams_to_remove
+      best_effort_remove_reviewers "$pr_number" $reviewers_to_remove
     fi
   fi
 
