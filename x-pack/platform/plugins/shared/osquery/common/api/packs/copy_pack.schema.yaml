@@ -48,6 +48,10 @@ components:
                     type: integer
                   ecs_mapping:
                     $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ECSMappingArrayOrUndefined'
+                  schedule_type:
+                    $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ScheduleTypeOrUndefined'
+                  rrule_schedule:
+                    $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RRuleScheduleConfigOrUndefined'
             version:
               description: 'The pack version number.'
               type: integer
@@ -81,6 +85,12 @@ components:
                     type: string
                   value:
                     type: number
+            schedule_type:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ScheduleTypeOrUndefined'
+            interval:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackIntervalOrUndefined'
+            rrule_schedule:
+              $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/RRuleScheduleConfigOrUndefined'
       example:
         data:
           saved_object_id: "1c266590-381f-428c-878f-c80c1334f856"
