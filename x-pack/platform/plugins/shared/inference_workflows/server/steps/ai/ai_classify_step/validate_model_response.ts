@@ -7,7 +7,8 @@
 
 import { ExecutionError } from '@kbn/workflows/server';
 import type { z } from '@kbn/zod/v4';
-import type { AiClassifyStepOutputSchema } from '../../../../common/steps/ai';
+import { type ModelResponseSchema } from './schemas';
+import { type Category, getCategoryName } from '../../../../common/steps/ai/ai_classify_step';
 
 export function validateModelResponse({
   modelResponse,
@@ -15,9 +16,9 @@ export function validateModelResponse({
   fallbackCategory,
   responseMetadata,
 }: {
-  modelResponse: z.infer<AiClassifyStepOutputSchema> | null | undefined;
-  expectedCategories: string[];
-  fallbackCategory: string | undefined;
+  modelResponse: z.infer<typeof ModelResponseSchema> | null | undefined;
+  expectedCategories: Category[];
+  fallbackCategory: Category | undefined;
   responseMetadata: Record<string, unknown>;
 }): void {
   if (!modelResponse) {
@@ -35,8 +36,8 @@ export function validateModelResponse({
     ? modelResponse.categories
     : [modelResponse.category as string];
   const categoriesSet = new Set([
-    ...expectedCategories,
-    ...(fallbackCategory ? [fallbackCategory] : []),
+    ...expectedCategories.map(getCategoryName),
+    ...(fallbackCategory ? [getCategoryName(fallbackCategory)] : []),
   ]);
 
   const unexpectedCategories = returnedCategories.filter(

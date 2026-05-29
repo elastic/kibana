@@ -19,7 +19,15 @@ interface AppMenuSwitchComponentProps {
 
 export const AppMenuSwitchComponent = ({ switchConfig }: AppMenuSwitchComponentProps) => {
   const { euiTheme } = useEuiTheme();
-  const { id, label, labelProps, checked, onChange, 'data-test-subj': dataTestSubj } = switchConfig;
+  const {
+    id,
+    label,
+    labelProps,
+    checked,
+    onChange,
+    disabled,
+    'data-test-subj': dataTestSubj,
+  } = switchConfig;
 
   const switchCss = css`
     margin-right: ${euiTheme.size.s};
@@ -36,6 +44,7 @@ export const AppMenuSwitchComponent = ({ switchConfig }: AppMenuSwitchComponentP
       labelProps={labelProps}
       checked={checked}
       onChange={handleChange}
+      disabled={disabled}
       compressed
       css={switchCss}
       data-test-subj={dataTestSubj ?? 'app-menu-switch'}
