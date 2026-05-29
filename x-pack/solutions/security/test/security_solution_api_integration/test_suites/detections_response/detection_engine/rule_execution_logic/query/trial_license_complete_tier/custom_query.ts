@@ -284,12 +284,14 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with host and user risk indices', () => {
+      let entityStoreV2Installed = false;
+
       before(async () => {
         // Auditbeat host records carry host.id, so the EUID is id-based (host:<host.id>)
         // and must be supplied explicitly via entity.id.
         // Auditbeat user records do not carry user.id, so the EUID is name-based
         // (user:<user.name>) and is auto-generated, no entity.id needed.
-        await entityStoreV2.setup({
+        entityStoreV2Installed = await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
@@ -310,10 +312,19 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
+        if (!entityStoreV2Installed) {
+          await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        }
       });
 
       after(async () => {
-        await entityStoreV2.teardown();
+        if (entityStoreV2Installed) {
+          await entityStoreV2.teardown();
+        } else {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
+          );
+        }
       });
 
       it('should have host and user risk score fields', async () => {
@@ -370,8 +381,10 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('with asset criticality', () => {
+      let entityStoreV2Installed = false;
+
       before(async () => {
-        await entityStoreV2.setup({
+        entityStoreV2Installed = await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
@@ -387,10 +400,21 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         });
+        if (!entityStoreV2Installed) {
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
+        }
       });
 
       after(async () => {
-        await entityStoreV2.teardown();
+        if (entityStoreV2Installed) {
+          await entityStoreV2.teardown();
+        } else {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
+        }
       });
 
       it('should be enriched alert with criticality_level', async () => {

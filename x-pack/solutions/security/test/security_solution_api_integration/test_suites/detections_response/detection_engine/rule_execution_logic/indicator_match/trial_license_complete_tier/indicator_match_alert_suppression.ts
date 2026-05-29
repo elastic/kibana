@@ -2500,8 +2500,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         describe('alerts should be enriched', () => {
+          let entityStoreV2Installed = false;
+
           before(async () => {
-            await entityStoreV2.setup({
+            entityStoreV2Installed = await entityStoreV2.setup({
               hosts: [
                 {
                   host: { name: 'zeek-sensor-amsterdam' },
@@ -2522,10 +2524,21 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
             });
+            if (!entityStoreV2Installed) {
+              await esArchiver.load(
+                'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
+              );
+            }
           });
 
           after(async () => {
-            await entityStoreV2.teardown();
+            if (entityStoreV2Installed) {
+              await entityStoreV2.teardown();
+            } else {
+              await esArchiver.unload(
+                'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
+              );
+            }
           });
 
           it('should be enriched with host risk score', async () => {
@@ -2589,8 +2602,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         describe('with asset criticality', () => {
+          let entityStoreV2Installed = false;
+
           before(async () => {
-            await entityStoreV2.setup({
+            entityStoreV2Installed = await entityStoreV2.setup({
               hosts: [
                 {
                   host: { name: 'zeek-sensor-amsterdam' },
@@ -2606,10 +2621,21 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
             });
+            if (!entityStoreV2Installed) {
+              await esArchiver.load(
+                'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+              );
+            }
           });
 
           after(async () => {
-            await entityStoreV2.teardown();
+            if (entityStoreV2Installed) {
+              await entityStoreV2.teardown();
+            } else {
+              await esArchiver.unload(
+                'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+              );
+            }
           });
 
           it('should be enriched alert with criticality_level', async () => {
