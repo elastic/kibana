@@ -6,7 +6,7 @@
  */
 
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
-import type { StreamType } from '@kbn/streams-schema';
+import type { SigEventVerdict, StreamType } from '@kbn/streams-schema';
 
 interface StreamEndpointLatencyProps {
   name: string;
@@ -98,7 +98,7 @@ interface StreamsAgentToolEventCreateProps {
 interface StreamsAgentToolEventVerdictUpdateProps {
   success: boolean;
   event_id: string;
-  verdict: 'promoted' | 'acknowledged' | 'demoted';
+  verdict: SigEventVerdict;
   error_message?: string;
 }
 
