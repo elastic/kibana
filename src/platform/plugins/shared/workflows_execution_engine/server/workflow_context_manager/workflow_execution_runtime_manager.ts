@@ -171,6 +171,10 @@ export class WorkflowExecutionRuntimeManager {
 
   public setWorkflowStatus(status: ExecutionStatus): void {
     this.workflowExecutionState.updateWorkflowExecution({ status });
+
+    if (isTerminalStatus(status)) {
+      this.workflowExecutionCursor.stop();
+    }
   }
 
   /**
@@ -265,6 +269,7 @@ export class WorkflowExecutionRuntimeManager {
       duration:
         new Date(finishedAt).getTime() - new Date(this.workflowExecution.startedAt).getTime(),
     });
+    this.workflowExecutionCursor.stop();
   }
 
   public async start(): Promise<void> {
@@ -431,13 +436,16 @@ export class WorkflowExecutionRuntimeManager {
       scopeStack: this.workflowExecutionCursor.currentStackFrames,
     };
 
-    if (isTerminalStatus(workflowExecution.status)) {
-      workflowExecutionUpdate.status = workflowExecution.status;
-    } else if (this.workflowExecutionCursor.error) {
+    if (this.workflowExecutionCursor.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
       workflowExecutionUpdate.error = ExecutionError.fromError(
         this.workflowExecutionCursor.error
       ).toSerializableObject();
+    } else if (isTerminalStatus(workflowExecution.status)) {
+      workflowExecutionUpdate.status = workflowExecution.status;
+      workflowExecutionUpdate.error = this.workflowExecutionCursor.error
+        ? ExecutionError.fromError(this.workflowExecutionCursor.error).toSerializableObject()
+        : undefined;
     } else if (!this.workflowExecutionCursor.currentNode) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }

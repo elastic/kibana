@@ -762,13 +762,19 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
   describe('markWorkflowTimeouted', () => {
     it('should set status to TIMED_OUT with finishedAt and duration', () => {
+      const stopSpy = jest.spyOn(underTest.executionCursor, 'stop');
+
       underTest.markWorkflowTimeouted();
+
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
           status: ExecutionStatus.TIMED_OUT,
           finishedAt: '2025-07-05T20:00:00.000Z',
         })
       );
+      expect(stopSpy).toHaveBeenCalled();
+
+      stopSpy.mockRestore();
     });
   });
 

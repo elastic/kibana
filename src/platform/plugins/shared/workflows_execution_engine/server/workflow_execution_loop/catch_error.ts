@@ -62,6 +62,16 @@ export async function catchError(
   const { workflowExecutionCursor, workflowLogger, stepExecutionRuntimeFactory, nodesFactory } =
     params;
 
+  // Workflow-level timeout is finalized in EnterWorkflowTimeoutZoneNodeImpl.monitor()
+  // (TIMED_OUT on the workflow, cursor error cleared). run_node still invokes catch_error
+  // in finally; without this guard we would re-capture the timed-out step's error and run
+  // generic error bubbling (navigateToNode + commitPendingNavigation), which wrongly clears
+  // scopeStack and can override the timeout outcome. Interrupted steps are FAILED today;
+  // CANCELLED is the better fit and will likely replace FAILED for those steps later.
+  if (params.workflowRuntime.getWorkflowExecution().status === ExecutionStatus.TIMED_OUT) {
+    return;
+  }
+
   try {
     // Loop through nested scopes in reverse order to handle errors at each level.
     // The loop continues while:
