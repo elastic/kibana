@@ -110,7 +110,7 @@ describe('step validation', () => {
   });
 
   describe('alertCondition.validate', () => {
-    const alertStep = getSteps(false).find((s) => s.id === 'alertCondition')!;
+    const alertStep = getSteps(false).steps.find((s) => s.id === 'alertCondition')!;
 
     it('returns true when queryCommitted is true', async () => {
       const state = createState({ queryCommitted: true });
@@ -128,7 +128,7 @@ describe('step validation', () => {
   });
 
   describe('details.validate', () => {
-    const detailsStep = getSteps(false).find((s) => s.id === 'details')!;
+    const detailsStep = getSteps(false).steps.find((s) => s.id === 'details')!;
 
     it('delegates to methods.trigger with metadata.name', async () => {
       const state = createState();
@@ -193,13 +193,13 @@ describe('step validation', () => {
 
   describe('step registry', () => {
     it('recoveryCondition has no validate function', () => {
-      const recoveryStep = getSteps(true).find((s) => s.id === 'recoveryCondition')!;
+      const recoveryStep = getSteps(true).steps.find((s) => s.id === 'recoveryCondition')!;
       expect(recoveryStep.validate).toBeUndefined();
     });
   });
 
   describe('notifications.validate', () => {
-    const notificationsStep = getSteps(true).find((s) => s.id === 'notifications')!;
+    const notificationsStep = getSteps(true).steps.find((s) => s.id === 'notifications')!;
 
     const makeServices = (isValid?: (v: object) => boolean): RuleFormServices =>
       ({ workflowForm: { isValid } } as unknown as RuleFormServices);
@@ -282,8 +282,8 @@ describe('step validation', () => {
   });
 
   it('includes the correct steps based on isAlert', () => {
-    expect(getSteps(false).map((step) => step.id)).toEqual(['alertCondition', 'details']);
-    expect(getSteps(true).map((step) => step.id)).toEqual([
+    expect(getSteps(false).steps.map((step) => step.id)).toEqual(['alertCondition', 'details']);
+    expect(getSteps(true).steps.map((step) => step.id)).toEqual([
       'alertCondition',
       'recoveryCondition',
       'details',

@@ -496,7 +496,7 @@ const generateQueriesRoute = createServerRoute({
         featureClient,
         queryClient,
         esClient: scopedClusterClient.asCurrentUser,
-        uiSettingsClient,
+        featureFlags: server.core.featureFlags,
         searchInferenceEndpoints: server.searchInferenceEndpoints,
         request,
         logger: logger.get('significant_events_queries_generation'),
