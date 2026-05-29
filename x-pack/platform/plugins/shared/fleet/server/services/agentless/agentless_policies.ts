@@ -280,7 +280,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     try {
       agentPolicy = await agentPolicyService.get(this.soClient, policyId);
     } catch (e) {
-      if (e instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         this.logger.warn(`Agent policy ${policyId} not found, cleaning up orphaned resources`);
         await this.deleteOrphanedAgentlessResources(policyId, user);
         return;
@@ -310,7 +310,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         this.soClient,
         this.esClient,
         packagePolicies.map((pp) => pp.id),
-        { force: true, user: user ?? undefined }
+        { force: true, user: user ?? undefined, skipUnassignFromAgentPolicies: true }
       );
     }
 

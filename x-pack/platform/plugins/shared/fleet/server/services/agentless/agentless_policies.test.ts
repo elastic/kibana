@@ -11,13 +11,13 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { createAppContextStartContractMock, createPackagePolicyServiceMock } from '../../mocks';
 import { getPackageInfo } from '../epm/packages';
 import { appContextService, cloudConnectorService } from '..';
 import { agentPolicyService } from '../agent_policy';
 import { agentlessAgentService } from '../agents/agentless_agent';
-import { AgentPolicyNotFoundError } from '../../errors';
 
 import { AgentlessPoliciesServiceImpl } from './agentless_policies';
 
@@ -320,7 +320,7 @@ describe('AgentlessPoliciesService', () => {
 
       jest
         .mocked(agentPolicyService.get)
-        .mockRejectedValueOnce(new AgentPolicyNotFoundError('Agent policy not found'));
+        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
 
       packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
         { id: 'orphaned-pp-1' },
