@@ -124,7 +124,7 @@ const configSchema = schema.object(
 
 export type KbnEvalsCiConfig = ReturnType<typeof configSchema.validate>;
 
-export const validateKbnEvalsCiConfig = (config: unknown): KbnEvalsCiConfig => {
+export const validateKbnEvalsConfig = (config: unknown): KbnEvalsCiConfig => {
   return configSchema.validate(config);
 };
 
@@ -152,7 +152,7 @@ export const readConfigFromVaultPath = async (vaultPath: string): Promise<KbnEva
 
   const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
   const parsed = JSON.parse(value);
-  return validateKbnEvalsCiConfig(parsed);
+  return validateKbnEvalsConfig(parsed);
 };
 
 export const readConfigFromVault = async (vault: VaultType): Promise<KbnEvalsCiConfig> => {
@@ -173,7 +173,7 @@ export const retrieveConfigFromVault = async (vault: VaultType) => {
 export const uploadToVault = async (vaultPath: string, filePath: string, field: string) => {
   ensureLocalConfigFileExists(filePath);
   const config = await readFile(filePath, 'utf-8');
-  const validated = validateKbnEvalsCiConfig(JSON.parse(config));
+  const validated = validateKbnEvalsConfig(JSON.parse(config));
   const asB64 = Buffer.from(JSON.stringify(validated)).toString('base64');
 
   await execa('vault', ['write', vaultPath, `${field}=${asB64}`], {
@@ -196,7 +196,7 @@ export const getCommand = async (
 ) => {
   ensureLocalConfigFileExists(KBN_EVALS_CONFIG_FILE);
   const config = await readFile(KBN_EVALS_CONFIG_FILE, 'utf-8');
-  const validated = validateKbnEvalsCiConfig(JSON.parse(config));
+  const validated = validateKbnEvalsConfig(JSON.parse(config));
   const asB64 = Buffer.from(JSON.stringify(validated)).toString('base64');
 
   if (format === 'vault-write') {
@@ -223,5 +223,5 @@ export const getKbnEvalsConfigFromEnvVar = (): KbnEvalsCiConfig => {
     );
   }
 
-  return validateKbnEvalsCiConfig(config);
+  return validateKbnEvalsConfig(config);
 };
