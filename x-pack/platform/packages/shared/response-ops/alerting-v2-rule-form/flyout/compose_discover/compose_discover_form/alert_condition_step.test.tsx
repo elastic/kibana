@@ -420,13 +420,15 @@ describe('AlertConditionStep', () => {
 
   describe('group-by auto-population in tracking mode', () => {
     it('extracts BY columns from the base query (composed format)', async () => {
-      renderAlertStep(
+      renderStep(
         { queryCommitted: true },
         {
-          query: {
-            format: 'composed',
-            base: 'FROM logs-*\n| STATS count = COUNT(*) BY host.name',
-            blocks: { breach: '| WHERE count > 100' },
+          formValueOverrides: {
+            query: {
+              format: 'composed',
+              base: 'FROM logs-*\n| STATS count = COUNT(*) BY host.name',
+              blocks: { breach: '| WHERE count > 100' },
+            },
           },
         }
       );
@@ -437,13 +439,15 @@ describe('AlertConditionStep', () => {
     });
 
     it('extracts multiple BY columns from the base query', async () => {
-      renderAlertStep(
+      renderStep(
         { queryCommitted: true },
         {
-          query: {
-            format: 'composed',
-            base: 'FROM kibana_sample_data_ecommerce\n| STATS total = SUM(taxful_total_price) BY customer_gender, day_of_week',
-            blocks: { breach: '| WHERE total > 1000' },
+          formValueOverrides: {
+            query: {
+              format: 'composed',
+              base: 'FROM kibana_sample_data_ecommerce\n| STATS total = SUM(taxful_total_price) BY customer_gender, day_of_week',
+              blocks: { breach: '| WHERE total > 1000' },
+            },
           },
         }
       );
@@ -455,13 +459,15 @@ describe('AlertConditionStep', () => {
     });
 
     it('clears group fields when the base query has no STATS BY', async () => {
-      renderAlertStep(
+      renderStep(
         { queryCommitted: true },
         {
-          query: {
-            format: 'composed',
-            base: 'FROM logs-*\n| STATS count = COUNT(*)',
-            blocks: { breach: '| WHERE count > 100' },
+          formValueOverrides: {
+            query: {
+              format: 'composed',
+              base: 'FROM logs-*\n| STATS count = COUNT(*)',
+              blocks: { breach: '| WHERE count > 100' },
+            },
           },
         }
       );
