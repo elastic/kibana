@@ -223,9 +223,7 @@ const computeValidation = (
   const hasVisitedEntries = visitedFields.entries;
 
   if (hasOsSelected || hasVisitedEntries) {
-    if (!formData.entries?.length) {
-      errors.entries = [INPUT_ERRORS.entriesAtLeastOne];
-    } else {
+    if (formData.entries?.length) {
       const entryValidation = validateEntries(formData.entries);
 
       if (entryValidation.duplicateErrors.length > 0) {

@@ -134,9 +134,6 @@ export const INPUT_ERRORS = {
   name: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.nameRequired', {
     defaultMessage: 'Trusted device name is required',
   }),
-  entries: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.entriesRequired', {
-    defaultMessage: 'At least one condition is required',
-  }),
   invalidHash: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.invalidHash', {
     defaultMessage: 'Invalid hash value',
   }),
@@ -163,12 +160,6 @@ export const INPUT_ERRORS = {
     'xpack.securitySolution.trustedDevices.form.errors.entryValueEmpty',
     {
       defaultMessage: 'Condition value cannot be empty',
-    }
-  ),
-  entriesAtLeastOne: i18n.translate(
-    'xpack.securitySolution.trustedDevices.form.errors.entriesAtLeastOne',
-    {
-      defaultMessage: 'At least one condition must be specified',
     }
   ),
   noDuplicateField: (field: TrustedDeviceConditionEntryField) =>
