@@ -7,30 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CodeEditorProps } from '@kbn/code-editor';
+import '@kbn/code-editor-mock/jest_helper';
 import JsonCodeEditor from './json_code_editor';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-
-  const CodeEditorMock = (props: CodeEditorProps) => (
-    <pre data-test-subj="mockCodeEditor">{props.value}</pre>
-  );
-
-  return {
-    ...original,
-    CodeEditor: CodeEditorMock,
-  };
-});
-
 describe('JsonCodeEditor', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('returns the `JsonCodeEditor` component', () => {
     const value = {
       _index: 'test',
@@ -42,8 +25,8 @@ describe('JsonCodeEditor', () => {
 
     renderWithI18n(<JsonCodeEditor json={value} />);
 
-    const editor = screen.getByTestId('mockCodeEditor');
+    const editor = screen.getByTestId('mockedCodeEditor');
     expect(editor).toBeVisible();
-    expect(editor.textContent).toBe(JSON.stringify(value, null, 2));
+    expect(editor).toHaveAttribute('data-currentvalue', JSON.stringify(value, null, 2));
   });
 });

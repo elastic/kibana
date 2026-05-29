@@ -416,9 +416,8 @@ describe('UnifiedDataTable', () => {
     it(
       'copying selected columns to clipboard as text',
       async () => {
-        const { rerender } = await renderComponent();
+        await renderComponent({ ...getProps(), columns: ['date', 'extension', 'name'] });
 
-        rerender(<DataTableWithI18n {...getProps()} columns={['date', 'extension', 'name']} />);
         await toggleDocSelection(esHitsMock[2]);
         await toggleDocSelection(esHitsMock[1]);
         await openSelectedDocumentsMenu();
@@ -1665,7 +1664,7 @@ describe('UnifiedDataTable', () => {
       expect(onChangePageMock).toHaveBeenNthCalledWith(1, 1);
     });
 
-    test('should effect pageIndex change when itemsPerPage has been changed', async () => {
+    it('should effect pageIndex change when itemsPerPage has been changed', async () => {
       /*
        * Use Case:
        *

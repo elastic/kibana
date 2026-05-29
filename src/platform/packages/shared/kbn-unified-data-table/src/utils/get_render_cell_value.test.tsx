@@ -16,7 +16,6 @@ import type { EuiDataGridSetCellProps } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import userEvent from '@testing-library/user-event';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { cleanup, screen, waitFor, within } from '@testing-library/react';
 import {
   columnsMetaOverridingBytesType,
   createDataViewWithBytesField,
@@ -24,36 +23,15 @@ import {
   dataViewMock,
   expectFieldCallToMatch,
 } from '@kbn/discover-utils/src/__mocks__';
+import { screen, waitFor, within } from '@testing-library/react';
+import * as sourceDocumentModule from '../components/source_document';
+import * as sourcePopoverContentModule from '../components/source_popover_content';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
-const mockSourceDocument = jest.fn();
-
-jest.mock('../components/source_document', () => {
-  const original = jest.requireActual('../components/source_document');
-
-  return {
-    SourceDocument: (props: any) => {
-      mockSourceDocument(props);
-      return <original.SourceDocument {...props} />;
-    },
-  };
-});
-
-const mockSourcePopoverContent = jest.fn();
-
-jest.mock('../components/source_popover_content', () => {
-  const original = jest.requireActual('../components/source_popover_content');
-
-  return {
-    __esModule: true,
-    default: (props: any) => {
-      mockSourcePopoverContent(props);
-      return <original.default {...props} />;
-    },
-  };
-});
+const mockSourceDocument = jest.spyOn(sourceDocumentModule, 'SourceDocument');
+const mockSourcePopoverContent = jest.spyOn(sourcePopoverContentModule, 'default');
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -77,7 +55,7 @@ const mockServices = {
   fieldFormats: {
     getDefaultInstance: jest.fn(() => ({
       convert: (value: unknown) => (value ? value : '-'),
-      reactConvert: (value: unknown) => (value ? value : '-'),
+      convertToReact: (value: unknown) => (value ? value : '-'),
     })),
   },
   settings: {
@@ -141,6 +119,66 @@ const rowsSourceWithEmptyValues: EsHitRecord[] = [
 ];
 
 const build = (hit: EsHitRecord) => buildDataTableRecord(hit, dataViewMock);
+
+const getCustomEsqlDataTableCellValue = () => {
+  const rows: EsHitRecord[] = [
+    {
+      _id: '1',
+      _index: 'test',
+      _score: 1,
+      _source: undefined,
+      fields: { bytes: 100, var0: 350, extension: 'gif' },
+    },
+  ];
+
+  return getRenderCellValueFn({
+    closePopover: jest.fn(),
+    columnsMeta: {
+      // custom ES|QL var
+      var0: {
+        type: 'number',
+        esType: 'long',
+      },
+      // custom ES|QL override
+      bytes: {
+        type: 'string',
+        esType: 'keyword',
+      },
+    },
+    dataView: dataViewMock,
+    fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+    maxEntries: 100,
+    rows: rows.map(build),
+    shouldShowFieldHandler: () => true,
+  });
+};
+
+const getUnmappedFieldDataTableCellValue = () => {
+  (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+
+  const rowsFieldsUnmapped: EsHitRecord[] = [
+    {
+      _id: '1',
+      _index: 'test',
+      _score: 1,
+      _source: undefined,
+      fields: { unmapped: ['.gz'] },
+      highlight: {
+        extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
+      },
+    },
+  ];
+
+  return getRenderCellValueFn({
+    closePopover: jest.fn(),
+    columnsMeta: undefined,
+    dataView: dataViewMock,
+    fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+    maxEntries: 100,
+    rows: rowsFieldsUnmapped.map(build),
+    shouldShowFieldHandler: (fieldName: string) => ['unmapped'].includes(fieldName),
+  });
+};
 
 describe('Unified data table cell rendering', () => {
   beforeEach(() => {
@@ -226,6 +264,10 @@ describe('Unified data table cell rendering', () => {
         setCellProps={jest.fn()}
       />
     );
+
+    const closeBtn = screen.getByTestId('docTableClosePopover');
+    await user.click(closeBtn);
+
     expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
   });
 
@@ -263,17 +305,20 @@ describe('Unified data table cell rendering', () => {
     expect(within(descriptionList).getByText('_score')).toBeVisible();
     expect(within(descriptionList).getByText('1')).toBeVisible();
 
-    expect(mockSourceDocument).toHaveBeenCalledWith({
-      columnId: '_source',
-      columnsMeta: undefined,
-      dataView: dataViewMock,
-      fieldFormats: mockServices.fieldFormats,
-      isCompressed: true,
-      maxEntries: 100,
-      row: rows[0],
-      shouldShowFieldHandler: showFieldHandler,
-      useTopLevelObjectColumns: false,
-    });
+    expect(mockSourceDocument).toHaveBeenCalledWith(
+      {
+        columnId: '_source',
+        columnsMeta: undefined,
+        dataView: dataViewMock,
+        fieldFormats: mockServices.fieldFormats,
+        isCompressed: true,
+        maxEntries: 100,
+        row: rows[0],
+        shouldShowFieldHandler: showFieldHandler,
+        useTopLevelObjectColumns: false,
+      },
+      expect.anything()
+    );
   });
 
   it('renders _source column in ES|QL mode even when dataView has no _source field', () => {
@@ -387,18 +432,21 @@ describe('Unified data table cell rendering', () => {
     expect(within(descriptionList).getByText('_score')).toBeVisible();
     expect(within(descriptionList).getByText('1')).toBeVisible();
 
-    expect(mockSourceDocument).toHaveBeenCalledWith({
-      columnId: '_source',
-      columnsMeta: undefined,
-      dataView: dataViewMock,
-      fieldFormats: mockServices.fieldFormats,
-      isCompressed: true,
-      isPlainRecord: true,
-      maxEntries: 100,
-      row: rows[0],
-      shouldShowFieldHandler: showFieldHandler,
-      useTopLevelObjectColumns: false,
-    });
+    expect(mockSourceDocument).toHaveBeenCalledWith(
+      {
+        columnId: '_source',
+        columnsMeta: undefined,
+        dataView: dataViewMock,
+        fieldFormats: mockServices.fieldFormats,
+        isCompressed: true,
+        isPlainRecord: true,
+        maxEntries: 100,
+        row: rows[0],
+        shouldShowFieldHandler: showFieldHandler,
+        useTopLevelObjectColumns: false,
+      },
+      expect.anything()
+    );
   });
 
   it('renders fields-based column correctly', () => {
@@ -435,17 +483,20 @@ describe('Unified data table cell rendering', () => {
     expect(within(descriptionList).getByText('_score')).toBeVisible();
     expect(within(descriptionList).getByText('1')).toBeVisible();
 
-    expect(mockSourceDocument).toHaveBeenCalledWith({
-      columnId: '_source',
-      columnsMeta: undefined,
-      dataView: dataViewMock,
-      fieldFormats: mockServices.fieldFormats,
-      isCompressed: true,
-      maxEntries: 100,
-      row: rows[0],
-      shouldShowFieldHandler: showFieldHandler,
-      useTopLevelObjectColumns: false,
-    });
+    expect(mockSourceDocument).toHaveBeenCalledWith(
+      {
+        columnId: '_source',
+        columnsMeta: undefined,
+        dataView: dataViewMock,
+        fieldFormats: mockServices.fieldFormats,
+        isCompressed: true,
+        maxEntries: 100,
+        row: rows[0],
+        shouldShowFieldHandler: showFieldHandler,
+        useTopLevelObjectColumns: false,
+      },
+      expect.anything()
+    );
   });
 
   it('limits amount of rendered items', () => {
@@ -480,17 +531,20 @@ describe('Unified data table cell rendering', () => {
     expect(within(descriptionList).getByText('.gz')).toBeVisible();
     expect(within(descriptionList).getByText('and 2 more fields')).toBeVisible();
 
-    expect(mockSourceDocument).toHaveBeenCalledWith({
-      columnId: '_source',
-      columnsMeta: undefined,
-      dataView: dataViewMock,
-      fieldFormats: mockServices.fieldFormats,
-      isCompressed: true,
-      maxEntries: 1,
-      row: rows[0],
-      shouldShowFieldHandler: showFieldHandler,
-      useTopLevelObjectColumns: false,
-    });
+    expect(mockSourceDocument).toHaveBeenCalledWith(
+      {
+        columnId: '_source',
+        columnsMeta: undefined,
+        dataView: dataViewMock,
+        fieldFormats: mockServices.fieldFormats,
+        isCompressed: true,
+        maxEntries: 1,
+        row: rows[0],
+        shouldShowFieldHandler: showFieldHandler,
+        useTopLevelObjectColumns: false,
+      },
+      expect.anything()
+    );
   });
 
   it('renders fields-based column correctly when isDetails is set to true', () => {
@@ -548,17 +602,20 @@ describe('Unified data table cell rendering', () => {
     expect(within(descriptionList).getByText('object.value')).toBeVisible();
     expect(within(descriptionList).getByText('100')).toBeVisible();
 
-    expect(mockSourceDocument).toHaveBeenCalledWith({
-      columnId: 'object',
-      columnsMeta: undefined,
-      dataView: dataViewMock,
-      fieldFormats: mockServices.fieldFormats,
-      isCompressed: true,
-      maxEntries: 100,
-      row: rows[0],
-      shouldShowFieldHandler: showFieldHandler,
-      useTopLevelObjectColumns: true,
-    });
+    expect(mockSourceDocument).toHaveBeenCalledWith(
+      {
+        columnId: 'object',
+        columnsMeta: undefined,
+        dataView: dataViewMock,
+        fieldFormats: mockServices.fieldFormats,
+        isCompressed: true,
+        maxEntries: 100,
+        row: rows[0],
+        shouldShowFieldHandler: showFieldHandler,
+        useTopLevelObjectColumns: true,
+      },
+      expect.anything()
+    );
   });
 
   it('collect object fields and renders them like _source with fallback for unmapped', () => {
@@ -593,17 +650,20 @@ describe('Unified data table cell rendering', () => {
     expect(within(descriptionList).getByText('object.value')).toBeVisible();
     expect(within(descriptionList).getByText('100')).toBeVisible();
 
-    expect(mockSourceDocument).toHaveBeenCalledWith({
-      columnId: 'object',
-      columnsMeta: undefined,
-      dataView: dataViewMock,
-      fieldFormats: mockServices.fieldFormats,
-      isCompressed: true,
-      maxEntries: 100,
-      row: rows[0],
-      shouldShowFieldHandler: showFieldHandler,
-      useTopLevelObjectColumns: true,
-    });
+    expect(mockSourceDocument).toHaveBeenCalledWith(
+      {
+        columnId: 'object',
+        columnsMeta: undefined,
+        dataView: dataViewMock,
+        fieldFormats: mockServices.fieldFormats,
+        isCompressed: true,
+        maxEntries: 100,
+        row: rows[0],
+        shouldShowFieldHandler: showFieldHandler,
+        useTopLevelObjectColumns: true,
+      },
+      expect.anything()
+    );
   });
 
   it('collect object fields and renders them as json in details', () => {
@@ -753,30 +813,7 @@ describe('Unified data table cell rendering', () => {
   });
 
   it('renders unmapped fields correctly', () => {
-    (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
-
-    const rowsFieldsUnmapped: EsHitRecord[] = [
-      {
-        _id: '1',
-        _index: 'test',
-        _score: 1,
-        _source: undefined,
-        fields: { unmapped: ['.gz'] },
-        highlight: {
-          extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
-        },
-      },
-    ];
-
-    const DataTableCellValue = getRenderCellValueFn({
-      closePopover: jest.fn(),
-      columnsMeta: undefined,
-      dataView: dataViewMock,
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
-      maxEntries: 100,
-      rows: rowsFieldsUnmapped.map(build),
-      shouldShowFieldHandler: (fieldName: string) => ['unmapped'].includes(fieldName),
-    });
+    const DataTableCellValue = getUnmappedFieldDataTableCellValue();
 
     renderWithI18n(
       <DataTableCellValue
@@ -793,8 +830,11 @@ describe('Unified data table cell rendering', () => {
     const element = screen.getByText('.gz');
     expect(element).toBeVisible();
     expect(element).toHaveClass('unifiedDataTable__cellValue');
+  });
 
-    cleanup();
+  it('renders unmapped fields in details correctly', () => {
+    const DataTableCellValue = getUnmappedFieldDataTableCellValue();
+
     renderWithI18n(
       <DataTableCellValue
         colIndex={0}
@@ -806,43 +846,16 @@ describe('Unified data table cell rendering', () => {
         setCellProps={jest.fn()}
       />
     );
+
+    const popover = screen.getByTestId('dataTableExpandCellActionPopover');
+    expect(popover).toBeVisible();
+    expect(within(popover).getByText('.gz')).toBeVisible();
   });
 
-  it('renders custom ES|QL fields correctly', () => {
-    jest.spyOn(dataViewMock.fields, 'create');
+  it('renders regular ES|QL fields correctly', () => {
+    const DataTableCellValue = getCustomEsqlDataTableCellValue();
 
-    const rows: EsHitRecord[] = [
-      {
-        _id: '1',
-        _index: 'test',
-        _score: 1,
-        _source: undefined,
-        fields: { bytes: 100, var0: 350, extension: 'gif' },
-      },
-    ];
-
-    const DataTableCellValue = getRenderCellValueFn({
-      closePopover: jest.fn(),
-      columnsMeta: {
-        // custom ES|QL var
-        var0: {
-          type: 'number',
-          esType: 'long',
-        },
-        // custom ES|QL override
-        bytes: {
-          type: 'string',
-          esType: 'keyword',
-        },
-      },
-      dataView: dataViewMock,
-      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
-      maxEntries: 100,
-      rows: rows.map(build),
-      shouldShowFieldHandler: () => true,
-    });
-
-    const { unmount } = renderWithI18n(
+    renderWithI18n(
       <DataTableCellValue
         colIndex={0}
         columnId="extension"
@@ -857,8 +870,13 @@ describe('Unified data table cell rendering', () => {
     const element = screen.getByText('gif');
     expect(element).toBeVisible();
     expect(element).toHaveClass('unifiedDataTable__cellValue');
+  });
 
-    unmount();
+  it('renders custom ES|QL fields from columnsMeta correctly', () => {
+    const fieldsCreateSpy = jest.spyOn(dataViewMock.fields, 'create');
+    fieldsCreateSpy.mockClear();
+    const DataTableCellValue = getCustomEsqlDataTableCellValue();
+
     renderWithI18n(
       <DataTableCellValue
         colIndex={0}
@@ -875,8 +893,8 @@ describe('Unified data table cell rendering', () => {
     expect(element2).toBeVisible();
     expect(element2).toHaveClass('unifiedDataTable__cellValue');
 
-    expect(dataViewMock.fields.create).toHaveBeenCalledTimes(1);
-    expect(dataViewMock.fields.create).toHaveBeenCalledWith({
+    expect(fieldsCreateSpy).toHaveBeenCalledTimes(1);
+    expect(fieldsCreateSpy).toHaveBeenCalledWith({
       aggregatable: false,
       esTypes: ['long'],
       isComputedColumn: true,
@@ -885,8 +903,13 @@ describe('Unified data table cell rendering', () => {
       searchable: true,
       type: 'number',
     });
+  });
 
-    cleanup();
+  it('renders ES|QL fields with columnsMeta overrides correctly', () => {
+    const fieldsCreateSpy = jest.spyOn(dataViewMock.fields, 'create');
+    fieldsCreateSpy.mockClear();
+    const DataTableCellValue = getCustomEsqlDataTableCellValue();
+
     renderWithI18n(
       <DataTableCellValue
         colIndex={0}
@@ -903,8 +926,8 @@ describe('Unified data table cell rendering', () => {
     expect(element3).toBeVisible();
     expect(element3).toHaveClass('unifiedDataTable__cellValue');
 
-    expect(dataViewMock.fields.create).toHaveBeenCalledTimes(2);
-    expect(dataViewMock.fields.create).toHaveBeenLastCalledWith({
+    expect(fieldsCreateSpy).toHaveBeenCalledTimes(1);
+    expect(fieldsCreateSpy).toHaveBeenCalledWith({
       aggregatable: false,
       esTypes: ['keyword'],
       isComputedColumn: true,
