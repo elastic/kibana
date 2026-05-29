@@ -59,30 +59,32 @@ echo "--- Load previous snapshot for trend comparison"
 IS_WEEKLY_PIPELINE="${BUILDKITE_PIPELINE_SLUG:-}" && [ "$IS_WEEKLY_PIPELINE" = "kibana-code-quality-fallow" ] && IS_WEEKLY_PIPELINE=true || IS_WEEKLY_PIPELINE=false
 
 TREND_FLAG=""
-PREV_BUILD=""
+SAVE_SNAPSHOT_FLAG=""
 
-# Always pass --save-snapshot so fallow knows where to read/write the snapshot.
-# If the snapshot file already exists (downloaded below), fallow will use it as a baseline.
-# Artifact upload is conditional on IS_WEEKLY_PIPELINE (see below).
-mkdir -p "$SNAPSHOT_DIR"
-SAVE_SNAPSHOT_FLAG="--save-snapshot ${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
+# Snapshots are only used in the weekly standalone pipeline.
+# On PR runs, --save-snapshot is skipped: writing a ~200MB snapshot on every PR is too expensive.
+if [ "$IS_WEEKLY_PIPELINE" = "true" ]; then
+  mkdir -p "$SNAPSHOT_DIR"
+  SAVE_SNAPSHOT_FLAG="--save-snapshot ${SNAPSHOT_DIR}/${SNAPSHOT_FILE}"
 
-if [ -n "${BUILDKITE_API_TOKEN:-}" ]; then
-  PREV_BUILD=$(curl -sf \
-    -H "Authorization: Bearer ${BUILDKITE_API_TOKEN}" \
-    "https://api.buildkite.com/v2/organizations/elastic/pipelines/kibana-code-quality-fallow/builds?state=passed&branch=main&per_page=1" \
-    | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['number'] if d else '')" 2>/dev/null || true)
-fi
-
-if [ -n "$PREV_BUILD" ]; then
-  if buildkite-agent artifact download "$SNAPSHOT_FILE" "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}" --build "$PREV_BUILD" 2>/dev/null; then
-    echo "Loaded snapshot from weekly build #${PREV_BUILD} — trend comparison enabled"
-    TREND_FLAG="--trend"
-  else
-    echo "No snapshot found in build #${PREV_BUILD}"
+  if [ -n "${BUILDKITE_API_TOKEN:-}" ]; then
+    PREV_BUILD=$(curl -sf \
+      -H "Authorization: Bearer ${BUILDKITE_API_TOKEN}" \
+      "https://api.buildkite.com/v2/organizations/elastic/pipelines/kibana-code-quality-fallow/builds?state=passed&branch=main&per_page=1" \
+      | python3 -c "import sys,json; d=json.load(sys.stdin); print(d[0]['number'] if d else '')" 2>/dev/null || true)
+    if [ -n "$PREV_BUILD" ]; then
+      if buildkite-agent artifact download "$SNAPSHOT_FILE" "${SNAPSHOT_DIR}/${SNAPSHOT_FILE}" --build "$PREV_BUILD" 2>/dev/null; then
+        echo "Loaded snapshot from weekly build #${PREV_BUILD} — trend comparison enabled"
+        TREND_FLAG="--trend"
+      else
+        echo "No snapshot found in build #${PREV_BUILD} — this run will create the first baseline"
+      fi
+    else
+      echo "No previous weekly build found — this run will create the first baseline"
+    fi
   fi
 else
-  echo "No previous weekly build found"
+  echo "PR run — snapshot skipped (weekly pipeline only)"
 fi
 
 echo "--- Run fallow analysis"
