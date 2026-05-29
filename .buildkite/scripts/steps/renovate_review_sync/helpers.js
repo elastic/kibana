@@ -76,29 +76,35 @@ const printNoComputedReviewerRules = (reportPath, rawLimit) => {
   process.stdout.write(details.slice(0, parseLimit(rawLimit)).map(formatRule).join('\n'));
 };
 
-const getComputedTeamReviewers = (report) => {
+const getComputedReviewers = (report) => {
   const reviewers = new Set();
   for (const drift of getManagedRuleDrift(report)) {
     const after = asArray(drift.after);
     for (const reviewer of after) {
-      if (typeof reviewer === 'string' && reviewer.startsWith('team:')) {
+      if (typeof reviewer !== 'string' || reviewer.length === 0) continue;
+      if (reviewer.startsWith('team:')) {
         reviewers.add(`elastic/${reviewer.slice('team:'.length)}`);
+      } else {
+        // Individual CODEOWNERS user. `convertTeamFormat` already normalized this
+        // to a bare username, matching `printRequestedReviewers`' shape for
+        // `reviewRequest.login`, so it round-trips through the request flow.
+        reviewers.add(reviewer);
       }
     }
   }
   return Array.from(reviewers).sort();
 };
 
-const printComputedTeams = (reportPath, formatTeam) => {
-  process.stdout.write(getComputedTeamReviewers(readReport(reportPath)).map(formatTeam).join(' '));
-};
-
 const printComputedReviewers = (reportPath) => {
-  printComputedTeams(reportPath, (team) => team);
+  process.stdout.write(getComputedReviewers(readReport(reportPath)).join(' '));
 };
 
 const printComputedMentions = (reportPath) => {
-  printComputedTeams(reportPath, (team) => `@${team}`);
+  process.stdout.write(
+    getComputedReviewers(readReport(reportPath))
+      .map((reviewer) => `@${reviewer}`)
+      .join(' ')
+  );
 };
 
 const readStdin = () =>
