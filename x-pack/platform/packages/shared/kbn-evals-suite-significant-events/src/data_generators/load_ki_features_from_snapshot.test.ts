@@ -94,8 +94,8 @@ describe('load_ki_features_from_snapshot', () => {
     esClient.search.mockResolvedValue({
       hits: {
         hits: [
-          { _source: { uuid: 'u1', id: 'f1', stream_name: 'logs', type: 'entity' } },
-          { _source: { uuid: 'u2', id: 'f2', stream_name: 'logs', type: 'dependency' } },
+          { _source: { id: 'f1', stream_name: 'logs', type: 'entity' } },
+          { _source: { id: 'f2', stream_name: 'logs', type: 'dependency' } },
         ],
       },
     } as never);

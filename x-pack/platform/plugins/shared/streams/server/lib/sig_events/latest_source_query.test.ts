@@ -46,7 +46,7 @@ describe('executeAndDecodeSource', () => {
         },
         headers: {},
         warnings: [],
-        meta: {} as any,
+        meta: {} as never,
       })
     );
 

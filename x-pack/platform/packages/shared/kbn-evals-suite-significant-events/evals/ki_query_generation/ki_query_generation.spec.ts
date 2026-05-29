@@ -112,7 +112,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               extractionScenario?.output.expected_ground_truth != null
                 ? canonicalKIFeaturesFromExpectedGroundTruth({
                     streamName: scenario.input.stream_name,
-                    scenarioId: scenario.input.scenario_id,
                     expectedGroundTruth: extractionScenario.output.expected_ground_truth,
                   })
                 : [];

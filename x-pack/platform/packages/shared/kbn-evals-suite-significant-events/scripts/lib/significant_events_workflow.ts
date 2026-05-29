@@ -193,7 +193,6 @@ export async function persistSigEventsExtractedKIsForSnapshot(
     mappings: {
       dynamic: false,
       properties: {
-        uuid: { type: 'keyword' },
         id: { type: 'keyword' },
         stream_name: { type: 'keyword' },
         type: { type: 'keyword' },
@@ -203,17 +202,20 @@ export async function persistSigEventsExtractedKIsForSnapshot(
         properties: { type: 'object', enabled: false },
         confidence: { type: 'float' },
         evidence: { type: 'keyword' },
+        evidence_doc_ids: { type: 'keyword' },
         tags: { type: 'keyword' },
+        filter: { type: 'object', enabled: false },
         meta: { type: 'object', enabled: false },
-        status: { type: 'keyword' },
-        last_seen: { type: 'date' },
+        run_id: { type: 'keyword' },
+        excluded: { type: 'boolean' },
+        updated_at: { type: 'date' },
         expires_at: { type: 'date' },
       },
     },
   });
 
   if (kis.length > 0) {
-    const operations = kis.flatMap((ki) => [{ index: { _index: index, _id: ki.uuid } }, ki]);
+    const operations = kis.flatMap((ki) => [{ index: { _index: index, _id: ki.id } }, ki]);
 
     await esClient.bulk({ refresh: true, operations });
   } else {

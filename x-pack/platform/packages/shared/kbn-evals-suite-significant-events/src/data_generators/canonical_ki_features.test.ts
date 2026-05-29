@@ -7,7 +7,6 @@
 
 import type { Feature } from '@kbn/streams-schema';
 import { canonicalKIFeaturesFromExpectedGroundTruth } from './canonical_ki_features';
-import { CANONICAL_LAST_SEEN } from './canonical_ki_features';
 
 const getFeatureById = (features: Feature[], id: string) =>
   features.find((feature) => feature.id === id);
@@ -16,7 +15,6 @@ describe('canonical_ki_features', () => {
   it('creates deterministic entity/dependency/infra KI features from expected_ground_truth', () => {
     const features = canonicalKIFeaturesFromExpectedGroundTruth({
       streamName: 'logs',
-      scenarioId: 'payment-unreachable',
       expectedGroundTruth:
         'entities=[frontend, checkout, payment], deps=[frontend->checkout (gRPC), checkout->payment (gRPC)], infra=[kubernetes]',
     });
@@ -35,17 +33,11 @@ describe('canonical_ki_features', () => {
     expect(getFeatureById(features, 'infra-kubernetes')?.properties).toEqual({
       name: 'kubernetes',
     });
-
-    expect(getFeatureById(features, 'entity-frontend')?.uuid).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-5[0-9a-f]{3}-a[0-9a-f]{3}-[0-9a-f]{12}$/
-    );
-    expect(getFeatureById(features, 'entity-frontend')?.last_seen).toBe(CANONICAL_LAST_SEEN);
   });
 
   it('filters ellipsis and "multiple services" items', () => {
     const features = canonicalKIFeaturesFromExpectedGroundTruth({
       streamName: 'logs',
-      scenarioId: 'healthy-baseline',
       expectedGroundTruth:
         'entities=[frontend, ..., multiple services], deps=[frontend->checkout], infra=[kubernetes]',
     });
@@ -57,7 +49,6 @@ describe('canonical_ki_features', () => {
   it('skips malformed deps without ->', () => {
     const features = canonicalKIFeaturesFromExpectedGroundTruth({
       streamName: 'logs',
-      scenarioId: 'healthy-baseline',
       expectedGroundTruth: 'deps=[frontend checkout, checkout->payment]',
     });
 
@@ -70,7 +61,6 @@ describe('canonical_ki_features', () => {
   it('drops text within parentheses from ids', () => {
     const features = canonicalKIFeaturesFromExpectedGroundTruth({
       streamName: 'logs',
-      scenarioId: 'scenario',
       expectedGroundTruth: 'entities=[payment (nodejs)], deps=[frontend->checkout (gRPC)]',
     });
 
@@ -78,20 +68,18 @@ describe('canonical_ki_features', () => {
     expect(features.some((feature) => feature.id.includes('nodejs'))).toBe(false);
   });
 
-  it('generates stable uuids for the same scenario and KI feature id', () => {
+  it('generates stable ids for the same input', () => {
     const firstRun = canonicalKIFeaturesFromExpectedGroundTruth({
       streamName: 'logs',
-      scenarioId: 'payment-unreachable',
       expectedGroundTruth: 'entities=[frontend]',
     });
     const secondRun = canonicalKIFeaturesFromExpectedGroundTruth({
       streamName: 'logs',
-      scenarioId: 'payment-unreachable',
       expectedGroundTruth: 'entities=[frontend]',
     });
 
-    expect(getFeatureById(firstRun, 'entity-frontend')?.uuid).toBe(
-      getFeatureById(secondRun, 'entity-frontend')?.uuid
+    expect(getFeatureById(firstRun, 'entity-frontend')?.id).toBe(
+      getFeatureById(secondRun, 'entity-frontend')?.id
     );
   });
 });

@@ -85,7 +85,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { features } = await listFeatures(apiClient, STREAM_NAME);
         const found = features.find((f) => f.id === testFeature.id);
         expect(found).to.be.ok();
-        expect(found!.uuid).to.eql(uuid);
+        expect(found!.id).to.eql(uuid);
 
         // Cleanup
         await deleteFeature(apiClient, STREAM_NAME, uuid);
@@ -99,7 +99,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Should NOT appear in default list
         const { features } = await listFeatures(apiClient, STREAM_NAME);
-        const found = features.find((f) => f.uuid === uuid);
+        const found = features.find((f) => f.id === uuid);
         expect(found).to.be(undefined);
 
         // Cleanup
@@ -115,9 +115,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { features } = await listFeatures(apiClient, STREAM_NAME, {
           includeExcluded: true,
         });
-        const found = features.find((f) => f.uuid === uuid);
+        const found = features.find((f) => f.id === uuid);
         expect(found).to.be.ok();
-        expect(found!.excluded_at).to.be.a('string');
+        expect(found!.excluded).to.be(true);
 
         // Cleanup
         await deleteFeature(apiClient, STREAM_NAME, uuid);
@@ -133,10 +133,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Should appear in default list again
         const { features } = await listFeatures(apiClient, STREAM_NAME);
-        const found = features.find((f) => f.uuid === uuid);
+        const found = features.find((f) => f.id === uuid);
         expect(found).to.be.ok();
-        expect(found!.excluded_at).to.be(undefined);
-        expect(found!.last_seen).to.be.a('string');
+        expect(found!.excluded).to.be(undefined);
+        expect(found!.updated_at).to.be.a('string');
         expect(found!.expires_at).to.be.a('string');
 
         // Cleanup
@@ -161,9 +161,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Default list should have none of the 3
         const { features: afterExclude } = await listFeatures(apiClient, STREAM_NAME);
-        expect(afterExclude.find((f) => f.uuid === uuid1)).to.be(undefined);
-        expect(afterExclude.find((f) => f.uuid === uuid2)).to.be(undefined);
-        expect(afterExclude.find((f) => f.uuid === uuid3)).to.be(undefined);
+        expect(afterExclude.find((f) => f.id === uuid1)).to.be(undefined);
+        expect(afterExclude.find((f) => f.id === uuid2)).to.be(undefined);
+        expect(afterExclude.find((f) => f.id === uuid3)).to.be(undefined);
 
         // Restore 2 of them
         await bulkFeatures(apiClient, STREAM_NAME, [
@@ -172,9 +172,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
 
         const { features: afterRestore } = await listFeatures(apiClient, STREAM_NAME);
-        expect(afterRestore.find((f) => f.uuid === uuid1)).to.be.ok();
-        expect(afterRestore.find((f) => f.uuid === uuid2)).to.be.ok();
-        expect(afterRestore.find((f) => f.uuid === uuid3)).to.be(undefined);
+        expect(afterRestore.find((f) => f.id === uuid1)).to.be.ok();
+        expect(afterRestore.find((f) => f.id === uuid2)).to.be.ok();
+        expect(afterRestore.find((f) => f.id === uuid3)).to.be(undefined);
 
         // Cleanup
         await bulkFeatures(apiClient, STREAM_NAME, [
@@ -196,7 +196,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { features } = await listFeatures(apiClient, STREAM_NAME, {
           includeExcluded: true,
         });
-        const found = features.find((f) => f.uuid === uuid);
+        const found = features.find((f) => f.id === uuid);
         expect(found).to.be(undefined);
       });
     });
@@ -228,7 +228,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .fetch('POST /internal/streams/features/_bulk', {
             params: {
               body: {
-                operations: [{ delete: { id: uuidA } }, { delete: { id: uuidB } }],
+                operations: [
+                  { delete: { id: uuidA, stream_name: STREAM_NAME } },
+                  { delete: { id: uuidB, stream_name: SECOND_STREAM_NAME } },
+                ],
               },
             },
           })
@@ -243,8 +246,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { features: streamBFeatures } = await listFeatures(apiClient, SECOND_STREAM_NAME, {
           includeExcluded: true,
         });
-        expect(streamAFeatures.find((f) => f.uuid === uuidA)).to.be(undefined);
-        expect(streamBFeatures.find((f) => f.uuid === uuidB)).to.be(undefined);
+        expect(streamAFeatures.find((f) => f.id === uuidA)).to.be(undefined);
+        expect(streamBFeatures.find((f) => f.id === uuidB)).to.be(undefined);
       });
 
       it('deletes multiple features in one request and returns the right counts', async () => {
@@ -258,7 +261,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .fetch('POST /internal/streams/features/_bulk', {
             params: {
               body: {
-                operations: [{ delete: { id: uuid1 } }, { delete: { id: uuid2 } }],
+                operations: [
+                  { delete: { id: uuid1, stream_name: STREAM_NAME } },
+                  { delete: { id: uuid2, stream_name: STREAM_NAME } },
+                ],
               },
             },
           })
@@ -270,8 +276,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { features } = await listFeatures(apiClient, STREAM_NAME, {
           includeExcluded: true,
         });
-        expect(features.find((f) => f.uuid === uuid1)).to.be(undefined);
-        expect(features.find((f) => f.uuid === uuid2)).to.be(undefined);
+        expect(features.find((f) => f.id === uuid1)).to.be(undefined);
+        expect(features.find((f) => f.id === uuid2)).to.be(undefined);
       });
 
       it('excludes and restores features across streams in one request', async () => {
@@ -286,7 +292,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .fetch('POST /internal/streams/features/_bulk', {
             params: {
               body: {
-                operations: [{ exclude: { id: uuid1 } }, { exclude: { id: uuid2 } }],
+                operations: [
+                  { exclude: { id: uuid1, stream_name: STREAM_NAME } },
+                  { exclude: { id: uuid2, stream_name: STREAM_NAME } },
+                ],
               },
             },
           })
@@ -300,7 +309,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .fetch('POST /internal/streams/features/_bulk', {
             params: {
               body: {
-                operations: [{ restore: { id: uuid1 } }, { restore: { id: uuid2 } }],
+                operations: [
+                  { restore: { id: uuid1, stream_name: STREAM_NAME } },
+                  { restore: { id: uuid2, stream_name: STREAM_NAME } },
+                ],
               },
             },
           })
@@ -321,7 +333,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .fetch('POST /internal/streams/features/_bulk', {
             params: {
               body: {
-                operations: [{ delete: { id: 'non-existent-uuid' } }],
+                operations: [{ delete: { id: 'non-existent-uuid', stream_name: STREAM_NAME } }],
               },
             },
           })

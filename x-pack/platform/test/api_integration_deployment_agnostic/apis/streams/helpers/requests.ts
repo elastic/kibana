@@ -566,7 +566,7 @@ export async function upsertFeature(
     throw new Error(`Feature with id "${feature.id}" not found after upsert`);
   }
 
-  return { uuid: created.uuid };
+  return { uuid: created.id };
 }
 
 export async function listFeatures(
@@ -615,9 +615,9 @@ export async function deleteFeature(
   expectedStatusCode = 200
 ) {
   return client
-    .fetch('DELETE /internal/streams/{name}/features/{uuid}', {
+    .fetch('DELETE /internal/streams/{name}/features/{id}', {
       params: {
-        path: { name: streamName, uuid },
+        path: { name: streamName, id: uuid },
       },
     })
     .expect(expectedStatusCode)
