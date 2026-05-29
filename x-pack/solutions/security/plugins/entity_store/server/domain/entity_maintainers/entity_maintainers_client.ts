@@ -71,6 +71,7 @@ interface SyncExecutionContext {
   logger: Logger;
   fakeRequest: KibanaRequest;
   esClient: ElasticsearchClient;
+  cpsEsClient: ElasticsearchClient;
   crudClient: CRUDClient;
 }
 
