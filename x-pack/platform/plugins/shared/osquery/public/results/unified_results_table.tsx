@@ -242,17 +242,7 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     executionCount,
   });
 
-  // Publish active filters to the ref-backed context so the page-header export
-  // button and row kebab menu can read them. The store does not re-render this
-  // tree on writes; only subscribers of this `actionId` re-render.
   const exportFiltersStore = useExportFiltersContext();
-  // Only publish the row count once a fetch has actually succeeded. React
-  // Query flips `isFetched` to true on both success and failure, and
-  // `useActionResults` seeds `initialData.aggregations.totalRowCount = 0`,
-  // so gating on `isFetched` alone would treat a failed initial fetch as
-  // "loaded, zero rows" and disable the export action with the empty-state
-  // tooltip. Excluding the error case keeps `total` as `undefined` until
-  // the consumer (`ExportResultsButton`) can render its loading state.
   const unfilteredTotal =
     actionResultsFetched && !actionResultsErrored
       ? actionResultsData?.aggregations?.totalRowCount
