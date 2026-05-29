@@ -55,6 +55,83 @@ jest.mock('./metrics_experience_grid_content', () => ({
   )),
 }));
 
+// Simplified ToolbarSelector so dimension options are clickable in JSDOM without
+// needing EUI portals or keyboard simulation.
+jest.mock('@kbn/shared-ux-toolbar-selector', () => {
+  const actual = jest.requireActual('@kbn/shared-ux-toolbar-selector');
+  return {
+    ...actual,
+    ToolbarSelector: ({
+      options,
+      onChange,
+      buttonLabel,
+      'data-test-subj': dataTestSubj,
+      singleSelection,
+    }: {
+      options: any[];
+      onChange?: (option: any) => void;
+      buttonLabel: React.ReactNode;
+      'data-test-subj'?: string;
+      singleSelection?: boolean;
+    }) => {
+      const handleOptionClick = (clickedOption: any) => {
+        if (clickedOption.disabled) return;
+        if (singleSelection) {
+          onChange?.(clickedOption);
+          return;
+        }
+        const wasChecked = clickedOption.checked === 'on';
+        const nextSelected = options
+          .filter((opt) => {
+            if (opt.value === clickedOption.value) return !wasChecked;
+            return opt.checked === 'on';
+          })
+          .map((opt) => ({ ...opt, checked: 'on' }));
+        onChange?.(nextSelected);
+      };
+      return (
+        <div data-test-subj={dataTestSubj}>
+          <div data-test-subj={`${dataTestSubj}Button`}>{buttonLabel}</div>
+          <div data-test-subj={`${dataTestSubj}Popover`}>
+            {options.map((option) => (
+              <div
+                key={option.key ?? option.value}
+                data-test-subj={`${dataTestSubj}Option-${option.value}`}
+                data-checked={option.checked}
+                onClick={() => handleOptionClick(option)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleOptionClick(option);
+                  }
+                }}
+                role="option"
+                aria-selected={option.checked === 'on'}
+                tabIndex={option.disabled ? -1 : 0}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    },
+  };
+});
+
+// Make lodash debounce synchronous so dimension-change callbacks fire in act().
+jest.mock('lodash', () => {
+  const actual = jest.requireActual('lodash');
+  return {
+    ...actual,
+    debounce: (fn: any) => {
+      const debounced = (...args: any[]) => fn(...args);
+      debounced.cancel = jest.fn();
+      return debounced;
+    },
+  };
+});
+
 /**
  * Mock EuiDelayRender to render immediately in tests.
  *
@@ -110,7 +187,7 @@ const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field1',
     dimensionFields: [dimensions[0]],
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: [],
     metricTypes: [],
     fieldTypes: [],
@@ -118,7 +195,7 @@ const metricItems: ParsedMetricItem[] = [
   {
     metricName: 'field2',
     dimensionFields: [dimensions[1]],
-    dataStream: 'metrics-*',
+    indexName: 'metrics-*',
     units: [],
     metricTypes: [],
     fieldTypes: [],
@@ -506,6 +583,44 @@ describe('MetricsExperienceGrid', () => {
 
       expect(onDimensionsChange).toHaveBeenCalledWith([hostName]);
       expect(onBreakdownFieldChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onToolbarDimensionsChange', () => {
+    it('calls onDimensionsChange and onBreakdownFieldChange when user picks a dimension via the toolbar', () => {
+      const onPageChange = jest.fn();
+      const onDimensionsChange = jest.fn();
+      const onBreakdownFieldChange = jest.fn();
+
+      useMetricsExperienceStateMock.mockReturnValue({
+        currentPage: 2,
+        selectedDimensions: [],
+        onDimensionsChange,
+        onPageChange,
+        isFullscreen: false,
+        searchTerm: '',
+        onSearchTermChange: jest.fn(),
+        onToggleFullscreen: jest.fn(),
+        flyoutState: undefined,
+        onFlyoutStateChange: jest.fn(),
+        onFlyoutSelectedTabChange: jest.fn(),
+        profileId: 'test-profile-id',
+      });
+
+      const { getByTestId } = render(
+        <MetricsExperienceGrid {...defaultProps} onBreakdownFieldChange={onBreakdownFieldChange} />,
+        { wrapper: IntlProvider }
+      );
+
+      act(() => {
+        getByTestId('metricsExperienceBreakdownSelectorOption-foo').click();
+      });
+
+      expect(onDimensionsChange).toHaveBeenCalledWith([dimensions[0]]);
+      // Page reset is now owned exclusively by useDiscoverFieldForBreakdown reacting
+      // to the breakdownField prop change — not by the toolbar handler directly.
+      expect(onPageChange).not.toHaveBeenCalled();
+      expect(onBreakdownFieldChange).toHaveBeenCalledWith(dimensions[0].name);
     });
   });
 });
