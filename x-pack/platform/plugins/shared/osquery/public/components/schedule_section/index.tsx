@@ -142,6 +142,7 @@ export const ScheduleSection = ({
             {hasUnknownParts ? (
               <>
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   color="primary"
                   iconType="iInCircle"

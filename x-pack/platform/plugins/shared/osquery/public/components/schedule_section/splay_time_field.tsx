@@ -138,6 +138,7 @@ export const SplayTimeField = ({
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             size="s"
             color="warning"
             iconType="warning"
