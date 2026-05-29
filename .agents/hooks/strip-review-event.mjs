@@ -340,7 +340,17 @@ const analyzeCreationSegment = (segment, raw) => {
         writeFileSync(filePath, JSON.stringify(payload, null, 2));
       }
     } catch {
-      /* file doesn't exist or isn't JSON — skip */
+      // Fail closed. The hook runs before the shell executes, so a payload
+      // created earlier in the same command (e.g.
+      // `printf '{"event":"APPROVE"}' > body.json; gh api .../reviews --input body.json`)
+      // does not exist yet, and an unreadable / non-JSON file can't be checked
+      // for a stray `event` key. Allowing it would let `gh` read an
+      // unsanitised body and publish. Require the payload file to already exist
+      // and be valid JSON at hook time (write it in a separate, earlier
+      // command), matching the documented `--input <file>` flow.
+      return {
+        deny: 'The hook cannot read or parse the `--input` file before `gh` runs, so it cannot strip a stray `event` key. This usually means the payload is created in the same command (e.g. `printf ... > body.json; gh api .../reviews --input body.json`) or the file is not valid JSON. Write a well-formed JSON payload file (no `event` key) at an absolute path in a separate, earlier command, then run `gh api repos/{owner}/{repo}/pulls/{number}/reviews --input <file>`.',
+      };
     }
   }
 
