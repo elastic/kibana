@@ -210,7 +210,7 @@ export class WorkflowExecutionRuntimeManager {
     shouldStop?: (scope: ScopeData) => boolean,
     { inclusive = false }: { inclusive?: boolean } = {}
   ): void {
-    let scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
+    let scopeStack = WorkflowScopeStack.fromStackFrames(this.executionCursor.currentStackFrames);
 
     while (!scopeStack.isEmpty()) {
       const currentScope = scopeStack.getCurrentScope();

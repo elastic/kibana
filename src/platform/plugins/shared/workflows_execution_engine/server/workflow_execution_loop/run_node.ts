@@ -126,10 +126,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
      * When cancelRequested is true, status is always updated to CANCELLED, so this check
      * covers both cancellation and other terminal states (COMPLETED, FAILED, etc.).
      */
-    if (
-      params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING ||
-      !workflowExecutionCursor.isExecuting
-    ) {
+    if (params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING) {
       await runOnCancelIfNeeded(nodeImplementation, stepExecutionRuntime, params.workflowLogger);
       nodeSpan?.setOutcome('unknown');
       nodeSpan?.end();

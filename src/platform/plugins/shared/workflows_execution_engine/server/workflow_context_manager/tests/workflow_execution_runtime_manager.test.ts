@@ -779,20 +779,26 @@ describe('WorkflowExecutionRuntimeManager', () => {
   });
 
   describe('unwindScopes', () => {
+    const setExecutionCursorStack = (stackFrames: StackFrame[]) => {
+      (
+        workflowExecutionCursor as unknown as { stackFrames: StackFrame[] }
+      ).stackFrames = stackFrames.map((frame) => ({
+        stepId: frame.stepId,
+        nestedScopes: frame.nestedScopes.map((scope) => ({ ...scope })),
+      }));
+    };
+
     it('should unwind all scopes when no shouldStop predicate is given', () => {
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
-        ...workflowExecution,
-        scopeStack: [
-          {
-            stepId: 'step1',
-            nestedScopes: [{ nodeId: 'n1', nodeType: 'enter-foreach' }],
-          },
-          {
-            stepId: 'step2',
-            nestedScopes: [{ nodeId: 'n2', nodeType: 'enter-if' }],
-          },
-        ] as StackFrame[],
-      } as Partial<EsWorkflowExecution>);
+      setExecutionCursorStack([
+        {
+          stepId: 'step1',
+          nestedScopes: [{ nodeId: 'n1', nodeType: 'enter-foreach' }],
+        },
+        {
+          stepId: 'step2',
+          nestedScopes: [{ nodeId: 'n2', nodeType: 'enter-if' }],
+        },
+      ]);
 
       const mockFactory = {
         createStepExecutionRuntime: jest.fn().mockReturnValue({
@@ -804,25 +810,33 @@ describe('WorkflowExecutionRuntimeManager', () => {
       underTest.unwindScopes(mockFactory as any);
 
       expect(mockFactory.createStepExecutionRuntime).toHaveBeenCalledTimes(2);
-      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        scopeStack: [],
+      expect(mockFactory.createStepExecutionRuntime).toHaveBeenNthCalledWith(1, {
+        nodeId: 'n2',
+        stackFrames: [
+          {
+            stepId: 'step1',
+            nestedScopes: [{ nodeId: 'n1', nodeType: 'enter-foreach' }],
+          },
+        ],
       });
+      expect(mockFactory.createStepExecutionRuntime).toHaveBeenNthCalledWith(2, {
+        nodeId: 'n1',
+        stackFrames: [],
+      });
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
     });
 
     it('should stop before the matching scope (exclusive) when shouldStop matches', () => {
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
-        ...workflowExecution,
-        scopeStack: [
-          {
-            stepId: 'loopStep',
-            nestedScopes: [{ nodeId: 'loop', nodeType: 'enter-foreach' }],
-          },
-          {
-            stepId: 'innerStep',
-            nestedScopes: [{ nodeId: 'inner', nodeType: 'enter-if' }],
-          },
-        ] as StackFrame[],
-      } as Partial<EsWorkflowExecution>);
+      setExecutionCursorStack([
+        {
+          stepId: 'loopStep',
+          nestedScopes: [{ nodeId: 'loop', nodeType: 'enter-foreach' }],
+        },
+        {
+          stepId: 'innerStep',
+          nestedScopes: [{ nodeId: 'inner', nodeType: 'enter-if' }],
+        },
+      ]);
 
       const mockFactory = {
         createStepExecutionRuntime: jest.fn().mockReturnValue({
@@ -833,21 +847,26 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       underTest.unwindScopes(mockFactory as any, (scope) => scope.nodeType === 'enter-foreach');
 
-      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        scopeStack: expect.arrayContaining([expect.objectContaining({ stepId: 'loopStep' })]),
-      });
-    });
-
-    it('should include the matching scope when inclusive is true', () => {
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
-        ...workflowExecution,
-        scopeStack: [
+      expect(mockFactory.createStepExecutionRuntime).toHaveBeenCalledTimes(1);
+      expect(mockFactory.createStepExecutionRuntime).toHaveBeenCalledWith({
+        nodeId: 'inner',
+        stackFrames: [
           {
             stepId: 'loopStep',
             nestedScopes: [{ nodeId: 'loop', nodeType: 'enter-foreach' }],
           },
-        ] as StackFrame[],
-      } as Partial<EsWorkflowExecution>);
+        ],
+      });
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+
+    it('should include the matching scope when inclusive is true', () => {
+      setExecutionCursorStack([
+        {
+          stepId: 'loopStep',
+          nestedScopes: [{ nodeId: 'loop', nodeType: 'enter-foreach' }],
+        },
+      ]);
 
       const mockFactory = {
         createStepExecutionRuntime: jest.fn().mockReturnValue({
@@ -860,9 +879,12 @@ describe('WorkflowExecutionRuntimeManager', () => {
         inclusive: true,
       });
 
-      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
-        scopeStack: [],
+      expect(mockFactory.createStepExecutionRuntime).toHaveBeenCalledTimes(1);
+      expect(mockFactory.createStepExecutionRuntime).toHaveBeenCalledWith({
+        nodeId: 'loop',
+        stackFrames: [],
       });
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
     });
   });
 
