@@ -105,12 +105,7 @@ export const SplayTimeField = ({
         disabled={disabled}
         dataTestSubj="osquery-schedule-splay-toggle"
       >
-        <EuiFormRow
-          label={SPLAY_VALUE_LABEL}
-          isInvalid={isInvalid}
-          error={isInvalid ? SPLAY_MAX_ERROR : undefined}
-          fullWidth
-        >
+        <EuiFormRow isInvalid={isInvalid} error={isInvalid ? SPLAY_MAX_ERROR : undefined} fullWidth>
           <EuiFieldNumber
             fullWidth
             min={1}
@@ -120,6 +115,7 @@ export const SplayTimeField = ({
             onChange={handleValueChange}
             disabled={disabled}
             isInvalid={isInvalid}
+            aria-label={SPLAY_VALUE_LABEL}
             append={
               <EuiSelect
                 options={UNIT_OPTIONS}

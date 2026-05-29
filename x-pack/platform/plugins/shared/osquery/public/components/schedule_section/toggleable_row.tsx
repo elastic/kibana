@@ -57,7 +57,7 @@ export const ToggleableRow = ({
             <strong>{title}</strong>
           </EuiText>
           {description ? (
-            <EuiText size="xs" color="subdued">
+            <EuiText size="s" color="subdued">
               {description}
             </EuiText>
           ) : null}
@@ -75,7 +75,7 @@ export const ToggleableRow = ({
       </EuiFlexGroup>
       {enabled && children ? (
         <>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
           {children}
         </>
       ) : null}

@@ -76,7 +76,7 @@ export const ScheduleTypeSelector = ({
 
   return (
     <EuiFormRow
-      label={SCHEDULE_TYPE_LABEL}
+      // label={SCHEDULE_TYPE_LABEL}
       helpText={isLocked ? SCHEDULE_TYPE_LOCKED_HELP : undefined}
       fullWidth
     >
