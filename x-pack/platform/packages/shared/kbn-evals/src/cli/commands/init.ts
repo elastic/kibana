@@ -491,9 +491,9 @@ export const initCmd: Command<void> = {
 
   Subcommands:
     node scripts/evals init              Full setup (config + connectors)
-    node scripts/evals init config       Create config.json (or config.<profile>.json)
+    node scripts/evals init config       Only create/update vault config.json
 
-  Guides you through eval config creation and EIS (Cloud Connected Mode)
+  Guides you through vault config creation and EIS (Cloud Connected Mode)
   connector discovery or validates an existing configuration.
 
   Examples:
@@ -507,7 +507,8 @@ export const initCmd: Command<void> = {
     string: ['profile'],
     default: { 'skip-discovery': false },
     help: `
-      --profile <name>   e.g. local -> config.local.json (default: config.json)
+      --profile <name>   Write config to config.<name>.json instead of config.json
+                          (e.g. --profile local creates config.local.json)
       --skip-discovery    Skip EIS model discovery (only applies to full init)
     `,
   },
