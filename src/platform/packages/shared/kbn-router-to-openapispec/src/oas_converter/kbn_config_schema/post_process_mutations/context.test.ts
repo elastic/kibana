@@ -10,6 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { joi2JsonInternal } from '../parse';
 import { createCtx } from './context';
+import { OasSchemaCollisionError } from './schema_collision';
 
 it('records schemas as expected', () => {
   const ctx = createCtx();
@@ -24,5 +25,113 @@ it('records schemas as expected', () => {
   expect(ctx.getSharedSchemas()).toMatchObject({
     a: { properties: {} },
     b: { properties: {} },
+  });
+});
+
+describe('shared-schema id collision detection', () => {
+  const baseShape = { type: 'object' as const, properties: { a: { type: 'string' as const } } };
+  const extendedShape = {
+    type: 'object' as const,
+    properties: {
+      a: { type: 'string' as const },
+      b: { type: 'number' as const },
+    },
+  };
+
+  it('is a no-op when the same id is registered with the same shape', () => {
+    const ctx = createCtx();
+    ctx.addSharedSchema('reused', { ...baseShape });
+    expect(() => ctx.addSharedSchema('reused', { ...baseShape })).not.toThrow();
+    expect(ctx.getSharedSchemas()).toEqual({ reused: baseShape });
+  });
+
+  it('throws OasSchemaCollisionError when the same id is registered with a different shape', () => {
+    const ctx = createCtx();
+    ctx.addSharedSchema('id_collision', { ...baseShape });
+    expect(() => ctx.addSharedSchema('id_collision', { ...extendedShape })).toThrowError(
+      OasSchemaCollisionError
+    );
+  });
+
+  it('includes the conflicting id and a key-set diff in the error message', () => {
+    const ctx = createCtx();
+    ctx.addSharedSchema('id_collision', { ...baseShape });
+    let captured: Error | undefined;
+    try {
+      ctx.addSharedSchema('id_collision', { ...extendedShape });
+    } catch (error) {
+      captured = error as Error;
+    }
+    expect(captured).toBeDefined();
+    expect(captured!.message).toContain('"id_collision"');
+    expect(captured!.message).toContain('properties only in the second registration: `b`');
+    expect(captured!.message).toContain('Base.extends({...})');
+    expect(captured!.message).toContain('https://github.com/elastic/kibana/issues/271809');
+  });
+
+  it('warns instead of throwing when onCollision is "warn"', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const ctx = createCtx({ onCollision: 'warn' });
+      ctx.addSharedSchema('id_collision', { ...baseShape });
+      ctx.addSharedSchema('id_collision', { ...extendedShape });
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn.mock.calls[0][0]).toContain('OAS shared schema collision');
+      // last write still wins under 'warn'
+      expect(ctx.getSharedSchemas().id_collision).toEqual(extendedShape);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('preserves legacy last-write-wins semantics when onCollision is "ignore"', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const ctx = createCtx({ onCollision: 'ignore' });
+      ctx.addSharedSchema('id_collision', { ...baseShape });
+      ctx.addSharedSchema('id_collision', { ...extendedShape });
+      expect(warn).not.toHaveBeenCalled();
+      expect(ctx.getSharedSchemas().id_collision).toEqual(extendedShape);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('reports the collision when reproducing the issue #271809 pattern via @kbn/config-schema', () => {
+    const ctx = createCtx();
+    // Two distinct schemas that share the same `meta.id` — what `Base.extends({...})`
+    // (without overriding meta.id) produces in practice.
+    const baseSchema = schema.object(
+      { a: schema.string(), b: schema.boolean() },
+      { meta: { id: 'package_policy_status_response_demo' } }
+    );
+    const extendedSchema = schema.object(
+      {
+        a: schema.string(),
+        b: schema.boolean(),
+        output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+        policy_ids: schema.arrayOf(schema.string()),
+      },
+      { meta: { id: 'package_policy_status_response_demo' } }
+    );
+
+    const baseJson = joi2JsonInternal(baseSchema.getSchema()) as unknown as {
+      schemas: Record<string, object>;
+    };
+    const extendedJson = joi2JsonInternal(extendedSchema.getSchema()) as unknown as {
+      schemas: Record<string, object>;
+    };
+
+    ctx.addSharedSchema(
+      'package_policy_status_response_demo',
+      extendedJson.schemas.package_policy_status_response_demo as never
+    );
+
+    expect(() =>
+      ctx.addSharedSchema(
+        'package_policy_status_response_demo',
+        baseJson.schemas.package_policy_status_response_demo as never
+      )
+    ).toThrowError(/OAS shared schema collision for id "package_policy_status_response_demo"/);
   });
 });
