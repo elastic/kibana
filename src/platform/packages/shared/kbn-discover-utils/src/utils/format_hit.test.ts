@@ -85,6 +85,31 @@ describe('formatHitReact', () => {
     ]);
   });
 
+  it('orders inline highlights first', () => {
+    const highlightHit = buildDataTableRecord(
+      {
+        ...hit,
+        inline_highlights: { message: { preTag: '<em>', postTag: '</em>' } },
+      },
+      dataViewMock
+    );
+    const formatted = formatHitReact(
+      highlightHit,
+      dataViewMock,
+      (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
+      220,
+      fieldFormatsMock,
+      undefined
+    );
+    expect(formatted.map(([fieldName]) => fieldName)).toEqual([
+      'message',
+      'extension',
+      'object.value',
+      '_index',
+      '_score',
+    ]);
+  });
+
   it('only limits count of pairs based on advanced setting', () => {
     const formatted = formatHitReact(
       row,
