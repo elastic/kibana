@@ -70,7 +70,9 @@ export const registerStreamsMemoryAgentBuilder = async ({
 
     if (registered.length === MEMORY_SKILL_FACTORIES.length) {
       memorySkillsRegistered = true;
-      logger.info('Streams memory skills registered (observability:streamsEnableMemory is enabled)');
+      logger.info(
+        'Streams memory skills registered (observability:streamsEnableMemory is enabled)'
+      );
     } else {
       logger.warn(
         `Streams memory skills partially registered (${registered.length}/${MEMORY_SKILL_FACTORIES.length}). ` +
