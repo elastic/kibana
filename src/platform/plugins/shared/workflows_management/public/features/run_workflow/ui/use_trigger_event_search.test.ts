@@ -147,6 +147,38 @@ describe('useTriggerEventSearch pagination', () => {
     });
   });
 
+  it('keeps onFetchMoreRecords when the capped total is reached but the page is full', async () => {
+    mockUseQueryTriggerEvents.mockReturnValue({
+      data: {
+        hits: Array.from({ length: 50 }, (_, index) => hit(`evt-1-${index}`)),
+        total: 10_000,
+        page: 1,
+        size: 50,
+      },
+      isLoading: false,
+      isFetching: false,
+      isPreviousData: false,
+      isError: false,
+      error: undefined,
+    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
+
+    const { result } = renderHook(() =>
+      useTriggerEventSearch({
+        definition: baseDefinition as never,
+        customTriggerTypeIds,
+        customTriggerIdsKey: 'custom.trigger',
+        queryEnabled: true,
+        isEventConfigLoading: false,
+        getTimeDefaults: () => TIMEPICKER_FALLBACK,
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.rows).toHaveLength(50);
+    });
+    expect(result.current.onFetchMoreRecords).toEqual(expect.any(Function));
+  });
+
   it('clears onFetchMoreRecords while fetching the next page', async () => {
     mockUseQueryTriggerEvents.mockReturnValue({
       data: {

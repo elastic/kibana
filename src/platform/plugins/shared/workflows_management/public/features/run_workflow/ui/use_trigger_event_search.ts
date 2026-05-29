@@ -15,6 +15,7 @@ import { useQueryTriggerEvents } from '@kbn/workflows-ui';
 import { TIMEPICKER_FALLBACK } from './constants';
 import type { TriggerEventLogGridRow } from './trigger_event_log_grid_cells';
 import { triggerSourceToGridRow } from './trigger_event_log_grid_cells';
+import { resolveWorkflowsEventsHasMoreHits } from './trigger_event_search_totals';
 import { useAccumulatedTriggerEventSearchPages } from './workflow_execute_event_form_infinite_list';
 import { buildDefaultTriggerEventSearchQuery } from './workflow_execute_modal_helpers';
 
@@ -151,7 +152,15 @@ export function useTriggerEventSearch(options: UseTriggerEventSearchOptions) {
     });
   }, [accumulatedHits]);
 
-  const hasMoreHits = Boolean(searchResult && accumulatedHits.length < searchResult.total);
+  const hasMoreHits = Boolean(
+    searchResult &&
+      resolveWorkflowsEventsHasMoreHits({
+        totalHits: searchResult.total,
+        accumulatedHitsLength: accumulatedHits.length,
+        currentPageHitsLength: searchResult.hits.length,
+        pageSize: TRIGGER_EVENT_SEARCH_PAGE_SIZE,
+      })
+  );
   const totalHits = searchResult?.total ?? 0;
 
   const onFetchMoreRecords = useMemo(

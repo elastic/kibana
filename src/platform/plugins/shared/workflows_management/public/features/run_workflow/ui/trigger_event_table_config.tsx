@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
-import { FormattedNumber } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   type CustomCellRenderer,
@@ -30,9 +30,11 @@ import {
   type UnifiedDataTableRenderCustomToolbar,
   type UnifiedDataTableRenderCustomToolbarProps,
 } from '@kbn/unified-data-table';
+import { WORKFLOWS_EVENTS_TRACK_TOTAL_HITS_CAP } from '@kbn/workflows';
 import type { TriggerEventLogGridRow } from './trigger_event_log_grid_cells';
 import { TriggerEventLogSummaryCell, triggerSourceToGridRow } from './trigger_event_log_grid_cells';
 import { formatTriggerEventPayloadPreview } from './trigger_event_payload_format';
+import { isWorkflowsEventsTotalHitsCapped } from './trigger_event_search_totals';
 import {
   createTriggerEventSummaryCopyPayloadCellAction,
   withoutTrailingDefaultCopyCellAction,
@@ -273,20 +275,56 @@ export function useTriggerEventTableConfig(
     [euiThemeContext]
   );
 
-  const leftToolbarContent = useMemo(
-    () => (
+  const leftToolbarContent = useMemo(() => {
+    const isTotalHitsCapped = isWorkflowsEventsTotalHitsCapped(documentCount);
+
+    return (
       <EuiText size="s" color="subdued" data-test-subj="workflowTriggerEventsDocumentCount">
-        <span css={{ fontWeight: euiTheme.font.weight.bold }}>
-          <FormattedNumber value={documentCount} />
+        <span
+          css={{ fontWeight: euiTheme.font.weight.bold }}
+          data-test-subj="workflowTriggerEventsDocumentCountValue"
+        >
+          {isTotalHitsCapped ? (
+            <FormattedMessage
+              id="workflows.workflowExecuteEventTriggerForm.cappedDocumentCount"
+              defaultMessage="{count}+"
+              values={{
+                count: <FormattedNumber value={WORKFLOWS_EVENTS_TRACK_TOTAL_HITS_CAP} />,
+              }}
+            />
+          ) : (
+            <FormattedNumber value={documentCount} />
+          )}
         </span>{' '}
-        {i18n.translate('workflows.workflowExecuteEventTriggerForm.documentCountLabel', {
-          defaultMessage: '{count, plural, one {document} other {documents}}',
-          values: { count: documentCount },
-        })}
+        {isTotalHitsCapped ? (
+          <>
+            {i18n.translate('workflows.workflowExecuteEventTriggerForm.cappedDocumentCountLabel', {
+              defaultMessage: 'documents',
+            })}
+            <EuiIconTip
+              type="iInCircle"
+              css={{ marginLeft: euiTheme.size.xs }}
+              content={i18n.translate(
+                'workflows.workflowExecuteEventTriggerForm.cappedDocumentCountTooltip',
+                {
+                  defaultMessage:
+                    'Total matching events may exceed {cap}. Narrow your search or time range to see a precise count.',
+                  values: {
+                    cap: WORKFLOWS_EVENTS_TRACK_TOTAL_HITS_CAP.toLocaleString(),
+                  },
+                }
+              )}
+            />
+          </>
+        ) : (
+          i18n.translate('workflows.workflowExecuteEventTriggerForm.documentCountLabel', {
+            defaultMessage: '{count, plural, one {document} other {documents}}',
+            values: { count: documentCount },
+          })
+        )}
       </EuiText>
-    ),
-    [documentCount, euiTheme.font.weight.bold]
-  );
+    );
+  }, [documentCount, euiTheme.font.weight.bold, euiTheme.size.xs]);
 
   const baseToolbarRenderer = useMemo(
     () =>

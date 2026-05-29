@@ -12,6 +12,18 @@ import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 export const WORKFLOWS_EVENTS_DATA_STREAM = '.workflows-events';
 
 /**
+ * Upper bound passed to Elasticsearch `track_total_hits` when searching `.workflows-events`.
+ *
+ * Totals at or above this value are a lower bound only — the index may contain more matching
+ * documents. The trigger-event search API returns `total: WORKFLOWS_EVENTS_TRACK_TOTAL_HITS_CAP`
+ * in that case; clients should display `10,000+` (or equivalent) rather than an exact count.
+ *
+ * Matches UnifiedDataTable's `MAX_LOADED_GRID_ROWS` (10_000) so the Event tab grid and reported
+ * total stay aligned.
+ */
+export const WORKFLOWS_EVENTS_TRACK_TOTAL_HITS_CAP = 10_000;
+
+/**
  * KQL field metadata for `.workflows-events`, shared by server and client:
  *
  * - **Server** ({@link WORKFLOWS_EVENTS_DATA_VIEW}): passed to `toElasticsearchQuery` in the

@@ -132,6 +132,7 @@ export async function searchTriggerEventLog(
     sort,
     from,
     size,
+    // Intentional ES cost ceiling; see WORKFLOWS_EVENTS_TRACK_TOTAL_HITS_CAP.
     track_total_hits: TRACK_TOTAL_HITS_CAP,
   });
 

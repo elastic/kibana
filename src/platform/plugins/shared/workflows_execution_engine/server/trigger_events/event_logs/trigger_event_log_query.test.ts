@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TRACK_TOTAL_HITS_CAP } from './constants';
 import { searchTriggerEventLog } from './trigger_event_log_query';
 import type { TriggerEventsDataStreamClient } from './trigger_events_data_stream';
 
@@ -47,5 +48,11 @@ describe('searchTriggerEventLog KQL translation', () => {
     expect(searchArgs.query.bool.must).toHaveLength(1);
     expect(JSON.stringify(searchArgs.query.bool.must[0])).toContain('payload.workflow.status');
     expect(JSON.stringify(searchArgs.query.bool.must[0])).toContain('failed');
+  });
+
+  it('applies the shared track_total_hits cap for ES cost control', async () => {
+    await searchTriggerEventLog(client, { spaceId: 'default' });
+
+    expect(mockSearch.mock.calls[0][0].track_total_hits).toBe(TRACK_TOTAL_HITS_CAP);
   });
 });
