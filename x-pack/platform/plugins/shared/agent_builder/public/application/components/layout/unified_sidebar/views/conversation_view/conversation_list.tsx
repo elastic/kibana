@@ -28,10 +28,14 @@ import { ConversationListItemRow } from './conversation_list_item_row';
 
 const deriveDisplayStatus = (
   conversation: { read?: boolean; status?: ConversationRoundStatus },
-  isStreaming: boolean
+  isStreaming: boolean,
+  hasError: boolean
 ): ConversationDisplayStatus | undefined => {
   if (isStreaming || conversation.status === ConversationRoundStatus.inProgress) {
     return ConversationDisplayStatus.inProgress;
+  }
+  if (hasError) {
+    return ConversationDisplayStatus.error;
   }
   if (conversation.status === ConversationRoundStatus.awaitingPrompt) {
     return ConversationDisplayStatus.awaitingPrompt;
@@ -62,7 +66,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { conversations = [], isLoading } = useConversationList({ agentId });
-  const { activeStreams } = useStreamingContext();
+  const { activeStreams, byConversationId } = useStreamingContext();
 
   const sortedConversations = useMemo(
     () =>
@@ -108,7 +112,8 @@ export const ConversationList: React.FC<ConversationListProps> = ({
       {sortedConversations.map((conversation) => {
         const isActive = currentConversationId === conversation.id;
         const isStreaming = activeStreams.has(conversation.id);
-        const status = deriveDisplayStatus(conversation, isStreaming);
+        const hasError = Boolean(byConversationId[conversation.id]?.error);
+        const status = deriveDisplayStatus(conversation, isStreaming, hasError);
         return (
           <EuiFlexItem grow={false} key={conversation.id}>
             <ConversationListItemRow
