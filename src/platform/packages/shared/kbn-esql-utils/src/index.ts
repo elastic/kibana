@@ -75,6 +75,11 @@ export {
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
 export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
+export {
+  getColumnsWithHighlights,
+  type ESQLColumnsWithHighlights,
+  type ESQLHighlightTags,
+} from './utils/get_columns_with_highlights';
 export { buildRenameSourceFieldMap } from './utils/build_rename_source_field_map';
 export { convertFiltersToESQLExpression } from './utils/convert_filters_to_esql';
 export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';
