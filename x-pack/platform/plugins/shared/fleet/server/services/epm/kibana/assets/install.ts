@@ -20,7 +20,7 @@ import type {
 } from '@kbn/core/server';
 import { createListStream } from '@kbn/utils';
 
-import { partition, chunk, once, omit } from 'lodash';
+import { partition, chunk, once } from 'lodash';
 
 import { getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
@@ -34,7 +34,6 @@ import {
 import { saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
 import { FleetError, KibanaSOReferenceError } from '../../../../errors';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { withPackageSpan } from '../../packages/utils';
 
 import { appContextService } from '../../..';
@@ -212,40 +211,6 @@ export async function createDefaultIndexPatterns(
   });
 }
 
-/**
- * Removes the primary-space key from `additional_spaces_installed_kibana` if it was
- * unexpectedly written there.
- */
-async function pruneMisplacedAdditionalSpacesEntry({
-  savedObjectsClient,
-  pkgName,
-  installedPkg,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-  installedPkg: SavedObject<Installation>;
-}): Promise<SavedObject<Installation>> {
-  const primarySpaceId = installedPkg.attributes.installed_kibana_space_id;
-  if (!primarySpaceId) {
-    return installedPkg;
-  }
-  const additionalSpaces = installedPkg.attributes.additional_spaces_installed_kibana ?? {};
-  if (!(primarySpaceId in additionalSpaces)) {
-    return installedPkg;
-  }
-  const pruned = omit(additionalSpaces, primarySpaceId);
-  await savedObjectsClient.update<Installation>(
-    PACKAGES_SAVED_OBJECT_TYPE,
-    pkgName,
-    { additional_spaces_installed_kibana: pruned },
-    { refresh: false }
-  );
-  return {
-    ...installedPkg,
-    attributes: { ...installedPkg.attributes, additional_spaces_installed_kibana: pruned },
-  };
-}
-
 export async function installKibanaAssetsAndReferencesMultispace({
   savedObjectsClient,
   logger,
@@ -271,14 +236,6 @@ export async function installKibanaAssetsAndReferencesMultispace({
     ? (installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID) !== spaceId
     : false;
 
-  if (installedPkg) {
-    installedPkg = await pruneMisplacedAdditionalSpacesEntry({
-      savedObjectsClient,
-      pkgName,
-      installedPkg,
-    });
-  }
-
   if (installedPkg && !installAsAdditionalSpace) {
     // Install in every space => upgrades
     const refs = await installKibanaAssetsAndReferences({
@@ -293,9 +250,10 @@ export async function installKibanaAssetsAndReferencesMultispace({
       installAsAdditionalSpace,
     });
 
+    const primarySpaceId = installedPkg.attributes.installed_kibana_space_id ?? DEFAULT_SPACE_ID;
     for (const additionnalSpaceId of Object.keys(
       installedPkg.attributes.additional_spaces_installed_kibana ?? {}
-    )) {
+    ).filter((s) => s !== primarySpaceId)) {
       await installKibanaAssetsAndReferences({
         savedObjectsClient,
         logger,

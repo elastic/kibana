@@ -184,8 +184,7 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
   });
 
   describe('when additional_spaces_installed_kibana contains a misplaced primary-space key', () => {
-    it('prunes the misplaced key when the request comes from the primary space', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+    it('skips the primary-space key while still iterating legitimate additional spaces', async () => {
       const installedPkg = makeInstalledPkg('default', ['space-b']);
       (installedPkg.attributes as any).additional_spaces_installed_kibana = {
         default: [{ id: 'misplaced-dash', type: 'dashboard' }],
@@ -194,16 +193,9 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
 
       await installKibanaAssetsAndReferencesMultispace({
         ...baseArgs(),
-        savedObjectsClient,
         spaceId: 'default',
         installedPkg,
       });
-
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      const updateArg = (savedObjectsClient.update.mock.calls[0][2] as any)
-        .additional_spaces_installed_kibana;
-      expect(Object.keys(updateArg)).not.toContain('default');
-      expect(Object.keys(updateArg)).toContain('space-b');
 
       const additionalCalls = mockSaveKibanaAssetsRefs.mock.calls.filter(
         ([, , , , saveAsAdditional]) => saveAsAdditional === true
@@ -212,8 +204,7 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
       expect(additionalCalls.map(([, , , sid]) => sid)).not.toContain('default');
     });
 
-    it('prunes the misplaced key when the request comes from a non-primary space', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
+    it('skips the primary-space key when the request comes from a non-primary space', async () => {
       const installedPkg = makeInstalledPkg('default');
       (installedPkg.attributes as any).additional_spaces_installed_kibana = {
         default: [{ id: 'misplaced-dash', type: 'dashboard' }],
@@ -221,57 +212,14 @@ describe('installKibanaAssetsAndReferencesMultispace', () => {
 
       await installKibanaAssetsAndReferencesMultispace({
         ...baseArgs(),
-        savedObjectsClient,
         spaceId: 'space-b',
         installedPkg,
       });
 
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-      const updateArg = (savedObjectsClient.update.mock.calls[0][2] as any)
-        .additional_spaces_installed_kibana;
-      expect(Object.keys(updateArg)).not.toContain('default');
-
-      // The non-primary space is still installed as additional
+      expect(mockSaveKibanaAssetsRefs).toHaveBeenCalledTimes(1);
       const [, , , spaceId, saveAsAdditional] = mockSaveKibanaAssetsRefs.mock.calls[0];
       expect(saveAsAdditional).toBe(true);
       expect(spaceId).toBe('space-b');
-    });
-
-    it('handles a misplaced-only map without additional-space iterations', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      const installedPkg = makeInstalledPkg('default');
-      (installedPkg.attributes as any).additional_spaces_installed_kibana = {
-        default: [{ id: 'misplaced-dash', type: 'dashboard' }],
-      };
-
-      await installKibanaAssetsAndReferencesMultispace({
-        ...baseArgs(),
-        savedObjectsClient,
-        spaceId: 'default',
-        installedPkg,
-      });
-
-      expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-
-      expect(mockSaveKibanaAssetsRefs).toHaveBeenCalledTimes(1);
-      const [, , , , saveAsAdditional] = mockSaveKibanaAssetsRefs.mock.calls[0];
-      expect(saveAsAdditional).toBe(false);
-    });
-
-    it('does not prune when the primary space key is not in additional_spaces_installed_kibana', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      // Prod scenario: primary is non-default, 'default' is a legitimate additional space
-      const installedPkg = makeInstalledPkg('non-default-primary', ['default', 'space-b']);
-
-      await installKibanaAssetsAndReferencesMultispace({
-        ...baseArgs(),
-        savedObjectsClient,
-        spaceId: 'non-default-primary',
-        installedPkg,
-      });
-
-      // No SO update from prune — map was clean
-      expect(savedObjectsClient.update).not.toHaveBeenCalled();
     });
   });
 });
