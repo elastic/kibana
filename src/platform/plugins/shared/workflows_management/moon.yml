@@ -107,13 +107,13 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/std'
   - '@kbn/core-saved-objects-common'
-  - '@kbn/datemath'
-  - '@kbn/inbox-common'
-  - '@kbn/workflows-execution-engine-utils'
   - '@kbn/esql-types'
   - '@kbn/esql-language'
   - '@kbn/esql-utils'
   - '@kbn/inbox-plugin'
+  - '@kbn/inbox-common'
+  - '@kbn/workflows-execution-engine-utils'
+  - '@kbn/datemath'
 tags:
   - plugin
   - prod
