@@ -29,7 +29,6 @@ import type { PackagePolicyClient } from '../package_policy_service';
 import { agentPolicyService } from '../agent_policy';
 import { getPackageInfo } from '../epm/packages';
 import { appContextService, cloudConnectorService } from '..';
-import { FleetNotFoundError } from '../../errors';
 
 import type { PackageInfo } from '../../types';
 import {
