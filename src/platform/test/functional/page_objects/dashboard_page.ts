@@ -217,6 +217,7 @@ export class DashboardPageObject extends FtrService {
   public async onDashboardLandingPage() {
     this.log.debug(`onDashboardLandingPage`);
     const currentUrl = await this.browser.getCurrentUrl();
+    this.log.debug(`currentUrl: `, currentUrl);
     return currentUrl.includes('dashboards#/list');
   }
 
