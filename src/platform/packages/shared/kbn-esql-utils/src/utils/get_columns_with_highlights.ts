@@ -141,7 +141,7 @@ const getHighlightTagName = (optionsMap: ESQLMap, optionName: string): string | 
  * This function has an heuristic part, some combination of function could remove the highlighting tokens from the result.
  * But it assumes that if the user used highlight:true, it's not interested in removing them.
  * Doing a 100% accurate check would involve knowing the semantics of every invoked function.
- * In the worst case of having a false positive,
+ * In the worst case of having a false positive, a value without highlighting tags will run through the highlighitng code.
  */
 const getHighlightedColumnName = (
   root: ESQLAstQueryExpression,
