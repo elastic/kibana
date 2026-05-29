@@ -8,10 +8,18 @@
 /**
  * Quality eval: does the LLM produce a useful triage given real alert data?
  *
- * Two scenarios run in inline mode (1 batch each → ≤5 attachments → LLM sees
- * all data directly without needing attachment_read). This isolates output
- * quality from the attachment-read compliance already covered by
- * bulk_alerts_attachment_read.spec.ts.
+ * Three scenarios:
+ *   1. Priority triage (inline mode, 100 alerts / 5 batches ≤ threshold):
+ *      LLM sees all data directly; tests severity prioritisation.
+ *   2. Entity correlation (inline mode, 100 alerts / 5 batches):
+ *      Tests whether the LLM spots the host targeted by multiple alerts.
+ *   3. End-to-end / summary mode (200 alerts / 10 batches > threshold):
+ *      Uses both alert groups so attachment_read is required before
+ *      the LLM can reason over the data. Covers the full shipped path:
+ *      bulk selection → summary mode → attachment_read → triage real alerts.
+ *
+ * All scenarios include a grounding criterion that fails when the LLM
+ * invents hosts or rule names not present in the attached alert data.
  *
  * Synthetic alerts are indexed into .alerts-security.alerts-default in
  * beforeAll and cleaned up in afterAll so no external snapshot is required.
@@ -26,12 +34,14 @@ import {
   type ExperimentTask,
   type TaskOutput,
 } from '@kbn/evals';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import { evaluate as base } from '../src/evaluate';
+import { callConverse } from '../src/converse_task';
+import { attachmentReadCompliance } from '../src/evaluators';
 import {
   ALL_TRIAGE_EVAL_ALERTS,
+  ALL_TRIAGE_EVAL_IDS,
   ENTITY_CORRELATION_IDS,
   PRIORITY_TRIAGE_IDS,
 } from '../src/synthetic_alerts';
@@ -59,6 +69,7 @@ interface TriageEvalExample {
   output: { expected: string };
   metadata?: {
     attachments?: Array<{ type: string; data?: unknown }>;
+    expectedAttachmentReads?: number;
   };
 }
 
@@ -85,36 +96,19 @@ function createEvaluateTriageQuality({
     criteria: string[];
   }) {
     const task: ExperimentTask<TriageEvalExample, TaskOutput> = async ({ input, metadata }) => {
-      log.info(`Running triage eval task: "${input.question.slice(0, 80)}..."`);
-
       const { attachments = [] } = metadata ?? {};
-
-      const raw = (await fetch('/api/agent_builder/converse', {
-        method: 'POST',
-        version: '2023-10-31',
-        body: JSON.stringify({
-          agent_id: agentBuilderDefaultAgentId,
-          connector_id: connector.id,
-          input: input.question,
-          attachments,
-        }),
-      })) as {
-        conversation_id: string;
-        trace_id?: string;
-        steps: unknown[];
-        response: { message: string };
-      };
-
-      return {
-        errors: [],
-        messages: [{ message: input.question }, raw.response],
-        steps: raw.steps ?? [],
-        traceId: raw.trace_id,
-      };
+      return callConverse({
+        fetch,
+        connectorId: connector.id,
+        question: input.question,
+        attachments,
+        log,
+      });
     };
 
     const selectedEvaluators = selectEvaluators([
       evaluators.criteria(criteria),
+      attachmentReadCompliance,
       ...Object.values(evaluators.traceBasedEvaluators),
     ]);
 
@@ -205,8 +199,8 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'The response should prioritise the critical PowerShell alert on workstation-42, ' +
-                    'address the high-severity credential-dumping and network-scanning alerts, ' +
+                    'The response should prioritise the critical Memory Injection via Process Hollowing alert on laptop-finance-07, ' +
+                    'address the high-severity credential-dumping and lateral-movement alerts, ' +
                     'list the affected host names, and provide specific remediation steps for each.',
                 },
                 metadata: {
@@ -220,6 +214,7 @@ evaluate.describe(
             'The response mentions specific host names present in the alert data',
             'The response includes concrete remediation steps, not just a description of the alerts',
             'The response distinguishes between urgent and lower-priority items',
+            'The response does not reference any hostname, username, or rule name that is not present in the attached alert data',
           ],
         });
       }
@@ -258,6 +253,57 @@ evaluate.describe(
             'The response identifies that one specific host appears in multiple alerts',
             'The response names web-server-01 as the repeatedly targeted host',
             'The response treats the repeated targeting of a single host as a higher-risk indicator than the single-alert hosts',
+            'The response does not reference any hostname, username, or rule name that is not present in the attached alert data',
+          ],
+        });
+      }
+    );
+
+    evaluate(
+      'End-to-end — summary mode with real alert data exercises attachment_read',
+      async ({ evaluateTriageQuality }) => {
+        // ALL_TRIAGE_EVAL_IDS = 200 alerts → 10 batches > inline threshold of 5
+        // → framework switches to summary mode → LLM must call attachment_read
+        //   to read each batch before it can reason over real alert content.
+        // This is the only scenario that covers the full shipped path.
+        const E2E_BATCH_COUNT = Math.ceil(ALL_TRIAGE_EVAL_IDS.length / ALERTS_BATCH_MAX_SIZE);
+        await evaluateTriageQuality({
+          dataset: {
+            name: 'agent builder: security-alert-triage-e2e-summary-mode',
+            description:
+              `End-to-end coverage for the full bulk-add path: ${ALL_TRIAGE_EVAL_IDS.length} real ` +
+              `alerts produce ${E2E_BATCH_COUNT} batches, triggering summary mode. The LLM must ` +
+              'call attachment_read for each batch before reasoning. Combines both the priority-' +
+              'triage group (1 critical alert buried at index 49) and the entity-correlation group ' +
+              '(web-server-01 targeted by 20 alerts showing an attack progression).',
+            examples: [
+              {
+                input: {
+                  question:
+                    'Review all these security alerts. Identify the most critical threats, ' +
+                    'note any hosts or users that appear across multiple alerts, and recommend ' +
+                    'prioritized actions.',
+                },
+                output: {
+                  expected:
+                    `The response calls attachment_read ${E2E_BATCH_COUNT} times to read each alert ` +
+                    'batch, identifies the critical Memory Injection via Process Hollowing alert on ' +
+                    'laptop-finance-07 as the highest priority, identifies web-server-01 as the most ' +
+                    'frequently targeted host with an attack progression, and provides prioritized ' +
+                    'remediation steps without referencing hosts or rules not in the data.',
+                },
+                metadata: {
+                  attachments: toAlertAttachments(ALL_TRIAGE_EVAL_IDS),
+                  expectedAttachmentReads: E2E_BATCH_COUNT,
+                },
+              },
+            ],
+          },
+          criteria: [
+            'The response treats the critical severity alert as the highest priority item',
+            'The response names web-server-01 as a host that appears in multiple alerts',
+            'The response provides prioritized remediation steps',
+            'The response does not reference any hostname, username, or rule name that is not present in the attached alert data',
           ],
         });
       }

@@ -19,18 +19,17 @@
 
 import { tags } from '@kbn/scout';
 import {
-  getToolCallSteps,
   selectEvaluators,
   type DefaultEvaluators,
   type EvalsExecutorClient,
   type ExperimentTask,
   type TaskOutput,
 } from '@kbn/evals';
-import { attachmentTools, agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import { evaluate as base } from '../src/evaluate';
+import { callConverse } from '../src/converse_task';
+import { attachmentReadCompliance } from '../src/evaluators';
 
 // ── Dataset constants ──────────────────────────────────────────────────────────
 
@@ -69,14 +68,12 @@ function createEvaluateAlertBatches({
   connector,
   evaluators,
   executorClient,
-  traceEsClient,
   log,
 }: {
   fetch: HttpHandler;
   connector: { id: string };
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
-  traceEsClient: EsClient;
   log: ToolingLog;
 }) {
   return async function evaluateAlertBatches({
@@ -85,57 +82,18 @@ function createEvaluateAlertBatches({
     dataset: { name: string; description: string; examples: AlertEvalExample[] };
   }) {
     const task: ExperimentTask<AlertEvalExample, TaskOutput> = async ({ input, metadata }) => {
-      log.info('Calling converse with alert batch attachments');
-
       const attachments = metadata?.attachments ?? [];
-
-      const raw = (await fetch('/api/agent_builder/converse', {
-        method: 'POST',
-        version: '2023-10-31',
-        body: JSON.stringify({
-          agent_id: agentBuilderDefaultAgentId,
-          connector_id: connector.id,
-          input: input.question,
-          attachments,
-        }),
-      })) as {
-        conversation_id: string;
-        trace_id?: string;
-        steps: unknown[];
-        response: { message: string };
-      };
-
-      return {
-        errors: [],
-        messages: [{ message: input.question }, raw.response],
-        steps: raw.steps ?? [],
-        traceId: raw.trace_id,
-      };
+      return callConverse({
+        fetch,
+        connectorId: connector.id,
+        question: input.question,
+        attachments,
+        log,
+      });
     };
 
     const selectedEvaluators = selectEvaluators([
-      {
-        name: 'AttachmentReadCompliance',
-        kind: 'CODE' as const,
-        evaluate: async ({ output, metadata }) => {
-          const expected =
-            typeof metadata?.expectedAttachmentReads === 'number'
-              ? metadata.expectedAttachmentReads
-              : 0;
-
-          if (!expected) {
-            return { score: 1 };
-          }
-
-          const toolCalls = getToolCallSteps(output as TaskOutput);
-          const readCalls = toolCalls.filter((t) => t.tool_id === attachmentTools.read);
-
-          return {
-            score: Math.min(1, readCalls.length / expected),
-            metadata: { readCallCount: readCalls.length, expected },
-          };
-        },
-      },
+      attachmentReadCompliance,
       ...Object.values(evaluators.traceBasedEvaluators),
     ]);
 
@@ -152,14 +110,13 @@ type EvaluateAlertBatches = ReturnType<typeof createEvaluateAlertBatches>;
 
 const evaluate = base.extend<{ evaluateAlertBatches: EvaluateAlertBatches }, {}>({
   evaluateAlertBatches: [
-    ({ fetch, connector, evaluators, executorClient, traceEsClient, log }, use) => {
+    ({ fetch, connector, evaluators, executorClient, log }, use) => {
       use(
         createEvaluateAlertBatches({
           fetch,
           connector,
           evaluators,
           executorClient,
-          traceEsClient,
           log,
         })
       );
