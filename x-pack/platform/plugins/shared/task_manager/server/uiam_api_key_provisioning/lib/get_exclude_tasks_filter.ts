@@ -11,13 +11,14 @@ import {
   UiamApiKeyProvisioningEntityType,
   UiamApiKeyProvisioningStatus,
 } from '@kbn/uiam-api-keys-provisioning-status';
-import { GET_STATUS_BATCH_SIZE, NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE } from '../constants';
+import { GET_STATUS_BATCH_SIZE, PERMANENT_UIAM_CONVERSION_ERROR_CODES } from '../constants';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../uiam_api_keys_provisioning_status_saved_object';
 
 /**
  * Returns task `entityId`s that already have a final UIAM provisioning status
- * (completed, skipped, or failed due to non-Cloud user API key creator code) so
- * the provisioning fetch can exclude them.
+ * (completed, skipped, or failed with a permanent UIAM conversion error code,
+ * see {@link PERMANENT_UIAM_CONVERSION_ERROR_CODES}) so the provisioning fetch
+ * can exclude them.
  *
  * Mirrors {@link getExcludeRulesFilter} in
  * `x-pack/.../alerting/server/provisioning/lib/get_exclude_rules_filter.ts`.
@@ -32,7 +33,11 @@ export const getExcludeTasksFilter = async (
       nodeBuilder.is(`${statusAttr}.status`, UiamApiKeyProvisioningStatus.SKIPPED),
       nodeBuilder.and([
         nodeBuilder.is(`${statusAttr}.status`, UiamApiKeyProvisioningStatus.FAILED),
-        nodeBuilder.is(`${statusAttr}.errorCode`, NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE),
+        nodeBuilder.or(
+          PERMANENT_UIAM_CONVERSION_ERROR_CODES.map((code) =>
+            nodeBuilder.is(`${statusAttr}.errorCode`, code)
+          )
+        ),
       ]),
     ]),
     nodeBuilder.is(`${statusAttr}.entityType`, UiamApiKeyProvisioningEntityType.TASK),
