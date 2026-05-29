@@ -110,6 +110,12 @@ export const performRuleInstallationHandler = async (
       ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
+    const changeTracking = {
+      metadata: {
+        bulkCount: ruleInstallQueue.length,
+      },
+    };
+
     const BATCH_SIZE = 100;
     while (ruleInstallQueue.length > 0) {
       const rulesToInstall = ruleInstallQueue.splice(0, BATCH_SIZE);
@@ -118,6 +124,7 @@ export const performRuleInstallationHandler = async (
       const { results, errors } = await createPrebuiltRules(
         detectionRulesClient,
         ruleAssets,
+        changeTracking,
         logger
       );
 

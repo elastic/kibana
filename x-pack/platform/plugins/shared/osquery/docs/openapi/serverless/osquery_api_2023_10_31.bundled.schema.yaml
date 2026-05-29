@@ -28,27 +28,23 @@ paths:
             maximum: 100
             minimum: 1
             type: integer
-        - description: >-
-            A base64-encoded cursor for pagination. Use the value from the
+        - description: A base64-encoded cursor for pagination. Use the value from the
             previous response to fetch the next page.
           in: query
           name: nextPage
           required: false
           schema:
-            description: >-
-              A base64-encoded cursor for pagination. Use the value from the
+            description: A base64-encoded cursor for pagination. Use the value from the
               previous response to fetch the next page.
             type: string
-        - description: >-
-            A search string to filter history entries by pack name, query text,
+        - description: A search string to filter history entries by pack name, query text,
             or query ID.
           in: query
           name: kuery
           required: false
           schema:
-            description: >-
-              A search string to filter history entries by pack name, query
-              text, or query ID.
+            description: A search string to filter history entries by pack name, query text,
+              or query ID.
             type: string
         - description: Comma-separated list of user IDs to filter live query history.
           in: query
@@ -58,15 +54,13 @@ paths:
             description: Comma-separated list of user IDs to filter live query history.
             example: elastic,admin
             type: string
-        - description: >-
-            Comma-separated list of source types to include. Valid values are
+        - description: Comma-separated list of source types to include. Valid values are
             `live`, `rule`, and `scheduled`.
           in: query
           name: sourceFilters
           required: false
           schema:
-            description: >-
-              Comma-separated list of source types to include. Valid values are
+            description: Comma-separated list of source types to include. Valid values are
               `live`, `rule`, and `scheduled`.
             example: live,scheduled
             type: string
@@ -637,11 +631,10 @@ paths:
         - Security Osquery API
   /api/osquery/packs/{id}/copy:
     post:
-      description: >-
-        Create a copy of a query pack with a unique name by appending a `_copy`
-        suffix. If the name already exists, a numeric suffix is added (e.g.,
-        `_copy_2`). The copied pack is always created with `enabled` set to
-        `false`.
+      description: Create a copy of a query pack with a unique name by appending a
+        `_copy` suffix. If the name already exists, a numeric suffix is added
+        (e.g., `_copy_2`). The copied pack is always created with `enabled` set
+        to `false`.
       operationId: OsqueryCopyPacks
       parameters:
         - description: The ID of the pack to copy.
@@ -918,10 +911,9 @@ paths:
         - Security Osquery API
   /api/osquery/saved_queries/{id}/copy:
     post:
-      description: >-
-        Create a copy of a saved query with a unique name by appending a `_copy`
-        suffix. If the name already exists, a numeric suffix is added (e.g.,
-        `_copy_2`).
+      description: Create a copy of a saved query with a unique name by appending a
+        `_copy` suffix. If the name already exists, a numeric suffix is added
+        (e.g., `_copy_2`).
       operationId: OsqueryCopySavedQuery
       parameters:
         - description: The ID of the saved query to copy.
@@ -1208,14 +1200,15 @@ components:
               $ref: '#/components/schemas/PackDescriptionOrUndefined'
             enabled:
               $ref: '#/components/schemas/EnabledOrUndefined'
+            interval:
+              $ref: '#/components/schemas/PackIntervalOrUndefined'
             name:
               $ref: '#/components/schemas/PackName'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
-              description: >-
-                Pack queries in saved-object storage format (array). Note: the
-                read endpoint returns object format.
+              description: 'Pack queries in saved-object storage format (array). Note: the
+                read endpoint returns object format.'
               items:
                 type: object
                 properties:
@@ -1231,6 +1224,10 @@ components:
                     type: string
                   removed:
                     type: boolean
+                  rrule_schedule:
+                    $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
+                  schedule_type:
+                    $ref: '#/components/schemas/ScheduleTypeOrUndefined'
                   snapshot:
                     type: boolean
                   timeout:
@@ -1238,9 +1235,13 @@ components:
                   version:
                     type: string
               type: array
+            rrule_schedule:
+              $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the copied pack.
               type: string
+            schedule_type:
+              $ref: '#/components/schemas/ScheduleTypeOrUndefined'
             shards:
               description: Shard configuration as an array of key-value pairs.
               items:
@@ -1534,12 +1535,18 @@ components:
           $ref: '#/components/schemas/PackDescriptionOrUndefined'
         enabled:
           $ref: '#/components/schemas/EnabledOrUndefined'
+        interval:
+          $ref: '#/components/schemas/PackInterval'
         name:
           $ref: '#/components/schemas/PackName'
         policy_ids:
           $ref: '#/components/schemas/PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/ObjectQueries'
+        rrule_schedule:
+          $ref: '#/components/schemas/RRuleScheduleConfig'
+        schedule_type:
+          $ref: '#/components/schemas/ScheduleType'
         shards:
           $ref: '#/components/schemas/Shards'
     CreatePacksResponse:
@@ -1590,15 +1597,21 @@ components:
               $ref: '#/components/schemas/PackDescriptionOrUndefined'
             enabled:
               $ref: '#/components/schemas/EnabledOrUndefined'
+            interval:
+              $ref: '#/components/schemas/PackInterval'
             name:
               $ref: '#/components/schemas/PackName'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/ObjectQueries'
+            rrule_schedule:
+              $ref: '#/components/schemas/RRuleScheduleConfig'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
+            schedule_type:
+              $ref: '#/components/schemas/ScheduleType'
             shards:
               description: Shard configuration as an array of key-value pairs.
               items:
@@ -1700,9 +1713,8 @@ components:
             id:
               $ref: '#/components/schemas/SavedQueryId'
             interval:
-              description: >-
-                An interval, in seconds, on which to run the query. May be
-                returned as number or string.
+              description: An interval, in seconds, on which to run the query. May be returned
+                as number or string.
               oneOf:
                 - type: integer
                 - type: string
@@ -1748,18 +1760,16 @@ components:
     ECSMapping:
       additionalProperties:
         $ref: '#/components/schemas/ECSMappingItem'
-      description: >-
-        Map osquery results columns or static values to Elastic Common Schema
-        (ECS) fields
+      description: Map osquery results columns or static values to Elastic Common
+        Schema (ECS) fields
       example:
         host.uptime:
           field: total_seconds
       type: object
     ECSMappingArray:
-      description: >-
-        ECS mapping in saved-object storage format (array of key-value pairs).
-        The find and copy pack endpoints return this format. The read endpoint
-        returns object format (ECSMapping).
+      description: ECS mapping in saved-object storage format (array of key-value
+        pairs). The find and copy pack endpoints return this format. The read
+        endpoint returns object format (ECSMapping).
       items:
         $ref: '#/components/schemas/ECSMappingArrayItem'
       type: array
@@ -1978,9 +1988,7 @@ components:
                               type: string
                         type: array
                       result_counts:
-                        description: >-
-                          Result count statistics (present when withResultCounts
-                          is true).
+                        description: Result count statistics (present when withResultCounts is true).
                         type: object
                         properties:
                           error_agents:
@@ -2041,6 +2049,8 @@ components:
               $ref: '#/components/schemas/PackDescriptionOrUndefined'
             enabled:
               $ref: '#/components/schemas/EnabledOrUndefined'
+            interval:
+              $ref: '#/components/schemas/PackIntervalOrUndefined'
             name:
               $ref: '#/components/schemas/PackName'
             namespaces:
@@ -2055,9 +2065,13 @@ components:
             read_only:
               description: Whether the pack is read-only (true for prebuilt packs).
               type: boolean
+            rrule_schedule:
+              $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
+            schedule_type:
+              $ref: '#/components/schemas/ScheduleTypeOrUndefined'
             shards:
               $ref: '#/components/schemas/Shards'
             type:
@@ -2125,14 +2139,15 @@ components:
                 $ref: '#/components/schemas/PackDescriptionOrUndefined'
               enabled:
                 $ref: '#/components/schemas/EnabledOrUndefined'
+              interval:
+                $ref: '#/components/schemas/PackIntervalOrUndefined'
               name:
                 $ref: '#/components/schemas/PackName'
               policy_ids:
                 $ref: '#/components/schemas/PolicyIdsOrUndefined'
               queries:
-                description: >-
-                  Pack queries in saved-object storage format (array). Note: the
-                  read endpoint returns object format.
+                description: 'Pack queries in saved-object storage format (array). Note: the
+                  read endpoint returns object format.'
                 items:
                   type: object
                   properties:
@@ -2148,6 +2163,10 @@ components:
                       type: string
                     removed:
                       type: boolean
+                    rrule_schedule:
+                      $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
+                    schedule_type:
+                      $ref: '#/components/schemas/ScheduleTypeOrUndefined'
                     snapshot:
                       type: boolean
                     timeout:
@@ -2158,9 +2177,13 @@ components:
               read_only:
                 description: Whether the pack is read-only (true for prebuilt packs).
                 type: boolean
+              rrule_schedule:
+                $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
               saved_object_id:
                 description: The saved object ID of the pack.
                 type: string
+              schedule_type:
+                $ref: '#/components/schemas/ScheduleTypeOrUndefined'
               updated_at:
                 format: date-time
                 type: string
@@ -2379,9 +2402,7 @@ components:
                   _id:
                     type: string
                   _source:
-                    description: >-
-                      The Elasticsearch document source containing query
-                      results.
+                    description: The Elasticsearch document source containing query results.
                     type: object
               type: array
             total:
@@ -2513,8 +2534,7 @@ components:
           description: Whether there are more results beyond the current page.
           type: boolean
         nextPage:
-          description: >-
-            A base64-encoded cursor to fetch the next page. Absent when there
+          description: A base64-encoded cursor to fetch the next page. Absent when there
             are no more results.
           type: string
       required:
@@ -2569,14 +2589,10 @@ components:
               description: The number of sub-queries that returned results.
               type: integer
             savedQueryId:
-              description: >-
-                The saved query ID, if the live query was based on a saved
-                query.
+              description: The saved query ID, if the live query was based on a saved query.
               type: string
             source:
-              description: >-
-                Whether this was a manually run live query or triggered by a
-                rule.
+              description: Whether this was a manually run live query or triggered by a rule.
               enum:
                 - Live
                 - Rule
@@ -2616,8 +2632,12 @@ components:
           $ref: '#/components/schemas/Query'
         removed:
           $ref: '#/components/schemas/RemovedOrUndefined'
+        rrule_schedule:
+          $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
         saved_query_id:
           $ref: '#/components/schemas/SavedQueryIdOrUndefined'
+        schedule_type:
+          $ref: '#/components/schemas/ScheduleTypeOrUndefined'
         snapshot:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         version:
@@ -2636,6 +2656,15 @@ components:
     PackIdOrUndefined:
       $ref: '#/components/schemas/PackId'
       nullable: true
+    PackInterval:
+      description: Pack-level interval, in seconds. Used when `schedule_type` is
+        `interval`. Mutually exclusive with `rrule_schedule`.
+      example: 60
+      minimum: 1
+      type: integer
+    PackIntervalOrUndefined:
+      $ref: '#/components/schemas/PackInterval'
+      nullable: true
     PackName:
       description: The pack name.
       example: my_pack
@@ -2651,8 +2680,7 @@ components:
       nullable: true
       type: integer
     Platform:
-      description: >-
-        Restricts the query to a specified platform. The default is all
+      description: Restricts the query to a specified platform. The default is all
         platforms. To specify multiple platforms, use commas. For example,
         `linux,darwin`.
       example: linux,darwin
@@ -2688,6 +2716,60 @@ components:
       type: boolean
     RemovedOrUndefined:
       $ref: '#/components/schemas/Removed'
+      nullable: true
+    RRuleScheduleConfig:
+      description: |
+        RRULE schedule configuration consumed by osquerybeat. Loose date
+        forms like `"2024-01-01"` are rejected with 400. DTSTART is NOT
+        embedded in `rrule`; the separate `start_date` field is the
+        schedule anchor.
+      type: object
+      properties:
+        end_date:
+          description: Optional RFC 3339 datetime string for the schedule's end. MUST be
+            after `start_date`.
+          example: '2024-12-31T23:59:59Z'
+          format: date-time
+          maxLength: 64
+          type: string
+        rrule:
+          description: |
+            Fully serialized RFC 5545 RRULE string (e.g.
+            `"FREQ=WEEKLY;BYDAY=MO,WE,FR"`). The Kibana UI writes only a
+            subset of parts — `FREQ`, `INTERVAL`, `BYDAY`, `BYMONTHDAY`,
+            `BYMONTH` — but the server accepts and round-trips any
+            well-formed parts (other recognized parts like `BYHOUR`,
+            `BYMINUTE`, `BYSETPOS`, `WKST`, `COUNT`, `UNTIL` are preserved
+            verbatim).
+          example: FREQ=WEEKLY;BYDAY=MO,WE,FR
+          maxLength: 2048
+          type: string
+        splay:
+          description: |
+            Optional Go duration string for splay (random execution delay),
+            e.g. `"30s"`, `"5m"`, `"1h"`. The Kibana form writes single-unit
+            values only; compound durations (`"1h30m"`) are tolerated on
+            read for round-trip safety with osquerybeat's writer. Maximum
+            12 hours (43200 seconds).
+          example: 5m
+          maxLength: 64
+          type: string
+        start_date:
+          description: RFC 3339 datetime string for the schedule's start.
+          example: '2024-01-01T00:00:00Z'
+          format: date-time
+          maxLength: 64
+          type: string
+        timeout:
+          description: Optional query execution timeout, in seconds. Defaults to 60 in
+            osquerybeat when unset.
+          example: 60
+          type: number
+      required:
+        - rrule
+        - start_date
+    RRuleScheduleConfigOrUndefined:
+      $ref: '#/components/schemas/RRuleScheduleConfig'
       nullable: true
     SavedQueryDescription:
       description: The saved query description.
@@ -2773,13 +2855,26 @@ components:
           required:
             - sourceType
             - source
+    ScheduleType:
+      description: |
+        Discriminator for the pack's schedule mode. `interval` uses native
+        osqueryd interval scheduling (seconds). `rrule` uses osquerybeat's
+        RRULE-based recurrence scheduling. Per-query overrides MUST use the
+        same mode as the pack — cross-mode overrides are rejected with 400.
+      enum:
+        - interval
+        - rrule
+      example: rrule
+      type: string
+    ScheduleTypeOrUndefined:
+      $ref: '#/components/schemas/ScheduleType'
+      nullable: true
     Shards:
       additionalProperties:
         type: number
-      description: >-
-        An object with shard configuration for policies included in the pack.
-        For each policy, set the shard configuration to a percentage (1–100) of
-        target hosts.
+      description: An object with shard configuration for policies included in the
+        pack. For each policy, set the shard configuration to a percentage
+        (1–100) of target hosts.
       example:
         policy_id: 50
       type: object
@@ -2865,12 +2960,18 @@ components:
           $ref: '#/components/schemas/PackDescriptionOrUndefined'
         enabled:
           $ref: '#/components/schemas/EnabledOrUndefined'
+        interval:
+          $ref: '#/components/schemas/PackIntervalOrUndefined'
         name:
           $ref: '#/components/schemas/PackName'
         policy_ids:
           $ref: '#/components/schemas/PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/ObjectQueries'
+        rrule_schedule:
+          $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
+        schedule_type:
+          $ref: '#/components/schemas/ScheduleTypeOrUndefined'
         shards:
           $ref: '#/components/schemas/Shards'
     UpdatePacksResponse:
@@ -2918,15 +3019,21 @@ components:
               $ref: '#/components/schemas/PackDescriptionOrUndefined'
             enabled:
               $ref: '#/components/schemas/EnabledOrUndefined'
+            interval:
+              $ref: '#/components/schemas/PackIntervalOrUndefined'
             name:
               $ref: '#/components/schemas/PackName'
             policy_ids:
               $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/ObjectQueries'
+            rrule_schedule:
+              $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
+            schedule_type:
+              $ref: '#/components/schemas/ScheduleTypeOrUndefined'
             shards:
               $ref: '#/components/schemas/Shards'
             updated_at:
@@ -3031,9 +3138,8 @@ components:
       required:
         - data
     Version:
-      description: >-
-        Uses the Osquery versions greater than or equal to the specified version
-        string.
+      description: Uses the Osquery versions greater than or equal to the specified
+        version string.
       example: 1.0.0
       type: string
     VersionOrUndefined:
