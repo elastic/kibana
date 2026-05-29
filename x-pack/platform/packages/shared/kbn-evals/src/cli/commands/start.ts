@@ -597,6 +597,10 @@ export const startCmd: Command<void> = {
       EVALUATION_CONNECTOR_ID: evaluationConnectorId,
     };
 
+    if (requiresEisCcm && !skipServer) {
+      envOverrides.KBN_EVALS_AWAIT_CCM_CONNECTORS = '1';
+    }
+
     if (suite) {
       envOverrides.EVAL_SUITE_ID = suite.id;
     }
