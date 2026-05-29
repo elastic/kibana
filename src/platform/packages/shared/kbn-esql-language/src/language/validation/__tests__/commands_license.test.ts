@@ -8,6 +8,6 @@
  */
 
 import { setup } from './helpers';
-import { runValidationParamsSuite } from './validation_params_suite';
+import { runValidationCommandsLicenseSuite } from './commands_license_suite';
 
-runValidationParamsSuite(setup);
+runValidationCommandsLicenseSuite(setup);

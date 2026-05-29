@@ -17,8 +17,8 @@ import { runFunctionsValidationSuite } from '../__tests__/functions_suite';
 import { runInlineCastValidationSuite } from '../__tests__/inline_cast_suite';
 import { runSourcesValidationSuite } from '../__tests__/sources_suite';
 import { runSubqueriesValidationSuite } from '../__tests__/subqueries_suite';
-import { runValidationCommandsLicenseSuite } from '../__tests__/validation_commands_license_suite';
-import { runValidationParamsSuite } from '../__tests__/validation_params_suite';
+import { runValidationCommandsLicenseSuite } from '../__tests__/commands_license_suite';
+import { runValidationParamsSuite } from '../__tests__/params_suite';
 import { setupEsqlEnv, type EsqlEnv } from './helpers';
 
 const getValidationErrorMessage = (error: ESQLMessage | EditorError) =>
