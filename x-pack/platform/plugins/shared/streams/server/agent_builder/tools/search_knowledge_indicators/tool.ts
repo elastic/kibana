@@ -81,7 +81,7 @@ export function createSearchKnowledgeIndicatorsTool({
     schema: searchKnowledgeIndicatorsSchema,
     tags: ['streams', 'significant_events'],
     availability: {
-      cacheMode: 'global',
+      cacheMode: 'space',
       handler: async ({ uiSettings }): Promise<ToolAvailabilityResult> => {
         try {
           await assertSignificantEventsAccess({

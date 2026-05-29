@@ -81,7 +81,7 @@ export function createQueryKnowledgeIndicatorTool({
       },
     },
     availability: {
-      cacheMode: 'global',
+      cacheMode: 'space',
       handler: async ({ uiSettings }): Promise<ToolAvailabilityResult> => {
         try {
           await assertSignificantEventsAccess({

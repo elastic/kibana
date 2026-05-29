@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   executeAndDecodeSource,
@@ -33,13 +34,21 @@ describe('executeAndDecodeSource', () => {
     ({ esql: { query: queryMock } } as unknown as ElasticsearchClient);
 
   it('returns empty hits when the backing data stream does not exist yet', async () => {
-    const queryMock = jest
-      .fn()
-      .mockRejectedValue(
-        new Error(
-          'verification_exception Root causes: verification_exception: Unknown index [.significant_events-knowledge_indicators]'
-        )
-      );
+    const queryMock = jest.fn().mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'verification_exception',
+            reason:
+              'Root causes: verification_exception: Unknown index [.significant_events-knowledge_indicators]',
+          },
+        },
+        headers: {},
+        warnings: [],
+        meta: {} as any,
+      })
+    );
 
     const query = latestSourceFrom('.significant_events-knowledge_indicators', 'default').keep(
       '_source'
