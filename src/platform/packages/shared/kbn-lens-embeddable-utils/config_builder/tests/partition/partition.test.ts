@@ -11,6 +11,7 @@ import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import type { LensPartitionVisualizationState } from '@kbn/lens-common';
 
 import type { LensApiConfigChartType } from '../../schema';
+import type { MosaicConfig } from '../../schema/charts/mosaic';
 import type { PieConfig } from '../../schema/charts/pie';
 import type { TreemapConfig } from '../../schema/charts/treemap';
 import type { WaffleConfig } from '../../schema/charts/waffle';
@@ -33,6 +34,7 @@ import {
 } from './lens_state_config.mock';
 import { validator } from '../utils/validator';
 import type { LensAttributes } from '../../types';
+import type { PartitionConfig } from '../../schema/charts/partition';
 
 describe('Partition', () => {
   describe('state transform validation', () => {
@@ -319,6 +321,70 @@ describe('Partition', () => {
       const apiOutput = builder.toAPIFormat(waffleLegacyBasicState) as WaffleConfig;
 
       expect(apiOutput.legend?.values).toEqual(['absolute']);
+    });
+  });
+
+  describe('legend position', () => {
+    const baseDataSource = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test-index',
+      time_field: '@timestamp',
+    } as const;
+
+    const basePartitionConfig = {
+      title: 'Partition legend position test',
+      data_source: baseDataSource,
+      group_by: [
+        {
+          operation: 'terms',
+          fields: ['tags.keyword'],
+          limit: 3,
+        },
+      ],
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies Omit<PartitionConfig, 'type'>;
+
+    const basePieConfig = {
+      ...basePartitionConfig,
+      type: 'pie',
+      metrics: [{ operation: 'count', empty_as_null: false }],
+    } satisfies PieConfig;
+
+    const baseTreemapConfig = {
+      ...basePieConfig,
+      type: 'treemap',
+      metrics: [{ operation: 'count', empty_as_null: false }],
+    } satisfies TreemapConfig;
+
+    const baseWaffleConfig = {
+      ...basePieConfig,
+      type: 'waffle',
+      metrics: [{ operation: 'count', empty_as_null: false }],
+    } satisfies WaffleConfig;
+
+    const baseMosaicConfig = {
+      ...basePieConfig,
+      type: 'mosaic',
+      metric: { operation: 'count', empty_as_null: false },
+    } satisfies MosaicConfig;
+
+    it.each<[string, PieConfig | TreemapConfig | WaffleConfig | MosaicConfig]>([
+      ['pie', basePieConfig],
+      ['treemap', baseTreemapConfig],
+      ['waffle', baseWaffleConfig],
+      ['mosaic', baseMosaicConfig],
+    ])('should roundtrip for %s chart', (_name, config) => {
+      const partitionConfig = {
+        ...config,
+        legend: { position: 'bottom' },
+      } satisfies PartitionConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(partitionConfig);
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
+
+      expect(apiOutput.legend?.position).toBe('bottom');
     });
   });
 });
