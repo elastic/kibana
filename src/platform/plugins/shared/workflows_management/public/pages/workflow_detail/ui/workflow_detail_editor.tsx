@@ -19,6 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -83,6 +84,35 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
   const styles = useMemoCss(componentStyles);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const openActionsRef = useRef<(() => void) | null>(null);
+  // Saved graph viewport — survives the YAML↔graph remount because this
+  // component (which owns the workflow page) stays mounted. Cleared
+  // implicitly when the user navigates to a different workflow because the
+  // whole component unmounts then.
+  const graphViewportRef = useRef<Viewport | undefined>(undefined);
+  const handleGraphViewportChange = useCallback((viewport: Viewport) => {
+    graphViewportRef.current = viewport;
+  }, []);
+
+  // "Hide controls menu" toggle (settings popover). When OFF the bottom bar
+  // stays expanded indefinitely; when ON (default) it auto-collapses to the
+  // small pill after 5s. Persisted in localStorage so the choice sticks
+  // across reloads.
+  const HIDE_CONTROLS_MENU_KEY = 'workflowsUi.bottomBar.hideControlsMenu';
+  const [hideControlsMenu, setHideControlsMenu] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    const stored = window.localStorage.getItem(HIDE_CONTROLS_MENU_KEY);
+    return stored === null ? true : stored === 'true';
+  });
+  const handleHideControlsMenuChange = useCallback((next: boolean) => {
+    setHideControlsMenu(next);
+    try {
+      window.localStorage.setItem(HIDE_CONTROLS_MENU_KEY, String(next));
+    } catch {
+      // localStorage may be unavailable (private mode, quota); silently skip —
+      // the in-memory state still drives the bar for this session.
+    }
+  }, []);
+
   const dispatch = useDispatch();
 
   const workflowYaml = useSelector(selectYamlString) ?? '';
@@ -259,7 +289,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         isDisabled={runDisabled}
         data-test-subj="workflowBottomBarRunButton"
       >
-        {i18n.translate('workflows.workflowDetailEditor.newRun', { defaultMessage: 'New run' })}
+        {i18n.translate('workflows.workflowDetailEditor.runWorkflow', { defaultMessage: 'Run workflow' })}
       </EuiButton>
     </EuiToolTip>
   );
@@ -273,8 +303,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
         size="s"
         onClick={handleRunClickWithUnsavedCheck}
         disabled={runDisabled}
-        aria-label={i18n.translate('workflows.workflowDetailEditor.newRun', {
-          defaultMessage: 'New run',
+        aria-label={i18n.translate('workflows.workflowDetailEditor.runWorkflow', {
+          defaultMessage: 'Run workflow',
         })}
         data-test-subj="workflowBottomBarRunButtonCompact"
       />
@@ -289,8 +319,22 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     defaultMessage: 'Actions menu',
   });
 
-  const toolsSlot = (
+  // Always built; the bar cross-fades visibility based on editorView so the
+  // mount/unmount jump doesn't interrupt the opacity transition.
+  const yamlActionsSlot = (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={`${actionsMenuLabel} (${commandKey}+K)`}>
+          <EuiButtonIcon
+            iconType="plus"
+            color="text"
+            size="s"
+            onClick={() => openActionsRef.current?.()}
+            aria-label={actionsMenuLabel}
+            data-test-subj="workflowBottomBarActionsMenu"
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={documentationLabel} disableScreenReaderOutput>
           <EuiButtonIcon
@@ -304,18 +348,11 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
           />
         </EuiToolTip>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={`${actionsMenuLabel} (${commandKey}+K)`}>
-          <EuiButtonIcon
-            iconType="search"
-            color="text"
-            size="s"
-            onClick={() => openActionsRef.current?.()}
-            aria-label={actionsMenuLabel}
-            data-test-subj="workflowBottomBarActionsMenu"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const toolsSlot = (
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
       <EuiFlexItem grow={false}>
         <KeyboardShortcutsPopover />
       </EuiFlexItem>
@@ -324,6 +361,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
           editorRef={editorRef}
           graphDirection={graphDirection}
           onGraphDirectionChange={setGraphDirection}
+          hideControlsMenu={hideControlsMenu}
+          onHideControlsMenuChange={handleHideControlsMenuChange}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -348,8 +387,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
           {/*
            * The YAML editor is always mounted so its validation pipeline keeps
            * running. When in graph view, the editor swaps Monaco out for the
-           * visual editor in the same flex column so the validation accordion
-           * stays pinned at the bottom for both views.
+           * visual editor in the same flex column. The validation accordion
+           * is hidden in graph view.
            */}
           <React.Suspense fallback={<EuiLoadingSpinner />}>
             <WorkflowYAMLEditor
@@ -362,7 +401,12 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
               bodyOverride={
                 isVisualEditorEnabled && renderGraph ? (
                   <React.Suspense fallback={<EuiLoadingSpinner />}>
-                    <WorkflowVisualEditor onStepRun={handleStepRun} direction={graphDirection} />
+                    <WorkflowVisualEditor
+                      onStepRun={handleStepRun}
+                      direction={graphDirection}
+                      defaultViewport={graphViewportRef.current}
+                      onViewportChange={handleGraphViewportChange}
+                    />
                   </React.Suspense>
                 ) : null
               }
@@ -371,9 +415,11 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
           <WorkflowDetailBottomBar
             editorView={editorView}
             onEditorViewChange={handleEditorViewChange}
+            yamlActionsSlot={yamlActionsSlot}
             toolsSlot={toolsSlot}
             testWorkflowButton={testWorkflowButton}
             testWorkflowButtonCompact={testWorkflowButtonCompact}
+            disableAutoCollapse={!hideControlsMenu}
           />
         </EuiFlexItem>
         {isExecutionGraphEnabled && (

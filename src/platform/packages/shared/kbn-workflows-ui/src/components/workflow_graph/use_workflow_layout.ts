@@ -132,6 +132,15 @@ export function useWorkflowLayout({
     }, {});
   }, [stepExecutions]);
 
+  // The backend doesn't emit a `stepExecution` for the trigger itself, but
+  // once any step has executed we know the trigger has fired successfully —
+  // synthesize a COMPLETED status so the trigger row picks up the same
+  // success styling as the rest of the graph.
+  const syntheticTriggerExecution = useMemo<WorkflowStepExecutionDto | null>(() => {
+    if (!stepExecutions || stepExecutions.length === 0) return null;
+    return { status: ExecutionStatus.COMPLETED } as WorkflowStepExecutionDto;
+  }, [stepExecutions]);
+
   const derivedNodes = useMemo<Node[]>(() => {
     const layoutNodeById = new Map(layoutSnapshot.nodes.map((n) => [n.id, n]));
     const allNodes = [
@@ -145,7 +154,11 @@ export function useWorkflowLayout({
       }
       const data = n.data as Record<string, unknown>;
       const label = typeof data.label === 'string' ? data.label : undefined;
-      const exec = stepExecutionMap?.[label ?? n.id] ?? stepExecutionMap?.[n.id];
+      const explicitExec = stepExecutionMap?.[label ?? n.id] ?? stepExecutionMap?.[n.id];
+      // Trigger rows reuse the same success/failed visuals as regular steps
+      // once the workflow has been run — see `syntheticTriggerExecution`.
+      const exec =
+        explicitExec ?? (n.type === 'trigger' ? syntheticTriggerExecution ?? undefined : undefined);
       const targetPosition = HANDLE_SIDE_TO_POSITION[laid.targetPosition ?? 'top'];
       const sourcePosition = HANDLE_SIDE_TO_POSITION[laid.sourcePosition ?? 'bottom'];
       return {
@@ -165,7 +178,13 @@ export function useWorkflowLayout({
         },
       };
     });
-  }, [layoutSnapshot.nodes, stepExecutionMap, transformed.foreachGroups, transformed.nodes]);
+  }, [
+    layoutSnapshot.nodes,
+    stepExecutionMap,
+    syntheticTriggerExecution,
+    transformed.foreachGroups,
+    transformed.nodes,
+  ]);
 
   const derivedEdges = useMemo<Edge[]>(() => {
     const layoutEdgeById = new Map(layoutSnapshot.edges.map((e) => [e.id, e]));

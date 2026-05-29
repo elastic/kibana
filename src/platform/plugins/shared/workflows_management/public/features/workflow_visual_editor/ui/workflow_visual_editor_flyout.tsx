@@ -149,7 +149,10 @@ export function WorkflowVisualEditorFlyout({
               css={{
                 width: 40,
                 height: 40,
-                border: `1px solid ${euiTheme.colors.borderBaseFloating}`,
+                // Same light-gray inner-box stroke the graph step uses
+                // (Figma FIGMA_STEP_INNER_BOX_BORDER) so the flyout header
+                // visually echoes the row that opened it.
+                border: `1px solid #e4e7f1`,
                 borderRadius: 8,
                 background: euiTheme.colors.backgroundBasePlain,
                 display: 'flex',

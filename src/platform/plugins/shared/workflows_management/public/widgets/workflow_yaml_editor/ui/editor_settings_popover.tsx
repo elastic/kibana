@@ -7,34 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButtonGroup,
   EuiButtonIcon,
-  EuiForm,
-  EuiFormRow,
   EuiPopover,
-  EuiPopoverTitle,
   EuiSwitch,
-  EuiText,
   EuiToolTip,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React, { useCallback, useState } from 'react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import type { LayoutDirection } from '@kbn/workflows';
+import { useWorkflowBottomBarState } from '@kbn/workflows-ui';
 
 interface EditorSettingsPopoverProps {
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
   graphDirection?: LayoutDirection;
   onGraphDirectionChange?: (next: LayoutDirection) => void;
+  /**
+   * "Hide controls menu" toggle. When true the bottom bar auto-collapses;
+   * when false it stays expanded.
+   */
+  hideControlsMenu?: boolean;
+  onHideControlsMenuChange?: (next: boolean) => void;
 }
 
-const directionOptions = [
+// Figma node 11146:20897.
+const TITLE_COLOR = '#111c2c';
+const DIVIDER_COLOR = '#e3e8f2';
+const SECTION_TITLE_COLOR = '#000000';
+const SWITCH_LABEL_COLOR = '#1d2a3e';
+
+const directionOptions: EuiButtonGroupOptionProps[] = [
   {
     id: 'TB',
     iconType: 'arrowDown',
@@ -49,22 +55,47 @@ const directionOptions = [
       defaultMessage: 'Horizontal',
     }),
   },
-] satisfies EuiButtonGroupOptionProps[];
+];
+
+const PANEL_CLASS = 'workflowEditorSettingsPopoverPanel';
+const BUTTON_TEST_SUBJ = 'workflowYamlEditorSettingsButton';
 
 export function EditorSettingsPopover({
   editorRef,
   graphDirection,
   onGraphDirectionChange,
+  hideControlsMenu = true,
+  onHideControlsMenuChange,
 }: EditorSettingsPopoverProps) {
-  const { euiTheme } = useEuiTheme();
-  const styles = useMemoCss(componentStyles);
   const [isOpen, setIsOpen] = useState(false);
   const [showIndentGuides, setShowIndentGuides] = useState(true);
   const [showWhitespace, setShowWhitespace] = useState(false);
 
+  // Close when the bottom bar auto-collapses to its small pill so the
+  // floating panel doesn't sit orphaned over the canvas.
+  const { isExpanded: isBottomBarExpanded } = useWorkflowBottomBarState();
+  useEffect(() => {
+    if (!isBottomBarExpanded) setIsOpen(false);
+  }, [isBottomBarExpanded]);
+
+  // EuiPopover's built-in outside-click detector listens on the bubble phase,
+  // but React Flow / Monaco can swallow the event before it reaches the
+  // document. Subscribing on the capture phase guarantees we see the
+  // mousedown first and can close the panel ourselves.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      if (target.closest(`[data-test-subj="${BUTTON_TEST_SUBJ}"]`)) return;
+      if (target.closest(`.${PANEL_CLASS}`)) return;
+      setIsOpen(false);
+    };
+    document.addEventListener('mousedown', handler, true);
+    return () => document.removeEventListener('mousedown', handler, true);
+  }, [isOpen]);
+
   const popoverTitleId = useGeneratedHtmlId({ prefix: 'wf-editor-settings-title' });
-  const editorSectionId = useGeneratedHtmlId({ prefix: 'wf-editor-settings-editor-section' });
-  const directionSectionId = useGeneratedHtmlId({ prefix: 'wf-editor-settings-direction-section' });
 
   const handleIndentGuidesChange = useCallback(() => {
     setShowIndentGuides(!showIndentGuides);
@@ -81,29 +112,28 @@ export function EditorSettingsPopover({
   }, [editorRef, showWhitespace]);
 
   const label = i18n.translate('workflows.yamlEditor.editorSettings.label', {
-    defaultMessage: 'Editor settings',
+    defaultMessage: 'Settings',
   });
-
   const directionLabel = i18n.translate('workflows.yamlEditor.editorSettings.directionLabel', {
     defaultMessage: 'Direction',
   });
 
   return (
     <EuiPopover
-      css={{ marginLeft: euiTheme.size.xs }}
       data-test-subj="workflowYamlEditorSettingsPopover"
       aria-labelledby={popoverTitleId}
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
-      anchorPosition="upRight"
+      anchorPosition="upCenter"
       panelPaddingSize="none"
-      panelStyle={{ minWidth: 280 }}
+      panelClassName={PANEL_CLASS}
+      panelStyle={{ width: 269 }}
       button={
         <EuiToolTip content={label} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType="controlsHorizontal"
             size="s"
-            data-test-subj="workflowYamlEditorSettingsButton"
+            data-test-subj={BUTTON_TEST_SUBJ}
             onClick={() => setIsOpen(!isOpen)}
             aria-label={label}
             color="text"
@@ -111,107 +141,120 @@ export function EditorSettingsPopover({
         </EuiToolTip>
       }
     >
-      <EuiPopoverTitle id={popoverTitleId} paddingSize="s">
+      {/* Header */}
+      <div
+        id={popoverTitleId}
+        css={{
+          padding: 12,
+          fontSize: 14,
+          fontWeight: 600,
+          lineHeight: '20px',
+          color: TITLE_COLOR,
+          borderBottom: `1px solid ${DIVIDER_COLOR}`,
+        }}
+      >
         {label}
-      </EuiPopoverTitle>
-      <EuiForm component="div" css={styles.form}>
-        <section aria-labelledby={editorSectionId} css={styles.section}>
-          <div id={editorSectionId} css={styles.sectionHeader}>
-            {i18n.translate('workflows.yamlEditor.editorSettings.editorSectionTitle', {
-              defaultMessage: 'Editor',
+      </div>
+
+      {/* Editors section */}
+      <Section
+        title={i18n.translate('workflows.yamlEditor.editorSettings.editorSectionTitle', {
+          defaultMessage: 'Editors',
+        })}
+      >
+        <EuiSwitch
+          compressed
+          label={i18n.translate('workflows.yamlEditor.editorSettings.showIndentGuides', {
+            defaultMessage: 'Show indent guides',
+          })}
+          labelProps={{ style: { color: SWITCH_LABEL_COLOR, fontSize: 14, fontWeight: 400 } }}
+          checked={showIndentGuides}
+          onChange={handleIndentGuidesChange}
+        />
+        <EuiSwitch
+          compressed
+          label={i18n.translate('workflows.yamlEditor.editorSettings.showWhitespace', {
+            defaultMessage: 'Show whitespace characters',
+          })}
+          labelProps={{ style: { color: SWITCH_LABEL_COLOR, fontSize: 14, fontWeight: 400 } }}
+          checked={showWhitespace}
+          onChange={handleWhitespaceChange}
+        />
+      </Section>
+
+      {/* Graph view section (only when the canvas exposes a direction) */}
+      {graphDirection && onGraphDirectionChange && (
+        <Section
+          title={i18n.translate('workflows.yamlEditor.editorSettings.directionSectionTitle', {
+            defaultMessage: 'Graph view',
+          })}
+          topBorder
+        >
+          <EuiButtonGroup
+            legend={directionLabel}
+            options={directionOptions}
+            idSelected={graphDirection}
+            onChange={(id) => onGraphDirectionChange(id as LayoutDirection)}
+            buttonSize="compressed"
+            isFullWidth
+          />
+        </Section>
+      )}
+
+      {/* Controls menu section — toggles the bottom bar's auto-collapse */}
+      {onHideControlsMenuChange && (
+        <Section
+          title={i18n.translate('workflows.yamlEditor.editorSettings.controlsSectionTitle', {
+            defaultMessage: 'Controls menu',
+          })}
+          topBorder
+        >
+          <EuiSwitch
+            compressed
+            label={i18n.translate('workflows.yamlEditor.editorSettings.hideControlsMenu', {
+              defaultMessage: 'Hide controls menu',
             })}
-          </div>
-          <EuiFormRow css={styles.checkboxRow}>
-            <EuiSwitch
-              label={
-                <EuiText size="xs">
-                  {i18n.translate('workflows.yamlEditor.editorSettings.showIndentGuides', {
-                    defaultMessage: 'Show indent guides',
-                  })}
-                </EuiText>
-              }
-              labelProps={{
-                style: {
-                  fontWeight: euiTheme.font.weight.medium,
-                },
-              }}
-              checked={showIndentGuides}
-              onChange={handleIndentGuidesChange}
-              compressed
-            />
-          </EuiFormRow>
-          <EuiFormRow css={styles.checkboxRow}>
-            <EuiSwitch
-              label={
-                <EuiText size="xs">
-                  {i18n.translate('workflows.yamlEditor.editorSettings.showWhitespace', {
-                    defaultMessage: 'Show whitespace characters',
-                  })}
-                </EuiText>
-              }
-              labelProps={{
-                style: {
-                  fontWeight: euiTheme.font.weight.medium,
-                },
-              }}
-              checked={showWhitespace}
-              onChange={handleWhitespaceChange}
-              compressed
-            />
-          </EuiFormRow>
-        </section>
-        {graphDirection && onGraphDirectionChange && (
-          <section aria-labelledby={directionSectionId} css={styles.section}>
-            <div id={directionSectionId} css={styles.sectionHeader}>
-              {i18n.translate('workflows.yamlEditor.editorSettings.directionSectionTitle', {
-                defaultMessage: 'Visualization',
-              })}
-            </div>
-            <EuiFormRow label={directionLabel} display="columnCompressed" css={styles.directionRow}>
-              <EuiButtonGroup
-                legend={directionLabel}
-                options={directionOptions}
-                idSelected={graphDirection}
-                onChange={(id) => onGraphDirectionChange(id as LayoutDirection)}
-                buttonSize="compressed"
-                isIconOnly
-              />
-            </EuiFormRow>
-          </section>
-        )}
-      </EuiForm>
+            labelProps={{ style: { color: SWITCH_LABEL_COLOR, fontSize: 14, fontWeight: 400 } }}
+            checked={hideControlsMenu}
+            onChange={(e) => onHideControlsMenuChange(e.target.checked)}
+            data-test-subj="workflowHideControlsMenuSwitch"
+          />
+        </Section>
+      )}
     </EuiPopover>
   );
 }
 
-const componentStyles = {
-  form: css({
-    // EuiForm adds a large gap between fieldsets/sections; keep the compact popover rhythm.
-    gap: 0,
-  }),
-  section: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: `${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.m}`,
-    }),
-  sectionHeader: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      fontSize: '11px',
-      fontWeight: euiTheme.font.weight.semiBold,
-      letterSpacing: '0.04em',
-      textTransform: 'uppercase',
-      color: euiTheme.colors.textSubdued,
-      marginBottom: euiTheme.size.s,
-    }),
-  checkboxRow: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      marginBlock: 0,
-      paddingBlock: 0,
-      '& + &': {
-        marginTop: euiTheme.size.s,
-      },
-    }),
-  directionRow: css({
-    marginBlock: 0,
-    paddingBlock: 0,
-  }),
-};
+function Section({
+  title,
+  topBorder,
+  children,
+}: {
+  title: string;
+  topBorder?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      css={{
+        padding: 16,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        borderTop: topBorder ? `1px solid ${DIVIDER_COLOR}` : undefined,
+      }}
+    >
+      <div
+        css={{
+          fontSize: 12,
+          fontWeight: 600,
+          lineHeight: '16px',
+          color: SECTION_TITLE_COLOR,
+        }}
+      >
+        {title}
+      </div>
+      {children}
+    </div>
+  );
+}

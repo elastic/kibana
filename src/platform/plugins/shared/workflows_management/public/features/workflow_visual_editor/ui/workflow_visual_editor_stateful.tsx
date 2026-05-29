@@ -8,7 +8,7 @@
  */
 
 import { EuiEmptyPrompt, EuiFocusTrap, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import type { ColorMode } from '@xyflow/react';
+import type { ColorMode, Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { stringify as stringifyYaml } from 'yaml';
@@ -48,6 +48,13 @@ interface WorkflowVisualEditorStatefulProps {
   onStepRun?: (params: { stepId: string; actionType: string }) => void;
   /** Dagre rank direction for the graph layout. Defaults to `'TB'`. */
   direction?: LayoutDirection;
+  /**
+   * Viewport to restore when the canvas mounts. The parent owns this value
+   * so it survives the unmount/remount that happens on YAML↔graph toggle.
+   */
+  defaultViewport?: Viewport;
+  /** Fired when the user pans or zooms; persist to restore on next mount. */
+  onViewportChange?: (viewport: Viewport) => void;
 }
 
 const TRIGGER_LABEL: Record<string, string> = {
@@ -68,6 +75,8 @@ const TRIGGER_LABEL: Record<string, string> = {
 export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStatefulProps> = ({
   onStepRun,
   direction = 'TB',
+  defaultViewport,
+  onViewportChange,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
 
@@ -234,6 +243,8 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         renderStepIcon={renderStepIcon}
         onStepRun={handleStepRun}
         canRunSteps={Boolean(canExecuteWorkflow) && isYamlValid}
+        defaultViewport={defaultViewport}
+        onViewportChange={onViewportChange}
       />
       {flyoutTarget && (
         <EuiFocusTrap returnFocus>

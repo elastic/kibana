@@ -28,6 +28,12 @@ const CORNER_RADIUS = 4;
 const TRUNK_LENGTH_FROM_SOURCE = 9;
 const TRUNK_LENGTH_TO_TARGET = 14;
 
+// Vertical offset from the source for branch labels (TB layout). Anchoring
+// labels at a fixed Y instead of the source/target midpoint keeps sibling
+// `true`/`false` labels on the same row even when the two branches lead to
+// targets at very different ranks.
+const TB_LABEL_Y_OFFSET = 30;
+
 const EPS = 0.5;
 
 /**
@@ -236,7 +242,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
         );
         edgePath = builtStraight.path;
         labelX = straightX;
-        labelY = (sourceY + targetY) / 2;
+        labelY = sourceY + TB_LABEL_Y_OFFSET;
       } else {
         // Find the FIRST horizontal segment in the dagre middle. Replace any
         // points before it with a single endpoint at trunk-Y so the bend
@@ -283,7 +289,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
         const built = buildRoundedOrthogonalPath(adjusted, CORNER_RADIUS);
         edgePath = built.path;
         labelX = targetX;
-        labelY = (sourceY + targetY) / 2;
+        labelY = sourceY + TB_LABEL_Y_OFFSET;
       }
     }
   } else {

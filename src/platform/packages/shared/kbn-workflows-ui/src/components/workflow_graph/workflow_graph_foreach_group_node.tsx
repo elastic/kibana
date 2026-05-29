@@ -7,65 +7,124 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import type { Node, NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
-import React, { memo } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { memo, useState } from 'react';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 
 interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly label: string;
   readonly stepType: 'foreach';
+  /** Optional execution status threaded through from the canvas. */
+  readonly stepExecution?: WorkflowStepExecutionDto;
 }
 
+// Figma "foreach" container (node 10791:11140).
+const FIGMA_FOREACH_BORDER = '#bfdbff';
+const FIGMA_FOREACH_HEADER_BG = '#f1f6ff';
+const FIGMA_FOREACH_ICON_COLOR = '#61a2ff';
+const FIGMA_FOREACH_LABEL_COLOR = '#111c2c';
+
+// Figma "foreach" executed variant (node 11130:5900).
+const FIGMA_FOREACH_EXECUTED_BORDER = '#a2e8e6';
+const FIGMA_FOREACH_EXECUTED_HEADER_BG = '#e7f9f9';
+const FIGMA_FOREACH_EXECUTED_ICON_COLOR = '#16c5c0';
+
+// Figma "foreach" failed variant — reusing the danger palette already used by
+// status icons on regular step rows so the two visuals read as one family.
+const FIGMA_FOREACH_FAILED_BORDER = '#ffb3b3';
+const FIGMA_FOREACH_FAILED_HEADER_BG = '#ffe5e5';
+const FIGMA_FOREACH_FAILED_ICON_COLOR = '#bd271e';
+
+// Figma Shadow/X-small composite — matches the hover variant (node 11130:5821).
+const FOREACH_HOVER_SHADOW =
+  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)';
+
 function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNodeData>>) {
-  const { euiTheme } = useEuiTheme();
+  const { label, stepExecution } = node.data;
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
-  // Match the step row's blue (accentSecondary) palette so the foreach
-  // container reads as a natural wrapper for the steps it contains.
-  const borderColor = euiTheme.colors.borderBaseAccentSecondary;
-  const headerBg = euiTheme.colors.backgroundLightAccentSecondary;
-  const labelColor = euiTheme.colors.accentSecondary;
+  const [isHovered, setIsHovered] = useState(false);
+
+  const execStatus = stepExecution?.status;
+  const isSuccess = execStatus === ExecutionStatus.COMPLETED;
+  const isFailed =
+    execStatus === ExecutionStatus.FAILED ||
+    execStatus === ExecutionStatus.TIMED_OUT ||
+    execStatus === ExecutionStatus.CANCELLED;
+
+  const borderColor = isSuccess
+    ? FIGMA_FOREACH_EXECUTED_BORDER
+    : isFailed
+    ? FIGMA_FOREACH_FAILED_BORDER
+    : FIGMA_FOREACH_BORDER;
+  const headerBg = isSuccess
+    ? FIGMA_FOREACH_EXECUTED_HEADER_BG
+    : isFailed
+    ? FIGMA_FOREACH_FAILED_HEADER_BG
+    : FIGMA_FOREACH_HEADER_BG;
+  const iconColor = isSuccess
+    ? FIGMA_FOREACH_EXECUTED_ICON_COLOR
+    : isFailed
+    ? FIGMA_FOREACH_FAILED_ICON_COLOR
+    : FIGMA_FOREACH_ICON_COLOR;
+
   return (
     <>
       <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />
       <div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         css={{
           width: '100%',
           height: '100%',
-          // Lightly tinted so the foreach reads as a container without dominating
-          // the steps inside.
-          background: euiTheme.colors.backgroundLightAccentSecondary,
+          // ~10% white so the canvas's dot pattern shows through and the
+          // container body reads as a soft outline rather than a solid panel.
+          background: 'rgba(255, 255, 255, 0.1)',
           border: `1px solid ${borderColor}`,
           borderRadius: 8,
           position: 'relative',
-          overflow: 'hidden',
+          transition: 'border-color 120ms ease',
         }}
       >
-        {/* Full-width header — same blue palette as step rows so the container
-            visually owns the steps below it. Sized to match GROUP_PADDING_TOP
-            (apply_graph_layout.ts) so inner nodes sit just below the header. */}
+        {/* Full-width header with refresh icon + label. Sized to match
+            GROUP_PADDING_TOP in apply_graph_layout.ts so inner nodes sit
+            just below the header. */}
         <div
           css={{
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
-            padding: '8px 12px',
+            gap: 16,
+            padding: '8px 16px',
             background: headerBg,
+            borderTopLeftRadius: 8,
+            borderTopRightRadius: 8,
             borderBottom: `1px solid ${borderColor}`,
-            fontFamily: euiTheme.font.family,
+            fontFamily:
+              '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             fontSize: 12,
             fontWeight: 500,
-            color: labelColor,
-            lineHeight: '20px',
+            color: FIGMA_FOREACH_LABEL_COLOR,
+            lineHeight: '24px',
+            // Hover lifts the header chip; Figma applies the shadow to the
+            // header strip only, not the entire container body.
+            boxShadow: isHovered ? FOREACH_HOVER_SHADOW : 'none',
+            transition: 'box-shadow 120ms ease, background 120ms ease',
           }}
         >
-          <EuiIcon type="refresh" size="s" color={labelColor} aria-hidden />
-          <span>
-            {`${node.data.label} · ${i18n.translate('workflowsUi.graph.foreachLabel', {
-              defaultMessage: 'for each item',
-            })}`}
+          <EuiIcon type="refresh" size="m" color={iconColor} aria-hidden />
+          <span
+            css={{
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              minWidth: 0,
+            }}
+            title={label}
+          >
+            {label}
           </span>
         </div>
       </div>

@@ -89,6 +89,13 @@ const FIGMA_SUCCESS_COLOR = '#16c5c0';
 const FIGMA_TRIGGER_ICON_AREA_BG = '#fff3f9';
 const FIGMA_TRIGGER_INNER_BOX_BORDER = '#ffc7db';
 const FIGMA_TRIGGER_ICON_COLOR = '#ee72a6';
+// Selected, unrun. Figma uses a saturated outer border but keeps the icon
+// area and inner box at their default colours — selection is signalled by
+// the border alone (nodes 11130:5814 "Selected" and trigger selected variant).
+// Toned down from Figma's `#61a2ff` so the selected border doesn't dominate
+// the rest of the row — still recognisably blue, just less aggressive.
+const FIGMA_STEP_SELECTED_BORDER = '#a3c4ff';
+const FIGMA_TRIGGER_SELECTED_BORDER = '#ffddea';
 
 
 function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
@@ -104,16 +111,14 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
         iconAreaBg: FIGMA_TRIGGER_ICON_AREA_BG,
         innerBoxBorder: FIGMA_TRIGGER_INNER_BOX_BORDER,
         iconColor: FIGMA_TRIGGER_ICON_COLOR,
-        activeBorder: euiTheme.colors.accent,
-        activeIconAreaBg: euiTheme.colors.borderBaseAccent,
+        selectedBorder: FIGMA_TRIGGER_SELECTED_BORDER,
       }
     : {
         outerBorder: FIGMA_STEP_OUTER_BORDER,
         iconAreaBg: FIGMA_STEP_ICON_AREA_BG,
         innerBoxBorder: FIGMA_STEP_INNER_BOX_BORDER,
         iconColor: FIGMA_STEP_ICON_COLOR,
-        activeBorder: euiTheme.colors.accentSecondary,
-        activeIconAreaBg: euiTheme.colors.borderBaseAccentSecondary,
+        selectedBorder: FIGMA_STEP_SELECTED_BORDER,
       };
 
   const statusSuccessColor = FIGMA_SUCCESS_COLOR;
@@ -140,25 +145,32 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
     execStatus === ExecutionStatus.FAILED ||
     execStatus === ExecutionStatus.TIMED_OUT ||
     execStatus === ExecutionStatus.CANCELLED;
+  // Outer border (Figma 11142:2638): a successfully-run step keeps the
+  // DEFAULT gray outer border — the status reads from the icon area /
+  // inner box / icon. Only when the row is selected does the border take
+  // on the status colour. Running is its own state and always shows the
+  // Working border (`#bfdbff`) since that's how the in-progress signal is
+  // expressed in the design system.
   const borderColor = isActive
-    ? palette.activeBorder
+    ? isFailed
+      ? statusFailColor
+      : isSuccess
+      ? statusSuccessColor
+      : isRunning
+      ? FIGMA_RUNNING_BORDER
+      : palette.selectedBorder
     : isRunning
     ? FIGMA_RUNNING_BORDER
-    : isSuccess
-    ? statusSuccessColor
-    : isFailed
-    ? statusFailColor
     : palette.outerBorder;
-  const iconAreaBg = isActive
-    ? palette.activeIconAreaBg
-    : isSuccess
+  const iconAreaBg = isSuccess
     ? statusSuccessBg
     : isFailed
     ? statusFailBg
     : palette.iconAreaBg;
-  const innerBoxBorder = isActive
-    ? 'transparent'
-    : isSuccess
+  // Inner box border keeps its default neutral colour when only selection
+  // is active (Figma "Selected" leaves the inner box border at #e4e7f1);
+  // run states still recolour it as before.
+  const innerBoxBorder = isSuccess
     ? statusSuccessColor
     : isFailed
     ? statusFailColor
@@ -195,14 +207,27 @@ const FIGMA_RETRY_BADGE_COLOR = '#825803';
           }}
         >
           {renderStepIcon ? (
-            <div css={{ color: palette.iconColor, display: 'flex' }}>
+            <div
+              css={[
+                { color: palette.iconColor, display: 'flex' },
+                isTriggerNode && {
+                  '& svg, & svg *': { fill: FIGMA_TRIGGER_ICON_COLOR },
+                },
+              ]}
+            >
               {renderStepIcon({ stepType, isTrigger: isTrigger ?? false, size: 'm' })}
             </div>
           ) : (
             <EuiIcon
               type={iconType}
               size="m"
-              color={LOGO_ICONS.has(iconType) ? undefined : palette.iconColor}
+              color={
+                isTriggerNode
+                  ? FIGMA_TRIGGER_ICON_COLOR
+                  : LOGO_ICONS.has(iconType)
+                  ? undefined
+                  : palette.iconColor
+              }
               aria-hidden={true}
             />
           )}
@@ -243,7 +268,7 @@ const FIGMA_RETRY_BADGE_COLOR = '#825803';
             // 16px gutter on the right whenever any meta is present (retry badge,
             // status icon, or hover action) so the retry badge sits at the
             // design's 16px inset from the step's right edge.
-            paddingRight: showActions || hasStatusIcon || maxAttempts != null ? 16 : 6,
+            paddingRight: 16,
             transition: 'border-color 120ms ease, background 120ms ease, box-shadow 120ms ease',
           },
           css`
@@ -280,39 +305,46 @@ const FIGMA_RETRY_BADGE_COLOR = '#825803';
               transition: 'border-color 120ms ease',
             }}
           >
-            {renderStepIcon ? (
-              <div
-                css={{
-                  color: isActive
-                    ? palette.iconColor
-                    : isSuccess
-                    ? statusSuccessColor
-                    : isFailed
-                    ? statusFailColor
-                    : palette.iconColor,
-                  display: 'flex',
-                }}
-              >
-                {renderStepIcon({ stepType, isTrigger: isTrigger ?? false, size: 'm' })}
-              </div>
-            ) : (
-              <EuiIcon
-                type={iconType}
-                size="m"
-                color={
-                  LOGO_ICONS.has(iconType)
-                    ? undefined
-                    : isActive
-                    ? palette.iconColor
-                    : isSuccess
-                    ? statusSuccessColor
-                    : isFailed
-                    ? statusFailColor
-                    : palette.iconColor
-                }
-                aria-hidden={true}
-              />
-            )}
+            {(() => {
+              // Trigger icon stays in its "Datavis Default Color 4" pink ONLY
+              // while the workflow hasn't run yet. Once execution kicks off,
+              // the trigger picks up the same success/failed colours as the
+              // regular step rows — so a successful run paints the trigger
+              // turquoise alongside the rest of the graph.
+              const iconColor = isSuccess
+                ? statusSuccessColor
+                : isFailed
+                ? statusFailColor
+                : isTriggerNode
+                ? FIGMA_TRIGGER_ICON_COLOR
+                : palette.iconColor;
+              // Triggers in their idle pink state need a hard `fill` override
+              // because EuiIcon paints `fill` directly onto the SVG paths,
+              // beating CSS `color` inheritance.
+              const forceTriggerPinkFill = isTriggerNode && !isSuccess && !isFailed;
+              if (renderStepIcon) {
+                return (
+                  <div
+                    css={[
+                      { color: iconColor, display: 'flex' },
+                      forceTriggerPinkFill && {
+                        '& svg, & svg *': { fill: FIGMA_TRIGGER_ICON_COLOR },
+                      },
+                    ]}
+                  >
+                    {renderStepIcon({ stepType, isTrigger: isTrigger ?? false, size: 'm' })}
+                  </div>
+                );
+              }
+              return (
+                <EuiIcon
+                  type={iconType}
+                  size="m"
+                  color={LOGO_ICONS.has(iconType) ? undefined : iconColor}
+                  aria-hidden={true}
+                />
+              );
+            })()}
           </div>
         </div>
 
@@ -321,6 +353,7 @@ const FIGMA_RETRY_BADGE_COLOR = '#825803';
             flex: '1 1 auto',
             fontFamily: euiTheme.font.family,
             fontSize: 12,
+            fontStyle: 'normal',
             fontWeight: 500,
             lineHeight: '24px',
             color: FIGMA_STEP_LABEL_COLOR,

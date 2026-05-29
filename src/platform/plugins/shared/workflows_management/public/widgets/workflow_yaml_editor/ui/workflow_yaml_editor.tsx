@@ -160,9 +160,8 @@ export interface WorkflowYAMLEditorProps {
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
   /**
    * When true, the Monaco editor body and assist/agent toolbar are hidden via
-   * CSS but kept mounted so YAML validation continues to run and the
-   * validation accordion stays visible. Used by the graph view to share the
-   * validation bar with the YAML view.
+   * CSS but kept mounted so YAML validation continues to run.
+   * The validation accordion is hidden in graph view.
    */
   hideEditorBody?: boolean;
   /**
@@ -811,14 +810,18 @@ export const WorkflowYAMLEditor = ({
         onJumpToStep={handleJumpToStep}
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
-      {/* Floating Elasticsearch step actions */}
-      <div
-        css={styles.stepActionsContainer}
-        style={positionStyles ?? {}}
-        data-test-subj={`workflowStepActionsContainer-${focusedStepInfo?.stepId}`}
-      >
-        <StepActions onStepRun={onStepRun} />
-      </div>
+      {/* Floating Elasticsearch step actions — anchored to the focused
+          step's line in the Monaco editor, so they're meaningless (and
+          visually orphaned) when the graph view replaces the editor body. */}
+      {!hideEditorBody && (
+        <div
+          css={styles.stepActionsContainer}
+          style={positionStyles ?? {}}
+          data-test-subj={`workflowStepActionsContainer-${focusedStepInfo?.stepId}`}
+        >
+          <StepActions onStepRun={onStepRun} />
+        </div>
+      )}
       {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml ? (
         <div
           css={styles.agentBuilderSectionCss}
@@ -892,15 +895,17 @@ export const WorkflowYAMLEditor = ({
           </div>
         )}
       </div>
-      <div css={styles.validationErrorsContainer}>
-        <WorkflowYamlValidationAccordion
-          isMounted={isEditorMounted}
-          isLoading={isLoadingValidation}
-          error={errorValidating}
-          validationErrors={validationErrors}
-          onErrorClick={handleErrorClick}
-        />
-      </div>
+      {!hideEditorBody && (
+        <div css={styles.validationErrorsContainer}>
+          <WorkflowYamlValidationAccordion
+            isMounted={isEditorMounted}
+            isLoading={isLoadingValidation}
+            error={errorValidating}
+            validationErrors={validationErrors}
+            onErrorClick={handleErrorClick}
+          />
+        </div>
+      )}
     </div>
   );
 };

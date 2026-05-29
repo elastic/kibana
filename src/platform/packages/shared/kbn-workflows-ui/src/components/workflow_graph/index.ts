@@ -19,6 +19,7 @@ export {
   type WorkflowDetailBottomBarProps,
   type WorkflowDetailBottomBarView,
   type ToolMenuItemDef,
+  useWorkflowBottomBarState,
 } from './workflow_graph_bottom_bar';
 export {
   WorkflowGraphCanvasFloatingBar,

@@ -17,6 +17,7 @@ import {
   ReactFlow,
   type ReactFlowInstance,
   ReactFlowProvider,
+  type Viewport,
 } from '@xyflow/react';
 import React, { Component, type ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -151,6 +152,18 @@ export interface WorkflowGraphCanvasProps {
    * to know when the graph is ready to capture.
    */
   readonly onReady?: () => void;
+  /**
+   * When provided, ReactFlow uses this as the initial viewport instead of
+   * running the default centering. Pair with `onViewportChange` to persist
+   * the user's zoom/pan across canvas remounts (e.g. YAML↔graph toggle).
+   */
+  readonly defaultViewport?: Viewport;
+  /**
+   * Fires when the user finishes a pan or zoom gesture. The caller is
+   * responsible for storing this so it can be passed back as
+   * `defaultViewport` on the next mount.
+   */
+  readonly onViewportChange?: (viewport: Viewport) => void;
 }
 
 function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
@@ -177,6 +190,8 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     showBackground = true,
     edgeZIndex = -1,
     onReady,
+    defaultViewport,
+    onViewportChange,
   } = props;
 
   const defaultEdgeOptions = useMemo(
@@ -329,10 +344,20 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         return;
       }
 
+      // If the caller supplied a `defaultViewport`, React Flow has already
+      // restored the user's previous zoom/pan — don't re-center over it.
+      // (The store doesn't survive a remount of <ReactFlow>, so we can't
+      // detect this from `instance.getViewport()`; the explicit prop is the
+      // only reliable signal.)
+      if (defaultViewport) {
+        onReady?.();
+        return;
+      }
+
       resetViewportToInitialView(instance, 0);
       onReady?.();
     },
-    [decoratedNodes.length, fitViewProp, onReady, resetViewportToInitialView]
+    [decoratedNodes.length, defaultViewport, fitViewProp, onReady, resetViewportToInitialView]
   );
 
   const previousDirectionRef = useRef(direction);
@@ -367,9 +392,9 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     (n: { data?: unknown }) => {
       const status = (n.data as { stepExecution?: { status?: string } } | undefined)?.stepExecution
         ?.status;
-      return status === 'failed' ? euiTheme.colors.danger : euiTheme.colors.primary;
+      return status === 'failed' ? euiTheme.colors.danger : '#0b64dd';
     },
-    [euiTheme.colors.danger, euiTheme.colors.primary]
+    [euiTheme.colors.danger]
   );
 
   const dimmed = !isYamlValid;
@@ -383,6 +408,16 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
           width: '100%',
           height: '100%',
           background: showBackground ? euiTheme.colors.backgroundBaseSubdued : 'transparent',
+          // Inset the MiniMap's inner SVG so the container's white background
+          // shows through as a 4px frame on all sides. React Flow sizes the
+          // SVG via attributes to match the container's outer dimensions, so
+          // CSS padding alone only takes effect on top/left — shrinking the
+          // SVG dimensions in CSS is what works uniformly.
+          '& .react-flow__minimap-svg': {
+            margin: 4,
+            width: 'calc(100% - 8px)',
+            height: 'calc(100% - 8px)',
+          },
         }}
         data-test-subj="workflowGraphCanvas"
       >
@@ -428,6 +463,8 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               onInit={handleInit}
               fitView={fitViewProp}
               fitViewOptions={fitViewProp ? fitViewOptionsProp : undefined}
+              defaultViewport={defaultViewport}
+              onMoveEnd={(_event, viewport) => onViewportChange?.(viewport)}
               onNodeClick={handleNodeClick}
               onPaneClick={handlePaneClick}
               nodesDraggable={false}
@@ -459,18 +496,20 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
                   pannable
                   zoomable
                   position="bottom-left"
-                  bgColor={euiTheme.colors.emptyShade}
-                  maskColor={euiTheme.colors.backgroundBaseSubdued}
+                  bgColor="#f6f9fc"
+                  maskColor="rgba(246, 249, 252, 0.7)"
                   nodeColor={minimapNodeColor}
                   nodeStrokeWidth={0}
-                  nodeBorderRadius={1}
+                  nodeBorderRadius={2}
                   style={{
                     width: 160,
-                    height: 120,
+                    height: 126,
+                    boxSizing: 'border-box',
                     background: euiTheme.colors.emptyShade,
-                    border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-                    borderRadius: 6,
+                    borderRadius: 4,
                     overflow: 'hidden',
+                    boxShadow:
+                      '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)',
                   }}
                 />
               )}
