@@ -158,6 +158,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-episode-id-stable" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
+            recovery: {
+              strategy: 'no_breach',
+            },
           },
           state_transition: { pending_count: 1, recovering_count: 1 },
         })
@@ -217,6 +220,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             format: 'standalone',
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-new-lifecycle" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            recovery: {
+              strategy: 'no_breach',
             },
           },
         })
@@ -300,6 +306,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             format: 'standalone',
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-basic-strategy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            recovery: {
+              strategy: 'no_breach',
             },
           },
           state_transition: null,
@@ -417,6 +426,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-reset" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
+            recovery: {
+              strategy: 'no_breach',
+            },
           },
           state_transition: { pending_count: 10 },
         })
@@ -501,6 +513,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           breach: {
             query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-inactive-no-count" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
+          recovery: {
+            strategy: 'no_breach',
+          },
         },
       })
     );
@@ -553,6 +568,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             format: 'standalone',
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-threshold" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            recovery: {
+              strategy: 'no_breach',
             },
           },
           state_transition: { pending_count: 0, recovering_count: 3 },
@@ -613,6 +631,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             format: 'standalone',
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-skip-recovering" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            recovery: {
+              strategy: 'no_breach',
             },
           },
         })
@@ -717,6 +738,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             format: 'standalone',
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-rebreach" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            recovery: {
+              strategy: 'no_breach',
             },
           },
           state_transition: { pending_count: 0, recovering_count: 10 },
@@ -823,6 +847,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-pending-to-inactive" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
+            recovery: {
+              strategy: 'no_breach',
+            },
           },
           state_transition: { pending_count: 10 },
         })
@@ -881,6 +908,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
           format: 'standalone',
           breach: {
             query: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-group-a", "host-multi-group-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
+          recovery: {
+            strategy: 'no_breach',
           },
         },
         // pending_count is high so neither group transitions to active
@@ -1041,6 +1071,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-timeframe-or" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
+            recovery: {
+              strategy: 'no_breach',
+            },
           },
           state_transition: {
             pending_count: 0,
@@ -1109,6 +1142,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
             format: 'standalone',
             breach: {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovering-timeframe-and" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+            recovery: {
+              strategy: 'no_breach',
             },
           },
           state_transition: {

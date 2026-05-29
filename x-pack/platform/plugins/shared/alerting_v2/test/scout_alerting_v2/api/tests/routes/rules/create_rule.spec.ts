@@ -281,6 +281,11 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       const body = buildCreateRuleData({
         kind: 'signal',
         state_transition: undefined,
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 10' },
+          recovery: undefined,
+        },
         metadata: { name: 'created-signal-rule' },
       });
       const response = await apiClient.post(testData.RULE_API_PATH, {

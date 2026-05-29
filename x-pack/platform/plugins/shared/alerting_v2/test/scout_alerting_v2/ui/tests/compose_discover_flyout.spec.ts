@@ -133,6 +133,11 @@ test.describe(
           buildCreateRuleData({
             kind: 'signal',
             state_transition: undefined,
+            query: {
+              format: 'standalone',
+              breach: { query: 'FROM logs-* | LIMIT 10' },
+              recovery: undefined,
+            },
             metadata: { name: EDIT_RULE_NAME },
             artifacts: [
               {

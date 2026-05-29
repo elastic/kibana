@@ -52,19 +52,10 @@ const ACTION_POLICY_DEFAULTS: CreateActionPolicyDataInput = {
 
 export type BuildCreateRuleDataInput = Partial<CreateRuleData>;
 
-export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => {
-  const ruleData = {
-    ...DEFAULTS,
-    ...input,
-  };
-
-  if (input.kind === 'signal') {
-    ruleData.query.recovery = undefined;
-    ruleData.query.no_data = undefined;
-  }
-
-  return ruleData;
-};
+export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): CreateRuleData => ({
+  ...DEFAULTS,
+  ...input,
+});
 
 export type BuildCreateActionPolicyDataInput = Partial<CreateActionPolicyDataInput>;
 
