@@ -73,6 +73,12 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * Whether attachments of this type are read-only. Defaults to false.
    */
   isReadonly?: boolean;
+  /**
+   * Maximum content length (in characters) for attachments of this type when presented inline
+   * to the LLM. Applied per-attachment — each attachment is truncated to its own type's limit.
+   * Defaults to the global DEFAULT_MAX_CONTENT_LENGTH (10 000).
+   */
+  maxContentLength?: number;
 }
 
 /**
