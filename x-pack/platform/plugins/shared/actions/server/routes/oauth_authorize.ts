@@ -75,8 +75,7 @@ const validateOAuthUrlsAreAllowed = (
  * - **POST** `/internal/actions/connector/{connectorId}/_start_oauth_flow` — JSON `{ authorizationUrl, state }` (internal).
  * - **GET** `/api/actions/connector/{connectorId}/oauth/start` — **302** to the IdP (public).
  *   Absolute link: `{server.publicBaseUrl}/api/actions/connector/{connectorId}/oauth/start`
- *   with optional `?returnUrl=` (https, same origin as Kibana), e.g. for Slack:
- *   `https://my.kibana.example/api/actions/connector/my-id/oauth/start?returnUrl=https://my.kibana.example/app/foo`
+ *   e.g. for Slack: `https://my.kibana.example/api/actions/connector/my-id/oauth/start`
  *
  * Both require an authenticated Kibana user with `profile_uid` and the same OAuth privileges.
  */
@@ -144,7 +143,7 @@ export const oauthAuthorizeRoute = (
       validate: {
         request: {
           params: paramsSchema,
-          query: schema.object(oauthStartReturnUrlFields),
+          query: schema.object({}),
         },
         response: {
           302: {
@@ -182,7 +181,7 @@ export const oauthAuthorizeRoute = (
         try {
           const { authorizationUrl } = await startOAuthAuthorizationFlow({
             connectorId,
-            returnUrl: req.query.returnUrl,
+            returnUrl: undefined,
             context,
             req,
             coreSetup,
