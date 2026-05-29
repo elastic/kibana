@@ -82,6 +82,7 @@ export class ElasticAssistantPlugin
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly config: ConfigSchema;
   private readonly isDev: boolean;
+  private inferencePlugin?: ElasticAssistantPluginStartDependencies['inference'];
   private workflowExecutorFactory?: AttackDiscoveryWorkflowExecutorFactory;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -208,6 +209,7 @@ export class ElasticAssistantPlugin
   ): ElasticAssistantPluginStart {
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
+    this.inferencePlugin = plugins.inference;
 
     removeLegacyQuickPrompt(core.elasticsearch.client.asInternalUser)
       .then((res) => {
