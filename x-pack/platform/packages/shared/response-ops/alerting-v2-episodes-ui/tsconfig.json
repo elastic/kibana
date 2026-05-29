@@ -46,6 +46,9 @@
     "@kbn/user-profile-components",
     "@kbn/unified-data-table",
     "@kbn/coloring",
-    "@kbn/lens-plugin"
+    "@kbn/lens-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/unified-doc-viewer-plugin"
   ]
 }
