@@ -50,6 +50,7 @@ const buildToolDeps = () => ({
 const buildContext = (overrides: Partial<ToolHandlerContext> = {}): ToolHandlerContext => ({
   attachments: {} as never,
   callContext: { callSource: 'agent', toolCallId: 'test-tool-call-id', toolId: 'test-tool-id' },
+  defaultConnectorId: 'context-connector',
   esClient: elasticsearchClientMock.createScopedClusterClient(),
   events: {} as never,
   filestore: {} as never,
