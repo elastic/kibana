@@ -171,6 +171,7 @@ import { registerWorkflowSteps } from './workflows/step_types';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
+import { createExceptionFilterProvider } from './lib/detection_engine/rule_types/utils/exception_filter_provider';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -315,6 +316,21 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.ruleMonitoringService.setup(core, plugins);
+
+    if (plugins.alertingVTwo && plugins.lists) {
+      plugins.alertingVTwo.registerPreQueryFilterProvider(
+        'securitySolution.exceptionLists',
+        createExceptionFilterProvider({
+          lists: plugins.lists,
+          core,
+          getSpaces: async () => {
+            const [, startPlugins] = await core.getStartServices();
+            return startPlugins.spaces;
+          },
+          logger: this.logger,
+        })
+      );
+    }
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 

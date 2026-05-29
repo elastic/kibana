@@ -19,9 +19,12 @@ import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 import { scheduleCleanupInsightsTask } from '../lib/tasks/cleanup_insights/schedule_task';
 import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
 import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/advanced_settings';
+import { PreQueryFilterRegistryToken } from '../lib/rule_executor/pre_query_filter_registry';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue(async (container) => {
+    container.get(PreQueryFilterRegistryToken).freeze();
+
     const resourceManager = container.get(ResourceManager);
     const logger = container.get(Logger);
     const esClient = container.get(EsServiceInternalToken);

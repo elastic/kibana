@@ -31,6 +31,7 @@ export const RuleResultsPreview = () => {
     query,
     timeField,
     lookback,
+    additionalFilter,
   } = useRulePreview();
 
   return (
@@ -59,6 +60,7 @@ export const RuleResultsPreview = () => {
       query={query}
       timeField={timeField}
       lookback={lookback}
+      additionalFilter={additionalFilter}
     />
   );
 };

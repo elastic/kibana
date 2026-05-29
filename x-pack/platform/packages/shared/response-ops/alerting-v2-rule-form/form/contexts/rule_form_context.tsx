@@ -26,6 +26,8 @@ export type RuleFormLayout = 'page' | 'flyout';
 export interface RuleFormMeta {
   /** Whether the form is rendered on a full page or inside a flyout. */
   layout: RuleFormLayout;
+  /** Optional DSL filter to compose into preview queries (e.g. exception exclusions). */
+  additionalPreviewFilter?: unknown;
 }
 
 interface RuleFormContextValue {

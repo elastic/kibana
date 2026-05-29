@@ -263,6 +263,24 @@ export const ruleParamsSchema = z
 
 export type RuleParams = z.infer<typeof ruleParamsSchema>;
 
+/** Exception list references (optional) */
+
+const exceptionListNamespaceTypeSchema = z.enum(['agnostic', 'single']);
+const exceptionListTypeSchema = z.enum(['detection', 'rule_default', 'endpoint']);
+
+export const exceptionListReferenceSchema = z
+  .object({
+    id: z.string().min(1).max(256).describe('Exception list saved object ID.'),
+    list_id: z.string().min(1).max(256).describe('Exception list logical ID.'),
+    type: exceptionListTypeSchema.describe('Exception list type.'),
+    namespace_type: exceptionListNamespaceTypeSchema.describe(
+      'Namespace type: "agnostic" for shared across spaces, "single" for space-scoped.'
+    ),
+  })
+  .strict();
+
+export type ExceptionListReference = z.infer<typeof exceptionListReferenceSchema>;
+
 /** Artifacts (optional) */
 
 const artifactSchema = z
@@ -307,6 +325,11 @@ export const createRuleDataBaseSchema = z
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
+    exceptions: z
+      .array(exceptionListReferenceSchema)
+      .max(100)
+      .optional()
+      .describe('Exception list references for this rule.'),
     artifacts: z.array(artifactSchema).max(100).optional(),
     params: ruleParamsSchema.optional(),
   })
@@ -380,6 +403,7 @@ export const updateRuleDataSchema = z
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
+    exceptions: z.array(exceptionListReferenceSchema).max(100).optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
     params: ruleParamsSchema.optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),

@@ -29,6 +29,8 @@ export interface UsePreviewChartResult {
   isLoading: boolean;
   /** Whether the chart attributes failed to build */
   hasError: boolean;
+  /** DSL filters to pass to the Lens embeddable (e.g. exception exclusions) */
+  lensFilters: unknown[];
 }
 
 export interface UsePreviewChartParams {
@@ -42,6 +44,8 @@ export interface UsePreviewChartParams {
   esqlColumns?: PreviewColumn[];
   /** Whether the chart is enabled (defaults to true) */
   enabled?: boolean;
+  /** Optional additional DSL filter for the chart (e.g. exception exclusions) */
+  additionalFilter?: unknown;
 }
 
 /**
@@ -89,6 +93,7 @@ export const usePreviewChart = ({
   lookback,
   esqlColumns = [],
   enabled = true,
+  additionalFilter,
 }: UsePreviewChartParams): UsePreviewChartResult => {
   const { dataViews, lens } = useRuleFormServices();
 
@@ -237,10 +242,16 @@ export const usePreviewChart = ({
   // True while the debounce timer is pending
   const isDebouncing = query !== debouncedQuery;
 
+  const lensFilters = useMemo(() => {
+    if (additionalFilter == null) return [];
+    return [{ meta: { alias: null, disabled: false, negate: false }, query: additionalFilter }];
+  }, [additionalFilter]);
+
   return {
     lensAttributes,
     timeRange,
     isLoading: isDebouncing || isLoading,
     hasError,
+    lensFilters,
   };
 };

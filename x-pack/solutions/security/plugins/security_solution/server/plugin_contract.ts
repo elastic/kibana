@@ -47,6 +47,7 @@ import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { AnonymizationPluginStart } from '@kbn/anonymization-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AlertingServerSetup as AlertingV2ServerSetup } from '@kbn/alerting-v2-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type {
   WorkflowsServerPluginSetup,
@@ -87,6 +88,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   entityStore?: EntityStoreSetupContract;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
+  alertingVTwo?: AlertingV2ServerSetup;
 }
 
 export interface SecuritySolutionPluginStartDependencies {

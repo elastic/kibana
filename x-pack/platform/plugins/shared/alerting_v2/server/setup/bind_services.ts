@@ -89,9 +89,14 @@ import {
   InsightsClientScopedToken,
   InsightsClientInternalToken,
 } from '../lib/rule_doctor_insights_client/tokens';
+import {
+  PreQueryFilterRegistry,
+  PreQueryFilterRegistryToken,
+} from '../lib/rule_executor/pre_query_filter_registry';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
+  bind(PreQueryFilterRegistryToken).toConstantValue(new PreQueryFilterRegistry());
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(RulesClient)
     .toDynamicValue(({ get }) => {

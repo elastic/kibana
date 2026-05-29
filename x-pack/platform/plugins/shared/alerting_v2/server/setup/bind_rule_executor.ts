@@ -15,6 +15,7 @@ import {
   WaitForResourcesStep,
   FetchRuleStep,
   ValidateRuleStep,
+  ApplyPreQueryFiltersStep,
   ExecuteRuleQueryStep,
   CreateAlertEventsStep,
   ApplyDetectionEngineFeaturesStep,
@@ -51,6 +52,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(RuleExecutionStepsToken).to(WaitForResourcesStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(FetchRuleStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
+  bind(RuleExecutionStepsToken).to(ApplyPreQueryFiltersStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(ExecuteRuleQueryStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(ApplyDetectionEngineFeaturesStep).inSingletonScope();

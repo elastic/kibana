@@ -8,6 +8,7 @@
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { usePreview } from './use_preview';
+import { useRuleFormMeta } from '../contexts';
 
 // Re-export shared types for backward compatibility
 export type { PreviewResult as RulePreviewResult, PreviewColumn } from './use_preview';
@@ -20,6 +21,7 @@ export type { PreviewResult as RulePreviewResult, PreviewColumn } from './use_pr
  */
 export const useRulePreview = () => {
   const { control } = useFormContext<FormValues>();
+  const { additionalPreviewFilter } = useRuleFormMeta();
 
   const baseQuery = useWatch({ control, name: 'evaluation.query.base' });
   const timeField = useWatch({ control, name: 'timeField' });
@@ -31,5 +33,6 @@ export const useRulePreview = () => {
     timeField,
     lookback,
     groupingFields,
+    additionalFilter: additionalPreviewFilter,
   });
 };

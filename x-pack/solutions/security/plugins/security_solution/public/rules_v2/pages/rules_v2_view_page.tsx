@@ -30,13 +30,21 @@ import { useQuery } from '@kbn/react-query';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useHistory, useParams } from 'react-router-dom';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useKibana } from '../../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { RULES_V2_PATH } from '../../../common/constants';
 import { ExecutionLogTable } from '../components/execution_log_table';
 import { RuleAlertsTable } from '../components/rule_alerts_table';
+import { ExceptionsViewer } from '../../detection_engine/rule_exceptions/components/all_exception_items_table';
 import { parseThresholdEsqlQuery } from '../utils/threshold_to_esql';
+import { toV1ExceptionRuleShape } from '../utils/v2_rule_to_v1_shape';
 import * as i18n from '../translations';
+
+const RULE_EXCEPTION_LIST_TYPES = [
+  ExceptionListTypeEnum.DETECTION,
+  ExceptionListTypeEnum.RULE_DEFAULT,
+];
 
 const OverviewTab: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
   const descriptionItems = [
@@ -307,9 +315,14 @@ export const RulesV2ViewPage = () => {
     isLoading,
     isError,
     error,
+    refetch: refreshRule,
   } = useQuery(['rulesV2View', id], () =>
     http.get<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${id}`)
   );
+
+  const v1RuleShape = useMemo(() => (rule ? toV1ExceptionRuleShape(rule) : null), [rule]);
+
+  const handleRuleChange = useMemo(() => () => refreshRule(), [refreshRule]);
 
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
@@ -324,6 +337,22 @@ export const RulesV2ViewPage = () => {
         content: <AlertsTab ruleId={id} />,
       },
       {
+        id: 'rule_exceptions',
+        name: 'Rule exceptions',
+        content: (
+          <>
+            <EuiSpacer size="l" />
+            <ExceptionsViewer
+              rule={v1RuleShape}
+              listTypes={RULE_EXCEPTION_LIST_TYPES}
+              onRuleChange={handleRuleChange}
+              isViewReadOnly={false}
+              data-test-subj="v2ExceptionTab"
+            />
+          </>
+        ),
+      },
+      {
         id: 'execution-log',
         name: 'Execution results',
         content: (
@@ -336,7 +365,7 @@ export const RulesV2ViewPage = () => {
         ),
       },
     ],
-    [rule, id]
+    [rule, id, v1RuleShape, handleRuleChange]
   );
 
   if (isLoading) {

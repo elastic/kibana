@@ -51,6 +51,8 @@ export interface PreviewResult {
   timeField: string;
   /** The lookback duration string (e.g. '5m', '1h') */
   lookback: string;
+  /** Optional additional DSL filter applied to the preview (e.g. exception exclusions) */
+  additionalFilter?: unknown;
 }
 
 export interface UsePreviewParams {
@@ -64,6 +66,8 @@ export interface UsePreviewParams {
   groupingFields: string[];
   /** Whether the preview is enabled (defaults to true) */
   enabled?: boolean;
+  /** Optional additional DSL filter to compose with the time range filter (e.g. exception exclusions) */
+  additionalFilter?: unknown;
 }
 
 /**
@@ -125,6 +129,7 @@ export const usePreview = ({
   lookback,
   groupingFields,
   enabled = true,
+  additionalFilter,
 }: UsePreviewParams): PreviewResult => {
   const { data } = useRuleFormServices();
 
@@ -132,6 +137,12 @@ export const usePreview = ({
   // useDebouncedValue properly cancels stale timers so only the latest value
   // ever commits, regardless of the debounce duration.
   const debouncedQuery = useDebouncedValue(query, DEBOUNCE_WAIT);
+
+  const stableAdditionalFilter = useMemo(
+    () => additionalFilter,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(additionalFilter)]
+  );
 
   // Determine if we have enough inputs to run the query
   const canExecute =
@@ -144,16 +155,37 @@ export const usePreview = ({
 
     const { timeFilter, timeRange } = getTimeFilter(timeField, lookback);
 
+    const composedFilter =
+      stableAdditionalFilter != null
+        ? {
+            bool: {
+              filter: [
+                ...(timeFilter &&
+                'bool' in timeFilter &&
+                timeFilter.bool &&
+                'filter' in timeFilter.bool &&
+                Array.isArray(timeFilter.bool.filter)
+                  ? timeFilter.bool.filter
+                  : [timeFilter]),
+                stableAdditionalFilter,
+              ],
+            },
+          }
+        : timeFilter;
+
+    // eslint-disable-next-line no-console
+    console.log('[usePreview] executing with filter:', JSON.stringify(composedFilter, null, 2));
+
     const result = await getESQLResults({
       esqlQuery: debouncedQuery,
       search: data.search.search,
       dropNullColumns: true,
       timeRange,
-      filter: timeFilter,
+      filter: composedFilter,
     });
 
     return result.response;
-  }, [canExecute, debouncedQuery, timeField, lookback, data.search.search]);
+  }, [canExecute, debouncedQuery, timeField, lookback, data.search.search, stableAdditionalFilter]);
 
   const {
     data: response,
@@ -161,7 +193,7 @@ export const usePreview = ({
     isError,
     error,
   } = useQuery({
-    queryKey: ruleFormKeys.preview(debouncedQuery, timeField, lookback),
+    queryKey: [...ruleFormKeys.preview(debouncedQuery, timeField, lookback), stableAdditionalFilter],
     queryFn: fetchPreview,
     enabled: canExecute,
     keepPreviousData: true,
@@ -224,5 +256,6 @@ export const usePreview = ({
     query,
     timeField,
     lookback,
+    additionalFilter: stableAdditionalFilter,
   };
 };

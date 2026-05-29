@@ -24,6 +24,8 @@ export interface PreviewChartProps {
   lookback: string;
   /** ES|QL columns from the preview query result (used for STATS query suggestions) */
   esqlColumns?: PreviewColumn[];
+  /** Optional additional DSL filter for the chart (e.g. exception exclusions) */
+  additionalFilter?: unknown;
 }
 
 /**
@@ -39,12 +41,13 @@ export interface PreviewChartProps {
  * This component renders only the chart content (no panel wrapper) and is
  * intended to be placed inside a parent panel such as `QueryResultsGrid`.
  */
-export const PreviewChart = ({ query, timeField, lookback, esqlColumns }: PreviewChartProps) => {
-  const { lensAttributes, timeRange, isLoading, hasError } = usePreviewChart({
+export const PreviewChart = ({ query, timeField, lookback, esqlColumns, additionalFilter }: PreviewChartProps) => {
+  const { lensAttributes, timeRange, isLoading, hasError, lensFilters } = usePreviewChart({
     query,
     timeField,
     lookback,
     esqlColumns,
+    additionalFilter,
   });
 
   if (hasError) {
@@ -74,7 +77,7 @@ export const PreviewChart = ({ query, timeField, lookback, esqlColumns }: Previe
     return null;
   }
 
-  return <LensChart lensAttributes={lensAttributes} timeRange={timeRange} height={CHART_HEIGHT} />;
+  return <LensChart lensAttributes={lensAttributes} timeRange={timeRange} height={CHART_HEIGHT} filters={lensFilters} />;
 };
 
 /**
@@ -87,10 +90,12 @@ const LensChart = ({
   lensAttributes,
   timeRange,
   height,
+  filters = [],
 }: {
   lensAttributes: TypedLensByValueInput['attributes'];
   timeRange: { from: string; to: string };
   height: number;
+  filters?: unknown[];
 }) => {
   const { lens } = useRuleFormServices();
   const LensComponent = lens.EmbeddableComponent;
@@ -104,6 +109,7 @@ const LensChart = ({
         viewMode="view"
         timeRange={timeRange}
         attributes={lensAttributes}
+        filters={filters as TypedLensByValueInput['filters']}
         noPadding
         disableTriggers
       />

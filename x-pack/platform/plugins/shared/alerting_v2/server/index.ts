@@ -34,4 +34,5 @@ export const module = new ContainerModule((options) => {
 });
 
 export type { PluginConfig as AlertingV2Config } from './config';
-export type { AlertingServerStart, RulesClientApi } from './types';
+export type { AlertingServerSetup, AlertingServerStart, RulesClientApi } from './types';
+export type { PreQueryFilterProvider } from './lib/rule_executor/pre_query_filter_registry';

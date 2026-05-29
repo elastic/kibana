@@ -69,6 +69,8 @@ export interface QueryResultsGridProps {
   timeField?: string;
   /** The lookback duration string for the chart time range (e.g. '5m', '1h') */
   lookback?: string;
+  /** Optional additional DSL filter for the chart (e.g. exception exclusions) */
+  additionalFilter?: unknown;
 }
 
 /**
@@ -97,6 +99,7 @@ export const QueryResultsGrid = ({
   query,
   timeField,
   lookback,
+  additionalFilter,
 }: QueryResultsGridProps) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
 
@@ -200,6 +203,7 @@ export const QueryResultsGrid = ({
             timeField={timeField}
             lookback={lookback}
             esqlColumns={columns}
+            additionalFilter={additionalFilter}
           />
         </>
       )}

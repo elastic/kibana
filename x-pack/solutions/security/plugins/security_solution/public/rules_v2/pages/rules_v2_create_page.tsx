@@ -128,6 +128,7 @@ const EditRulePage = ({ ruleId }: { ruleId: string }) => {
   const initialValues: Partial<FormValues> = mapRuleResponseToFormValues(rule);
   const initialQuery = rule.evaluation?.query?.base ?? 'FROM logs-*';
   const initialParams = rule.params;
+  const initialExceptions = rule.exceptions ?? [];
 
   return (
     <SecuritySolutionPageWrapper>
@@ -150,6 +151,7 @@ const EditRulePage = ({ ruleId }: { ruleId: string }) => {
             initialValues={initialValues}
             initialQuery={initialQuery}
             initialParams={initialParams}
+            initialExceptions={initialExceptions}
             onSuccess={handleSuccess}
             onCancel={handleCancel}
           />

@@ -78,6 +78,22 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     })
   ),
 
+  exceptions: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+        list_id: schema.string(),
+        type: schema.oneOf([
+          schema.literal('detection'),
+          schema.literal('rule_default'),
+          schema.literal('endpoint'),
+        ]),
+        namespace_type: schema.oneOf([schema.literal('agnostic'), schema.literal('single')]),
+      }),
+      { maxSize: 100 }
+    )
+  ),
+
   artifacts: schema.maybe(
     schema.arrayOf(
       schema.object({

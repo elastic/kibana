@@ -6,15 +6,27 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { Start } from '@kbn/core-di';
+import { Setup, Start } from '@kbn/core-di';
 import { Global } from '@kbn/core-di-internal';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { RulesClient } from '../lib/rules_client';
 import { RulesClientSpaceIdToken } from '../lib/rules_client/tokens';
-import type { AlertingServerStart, RulesClientApi } from '../types';
+import { PreQueryFilterRegistryToken } from '../lib/rule_executor/pre_query_filter_registry';
+import type { AlertingServerSetup, AlertingServerStart, RulesClientApi } from '../types';
 
 export function bindContract({ bind }: ContainerModuleLoadOptions) {
+  bind(Setup).toDynamicValue(({ get }) => {
+    const registry = get(PreQueryFilterRegistryToken);
+
+    const setupContract: AlertingServerSetup = {
+      registerPreQueryFilterProvider(name, provider) {
+        registry.register(name, provider);
+      },
+    };
+    return setupContract;
+  });
+
   bind(Start).toDynamicValue(({ get }) => {
     const injection = get(CoreStart('injection'));
 

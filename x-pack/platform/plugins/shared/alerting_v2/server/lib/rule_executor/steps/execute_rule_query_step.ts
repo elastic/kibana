@@ -51,18 +51,39 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         lookbackWindow,
       });
 
+      const composedFilter =
+        state.exceptionFilter != null
+          ? {
+              bool: {
+                filter: [
+                  ...(queryPayload.filter &&
+                  'bool' in queryPayload.filter &&
+                  queryPayload.filter.bool &&
+                  'filter' in queryPayload.filter.bool &&
+                  Array.isArray(queryPayload.filter.bool.filter)
+                    ? queryPayload.filter.bool.filter
+                    : [queryPayload.filter]),
+                  state.exceptionFilter,
+                ],
+              },
+            }
+          : queryPayload.filter;
+
+      // eslint-disable-next-line no-console
+      console.log(`[ExecuteRuleQueryStep] rule=${input.ruleId}`, JSON.stringify({ query: effectiveQuery, filter: composedFilter, params: queryPayload.params }, null, 2));
+
       step.logger.debug({
         message: () =>
           `[${step.name}] Executing ES|QL query for rule ${input.ruleId} - ${JSON.stringify({
             query: effectiveQuery,
-            filter: queryPayload.filter,
+            filter: composedFilter,
             params: queryPayload.params,
           })}`,
       });
 
       const esqlRowBatchStream = step.queryService.executeQueryStream({
         query: effectiveQuery,
-        filter: queryPayload.filter,
+        filter: composedFilter,
         params: queryPayload.params,
         abortSignal: input.executionContext.signal,
       });

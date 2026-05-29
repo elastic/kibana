@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
@@ -28,6 +29,7 @@ export interface RulePipelineState {
   readonly queryPayload?: QueryPayload;
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
+  readonly exceptionFilter?: QueryDslQueryContainer;
 }
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';

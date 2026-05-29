@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { RuleResponse, RuleParams } from '@kbn/alerting-v2-schemas';
@@ -22,10 +22,12 @@ import {
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
 } from '@kbn/alerting-v2-rule-form';
+import type { ExceptionListReference } from '@kbn/alerting-v2-schemas';
 import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 import type { SecurityRuleType } from '../constants';
 import { buildThresholdEsqlQuery, parseThresholdEsqlQuery } from '../utils/threshold_to_esql';
 import { SecurityGuiRuleForm } from './security_gui_rule_form';
+import { RuleExceptionPreview } from './rule_exception_preview';
 
 const DEFAULT_THRESHOLD_VALUE = 200;
 
@@ -46,6 +48,7 @@ interface SecurityRuleFormProps {
   initialValues?: Partial<FormValues>;
   initialQuery?: string;
   initialParams?: RuleParams;
+  initialExceptions?: ExceptionListReference[];
   onSuccess?: (savedRuleId: string) => void;
   onCancel?: () => void;
 }
@@ -61,6 +64,7 @@ export const SecurityRuleForm = ({
   initialValues,
   initialQuery,
   initialParams,
+  initialExceptions = [],
   onSuccess,
   onCancel,
 }: SecurityRuleFormProps) => {
@@ -186,7 +190,15 @@ export const SecurityRuleForm = ({
     []
   );
 
-  const meta = useMemo(() => ({ layout: 'page' as const }), []);
+  const [exceptionPreviewFilter, setExceptionPreviewFilter] = useState<unknown>(null);
+
+  const meta = useMemo(
+    () => ({
+      layout: 'page' as const,
+      ...(exceptionPreviewFilter != null ? { additionalPreviewFilter: exceptionPreviewFilter } : {}),
+    }),
+    [exceptionPreviewFilter]
+  );
 
   useEffect(() => {
     if (ruleType === 'threshold' && generatedQuery) {
@@ -305,6 +317,15 @@ export const SecurityRuleForm = ({
             </EuiFlexItem>
             <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
               <RulePreviewPanel />
+              {initialExceptions.length > 0 && (
+                <>
+                  <EuiSpacer size="m" />
+                  <RuleExceptionPreview
+                    exceptions={initialExceptions}
+                    onExceptionFilterChange={setExceptionPreviewFilter}
+                  />
+                </>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </FormProvider>

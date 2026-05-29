@@ -60,6 +60,15 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         timeframe: { type: 'keyword' },
       },
     },
+    exceptions: {
+      type: 'nested',
+      properties: {
+        id: { type: 'keyword' },
+        list_id: { type: 'keyword' },
+        type: { type: 'keyword' },
+        namespace_type: { type: 'keyword' },
+      },
+    },
     params: { type: 'flattened', ignore_above: 4096 },
     enabled: { type: 'boolean' },
     createdBy: { type: 'keyword' },

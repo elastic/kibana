@@ -17,7 +17,6 @@ export interface EpisodeEventRow {
   'rule.version'?: number;
   group_hash: string;
   status: string;
-  grouping_fields?: string;
   source?: string;
   scheduled_timestamp?: string;
   event_data?: string;
@@ -31,7 +30,6 @@ const ALERT_EPISODE_EVENT_FIELDS = [
   'rule.version',
   'group_hash',
   'status',
-  'grouping_fields',
   'source',
   'scheduled_timestamp',
   'event_data',
