@@ -304,3 +304,44 @@ export const shiftEdgePointsOnCrossAxis = (
   delta: number
 ): Array<{ x: number; y: number }> =>
   points.map((p) => (crossAxis === 'x' ? { x: p.x + delta, y: p.y } : { x: p.x, y: p.y + delta }));
+
+export interface ShiftEdgePointsInterpolatedParams {
+  points: Array<{ x: number; y: number }>;
+  crossAxis: CrossAxis;
+  mainAxis: CrossAxis;
+  sourceMain: number;
+  targetMain: number;
+  sourceDelta: number;
+  targetDelta: number;
+}
+
+/**
+ * Shifts each waypoint's cross-axis coordinate by an amount interpolated between
+ * sourceDelta and targetDelta along the edge's main axis (Y for TB, X for LR).
+ */
+export const shiftEdgePointsInterpolated = ({
+  points,
+  crossAxis,
+  mainAxis,
+  sourceMain,
+  targetMain,
+  sourceDelta,
+  targetDelta,
+}: ShiftEdgePointsInterpolatedParams): Array<{ x: number; y: number }> => {
+  const mainSpan = targetMain - sourceMain;
+  return points.map((p) => {
+    const mainCoord = mainAxis === 'x' ? p.x : p.y;
+    const t =
+      Math.abs(mainSpan) < 0.001
+        ? 0.5
+        : Math.max(0, Math.min(1, (mainCoord - sourceMain) / mainSpan));
+    const delta = sourceDelta + t * (targetDelta - sourceDelta);
+    return crossAxis === 'x' ? { x: p.x + delta, y: p.y } : { x: p.x, y: p.y + delta };
+  });
+};
+
+export const translateEdgePoints = (
+  points: Array<{ x: number; y: number }>,
+  dx: number,
+  dy: number
+): Array<{ x: number; y: number }> => points.map((p) => ({ x: p.x + dx, y: p.y + dy }));

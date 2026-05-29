@@ -12,8 +12,9 @@ import { Position } from '@xyflow/react';
 import {
   alignDagreCrossAxisInPlace,
   type CrossAxis,
-  shiftEdgePointsOnCrossAxis,
+  shiftEdgePointsInterpolated,
   snapshotDagreNodeCenters,
+  translateEdgePoints,
 } from './align_dagre_cross_axis';
 import type { ForeachGroup, GraphEdge, LayoutedEdge, LayoutedNode, PreLayoutNode } from './types';
 import { DEFAULT_NODE_STYLE } from './types';
@@ -23,6 +24,9 @@ import { DEFAULT_NODE_STYLE } from './types';
 const GROUP_PADDING_TOP = 70;
 const GROUP_PADDING_X = 32;
 const GROUP_PADDING_BOTTOM = 32;
+
+/** When barycenter moves endpoints by unequal cross-axis deltas, Dagre waypoints are stale. */
+const CROSS_AXIS_DELTA_TOLERANCE = 1;
 
 export type LayoutDirection = 'TB' | 'LR';
 
@@ -61,6 +65,7 @@ function applyDagre(
   dagre.layout(g);
 
   const crossAxis: CrossAxis = direction === 'LR' ? 'y' : 'x';
+  const mainAxis: CrossAxis = direction === 'LR' ? 'x' : 'y';
   const nodeIds = nodes.map((n) => n.id);
   const centersBefore = snapshotDagreNodeCenters(g, nodeIds);
   alignDagreCrossAxisInPlace(g, crossAxis, nodeSep);
@@ -90,25 +95,39 @@ function applyDagre(
     const beforeTarget = centersBefore.get(edge.target);
     const afterSource = g.node(edge.source);
     const afterTarget = g.node(edge.target);
-    let deltaCross = 0;
-    if (beforeSource && beforeTarget && afterSource && afterTarget) {
+
+    let points: Array<{ x: number; y: number }> = [];
+    if (
+      rawPoints &&
+      rawPoints.length >= 2 &&
+      beforeSource &&
+      beforeTarget &&
+      afterSource &&
+      afterTarget
+    ) {
       const sourceDelta =
         crossAxis === 'x' ? afterSource.x - beforeSource.x : afterSource.y - beforeSource.y;
       const targetDelta =
         crossAxis === 'x' ? afterTarget.x - beforeTarget.x : afterTarget.y - beforeTarget.y;
-      deltaCross = (sourceDelta + targetDelta) / 2;
+      const successorCount = (g.successors(edge.source) ?? []).length;
+      const predecessorCount = (g.predecessors(edge.target) ?? []).length;
+      // Fan-out/fan-in edges keep stale multi-rank Dagre buses after barycenter; smooth-step instead.
+      const isBranchOrMergeEdge = successorCount > 1 || predecessorCount > 1;
+      const useDagreWaypoints =
+        !isBranchOrMergeEdge && Math.abs(sourceDelta - targetDelta) <= CROSS_AXIS_DELTA_TOLERANCE;
+      if (useDagreWaypoints) {
+        points = shiftEdgePointsInterpolated({
+          points: rawPoints.map((p) => ({ x: p.x, y: p.y })),
+          crossAxis,
+          mainAxis,
+          sourceMain: mainAxis === 'x' ? afterSource.x : afterSource.y,
+          targetMain: mainAxis === 'x' ? afterTarget.x : afterTarget.y,
+          sourceDelta,
+          targetDelta,
+        });
+      }
     }
-    const points =
-      rawPoints && rawPoints.length >= 2
-        ? shiftEdgePointsOnCrossAxis(
-            rawPoints.map((p) => ({ x: p.x, y: p.y })),
-            crossAxis,
-            deltaCross
-          )
-        : [
-            { x: 0, y: 0 },
-            { x: 0, y: 0 },
-          ];
+
     return { ...edge, points };
   });
 
@@ -156,18 +175,26 @@ export function layoutForeachGroup(
   const maxX = Math.max(...innerLayouted.map((n) => n.position.x + n.style.width));
   const maxY = Math.max(...innerLayouted.map((n) => n.position.y + n.style.height));
 
+  const shiftX = -minX + padX;
+  const shiftY = -minY + padTop;
+
   // Shift all inner nodes so the bounding box starts at (padX, padTop)
   const shifted = innerLayouted.map((n) => ({
     ...n,
     position: {
-      x: n.position.x - minX + padX,
-      y: n.position.y - minY + padTop,
+      x: n.position.x + shiftX,
+      y: n.position.y + shiftY,
     },
+  }));
+
+  const shiftedInnerEdges = innerEdges.map((e) => ({
+    ...e,
+    points: translateEdgePoints(e.points, shiftX, shiftY),
   }));
 
   return {
     layoutedInnerNodes: shifted,
-    innerEdges,
+    innerEdges: shiftedInnerEdges,
     groupWidth: maxX - minX + padX * 2,
     groupHeight: maxY - minY + padTop + padBottom,
   };

@@ -25,6 +25,23 @@ const findLaidNode = (nodes: LayoutedNode[], id: string): LayoutedNode => {
   return node;
 };
 
+const findLaidEdge = (
+  edges: Array<{
+    id: string;
+    source: string;
+    target: string;
+    points: Array<{ x: number; y: number }>;
+  }>,
+  source: string,
+  target: string
+) => {
+  const edge = edges.find((e) => e.source === source && e.target === target);
+  if (!edge) {
+    throw new Error(`Expected edge ${source} → ${target}`);
+  }
+  return edge;
+};
+
 const minimal = (overrides: Partial<WorkflowYaml> = {}): WorkflowYaml =>
   ({
     name: 'wf',
@@ -218,6 +235,86 @@ describe('applyGraphLayout', () => {
     expect(trigger).toBeDefined();
     const centers = [nodeCenterX(trigger!), nodeCenterX(a), nodeCenterX(b)];
     expect(Math.max(...centers) - Math.min(...centers)).toBeLessThanOrEqual(CENTER_TOLERANCE);
+  });
+
+  it('TB linear chain edge waypoints share center X with nodes', () => {
+    const { nodes, edges, foreachGroups } = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          { name: 'a', type: 'http' },
+          { name: 'b', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const { nodes: laid, edges: laidEdges } = applyGraphLayout(nodes, edges, foreachGroups, {
+      direction: 'TB',
+    });
+    const a = findLaidNode(laid, 'a');
+    const b = findLaidNode(laid, 'b');
+    const edge = findLaidEdge(laidEdges, 'a', 'b');
+    for (const p of edge.points) {
+      expect(Math.abs(p.x - nodeCenterX(a))).toBeLessThanOrEqual(CENTER_TOLERANCE);
+      expect(Math.abs(p.x - nodeCenterX(b))).toBeLessThanOrEqual(CENTER_TOLERANCE);
+    }
+  });
+
+  it('TB if branch fan-out omits dagre waypoints for smooth-step routing', () => {
+    const { nodes, edges, foreachGroups } = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'true',
+            steps: [{ name: 'left_step', type: 'http' }],
+            else: [
+              {
+                name: 'wide_loop',
+                type: 'foreach',
+                foreach: 'items',
+                steps: [
+                  { name: 'inner_a', type: 'http' },
+                  { name: 'inner_b', type: 'http' },
+                ],
+              },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const { edges: laidEdges } = applyGraphLayout(nodes, edges, foreachGroups, {
+      direction: 'TB',
+    });
+    const thenEdge = findLaidEdge(laidEdges, 'gate', 'left-step');
+    expect(thenEdge.points.length).toBeLessThan(2);
+  });
+
+  it('shifts foreach inner edge points with inner node padding', () => {
+    const { nodes, edges, foreachGroups } = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'loop',
+            type: 'foreach',
+            foreach: 'items',
+            steps: [
+              { name: 'inner_a', type: 'http' },
+              { name: 'inner_b', type: 'http' },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const { nodes: laid, edges: laidEdges } = applyGraphLayout(nodes, edges, foreachGroups);
+    const innerA = findLaidNode(laid, 'inner-a');
+    const innerB = findLaidNode(laid, 'inner-b');
+    const innerEdge = findLaidEdge(laidEdges, 'inner-a', 'inner-b');
+    expect(innerA.position.x).toBeGreaterThanOrEqual(32);
+    expect(innerA.position.y).toBeGreaterThanOrEqual(70);
+    for (const p of innerEdge.points) {
+      expect(p.x).toBeGreaterThanOrEqual(innerA.position.x - 1);
+      expect(p.y).toBeGreaterThanOrEqual(innerA.position.y - 1);
+    }
   });
 
   it('TB parallel fan-out keeps sibling steps separated', () => {
