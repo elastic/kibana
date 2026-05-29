@@ -12,13 +12,11 @@ import { EuiLoadingChart, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
-  apiPublishesRelatedPanels,
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { BehaviorSubject, of, switchMap } from 'rxjs';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
@@ -28,25 +26,6 @@ import { DASHBOARD_MARGIN_SIZE } from './constants';
 import { getHighlightStyles } from './highlight_styles';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
-
-const useRenderedPanelRelatedPanels$ = (
-  dashboardApi: ReturnType<typeof useDashboardApi>,
-  id: string
-) => {
-  const relatedPanels$ = useRef(new BehaviorSubject<string[]>([]));
-  useEffect(() => {
-    const subscription = dashboardApi.children$
-      .pipe(
-        switchMap((children) => {
-          const child = children[id];
-          return apiPublishesRelatedPanels(child) ? child.relatedPanels$ : of<string[]>([]);
-        })
-      )
-      .subscribe((relatedPanels) => relatedPanels$.current.next(relatedPanels));
-    return () => subscription.unsubscribe();
-  }, [dashboardApi, id, relatedPanels$]);
-  return relatedPanels$.current;
-};
 
 export interface Props extends DivProps {
   appFixedViewport?: HTMLElement;

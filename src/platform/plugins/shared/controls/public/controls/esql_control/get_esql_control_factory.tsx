@@ -76,14 +76,6 @@ export const getESQLControlFactory = <
         .subscribe((next) => tooltipLabel$.next(next));
 
       const stateApi = initializeStateApi<typeof initialState>({
-      function serializeState() {
-        return {
-          ...selections.getLatestState(),
-          ...labelManager.getLatestState(),
-        } as typeof initialState;
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<typeof initialState>({
         uuid,
         parentApi,
         serializeState: () =>

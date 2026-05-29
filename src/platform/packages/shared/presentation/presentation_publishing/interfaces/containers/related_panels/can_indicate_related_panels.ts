@@ -8,7 +8,7 @@
  */
 
 import type { BehaviorSubject } from 'rxjs';
-import type { PublishesRelatedPanels } from '../publishes_related_panels';
+import type { PublishesRelatedPanels } from '../../publishes_related_panels';
 
 /**
  * This API can indicate panels related to a certain child panel. Consumers determine

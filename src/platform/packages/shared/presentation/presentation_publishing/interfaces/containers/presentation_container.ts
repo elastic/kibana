@@ -15,7 +15,7 @@ import { apiHasUniqueId } from '../has_uuid';
 import type { CanAddNewPanel } from './can_add_new_panel';
 import { apiCanAddNewPanel } from './can_add_new_panel';
 import type { CanAddNewSection } from './can_add_new_section';
-import type { CanIndicateRelatedChildren } from './can_indicate_related_panels';
+import type { CanIndicateRelatedChildren } from './related_panels/can_indicate_related_panels';
 
 export interface PanelPackage<SerializedState extends object = object> {
   panelType: string;

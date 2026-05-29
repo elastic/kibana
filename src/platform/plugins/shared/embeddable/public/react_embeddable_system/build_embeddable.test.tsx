@@ -100,38 +100,6 @@ it('should return Component and componentApi', async () => {
   `);
 });
 
-it('auto-injects relatedPanels$ and recomputes it when siblings change', async () => {
-  const children$ = new BehaviorSubject<Record<string, unknown>>({});
-  const viewMode$ = new BehaviorSubject<'edit' | 'view'>('edit');
-  const containerParentApi = {
-    ...parentApi,
-    children$,
-    viewMode$,
-  };
-
-  const { componentApi } = await buildEmbeddable<{ name: string; bork: string }>({
-    factory: testEmbeddableFactory,
-    maybeId: 'auto-inject-test',
-    parentApi: containerParentApi,
-    phaseTracker,
-    type: 'test',
-  });
-
-  expect(componentApi.relatedPanels$!.value).toEqual([]);
-
-  const filterControl = {
-    uuid: 'filter',
-    appliedFilters$: new BehaviorSubject<unknown>(undefined),
-    useGlobalFilters$: new BehaviorSubject<boolean | undefined>(true),
-  };
-  children$.next({
-    [componentApi.uuid]: componentApi,
-    filter: filterControl,
-  });
-
-  expect(componentApi.relatedPanels$!.value).toEqual(['filter']);
-});
-
 it('should handle factory error', async () => {
   const { Component, componentApi } = await buildEmbeddable({
     factory: {
