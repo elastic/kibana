@@ -173,7 +173,7 @@ export class StreamsAppPlugin
                 }
 
                 return {
-                  visibleIn: ['classicSideNav', 'solutionSideNav', 'globalSearch'],
+                  visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
                   deepLinks: (app.deepLinks ?? []).map((link) => {
                     if (significantEventsDeepLinkIds.includes(link.id as SigEventsLinkId)) {
                       return {

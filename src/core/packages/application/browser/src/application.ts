@@ -105,11 +105,11 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
    * Locations where the app is visible. Each value enables one surface:
    * - `globalSearch`: top-bar search results
    * - `classicSideNav`: classic (hamburger) side navigation
-   * - `solutionSideNav`: solution side navs (Observability, Security, Search)
+   * - `projectSideNav`: project side navs (Observability, Security, Search)
    * - `home`: Kibana home page
    * - `kibanaOverview`: Kibana overview page
    *
-   * @default ['globalSearch', 'classicSideNav', 'solutionSideNav']
+   * @default ['globalSearch', 'classicSideNav', 'projectSideNav']
    * unless the status is marked as `inaccessible`.
    * @note Set to `[]` (empty array) to hide this link from every surface.
    */
@@ -256,7 +256,7 @@ export type AppDeepLinkLocations =
   | 'globalSearch'
   | 'classicSideNav'
   // TODO: rename to 'sideNav' when 'classicSideNav' is removed (classic nav deprecation).
-  | 'solutionSideNav'
+  | 'projectSideNav'
   | 'home'
   | 'kibanaOverview';
 

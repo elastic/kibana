@@ -31,7 +31,7 @@ function getDeepLinksFromUpdater(plugin: ManagementPlugin): AppDeepLink[] {
 }
 
 describe('ManagementPlugin appUpdater deep link visibleIn', () => {
-  it('defaults to globalSearch + solutionSideNav (no classicSideNav, to avoid duplicating Stack Management entries in the classic hamburger)', () => {
+  it('defaults to globalSearch + projectSideNav (no classicSideNav, to avoid duplicating Stack Management entries in the classic hamburger)', () => {
     const plugin = createPlugin();
     const setup = plugin.setup(coreMock.createSetup(), { share: mockShare });
 
@@ -46,7 +46,7 @@ describe('ManagementPlugin appUpdater deep link visibleIn', () => {
     const app = kibana?.deepLinks?.find((a) => a.id === 'test-no-visible-in');
 
     expect(app).toBeDefined();
-    expect(app?.visibleIn).toEqual(['globalSearch', 'solutionSideNav']);
+    expect(app?.visibleIn).toEqual(['globalSearch', 'projectSideNav']);
   });
 
   it('excludes apps with hideFromGlobalSearch:true and no explicit visibleIn', () => {

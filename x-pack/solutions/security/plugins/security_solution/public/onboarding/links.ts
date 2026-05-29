@@ -66,7 +66,7 @@ export const launchPadLinks: LinkItem = {
   sideNavFooter: true,
   skipUrlState: true,
   hideTimeline: true,
-  visibleIn: ['globalSearch', 'classicSideNav', 'solutionSideNav'],
+  visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
 };
 
 /**

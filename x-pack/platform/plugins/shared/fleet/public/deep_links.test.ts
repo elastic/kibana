@@ -49,13 +49,10 @@ const authzGatedIds = [
 ];
 
 describe('getFleetDeepLinks', () => {
-  it('authz-gated links include solutionSideNav when authorized', () => {
+  it('authz-gated links include projectSideNav when authorized', () => {
     const links = getFleetDeepLinks(allowedExperimentalValues, authorizedAuthz);
     for (const id of authzGatedIds) {
-      expect(links.find((l) => l.id === id)?.visibleIn).toEqual([
-        'globalSearch',
-        'solutionSideNav',
-      ]);
+      expect(links.find((l) => l.id === id)?.visibleIn).toEqual(['globalSearch', 'projectSideNav']);
     }
   });
 });

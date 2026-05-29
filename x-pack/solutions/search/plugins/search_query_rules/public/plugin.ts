@@ -51,7 +51,7 @@ export class QueryRulesPlugin
         return renderApp(coreStart, startDeps, element);
       },
       order: 5,
-      visibleIn: ['globalSearch', 'classicSideNav', 'solutionSideNav'],
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
     });
 
     return {};

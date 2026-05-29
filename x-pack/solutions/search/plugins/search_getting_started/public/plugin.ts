@@ -67,7 +67,7 @@ export class SearchGettingStartedPlugin
         return renderApp(coreStart, services, element, queryClient, kibanaVersion);
       },
       order: 1,
-      visibleIn: ['globalSearch', 'classicSideNav', 'solutionSideNav'],
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
     });
 
     return {};

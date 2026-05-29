@@ -57,7 +57,7 @@ describe('InboxPublicPlugin', () => {
 
       const [registration] = coreSetup.application.register.mock.calls[0];
       expect(registration.visibleIn).toEqual(
-        expect.arrayContaining(['classicSideNav', 'solutionSideNav', 'globalSearch'])
+        expect.arrayContaining(['classicSideNav', 'projectSideNav', 'globalSearch'])
       );
     });
 

@@ -210,7 +210,7 @@ export class UptimePlugin
           id: 'Certificates',
           title: 'TLS Certificates',
           path: '/certificates',
-          visibleIn: ['globalSearch', 'solutionSideNav'],
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
         { id: 'Settings', title: 'Settings', path: '/settings' },
       ],

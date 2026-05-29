@@ -12,7 +12,7 @@ import type { AppDeepLinkLocations } from '@kbn/core-application-browser/src/app
 export const DEFAULT_APP_VISIBILITY: AppDeepLinkLocations[] = [
   'globalSearch',
   'classicSideNav',
-  'solutionSideNav',
+  'projectSideNav',
 ];
 
 export const DEFAULT_LINK_VISIBILITY: AppDeepLinkLocations[] = ['globalSearch'];

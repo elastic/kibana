@@ -15,28 +15,28 @@ const fullCapabilities: MlCapabilities = {
 };
 
 describe('getDeepLinks', () => {
-  it('primary visible nav links include globalSearch and solutionSideNav', () => {
+  it('primary visible nav links include globalSearch and projectSideNav', () => {
     const links = getDeepLinks(true, fullCapabilities, false);
     expect(links.find((l) => l.id === 'overview')?.visibleIn).toEqual([
       'globalSearch',
-      'solutionSideNav',
+      'projectSideNav',
     ]);
   });
 
-  it('file upload / index data visualizer / data drift remain in globalSearch + solutionSideNav', () => {
+  it('file upload / index data visualizer / data drift remain in globalSearch + projectSideNav', () => {
     const links = getDeepLinks(true, fullCapabilities, false);
 
     expect(links.find((l) => l.id === 'fileUpload')?.visibleIn).toEqual([
       'globalSearch',
-      'solutionSideNav',
+      'projectSideNav',
     ]);
     expect(links.find((l) => l.id === 'indexDataVisualizer')?.visibleIn).toEqual([
       'globalSearch',
-      'solutionSideNav',
+      'projectSideNav',
     ]);
     expect(links.find((l) => l.id === 'dataDrift')?.visibleIn).toEqual([
       'globalSearch',
-      'solutionSideNav',
+      'projectSideNav',
     ]);
   });
 

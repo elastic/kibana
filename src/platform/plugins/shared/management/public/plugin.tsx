@@ -83,7 +83,7 @@ export class ManagementPlugin
             title: mgmtApp.title,
             path: mgmtApp.basePath,
             keywords: mgmtApp.keywords,
-            visibleIn: mgmtApp.visibleIn ?? ['globalSearch', 'solutionSideNav'],
+            visibleIn: mgmtApp.visibleIn ?? ['globalSearch', 'projectSideNav'],
           })),
       }));
 

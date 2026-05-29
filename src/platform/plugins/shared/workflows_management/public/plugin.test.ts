@@ -196,11 +196,11 @@ describe('WorkflowsPlugin', () => {
           'home',
           'kibanaOverview',
           'classicSideNav',
-          'solutionSideNav',
+          'projectSideNav',
         ]);
       });
 
-      it('should hide the app from classicSideNav and solutionSideNav when the user lacks read capability', () => {
+      it('should hide the app from classicSideNav and projectSideNav when the user lacks read capability', () => {
         setReadCapability(false);
         setLicenseValid(true);
         const updates = captureAppUpdates();
@@ -214,11 +214,11 @@ describe('WorkflowsPlugin', () => {
           'classicSideNav'
         );
         expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).not.toContain(
-          'solutionSideNav'
+          'projectSideNav'
         );
       });
 
-      it('should keep the app in classicSideNav and solutionSideNav and globalSearch when authorized but unavailable', () => {
+      it('should keep the app in classicSideNav and projectSideNav and globalSearch when authorized but unavailable', () => {
         setReadCapability(true);
         setLicenseValid(false);
         const updates = captureAppUpdates();
@@ -230,11 +230,11 @@ describe('WorkflowsPlugin', () => {
         expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
           'globalSearch',
           'classicSideNav',
-          'solutionSideNav',
+          'projectSideNav',
         ]);
       });
 
-      it('should hide the app from classicSideNav and solutionSideNav for unauthorized users even when unavailable', () => {
+      it('should hide the app from classicSideNav and projectSideNav for unauthorized users even when unavailable', () => {
         setReadCapability(false);
         setLicenseValid(false);
         const updates = captureAppUpdates();
@@ -246,7 +246,7 @@ describe('WorkflowsPlugin', () => {
         expect(visibleInUpdates[visibleInUpdates.length - 1].visibleIn).toEqual([
           'globalSearch',
           'classicSideNav',
-          'solutionSideNav',
+          'projectSideNav',
         ]);
       });
     });

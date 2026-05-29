@@ -177,8 +177,8 @@ function getNodeStatus(
   },
   { cloudLinks }: { cloudLinks: CloudLinks }
 ): SideNavNodeStatus | 'remove' {
-  if (link && (!deepLink || !deepLink.visibleIn.includes('solutionSideNav'))) {
-    // If a link is provided but no deepLink found, or the app excluded solutionSideNav
+  if (link && (!deepLink || !deepLink.visibleIn.includes('projectSideNav'))) {
+    // If a link is provided but no deepLink found, or the app excluded projectSideNav
     return 'remove';
   }
 

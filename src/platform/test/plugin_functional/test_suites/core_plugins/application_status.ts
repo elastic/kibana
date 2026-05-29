@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
     it('can change the visibleIn array at runtime', async () => {
       await setAppStatus({
-        visibleIn: ['classicSideNav', 'solutionSideNav'],
+        visibleIn: ['classicSideNav', 'projectSideNav'],
       });
       let link = await appsMenu.getLink('App Status');
       expect(link).not.to.eql(undefined);

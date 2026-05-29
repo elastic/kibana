@@ -205,14 +205,14 @@ export class WorkflowsPlugin
   }): AppDeepLinkLocations[] {
     // Not available takes precedence over authorized.
     if (!params.isAvailable) {
-      // Remove generic locations, but keep in 'classicSideNav', 'solutionSideNav' and globalSearch to make users aware of the feature.
-      return ['globalSearch', 'classicSideNav', 'solutionSideNav'];
+      // Remove generic locations, but keep in 'classicSideNav', 'projectSideNav' and globalSearch to make users aware of the feature.
+      return ['globalSearch', 'classicSideNav', 'projectSideNav'];
     }
     if (!params.isAuthorized) {
-      // Remove from 'classicSideNav', 'solutionSideNav' so it does not use nav real estate, but keep in globalSearch to make it discoverable
+      // Remove from 'classicSideNav', 'projectSideNav' so it does not use nav real estate, but keep in globalSearch to make it discoverable
       return ['globalSearch'];
     }
-    return ['globalSearch', 'home', 'kibanaOverview', 'classicSideNav', 'solutionSideNav'];
+    return ['globalSearch', 'home', 'kibanaOverview', 'classicSideNav', 'projectSideNav'];
   }
 
   /**

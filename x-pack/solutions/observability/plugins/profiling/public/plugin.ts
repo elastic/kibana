@@ -48,7 +48,7 @@ export class ProfilingPlugin
           defaultMessage: 'Stacktraces',
         }),
         path: '/stacktraces',
-        visibleIn: ['globalSearch', 'solutionSideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
       {
         id: 'flamegraphs',
@@ -56,7 +56,7 @@ export class ProfilingPlugin
           defaultMessage: 'Flamegraphs',
         }),
         path: '/flamegraphs',
-        visibleIn: ['globalSearch', 'solutionSideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
       {
         id: 'functions',
@@ -64,7 +64,7 @@ export class ProfilingPlugin
           defaultMessage: 'Functions',
         }),
         path: '/functions',
-        visibleIn: ['globalSearch', 'solutionSideNav'],
+        visibleIn: ['globalSearch', 'projectSideNav'],
       },
     ] satisfies AppDeepLink[];
 

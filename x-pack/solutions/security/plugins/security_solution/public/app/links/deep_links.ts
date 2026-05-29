@@ -94,7 +94,7 @@ const solutionNodesFormatter = (
     if (appLink && !appLink.unauthorized) {
       const deepLink = formatDeepLink(appLink);
       if (appLink.unavailable) {
-        deepLink.visibleIn = ['solutionSideNav']; // Links marked as unavailable have an upselling page to display, show only in solutionSideNav
+        deepLink.visibleIn = ['projectSideNav']; // Links marked as unavailable have an upselling page to display, show only in projectSideNav
       }
       if (node.children) {
         const childrenLinks = solutionNodesFormatter(node.children, normalizedLinks);
@@ -121,7 +121,7 @@ const formatDeepLink = (appLink: LinkItem): AppDeepLink => {
     visibleIn.add('globalSearch');
   }
   if (!appLink.sideNavDisabled) {
-    visibleIn.add('solutionSideNav');
+    visibleIn.add('projectSideNav');
   }
   const deepLink: AppDeepLink = {
     id: appLink.id,

@@ -8,16 +8,16 @@
 import { getInfraDeepLinks } from './plugin';
 
 describe('getInfraDeepLinks', () => {
-  it('primary nav links use the shared globalSearch + solutionSideNav value', () => {
+  it('primary nav links use the shared globalSearch + projectSideNav value', () => {
     const links = getInfraDeepLinks({ metricsExplorerEnabled: true });
 
     expect(links.find((l) => l.id === 'inventory')?.visibleIn).toEqual([
       'globalSearch',
-      'solutionSideNav',
+      'projectSideNav',
     ]);
     expect(links.find((l) => l.id === 'metrics-explorer')?.visibleIn).toEqual([
       'globalSearch',
-      'solutionSideNav',
+      'projectSideNav',
     ]);
   });
 
