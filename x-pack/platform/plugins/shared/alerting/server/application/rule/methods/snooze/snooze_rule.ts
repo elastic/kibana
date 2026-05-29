@@ -122,8 +122,12 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
 
   await logRuleChanges({
     ruleSOs: [
-      { ...updatedRuleRaw, attributes: { ...attributes, ...updatedRuleRaw.attributes } },
-    ] as Array<SavedObject<RawRule>>,
+      {
+        ...updatedRuleRaw,
+        attributes: { ...attributes, ...updatedRuleRaw.attributes },
+        references: updatedRuleRaw.references ?? [],
+      },
+    ],
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleSnooze,
