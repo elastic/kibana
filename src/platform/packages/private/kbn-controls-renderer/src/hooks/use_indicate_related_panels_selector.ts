@@ -28,8 +28,8 @@ export const useIndicateRelatedPanelsSelector = (api: unknown) => {
   const id = useMemo(() => (api && apiHasUniqueId(api) ? api.uuid : undefined), [api]);
 
   const [viewMode, setViewMode] = useState<string>(parentApiLoaded?.viewMode$.value ?? 'view');
-  const [indicateRelatedPanelsId, setIndicateRelatedPanelsId] = useState<string | undefined>(
-    parentApiLoaded?.indicateRelatedPanelsId$.value
+  const [relatedPanelsIndicatorId, setRelatedPanelsIndicatorId] = useState<string | undefined>(
+    parentApiLoaded?.relatedPanelsIndicatorId$.value
   );
   const [relatedPanels, setRelatedPanels] = useState<string[]>([]);
 
@@ -41,11 +41,11 @@ export const useIndicateRelatedPanelsSelector = (api: unknown) => {
     if (!parentApiSubscription.current) {
       const sub = combineLatest([
         parentApiLoaded.viewMode$,
-        parentApiLoaded.indicateRelatedPanelsId$,
+        parentApiLoaded.relatedPanelsIndicatorId$,
         api.relatedPanels$,
       ]).subscribe(([vm, indicateId, relatedPanelIds]) => {
         setViewMode(vm);
-        setIndicateRelatedPanelsId(indicateId);
+        setRelatedPanelsIndicatorId(indicateId);
         setRelatedPanels(relatedPanelIds);
       });
       parentApiSubscription.current = sub;
@@ -59,12 +59,12 @@ export const useIndicateRelatedPanelsSelector = (api: unknown) => {
   );
   const numberOfRelatedPanels = useMemo(() => relatedPanels.length, [relatedPanels]);
   const isIndicatingRelatedPanels = useMemo(
-    () => canIndicateRelatedPanels && indicateRelatedPanelsId === id,
-    [canIndicateRelatedPanels, indicateRelatedPanelsId, id]
+    () => canIndicateRelatedPanels && relatedPanelsIndicatorId === id,
+    [canIndicateRelatedPanels, relatedPanelsIndicatorId, id]
   );
   const onToggleIndicateRelatedPanels = useCallback(() => {
     if (apiCanIndicateRelatedChildren(parentApi))
-      parentApi.setIndicateRelatedPanelsId(isIndicatingRelatedPanels ? undefined : id);
+      parentApi.setRelatedPanelsIndicatorId(isIndicatingRelatedPanels ? undefined : id);
   }, [parentApi, isIndicatingRelatedPanels, id]);
 
   return {

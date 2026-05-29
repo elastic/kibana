@@ -18,7 +18,7 @@ import type { DashboardState } from '../../common';
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
 const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
-const DASHBOARD_INDICATE_RELATED_PANELS_KEY = 'dashboardIndicateRelatedPanelsId';
+const DASHBOARD_INDICATE_RELATED_PANELS_KEY = 'dashboardrelatedPanelsIndicatorId';
 
 export type DashboardBackupState = Partial<DashboardState> & {
   viewMode?: ViewMode;
@@ -32,8 +32,8 @@ export interface DashboardBackupService {
   storeViewMode: (viewMode: ViewMode) => void;
   getDashboardIdsWithUnsavedChanges: () => string[];
   dashboardHasUnsavedEdits: (id?: string) => boolean;
-  getIndicateRelatedPanelsId: (dashboardId?: string) => string | undefined;
-  setIndicateRelatedPanelsId: (
+  getrelatedPanelsIndicatorId: (dashboardId?: string) => string | undefined;
+  setRelatedPanelsIndicatorId: (
     dashboardId: string | undefined,
     panelId: string | undefined
   ) => void;
@@ -41,7 +41,7 @@ export interface DashboardBackupService {
 
 function hasUnsavedEdits(backupState?: DashboardBackupState) {
   /**
-   * Intentionally exclude indicateRelatedPanelsId from unsaved edits. We should
+   * Intentionally exclude relatedPanelsIndicatorId from unsaved edits. We should
    * back this setting up to preserve it on page refresh, but it's not an important
    * enough thing to save to the server
    */
@@ -128,13 +128,13 @@ export const createDashboardBackupService = async (
     },
     dashboardHasUnsavedEdits: (id = DASHBOARD_PANELS_UNSAVED_ID) =>
       warnOnErrors(() => hasUnsavedEdits(getUnsavedDashboardChanges()[id])) ?? false,
-    getIndicateRelatedPanelsId: (dashboardId = DASHBOARD_PANELS_UNSAVED_ID) => {
+    getrelatedPanelsIndicatorId: (dashboardId = DASHBOARD_PANELS_UNSAVED_ID) => {
       return warnOnErrors(() => {
         const allIndicators = sessionStore.get(DASHBOARD_INDICATE_RELATED_PANELS_KEY) ?? {};
         return allIndicators[activeSpaceId]?.[dashboardId] ?? undefined;
       });
     },
-    setIndicateRelatedPanelsId: (
+    setRelatedPanelsIndicatorId: (
       dashboardId = DASHBOARD_PANELS_UNSAVED_ID,
       panelId: string | undefined
     ) => {

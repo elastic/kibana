@@ -37,8 +37,8 @@ export function initializeTrackPanel(
   const scrollToPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const scrollToBottom$ = new Subject<void>();
   const scrollPosition$ = new BehaviorSubject<number | undefined>(undefined);
-  const indicateRelatedPanelsId$ = new BehaviorSubject<string | undefined>(
-    backupService.getIndicateRelatedPanelsId(savedObjectId$.value)
+  const relatedPanelsIndicatorId$ = new BehaviorSubject<string | undefined>(
+    backupService.getrelatedPanelsIndicatorId(savedObjectId$.value)
   );
 
   function setScrollToPanelId(id: string | undefined) {
@@ -53,13 +53,13 @@ export function initializeTrackPanel(
   const blurredPanelIdsSubscription = combineLatest([
     children$,
     focusedPanelId$,
-    indicateRelatedPanelsId$,
+    relatedPanelsIndicatorId$,
   ])
     .pipe(
       // Get the relatedPanels$ subject of the focused panel and use it to determine blurred panels
-      map(([children, focusedPanelId, indicateRelatedPanelsId]) => {
+      map(([children, focusedPanelId, relatedPanelsIndicatorId]) => {
         // To decide whether to blur a panel, a panel in focus takes precedence over something indicating related panels
-        const idToCompareForBlur = focusedPanelId ?? indicateRelatedPanelsId;
+        const idToCompareForBlur = focusedPanelId ?? relatedPanelsIndicatorId;
         if (!idToCompareForBlur) {
           return of({
             focusedChildId: '',
@@ -141,10 +141,10 @@ export function initializeTrackPanel(
 
         highlightPanelId$.next(undefined);
       },
-      indicateRelatedPanelsId$,
-      setIndicateRelatedPanelsId: (panelId: string | undefined) => {
-        indicateRelatedPanelsId$.next(panelId);
-        backupService.setIndicateRelatedPanelsId(savedObjectId$.value, panelId);
+      relatedPanelsIndicatorId$,
+      setRelatedPanelsIndicatorId: (panelId: string | undefined) => {
+        relatedPanelsIndicatorId$.next(panelId);
+        backupService.setRelatedPanelsIndicatorId(savedObjectId$.value, panelId);
       },
       scrollToPanelId$,
       scrollToPanel: async (panelRef: HTMLDivElement) => {

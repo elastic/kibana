@@ -20,8 +20,8 @@ import type { PublishesRelatedPanels } from '../../publishes_related_panels';
  * computer science.
  */
 export interface CanIndicateRelatedChildren {
-  setIndicateRelatedPanelsId: (panelId?: string) => void;
-  indicateRelatedPanelsId$: BehaviorSubject<string | undefined>;
+  setRelatedPanelsIndicatorId: (panelId?: string) => void;
+  relatedPanelsIndicatorId$: BehaviorSubject<string | undefined>;
 }
 
 /**
@@ -29,14 +29,14 @@ export interface CanIndicateRelatedChildren {
  */
 export const apiCanIndicateRelatedChildren = (api: unknown): api is CanIndicateRelatedChildren => {
   return (
-    typeof (api as CanIndicateRelatedChildren)?.setIndicateRelatedPanelsId === 'function' &&
-    typeof (api as CanIndicateRelatedChildren)?.indicateRelatedPanelsId$ !== 'undefined'
+    typeof (api as CanIndicateRelatedChildren)?.setRelatedPanelsIndicatorId === 'function' &&
+    typeof (api as CanIndicateRelatedChildren)?.relatedPanelsIndicatorId$ !== 'undefined'
   );
 };
 
 /**
  * This API is capable of indicating its related siblings. Used to enable a user action to set this particular panel
- * as the indicateRelatedPanelsId in a CanIndicateRelatedChildren
+ * as the relatedPanelsIndicatorId in a CanIndicateRelatedChildren
  */
 export type CanIndicateRelatedSiblings = PublishesRelatedPanels & {
   canIndicateRelatedSiblings: boolean;

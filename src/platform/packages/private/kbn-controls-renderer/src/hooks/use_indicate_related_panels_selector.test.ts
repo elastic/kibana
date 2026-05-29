@@ -12,15 +12,15 @@ import { BehaviorSubject } from 'rxjs';
 import { useIndicateRelatedPanelsSelector } from './use_indicate_related_panels_selector';
 
 const createMockParentApi = ({
-  indicateRelatedPanelsId,
+  relatedPanelsIndicatorId,
 }: {
-  indicateRelatedPanelsId?: string;
+  relatedPanelsIndicatorId?: string;
 } = {}) => {
   const mock = {
     viewMode$: new BehaviorSubject<'view' | 'edit'>('edit'),
-    indicateRelatedPanelsId$: new BehaviorSubject<string | undefined>(indicateRelatedPanelsId),
-    setIndicateRelatedPanelsId: jest.fn((id?: string) => {
-      mock.indicateRelatedPanelsId$.next(id);
+    relatedPanelsIndicatorId$: new BehaviorSubject<string | undefined>(relatedPanelsIndicatorId),
+    setRelatedPanelsIndicatorId: jest.fn((id?: string) => {
+      mock.relatedPanelsIndicatorId$.next(id);
     }),
   };
   return mock;
@@ -54,8 +54,8 @@ describe('useIndicateRelatedPanelsSelector', () => {
   });
 
   describe('when api does not publish related panels', () => {
-    it('should not subscribe to parent indicateRelatedPanelsId$', () => {
-      const subscribeSpy = jest.spyOn(mockParentApi.indicateRelatedPanelsId$, 'subscribe');
+    it('should not subscribe to parent relatedPanelsIndicatorId$', () => {
+      const subscribeSpy = jest.spyOn(mockParentApi.relatedPanelsIndicatorId$, 'subscribe');
       const api = createMockApi({ publishesRelatedPanels: false });
 
       renderHook(() => useIndicateRelatedPanelsSelector(api));
@@ -81,8 +81,8 @@ describe('useIndicateRelatedPanelsSelector', () => {
   });
 
   describe('when parent can indicate and API can inicate related panels', () => {
-    it('should track indicateRelatedPanelsId from parent', async () => {
-      const parentApi = createMockParentApi({ indicateRelatedPanelsId: undefined });
+    it('should track relatedPanelsIndicatorId from parent', async () => {
+      const parentApi = createMockParentApi({ relatedPanelsIndicatorId: undefined });
       const api = createMockApi({ parentApi });
 
       const { result } = renderHook(() => useIndicateRelatedPanelsSelector(api));
@@ -90,7 +90,7 @@ describe('useIndicateRelatedPanelsSelector', () => {
       expect(result.current.isIndicatingRelatedPanels).toBe(false);
 
       act(() => {
-        parentApi.indicateRelatedPanelsId$.next('test-panel');
+        parentApi.relatedPanelsIndicatorId$.next('test-panel');
       });
 
       await waitFor(() => {
@@ -107,12 +107,12 @@ describe('useIndicateRelatedPanelsSelector', () => {
       await waitFor(() => expect(result.current.isIndicatingRelatedPanels).toBe(false));
 
       act(() => result.current.onToggleIndicateRelatedPanels());
-      expect(parentApi.setIndicateRelatedPanelsId).toHaveBeenCalledWith('test-panel');
+      expect(parentApi.setRelatedPanelsIndicatorId).toHaveBeenCalledWith('test-panel');
     });
 
     it('should toggle indicating off when already indicating', async () => {
       const parentApi = createMockParentApi({
-        indicateRelatedPanelsId: 'test-panel',
+        relatedPanelsIndicatorId: 'test-panel',
       });
       const api = createMockApi({ parentApi });
 
@@ -121,7 +121,7 @@ describe('useIndicateRelatedPanelsSelector', () => {
       await waitFor(() => expect(result.current.isIndicatingRelatedPanels).toBe(true));
 
       act(() => result.current.onToggleIndicateRelatedPanels());
-      expect(parentApi.setIndicateRelatedPanelsId).toHaveBeenCalledWith(undefined);
+      expect(parentApi.setRelatedPanelsIndicatorId).toHaveBeenCalledWith(undefined);
     });
   });
 });

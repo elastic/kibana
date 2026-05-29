@@ -63,10 +63,10 @@ export const ControlPanel = ({
     id,
   });
 
-  const [viewMode, disabledActionIds, indicateRelatedPanelsId] = useBatchedPublishingSubjects(
+  const [viewMode, disabledActionIds, relatedPanelsIndicatorId] = useBatchedPublishingSubjects(
     parentApi.viewMode$,
     parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>),
-    parentApi.indicateRelatedPanelsId$ ?? (of(undefined) as PublishingSubject<undefined>)
+    parentApi.relatedPanelsIndicatorId$ ?? (of(undefined) as PublishingSubject<undefined>)
   );
 
   const [panelLabel, setPanelLabel] = useState<string | undefined>();
@@ -79,10 +79,10 @@ export const ControlPanel = ({
     () =>
       Boolean(
         api &&
-          indicateRelatedPanelsId !== undefined &&
-          relatedPanels.includes(indicateRelatedPanelsId)
+          relatedPanelsIndicatorId !== undefined &&
+          relatedPanels.includes(relatedPanelsIndicatorId)
       ),
-    [relatedPanels, indicateRelatedPanelsId, api]
+    [relatedPanels, relatedPanelsIndicatorId, api]
   );
   const {
     canIndicateRelatedPanels,

@@ -63,7 +63,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       useMargins,
       viewMode,
       dashboardContainerRef,
-      indicateRelatedPanelsId,
+      relatedPanelsIndicatorId,
       blurredPanelIds,
     ] = useBatchedPublishingSubjects(
       dashboardApi.hideBorder$,
@@ -74,7 +74,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$,
       dashboardInternalApi.dashboardContainerRef$,
-      dashboardApi.indicateRelatedPanelsId$,
+      dashboardApi.relatedPanelsIndicatorId$,
       dashboardApi.blurredPanelIds$
     );
 
@@ -82,7 +82,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
 
     const isIndicatingRelatedPanels =
-      indicateRelatedPanelsId !== undefined && indicateRelatedPanelsId === id;
+      relatedPanelsIndicatorId !== undefined && relatedPanelsIndicatorId === id;
 
     const focusPanel =
       isIndicatingRelatedPanels || (focusedPanelId !== undefined && focusedPanelId === id);

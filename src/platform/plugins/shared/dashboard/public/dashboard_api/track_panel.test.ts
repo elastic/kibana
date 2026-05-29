@@ -27,8 +27,8 @@ const buildChild = (
 describe('track panel', () => {
   const mockChildrenSubject = new BehaviorSubject<DashboardChildren>({});
   const mockBackupService = {
-    getIndicateRelatedPanelsId: jest.fn(() => undefined),
-    setIndicateRelatedPanelsId: jest.fn(),
+    getrelatedPanelsIndicatorId: jest.fn(() => undefined),
+    setRelatedPanelsIndicatorId: jest.fn(),
   } as unknown as DashboardBackupService;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(undefined);
   const { api, cleanup } = initializeTrackPanel(
@@ -44,8 +44,8 @@ describe('track panel', () => {
     setFocusedPanelId,
     highlightPanelId$,
     highlightPanel,
-    indicateRelatedPanelsId$,
-    setIndicateRelatedPanelsId,
+    relatedPanelsIndicatorId$,
+    setRelatedPanelsIndicatorId,
     scrollToPanel,
     scrollPosition$,
     scrollToPanelId$,
@@ -204,18 +204,18 @@ describe('track panel', () => {
     });
   });
 
-  describe('setIndicateRelatedPanelsId', () => {
+  describe('setRelatedPanelsIndicatorId', () => {
     it('updates the subject and persists the id to the backup service', () => {
-      setIndicateRelatedPanelsId('control-id');
-      expect(indicateRelatedPanelsId$.value).toBe('control-id');
-      expect(mockBackupService.setIndicateRelatedPanelsId).toHaveBeenCalledWith(
+      setRelatedPanelsIndicatorId('control-id');
+      expect(relatedPanelsIndicatorId$.value).toBe('control-id');
+      expect(mockBackupService.setRelatedPanelsIndicatorId).toHaveBeenCalledWith(
         undefined,
         'control-id'
       );
 
-      setIndicateRelatedPanelsId(undefined);
-      expect(indicateRelatedPanelsId$.value).toBeUndefined();
-      expect(mockBackupService.setIndicateRelatedPanelsId).toHaveBeenCalledWith(
+      setRelatedPanelsIndicatorId(undefined);
+      expect(relatedPanelsIndicatorId$.value).toBeUndefined();
+      expect(mockBackupService.setRelatedPanelsIndicatorId).toHaveBeenCalledWith(
         undefined,
         undefined
       );
@@ -228,8 +228,8 @@ describe('track panel', () => {
     const setupBlurTest = () => {
       const children$ = new BehaviorSubject<DashboardChildren>({});
       const backupService = {
-        getIndicateRelatedPanelsId: jest.fn(() => undefined),
-        setIndicateRelatedPanelsId: jest.fn(),
+        getrelatedPanelsIndicatorId: jest.fn(() => undefined),
+        setRelatedPanelsIndicatorId: jest.fn(),
       } as unknown as DashboardBackupService;
       const savedObjectIdSubject$ = new BehaviorSubject<string | undefined>(undefined);
       const { api: blurApi, cleanup: blurCleanup } = initializeTrackPanel(
@@ -279,7 +279,7 @@ describe('track panel', () => {
       blurCleanup();
     });
 
-    it('falls back to indicateRelatedPanelsId when no panel is focused', () => {
+    it('falls back to relatedPanelsIndicatorId when no panel is focused', () => {
       const { children$, blurApi, blurCleanup } = setupBlurTest();
       children$.next({
         otter: buildChild('otter', ['beaver']),
@@ -287,15 +287,15 @@ describe('track panel', () => {
         crow: buildChild('crow'),
       });
 
-      blurApi.setIndicateRelatedPanelsId('otter');
+      blurApi.setRelatedPanelsIndicatorId('otter');
       expect(blurApi.blurredPanelIds$.value).toEqual(['crow']);
 
-      blurApi.setIndicateRelatedPanelsId(undefined);
+      blurApi.setRelatedPanelsIndicatorId(undefined);
       expect(blurApi.blurredPanelIds$.value).toEqual([]);
       blurCleanup();
     });
 
-    it('prefers focusedPanelId over indicateRelatedPanelsId when both are set', () => {
+    it('prefers focusedPanelId over relatedPanelsIndicatorId when both are set', () => {
       const { children$, blurApi, blurCleanup } = setupBlurTest();
       children$.next({
         fox: buildChild('fox', ['hare']),
@@ -304,7 +304,7 @@ describe('track panel', () => {
         mouse: buildChild('mouse'),
       });
 
-      blurApi.setIndicateRelatedPanelsId('owl');
+      blurApi.setRelatedPanelsIndicatorId('owl');
       expect(blurApi.blurredPanelIds$.value.sort()).toEqual(['fox', 'hare']);
 
       blurApi.setFocusedPanelId('fox');
