@@ -1738,6 +1738,88 @@ describe('Agent policy', () => {
         ]
       );
     });
+
+    it('should remove copied endpoint package policy input ids before bulk create', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      soClient = createSavedObjectClientMock();
+      const mockPolicy = {
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: { revision: 1, package_policies: ['package-1'] } as any,
+      };
+      soClient.bulkGet.mockImplementation(async (objects) => {
+        return {
+          saved_objects: objects.map(({ id }) => {
+            return {
+              id,
+              ...mockPolicy,
+            };
+          }),
+        };
+      });
+      soClient.create.mockImplementation(async (type, attributes) => {
+        return {
+          attributes: attributes as unknown as NewAgentPolicy,
+          id: 'mocked',
+          type: 'mocked',
+          references: [],
+        };
+      });
+      const packagePolicies = [
+        {
+          id: 'package-1',
+          name: 'endpoint-1',
+          policy_id: 'policy_1',
+          policy_ids: ['policy_1'],
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '1.0.0',
+          },
+          inputs: [
+            {
+              id: 'stale-input-id',
+              type: 'endpoint',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stale-stream-id',
+                  enabled: true,
+                  data_stream: { type: 'logs', dataset: 'endpoint.events' },
+                },
+              ],
+            },
+          ],
+        },
+      ] as any;
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue(packagePolicies);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: packagePolicies } as any);
+
+      await agentPolicyService.copy(soClient, esClient, 'mocked', {
+        name: 'copy mocked',
+      });
+
+      const copiedPackagePolicies = mockedPackagePolicyService.bulkCreate.mock.calls[0][2];
+
+      expect(copiedPackagePolicies[0].inputs).toEqual([
+        {
+          type: 'endpoint',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'logs', dataset: 'endpoint.events' },
+            },
+          ],
+        },
+      ]);
+      expect(copiedPackagePolicies[0]).toEqual(
+        expect.objectContaining({
+          name: 'endpoint-1 (copy)',
+          policy_ids: ['mocked'],
+        })
+      );
+    });
   });
 
   describe('deployPolicy', () => {

@@ -120,6 +120,7 @@ describe('runDiscoverPlaywrightConfigs', () => {
       info: jest.fn(),
       error: jest.fn(),
       warn: jest.fn(),
+      warning: jest.fn(),
     } as any;
   });
 
@@ -319,97 +320,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
     expect(foundMessage).toBeDefined();
     expect(foundMessage![0]).toContain('1 plugin(s)'); // pluginA only (pluginB filtered out)
     expect(foundMessage![0]).toContain('1 package(s)'); // packageA
-  });
-
-  it('fails when --selective-testing is set without --affected-modules', () => {
-    flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
-    flagsReader.string.mockReturnValue('');
-
-    expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(
-      '--selective-testing requires --affected-modules'
-    );
-  });
-
-  it('with --selective-testing and --affected-modules, limits discovery to affected modules only', () => {
-    flagsReader.enum.mockReturnValue('mki');
-    flagsReader.boolean.mockImplementation((flag: string) => flag === 'selective-testing');
-    flagsReader.string.mockImplementation((name: string) =>
-      name === 'affected-modules' ? '/mock/affected_modules.json' : ''
-    );
-
-    (findPackageForPath as jest.Mock).mockImplementation((_root: string, absPath: string) => {
-      if (absPath.includes('/pluginA/')) return { id: '@kbn/pluginA' };
-      if (absPath.includes('/pluginB/')) return { id: '@kbn/pluginB' };
-      if (absPath.includes('/packageA/')) return { id: '@kbn/packageA' };
-      return undefined;
-    });
-
-    (fs.readFileSync as jest.Mock).mockImplementation((readPath: string) => {
-      if (readPath === '/mock/affected_modules.json') {
-        return JSON.stringify(['@kbn/pluginA']);
-      }
-      if (typeof readPath === 'string' && readPath.endsWith('package.json')) {
-        return JSON.stringify({ name: 'kibana', version: '1.0.0' });
-      }
-      if (typeof readPath === 'string' && readPath.endsWith('.yml')) {
-        return 'mock yaml content';
-      }
-      return '';
-    });
-
-    runDiscoverPlaywrightConfigs(flagsReader, log);
-
-    const infoCalls = log.info.mock.calls;
-    const foundMessage = infoCalls.find((call) =>
-      call[0].includes('Found Playwright config files')
-    );
-    expect(foundMessage).toBeDefined();
-    expect(foundMessage![0]).toContain('1 plugin(s)');
-    expect(foundMessage![0]).toContain('0 package(s)');
-
-    expect(
-      infoCalls.some((call) =>
-        String(call[0]).includes('Selective testing: Scout discovery limited')
-      )
-    ).toBe(true);
-  });
-
-  it('with --affected-modules but without --selective-testing, still discovers all modules matching the target', () => {
-    flagsReader.enum.mockReturnValue('mki');
-    flagsReader.boolean.mockReturnValue(false);
-    flagsReader.string.mockImplementation((name: string) =>
-      name === 'affected-modules' ? '/mock/affected_modules_non_draft.json' : ''
-    );
-
-    (findPackageForPath as jest.Mock).mockImplementation((_root: string, absPath: string) => {
-      if (absPath.includes('/pluginA/')) return { id: '@kbn/pluginA' };
-      if (absPath.includes('/pluginB/')) return { id: '@kbn/pluginB' };
-      if (absPath.includes('/packageA/')) return { id: '@kbn/packageA' };
-      return undefined;
-    });
-
-    (fs.readFileSync as jest.Mock).mockImplementation((readPath: string) => {
-      if (readPath === '/mock/affected_modules_non_draft.json') {
-        return JSON.stringify(['@kbn/pluginA']);
-      }
-      if (typeof readPath === 'string' && readPath.endsWith('package.json')) {
-        return JSON.stringify({ name: 'kibana', version: '1.0.0' });
-      }
-      if (typeof readPath === 'string' && readPath.endsWith('.yml')) {
-        return 'mock yaml content';
-      }
-      return '';
-    });
-
-    runDiscoverPlaywrightConfigs(flagsReader, log);
-
-    const infoCalls = log.info.mock.calls;
-    const foundMessage = infoCalls.find((call) =>
-      call[0].includes('Found Playwright config files')
-    );
-    expect(foundMessage).toBeDefined();
-    expect(foundMessage![0]).toContain('2 plugin(s)');
-    expect(foundMessage![0]).toContain('1 package(s)');
   });
 
   it('filters configs based on target tags for "mki" target (@cloud-serverless-*)', () => {
@@ -1487,6 +1397,147 @@ describe('runDiscoverPlaywrightConfigs', () => {
       expect(serverlessObltGroup.configs).toContain(
         'x-pack/platform/plugins/private/pluginMultiMode/test/scout/ui/playwright.config.ts'
       );
+    });
+  });
+
+  describe('"--testing-scope" flag', () => {
+    const TESTING_SCOPE_PATH = '/mock/testing_scope.json';
+
+    const setupTestingScope = (scope: Record<string, unknown>) => {
+      (fs.readFileSync as jest.Mock).mockImplementation((readPath: string) => {
+        if (readPath === TESTING_SCOPE_PATH) {
+          return JSON.stringify(scope);
+        }
+        if (typeof readPath === 'string' && readPath.endsWith('package.json')) {
+          return JSON.stringify({ name: 'kibana', version: '1.0.0' });
+        }
+        if (typeof readPath === 'string' && readPath.endsWith('.yml')) {
+          return 'mock yaml content';
+        }
+        return '';
+      });
+    };
+
+    beforeEach(() => {
+      (findPackageForPath as jest.Mock).mockImplementation((_root: string, absPath: string) => {
+        if (absPath.includes('/pluginA/')) return { id: '@kbn/pluginA' };
+        if (absPath.includes('/pluginB/')) return { id: '@kbn/pluginB' };
+        if (absPath.includes('/packageA/')) return { id: '@kbn/packageA' };
+        return undefined;
+      });
+    });
+
+    it('routes kind=full/critical-files to a full suite run (warning preserved upstream, no "limited to" message here)', () => {
+      flagsReader.enum.mockReturnValue('mki');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
+      );
+      setupTestingScope({
+        kind: 'full',
+        reason: 'critical-files',
+        affectedModules: ['@kbn/scout'],
+      });
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const infoCalls = log.info.mock.calls;
+      // No filtering applied: every module passes through to the target-tag step.
+      expect(infoCalls.some((call) => String(call[0]).includes('limited to'))).toBe(false);
+    });
+
+    it('routes kind=tests-only to the configs fast path using affectedConfigs', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
+      );
+      setupTestingScope({
+        kind: 'tests-only',
+        affectedModules: ['@kbn/pluginA'],
+        affectedConfigs: [
+          'x-pack/platform/plugins/private/pluginA/test/scout/ui/playwright.config.ts',
+        ],
+      });
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const infoCalls = log.info.mock.calls;
+      expect(
+        infoCalls.some((call) => String(call[0]).includes('limited to affected configs'))
+      ).toBe(true);
+    });
+
+    it('routes kind=dependency-tree to the affected-modules filter', () => {
+      flagsReader.enum.mockReturnValue('mki');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
+      );
+      setupTestingScope({
+        kind: 'dependency-tree',
+        affectedModules: ['@kbn/pluginA'],
+      });
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const infoCalls = log.info.mock.calls;
+      expect(
+        infoCalls.some((call) => String(call[0]).includes('limited to affected modules'))
+      ).toBe(true);
+    });
+
+    it('marks isAffected on every module from scope.affectedModules even when kind=full', () => {
+      flagsReader.enum.mockReturnValue('mki');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
+      );
+      setupTestingScope({
+        kind: 'full',
+        reason: 'selective-disabled',
+        affectedModules: ['@kbn/pluginA'],
+      });
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const infoCalls = log.info.mock.calls;
+      // Full-suite run: pluginA, pluginB, and packageA all included.
+      const foundMessage = infoCalls.find((call) =>
+        String(call[0]).includes('Found Playwright config files')
+      );
+      expect(foundMessage).toBeDefined();
+      expect(foundMessage![0]).toContain('2 plugin(s)');
+      expect(foundMessage![0]).toContain('1 package(s)');
+      // Marking ran: the "Affected modules: ..." line appears.
+      expect(infoCalls.some((call) => String(call[0]).includes('Affected modules:'))).toBe(true);
+    });
+
+    it('runs the full suite without marking when --testing-scope is omitted', () => {
+      flagsReader.enum.mockReturnValue('mki');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation(() => '');
+
+      runDiscoverPlaywrightConfigs(flagsReader, log);
+
+      const infoCalls = log.info.mock.calls;
+      // Marking did NOT run.
+      expect(infoCalls.some((call) => String(call[0]).includes('Affected modules:'))).toBe(false);
+      // Full-suite log is emitted.
+      expect(infoCalls.some((call) => String(call[0]).includes('no testing-scope provided'))).toBe(
+        true
+      );
+    });
+
+    it('throws when the testing-scope file is missing required fields', () => {
+      flagsReader.enum.mockReturnValue('all');
+      flagsReader.boolean.mockReturnValue(false);
+      flagsReader.string.mockImplementation((name: string) =>
+        name === 'testing-scope' ? TESTING_SCOPE_PATH : ''
+      );
+      setupTestingScope({ kind: 'full' }); // missing affectedModules
+
+      expect(() => runDiscoverPlaywrightConfigs(flagsReader, log)).toThrow(/testing-scope file/i);
     });
   });
 });
