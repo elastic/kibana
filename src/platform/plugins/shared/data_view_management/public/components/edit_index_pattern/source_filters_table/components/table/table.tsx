@@ -11,12 +11,13 @@ import React, { Component } from 'react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  keys,
-  EuiInMemoryTable,
-  EuiFieldText,
-  EuiButtonIcon,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiInMemoryTable,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
+  keys,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -258,47 +259,55 @@ class TableClass extends Component<
           if (this.state.editingFilterId === filter.clientId) {
             return (
               <>
-                <EuiButtonIcon
-                  size="s"
-                  onClick={() => {
-                    saveFilter({
-                      clientId: this.state.editingFilterId,
-                      value: this.state.editingFilterValue,
-                    });
-                    this.stopEditingFilter();
-                  }}
-                  iconType="checkCircleFill"
-                  aria-label={saveAria}
-                  data-test-subj={`save_filter-${filter.value}`}
-                />
-                <EuiButtonIcon
-                  size="s"
-                  onClick={() => {
-                    this.stopEditingFilter();
-                  }}
-                  iconType="cross"
-                  aria-label={cancelAria}
-                />
+                <EuiToolTip content={saveAria} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    size="s"
+                    onClick={() => {
+                      saveFilter({
+                        clientId: this.state.editingFilterId,
+                        value: this.state.editingFilterValue,
+                      });
+                      this.stopEditingFilter();
+                    }}
+                    iconType="checkCircleFill"
+                    aria-label={saveAria}
+                    data-test-subj={`save_filter-${filter.value}`}
+                  />
+                </EuiToolTip>
+                <EuiToolTip content={cancelAria} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    size="s"
+                    onClick={() => {
+                      this.stopEditingFilter();
+                    }}
+                    iconType="cross"
+                    aria-label={cancelAria}
+                  />
+                </EuiToolTip>
               </>
             );
           }
 
           return (
             <>
-              <EuiButtonIcon
-                size="s"
-                onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
-                iconType="pencil"
-                aria-label={editAria}
-                data-test-subj={`edit_filter-${filter.value}`}
-              />
-              <EuiButtonIcon
-                size="s"
-                color="danger"
-                onClick={() => deleteFilter(filter)}
-                iconType="trash"
-                aria-label={deleteAria}
-              />
+              <EuiToolTip content={editAria} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  size="s"
+                  onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
+                  iconType="pencil"
+                  aria-label={editAria}
+                  data-test-subj={`edit_filter-${filter.value}`}
+                />
+              </EuiToolTip>
+              <EuiToolTip content={deleteAria} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  size="s"
+                  color="danger"
+                  onClick={() => deleteFilter(filter)}
+                  iconType="trash"
+                  aria-label={deleteAria}
+                />
+              </EuiToolTip>
             </>
           );
         },
