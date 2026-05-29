@@ -161,7 +161,7 @@ describe('pollForWorkflowCompletion', () => {
         getWorkflow: jest.fn(),
         getWorkflowExecution: jest.fn().mockResolvedValue(createExecution('completed')),
         runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+        scheduleWorkflow: jest.fn(),
       };
 
       const result = await pollForWorkflowCompletion({
@@ -184,7 +184,7 @@ describe('pollForWorkflowCompletion', () => {
         getWorkflow: jest.fn(),
         getWorkflowExecution: jest.fn().mockResolvedValue(executionWithSteps),
         runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+        scheduleWorkflow: jest.fn(),
       };
 
       const isReady = (exec: WorkflowExecutionDto): boolean =>
@@ -219,7 +219,7 @@ describe('pollForWorkflowCompletion', () => {
           .mockResolvedValueOnce(terminalWithoutSteps)
           .mockResolvedValueOnce(terminalWithSteps),
         runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+        scheduleWorkflow: jest.fn(),
       };
 
       const isReady = (exec: WorkflowExecutionDto): boolean =>
@@ -251,7 +251,7 @@ describe('pollForWorkflowCompletion', () => {
         getWorkflow: jest.fn(),
         getWorkflowExecution: jest.fn().mockResolvedValue(terminalWithoutSteps),
         runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+        scheduleWorkflow: jest.fn(),
       };
 
       const isReady = (_exec: WorkflowExecutionDto): boolean => false;
@@ -280,7 +280,7 @@ describe('pollForWorkflowCompletion', () => {
         getWorkflow: jest.fn(),
         getWorkflowExecution: jest.fn().mockResolvedValue(terminalWithoutSteps),
         runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+        scheduleWorkflow: jest.fn(),
       };
 
       const isReady = (_exec: WorkflowExecutionDto): boolean => false;
@@ -310,7 +310,7 @@ describe('pollForWorkflowCompletion', () => {
         getWorkflow: jest.fn(),
         getWorkflowExecution: jest.fn().mockResolvedValue(failedExecution),
         runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+        scheduleWorkflow: jest.fn(),
       };
 
       const isReady = (exec: WorkflowExecutionDto): boolean =>
@@ -343,7 +343,7 @@ describe('pollForWorkflowCompletion', () => {
           .mockResolvedValueOnce(terminalWithoutSteps)
           .mockResolvedValueOnce(terminalWithSteps),
         runWorkflow: jest.fn(),
-      scheduleWorkflow: jest.fn(),
+        scheduleWorkflow: jest.fn(),
       };
 
       const isReady = (exec: WorkflowExecutionDto): boolean =>

@@ -470,10 +470,13 @@ describe('invokeAlertRetrievalWorkflow', () => {
       await expect(invokeAlertRetrievalWorkflow(defaultProps)).rejects.toThrow();
 
       const failedCall = mockWriteAttackDiscoveryEvent.mock.calls.find(
-        (call: unknown[]) => (call[0] as Record<string, unknown>)?.action === 'alert-retrieval-failed'
+        (call: unknown[]) =>
+          (call[0] as Record<string, unknown>)?.action === 'alert-retrieval-failed'
       );
 
-      expect(failedCall![0].workflowExecutions.alertRetrieval[0]).not.toHaveProperty('workflowName');
+      expect(failedCall![0].workflowExecutions.alertRetrieval[0]).not.toHaveProperty(
+        'workflowName'
+      );
     });
   });
 
@@ -788,7 +791,8 @@ describe('invokeAlertRetrievalWorkflow', () => {
       await expect(invokeAlertRetrievalWorkflow(defaultProps)).rejects.toThrow();
 
       const failedCall = mockWriteAttackDiscoveryEvent.mock.calls.find(
-        (call: unknown[]) => (call[0] as Record<string, unknown>)?.action === 'alert-retrieval-failed'
+        (call: unknown[]) =>
+          (call[0] as Record<string, unknown>)?.action === 'alert-retrieval-failed'
       );
 
       expect(failedCall![0].workflowExecutions.alertRetrieval[0]).toEqual(
