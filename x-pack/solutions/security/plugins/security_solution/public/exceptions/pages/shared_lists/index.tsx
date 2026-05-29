@@ -22,6 +22,7 @@ import {
   EuiScreenReaderLive,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 
@@ -528,6 +529,7 @@ export const SharedLists = React.memo(() => {
         }
         rightSideItems={[
           <EuiPopover
+            aria-label={i18n.CREATE_BUTTON}
             data-test-subj="manageExceptionListCreateButton"
             button={
               canEditExceptions && (
@@ -676,6 +678,7 @@ export const SharedLists = React.memo(() => {
               <EuiFlexGroup alignItems="flexStart">
                 <EuiFlexItem>
                   <EuiPopover
+                    aria-label={i18n.allExceptionsRowPerPage(rowSize)}
                     button={rowSizeButton}
                     isOpen={isRowSizePopoverOpen}
                     closePopover={closeRowSizePopover}

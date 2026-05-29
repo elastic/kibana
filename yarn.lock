@@ -4911,6 +4911,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/change-point-chart-viewer@link:src/platform/packages/shared/kbn-change-point-chart-viewer":
+  version "0.0.0"
+  uid ""
+
 "@kbn/chart-expressions-common@link:src/platform/packages/shared/chart-expressions-common":
   version "0.0.0"
   uid ""
@@ -6431,6 +6435,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-views-as-code-plugin@link:src/platform/plugins/shared/data_views_as_code":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-views-plugin@link:src/platform/plugins/shared/data_views":
   version "0.0.0"
   uid ""
@@ -6872,6 +6880,10 @@
   uid ""
 
 "@kbn/evals-plugin@link:x-pack/platform/plugins/shared/evals":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-agent-builder-dashboards@link:x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards":
   version "0.0.0"
   uid ""
 
