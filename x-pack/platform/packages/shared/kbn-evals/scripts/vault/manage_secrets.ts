@@ -159,7 +159,7 @@ export const readConfigFromVault = async (vault: VaultType): Promise<KbnEvalsCiC
   return readConfigFromVaultPath(getVaultPath(vault));
 };
 
-export const retrieveFromVault = async (vaultPath: string, filePath: string, field: string) => {
+export const retrieveFromVault = async (vaultPath: string, filePath: string) => {
   const validated = await readConfigFromVaultPath(vaultPath);
   await writeFile(filePath, JSON.stringify(validated, null, 2));
   // eslint-disable-next-line no-console
@@ -167,7 +167,7 @@ export const retrieveFromVault = async (vaultPath: string, filePath: string, fie
 };
 
 export const retrieveConfigFromVault = async (vault: VaultType) => {
-  await retrieveFromVault(getVaultPath(vault), KBN_EVALS_CONFIG_FILE, KBN_EVALS_CONFIG_FIELD);
+  await retrieveFromVault(getVaultPath(vault), KBN_EVALS_CONFIG_FILE);
 };
 
 export const uploadToVault = async (vaultPath: string, filePath: string, field: string) => {
