@@ -99,7 +99,9 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
   });
 
   await logRuleChanges({
-    ruleSOs: [updatedRuleRaw] as Array<SavedObject<RawRule>>,
+    ruleSOs: [
+      { ...updatedRuleRaw, attributes: { ...attributes, ...updatedRuleRaw.attributes } },
+    ] as Array<SavedObject<RawRule>>,
     rulesClientContext: context,
     changesContext: {
       action: RuleChangeTrackingAction.ruleUnsnooze,
