@@ -17,6 +17,7 @@ import { getPackageInfo } from '../epm/packages';
 import { appContextService, cloudConnectorService } from '..';
 import { agentPolicyService } from '../agent_policy';
 import { agentlessAgentService } from '../agents/agentless_agent';
+import { AgentPolicyNotFoundError } from '../../errors';
 
 import { AgentlessPoliciesServiceImpl } from './agentless_policies';
 
@@ -317,9 +318,9 @@ describe('AgentlessPoliciesService', () => {
         .spyOn(agentlessAgentService, 'deleteAgentlessAgent')
         .mockResolvedValueOnce(undefined as any);
 
-      jest.mocked(agentPolicyService.get).mockRejectedValueOnce({
-        output: { statusCode: 404 },
-      });
+      jest
+        .mocked(agentPolicyService.get)
+        .mockRejectedValueOnce(new AgentPolicyNotFoundError('Agent policy not found'));
 
       packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
         { id: 'orphaned-pp-1' },
