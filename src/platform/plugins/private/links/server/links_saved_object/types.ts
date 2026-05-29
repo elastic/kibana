@@ -10,15 +10,10 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   dashboardLinkSchema,
+  externalLinkOptionsSchema,
   externalLinkSchema,
   linksSchema,
-  linksCreateOptionsSchema,
-  linksCreateResultSchema,
-  linksGetResultSchema,
-  linksSearchOptionsSchema,
-  linksUpdateOptionsSchema,
-  externalLinkOptionsSchema,
-} from './schemas';
+} from '../api/schemas';
 
 export type DashboardLink = TypeOf<typeof dashboardLinkSchema>;
 export type ExternalLink = TypeOf<typeof externalLinkSchema>;
@@ -37,14 +32,6 @@ export type StoredDashboardLink = Omit<DashboardLink, 'destination'> &
     destinationRefName: string;
   };
 type StoredExternalLink = ExternalLink & DeprecatedLinkProperties;
-
-export type LinksCreateOptions = TypeOf<typeof linksCreateOptionsSchema>;
-export type LinksUpdateOptions = TypeOf<typeof linksUpdateOptionsSchema>;
-export type LinksSearchOptions = TypeOf<typeof linksSearchOptionsSchema>;
-
-export type LinksGetOut = TypeOf<typeof linksGetResultSchema>;
-export type LinksCreateOut = TypeOf<typeof linksCreateResultSchema>;
-export type LinksUpdateOut = TypeOf<typeof linksCreateResultSchema>;
 
 // For BWC, optionally include deprecated props in StoredLink states so they can be transformed away
 interface DeprecatedLinkProperties {
