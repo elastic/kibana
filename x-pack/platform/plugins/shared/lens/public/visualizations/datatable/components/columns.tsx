@@ -27,6 +27,7 @@ import {
   getGenericFilterDisabledMessage,
   isEsqlTableComputedColumn,
 } from './helpers';
+import { isEmptyValue } from './cell_value_helpers';
 
 const hasFilterCellAction = (actions: LensCellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
@@ -71,7 +72,7 @@ export const createGridColumns = (
     // incoming data might change and put the current page out of bounds - check whether row actually exists
     const rowValue = table.rows[rowIndex]?.[columnId];
     const column = columnsReverseLookup?.[columnId];
-    const contentsIsDefined = rowValue != null;
+    const contentsIsDefined = !isEmptyValue(rowValue);
 
     const cellContent = formatFactory(column?.meta?.params).convertToText(rowValue);
     return { rowValue, contentsIsDefined, cellContent };
@@ -102,8 +103,8 @@ export const createGridColumns = (
 
       const disabledFilterActionMessage = !filterable
         ? isEsqlTableComputedColumn(table, field)
-          ? getEsqlComputedColumnFilterDisabledMessage()
-          : getGenericFilterDisabledMessage()
+          ? getEsqlComputedColumnFilterDisabledMessage
+          : getGenericFilterDisabledMessage
         : undefined;
 
       if (showFilterActions) {

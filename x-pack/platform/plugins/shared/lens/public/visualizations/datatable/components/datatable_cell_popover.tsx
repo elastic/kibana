@@ -10,7 +10,7 @@ import type { EuiDataGridCellPopoverElementProps, UseEuiTheme } from '@elastic/e
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { isNonColorableValue } from './cell_value_helpers';
+import { isEmptyValue } from './cell_value_helpers';
 import {
   getEsqlComputedColumnFilterDisabledMessage,
   getGenericFilterDisabledMessage,
@@ -44,14 +44,14 @@ const LensDatatableCellPopover = ({
   const colIndex = table.columns.findIndex((col) => col.id === columnId);
   const filterable = colIndex >= 0 ? columnFilterable?.[colIndex] || false : false;
 
-  if (isNonColorableValue(rawValue)) {
+  if (isEmptyValue(rawValue)) {
     return <DefaultCellPopover {...popoverProps} cellActions={null} />;
   }
 
   const popoverMessage = !filterable
     ? isEsqlTableComputedColumn(table, columnId)
-      ? getEsqlComputedColumnFilterDisabledMessage()
-      : getGenericFilterDisabledMessage()
+      ? getEsqlComputedColumnFilterDisabledMessage
+      : getGenericFilterDisabledMessage
     : undefined;
 
   return (
