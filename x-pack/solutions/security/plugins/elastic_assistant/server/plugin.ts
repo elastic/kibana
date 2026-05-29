@@ -35,6 +35,7 @@ import {
 } from './inference_feature';
 import type {
   AssistantTool,
+  AttackDiscoveryWorkflowExecutorFactory,
   ElasticAssistantPluginCoreSetupDependencies,
   ElasticAssistantPluginSetup,
   ElasticAssistantPluginSetupDependencies,
@@ -81,6 +82,8 @@ export class ElasticAssistantPlugin
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly config: ConfigSchema;
   private readonly isDev: boolean;
+  private inferencePlugin?: ElasticAssistantPluginStartDependencies['inference'];
+  private workflowExecutorFactory?: AttackDiscoveryWorkflowExecutorFactory;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
@@ -192,6 +195,11 @@ export class ElasticAssistantPlugin
       getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
+      registerAttackDiscoveryWorkflowExecutor: (
+        factory: AttackDiscoveryWorkflowExecutorFactory
+      ) => {
+        this.workflowExecutorFactory = factory;
+      },
     };
   }
 
@@ -201,6 +209,7 @@ export class ElasticAssistantPlugin
   ): ElasticAssistantPluginStart {
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
+    this.inferencePlugin = plugins.inference;
 
     removeLegacyQuickPrompt(core.elasticsearch.client.asInternalUser)
       .then((res) => {
