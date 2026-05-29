@@ -12,12 +12,10 @@ import type {
   ChromeNavLinks,
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
-  ChromeProjectNavigationNode,
   ChromeNavLink,
   CloudURLs,
   NavigationCustomization,
   NavigationTreeDefinition,
-  NavigationTreeDefinitionUI,
   CloudLinks,
   SolutionId,
 } from '@kbn/core-chrome-browser';
@@ -41,15 +39,10 @@ import type { Location, History } from 'history';
 import deepEqual from 'react-fast-compare';
 import type { Logger } from '@kbn/logging';
 
-import {
-  findActiveNodes,
-  flattenNav,
-  parseNavigationTree,
-  getRenderableNodes,
-  stripQueryParams,
-} from './utils';
+import { findActiveNodes, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
+import { applyCustomization, type ParsedNavigation } from './apply_customization';
 
 interface StartDeps {
   history: History;
@@ -58,20 +51,6 @@ interface StartDeps {
   getUiSettingsHomeRoute: () => string | undefined;
   logger: Logger;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
-}
-
-interface ParsedNavigation {
-  id: SolutionId;
-  tree: ChromeProjectNavigationNode[];
-  treeUI: NavigationTreeDefinitionUI;
-  flattened: Record<string, ChromeProjectNavigationNode>;
-  overflowItemIds: string[];
-  defaultItemIds: string[];
-  /**
-   * Top-level body nodes the sidebar will actually render: home node excluded,
-   * hidden nodes removed, and panel-openers with no visible descendants pruned.
-   */
-  renderableNodes: ChromeProjectNavigationNode[];
 }
 
 export class ProjectNavigationService {
@@ -128,54 +107,9 @@ export class ProjectNavigationService {
           cloudLinks$,
           this.customization$,
         ]).pipe(
-          map(([def, deepLinks, links, customization]) => {
-            let body = [...def.body];
-            let overflowItemIds: string[] = [];
-
-            // Capture default item IDs from the raw body before any customization is applied.
-            const getId = (item: (typeof body)[number]) => item.id ?? item.link;
-            const defaultItemIds = body
-              .filter((item) => item.renderAs !== 'home')
-              .map((item) => getId(item) as string)
-              .filter(Boolean);
-
-            if (customization) {
-              const { moves, hidden } = customization;
-              overflowItemIds = hidden;
-
-              // Replay each move sequentially on top of the default order.
-              // Skip moves whose id or afterId no longer exists in the current nav.
-              for (const { id, afterId } of moves) {
-                const fromIdx = body.findIndex((item) => getId(item) === id);
-                if (fromIdx === -1) continue; // item no longer in nav — skip
-                if (afterId !== null && !body.some((item) => getId(item) === afterId)) continue; // reference item gone — skip
-
-                const [moving] = body.splice(fromIdx, 1);
-                if (afterId === null) {
-                  body = [moving, ...body];
-                } else {
-                  const afterIdx = body.findIndex((item) => getId(item) === afterId);
-                  body.splice(afterIdx + 1, 0, moving);
-                }
-              }
-            }
-
-            const { navigationTree, navigationTreeUI } = parseNavigationTree(
-              source.id,
-              { ...def, body },
-              { deepLinks, cloudLinks: links }
-            );
-
-            return {
-              id: source.id,
-              treeUI: navigationTreeUI,
-              tree: navigationTree,
-              flattened: flattenNav(navigationTree),
-              overflowItemIds,
-              defaultItemIds,
-              renderableNodes: getRenderableNodes(navigationTreeUI.body),
-            };
-          }),
+          map(([def, deepLinks, links, customization]) =>
+            applyCustomization(source.id, def, deepLinks, links, customization)
+          ),
           catchError((err) => {
             logger.error(err);
             return of(null);
