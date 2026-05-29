@@ -288,7 +288,7 @@ export default ({ getService }: FtrProviderContext) => {
         // Auditbeat host records carry host.id, so the EUID is id-based (host:<host.id>)
         // and must be supplied explicitly via entity.id.
         // Auditbeat user records do not carry user.id, so the EUID is name-based
-        // (user:<user.name>) and is auto-generated — no entity.id needed.
+        // (user:<user.name>) and is auto-generated, no entity.id needed.
         await entityStoreV2.setup({
           hosts: [
             {

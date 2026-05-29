@@ -37,7 +37,7 @@ export interface EnrichmentSetupConfig {
  * Installs Entity Store V2 engines and seeds entities for alert enrichment tests.
  *
  * Entity creation uses `refresh: 'wait_for'` internally, so seeded entities are
- * immediately searchable when `setup` returns — no additional refresh step is needed.
+ * immediately searchable when `setup` returns. No additional refresh step is needed.
  *
  * Inspired by the approach started in https://github.com/elastic/kibana/pull/270939
  * by @denar50.
