@@ -228,14 +228,13 @@ export const TableSection = React.memo(
         if (!attack) {
           return (
             <AlertsTab
+              attackAlertIds={[]}
               groupingFilters={groupingFilters}
               defaultFilters={defaultFilters}
               isTableLoading={isLoading}
             />
           );
         }
-
-        const filteredAlertsCount = fieldBucket?.attackRelatedAlerts?.doc_count ?? 0;
 
         return (
           <AttackDetailsContainer
@@ -244,7 +243,6 @@ export const TableSection = React.memo(
             groupingFilters={groupingFilters}
             defaultFilters={defaultFilters}
             isTableLoading={isLoading}
-            filteredAlertsCount={filteredAlertsCount}
           />
         );
       },
