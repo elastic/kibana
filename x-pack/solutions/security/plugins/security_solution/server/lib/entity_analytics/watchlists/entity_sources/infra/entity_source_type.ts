@@ -130,8 +130,8 @@ const entitySourceSchemaV2 = {
 
 const entitySourceSchemaV3 = {
   ...entitySourceSchemaV2,
-  apiKeyId: schema.maybe(schema.nullable(schema.string())),
-  apiKey: schema.maybe(schema.nullable(schema.string())),
+  apiKeyId: schema.maybe(schema.nullable(schema.string({ maxLength: 64 }))),
+  apiKey: schema.maybe(schema.nullable(schema.string({ maxLength: 256 }))),
 };
 
 export const watchlistEntitySourceType: SavedObjectsType = {

@@ -137,7 +137,7 @@ export const MonitoringEntitySource = lazySchema(() =>
       /**
        * ID of the API key used for scoped reads from the source index. Only present for index-type sources.
        */
-      apiKeyId: z.string().nullable().optional(),
+      apiKeyId: z.string().max(64).nullable().optional(),
     })
   )
 );
