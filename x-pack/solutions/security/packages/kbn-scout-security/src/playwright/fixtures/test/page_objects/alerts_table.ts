@@ -83,4 +83,16 @@ export class AlertsTablePage {
     // Increased timeout to 20 seconds because this page sometimes takes longer to load
     return this.detectionsAlertsWrapper.waitFor({ state: 'visible', timeout: 20_000 });
   }
+
+  async waitForRuleAlert(ruleName: string) {
+    const cell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+    await expect(cell).toBeVisible({ timeout: 60_000 });
+    return cell;
+  }
+
+  async checkAlertRowCheckbox(ruleName: string) {
+    const cell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+    const row = cell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+    await row.getByRole('checkbox').check();
+  }
 }

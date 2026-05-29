@@ -43,14 +43,29 @@ import type { SetRequired } from 'type-fest';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
+import type { MutedAlerts } from '@kbn/response-ops-alerts-apis/types';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { ProjectRouting } from '@kbn/es-query';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
+import type { Case } from './apis/bulk_get_cases';
+import type { ItemsSelectionState } from './components/tags/items/types';
 
 /**
- * A single conversation attachment or a group of attachments.
- * Defined structurally here to avoid a compile-time dependency on agent-builder packages.
+ * A single conversation attachment or a group of attachments. Defined structurally
+ * here to avoid a compile-time dependency on agent-builder packages. The payload is
+ * passed through to openChat without inspection, so a broad structural type is enough.
  */
-export type ConversationAttachmentInput =
-  | { type: string; data?: unknown; hidden?: boolean }
-  | { type: 'group'; id: string; label: string; items: Array<{ type: string; data?: unknown }> };
+export interface ConversationAttachmentInput {
+  type: string;
+}
 
 /**
  * Minimal structural interface for the chat service required by the alerts table.
@@ -71,20 +86,6 @@ export interface BulkAddToChatConfig {
   initialMessage?: string;
   onAddedToChat?: (itemCount: number) => void;
 }
-import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
-import type { MutedAlerts } from '@kbn/response-ops-alerts-apis/types';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import type { RenderingService } from '@kbn/core-rendering-browser';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { ProjectRouting } from '@kbn/es-query';
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
-import type { Case } from './apis/bulk_get_cases';
-import type { ItemsSelectionState } from './components/tags/items/types';
 
 export interface Consumer {
   id: AlertConsumers;

@@ -28,7 +28,7 @@ export const spaceTest = baseSpaceTest.extend<{}, SecuritySolutionWorkerFixtures
         path: `/s/${scoutSpace.id}/api/actions/connector`,
         headers: XSRF,
         body: {
-          name: 'scout-llm-proxy',
+          name: `scout-llm-proxy-${scoutSpace.id}`,
           config: {
             apiProvider: 'OpenAI',
             apiUrl: `http://localhost:${proxy.getPort()}`,
@@ -50,7 +50,7 @@ export const spaceTest = baseSpaceTest.extend<{}, SecuritySolutionWorkerFixtures
       const connectors = Array.isArray(list.data) ? list.data : [];
       await Promise.all(
         connectors
-          .filter((c) => c.name === 'scout-llm-proxy')
+          .filter((c) => c.name === `scout-llm-proxy-${scoutSpace.id}`)
           .map((c) =>
             kbnClient.request({
               method: 'DELETE',

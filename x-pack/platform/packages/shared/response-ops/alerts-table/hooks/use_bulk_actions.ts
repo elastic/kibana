@@ -546,7 +546,7 @@ export function useBulkActions({
     const isSiem = ruleTypeIds?.some(isSiemRuleType);
     return [
       ...caseBulkActions,
-      ...(agentBuilderService ? addToChatActions : []),
+      ...addToChatActions,
       ...(isSiem ? [] : untrackBulkActions),
       ...(isSiem ? [] : tagsBulkActions),
       ...(isSiem ? [] : muteBulkActions),
@@ -558,7 +558,6 @@ export function useBulkActions({
     tagsBulkActions,
     muteBulkActions,
     addToChatActions,
-    agentBuilderService,
   ]);
 
   const bulkActions = useMemo(() => {
