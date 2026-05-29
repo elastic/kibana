@@ -16,9 +16,11 @@ import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderSkills } from './skills/register_skills';
 
 export const createMemoryToolsOptions = ({
+  getScopedClients,
   server,
   logger,
 }: {
+  getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
 }): MemoryToolsOptions => {
@@ -31,6 +33,9 @@ export const createMemoryToolsOptions = ({
   return {
     getMemoryService,
     getSecurity: () => server.core.security,
+    getScopedClients,
+    server,
+    logger,
   };
 };
 

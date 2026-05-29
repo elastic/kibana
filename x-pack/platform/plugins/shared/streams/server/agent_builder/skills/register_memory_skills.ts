@@ -15,6 +15,13 @@ import {
   createConversationScraperSkill,
 } from './memory';
 
+const MEMORY_SKILL_FACTORIES = [
+  { id: 'significant-events-memory', create: createSigEventsMemorySkill },
+  { id: 'streams-memory-synthesis', create: createMemorySynthesisSkill },
+  { id: 'streams-memory-consolidation', create: createMemoryConsolidationSkill },
+  { id: 'streams-conversation-scraper', create: createConversationScraperSkill },
+] as const;
+
 export const registerStreamsMemoryAgentBuilder = async ({
   agentBuilder,
   memoryToolsOptions,
@@ -35,18 +42,41 @@ export const registerStreamsMemoryAgentBuilder = async ({
     if (memorySkillsRegistered || !(await isMemoryEnabled())) {
       return;
     }
-    memorySkillsRegistered = true;
 
-    const memorySkills = [
-      createSigEventsMemorySkill(memoryToolsOptions),
-      createMemorySynthesisSkill(memoryToolsOptions),
-      createMemoryConsolidationSkill(memoryToolsOptions),
-      createConversationScraperSkill(memoryToolsOptions),
-    ];
+    const results = await Promise.allSettled(
+      MEMORY_SKILL_FACTORIES.map(async ({ id, create }) => {
+        await agentBuilder.skills.register(create(memoryToolsOptions));
+        return id;
+      })
+    );
 
-    await Promise.all(memorySkills.map((skill) => agentBuilder.skills.register(skill)));
+    const registered: string[] = [];
+    const failed: string[] = [];
 
-    logger.info('Streams memory skills registered (observability:streamsEnableMemory is enabled)');
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      const skillId = MEMORY_SKILL_FACTORIES[i].id;
+      if (result.status === 'fulfilled') {
+        registered.push(skillId);
+      } else {
+        failed.push(skillId);
+        logger.error(
+          `Failed to register streams memory skill "${skillId}": ${
+            result.reason instanceof Error ? result.reason.message : String(result.reason)
+          }`
+        );
+      }
+    }
+
+    if (registered.length === MEMORY_SKILL_FACTORIES.length) {
+      memorySkillsRegistered = true;
+      logger.info('Streams memory skills registered (observability:streamsEnableMemory is enabled)');
+    } else {
+      logger.warn(
+        `Streams memory skills partially registered (${registered.length}/${MEMORY_SKILL_FACTORIES.length}). ` +
+          `Registered: [${registered.join(', ')}]. Failed: [${failed.join(', ')}].`
+      );
+    }
   };
 
   await ensureMemorySkillsRegistered();

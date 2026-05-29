@@ -56,7 +56,7 @@ import {
 import { StreamsService } from './lib/streams/service';
 import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
-import type { RouteHandlerScopedClients } from './routes/types';
+import type { GetScopedClients, RouteHandlerScopedClients } from './routes/types';
 import type {
   StreamsPluginSetupDependencies,
   StreamsPluginStartDependencies,
@@ -81,7 +81,6 @@ import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { createMemoryToolsOptions, registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerStreamsMemoryAgentBuilder } from './agent_builder/skills/register_memory_skills';
-import type { MemoryToolsOptions } from './agent_builder/tools/memory';
 import { registerSignificantEventsInferenceFeatures } from './register_significant_events_inference_features';
 import { registerSuggestionsInferenceFeatures } from './register_suggestions_inference_features';
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
@@ -117,7 +116,7 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
-  private memoryToolsOptions?: MemoryToolsOptions;
+  private streamsGetScopedClients?: GetScopedClients;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -174,7 +173,7 @@ export class StreamsPlugin
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
-    const getScopedClients = async ({
+    this.streamsGetScopedClients = async ({
       request,
       rulesClientOptions,
     }: {
@@ -328,14 +327,9 @@ export class StreamsPlugin
     const telemetryClient = this.ebtTelemetryService.getClient();
 
     if (plugins.agentBuilder) {
-      this.memoryToolsOptions = createMemoryToolsOptions({
-        server: this.server,
-        logger: this.logger,
-      });
-
       registerStreamsAgentBuilder({
         agentBuilder: plugins.agentBuilder,
-        getScopedClients,
+        getScopedClients: this.streamsGetScopedClients,
         server: this.server,
         logger: this.logger,
         telemetry: telemetryClient,
@@ -356,7 +350,7 @@ export class StreamsPlugin
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(STREAMS_MANAGED_WORKFLOW_OWNER);
 
     taskService.registerTasks({
-      getScopedClients,
+      getScopedClients: this.streamsGetScopedClients,
       logger: this.logger,
       telemetry: telemetryClient,
       getInternalEsClient: () => this.server!.core.elasticsearch.client.asInternalUser,
@@ -428,7 +422,7 @@ export class StreamsPlugin
         telemetry: telemetryClient,
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
-        getScopedClients,
+        getScopedClients: this.streamsGetScopedClients,
         continuousKiExtractionWorkflowService,
       },
       core,
@@ -570,25 +564,22 @@ export class StreamsPlugin
   }
 
   public start(core: CoreStart, plugins: StreamsPluginStartDependencies): StreamsPluginStart {
-    if (plugins.agentBuilder && this.memoryToolsOptions) {
-      const soClient = core.savedObjects.getUnsafeInternalClient();
-      const uiSettings = core.uiSettings.asScopedToClient(soClient);
-      const isMemoryEnabled = () => uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+    if (this.server) {
+      this.server.core = core;
+      this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
+      this.server.security = plugins.security;
+      this.server.actions = plugins.actions;
+      this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
+      this.server.inference = plugins.inference;
+      this.server.licensing = plugins.licensing;
+      this.server.taskManager = plugins.taskManager;
+      this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
+      this.server.spaces = plugins.spaces;
 
-      registerStreamsMemoryAgentBuilder({
-        agentBuilder: plugins.agentBuilder,
-        memoryToolsOptions: this.memoryToolsOptions,
-        logger: this.logger,
-        isMemoryEnabled,
-      })
-        .then(({ ensureMemorySkillRegistered }) => {
-          if (this.server) {
-            this.server.ensureMemorySkillRegistered = ensureMemorySkillRegistered;
-          }
-        })
-        .catch((err) => {
-          this.logger.error(`Failed to register streams memory skills: ${err.message}`);
-        });
+      // Set up memory trigger registry with all built-in triggers
+      const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
+      memoryTriggerRegistry.register(discoveryCompletedTrigger);
+      this.server.memoryTriggerRegistry = memoryTriggerRegistry;
     }
 
     initializeSignificantEventsTemplates({
@@ -624,22 +615,31 @@ export class StreamsPlugin
         });
     }
 
-    if (this.server) {
-      this.server.core = core;
-      this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
-      this.server.security = plugins.security;
-      this.server.actions = plugins.actions;
-      this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
-      this.server.inference = plugins.inference;
-      this.server.licensing = plugins.licensing;
-      this.server.taskManager = plugins.taskManager;
-      this.server.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
-      this.server.spaces = plugins.spaces;
+    if (plugins.agentBuilder && this.server && this.streamsGetScopedClients) {
+      const soClient = core.savedObjects.getUnsafeInternalClient();
+      const uiSettings = core.uiSettings.asScopedToClient(soClient);
+      const isMemoryEnabled = () => uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
 
-      // Set up memory trigger registry with all built-in triggers
-      const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
-      memoryTriggerRegistry.register(discoveryCompletedTrigger);
-      this.server.memoryTriggerRegistry = memoryTriggerRegistry;
+      const memoryToolsOptions = createMemoryToolsOptions({
+        getScopedClients: this.streamsGetScopedClients,
+        server: this.server,
+        logger: this.logger,
+      });
+
+      registerStreamsMemoryAgentBuilder({
+        agentBuilder: plugins.agentBuilder,
+        memoryToolsOptions,
+        logger: this.logger,
+        isMemoryEnabled,
+      })
+        .then(({ ensureMemorySkillRegistered }) => {
+          if (this.server) {
+            this.server.ensureMemorySkillRegistered = ensureMemorySkillRegistered;
+          }
+        })
+        .catch((err) => {
+          this.logger.error(`Failed to register streams memory skills: ${err.message}`);
+        });
     }
 
     if (plugins.workflowsExtensions) {

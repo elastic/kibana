@@ -525,19 +525,3 @@ export const internalMemoryRoutes = {
   ...synthesizeMemoryRoute,
 };
 
-export const internalMemoryRoutes = {
-  ...createEntryRoute,
-  ...getEntryRoute,
-  ...getEntryByNameRoute,
-  ...updateEntryRoute,
-  ...deleteEntryRoute,
-  ...renameEntryRoute,
-  ...searchRoute,
-  ...getCategoryTreeRoute,
-  ...getHistoryRoute,
-  ...getVersionRoute,
-  ...recentChangesRoute,
-  ...scrapeConversationsRoute,
-  ...consolidateMemoryRoute,
-  ...synthesizeMemoryRoute,
-};

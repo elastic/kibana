@@ -7,13 +7,11 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
-import {
-  createMemorySearchTool,
-  createMemoryReadTool,
-  createMemoryWriteTool,
-  createMemoryListTool,
-} from '../../tools/memory';
-import type { MemoryToolsOptions } from '../../tools/memory';
+import type { MemoryToolsOptions } from '../../tools/memory/types';
+import { createMemorySearchTool } from '../../tools/memory/memory_search';
+import { createMemoryReadTool } from '../../tools/memory/memory_read';
+import { createMemoryWriteTool } from '../../tools/memory/memory_write';
+import { createMemoryListTool } from '../../tools/memory/memory_list';
 import { createSearchKnowledgeIndicatorsTool } from '../../tools/search_knowledge_indicators/tool';
 
 export const createMemorySynthesisSkill = (options: MemoryToolsOptions) =>
@@ -61,20 +59,19 @@ Pages have **names** (unique identifiers, e.g. "nginx-error-patterns"), **titles
         id: id.replaceAll('.', '_'),
       })) as SkillBoundedTool[];
 
-      const extraTools = [];
-      if (options.getScopedClients && options.server && options.logger) {
-        const { availability: _availability, ...kiTool } = createSearchKnowledgeIndicatorsTool({
-          getScopedClients: options.getScopedClients,
-          server: options.server,
-          logger: options.logger,
-        });
-        extraTools.push({
+      const { availability: _availability, ...kiTool } = createSearchKnowledgeIndicatorsTool({
+        getScopedClients: options.getScopedClients,
+        server: options.server,
+        logger: options.logger,
+      });
+
+      return [
+        ...memoryTools,
+        {
           ...kiTool,
           id: kiTool.id.replaceAll('.', '_'),
           experimental: false,
-        } as SkillBoundedTool);
-      }
-
-      return [...memoryTools, ...extraTools];
+        } as SkillBoundedTool,
+      ];
     },
   });
