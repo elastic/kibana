@@ -73,8 +73,16 @@ export class SamlAuthManager {
     if (!roleData) {
       throw new Error(`Role '${roleName}' not found in Elasticsearch`);
     }
-    // Strip non-privilege metadata before delegating to the generic custom-role path
-    const { metadata: _metadata, transient_metadata: _transient, ...descriptor } = roleData;
+    // Strip fields that are not valid privilege fields:
+    // - `metadata` / `transient_metadata`: ES internal bookkeeping
+    // - `description`: human-readable label accepted by the role API but rejected
+    //   by the API key role_descriptors endpoint
+    const {
+      metadata: _metadata,
+      transient_metadata: _transient,
+      description: _description,
+      ...descriptor
+    } = roleData;
     await this.setCustomRole(descriptor as ElasticsearchRoleDescriptor);
     return descriptor as ElasticsearchRoleDescriptor;
   }

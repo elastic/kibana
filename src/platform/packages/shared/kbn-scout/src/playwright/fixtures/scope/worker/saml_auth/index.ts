@@ -149,7 +149,16 @@ export const samlAuthFixture = coreWorkerFixtures.extend<{}, { samlAuth: SamlAut
         }
       }
 
-      await use(manager);
+      // Expose a plain object (not a class instance) so that consumers that
+      // spread `samlAuth` (e.g. `{ ...samlAuth, extraMethod }`) get all methods
+      // as own enumerable properties rather than losing prototype methods.
+      await use({
+        session: manager.session,
+        customRoleName: manager.customRoleName,
+        setCustomRole: (role) => manager.setCustomRole(role),
+        setBuiltinRole: (roleName) => manager.setBuiltinRole(roleName),
+        asInteractiveUser: (role) => manager.asInteractiveUser(role),
+      });
       await manager.cleanup();
     },
     { scope: 'worker' },
