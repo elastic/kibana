@@ -73,6 +73,7 @@ components:
         entity_id:
           description: V2-only, the canonical Entity Store EUID.
           type: string
+          maxLength: 1000
           example: 'host:HW-UUID-ABC'
         refresh:
           type: string
