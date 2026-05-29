@@ -8,7 +8,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EuiButton, EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CloudOnboardingDeployment } from '@kbn/fleet-plugin/common/types/models/cloud_onboarding_deployment';
-import type { AwsServiceVarsSource } from '../../aws_service_matrix';
+import {
+  AWS_SERVICES_MATRIX,
+  type AwsServiceMatrixEntry,
+  type AwsServiceVarsSource,
+} from '../../aws_service_matrix';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { computeRequiredStacks, type RequiredStack } from './compute_required_stacks';
@@ -38,18 +42,23 @@ interface StackState {
   isCreating: boolean;
 }
 
+const SERVICE_MAP = new Map(AWS_SERVICES_MATRIX.map((s) => [s.id, s]));
+
 export const DeploymentStep: React.FC<DeploymentStepProps> = ({ onNext }) => {
-  const { connectStep } = useOnboardingFlow();
+  const { connectStep, servicesStep } = useOnboardingFlow();
 
   const connectorId = connectStep.connectorId ?? '';
   const authType: 'identity_federation' | 'static_keys' = connectStep.connectorId
     ? 'identity_federation'
     : 'static_keys';
 
-  // TODO: Wire from OnboardingFlowContext once the Services step PR extends it
-  // with selectedServices, serviceVars, and isNewConnection.
-  // Deployment step renders "no stacks required" until then.
-  const selectedServices = useMemo(() => [], []);
+  const selectedServices = useMemo(
+    () =>
+      servicesStep.selectedServiceIds
+        .map((id) => SERVICE_MAP.get(id))
+        .filter((s): s is AwsServiceMatrixEntry => s !== undefined),
+    [servicesStep.selectedServiceIds]
+  );
   const serviceVars = useMemo<Record<string, AwsServiceVarsSource[]>>(() => ({}), []);
   const isNewConnection = true;
 

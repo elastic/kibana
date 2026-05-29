@@ -6,14 +6,46 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 
-export function NameAndScopeStep() {
+const DEV_STUB_NAME = 'My AWS Integration';
+const DEV_STUB_SCOPE = 'All selected services';
+
+interface NameAndScopeStepProps {
+  onNext: () => void;
+}
+
+export function NameAndScopeStep({ onNext }: NameAndScopeStepProps) {
   return (
-    <EuiEmptyPrompt
-      data-test-subj="onboardingStep-name-and-scope"
-      title={<h2>Name &amp; Scope</h2>}
-      body={<p>Name &amp; Scope step content will go here.</p>}
-    />
+    <div data-test-subj="onboardingStep-name-and-scope">
+      <EuiTitle size="s">
+        <h2>Name &amp; Scope</h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <EuiText color="subdued" size="s">
+        <p>Dev stub — defaults are hard-coded for local testing.</p>
+      </EuiText>
+      <EuiSpacer size="l" />
+      <EuiForm component="div">
+        <EuiFormRow label="Integration name">
+          <EuiFieldText value={DEV_STUB_NAME} readOnly compressed />
+        </EuiFormRow>
+        <EuiFormRow label="Scope">
+          <EuiFieldText value={DEV_STUB_SCOPE} readOnly compressed />
+        </EuiFormRow>
+      </EuiForm>
+      <EuiSpacer size="l" />
+      <EuiButton fill onClick={onNext} data-test-subj="nameAndScopeNextButton">
+        Next
+      </EuiButton>
+    </div>
   );
 }
