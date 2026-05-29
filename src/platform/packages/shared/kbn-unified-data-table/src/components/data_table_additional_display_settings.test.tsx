@@ -7,103 +7,80 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import type { UnifiedDataTableAdditionalDisplaySettingsProps } from './data_table_additional_display_settings';
-import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import lodash from 'lodash';
-import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import { RowHeightMode } from './row_height_settings';
+import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 
 jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
+
+const defaultDisplaySettingsProps = {
+  headerLineCountInput: 5,
+  headerRowHeight: RowHeightMode.custom,
+  lineCountInput: 10,
+  rowHeight: RowHeightMode.custom,
+  sampleSize: 10,
+};
+
+const getSampleSizeNumberInput = () => screen.getByRole('spinbutton', { name: 'Sample size' });
 
 const renderDisplaySettings = (
   props: Partial<UnifiedDataTableAdditionalDisplaySettingsProps> = {}
 ) => {
   return render(
-    <UnifiedDataTableAdditionalDisplaySettings
-      sampleSize={10}
-      rowHeight={RowHeightMode.custom}
-      lineCountInput={10}
-      headerRowHeight={RowHeightMode.custom}
-      headerLineCountInput={5}
-      {...props}
-    />
+    <UnifiedDataTableAdditionalDisplaySettings {...defaultDisplaySettingsProps} {...props} />
   );
 };
 
-describe('UnifiedDataTableAdditionalDisplaySettings', function () {
-  describe('sampleSize', function () {
+const replaceNumberInputValue = async (input: HTMLElement, value: string) => {
+  await userEvent.clear(input);
+  await userEvent.click(input);
+  await userEvent.paste(value);
+};
+
+describe('UnifiedDataTableAdditionalDisplaySettings', () => {
+  describe('sampleSize', () => {
     it('should work correctly', async () => {
       const onChangeSampleSizeMock = jest.fn();
 
-      const component = mountWithIntl(
-        <UnifiedDataTableAdditionalDisplaySettings
-          sampleSize={10}
-          onChangeSampleSize={onChangeSampleSizeMock}
-          rowHeight={RowHeightMode.custom}
-          lineCountInput={10}
-          headerRowHeight={RowHeightMode.custom}
-          headerLineCountInput={5}
-        />
-      );
-      const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
-      expect(input.prop('value')).toBe(10);
-      expect(input.prop('step')).toBe(10);
-
-      await act(async () => {
-        input.simulate('change', {
-          target: {
-            value: 100,
-          },
-        });
+      renderDisplaySettings({
+        sampleSize: 10,
+        onChangeSampleSize: onChangeSampleSizeMock,
       });
 
-      expect(onChangeSampleSizeMock).toHaveBeenCalledWith(100);
+      expect(screen.getByText('Sample size')).toBeVisible();
 
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      component.update();
+      const input = getSampleSizeNumberInput();
+      expect(input).toHaveValue(10);
+      expect(input).toHaveAttribute('step', '10');
 
-      expect(
-        findTestSubject(component, 'unifiedDataTableSampleSizeInput').last().prop('value')
-      ).toBe(100);
+      await replaceNumberInputValue(input, '100');
+
+      expect(onChangeSampleSizeMock).toHaveBeenLastCalledWith(100);
+
+      expect(getSampleSizeNumberInput()).toHaveValue(100);
     });
 
     it('should not execute the callback for an invalid input', async () => {
       const invalidValue = 600;
       const onChangeSampleSizeMock = jest.fn();
 
-      const component = mountWithIntl(
-        <UnifiedDataTableAdditionalDisplaySettings
-          maxAllowedSampleSize={500}
-          sampleSize={50}
-          onChangeSampleSize={onChangeSampleSizeMock}
-          rowHeight={RowHeightMode.custom}
-          lineCountInput={10}
-          headerRowHeight={RowHeightMode.custom}
-          headerLineCountInput={5}
-        />
-      );
-      const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
-      expect(input.prop('value')).toBe(50);
-
-      await act(async () => {
-        input.simulate('change', {
-          target: {
-            value: invalidValue,
-          },
-        });
+      renderDisplaySettings({
+        maxAllowedSampleSize: 500,
+        onChangeSampleSize: onChangeSampleSizeMock,
+        sampleSize: 50,
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      component.update();
+      const input = getSampleSizeNumberInput();
+      expect(screen.getByText('Sample size')).toBeVisible();
+      expect(input).toHaveValue(50);
 
-      expect(
-        findTestSubject(component, 'unifiedDataTableSampleSizeInput').last().prop('value')
-      ).toBe(invalidValue);
+      await replaceNumberInputValue(input, String(invalidValue));
+
+      expect(getSampleSizeNumberInput()).toHaveValue(invalidValue);
 
       expect(onChangeSampleSizeMock).not.toHaveBeenCalled();
     });
@@ -111,32 +88,22 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
     it('should render value changes correctly', async () => {
       const onChangeSampleSizeMock = jest.fn();
 
-      const component = mountWithIntl(
+      const { rerender } = renderDisplaySettings({
+        onChangeSampleSize: onChangeSampleSizeMock,
+        sampleSize: 200,
+      });
+
+      expect(getSampleSizeNumberInput()).toHaveValue(200);
+
+      rerender(
         <UnifiedDataTableAdditionalDisplaySettings
-          sampleSize={200}
+          {...defaultDisplaySettingsProps}
           onChangeSampleSize={onChangeSampleSizeMock}
-          rowHeight={RowHeightMode.custom}
-          lineCountInput={10}
-          headerRowHeight={RowHeightMode.custom}
-          headerLineCountInput={5}
+          sampleSize={500}
         />
       );
 
-      expect(
-        findTestSubject(component, 'unifiedDataTableSampleSizeInput').last().prop('value')
-      ).toBe(200);
-
-      component.setProps({
-        sampleSize: 500,
-        onChangeSampleSize: onChangeSampleSizeMock,
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      component.update();
-
-      expect(
-        findTestSubject(component, 'unifiedDataTableSampleSizeInput').last().prop('value')
-      ).toBe(500);
+      expect(getSampleSizeNumberInput()).toHaveValue(500);
 
       expect(onChangeSampleSizeMock).not.toHaveBeenCalled();
     });
@@ -144,37 +111,21 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
     it('should only render integers when a decimal value is provided', async () => {
       const invalidDecimalValue = 6.11;
       const validIntegerValue = 6;
-
       const onChangeSampleSizeMock = jest.fn();
 
-      const component = mountWithIntl(
-        <UnifiedDataTableAdditionalDisplaySettings
-          maxAllowedSampleSize={500}
-          sampleSize={50}
-          onChangeSampleSize={onChangeSampleSizeMock}
-          rowHeight={RowHeightMode.custom}
-          lineCountInput={10}
-          headerRowHeight={RowHeightMode.custom}
-          headerLineCountInput={5}
-        />
-      );
-      const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
-      expect(input.prop('value')).toBe(50);
-
-      await act(async () => {
-        input.simulate('change', {
-          target: {
-            value: invalidDecimalValue,
-          },
-        });
+      renderDisplaySettings({
+        maxAllowedSampleSize: 500,
+        sampleSize: 50,
+        onChangeSampleSize: onChangeSampleSizeMock,
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      component.update();
+      const input = getSampleSizeNumberInput();
+      expect(input).toHaveValue(50);
+      expect(screen.getByText('Sample size')).toBeVisible();
 
-      expect(
-        findTestSubject(component, 'unifiedDataTableSampleSizeInput').last().prop('value')
-      ).toBe(validIntegerValue);
+      await replaceNumberInputValue(input, String(invalidDecimalValue));
+
+      expect(getSampleSizeNumberInput()).toHaveValue(validIntegerValue);
     });
 
     it('should not fail if sample size is not step of 10', async () => {
@@ -183,38 +134,24 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       const customSampleSize = 9995;
       const newSampleSize = 9990;
 
-      const component = mountWithIntl(
-        <UnifiedDataTableAdditionalDisplaySettings
-          sampleSize={customSampleSize}
-          maxAllowedSampleSize={customSampleSize}
-          onChangeSampleSize={onChangeSampleSizeMock}
-          rowHeight={RowHeightMode.custom}
-          lineCountInput={10}
-          headerRowHeight={RowHeightMode.custom}
-          headerLineCountInput={5}
-        />
-      );
-
-      let input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
-      expect(input.prop('value')).toBe(customSampleSize);
-      expect(input.prop('step')).toBe(1);
-
-      await act(async () => {
-        input.simulate('change', {
-          target: {
-            value: newSampleSize,
-          },
-        });
+      renderDisplaySettings({
+        maxAllowedSampleSize: customSampleSize,
+        onChangeSampleSize: onChangeSampleSizeMock,
+        sampleSize: customSampleSize,
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      component.update();
+      let input = getSampleSizeNumberInput();
+      expect(input).toHaveValue(customSampleSize);
+      expect(input).toHaveAttribute('step', '1');
+      expect(screen.getByText('Sample size')).toBeVisible();
 
-      input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
-      expect(input.prop('value')).toBe(newSampleSize);
-      expect(input.prop('step')).toBe(1);
+      await replaceNumberInputValue(input, String(newSampleSize));
 
-      expect(onChangeSampleSizeMock).toHaveBeenCalledWith(newSampleSize);
+      input = getSampleSizeNumberInput();
+      expect(input).toHaveValue(newSampleSize);
+      expect(input).toHaveAttribute('step', '1');
+
+      expect(onChangeSampleSizeMock).toHaveBeenLastCalledWith(newSampleSize);
     });
 
     it('should not fail if sample size is less than 10', async () => {
@@ -223,36 +160,23 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       const customSampleSize = 5;
       const newSampleSize = 10;
 
-      const component = mountWithIntl(
-        <UnifiedDataTableAdditionalDisplaySettings
-          sampleSize={customSampleSize}
-          onChangeSampleSize={onChangeSampleSizeMock}
-          rowHeight={RowHeightMode.custom}
-          lineCountInput={10}
-          headerRowHeight={RowHeightMode.custom}
-          headerLineCountInput={5}
-        />
-      );
-      let input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
-      expect(input.prop('value')).toBe(customSampleSize);
-      expect(input.prop('step')).toBe(1);
-
-      await act(async () => {
-        input.simulate('change', {
-          target: {
-            value: newSampleSize,
-          },
-        });
+      renderDisplaySettings({
+        onChangeSampleSize: onChangeSampleSizeMock,
+        sampleSize: customSampleSize,
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      component.update();
+      let input = getSampleSizeNumberInput();
+      expect(input).toHaveValue(customSampleSize);
+      expect(input).toHaveAttribute('step', '1');
+      expect(screen.getByText('Sample size')).toBeVisible();
 
-      input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
-      expect(input.prop('value')).toBe(newSampleSize);
-      expect(input.prop('step')).toBe(1);
+      await replaceNumberInputValue(input, String(newSampleSize));
 
-      expect(onChangeSampleSizeMock).toHaveBeenCalledWith(newSampleSize);
+      input = getSampleSizeNumberInput();
+      expect(input).toHaveValue(newSampleSize);
+      expect(input).toHaveAttribute('step', '1');
+
+      expect(onChangeSampleSizeMock).toHaveBeenLastCalledWith(newSampleSize);
     });
   });
 
@@ -262,25 +186,49 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeRowHeight: jest.fn(),
         onChangeRowHeightLines: jest.fn(),
       });
-      expect(screen.getByLabelText('Body cell lines')).toBeInTheDocument();
+
+      expect(screen.getByLabelText('Body cell lines')).toBeVisible();
+      expect(screen.getByText('Custom')).toBeVisible();
+      expect(screen.getByText('Auto')).toBeVisible();
     });
 
     it('should not render rowHeight if onChangeRowHeight and onChangeRowHeightLines are undefined', () => {
       renderDisplaySettings();
+
       expect(screen.queryByLabelText('Body cell lines')).not.toBeInTheDocument();
     });
 
     it('should call onChangeRowHeight and onChangeRowHeightLines when the rowHeight changes', async () => {
       const onChangeRowHeight = jest.fn();
       const onChangeRowHeightLines = jest.fn();
-      renderDisplaySettings({
-        rowHeight: RowHeightMode.custom,
+
+      const { rerender } = renderDisplaySettings({
         onChangeRowHeight,
         onChangeRowHeightLines,
       });
-      fireEvent.change(screen.getByRole('spinbutton'), { target: { value: 5 } });
+
+      expect(screen.getByLabelText('Body cell lines')).toBeVisible();
+
+      const input = screen.getByRole('spinbutton');
+
+      await userEvent.clear(input);
+
+      rerender(
+        <UnifiedDataTableAdditionalDisplaySettings
+          {...defaultDisplaySettingsProps}
+          lineCountInput={0}
+          onChangeRowHeight={onChangeRowHeight}
+          onChangeRowHeightLines={onChangeRowHeightLines}
+        />
+      );
+
+      await userEvent.click(input);
+      await userEvent.paste('5');
+
       expect(onChangeRowHeightLines).toHaveBeenCalledWith(5, true);
+
       await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
+
       expect(onChangeRowHeight).toHaveBeenCalledWith('auto');
     });
   });
@@ -291,25 +239,46 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeHeaderRowHeight: jest.fn(),
         onChangeHeaderRowHeightLines: jest.fn(),
       });
-      expect(screen.getByLabelText('Max header cell lines')).toBeInTheDocument();
+
+      expect(screen.getByLabelText('Max header cell lines')).toBeVisible();
     });
 
     it('should not render headerRowHeight if onChangeHeaderRowHeight and onChangeHeaderRowHeightLines are undefined', () => {
       renderDisplaySettings();
+
       expect(screen.queryByLabelText('Max header cell lines')).not.toBeInTheDocument();
     });
 
     it('should call onChangeHeaderRowHeight and onChangeHeaderRowHeightLines when the headerRowHeight changes', async () => {
       const onChangeHeaderRowHeight = jest.fn();
       const onChangeHeaderRowHeightLines = jest.fn();
-      renderDisplaySettings({
-        headerRowHeight: RowHeightMode.custom,
+
+      const { rerender } = renderDisplaySettings({
         onChangeHeaderRowHeight,
         onChangeHeaderRowHeightLines,
       });
-      fireEvent.change(screen.getByRole('spinbutton'), { target: { value: 3 } });
+
+      expect(screen.getByLabelText('Max header cell lines')).toBeVisible();
+
+      const input = screen.getByRole('spinbutton');
+      await userEvent.clear(input);
+
+      rerender(
+        <UnifiedDataTableAdditionalDisplaySettings
+          {...defaultDisplaySettingsProps}
+          headerLineCountInput={0}
+          onChangeHeaderRowHeight={onChangeHeaderRowHeight}
+          onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
+        />
+      );
+
+      await userEvent.click(input);
+      await userEvent.paste('3');
+
       expect(onChangeHeaderRowHeightLines).toHaveBeenCalledWith(3, true);
+
       await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
+
       expect(onChangeHeaderRowHeight).toHaveBeenCalledWith('auto');
     });
   });
