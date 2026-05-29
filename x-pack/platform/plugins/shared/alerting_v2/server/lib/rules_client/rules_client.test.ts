@@ -908,6 +908,31 @@ describe('RulesClient', () => {
       expect(res.map((r) => r.id)).toEqual(['rule-z', 'rule-a', 'rule-m']);
     });
 
+    it('filters out ids absent from the bulkGet response', async () => {
+      const client = createClient();
+
+      mockSavedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'rule-id-present',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: createRuleSoAttributes({ metadata: { name: 'present' } }),
+            references: [],
+          },
+        ],
+      });
+
+      const res = await client.getRules(['rule-id-present', 'rule-id-absent']);
+
+      expect(res).toHaveLength(1);
+      expect(res[0]).toEqual(
+        expect.objectContaining({
+          id: 'rule-id-present',
+          metadata: expect.objectContaining({ name: 'present' }),
+        })
+      );
+    });
+
     it('throws with the SO error status when a requested id is missing', async () => {
       const client = createClient();
 
