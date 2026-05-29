@@ -1,5 +1,7 @@
 # Hosts UI Performance Investigation
 
+> **Editor's note (post-PoC).** This document is the **pre-PoC** forensic investigation — captured before any prototype code was written, with `getAllHosts` framed as the dominant cost and the four KPI tiles as a smaller secondary win (item #4 of 7 in the TL;DR below). The PoC's deploy-side measurements on a real 5000-host cluster **flipped that priority**: the host table is not the user-perceived bottleneck on a loaded Hosts page, the **KPI strip is** — its four parallel Lens/DSL queries dominate the wall by roughly two orders of magnitude on TSDS-backed semconv data. The architectural argument here still stands and the table is still expensive in absolute terms, but if you're reading this looking for "what we actually shipped and why", start with the [PoC outcomes comment](https://github.com/elastic/observability-dev/issues/5590#issuecomment-4563528163) and [`PROPOSALS.md`](./PROPOSALS.md). This report is kept verbatim as the empirical input behind the proposals.
+
 **Status:** Draft. Server-side analysis complete. Local HAR + Inspector captured.
 **Scope:** Kibana Infra Hosts view (`/app/metrics/hosts`) at scale (≥500 hosts).
 **Repro:** Local Kibana + ES (9.5.0 snapshot) with 1500 OTel hosts ingested via synthtrace `infra_hosts_semconv`, ~25h of `host.name`-bearing OTel metrics in `metrics-hostmetricsreceiver.otel-default`. A parallel ECS run (system.* via metricbeat) was used for cross-schema sanity checks.
