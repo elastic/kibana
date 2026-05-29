@@ -32,18 +32,17 @@ export const isEsqlTableComputedColumn = (table: Datatable, columnId: string): b
   return Boolean(lookup[columnId]?.isComputedColumn);
 };
 
-export const getEsqlComputedColumnFilterDisabledMessage = () => {
-  return i18n.translate(
-    'xpack.lens.table.tableCellFilter.esqlComputedColumnFilterDrilldownDisabledTooltip',
-    {
-      defaultMessage:
-        "You can't apply a filter or drill down from this value because it relies on a field created at query time.",
-    }
-  );
-};
+export const getEsqlComputedColumnFilterDisabledMessage = i18n.translate(
+  'xpack.lens.table.tableCellFilter.esqlComputedColumnFilterDrilldownDisabledTooltip',
+  {
+    defaultMessage:
+      "You can't apply a filter or drill down from this value because it relies on a field created at query time.",
+  }
+);
 
-export const getGenericFilterDisabledMessage = () => {
-  return i18n.translate('xpack.lens.table.tableCellFilter.valueFilterDrilldownDisabledTooltip', {
+export const getGenericFilterDisabledMessage = i18n.translate(
+  'xpack.lens.table.tableCellFilter.valueFilterDrilldownDisabledTooltip',
+  {
     defaultMessage: "You can't apply a filter or drill down from this value.",
-  });
-};
+  }
+);
