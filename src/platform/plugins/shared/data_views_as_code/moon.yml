@@ -21,13 +21,18 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/as-code-data-views-schema'
   - '@kbn/as-code-data-views-transforms'
+  - '@kbn/config-schema'
+  - '@kbn/kibana-utils-plugin'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
+  - jest-unit-tests
 fileGroups:
   src:
     - server/**/*
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}
