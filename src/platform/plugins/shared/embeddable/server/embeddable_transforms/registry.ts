@@ -15,7 +15,7 @@ export function getEmbeddableServerRegistry(
   drilldownRegistry: ReturnType<typeof getDrilldownRegistry>
 ) {
   const registry: { [key: string]: EmbeddableServerDefinition<any, any> } = {};
-  const schemaCache: Record<string, Type<object>> = {};
+  const schemaCache: Record<string, Type<object> | undefined> = {};
 
   function getCachedSchema(type: string) {
     if (schemaCache[type]) {
@@ -23,9 +23,7 @@ export function getEmbeddableServerRegistry(
     }
 
     const { getSchema } = registry[type] ?? {};
-    if (!getSchema) return;
-    const schema = getSchema(drilldownRegistry.getSchema);
-    if (!schema) return;
+    const schema = getSchema?.(drilldownRegistry.getSchema);
     schemaCache[type] = schema;
     return schema;
   }
