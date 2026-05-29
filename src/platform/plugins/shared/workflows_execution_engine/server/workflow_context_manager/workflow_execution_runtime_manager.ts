@@ -233,10 +233,6 @@ export class WorkflowExecutionRuntimeManager {
         break;
       }
     }
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      scopeStack: scopeStack.stackFrames,
-    });
   }
 
   /**
