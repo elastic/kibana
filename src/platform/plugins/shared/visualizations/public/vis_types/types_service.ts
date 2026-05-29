@@ -53,7 +53,7 @@ export class TypesService {
       createBaseVisualization: <TVisParams extends VisParams>(
         config: VisTypeDefinition<TVisParams>
       ): void => {
-        this.registerVisualization(config.name, async () => new BaseVisType(config));
+        this.registerVisualization(config.name, async () => config);
       },
       /**
        * registers a visualization type
