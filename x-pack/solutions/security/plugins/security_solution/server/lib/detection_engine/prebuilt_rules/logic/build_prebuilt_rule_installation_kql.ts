@@ -8,13 +8,24 @@
 import type {
   GranularRulesFilter,
   GranularRulesSearch,
-} from '../../../../../../common/api/detection_engine/rule_management';
-import { convertRuleSearchTermToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
+} from '../../../../../common/api/detection_engine/rule_management/granular_rules/granular_rules_contract.gen';
+import { fullyEscapeKQLStringParam, prepareKQLStringParam } from '../../../../../common/utils/kql';
+import { PREBUILT_RULE_ASSETS_SO_TYPE } from './rule_assets/prebuilt_rule_assets_type';
+
+export const convertPrebuiltRuleAssetSearchTermToKQL = (searchTerm: string): string => {
+  const nameField = `${PREBUILT_RULE_ASSETS_SO_TYPE}.name`;
+  const escapedTerm = fullyEscapeKQLStringParam(searchTerm);
+  const isSingleTerm = escapedTerm.split(' ').length === 1;
+  if (isSingleTerm) {
+    return `${nameField}.keyword: *${escapedTerm}*`;
+  }
+  return `${nameField}: ${prepareKQLStringParam(searchTerm)}`;
+};
 
 /**
- * Combines the KQL filter with search into a unified query.
+ * Combines KQL `filter` with `search`.
  */
-export const buildGranularRulesKql = ({
+export const buildPrebuiltRuleInstallationKql = ({
   filter,
   search,
 }: {
@@ -32,7 +43,7 @@ export const buildGranularRulesKql = ({
   const trimmedSearch = search?.term?.trim();
 
   if (trimmedSearch && searchMode === 'legacy') {
-    parts.push(`(${convertRuleSearchTermToKQL(trimmedSearch)})`);
+    parts.push(`(${convertPrebuiltRuleAssetSearchTermToKQL(trimmedSearch)})`);
   }
 
   if (parts.length === 0) {
