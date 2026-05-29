@@ -32,9 +32,9 @@ import {
 } from '@kbn/unified-data-table';
 import type { TriggerEventLogGridRow } from './trigger_event_log_grid_cells';
 import { TriggerEventLogSummaryCell, triggerSourceToGridRow } from './trigger_event_log_grid_cells';
+import { formatTriggerEventPayloadPreview } from './trigger_event_payload_format';
 import {
   createTriggerEventSummaryCopyPayloadCellAction,
-  formatTriggerEventPayloadAsText,
   withoutTrailingDefaultCopyCellAction,
 } from './trigger_event_summary_copy_payload_cell_action';
 import type {
@@ -133,7 +133,7 @@ export function useTriggerEventTableConfig(
       summary: ({ row, isDetails }) => {
         const source = (row.raw._source ?? {}) as Record<string, unknown>;
         if (isDetails) {
-          const jsonValue = formatTriggerEventPayloadAsText(source.payload);
+          const jsonValue = formatTriggerEventPayloadPreview(source.payload);
           return (
             <div
               data-test-subj="workflowTriggerEventSummaryCellExpanded"

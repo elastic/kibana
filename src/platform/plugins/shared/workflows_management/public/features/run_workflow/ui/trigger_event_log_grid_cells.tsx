@@ -11,8 +11,7 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elas
 import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-
-const PAYLOAD_SUMMARY_MAX_CHARS = 4000;
+import { buildTriggerEventPayloadCompactText } from './trigger_event_payload_format';
 
 export interface TriggerEventLogGridRow {
   id: string;
@@ -38,9 +37,8 @@ export function triggerSourceToGridRow(
     ? source.subscriptions.map((s) => String(s))
     : [];
 
-  const { text: payloadSummaryText, isEmpty: payloadSummaryEmpty } = buildPayloadSummaryText(
-    source.payload
-  );
+  const { text: payloadSummaryText, isEmpty: payloadSummaryEmpty } =
+    buildTriggerEventPayloadCompactText(source.payload);
 
   return {
     id,
@@ -51,19 +49,6 @@ export function triggerSourceToGridRow(
     payloadSummaryEmpty,
     subscriptionIds,
   };
-}
-
-function buildPayloadSummaryText(payload: unknown): { text: string; isEmpty: boolean } {
-  if (payload === undefined || payload === null) {
-    return { text: '', isEmpty: true };
-  }
-  if (typeof payload === 'object' && !Array.isArray(payload) && Object.keys(payload).length === 0) {
-    return { text: '', isEmpty: true };
-  }
-  const json = JSON.stringify(payload);
-  const text =
-    json.length > PAYLOAD_SUMMARY_MAX_CHARS ? `${json.slice(0, PAYLOAD_SUMMARY_MAX_CHARS)}…` : json;
-  return { text, isEmpty: false };
 }
 
 const emptyPayloadSummaryLabel = i18n.translate(

@@ -25,35 +25,9 @@ import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_conte
 import type { DataTableContext } from '@kbn/unified-data-table/src/table_context';
 import {
   createTriggerEventSummaryCopyPayloadCellAction,
-  formatTriggerEventPayloadAsText,
   withoutTrailingDefaultCopyCellAction,
 } from './trigger_event_summary_copy_payload_cell_action';
-
-describe('formatTriggerEventPayloadAsText', () => {
-  it('returns empty string for undefined', () => {
-    expect(formatTriggerEventPayloadAsText(undefined)).toBe('');
-  });
-
-  it('returns literal null for null', () => {
-    expect(formatTriggerEventPayloadAsText(null)).toBe('null');
-  });
-
-  it('pretty-prints objects as JSON', () => {
-    expect(formatTriggerEventPayloadAsText({ a: 1, b: { c: 2 } })).toBe(
-      JSON.stringify({ a: 1, b: { c: 2 } }, null, 2)
-    );
-  });
-
-  it('stringifies primitives', () => {
-    expect(formatTriggerEventPayloadAsText('hello')).toBe('hello');
-    expect(formatTriggerEventPayloadAsText(42)).toBe('42');
-    expect(formatTriggerEventPayloadAsText(false)).toBe('false');
-  });
-
-  it('formats arrays as JSON', () => {
-    expect(formatTriggerEventPayloadAsText([1, 'two'])).toBe(JSON.stringify([1, 'two'], null, 2));
-  });
-});
+import { formatTriggerEventPayloadForCopy } from './trigger_event_payload_format';
 
 describe('withoutTrailingDefaultCopyCellAction', () => {
   it('returns empty array for undefined or empty input', () => {
@@ -122,7 +96,7 @@ describe('createTriggerEventSummaryCopyPayloadCellAction', () => {
     fireEvent.click(screen.getByTestId('workflowTriggerEventSummaryCopyPayloadButton'));
 
     expect(mockCopyToClipboard).toHaveBeenCalledWith(
-      formatTriggerEventPayloadAsText({ foo: 'bar' })
+      formatTriggerEventPayloadForCopy({ foo: 'bar' })
     );
     expect(addInfo).toHaveBeenCalled();
     expect(addWarning).not.toHaveBeenCalled();

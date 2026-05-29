@@ -13,19 +13,7 @@ import React, { useContext } from 'react';
 import type { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_context';
-
-export function formatTriggerEventPayloadAsText(payload: unknown): string {
-  if (payload === undefined) {
-    return '';
-  }
-  if (payload === null) {
-    return 'null';
-  }
-  if (typeof payload === 'object') {
-    return JSON.stringify(payload, null, 2);
-  }
-  return String(payload);
-}
+import { formatTriggerEventPayloadForCopy } from './trigger_event_payload_format';
 
 /**
  * Unified data table builds cell actions with a trailing "copy cell value" action.
@@ -92,7 +80,7 @@ export function createTriggerEventSummaryCopyPayloadCellAction(
         title={ariaLabel}
         data-test-subj="workflowTriggerEventSummaryCopyPayloadButton"
         onClick={() => {
-          const text = formatTriggerEventPayloadAsText(payload);
+          const text = formatTriggerEventPayloadForCopy(payload);
           if (!copyToClipboard(text)) {
             toastNotifications.addWarning({ title: copyFailedTitle });
             return;
