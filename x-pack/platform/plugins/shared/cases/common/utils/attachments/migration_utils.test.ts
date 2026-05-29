@@ -10,6 +10,7 @@ import {
   INDICATOR_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
 } from '../../constants/attachments';
 import { AttachmentType } from '../../types/domain';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } from '../../constants';
@@ -70,6 +71,21 @@ describe('migration_utils', () => {
   describe('isMigratedAttachmentType - file', () => {
     it('is true for the unified file type', () => {
       expect(isMigratedAttachmentType(FILE_ATTACHMENT_TYPE, owner)).toBe(true);
+    });
+  });
+
+  describe('isMigratedAttachmentType - osquery', () => {
+    it('is true for the unified osquery type', () => {
+      expect(isMigratedAttachmentType(OSQUERY_ATTACHMENT_TYPE, owner)).toBe(true);
+      expect(isMigratedAttachmentType(OSQUERY_ATTACHMENT_TYPE, OBSERVABILITY_OWNER)).toBe(true);
+    });
+  });
+
+  describe('toLegacyAttachmentType - osquery', () => {
+    it('maps the unified osquery type back to externalReference (top-level type)', () => {
+      expect(toLegacyAttachmentType(OSQUERY_ATTACHMENT_TYPE)).toBe(
+        AttachmentType.externalReference
+      );
     });
   });
 

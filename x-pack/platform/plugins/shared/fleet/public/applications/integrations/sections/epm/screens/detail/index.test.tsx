@@ -21,6 +21,7 @@ import type {
   GetVerificationKeyIdResponse,
 } from '../../../../../../../common/types/rest_spec';
 import type { KibanaAssetType } from '../../../../../../../common/types/models';
+import { KibanaSavedObjectType } from '../../../../../../../common/types/models';
 import {
   agentPolicyRouteService,
   appRoutesService,
@@ -188,6 +189,42 @@ describe('When on integration detail', () => {
 
       // Reset to default
       ExperimentalFeaturesService.init(allowedExperimentalValues);
+    });
+
+    it('should show Alerting tab for pre-installed packages with alerting assets in installationInfo', async () => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      const kibanaAssets = baseResponse.item.assets?.kibana as Record<string, unknown> | undefined;
+      const itemWithInstalledAlertingAssets = {
+        ...baseResponse.item,
+        assets: {
+          ...baseResponse.item.assets,
+          kibana: {
+            dashboard: kibanaAssets?.dashboard ?? [],
+            search: kibanaAssets?.search ?? [],
+            visualization: kibanaAssets?.visualization ?? [],
+          },
+        },
+        installationInfo: {
+          install_source: 'bundled' as const,
+          installed_kibana: [
+            {
+              id: 'nginx-inactivity-rule',
+              type: KibanaSavedObjectType.alertingRuleTemplate,
+            },
+          ],
+        },
+      };
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: itemWithInstalledAlertingAssets as typeof baseResponse.item,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+
+      expect(await renderResult.findByTestId('tab-alerting')).not.toBeNull();
     });
   });
 

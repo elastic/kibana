@@ -7,18 +7,31 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AgentAcl } from '@kbn/agent-builder-common';
 import type {
+  AgentAclUpdateRequest,
   AgentCreateRequest,
   AgentListOptions,
   AgentUpdateRequest,
 } from '../../../common/agents';
 import type { InternalAgentDefinition } from './agent_registry';
 
+export type AgentAccess = 'read' | 'use' | 'write' | 'delete' | 'manageAcl';
+
+export interface GetAgentOptions {
+  access?: AgentAccess;
+}
+
+export interface AgentAclResult {
+  can_manage: boolean;
+  acl: AgentAcl;
+}
+
 export interface ReadonlyAgentProvider {
   id: string;
   readonly: true;
   has(agentId: string): MaybePromise<boolean>;
-  get(agentId: string): MaybePromise<InternalAgentDefinition>;
+  get(agentId: string, opts?: GetAgentOptions): MaybePromise<InternalAgentDefinition>;
   list(opts: AgentListOptions): MaybePromise<InternalAgentDefinition[]>;
 }
 
@@ -27,6 +40,8 @@ export interface WritableAgentProvider extends Omit<ReadonlyAgentProvider, 'read
   create(createRequest: AgentCreateRequest): MaybePromise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): MaybePromise<InternalAgentDefinition>;
   delete(agentId: string): MaybePromise<boolean>;
+  getAcl(agentId: string): MaybePromise<AgentAclResult>;
+  updateAcl(agentId: string, update: AgentAclUpdateRequest): MaybePromise<AgentAcl>;
 }
 
 export type AgentProvider = ReadonlyAgentProvider | WritableAgentProvider;
