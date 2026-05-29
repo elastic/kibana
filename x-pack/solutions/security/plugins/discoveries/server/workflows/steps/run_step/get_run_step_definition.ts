@@ -134,7 +134,6 @@ export const getRunStepDefinition = ({
                     logger: checkLogger,
                     spaceId,
                     workflowsExtensions: startDeps.workflowsExtensions,
-                    workflowsManagementApi,
                   });
                 }
               : undefined,

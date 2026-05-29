@@ -26,7 +26,10 @@ export type {
   AttackDiscoveryGraphMetadata,
   AttackDiscoveryGraphState,
   BaseGraphState,
+  DefendInsightsGraphMetadata,
+  DefendInsightsGraphState,
   GetAttackDiscoveryGraph,
+  GetDefendInsightsGraph,
   GraphInsightTypes,
   GraphInvocationResult,
   InvokeGraphParams,
@@ -136,5 +139,22 @@ export type {
   WorkflowExecutionsTracking,
 } from './impl/attack_discovery/persistence/event_logging';
 
-// Note: schedules/transforms, telemetry/event_based_telemetry, and
-// defend_insights/graphs are added in later PRs alongside their source files.
+// Defend Insights
+export {
+  DEFEND_INSIGHTS_GRAPH_RUN_NAME,
+  getDefaultDefendInsightsGraph,
+} from './impl/defend_insights/graphs';
+export type {
+  DefaultDefendInsightsGraph,
+  DefendInsightsCombinedPrompts,
+  DefendInsightsGenerationPrompts,
+  DefendInsightsGraphResult,
+  DefendInsightsPrompts,
+  GetDefaultDefendInsightsGraphParams,
+  IKnowledgeBaseDataClient,
+  InvokeDefendInsightsGraphWithDocs,
+  InvokeDefendInsightsGraphWithDocsParams,
+} from './impl/defend_insights/graphs';
+
+// Note: schedules/transforms and telemetry/event_based_telemetry barrel exports
+// are added in the Schedule Integration PR (PR10) alongside their consumers.
