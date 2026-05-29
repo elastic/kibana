@@ -463,64 +463,6 @@ describe('useWorkflowExecutionDetails', () => {
       expect(result).toBeUndefined();
     });
 
-    it('returns stubbed execution when workflowRunId starts with stub-', async () => {
-      let queryFn: (() => Promise<AggregatedWorkflowExecution | undefined>) | undefined;
-      mockUseQuery.mockImplementation((key, fn, options) => {
-        queryFn = fn;
-        return {
-          data: undefined,
-          error: undefined,
-          isLoading: false,
-        };
-      });
-
-      mockHttp.fetch = jest.fn();
-
-      renderHook(() =>
-        useWorkflowExecutionDetails({
-          http: mockHttp,
-          stubData: {
-            alertsContextCount: 10,
-            discoveriesCount: 2,
-            generationStatus: 'started',
-          },
-          workflowRunId: 'stub-run-123',
-        })
-      );
-
-      const result = await queryFn?.();
-
-      expect(result?.steps[0]?.workflowRunId).toBe('stub-run-123');
-    });
-
-    it('does not call http.fetch when workflowRunId starts with stub-', async () => {
-      let queryFn: (() => Promise<AggregatedWorkflowExecution | undefined>) | undefined;
-      mockUseQuery.mockImplementation((key, fn, options) => {
-        queryFn = fn;
-        return {
-          data: undefined,
-          error: undefined,
-          isLoading: false,
-        };
-      });
-
-      mockHttp.fetch = jest.fn();
-
-      renderHook(() =>
-        useWorkflowExecutionDetails({
-          http: mockHttp,
-          stubData: {
-            generationStatus: 'succeeded',
-          },
-          workflowRunId: 'stub-run-123',
-        })
-      );
-
-      await queryFn?.();
-
-      expect(mockHttp.fetch).not.toHaveBeenCalled();
-    });
-
     it('calls http.fetch with correct parameters', async () => {
       let queryFn: (() => Promise<AggregatedWorkflowExecution | undefined>) | undefined;
       mockUseQuery.mockImplementation((key, fn, options) => {
@@ -1297,88 +1239,6 @@ describe('useWorkflowExecutionDetails', () => {
       ]);
     });
 
-    it('uses real IDs from workflowExecutions even when workflowRunId is a stub', async () => {
-      let queryFn: (() => Promise<AggregatedWorkflowExecution | undefined>) | undefined;
-      mockUseQuery.mockImplementation((key, fn, options) => {
-        queryFn = fn;
-        return {
-          data: undefined,
-          error: undefined,
-          isLoading: false,
-        };
-      });
-
-      mockHttp.fetch = jest.fn().mockResolvedValue(mockWorkflowExecution);
-
-      // workflowRunId is a stub, but workflowExecutions has real IDs
-      renderHook(() =>
-        useWorkflowExecutionDetails({
-          http: mockHttp,
-          workflowExecutions: mockWorkflowExecutions,
-          workflowRunId: 'stub-fake-id-123', // stub ID
-        })
-      );
-
-      await queryFn?.();
-
-      // Should call http.fetch with the real IDs from workflowExecutions
-      expect(mockHttp.fetch).toHaveBeenCalledWith('/api/workflows/executions/alert-retrieval-run', {
-        method: 'GET',
-        signal: expect.any(AbortSignal),
-      });
-      expect(mockHttp.fetch).toHaveBeenCalledWith('/api/workflows/executions/generation-run', {
-        method: 'GET',
-        signal: expect.any(AbortSignal),
-      });
-    });
-
-    it('falls back to stub data only when all IDs are stubs', async () => {
-      let queryFn: (() => Promise<AggregatedWorkflowExecution | undefined>) | undefined;
-      mockUseQuery.mockImplementation((key, fn, options) => {
-        queryFn = fn;
-        return {
-          data: undefined,
-          error: undefined,
-          isLoading: false,
-        };
-      });
-
-      mockHttp.fetch = jest.fn();
-
-      // All IDs in workflowExecutions are stubs
-      const allStubWorkflowExecutions: WorkflowExecutionsTracking = {
-        alertRetrieval: [
-          {
-            workflowId: 'alert-retrieval-workflow',
-            workflowRunId: 'stub-alert-run',
-          },
-        ],
-        generation: {
-          workflowId: 'generation-workflow',
-          workflowRunId: 'stub-orch-run',
-        },
-        validation: null,
-      };
-
-      renderHook(() =>
-        useWorkflowExecutionDetails({
-          http: mockHttp,
-          stubData: {
-            alertsContextCount: 10,
-            discoveriesCount: 2,
-            generationStatus: 'started',
-          },
-          workflowExecutions: allStubWorkflowExecutions,
-          workflowRunId: 'stub-run-123',
-        })
-      );
-
-      await queryFn?.();
-
-      // Should NOT call http.fetch since all IDs are stubs
-      expect(mockHttp.fetch).not.toHaveBeenCalled();
-    });
-
     it('does NOT add a retrieve_alerts placeholder when a custom workflow already covers that pipeline phase', async () => {
       let queryFn: (() => Promise<AggregatedWorkflowExecution | undefined>) | undefined;
       mockUseQuery.mockImplementation((key, fn) => {
@@ -1988,52 +1848,6 @@ describe('useWorkflowExecutionDetails', () => {
         { status: ExecutionStatus.PENDING, stepId: 'generate_discoveries' },
         { status: ExecutionStatus.PENDING, stepId: 'validate_discoveries' },
       ]);
-    });
-
-    it('filters out stub IDs and only fetches real IDs', async () => {
-      let queryFn: (() => Promise<AggregatedWorkflowExecution | undefined>) | undefined;
-      mockUseQuery.mockImplementation((key, fn, options) => {
-        queryFn = fn;
-        return {
-          data: undefined,
-          error: undefined,
-          isLoading: false,
-        };
-      });
-
-      mockHttp.fetch = jest.fn().mockResolvedValue(mockWorkflowExecution);
-
-      // Mix of stub and real IDs
-      const mixedWorkflowExecutions: WorkflowExecutionsTracking = {
-        alertRetrieval: [
-          {
-            workflowId: 'alert-retrieval-workflow',
-            workflowRunId: 'real-alert-run-123', // real ID
-          },
-        ],
-        generation: {
-          workflowId: 'generation-workflow',
-          workflowRunId: 'stub-orch-run', // stub ID
-        },
-        validation: null,
-      };
-
-      renderHook(() =>
-        useWorkflowExecutionDetails({
-          http: mockHttp,
-          workflowExecutions: mixedWorkflowExecutions,
-          workflowRunId: 'stub-run-123',
-        })
-      );
-
-      await queryFn?.();
-
-      // Should only call http.fetch for the real ID
-      expect(mockHttp.fetch).toHaveBeenCalledTimes(1);
-      expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/api/workflows/executions/real-alert-run-123',
-        expect.any(Object)
-      );
     });
 
     it('gracefully handles a 404 for a synthetic workflow run ID while still returning data from successful fetches', async () => {

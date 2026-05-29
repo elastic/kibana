@@ -59,6 +59,14 @@ export const shouldAddAttackDiscoveryPipelinePlaceholders = (
 
 const DOWNSTREAM_STEP_IDS = new Set(['generate_discoveries', 'validate_discoveries']);
 
+const RETRIEVAL_STEP_IDS = new Set(['retrieve_alerts']);
+
+const TERMINAL_FAILURE_STATUSES = new Set([
+  ExecutionStatus.CANCELLED,
+  ExecutionStatus.FAILED,
+  ExecutionStatus.TIMED_OUT,
+]);
+
 /**
  * Infers the status for a `retrieve_alerts` placeholder based on downstream
  * step progress. When alerts are "provided" (e.g. action-triggered runs),
@@ -78,6 +86,72 @@ const inferRetrievalPlaceholderStatus = (
   );
 
   return hasDownstreamProgress ? ExecutionStatus.COMPLETED : ExecutionStatus.PENDING;
+};
+
+/**
+ * Infers the status and approximate start time for a `generate_discoveries`
+ * placeholder based on upstream completion.
+ *
+ * The generation workflow engine call is blocking — it doesn't return the
+ * `workflowRunId` until the LLM finishes (which can take minutes). This means
+ * `generate-step-started` is only written to the event log AFTER the generation
+ * workflow completes, so there is no real generation tracking entry while the
+ * LLM is running.
+ *
+ * When alert retrieval has real steps that are completed and the generation step
+ * is still missing, we know generation is actively running and the placeholder
+ * should reflect that so the user sees "RUNNING" rather than "PENDING".
+ *
+ * The completed retrieval step's `finishedAt` timestamp is also returned as the
+ * best available approximation of when generation began (generation starts
+ * immediately after retrieval ends). This is used to seed the LiveTimer so that
+ * reopening the flyout mid-generation shows the correct elapsed time rather than
+ * restarting from zero each time.
+ *
+ * If any retrieval-phase step has a terminal failure status (FAILED, CANCELLED,
+ * TIMED_OUT), generation never ran and the placeholder stays PENDING regardless
+ * of other completed retrieval steps.
+ */
+const inferGenerationPlaceholderState = (
+  existingSteps: StepExecutionWithLink[]
+): { startedAt: string; status: ExecutionStatus } => {
+  // Short-circuit: if any retrieval-phase step terminated with failure,
+  // generation never ran — don't infer RUNNING even if another retrieval
+  // step completed successfully (e.g., one of N configured workflows failed).
+  const hasRetrievalFailure = existingSteps.some(
+    (step) =>
+      (RETRIEVAL_STEP_IDS.has(step.stepId) ||
+        (step.pipelinePhase != null && RETRIEVAL_STEP_IDS.has(step.pipelinePhase))) &&
+      TERMINAL_FAILURE_STATUSES.has(step.status)
+  );
+
+  if (hasRetrievalFailure) {
+    return { startedAt: '', status: ExecutionStatus.PENDING };
+  }
+
+  // Only match by stepId (not pipelinePhase) so that custom alert retrieval steps
+  // (which have stepId like 'query_alerts' but pipelinePhase 'retrieve_alerts') do
+  // not incorrectly trigger RUNNING status for the generation placeholder.
+  // Only the canonical orchestrator 'retrieve_alerts' step indicates that generation
+  // is actively in flight.
+  const completedRetrieval = existingSteps.find(
+    (step) =>
+      RETRIEVAL_STEP_IDS.has(step.stepId) &&
+      step.status === ExecutionStatus.COMPLETED &&
+      step.workflowRunId != null // real step (not itself a placeholder)
+  );
+
+  if (completedRetrieval != null) {
+    return {
+      // Use the retrieval step's finishedAt as the best approximation of when
+      // generation began. Avoids the LiveTimer restarting from zero on each
+      // flyout open when the generation workflow hasn't returned its run ID yet.
+      startedAt: completedRetrieval.finishedAt ?? '',
+      status: ExecutionStatus.RUNNING,
+    };
+  }
+
+  return { startedAt: '', status: ExecutionStatus.PENDING };
 };
 
 export const addAttackDiscoveryPipelinePlaceholders = (
@@ -139,10 +213,16 @@ export const addAttackDiscoveryPipelinePlaceholders = (
       topologicalIndex = maxExistingIndex + dynamicOffset;
     }
 
-    const status =
-      placeholder.stepId === 'retrieve_alerts'
-        ? inferRetrievalPlaceholderStatus(steps)
-        : ExecutionStatus.PENDING;
+    let status: ExecutionStatus = ExecutionStatus.PENDING;
+    let placeholderStartedAt = '';
+
+    if (placeholder.stepId === 'retrieve_alerts') {
+      status = inferRetrievalPlaceholderStatus(steps);
+    } else if (placeholder.stepId === 'generate_discoveries') {
+      const generationState = inferGenerationPlaceholderState(steps);
+      status = generationState.status;
+      placeholderStartedAt = generationState.startedAt;
+    }
 
     return {
       error: undefined,
@@ -153,7 +233,7 @@ export const addAttackDiscoveryPipelinePlaceholders = (
       input: undefined,
       output: undefined,
       scopeStack: [],
-      startedAt: '',
+      startedAt: placeholderStartedAt,
       state: undefined,
       status,
       stepExecutionIndex: 0,

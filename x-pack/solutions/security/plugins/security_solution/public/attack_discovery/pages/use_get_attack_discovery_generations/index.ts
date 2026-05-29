@@ -41,6 +41,7 @@ export const useGetAttackDiscoveryGenerations = ({
   end,
   http,
   isAssistantEnabled,
+  scheduled,
   size,
   start,
   refetchOnWindowFocus = false,
@@ -61,6 +62,7 @@ export const useGetAttackDiscoveryGenerations = ({
         version: API_VERSIONS.public.v1,
         query: {
           end,
+          scheduled,
           size,
           start,
         },
@@ -69,10 +71,10 @@ export const useGetAttackDiscoveryGenerations = ({
     );
 
     return response;
-  }, [end, http, size, start]);
+  }, [end, http, scheduled, size, start]);
 
   const { data, error, isLoading, refetch, status } = useQuery(
-    ['GET', ATTACK_DISCOVERY_GENERATIONS, end, isAssistantEnabled, size, start],
+    ['GET', ATTACK_DISCOVERY_GENERATIONS, end, isAssistantEnabled, scheduled, size, start],
     queryFn,
     {
       enabled: isAssistantEnabled,

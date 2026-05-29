@@ -61,10 +61,25 @@ const baseExecution: WorkflowExecutionDto = {
 describe('buildStepExecutions', () => {
   const emptyLookup = new Map<string, string>();
 
-  it('returns an empty array when a non-terminal execution has no step executions and no definition steps', () => {
-    const result = buildStepExecutions(baseExecution, emptyLookup); // baseExecution.status = RUNNING
+  it('creates a synthetic placeholder step for a non-terminal (running) execution with no step executions and no definition steps', () => {
+    // During the running state, the generation workflow's stepExecutions may be empty
+    // and the API response may not include workflowDefinition.steps. Without a synthetic
+    // placeholder, the pipeline shows "No execution data available" for the entire LLM call.
+    const result = buildStepExecutions(baseExecution, emptyLookup, 'generate_discoveries'); // baseExecution.status = RUNNING
 
-    expect(result).toEqual([]);
+    expect(result).toHaveLength(1);
+    expect(result[0].stepId).toBe('generate_discoveries');
+    expect(result[0].status).toBe(ExecutionStatus.RUNNING);
+    expect(result[0].workflowId).toBe('wf-1');
+    expect(result[0].workflowRunId).toBe('run-1');
+  });
+
+  it('falls back to "retrieve_alerts" stepId when no pipelinePhase is passed for a non-terminal execution', () => {
+    const result = buildStepExecutions(baseExecution, emptyLookup); // no pipelinePhase
+
+    expect(result).toHaveLength(1);
+    expect(result[0].stepId).toBe('retrieve_alerts');
+    expect(result[0].status).toBe(ExecutionStatus.RUNNING);
   });
 
   it('creates a synthetic placeholder step for a terminal execution with no definition steps and no step executions', () => {
@@ -215,6 +230,34 @@ describe('buildStepExecutions', () => {
     expect(result[0].status).toBe(ExecutionStatus.COMPLETED);
     expect(result[0].executionTimeMs).toBe(500);
     expect(result[1].status).toBe(ExecutionStatus.COMPLETED);
+  });
+
+  it('infers RUNNING status for definition steps when execution is RUNNING with no step executions', () => {
+    // This covers the "provided" mode: the generation workflow definition has one step
+    // (generate_discoveries), but step executions are empty while the LLM is in-flight.
+    // Without this inference, the step shows as PENDING instead of RUNNING, which also
+    // prevents the retrieve_alerts placeholder from showing as COMPLETED ("provided").
+    const execution: WorkflowExecutionDto = {
+      ...baseExecution,
+      startedAt: '2024-01-01T00:00:00Z',
+      status: ExecutionStatus.RUNNING,
+      stepExecutions: [],
+      workflowDefinition: {
+        ...baseExecution.workflowDefinition!,
+        steps: [
+          { name: 'generate_discoveries', type: 'security.attack-discovery.generate', with: {} },
+        ],
+      },
+    };
+
+    const result = buildStepExecutions(execution, emptyLookup);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].stepId).toBe('generate_discoveries');
+    expect(result[0].status).toBe(ExecutionStatus.RUNNING);
+    expect(result[0].startedAt).toBe('2024-01-01T00:00:00Z');
+    expect(result[0].executionTimeMs).toBeUndefined();
+    expect(result[0].finishedAt).toBeUndefined();
   });
 
   it('deduplicates by stepId keeping the highest stepExecutionIndex', () => {

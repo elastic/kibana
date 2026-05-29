@@ -253,6 +253,187 @@ describe('applyGenerationStatusOverride', () => {
     });
   });
 
+  describe('when a validation step already has FAILED status', () => {
+    it('returns aggregatedExecution unchanged when validate_discoveries is already FAILED', () => {
+      const aggregatedExecution = createAggregatedExecution({
+        steps: [
+          createStep({
+            status: ExecutionStatus.COMPLETED,
+            stepId: 'retrieve_alerts',
+            topologicalIndex: 0,
+          }),
+          createStep({
+            status: ExecutionStatus.COMPLETED,
+            stepId: 'generate_discoveries',
+            topologicalIndex: 1,
+          }),
+          createStep({
+            status: ExecutionStatus.FAILED,
+            stepId: 'validate_discoveries',
+            topologicalIndex: 2,
+          }),
+        ],
+      });
+
+      const result = applyGenerationStatusOverride({
+        aggregatedExecution,
+        generationStatus: 'failed',
+      });
+
+      expect(result).toBe(aggregatedExecution);
+    });
+
+    it('does NOT mark generation step as FAILED when validation already failed (matched by pipelinePhase)', () => {
+      const aggregatedExecution = createAggregatedExecution({
+        steps: [
+          createStep({
+            pipelinePhase: 'generate_discoveries',
+            status: ExecutionStatus.COMPLETED,
+            stepId: 'custom_generation',
+            topologicalIndex: 0,
+          }),
+          createStep({
+            pipelinePhase: 'validate_discoveries',
+            status: ExecutionStatus.FAILED,
+            stepId: 'custom_validation',
+            topologicalIndex: 1,
+          }),
+        ],
+      });
+
+      const result = applyGenerationStatusOverride({
+        aggregatedExecution,
+        generationStatus: 'failed',
+      });
+
+      expect(result).toBe(aggregatedExecution);
+      expect(result.steps.find((s) => s.stepId === 'custom_generation')?.status).toBe(
+        ExecutionStatus.COMPLETED
+      );
+    });
+  });
+
+  describe('when eventActions contains "validation-failed"', () => {
+    it('does NOT override generation step when validation-failed is in eventActions (validation step is PENDING)', () => {
+      const aggregatedExecution = createAggregatedExecution({
+        steps: [
+          createStep({
+            status: ExecutionStatus.COMPLETED,
+            stepId: 'retrieve_alerts',
+            topologicalIndex: 0,
+          }),
+          createStep({
+            status: ExecutionStatus.COMPLETED,
+            stepId: 'generate_discoveries',
+            topologicalIndex: 1,
+          }),
+          createStep({
+            status: ExecutionStatus.PENDING,
+            stepId: 'validate_discoveries',
+            topologicalIndex: 2,
+          }),
+        ],
+      });
+
+      const result = applyGenerationStatusOverride({
+        aggregatedExecution,
+        eventActions: [
+          'generation-started',
+          'generate-step-succeeded',
+          'validation-failed',
+          'generation-failed',
+        ],
+        generationStatus: 'failed',
+      });
+
+      expect(result).toBe(aggregatedExecution);
+    });
+
+    it('leaves generation step status unchanged when validation-failed is in eventActions', () => {
+      const aggregatedExecution = createAggregatedExecution({
+        steps: [
+          createStep({
+            status: ExecutionStatus.COMPLETED,
+            stepId: 'generate_discoveries',
+            topologicalIndex: 0,
+          }),
+          createStep({
+            status: ExecutionStatus.PENDING,
+            stepId: 'validate_discoveries',
+            topologicalIndex: 1,
+          }),
+        ],
+      });
+
+      const result = applyGenerationStatusOverride({
+        aggregatedExecution,
+        eventActions: ['validation-failed'],
+        generationStatus: 'failed',
+      });
+
+      expect(result.steps[0].status).toBe(ExecutionStatus.COMPLETED);
+    });
+
+    it('DOES override generation step when eventActions does NOT contain validation-failed', () => {
+      const aggregatedExecution = createAggregatedExecution({
+        steps: [
+          createStep({
+            status: ExecutionStatus.COMPLETED,
+            stepId: 'generate_discoveries',
+            topologicalIndex: 0,
+          }),
+        ],
+      });
+
+      const result = applyGenerationStatusOverride({
+        aggregatedExecution,
+        eventActions: ['generation-started', 'generate-step-failed', 'generation-failed'],
+        generationStatus: 'failed',
+      });
+
+      expect(result.steps[0].status).toBe(ExecutionStatus.FAILED);
+    });
+
+    it('DOES override generation step when eventActions is null', () => {
+      const aggregatedExecution = createAggregatedExecution({
+        steps: [
+          createStep({
+            status: ExecutionStatus.COMPLETED,
+            stepId: 'generate_discoveries',
+            topologicalIndex: 0,
+          }),
+        ],
+      });
+
+      const result = applyGenerationStatusOverride({
+        aggregatedExecution,
+        eventActions: null,
+        generationStatus: 'failed',
+      });
+
+      expect(result.steps[0].status).toBe(ExecutionStatus.FAILED);
+    });
+
+    it('DOES override generation step when eventActions is undefined', () => {
+      const aggregatedExecution = createAggregatedExecution({
+        steps: [
+          createStep({
+            status: ExecutionStatus.COMPLETED,
+            stepId: 'generate_discoveries',
+            topologicalIndex: 0,
+          }),
+        ],
+      });
+
+      const result = applyGenerationStatusOverride({
+        aggregatedExecution,
+        generationStatus: 'failed',
+      });
+
+      expect(result.steps[0].status).toBe(ExecutionStatus.FAILED);
+    });
+  });
+
   describe('when generationStatus is NOT "failed"', () => {
     it('returns the aggregated execution unchanged when generationStatus is "succeeded"', () => {
       const aggregatedExecution = createAggregatedExecution({
