@@ -48,6 +48,12 @@ dependsOn:
   - '@kbn/product-doc-common'
   - '@kbn/react-kibana-mount'
   - '@kbn/onechat-common'
+  - '@kbn/agent-builder-common'
+  - '@kbn/scout'
+  - '@kbn/workflows'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/zod'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
@@ -59,6 +65,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
