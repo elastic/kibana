@@ -165,6 +165,19 @@ Notes:
 
 - `--datasets-profile <name>` loads `EVALUATIONS_KBN_URL` / `EVALUATIONS_KBN_API_KEY` from `config.<name>.json`
 - `--export-profile <name>` loads `EVALUATIONS_ES_URL`, `TRACING_ES_URL`, and `TRACING_EXPORTERS` from `config.<name>.json`
+- `--profile <name>` sets both datasets and export profiles at once (default: `config.json`)
+
+#### Loading datasets from dev Vault
+
+Evals run against the local Scout test server. Use `--datasets-profile` when dataset credentials should come from the shared golden cluster instead of a local `config.json`.
+
+```bash
+# Datasets from dev Vault (no local secrets file)
+node scripts/evals start --suite <id> --datasets-profile dev-vault
+
+# Datasets from dev Vault, results/traces to localhost
+node scripts/evals start --suite <id> --datasets-profile dev-vault --export-profile local
+```
 
 #### Filtering tests with `--grep`
 
@@ -352,7 +365,7 @@ cp x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.example.json \
 # 2) Edit config.json with the desired values (includes secrets)
 
 # 3) Print a vault write command (contains base64-encoded config)
-node x-pack/platform/packages/shared/kbn-evals/scripts/vault/get_command.js
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/get_command.js --vault ci-prod
 ```
 
 Share the output via a secure pastebin (for example `https://p.elstc.co`) and have ops run it.
