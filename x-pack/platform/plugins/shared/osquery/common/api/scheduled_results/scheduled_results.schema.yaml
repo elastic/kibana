@@ -184,3 +184,112 @@ paths:
                           fields:
                             host.uptime:
                               - '67890'
+  /api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export:
+    post:
+      summary: Export scheduled query results
+      description: >
+        Export all result rows for a specific scheduled query execution as a
+        downloadable file. The response is a streaming file attachment in the
+        requested format.
+
+        This endpoint is gated behind the `exportResults` experimental feature
+        flag and must be enabled in `kibana.yml` before use:
+
+        ```yaml
+        xpack.osquery.enableExperimental:
+          - exportResults
+        ```
+      operationId: OsqueryExportScheduledQueryResults
+      x-codegen-enabled: true
+      x-labels: [ ]
+      # TODO: Uncomment when feature flag exportResults is set to true
+      #      x-labels: [ess]
+      #      x-state: Added in 9.5.0
+      parameters:
+        - name: scheduleId
+          in: path
+          required: true
+          description: 'The schedule ID of the scheduled query.'
+          schema:
+            description: 'The schedule ID of the scheduled query.'
+            type: string
+            example: '90f342ee-9c05-4844-849b-173993234f22'
+        - name: executionCount
+          in: path
+          required: true
+          description: 'The execution counter for the scheduled query run whose results are exported. Must be a non-negative integer.'
+          schema:
+            description: 'The execution counter for this scheduled query run.'
+            type: integer
+            minimum: 0
+            example: 17384
+        - name: format
+          in: query
+          required: true
+          description: 'The output format of the exported file.'
+          schema:
+            $ref: '../export/export_results.schema.yaml#/components/schemas/ExportFormat'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '../export/export_results.schema.yaml#/components/schemas/ExportRequestBody'
+      responses:
+        '200':
+          description: >
+            A downloadable file in the requested format. The `Content-Disposition`
+            header contains the suggested filename.
+          headers:
+            Content-Disposition:
+              description: 'Attachment disposition with a generated filename, e.g. `attachment; filename="osquery-scheduled-results-{scheduleId}-{executionCount}-{timestamp}.csv"`.'
+              schema:
+                type: string
+                example: 'attachment; filename="osquery-scheduled-results-90f342ee-9c05-4844-849b-173993234f22-17384-2026-04-30T09-12-00-000Z.csv"'
+          content:
+            application/ndjson:
+              schema:
+                description: >
+                  Newline-delimited JSON stream. The first line is a metadata
+                  object (includes `execution_count`); each subsequent line is a
+                  result row.
+                type: string
+                format: binary
+              example: |
+                {"_meta":{"action_id":"90f342ee-9c05-4844-849b-173993234f22","execution_count":17384,"timestamp":"2026-04-30T09:12:00.000Z","exported_by":"elastic","format":"ndjson","total_results":32}}
+                {"@timestamp":"2026-04-30T09:11:58.321Z","agent":{"id":"5b1bb334-a23d-4006-80fe-bd129b979c9f","name":"prod-host-1"},"osquery":{"uid":"1000","username":"ubuntu"}}
+            application/json:
+              schema:
+                description: >
+                  A JSON object with `_meta` (export metadata) and `results` (all
+                  result rows). Rows are held in memory before writing; prefer
+                  `ndjson` for large exports.
+                $ref: '../export/export_results.schema.yaml#/components/schemas/ExportJsonResponse'
+            text/csv:
+              schema:
+                description: >
+                  CSV file with a header row. No metadata block is included in
+                  CSV output.
+                type: string
+                format: binary
+              example: |
+                osquery.description,agent.name,agent.id,osquery.uid,osquery.username
+                Ubuntu,prod-host-1,5b1bb334-a23d-4006-80fe-bd129b979c9f,1000,ubuntu
+                root,prod-host-1,5b1bb334-a23d-4006-80fe-bd129b979c9f,0,root
+        '400':
+          description: >
+            Bad request. Possible causes: invalid or missing `format` query
+            parameter, malformed KQL in the request body, invalid `esFilters`,
+            or the result count exceeds the 500,000-row limit.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Export limited to 500,000 results. Found 500,001. Please add filters to narrow results.'
+        '403':
+          description: >
+            The authenticated user does not have the `osquery-read` privilege
+            required to export scheduled query results.

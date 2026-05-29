@@ -1,0 +1,25 @@
+# Inbox demo workflow — string input field
+# Aligns with the schema-driven form requirement of
+# https://github.com/elastic/security-team/issues/16707
+name: inbox-demo-string
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: ask_reason
+    type: waitForInput
+    with:
+      message: "Why should we proceed with this action?"
+      schema:
+        type: object
+        properties:
+          reason:
+            type: string
+            title: Reason
+            description: Free-text justification
+        required:
+          - reason
+  - name: log_reason
+    type: console
+    with:
+      message: "Operator reason: {{ steps.ask_reason.output.reason }}"

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { render } from '@testing-library/react';
+import type { EuiDataGridSetCellProps } from '@elastic/eui';
+import { render, waitFor } from '@testing-library/react';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import {
   dataViewMock,
@@ -24,9 +25,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SourceDocument } from '../components/source_document';
+import type { CustomCellRenderer } from '../types';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -57,8 +59,8 @@ const mockServices = {
   },
   fieldFormats: {
     getDefaultInstance: jest.fn(() => ({
-      convert: (value: unknown) => (value ? value : '-'),
-      reactConvert: (value: unknown) => (value ? value : '-'),
+      convertToText: (value: unknown) => (value ? value : '-'),
+      convertToReact: (value: unknown) => (value ? value : '-'),
     })),
   },
 };
@@ -164,7 +166,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord css-i1xbf4-popover\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-cxyb91-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord css-i1xbf4-popover\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><span id=\\"generated-id_euiToolTipAnchor\\" class=\\"euiToolTipAnchor css-jcaat8-euiToolTipAnchor-inlineBlock\\"><button class=\\"euiButtonIcon css-cxyb91-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></span></div></div>"`
     );
   });
 
@@ -191,7 +193,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord css-i1xbf4-popover\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-cxyb91-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord css-i1xbf4-popover\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><span id=\\"generated-id_euiToolTipAnchor\\" class=\\"euiToolTipAnchor css-jcaat8-euiToolTipAnchor-inlineBlock\\"><button class=\\"euiButtonIcon css-cxyb91-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></span></div></div>"`
     );
     findTestSubject(component, 'docTableClosePopover').simulate('click');
     expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
@@ -305,14 +307,19 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <SourcePopoverContent
         closeButton={
-          <EuiButtonIcon
-            aria-label="Close popover"
-            data-test-subj="docTableClosePopover"
-            iconSize="s"
-            iconType="cross"
-            onClick={[MockFunction]}
-            size="xs"
-          />
+          <EuiToolTip
+            content="Close popover"
+            disableScreenReaderOutput={true}
+          >
+            <EuiButtonIcon
+              aria-label="Close popover"
+              data-test-subj="docTableClosePopover"
+              iconSize="s"
+              iconType="cross"
+              onClick={[MockFunction]}
+              size="xs"
+            />
+          </EuiToolTip>
         }
         columnId="_source"
         row={
@@ -493,14 +500,19 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <SourcePopoverContent
         closeButton={
-          <EuiButtonIcon
-            aria-label="Close popover"
-            data-test-subj="docTableClosePopover"
-            iconSize="s"
-            iconType="cross"
-            onClick={[MockFunction]}
-            size="xs"
-          />
+          <EuiToolTip
+            content="Close popover"
+            disableScreenReaderOutput={true}
+          >
+            <EuiButtonIcon
+              aria-label="Close popover"
+              data-test-subj="docTableClosePopover"
+              iconSize="s"
+              iconType="cross"
+              onClick={[MockFunction]}
+              size="xs"
+            />
+          </EuiToolTip>
         }
         columnId="_source"
         row={
@@ -651,14 +663,19 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <SourcePopoverContent
         closeButton={
-          <EuiButtonIcon
-            aria-label="Close popover"
-            data-test-subj="docTableClosePopover"
-            iconSize="s"
-            iconType="cross"
-            onClick={[MockFunction]}
-            size="xs"
-          />
+          <EuiToolTip
+            content="Close popover"
+            disableScreenReaderOutput={true}
+          >
+            <EuiButtonIcon
+              aria-label="Close popover"
+              data-test-subj="docTableClosePopover"
+              iconSize="s"
+              iconType="cross"
+              onClick={[MockFunction]}
+              size="xs"
+            />
+          </EuiToolTip>
         }
         columnId="object"
         row={
@@ -883,14 +900,19 @@ describe('Unified data table cell rendering', function () {
         <EuiFlexItem
           grow={false}
         >
-          <EuiButtonIcon
-            aria-label="Close popover"
-            data-test-subj="docTableClosePopover"
-            iconSize="s"
-            iconType="cross"
-            onClick={[MockFunction]}
-            size="xs"
-          />
+          <EuiToolTip
+            content="Close popover"
+            disableScreenReaderOutput={true}
+          >
+            <EuiButtonIcon
+              aria-label="Close popover"
+              data-test-subj="docTableClosePopover"
+              iconSize="s"
+              iconType="cross"
+              onClick={[MockFunction]}
+              size="xs"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     `);
@@ -1090,6 +1112,113 @@ describe('Unified data table cell rendering', function () {
 
       expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
       formatFieldValueReactSpy.mockRestore();
+    });
+  });
+
+  describe('setCellProps handling', () => {
+    const customCellProps: EuiDataGridSetCellProps = {
+      className: 'custom-cell',
+      style: { backgroundColor: 'pink', color: 'white' },
+      'data-test-subj': 'custom-renderer-cell',
+    };
+
+    const highlightedCellProps: EuiDataGridSetCellProps = {
+      className: 'unifiedDataTable__cell--highlight',
+      style: {},
+    };
+
+    const mergedCellProps: EuiDataGridSetCellProps = {
+      ...customCellProps,
+      className: 'unifiedDataTable__cell--highlight custom-cell',
+    };
+
+    const customCellRenderers: CustomCellRenderer = {
+      bytes: function BytesRenderer({ setCellProps }) {
+        useEffect(() => {
+          setCellProps(customCellProps);
+        }, [setCellProps]);
+
+        return null;
+      },
+    };
+
+    const highlightedRows = rowsSource.map((hit) => ({ ...build(hit), isAnchor: true }));
+    const plainRows = rowsSource.map(build);
+
+    const getRenderCellValue = (
+      externalCustomRenderers?: CustomCellRenderer,
+      rows: DataTableRecord[] = highlightedRows
+    ) =>
+      getRenderCellValueFn({
+        dataView: dataViewMock,
+        rows,
+        shouldShowFieldHandler: () => false,
+        closePopover: jest.fn(),
+        fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+        maxEntries: 100,
+        externalCustomRenderers,
+        columnsMeta: undefined,
+      });
+
+    const getCellValue = (
+      RenderCellValue: ReturnType<typeof getRenderCellValueFn>,
+      setCellProps: jest.Mock
+    ) => (
+      <RenderCellValue
+        rowIndex={0}
+        colIndex={0}
+        columnId="bytes"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={setCellProps}
+      />
+    );
+
+    it('merges internal and custom cell props', async () => {
+      const setCellProps = jest.fn();
+
+      render(getCellValue(getRenderCellValue(customCellRenderers), setCellProps));
+
+      await waitFor(() => {
+        expect(setCellProps).toHaveBeenLastCalledWith(mergedCellProps);
+      });
+    });
+
+    it('clears custom cell props when the custom renderer is removed', async () => {
+      const setCellProps = jest.fn();
+      const initialRenderCellValue = getRenderCellValue(customCellRenderers);
+      const nextRenderCellValue = getRenderCellValue();
+
+      const { rerender } = render(getCellValue(initialRenderCellValue, setCellProps));
+
+      await waitFor(() => {
+        expect(setCellProps).toHaveBeenLastCalledWith(mergedCellProps);
+      });
+
+      rerender(getCellValue(nextRenderCellValue, setCellProps));
+
+      await waitFor(() => {
+        expect(setCellProps).toHaveBeenLastCalledWith(highlightedCellProps);
+      });
+    });
+
+    it('keeps custom cell props when the internal highlight is removed', async () => {
+      const setCellProps = jest.fn();
+      const initialRenderCellValue = getRenderCellValue(customCellRenderers);
+      const nextRenderCellValue = getRenderCellValue(customCellRenderers, plainRows);
+
+      const { rerender } = render(getCellValue(initialRenderCellValue, setCellProps));
+
+      await waitFor(() => {
+        expect(setCellProps).toHaveBeenLastCalledWith(mergedCellProps);
+      });
+
+      rerender(getCellValue(nextRenderCellValue, setCellProps));
+
+      await waitFor(() => {
+        expect(setCellProps).toHaveBeenLastCalledWith(customCellProps);
+      });
     });
   });
 });

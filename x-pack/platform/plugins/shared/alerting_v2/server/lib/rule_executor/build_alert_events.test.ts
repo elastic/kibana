@@ -90,6 +90,74 @@ describe('createAlertEventsBatchBuilder', () => {
     expect(docs).toHaveLength(1);
     expect(docs[0].space_id).toBe('custom-space');
   });
+
+  describe('severity', () => {
+    const buildBatchOnce = (rows: Array<Record<string, unknown>>) =>
+      createAlertEventsBatchBuilder({
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        ruleAttributes: { grouping: { fields: ['host.name'] } },
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+      })(rows);
+
+    it.each(['info', 'low', 'medium', 'high', 'critical'] as const)(
+      'sets severity to %s when the row has a matching severity column',
+      (severity) => {
+        const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity }]);
+
+        expect(doc.severity).toBe(severity);
+      }
+    );
+
+    it('lowercases the severity value before matching', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'CRITICAL' }]);
+
+      expect(doc.severity).toBe('critical');
+    });
+
+    it('lowercases mixed-case severity values', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'HiGh' }]);
+
+      expect(doc.severity).toBe('high');
+    });
+
+    it('does not set severity when the value is not in the supported set', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'SEV1' }]);
+
+      expect(doc.severity).toBeUndefined();
+    });
+
+    it('does not set severity when the value is not a string', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 5 }]);
+
+      expect(doc.severity).toBeUndefined();
+    });
+
+    it('does not set severity when the value is null', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: null }]);
+
+      expect(doc.severity).toBeUndefined();
+    });
+
+    it('does not set severity when the row has no severity column', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a' }]);
+
+      expect(doc.severity).toBeUndefined();
+    });
+
+    it('keeps the original severity value in the data attribute', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'CRITICAL' }]);
+
+      expect(doc.data).toEqual({ 'host.name': 'host-a', severity: 'CRITICAL' });
+    });
+
+    it('keeps the unsupported severity value in the data attribute', () => {
+      const [doc] = buildBatchOnce([{ 'host.name': 'host-a', severity: 'SEV1' }]);
+
+      expect(doc.data).toEqual({ 'host.name': 'host-a', severity: 'SEV1' });
+    });
+  });
 });
 
 describe('buildRecoveryAlertEvents', () => {

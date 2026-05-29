@@ -23,10 +23,12 @@ import type {
   CompactionStep,
   BackgroundAgentCompleteEvent,
   BackgroundAgentCompleteStep,
+  TodosStep,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
+import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import {
   ChatEventType,
   ConversationRoundStepType,
@@ -40,6 +42,10 @@ import {
   isReasoningEvent,
   isToolCallStep,
   isBackgroundAgentCompleteEvent,
+  isToolUiEvent,
+  carriedOverTodos,
+  TODOS_UPDATED_UI_EVENT,
+  type TodosUpdatedUiEventData,
 } from '@kbn/agent-builder-common';
 import type {
   ConversationInternalState,
@@ -76,6 +82,7 @@ export const addRoundCompleteEvent = ({
   configurationOverrides,
   compactionResult,
   roundId: providedRoundId,
+  initialTodos,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -90,6 +97,8 @@ export const addRoundCompleteEvent = ({
   compactionResult?: CompactedConversation;
   /** Optional pre-generated round ID. If not provided, a new UUID is generated. */
   roundId?: string;
+  /** Todo list at round start; used as fallback when the agent never called todoWrite this round */
+  initialTodos?: TodoItem[];
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -121,6 +130,7 @@ export const addRoundCompleteEvent = ({
                 attachmentRefs,
                 configurationOverrides,
                 compactionResult,
+                initialTodos,
               });
 
           round.state = buildRoundState({ round, events, stateManager });
@@ -268,6 +278,7 @@ const createRound = ({
   attachmentRefs,
   configurationOverrides,
   compactionResult,
+  initialTodos,
 }: {
   roundId?: string;
   events: SourceEvents[];
@@ -278,6 +289,7 @@ const createRound = ({
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
   compactionResult?: CompactedConversation;
+  initialTodos?: TodoItem[];
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -285,6 +297,19 @@ const createRound = ({
   const stepEvents = events.filter(isStepEvent);
   const thinkingCompleteEvent = events.find(isThinkingCompleteEvent);
   const promptRequestEvents = events.filter(isPromptRequestEvent);
+
+  // Collect todos_updated UI events; only the last snapshot is stored as a round step
+  const lastTodosData = events.reduce<TodoItem[] | undefined>((last, e) => {
+    if (
+      isToolUiEvent<typeof TODOS_UPDATED_UI_EVENT, TodosUpdatedUiEventData>(
+        e,
+        TODOS_UPDATED_UI_EVENT
+      )
+    ) {
+      return e.data.data.todos;
+    }
+    return last;
+  }, undefined);
 
   const eventToStep = (event: StepEvents): ConversationRoundStep[] => {
     if (isToolCallEvent(event)) {
@@ -336,6 +361,16 @@ const createRound = ({
   }
 
   steps.push(...stepEvents.flatMap(eventToStep));
+
+  const todosForStep = lastTodosData ?? carriedOverTodos(initialTodos);
+  if (todosForStep !== undefined) {
+    const todosStep: TodosStep = {
+      type: ConversationRoundStepType.updateTodos,
+      todos: todosForStep,
+      ...(lastTodosData === undefined ? { carried_over: true } : {}),
+    };
+    steps.push(todosStep);
+  }
 
   const round: ConversationRound = {
     id: providedRoundId ?? uuidv4(),

@@ -243,13 +243,14 @@ const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
   const panels = [{ id: 0, items }];
   return render(
     <EuiPopover
+      aria-label="Context menu"
       isOpen={true}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };

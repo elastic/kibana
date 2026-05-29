@@ -153,12 +153,7 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
                         })}
                       </EuiPopoverTitle>
                       <div style={{ width: '280px' }}>
-                        <EuiListGroup
-                          listItems={listItems}
-                          color="primary"
-                          size="s"
-                          gutterSize="none"
-                        />
+                        <EuiListGroup listItems={listItems} color="primary" />
                       </div>
                       <EuiPopoverFooter>
                         <EuiButton

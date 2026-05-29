@@ -81,7 +81,6 @@ describe(
 
       visitRuleAlerts(ruleName);
       closeAllToasts();
-      waitForAlertsToPopulate(1, 2000, 120000);
       changeAlertsFilter(
         `agent.id: "${createdHost.agentId}" and process.name: "sshd" and kibana.alert.rule.uuid: "${ruleId}"`
       );

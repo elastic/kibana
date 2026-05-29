@@ -17,6 +17,7 @@ import {
   getBrowserLoggingConfigMock,
   getApmConfigMock,
   getIsThemeBundledMock,
+  isRspackModeEnabledMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -30,7 +31,11 @@ import {
   mockRenderingSetupDeps,
   mockRenderingStartDeps,
 } from './test_helpers/params';
-import type { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
+import type {
+  InternalRenderingServicePreboot,
+  InternalRenderingServiceSetup,
+  RenderingResponse,
+} from './types';
 import { RenderingService, DEFAULT_THEME_NAME_FEATURE_FLAG } from './rendering_service';
 import { AuthStatus } from '@kbn/core-http-server';
 import type { ThemeName } from '@kbn/core-ui-settings-common';
@@ -94,7 +99,7 @@ function renderTestCases(
 
     it('renders "core" page', async () => {
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 
@@ -108,7 +113,7 @@ function renderTestCases(
       });
 
       const [render] = await getRender();
-      const content = await render(
+      const { body: content } = await render(
         createKibanaRequest({ auth: { isAuthenticated: false } }),
         uiSettings
       );
@@ -122,7 +127,7 @@ function renderTestCases(
       const [render, deps] = await getRender();
       deps.http.basePath.get.mockReturnValueOnce('');
 
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 
@@ -133,7 +138,7 @@ function renderTestCases(
       const userSettings = { 'theme:darkMode': { userValue: true } };
       uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 
@@ -151,7 +156,7 @@ function renderTestCases(
       });
 
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
 
       expect(dom('meta[name="color-scheme"]').attr('content')).toBe('light');
@@ -166,7 +171,7 @@ function renderTestCases(
       });
 
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
 
       expect(dom('meta[name="color-scheme"]').attr('content')).toBe('dark');
@@ -181,7 +186,7 @@ function renderTestCases(
       });
 
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
 
       expect(dom('meta[name="color-scheme"]').attr('content')).toBe('light dark');
@@ -191,7 +196,7 @@ function renderTestCases(
       const userSettings = { 'foo:bar': { userValue: true } };
       uiSettings.globalClient.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings);
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
 
@@ -205,7 +210,7 @@ function renderTestCases(
       const userSettings = { 'theme:darkMode': { userValue: true } };
       uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: true,
       });
       const dom = load(content);
@@ -219,7 +224,7 @@ function renderTestCases(
       const userSettings = { 'foo:bar': { userValue: true } };
       uiSettings.globalClient.getUserProvided.mockResolvedValue(userSettings);
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: true,
       });
       const dom = load(content);
@@ -237,6 +242,32 @@ function renderTestCases(
 
       expect(uiSettings.client.getUserProvided).not.toHaveBeenCalled();
       expect(uiSettings.globalClient.getUserProvided).not.toHaveBeenCalled();
+    });
+
+    it('does not resolve async default `getValue` for anonymous pages', async () => {
+      const getValue = jest.fn().mockResolvedValue('async-default');
+      uiSettings.client.getRegistered.mockReturnValue({
+        registered: { name: 'title', getValue },
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: true,
+      });
+
+      expect(getValue).not.toHaveBeenCalled();
+    });
+
+    it('resolves async default `getValue` for non-anonymous pages', async () => {
+      const getValue = jest.fn().mockResolvedValue('async-default');
+      uiSettings.client.getRegistered.mockReturnValue({
+        registered: { name: 'title', getValue },
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings);
+
+      expect(getValue).toHaveBeenCalledTimes(1);
     });
 
     it('calls `getCommonStylesheetPaths` with the correct parameters', async () => {
@@ -304,7 +335,7 @@ function renderTestCases(
         () => 'http://foo.bar:1773'
       );
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
       const dom = load(content);
@@ -318,7 +349,7 @@ function renderTestCases(
         'my-overridden-flag': 1234,
       });
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
       const dom = load(content);
@@ -331,7 +362,7 @@ function renderTestCases(
         'my-initial-flag': 1234,
       });
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
       const dom = load(content);
@@ -347,7 +378,7 @@ function renderTestCases(
       };
       getBrowserLoggingConfigMock.mockReturnValue(loggingConfig);
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
       const dom = load(content);
@@ -362,7 +393,7 @@ function renderTestCases(
       const request = createKibanaRequest();
 
       const [render] = await getRender();
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
 
@@ -383,7 +414,7 @@ function renderTestCases(
       (deps.http.staticAssets.getHrefBase as jest.Mock).mockReturnValueOnce('http://foo.bar:1773');
       (deps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(true);
 
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
       const dom = load(content);
@@ -401,7 +432,7 @@ function renderTestCases(
       (deps.http.staticAssets.getHrefBase as jest.Mock).mockReturnValueOnce('http://foo.bar:1773');
       (deps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(false);
 
-      const content = await render(createKibanaRequest(), uiSettings, {
+      const { body: content } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: false,
       });
       const dom = load(content);
@@ -634,7 +665,7 @@ describe('RenderingService', () => {
   describe('preboot()', () => {
     it('calls `registerBootstrapRoute` with the correct parameters', async () => {
       const routerMock = mockRouter.create();
-      mockRenderingPrebootDeps.http.registerRoutes.mockImplementation((path, callback) =>
+      mockRenderingPrebootDeps.http.registerRoutes.mockImplementation((_path, callback) =>
         callback(routerMock)
       );
 
@@ -671,6 +702,44 @@ describe('RenderingService', () => {
       await service.preboot(mockRenderingPrebootDeps);
       return [(await service.setup(mockRenderingSetupDeps)).render, mockRenderingSetupDeps];
     });
+
+    describe('allowLocaleCookie', () => {
+      let uiSettings: {
+        client: ReturnType<typeof uiSettingsServiceMock.createClient>;
+        globalClient: ReturnType<typeof uiSettingsServiceMock.createClient>;
+      };
+
+      beforeEach(() => {
+        uiSettings = {
+          client: uiSettingsServiceMock.createClient(),
+          globalClient: uiSettingsServiceMock.createClient(),
+        };
+      });
+
+      it('includes a set-cookie header when allowLocaleCookie is true', async () => {
+        mockRenderingSetupDeps.i18n.allowLocaleCookie = true;
+        await service.preboot(mockRenderingPrebootDeps);
+        const { render } = await service.setup(mockRenderingSetupDeps);
+
+        const result = await render(createKibanaRequest(), uiSettings);
+
+        expect(result.headers).toHaveProperty('set-cookie');
+      });
+
+      it('omits the set-cookie header when allowLocaleCookie is false', async () => {
+        mockRenderingSetupDeps.i18n.allowLocaleCookie = false;
+        await service.preboot(mockRenderingPrebootDeps);
+        const { render } = await service.setup(mockRenderingSetupDeps);
+
+        const result = await render(createKibanaRequest(), uiSettings);
+
+        expect(result.headers).not.toHaveProperty('set-cookie');
+      });
+
+      afterEach(() => {
+        mockRenderingSetupDeps.i18n.allowLocaleCookie = true;
+      });
+    });
   });
 
   describe('start()', () => {
@@ -680,7 +749,7 @@ describe('RenderingService', () => {
       const themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
       const getStringValue$ = jest
         .fn()
-        .mockImplementation((_, fallback) => themeName$.asObservable());
+        .mockImplementation((_, _fallback) => themeName$.asObservable());
       service.start({
         ...mockRenderingStartDeps,
         featureFlags: {
@@ -702,7 +771,7 @@ describe('RenderingService', () => {
 
       getIsThemeBundledMock.mockImplementation((name) => name === 'borealis');
 
-      const renderResult = await render(createKibanaRequest(), uiSettings);
+      const { body: renderResult } = await render(createKibanaRequest(), uiSettings);
       expect(getIsThemeBundledMock).toHaveBeenCalledWith('borealis');
       expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
     });
@@ -713,7 +782,7 @@ describe('RenderingService', () => {
       const themeName$ = new BehaviorSubject<ThemeName>('unknown' as any);
       const getStringValue$ = jest
         .fn()
-        .mockImplementation((_, fallback) => themeName$.asObservable());
+        .mockImplementation((_, _fallback) => themeName$.asObservable());
       service.start({
         ...mockRenderingStartDeps,
         featureFlags: {
@@ -729,8 +798,134 @@ describe('RenderingService', () => {
 
       getIsThemeBundledMock.mockReturnValue(false);
 
-      const renderResult = await render(createKibanaRequest(), uiSettings);
+      const { body: renderResult } = await render(createKibanaRequest(), uiSettings);
       expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
+    });
+  });
+
+  describe('userStorage injection', () => {
+    const renderAndReadUserStorage = async (content: RenderingResponse) => {
+      const dom = load(content.body);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      return data.userStorage;
+    };
+
+    const buildUiSettings = () => ({
+      client: uiSettingsServiceMock.createClient(),
+      globalClient: uiSettingsServiceMock.createClient(),
+    });
+
+    it('injects values returned by userStorage.asScoped().getForInjection()', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const getForInjection = jest
+        .fn()
+        .mockResolvedValue({ 'navigation:layout': { hidden: ['discover'] } });
+      const asScoped = jest.fn().mockReturnValue({ getForInjection });
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const content = await render(createKibanaRequest(), buildUiSettings());
+
+      expect(asScoped).toHaveBeenCalledTimes(1);
+      expect(getForInjection).toHaveBeenCalledTimes(1);
+      expect(await renderAndReadUserStorage(content)).toEqual({
+        values: { 'navigation:layout': { hidden: ['discover'] } },
+      });
+    });
+
+    it('injects empty values when asScoped() returns null (no profile_uid)', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const asScoped = jest.fn().mockReturnValue(null);
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const content = await render(createKibanaRequest(), buildUiSettings());
+
+      expect(asScoped).toHaveBeenCalledTimes(1);
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+    });
+
+    it('injects empty values for anonymous pages without consulting userStorage', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const asScoped = jest.fn();
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      const content = await render(createKibanaRequest(), buildUiSettings(), {
+        isAnonymousPage: true,
+      });
+
+      expect(asScoped).not.toHaveBeenCalled();
+      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+    });
+
+    it('rejects when getForInjection() rejects', async () => {
+      const { render } = await service.setup(mockRenderingSetupDeps);
+
+      const getForInjection = jest.fn().mockRejectedValue(new Error('ES exploded'));
+      const asScoped = jest.fn().mockReturnValue({ getForInjection });
+      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
+
+      await expect(render(createKibanaRequest(), buildUiSettings())).rejects.toThrow('ES exploded');
+    });
+  });
+
+  describe('rspack mode metadata', () => {
+    let rspackService: RenderingService;
+
+    beforeEach(() => {
+      rspackService = new RenderingService(mockRenderingServiceParams);
+    });
+
+    afterEach(() => {
+      isRspackModeEnabledMock.mockReturnValue(false);
+    });
+
+    it('includes font preload links and font-display:swap when rspack mode is enabled', async () => {
+      isRspackModeEnabledMock.mockReturnValue(true);
+
+      const { render } = await rspackService.setup(mockRenderingSetupDeps);
+      rspackService.start(mockRenderingStartDeps);
+
+      const uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+      uiSettings.client.getRegistered.mockReturnValue({});
+
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+
+      const preloadLinks = dom('link[rel="preload"][as="font"]');
+      expect(preloadLinks.length).toBeGreaterThanOrEqual(3);
+
+      preloadLinks.each((_i, el) => {
+        const href = dom(el).attr('href');
+        expect(href).toContain('.woff2');
+      });
+
+      expect(content).toContain('font-display: swap');
+    });
+
+    it('does not include font preload links when rspack mode is disabled', async () => {
+      isRspackModeEnabledMock.mockReturnValue(false);
+
+      const { render } = await rspackService.setup(mockRenderingSetupDeps);
+      rspackService.start(mockRenderingStartDeps);
+
+      const uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+      uiSettings.client.getRegistered.mockReturnValue({});
+
+      const { body: content } = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+
+      const preloadLinks = dom('link[rel="preload"][as="font"]');
+      expect(preloadLinks.length).toBe(0);
+
+      expect(content).not.toContain('font-display: swap');
     });
   });
 });

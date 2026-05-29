@@ -14,7 +14,11 @@ import {
   type Insight,
   type InsightImpactLevel,
 } from '@kbn/streams-schema/src/insights';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+  OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+} from '@kbn/management-settings-ids';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
 
@@ -68,6 +72,13 @@ export interface StreamsTestApiService {
   disableSignificantEvents: () => Promise<void>;
   enableWiredStreamViews: () => Promise<void>;
   disableWiredStreamViews: () => Promise<void>;
+  enableDraftStreams: () => Promise<void>;
+  disableDraftStreams: () => Promise<void>;
+  forkDraftStream: (
+    parentStream: string,
+    childStream: string,
+    condition: Condition
+  ) => Promise<void>;
   createEsqlView: (viewName: string, query: string) => Promise<void>;
   deleteEsqlView: (viewName: string) => Promise<void>;
   runEsql: (query: string) => Promise<{ columns: Array<{ name: string }>; values: unknown[][] }>;
@@ -335,6 +346,38 @@ export function getStreamsTestApiService({
       await measurePerformanceAsync(log, 'streamsTestApi.disableWiredStreamViews', async () => {
         await kbnClient.uiSettings.update({
           'observability:streamsEnableWiredStreamViews': false,
+        });
+      });
+    },
+
+    async enableDraftStreams() {
+      await measurePerformanceAsync(log, 'streamsTestApi.enableDraftStreams', async () => {
+        await kbnClient.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: true,
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
+        });
+      });
+    },
+
+    async disableDraftStreams() {
+      await measurePerformanceAsync(log, 'streamsTestApi.disableDraftStreams', async () => {
+        await kbnClient.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: false,
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
+        });
+      });
+    },
+
+    async forkDraftStream(parentStream: string, childStream: string, condition: Condition) {
+      await measurePerformanceAsync(log, 'streamsTestApi.forkDraftStream', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: `/api/streams/${parentStream}/_fork`,
+          body: {
+            where: condition,
+            stream: { name: childStream },
+            draft: true,
+          },
         });
       });
     },

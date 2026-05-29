@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { MouseEvent } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -15,43 +15,81 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  EuiButtonIcon,
   useIsWithinMinBreakpoint,
+  EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';
+import { css } from '@emotion/react';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { ErrorDetailsLink } from '../../common/links/error_details_link';
-import type { Ping, PingState } from '../../../../../../common/runtime_types';
+import type { PingState, ErrorGroupItem } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
+import { useSyntheticsSettingsContext } from '../../../contexts';
+import { ErrorPreviewFlyout } from '../../monitors_page/errors/error_preview_flyout';
+import { getErrorDetailsUrl } from './error_details_url';
 
-function isErrorActive(lastError: PingState, currentError: PingState, latestPing?: Ping) {
-  return (
-    latestPing?.monitor.status === 'down' &&
-    lastError['@timestamp'] === currentError['@timestamp'] &&
-    typeof currentError['@timestamp'] !== undefined
-  );
-}
+export { getErrorDetailsUrl };
 
-function getNextUpStateForResolvedError(errorState: PingState, upStates: PingState[]) {
+export function getNextUpStateForResolvedError(
+  errorState: PingState,
+  upStates: PingState[],
+  scopeByMonitor: boolean
+) {
   for (const upState of upStates) {
+    if (scopeByMonitor && upState.config_id !== errorState.config_id) continue;
+    if (upState.observer?.name !== errorState.observer?.name) continue;
     if (moment(upState.state.started_at).valueOf() > moment(errorState['@timestamp']).valueOf())
       return upState;
   }
+}
+
+export function computeActiveErrorKeys(
+  errorStates: PingState[],
+  upStates: PingState[]
+): Set<string> {
+  const latestErrorByMonitorAndLocation = new Map<string, PingState>();
+  for (const err of errorStates) {
+    const key = `${err.config_id}:${err.observer?.name ?? ''}`;
+    const existing = latestErrorByMonitorAndLocation.get(key);
+    if (!existing || moment(err['@timestamp']).isAfter(existing['@timestamp'])) {
+      latestErrorByMonitorAndLocation.set(key, err);
+    }
+  }
+
+  const ids = new Set<string>();
+  for (const latestErr of latestErrorByMonitorAndLocation.values()) {
+    const resolved = getNextUpStateForResolvedError(latestErr, upStates, true);
+    if (!resolved) {
+      ids.add(`${latestErr.config_id}:${latestErr['@timestamp']}`);
+    }
+  }
+  return ids;
 }
 
 export const ErrorsList = ({
   errorStates,
   upStates,
   loading,
+  showMonitorName = false,
 }: {
   errorStates: PingState[];
   upStates: PingState[];
   loading: boolean;
+  showMonitorName?: boolean;
 }) => {
   const { monitorId: configId } = useParams<{ monitorId: string }>();
+  const [previewItem, setPreviewItem] = useState<ErrorGroupItem | null>(null);
+
+  const { basePath } = useSyntheticsSettingsContext();
+
+  const isGlobalView = !configId && showMonitorName;
 
   const checkGroups = useMemo(() => {
     return errorStates.map((error) => error.monitor.check_group!);
@@ -59,20 +97,41 @@ export const ErrorsList = ({
 
   const { failedSteps } = useErrorFailedStep(checkGroups);
 
-  const isBrowserType = errorStates[0]?.monitor.type === 'browser';
+  const hasBrowserErrors = errorStates.some((e) => e.monitor.type === 'browser');
+  const hasHttpStatusCodes = errorStates.some((e) => e.http?.response?.status_code);
 
   const history = useHistory();
 
   const formatter = useDateFormat();
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
 
   const { latestPing } = useMonitorLatestPing({
     monitorId: configId,
   });
 
-  const lastErrorTestRun = errorStates?.sort((a, b) => {
-    return moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf();
-  })?.[0];
+  const activeErrorIds = useMemo(() => {
+    const ids = new Set<string>();
+
+    if (isGlobalView) {
+      for (const id of computeActiveErrorKeys(errorStates, upStates)) {
+        ids.add(id);
+      }
+    } else if (latestPing?.monitor.status === 'down') {
+      const sorted = [...errorStates].sort(
+        (a, b) => moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf()
+      );
+      if (sorted[0]) {
+        ids.add(`${sorted[0].config_id}:${sorted[0]['@timestamp']}`);
+      }
+    }
+
+    return ids;
+  }, [errorStates, upStates, isGlobalView, latestPing]);
+
+  const isActive = (item: PingState) =>
+    activeErrorIds.has(`${item.config_id}:${item['@timestamp']}`);
+
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
   const columns = [
@@ -85,14 +144,14 @@ export const ErrorsList = ({
       render: (_value: string, item: PingState) => {
         const link = (
           <ErrorDetailsLink
-            configId={configId}
-            stateId={item.state?.id!}
-            label={formatter(item.state!.started_at)}
-            locationId={selectedLocation?.id}
+            configId={item.config_id ?? configId}
+            stateId={item.state.id}
+            label={formatter(item.state.started_at)}
+            locationId={item.observer?.name}
           />
         );
 
-        if (isErrorActive(lastErrorTestRun, item, latestPing)) {
+        if (isActive(item)) {
           return (
             <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
               <EuiFlexItem grow={false} className="eui-textNoWrap">
@@ -112,7 +171,25 @@ export const ErrorsList = ({
         header: false,
       },
     },
-    ...(isBrowserType
+    ...(showMonitorName
+      ? [
+          {
+            field: 'monitor.name',
+            name: MONITOR_NAME_LABEL,
+            render: (monName: string, error: PingState) => {
+              return (
+                <EuiLink
+                  data-test-subj="syntheticsColumnsLink"
+                  href={`${basePath}/app/synthetics/monitor/${error.config_id}`}
+                >
+                  {monName}
+                </EuiLink>
+              );
+            },
+          },
+        ]
+      : []),
+    ...(hasBrowserErrors
       ? [
           {
             field: 'monitor.check_group',
@@ -127,10 +204,17 @@ export const ErrorsList = ({
               }
               return failedStep.synthetics?.step?.name;
             },
-            render: (value: string) => {
+            render: (value: string, item: PingState) => {
+              if (item.monitor.type !== 'browser') {
+                return (
+                  <>{i18n.translate('xpack.synthetics.columns.Label', { defaultMessage: '--' })}</>
+                );
+              }
               const failedStep = failedSteps.find((step) => step.monitor.check_group === value);
               if (!failedStep) {
-                return <>--</>;
+                return (
+                  <>{i18n.translate('xpack.synthetics.columns.Label', { defaultMessage: '--' })}</>
+                );
               }
               return (
                 <EuiText size="s">
@@ -144,7 +228,25 @@ export const ErrorsList = ({
     {
       field: 'error.message',
       name: ERROR_MESSAGE_LABEL,
+      css: css`
+        max-width: 400px;
+      `,
     },
+    ...(hasHttpStatusCodes
+      ? [
+          {
+            field: 'http.response.status_code',
+            name: RESULT_CODE_LABEL,
+            sortable: true,
+            width: '100px',
+            render: (value: number) => {
+              if (!value) return <>{'--'}</>;
+              const color = value >= 500 ? 'danger' : value >= 400 ? 'warning' : 'default';
+              return <EuiBadge color={color}>{value}</EuiBadge>;
+            },
+          },
+        ]
+      : []),
     {
       field: 'state.duration_ms',
       name: ERROR_DURATION_LABEL,
@@ -157,14 +259,16 @@ export const ErrorsList = ({
             moment(item.monitor.timespan.gte),
             'millisecond'
           );
-          if (isErrorActive(lastErrorTestRun, item, latestPing)) {
+          if (isActive(item)) {
             const currentDiff = moment().diff(item['@timestamp']);
 
             activeDuration = currentDiff < diff ? currentDiff : diff;
           } else {
-            const resolvedState = getNextUpStateForResolvedError(item, upStates);
+            const resolvedState = getNextUpStateForResolvedError(item, upStates, isGlobalView);
 
-            activeDuration = moment(resolvedState?.state.started_at).diff(item['@timestamp']) ?? 0;
+            activeDuration = resolvedState
+              ? moment(resolvedState.state.started_at).diff(item['@timestamp'])
+              : 0;
           }
         }
         return (
@@ -172,16 +276,73 @@ export const ErrorsList = ({
         );
       },
     },
+    {
+      field: '@timestamp',
+      name: RESOLVED_AT_LABEL,
+      sortable: (a: PingState) => {
+        const resolvedState = getNextUpStateForResolvedError(a, upStates, isGlobalView);
+        return resolvedState ? moment(resolvedState.state.started_at).valueOf() : 0;
+      },
+      render: (_value: string, item: PingState) => {
+        if (isActive(item)) {
+          return (
+            <EuiBadge color="danger" css={{ maxWidth: 'max-content' }}>
+              {ACTIVE_LABEL}
+            </EuiBadge>
+          );
+        }
+        const resolvedState = getNextUpStateForResolvedError(item, upStates, isGlobalView);
+        if (resolvedState) {
+          return <EuiText size="s">{formatter(resolvedState.state.started_at)}</EuiText>;
+        }
+        return <EuiText size="s">{'--'}</EuiText>;
+      },
+    },
+    {
+      name: '',
+      width: '40px',
+      render: (item: PingState) => (
+        <EuiToolTip content={PREVIEW_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj={`syntheticsErrorPreview-${item.state?.id}`}
+            iconType="eye"
+            aria-label={PREVIEW_LABEL}
+            onClick={(evt: MouseEvent) => {
+              evt.stopPropagation();
+              setPreviewItem({
+                timestamp: item.state?.started_at ?? item['@timestamp'] ?? '',
+                monitorName: item.monitor?.name ?? '',
+                monitorType: item.monitor?.type ?? '',
+                configId: item.config_id ?? configId ?? '',
+                stateId: item.state?.id ?? '',
+                checkGroup: item.monitor?.check_group ?? '',
+                locationName: item.observer?.geo?.name ?? item.observer?.name ?? '',
+                locationId: item.observer?.name ?? '',
+                durationMs: Number(item.state?.duration_ms) || 0,
+                errorMessage: item.error?.message ?? '',
+              });
+            }}
+            size="xs"
+          />
+        </EuiToolTip>
+      ),
+    },
   ];
 
-  const getRowProps = (item: Ping) => {
+  const getRowProps = (item: PingState) => {
     const { state } = item;
-    if (state?.id) {
+    if (state.id) {
+      const itemConfigId = item.config_id ?? configId;
+      const locationId = item.observer?.name ?? selectedLocation?.id;
+      const locationQuery = locationId ? `?locationId=${encodeURIComponent(locationId)}` : '';
+      const spaceIdQuery = spaceId
+        ? `${locationQuery ? '&' : '?'}spaceId=${encodeURIComponent(spaceId)}`
+        : '';
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
           history.push(
-            `/monitor/${configId}/errors/${state.id}?locationId=${selectedLocation?.id}`
+            `/monitor/${itemConfigId}/errors/${state.id}${locationQuery}${spaceIdQuery}`
           );
         },
       };
@@ -207,22 +368,11 @@ export const ErrorsList = ({
           },
         }}
       />
+      {previewItem && (
+        <ErrorPreviewFlyout error={previewItem} onClose={() => setPreviewItem(null)} />
+      )}
     </div>
   );
-};
-
-export const getErrorDetailsUrl = ({
-  basePath,
-  configId,
-  stateId,
-  locationId,
-}: {
-  stateId: string;
-  basePath: string;
-  configId: string;
-  locationId?: string;
-}) => {
-  return `${basePath}/app/synthetics/monitor/${configId}/errors/${stateId}?locationId=${locationId}`;
 };
 
 const ERRORS_LIST_LABEL = i18n.translate('xpack.synthetics.errorsList.label', {
@@ -247,4 +397,20 @@ const TIMESTAMP_LABEL = i18n.translate('xpack.synthetics.timestamp.label', {
 
 const ACTIVE_LABEL = i18n.translate('xpack.synthetics.active.label', {
   defaultMessage: 'Active',
+});
+
+const RESOLVED_AT_LABEL = i18n.translate('xpack.synthetics.resolvedAt.label', {
+  defaultMessage: 'Resolved at',
+});
+
+const MONITOR_NAME_LABEL = i18n.translate('xpack.synthetics.monitorName.label', {
+  defaultMessage: 'Monitor name',
+});
+
+const RESULT_CODE_LABEL = i18n.translate('xpack.synthetics.resultCode.label', {
+  defaultMessage: 'Result code',
+});
+
+const PREVIEW_LABEL = i18n.translate('xpack.synthetics.errorPreview.quickPreview', {
+  defaultMessage: 'Quick preview',
 });

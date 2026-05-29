@@ -19,9 +19,9 @@ project:
 dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
-  - '@kbn/core-chrome-layout-components'
-  - '@kbn/core-chrome-layout-utils'
-  - '@kbn/core-chrome-layout-constants'
+  - '@kbn/ui-chrome-layout'
+  - '@kbn/ui-chrome-layout-utils'
+  - '@kbn/ui-chrome-layout-constants'
 tags:
   - shared-browser
   - package

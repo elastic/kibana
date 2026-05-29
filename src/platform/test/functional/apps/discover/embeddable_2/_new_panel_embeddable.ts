@@ -12,9 +12,9 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
@@ -27,12 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('add new discover panel embeddable', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
-      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
@@ -83,6 +77,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
         await dashboard.verifyNoRenderErrors();
         expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
+      });
+
+      it('can save a new session from an existing By-Value panel to a dashboard without overriding the original', async () => {
+        const existingDashboardName = 'Existing Target Dashboard 3';
+
+        await dashboard.navigateToApp();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+        await dashboardAddPanel.clickAddDiscoverPanel();
+        await header.waitUntilLoadingHasFinished();
+        await discover.clickSaveSearchButton();
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.saveDashboard(existingDashboardName);
+        await dashboard.switchToEditMode();
+
+        await dashboardPanelActions.clickEdit();
+        await header.waitUntilLoadingHasFinished();
+        await queryBar.setQuery('test');
+        await queryBar.submitQuery();
+        await discover.waitUntilTabIsLoaded();
+        await discover.saveSearchToDashboard(
+          'Session for not Overridding panels',
+          {
+            existing: existingDashboardName,
+          },
+          { saveAsNew: true }
+        );
+        await dashboard.waitForRenderComplete();
+        await dashboard.verifyNoRenderErrors();
+        expect(await discover.getAllSavedSearchDocumentCount()).to.eql([
+          '4,633 documents',
+          '13 documents',
+        ]);
       });
 
       it('can cancel adding a new Discover session panel', async () => {

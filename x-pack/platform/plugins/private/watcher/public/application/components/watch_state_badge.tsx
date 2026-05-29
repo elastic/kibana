@@ -26,7 +26,7 @@ export const WatchStateBadge = ({ state, size = 's' }: Props) => {
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="dot" color={stateToColorMap[state]} />
+        <EuiIcon type="dot" color={stateToColorMap[state]} aria-hidden={true} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

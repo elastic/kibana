@@ -9,9 +9,10 @@
 
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
-
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
+
+import { WIDE_VIEWPORT_NAME_BREAKPOINT_PX } from '../../breakpoints';
 
 import { StarButton } from '../starred/star_button';
 import { NameCellTitle as Title } from './cell_title';
@@ -87,16 +88,6 @@ export const NameCell = memo(
     const hasTags = showTags && tagIds && tagIds.length > 0;
     const { euiTheme } = useEuiTheme();
 
-    // Aligns title and star button on the same row.
-    const titleRowCss = useMemo(
-      () => css`
-        display: flex;
-        align-items: center;
-        gap: ${euiTheme.size.xxs};
-      `,
-      [euiTheme]
-    );
-
     // Vertical margin compensation matches `TableListView`'s `ItemDetails` component.
     // Memoized so `StarButton` receives a stable css reference across re-renders.
     const inlineStarCss = useMemo(
@@ -107,15 +98,46 @@ export const NameCell = memo(
       [euiTheme]
     );
 
+    // Switches the name cell from column to row layout on wide viewports,
+    // and adds a gap between items in that layout.
+    const wideRowCss = useMemo(
+      () => css`
+        @media (min-width: ${WIDE_VIEWPORT_NAME_BREAKPOINT_PX}px) {
+          flex-direction: row;
+          align-items: center;
+          gap: ${euiTheme.size.s};
+        }
+      `,
+      [euiTheme]
+    );
+
     return (
-      <div>
-        <div css={showStarred ? titleRowCss : undefined}>
-          <Title {...{ item, onClick, shouldUseHref }} />
-          {showStarred && <StarButton id={item.id} wrapperCss={inlineStarCss} />}
-        </div>
-        {showDescription && <Description item={item} />}
-        {hasTags && <Tags tagIds={tagIds} onTagClick={onTagClick} />}
-      </div>
+      <EuiFlexGroup direction="column" responsive={false} gutterSize="none" css={wideRowCss}>
+        <EuiFlexItem grow={false}>
+          {showStarred ? (
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <Title {...{ item, onClick, shouldUseHref }} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <StarButton id={item.id} wrapperCss={inlineStarCss} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <Title {...{ item, onClick, shouldUseHref }} />
+          )}
+        </EuiFlexItem>
+        {showDescription && (
+          <EuiFlexItem grow={false}>
+            <Description item={item} />
+          </EuiFlexItem>
+        )}
+        {hasTags && (
+          <EuiFlexItem grow={false}>
+            <Tags tagIds={tagIds} onTagClick={onTagClick} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     );
   }
 );

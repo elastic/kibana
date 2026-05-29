@@ -6,6 +6,7 @@
  */
 
 import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import type { ResetSLOResponse } from '@kbn/slo-schema';
@@ -30,6 +31,7 @@ import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
+import { getSloApmLabels } from './utils';
 
 export class ResetSLO {
   constructor(
@@ -44,6 +46,7 @@ export class ResetSLO {
 
   public async execute(sloId: string): Promise<ResetSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
+    addTransactionLabels(getSloApmLabels(originalSlo));
     await assertExpectedIndicatorSourceIndexPrivileges(
       originalSlo,
       this.scopedClusterClient.asCurrentUser
@@ -78,9 +81,15 @@ export class ResetSLO {
     } catch (err) {
       // Any errors here should not prevent moving forward.
       // Worst case we keep rolling up data for the orignal SLO
-      this.logger.debug(
-        `Deletion of the original SLO resources failed while resetting it: ${err}.`
-      );
+      this.logger.warn('Deletion of the original SLO resources failed while resetting it.', {
+        service: { name: 'reset_slo' },
+        labels: {
+          slo_id: slo.id,
+          indicator_type: slo.indicator.type,
+          error_type: 'cleanup_failed',
+        },
+        error: err,
+      });
     }
   }
 
@@ -162,15 +171,29 @@ export class ResetSLO {
         this.summaryTransformManager.start(summaryTransformId),
       ]);
     } catch (err) {
-      this.logger.debug(
-        `Cannot reset the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
-      );
+      this.logger.warn('Cannot reset the SLO. Rolling back.', {
+        service: { name: 'reset_slo' },
+        labels: {
+          slo_id: slo.id,
+          indicator_type: slo.indicator.type,
+          error_type: 'reset_failed',
+        },
+        error: err,
+      });
 
       await asyncForEach(rollbackOperations.reverse(), async (operation) => {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
+          this.logger.warn('Rollback operation failed.', {
+            service: { name: 'reset_slo' },
+            labels: {
+              slo_id: slo.id,
+              indicator_type: slo.indicator.type,
+              error_type: 'rollback_failed',
+            },
+            error: rollbackErr,
+          });
         }
       });
 

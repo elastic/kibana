@@ -14,6 +14,7 @@ import { omit } from 'lodash';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { createCoreContext } from '@kbn/core-http-server-mocks';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import type { ServiceStatus, ServiceStatusLevel } from '@kbn/core-status-common';
@@ -23,7 +24,9 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { registerStatusRoute } from '@kbn/core-status-server-internal';
+import { coreMock } from '../../../mocks';
 import { createInternalHttpService } from '../../utilities';
 
 const coreId = Symbol('core');
@@ -40,15 +43,21 @@ describe('GET /api/status', () => {
   let httpSetup: InternalHttpServiceSetup;
   let metrics: jest.Mocked<MetricsServiceSetup>;
   let incrementUsageCounter: jest.Mock;
+  let hasPrivileges: jest.Mock;
+  let logger: ReturnType<typeof loggerMock.create>;
 
   const setupServer = async ({
     allowAnonymous = true,
+    statusPageBypassMonitorPrivilege = false,
     coreOverall,
     overall,
+    hasPrivilegesImpl,
   }: {
     allowAnonymous?: boolean;
+    statusPageBypassMonitorPrivilege?: boolean;
     coreOverall?: ServiceStatus;
     overall?: ServiceStatus;
+    hasPrivilegesImpl?: () => Promise<{ has_all_requested: boolean }>;
   } = {}) => {
     const coreContext = createCoreContext({ coreId });
     const contextService = new ContextService(coreContext);
@@ -82,12 +91,27 @@ describe('GET /api/status', () => {
     });
 
     incrementUsageCounter = jest.fn();
+    logger = loggerMock.create();
+    hasPrivileges = jest
+      .fn()
+      .mockImplementation(hasPrivilegesImpl ?? (async () => ({ has_all_requested: true })));
 
-    const router = httpSetup.createRouter('');
+    const handlerContext = coreMock.createRequestHandlerContext();
+    handlerContext.elasticsearch.client.asCurrentUser.security.hasPrivileges = hasPrivileges as any;
+
+    httpSetup.registerRouteHandlerContext<RequestHandlerContext, 'core'>(
+      coreId,
+      'core',
+      () => handlerContext
+    );
+
+    const router = httpSetup.createRouter<RequestHandlerContext>('');
     registerStatusRoute({
       router,
+      logger,
       config: {
         allowAnonymous,
+        statusPageBypassMonitorPrivilege,
         packageInfo: {
           branch: 'xbranch',
           buildNum: 1234,
@@ -465,6 +489,174 @@ describe('GET /api/status', () => {
           });
           await supertest(httpSetup.server.listener).get('/api/status?v7format=true').expect(503);
         });
+      });
+    });
+  });
+
+  describe('privilege gating (allowAnonymous: false)', () => {
+    const REDACTED_BODY = { status: { overall: { level: 'available' } } };
+
+    it('returns the full body when the authenticated caller has the monitor privilege', async () => {
+      await setupServer({
+        allowAnonymous: false,
+        coreOverall: createServiceStatus(ServiceStatusLevels.available),
+        hasPrivilegesImpl: async () => ({ has_all_requested: true }),
+      });
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/status')
+        .set('Authorization', 'let me in')
+        .expect(200);
+
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          name: 'xkibana',
+          status: expect.any(Object),
+          metrics: expect.any(Object),
+        })
+      );
+      expect(hasPrivileges).toHaveBeenCalledTimes(1);
+      expect(hasPrivileges).toHaveBeenCalledWith({ cluster: ['monitor'] });
+      expect(incrementUsageCounter).not.toHaveBeenCalledWith({
+        counterName: 'status_redacted_no_monitor',
+      });
+    });
+
+    it('returns the redacted body and increments status_redacted_no_monitor when monitor is missing', async () => {
+      await setupServer({
+        allowAnonymous: false,
+        coreOverall: createServiceStatus(ServiceStatusLevels.available),
+        hasPrivilegesImpl: async () => ({ has_all_requested: false }),
+      });
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/status')
+        .set('Authorization', 'let me in')
+        .expect(200);
+
+      expect(response.body).toEqual(REDACTED_BODY);
+      expect(hasPrivileges).toHaveBeenCalledTimes(1);
+      expect(incrementUsageCounter).toHaveBeenCalledTimes(1);
+      expect(incrementUsageCounter).toHaveBeenCalledWith({
+        counterName: 'status_redacted_no_monitor',
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the redacted no-monitor body when hasPrivileges throws', async () => {
+      await setupServer({
+        allowAnonymous: false,
+        coreOverall: createServiceStatus(ServiceStatusLevels.available),
+        hasPrivilegesImpl: async () => {
+          throw new Error('boom');
+        },
+      });
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/status')
+        .set('Authorization', 'let me in')
+        .expect(200);
+
+      expect(response.body).toEqual(REDACTED_BODY);
+      expect(incrementUsageCounter).toHaveBeenCalledWith({
+        counterName: 'status_redacted_no_monitor',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('boom'));
+    });
+
+    it('returns the same byte-identical redacted body for unauthenticated and no-monitor callers', async () => {
+      await setupServer({
+        allowAnonymous: false,
+        coreOverall: createServiceStatus(ServiceStatusLevels.available),
+        hasPrivilegesImpl: async () => ({ has_all_requested: false }),
+      });
+
+      const unauthResponse = await supertest(httpSetup.server.listener)
+        .get('/api/status')
+        .expect(200);
+      const noMonitorResponse = await supertest(httpSetup.server.listener)
+        .get('/api/status')
+        .set('Authorization', 'let me in')
+        .expect(200);
+
+      expect(noMonitorResponse.body).toEqual(unauthResponse.body);
+    });
+
+    it('does not call hasPrivileges for unauthenticated callers', async () => {
+      await setupServer({
+        allowAnonymous: false,
+        coreOverall: createServiceStatus(ServiceStatusLevels.available),
+      });
+
+      await supertest(httpSetup.server.listener).get('/api/status').expect(200);
+
+      expect(hasPrivileges).not.toHaveBeenCalled();
+      expect(incrementUsageCounter).toHaveBeenCalledWith({
+        counterName: 'status_redacted_unauthenticated',
+      });
+    });
+  });
+
+  describe('statusPageBypassMonitorPrivilege: true', () => {
+    const REDACTED_BODY = { status: { overall: { level: 'available' } } };
+
+    it('returns the full body for authenticated callers without checking monitor privilege', async () => {
+      await setupServer({
+        allowAnonymous: false,
+        statusPageBypassMonitorPrivilege: true,
+        coreOverall: createServiceStatus(ServiceStatusLevels.available),
+        hasPrivilegesImpl: async () => ({ has_all_requested: false }),
+      });
+
+      const response = await supertest(httpSetup.server.listener)
+        .get('/api/status')
+        .set('Authorization', 'let me in')
+        .expect(200);
+
+      expect(response.body).toEqual(
+        expect.objectContaining({
+          name: 'xkibana',
+          status: expect.any(Object),
+          metrics: expect.any(Object),
+        })
+      );
+      expect(hasPrivileges).not.toHaveBeenCalled();
+      expect(incrementUsageCounter).not.toHaveBeenCalledWith({
+        counterName: 'status_redacted_no_monitor',
+      });
+    });
+
+    it('keeps unauthenticated callers redacted', async () => {
+      await setupServer({
+        allowAnonymous: false,
+        statusPageBypassMonitorPrivilege: true,
+        coreOverall: createServiceStatus(ServiceStatusLevels.available),
+      });
+
+      const response = await supertest(httpSetup.server.listener).get('/api/status').expect(200);
+
+      expect(response.body).toEqual(REDACTED_BODY);
+      expect(hasPrivileges).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('privilege gating (allowAnonymous: true)', () => {
+    it('does not call hasPrivileges and returns the full body regardless of credentials', async () => {
+      await setupServer({ allowAnonymous: true });
+
+      const anonResponse = await supertest(httpSetup.server.listener)
+        .get('/api/status')
+        .expect(200);
+      const authedResponse = await supertest(httpSetup.server.listener)
+        .get('/api/status')
+        .set('Authorization', 'let me in')
+        .expect(200);
+
+      expect(anonResponse.body.name).toEqual('xkibana');
+      expect(authedResponse.body.name).toEqual('xkibana');
+      expect(hasPrivileges).not.toHaveBeenCalled();
+      expect(incrementUsageCounter).not.toHaveBeenCalledWith({
+        counterName: 'status_redacted_no_monitor',
       });
     });
   });

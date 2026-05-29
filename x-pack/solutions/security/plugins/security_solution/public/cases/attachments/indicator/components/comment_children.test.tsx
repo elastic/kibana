@@ -13,7 +13,7 @@ import {
   INDICATOR_NAME_TEST_ID,
   INDICATOR_TYPE_TEST_ID,
 } from './comment_children';
-import type { IndicatorAttachmentMetadata } from '../utils/attachments';
+import type { IndicatorAttachmentMetadata } from '..';
 import { TestProvidersComponent } from '../../../../threat_intelligence/mocks/test_providers';
 import { useIndicatorById } from '../hooks/use_indicator_by_id';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';

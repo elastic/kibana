@@ -17,7 +17,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, isTerminalStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, pickManagedWorkflowFields, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   ConcurrencySettings,
@@ -31,18 +31,20 @@ import {
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
+  cancelWorkflow,
   checkAndSkipIfExistingScheduledExecution,
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
-import { cancelWaitingWorkflow } from './lib/cancel_waiting_workflow';
 import { checkLicense } from './lib/check_license';
+import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
   resolveExhaustedWorkflowRunTask,
   resolveInterruptedWorkflowResumeTask,
   resolveInterruptedWorkflowRunTask,
 } from './lib/task_recovery';
+import { normalizeEventChainVisitedWorkflowIds } from './lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
@@ -50,11 +52,14 @@ import { initializeLogsRepositoryDataStream } from './repositories/logs_reposito
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
+import { initializeTriggerEventsClient } from './trigger_events/event_logs';
+import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
 import type {
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
+  InternalResumeWorkflowExecution,
   ResumeWorkflowExecution,
   ScheduleWorkflow,
   TriggerEventsContract,
@@ -76,7 +81,11 @@ import {
   WORKFLOW_RUN_TASK_TYPE,
   WORKFLOW_SCHEDULED_TASK_TYPE,
 } from './workflow_task_manager/types';
-import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import {
+  getWorkflowGlobalTimeoutResumeTaskId,
+  WorkflowTaskManager,
+} from './workflow_task_manager/workflow_task_manager';
+import { createWorkflowTaskAbortController } from './workflow_task_shutdown';
 import { createIndexes } from '../common';
 
 /**
@@ -123,6 +132,8 @@ export class WorkflowsExecutionEnginePlugin
   >;
   private meteringService?: WorkflowsMeteringService;
   private initializePromise?: Promise<void>;
+  /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
+  private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -172,11 +183,11 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowRunTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a workflow without Kibana Request');
           }
-          const taskAbortController = new AbortController();
+          const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
               const { workflowRunId, spaceId } =
@@ -217,12 +228,13 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              const workflowExecutionRepository = new WorkflowExecutionRepository(
-                coreStart.elasticsearch.client.asInternalUser
-              );
+              const esClient = coreStart.elasticsearch.client.asInternalUser;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const stepExecutionRepository = new StepExecutionRepository(esClient);
 
               const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
                 workflowExecutionRepository,
+                stepExecutionRepository,
                 workflowRunId,
                 spaceId,
                 taskAttempts: taskInstance.attempts,
@@ -244,10 +256,12 @@ export class WorkflowsExecutionEnginePlugin
                   dependencies,
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                 });
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
+                  stepExecutionRepository,
                   workflowRunId,
                   spaceId,
                   taskAttempts: taskInstance.attempts,
@@ -275,11 +289,11 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '365d',
         // Retries allow `resolveInterruptedWorkflowResumeTask` to fail-fast abandoned executions after interrupt.
         maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
           if (!fakeRequest) {
             throw new Error('Cannot resume a workflow without Kibana Request');
           }
-          const taskAbortController = new AbortController();
+          const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
               const { workflowRunId, spaceId } =
@@ -325,12 +339,13 @@ export class WorkflowsExecutionEnginePlugin
                 config,
               };
 
-              const workflowExecutionRepository = new WorkflowExecutionRepository(
-                coreStart.elasticsearch.client.asInternalUser
-              );
+              const esClient = coreStart.elasticsearch.client.asInternalUser;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const stepExecutionRepository = new StepExecutionRepository(esClient);
 
               const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
                 workflowExecutionRepository,
+                stepExecutionRepository,
                 workflowRunId,
                 spaceId,
                 taskAttempts: taskInstance.attempts,
@@ -352,10 +367,12 @@ export class WorkflowsExecutionEnginePlugin
                   dependencies,
                   workflowsExecutionEngine,
                   meteringService: this.meteringService,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
                 });
               } catch (error) {
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
+                  stepExecutionRepository,
                   workflowRunId,
                   spaceId,
                   taskAttempts: taskInstance.attempts,
@@ -382,11 +399,11 @@ export class WorkflowsExecutionEnginePlugin
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
         maxAttempts: 3,
-        createTaskRunner: ({ taskInstance, fakeRequest }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest, abortController }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a scheduled workflow without Kibana Request');
           }
-          const taskAbortController = new AbortController();
+          const taskAbortController = createWorkflowTaskAbortController(abortController);
           return {
             run: async () => {
               const { workflowId, spaceId } = taskInstance.params as {
@@ -444,8 +461,11 @@ export class WorkflowsExecutionEnginePlugin
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const stepExecutionRepository = new StepExecutionRepository(esClient);
 
-              const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
+              const workflow = await workflowRepository.getWorkflow(workflowId, spaceId, {
+                includeGlobal: true,
+              });
               if (!workflow) {
                 logger.error(`Workflow ${workflowId} not found`);
                 return;
@@ -459,6 +479,7 @@ export class WorkflowsExecutionEnginePlugin
                   workflow,
                   spaceId,
                   workflowExecutionRepository,
+                  stepExecutionRepository,
                   taskInstance,
                   logger
                 );
@@ -506,6 +527,7 @@ export class WorkflowsExecutionEnginePlugin
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
+                ...pickManagedWorkflowFields(workflow),
                 isTestRun: false,
                 workflowDefinition: workflow.definition,
                 yaml: workflow.yaml,
@@ -571,6 +593,7 @@ export class WorkflowsExecutionEnginePlugin
                 dependencies,
                 workflowsExecutionEngine,
                 meteringService: this.meteringService,
+                internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
               });
 
               const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
@@ -596,9 +619,11 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
 
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
+
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
     const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
@@ -618,15 +643,17 @@ export class WorkflowsExecutionEnginePlugin
     // Re-check that a workflow is still enabled right before persisting an
     // execution document.  The route-level check may have read a stale value
     // if a concurrent hard-delete disabled the workflow in the meantime.
-    // Skipped for test runs — unsaved workflows don't exist in the index.
+    // Skipped for ephemeral workflows — unsaved workflows don't exist in the workflow index.
     const ensureWorkflowEnabled = async (
       workflow: WorkflowExecutionEngineModel,
       spaceId: string
     ) => {
-      if (workflow.isTestRun) {
+      if (workflow.isEphemeral) {
         return;
       }
-      const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId);
+      const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId, {
+        includeGlobal: true,
+      });
       if (!stillEnabled) {
         throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
       }
@@ -645,12 +672,30 @@ export class WorkflowsExecutionEnginePlugin
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const metadata = context.metadata as Record<string, unknown> | undefined;
+      const eventPayload = context.event as Record<string, unknown> | undefined;
+      let rootEventChainDepth: number | undefined;
+      if (eventPayload) {
+        const rawDepth = eventPayload.eventChainDepth;
+        if (typeof rawDepth === 'number' && !Number.isNaN(rawDepth) && rawDepth >= 0) {
+          rootEventChainDepth = rawDepth;
+        } else if (typeof rawDepth === 'string' && rawDepth.trim() !== '') {
+          const parsed = parseInt(rawDepth, 10);
+          if (!Number.isNaN(parsed) && parsed >= 0) {
+            rootEventChainDepth = parsed;
+          }
+        }
+      }
+      const rootVisited = normalizeEventChainVisitedWorkflowIds(
+        eventPayload?.eventChainVisitedWorkflowIds,
+        this.config.eventDriven.maxChainDepth
+      );
       const dispatchEventId =
         typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
       const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId,
         workflowId: workflow.id,
+        ...pickManagedWorkflowFields(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -660,6 +705,8 @@ export class WorkflowsExecutionEnginePlugin
         executedBy: authenticatedUser,
         triggeredBy,
         ...(metadata ? { metadata } : {}),
+        ...(rootEventChainDepth !== undefined ? { eventChainDepth: rootEventChainDepth } : {}),
+        ...(rootVisited.length > 0 ? { eventChainVisitedWorkflowIds: rootVisited } : {}),
         ...(dispatchEventId ? { dispatchEventId } : {}),
       };
 
@@ -823,6 +870,7 @@ export class WorkflowsExecutionEnginePlugin
           dependencies,
           workflowsExecutionEngine,
           meteringService: this.meteringService,
+          internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
         });
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
@@ -900,14 +948,16 @@ export class WorkflowsExecutionEnginePlugin
         (item.context.spaceId as string | undefined) || 'default';
 
       // Single ES search for the enabled flags of every (workflowId, spaceId)
-      // referenced by the batch. Skips `isTestRun` items (they are not indexed).
+      // referenced by the batch. Skips ephemeral items (they are not indexed as workflows).
       const enabledRefs = items
-        .filter((item) => !item.workflow.isTestRun)
+        .filter((item) => !item.workflow.isEphemeral)
         .map((item) => ({ workflowId: item.workflow.id, spaceId: spaceIdFor(item) }));
       const enabledMap =
         enabledRefs.length === 0
           ? new Map<string, boolean>()
-          : await workflowRepository.areWorkflowsEnabled(enabledRefs);
+          : await workflowRepository.areWorkflowsEnabled(enabledRefs, {
+              includeGlobal: true,
+            });
 
       interface PreparedItem {
         idx: number;
@@ -918,7 +968,7 @@ export class WorkflowsExecutionEnginePlugin
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
         try {
-          if (!item.workflow.isTestRun) {
+          if (!item.workflow.isEphemeral) {
             const spaceId = spaceIdFor(item);
             const enabled = enabledMap.get(`${spaceId}:${item.workflow.id}`) ?? false;
             if (!enabled) {
@@ -1064,6 +1114,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
+        ...pickManagedWorkflowFields(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -1107,46 +1158,19 @@ export class WorkflowsExecutionEnginePlugin
 
     const cancelWorkflowExecution: CancelWorkflowExecution = async (
       workflowExecutionId,
-      spaceId
+      spaceId,
+      schedulingRequest
     ) => {
       await checkLicense(plugins.licensing);
-
       await this.initialize(coreStart);
-      const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+
+      await cancelWorkflow({
         workflowExecutionId,
-        spaceId
-      );
-
-      if (!workflowExecution) {
-        throw new WorkflowExecutionNotFoundError(workflowExecutionId);
-      }
-
-      if (isTerminalStatus(workflowExecution.status)) {
-        return;
-      }
-
-      if (workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
-        await cancelWaitingWorkflow({
-          workflowExecution,
-          workflowExecutionRepository,
-          stepExecutionRepository: new StepExecutionRepository(
-            coreStart.elasticsearch.client.asInternalUser
-          ),
-        });
-        return;
-      }
-
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        ...(workflowExecution.status === ExecutionStatus.PENDING
-          ? { status: ExecutionStatus.CANCELLED }
-          : {}),
-        cancelRequested: true,
-        cancellationReason: 'Cancelled by user',
-        cancelledAt: new Date().toISOString(),
-        cancelledBy: 'system', // TODO: set user if available
+        spaceId,
+        schedulingRequest,
+        workflowExecutionRepository,
+        workflowTaskManager,
       });
-      await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
     const cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions = async ({
@@ -1215,17 +1239,72 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: executionId,
-        context: { ...workflowExecution.context, resumeInput: input },
-      });
+      // Freshness guard: a waitForInput step whose parent workflow already
+      // terminated (timeout, cancel, external failure) can leave the execution
+      // doc with `status: waiting_for_input` but `finishedAt` set — writing
+      // resumeInput and scheduling a resume task in that state is a no-op that
+      // silently swallows the analyst's response. Reject explicitly so the
+      // caller sees a 409 and the Inbox provider can surface a real error.
+      if (workflowExecution.finishedAt) {
+        throw new WorkflowExecutionInvalidStatusError(
+          executionId,
+          `${workflowExecution.status} (already finished at ${workflowExecution.finishedAt})`,
+          ExecutionStatus.WAITING_FOR_INPUT
+        );
+      }
+
+      const resumedBy = await getAuthenticatedUser(
+        request,
+        coreStart.security,
+        coreStart.elasticsearch.client
+      );
+
+      const resumeContext = {
+        ...workflowExecution.context,
+        resumeInput: input,
+        resumedBy,
+        resumedAt: new Date().toISOString(),
+      };
+
+      await internalResumeWorkflowExecution(executionId, spaceId, resumeContext, request);
+
+      return { resumedBy };
+    };
+
+    const internalResumeWorkflowExecution: InternalResumeWorkflowExecution = async (
+      executionId,
+      spaceId,
+      context,
+      request
+    ) => {
+      if (context) {
+        await workflowExecutionRepository.updateWorkflowExecution({
+          id: executionId,
+          context,
+        });
+      }
 
       await workflowTaskManager.scheduleImmediateResume({
         executionId,
         spaceId,
         fakeRequest: request,
       });
+
+      await plugins.taskManager
+        .removeIfExists(getWorkflowGlobalTimeoutResumeTaskId(executionId))
+        .catch((error: unknown) => {
+          this.logger.warn(
+            `Failed to remove idle-timeout resume task (execution=${executionId}): ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        });
+
+      // Same idea as cancel: nudge TM so the resume task runs as soon as possible
+      await workflowTaskManager.forceRunIdleTasks(executionId);
     };
+
+    this.internalResumeWorkflowExecutionHandler = internalResumeWorkflowExecution;
 
     const workflowEventLoggerService = new WorkflowEventLoggerService(
       coreStart.dataStreams,
@@ -1233,13 +1312,17 @@ export class WorkflowsExecutionEnginePlugin
       this.config.logging.console
     );
 
+    const triggerEventsClientPromise = initializeTriggerEventsClient(coreStart.dataStreams);
+
     const triggerEventHandler = new TriggerEventHandler({
       coreStart,
+      workflowRepository,
       workflowsExtensions: plugins.workflowsExtensions,
       spaces: plugins.spaces?.spacesService,
       scheduleWorkflow,
       logger: this.logger,
       config: this.config.eventDriven,
+      triggerEventsClientPromise,
     });
 
     const triggerEvents: TriggerEventsContract = {
@@ -1247,6 +1330,10 @@ export class WorkflowsExecutionEnginePlugin
       isEnabled: this.config.eventDriven.enabled,
       isLogEventsEnabled: this.config.eventDriven.logEvents,
       maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+      searchTriggerEventLog: async (params) => {
+        const triggerEventsClient = await triggerEventsClientPromise;
+        return querySearchTriggerEventLog(triggerEventsClient, params);
+      },
     };
 
     return {
@@ -1266,9 +1353,19 @@ export class WorkflowsExecutionEnginePlugin
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {
-      this.initializePromise = createIndexes({
+      // Clear the cached promise on rejection so a transient failure (e.g. an ES
+      // circuit_breaking_exception) doesn't poison every subsequent call. In-flight
+      // callers still share the same attempt; only the *next* call after rejection
+      // gets a fresh `createIndexes` invocation.
+      const attempt = createIndexes({
         esClient: coreStart.elasticsearch.client.asInternalUser,
         logger: this.logger,
+      });
+      this.initializePromise = attempt;
+      attempt.catch(() => {
+        if (this.initializePromise === attempt) {
+          this.initializePromise = undefined;
+        }
       });
     }
     await this.initializePromise;

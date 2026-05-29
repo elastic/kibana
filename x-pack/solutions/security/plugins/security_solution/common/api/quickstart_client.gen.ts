@@ -20,7 +20,10 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
-import type { SetAlertAssigneesRequestBodyInput } from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
+import type {
+  SetAlertAssigneesRequestBodyInput,
+  SetAlertAssigneesResponse,
+} from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type {
   SetAlertTagsRequestBodyInput,
   SetAlertTagsResponse,
@@ -29,9 +32,16 @@ import type { CreateAlertsIndexResponse } from './detection_engine/index_managem
 import type { DeleteAlertsIndexResponse } from './detection_engine/index_management/delete_index/delete_index.gen';
 import type { ReadAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
 import type { ReadPrivilegesResponse } from './detection_engine/index_management/read_privileges/read_privileges.gen';
-import type { BootstrapPrebuiltRulesResponse } from './detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import type { InstallPrebuiltRulesAndTimelinesResponse } from './detection_engine/prebuilt_rules/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
 import type { ReadPrebuiltRulesAndTimelinesStatusResponse } from './detection_engine/prebuilt_rules/read_prebuilt_rules_and_timelines_status/read_prebuilt_rules_and_timelines_status_route.gen';
+import type {
+  ReviewRuleInstallationRequestBodyInput,
+  ReviewRuleInstallationResponse,
+} from './detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+import type {
+  ReviewRuleUpgradeRequestBodyInput,
+  ReviewRuleUpgradeResponse,
+} from './detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.gen';
 import type {
   PerformRulesBulkActionRequestQueryInput,
   PerformRulesBulkActionRequestBodyInput,
@@ -70,6 +80,11 @@ import type {
   ImportRulesResponse,
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
+import type {
+  RuleChangesHistoryRequestQueryInput,
+  RuleChangesHistoryRequestParamsInput,
+  RuleChangesHistoryResponse,
+} from './detection_engine/rule_management/rule_history/rule_history_route.gen';
 import type {
   SearchRulesRequestBodyInput,
   SearchRulesResponse,
@@ -654,21 +669,6 @@ is added to its existing source labels instead.
         },
         method: 'POST',
         body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Ensures that the packages needed for prebuilt detection rules to work are installed and up to date
-   */
-  async bootstrapPrebuiltRules() {
-    this.log.info(`${new Date().toISOString()} Calling API BootstrapPrebuiltRules`);
-    return this.kbnClient
-      .request<BootstrapPrebuiltRulesResponse>({
-        path: '/internal/detection_engine/prebuilt_rules/_bootstrap',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3053,6 +3053,38 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Lists prebuilt detection rules that can be installed
+   */
+  async reviewRuleInstallation(props: ReviewRuleInstallationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReviewRuleInstallation`);
+    return this.kbnClient
+      .request<ReviewRuleInstallationResponse>({
+        path: '/internal/detection_engine/prebuilt_rules/installation/_review',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Lists currently installed prebuilt detection rules that have newer versions available.
+   */
+  async reviewRuleUpgrade(props: ReviewRuleUpgradeProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ReviewRuleUpgrade`);
+    return this.kbnClient
+      .request<ReviewRuleUpgradeResponse>({
+        path: '/internal/detection_engine/prebuilt_rules/upgrade/_review',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async riskEngineGetPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API RiskEngineGetPrivileges`);
     return this.kbnClient
@@ -3062,6 +3094,26 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Retrieve a paginated list of historical revisions for a single detection rule.
+Each item contains the rule snapshot at that point in time and the snapshot of
+the immediately preceding revision in `old_values`.
+
+    */
+  async ruleChangesHistory(props: RuleChangesHistoryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RuleChangesHistory`);
+    return this.kbnClient
+      .request<RuleChangesHistoryResponse>({
+        path: replaceParams('/internal/detection_engine/rules/{ruleId}/history', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3123,7 +3175,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
     this.log.info(`${new Date().toISOString()} Calling API RunScriptAction`);
     return this.kbnClient
       .request<RunScriptActionResponse>({
-        path: '/api/endpoint/action/runscript',
+        path: '/api/endpoint/action/run_script',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3234,7 +3286,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
   async setAlertAssignees(props: SetAlertAssigneesProps) {
     this.log.info(`${new Date().toISOString()} Calling API SetAlertAssignees`);
     return this.kbnClient
-      .request({
+      .request<SetAlertAssigneesResponse>({
         path: '/api/detection_engine/signals/assignees',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -4117,6 +4169,16 @@ export interface ReadRuleExecutionResultsProps {
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
+}
+export interface ReviewRuleInstallationProps {
+  body: ReviewRuleInstallationRequestBodyInput;
+}
+export interface ReviewRuleUpgradeProps {
+  body: ReviewRuleUpgradeRequestBodyInput;
+}
+export interface RuleChangesHistoryProps {
+  query: RuleChangesHistoryRequestQueryInput;
+  params: RuleChangesHistoryRequestParamsInput;
 }
 export interface RuleMigrationEnhanceRuleProps {
   params: RuleMigrationEnhanceRuleRequestParamsInput;

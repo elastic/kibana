@@ -15,6 +15,7 @@ import {
   EuiPopoverTitle,
   EuiButtonEmpty,
   EuiPopoverFooter,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { CoverageOverviewRuleSource } from '../../../../../common/api/detection_engine';
@@ -38,6 +39,7 @@ const RuleSourceFilterComponent = ({
   isLoading,
 }: RuleSourceFilterComponentProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   const onButtonClick = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -95,13 +97,17 @@ const RuleSourceFilterComponent = ({
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
+        aria-labelledby={popoverTitleId}
       >
-        <EuiPopoverTitle paddingSize="s">{i18n.CoverageOverviewFilterPopoverTitle}</EuiPopoverTitle>
+        <EuiPopoverTitle id={popoverTitleId} paddingSize="s">
+          {i18n.CoverageOverviewFilterPopoverTitle}
+        </EuiPopoverTitle>
         <EuiSelectable
           data-test-subj="coverageOverviewFilterList"
           options={options}
           onChange={handleSelectableOnChange}
           renderOption={renderOptionLabel}
+          listProps={{ paddingSize: 's' }}
         >
           {(list) => (
             <div

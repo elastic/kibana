@@ -12,7 +12,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
@@ -27,12 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Save Discover session to dashboard', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
-      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
@@ -115,6 +108,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
         await dashboard.verifyNoRenderErrors();
         expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
+      });
+
+      it('can save a new session from an existing one to a dashboard without overriding the original', async () => {
+        const existingDashboardName = 'Existing Target Dashboard 2';
+        const originalSession = 'Original Session for Save As';
+
+        await discover.navigateToApp();
+        await discover.clickNewSearchButton();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+        await discover.saveSearch(originalSession);
+        await header.waitUntilLoadingHasFinished();
+
+        await dashboard.navigateToApp();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+        await dashboardAddPanel.addSavedSearch(originalSession);
+        await header.waitUntilLoadingHasFinished();
+        await dashboard.saveDashboard(existingDashboardName);
+        await dashboard.switchToEditMode();
+
+        await discover.editEmbeddableInDiscover();
+        await header.waitUntilLoadingHasFinished();
+        await queryBar.setQuery('test');
+        await queryBar.submitQuery();
+        await discover.waitUntilTabIsLoaded();
+        await discover.saveSearchToDashboard(
+          'Session for not Overridding panels',
+          {
+            existing: existingDashboardName,
+          },
+          { saveAsNew: true }
+        );
+        await dashboard.waitForRenderComplete();
+        await dashboard.verifyNoRenderErrors();
+        expect(await discover.getAllSavedSearchDocumentCount()).to.eql([
+          '4,633 documents',
+          '13 documents',
+        ]);
       });
 
       it('can save as a copy to a new dashboard via Save As menu', async () => {
@@ -232,7 +264,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.waitForRenderComplete();
         await dashboard.verifyNoRenderErrors();
-        expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
+        expect(await discover.getAllSavedSearchDocumentCount()).to.eql([
+          '13 documents',
+          '13 documents',
+        ]);
       });
     });
   });

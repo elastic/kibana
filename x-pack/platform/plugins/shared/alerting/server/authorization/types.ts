@@ -17,6 +17,7 @@ export enum ReadOperations {
   GetAlertSummary = 'getAlertSummary',
   GetExecutionLog = 'getExecutionLog',
   GetActionErrorLog = 'getActionErrorLog',
+  GetHistory = 'getHistory',
   Find = 'find',
   GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
   GetRuleExecutionKPI = 'getRuleExecutionKPI',

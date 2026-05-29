@@ -351,6 +351,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
           <EuiPopover
             id="singlePanel"
+            aria-label={ariaLabel}
             button={button}
             isOpen={isPopoverOpen}
             closePopover={closePopover}
@@ -359,7 +360,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             repositionOnScroll
           >
             <EuiContextMenu
-              size="s"
               initialPanelId={0}
               panels={panels}
               data-test-subj="actions-context-menu"

@@ -6,7 +6,6 @@
  */
 
 export { mapSortField } from './map_sort_field';
-export { validateOperationOnAttributes } from './validate_attributes';
 export { type ShouldIncrementRevision, type ParamsModifier } from './bulk_edit';
 export { retryIfBulkEditConflicts } from './bulk_edit/retry_if_bulk_edit_conflicts';
 export { retryIfBulkOperationConflicts } from './retry_if_bulk_operation_conflicts';
@@ -53,3 +52,5 @@ export {
   verifySnoozeScheduleLimit,
 } from './snooze_utils';
 export { tryToRemoveTasks } from './try_to_remove_tasks';
+export { resolveRuleAPIKey } from './resolve_rule_api_key';
+export type { ResolvedAPIKey, RuleApiKeyOwnership } from './resolve_rule_api_key';

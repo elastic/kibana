@@ -39,6 +39,8 @@ export * from './spec/deprecated_step_metadata';
 export * from './types/latest';
 export * from './types/utils';
 export * from './common/constants';
+export * from './common/workflows_events';
+export type * from './common/event_trigger_replay';
 export * from './common/well_known_trigger_sources';
 export type { WorkflowExecutionEventDispatchMetadata } from './common/workflow_execution_schedule_metadata';
 export * from './common/privileges';
@@ -60,7 +62,10 @@ export {
   TriggerSchema,
   getTriggerSchema,
   TriggerTypes,
+  WORKFLOW_EVENTS_VALUES_SET,
+  WorkflowEventsSchema,
   type TriggerType,
+  type WorkflowEventsValue,
 } from './spec/schema/triggers';
 
 // Export specific types that are commonly used

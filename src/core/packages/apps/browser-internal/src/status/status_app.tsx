@@ -8,17 +8,29 @@
  */
 
 import React, { Component } from 'react';
-import { EuiLoadingSpinner, EuiText, EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiPage,
+  EuiPageBody,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
-import { loadStatus, type ProcessedServerResponse } from './lib';
+import { loadStatus, type ProcessedServerResponse, type StatusState } from './lib';
 import { MetricTiles, ServerStatus, StatusSection, VersionHeader } from './components';
 
 interface StatusAppProps {
   http: InternalHttpSetup;
   notifications: NotificationsSetup;
+  getDocLinks: () => DocLinksStart | undefined;
 }
 
 interface StatusAppState {
@@ -47,15 +59,67 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
     }
   }
 
+  private renderRedactedView(serverState: StatusState) {
+    const clusterPrivilegesUrl = this.props.getDocLinks()?.links.security.clusterPrivileges;
+    return (
+      <>
+        <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <ServerStatus serverState={serverState} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+        <EuiEmptyPrompt
+          data-test-subj="statusPageRedactedPrompt"
+          color="highlighted"
+          iconType="info"
+          title={
+            <h2>
+              <FormattedMessage
+                id="core.statusPage.redactedPrompt.title"
+                defaultMessage="Detailed status hidden"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="core.statusPage.redactedPrompt.body"
+                defaultMessage="Your user does not have the Elasticsearch monitor cluster privilege, so detailed core, plugin, and metrics data is not shown."
+              />
+            </p>
+          }
+          actions={
+            clusterPrivilegesUrl
+              ? [
+                  <EuiLink
+                    key="learn-more"
+                    href={clusterPrivilegesUrl}
+                    target="_blank"
+                    external
+                    data-test-subj="statusPageRedactedPromptLearnMoreLink"
+                  >
+                    <FormattedMessage
+                      id="core.statusPage.redactedPrompt.learnMoreLabel"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>,
+                ]
+              : undefined
+          }
+        />
+      </>
+    );
+  }
+
   render() {
     const { loading, fetchError, data } = this.state;
 
-    // If we're still loading, return early with a spinner
     if (loading) {
       return <EuiLoadingSpinner size="l" />;
     }
 
-    if (fetchError) {
+    if (fetchError || !data) {
       return (
         <EuiText color="danger">
           <FormattedMessage
@@ -66,7 +130,15 @@ export class StatusApp extends Component<StatusAppProps, StatusAppState> {
       );
     }
 
-    const { metrics, coreStatus, pluginStatus, serverState, name, version } = data!;
+    if (data.redacted) {
+      return (
+        <EuiPage className="stsPage" data-test-subj="statusPageRoot">
+          <EuiPageBody restrictWidth>{this.renderRedactedView(data.serverState)}</EuiPageBody>
+        </EuiPage>
+      );
+    }
+
+    const { metrics, coreStatus, pluginStatus, serverState, name, version } = data;
 
     return (
       <EuiPage className="stsPage" data-test-subj="statusPageRoot">
