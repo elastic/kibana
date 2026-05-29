@@ -30,8 +30,7 @@ import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { EpisodeActionsBar } from '@kbn/alerting-v2-episodes-ui/components/episode_actions_bar';
 import { AlertEpisodeDetailsHeaderSection } from '@kbn/alerting-v2-episodes-ui/components/details/details_header_section';
-import { AlertEpisodeMetadataDetailsListSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_details_list_section';
-import { AlertEpisodeActionsOverviewSection } from '@kbn/alerting-v2-episodes-ui/components/details/actions_overview_section';
+import { AlertEpisodeOverviewListSection } from '@kbn/alerting-v2-episodes-ui/components/details/overview_list_section';
 import { AlertEpisodeRuleOverviewPanelSection } from '@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section';
 import { AlertEpisodeLifecycleHeatmapSection } from '@kbn/alerting-v2-episodes-ui/components/details/lifecycle_heatmap_section';
 import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
@@ -246,12 +245,7 @@ export function EpisodeDetailsPage() {
       >
         {sidebarPanel === 'episode_details' ? (
           <>
-            <AlertEpisodeMetadataDetailsListSection
-              episodeId={episodeId}
-              services={detailsServices}
-            />
-            <EuiSpacer size="l" />
-            <AlertEpisodeActionsOverviewSection
+            <AlertEpisodeOverviewListSection
               episodeId={episodeId}
               groupHash={groupHash}
               services={detailsServices}

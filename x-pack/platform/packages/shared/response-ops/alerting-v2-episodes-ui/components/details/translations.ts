@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-/** --- Actions overview --- */
-export const ACTIONS_OVERVIEW_EMPTY = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.actionsOverview.empty',
+/** --- Overview list --- */
+export const OVERVIEW_LIST_SECTION_LOAD_ERROR = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.overviewListSection.loadError',
   {
-    defaultMessage: 'No actions have been taken on this episode.',
+    defaultMessage: 'Could not load episode details.',
   }
 );
 
@@ -40,14 +40,6 @@ export const ACTIONS_OVERVIEW_SNOOZED_UNTIL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.actionsOverview.snoozedUntil',
   {
     defaultMessage: 'Snoozed until',
-  }
-);
-
-/** --- Actions overview section --- */
-export const ACTIONS_OVERVIEW_SECTION_LOAD_ERROR = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.actionsOverviewSection.loadError',
-  {
-    defaultMessage: 'Could not load episode actions.',
   }
 );
 
@@ -234,14 +226,6 @@ export const formatMetadataListDuration = (ms: number): string => {
     values: { seconds },
   });
 };
-
-/** --- Metadata details list section --- */
-export const METADATA_DETAILS_LIST_SECTION_LOAD_ERROR = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.metadataDetailsListSection.loadError',
-  {
-    defaultMessage: 'Could not load episode metadata.',
-  }
-);
 
 /** --- Metadata section --- */
 export const METADATA_SECTION_ERROR = i18n.translate(

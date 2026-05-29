@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { AlertEpisodeMetadataDetailsListSection } from './metadata_details_list_section';
-import { AlertEpisodeActionsOverviewSection } from './actions_overview_section';
+import { AlertEpisodeOverviewListSection } from './overview_list_section';
 import { AlertEpisodeLifecycleHeatmapSection } from './lifecycle_heatmap_section';
 import { AlertEpisodeRuleOverviewPanelSection } from './rule_overview_panel_section';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -28,9 +27,7 @@ export const AlertEpisodeOverviewSection = ({
   services,
 }: AlertEpisodeOverviewSectionProps) => (
   <>
-    <AlertEpisodeMetadataDetailsListSection episodeId={episodeId} services={services} />
-    <EuiSpacer size="l" />
-    <AlertEpisodeActionsOverviewSection
+    <AlertEpisodeOverviewListSection
       episodeId={episodeId}
       groupHash={groupHash}
       services={services}

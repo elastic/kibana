@@ -10,16 +10,8 @@ import { render, screen } from '@testing-library/react';
 import { createMockServices } from '../../hooks/test_utils';
 import { AlertEpisodeOverviewSection } from './overview_section';
 
-jest.mock('./metadata_details_list_section', () => ({
-  AlertEpisodeMetadataDetailsListSection: jest.fn(() => (
-    <div data-test-subj="metadataDetailsListSectionStub" />
-  )),
-}));
-
-jest.mock('./actions_overview_section', () => ({
-  AlertEpisodeActionsOverviewSection: jest.fn(() => (
-    <div data-test-subj="actionsOverviewSectionStub" />
-  )),
+jest.mock('./overview_list_section', () => ({
+  AlertEpisodeOverviewListSection: jest.fn(() => <div data-test-subj="overviewListSectionStub" />),
 }));
 
 jest.mock('./lifecycle_heatmap_section', () => ({
@@ -34,8 +26,8 @@ jest.mock('./rule_overview_panel_section', () => ({
   )),
 }));
 
-const { AlertEpisodeActionsOverviewSection } = jest.requireMock('./actions_overview_section') as {
-  AlertEpisodeActionsOverviewSection: jest.Mock;
+const { AlertEpisodeOverviewListSection } = jest.requireMock('./overview_list_section') as {
+  AlertEpisodeOverviewListSection: jest.Mock;
 };
 
 const mockServices = createMockServices();
@@ -45,23 +37,22 @@ describe('AlertEpisodeOverviewSection', () => {
     jest.clearAllMocks();
   });
 
-  it('stacks all four sub-sections', () => {
+  it('stacks all three sub-sections', () => {
     render(
       <AlertEpisodeOverviewSection episodeId="ep-1" groupHash="gh-1" services={mockServices} />
     );
 
-    expect(screen.getByTestId('metadataDetailsListSectionStub')).toBeInTheDocument();
-    expect(screen.getByTestId('actionsOverviewSectionStub')).toBeInTheDocument();
+    expect(screen.getByTestId('overviewListSectionStub')).toBeInTheDocument();
     expect(screen.getByTestId('lifecycleHeatmapSectionStub')).toBeInTheDocument();
     expect(screen.getByTestId('ruleOverviewPanelSectionStub')).toBeInTheDocument();
   });
 
-  it('forwards groupHash to the actions overview section', () => {
+  it('forwards groupHash to the overview list section', () => {
     render(
       <AlertEpisodeOverviewSection episodeId="ep-1" groupHash="gh-1" services={mockServices} />
     );
 
-    expect(AlertEpisodeActionsOverviewSection).toHaveBeenCalledWith(
+    expect(AlertEpisodeOverviewListSection).toHaveBeenCalledWith(
       expect.objectContaining({ episodeId: 'ep-1', groupHash: 'gh-1' }),
       expect.anything()
     );
