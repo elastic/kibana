@@ -81,6 +81,28 @@ Done in Phase C: `8.46.3` (peer `>=4.8.4 <6.0.0`) → `8.60.0` (peer `>=4.8.4 <6
 - **Jest / Babel / SWC compile paths** were not exercised locally. Babel `@babel/preset-typescript@7.24.7` strips types only and TS 6 ships no new syntax, so it should be a non-event. Cypress and Scout share the same Babel pipeline.
 - Some transitive dev-deps still pin `typescript@<6.0.0` in their peers (`find-cypress-specs`, etc.). They print warnings; not blocking.
 
+## Phase C2 — Full-repo typecheck fallout (2026-05-29)
+
+First full `node scripts/type_check` on TS 6.0.3 surfaced **56 errors**. Saved to `typecheck.log.txt`. Categorized:
+
+| Code | Count | Cause | Fix |
+|---|---|---|---|
+| TS2882 | 34 | Side-effect imports of `.scss` / `.css` (and `reflect-metadata/lite`, `core_styles`). TS 6.0 turned on `noUncheckedSideEffectImports: true` by default. | Add `*.scss` / `*.css` ambients to `kbn-ambient-ui-types`; handle the two specials individually. |
+| TS2345 | 8 | RxJS `OperatorFunction` widening in inference adapters + AI assistant test mocks. | Per-file narrow return types. |
+| TS2578 | 4 | Unused `@ts-expect-error upgrade typescript v5.9.3` directives (the underlying bug self-resolved). | Delete. |
+| TS2869 | 3 | `??` right operand unreachable — `fleet_proxies.ts` has a real bug uncovered by stricter analysis. | Fix the bug (operator precedence). |
+| TS2322 | 3 | (1) Test files reassign `HTMLElement.prototype.matches` without type-predicate signature; (2) RxJS shape. | Cast the function. |
+| TS2769 | 2 | reselect `createSelector` no longer accepts the input-function shape used in resolver. | Use explicit input selector typing. |
+| TS2420 | 1 | `MockIntersectionObserver` missing `scrollMargin` (added to lib.dom in TS 6.0). | Add the property. |
+| TS2353 | 1 | streams test mock — `enabled` property not in union response. | Adjust mock to a matching union member. |
+
+### Fix sequencing (smallest blast radius first)
+
+1. **TS2882 wave** — single PR. Add `*.scss` / `*.css` ambients to `kbn-ambient-ui-types`; resolve `'reflect-metadata/lite'` (the package has types but only at root); resolve `'core_styles'` (webpack alias to a real path).
+2. **TS2578 cleanups** + **TS2420** + **TS2353** + **TS2322 (HTMLElement.matches)** + **TS2869 (fleet_proxies)** — bundle into one "small fixes" PR.
+3. **TS2345 (RxJS) + TS2322 RxJS variants** — one PR for inference adapters + AI assistant tests.
+4. **TS2769 (reselect)** — one PR for resolver/selectors.
+
 ## Phase D — TS 7.0 prep
 
 Not started. Sequence:
