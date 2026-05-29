@@ -21,7 +21,7 @@ export const BodySchema = z
     historySnapshot: HistorySnapshotBodyParams.optional().superRefine(
       validateHistorySnapshotParams
     ),
-    timezone: z.string().optional(),
+    timezone: z.string().max(100).optional(),
   })
   .superRefine(validateHistorySnapshotTimezone({ isOptional: true }));
 

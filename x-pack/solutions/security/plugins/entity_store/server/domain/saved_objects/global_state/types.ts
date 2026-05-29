@@ -35,8 +35,8 @@ const historySnapshotSchemaV1 = schema.object({
 });
 
 const historySnapshotSchemaV2 = historySnapshotSchemaV1.extends({
-  frequency: schema.maybe(schema.string()),
-  timezone: schema.maybe(schema.string()),
+  frequency: schema.maybe(schema.string({ maxLength: 100 })),
+  timezone: schema.maybe(schema.string({ maxLength: 100 })),
 });
 
 const logExtractionSchemaV1 = schema.object({

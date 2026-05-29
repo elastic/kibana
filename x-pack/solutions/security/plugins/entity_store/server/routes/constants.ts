@@ -71,6 +71,6 @@ export const HistorySnapshotBodyParams = HistorySnapshotState.pick({ frequency: 
 export type HistorySnapshotCadenceBodyParams = z.infer<typeof HistorySnapshotCadenceBodyParams>;
 export const HistorySnapshotCadenceBodyParams = z
   .object({
-    timezone: z.string(),
+    timezone: z.string().max(100),
   })
   .superRefine(validateHistorySnapshotTimezone({ isOptional: false }));
