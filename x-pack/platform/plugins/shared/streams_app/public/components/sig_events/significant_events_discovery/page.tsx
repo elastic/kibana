@@ -78,7 +78,7 @@ export function SignificantEventsDiscoveryPage() {
     [toasts]
   );
 
-  const { isMemoryEnabled, isLoading: isSettingsLoading } = useDiscoverySettings();
+  const { isMemoryEnabled } = useDiscoverySettings();
 
   useStreamsAppBreadcrumbs(() => {
     return [
@@ -197,9 +197,6 @@ export function SignificantEventsDiscoveryPage() {
   }
 
   if (tab === 'memory' && !isMemoryEnabled) {
-    if (isSettingsLoading) {
-      return <EuiLoadingElastic size="xxl" />;
-    }
     return <RedirectTo path="/_discovery/{tab}" params={{ path: { tab: 'streams' } }} />;
   }
 
