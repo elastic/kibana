@@ -10,10 +10,23 @@
 import { schema } from '@kbn/config-schema';
 import { KQLSyntaxError } from '@kbn/es-query';
 import type { RouteDependencies } from '../types';
-import { INTERNAL_API_VERSION, MAX_PAGE_SIZE } from '../utils/route_constants';
+import {
+  INTERNAL_API_VERSION,
+  MAX_PAGE_SIZE,
+  MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH,
+  MAX_TRIGGER_EVENT_SEARCH_TIME_STRING_LENGTH,
+} from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
+
+export const triggerEventsLogSearchBodySchema = schema.object({
+  kql: schema.maybe(schema.string({ maxLength: MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH })),
+  from: schema.maybe(schema.string({ maxLength: MAX_TRIGGER_EVENT_SEARCH_TIME_STRING_LENGTH })),
+  to: schema.maybe(schema.string({ maxLength: MAX_TRIGGER_EVENT_SEARCH_TIME_STRING_LENGTH })),
+  page: schema.maybe(schema.number({ min: 1 })),
+  size: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
+});
 
 export function registerTriggerEventsLogRoutes(deps: RouteDependencies) {
   const { router, service, spaces } = deps;
@@ -29,13 +42,7 @@ export function registerTriggerEventsLogRoutes(deps: RouteDependencies) {
         version: INTERNAL_API_VERSION,
         validate: {
           request: {
-            body: schema.object({
-              kql: schema.maybe(schema.string()),
-              from: schema.maybe(schema.string()),
-              to: schema.maybe(schema.string()),
-              page: schema.maybe(schema.number({ min: 1 })),
-              size: schema.maybe(schema.number({ min: 1, max: MAX_PAGE_SIZE })),
-            }),
+            body: triggerEventsLogSearchBodySchema,
           },
         },
       },
