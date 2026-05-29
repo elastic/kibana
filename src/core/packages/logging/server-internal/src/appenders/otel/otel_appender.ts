@@ -15,7 +15,9 @@ import type { DisposableAppender, Layout, LogLevel, LogRecord } from '@kbn/loggi
 import {
   ROOT_CONTEXT,
   TraceFlags,
+  metrics,
   trace,
+  ValueType,
   type Context,
   type Attributes,
   type AttributeValue,
@@ -34,8 +36,18 @@ import {
   resolveTlsMaterial,
   toGrpcRootCerts,
 } from './otel_tls';
+import { InstrumentedExporter } from './instrumented_exporter';
 
 const DISPOSE_TIMEOUT_MS = 5_000;
+
+const meter = metrics.getMeter('kibana.logging.otel_appender');
+
+const recordsAccepted = meter.createCounter('kibana.logging.otel_appender.records.accepted', {
+  description:
+    'Log records accepted by the OTel appender before handing off to the underlying exporter.',
+  unit: '{record}',
+  valueType: ValueType.INT,
+});
 
 /**
  * Maps a Kibana log level to the corresponding OTel SeverityNumber.
@@ -255,8 +267,9 @@ export class OtelAppender implements DisposableAppender {
     const resource = buildOtelResources().merge(
       resources.resourceFromAttributes(config.attributes ?? {})
     );
+    const instrumentedExporter = new InstrumentedExporter(exporter, config.protocol);
     this.loggerProvider = new LoggerProvider({
-      processors: [new BatchLogRecordProcessor(exporter)],
+      processors: [new BatchLogRecordProcessor(instrumentedExporter)],
       resource,
     });
     // The scope name 'kibana' identifies this instrumentation library.
@@ -272,6 +285,8 @@ export class OtelAppender implements DisposableAppender {
 
   public append(record: LogRecord): void {
     const severityNumber = toSeverityNumber(record.level);
+
+    recordsAccepted.add(1, { 'log.severity_text': record.level.id.toUpperCase() });
 
     this.logger.emit({
       timestamp: record.timestamp,

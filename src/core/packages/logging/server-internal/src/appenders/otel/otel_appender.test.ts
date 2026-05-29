@@ -8,10 +8,13 @@
  */
 
 import {
+  getCounterAdd,
   mockBatchLogRecordProcessor,
+  mockCreateCounter,
   mockDetectResources,
   mockEmit,
   mockGetConfiguration,
+  mockGetMeter,
   mockLayoutFormat,
   mockLayoutsCreate,
   mockLoggerProvider,
@@ -42,6 +45,8 @@ const makeRecord = (overrides = {}) => ({
   ...overrides,
 });
 
+const RECORDS_ACCEPTED = 'kibana.logging.otel_appender.records.accepted';
+
 beforeEach(() => {
   mockEmit.mockReset();
   mockShutdown.mockReset();
@@ -55,6 +60,7 @@ beforeEach(() => {
   mockLayoutsCreate.mockClear();
   mockLayoutFormat.mockClear();
   jest.mocked(trace.setSpanContext).mockClear();
+  getCounterAdd(RECORDS_ACCEPTED)?.mockClear();
 });
 
 describe('OtelAppender.configSchema', () => {
@@ -563,6 +569,45 @@ describe('OtelAppender.append() — attributes', () => {
 
       const { attributes } = mockEmit.mock.calls[0][0];
       expect(attributes).not.toHaveProperty('log.meta');
+    });
+  });
+});
+
+describe('OtelAppender — metrics', () => {
+  it('acquires the kibana.logging.otel_appender meter scope', () => {
+    expect(mockGetMeter).toHaveBeenCalledWith('kibana.logging.otel_appender');
+  });
+
+  it('declares records.accepted counter with a fully-qualified name and {record} unit', () => {
+    expect(mockCreateCounter).toHaveBeenCalledWith(
+      'kibana.logging.otel_appender.records.accepted',
+      expect.objectContaining({ unit: '{record}' })
+    );
+  });
+
+  it('increments records.accepted once per append() call', () => {
+    const appender = new OtelAppender(validConfig);
+    appender.append(makeRecord());
+    appender.append(makeRecord());
+    appender.append(makeRecord());
+
+    expect(getCounterAdd(RECORDS_ACCEPTED)).toHaveBeenCalledTimes(3);
+  });
+
+  it('tags records.accepted with the uppercased log.severity_text', () => {
+    const appender = new OtelAppender(validConfig);
+    appender.append(makeRecord({ level: LogLevel.Info }));
+    appender.append(makeRecord({ level: LogLevel.Warn }));
+    appender.append(makeRecord({ level: LogLevel.Error }));
+
+    expect(getCounterAdd(RECORDS_ACCEPTED)).toHaveBeenNthCalledWith(1, 1, {
+      'log.severity_text': 'INFO',
+    });
+    expect(getCounterAdd(RECORDS_ACCEPTED)).toHaveBeenNthCalledWith(2, 1, {
+      'log.severity_text': 'WARN',
+    });
+    expect(getCounterAdd(RECORDS_ACCEPTED)).toHaveBeenNthCalledWith(3, 1, {
+      'log.severity_text': 'ERROR',
     });
   });
 });

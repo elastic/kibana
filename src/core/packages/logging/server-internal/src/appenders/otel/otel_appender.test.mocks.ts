@@ -17,6 +17,33 @@ export const mockLoggerProvider = jest.fn(() => ({
 export const mockBatchLogRecordProcessor = jest.fn();
 export const mockOTLPLogExporter = jest.fn();
 
+const counterAddMocks = new Map<string, jest.Mock>();
+const histogramRecordMocks = new Map<string, jest.Mock>();
+
+const getOrCreate = <T>(map: Map<string, T>, key: string, factory: () => T): T => {
+  if (!map.has(key)) {
+    map.set(key, factory());
+  }
+  return map.get(key)!;
+};
+
+export const mockCreateCounter = jest.fn((name: string) => ({
+  add: getOrCreate(counterAddMocks, name, () => jest.fn()),
+}));
+
+export const mockCreateHistogram = jest.fn((name: string) => ({
+  record: getOrCreate(histogramRecordMocks, name, () => jest.fn()),
+}));
+
+export const mockGetMeter = jest.fn(() => ({
+  createCounter: mockCreateCounter,
+  createHistogram: mockCreateHistogram,
+}));
+
+export const getCounterAdd = (name: string): jest.Mock | undefined => counterAddMocks.get(name);
+export const getHistogramRecord = (name: string): jest.Mock | undefined =>
+  histogramRecordMocks.get(name);
+
 export const mockResourceFromAttributes = jest.fn();
 
 interface MockResource {
@@ -79,6 +106,7 @@ jest.mock('@opentelemetry/api', () => {
     ...actual,
     ROOT_CONTEXT: 'root-context',
     trace: mockTrace,
+    metrics: { getMeter: mockGetMeter },
   };
 });
 
