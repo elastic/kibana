@@ -354,6 +354,7 @@ export const ModelSettings: React.FC = () => {
         <DefaultModelSection
           defaultModelSettings={defaultModelSettings}
           validation={defaultModelValidation}
+          disabled={!hasAdvancedSettingsSavePermission}
         />
         {showFeatureSections && (
           <>
