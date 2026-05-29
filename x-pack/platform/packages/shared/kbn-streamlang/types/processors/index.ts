@@ -830,7 +830,7 @@ export const userAgentProcessorSchema = processorBaseWithWhereSchema
   })
   .refine(
     (obj) => {
-      const target = obj.to ?? obj.from;
+      const target = obj.to ?? 'user_agent';
       return (
         !obj.where ||
         (obj.where && isAlwaysCondition(obj.where)) ||
