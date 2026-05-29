@@ -148,10 +148,10 @@ The Evals CLI supports this via **vault config profiles** in:
 Create the profiles:
 
 ```bash
-# Golden cluster credentials (interactive, or copy from config.example.json)
+# 1) Golden cluster config (datasets + keys)
 node scripts/evals init config
 
-# Local export profile (results + traces to localhost:9200)
+# 2) Local export profile (results + traces to localhost:9200, no golden API key setup)
 node scripts/evals init config --profile local
 ```
 
