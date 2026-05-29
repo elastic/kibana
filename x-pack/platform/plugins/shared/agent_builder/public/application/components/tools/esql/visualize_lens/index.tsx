@@ -47,8 +47,7 @@ export function VisualizeLens({
   const { height, width } = getVisualizationDimensionsFromLensConfig(
     lensConfig as Record<string, unknown>
   );
-  // eslint-disable-next-line no-console
-  console.log('[VisualizeLens] chart type:', (lensConfig as any).type, '→', { height, width });
+
   const [localActionButtons, setLocalActionButtons] = useState<ActionButton[]>([]);
   const registerLocalActionButtons = useCallback((buttons: ActionButton[]) => {
     setLocalActionButtons(buttons);
