@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout';
+
 export const CCR_TAGS = ['@local-stateful-classic', '@cloud-stateful-classic'];
 
-export const CCR_ROLE = {
+export const CCR_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: ['manage', 'manage_ccr'],
   },
@@ -20,7 +22,7 @@ export const CCR_ROLE = {
   ],
 };
 
-export const KIBANA_ADMIN_ROLE = {
+export const KIBANA_ADMIN_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
   },
@@ -33,7 +35,7 @@ export const KIBANA_ADMIN_ROLE = {
   ],
 };
 
-export const CCR_USER_ROLE = {
+export const CCR_USER_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: ['manage', 'manage_ccr'],
   },
