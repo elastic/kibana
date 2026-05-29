@@ -163,10 +163,21 @@ node scripts/evals start --suite attack-discovery --export-profile local
 
 Notes:
 
-- `--datasets-profile <name>` controls golden dataset credentials (`EVALUATIONS_KBN_*` + `GCS_CREDENTIALS`). Default datasets use `config.json`; `--datasets-profile dev-vault` reads dev Vault; other names use `config.<name>.json`
-- Export is never implicitly loaded from `config.json`. `--export-profile <name>` loads `EVALUATIONS_ES_*`, `TRACING_ES_*`, and `TRACING_EXPORTERS` from `config.<name>.json`; `--export-profile dev-vault` reads dev Vault
-- If `config.local.json` exists and no export profile is passed, export defaults to `local` automatically (with a soft reachability check for localhost ES)
-- `--profile <name>` sets both datasets and export profiles at once; for golden datasets + local export prefer split flags: `--datasets-profile dev-vault --export-profile local`
+- `--datasets-profile <name>` loads `EVALUATIONS_KBN_URL` / `EVALUATIONS_KBN_API_KEY` from `config.<name>.json`
+- `--export-profile <name>` loads `EVALUATIONS_ES_URL`, `TRACING_ES_URL`, and `TRACING_EXPORTERS` from `config.<name>.json`
+- `--profile <name>` sets both datasets and export profiles at once (default: `config.json`)
+
+#### Loading datasets from dev Vault
+
+Evals run against the local Scout test server. Use `--datasets-profile` when dataset credentials should come from the shared golden cluster instead of a local `config.json`.
+
+```bash
+# Datasets from dev Vault (no local secrets file)
+node scripts/evals start --suite <id> --datasets-profile dev-vault
+
+# Datasets from dev Vault, results/traces to localhost
+node scripts/evals start --suite <id> --datasets-profile dev-vault --export-profile local
+```
 
 #### Filtering tests with `--grep`
 
@@ -341,55 +352,27 @@ EVAL_SUITE_ID=agent-builder ...
 # -> X-Elastic-Product-Use-Case: kbn_evals
 ```
 
-### Developer Vault: golden cluster config (recommended)
-
-Kibana developers run evals against the shared **golden cluster** (datasets, trace export, snapshot restore, centralized reporting). That requires a bundle of secrets stored as a single JSON blob in Vault field `config` (see `config.example.json`).
-
-| Vault          | `VAULT_ADDR`                      | Path                                        | Who uses it                                           |
-| -------------- | --------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
-| **Prod (dev)** | `https://secrets.elastic.co:8200` | `secret/kibana-issues/dev/kbn-evals/golden` | Dev readers via runtime vault (`--profile dev-vault`) |
-| **CI**         | CI Vault instance                 | `secret/ci/elastic-kibana/kbn-evals`        | Buildkite when `KBN_EVALS=1`                          |
-
-**ACLs (prod path):** Obs AI and Security GenAI teams have **write**; Kibana developers have **read** (via OIDC). Use **dev-specific credentials** (separate LiteLLM virtual key from CI) so spend and rotation are independent.
-
-**Developer setup:**
-
-```bash
-# Default: local config.json (interactive init, retrieve_secrets.js, or copy config.example.json)
-node scripts/evals init config
-
-# Or retrieve from dev Vault:
-node scripts/evals start --suite <id> --profile dev-vault
-
-# Golden datasets from dev Vault at runtime (no config.json) + local export:
-node scripts/evals start --suite <id> --datasets-profile dev-vault --export-profile local
-```
-
-**Writers** staging config locally before upload:
-
-```bash
-node x-pack/platform/packages/shared/kbn-evals/scripts/vault/retrieve_secrets.js --vault dev
-```
-
-Upload:
-
-```bash
-node x-pack/platform/packages/shared/kbn-evals/scripts/vault/upload_secrets.js --vault dev
-```
-
 ### CI ops: sharing a Vault update command
 
-To update the **CI** Vault config, edit local `config.json` and generate a write command for @kibana-ops:
+If you need to update the kbn-evals CI Vault config (and want an easy copy/paste command to share with @kibana-ops),
+edit your local config and generate a Vault write command:
 
 ```bash
+# 1) Copy the example (first time only)
+cp x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.example.json \
+  x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json
+
+# 2) Edit config.json with the desired values (includes secrets)
+
+# 3) Print a vault write command (contains base64-encoded config)
 node x-pack/platform/packages/shared/kbn-evals/scripts/vault/get_command.js --vault ci-prod
 ```
 
-Share the output via a secure pastebin (for example `https://p.elstc.co`) and have ops run it against the CI Vault instance.
+Share the output via a secure pastebin (for example `https://p.elstc.co`) and have ops run it.
 
 The Vault config supports an optional `tracingExporters` array that configures OTel trace exporters for the eval Playwright worker process in CI. This is exported as the `TRACING_EXPORTERS` environment variable. See `config.example.json` for the full schema and [Configuring Trace Exporters via Environment Variable](#configuring-trace-exporters-via-environment-variable) for usage details.
 
-CI maintainers with CI Vault access can also sync locally:
+To sync your local `config.json` from Vault (requires Vault auth):
 
 ```bash
 node x-pack/platform/packages/shared/kbn-evals/scripts/vault/retrieve_secrets.js --vault ci-prod
@@ -746,7 +729,7 @@ When `EVALUATIONS_KBN_API_KEY` is provided, requests use `Authorization: ApiKey 
 
 ##### Golden cluster Kibana API key for dataset operations
 
-Golden cluster credentials come from `config.json` by default, or from dev Vault with `--datasets-profile dev-vault`. See [Golden cluster API key privileges](#golden-cluster-api-key-privileges-required) for how writers populate Vault.
+The recommended approach is to run `node scripts/evals init config`, which creates a single unified API key covering both dataset operations and evaluation result export. See [Golden cluster API key privileges](#golden-cluster-api-key-privileges-required) for details.
 
 In CI, these values are automatically sourced from the vault config field `evaluationsKbn`.
 
@@ -804,17 +787,17 @@ A single API key can cover **all** golden cluster operations: evaluation result 
 
 When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, `@kbn/evals` does **not** attempt to create/update templates or create the data stream. Instead it runs an export **preflight check** (sentinel write + best-effort cleanup) to fail fast when the cluster is misconfigured (missing data stream, incompatible mappings, missing write privileges, etc).
 
-**Developer setup:**
+**Automatic setup (recommended):**
 
 ```bash
 node scripts/evals init config
 ```
 
-Use `--profile dev-vault` / `--datasets-profile dev-vault` to load golden cluster credentials from dev Vault at runtime (no `config.json`).
+This interactive wizard opens your browser to the golden cluster Dev Tools, copies the API key creation payload to your clipboard, and walks you through pasting the result back. The single `encoded` key is applied to all four config fields (`evaluationsEs.apiKey`, `tracingEs.apiKey`, `evaluationsKbn.apiKey`, and the tracing exporter `Authorization` header).
 
-**Writers populating Vault:**
+**Manual setup:**
 
-In the golden cluster Kibana Dev Tools, run `POST kbn:/internal/security/api_key` with the privilege payload defined in [`src/api_key/golden_cluster_privileges.json`](src/api_key/golden_cluster_privileges.json). Use [`buildApiKeyPayload`](src/api_key/build_api_key_payload.ts) or the plugin UI for the request body.
+In the golden cluster Kibana Dev Tools, run `POST kbn:/internal/security/api_key` with the privilege payload defined in [`src/api_key/golden_cluster_privileges.json`](src/api_key/golden_cluster_privileges.json). The `init config` wizard builds this request automatically, filling your email from `git config user.email`.
 
 For manual use, add a `"name"` (e.g. `"kbn-evals-<your-email>"`) and `"expiration"` (e.g. `"90d"`) alongside the `kibana_role_descriptors` and `metadata` from that JSON file.
 
