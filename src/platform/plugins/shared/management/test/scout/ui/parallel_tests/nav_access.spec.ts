@@ -14,6 +14,7 @@ import { tags } from '@kbn/scout';
 import { test, CUSTOM_ROLES } from '../fixtures';
 
 test.describe('Stack Management — nav link access', { tag: tags.stateful.classic }, () => {
+  // Pre-migration tag 'skipFIPS'
   test('kibana_admin sees the nav link and only Kibana-privilege-driven sections', async ({
     browserAuth,
     pageObjects,
