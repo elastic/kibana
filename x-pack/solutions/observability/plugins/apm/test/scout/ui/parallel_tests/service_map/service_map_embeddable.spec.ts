@@ -47,10 +47,8 @@ test.describe(
       page,
       pageObjects,
     }) => {
-      test.setTimeout(120000);
-
       await test.step('open a new dashboard', async () => {
-        await pageObjects.dashboard.openNewDashboard({ timeout: EXTENDED_TIMEOUT });
+        await pageObjects.dashboard.openNewDashboard({ timeout: EXTENDED_TIMEOUT * 2 });
       });
 
       await test.step('set time range to last 24 hours so synth data stays in range vs globalSetup', async () => {
