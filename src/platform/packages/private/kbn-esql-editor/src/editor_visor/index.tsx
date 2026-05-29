@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiToolTip,
   useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
