@@ -100,7 +100,7 @@ exports[`XYChart component annotations should render grouped line annotations pr
     Array [
       Object {
         "dataValue": 1647591917125,
-        "details": "",
+        "details": "3 event annotations",
       },
     ]
   }
@@ -116,7 +116,7 @@ exports[`XYChart component annotations should render grouped line annotations pr
           "icon": "3",
           "id": "event1",
           "isGrouped": true,
-          "label": "",
+          "label": "3 event annotations",
           "lineStyle": "dashed",
           "lineWidth": 3,
           "position": "bottom",
@@ -155,7 +155,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
     Array [
       Object {
         "dataValue": 1647591917125,
-        "details": "",
+        "details": "2 event annotations",
       },
     ]
   }
@@ -171,7 +171,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
           "icon": "2",
           "id": "event1",
           "isGrouped": true,
-          "label": "",
+          "label": "2 event annotations",
           "lineStyle": "solid",
           "lineWidth": 1,
           "position": "bottom",

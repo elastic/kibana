@@ -59,7 +59,10 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type {
+  ServerTriggerDefinition,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
 import { getChildWorkflowExecutions } from './lib/get_child_workflow_executions';
@@ -334,11 +337,13 @@ export class WorkflowsService {
   private async scheduleWorkflowTriggers(
     workflowId: string,
     definition: WorkflowYaml | undefined,
+    enabled: boolean,
+    valid: boolean,
     spaceId: string,
     request: KibanaRequest
   ): Promise<void> {
     const { taskScheduler } = this;
-    if (!taskScheduler || !definition?.triggers) {
+    if (!taskScheduler || !definition?.triggers || !enabled || !valid) {
       return;
     }
 
@@ -416,7 +421,14 @@ export class WorkflowsService {
       document: workflowData,
     });
 
-    await this.scheduleWorkflowTriggers(id, definition, spaceId, request);
+    await this.scheduleWorkflowTriggers(
+      id,
+      definition,
+      workflowData.enabled,
+      workflowData.valid,
+      spaceId,
+      request
+    );
 
     return this.transformStorageDocumentToWorkflowDto(id, workflowData);
   }
@@ -559,7 +571,14 @@ export class WorkflowsService {
 
     await Promise.allSettled(
       workflowsToSchedule.map((vw) =>
-        this.scheduleWorkflowTriggers(vw.id, vw.definition, spaceId, request)
+        this.scheduleWorkflowTriggers(
+          vw.id,
+          vw.definition,
+          vw.workflowData.enabled,
+          vw.workflowData.valid,
+          spaceId,
+          request
+        )
       )
     );
 
@@ -2181,6 +2200,11 @@ export class WorkflowsService {
       return { config: { taskType: connector.config?.taskType } };
     }
     return undefined;
+  }
+
+  public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {
+    await this.ensureInitialized();
+    return this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
   }
 
   public async validateWorkflow(

@@ -470,6 +470,8 @@ export class TaskManagerRunner implements TaskRunner {
             withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
           );
 
+          stopUpdatingLongRunningTasks();
+
           const validatedResult = this.validateResult(result);
           const processedResult = await withSpan(
             { name: 'process result', type: 'task manager' },
@@ -478,6 +480,8 @@ export class TaskManagerRunner implements TaskRunner {
           if (apmTrans) apmTrans.end('success');
           return processedResult;
         } catch (err) {
+          stopUpdatingLongRunningTasks();
+
           const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
           const errorMessage =
             err instanceof Error
@@ -502,10 +506,6 @@ export class TaskManagerRunner implements TaskRunner {
           if (apmTrans) apmTrans.end('failure');
           return processedResult;
         } finally {
-          // Stop updating retryAt for long running tasks once the task has finished
-          if (stopUpdatingLongRunningTasks) {
-            stopUpdatingLongRunningTasks();
-          }
           this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
         }
       }
