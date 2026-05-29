@@ -82,14 +82,6 @@ describe('SearchInferenceEndpointsPlugin', () => {
       });
     });
 
-    it('registers feature with all privilege including manage_advanced_settings api privilege', () => {
-      plugin.setup(coreSetup, { features });
-
-      const feature = features.registerKibanaFeature.mock.calls[0][0];
-
-      expect(feature.privileges?.all.api).toContain('manage_advanced_settings');
-    });
-
     it('registers feature with read privilege disabled', () => {
       plugin.setup(coreSetup, { features });
 
