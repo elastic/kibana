@@ -1720,12 +1720,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('alert enrichment', () => {
-        let entityStoreV2Installed = false;
-
         before(async () => {
           // Dynamic docs in this describe only have host.name / user.name (no host.id),
           // so the EUID is name-based.
-          entityStoreV2Installed = await entityStoreV2.setup({
+          await entityStoreV2.setup({
             hosts: [
               {
                 host: { name: 'suricata-zeek-sensor-toronto' },
@@ -1744,32 +1742,15 @@ export default ({ getService }: FtrProviderContext) => {
             users: [
               {
                 user: { name: 'root' },
-                entity: { type: 'user' },
+                entity: { id: 'user:root', type: 'user' },
                 asset: { criticality: 'extreme_impact' },
               },
             ],
           });
-          if (!entityStoreV2Installed) {
-            await esArchiver.load(
-              'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
-            );
-            await esArchiver.load(
-              'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-            );
-          }
         });
 
         after(async () => {
-          if (entityStoreV2Installed) {
-            await entityStoreV2.teardown();
-          } else {
-            await esArchiver.unload(
-              'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
-            );
-            await esArchiver.unload(
-              'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-            );
-          }
+          await entityStoreV2.teardown();
         });
 
         it('suppressed alerts are enriched with host risk score', async () => {

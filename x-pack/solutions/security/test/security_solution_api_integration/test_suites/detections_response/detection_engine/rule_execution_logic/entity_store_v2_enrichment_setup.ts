@@ -36,11 +36,6 @@ export interface EnrichmentSetupConfig {
 /**
  * Installs Entity Store V2 engines and seeds entities for alert enrichment tests.
  *
- * Returns `true` when V2 was installed and entities were seeded (MKI / any environment
- * where Entity Store V2 is enabled). Returns `false` when V2 is not available (e.g.
- * disabled via `disable:entityAnalyticsEntityStoreV2` on ESS/serverless CI), allowing
- * callers to fall back to legacy esArchiver data.
- *
  * Entity creation uses `refresh: 'wait_for'` internally, so seeded entities are
  * immediately searchable when `setup` returns. No additional refresh step is needed.
  *
@@ -52,24 +47,16 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
   const retry = getService('retry');
   const log = getService('log');
 
-  const setup = async (enrichmentConfig: EnrichmentSetupConfig): Promise<boolean> => {
+  const setup = async (enrichmentConfig: EnrichmentSetupConfig): Promise<void> => {
     const entityTypes: string[] = [];
     if (enrichmentConfig.hosts?.length) entityTypes.push('host');
     if (enrichmentConfig.users?.length) entityTypes.push('user');
 
-    if (entityTypes.length === 0) return false;
+    if (entityTypes.length === 0) return;
 
     const installRes = await withHeaders(supertest.post('/api/security/entity_store/install')).send(
       { entityTypes }
     );
-
-    if (installRes.status >= 400 && installRes.status < 500) {
-      // 403: feature disabled; 404: endpoint not registered (plugin disabled via flag)
-      log.info(
-        `Entity Store V2 not available (status ${installRes.status}); falling back to legacy archive.`
-      );
-      return false;
-    }
 
     if (installRes.status !== 200 && installRes.status !== 201) {
       throw new Error(
@@ -112,8 +99,6 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
         );
       }
     }
-
-    return true;
   };
 
   const teardown = async (): Promise<void> => {

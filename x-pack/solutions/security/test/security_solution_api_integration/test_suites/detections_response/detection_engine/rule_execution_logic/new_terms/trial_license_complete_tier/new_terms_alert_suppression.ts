@@ -2260,14 +2260,12 @@ export default ({ getService }: FtrProviderContext) => {
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);
       const path = dataPathBuilder.getPath('auditbeat/hosts');
-      let entityStoreV2Installed = false;
-
       before(async () => {
         await esArchiver.load(path);
         // Two entities are needed:
         //   1. Id-based EUID for auditbeat docs (risk test, host.id present in alert).
         //   2. Name-based EUID for dynamic ecs_compliant docs (criticality test, no host.id).
-        entityStoreV2Installed = await entityStoreV2.setup({
+        await entityStoreV2.setup({
           hosts: [
             {
               host: { name: ENRICHMENT_HOST_NAME, id: [ENRICHMENT_HOST_ID] },
@@ -2286,31 +2284,16 @@ export default ({ getService }: FtrProviderContext) => {
           users: [
             {
               user: { name: 'root' },
-              entity: { type: 'user' },
+              entity: { id: 'user:root', type: 'user' },
               asset: { criticality: 'extreme_impact' },
             },
           ],
         });
-        if (!entityStoreV2Installed) {
-          await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
-          await esArchiver.load(
-            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-          );
-        }
       });
 
       after(async () => {
         await esArchiver.unload(path);
-        if (entityStoreV2Installed) {
-          await entityStoreV2.teardown();
-        } else {
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
-          );
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-          );
-        }
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched with host risk score', async () => {
