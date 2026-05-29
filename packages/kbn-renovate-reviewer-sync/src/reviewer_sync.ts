@@ -95,7 +95,12 @@ export function normalizeSortedUnique(values: string[]): string[] {
 
 export function convertTeamFormat(team: string): string {
   // @elastic/kibana-core -> team:kibana-core
-  return team.replace('@elastic/', 'team:');
+  if (team.startsWith('@elastic/')) {
+    return team.replace('@elastic/', 'team:');
+  }
+  // Individual CODEOWNERS users -> bare username, matching the existing
+  // renovate.json convention (e.g. `markov00`, `dej611`) rather than `@username`.
+  return team.replace(/^@/, '');
 }
 
 function getPackagesMatchingPatterns(patterns: string[], knownPackages: Set<string>): string[] {

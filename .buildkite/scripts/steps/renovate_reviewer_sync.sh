@@ -59,7 +59,7 @@ compute_new_reviewers_to_request () {
 
   local existing_reviewers
   if ! existing_reviewers="$(gh pr view "$pr_number" --json reviewRequests 2>/dev/null | node_helper requested-reviewers)"; then
-    echo "WARN: Failed to read existing review requests for #${pr_number}; skipping new reviewer requests this run"
+    echo "WARN: Failed to read existing review requests for #${pr_number}; skipping new reviewer requests this run" >&2
     return 0
   fi
 
@@ -147,7 +147,7 @@ compute_requested_stale_team_reviewers_to_remove () {
 
   local existing_reviewers
   if ! existing_reviewers="$(gh pr view "$pr_number" --json reviewRequests 2>/dev/null | node_helper requested-reviewers)"; then
-    echo "WARN: Failed to read existing review requests for #${pr_number}; skipping stale reviewer removal this run"
+    echo "WARN: Failed to read existing review requests for #${pr_number}; skipping stale reviewer removal this run" >&2
     return 0
   fi
 

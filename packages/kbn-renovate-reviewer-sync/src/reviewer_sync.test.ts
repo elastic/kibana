@@ -23,6 +23,11 @@ describe('reviewer sync', () => {
     expect(convertTeamFormat('@elastic/something')).toEqual('team:something');
   });
 
+  it('convertTeamFormat normalizes individual users to bare usernames', () => {
+    expect(convertTeamFormat('@vigneshshanmugam')).toEqual('vigneshshanmugam');
+    expect(convertTeamFormat('@markov00')).toEqual('markov00');
+  });
+
   it('normalizeSortedUnique sorts and de-dupes', () => {
     expect(normalizeSortedUnique(['b', 'a', 'a'])).toEqual(['a', 'b']);
   });
