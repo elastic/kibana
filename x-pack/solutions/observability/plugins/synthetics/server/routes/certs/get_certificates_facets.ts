@@ -31,8 +31,8 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
   path: SYNTHETICS_API_URLS.CERTS_FACETS,
   validate: {
     query: schema.object({
-      from: schema.maybe(schema.string()),
-      to: schema.maybe(schema.string()),
+      from: schema.maybe(schema.string({ maxLength: 256 })),
+      to: schema.maybe(schema.string({ maxLength: 256 })),
     }),
   },
   handler: async ({ request, syntheticsEsClient, monitorConfigRepository }) => {

@@ -24,22 +24,22 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
     query: schema.object({
       pageIndex: schema.maybe(schema.number()),
       size: schema.maybe(schema.number()),
-      sortBy: schema.maybe(schema.string()),
-      direction: schema.maybe(schema.string()),
-      search: schema.maybe(schema.string()),
-      from: schema.maybe(schema.string()),
-      to: schema.maybe(schema.string()),
+      sortBy: schema.maybe(schema.string({ maxLength: 256 })),
+      direction: schema.maybe(schema.string({ maxLength: 256 })),
+      search: schema.maybe(schema.string({ maxLength: 1024 })),
+      from: schema.maybe(schema.string({ maxLength: 256 })),
+      to: schema.maybe(schema.string({ maxLength: 256 })),
       // Upper bound on certificate `not_after` (datemath, e.g. `now+30d`), powering
       // the "Expiring within" quick filter. Already-expired certs are included.
-      notValidAfter: schema.maybe(schema.string()),
+      notValidAfter: schema.maybe(schema.string({ maxLength: 256 })),
       // Comma-separated filters (e.g. `http,browser`) sent as strings to avoid
       // query-array serialization edge cases. `monitorTypes` scopes by monitor
       // type; `browserResourceTypes` and `party` are browser-only quick filters;
       // `tags` scopes by monitor tag.
-      monitorTypes: schema.maybe(schema.string()),
-      browserResourceTypes: schema.maybe(schema.string()),
-      party: schema.maybe(schema.string()),
-      tags: schema.maybe(schema.string()),
+      monitorTypes: schema.maybe(schema.string({ maxLength: 1024 })),
+      browserResourceTypes: schema.maybe(schema.string({ maxLength: 1024 })),
+      party: schema.maybe(schema.string({ maxLength: 256 })),
+      tags: schema.maybe(schema.string({ maxLength: 1024 })),
     }),
   },
   handler: async ({ request, syntheticsEsClient, monitorConfigRepository }) => {
