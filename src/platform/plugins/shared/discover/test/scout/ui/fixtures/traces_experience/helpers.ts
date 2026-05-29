@@ -19,11 +19,15 @@ import type { TracesExperiencePage } from './page_objects';
 async function waitForTracesProfileApplied(
   pageObjects: PageObjects & { tracesExperience: TracesExperiencePage }
 ) {
-  const [firstProfileSpecificColumn] = pageObjects.tracesExperience.grid.profileSpecificColumns;
+  // Wait for every trace-profile column
+  for (const column of pageObjects.tracesExperience.grid.profileSpecificColumns) {
+    await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible({
+      timeout: 30_000,
+    });
+  }
 
-  await expect(pageObjects.discover.getColumnHeader(firstProfileSpecificColumn)).toBeVisible({
-    timeout: 30_000,
-  });
+  // Ensure the in-flight search / column swap finished
+  await pageObjects.discover.waitUntilSearchingHasFinished();
   await pageObjects.discover.waitForDocTableRendered();
 }
 
