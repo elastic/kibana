@@ -1,7 +1,10 @@
 # Hosts UI Performance Proposals
 
-This document lists concrete, capability-preserving changes that improve performance. References to "the report" below point at a forensic measurement deep-dive published as a comment on [observability-dev#5590](https://github.com/elastic/observability-dev/issues/5590#issuecomment-4499497658); the headline numbers and rationale needed to evaluate each proposal are inlined here.
+This document is a **catalogue of hypotheses** — concrete, capability-preserving changes that *could* improve Hosts UI performance, with the design rationale, expected mechanical effect, and trade-offs of each. It is forward-looking by construction: nothing here describes what was shipped, what was measured, or which PR landed which proposal.
 
+**PoC outcomes** (what was tried, what worked, what got dropped, with measured numbers) live in the [PoC outcomes comment][outcomes] on [observability-dev#5590][outcomes]. **Forensic measurements of the legacy behaviour** (per-stage breakdowns, ordering analysis, APM-host matrix, state-sub-agg multiplier) live in the [forensic report][report] earlier on the same issue.
+
+[outcomes]: https://github.com/elastic/observability-dev/issues/5590#issuecomment-4563528163
 [report]: https://github.com/elastic/observability-dev/issues/5590#issuecomment-4499497658
 
 **Capability-preservation rule** for every proposal below: same columns, same KPIs, same sort/filter options, same drill-downs, same tabs and the same data shown to the user. Where a change has any user-visible side effect (even cosmetic), it is explicitly called out.
@@ -34,179 +37,6 @@ The same applies to the proposals below. 14 of the 15 land on both schemas with 
 
 ECS users benefit from every Tier 1 / Tier 2 / Tier 3 proposal. They get a strictly smaller absolute saving from the metric-agg-shape proposals (because their metric aggs were already cheaper) but a strictly larger *proportional* saving from everything that targets orchestration (P1, P3, P5.5, P6, P7, P8, P10) — because those costs are a bigger share of an ECS page load than a semconv page load.
 
-## Implementation status (May 2026, updated post-deploy bench)
-
-> **PR refocus.** The original landing plan split into two phases: an architectural pass at the **host table** (P10 + P11 + P12 + P5.6) and a follow-up pass at the **KPI strip** (P15a / b / c). The first deploy-side measurements at 5000 hosts × 24 h flipped the priority — the KPI tiles, not the table, dominate the user-perceived page-load latency. The host-table architecture was reverted so the remaining surface is small enough to land cleanly, and the work has been re-scoped to focus on the KPI strip plus a parallel ES\|QL pass at the Metrics-tab charts. The original two-phase numbers are preserved further down for context.
-
-| # | Proposal | Status | Where |
-| --- | --- | --- | --- |
-| **P1** | Flat `terms` in `buildCombinedAssetFilter` | ✅ **In this PR**, gated behind `useTermsFilter` toggle | `public/utils/filters/build.ts` |
-| **P2** | Open-in-Alerts KQL `or` | ✅ **In this PR**, gated behind `useConsolidatedKql` toggle | `alerts_tab_content.tsx` |
-| **P3** | Keep `top_metrics` for metadata | ✅ **In this PR** (no-op decision, documented in code) | `get_all_hosts.ts` |
-| **P5** | Drop redundant `bool` wrap | ✅ **In this PR**, gated behind `useStrippedBoolWrap` toggle | `get_infra_metrics_client.ts` |
-| **P5.5** | Eliminate duplicate first-paint fetches | ✅ **In this PR** as the unconditional default — the underlying `useHostsPageReady` gate stays. | `use_hosts_page_ready.ts`, `use_hosts_view.ts`, `use_host_count.ts`, `use_fetcher.tsx` |
-| **P5.6** | Scope alerts to metric-bearing hosts | ⏪ **Reverted (Phase 1 revert).** Bound to the Phase A endpoint that was reverted with P10. Re-open as a stand-alone change against the legacy host endpoint when the table refocus lands. | — |
-| **P6** | Collapse `monitoredHosts` branch | ⏭ **Skipped.** Same rationale as before. | — |
-| **P7** | `cardinality` for `getHostsCount` | 🔜 **Follow-up PR.** Still self-contained, still cheap. Kept for after this PR lands. | `get_hosts_count.ts` |
-| **P8** | Defer KPI / Metrics-tab Lens charts | 🔜 **Follow-up PR.** | `hosts_content.tsx`, `tabs.tsx`, `metrics_grid.tsx` |
-| **P9** | Cache host-name list on the client | ⏭ **Skipped.** Still small absolute saving; revisit only if the host endpoint regresses. | — |
-| **P10** | Page-aware metrics (two-phase host endpoints) | ⏪ **Reverted (Phase 1 revert).** Re-measurement with the table reverted showed the dominant remaining cost on the loaded Hosts page is the KPI strip, not the table — and the two-phase split came with a non-trivial endpoint surface (`/host/list` + `/host/metrics` + io-ts contracts + alerts scoping + server-side sort plumbing) that wasn't worth carrying for a saving that's swamped by the KPI cost. The architectural argument still stands; it just isn't the top-priority surface right now. | — |
-| **P11** | Server-side sort + pagination | ⏪ **Reverted (Phase 1 revert).** Bound to P10. | — |
-| **P12** | Single `top_hits` for page metadata | ⏪ **Reverted (Phase 1 revert).** Was subsumed into Phase B ES\|QL `VALUES(…)`; reverted with P10. | — |
-| **P13** | EEM (entity-summary index) | ⏭ **Out of scope.** | — |
-| **P14** | Ingest-time gauges replacing `state` breakdowns | ⏭ **Demoted by `TS`.** | — |
-| **P15a** | KPI trendline toggle (DSL Lens path) | ✅ **In this PR**, `kpiTrendline` toggle in `<PocSettingsPopover>`. ON paints the per-tile sparkline (main behaviour, default); OFF drops the second `date_histogram` per tile. Best wall-time saving observed on the deploy at 5000 hosts: **−48 %** vs default. | `inventory_models/host/metrics/charts/{cpu,memory,disk}.ts` (passthrough), `kpi_charts.tsx` (toggle wiring) |
-| **P15b** | Server-endpoint KPI strip (`POST /api/metrics/infra/host/kpis`) + plain `<MetricChartWrapper>` indicators | ✅ **In this PR**, `useEsqlEndpointKpi` toggle. **Refactored after the deploy bench** to the simplest shape that works: single-stage ES\|QL `STATS … \| EVAL …` over the *entire* filter-matched fleet (no `BY host.name`, no `LIMIT`, no `names` from the client). Pre-STATS `WHERE state IN (…)` prunes via the inverted index on `state` (the decisive optimisation on real OTel data). Client fires it **in parallel with `/host`**; the "of {N} hosts" subtitle is rendered client-side as `min(hostCount, limit)` so the UI label stays aligned with the table even though the KPI scope is the fleet. | `server/routes/infra/lib/host/get_hosts_kpis.ts`, `common/http_api/infra/get_hosts_kpis.ts`, `public/.../hooks/use_hosts_kpis.ts`, `host_kpi_tiles.tsx` |
-| **P15c** | Lens ES\|QL KPI tiles | ✅ **In this PR**, `useLensEsqlKpiCharts` toggle. Four Lens `chartType: 'metric'` embeddables, each backed by a single ES\|QL `STATS \| EVAL` query. Host scoping comes from the embeddable's `filters` prop (translated to the request `filter` parameter, not inlined into ES\|QL). **Trendline intentionally disabled on this path** — the prototype trendline wiring in `@kbn/lens-embeddable-utils` was pulled out (didn't render cleanly end-to-end). | `esql_kpi_chart.ts`, `kpi_charts.tsx` |
-| **P16** | Server-side metrics-timeseries endpoint for the Metrics tab | ⏪ **Reverted.** Replaced by P16-A, which reuses the existing inventory-model chart chrome instead of a parallel rendering path. | — |
-| **P16-A** | Lens ES\|QL Metrics-tab charts | ✅ **In this PR**, `useLensEsqlMetricsCharts` toggle. All 11 Metrics-tab tiles re-render through Lens xy embeddables backed by `STATS … BY host.name, BUCKET(@timestamp, span)`. Counter metrics (rx / tx / disk-io / disk-throughput) compute `(MAX − MIN) / spanSeconds` per bucket because ES\|QL `RATE()` requires a `TS` pipeline incompatible with the per-direction filter. | `esql_metrics_chart.ts`, `bucket_span.ts`, `metrics_grid.tsx` |
-| **Phase 2** | ES\|QL spike on the surviving legacy `/host` endpoint | 🪧 **Scaffolded, not wired.** `server/routes/infra/lib/host/esql_host_metrics.ts` snapshots the semconv ES\|QL expressions that lived in the deleted Phase B handler — kept as a checkpoint for the next spike (one ES\|QL `STATS … BY host.name` to replace `getFilteredHostNames` + `getAllHosts` DSL). Dead code today; safe to delete if the next spike doesn't land. | — |
-
-### PR breakdown
-
-1. **This PR (refocused)** — KPI strip + Metrics-tab ES\|QL spike + retained cross-cutting Tier 1 plumbing, all gated behind runtime toggles in `<PocSettingsPopover>` so reviewers can A/B/C every path against a single running build:
-   - `P15a` (trendline toggle), `P15b` (server-endpoint + plain indicator), `P15c` (Lens ES\|QL tiles).
-   - `P16-A` (Lens ES\|QL Metrics-tab charts).
-   - `P1` / `P2` / `P5` (Tier 1, toggled, default ON).
-   - `P5.5` (unconditional default).
-   - `@kbn/lens-embeddable-utils` text-based `suffix` / `normalizeByUnit` passthrough — the only shared-library change, necessary because the ES\|QL Metrics-tab charts otherwise render IOPS / throughput / network without the `/s` suffix.
-   - `Phase 2` scaffolding (`esql_host_metrics.ts`) — dead code, kept as a checkpoint.
-2. **Follow-up PR** — **P7** (`cardinality` for `/api/infra/host/count`).
-3. **Follow-up PR** — **P8** (defer KPI + Metrics-tab Lens charts).
-4. **Future spike PR** — apply the Phase 2 ES\|QL scaffolding to the legacy `/host` endpoint once the KPI work has landed and stabilised.
-
-Everything else (P6, P9, P13, P14, the previously listed P15c sparkline option) stays off the landing path for the reasons in the status column.
-
-## Update — refocus on the KPI strip (post-deploy bench, May 2026)
-
-### Why we pivoted off the host table
-
-The original landing plan was built against a local 1500-host / 24 h TSDS fixture, where the host endpoint dominated the wall time (`getAllHosts` ≈ 5 s legacy → 154 ms two-phase, an 87 % saving). Once we deployed to a real 5000-host cluster (`metricsgenreceiver`-ingested, GCP `us-west2` Serverless project, 3 h-of-24 h window because ingestion was throttled — but the conclusion is shape-not-volume-dependent), the cost-share flipped:
-
-- The legacy `/host` endpoint is unpleasant but not the hot path on the loaded page — it lives in the ~30 s band at 5000 hosts, comparable to KPI-strip wall time at the same fleet size.
-- The four KPI tiles dominate the user-perceived "page is ready" moment because they paint last, sit at the top of the viewport, and were each issuing their own `date_histogram`-backed DSL query.
-- The two-phase split (P10 + P11 + P12 + P5.6) carries a non-trivial surface area: two new endpoints, two new io-ts contracts, alerts scoping changes, server-side sort plumbing, URL-state coupling. Hard to justify carrying that for the second-largest win on the page.
-
-So the table architecture was reverted (`Phase 1` in the commit history) and the remaining surface re-scoped onto **three comparable KPI render paths + an ES\|QL Metrics-tab pass**, all gated behind `<PocSettingsPopover>` toggles so reviewers and stakeholders can A/B/C them against a single running build.
-
-### The three KPI render paths
-
-| Path | Toggle | What changes vs `main` | When to read it |
-| --- | --- | --- | --- |
-| **P15a — DSL Lens** | `kpiTrendline` (ON = main, OFF = drop the per-tile trendline) | Same four Lens `chartType: 'metric'` tiles; `kpiTrendline=false` flips `trendLine: true → false` so each tile fires one DSL agg instead of two. | Headline saving available without touching ES\|QL. Lowest implementation risk. |
-| **P15b — Server endpoint + plain indicator** | `useEsqlEndpointKpi` | A new `POST /api/metrics/infra/host/kpis` endpoint resolves its **own** host ranking (`STATS BY host.name \| SORT host.name ASC \| LIMIT N`) and returns four scalars + the host count. Client renders with `<MetricChartWrapper>` (pre-Lens), no embeddable chrome. **Fires in parallel with `/host`** — does not wait for the host list. | When you want a single round-trip for the four headline numbers, no Lens compiler on the critical path, and the largest user-perceived saving at 5000+ hosts. |
-| **P15c — Lens ES\|QL tiles** | `useLensEsqlKpiCharts` | Same `<Kpi>` Lens chrome; each tile is a Lens ES\|QL chart with `STATS … \| EVAL …`. Host filter goes via the embeddable's `filters` prop, **not** inlined into ES\|QL. Trendline intentionally disabled on this path — the prototype `@kbn/lens-embeddable-utils` trendline wiring was pulled out because it didn't render cleanly. | Keeps the Lens embeddable affordances (Open-in-Lens, drill-downs) and still gets the single-pipeline cost shape per tile. Fires four parallel ES\|QL queries instead of one. |
-
-The three paths produce numerically aligned headlines at the same fleet+range:
-- P15c and P15b both end at `STATS … \| EVAL …` over the same metric expressions.
-- The only intentional semantic difference between P15b and the others is that P15b is host-weighted (per-host averages collapsed across N selected hosts) where P15a / P15c are doc-weighted (global averages over all docs in the filter scope). At 1 doc per metric per host per interval the two are within ~1 percentage point on the four KPI fields; on chatty fleets the host-weighted shape is the more correct fleet-level summary anyway.
-
-### Deploy-side bench (5000 hosts × 3 h window, kpi_bench_v2.mjs, median of 5 cold runs)
-
-Run against the issue-deploy Serverless project. ES `took_sum` is the sum of per-shard work the engine paid for; wall is the client-observed round-trip. `kpi_bench_v2.mjs` clears the request / query / fielddata caches before every run.
-
-| # | Scenario | Wall median | ES `took_sum` median | Notes |
-| --- | --- | --- | --- | --- |
-| **A** | DSL legacy (trendline ON, four parallel Lens DSL queries) | 43.3 s | 147.5 s | The "P15a OFF" baseline. ES does ~4× the work of the wall time because the four queries run in parallel. |
-| **B** | DSL no-trendline (P15a ON) | **22.4 s** | 75.7 s | One `date_histogram` dropped per tile. The single biggest pure-DSL win on the page, and the cheapest to ship. |
-| **C** | ES\|QL single-stage `STATS` with `host.name IN (5000 names)` inlined (old P15b shape) | 51.4 s | 51.2 s | The filter-in-aggregation (`AVG(…) WHERE state == "idle"`) runs row-by-row; on real OTel data each host emits ~30 docs per interval (one per state), so the operator scans an order of magnitude more rows than necessary. |
-| **D** | ES\|QL with `host.name` passed via request `filter` (P15c shape, no inline IN) | 47.8 s | 47.6 s | Slightly cheaper than C — request-filter is pushed into the engine before the pipeline starts — but still pays the row-by-row filter-in-agg cost. |
-| **E** | ES\|QL = C + pre-STATS `\| WHERE state IN ("idle", "used", "free") OR state IS NULL` | 30.9 s | 29.7 s | The decisive optimisation. Pre-filter prunes via the inverted index on `state` *before* the filter-in-agg operator runs, so the per-row work collapses by ~80 %. |
-| **F** | ES\|QL = E + two-stage `STATS BY host.name \| SORT \| LIMIT \| STATS` (intermediate experiment, dropped) | 88.9 s | 88.7 s | Tried to keep the "of N hosts" semantic by ranking hosts inside the ES\|QL pipeline. The inner `STATS BY host.name` has to materialise per-host rows for the entire fleet (~5000 hosts × 6 per-state slices) before the outer aggregation can run; that pre-aggregation work *dominates* whatever savings the pre-state filter buys. Replaced by G. |
-| **G** | ES\|QL = E without the `host.name IN (…)` clause — single-stage `STATS` over the *full* filter-matched fleet, no host scoping (**shipped P15b shape**) | **47.3 s** | **47.1 s** | The simplest shape that works. `host_count` is the true fleet count; the "(of N hosts)" subtitle is rendered client-side as `min(hostCount, limit)` so it still matches what the user sees in the table. |
-| **H** | DSL `terms` agg (alphabetical top-N names) + scenario-E ES\|QL with inline `host.name IN (?names)` | 46.5 s | 34.7 s | Same wall as G but preserves "exact same N hosts as the table" semantic via two sequential ES queries server-side. Considered but not shipped — G is simpler and the semantic difference doesn't justify the extra round-trip. |
-
-The takeaways:
-1. **`P15a` alone is the biggest one-flag DSL saving on the page.** Drop the per-tile trendline, get ~48 % wall back.
-2. **Filter-in-aggregation on a high-cardinality state field is the silent killer.** The single most impactful ES\|QL change is the pre-STATS `WHERE state IN (…)` clause. Without it, the ES\|QL endpoint is *worse* than legacy DSL. Document this in any ES\|QL guidance we produce.
-3. **Don't pre-aggregate per host unless you need to.** The two-stage `STATS BY host.name \| SORT \| LIMIT \| STATS` shape (F) was a dead end at 5000 hosts — almost 2× slower than the single-stage shape (G). If the KPI doesn't *fundamentally* need to be "of N hosts" rather than "of the fleet", drop the BY-host grouping.
-
-### Why the shipped P15b uses shape G
-
-The original P15b commit (`febd954`) threaded `names: string[]` from `useHostsViewContext` into the request body: KPIs always waited for `/host` to resolve first, then fired with the resolved name list as an inline `WHERE host.name IN (…)` clause. Two problems:
-
-1. **Serial dependency on `/host`.** At 5000 hosts `/host` takes ~30–40 s on the deploy bench. Even with the fastest server-side KPI query (E at 30 s), the user-perceived KPI latency was `~40 s + ~30 s ≈ 70 s`. The wait was the cost.
-2. **`host.name IN (5000)` is itself expensive.** It re-evaluates the IN clause per row even after we'd pre-filtered on state.
-
-An intermediate iteration moved the host ranking into the ES\|QL pipeline itself (shape F: `STATS BY host.name \| SORT \| LIMIT \| STATS`) on the theory that one pipeline beats one server round-trip. The deploy bench showed it backfired: pre-aggregating per host across the whole fleet before the outer collapse cost more than the IN-list it eliminated (88.9 s vs 47.3 s).
-
-The shipped fix drops host scoping entirely:
-- **ES\|QL pipeline is now `WHERE state IN (…) \| STATS … \| EVAL …` over the full filter-matched fleet** — no `BY host.name`, no `LIMIT`, no `names` list. The four KPI values are the same scalars the legacy DSL Lens path would compute if you set `limit = fleet_count`, plus a `host_count = COUNT_DISTINCT(host.name)` for the subtitle.
-- **Client (`useHostsKpis`) drops the `useHostsViewContext` dependency.** The KPI request fires in parallel with `/host` — both gated by the same `useHostsPageReady` shared with `useHostsView` and `useHostCount`.
-- **The "(of N hosts)" subtitle is `min(hostCount, searchCriteria.limit)`.** When `hostCount ≤ limit` it shows the genuine fleet size; when `hostCount > limit` it shows the user-selected page size so the wording stays consistent with the table the user is looking at. The KPI value itself reflects the whole fleet either way, which is the more useful semantic — alphabetical truncation at `limit` was never a meaningful sample.
-
-Net wall-time math at 5000 hosts × 3 h, on the deploy:
-
-| | Old P15b (serial, inline IN) | Shipped P15b (parallel, shape G) |
-| --- | --- | --- |
-| `/host` | ~40 s | ~40 s |
-| `/kpis` | ~50 s | ~47 s |
-| **User-perceived KPI latency** | `40 + 50 = ~90 s` | `max(40, 47) ≈ ~47 s` |
-| **User-perceived KPI saving vs legacy default (~96 s in browser)** | ~6 % | **~51 %** |
-
-At smaller fleet sizes (≤ 500 hosts) all of E / F / G converge — the per-host work that hurts F at scale is cheap, and the IN-list that hurts C is short. The parallelism win is what generalises.
-
-### Local bench — 1500 hosts × 24 h, semconv TSDS (May 28, single-node ES on laptop)
-
-Re-ran `kpi_bench_v2.mjs` after the deploy bench against a local 1500-host synthtrace fixture (5-minute sampling, 24 h window, TSDS, ~3.46 M docs). Same five scenarios A–F + the shipped G shape exercised through the actual `getHostsKpis` handler. Five cold runs each, median:
-
-| # | Scenario | Wall median | ES `took_sum` median |
-| --- | --- | --- | --- |
-| A | DSL legacy (trendline ON) | 142 ms | 519 ms |
-| B | DSL no-trendline (P15a) | 66 ms | 236 ms |
-| C | ES\|QL inline `host.name IN` | 97 ms | 95 ms |
-| D | ES\|QL host scoping via request `filter` | 85 ms | 83 ms |
-| **E** | **ES\|QL inline IN + pre-STATS `WHERE state IN (…)`** | **73 ms** | **71 ms** |
-| F | ES\|QL two-stage `STATS BY host.name \| SORT \| LIMIT \| STATS` | 95 ms | 93 ms |
-
-At 1500 hosts the gaps narrow (the deploy bench had ~30× larger absolute numbers because of network latency + Serverless throttling), but the ordering reproduces: **E remains the fastest ES\|QL shape, F is the slowest, and the pre-STATS state filter is the optimisation that moves the needle.** The shipped G shape is E without the inline `host.name IN` clause — at 1500 hosts the IN-list is short enough that the gap to D/E is in the noise; in production where the fleet may exceed `limit`, dropping the IN avoids the cost without giving up anything meaningful.
-
-### End-to-end (kbn-journey, 1500 hosts × 24 h, single cold run per config)
-
-Same fixture, browser-side instrumentation in `kpi_charts.tsx` (Lens path) and `use_hosts_kpis.ts` (P15b path) marks `infra.hosts.kpiReady` once all four tiles have rendered. `infra.hosts.kpiReadyDuration` is from `navigationStart` to that mark — i.e. real user-perceived wall time, including the `/host` request, React commit, Lens compile, and ES roundtrip.
-
-| Config | hostCount | **KPI** | Table |
-| --- | ---: | ---: | ---: |
-| baseline-main (legacy + trendline) | 418 ms | **53614 ms** | 978 ms |
-| tier1 (Tier-1 fixes only) | 363 ms | **6808 ms** | 737 ms |
-| p15a (drop trendline) | 369 ms | **32322 ms** | 895 ms |
-| p15c (Lens ES\|QL KPI) | 373 ms | **26345 ms** | 752 ms |
-| p15b (server endpoint + plain tiles) | 374 ms | **406 ms** | 945 ms |
-| p16-a (P16-A metrics-tab, KPIs unchanged) | 390 ms | **54582 ms** | 904 ms |
-| everything (all flags on) | 379 ms | **396 ms** | 877 ms |
-
-Notes on what to read into / not into these numbers:
-- **The Lens KPI path is genuinely slow on cold cache.** baseline-main at 53.6 s is not a measurement error — `/internal/lens/esql_async_search` per-tile starts kicking off four 50-second `searchSession`-coordinated queries with one `date_histogram` per tile and a separate scalar agg. The Tier-1 search-cache primer (tier1: 6.8 s) is what most production users see on second visit; the 53 s number is "open a tab on a cold cluster", which is the regime the bench is designed to surface.
-- **P15a (no trendline) is ~40 % faster than baseline.** Same render path, one `date_histogram` dropped per tile. Matches the bench A→B ratio almost exactly.
-- **P15c (Lens ES\|QL KPI) is ~50 % faster than baseline.** The pipeline-side `STATS WHERE state == "idle"` is cheaper than the DSL `filter+avg` sub-agg, *but only because the trendline is dropped*. Lens currently doesn't compile a trendline layer on ES\|QL KPI tiles (see `kbn-lens-embeddable-utils` thread).
-- **P15b (server endpoint) is ~130× faster than baseline.** This is the headline. One ES\|QL roundtrip over the whole fleet with the pre-STATS state filter, plus no Lens compile / no embeddable lifecycle / no trendline. The "everything" config at 396 ms confirms the same path works when stacked with the other Tier-1 fixes.
-- **p16-a's KPI is identical to baseline.** P16-A only switches the Metrics-tab charts; the KPI strip stays on Lens DSL + trendline.
-
-These were single cold runs per config on a laptop — there's considerable variance — but the ratios reproduce across multiple runs and the *ordering* is what matters for the architectural takeaway: P15b is the only path that drops sub-second; everything else stays in the same order of magnitude as the legacy default.
-
-### Metrics-tab ES\|QL pass (P16-A)
-
-Same wins available on the eleven Metrics-tab tiles. Each chart used to be a Lens DSL embeddable issuing `terms(host.name) → date_histogram(@timestamp) → metric_agg` (the same `O(hosts × buckets × per-state slices)` shape that P15 attacks for KPIs). `P16-A` re-renders them through Lens ES\|QL embeddables backed by `STATS … BY host.name, BUCKET(@timestamp, span)`.
-
-Three Metrics-tab-specific things landed alongside:
-
-- **Counter-metric rate compatibility.** ES\|QL `RATE()` is only available on a `TS` pipeline, and `TS` is incompatible with the per-direction filter we apply for `rx` vs `tx` and per-device disk metrics. We compute `(MAX(counter) − MIN(counter)) / spanSeconds` per bucket instead.
-- **Reference layers stripped from the ES\|QL config.** xy ES\|QL charts choked on `type: 'reference'` layers (which the existing inventory models use for the "average baseline" overlay); we filter those out before handing the config to the ES\|QL builder.
-- **`@kbn/lens-embeddable-utils` text-based passthrough.** Lens's xy ES\|QL builder dropped `suffix` and `normalizeByUnit` on text-based columns, so disk IOPS / network / throughput rendered without their `/s` suffix. Fixed in `mapToValueFormat` so the text-based column path emits the same `params.suffix` shape the DSL path produces.
-
-### Host-table changes — what is left after the Phase 1 revert
-
-Everything below is the surface that survived the Phase 1 revert and is still landing in this PR:
-
-- **Frontend filters (P1) — `useTermsFilter`.** `buildCombinedAssetFilter` switches from `OR`-of-`match_phrase` to a flat `terms` filter when the toggle is ON (default). Same `terms` query shape ES sees, but the client constructs it once instead of `N` times.
-- **Open-in-Alerts (P2) — `useConsolidatedKql`.** Generates one KQL `host.name : ("a" or "b" or "c")` instead of `host.name : "a" or host.name : "b" …`.
-- **Server `bool` wrap (P5) — `useStrippedBoolWrap`.** Drops a redundant nesting in `getInfraMetricsClient` when no tiers are excluded.
-- **First-paint gate (P5.5) — unconditional.** `useHostsPageReady` is the single source of truth for "search has settled, fire the host endpoints once" — fed by both `useHostsView`, `useHostCount`, and now `useHostsKpis`.
-
-The host-table data path itself is otherwise identical to `main`. The Phase 2 scaffolding (`esql_host_metrics.ts`) is the checkpoint for the next ES\|QL spike against the legacy `/host` endpoint, when the KPI work has landed.
-
----
-
 > **A note on index-pattern narrowing** — an earlier draft of this document included a proposal (then numbered P4) to narrow the metrics index pattern from `metrics-*,metricbeat-*` to a schema-specific subset (`metrics-hostmetricsreceiver.otel-*` for semconv, `metrics-system.*,metricbeat-*` for ECS). It was **dropped** because (a) the local fixture shows ~0 win (one shard either way), (b) the assumed Serverless gain was inferred from Ty's 80× slowdown rather than measured, (c) ES's `can_match` shard-skipping phase may already mitigate most of the cost via the existing `nodeFilter`, and (d) the proposal made hard assumptions about canonical data-stream prefixes that don't hold for self-managed OTel pipelines or CCS setups with custom patterns. If a future measurement (controlled experiment varying only the pattern, with `profile=true` on the `can_match` phase) shows a real win, this can be reopened.
 
 ---
@@ -215,8 +45,6 @@ The host-table data path itself is otherwise identical to `main`. The Phase 2 sc
 *One-line / one-file changes. Land first.*
 
 ### P1. Replace `OR`-of-`match_phrase` with flat `terms` in `buildCombinedAssetFilter`
-
-> **Status:** ✅ **In this PR.** Implemented in `build.ts` using `buildPhrasesFilter` so the filter bar still renders the familiar "field is one of [...]" pill shape.
 
 **File:** [`x-pack/solutions/observability/plugins/infra/public/utils/filters/build.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/public/utils/filters/build.ts)
 
@@ -257,8 +85,6 @@ Stacks across the 4 KPI charts that the Hosts page fires in parallel — at 500/
 
 ### P2. Get rid of the `OR` of `match_phrase` strings in the "Open in Alerts" link
 
-> **Status:** ✅ **In this PR.** `host.name: (a or b or c)` KQL shape, guarded against empty host lists.
-
 **File:** [`x-pack/solutions/observability/plugins/infra/public/pages/metrics/hosts/components/tabs/alerts/alerts_tab_content.tsx`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/public/pages/metrics/hosts/components/tabs/alerts/alerts_tab_content.tsx)
 
 **Today:** builds a literal KQL string of length `O(numHosts × avg(hostNameLen))`:
@@ -284,11 +110,9 @@ KQL's `or` inside parentheses compiles to a single `terms` query.
 
 ### P3. Keep `top_metrics` for host metadata — empirical ablation found no DSL "free lunch"; the durable fix is P12
 
-> **Status:** ✅ **In this PR** as a no-op decision. The DSL shape in the legacy `getAllHosts` is unchanged; a code comment captures the empirical ablation so a future reader doesn't re-litigate the trade-off. The semconv path's metadata fetch moves to ES\|QL `VALUES(...)` in the new Phase B endpoint (see P12 status), which is the durable fix this proposal pointed at.
-
 **File:** [`x-pack/solutions/observability/plugins/infra/server/routes/infra/lib/host/get_all_hosts.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/server/routes/infra/lib/host/get_all_hosts.ts)
 
-**Status:** earlier drafts of this proposal traded `top_metrics(sort:@timestamp desc, size:1)` for `terms(size:1)`. Re-running the ablation on the local fixture showed the perf win was real (~25 % at 500/24h) but the semantic change — from "latest non-null" to "most-frequent non-null" — is materially user-visible, including under the metadata-exclusion path (a `cloud.provider != aws` filter would drop hosts that migrated from AWS to GCP mid-window because the historical AWS value still won the frequency contest). We then designed a "best of both worlds" shape `terms(size:1, order:{latest_ts:desc}) > max(@timestamp)` and benchmarked it on the same fixture. **The result rejected the proposal**: see ablation below. P3 therefore lands as **"keep the original shape"**, and the durable cost fix is P12 (metadata aggs only for the visible page).
+**Why this proposal is a "keep" rather than a "rewrite":** earlier drafts traded `top_metrics(sort:@timestamp desc, size:1)` for `terms(size:1)`. Ablation on the local fixture showed the perf win was real (~25 % at 500/24h) but the semantic change — from "latest non-null" to "most-frequent non-null" — is materially user-visible, including under the metadata-exclusion path (a `cloud.provider != aws` filter would drop hosts that migrated from AWS to GCP mid-window because the historical AWS value still won the frequency contest). A "best of both worlds" shape `terms(size:1, order:{latest_ts:desc}) > max(@timestamp)` was then designed and benchmarked on the same fixture — the result rejected the proposal (see ablation below). The conclusion of P3 is therefore **"keep the original shape"**, and the durable cost fix is P12 (metadata aggs only for the visible page).
 
 **Ablation, 3-way, 500 hosts, anchored to the dataset's max `@timestamp`, cold cache, single shard, single segment merge:**
 
@@ -336,8 +160,6 @@ hostOsName: {
 
 ### P5. Drop the `excludedQuery`'s extra `bool` wrap when no tiers are excluded
 
-> **Status:** ✅ **In this PR.** Pass-through when `excludedQuery` is undefined; the `bool { filter, must }` wrap is only built on the data-tier-exclusion path.
-
 **File:** [`get_infra_metrics_client.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/server/lib/helpers/get_infra_metrics_client.ts) lines 60–70
 
 **Today:** every search is wrapped in an extra `bool` even when `excludedQuery` is undefined:
@@ -368,8 +190,6 @@ Small per-query saving as expected, and only on the no-excluded-tiers path (whic
 ---
 
 ### P5.5. Eliminate duplicate first-paint fetches (`useFetcher` gating)
-
-> **Status:** ✅ **In this PR.** Combined value-and-status gate in `useUnifiedSearch`; `useHostsView` and `useHostCount` return `undefined` synchronously when `isReady === false`; `useFetcher`'s type signature widened to `Promise<TReturn> | undefined`.
 
 **Files:**
 - [`x-pack/solutions/observability/plugins/infra/public/pages/metrics/hosts/hooks/use_unified_search.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/public/pages/metrics/hosts/hooks/use_unified_search.ts) — expose `isReady`.
@@ -462,8 +282,6 @@ Add a Scout regression test that loads the Hosts page and asserts the network pa
 
 ### P5.6. Scope the alerts query to metric-bearing hosts only
 
-> **Status:** ✅ **In this PR** — satisfied *by construction* by the new Phase A handler. `get_hosts_list.ts` scopes the alerts query to the visible page's infra-bearing names (not the full Phase A union), which is strictly stronger than the original P5.6 proposal: the alerts pipeline no longer pays for either APM-only or off-page hosts. The legacy `get_hosts.ts` is left untouched because the two-phase split deprecates it.
-
 **File:** [`x-pack/solutions/observability/plugins/infra/server/routes/infra/lib/host/get_hosts.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/server/routes/infra/lib/host/get_hosts.ts)
 
 **Today:** `getHostsAlertsCount` receives the full Phase A union (`[...filteredHosts, ...apmHosts]`) and runs its own `terms(host.name, size: limit, order: _key asc)` over the alerts indices, scoped to that union. The result is joined back onto the Phase B rows by name. See the [report]'s §"Ordering across the whole pipeline" for the full failure-mode write-up; the relevant one here is **Mode B**: APM-only host names typically sort earlier than infra names (e.g. `apm-only-host-*` < `semconv-host-*`), and the alerts agg's alphabetic cut can bucket alerts on APM-only hosts that will never render in the table (Phase B can only bucket metric-bearing hosts). The visible (infra) rows then show `alertsCount: undefined` even when they have active alerts, because the join can't find them in the alerts response.
@@ -498,8 +316,6 @@ const [hostMetricsResponse, alertsCountResponse] = await Promise.all([
 *Single-feature refactors. Land after Tier 1.*
 
 ### P6. Simplify the `monitoredHosts` branch
-
-> **Status:** ⏭ **Skipped.** P6 targets the legacy `getAllHosts` aggregation that the two-phase split deprecates. The new Phase A/B handlers don't compute `monitoredHosts` at all — `hasSystemMetrics` is derived from the presence of a Phase B bucket, which is the architecturally correct way to ask the question. The legacy endpoint stays around for the cross-version compat window but isn't worth a separate PR while we're moving traffic off it. Reopen only if we end up keeping the legacy endpoint long-term.
 
 **File:** [`get_all_hosts.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/server/routes/infra/lib/host/get_all_hosts.ts) lines 64–77
 
@@ -545,8 +361,6 @@ hasSystemMetrics: (bucket?.monitored?.doc_count ?? 0) > 0,
 
 ### P7. Replace `getHostsCount`'s big terms agg with `cardinality`
 
-> **Status:** 🔜 **Follow-up PR #2.** Independent endpoint, fires on every page load alongside the new `/host/list`. ~400 ms saving at 1500/24h on the local fixture, grows with fleet size. Cleanly separable from the architectural PR — different file, different review surface, no shared types.
-
 **File:** [`get_hosts_count.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/server/routes/infra/lib/host/get_hosts_count.ts)
 
 **Today:** `MAX_HOST_COUNT_LIMIT = 10000` is materialised as buckets just to compute a count. The buckets are only needed when `excludedValues` (metadata exclusion filters) are present:
@@ -577,8 +391,6 @@ Even better: replace the entire post-processing model with a real filter — tre
 ---
 
 ### P8. Defer KPI and Metrics-tab Lens rendering until visible
-
-> **Status:** 🔜 **Follow-up PR #3.** Biggest user-facing win still on the table after the architectural PR lands (30–60 % perceived first-paint improvement). Lands as its own PR because it introduces a UX-shaping change (load-on-scroll for the KPI strip and a potential default-tab change) that wants a separate design / Scout discussion. Independent of the two-phase data path.
 
 **Files:**
 - [`hosts_content.tsx`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/public/pages/metrics/hosts/components/hosts_content.tsx) (wraps `KpiCharts`)
@@ -611,8 +423,6 @@ So a user staring at the table after 5 seconds is also waiting on 14 Lens querie
 ---
 
 ### P9. Pre-compute and cache the host name list on the client
-
-> **Status:** ⏭ **Skipped — motivation removed by P10/P11.** This proposal was sized against the ~5 s `getAllHosts` cost. The new Phase A endpoint on TSDS is ~92 ms median (cold) on the 1500-host fixture, so a tab toggle or sort-flip saves a few tens of ms at most — not enough to justify the cache-key / invalidation complexity documented in the drawbacks below. Reopen only if Phase A regresses or the ECS path (where Phase A is DSL, not TSDS-`TS`) becomes the hot path.
 
 **Files:** [`use_hosts_view.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/public/pages/metrics/hosts/hooks/use_hosts_view.ts), [`use_host_count.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/public/pages/metrics/hosts/hooks/use_host_count.ts)
 
@@ -656,8 +466,6 @@ So a user staring at the table after 5 seconds is also waiting on 14 Lens querie
 > **The ordering gap also bites the alerts pipeline.** `getHostsAlertsCount` runs an independent `terms(host.name, size: limit, order: _key asc)` over the alerts indices, scoped to the Phase A union, and is joined to Phase B rows by name in Node. So `alertsCount` only lands on a row when the host is simultaneously in the alphabetic top-`limit` of metric-bearing hosts *and* in the alphabetic top-`limit` of alert-bearing hosts. The two truncations can disagree (Mode A: more than `limit` hosts have alerts; Mode B: APM-only host names skew the alerts cut away from visible rows). The selection signal chosen in (a) must therefore be used by the alerts query too, otherwise lifting the cap silently desynchronises alerts from visible rows even more. Full stage-by-stage analysis (with code refs, the Node-side `(hasSystemMetrics, cpuV2)` post-sort that operates *on the already-truncated set*, and the alerts Mode A/B failure modes) is in the [report]'s §"Ordering across the whole pipeline". Mode B has a Tier 1 standalone fix landing before P10/P11 — see P5.6.
 
 ### P10. Page-aware metrics: load every host cheaply, aggregate only for the visible page
-
-> **Status:** ✅ **In this PR.** Two new endpoints live behind their final names (`/api/metrics/infra/host/list`, `/api/metrics/infra/host/metrics`). Client orchestration in `useHostsView` runs Phase A → Phase B and merges results into the existing row shape so the table renders unchanged. Legacy `/api/metrics/infra/host` is left in place for the cross-version compat window.
 
 > **PoC status (May 2026): implemented and measured at 1500-host scale on TSDS-backed fixtures.**
 >
@@ -790,8 +598,6 @@ On the client, the table renders Phase A immediately; metric cells show a small 
 
 ### P11. Server-side sort + pagination (prerequisite for P10)
 
-> **Status:** ✅ **In this PR.** `sort` + `page` are first-class arguments on Phase A. Sort by `host.name` maps to `terms({ order: { _key } })` on the DSL path and `SORT host.name` on the ES\|QL path; sort by a metric uses `bucket_sort` on DSL or `SORT <metric>` after the boundary `STATS` on ES\|QL. The client's `sortTableData` is gone — URL state drives the server sort directly. Sort-by-`alertsCount` falls back to lex name ranking + a visible-page client-side post-sort (Phase A doesn't cross the alertsClient RBAC boundary at ranking time); flagged as a known limitation in the PR description.
-
 **Files:** API contract in [`get_infra_metrics.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/common/http_api/infra/get_infra_metrics.ts); handler in [`get_filtered_hosts.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/server/routes/infra/lib/host/get_filtered_hosts.ts) and [`get_all_hosts.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/server/routes/infra/lib/host/get_all_hosts.ts); client in [`use_hosts_table.tsx`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/public/pages/metrics/hosts/hooks/use_hosts_table.tsx).
 
 **Today:** the table requests all `limit` rows, then sorts in JS via [`sortTableData`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/public/pages/metrics/hosts/hooks/use_hosts_table.tsx:137). The page slice is computed in `useMemo` over the sorted array. This works only because every row is in memory, which is exactly what P10 is trying to stop.
@@ -818,10 +624,6 @@ The client passes the URL-state sort/pagination directly into the Phase A reques
 ---
 
 ### P12. Single `top_hits` follow-up for page metadata
-
-> **Status:** ✅ **Semconv path: in this PR.** Phase B issues a single ES\|QL `FROM` query that pulls metadata (`host.os.name`, `cloud.provider`, `host.ip`) via `VALUES(...)` in the same `STATS BY host.name` as the metric values — so the three `top_metrics` round-trips collapse into one round-trip per page. The synthtrace metadata-completeness check (sparse-metadata + migrated-metadata fixtures) confirmed `VALUES(...)` returns the latest non-null value because those fields are TSDS dimensions in the OTel template.
->
-> ⏭ **ECS path: skipped.** Under the page-bounded model (≤ 20 buckets), the gap between 3 × `top_metrics` and 1 × `top_hits` on the DSL path is small. Revisit only if ECS Phase B shows up hot in production traces.
 
 **File:** [`get_hosts.ts`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/server/routes/infra/lib/host/get_hosts.ts) — specifically Phase A as introduced by P10.
 
@@ -861,8 +663,6 @@ One `top_hits` per bucket instead of three independent `filter + top_metrics` ag
 ---
 
 ### P15. Make the KPI summary tiles fast by attacking what they actually do
-
-> **Status:** 🔜 **Two follow-up PRs (PR #4 = P15a, PR #5 = P15b).** Ty's April 2026 thread (≪ link ≫) made it clear that the dominant cost in his videos — 30 s to 8+ minutes of page-load time — was the four KPI tiles at the top of the Hosts page, not the table. Our PR #1 deliberately scoped to the table; we now have measurement clarity that the KPI strip is the next biggest user-visible win.
 
 **Where the cost actually lives today.** Each of the four host KPI tiles (`CPU Usage`, `Normalized Load`, `Memory Usage`, `Disk Usage`) is a Lens **`chartType: 'metric'`** chart with **`trendLine: true`**:
 
@@ -1164,74 +964,6 @@ Smallest measurement that answers Nathan's question and unlocks the semconv migr
    - If `TS` *loses* → most likely cause is bucket-size / window misconfiguration (the blog's "chart goes blank" gotcha) or a metric-type tagging issue. Document the cause and the threshold above which `TS` would win, file an issue if it points at a missing primitive, and stay on DSL.
 
 The PoC is **not** a binary "should we rewrite the page in ES|QL". It is a measurement of a specific bounded surface — Phase B on semconv data — against a known baseline (Tier 1–3 DSL), with the 30× columnar-engine benchmark numbers from the Search Labs post as the upper bound.
-
----
-
-## Landing plan (May 2026)
-
-The original tier-based landing order has collapsed into **three PRs**, because the architectural PR ended up the natural home for every Tier 1 prerequisite that has to ship with it (without P1 the table filter pill regresses; without P5.5 the duplicate-fire confounder makes the perf measurements unreadable; without the P5.6 *semantic* the new Phase A's alerts scoping is wrong by construction). The two remaining wins worth shipping are surgical enough to live in their own small PRs.
-
-```mermaid
-flowchart LR
-  PR1["PR #1 — this PR<br/>Architectural Tier 3 + folded prerequisites<br/>P10 + P11 + semconv-P12<br/>+ P1 + P2 + P3 (no-op) + P5 + P5.5 + P5.6<br/>+ TSDS synthtrace template + new fixtures"]
-  PR2["PR #2 — Follow-up<br/>P7: cardinality for /host/count"]
-  PR3["PR #3 — Follow-up<br/>P8: defer KPI + Metrics-tab Lens"]
-  PR4["PR #4 — Follow-up<br/>P15a: drop KPI trendLine"]
-  PR5["PR #5 — Follow-up<br/>P15b: single ES|QL STATS<br/>KPI endpoint"]
-  SKIP["⏭ Skipped / deferred<br/>P6 (legacy path only)<br/>P9 (motivation removed)<br/>P12 ECS (marginal under page-bounded)<br/>P13 (EEM, out of scope)<br/>P14 (demoted by TS)<br/>P15c (only if product feedback says so)"]
-
-  PR1 --> PR2
-  PR1 --> PR3
-  PR1 --> PR4
-  PR4 --> PR5
-  PR1 -.documents.-> SKIP
-```
-
-### Expected end-to-end improvement on 500/24h
-
-Numbers are for the semconv fixture (matrix in the [report]); ECS users start at a lower absolute baseline (~3 s) and end proportionally closer to the same floor.
-
-**After PR #1 (this PR) lands:**
-
-- **Whole-page wall time** (Hosts API), measured cold-cache on 1500-host synthtrace fixtures:
-  - **Pre-TSDS, 24h window:** 5436 ms → **675 ms** (87.6 % saving)
-  - **Post-TSDS, ~2h window:** 485 ms → **154 ms** (68.3 % saving — TSDS itself collapsed the legacy baseline by ~11×, the two-phase architecture layers a further ~68 % on top)
-  - Driven by P10 + P11 + semconv-P12. The TSDS write window cap (default 2h look-back) is the reason the post-TSDS measurement uses a shorter window; the architectural saving is window-independent because Phase B's per-page work is bounded to ≤ 20 host buckets regardless of date range.
-- **First-paint waste**: P5.5 collapses ~1.08 s of *wasted* ES work per page load down to ~20 ms (aborts resolve in 1–7 ms vs. 190–340 ms baseline). Cluster-side saving, scales with shard fan-out in Serverless / CCS.
-- **KPI fan-out**: ~1.6 s → ~1.0 s on the relevant queries from P1 (the four KPI charts that fire in parallel).
-- **Alerts correctness**: P5.6's spirit is satisfied by Phase A scoping alerts to the visible page's metric-bearing hosts. Closes Mode B (APM-only host names skewing the alphabetic alerts cut) and Mode A (more than `limit` hosts have alerts) simultaneously, because the alerts query is now bounded to ≤ 20 names per page rather than ≤ `limit` over the whole fleet.
-- **The silent 500-cap product gap is closed** — Phase A addresses every matching host (up to `MAX_HOST_COUNT_LIMIT`) and the user can paginate through them all.
-
-**After PR #2 (P7) lands:**
-
-- **`/api/infra/host/count`**: ~400 ms → < 50 ms at 1500/24h via `cardinality` on the no-exclusions path; the must-not-filter rewrite on the excluded-values path also runs cleanly under `cardinality` rather than materialising 10 000 buckets just to count them.
-
-**After PR #3 (P8) lands:**
-
-- **Perceived first-paint**: 30–60 % improvement for users who care about the table first — KPI strip + 10-chart Metrics-tab fan-out defer until in-viewport. Network panel at t < 1 s drops from ~16 ES requests to ~3.
-
-**After PR #4 (P15a) lands:**
-
-- **KPI strip cold-load**: per-tile ES `took` drops by 80–95 % on the 500-host / 24h shape (Inspector "Table 2" with `date_histogram` removed). On Ty's measured 8+-minute / "never finished" 500/24h workload this is the single largest user-visible saving in the entire series.
-- **Serverless CB exposure**: removed for the KPI strip. The headline number's `O(hosts × states)` cell count is now single-digit MB.
-
-**After PR #5 (P15b) lands:**
-
-- **KPI fan-out → 1 round-trip**: the four parallel Lens-driven DSL requests become one ES|QL `STATS`. Compounds with P15a's `date_histogram` removal — for the semconv path, projected sub-second end-to-end on Ty's 500/24h fixture (extrapolated from his "a few seconds" measurement on the same STATS shape).
-- **Node-side**: four Lens expression compilations per page load → one io-ts decode of four numbers.
-
-**Cumulative target**: sub-second initial paint at any fleet size on either schema, with the per-page agg work bounded to ≤ 20 buckets regardless of fleet size, the KPI strip down to one ES round-trip with zero CB exposure, *and* the silent 500-cap product gap closed.
-
-### Skipped / deferred (with reasons)
-
-- **P6** (collapse `monitoredHosts`) — only applies to the legacy `/api/metrics/infra/host` path, which the two-phase split deprecates. Not worth a PR while we're moving traffic off it.
-- **P9** (client-side host-name cache) — sized against a ~5 s `getAllHosts`. Phase A on TSDS is ~92 ms on the 1500-host fixture; the cache's savings are dwarfed by its key / invalidation complexity. Reopen only if Phase A regresses.
-- **P12 (ECS DSL path)** — under the page-bounded model the gap between 3 × `top_metrics` and 1 × `top_hits` on ≤ 20 buckets is small. Revisit only if ECS Phase B shows up hot in production.
-- **P13 (EEM)** — out of scope, deprioritized at the program level. Tier 3 is the largest practical optimisation reachable without revisiting EEM.
-- **P14 (ingest-time gauges)** — demoted by `TS + WHERE state == 'idle' + AVG_OVER_TIME`. Kept as a "nice to have" for absolute peak query speed only.
-- **P15c (re-introduce trend line as ES|QL series)** — deferred until product feedback after P15a says the trend line is actually missed. Carrying the design notes so the bucket-sizing rule (≤ 100 buckets across the visible window) is on file the day we need it.
-
-Tier 4 (P13 / EEM) would unlock the next order of magnitude, but is out of scope for this report. The architecture landed in PR #1 is what's reachable in the absence of that work.
 
 ---
 
