@@ -9,25 +9,22 @@ import type React from 'react';
 import type { ComposeDiscoverState, ComposeDiscoverAction } from '../types';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 
-export interface RuleBuilderStepProps<TState = unknown> {
+export type BuilderState = unknown;
+
+export interface RuleBuilderStepProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  builderState: TState;
-  onBuilderStateChange: (state: TState) => void;
 }
 
-export type RuleBuilderRecoveryProps<TState = unknown> = Omit<
-  RuleBuilderStepProps<TState>,
-  'services'
->;
+export type RuleBuilderRecoveryProps = Omit<RuleBuilderStepProps, 'services'>;
 
-export interface RuleBuilderDefinition<TState = unknown> {
+export interface RuleBuilderDefinition<TState = BuilderState> {
   type: string;
   stepTitle: string;
   createDefaultState: () => TState;
-  renderStep: (props: RuleBuilderStepProps<TState>) => React.ReactNode;
-  renderRecoveryStep?: (props: RuleBuilderRecoveryProps<TState>) => React.ReactNode;
+  renderStep: (props: RuleBuilderStepProps) => React.ReactNode;
+  renderRecoveryStep?: (props: RuleBuilderRecoveryProps) => React.ReactNode;
   validate?: (state: ComposeDiscoverState, builderState?: TState) => boolean;
   parseState?: (query: string, recoveryQuery?: string) => TState | null;
 }

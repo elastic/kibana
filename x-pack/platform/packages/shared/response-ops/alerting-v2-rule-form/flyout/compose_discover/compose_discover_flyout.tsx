@@ -40,7 +40,7 @@ import {
 } from './compose_mappers';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
-import { RULE_BUILDER_REGISTRY } from './rule_builder';
+import { RULE_BUILDER_REGISTRY, BuilderStateProvider, type BuilderState } from './rule_builder';
 import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
@@ -149,7 +149,7 @@ export interface ComposeDiscoverFlyoutProps<TWorkflow extends object = object> {
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
   builderType?: string;
-  initialBuilderState?: unknown;
+  initialBuilderState?: BuilderState;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -264,7 +264,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(baseServices);
 
-  const [builderState, setBuilderState] = useState<unknown>(() => {
+  const [builderState, setBuilderState] = useState<BuilderState>(() => {
     if (!builderType) return undefined;
     if (initialBuilderState !== undefined) return initialBuilderState;
     const definition = RULE_BUILDER_REGISTRY[builderType];
@@ -611,17 +611,17 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                 />
               </React.Suspense>
             ) : (
-              <ComposeDiscoverForm
-                state={uiState}
-                dispatch={dispatch}
-                services={baseServices}
-                onRecoveryTypeChange={handleRecoveryTypeChange}
-                onKindChange={handleKindChange}
-                ruleId={ruleId}
-                builderType={builderType}
-                builderState={builderState}
-                onBuilderStateChange={setBuilderState}
-              />
+              <BuilderStateProvider builderState={builderState} setBuilderState={setBuilderState}>
+                <ComposeDiscoverForm
+                  state={uiState}
+                  dispatch={dispatch}
+                  services={baseServices}
+                  onRecoveryTypeChange={handleRecoveryTypeChange}
+                  onKindChange={handleKindChange}
+                  ruleId={ruleId}
+                  builderType={builderType}
+                />
+              </BuilderStateProvider>
             )}
           </EuiFlyoutBody>
 

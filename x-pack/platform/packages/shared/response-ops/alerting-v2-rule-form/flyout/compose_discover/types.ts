@@ -9,6 +9,7 @@ import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import type { ComposeFormValues } from './compose_form_types';
+import type { BuilderState } from './rule_builder/types';
 import type { RuleBuilderRecoveryProps } from './rule_builder/types';
 
 export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
@@ -31,8 +32,6 @@ export interface StepRenderProps {
   onRecoveryTypeChange: (type: RecoveryType) => void;
   onKindChange: (kind: 'signal' | 'alert') => void;
   ruleId?: string;
-  builderState?: unknown;
-  onBuilderStateChange?: (state: unknown) => void;
   renderBuilderRecovery?: (props: RuleBuilderRecoveryProps) => React.ReactNode;
 }
 
@@ -44,7 +43,7 @@ export interface StepDefinition {
     methods: UseFormReturn<ComposeFormValues>,
     state: ComposeDiscoverState,
     services?: RuleFormServices,
-    builderState?: unknown
+    builderState?: BuilderState
   ) => Promise<boolean> | boolean;
 }
 

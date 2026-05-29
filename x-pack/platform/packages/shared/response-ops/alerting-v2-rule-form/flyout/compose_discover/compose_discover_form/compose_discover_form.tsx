@@ -35,8 +35,6 @@ interface Props {
   onKindChange: (kind: 'signal' | 'alert') => void;
   ruleId?: string;
   builderType?: string;
-  builderState?: unknown;
-  onBuilderStateChange?: (state: unknown) => void;
 }
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -73,8 +71,6 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         state={props.state}
         dispatch={props.dispatch}
         onRecoveryTypeChange={props.onRecoveryTypeChange}
-        builderState={props.builderState}
-        onBuilderStateChange={props.onBuilderStateChange}
         renderBuilderRecovery={props.renderBuilderRecovery}
       />
     ),
@@ -126,24 +122,19 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
   const steps = ids.map((id) => {
     const base = STEP_REGISTRY[id];
     if (id === 'builderCondition' && definition) {
-      const step: StepDefinition = {
+      return {
         ...base,
         title: definition.stepTitle,
-        render: (props) => {
-          if (!props.builderState || !props.onBuilderStateChange) return null;
-          return definition.renderStep({
+        render: (props: StepRenderProps) =>
+          definition.renderStep({
             state: props.state,
             dispatch: props.dispatch,
             services: props.services,
-            builderState: props.builderState,
-            onBuilderStateChange: props.onBuilderStateChange,
-          });
-        },
+          }),
         validate: definition.validate
-          ? (_methods, s, _services, bs) => definition.validate!(s, bs)
+          ? (_methods: Parameters<NonNullable<StepDefinition['validate']>>[0], s: Parameters<NonNullable<StepDefinition['validate']>>[1], _services: Parameters<NonNullable<StepDefinition['validate']>>[2], bs: Parameters<NonNullable<StepDefinition['validate']>>[3]) => definition.validate!(s, bs)
           : base.validate,
       };
-      return step;
     }
     return base;
   });
@@ -159,8 +150,6 @@ export const ComposeDiscoverForm = ({
   onKindChange,
   ruleId,
   builderType,
-  builderState,
-  onBuilderStateChange,
 }: Props) => {
   const isAlert = useWatch<ComposeFormValues, 'kind'>({ name: 'kind' }) === 'alert';
   const { steps, renderBuilderRecovery } = getSteps(isAlert, builderType);
@@ -172,8 +161,6 @@ export const ComposeDiscoverForm = ({
     onRecoveryTypeChange,
     onKindChange,
     ruleId,
-    builderState,
-    onBuilderStateChange,
     renderBuilderRecovery,
   });
 };

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ComposeDiscoverMode, RuleFormServices } from '@kbn/alerting-v2-rule-form';
+import type {
+  ComposeDiscoverMode,
+  RuleFormServices,
+  BuilderState,
+} from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -28,7 +32,7 @@ const tryParseBuilderState = (
   type: string,
   query: string,
   recoveryQuery?: string
-): unknown | null => {
+): BuilderState | null => {
   const definition = RULE_BUILDER_REGISTRY[type];
   if (definition?.parseState) {
     return definition.parseState(query, recoveryQuery);
@@ -55,7 +59,7 @@ export const useComposeDiscoverFlyout = ({
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
   const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
   const [builderType, setBuilderType] = useState<string | null>(null);
-  const [initialBuilderState, setInitialBuilderState] = useState<unknown>(undefined);
+  const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
   const createRuleMutation = useCreateRule();
   const setupNotificationsMutation = useSetupRuleNotifications();
