@@ -146,6 +146,8 @@ describe('lookupTriggerDefinitionsForAgent', () => {
         {
           id: 'example.minimal',
           eventSchema: z.object({ value: z.string() }),
+          title: 'Minimal trigger',
+          description: 'Minimal trigger for testing.',
         },
       ],
       triggerType: 'example.minimal',

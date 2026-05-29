@@ -8,12 +8,14 @@
 import { EuiFlexGroup, EuiFlexItem, type EuiFlexGroupProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import { isAttachmentGroup } from '@kbn/agent-builder-common/attachments';
 import { AttachmentPill } from './attachment_pill';
+import { AttachmentGroupPill } from './attachment_group_pill';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 
 export interface AttachmentPillsRowProps {
-  attachments: AttachmentInput[] | Attachment[];
+  attachments: ConversationAttachment[];
   removable?: boolean;
   justifyContent?: EuiFlexGroupProps['justifyContent'];
 }
@@ -46,8 +48,18 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
       data-test-subj="agentBuilderAttachmentPillsRow"
     >
       {attachments.map((attachment, index) => {
-        const attachmentId = attachment.id ?? `${attachment.type}-${index}`;
+        if (isAttachmentGroup(attachment)) {
+          return (
+            <EuiFlexItem key={attachment.id} grow={false}>
+              <AttachmentGroupPill
+                group={attachment}
+                onRemove={removable ? () => removeAttachment?.(index) : undefined}
+              />
+            </EuiFlexItem>
+          );
+        }
 
+        const attachmentId = attachment.id ?? `${attachment.type}-${index}`;
         return (
           <EuiFlexItem key={attachmentId} grow={false}>
             <AttachmentPill
