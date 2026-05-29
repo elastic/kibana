@@ -36,6 +36,9 @@ export interface EnrichmentSetupConfig {
 /**
  * Installs Entity Store V2 engines and seeds entities for alert enrichment tests.
  *
+ * Entity creation uses `refresh: 'wait_for'` internally, so seeded entities are
+ * immediately searchable when `setup` returns — no additional refresh step is needed.
+ *
  * Inspired by the approach started in https://github.com/elastic/kibana/pull/270939
  * by @denar50.
  */
@@ -99,12 +102,15 @@ export const EntityStoreV2EnrichmentSetup = (getService: FtrProviderContext['get
   };
 
   const teardown = async (): Promise<void> => {
-    try {
-      await withHeaders(supertest.post('/api/security/entity_store/uninstall')).send({
-        entityTypes: ['user', 'host', 'service'],
-      });
-    } catch (err) {
-      log.debug(`Entity Store V2 uninstall skipped: ${err instanceof Error ? err.message : err}`);
+    const res = await withHeaders(supertest.post('/api/security/entity_store/uninstall')).send({
+      entityTypes: ['user', 'host', 'service'],
+    });
+    if (res.status !== 200) {
+      log.debug(
+        `Entity Store V2 uninstall returned non-200 (status ${res.status}): ${JSON.stringify(
+          res.body
+        )}`
+      );
     }
   };
 
