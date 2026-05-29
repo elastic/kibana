@@ -190,6 +190,10 @@ export function createChromeApi({
         get$: () => state.globalSearch.$,
         set: (config) => state.globalSearch.set(config),
       },
+      contextSwitcher: {
+        get$: () => state.contextSwitcher.$,
+        set: state.contextSwitcher.set,
+      },
       inlineAppHeader: {
         get$: () => state.inlineAppHeader.$,
         set: state.inlineAppHeader.set,
