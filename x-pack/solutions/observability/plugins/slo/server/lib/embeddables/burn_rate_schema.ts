@@ -14,9 +14,11 @@ import { SLO_BURN_RATE_SUPPORTED_TRIGGERS } from '../../../common/embeddables/bu
 
 const BurnRateCustomSchema = schema.object({
   slo_id: schema.string({
+    maxLength: 64,
     meta: { description: 'The ID of the SLO to display the burn rate for' },
   }),
   slo_instance_id: schema.string({
+    maxLength: 512,
     defaultValue: ALL_VALUE,
     meta: {
       description:
@@ -24,6 +26,7 @@ const BurnRateCustomSchema = schema.object({
     },
   }),
   duration: schema.string({
+    maxLength: 32,
     meta: {
       description:
         'Duration for the burn rate chart in the format [value][unit], e.g. 5m, 3h, or 6d',
