@@ -10,23 +10,6 @@
 import { schema } from '@kbn/config-schema';
 import { referenceSchema } from '@kbn/content-management-utils';
 
-const generalWarningSchema = schema.object(
-  {
-    type: schema.literal('schema_warning'),
-    message: schema.string({
-      meta: { description: 'Human-readable explanation of why the schema is invalid.' },
-    }),
-  },
-  {
-    meta: {
-      id: 'kbn-dashboard-schema-warning',
-      title: 'Warning',
-      description:
-        'A warning about the schema that does not currently have any action associated with it.',
-    },
-  }
-);
-
 const droppedPanelWarningSchema = schema.object(
   {
     type: schema.literal('dropped_panel'),
@@ -86,7 +69,7 @@ const droppedDashboardProperty = schema.object(
 );
 
 export const warningsSchema = schema.arrayOf(
-  schema.oneOf([droppedPanelWarningSchema, droppedDashboardProperty, generalWarningSchema]),
+  schema.oneOf([droppedPanelWarningSchema, droppedDashboardProperty]),
   {
     maxSize: 100,
     meta: {

@@ -84,16 +84,6 @@ export function transformPinnedPanelsOut(
     }
   }
 
-  // Validate against the array to ensure the number of elements is valid
-  try {
-    transformedPanels = strictValidationSchema.validateKey('pinned_panels', transformedPanels);
-  } catch (e) {
-    warnings.push({
-      type: 'schema_warning',
-      message: `Error: ${e.message}`, // the size error message is already descriptive enough
-    });
-  }
-
   return { warnings, panels: transformedPanels };
 }
 

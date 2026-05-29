@@ -29,33 +29,24 @@ import { coreServices } from '../../services/kibana_services';
 
 export const showWarningToast = ({ warnings }: { warnings: Warnings }) => {
   let droppedPanelsCount = 0;
-  let generalWarningCount = 0;
   warnings.forEach((warning) => {
     if (warning.type === 'dropped_panel') {
       droppedPanelsCount++;
-    } else {
-      generalWarningCount++;
     }
   });
 
-  let warningMessage;
-  if (droppedPanelsCount > 0 && !generalWarningCount) {
-    warningMessage = i18n.translate('dashboard.warnings.modal.droppedPanelsWarning', {
+  let warningNotificationTitle;
+  if (droppedPanelsCount === warnings.length) {
+    warningNotificationTitle = i18n.translate('dashboard.warnings.modal.droppedPanelsWarning', {
       defaultMessage:
         '{droppedPanelsCount} {droppedPanelsCount, plural, one {panel has} other {panels have}} been removed from the dashboard.',
       values: { droppedPanelsCount },
     });
-  } else if (generalWarningCount > 0 && !droppedPanelsCount) {
-    warningMessage = i18n.translate('dashboard.warnings.modal.schemaWarning', {
-      defaultMessage:
-        'There {warningCount, plural, one {is} other {are}} {warningCount} {warningCount, plural, one {warning} other {warnings}} on this dashboard that could not be automatically resolved.',
-      values: { warningCount: warnings.length },
-    });
   } else {
-    warningMessage = i18n.translate('dashboard.warnings.modal.multipleWarnings', {
+    warningNotificationTitle = i18n.translate('dashboard.warnings.modal.genericWarning', {
       defaultMessage:
-        '{droppedPanelsCount} {droppedPanelsCount, plural, one {panel has} other {panels have}} been removed, and there {warningCount, plural, one {is} other {are}} {warningCount} other {warningCount, plural, one {warning} other {warnings}} that could not be automatically resolved.',
-      values: { droppedPanelsCount, warningCount: warnings.length - droppedPanelsCount },
+        'This dashboard has {warningCount} {warningCount, plural, one {warning} other {warnings}}.',
+      values: { warningCount: warnings.length },
     });
   }
 
@@ -89,14 +80,9 @@ export const showWarningToast = ({ warnings }: { warnings: Warnings }) => {
   };
 
   coreServices.notifications.toasts.addWarning({
-    title: i18n.translate('dashboard.schemaWarning', {
-      defaultMessage:
-        'This dashboard has {warningCount} {warningCount, plural, one {warning} other {warnings}}.',
-      values: { warningCount: warnings.length },
-    }),
+    title: warningNotificationTitle,
     text: toMountPoint(
       <>
-        <p>{warningMessage}</p>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton color="warning" size="s" onClick={openModal}>

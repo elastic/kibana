@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Joi, { type ArraySchema } from 'joi';
 import { flow } from 'lodash';
 
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -82,26 +81,8 @@ export function transformPanelsOut(
     }
   });
 
-  // Validate against the array to ensure the number of elements is valid
-  const panels = [...topLevelPanels, ...Object.values(sectionsMap)];
-  try {
-    const result = strictValidationSchema
-      .getSchema()
-      // allow all panel types through, since they have been validated above
-      .fork('panels', (schema) => (schema as ArraySchema<unknown>).items(Joi.object()))
-      .extract('panels')
-      .validate(panels);
-
-    if (result.error) throw result.error;
-  } catch (e) {
-    warnings.push({
-      type: 'schema_warning',
-      message: `Error: [panels]: ${e.message}`, // the size error message is already descriptive enough
-    });
-  }
-
   return {
-    panels,
+    panels: [...topLevelPanels, ...Object.values(sectionsMap)],
     warnings,
   };
 }

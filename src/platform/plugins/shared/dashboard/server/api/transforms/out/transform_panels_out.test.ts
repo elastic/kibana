@@ -180,41 +180,6 @@ describe('transformPanelsOut', () => {
         ],
       }
     `);
-
-    // mockGetTransforms.mockReturnValue({});
-  });
-
-  it('shows warning when over 100 panels', () => {
-    const panels: any = [];
-    for (let i = 0; i < 101; i++) {
-      panels.push({
-        type: 'markdown',
-        embeddableConfig: { content: 'Markdown panel content' },
-        panelIndex: `panel-${i}`,
-        gridData: {
-          i: `panel-${i}`,
-          h: 1,
-          w: 1,
-          x: i,
-          y: 0,
-        },
-      });
-    }
-
-    const result = transformPanelsOut(
-      JSON.stringify(panels),
-      [],
-      [],
-      false,
-      getDashboardStateSchema(false)
-    );
-
-    expect(result.warnings).toEqual([
-      {
-        type: 'schema_warning',
-        message: `Error: [panels]: array size is [101], but cannot be greater than [100]`,
-      },
-    ]);
   });
 
   it('should combine panelsJSON and sections', () => {

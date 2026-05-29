@@ -142,34 +142,6 @@ describe('pinned panels', () => {
     ]);
   });
 
-  it('shows warning when over 100 panels', () => {
-    const panels: Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'] = {};
-    for (let i = 0; i < 101; i++) {
-      panels[`control-${i}`] = {
-        order: i,
-        type: TIME_SLIDER_CONTROL,
-        grow: true,
-        width: 'large',
-        config: {},
-      };
-    }
-
-    const result = transformPinnedPanelsOut(
-      undefined,
-      {
-        panels,
-      } as DashboardSavedObjectAttributes['pinned_panels'],
-      [],
-      getDashboardStateSchema(false)
-    );
-    expect(result.warnings).toEqual([
-      {
-        type: 'schema_warning',
-        message: `Error: [pinned_panels]: array size is [101], but cannot be greater than [100]`,
-      },
-    ]);
-  });
-
   describe('transform <9.4 legacy controls', () => {
     it('should transform controls explicit input', () => {
       const controlsArray = transformPinnedPanelsObjectToArray({
