@@ -14,7 +14,8 @@ import {
   ALERTS_TAB_CALLOUT_TEST_ID,
   ALERTS_TAB_FILTERING_MODE_CONTROL_TEST_ID,
 } from './alerts_tab';
-import { TestProviders } from '../../../../../common/mock/test_providers';
+import { TestProviders, kibanaMock } from '../../../../../common/mock/test_providers';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { AlertsTable } from '../../../alerts_table';
 import { useFilteredRelatedAlertIds } from './use_filtered_related_alert_ids';
 
@@ -36,10 +37,19 @@ describe('AlertsTab', () => {
 
   const renderAlertsTab = (props = {}) =>
     render(
-      <TestProviders>
+      <TestProviders
+        startServices={
+          {
+            ...kibanaMock,
+            telemetry: { ...kibanaMock.telemetry, reportEvent: reportEventMock },
+          } as unknown as typeof kibanaMock
+        }
+      >
         <AlertsTab {...defaultProps} {...props} />
       </TestProviders>
     );
+
+  const reportEventMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -177,6 +187,11 @@ describe('AlertsTab', () => {
       const lastCallProps = (AlertsTable as unknown as jest.Mock).mock.calls.at(-1)?.[0];
       expect(lastCallProps.query).toBeUndefined();
       expect(lastCallProps.shouldHighlightRow).toBeUndefined();
+
+      expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.ViewOptionChanged, {
+        option: 'showMatchingAlertsOnly',
+        enabled: true,
+      });
     });
   });
 });

@@ -17,6 +17,8 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { AlertsTable } from '../../../alerts_table';
 import { useFilteredRelatedAlertIds } from './use_filtered_related_alert_ids';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { useLocalStorage } from '../../../../../common/components/local_storage';
 import { getSettingKey } from '../../../../../common/components/local_storage/helpers';
 import { ATTACKS_PAGE, ATTACK_GROUP_DETAILS_CATEGORY } from '../../constants';
@@ -58,6 +60,10 @@ interface AlertsTabProps {
  */
 export const AlertsTab = React.memo<AlertsTabProps>(
   ({ attackAlertIds, groupingFilters, defaultFilters, isTableLoading }) => {
+    const {
+      services: { telemetry },
+    } = useKibana();
+
     const [showMatchingAlertsOnly, setShowMatchingAlertsOnly] = useLocalStorage<boolean>({
       defaultValue: false,
       key: getSettingKey({
@@ -95,9 +101,14 @@ export const AlertsTab = React.memo<AlertsTabProps>(
 
     const onToggleChange = useCallback(
       (e: EuiSwitchEvent) => {
-        setShowMatchingAlertsOnly(e.target.checked);
+        const checked = e.target.checked;
+        setShowMatchingAlertsOnly(checked);
+        telemetry.reportEvent(AttacksEventTypes.ViewOptionChanged, {
+          option: 'showMatchingAlertsOnly',
+          enabled: checked,
+        });
       },
-      [setShowMatchingAlertsOnly]
+      [setShowMatchingAlertsOnly, telemetry]
     );
 
     return (
