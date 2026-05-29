@@ -18,7 +18,6 @@ import {
   andWhere,
   runLatestSourceEsqlQuery,
   runPaginatedLatestSourceEsqlQuery,
-  runFindByIdEsqlQuery,
   queryEsql,
   esqlToObjects,
 } from '../latest_source_query';
@@ -162,20 +161,5 @@ export class DetectionClient {
         this.toDetection(raw, processedIds.has(raw.detection_id ?? ''))
       ),
     };
-  }
-
-  async findById(detectionId: string): Promise<{ hits: Detection[] }> {
-    const result = await runFindByIdEsqlQuery<RawDetection>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      index: DETECTIONS_DATA_STREAM,
-      idField: FIELD_DETECTION_ID,
-      idValue: detectionId,
-    });
-    // History returns all raw docs for a detection_id (including kind:handled stamps).
-    // `processed` here means "this specific doc is a handled stamp", not "is the detection
-    // currently processed" — intentionally different from the list path which uses
-    // getProcessedIds to compare timestamps across the full doc set.
-    return { hits: result.hits.map((raw) => this.toDetection(raw, raw.kind === KIND_HANDLED)) };
   }
 }
