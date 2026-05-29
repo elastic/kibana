@@ -33,8 +33,7 @@ export const getLegendAction = (
   fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo,
   titles: LayersAccessorsTitles,
-  singleTable?: boolean,
-  panelHasConfiguredDrilldowns?: boolean
+  singleTable?: boolean
 ): LegendAction =>
   React.memo(({ series: [xySeries] }) => {
     const series = xySeries as XYChartSeriesIdentifier;
@@ -89,8 +88,7 @@ export const getLegendAction = (
 
     const warningMessage = isEsqlMode
       ? getComputedColumnWarningForColumns(
-          filterActionData.map((data) => data.table.columns[data.column]),
-          panelHasConfiguredDrilldowns ?? false
+          filterActionData.map((data) => data.table.columns[data.column])
         )
       : undefined;
 

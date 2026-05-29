@@ -183,39 +183,10 @@ describe('getLegendActions', () => {
         fieldFormatsMock as unknown as FieldFormatsStart
       );
       await renderAndOpen(Component);
-      expect(await screen.findByTestId('legendFilterFooterMessage')).toBeInTheDocument();
-    });
-
-    it('mentions drill down in the warning when the panel has configured drilldowns', async () => {
-      const Component = getLegendActions(
-        undefined,
-        makeGetFilterEventData(esqlVisDataWithComputedColumn),
-        jest.fn(),
-        [],
-        visParams,
-        esqlVisDataWithComputedColumn,
-        fieldFormatsMock as unknown as FieldFormatsStart,
-        true // panelHasConfiguredDrilldowns
-      );
-      await renderAndOpen(Component);
       const warning = await screen.findByTestId('legendFilterFooterMessage');
-      expect(warning).toHaveTextContent(/drill down/i);
-    });
-
-    it('does not mention drill down in the warning when the panel has no drilldowns', async () => {
-      const Component = getLegendActions(
-        undefined,
-        makeGetFilterEventData(esqlVisDataWithComputedColumn),
-        jest.fn(),
-        [],
-        visParams,
-        esqlVisDataWithComputedColumn,
-        fieldFormatsMock as unknown as FieldFormatsStart,
-        false // panelHasConfiguredDrilldowns
+      expect(warning).toHaveTextContent(
+        `You can't apply a filter or drill down from this value because it relies on a field created at query time.`
       );
-      await renderAndOpen(Component);
-      const warning = await screen.findByTestId('legendFilterFooterMessage');
-      expect(warning).not.toHaveTextContent(/drill down/i);
     });
 
     it('does not disable filter actions or show a warning for a renamed computed column', async () => {

@@ -57,8 +57,7 @@ export const getLegendActions = (
   columnCellValueActions: ColumnCellValueActions,
   visParams: PartitionVisParams,
   visData: Datatable,
-  formatter: FieldFormatsStart,
-  panelHasConfiguredDrilldowns?: boolean
+  formatter: FieldFormatsStart
 ): LegendAction => {
   return ({ series: [pieSeries] }) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
@@ -77,7 +76,7 @@ export const getLegendActions = (
     const isEsqlMode = visData.meta?.type === ESQL_TABLE_TYPE;
     const column = visData.columns[columnIndex];
     const warningMessage: string | undefined = isEsqlMode
-      ? getComputedColumnWarningForColumns([column], panelHasConfiguredDrilldowns ?? false)
+      ? getComputedColumnWarningForColumns([column])
       : undefined;
 
     useEffect(() => {

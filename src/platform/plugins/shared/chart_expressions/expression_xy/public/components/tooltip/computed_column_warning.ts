@@ -19,8 +19,7 @@ import type { CommonXYDataLayerConfig } from '../../../common';
  * `undefined` when there is nothing to warn about.
  */
 export const getComputedColumnWarning = (
-  dataLayers: CommonXYDataLayerConfig[],
-  panelHasConfiguredDrilldowns: boolean
+  dataLayers: CommonXYDataLayerConfig[]
 ): string | undefined => {
   // Collect all filterable column IDs (x-accessor + split accessors) across layers.
   const allFilterableColumnIds = new Set(
@@ -45,8 +44,5 @@ export const getComputedColumnWarning = (
     )
   );
 
-  return getComputedColumnWarningForColumns(
-    [...filterableColumnsById.values()],
-    panelHasConfiguredDrilldowns
-  );
+  return getComputedColumnWarningForColumns([...filterableColumnsById.values()]);
 };

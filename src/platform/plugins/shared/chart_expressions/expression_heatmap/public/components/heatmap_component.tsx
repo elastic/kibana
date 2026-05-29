@@ -327,7 +327,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     renderComplete,
     overrides,
     uiSettings,
-    panelHasConfiguredDrilldowns,
   }) => {
     const chartRef = useRef<Chart>(null);
     const isDarkTheme = useKibanaIsDarkMode();
@@ -486,13 +485,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     // Compute warning message for ES|QL computed columns that cannot be filtered.
     const warningMessage = useMemo(
       () =>
-        isEsqlMode
-          ? getComputedColumnWarningForColumns(
-              [xAxisColumn, yAxisColumn],
-              panelHasConfiguredDrilldowns ?? false
-            )
-          : undefined,
-      [isEsqlMode, xAxisColumn, yAxisColumn, panelHasConfiguredDrilldowns]
+        isEsqlMode ? getComputedColumnWarningForColumns([xAxisColumn, yAxisColumn]) : undefined,
+      [isEsqlMode, xAxisColumn, yAxisColumn]
     );
 
     const TooltipFooter = useMemo<

@@ -139,7 +139,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     interactive,
     overrides,
     hasOpenedOnAggBasedEditor,
-    panelHasConfiguredDrilldowns,
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
@@ -371,8 +370,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
             columnCellValueActions,
             visParams,
             visData,
-            services.fieldFormats,
-            panelHasConfiguredDrilldowns
+            services.fieldFormats
           )
         : undefined,
     [
@@ -380,7 +378,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       getLegendActionEventData,
       handleLegendAction,
       interactive,
-      panelHasConfiguredDrilldowns,
       services.fieldFormats,
       visData,
       visParams,
@@ -443,11 +440,10 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     () =>
       isEsqlMode
         ? getComputedColumnWarningForColumns(
-            bucketColumns.map((col) => visData.columns.find((c) => c.id === col.id)),
-            panelHasConfiguredDrilldowns ?? false
+            bucketColumns.map((col) => visData.columns.find((c) => c.id === col.id))
           )
         : undefined,
-    [isEsqlMode, bucketColumns, visData.columns, panelHasConfiguredDrilldowns]
+    [isEsqlMode, bucketColumns, visData.columns]
   );
 
   const TooltipFooter = useMemo<

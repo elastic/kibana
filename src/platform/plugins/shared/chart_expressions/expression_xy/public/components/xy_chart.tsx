@@ -162,7 +162,6 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   timeFormat: string;
   setChartSize: (chartSizeSpec: ChartSizeSpec) => void;
   shouldShowLegendAction?: (actionId: string) => boolean;
-  panelHasConfiguredDrilldowns?: boolean;
 };
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -245,7 +244,6 @@ export function XYChart({
   uiState,
   timeFormat,
   overrides,
-  panelHasConfiguredDrilldowns,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -375,11 +373,8 @@ export function XYChart({
 
   // Compute warning message for ES|QL computed columns that cannot be filtered.
   const warningMessage = useMemo(
-    () =>
-      isEsqlMode
-        ? getComputedColumnWarning(dataLayers, panelHasConfiguredDrilldowns ?? false)
-        : undefined,
-    [isEsqlMode, dataLayers, panelHasConfiguredDrilldowns]
+    () => (isEsqlMode ? getComputedColumnWarning(dataLayers) : undefined),
+    [isEsqlMode, dataLayers]
   );
 
   const TooltipFooter = useMemo<
@@ -964,8 +959,7 @@ export function XYChart({
                       fieldFormats,
                       formattedDatatables,
                       titles,
-                      singleTable,
-                      panelHasConfiguredDrilldowns
+                      singleTable
                     )
                   : undefined
               }

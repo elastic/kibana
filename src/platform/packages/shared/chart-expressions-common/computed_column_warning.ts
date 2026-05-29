@@ -13,43 +13,32 @@ import { i18n } from '@kbn/i18n';
 const getComputedColumnFilterDisabledMessage = ({
   computedColumnNames,
   allColumnsAreComputed,
-  panelHasConfiguredDrilldowns,
 }: {
   computedColumnNames: string[];
   allColumnsAreComputed: boolean;
-  panelHasConfiguredDrilldowns: boolean;
 }) => {
   const count = computedColumnNames.length;
 
   if (allColumnsAreComputed) {
-    return panelHasConfiguredDrilldowns
-      ? i18n.translate('chartExpressionsCommon.computedColumn.filterDrilldownDisabledDescription', {
-          defaultMessage:
-            "You can't apply a filter or drill down {count, plural, one {from this value because it relies on a field} other {from these values because they rely on fields}} created at query time.",
-          values: { count },
-        })
-      : i18n.translate('chartExpressionsCommon.computedColumn.filterDisabledDescription', {
-          defaultMessage:
-            "You can't apply a filter {count, plural, one {from this value because it relies on a field} other {from these values because they rely on fields}} created at query time.",
-          values: { count },
-        });
+    return i18n.translate(
+      'chartExpressionsCommon.computedColumn.filterDrilldownDisabledDescription',
+      {
+        defaultMessage:
+          "You can't apply a filter or drill down {count, plural, one {from this value because it relies on a field} other {from these values because they rely on fields}} created at query time.",
+        values: { count },
+      }
+    );
   }
 
   const names = computedColumnNames.map((n) => `'${n}'`).join(', ');
-  return panelHasConfiguredDrilldowns
-    ? i18n.translate(
-        'chartExpressionsCommon.computedColumn.partialFilterDrilldownDisabledDescription',
-        {
-          defaultMessage:
-            "You can't apply a filter or drill down from {names} because {count, plural, one {it relies on a field} other {they rely on fields}} created at query time.",
-          values: { names, count },
-        }
-      )
-    : i18n.translate('chartExpressionsCommon.computedColumn.partialFilterDisabledDescription', {
-        defaultMessage:
-          "You can't apply a filter from {names} because {count, plural, one {it relies on a field} other {they rely on fields}} created at query time.",
-        values: { names, count },
-      });
+  return i18n.translate(
+    'chartExpressionsCommon.computedColumn.partialFilterDrilldownDisabledDescription',
+    {
+      defaultMessage:
+        "You can't apply a filter or drill down from {names} because {count, plural, one {it relies on a field} other {they rely on fields}} created at query time.",
+      values: { names, count },
+    }
+  );
 };
 
 export function isComputedColumnNonFilterable(column: DatatableColumn): boolean {
@@ -65,8 +54,7 @@ export function isComputedColumnNonFilterable(column: DatatableColumn): boolean 
  * to warn about.
  */
 export const getComputedColumnWarningForColumns = (
-  filterableColumns: Array<DatatableColumn | undefined>,
-  panelHasConfiguredDrilldowns: boolean
+  filterableColumns: Array<DatatableColumn | undefined>
 ): string | undefined => {
   const defined = filterableColumns.filter((c): c is DatatableColumn => c != null);
   if (defined.length === 0) {
@@ -85,6 +73,5 @@ export const getComputedColumnWarningForColumns = (
   return getComputedColumnFilterDisabledMessage({
     computedColumnNames: nonFilterableComputedColumnNames,
     allColumnsAreComputed,
-    panelHasConfiguredDrilldowns,
   });
 };

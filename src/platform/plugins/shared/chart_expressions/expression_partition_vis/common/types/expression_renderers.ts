@@ -122,7 +122,6 @@ export interface PartitionChartProps {
   syncColors: boolean;
   canNavigateToLens?: boolean;
   overrides?: AllowedPartitionOverrides & AllowedSettingsOverrides & AllowedChartOverrides;
-  panelHasConfiguredDrilldowns?: boolean;
 }
 
 export enum LabelPositions {

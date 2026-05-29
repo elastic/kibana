@@ -141,7 +141,6 @@ export const heatmapRenderer: (
             syncCursor={config.syncCursor}
             onClickMultiValue={onClickMultiValue}
             uiSettings={getUISettings()}
-            panelHasConfiguredDrilldowns={handlers.panelHasConfiguredDrilldowns}
           />
         </div>
       </KibanaRenderContextProvider>,
