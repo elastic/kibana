@@ -9,8 +9,7 @@ import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import type { ComposeFormValues } from './compose_form_types';
-import type { BuilderState } from './rule_builder/types';
-import type { RuleBuilderRecoveryProps } from './rule_builder/types';
+import type { BuilderState, RuleBuilderRecoveryProps } from './rule_builder/types';
 
 export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
 

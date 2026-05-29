@@ -122,19 +122,20 @@ export const getSteps = (isAlert: boolean, builderType?: string): ResolvedSteps 
   const steps = ids.map((id) => {
     const base = STEP_REGISTRY[id];
     if (id === 'builderCondition' && definition) {
-      return {
+      const step: StepDefinition = {
         ...base,
         title: definition.stepTitle,
-        render: (props: StepRenderProps) =>
+        render: (props) =>
           definition.renderStep({
             state: props.state,
             dispatch: props.dispatch,
             services: props.services,
           }),
         validate: definition.validate
-          ? (_methods: Parameters<NonNullable<StepDefinition['validate']>>[0], s: Parameters<NonNullable<StepDefinition['validate']>>[1], _services: Parameters<NonNullable<StepDefinition['validate']>>[2], bs: Parameters<NonNullable<StepDefinition['validate']>>[3]) => definition.validate!(s, bs)
+          ? (_methods, s, _services, bs) => definition.validate!(s, bs)
           : base.validate,
       };
+      return step;
     }
     return base;
   });

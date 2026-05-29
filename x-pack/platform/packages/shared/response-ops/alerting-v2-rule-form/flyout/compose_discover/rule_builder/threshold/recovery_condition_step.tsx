@@ -40,11 +40,11 @@ export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state,
   const { state: builderState, setState: onBuilderStateChange } =
     useBuilderState<ThresholdFormValues>();
   const { setValue, getValues } = useFormContext<ComposeFormValues>();
-  const initialized = useRef(false);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
+    if (initializedRef.current) return;
+    initializedRef.current = true;
     if (builderState.recovery) return;
 
     const validAlert = builderState.alertConditions.filter(
@@ -203,6 +203,7 @@ export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state,
                   >
                     <EuiSelect
                       fullWidth
+                      compressed
                       options={metricOptions.map((m) => ({
                         value: m,
                         text: m,
@@ -227,6 +228,7 @@ export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state,
                   >
                     <EuiSelect
                       fullWidth
+                      compressed
                       options={COMPARATOR_OPTIONS}
                       value={condition.comparator}
                       onChange={(e) =>
@@ -248,6 +250,7 @@ export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state,
                   >
                     <EuiFieldNumber
                       fullWidth
+                      compressed
                       value={condition.threshold[0] ?? 0}
                       onChange={(e) =>
                         updateRecoveryCondition(idx, {
@@ -271,6 +274,7 @@ export const BuilderRecoveryForm: React.FC<RuleBuilderRecoveryProps> = ({ state,
                     >
                       <EuiFieldNumber
                         fullWidth
+                        compressed
                         value={condition.threshold[1] ?? 0}
                         onChange={(e) =>
                           updateRecoveryCondition(idx, {
