@@ -160,13 +160,15 @@ export const ConsoleErrorIndicator: React.FC = () => {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            color={iconColor}
-            size="xs"
-            onClick={dismissError}
-            aria-label="Dismiss all errors"
-          />
+          <EuiToolTip content="Dismiss all errors" disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              color={iconColor}
+              size="xs"
+              onClick={dismissError}
+              aria-label="Dismiss all errors"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
