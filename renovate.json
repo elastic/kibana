@@ -35,6 +35,15 @@
       "enabled": true
     },
     {
+      "groupName": "jsonc-parser",
+      "matchDepNames": ["jsonc-parser"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "backport:skip", "release_note:skip"],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "webpack",
       "matchDepNames": [
         "autoprefixer",
