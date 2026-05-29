@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { applyGraphLayout } from './apply_graph_layout';
+import { applyGraphLayout, resolveShiftedEdgePoints } from './apply_graph_layout';
 import { transformWorkflowToGraph } from './transform_workflow_to_graph';
 import type { ForeachGroup, LayoutedNode, PreLayoutForeachGroupNode } from './types';
 import type { WorkflowYaml } from '../spec/schema';
@@ -289,6 +289,36 @@ describe('applyGraphLayout', () => {
     expect(thenEdge.points.length).toBeLessThan(2);
   });
 
+  it('drops co-linear spine waypoints when middle bus is laterally stale', () => {
+    const result = resolveShiftedEdgePoints({
+      shifted: [
+        { x: 175, y: 100 },
+        { x: 400, y: 150 },
+        { x: 175, y: 200 },
+      ],
+      sourceCenter: 175,
+      targetCenter: 175,
+      crossAxis: 'x',
+    });
+    expect(result).toEqual([]);
+  });
+
+  it('keeps shifted waypoints when middle bus stays within endpoint span', () => {
+    const shifted = [
+      { x: 175, y: 100 },
+      { x: 180, y: 150 },
+      { x: 175, y: 200 },
+    ];
+    expect(
+      resolveShiftedEdgePoints({
+        shifted,
+        sourceCenter: 175,
+        targetCenter: 175,
+        crossAxis: 'x',
+      })
+    ).toEqual(shifted);
+  });
+
   it('shifts foreach inner edge points with inner node padding', () => {
     const { nodes, edges, foreachGroups } = transformWorkflowToGraph(
       minimal({
@@ -306,14 +336,17 @@ describe('applyGraphLayout', () => {
       })
     );
     const { nodes: laid, edges: laidEdges } = applyGraphLayout(nodes, edges, foreachGroups);
+    const loop = findLaidNode(laid, 'loop');
     const innerA = findLaidNode(laid, 'inner-a');
     const innerB = findLaidNode(laid, 'inner-b');
     const innerEdge = findLaidEdge(laidEdges, 'inner-a', 'inner-b');
     expect(innerA.position.x).toBeGreaterThanOrEqual(32);
     expect(innerA.position.y).toBeGreaterThanOrEqual(70);
+    const innerAAbsX = loop.position.x + innerA.position.x;
+    const innerAAbsY = loop.position.y + innerA.position.y;
     for (const p of innerEdge.points) {
-      expect(p.x).toBeGreaterThanOrEqual(innerA.position.x - 1);
-      expect(p.y).toBeGreaterThanOrEqual(innerA.position.y - 1);
+      expect(p.x).toBeGreaterThanOrEqual(innerAAbsX - 1);
+      expect(p.y).toBeGreaterThanOrEqual(innerAAbsY - 1);
     }
   });
 

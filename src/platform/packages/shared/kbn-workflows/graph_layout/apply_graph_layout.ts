@@ -27,6 +27,30 @@ const GROUP_PADDING_BOTTOM = 32;
 
 /** When barycenter moves endpoints by unequal cross-axis deltas, Dagre waypoints are stale. */
 const CROSS_AXIS_DELTA_TOLERANCE = 1;
+/** Keep in sync with WorkflowGraphEdge STRAIGHT_X_THRESHOLD (workflow_graph_edge.tsx). */
+const STRAIGHT_X_THRESHOLD = 100;
+
+/** Drops Dagre waypoints when endpoints align but middle segments still spread laterally. */
+export const resolveShiftedEdgePoints = ({
+  shifted,
+  sourceCenter,
+  targetCenter,
+  crossAxis,
+}: {
+  shifted: Array<{ x: number; y: number }>;
+  sourceCenter: number;
+  targetCenter: number;
+  crossAxis: CrossAxis;
+}): Array<{ x: number; y: number }> => {
+  const endpointSpread = Math.abs(sourceCenter - targetCenter);
+  const crossCoord = (p: { x: number; y: number }): number => (crossAxis === 'x' ? p.x : p.y);
+  const allCrossCoords = [sourceCenter, targetCenter, ...shifted.map(crossCoord)];
+  const waypointSpread = Math.max(...allCrossCoords) - Math.min(...allCrossCoords);
+  if (endpointSpread < STRAIGHT_X_THRESHOLD && waypointSpread >= STRAIGHT_X_THRESHOLD) {
+    return [];
+  }
+  return shifted;
+};
 
 export type LayoutDirection = 'TB' | 'LR';
 
@@ -116,7 +140,7 @@ function applyDagre(
       const useDagreWaypoints =
         !isBranchOrMergeEdge && Math.abs(sourceDelta - targetDelta) <= CROSS_AXIS_DELTA_TOLERANCE;
       if (useDagreWaypoints) {
-        points = shiftEdgePointsInterpolated({
+        const shifted = shiftEdgePointsInterpolated({
           points: rawPoints.map((p) => ({ x: p.x, y: p.y })),
           crossAxis,
           mainAxis,
@@ -124,6 +148,14 @@ function applyDagre(
           targetMain: mainAxis === 'x' ? afterTarget.x : afterTarget.y,
           sourceDelta,
           targetDelta,
+        });
+        const sourceCenter = crossAxis === 'x' ? afterSource.x : afterSource.y;
+        const targetCenter = crossAxis === 'x' ? afterTarget.x : afterTarget.y;
+        points = resolveShiftedEdgePoints({
+          shifted,
+          sourceCenter,
+          targetCenter,
+          crossAxis,
         });
       }
     }
@@ -295,13 +327,37 @@ export function applyGraphLayout(
 
   const outerLayout = applyDagre(outerNodes, edges, direction, { compact });
 
+  const getGroupAbsolutePosition = (groupId: string): { x: number; y: number } => {
+    const outerNode = outerLayout.nodes.find((n) => n.id === groupId);
+    if (outerNode) {
+      return outerNode.position;
+    }
+    for (const [parentGroupId, inner] of groupInnerById) {
+      const childInParent = inner.layoutedInnerNodes.find((n) => n.id === groupId);
+      if (childInParent) {
+        const parentAbs = getGroupAbsolutePosition(parentGroupId);
+        return {
+          x: parentAbs.x + childInParent.position.x,
+          y: parentAbs.y + childInParent.position.y,
+        };
+      }
+    }
+    return { x: 0, y: 0 };
+  };
+
   // 3. Splice inner nodes back in at absolute positions (React Flow uses
   //    relative-to-parent positions when `extent: 'parent'`, so keep relative).
   const finalNodes: LayoutedNode[] = [...outerLayout.nodes];
   const finalEdges: LayoutedEdge[] = [...outerLayout.edges];
-  for (const [, inner] of groupInnerById) {
+  for (const [groupId, inner] of groupInnerById) {
     finalNodes.push(...inner.layoutedInnerNodes);
-    finalEdges.push(...inner.innerEdges);
+    const groupAbs = getGroupAbsolutePosition(groupId);
+    finalEdges.push(
+      ...inner.innerEdges.map((e) => ({
+        ...e,
+        points: translateEdgePoints(e.points, groupAbs.x, groupAbs.y),
+      }))
+    );
   }
 
   return { nodes: finalNodes, edges: finalEdges };
