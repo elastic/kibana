@@ -31,6 +31,22 @@ interface CertResultBody {
   }>;
 }
 
+interface CertFacetCount {
+  value: string;
+  count: number;
+}
+
+interface CertFacetsBody {
+  monitorTypes: CertFacetCount[];
+  tags: CertFacetCount[];
+  resourceTypes: CertFacetCount[];
+  party: CertFacetCount[];
+  expiringWithin: CertFacetCount[];
+}
+
+const findCount = (counts: CertFacetCount[], value: string) =>
+  counts.find((entry) => entry.value === value)?.count;
+
 /**
  * API coverage for the certificates route (`GET internal/synthetics/certs`),
  * focused on the changes that power the TLS Certificates page: browser-inclusive
@@ -81,6 +97,14 @@ apiTest.describe(
 
     const getCerts = async (apiClient: ApiClientFixture, query = '') => {
       const res = await apiClient.get(`${SYNTHETICS_API_URLS.CERTS}${query}`, {
+        headers: editorHeaders,
+        responseType: 'json',
+      });
+      return res;
+    };
+
+    const getCertFacets = async (apiClient: ApiClientFixture) => {
+      const res = await apiClient.get(SYNTHETICS_API_URLS.CERTS_FACETS, {
         headers: editorHeaders,
         responseType: 'json',
       });
@@ -184,6 +208,44 @@ apiTest.describe(
       const missRes = await getCerts(apiClient, '?tags=this-tag-does-not-exist');
       expect(missRes).toHaveStatusCode(200);
       expect((missRes.body as CertResultBody).total).toBe(0);
+    });
+
+    apiTest('filters certificates by expiry window (notValidAfter)', async ({ apiClient }) => {
+      // `notValidAfter` keeps certs with `not_after <= now+window`, including
+      // already-expired ones. `encodeURIComponent` preserves the datemath `+`.
+      const within30 = await getCerts(apiClient, `?notValidAfter=${encodeURIComponent('now+30d')}`);
+      expect(within30).toHaveStatusCode(200);
+      // expiring.scout.test (now+10d) and expired.scout.test (now-10d); excludes valid (now+60d).
+      expect((within30.body as CertResultBody).total).toBe(2);
+
+      const withinYear = await getCerts(
+        apiClient,
+        `?notValidAfter=${encodeURIComponent('now+1y')}`
+      );
+      expect(withinYear).toHaveStatusCode(200);
+      expect((withinYear.body as CertResultBody).total).toBe(3);
+    });
+
+    apiTest('returns global distinct-cert counts per filter value', async ({ apiClient }) => {
+      const res = await getCertFacets(apiClient);
+      expect(res).toHaveStatusCode(200);
+      const facets = res.body as CertFacetsBody;
+
+      // All three seeded certs come from one HTTP monitor and share TEST_TAG.
+      expect(findCount(facets.monitorTypes, 'http')).toBe(3);
+      expect(findCount(facets.tags, TEST_TAG)).toBe(3);
+
+      // No browser network events were indexed, so browser-only facets are empty/zero.
+      expect(facets.resourceTypes).toStrictEqual([]);
+      expect(findCount(facets.party, 'first_party')).toBe(0);
+      expect(findCount(facets.party, 'third_party')).toBe(0);
+
+      // Cumulative "expiring within" windows over not_after of the seeded certs:
+      // expired (now-10d), expiring (now+10d), valid (now+60d).
+      expect(findCount(facets.expiringWithin, 'now+7d')).toBe(1);
+      expect(findCount(facets.expiringWithin, 'now+30d')).toBe(2);
+      expect(findCount(facets.expiringWithin, 'now+90d')).toBe(3);
+      expect(findCount(facets.expiringWithin, 'now+1y')).toBe(3);
     });
   }
 );

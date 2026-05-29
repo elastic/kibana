@@ -6,17 +6,19 @@
  */
 
 import { useDispatch } from 'react-redux';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import type { CertFacetCount } from '../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../common/runtime_types';
 import { setCertificatesTotalAction } from '../../state/certificates/certificates';
-import { useFilters } from '../monitors_page/common/monitor_filters/use_filters';
 import { CertificateSearch } from './cert_search';
 import { CertQuickFilter } from './cert_quick_filter';
 import type { QuickFilterOption } from './cert_quick_filter';
+import { useCertFacets } from './use_cert_facets';
 import {
   BROWSER_RESOURCE_TYPE_OPTIONS,
+  EXPIRY_WITHIN_OPTIONS,
   MONITOR_TYPE_FILTER_OPTIONS,
   PARTY_FILTER_OPTIONS,
 } from './cert_filter_options';
@@ -28,6 +30,20 @@ import { useBreadcrumbs } from '../../hooks';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
+
+// Merges global facet counts onto a static option list. While facets are still
+// loading (`counts` undefined) options are returned untouched, so no counts render.
+const withCounts = (
+  options: QuickFilterOption[],
+  counts?: CertFacetCount[]
+): QuickFilterOption[] => {
+  if (!counts) {
+    return options;
+  }
+  const countByValue = new Map(counts.map(({ value, count }) => [value, count]));
+  return options.map((option) => ({ ...option, count: countByValue.get(option.value) ?? 0 }));
+};
+
 const getPageSizeValue = () => {
   const value = parseInt(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '', 10);
   if (isNaN(value)) {
@@ -52,13 +68,33 @@ export const CertificatesPage: React.FC = () => {
   const [browserResourceTypes, setBrowserResourceTypes] = useState<string[]>([]);
   const [party, setParty] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
+  const [expiringWithin, setExpiringWithin] = useState<string[]>([]);
 
   const dispatch = useDispatch();
 
-  const filters = useFilters();
+  const facets = useCertFacets();
+
+  const monitorTypeOptions = useMemo(
+    () => withCounts(MONITOR_TYPE_FILTER_OPTIONS, facets?.monitorTypes),
+    [facets?.monitorTypes]
+  );
+  const resourceTypeOptions = useMemo(
+    () => withCounts(BROWSER_RESOURCE_TYPE_OPTIONS, facets?.resourceTypes),
+    [facets?.resourceTypes]
+  );
+  const partyOptions = useMemo(
+    () => withCounts(PARTY_FILTER_OPTIONS, facets?.party),
+    [facets?.party]
+  );
+  const expiryOptions = useMemo(
+    () => withCounts(EXPIRY_WITHIN_OPTIONS, facets?.expiringWithin),
+    [facets?.expiringWithin]
+  );
+  // The tag list itself is derived from the cert facets, so only tags that actually
+  // appear on certificate-bearing documents are offered (each with its cert count).
   const tagOptions: QuickFilterOption[] = useMemo(
-    () => (filters?.tags ?? []).map(({ label }) => ({ value: label, label })),
-    [filters?.tags]
+    () => (facets?.tags ?? []).map(({ value, count }) => ({ value, label: value, count })),
+    [facets?.tags]
   );
 
   // Browser-specific filters are only meaningful when browser certs can appear,
@@ -78,6 +114,7 @@ export const CertificatesPage: React.FC = () => {
     browserResourceTypes: isBrowserIncluded ? browserResourceTypes : undefined,
     party: isBrowserIncluded ? party : undefined,
     tags,
+    notValidAfter: expiringWithin[0],
   });
 
   useEffect(() => {
@@ -92,59 +129,65 @@ export const CertificatesPage: React.FC = () => {
           <CertificateSearch setSearch={setSearch} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <CertQuickFilter
-            label={labels.MONITOR_TYPE_FILTER}
-            dataTestSubj="certMonitorTypeFilterButton"
-            options={MONITOR_TYPE_FILTER_OPTIONS}
-            selectedValues={monitorTypes}
-            onChange={(types) => {
-              setMonitorTypes(types);
-              resetToFirstPage();
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <CertQuickFilter
-            label={labels.RESOURCE_TYPE_FILTER}
-            dataTestSubj="certResourceTypeFilterButton"
-            options={BROWSER_RESOURCE_TYPE_OPTIONS}
-            selectedValues={browserResourceTypes}
-            isDisabled={!isBrowserIncluded}
-            disabledTooltip={labels.BROWSER_FILTER_DISABLED_TOOLTIP}
-            onChange={(types) => {
-              setBrowserResourceTypes(types);
-              resetToFirstPage();
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <CertQuickFilter
-            label={labels.PARTY_FILTER}
-            dataTestSubj="certPartyFilterButton"
-            options={PARTY_FILTER_OPTIONS}
-            selectedValues={party}
-            isDisabled={!isBrowserIncluded}
-            disabledTooltip={labels.BROWSER_FILTER_DISABLED_TOOLTIP}
-            onChange={(values) => {
-              setParty(values);
-              resetToFirstPage();
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <CertQuickFilter
-            label={labels.TAGS_FILTER}
-            dataTestSubj="certTagsFilterButton"
-            options={tagOptions}
-            selectedValues={tags}
-            searchable
-            isDisabled={tagOptions.length === 0}
-            disabledTooltip={labels.TAGS_FILTER_NO_TAGS}
-            onChange={(values) => {
-              setTags(values);
-              resetToFirstPage();
-            }}
-          />
+          <EuiFilterGroup>
+            <CertQuickFilter
+              label={labels.EXPIRY_WITHIN_FILTER}
+              dataTestSubj="certExpiryWithinFilterButton"
+              options={expiryOptions}
+              selectedValues={expiringWithin}
+              singleSelection
+              onChange={(values) => {
+                setExpiringWithin(values);
+                resetToFirstPage();
+              }}
+            />
+            <CertQuickFilter
+              label={labels.MONITOR_TYPE_FILTER}
+              dataTestSubj="certMonitorTypeFilterButton"
+              options={monitorTypeOptions}
+              selectedValues={monitorTypes}
+              onChange={(types) => {
+                setMonitorTypes(types);
+                resetToFirstPage();
+              }}
+            />
+            <CertQuickFilter
+              label={labels.TAGS_FILTER}
+              dataTestSubj="certTagsFilterButton"
+              options={tagOptions}
+              selectedValues={tags}
+              isDisabled={tagOptions.length === 0}
+              disabledTooltip={labels.TAGS_FILTER_NO_TAGS}
+              onChange={(values) => {
+                setTags(values);
+                resetToFirstPage();
+              }}
+            />
+            <CertQuickFilter
+              label={labels.RESOURCE_TYPE_FILTER}
+              dataTestSubj="certResourceTypeFilterButton"
+              options={resourceTypeOptions}
+              selectedValues={browserResourceTypes}
+              isDisabled={!isBrowserIncluded}
+              disabledTooltip={labels.BROWSER_FILTER_DISABLED_TOOLTIP}
+              onChange={(types) => {
+                setBrowserResourceTypes(types);
+                resetToFirstPage();
+              }}
+            />
+            <CertQuickFilter
+              label={labels.PARTY_FILTER}
+              dataTestSubj="certPartyFilterButton"
+              options={partyOptions}
+              selectedValues={party}
+              isDisabled={!isBrowserIncluded}
+              disabledTooltip={labels.BROWSER_FILTER_DISABLED_TOOLTIP}
+              onChange={(values) => {
+                setParty(values);
+                resetToFirstPage();
+              }}
+            />
+          </EuiFilterGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

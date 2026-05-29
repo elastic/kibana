@@ -29,6 +29,9 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       search: schema.maybe(schema.string()),
       from: schema.maybe(schema.string()),
       to: schema.maybe(schema.string()),
+      // Upper bound on certificate `not_after` (datemath, e.g. `now+30d`), powering
+      // the "Expiring within" quick filter. Already-expired certs are included.
+      notValidAfter: schema.maybe(schema.string()),
       // Comma-separated filters (e.g. `http,browser`) sent as strings to avoid
       // query-array serialization edge cases. `monitorTypes` scopes by monitor
       // type; `browserResourceTypes` and `party` are browser-only quick filters;
@@ -70,6 +73,9 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       // The certificates page lists certs from every enabled monitor, including
       // the certificate captured on a browser monitor's navigation request.
       includeBrowserCerts: true,
+      // The page header shows expired / expiring-soon counts, so request the
+      // (filter-aware) summary aggregations. The TLS rule leaves these off.
+      includeStats: true,
     });
     return { data };
   },

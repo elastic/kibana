@@ -56,6 +56,7 @@ export enum SYNTHETICS_API_URLS {
   TRIGGER_TASK_RUN = '/internal/synthetics/trigger_task_run/{taskType}',
 
   CERTS = '/internal/synthetics/certs',
+  CERTS_FACETS = '/internal/synthetics/certs/facets',
 
   ERROR_GROUPS = '/internal/synthetics/error_groups',
   ERROR_STATS = '/internal/synthetics/error_stats',

@@ -16,6 +16,7 @@ export const SYNTHETICS_API_URLS = {
   SYNTHETICS_ENABLEMENT: '/internal/synthetics/service/enablement',
   SYNTHETICS_MONITORS: '/api/synthetics/monitors',
   CERTS: '/internal/synthetics/certs',
+  CERTS_FACETS: '/internal/synthetics/certs/facets',
   FILTERS: '/internal/synthetics/monitor/filters',
   SUGGESTIONS: '/internal/synthetics/suggestions',
   PRIVATE_LOCATIONS: '/api/synthetics/private_locations',

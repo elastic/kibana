@@ -5,23 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { css } from '@emotion/react';
-import {
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiIconTip,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiToolTip,
-  type EuiSelectableOption,
-} from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import { FieldValueSelection } from '@kbn/observability-shared-plugin/public';
 
 export interface QuickFilterOption {
   value: string;
   label: string;
   tooltip?: string;
+  count?: number;
 }
 
 interface Props {
@@ -32,9 +23,15 @@ interface Props {
   dataTestSubj?: string;
   isDisabled?: boolean;
   disabledTooltip?: string;
-  searchable?: boolean;
+  singleSelection?: boolean;
 }
 
+/**
+ * Adapter around the shared {@link FieldValueSelection} so the Certificates page
+ * filters match the look and behaviour of the Monitors page filters. Cert filter
+ * options carry a separate machine `value` (used in the API query) and display
+ * `label`, so we map between the two since FieldValueSelection works on labels.
+ */
 export const CertQuickFilter: React.FC<Props> = ({
   label,
   options,
@@ -43,88 +40,52 @@ export const CertQuickFilter: React.FC<Props> = ({
   dataTestSubj,
   isDisabled = false,
   disabledTooltip,
-  searchable = false,
+  singleSelection = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState('');
 
-  const selectableOptions: EuiSelectableOption[] = options.map(
-    ({ value, label: optionLabel, tooltip }) => ({
-      label: optionLabel,
-      key: value,
-      checked: selectedValues.includes(value) ? 'on' : undefined,
-      'data-test-subj': `${dataTestSubj ?? 'certQuickFilter'}Option-${value}`,
-      ...(tooltip
-        ? {
-            append: (
-              <EuiIconTip
-                type="question"
-                color="subdued"
-                content={tooltip}
-                data-test-subj={`${dataTestSubj ?? 'certQuickFilter'}OptionTip-${value}`}
-              />
-            ),
-          }
-        : {}),
-    })
+  const { valueByLabel, labelByValue } = useMemo(() => {
+    const byLabel = new Map(options.map(({ value, label: optionLabel }) => [optionLabel, value]));
+    const byValue = new Map(options.map(({ value, label: optionLabel }) => [value, optionLabel]));
+    return { valueByLabel: byLabel, labelByValue: byValue };
+  }, [options]);
+
+  const values = useMemo(
+    () =>
+      options.map(({ label: optionLabel, tooltip, count }) => ({
+        label: optionLabel,
+        count: count ?? 0,
+        tooltip,
+      })),
+    [options]
   );
 
-  const button = (
-    <EuiFilterButton
-      data-test-subj={dataTestSubj ?? 'certQuickFilterButton'}
-      iconType="arrowDown"
-      onClick={() => setIsOpen(!isOpen)}
-      isSelected={isOpen}
-      isDisabled={isDisabled}
-      numFilters={options.length}
-      hasActiveFilters={selectedValues.length > 0}
-      numActiveFilters={selectedValues.length}
-    >
-      {label}
-    </EuiFilterButton>
+  // Only render counts once they are known for at least one option; otherwise every
+  // value would misleadingly show 0 while the facet counts are still loading.
+  const showCount = useMemo(
+    () => options.some(({ count }) => typeof count === 'number'),
+    [options]
   );
 
-  if (isDisabled) {
-    return (
-      <EuiFilterGroup>
-        {disabledTooltip ? <EuiToolTip content={disabledTooltip}>{button}</EuiToolTip> : button}
-      </EuiFilterGroup>
-    );
-  }
+  const selectedLabels = selectedValues.map((value) => labelByValue.get(value) ?? value);
 
   return (
-    <EuiFilterGroup>
-      <EuiPopover
-        button={button}
-        isOpen={isOpen}
-        closePopover={() => setIsOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="downCenter"
-      >
-        <EuiSelectable
-          aria-label={label}
-          options={selectableOptions}
-          searchable={searchable}
-          onChange={(newOptions) => {
-            onChange(
-              newOptions
-                .filter((option) => option.checked === 'on')
-                .map((option) => option.key as string)
-            );
-          }}
-        >
-          {(list, search) => (
-            <div
-              css={css`
-                width: 260px;
-              `}
-            >
-              <EuiPopoverTitle paddingSize="s">{label}</EuiPopoverTitle>
-              {search}
-              {list}
-            </div>
-          )}
-        </EuiSelectable>
-      </EuiPopover>
-    </EuiFilterGroup>
+    <FieldValueSelection
+      label={label}
+      dataTestSubj={dataTestSubj}
+      values={values}
+      selectedValue={selectedLabels}
+      query={query}
+      setQuery={setQuery}
+      singleSelection={singleSelection}
+      asFilterButton
+      showCount={showCount}
+      allowExclusions={false}
+      isDisabled={isDisabled}
+      disabledTooltip={disabledTooltip}
+      onChange={(selected = []) =>
+        onChange(selected.map((selectedLabel) => valueByLabel.get(selectedLabel) ?? selectedLabel))
+      }
+    />
   );
 };

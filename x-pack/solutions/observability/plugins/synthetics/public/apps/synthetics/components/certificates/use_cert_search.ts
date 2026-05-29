@@ -27,6 +27,7 @@ export const useCertSearch = ({
   browserResourceTypes,
   party,
   tags,
+  notValidAfter,
 }: GetCertsParams): CertResult & { isLoading?: boolean } => {
   const { lastRefresh } = useContext(SyntheticsRefreshContext);
 
@@ -44,6 +45,7 @@ export const useCertSearch = ({
         browserResourceTypes,
         party,
         tags,
+        notValidAfter,
       })
     );
   }, [
@@ -58,6 +60,7 @@ export const useCertSearch = ({
     browserResourceTypes,
     party,
     tags,
+    notValidAfter,
   ]);
 
   const { data, isLoading } = useSelector(selectCertsListState);

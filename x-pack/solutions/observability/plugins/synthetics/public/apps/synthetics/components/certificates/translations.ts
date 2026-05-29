@@ -188,6 +188,26 @@ export const TAGS_FILTER = i18n.translate('xpack.synthetics.certs.tagsFilter.lab
   defaultMessage: 'Tags',
 });
 
+export const EXPIRY_WITHIN_FILTER = i18n.translate('xpack.synthetics.certs.expiryFilter.label', {
+  defaultMessage: 'Expiring within',
+});
+
+export const EXPIRY_WITHIN_7_DAYS = i18n.translate('xpack.synthetics.certs.expiryFilter.days7', {
+  defaultMessage: '7 days',
+});
+
+export const EXPIRY_WITHIN_30_DAYS = i18n.translate('xpack.synthetics.certs.expiryFilter.days30', {
+  defaultMessage: '30 days',
+});
+
+export const EXPIRY_WITHIN_90_DAYS = i18n.translate('xpack.synthetics.certs.expiryFilter.days90', {
+  defaultMessage: '90 days',
+});
+
+export const EXPIRY_WITHIN_1_YEAR = i18n.translate('xpack.synthetics.certs.expiryFilter.year1', {
+  defaultMessage: '1 year',
+});
+
 export const TAGS_FILTER_NO_TAGS = i18n.translate('xpack.synthetics.certs.tagsFilter.noTags', {
   defaultMessage: 'No tags available',
 });

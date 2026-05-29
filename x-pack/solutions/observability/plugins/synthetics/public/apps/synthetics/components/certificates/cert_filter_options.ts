@@ -33,6 +33,15 @@ export const BROWSER_RESOURCE_TYPE_OPTIONS: QuickFilterOption[] = [
   { value: 'Other', label: 'Other', tooltip: labels.RESOURCE_TYPE_TOOLTIP_OTHER },
 ];
 
+// Datemath windows passed to the `notValidAfter` param (cert `not_after <= now+N`).
+// These intentionally include already-expired certs, which are the most urgent.
+export const EXPIRY_WITHIN_OPTIONS: QuickFilterOption[] = [
+  { value: 'now+7d', label: labels.EXPIRY_WITHIN_7_DAYS },
+  { value: 'now+30d', label: labels.EXPIRY_WITHIN_30_DAYS },
+  { value: 'now+90d', label: labels.EXPIRY_WITHIN_90_DAYS },
+  { value: 'now+1y', label: labels.EXPIRY_WITHIN_1_YEAR },
+];
+
 export const PARTY_FILTER_OPTIONS: QuickFilterOption[] = [
   {
     value: FIRST_PARTY,

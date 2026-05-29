@@ -32,8 +32,8 @@ export const DEFAULT_SIZE = 20;
 export const DEFAULT_FROM = 'now-20m';
 export const DEFAULT_TO = 'now';
 
-const CERT_HASH_SHA256 = 'tls.server.hash.sha256';
-const CERT_SUBJECT_COMMON_NAME = 'tls.server.x509.subject.common_name';
+export const CERT_HASH_SHA256 = 'tls.server.hash.sha256';
+export const CERT_SUBJECT_COMMON_NAME = 'tls.server.x509.subject.common_name';
 
 // Values used by the browser-cert "party" quick filter (first- vs third-party,
 // derived from `http.request.is_same_site`). Shared with the UI control.
@@ -61,6 +61,7 @@ export const getCertsRequestBody = ({
   party,
   tags,
   includeBrowserCerts = false,
+  includeStats = false,
 }: GetCertsParams) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
 
@@ -255,21 +256,30 @@ export const getCertsRequestBody = ({
       // Distinct-cert counts for the page summary header. They run in the same
       // filter context, so they reflect the active quick filters. `not_after`
       // is fixed per certificate, so each cert falls into exactly one bucket.
-      expired: {
-        filter: { range: { 'tls.server.x509.not_after': { lt: 'now' } } },
-        aggs: { count: { cardinality: { field: certIdField } } },
-      },
-      expiringSoon: {
-        filter: {
-          range: {
-            'tls.server.x509.not_after': {
-              gte: 'now',
-              lt: `now+${DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}d`,
+      //
+      // These two filter+cardinality aggregations add ~25% to the query's `took`
+      // at scale (see scripts/tasks/benchmark_certs_query.ts), so they are opt-in:
+      // only the certificates page requests them. The TLS alert rule discards
+      // stats, so it leaves `includeStats` false and keeps the query lean.
+      ...(includeStats
+        ? {
+            expired: {
+              filter: { range: { 'tls.server.x509.not_after': { lt: 'now' } } },
+              aggs: { count: { cardinality: { field: certIdField } } },
             },
-          },
-        },
-        aggs: { count: { cardinality: { field: certIdField } } },
-      },
+            expiringSoon: {
+              filter: {
+                range: {
+                  'tls.server.x509.not_after': {
+                    gte: 'now',
+                    lt: `now+${DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}d`,
+                  },
+                },
+              },
+              aggs: { count: { cardinality: { field: certIdField } } },
+            },
+          }
+        : {}),
     },
   });
 };
