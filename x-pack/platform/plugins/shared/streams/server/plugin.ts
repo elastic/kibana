@@ -29,8 +29,8 @@ import {
   STREAMS_KI_ONBOARDING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled'; main
+import { isSignificantEventsMemoryEnabled } from './lib/memory/is_significant_events_memory_enabled';
+main;
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
