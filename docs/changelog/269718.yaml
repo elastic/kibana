@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/269718
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+title: Expand alert consumer list to include ml and stackAlerts
+description: ML anomaly detection alerts and Stack alerts are now visible on the Observability Alerts page for users who have the corresponding feature privileges.

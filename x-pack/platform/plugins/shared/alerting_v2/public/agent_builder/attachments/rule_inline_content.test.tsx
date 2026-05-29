@@ -41,11 +41,11 @@ describe('RuleInlineContent', () => {
     expect(getByText('signal')).toBeDefined();
   });
 
-  it('shows proposed status when no origin', () => {
+  it('shows draft status when no origin', () => {
     const { getByText } = render(
       <RuleInlineContent attachment={createAttachment()} isSidebar={false} />
     );
-    expect(getByText('proposed')).toBeDefined();
+    expect(getByText('draft')).toBeDefined();
   });
 
   it('shows enabled status when origin is set and enabled is undefined (server default)', () => {

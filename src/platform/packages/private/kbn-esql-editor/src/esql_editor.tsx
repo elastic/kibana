@@ -195,8 +195,22 @@ const ESQLEditorInternal = function ESQLEditor({
   const variablesService = esqlService?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(fixedQuery ?? '');
-  // To make server side errors less "sticky", register the state of the code when submitting
-  const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
+
+  // To make server side errors less "sticky", register the query that last errored
+  const [lastErroredCode, setLastErroredCode] = useState<string | undefined>(() =>
+    serverErrors?.length || serverWarning ? fixedQuery : undefined
+  );
+
+  const fixedQueryRef = useRef(fixedQuery);
+  fixedQueryRef.current = fixedQuery;
+  useEffect(() => {
+    if (serverErrors?.length || serverWarning) {
+      setLastErroredCode(fixedQueryRef.current);
+    } else {
+      setLastErroredCode(undefined);
+    }
+  }, [serverErrors, serverWarning]);
+
   const [editorHeight, setEditorHeight] = useRestorableState(
     'editorHeight',
     editorIsInline ? EDITOR_INITIAL_HEIGHT_INLINE_EDITING : EDITOR_INITIAL_HEIGHT
@@ -314,7 +328,6 @@ const ESQLEditorInternal = function ESQLEditor({
     measuredEditorWidth,
     onTextLangQuerySubmit,
     onQueryUpdate,
-    setCodeStateOnSubmission,
     telemetryService,
   });
 
@@ -567,6 +580,7 @@ const ESQLEditorInternal = function ESQLEditor({
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
     clearGhostHintRef,
+    telemetryService,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -599,7 +613,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const { editorMessages, editorMessagesRef, onLookupIndexCreate, onNewFieldsAddedToLookupIndex } =
     useQueryValidation({
       code,
-      codeWhenSubmitted,
+      lastErroredCode,
       editorRef,
       editorModel,
       esqlCallbacks,
@@ -627,6 +641,7 @@ const ESQLEditorInternal = function ESQLEditor({
     http: core.http,
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
+    telemetryService,
   });
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
@@ -887,12 +902,14 @@ const ESQLEditorInternal = function ESQLEditor({
       {!hideQuickSearch && (
         <QuickSearchVisor
           query={code}
+          isInline={Boolean(editorIsInline)}
           isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
           isVisible={isVisorOpen}
           onUpdateAndSubmitQuery={(newQuery) =>
             onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
           }
           onToggleVisor={onToggleVisor}
+          telemetryService={telemetryService}
         />
       )}
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (

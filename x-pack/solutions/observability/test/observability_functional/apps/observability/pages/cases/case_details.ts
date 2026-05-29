@@ -79,9 +79,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await (await find.byCssSelector('[data-test-subj*="alert-rule-link"]')).click();
 
-        await retry.waitFor('URL to include /app/rules/rule', async () => {
+        await retry.waitFor('URL to include triggersActions/rule', async () => {
           const url = await browser.getCurrentUrl();
-          return url.includes('/app/rules/rule');
+          return url.includes('/app/management/insightsAndAlerting/triggersActions/rule');
         });
       });
     });

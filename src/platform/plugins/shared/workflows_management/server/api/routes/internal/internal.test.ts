@@ -20,6 +20,12 @@ describe('Internal Routes', () => {
     workflows: Promise.resolve({
       isWorkflowsAvailable: true,
       emitEvent: jest.fn(),
+      managedWorkflows: {
+        install: jest.fn(),
+        uninstall: jest.fn(),
+        getWorkflowStatus: jest.fn(),
+        execute: jest.fn(),
+      },
     }),
     licensing: Promise.resolve({
       license: {

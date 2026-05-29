@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { debounce } from 'lodash';
 import type { z } from '@kbn/zod/v4';
 import type { FieldValues } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -22,8 +21,6 @@ import { getFieldCamelKey, getFieldSnakeKey } from '../../../../common/utils';
 import type { OnUpdateFields } from '../types';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
-
-const BLUR_DEBOUNCE_MS = 200;
 
 interface TemplateFieldsProps {
   caseData: CaseUI;
@@ -82,14 +79,10 @@ const TemplateFieldsFormReady: FC<{
     });
   }, [form, onUpdateField, releaseLock]);
 
-  const handleBlurCapture = useMemo(() => debounce(persist, BLUR_DEBOUNCE_MS), [persist]);
-
-  useEffect(() => () => handleBlurCapture.cancel(), [handleBlurCapture]);
-
   return (
     <FormProvider {...form}>
-      <div onBlurCapture={handleBlurCapture} data-test-subj="template-fields-form">
-        <FieldsRenderer resolvedFields={resolvedFields} />
+      <div data-test-subj="template-fields-form">
+        <FieldsRenderer resolvedFields={resolvedFields} onFieldConfirm={persist} />
       </div>
     </FormProvider>
   );

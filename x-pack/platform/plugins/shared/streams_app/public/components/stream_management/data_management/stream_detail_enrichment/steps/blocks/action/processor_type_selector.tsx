@@ -764,6 +764,7 @@ const PROCESSOR_GROUP_MAP: Record<
   dissect: 'extract',
   json_extract: 'extract',
   user_agent: 'extract',
+  uri_parts: 'extract',
   convert: 'convert',
   date: 'convert',
   replace: 'convert',
