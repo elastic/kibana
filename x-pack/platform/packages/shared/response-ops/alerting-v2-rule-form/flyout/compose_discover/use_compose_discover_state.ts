@@ -17,10 +17,14 @@ import type {
 } from './types';
 
 export const getStepIds = (isAlert: boolean): StepId[] =>
-  isAlert ? ['alertCondition', 'recoveryCondition', 'details'] : ['alertCondition', 'details'];
+  isAlert
+    ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
+    : ['alertCondition', 'details'];
 
 export const getBuilderStepIds = (isAlert: boolean): StepId[] =>
-  isAlert ? ['builderCondition', 'recoveryCondition', 'details'] : ['builderCondition', 'details'];
+  isAlert
+    ? ['builderCondition', 'recoveryCondition', 'details', 'notifications']
+    : ['builderCondition', 'details'];
 
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
@@ -78,7 +82,7 @@ export function reducer(
       return {
         ...state,
         recoveryType: action.recoveryType,
-        ...(action.recoveryType === 'custom'
+        ...(action.recoveryType === 'custom' && !action.isBuilderMode
           ? { childOpen: true, activeTab: 'recovery' as const }
           : {}),
       };

@@ -99,7 +99,7 @@ apiTest.describe(
         );
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
         const firstAgentRequest = llmProxy.interceptedRequests.find(
-          (request) => request.matchingInterceptorName === 'handover-to-answer'
+          (request) => request.matchingInterceptorName === 'final-assistant-response'
         )?.requestBody;
         expect(firstAgentRequest).toBeDefined();
         const allMessageContent = firstAgentRequest!.messages
@@ -166,7 +166,7 @@ apiTest.describe(
           );
           await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
           const firstAgentRequest = llmProxy.interceptedRequests.find(
-            (request) => request.matchingInterceptorName === 'handover-to-answer'
+            (request) => request.matchingInterceptorName === 'final-assistant-response'
           )?.requestBody;
           expect(firstAgentRequest).toBeDefined();
           const allMessageContent = firstAgentRequest!.messages
