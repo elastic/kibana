@@ -227,7 +227,18 @@ export const createOrClauses = async <
 };
 
 const isListTypeProcessable = (type: Type): boolean =>
-  type === 'keyword' || type === 'ip' || type === 'ip_range';
+  type === 'keyword' ||
+  type === 'ip' ||
+  type === 'ip_range' ||
+  type === 'byte' ||
+  type === 'integer_range' ||
+  type === 'float_range' ||
+  type === 'long_range' ||
+  type === 'double_range' ||
+  type === 'date_range' ||
+  type === 'geo_point' ||
+  type === 'geo_shape' ||
+  type === 'shape';
 
 export const filterOutUnprocessableValueLists = async <
   T extends ExceptionListItemSchema | CreateExceptionListItemSchema
