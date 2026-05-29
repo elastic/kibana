@@ -25,30 +25,30 @@ export const SIEM_READINESS_ATTACHMENT_ID = 'security.siem_readiness';
 // ---- Shared sub-schemas ----
 
 const affectedRuleSchema = z.object({
-  id: z.string(),
-  name: z.string(),
+  id: z.string().max(100),
+  name: z.string().max(500),
 });
 
 const affectedTacticSchema = z.object({
-  id: z.string(),
-  name: z.string(),
+  id: z.string().max(20),
+  name: z.string().max(200),
   totalRules: z.number(),
   affectedRulesCount: z.number(),
 });
 
 const recommendedActionSchema = z.object({
-  label: z.string(),
-  href: z.string(),
+  label: z.string().max(200),
+  href: z.string().max(2048),
 });
 
 const actionableFindingSchema = z.object({
-  category: z.string().optional(),
+  category: z.string().max(100).optional(),
   severity: z.enum(['CRITICAL', 'WARNING', 'INFORMATIONAL']),
-  message: z.string(),
-  resource: z.string(),
+  message: z.string().max(5000),
+  resource: z.string().max(500),
   affectedRules: z.array(affectedRuleSchema).optional(),
   affectedTactics: z.array(affectedTacticSchema).optional(),
-  affectedPlatform: z.string().optional(),
+  affectedPlatform: z.string().max(200).optional(),
   recommendedActions: z.array(recommendedActionSchema).optional(),
 });
 
@@ -57,11 +57,11 @@ const actionableFindingSchema = z.object({
 export const siemReadinessCoverageDataSchema = securityAttachmentDataSchema.extend({
   dimension: z.literal('coverage'),
   status: z.enum(['healthy', 'actionsRequired', 'noData']),
-  summary: z.string(),
+  summary: z.string().max(8000),
   items: z.array(
     z.object({
-      category: z.string(),
-      indices: z.array(z.object({ indexName: z.string(), docs: z.number() })),
+      category: z.string().max(100),
+      indices: z.array(z.object({ indexName: z.string().max(500), docs: z.number() })),
     })
   ),
   actionableFindings: z.array(actionableFindingSchema),
@@ -72,10 +72,10 @@ export const siemReadinessCoverageDataSchema = securityAttachmentDataSchema.exte
 export const siemReadinessQualityDataSchema = securityAttachmentDataSchema.extend({
   dimension: z.literal('quality'),
   status: z.enum(['healthy', 'actionsRequired', 'noData']),
-  summary: z.string(),
+  summary: z.string().max(8000),
   items: z.array(
     z.object({
-      indexName: z.string(),
+      indexName: z.string().max(500),
       incompatibleFieldCount: z.number(),
       totalFieldCount: z.number(),
       ecsFieldCount: z.number(),
@@ -90,15 +90,15 @@ export const siemReadinessQualityDataSchema = securityAttachmentDataSchema.exten
 export const siemReadinessContinuityDataSchema = securityAttachmentDataSchema.extend({
   dimension: z.literal('continuity'),
   status: z.enum(['healthy', 'actionsRequired', 'noData']),
-  summary: z.string(),
+  summary: z.string().max(8000),
   items: z.array(
     z.object({
-      name: z.string(),
-      indices: z.array(z.string()),
+      name: z.string().max(500),
+      indices: z.array(z.string().max(500)),
       docsCount: z.number(),
       failedDocsCount: z.number(),
       statsAvailable: z.boolean(),
-      categories: z.array(z.string()).optional(),
+      categories: z.array(z.string().max(100)).optional(),
     })
   ),
   actionableFindings: z.array(actionableFindingSchema),
@@ -109,17 +109,17 @@ export const siemReadinessContinuityDataSchema = securityAttachmentDataSchema.ex
 export const siemReadinessRetentionDataSchema = securityAttachmentDataSchema.extend({
   dimension: z.literal('retention'),
   status: z.enum(['healthy', 'actionsRequired', 'noData']),
-  summary: z.string(),
+  summary: z.string().max(8000),
   items: z.array(
     z.object({
-      indexName: z.string(),
+      indexName: z.string().max(500),
       isDataStream: z.boolean(),
       retentionType: z.enum(['ilm', 'dsl']).nullable(),
-      retentionPeriod: z.string().nullable(),
+      retentionPeriod: z.string().max(50).nullable(),
       retentionDays: z.number().nullable(),
-      policyName: z.string().nullable(),
+      policyName: z.string().max(500).nullable(),
       status: z.enum(['healthy', 'non-compliant']),
-      categories: z.array(z.string()).optional(),
+      categories: z.array(z.string().max(100)).optional(),
     })
   ),
   actionableFindings: z.array(actionableFindingSchema),
