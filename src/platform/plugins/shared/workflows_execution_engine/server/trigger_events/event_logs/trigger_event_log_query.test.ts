@@ -38,6 +38,30 @@ describe('searchTriggerEventLog', () => {
       expect(JSON.stringify(searchArgs.query.bool.must[0])).toContain('workflows.failed');
     });
 
+    it('uses case-insensitive term queries for camelCase trigger ids', async () => {
+      await searchTriggerEventLog(client, {
+        spaceId: 'default',
+        kql: 'triggerId: "cases.caseCreated"',
+      });
+
+      const kqlClause = mockSearch.mock.calls[0][0].query.bool.must[0];
+      expect(kqlClause).toEqual({
+        bool: {
+          should: [
+            {
+              term: {
+                triggerId: {
+                  value: 'cases.caseCreated',
+                  case_insensitive: true,
+                },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
     it('translates payload.* KQL using the shared workflows-events data view fields', async () => {
       await searchTriggerEventLog(client, {
         spaceId: 'default',

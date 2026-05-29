@@ -36,6 +36,7 @@ export function registerTriggerEventsLogRoutes(deps: RouteDependencies) {
       path: '/internal/workflows/trigger_events/_search',
       access: 'internal',
       security: WORKFLOW_EXECUTION_READ_SECURITY,
+      enableQueryVersion: true,
     })
     .addVersion(
       {
