@@ -66,6 +66,7 @@
     "@kbn/upgrade-assistant-pkg-common",
     "@kbn/ml-common-types",
     "@kbn/failure-store-modal",
+    "@kbn/data-lifecycle-phases",
     "@kbn/react-query",
     "@kbn/scout",
     "@kbn/deeplinks-management",
