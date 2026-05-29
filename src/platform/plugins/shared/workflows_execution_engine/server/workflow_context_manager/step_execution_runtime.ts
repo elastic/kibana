@@ -14,7 +14,6 @@ import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepIoService } from './step_io_service';
 import type { WorkflowContextManager } from './workflow_context_manager';
-import type { WorkflowExecutionCursor } from './workflow_execution_cursor';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
@@ -31,7 +30,6 @@ interface StepExecutionRuntimeInit {
   stepExecutionId: string;
   node: GraphNodeUnion;
   stackFrames: StackFrame[];
-  workflowExecutionCursor: WorkflowExecutionCursor;
 }
 
 /**
@@ -57,7 +55,6 @@ export class StepExecutionRuntime {
   private workflowExecutionState: WorkflowExecutionState;
   private stepIoService: StepIoService;
   private workflowGraph: WorkflowGraph;
-  private workflowExecutionCursor: WorkflowExecutionCursor;
   private stackFrames: StackFrame[];
 
   public contextManager: WorkflowContextManager;
@@ -109,7 +106,6 @@ export class StepExecutionRuntime {
     this.node = stepExecutionRuntimeInit.node;
     this.stepExecutionId = stepExecutionRuntimeInit.stepExecutionId;
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
-    this.workflowExecutionCursor = stepExecutionRuntimeInit.workflowExecutionCursor;
   }
 
   public get error(): ExecutionError | undefined {

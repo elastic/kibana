@@ -780,12 +780,11 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
   describe('unwindScopes', () => {
     const setExecutionCursorStack = (stackFrames: StackFrame[]) => {
-      (
-        workflowExecutionCursor as unknown as { stackFrames: StackFrame[] }
-      ).stackFrames = stackFrames.map((frame) => ({
-        stepId: frame.stepId,
-        nestedScopes: frame.nestedScopes.map((scope) => ({ ...scope })),
-      }));
+      (workflowExecutionCursor as unknown as { stackFrames: StackFrame[] }).stackFrames =
+        stackFrames.map((frame) => ({
+          stepId: frame.stepId,
+          nestedScopes: frame.nestedScopes.map((scope) => ({ ...scope })),
+        }));
     };
 
     it('should unwind all scopes when no shouldStop predicate is given', () => {
