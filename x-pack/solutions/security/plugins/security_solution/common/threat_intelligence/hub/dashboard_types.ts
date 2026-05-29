@@ -9,6 +9,24 @@ import type { CoverageRecommendation } from './attachment_payloads';
 import type { SeverityLevel, ThreatCategory, ThreatRegion } from './constants';
 
 /**
+ * Latest cross-report advisory row from `.kibana-threat-intel-advisories`
+ * for the Intelligence Hub executive summary panel.
+ */
+export interface DashboardLatestAdvisory {
+  advisory_id: string;
+  theme_id: string;
+  theme_title: string;
+  narrative_markdown: string;
+  recommended_actions: string[];
+  report_ids: string[];
+  generated_at: string;
+  /** Source reports in the advisory that have correlated env hits in the current overview scope. */
+  source_reports_with_env_hits: number;
+  /** True when Hub filters or time range no longer match how the advisory was produced. */
+  stale: boolean;
+}
+
+/**
  * Shared response shape for the visual dashboard overview endpoint
  * (`DASHBOARD_OVERVIEW_API_PATH`). Defined in `common/` so the server route
  * and the public dashboard panels share a single source of truth.
@@ -80,4 +98,6 @@ export interface DashboardOverviewResponse {
       layer_2_hits: number;
     }>;
   };
+  /** Most recent persisted advisory for the current space, if any. */
+  latest_advisory?: DashboardLatestAdvisory;
 }

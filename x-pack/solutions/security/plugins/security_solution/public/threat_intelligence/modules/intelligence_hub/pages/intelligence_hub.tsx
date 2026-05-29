@@ -46,6 +46,7 @@ import {
 } from '@elastic/eui';
 import {
   DASHBOARD_OVERVIEW_API_PATH,
+  SYNTHESIZE_ADVISORY_API_PATH,
   DEFAULT_REGIONS_SETTING_KEY,
   DEFAULT_TIME_RANGE_PRESET,
   SAVED_VIEWS_API_PATH,
@@ -162,6 +163,7 @@ export const IntelligenceHubPage: FC = () => {
   const [timeRangePreset, setTimeRangePreset] =
     useState<TimeRangePresetId>(DEFAULT_TIME_RANGE_PRESET);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
+  const [isGeneratingAdvisory, setIsGeneratingAdvisory] = useState(false);
 
   useEffect(() => {
     const defaultRegions = (uiSettings.get(DEFAULT_REGIONS_SETTING_KEY, []) ??
@@ -193,6 +195,74 @@ export const IntelligenceHubPage: FC = () => {
       setLoading(false);
     }
   }, [http, filters.regions, filters.categories, timeRangePreset]);
+
+  const generateAdvisory = useCallback(async () => {
+    setIsGeneratingAdvisory(true);
+    const { from, to } = resolveTimeRangeFromPreset(timeRangePreset);
+    try {
+      const result = await http.post<{
+        status: string;
+        message?: string;
+      }>(SYNTHESIZE_ADVISORY_API_PATH, {
+        version: '2023-10-31',
+        body: {
+          time_range: { from, to },
+          persist: true,
+          max_reports: 20,
+          ...(filters.regions.length ? { regions: filters.regions } : {}),
+          ...(filters.categories.length ? { categories: filters.categories } : {}),
+        },
+      });
+      if (result.status === 'no_reports') {
+        notifications.toasts.addWarning(
+          i18n.translate(
+            'xpack.securitySolution.threatIntelligence.app.generateAdvisoryNoReports',
+            { defaultMessage: 'No reports matched the current filters and time range.' }
+          )
+        );
+      } else if (result.status === 'no_inference') {
+        notifications.toasts.addWarning(
+          i18n.translate(
+            'xpack.securitySolution.threatIntelligence.app.generateAdvisoryNoInference',
+            {
+              defaultMessage:
+                'A GenAI connector is required to generate an executive summary. Configure one in Stack Management.',
+            }
+          )
+        );
+      } else {
+        notifications.toasts.addSuccess(
+          i18n.translate(
+            'xpack.securitySolution.threatIntelligence.app.generateAdvisorySuccess',
+            { defaultMessage: 'Executive summary updated.' }
+          )
+        );
+        await fetchOverview();
+      }
+    } catch (err) {
+      notifications.toasts.addError(err as Error, {
+        title: i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.generateAdvisoryError',
+          { defaultMessage: 'Failed to generate executive summary' }
+        ),
+      });
+    } finally {
+      setIsGeneratingAdvisory(false);
+    }
+  }, [
+    fetchOverview,
+    filters.categories,
+    filters.regions,
+    http,
+    notifications.toasts,
+    timeRangePreset,
+  ]);
+
+  const focusSourceReports = useCallback(() => {
+    document
+      .getElementById('threat-intel-report-feed')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   const fetchSavedViews = useCallback(async () => {
     try {
@@ -354,6 +424,11 @@ export const IntelligenceHubPage: FC = () => {
         onClearChipFilters={clearChipFilters}
         highlightReportId={highlightReportId}
         onHighlightReport={onHighlightReport}
+        isGeneratingAdvisory={isGeneratingAdvisory}
+        onGenerateAdvisory={() => {
+          void generateAdvisory();
+        }}
+        onFocusSourceReports={focusSourceReports}
       />
     );
   }, [
@@ -367,6 +442,9 @@ export const IntelligenceHubPage: FC = () => {
     clearChipFilters,
     highlightReportId,
     onHighlightReport,
+    isGeneratingAdvisory,
+    generateAdvisory,
+    focusSourceReports,
   ]);
 
   const sourceCount = data?.stats_ribbon.distinct_source_count ?? 0;

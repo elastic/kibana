@@ -27,7 +27,7 @@ import { registerAttachments } from './agent_builder/attachments/register_attach
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
 import { registerRoutes as registerThreatIntelligenceRoutes } from './threat_intelligence/routes';
-import { bootstrapThreatIntelligence } from './threat_intelligence/setup/bootstrap_threat_intelligence';
+import { ensureThreatIntelligenceBootstrap } from './threat_intelligence/setup/bootstrap_threat_intelligence';
 import { installBuiltinWorkflows as installThreatIntelligenceBuiltinWorkflows } from './threat_intelligence/workflows';
 import { registerThreatIntelligenceWorkflowSteps } from './threat_intelligence/workflows/step_types';
 import { registerDeprecatedThreatIntelligenceFeature } from './threat_intelligence/feature_deprecation';
@@ -388,10 +388,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       }
 
       // Bootstrap indices + the default feed catalog once core start services
-      // (and Elasticsearch) are ready. `start()` can race a cold cluster and
-      // leave `.kibana-threat-intel-sources` empty without retrying.
+      // (and Elasticsearch) are ready.
       void core.getStartServices().then(([coreStart]) => {
-        void bootstrapThreatIntelligence({
+        void ensureThreatIntelligenceBootstrap({
           esClient: coreStart.elasticsearch.client.asInternalUser,
           logger: this.logger.get('threatIntelligence'),
         }).catch((err) => {
@@ -427,11 +426,9 @@ export class Plugin implements ISecuritySolutionPlugin {
    * threat-intelligence plugin).
    *
    * Captures optional `spaces` and `inference` start contracts for the
-   * routes registered in setup(), then performs the best-effort start-time
-   * side effects: index template installation, default-source seeding, and
-   * built-in workflow registration. All of these are gated on
-   * `threatIntelligenceSkillEnabled` so the dark-flagged feature does not
-   * provision indices, write seed data, or pollute the Workflows UI.
+   * routes registered in setup(), re-checks the feed catalog bootstrap when
+   * empty, and registers built-in workflows. Gated on
+   * `threatIntelligenceSkillEnabled`.
    *
    * The IOC indicator-sync task is scheduled here (its type was registered
    * in setup) when its independent `iocIndicatorSyncEnabled` flag is on and
@@ -450,7 +447,16 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.threatIntelligenceInference = plugins.inference;
 
     if (experimentalFeatures.threatIntelligenceSkillEnabled) {
+      const esClient = core.elasticsearch.client.asInternalUser;
       const logger = this.logger.get('threatIntelligence');
+
+      // Heal an empty catalog after Elasticsearch was reset or if setup-time
+      // bootstrap failed while the cluster was still starting.
+      void ensureThreatIntelligenceBootstrap({ esClient, logger }).catch((err) => {
+        logger.error(
+          `Failed to ensure threat intelligence bootstrap on start: ${(err as Error).message}`
+        );
+      });
 
       if (this.threatIntelligenceWorkflowsManagement) {
         // Built-in workflows are upserted idempotently by stable id at every

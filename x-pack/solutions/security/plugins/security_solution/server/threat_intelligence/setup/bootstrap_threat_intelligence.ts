@@ -96,3 +96,36 @@ export const bootstrapThreatIntelligence = async ({
 
   return { seed };
 };
+
+/**
+ * Idempotent guard used on setup and start. Re-runs bootstrap when the sources
+ * catalog index is missing or empty (e.g. Elasticsearch data was wiped while
+ * Kibana stayed up, or the first bootstrap attempt failed during a cold start).
+ */
+export const ensureThreatIntelligenceBootstrap = async ({
+  esClient,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<BootstrapThreatIntelligenceResult | undefined> => {
+  const log = logger.get('bootstrap');
+
+  const catalogCount = await esClient.count(
+    { index: THREAT_INTEL_SOURCES_INDEX },
+    { ignore: [404] }
+  );
+
+  if (catalogCount.count > 0) {
+    log.debug(
+      `Threat intelligence catalog already has ${catalogCount.count} sources; skipping bootstrap`
+    );
+    return undefined;
+  }
+
+  log.info(
+    'Threat intelligence catalog is empty; running bootstrap (index templates + default sources)'
+  );
+
+  return bootstrapThreatIntelligence({ esClient, logger });
+};

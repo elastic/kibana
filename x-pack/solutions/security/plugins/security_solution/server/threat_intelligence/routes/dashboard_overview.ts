@@ -32,6 +32,7 @@ import {
   coverageSummaryForTechniques,
   enrichTechniquesWithRuleCoverage,
 } from '../services/coverage_gap';
+import { fetchLatestAdvisoryForDashboard } from '../lib/fetch_latest_advisory';
 import type { RouteRegistrationDeps } from '.';
 
 const DEFAULT_LOOKBACK_DAYS = 7;
@@ -346,6 +347,30 @@ export const registerDashboardOverviewRoute = ({
             regions: hit._source.geography?.regions ?? [],
           }));
 
+          const reportIdsWithEnvHits = new Set<string>([
+            ...topReports.map((report) => report.report_id),
+            ...recentArticles
+              .filter((article) => article.environment_hits_total > 0)
+              .map((article) => article.report_id),
+          ]);
+          const scopedReportIds = [
+            ...new Set([
+              ...recentArticles.map((article) => article.report_id),
+              ...topReports.map((report) => report.report_id),
+            ]),
+          ];
+
+          const latestAdvisory = await fetchLatestAdvisoryForDashboard({
+            esClient,
+            spaceId: currentSpaceId,
+            from,
+            to,
+            regions,
+            categories,
+            reportIdsWithEnvHits,
+            scopedReportIds,
+          });
+
           const body: DashboardOverviewResponse = {
             time_range_label: `${from} → ${to}`,
             stats_ribbon: {
@@ -368,6 +393,7 @@ export const registerDashboardOverviewRoute = ({
               reports_with_hits: reportsWithHits,
               top_reports: topReports,
             },
+            ...(latestAdvisory ? { latest_advisory: latestAdvisory } : {}),
           };
 
           return response.ok({ body });

@@ -16,6 +16,11 @@ import {
   THREAT_INTEL_TOOL_IDS,
 } from '../../../../common/threat_intelligence/hub';
 import { coverageGap } from '../../../threat_intelligence/services';
+import {
+  buildCoverageGapHeatmapAttachmentId,
+  buildRenderAttachmentTag,
+  ensureMitreHeatmapAttachment,
+} from './threat_intel_attachment_utils';
 
 /**
  * Thin Agent Builder tool wrapper for the `coverage_gap` domain action.
@@ -60,13 +65,48 @@ export const coverageGapTool: BuiltinSkillBoundedTool<typeof coverageGapSchema> 
     'Compute the gap between ATT&CK techniques observed in recent threat reports and ATT&CK ' +
     "techniques covered by the customer's Detection Engine rules. Distinguishes enabled coverage " +
     'from disabled rules that should be re-enabled (`coverage_recommendation: enable_existing`) ' +
-    'versus techniques with no rule (`create_rule`). Renders as a `threat-intel-mitre-heatmap` ' +
-    'attachment with `mode: "coverage"`. Inside Kibana, prefer the route via `kibana-request`.',
+    'versus techniques with no rule (`create_rule`). When techniques are returned, ' +
+    'automatically stores a `threat-intel-mitre-heatmap` attachment (`mode: "coverage"`) and ' +
+    'includes a `renderTag` in the tool result. Inside Kibana, prefer the route via `kibana-request`.',
   schema: coverageGapSchema,
-  handler: async (params, { esClient, savedObjectsClient, logger }) => {
+  handler: async (params, { esClient, savedObjectsClient, logger, attachments }) => {
     try {
       const data = await coverageGap(esClient.asCurrentUser, savedObjectsClient, logger, params);
-      return { results: [{ type: ToolResultType.other, data }] };
+
+      let renderTag: string | undefined;
+      if (data.techniques.length > 0) {
+        const payload = data.attachment_hint.payload;
+        const attachmentResult = await ensureMitreHeatmapAttachment({
+          attachments,
+          id: buildCoverageGapHeatmapAttachmentId(params),
+          payload,
+          description: `MITRE coverage heatmap (${payload.time_range_label})`,
+          logger,
+        });
+        if (attachmentResult) {
+          renderTag = buildRenderAttachmentTag({
+            attachmentId: attachmentResult.attachmentId,
+            version: attachmentResult.version,
+          });
+        }
+      }
+
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              ...data,
+              ...(renderTag
+                ? {
+                    renderTag,
+                    attachmentId: buildCoverageGapHeatmapAttachmentId(params),
+                  }
+                : {}),
+            },
+          },
+        ],
+      };
     } catch (err) {
       logger.warn(`coverage_gap failed: ${(err as Error).message}`);
       return {

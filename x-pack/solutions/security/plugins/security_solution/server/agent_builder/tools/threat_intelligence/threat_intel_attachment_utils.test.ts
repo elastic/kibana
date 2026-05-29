@@ -6,6 +6,7 @@
  */
 
 import {
+  buildCoverageGapHeatmapAttachmentId,
   buildDigestReportTableAttachmentId,
   formatTimeRangeLabel,
   mapSearchReportHitToTableRow,
@@ -65,6 +66,17 @@ describe('threat_intel_attachment_utils', () => {
     };
     expect(buildDigestReportTableAttachmentId(params)).toBe(
       buildDigestReportTableAttachmentId(params)
+    );
+  });
+
+  it('builds a stable coverage-gap heatmap attachment id for the same params', () => {
+    const params = {
+      time_range: { from: 'now-30d', to: 'now' },
+      tags: ['advisories'],
+      min_severity: 'high' as const,
+    };
+    expect(buildCoverageGapHeatmapAttachmentId(params)).toBe(
+      buildCoverageGapHeatmapAttachmentId(params)
     );
   });
 });

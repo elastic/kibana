@@ -39,6 +39,7 @@ import {
   type ReportFeedSort,
 } from '../../../components/report_feed';
 import { getMitreTechniqueMetadata } from '../mitre_technique_metadata';
+import { ExecutiveAdvisoryPanel } from './executive_advisory_panel';
 
 export interface IntelligenceHubChipFilters {
   regions: ThreatRegion[];
@@ -56,6 +57,9 @@ export const IntelligenceHubDashboardView: React.FC<{
   onClearChipFilters: () => void;
   highlightReportId?: string;
   onHighlightReport: (reportId: string) => void;
+  isGeneratingAdvisory: boolean;
+  onGenerateAdvisory: () => void;
+  onFocusSourceReports: () => void;
 }> = ({
   data,
   filters,
@@ -66,6 +70,9 @@ export const IntelligenceHubDashboardView: React.FC<{
   onClearChipFilters,
   highlightReportId,
   onHighlightReport,
+  isGeneratingAdvisory,
+  onGenerateAdvisory,
+  onFocusSourceReports,
 }) => {
   const topCategory = data.by_category[0]?.category;
 
@@ -92,6 +99,14 @@ export const IntelligenceHubDashboardView: React.FC<{
         recentArticles={data.recent_articles}
       />
       <EuiSpacer size="l" />
+      <ExecutiveAdvisoryPanel
+        advisory={data.latest_advisory}
+        isGenerating={isGeneratingAdvisory}
+        onGenerateSummary={onGenerateAdvisory}
+        onHighlightReport={onHighlightReport}
+        onFocusSourceReports={onFocusSourceReports}
+      />
+      <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="l" wrap alignItems="flexStart">
         <EuiFlexItem style={{ minWidth: 320 }}>
           <ThreatRadar buckets={data.by_category} />
@@ -104,18 +119,20 @@ export const IntelligenceHubDashboardView: React.FC<{
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      <ThreatReportFeed
-        items={feedItems}
-        categoryCounts={categoryCounts}
-        highlightReportId={highlightReportId}
-        selectedSeverities={filters.severities}
-        selectedCategories={filters.categories}
-        onToggleSeverity={onToggleSeverity}
-        onToggleCategory={onToggleCategory}
-        onClearFilters={onClearChipFilters}
-        sortBy={sortBy}
-        onSortChange={onSortChange}
-      />
+      <div id="threat-intel-report-feed" data-test-subj="threatIntelReportFeedSection">
+        <ThreatReportFeed
+          items={feedItems}
+          categoryCounts={categoryCounts}
+          highlightReportId={highlightReportId}
+          selectedSeverities={filters.severities}
+          selectedCategories={filters.categories}
+          onToggleSeverity={onToggleSeverity}
+          onToggleCategory={onToggleCategory}
+          onClearFilters={onClearChipFilters}
+          sortBy={sortBy}
+          onSortChange={onSortChange}
+        />
+      </div>
       <EuiSpacer size="l" />
       <RegionBreakdown buckets={data.by_region} />
       <EuiSpacer size="l" />

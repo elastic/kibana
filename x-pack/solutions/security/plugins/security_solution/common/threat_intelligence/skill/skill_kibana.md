@@ -55,8 +55,9 @@ timeline, category breakdown, report cards, environment impact) scoped to the sa
   `attachments.add` (editable subscription form; not read-only).
 - `threat-intel-finding-card` — follow `hunt_behavior` `attachment_hints[]`; cards are
   emitted by the hunt flow, not via `attachments.add`.
-- `threat-intel-mitre-heatmap` — use `coverage_gap`'s `attachment_hint.payload` with
-  `attachments.add` for coverage-gap flows.
+- `threat-intel-mitre-heatmap` — `threat_intel.coverage_gap` **automatically** stores the
+  heatmap when techniques are returned. Copy `renderTag` verbatim (same rules as report table).
+  Do **not** call `attachments.add` for the heatmap.
 
 ## Orchestration Rules (Kibana)
 
@@ -79,11 +80,11 @@ timeline, category breakdown, report cards, environment impact) scoped to the sa
 
 ### For coverage-gap queries ("what's hot that I don't cover?")
 
-1. Issue `POST /api/threat_intelligence/coverage_gap` with the user's time range and
-   any tag/source filters they specified.
-2. Call `attachments.add` with `type: "threat-intel-mitre-heatmap"` and
-   `data` = the `attachment_hint.payload` with `mode: "coverage"` — uncovered
-   techniques render red. Emit `<render_attachment … />` after the add succeeds.
+1. Call `threat_intel.coverage_gap` (or `POST /api/threat_intelligence/coverage_gap`) with
+   the user's time range and any tag/source filters they specified.
+2. When `techniques.length > 0`: copy the `renderTag` from the tool result verbatim so the
+   `threat-intel-mitre-heatmap` Canvas renders (see **Rich attachments**). Uncovered techniques
+   render red; disabled-rule-only techniques render warning.
 3. Branch on `coverage_recommendation` per technique:
    - `enable_existing`: recommend enabling the disabled rule(s) in
      `matching_disabled_rule_ids` (Detection Engine bulk-enable) — do
@@ -99,7 +100,9 @@ timeline, category breakdown, report cards, environment impact) scoped to the sa
    `threat_intel.manage_subscriptions` portability tool with `confirm=false`); the
    resolved shape carries `status: pending_confirmation`.
 2. Call `attachments.add` with `type: "threat-intel-subscription-confirmation"` and
-   the proposed parameters. The card is editable inline — the user can adjust
+   a `data` object containing the proposed parameters from `manage_subscriptions`
+   (for example `{ "type": "threat-intel-subscription-confirmation", "data": { "tags": [...], "severity_threshold": "high", ... } }`).
+   Do not pass subscription fields only at the top level without `data`. The card is editable inline — the user can adjust
    tags, severity, schedule, delivery, and connector id before Submit.
 3. The Submit button posts directly to
    `/api/threat_intelligence/subscriptions/submit` so the agent does

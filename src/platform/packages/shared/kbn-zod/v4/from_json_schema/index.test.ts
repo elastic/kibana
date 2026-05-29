@@ -97,6 +97,37 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
       expect(() => zodSchema!.parse({ config: {} })).toThrow();
     });
 
+    it('preserves additionalProperties on object schemas', () => {
+      const jsonSchema = {
+        type: 'object',
+        properties: {
+          type: { type: 'string' },
+          data: {
+            type: 'object',
+            additionalProperties: {},
+          },
+        },
+        required: ['type'],
+        additionalProperties: {},
+      };
+
+      const zodSchema = fromJSONSchema(jsonSchema);
+      expect(zodSchema).toBeDefined();
+
+      expect(() =>
+        zodSchema!.parse({
+          type: 'example',
+          data: { tags: ['ransomware'] },
+        })
+      ).not.toThrow();
+      expect(() =>
+        zodSchema!.parse({
+          type: 'example',
+          tags: ['ransomware'],
+        })
+      ).not.toThrow();
+    });
+
     it('handles nullable object properties', () => {
       const jsonSchema = {
         type: 'object',
