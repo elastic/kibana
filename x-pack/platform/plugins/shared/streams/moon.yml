@@ -99,7 +99,6 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/data-streams'
   - '@kbn/es-mappings'
-  - '@kbn/workflows-extensions'
   - '@kbn/elastic-agent-utils'
   - '@kbn/sample-log-parser'
 tags:
