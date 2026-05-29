@@ -132,8 +132,8 @@ const ensureLocalConfigFileExists = (filePath: string) => {
   );
 };
 
-export const readConfigFromVaultPath = async (vaultPath: string): Promise<KbnEvalsConfig> => {
-  const { stdout } = await execa('vault', ['read', `-field=${KBN_EVALS_CONFIG_FIELD}`, vaultPath], {
+export const retrieveFromVault = async (vaultPath: string, filePath: string, field: string) => {
+  const { stdout } = await execa('vault', ['read', `-field=${field}`, vaultPath], {
     cwd: REPO_ROOT,
     buffer: true,
     env: {
@@ -144,22 +144,14 @@ export const readConfigFromVaultPath = async (vaultPath: string): Promise<KbnEva
 
   const value = Buffer.from(stdout, 'base64').toString('utf-8').trim();
   const parsed = JSON.parse(value);
-  return validateKbnEvalsConfig(parsed);
-};
-
-export const readConfigFromVault = async (vault: KbnEvalsVaultType): Promise<KbnEvalsConfig> => {
-  return readConfigFromVaultPath(getVaultPath(vault));
-};
-
-export const retrieveFromVault = async (vaultPath: string, filePath: string) => {
-  const validated = await readConfigFromVaultPath(vaultPath);
+  const validated = validateKbnEvalsConfig(parsed);
   await writeFile(filePath, JSON.stringify(validated, null, 2));
   // eslint-disable-next-line no-console
   console.log(`Config written to: ${filePath}`);
 };
 
 export const retrieveConfigFromVault = async (vault: KbnEvalsVaultType) => {
-  await retrieveFromVault(getVaultPath(vault), KBN_EVALS_CONFIG_FILE);
+  await retrieveFromVault(getVaultPath(vault), KBN_EVALS_CONFIG_FILE, KBN_EVALS_CONFIG_FIELD);
 };
 
 export const uploadToVault = async (vaultPath: string, filePath: string, field: string) => {
