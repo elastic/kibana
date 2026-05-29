@@ -24,13 +24,14 @@ export interface RunSummary {
   readonly results: readonly ExampleResult[];
   readonly passed: number;
   readonly failed: number;
+  readonly empty: boolean;
 }
 
 export async function runValidation({ rootDir, log }: RunOptions): Promise<RunSummary> {
   const files = await discoverExampleFiles(rootDir);
   if (files.length === 0) {
     log.warning(`No workflow YAML files found under ${rootDir}`);
-    return { results: [], passed: 0, failed: 0 };
+    return { results: [], passed: 0, failed: 0, empty: true };
   }
   log.info(`Validating ${files.length} example(s) under ${rootDir}`);
 
@@ -55,7 +56,7 @@ export async function runValidation({ rootDir, log }: RunOptions): Promise<RunSu
   }
 
   log.info(`Validated ${files.length} example(s): ${passed} passed, ${failed} failed`);
-  return { results, passed, failed };
+  return { results, passed, failed, empty: false };
 }
 
 async function validateOne(

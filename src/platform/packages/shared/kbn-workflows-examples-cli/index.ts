@@ -39,6 +39,10 @@ export function runValidateExamplesCli(): void {
         log.info(`Wrote JUnit report to ${junitPath}`);
       }
 
+      if (summary.empty && junitOutFlag) {
+        throw createFailError(`No workflow YAML files found under ${rootDir}`);
+      }
+
       if (summary.failed > 0) {
         throw createFailError(
           `${summary.failed} of ${summary.results.length} workflow example(s) failed validation`
