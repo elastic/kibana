@@ -11,7 +11,7 @@ import type {
   SavedObjectsFullModelVersion,
   SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
-import { expectConfigSchema } from '@kbn/config-schema';
+import { expectConfigSchema } from '@kbn/config-schema-helpers';
 
 test('allows valid duration', () => {
   expect(validateDuration('1s')).toBeUndefined();

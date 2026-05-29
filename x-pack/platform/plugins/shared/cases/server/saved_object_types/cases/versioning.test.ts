@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectConfigSchema } from '@kbn/config-schema';
+import { expectConfigSchema } from '@kbn/config-schema-helpers';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createCaseSavedObjectType } from './cases';
 import {
