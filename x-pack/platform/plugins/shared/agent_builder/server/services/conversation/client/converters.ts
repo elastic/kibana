@@ -286,6 +286,6 @@ export const createRequestToEs = ({
     ...(conversation.rounds.length > 0 && {
       status: conversation.rounds[conversation.rounds.length - 1].status,
     }),
-    ...(conversation.read !== undefined && { read: conversation.read }),
+    read: false,
   };
 };
