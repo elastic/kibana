@@ -135,12 +135,35 @@ exports[`ManageData render 1`] = `
             coreStart={
               Object {
                 "application": Object {
+                  "applications$": BehaviorSubject {
+                    "_value": Map {
+                      "management" => Object {
+                        "status": 0,
+                      },
+                    },
+                    "closed": false,
+                    "currentObservers": null,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
                   "capabilities": Object {
                     "navLinks": Object {
                       "dev_tools": true,
                       "management": true,
                     },
                   },
+                  "currentAppId$": BehaviorSubject {
+                    "_value": "home",
+                    "closed": false,
+                    "currentObservers": null,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                  "navigateToUrl": [MockFunction],
                 },
               }
             }
@@ -155,37 +178,6 @@ exports[`ManageData render 1`] = `
               <MemoizedFormattedMessage
                 defaultMessage="Dev Tools"
                 id="home.manageData.devToolsButtonLabel"
-              />
-            </EuiButtonEmpty>
-          </RedirectAppLinks>
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <RedirectAppLinks
-            coreStart={
-              Object {
-                "application": Object {
-                  "capabilities": Object {
-                    "navLinks": Object {
-                      "dev_tools": true,
-                      "management": true,
-                    },
-                  },
-                },
-              }
-            }
-          >
-            <EuiButtonEmpty
-              className="kbnOverviewPageHeader__actionButton"
-              data-test-subj="homeManage"
-              flush="both"
-              href=""
-              iconType="gear"
-            >
-              <MemoizedFormattedMessage
-                defaultMessage="Stack Management"
-                id="home.manageData.stackManagementButtonLabel"
               />
             </EuiButtonEmpty>
           </RedirectAppLinks>
