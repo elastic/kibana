@@ -41,8 +41,8 @@ const columns: Array<EuiBasicTableColumn<Discovery>> = [
   },
   {
     field: 'kind',
-    name: i18n.translate('xpack.streams.discoveriesTab.statusColumn', {
-      defaultMessage: 'Status',
+    name: i18n.translate('xpack.streams.discoveriesTab.kindColumn', {
+      defaultMessage: 'Kind',
     }),
     width: '90px',
     render: (kind: Discovery['kind']) => (
