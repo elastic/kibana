@@ -14,7 +14,6 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
@@ -164,25 +163,80 @@ const AssistanceSparklesIcon = () => {
 
 const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
   const { euiTheme } = useEuiTheme();
+  // Compact, neutral card with a slim assistance-tinted stripe on the left
+  // edge — that's enough to read as AI-generated without flooding the panel
+  // with purple. Section headers use small inline labels rather than full
+  // paragraphs to keep the card tight.
   return (
     <EuiPanel
       hasBorder
       hasShadow={false}
       paddingSize="m"
-      // Assistance-tinted backdrop ties the AI summary card to the `sparkles`
-      // section adornment and the `assistance`-colored refresh affordance below
-      // (canonical Borealis purple palette dedicated to AI-generated content).
       css={css`
-        background-color: ${euiTheme.colors.backgroundLightAssistance};
-        border-color: ${euiTheme.colors.borderBaseAssistance};
+        position: relative;
+        padding-left: ${euiTheme.size.l};
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          width: 3px;
+          background-color: ${euiTheme.colors.backgroundFilledAssistance};
+          border-top-left-radius: inherit;
+          border-bottom-left-radius: inherit;
+        }
       `}
       data-test-subj="entityCentricLabEntitySummaryCard"
     >
-      <EuiText size="s">
-        <p>{overview.summary.text}</p>
+      <EuiText
+        size="s"
+        css={css`
+          p,
+          ul {
+            margin-block-end: ${euiTheme.size.s};
+          }
+          ul {
+            padding-inline-start: ${euiTheme.size.base};
+          }
+          li + li {
+            margin-block-start: ${euiTheme.size.xs};
+          }
+        `}
+      >
+        <p data-test-subj="entityCentricLabSummaryHeadline">{overview.summary.headline}</p>
+        {overview.summary.issues.length > 0 ? (
+          <>
+            <SummarySubheader>
+              {i18n.translate('entityCentricLabFlyout.flyout.overview.issuesFound', {
+                defaultMessage: '{count, plural, one {# issue found} other {# issues found}}',
+                values: { count: overview.summary.issues.length },
+              })}
+            </SummarySubheader>
+            <ul data-test-subj="entityCentricLabSummaryIssues">
+              {overview.summary.issues.map((issue, idx) => (
+                <li key={`issue-${idx}`}>{issue}</li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+        {overview.summary.nextSteps.length > 0 ? (
+          <>
+            <SummarySubheader>
+              {i18n.translate('entityCentricLabFlyout.flyout.overview.suggestedNextSteps', {
+                defaultMessage: 'Suggested next steps',
+              })}
+            </SummarySubheader>
+            <ul data-test-subj="entityCentricLabSummaryNextSteps">
+              {overview.summary.nextSteps.map((step, idx) => (
+                <li key={`step-${idx}`}>{step}</li>
+              ))}
+            </ul>
+          </>
+        ) : null}
       </EuiText>
-      <EuiHorizontalRule margin="m" />
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
             {i18n.translate('entityCentricLabFlyout.flyout.overview.summaryGeneratedAt', {
@@ -207,6 +261,22 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
+  );
+};
+
+const SummarySubheader = ({ children }: { children: React.ReactNode }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <p
+      css={css`
+        color: ${euiTheme.colors.textHeading};
+        font-weight: ${euiTheme.font.weight.semiBold};
+        font-size: ${euiTheme.size.m};
+        margin-block-start: ${euiTheme.size.s};
+      `}
+    >
+      {children}
+    </p>
   );
 };
 

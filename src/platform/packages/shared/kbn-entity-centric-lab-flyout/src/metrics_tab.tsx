@@ -36,17 +36,20 @@ import {
   Settings,
 } from '@elastic/charts';
 import { useEntityFlyoutServices } from './services_context';
-import type { MetricSeries, MetricsTabData } from './fake_entity_tabs';
+import type { MetricEvent, MetricSeries, MetricsTabData } from './fake_entity_tabs';
+import { formatIncidentTick } from './time_domain';
 
 interface MetricsTabProps {
   readonly metrics: MetricsTabData;
 }
 
+const NO_EVENTS: readonly MetricEvent[] = [];
+
 export const MetricsTab = ({ metrics }: MetricsTabProps) => {
   const goldenAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabMetricsGolden' });
   const otherAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabMetricsOther' });
   const [surfaceEvents, setSurfaceEvents] = useState(true);
-  const eventPositions = surfaceEvents ? metrics.eventPositions : [];
+  const events = surfaceEvents ? metrics.events : NO_EVENTS;
 
   // Layout follows the design: latency + error rate side-by-side, throughput
   // full-width below them.
@@ -84,17 +87,17 @@ export const MetricsTab = ({ metrics }: MetricsTabProps) => {
         <EuiFlexGroup gutterSize="m" responsive={false} wrap>
           {primaryA ? (
             <EuiFlexItem style={{ minWidth: 220 }}>
-              <MetricChartCard series={primaryA} eventPositions={eventPositions} />
+              <MetricChartCard series={primaryA} events={events} />
             </EuiFlexItem>
           ) : null}
           {primaryB ? (
             <EuiFlexItem style={{ minWidth: 220 }}>
-              <MetricChartCard series={primaryB} eventPositions={eventPositions} />
+              <MetricChartCard series={primaryB} events={events} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        {primaryC ? <MetricChartCard series={primaryC} eventPositions={eventPositions} /> : null}
+        {primaryC ? <MetricChartCard series={primaryC} events={events} /> : null}
       </EuiAccordion>
 
       <EuiSpacer size="m" />
@@ -118,12 +121,12 @@ export const MetricsTab = ({ metrics }: MetricsTabProps) => {
         <EuiFlexGroup gutterSize="m" responsive={false} wrap>
           {otherA ? (
             <EuiFlexItem style={{ minWidth: 220 }}>
-              <MetricChartCard series={otherA} eventPositions={eventPositions} />
+              <MetricChartCard series={otherA} events={events} />
             </EuiFlexItem>
           ) : null}
           {otherB ? (
             <EuiFlexItem style={{ minWidth: 220 }}>
-              <MetricChartCard series={otherB} eventPositions={eventPositions} />
+              <MetricChartCard series={otherB} events={events} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
@@ -147,10 +150,10 @@ const CHART_HEIGHT = 200;
 
 const MetricChartCard = ({
   series,
-  eventPositions,
+  events,
 }: {
   readonly series: MetricSeries;
-  readonly eventPositions: readonly number[];
+  readonly events: readonly MetricEvent[];
 }) => {
   const { euiTheme } = useEuiTheme();
   const { charts } = useEntityFlyoutServices();
@@ -187,9 +190,7 @@ const MetricChartCard = ({
           <Axis
             id={`${series.id}-x`}
             position={Position.Bottom}
-            tickFormat={(value) =>
-              `${String(10 + Math.round(Number(value) / 2)).padStart(2, '0')}:00:00`
-            }
+            tickFormat={(value) => formatIncidentTick(Number(value))}
           />
           <Axis id={`${series.id}-y`} position={Position.Left} />
           {series.threshold !== undefined ? (
@@ -207,11 +208,18 @@ const MetricChartCard = ({
               }}
             />
           ) : null}
-          {eventPositions.length > 0 ? (
+          {events.length > 0 ? (
             <LineAnnotation
               id={`${series.id}-events`}
               domainType={AnnotationDomainType.XDomain}
-              dataValues={eventPositions.map((x) => ({ dataValue: x }))}
+              // `header` + `details` are picked up by the built-in annotation
+              // tooltip on hover — that's how the demo surfaces the deployment
+              // story (e.g. "Deployment — payments-service v2.14.3").
+              dataValues={events.map((event) => ({
+                dataValue: event.x,
+                header: event.header,
+                details: event.details,
+              }))}
               marker={<EventDiamond euiTheme={euiTheme} />}
               markerPosition={Position.Bottom}
               style={{
@@ -224,12 +232,15 @@ const MetricChartCard = ({
               key={line.id}
               id={line.id}
               name={line.label}
-              xScaleType={ScaleType.Linear}
+              xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"
               yAccessors={['y']}
               data={line.points as Array<{ x: number; y: number }>}
               color={chartLineColor(idx, euiTheme)}
+              // Pin time axis to UTC so deploy marker (02:46:41 UTC) and the
+              // spike that follows it sit under labels matching the AI summary.
+              timeZone="utc"
             />
           ))}
         </Chart>

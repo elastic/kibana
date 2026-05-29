@@ -111,7 +111,12 @@ function createNavTree({
               // is enabled.
               id: 'entities',
               link: 'streams:entitiesAll' as const,
-              icon: 'nodes',
+              // `cluster` renders three connected circles — reads as
+              // "connected things / a network of entities" and is the closest
+              // generic-entity metaphor available in the current EUI icon set.
+              // The previous `nodes` value rendered as a broken-image
+              // placeholder because that icon name doesn't exist in Borealis.
+              icon: 'cluster',
               title: i18n.translate('xpack.observability.obltNav.entities', {
                 defaultMessage: 'Entities',
               }),

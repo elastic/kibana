@@ -19,75 +19,56 @@ export interface FakeLogEntry {
   readonly message: string;
 }
 
+/**
+ * PayFlow incident storyline (Apr 14, 2026 — 02:46:41 → 02:47:31):
+ * Sofia opens Discover, scans these six lines, and clicks the service name
+ * (`payments-service` or `checkout-service`) to start her four-hop
+ * investigation. The other entities mentioned in the message body
+ * (`stripe-api`, `payments-pod-7f9b2`, `node-prod-eu-04`, …) are intentionally
+ * left as plain text — they are reachable only via the Dependencies tab of
+ * the click-path flyouts.
+ */
 export const FAKE_LOG_ENTRIES: readonly FakeLogEntry[] = [
   {
     id: 'log-1',
-    timestamp: '2026-05-07T09:42:11.302Z',
+    timestamp: '2026-04-14T02:46:41.012Z',
     level: 'INFO',
-    serviceName: 'orders-api',
-    message: 'POST /api/v1/orders 201 created in 84ms',
+    serviceName: 'payments-service',
+    message: 'Deployment completed v2.14.3',
   },
   {
     id: 'log-2',
-    timestamp: '2026-05-07T09:42:11.987Z',
+    timestamp: '2026-04-14T02:46:58.421Z',
     level: 'WARN',
-    serviceName: 'payments-worker',
-    message: 'Retrying charge for tx_8821 (attempt 2/5)',
+    serviceName: 'payments-service',
+    message: 'Memory usage at 97% of limit (pod payments-pod-7f9b2)',
   },
   {
     id: 'log-3',
-    timestamp: '2026-05-07T09:42:12.114Z',
+    timestamp: '2026-04-14T02:47:09.084Z',
     level: 'ERROR',
-    serviceName: 'inventory-svc',
-    message: 'ConnectionTimeout: upstream stock-db unreachable after 5000ms',
+    serviceName: 'payments-service',
+    message: 'OOMKilled — container payments-pod-7f9b2 restarting (3 restarts in last 5 min)',
   },
   {
     id: 'log-4',
-    timestamp: '2026-05-07T09:42:12.530Z',
-    level: 'INFO',
-    serviceName: 'orders-api',
-    message: 'GET /api/v1/orders/42 200 served from cache',
+    timestamp: '2026-04-14T02:47:21.604Z',
+    level: 'ERROR',
+    serviceName: 'payments-service',
+    message: 'Timeout connecting to stripe-api after 5000ms',
   },
   {
     id: 'log-5',
-    timestamp: '2026-05-07T09:42:13.001Z',
-    level: 'DEBUG',
-    serviceName: 'auth-gateway',
-    message: 'Issued JWT for user_id=4711, scopes=[orders:read]',
+    timestamp: '2026-04-14T02:47:28.612Z',
+    level: 'ERROR',
+    serviceName: 'checkout-service',
+    message: 'POST /checkout/confirm 503 upstream error 812ms',
   },
   {
     id: 'log-6',
-    timestamp: '2026-05-07T09:42:13.488Z',
-    level: 'INFO',
-    serviceName: 'shipping-tracker',
-    message: 'Shipment SHP-9912 transitioned to OUT_FOR_DELIVERY',
-  },
-  {
-    id: 'log-7',
-    timestamp: '2026-05-07T09:42:13.902Z',
-    level: 'WARN',
-    serviceName: 'payments-worker',
-    message: 'Slow downstream call: stripe.charges.create took 1.2s',
-  },
-  {
-    id: 'log-8',
-    timestamp: '2026-05-07T09:42:14.337Z',
-    level: 'INFO',
-    serviceName: 'auth-gateway',
-    message: '12 active sessions refreshed',
-  },
-  {
-    id: 'log-9',
-    timestamp: '2026-05-07T09:42:14.812Z',
+    timestamp: '2026-04-14T02:47:31.842Z',
     level: 'ERROR',
-    serviceName: 'orders-api',
-    message: 'Unhandled rejection in /api/v1/orders/checkout: ValidationError',
-  },
-  {
-    id: 'log-10',
-    timestamp: '2026-05-07T09:42:15.220Z',
-    level: 'INFO',
-    serviceName: 'inventory-svc',
-    message: 'Restored connection to stock-db (3 pending writes flushed)',
+    serviceName: 'checkout-service',
+    message: 'POST /checkout/confirm 503 upstream error 841ms — error rate above 5%',
   },
 ];

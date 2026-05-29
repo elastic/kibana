@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { Axis, Chart, LineSeries, Position, ScaleType, Settings } from '@elastic/charts';
 import { useEntityFlyoutServices } from './services_context';
 import type { AlertRow, AlertsTabData } from './fake_entity_tabs';
+import { formatIncidentTick } from './time_domain';
 
 interface AlertsTabProps {
   readonly alerts: AlertsTabData;
@@ -199,20 +200,21 @@ export const AlertsTab = ({ alerts }: AlertsTabProps) => {
                 <Axis
                   id="alerts-over-time-x"
                   position={Position.Bottom}
-                  tickFormat={(value) =>
-                    `${String(10 + Math.round(Number(value) / 2)).padStart(2, '0')}:00:00`
-                  }
+                  tickFormat={(value) => formatIncidentTick(Number(value))}
                 />
                 <Axis id="alerts-over-time-y" position={Position.Left} />
                 <LineSeries
                   id="active-alerts"
                   name="Active alerts"
-                  xScaleType={ScaleType.Linear}
+                  xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   xAccessor="x"
                   yAccessors={['y']}
                   data={alerts.overTime as Array<{ x: number; y: number }>}
                   color={euiTheme.colors.vis.euiColorVis0}
+                  // Pin time axis to UTC so the alert-count climb at 02:47:31
+                  // UTC lines up with the AI summary copy and log timestamps.
+                  timeZone="utc"
                 />
               </Chart>
             </div>

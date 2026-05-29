@@ -12,6 +12,14 @@
  * labels come from the design mockup — there is no real backend.
  */
 
+import { getStoryOverview } from './payflow_story';
+import {
+  buildKindTemplate,
+  entityTypeToKind,
+  inferEntityKind,
+  type EntityKind,
+} from './kind_templates';
+
 export type EntityHealth = 'healthy' | 'degraded' | 'unhealthy';
 
 export interface EntityTag {
@@ -71,14 +79,30 @@ export interface OwnershipContact {
   readonly value: string;
 }
 
+/**
+ * Structured AI summary surfaced at the top of the Overview tab. Renders as
+ * three distinct paragraphs:
+ *
+ *   1. `headline`   — single high-level sentence (the "what")
+ *   2. `issues`     — bullet list under "{N} issues found" (the "why")
+ *   3. `nextSteps`  — bullet list under "Suggested next steps" (the "now what")
+ *
+ * Keeping the three sections as separate fields (rather than a single freeform
+ * string) lets the UI render them with consistent visual hierarchy and lets
+ * the agent-builder attachment forward each section to the AI verbatim.
+ */
+export interface EntityAiSummary {
+  readonly headline: string;
+  readonly issues: readonly string[];
+  readonly nextSteps: readonly string[];
+  readonly generatedAt: string;
+}
+
 export interface EntityOverview {
   readonly displayName: string;
   readonly lastUpdate: string;
   readonly tags: readonly EntityTag[];
-  readonly summary: {
-    readonly text: string;
-    readonly generatedAt: string;
-  };
+  readonly summary: EntityAiSummary;
   readonly goldenSignals: readonly GoldenSignal[];
   readonly details: readonly EntityDetailRow[];
   readonly ownership: readonly OwnershipContact[];
@@ -86,11 +110,38 @@ export interface EntityOverview {
 }
 
 /**
- * Build a fake overview for a given entity name. The shape mirrors the design
- * mockup — only the title is interpolated so the flyout looks specific to the
- * row the user clicked.
+ * Build a fake overview for a given entity name.
+ *
+ * Dispatch order:
+ *
+ *   1. PayFlow story — curated overview for the 4 click-path entities
+ *      (`payments-service`, `checkout-service`, `payments-pod-7f9b2`,
+ *      `node-prod-eu-04`).
+ *   2. Per-kind template — when the entity's kind can be resolved (either
+ *      passed in via `entityType` from the caller, or inferred from the
+ *      name), return a kind-shaped overview (service / host / pod / node /
+ *      cluster / namespace / database / cloud / middleware / llm).
+ *   3. Generic fallback — last-resort mock that mirrors the original design
+ *      mockup; mostly never reached now that the kind templates cover the
+ *      common shapes.
  */
-export const buildFakeEntityOverview = (entityName: string): EntityOverview => ({
+export const buildFakeEntityOverview = (
+  entityName: string,
+  entityType?: string
+): EntityOverview => {
+  const storyOverview = getStoryOverview(entityName);
+  if (storyOverview) {
+    return storyOverview;
+  }
+  const kind: EntityKind | undefined = entityTypeToKind(entityType) ?? inferEntityKind(entityName);
+  const kindTemplate = buildKindTemplate(entityName, kind);
+  if (kindTemplate) {
+    return kindTemplate.overview;
+  }
+  return buildGenericEntityOverview(entityName);
+};
+
+const buildGenericEntityOverview = (entityName: string): EntityOverview => ({
   displayName: entityName,
   lastUpdate: '2026-04-20',
   tags: [
@@ -100,10 +151,16 @@ export const buildFakeEntityOverview = (entityName: string): EntityOverview => (
     { label: `${entityName} subset`, color: 'hollow' },
   ],
   summary: {
-    text:
-      `Error rate spiked 4 min ago following deployment v2.4.1. db-primary latency is elevated. ` +
-      `Downstream checkout-service is affected. Suggested action: rollback v2.4.1 or investigate ` +
-      `db-primary connection pool.`,
+    headline: `${entityName} is degraded — error rate spiked 4 min ago following deployment v2.4.1.`,
+    issues: [
+      'Error rate at 4.5% (warning threshold 3%) since 4 min ago',
+      'db-primary latency is elevated — p95 climbing for the last 10 min',
+      'Downstream checkout-service reports correlated failures',
+    ],
+    nextSteps: [
+      'Rollback v2.4.1 or investigate db-primary connection pool',
+      'Page checkout-platform if error rate stays above threshold for another 5 min',
+    ],
     generatedAt: 'Dec 12th, 2025 at 11:30',
   },
   goldenSignals: [

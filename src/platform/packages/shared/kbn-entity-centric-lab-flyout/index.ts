@@ -14,6 +14,7 @@ export type { EntityFlyoutServices } from './src/services_context';
 export { buildFakeEntityOverview, formatGoldenSignalValue } from './src/fake_entity_overview';
 export type {
   EntityOverview,
+  EntityAiSummary,
   EntityTag,
   EntityDetailRow,
   OwnershipContact,
@@ -25,10 +26,12 @@ export type {
 export { buildFakeEntityTabsData } from './src/fake_entity_tabs';
 export type {
   EntityTabsData,
+  MetricEvent,
   MetricSeries,
   MetricSeriesPoint,
   MetricsTabData,
   LogRow,
+  LogSeverity,
   AlertRow,
   AlertsTabData,
   RelatedEntity,
@@ -46,3 +49,6 @@ export {
   buildEntityFlyoutAttachment,
   buildEntityFlyoutInitialMessage,
 } from './src/build_entity_flyout_attachment';
+
+export { entityTypeToKind, inferEntityKind } from './src/kind_templates';
+export type { EntityKind } from './src/kind_templates';

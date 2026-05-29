@@ -77,6 +77,23 @@ export const AllEntitiesView = () => {
     });
   }, [dataset.entities, search, activeTagFilters]);
 
+  // Resolve the clicked entity's `type` from the dataset so the shared flyout
+  // can pick the right kind template (service / host / pod / node / cluster
+  // / namespace / database / cloud / middleware / llm). When the user keeps
+  // navigating from inside the flyout (Dependencies row clicks), the new
+  // name may not be in the dataset — in that case `selectedEntityType` is
+  // undefined and the shared package falls back to name-based inference.
+  const entityTypeByName = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const entity of dataset.entities) {
+      map.set(entity.name, entity.type);
+    }
+    return map;
+  }, [dataset.entities]);
+  const selectedEntityType = selectedEntityName
+    ? entityTypeByName.get(selectedEntityName)
+    : undefined;
+
   // `agentBuilder` is intentionally undefined: streams_app does not declare it
   // as a start dependency. The shared flyout hides the "Add to chat" button
   // when this is omitted, so the rest of the UI keeps working.
@@ -203,7 +220,9 @@ export const AllEntitiesView = () => {
         <EntityFlyoutServicesProvider services={flyoutServices}>
           <EntityFlyout
             entityName={selectedEntityName}
+            entityType={selectedEntityType}
             onClose={() => setSelectedEntityName(null)}
+            onSelectEntity={setSelectedEntityName}
           />
         </EntityFlyoutServicesProvider>
       ) : null}

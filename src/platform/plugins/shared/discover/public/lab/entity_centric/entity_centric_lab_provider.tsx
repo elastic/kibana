@@ -57,7 +57,11 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
       {children}
       {enabled && currentEntityName !== null ? (
         <EntityFlyoutServicesProvider services={flyoutServices}>
-          <EntityFlyout entityName={currentEntityName} onClose={closeEntity} />
+          <EntityFlyout
+            entityName={currentEntityName}
+            onClose={closeEntity}
+            onSelectEntity={openEntity}
+          />
         </EntityFlyoutServicesProvider>
       ) : null}
     </EntityCentricLabContext.Provider>

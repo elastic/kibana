@@ -10,11 +10,13 @@ import {
   EuiButtonEmpty,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiPanel,
   EuiPopover,
-  EuiPopoverTitle,
   EuiSelectable,
+  useGeneratedHtmlId,
   type EuiSelectableOption,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ActiveTagFilters, TagKey } from './fake_entities';
 import { TAG_KEYS, TAG_KEY_LABEL } from './fake_entities';
@@ -25,7 +27,7 @@ interface Props {
   readonly onChange: (next: ActiveTagFilters) => void;
 }
 
-const FilterDropdown = ({
+const TagFilterPopover = ({
   tagKey,
   options,
   selected,
@@ -34,25 +36,25 @@ const FilterDropdown = ({
   tagKey: TagKey;
   options: readonly string[];
   selected: readonly string[];
-  onChange: (next: readonly string[]) => void;
+  onChange: (next: string[]) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const popoverId = useGeneratedHtmlId({ prefix: `entityCentricLabTagFilter-${tagKey}` });
+  const label = TAG_KEY_LABEL[tagKey];
 
-  const items = useMemo<EuiSelectableOption[]>(
+  const selectableOptions = useMemo<EuiSelectableOption[]>(
     () =>
       options.map((value) => ({
-        label: value,
         key: value,
-        checked: selected.includes(value) ? 'on' : undefined,
+        label: value,
+        checked: selected.includes(value) ? ('on' as const) : undefined,
       })),
     [options, selected]
   );
 
-  const label = TAG_KEY_LABEL[tagKey];
-
   return (
     <EuiPopover
-      id={`entityCentricLabTagFilter-${tagKey}`}
+      id={popoverId}
       aria-label={i18n.translate(
         'xpack.streams.entityCentricLab.entities.tagFilter.popoverAriaLabel',
         {
@@ -63,17 +65,16 @@ const FilterDropdown = ({
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
-      anchorPosition="downCenter"
       button={
         <EuiFilterButton
           iconType="arrowDown"
+          iconSide="right"
           isSelected={isOpen}
           numFilters={options.length}
           numActiveFilters={selected.length}
           hasActiveFilters={selected.length > 0}
           onClick={() => setIsOpen((prev) => !prev)}
           data-test-subj={`entityCentricLabTagFilterButton-${tagKey}`}
-          grow={false}
         >
           {label}
         </EuiFilterButton>
@@ -81,30 +82,18 @@ const FilterDropdown = ({
     >
       <EuiSelectable
         searchable
-        searchProps={{
-          placeholder: i18n.translate(
-            'xpack.streams.entityCentricLab.entities.tagFilter.searchPlaceholder',
-            {
-              defaultMessage: 'Filter {label}',
-              values: { label: label.toLowerCase() },
-            }
-          ),
-          'data-test-subj': `entityCentricLabTagFilterSearch-${tagKey}`,
-          compressed: true,
-        }}
-        options={items}
+        aria-label={i18n.translate(
+          'xpack.streams.entityCentricLab.entities.tagFilter.selectableAriaLabel',
+          {
+            defaultMessage: 'Filter entities by {label}',
+            values: { label: label.toLowerCase() },
+          }
+        )}
+        options={selectableOptions}
         onChange={(next) => {
-          const checked = next.filter((opt) => opt.checked === 'on').map((opt) => String(opt.key));
-          onChange(checked);
-        }}
-        listProps={{
-          'aria-label': i18n.translate(
-            'xpack.streams.entityCentricLab.entities.tagFilter.listAriaLabel',
-            {
-              defaultMessage: '{label} values',
-              values: { label },
-            }
-          ),
+          onChange(
+            next.filter((opt) => opt.checked === 'on').map((opt) => String(opt.key ?? opt.label))
+          );
         }}
         emptyMessage={i18n.translate(
           'xpack.streams.entityCentricLab.entities.tagFilter.emptyValues',
@@ -112,10 +101,17 @@ const FilterDropdown = ({
         )}
       >
         {(list, search) => (
-          <div style={{ width: 260 }}>
-            <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+          <EuiPanel
+            hasShadow={false}
+            hasBorder={false}
+            paddingSize="none"
+            css={css`
+              min-width: 260px;
+            `}
+          >
+            {search}
             {list}
-          </div>
+          </EuiPanel>
         )}
       </EuiSelectable>
     </EuiPopover>
@@ -128,7 +124,7 @@ export const EntitiesTagFilters = ({ facets, activeFilters, onChange }: Props) =
     [activeFilters]
   );
 
-  const updateKey = (key: TagKey) => (next: readonly string[]) => {
+  const handleKeyChange = (key: TagKey) => (next: string[]) => {
     onChange({ ...activeFilters, [key]: next });
   };
 
@@ -137,22 +133,46 @@ export const EntitiesTagFilters = ({ facets, activeFilters, onChange }: Props) =
   };
 
   return (
-    <EuiFilterGroup
+    <div
+      css={css`
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      `}
       data-test-subj="entityCentricLabTagFilters"
-      aria-label={i18n.translate(
-        'xpack.streams.entityCentricLab.entities.tagFilter.groupAriaLabel',
-        { defaultMessage: 'Entity tag filters' }
-      )}
     >
-      {TAG_KEYS.map((key) => (
-        <FilterDropdown
-          key={key}
-          tagKey={key}
-          options={facets[key]}
-          selected={activeFilters[key]}
-          onChange={updateKey(key)}
+      <EuiFilterGroup
+        aria-label={i18n.translate(
+          'xpack.streams.entityCentricLab.entities.tagFilter.groupAriaLabel',
+          { defaultMessage: 'Entity tag filters' }
+        )}
+      >
+        <TagFilterPopover
+          tagKey="application"
+          options={facets.application}
+          selected={activeFilters.application}
+          onChange={handleKeyChange('application')}
         />
-      ))}
+        <TagFilterPopover
+          tagKey="environment"
+          options={facets.environment}
+          selected={activeFilters.environment}
+          onChange={handleKeyChange('environment')}
+        />
+        <TagFilterPopover
+          tagKey="team"
+          options={facets.team}
+          selected={activeFilters.team}
+          onChange={handleKeyChange('team')}
+        />
+        <TagFilterPopover
+          tagKey="region"
+          options={facets.region}
+          selected={activeFilters.region}
+          onChange={handleKeyChange('region')}
+        />
+      </EuiFilterGroup>
       {totalActive > 0 ? (
         <EuiButtonEmpty
           size="s"
@@ -165,6 +185,6 @@ export const EntitiesTagFilters = ({ facets, activeFilters, onChange }: Props) =
           })}
         </EuiButtonEmpty>
       ) : null}
-    </EuiFilterGroup>
+    </div>
   );
 };

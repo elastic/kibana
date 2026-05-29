@@ -57,7 +57,9 @@ export const buildEntityFlyoutAttachment = ({
         active_tab: activeTab,
         last_update: overview.lastUpdate,
         tags: JSON.stringify(overview.tags.map((tag) => tag.label)),
-        ai_summary: overview.summary.text,
+        ai_summary_headline: overview.summary.headline,
+        ai_summary_issues: JSON.stringify(overview.summary.issues),
+        ai_summary_next_steps: JSON.stringify(overview.summary.nextSteps),
         golden_signals: JSON.stringify(
           overview.goldenSignals.map((signal) => ({
             id: signal.id,

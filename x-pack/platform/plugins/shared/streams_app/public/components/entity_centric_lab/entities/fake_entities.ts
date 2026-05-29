@@ -116,26 +116,22 @@ const AGE_SAMPLES: readonly string[] = [
   '38 days',
 ];
 
+// Tag pools — tightened to match the PayFlow demo storyline. Sofia's chain
+// only meaningfully exercises payments / checkout / fraud applications in
+// production on the EU clusters, so the navigator filter facets reflect that.
 const APPLICATION_VALUES: readonly string[] = [
-  'my-app',
-  'checkout',
   'payments',
-  'search',
-  'frontend',
+  'checkout',
+  'fraud',
+  'merchant',
   'platform',
 ];
 
-const ENVIRONMENT_VALUES: readonly string[] = ['production', 'staging', 'development'];
+const ENVIRONMENT_VALUES: readonly string[] = ['production', 'staging'];
 
-const TEAM_VALUES: readonly string[] = ['observability', 'platform', 'payments', 'search', 'web'];
+const TEAM_VALUES: readonly string[] = ['payments-team', 'platform-team', 'risk-team'];
 
-const REGION_VALUES: readonly string[] = [
-  'us-east-1',
-  'us-west-2',
-  'eu-west-1',
-  'eu-central-1',
-  'ap-southeast-1',
-];
+const REGION_VALUES: readonly string[] = ['eu-west-1', 'eu-central-1'];
 
 const TAG_POOLS: Record<TagKey, readonly string[]> = {
   application: APPLICATION_VALUES,
@@ -144,8 +140,12 @@ const TAG_POOLS: Record<TagKey, readonly string[]> = {
   region: REGION_VALUES,
 };
 
-// Tiny string hash used purely as a deterministic per-category salt. The
-// distribution doesn't need to be cryptographic, just stable across renders.
+// Tiny string hash used purely as a deterministic per-entity-per-tag
+// pseudo-random source. Each tag is computed from a *different* string
+// (e.g. "hosts-app-12", "hosts-env-12") so the resulting values are
+// independent and free of the modular correlation that plagues
+// `(salt + index * stride) % poolSize` schemes when pool sizes share a
+// factor with the stride.
 const stableHash = (input: string): number => {
   let hash = 5381;
   for (let i = 0; i < input.length; i++) {
@@ -154,19 +154,26 @@ const stableHash = (input: string): number => {
   return hash;
 };
 
-const pickFromPool = (pool: readonly string[], salt: number, index: number): string =>
-  pool[(salt + index * 31) % pool.length];
+const pickTag = (pool: readonly string[], scope: string, index: number): string =>
+  pool[stableHash(`${scope}-${index}`) % pool.length];
 
-const buildTags = (categorySalt: number, index: number): EntityTags => ({
-  application: pickFromPool(APPLICATION_VALUES, categorySalt + 1, index),
-  environment: pickFromPool(ENVIRONMENT_VALUES, categorySalt + 2, Math.floor(index / 2)),
-  team: pickFromPool(TEAM_VALUES, categorySalt + 3, Math.floor(index / 3)),
-  region: pickFromPool(REGION_VALUES, categorySalt + 4, Math.floor(index / 5)),
+const buildTags = (scope: string, index: number): EntityTags => ({
+  application: pickTag(APPLICATION_VALUES, `${scope}-application`, index),
+  environment: pickTag(ENVIRONMENT_VALUES, `${scope}-environment`, index),
+  team: pickTag(TEAM_VALUES, `${scope}-team`, index),
+  region: pickTag(REGION_VALUES, `${scope}-region`, index),
 });
 
 interface SeedRow {
   readonly name: string;
   readonly type: string;
+  /**
+   * Optional forced health override. When set, the seed entity ignores the
+   * deterministic `seededHealth` roll — used to pin PayFlow story entities
+   * (e.g. `payments-pod-7f9b2`) at `unhealthy` so they reliably surface at
+   * the top of the heatmap and list view.
+   */
+  readonly health?: EntityHealth;
 }
 
 interface CategorySpec {
@@ -187,138 +194,160 @@ interface KubernetesSubSpec {
 
 const padIndex = (index: number, width = 4): string => String(index + 1).padStart(width, '0');
 
+// PayFlow demo seeds — the four click-path entities are pinned to their
+// expected health so Sofia's chain always reads the same way, regardless of
+// the deterministic seed rolls.
 const HOST_SEED_ROWS: readonly SeedRow[] = [
-  { name: 'hostName1', type: 'K8s cluster' },
-  { name: 'hostName2', type: 'K8s cluster' },
-  { name: 'hostName3', type: 'K8s cluster' },
-  { name: 'hostName4', type: 'Other type 1' },
-  { name: 'hostName5', type: 'Other type 1' },
-  { name: 'hostName6', type: 'Database' },
+  { name: 'host-eu-prod-01', type: 'Bare-metal', health: 'healthy' },
+  { name: 'host-eu-prod-02', type: 'Bare-metal', health: 'healthy' },
 ];
 
 const DATABASE_SEED_ROWS: readonly SeedRow[] = [
-  { name: 'pg-checkout-primary', type: 'Postgres' },
-  { name: 'pg-checkout-replica', type: 'Postgres' },
-  { name: 'mysql-orders', type: 'MySQL' },
-  { name: 'elastic-logs', type: 'Elasticsearch' },
+  { name: 'payments-db', type: 'Postgres', health: 'healthy' },
+  { name: 'orders-db', type: 'Postgres', health: 'healthy' },
+  { name: 'fraud-db', type: 'Postgres', health: 'healthy' },
 ];
 
 const SERVICE_SEED_ROWS: readonly SeedRow[] = [
-  { name: 'checkout', type: 'APM service' },
-  { name: 'cart', type: 'APM service' },
-  { name: 'frontend', type: 'APM service' },
-  { name: 'payments', type: 'APM service' },
+  { name: 'payments-service', type: 'apm.service', health: 'unhealthy' },
+  { name: 'checkout-service', type: 'apm.service', health: 'unhealthy' },
+  { name: 'fraud-service', type: 'apm.service', health: 'healthy' },
+  { name: 'merchant-portal', type: 'apm.service', health: 'healthy' },
+  { name: 'billing-api', type: 'apm.service', health: 'healthy' },
+  { name: 'settlement-service', type: 'apm.service', health: 'healthy' },
+  { name: 'wallet-service', type: 'apm.service', health: 'healthy' },
+  { name: 'reporting-service', type: 'apm.service', health: 'healthy' },
+  { name: 'notifications-service', type: 'apm.service', health: 'healthy' },
+  { name: 'identity-service', type: 'apm.service', health: 'healthy' },
+  { name: 'webhooks-service', type: 'apm.service', health: 'healthy' },
+  { name: 'pricing-service', type: 'apm.service', health: 'healthy' },
 ];
 
 const CLOUD_SEED_ROWS: readonly SeedRow[] = [
-  { name: 'aws-prod-us-east-1', type: 'AWS region' },
-  { name: 'gcp-prod-europe-west', type: 'GCP region' },
+  { name: 'aws-eu-west-1', type: 'AWS region', health: 'healthy' },
+  { name: 'aws-eu-central-1', type: 'AWS region', health: 'healthy' },
 ];
 
 const MIDDLEWARE_SEED_ROWS: readonly SeedRow[] = [
-  { name: 'rabbitmq-orders', type: 'RabbitMQ' },
-  { name: 'kafka-events', type: 'Kafka' },
+  { name: 'kafka-payments', type: 'Kafka', health: 'healthy' },
+  { name: 'rabbitmq-checkout', type: 'RabbitMQ', health: 'healthy' },
 ];
 
 const LLM_SEED_ROWS: readonly SeedRow[] = [
-  { name: 'gpt-4o-summaries', type: 'OpenAI' },
-  { name: 'claude-3-5-sonnet', type: 'Anthropic' },
+  { name: 'gpt-4o-summaries', type: 'OpenAI', health: 'healthy' },
+  { name: 'claude-3-5-sonnet', type: 'Anthropic', health: 'healthy' },
 ];
 
 const NON_KUBERNETES_SPECS: readonly CategorySpec[] = [
   {
     category: 'hosts',
-    total: 1287,
-    typeCycle: ['K8s cluster', 'Other type 1', 'Database', 'VM', 'Bare-metal'],
+    total: 24,
+    typeCycle: ['Bare-metal', 'VM'],
     seedRows: HOST_SEED_ROWS,
-    fallbackName: (index) => `host-${padIndex(index)}`,
+    fallbackName: (index) => `host-${padIndex(index, 3)}`,
   },
   {
     category: 'databases',
-    total: 213,
-    typeCycle: ['Postgres', 'MySQL', 'Elasticsearch', 'Redis', 'MongoDB'],
+    total: 3,
+    typeCycle: ['Postgres'],
     seedRows: DATABASE_SEED_ROWS,
-    fallbackName: (index) => `db-${padIndex(index)}`,
+    fallbackName: (index) => `db-${padIndex(index, 2)}`,
   },
   {
     category: 'services',
-    total: 1042,
-    typeCycle: ['APM service'],
+    total: 12,
+    typeCycle: ['apm.service'],
     seedRows: SERVICE_SEED_ROWS,
-    fallbackName: (index) => `svc-${padIndex(index)}`,
+    fallbackName: (index) => `svc-${padIndex(index, 2)}`,
   },
   {
     category: 'cloud',
-    total: 89,
-    typeCycle: ['AWS region', 'GCP region', 'Azure region'],
+    total: 2,
+    typeCycle: ['AWS region'],
     seedRows: CLOUD_SEED_ROWS,
-    fallbackName: (index) => `cloud-${padIndex(index, 3)}`,
+    fallbackName: (index) => `cloud-${padIndex(index, 2)}`,
   },
   {
     category: 'middlewares',
-    total: 156,
-    typeCycle: ['RabbitMQ', 'Kafka', 'Redis Streams'],
+    total: 4,
+    typeCycle: ['Kafka', 'RabbitMQ'],
     seedRows: MIDDLEWARE_SEED_ROWS,
-    fallbackName: (index) => `mw-${padIndex(index, 3)}`,
+    fallbackName: (index) => `mw-${padIndex(index, 2)}`,
   },
   {
     category: 'llms',
-    total: 31,
-    typeCycle: ['OpenAI', 'Anthropic', 'Google'],
+    total: 2,
+    typeCycle: ['OpenAI', 'Anthropic'],
     seedRows: LLM_SEED_ROWS,
     fallbackName: (index) => `llm-${padIndex(index, 2)}`,
   },
 ];
 
+const KUBERNETES_CLUSTER_SEED_ROWS: readonly SeedRow[] = [
+  { name: 'k8s-eu-prod', type: 'K8s cluster', health: 'atRisk' },
+  { name: 'k8s-us-prod', type: 'K8s cluster', health: 'healthy' },
+];
+
 const KUBERNETES_NODE_SEED_ROWS: readonly SeedRow[] = [
-  { name: 'node-checkout-1', type: 'K8s node' },
-  { name: 'node-checkout-2', type: 'K8s node' },
-  { name: 'node-payments-1', type: 'K8s node' },
-  { name: 'node-search-1', type: 'K8s node' },
+  { name: 'node-prod-eu-04', type: 'K8s node', health: 'unhealthy' },
+];
+
+const KUBERNETES_NAMESPACE_SEED_ROWS: readonly SeedRow[] = [
+  { name: 'payments', type: 'K8s namespace', health: 'unhealthy' },
+  { name: 'checkout', type: 'K8s namespace', health: 'unhealthy' },
+  { name: 'fraud', type: 'K8s namespace', health: 'healthy' },
+  { name: 'settlement', type: 'K8s namespace', health: 'atRisk' },
+];
+
+const KUBERNETES_POD_SEED_ROWS: readonly SeedRow[] = [
+  { name: 'payments-pod-7f9b2', type: 'K8s pod', health: 'unhealthy' },
+  { name: 'batch-settlement-job-xk2p', type: 'K8s pod', health: 'atRisk' },
+  { name: 'payments-pod-3ac1f', type: 'K8s pod', health: 'healthy' },
+  { name: 'fraud-pod-9a1c', type: 'K8s pod', health: 'healthy' },
 ];
 
 const KUBERNETES_SUB_SPECS: readonly KubernetesSubSpec[] = [
   {
     label: 'Clusters',
-    total: 12,
+    total: 2,
     type: 'K8s cluster',
-    seedRows: [],
+    seedRows: KUBERNETES_CLUSTER_SEED_ROWS,
     fallbackName: (index) => `cluster-${padIndex(index, 2)}`,
   },
   {
     label: 'Nodes',
-    total: 184,
+    total: 48,
     type: 'K8s node',
     seedRows: KUBERNETES_NODE_SEED_ROWS,
     fallbackName: (index) => `node-${padIndex(index, 3)}`,
   },
   {
     label: 'Namespaces',
-    total: 92,
+    total: 8,
     type: 'K8s namespace',
-    seedRows: [],
-    fallbackName: (index) => `ns-${padIndex(index, 3)}`,
+    seedRows: KUBERNETES_NAMESPACE_SEED_ROWS,
+    fallbackName: (index) => `ns-${padIndex(index, 2)}`,
   },
   {
     label: 'Pods',
-    total: 2310,
+    total: 597,
     type: 'K8s pod',
-    seedRows: [],
-    fallbackName: (index) => `pod-${padIndex(index)}`,
+    seedRows: KUBERNETES_POD_SEED_ROWS,
+    fallbackName: (index) => `pod-${padIndex(index, 3)}`,
   },
   {
     label: 'Deployments',
-    total: 410,
+    total: 96,
     type: 'K8s deployment',
     seedRows: [],
     fallbackName: (index) => `deployment-${padIndex(index, 3)}`,
   },
   {
     label: 'Containers',
-    total: 1208,
+    total: 320,
     type: 'K8s container',
     seedRows: [],
-    fallbackName: (index) => `container-${padIndex(index)}`,
+    fallbackName: (index) => `container-${padIndex(index, 3)}`,
   },
 ];
 
@@ -340,11 +369,11 @@ const buildCategoryEntities = (spec: CategorySpec): Entity[] => {
       name,
       category: spec.category,
       type,
-      health: seededHealth(salt + i * 3, i),
+      health: seed?.health ?? seededHealth(salt + i * 3, i),
       lastHealthChange: '2026-04-14 12:34',
       age: AGE_SAMPLES[i % AGE_SAMPLES.length],
       anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
-      tags: buildTags(salt, i),
+      tags: buildTags(spec.category, i),
     });
   }
   return sortByHealth(entities);
@@ -366,11 +395,11 @@ const buildKubernetesEntities = (): Entity[] => {
         category: 'kubernetes',
         subType: sub.label,
         type: sub.type,
-        health: seededHealth(salt + globalIndex * 3, globalIndex),
+        health: seed?.health ?? seededHealth(salt + globalIndex * 3, globalIndex),
         lastHealthChange: '2026-04-14 12:34',
         age: AGE_SAMPLES[i % AGE_SAMPLES.length],
         anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
-        tags: buildTags(salt + sub.label.length, globalIndex),
+        tags: buildTags(`kubernetes-${sub.label}`, globalIndex),
       });
     }
     entities.push(...sortByHealth(subEntities));

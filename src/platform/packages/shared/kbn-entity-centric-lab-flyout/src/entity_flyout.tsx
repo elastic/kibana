@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBetaBadge,
@@ -29,6 +29,7 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
@@ -51,18 +52,105 @@ import {
 interface EntityFlyoutProps {
   readonly entityName: string;
   readonly onClose: () => void;
+  /**
+   * Optional entity-type hint passed by callers that know what they're
+   * opening (e.g. the Streams "All entities" page has `entity.type` from the
+   * dataset). When supplied, the per-kind template dispatcher uses it
+   * directly instead of inferring from the name. Free-form string
+   * (`'apm.service'`, `'K8s pod'`, `'Postgres'`, ...) — the shared package
+   * maps it to a canonical {@link EntityKind} internally.
+   */
+  readonly entityType?: string;
+  /**
+   * Optional callback fired when the user clicks a related entity name from
+   * inside the flyout (e.g. a row in the Dependencies tab). When supplied,
+   * the host application is expected to swap the flyout content to the
+   * newly selected entity — see `Discover` and `streams_app` providers.
+   */
+  readonly onSelectEntity?: (entityName: string) => void;
 }
 
 type TabId = 'overview' | 'metrics' | 'logs' | 'alerts' | 'relationships' | 'security';
 
-export const EntityFlyout = ({ entityName, onClose }: EntityFlyoutProps) => {
+export const EntityFlyout = ({
+  entityName,
+  entityType,
+  onClose,
+  onSelectEntity,
+}: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const { agentBuilder, notifications } = useEntityFlyoutServices();
 
-  const overview = useMemo(() => buildFakeEntityOverview(entityName), [entityName]);
-  const tabsData = useMemo(() => buildFakeEntityTabsData(entityName), [entityName]);
+  // Each hop along the PayFlow story chain should land Sofia back on the
+  // Overview tab — otherwise she'd ride the Dependencies tab forever.
+  useEffect(() => {
+    setActiveTab('overview');
+  }, [entityName]);
+
+  // Browser-style back/forward history. The flyout is a controlled component
+  // (parents own `entityName`), so navigating "back" round-trips through
+  // `onSelectEntity` just like a Dependencies-row click. `isInternalNavRef`
+  // lets the entityName-change effect distinguish "user clicked back/forward"
+  // (skip — history already updated optimistically) from "external push"
+  // (Dependencies-row click, or a fresh open from Discover / streams_app).
+  const [history, setHistory] = useState<{ entries: string[]; index: number }>(() => ({
+    entries: [entityName],
+    index: 0,
+  }));
+  const isInternalNavRef = useRef(false);
+
+  useEffect(() => {
+    if (isInternalNavRef.current) {
+      isInternalNavRef.current = false;
+      return;
+    }
+    setHistory((prev) => {
+      if (prev.entries[prev.index] === entityName) {
+        // Initial mount, or a redundant re-render with the same entity — no-op.
+        return prev;
+      }
+      // Standard browser-history semantics: navigating mid-history wipes the
+      // forward stack so the path stays linear from the user's POV.
+      const entries = [...prev.entries.slice(0, prev.index + 1), entityName];
+      return { entries, index: entries.length - 1 };
+    });
+  }, [entityName]);
+
+  const canGoBack = history.index > 0 && Boolean(onSelectEntity);
+  const canGoForward = history.index < history.entries.length - 1 && Boolean(onSelectEntity);
+
+  const handleHistoryBack = useCallback(() => {
+    if (!onSelectEntity) return;
+    setHistory((prev) => {
+      if (prev.index === 0) return prev;
+      const nextIndex = prev.index - 1;
+      isInternalNavRef.current = true;
+      onSelectEntity(prev.entries[nextIndex]);
+      return { ...prev, index: nextIndex };
+    });
+  }, [onSelectEntity]);
+
+  const handleHistoryForward = useCallback(() => {
+    if (!onSelectEntity) return;
+    setHistory((prev) => {
+      if (prev.index === prev.entries.length - 1) return prev;
+      const nextIndex = prev.index + 1;
+      isInternalNavRef.current = true;
+      onSelectEntity(prev.entries[nextIndex]);
+      return { ...prev, index: nextIndex };
+    });
+  }, [onSelectEntity]);
+
+  const overview = useMemo(
+    () => buildFakeEntityOverview(entityName, entityType),
+    [entityName, entityType]
+  );
+  const tabsData = useMemo(
+    () => buildFakeEntityTabsData(entityName, entityType),
+    [entityName, entityType]
+  );
 
   const chatAttachment = useMemo(
     () => buildEntityFlyoutAttachment({ entityName, activeTab, overview, tabsData }),
@@ -227,8 +315,11 @@ export const EntityFlyout = ({ entityName, onClose }: EntityFlyoutProps) => {
       },
       {
         id: 'relationships',
+        // i18n key intentionally still says "relationships" to minimise
+        // translation churn — only the `defaultMessage` shifts to
+        // "Dependencies" to match the PayFlow demo storyline.
         label: i18n.translate('entityCentricLabFlyout.flyout.tabs.relationships', {
-          defaultMessage: 'Relationships',
+          defaultMessage: 'Dependencies',
         }),
       },
       {
@@ -246,17 +337,67 @@ export const EntityFlyout = ({ entityName, onClose }: EntityFlyoutProps) => {
     <EuiFlyout
       ownFocus
       onClose={onClose}
-      size="m"
+      size="l"
       aria-labelledby={titleId}
       data-test-subj="entityCentricLabFlyout"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          justifyContent="flexEnd"
-          responsive={false}
-        >
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="bottom"
+                  content={
+                    canGoBack
+                      ? i18n.translate('entityCentricLabFlyout.flyout.history.backTooltip', {
+                          defaultMessage: 'Back to {entityName}',
+                          values: { entityName: history.entries[history.index - 1] },
+                        })
+                      : null
+                  }
+                >
+                  <EuiButtonIcon
+                    iconType="arrowLeft"
+                    color="text"
+                    isDisabled={!canGoBack}
+                    onClick={handleHistoryBack}
+                    aria-label={i18n.translate(
+                      'entityCentricLabFlyout.flyout.history.backAriaLabel',
+                      { defaultMessage: 'Back in entity history' }
+                    )}
+                    data-test-subj="entityCentricLabFlyoutHistoryBack"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="bottom"
+                  content={
+                    canGoForward
+                      ? i18n.translate('entityCentricLabFlyout.flyout.history.forwardTooltip', {
+                          defaultMessage: 'Forward to {entityName}',
+                          values: { entityName: history.entries[history.index + 1] },
+                        })
+                      : null
+                  }
+                >
+                  <EuiButtonIcon
+                    iconType="arrowRight"
+                    color="text"
+                    isDisabled={!canGoForward}
+                    onClick={handleHistoryForward}
+                    aria-label={i18n.translate(
+                      'entityCentricLabFlyout.flyout.history.forwardAriaLabel',
+                      { defaultMessage: 'Forward in entity history' }
+                    )}
+                    data-test-subj="entityCentricLabFlyoutHistoryForward"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               iconType="share"
@@ -355,6 +496,7 @@ export const EntityFlyout = ({ entityName, onClose }: EntityFlyoutProps) => {
           entityName={entityName}
           overview={overview}
           tabsData={tabsData}
+          onSelectEntity={onSelectEntity}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -410,11 +552,13 @@ const TabContent = ({
   entityName,
   overview,
   tabsData,
+  onSelectEntity,
 }: {
   readonly activeTab: TabId;
   readonly entityName: string;
   readonly overview: ReturnType<typeof buildFakeEntityOverview>;
   readonly tabsData: ReturnType<typeof buildFakeEntityTabsData>;
+  readonly onSelectEntity?: (entityName: string) => void;
 }) => {
   switch (activeTab) {
     case 'overview':
@@ -426,7 +570,9 @@ const TabContent = ({
     case 'alerts':
       return <AlertsTab alerts={tabsData.alerts} />;
     case 'relationships':
-      return <RelationshipsTab relationships={tabsData.relationships} />;
+      return (
+        <RelationshipsTab relationships={tabsData.relationships} onSelectEntity={onSelectEntity} />
+      );
     case 'security':
       return <SecurityTab security={tabsData.security} />;
   }

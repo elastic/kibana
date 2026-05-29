@@ -9,6 +9,7 @@
 
 import React, { useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
   EuiCheckbox,
@@ -24,7 +25,7 @@ import {
   type Criteria,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LogRow } from './fake_entity_tabs';
+import type { LogRow, LogSeverity } from './fake_entity_tabs';
 
 interface LogsTabProps {
   readonly entityName: string;
@@ -99,6 +100,22 @@ export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
           <EuiText size="s">
             <strong>@timestamp</strong> {timestamp}
           </EuiText>
+        ),
+      },
+      {
+        field: 'severity',
+        name: i18n.translate('entityCentricLabFlyout.flyout.logs.columns.severity', {
+          defaultMessage: 'Severity',
+        }),
+        width: '110px',
+        sortable: true,
+        render: (severity: LogSeverity) => (
+          <EuiBadge
+            color={severityBadgeColor(severity)}
+            data-test-subj={`entityCentricLabLogsSeverityBadge-${severity}`}
+          >
+            {severity}
+          </EuiBadge>
         ),
       },
       {
@@ -191,4 +208,18 @@ export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
       />
     </EuiPanel>
   );
+};
+
+// Per design: Info = green, Warning = yellow, Error = red — mapped to the EUI
+// semantic badge colours so the palette stays aligned with the rest of the
+// flyout (e.g. dependency health badges).
+const severityBadgeColor = (severity: LogSeverity): 'success' | 'warning' | 'danger' => {
+  switch (severity) {
+    case 'Info':
+      return 'success';
+    case 'Warning':
+      return 'warning';
+    case 'Error':
+      return 'danger';
+  }
 };

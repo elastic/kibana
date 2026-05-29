@@ -14,6 +14,15 @@
  * it so the flyout still feels specific.
  */
 
+import { getStoryTabsData } from './payflow_story';
+import {
+  buildKindTemplate,
+  entityTypeToKind,
+  inferEntityKind,
+  type EntityKind,
+} from './kind_templates';
+import { INCIDENT_X_DOMAIN } from './time_domain';
+
 export interface MetricSeriesPoint {
   readonly x: number;
   readonly y: number;
@@ -34,18 +43,41 @@ export interface MetricSeries {
   }>;
 }
 
+/**
+ * A point-in-time event surfaced on the Metrics tab as a vertical purple
+ * annotation. Hovering the line/marker opens a built-in chart tooltip with the
+ * supplied `header` (title) and `details` (body copy) — that's the storyline
+ * mechanic the demo relies on, e.g. "Deployment — v2.14.3 deployed at
+ * 02:46:41 UTC".
+ */
+export interface MetricEvent {
+  /** Epoch ms position on the X axis. Must fall within {@link INCIDENT_X_DOMAIN}. */
+  readonly x: number;
+  /** Tooltip title shown when hovering the annotation. */
+  readonly header: string;
+  /** Tooltip body copy explaining what happened at this point in time. */
+  readonly details?: string;
+}
+
 export interface MetricsTabData {
   readonly goldenSignals: readonly MetricSeries[];
   readonly otherMetrics: readonly MetricSeries[];
-  /** X-positions where the lab renders purple event annotations. */
-  readonly eventPositions: readonly number[];
+  /** Events rendered as vertical purple annotations + hover tooltips. */
+  readonly events: readonly MetricEvent[];
 }
+
+export type LogSeverity = 'Info' | 'Warning' | 'Error';
 
 export interface LogRow {
   readonly id: string;
   readonly timestamp: string;
   readonly attribute: string;
   readonly summary: string;
+  /**
+   * Severity surfaced as a coloured badge in the logs table. Defaults to
+   * `'Info'` when the source data doesn't classify the row.
+   */
+  readonly severity: LogSeverity;
 }
 
 export interface AlertRow {
@@ -91,6 +123,13 @@ export interface RelationshipsTabData {
   readonly topology: {
     readonly nodes: readonly TopologyNode[];
     readonly edges: readonly TopologyEdge[];
+    /**
+     * Health of the focal (centre) node. Non-focal node health is derived
+     * automatically from {@link RelationshipsTabData.related} (matching by
+     * `node.label`), so this field only carries information about the entity
+     * the flyout is currently open on.
+     */
+    readonly focalHealth?: RelatedEntityHealth;
   };
   readonly related: readonly RelatedEntity[];
 }
@@ -121,8 +160,14 @@ export interface EntityTabsData {
   readonly security: SecurityTabData;
 }
 
-/** 24-point evenly-spaced X domain shared by every chart in the flyout. */
-const X_DOMAIN = Array.from({ length: 24 }, (_, i) => i);
+/**
+ * 24-point X domain shared by every chart in the flyout — see
+ * `time_domain.ts`. Off-story / generic entities surface the same chart
+ * window (02:41:21 → 02:49:01 around the v2.14.3 deployment) so the X-axis
+ * tick formatter in `metrics_tab.tsx` / `alerts_tab.tsx` only has to handle
+ * one shape of value (epoch milliseconds).
+ */
+const X_DOMAIN = INCIDENT_X_DOMAIN;
 
 const series = (id: string, label: string, ys: readonly number[]) => ({
   id,
@@ -130,9 +175,46 @@ const series = (id: string, label: string, ys: readonly number[]) => ({
   points: X_DOMAIN.map((x, i) => ({ x, y: ys[i] ?? 0 })),
 });
 
-export const buildFakeEntityTabsData = (entityName: string): EntityTabsData => ({
+/**
+ * Build the curated/fake payload for the non-Overview tabs of the flyout.
+ *
+ * Dispatch order mirrors `buildFakeEntityOverview`:
+ *
+ *   1. PayFlow story — curated tabs for the 4 click-path entities.
+ *   2. Per-kind template — kind-shaped tabs (service / host / pod / node /
+ *      cluster / namespace / database / cloud / middleware / llm).
+ *   3. Generic fallback — last-resort mock, mostly never reached.
+ */
+export const buildFakeEntityTabsData = (
+  entityName: string,
+  entityType?: string
+): EntityTabsData => {
+  const storyTabs = getStoryTabsData(entityName);
+  if (storyTabs) {
+    return storyTabs;
+  }
+  const kind: EntityKind | undefined = entityTypeToKind(entityType) ?? inferEntityKind(entityName);
+  const kindTemplate = buildKindTemplate(entityName, kind);
+  if (kindTemplate) {
+    return kindTemplate.tabs;
+  }
+  return buildGenericEntityTabsData(entityName);
+};
+
+const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({
   metrics: {
-    eventPositions: [4, 9],
+    events: [
+      {
+        x: X_DOMAIN[4],
+        header: 'Configuration change',
+        details: 'Rolling restart triggered by GitOps reconcile loop.',
+      },
+      {
+        x: X_DOMAIN[9],
+        header: 'Auto-scaling event',
+        details: 'Horizontal Pod Autoscaler added 2 replicas (target CPU 70%).',
+      },
+    ],
     goldenSignals: [
       {
         id: 'latency',
@@ -409,97 +491,121 @@ const buildFakeLogRows = (entityName: string): LogRow[] => {
   const lines: Array<Omit<LogRow, 'id' | 'timestamp'> & { ts: string }> = [
     {
       ts: '5.803',
+      severity: 'Info',
       attribute: '3 attributes.log.file.path',
       summary: `/var/log/pods/${entityName}-system_konnectivity-agent-6ffb545547-phjh2_c9b9e8d6-9b95-...`,
     },
     {
       ts: '2.542',
+      severity: 'Info',
       attribute: '2 attributes.log.file.path',
       summary: `/var/log/pods/${entityName}-system_konnectivity-agent-6ffb545547-w6lg4_298622e6-f54d-...`,
     },
     {
       ts: '2.295',
+      severity: 'Info',
       attribute: '5 attributes.log.file.path',
       summary: `/var/log/pods/ensemble-oteldemo-yrxlg-default_kafka-6989c85598-4mwpt_92fe8ad...`,
     },
     {
       ts: '2.295',
+      severity: 'Info',
       attribute: '5 attributes.log.file.path',
       summary: `/var/log/pods/ensemble-oteldemo-yrxlg-default_kafka-6989c85598-4mwpt_92fe8ad...`,
     },
     {
       ts: '2.293',
+      severity: 'Info',
       attribute: 'body.text',
       summary: `[LocalLog partition=__cluster_metadata-0, dir=/tmp/kafka-logs] Rolled new log segment at offset 1895220 in...`,
     },
     {
       ts: '2.293',
+      severity: 'Info',
       attribute: 'body.text',
       summary: `[ProducerStateManager partition=__cluster_metadata-0] Wrote producer snapshot at offset 1895220 with 0 pre...`,
     },
     {
       ts: '2.150',
+      severity: 'Info',
       attribute: '2 attributes.log.file.path',
       summary: `/var/log/pods/${entityName}_default_main-9c0e8d2e-9b95.log`,
     },
     {
       ts: '1.987',
+      severity: 'Info',
       attribute: 'body.text',
       summary: `[Health] Entity ${entityName} reported healthy after readiness probe`,
     },
     {
       ts: '1.812',
+      severity: 'Info',
       attribute: '3 attributes.log.file.path',
       summary: `/var/log/pods/${entityName}_default_sidecar-1f2a3b-4c5d.log`,
     },
     {
       ts: '1.654',
+      severity: 'Info',
       attribute: 'body.text',
       summary: `[GC] Young generation pause 18ms (allocated 412MB)`,
     },
     {
       ts: '1.501',
+      severity: 'Info',
       attribute: 'body.text',
       summary: `[HTTP] POST /v1/orders 201 in 84ms (request_id=req_8821)`,
     },
     {
       ts: '1.342',
+      severity: 'Info',
       attribute: 'body.text',
       summary: `[HTTP] GET /v1/orders/42 200 in 12ms (cache hit)`,
     },
     {
       ts: '1.193',
+      severity: 'Info',
       attribute: 'body.text',
       summary: `[Cache] Evicted 32 entries from session cache (capacity reached)`,
     },
     {
       ts: '0.998',
+      severity: 'Info',
       attribute: 'body.text',
       summary: `[Auth] Issued JWT for user_id=4711, scopes=[orders:read]`,
     },
     {
       ts: '0.834',
+      severity: 'Info',
       attribute: 'body.text',
       summary: `[Outbound] charge tx_8821 → stripe.charges.create OK in 1.2s`,
     },
     {
       ts: '0.671',
+      severity: 'Warning',
       attribute: 'body.text',
       summary: `[Worker] Retrying charge tx_8821 (attempt 2/5)`,
     },
     {
       ts: '0.512',
+      severity: 'Error',
       attribute: 'body.text',
       summary: `[Outbound] stock-db connection-timeout after 5000ms`,
     },
     {
       ts: '0.345',
+      severity: 'Info',
       attribute: 'body.text',
       summary: `[Health] Entity ${entityName} liveness probe OK`,
     },
-    { ts: '0.198', attribute: 'body.text', summary: `[HTTP] GET /healthz 200 in 2ms` },
+    {
+      ts: '0.198',
+      severity: 'Info',
+      attribute: 'body.text',
+      summary: `[HTTP] GET /healthz 200 in 2ms`,
+    },
     {
       ts: '0.050',
+      severity: 'Info',
       attribute: 'body.text',
       summary: `[Worker] Restored connection to stock-db (3 pending writes flushed)`,
     },
@@ -509,6 +615,7 @@ const buildFakeLogRows = (entityName: string): LogRow[] => {
     timestamp: `${baseTimestamp}${line.ts}`,
     attribute: line.attribute,
     summary: line.summary,
+    severity: line.severity,
   }));
 };
 
