@@ -46,6 +46,7 @@ import {
   getScriptPaths,
   getBrowserLoggingConfig,
 } from './render_utils';
+import { resolveLocale } from './resolve_locale';
 import { filterUiPlugins } from './filter_ui_plugins';
 import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
@@ -284,11 +285,17 @@ export class RenderingService {
     const configLocale = i18nLib.getLocale();
     const translationHashes = i18n.getTranslationHashes();
     const availableLocales = i18n.getAvailableLocales();
-    // Resolve the effective locale server-side using the priority chain:
-    // 1. User profile setting
-    // 2. kibana.yml i18n.defaultLocale (configLocale)
-    const effectiveLocale =
-      userSettingLocale && translationHashes[userSettingLocale] ? userSettingLocale : configLocale;
+    const isServerless = this.coreContext.env.packageInfo.buildFlavor === 'serverless';
+    const { locale: effectiveLocale, setCookieHeader } = resolveLocale({
+      request,
+      userSettingLocale,
+      configLocale,
+      configuredLocales: availableLocales.map((entry) => entry.id),
+      translationHashes,
+      isServerless,
+      serverBasePath,
+      allowLocaleCookie: i18n.allowLocaleCookie,
+    });
     let translationsUrl: string;
     if (usingCdn) {
       translationsUrl = `${staticAssetsHrefBase}/translations/${effectiveLocale}.json`;
@@ -396,7 +403,14 @@ export class RenderingService {
       },
     };
 
-    return `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`;
+    const cookieHeaders: Record<string, string> = i18n.allowLocaleCookie
+      ? { 'set-cookie': setCookieHeader }
+      : {};
+
+    return {
+      body: `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`,
+      headers: cookieHeaders,
+    };
   }
 
   public async stop() {}
