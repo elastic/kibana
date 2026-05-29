@@ -29,6 +29,7 @@ import type { PackagePolicyClient } from '../package_policy_service';
 import { agentPolicyService } from '../agent_policy';
 import { getPackageInfo } from '../epm/packages';
 import { appContextService, cloudConnectorService } from '..';
+import { FleetNotFoundError } from '../../errors';
 
 import type { PackageInfo } from '../../types';
 import {
@@ -279,7 +280,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     try {
       agentPolicy = await agentPolicyService.get(this.soClient, policyId);
     } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      if (e instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(e)) {
         this.logger.warn(`Agent policy ${policyId} not found, cleaning up orphaned resources`);
         await this.deleteOrphanedAgentlessResources(policyId, user);
         return;
