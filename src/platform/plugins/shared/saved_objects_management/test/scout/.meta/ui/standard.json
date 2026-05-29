@@ -1,0 +1,145 @@
+{
+  "sha1": "f559ae6a1bbaddd2b8f54acc9381a35359e1295d",
+  "tests": [
+    {
+      "id": "12438030416ccc4-0ca770f7b4f667b",
+      "title": "Saved objects management feature controls global:all listing — select-all enables the delete action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "12438030416ccc4-51982b0fbee0771",
+      "title": "Saved objects management feature controls savedObjectsManagement:read listing — select-all keeps the delete action disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "12438030416ccc4-dce64f844af6395",
+      "title": "Saved objects management feature controls global:all inspect view shows the delete button and the JSON editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 55,
+        "column": 7
+      }
+    },
+    {
+      "id": "12438030416ccc4-bc22fac1b29fcde",
+      "title": "Saved objects management feature controls savedObjectsManagement:read inspect view shows the JSON editor but hides delete & save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "12438030416ccc4-f6ef64a91aecb10",
+      "title": "Saved objects management feature controls visualize:minimal_all alone routes the SOM listing URL to appNotFound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 84,
+        "column": 7
+      }
+    },
+    {
+      "id": "12438030416ccc4-a28daf6a54b69f1",
+      "title": "Saved objects management feature controls visualize:minimal_all alone routes the SOM inspect URL to appNotFound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 94,
+        "column": 7
+      }
+    },
+    {
+      "id": "4022d6a310e4ec6-bac22a7edb9da76",
+      "title": "Saved objects management - imports (UI) importing 7.13 saved objects lets the imported dashboard render without errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/imports.spec.ts",
+        "line": 59,
+        "column": 7
+      }
+    },
+    {
+      "id": "4022d6a310e4ec6-e40218f624b2679",
+      "title": "Saved objects management - imports (UI) copy-to-space flyout copies a dashboard from one space to another",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/imports.spec.ts",
+        "line": 81,
+        "column": 7
+      }
+    },
+    {
+      "id": "987c0ab5efbd1a4-c627cd271149970",
+      "title": "Saved objects management - inspect view inspect-view delete removes the object from the listing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/inspect.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "77b1962f6738a14-8afa6a6e237d707",
+      "title": "Saved objects management - spaces integration inspecting an object from a non-default space stays in that space and renders the JSON editor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/spaces_integration.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    }
+  ]
+}
