@@ -33,7 +33,7 @@ import {
 } from '../../contexts';
 import { OutputPanel } from './output_panel';
 import { InputPanel } from './input_panel';
-import { OutputFilterControls } from './components';
+import { OutputFilterControls, OutputFilterExpandedPanel } from './components';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 import { useStyles } from './editor_styles';
 import { PanelStorage } from './panel_storage';
@@ -200,7 +200,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
               >
                 <EuiSplitPanel.Inner
                   paddingSize="none"
-                  css={[styles.consoleEditorPanel, styles.outputPanelCentered]}
+                  css={styles.outputPanelContent}
                 >
                   <OutputPanel loading={isLoading} />
                 </EuiSplitPanel.Inner>
@@ -209,7 +209,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                   <EuiSplitPanel.Inner
                     grow={false}
                     paddingSize="s"
-                    css={[styles.consoleEditorPanel, styles.actionsPanelWithBackground]}
+                    css={styles.actionsPanelWithBackground}
                   >
                     <EuiFlexGroup gutterSize="none" responsive={false}>
                       <EuiFlexItem grow={false}>
@@ -235,6 +235,8 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                     </EuiFlexGroup>
                   </EuiSplitPanel.Inner>
                 )}
+
+                <OutputFilterExpandedPanel />
               </EuiSplitPanel.Outer>
             </EuiResizablePanel>
           </>

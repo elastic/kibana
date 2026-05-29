@@ -8,4 +8,4 @@
  */
 
 export { ContextMenu } from './context_menu';
-export { OutputFilterControls } from './output_filter';
+export { OutputFilterControls, OutputFilterRow, OutputFilterExpandedPanel } from './output_filter';

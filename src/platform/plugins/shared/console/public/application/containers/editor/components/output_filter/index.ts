@@ -8,3 +8,4 @@
  */
 
 export { OutputFilterControls } from './output_filter_controls';
+export { OutputFilterRow, OutputFilterExpandedPanel } from './output_filter_row';

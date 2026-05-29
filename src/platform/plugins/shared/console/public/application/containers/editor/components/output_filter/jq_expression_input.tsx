@@ -10,41 +10,29 @@
 import React from 'react';
 import { checkScript } from '@elastic/micro-jq';
 import { i18n } from '@kbn/i18n';
-import { EuiTextArea, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText } from '@elastic/eui';
 
 interface JqExpressionInputProps {
   value: string;
   onChange: (value: string) => void;
+  onBlur: () => void;
 }
 
-export const JqExpressionInput = ({ value, onChange }: JqExpressionInputProps) => {
+export const JqExpressionInput = ({ value, onChange, onBlur }: JqExpressionInputProps) => {
   const isInvalid = value.length > 0 && !checkScript(value);
 
   return (
-    <EuiFormRow
-      data-test-subj="filterJq-row"
+    <EuiFieldText
+      data-test-subj="filterJq"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onBlur={onBlur}
       isInvalid={isInvalid}
-      error={
-        isInvalid
-          ? i18n.translate('console.outputFilter.jq.invalidExpression', {
-              defaultMessage: 'Invalid expression — only a subset of the JQ language is supported',
-            })
-          : undefined
-      }
+      placeholder={i18n.translate('console.outputFilter.jq.placeholder', {
+        defaultMessage: 'JQ expression',
+      })}
+      compressed
       fullWidth
-    >
-      <EuiTextArea
-        data-test-subj="filterJq"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        isInvalid={isInvalid}
-        placeholder={i18n.translate('console.outputFilter.jq.placeholder', {
-          defaultMessage: 'JQ expression',
-        })}
-        rows={3}
-        resize="vertical"
-        fullWidth
-      />
-    </EuiFormRow>
+    />
   );
 };

@@ -16,24 +16,28 @@ export interface OutputFilterState {
   expression: string;
   mode: FilterMode;
   invertMatch: boolean;
+  isExpanded: boolean;
 }
 
 export interface OutputFilterActions {
   setExpression: (expression: string) => void;
   setMode: (mode: FilterMode) => void;
   setInvertMatch: (invertMatch: boolean) => void;
+  setIsExpanded: (isExpanded: boolean) => void;
 }
 
 const defaultState: OutputFilterState = {
   expression: '',
   mode: 'regex',
   invertMatch: false,
+  isExpanded: false,
 };
 
 const defaultActions: OutputFilterActions = {
   setExpression: () => {},
   setMode: () => {},
   setInvertMatch: () => {},
+  setIsExpanded: () => {},
 };
 
 const OutputFilterReadContext = createContext<OutputFilterState>(defaultState);
@@ -43,9 +47,13 @@ export function OutputFilterContextProvider({ children }: { children: React.Reac
   const [expression, setExpression] = useState('');
   const [mode, setMode] = useState<FilterMode>('regex');
   const [invertMatch, setInvertMatch] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const state = useMemo(() => ({ expression, mode, invertMatch }), [expression, mode, invertMatch]);
-  const actions = useMemo(() => ({ setExpression, setMode, setInvertMatch }), []);
+  const state = useMemo(
+    () => ({ expression, mode, invertMatch, isExpanded }),
+    [expression, mode, invertMatch, isExpanded]
+  );
+  const actions = useMemo(() => ({ setExpression, setMode, setInvertMatch, setIsExpanded }), []);
 
   return (
     <OutputFilterReadContext.Provider value={state}>

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiFieldText } from '@elastic/eui';
 
 const isValidRegex = (expression: string): boolean => {
   if (!expression) return true;
@@ -24,56 +24,24 @@ const isValidRegex = (expression: string): boolean => {
 interface RegexExpressionInputProps {
   value: string;
   onChange: (value: string) => void;
-  invertMatch: boolean;
-  onInvertMatchChange: (checked: boolean) => void;
+  onBlur: () => void;
 }
 
-export const RegexExpressionInput = ({
-  value,
-  onChange,
-  invertMatch,
-  onInvertMatchChange,
-}: RegexExpressionInputProps) => {
+export const RegexExpressionInput = ({ value, onChange, onBlur }: RegexExpressionInputProps) => {
   const isInvalid = !isValidRegex(value);
 
   return (
-    <>
-      <EuiFormRow
-        data-test-subj="filterRegex-row"
-        isInvalid={isInvalid}
-        error={
-          isInvalid
-            ? i18n.translate('console.outputFilter.regex.invalidExpression', {
-                defaultMessage: 'Invalid expression',
-              })
-            : undefined
-        }
-        fullWidth
-      >
-        <EuiTextArea
-          data-test-subj="filterRegex"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          isInvalid={isInvalid}
-          placeholder={i18n.translate('console.outputFilter.regex.placeholder', {
-            defaultMessage: 'Regular expression',
-          })}
-          rows={3}
-          resize="vertical"
-          fullWidth
-        />
-      </EuiFormRow>
-
-      <EuiSpacer size="s" />
-      <EuiSwitch
-        data-test-subj="invertFilter"
-        label={i18n.translate('console.outputFilter.regex.invertMatch', {
-          defaultMessage: 'Invert match',
-        })}
-        checked={invertMatch}
-        onChange={(e) => onInvertMatchChange(e.target.checked)}
-        compressed
-      />
-    </>
+    <EuiFieldText
+      data-test-subj="filterRegex"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      onBlur={onBlur}
+      isInvalid={isInvalid}
+      placeholder={i18n.translate('console.outputFilter.regex.placeholder', {
+        defaultMessage: 'Regular expression',
+      })}
+      compressed
+      fullWidth
+    />
   );
 };
