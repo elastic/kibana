@@ -17,6 +17,7 @@ import type { NavigationLink } from '../../../links/types';
 import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
 import { getNavCategories } from './categories';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 const settingsNavLink: NavigationLink = {
   id: SecurityPageName.administration,
@@ -312,19 +313,16 @@ describe('SecuritySideNav', () => {
 
   describe('enableAlertsAndAttacksAlignment setting', () => {
     beforeEach(() => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
-        if (feature === 'enableAlertsAndAttacksAlignment') {
-          return true;
-        }
-        return false;
-      });
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(
+        (feature: string) => feature === 'enableAlertsAndAttacksAlignment'
+      );
     });
     it('should call getNavCategories with true when setting is enabled', () => {
       useKibana().services.uiSettings.get = jest.fn().mockReturnValue(true);
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(true, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, true, false, false),
         })
       );
     });
@@ -334,7 +332,7 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(false, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, false, false, false),
         })
       );
     });
@@ -342,26 +340,23 @@ describe('SecuritySideNav', () => {
 
   describe('isNewEAHomePageEnabled feature flag', () => {
     it('should call getNavCategories with true when feature flag is enabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
-        if (feature === 'entityAnalyticsNewHomePageEnabled') {
-          return true;
-        }
-        return false;
-      });
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(
+        (feature: string) => feature === 'entityAnalyticsNewHomePageEnabled'
+      );
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(false, true, false),
+          categories: getNavCategories(AIChatExperience.Classic, false, true, false),
         })
       );
     });
 
     it('should call getNavCategories with false when feature flag is disabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => false);
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(() => false);
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(false, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, false, false, false),
         })
       );
     });
@@ -382,8 +377,35 @@ describe('SecuritySideNav', () => {
           selectedId: SecurityPageName.alerts,
           items: [
             expect.objectContaining({
-              id: SecurityPageName.externalLinkAgentBuilder,
+              id: SecurityPageName.externalLinkDiscover,
             }),
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkWorkflows,
+              label: 'Workflows',
+              position: 'top',
+            }),
+            expect.objectContaining({
+              href: '/alerts',
+              id: SecurityPageName.alerts,
+              label: 'alerts',
+              position: 'top',
+            }),
+          ],
+          categories: getNavCategories(AIChatExperience.Classic, false, false, true),
+          tracker: track,
+        })
+      );
+    });
+
+    it('should render agentBuilder external link when chat experience is Agent', () => {
+      (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
+        new BehaviorSubject(AIChatExperience.Agent).asObservable()
+      );
+      mockUseNavLinks.mockReturnValue([alertsNavLink]);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: [
             expect.objectContaining({
               id: SecurityPageName.externalLinkDiscover,
             }),
@@ -399,8 +421,7 @@ describe('SecuritySideNav', () => {
               position: 'top',
             }),
           ],
-          categories: getNavCategories(false, false, true),
-          tracker: track,
+          categories: getNavCategories(AIChatExperience.Classic, false, false, true),
         })
       );
     });
@@ -409,6 +430,9 @@ describe('SecuritySideNav', () => {
       (useKibana().services.application.getUrlForApp as jest.Mock).mockImplementation(
         (appId: string, options?: { path?: string }) =>
           `/test-basepath/s/my-space/app/${appId}${options?.path ?? ''}`
+      );
+      (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
+        new BehaviorSubject(AIChatExperience.Agent).asObservable()
       );
       mockUseNavLinks.mockReturnValue([alertsNavLink]);
       renderNav();

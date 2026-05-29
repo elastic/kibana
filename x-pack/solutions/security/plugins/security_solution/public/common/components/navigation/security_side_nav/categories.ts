@@ -6,9 +6,11 @@
  */
 
 import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solution-navigation';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { SecurityPageName } from '../../../../../common';
 
 export const getNavCategories = (
+  chatExperience: AIChatExperience,
   enableAlertsAndAttacksAlignment?: boolean,
   isNewEAHomePageEnabled?: boolean,
   securityClassicNavExternalLinks?: boolean
@@ -28,7 +30,13 @@ export const getNavCategories = (
           ? SecurityPageName.alertDetections
           : SecurityPageName.alerts,
         ...(securityClassicNavExternalLinks
-          ? [SecurityPageName.externalLinkAgentBuilder, SecurityPageName.externalLinkWorkflows]
+          ? [
+              // Agent builder for AI agent chat and not classic AI experience
+              ...(chatExperience === AIChatExperience.Agent
+                ? [SecurityPageName.externalLinkAgentBuilder]
+                : []),
+              SecurityPageName.externalLinkWorkflows,
+            ]
           : []),
         SecurityPageName.attackDiscovery,
         SecurityPageName.cloudSecurityPostureFindings,
