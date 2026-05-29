@@ -29,6 +29,7 @@ import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
 import { registerWorkflowEditTools } from './tools/workflow_edit_tools';
 import { registerWorkflowExecuteStepTool } from './tools/workflow_execute_step_tool';
 import { getWorkflowExecutionStatusTool } from './tools/get_workflow_execution_status';
+import { listWorkflowExecutionsTool } from './tools/list_workflow_executions';
 import { resumeWorkflowExecutionTool } from './tools/resume_workflow_execution';
 import { generateWorkflowTool } from './tools/generate_workflow';
 
@@ -63,7 +64,7 @@ export class AgentBuilderWorkflowsPlugin
     // Workflow tools
     registerValidateWorkflowTool(agentBuilder, api);
     registerGetStepDefinitionsTool(agentBuilder, api);
-    registerGetTriggerDefinitionsTool(agentBuilder);
+    registerGetTriggerDefinitionsTool(agentBuilder, api);
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
     registerWorkflowExecuteStepTool(agentBuilder, api);
@@ -83,6 +84,7 @@ export class AgentBuilderWorkflowsPlugin
     const platformTools: Array<BuiltinToolDefinition<any>> = [
       getWorkflowExecutionStatusTool({ workflowsManagement }),
       resumeWorkflowExecutionTool({ workflowsManagement }),
+      listWorkflowExecutionsTool({ workflowsManagement }),
       generateWorkflowTool({ workflowsManagement }),
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));

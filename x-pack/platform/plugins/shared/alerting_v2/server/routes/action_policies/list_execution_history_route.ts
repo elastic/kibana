@@ -10,6 +10,7 @@ import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
 import { injectable, inject } from 'inversify';
 import {
+  errorResponseSchema,
   listPolicyExecutionHistoryQuerySchema,
   listPolicyExecutionHistoryResponseSchema,
 } from '@kbn/alerting-v2-schemas';
@@ -18,7 +19,6 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
 
 @injectable()
 export class ListExecutionHistoryRoute extends BaseAlertingRoute {
@@ -36,14 +36,18 @@ export class ListExecutionHistoryRoute extends BaseAlertingRoute {
     description:
       'Get a paginated list of dispatcher summary events for action policies in the current space.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(listPolicyExecutionHistoryQuerySchema),
+      query: listPolicyExecutionHistoryQuerySchema,
     },
     response: {
       200: {
         body: () => listPolicyExecutionHistoryResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns a paginated list of execution history events.',
+      },
+      400: {
+        body: () => errorResponseSchema,
+        description: 'Indicates invalid query parameters.',
       },
     },
   };

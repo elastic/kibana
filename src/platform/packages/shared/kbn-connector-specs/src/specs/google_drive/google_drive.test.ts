@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  getConnectorActionErrorMeta,
+  ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
+} from '../../connector_utils';
 import type { ActionContext } from '../../connector_spec';
 import { GoogleDriveConnector } from './google_drive';
 
@@ -367,6 +371,32 @@ describe('GoogleDriveConnector', () => {
   });
 
   describe('downloadFile action', () => {
+    it('should attach file size hints when content download exceeds the Axios limit', async () => {
+      const metadataResponse = {
+        data: {
+          id: 'file-1',
+          name: 'report.pdf',
+          mimeType: 'application/pdf',
+          size: '10485760',
+        },
+      };
+      const error = new Error('maxContentLength size of 1048576 exceeded');
+
+      mockClient.get.mockResolvedValueOnce(metadataResponse).mockRejectedValueOnce(error);
+
+      await expect(
+        GoogleDriveConnector.actions.downloadFile.handler(mockContext, {
+          fileId: 'file-1',
+        })
+      ).rejects.toBe(error);
+
+      expect(getConnectorActionErrorMeta(error)).toEqual({
+        contentLengthBytes: 10 * 1024 * 1024,
+        estimatedOutputBytes:
+          Math.ceil((10 * 1024 * 1024) / 3) * 4 + ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
+      });
+    });
+
     it('should download a native file', async () => {
       const metadataResponse = {
         data: {

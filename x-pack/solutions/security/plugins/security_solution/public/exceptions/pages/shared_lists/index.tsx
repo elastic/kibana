@@ -22,6 +22,7 @@ import {
   EuiScreenReaderLive,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 
@@ -507,14 +508,16 @@ export const SharedLists = React.memo(() => {
                   <EuiText>{i18n.ALL_EXCEPTIONS_SUBTITLE}</EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiButtonIcon
-                    iconType="external"
-                    aria-label="go-to-rules"
-                    color="primary"
-                    onClick={() =>
-                      navigateToApp('security', { openInNewTab: true, path: '/rules' })
-                    }
-                  />
+                  <EuiToolTip content="go-to-rules" disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="external"
+                      aria-label="go-to-rules"
+                      color="primary"
+                      onClick={() =>
+                        navigateToApp('security', { openInNewTab: true, path: '/rules' })
+                      }
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -528,6 +531,7 @@ export const SharedLists = React.memo(() => {
         }
         rightSideItems={[
           <EuiPopover
+            aria-label={i18n.CREATE_BUTTON}
             data-test-subj="manageExceptionListCreateButton"
             button={
               canEditExceptions && (
@@ -670,33 +674,36 @@ export const SharedLists = React.memo(() => {
             )}
           </>
         )}
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="flexStart">
-              <EuiFlexItem>
-                <EuiPopover
-                  button={rowSizeButton}
-                  isOpen={isRowSizePopoverOpen}
-                  closePopover={closeRowSizePopover}
-                >
-                  <EuiContextMenuPanel items={rowSizeItems} />
-                </EuiPopover>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem css={{ alignItems: 'flex-end' }}>
-            <EuiFlexGroup alignItems="flexEnd">
-              <EuiFlexItem>
-                <EuiPagination
-                  aria-label={'Custom pagination example'}
-                  pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
-                  activePage={activePage}
-                  onPageClick={goToPage}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {viewerStatus == null && (
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="flexStart">
+                <EuiFlexItem>
+                  <EuiPopover
+                    aria-label={i18n.allExceptionsRowPerPage(rowSize)}
+                    button={rowSizeButton}
+                    isOpen={isRowSizePopoverOpen}
+                    closePopover={closeRowSizePopover}
+                  >
+                    <EuiContextMenuPanel items={rowSizeItems} />
+                  </EuiPopover>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem css={{ alignItems: 'flex-end' }}>
+              <EuiFlexGroup alignItems="flexEnd">
+                <EuiFlexItem>
+                  <EuiPagination
+                    aria-label={'Custom pagination example'}
+                    pageCount={pagination.total ? Math.ceil(pagination.total / rowSize) : 0}
+                    activePage={activePage}
+                    onPageClick={goToPage}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
 
         <AutoDownload
           blob={exportDownload.blob}
