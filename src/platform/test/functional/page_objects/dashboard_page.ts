@@ -240,7 +240,7 @@ export class DashboardPageObject extends FtrService {
     if (await this.onDashboardLandingPage()) return;
 
     await this.common.navigateToApp(DASHBOARD_APP_ID, {
-      hash: 'list'
+      hash: '/list'
     });
   }
 
