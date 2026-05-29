@@ -28,6 +28,7 @@ export interface AppHeaderViewProps {
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
   favorite?: ReactNode;
+  titleAppend?: ReactNode;
   sticky?: boolean;
   padding?: AppHeaderPadding;
   docLink?: string;
@@ -42,6 +43,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
     badges,
     menu,
     favorite,
+    titleAppend,
     sticky,
     padding,
     docLink,
@@ -56,6 +58,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
       !!tabs?.length ||
       !!resolvedBadges?.length ||
       !!menu?.items?.length ||
+      !!titleAppend ||
       !!shareAction ||
       !!favorite ||
       !!docLink ||
@@ -71,6 +74,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
         title={<TitleArea title={title} back={back} />}
         badges={<AppBadges badges={resolvedBadges} />}
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
+        titleAppend={titleAppend}
         trailing={
           <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
         }
