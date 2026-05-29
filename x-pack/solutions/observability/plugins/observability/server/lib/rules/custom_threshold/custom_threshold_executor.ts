@@ -309,6 +309,7 @@ export const createCustomThresholdExecutor = ({
           typeof params.searchConfiguration?.index === 'string'
             ? params.searchConfiguration?.index
             : params.searchConfiguration?.index?.title;
+        const singleCriterion = alertResults.length === 1 ? alertResults[0][group] : undefined;
         alertsClient.setAlertData({
           id: `${group}`,
           context: {
@@ -330,10 +331,12 @@ export const createCustomThresholdExecutor = ({
               dataViewId: dataViewIdTitle ?? dataViewId,
               groups,
               logsLocator,
-              metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
+              metrics: singleCriterion?.metrics ?? [],
               searchConfiguration: params.searchConfiguration,
               startedAt: indexedStartedAt,
               spaceId,
+              timeSize: singleCriterion?.timeSize,
+              timeUnit: singleCriterion?.timeUnit,
             }),
             ...additionalContext,
           },
@@ -365,6 +368,8 @@ export const createCustomThresholdExecutor = ({
           metrics: params.criteria[0]?.metrics,
           searchConfiguration: params.searchConfiguration,
           startedAt: indexedStartedAt,
+          timeSize: params.criteria[0]?.timeSize,
+          timeUnit: params.criteria[0]?.timeUnit,
         }),
         reason: alertHits?.[ALERT_REASON],
         ...additionalContext,
