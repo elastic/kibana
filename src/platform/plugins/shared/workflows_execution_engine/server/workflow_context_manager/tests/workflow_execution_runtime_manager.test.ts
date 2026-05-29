@@ -732,6 +732,19 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
   });
 
+  describe('getWorkflowErrorSerialized', () => {
+    it('should return serialized error from the execution cursor', () => {
+      underTest.setWorkflowError(new Error('something broke'));
+      expect(underTest.getWorkflowErrorSerialized()).toEqual(
+        expect.objectContaining({ type: 'Error', message: 'something broke' })
+      );
+    });
+
+    it('should return undefined when cursor has no error', () => {
+      expect(underTest.getWorkflowErrorSerialized()).toBeUndefined();
+    });
+  });
+
   describe('setWorkflowError', () => {
     it('should serialize and set error on the execution cursor', () => {
       underTest.setWorkflowError(new Error('something broke'));

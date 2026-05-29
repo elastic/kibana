@@ -34,7 +34,7 @@ export class EnterTryBlockNodeImpl implements NodeImplementation, NodeWithErrorC
       this.stepExecutionRuntime.setCurrentStepState({
         ...stepState,
         isFallbackExecuted: true,
-        error: this.wfExecutionRuntimeManager.getWorkflowExecution().error, // save error to the state of the enter node
+        error: this.wfExecutionRuntimeManager.getWorkflowErrorSerialized(), // save error to step state to preserve type
       });
       this.wfExecutionRuntimeManager.setWorkflowError(undefined); // clear workflow error to let run go
       this.wfExecutionRuntimeManager.navigateToNode(this.node.enterFallbackPathNodeId);

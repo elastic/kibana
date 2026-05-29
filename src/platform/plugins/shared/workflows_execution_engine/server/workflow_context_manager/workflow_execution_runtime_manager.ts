@@ -10,7 +10,7 @@
 import agent from 'elastic-apm-node';
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
-import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowExecution, SerializedError, StackFrame } from '@kbn/workflows';
 import {
   ExecutionStatus,
   isEventDrivenWorkflowTriggerSource,
@@ -235,9 +235,26 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
+  /**
+   * @deprecated Temporary bridge for node implementations. Prefer reading
+   * `workflowExecutionCursor.error` directly once nodes receive cursor access.
+   */
+  public getWorkflowErrorSerialized(): SerializedError | undefined {
+    return this.workflowExecutionCursor.error
+      ? ExecutionError.fromError(this.workflowExecutionCursor.error).toSerializableObject()
+      : undefined;
+  }
+
+  /**
+   * @deprecated Temporary bridge for node implementations. Prefer writing
+   * `workflowExecutionCursor.error` directly once nodes receive cursor access.
+   */
   public setWorkflowError(error: Error | undefined): void {
-    const executionError = error ? ExecutionError.fromError(error) : undefined;
-    this.workflowExecutionCursor.error = executionError;
+    if (error) {
+      this.workflowExecutionCursor.captureError(error);
+    } else {
+      this.workflowExecutionCursor.clearError();
+    }
   }
 
   public markWorkflowTimeouted(): void {

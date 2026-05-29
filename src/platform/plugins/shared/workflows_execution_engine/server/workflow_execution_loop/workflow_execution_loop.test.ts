@@ -84,7 +84,9 @@ describe('workflowExecutionLoop', () => {
 
     await workflowExecutionLoop(params as any);
 
-    expect(params.workflowRuntime.setWorkflowError).toHaveBeenCalledWith(testError);
+    expect(params.workflowExecutionCursor.error).toEqual(
+      expect.objectContaining({ message: 'execution failed' })
+    );
   });
 
   it('updates execution state when task abort is signaled during workflow execution', async () => {

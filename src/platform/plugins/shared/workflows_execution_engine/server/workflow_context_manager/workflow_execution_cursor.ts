@@ -20,7 +20,9 @@ export interface WorkflowExecutionCursorInit {
 /** Public surface of {@link WorkflowExecutionCursor} for typing mocks and loop params. */
 export interface WorkflowExecutionCursorApi {
   readonly isExecuting: boolean;
-  error: Error | undefined;
+  readonly error: Error | undefined;
+  captureError(caught: unknown): void;
+  clearError(): void;
   start(): void;
   stop(): void;
   handleStartOfCycle(): void;
@@ -45,6 +47,7 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
   private nextNodeId: string | undefined;
   private executing = true;
   private stackFrames: StackFrame[];
+  private workflowError: Error | undefined;
 
   constructor(init: WorkflowExecutionCursorInit) {
     this.workflowGraph = init.workflowExecutionGraph;
@@ -52,11 +55,31 @@ export class WorkflowExecutionCursor implements WorkflowExecutionCursorApi {
     this.stackFrames = init.stackFrames ?? [];
   }
 
+  /**
+   * Whether the execution is currently running.
+   */
   public get isExecuting(): boolean {
     return this.executing;
   }
 
-  public error: Error | undefined;
+  public get error(): Error | undefined {
+    return this.workflowError;
+  }
+
+  /**
+   * Records a execution-level error from a caught/thrown value.
+   * Synchronous so callers may invoke it after `await` without tripping `require-atomic-updates`.
+   */
+  public captureError(caught: Error): void {
+    this.workflowError = caught;
+  }
+
+  /**
+   * Clears the execution-level error.
+   */
+  public clearError(): void {
+    this.workflowError = undefined;
+  }
 
   /**
    * Starts the execution cursor: execution and persistence loops run while `isExecuting` is true.

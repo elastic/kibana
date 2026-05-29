@@ -357,7 +357,9 @@ describe('runNode', () => {
 
       await runNode(mockParams);
 
-      expect(mockParams.workflowExecutionCursor.error).toBe(error);
+      expect(mockParams.workflowExecutionCursor.error).toEqual(
+        expect.objectContaining({ message: 'Step execution failed' })
+      );
       expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledTimes(1);
     });
 

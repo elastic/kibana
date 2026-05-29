@@ -182,7 +182,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
     nodeSpan?.setOutcome('success');
   } catch (error) {
-    workflowExecutionCursor.error = error;
+    workflowExecutionCursor.captureError(error);
     nodeSpan?.setOutcome('failure');
   } finally {
     monitorAbortController?.abort();

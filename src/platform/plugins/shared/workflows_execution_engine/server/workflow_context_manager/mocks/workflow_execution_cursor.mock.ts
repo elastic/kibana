@@ -9,6 +9,7 @@
 
 import type { StackFrame } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
 import type {
   WorkflowExecutionCursorApi,
   WorkflowExecutionCursorInit,
@@ -53,9 +54,14 @@ export const createMockWorkflowExecutionCursor = (
     get error() {
       return error;
     },
-    set error(value: Error | undefined) {
-      error = value;
-    },
+    captureError: jest.fn((caught: unknown) => {
+      error = ExecutionError.fromError(
+        caught instanceof Error ? caught : new Error(String(caught))
+      );
+    }),
+    clearError: jest.fn(() => {
+      error = undefined;
+    }),
     get currentNode() {
       return currentNode;
     },

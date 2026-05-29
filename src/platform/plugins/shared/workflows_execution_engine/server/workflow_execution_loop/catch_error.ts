@@ -70,7 +70,7 @@ export async function catchError(
     // 3. The top stack entry has nested scopes to process
     // This allows error handling to bubble up through the scope hierarchy.
     if (failedStepExecutionRuntime.stepExecutionExists() && failedStepExecutionRuntime.error) {
-      workflowExecutionCursor.error = failedStepExecutionRuntime.error;
+      workflowExecutionCursor.captureError(failedStepExecutionRuntime.error);
     } else if (failedStepExecutionRuntime.stepExecutionExists()) {
       const stepExecution = failedStepExecutionRuntime.stepExecution;
       // A step may already be COMPLETED if workflow.output/workflow.fail finished
@@ -104,7 +104,7 @@ export async function catchError(
 
       const stepExecutionRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
         nodeId: scopeEntry.nodeId,
-        stackFrames: workflowScopeStack.stackFrames,
+        stackFrames: newWorkflowScopeStack.stackFrames,
       });
       const stepImplementation = nodesFactory.create(stepExecutionRuntime);
 
@@ -112,13 +112,13 @@ export async function catchError(
         const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
         const failedContext = stepExecutionRuntimeFactory.createStepExecutionRuntime({
           nodeId: currentNode.id,
-          stackFrames: newWorkflowScopeStack.stackFrames,
+          stackFrames: workflowScopeStack.stackFrames,
         });
 
         try {
           await Promise.resolve(stepErrorCatcher.catchError(failedContext));
         } catch (error) {
-          workflowExecutionCursor.error = error;
+          workflowExecutionCursor.captureError(error);
         }
       }
 
@@ -135,7 +135,7 @@ export async function catchError(
       }
     }
   } catch (error) {
-    workflowExecutionCursor.error = error;
+    workflowExecutionCursor.captureError(error);
     workflowLogger.logError(
       `Error in catchError: ${error.message}. Workflow execution may be in an inconsistent state.`
     );
