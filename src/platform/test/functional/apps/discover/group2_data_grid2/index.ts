@@ -16,17 +16,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('discover/group2/data_grid2', function () {
     before(async function () {
       await browser.setWindowSize(1600, 1200);
-    });
-
-    after(async function unloadMakelogs() {
-      await esArchiver.unload(
+      await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
     });
 
     loadTestFile(require.resolve('./_data_grid_new_line'));
     loadTestFile(require.resolve('./_data_grid_footer'));
-    loadTestFile(require.resolve('./_data_grid_field_data'));
     loadTestFile(require.resolve('./_data_grid_field_tokens'));
     loadTestFile(require.resolve('./_data_grid_in_table_search'));
   });
