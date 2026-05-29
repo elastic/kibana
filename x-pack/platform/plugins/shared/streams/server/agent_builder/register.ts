@@ -71,6 +71,8 @@ export const registerStreamsAgentBuilder = async ({
 
   const memoryToolsOptions = createMemoryToolsOptions({ getScopedClients, server, logger });
 
+  // The memory skill is registered lazily — only once the significant events memory feature flag is on.
+  // This avoids exposing the skill to the agent when memory is not configured.
   let memorySkillRegistered = false;
 
   const ensureMemorySkillRegistered = () => {
@@ -79,7 +81,9 @@ export const registerStreamsAgentBuilder = async ({
     }
     memorySkillRegistered = true;
     agentBuilder.skills.register(createSigEventsMemorySkill(memoryToolsOptions));
-    logger.info('Memory skill registered (observability:streamsEnableMemory is enabled)');
+    logger.info(
+      'Memory skill registered (streams.significantEventsMemoryEnabled feature flag is enabled)'
+    );
   };
 
   if (await isMemoryEnabled()) {
@@ -88,10 +92,5 @@ export const registerStreamsAgentBuilder = async ({
 
   return {
     ensureMemorySkillRegistered,
-    onMemorySettingChanged: async () => {
-      if (await isMemoryEnabled()) {
-        ensureMemorySkillRegistered();
-      }
-    },
   };
 };
