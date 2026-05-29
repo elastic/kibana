@@ -202,7 +202,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <FormattedMessage
                     id="xpack.fleet.integrations.settings.namespaceCustomization.applying"
-                    defaultMessage="Applying namespace index template changes…"
+                    defaultMessage="Applying changes to namespace index templates…"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
