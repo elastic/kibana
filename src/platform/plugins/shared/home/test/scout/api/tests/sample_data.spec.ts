@@ -32,21 +32,20 @@ const sampleDataApiPath = (space: string) => `/s/${space}/api/sample_data`;
 apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
   let credentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, apiClient, esClient, kbnClient }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiClient, kbnClient }) => {
     credentials = await requestAuth.getApiKeyForAdmin();
 
     // Pre-clean: remove any flights sample data that a previous run may have left
     // behind. This guarantees the "not_installed" pre-condition at the start of
-    // every test regardless of prior state.
+    // every test regardless of prior state. The Kibana API handles both saved
+    // objects and the shared ES index — avoid direct index deletion here as
+    // kibana_sample_data_flights is shared across CI lanes and deleting it directly
+    // can break concurrent test runs.
     await apiClient
       .delete(`${sampleDataApiPath('default')}/${FLIGHTS_DATASET_ID}`, {
         headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
       })
       .catch(() => {}); // 404 when not installed is expected
-
-    // Also delete the shared ES index directly in case the previous uninstall
-    // failed mid-flight and left the index orphaned.
-    await esClient.indices.delete({ index: FLIGHTS_ES_INDEX, ignore_unavailable: true });
 
     // Create the unique test space. The try-catch handles the extremely unlikely
     // case of a UUID collision leaving the space from a prior failed run.
@@ -57,10 +56,11 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  apiTest.afterAll(async ({ apiClient, esClient, kbnClient }) => {
+  apiTest.afterAll(async ({ apiClient, kbnClient }) => {
     // Defensive uninstall from both spaces in case a test failed mid-flight.
     // Errors are ignored — the goal is to leave the server clean for the next run,
-    // not to assert on the cleanup response.
+    // not to assert on the cleanup response. The Kibana API handles ES index removal,
+    // so no direct index deletion is needed.
     for (const space of ['default', TEST_SPACE_ID]) {
       await apiClient
         .delete(`${sampleDataApiPath(space)}/${FLIGHTS_DATASET_ID}`, {
@@ -68,9 +68,6 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
         })
         .catch(() => {});
     }
-
-    // Belt-and-suspenders: delete the ES index even if uninstall already removed it.
-    await esClient.indices.delete({ index: FLIGHTS_ES_INDEX, ignore_unavailable: true });
 
     // Remove the test space (also removes all saved objects inside it).
     await kbnClient.spaces.delete(TEST_SPACE_ID).catch(() => {});
@@ -193,7 +190,7 @@ apiTest.describe('sample data API', { tag: tags.stateful.classic }, () => {
   );
 
   // ---------------------------------------------------------------------------
-  // Non-default space: ID regeneration + full lifecycle
+  // Non-default space: ID preservation + full lifecycle
   // ---------------------------------------------------------------------------
 
   apiTest(
