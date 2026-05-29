@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { conditionToESQL } from '@kbn/streamlang';
+import { entityStoreConditionToESQL as conditionToESQL } from '../../esql/condition_to_esql';
 import type {
   EntityDefinitionWithoutId,
   FieldEvaluation,
