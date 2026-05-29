@@ -7,17 +7,46 @@
 
 import { v4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
+import type { KibanaRequest } from '@kbn/core/server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { generateWorkflow, type GenerateWorkflowEdit } from '@kbn/agent-builder-workflow-gen';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
-import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type {
+  WorkflowsManagementApi,
+  WorkflowsServerPluginSetup,
+} from '@kbn/workflows-management-plugin/server';
 import { workflowIdSchema } from '@kbn/workflows-management-plugin/common/lib/workflow_id_schema';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
 import { emitWorkflowDiff, extractConversationId } from './utils/workflow_attachments';
+
+interface CompactValidation {
+  valid: boolean;
+  errors?: string[];
+}
+
+const runCompactValidation = async (
+  yaml: string,
+  api: WorkflowsManagementApi,
+  spaceId: string,
+  request: KibanaRequest
+): Promise<CompactValidation | undefined> => {
+  try {
+    const result = await api.validateWorkflow(yaml, spaceId, request);
+    if (result.valid) {
+      return { valid: true };
+    }
+    const errors = result.diagnostics
+      .filter((d) => d.severity === 'error')
+      .map((d) => `[${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`);
+    return { valid: false, errors };
+  } catch {
+    return undefined;
+  }
+};
 
 const generateWorkflowSchema = z.object({
   query: z
@@ -162,11 +191,14 @@ And you should **not**:
           toolId: platformCoreTools.generateWorkflow,
         });
 
+        const validation = await runCompactValidation(afterYaml, workflowsApi, spaceId, request);
+
         aiTelemetryClient.reportEditResult({
           toolId: platformCoreTools.generateWorkflow,
           conversationId: extractConversationId(toolContext),
           editSuccess: true,
           isCreation: !sourceAttachment,
+          validation,
         });
 
         return {
