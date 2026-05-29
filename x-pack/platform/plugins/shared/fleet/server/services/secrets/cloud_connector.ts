@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { isCloudConnectorSecretReference } from '../../../common/types';
 import type {
   CloudProvider,
   CloudConnectorVars,
@@ -354,8 +355,9 @@ export function extractSecretIdsFromCloudConnectorVars(
   if (cloudProvider === 'aws') {
     const awsVars = cloudConnectorVars as AwsCloudConnectorVars;
     // AWS has external_id as a secret
-    if (awsVars.external_id?.value?.isSecretRef && awsVars.external_id.value.id) {
-      secretIds.push(awsVars.external_id.value.id);
+    const externalIdValue = awsVars.external_id?.value;
+    if (isCloudConnectorSecretReference(externalIdValue) && externalIdValue.isSecretRef) {
+      secretIds.push(externalIdValue.id);
     }
   } else if (cloudProvider === 'azure') {
     const azureVars = cloudConnectorVars as AzureCloudConnectorVars;
