@@ -158,7 +158,8 @@ steps:
             with:
               streamName: "{{ foreach.item.streamName }}"
               status: "${{ steps.check_status.output.status }}"
-              featuresSkipped: "${{ steps.check_status.output.featuresSkipped }}"
-              discoveredFeatures: "${{ steps.check_status.output.discoveredFeatures }}"
-              featuresConnectorUsed: "${{ steps.check_status.output.featuresConnectorUsed }}"
-              featuresTokensUsed: "${{ steps.check_status.output.featuresTokensUsed }}"
+              features:
+                skipped: "${{ steps.check_status.output.features.skipped }}"
+                discovered: "${{ steps.check_status.output.features.discovered }}"
+                connectorUsed: "${{ steps.check_status.output.features.connectorUsed }}"
+                tokensUsed: "${{ steps.check_status.output.features.tokensUsed }}"

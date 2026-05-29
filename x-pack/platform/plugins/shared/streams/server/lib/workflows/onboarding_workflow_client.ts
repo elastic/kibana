@@ -15,6 +15,8 @@ import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   StreamsKIsOnboardingStatus,
   type StreamsKIsOnboardingStatusResult,
+  type StreamsKIsOnboardingFeaturesResult,
+  type StreamsKIsOnboardingQueriesResult,
   type BaseFeature,
   type GeneratedSignificantEventQuery,
 } from '@kbn/streams-schema';
@@ -23,11 +25,42 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 const EMPTY_TOKEN_COUNT: ChatCompletionTokenCount = { prompt: 0, completion: 0, total: 0 };
 
 /**
- * Inputs passed to the managed onboarding workflow (streams_ki/onboarding.yaml).
- * Required fields drive the two main steps (features identification and queries
- * generation); optional fields override tuning knobs that default inside the YAML.
+ * Inputs for an onboarding run, grouped by the two pipeline steps. Required
+ * fields drive the steps (features identification and queries generation);
+ * optional fields override tuning knobs that default inside the YAML.
+ *
+ * These are flattened into {@link OnboardingWorkflowInputPayload} before being
+ * handed to the workflow engine, whose manual trigger only accepts flat scalars.
  */
 export interface StreamsKIsOnboardingInputs {
+  streamName: string;
+  features: {
+    skip: boolean;
+    start: number;
+    end: number;
+    connectorId?: string;
+    maxIterations?: number;
+    sampleSize?: number;
+    ttlDays?: number;
+    entityFilteredRatio?: number;
+    diverseRatio?: number;
+    maxExcludedInPrompt?: number;
+    maxEntityFilters?: number;
+    maxPreviouslyIdentified?: number;
+    recencyThresholdHours?: number;
+  };
+  queries: {
+    skip: boolean;
+    connectorId?: string;
+  };
+}
+
+/**
+ * Flat scalar payload actually passed to the workflow engine's manual trigger,
+ * matching the `inputs` keys declared in streams_ki/onboarding.yaml. Nested
+ * {@link StreamsKIsOnboardingInputs} are flattened into this shape in `run()`.
+ */
+interface OnboardingWorkflowInputPayload {
   streamName: string;
   skipFeatures: boolean;
   skipQueries: boolean;
@@ -47,10 +80,11 @@ export interface StreamsKIsOnboardingInputs {
 }
 
 /**
- * Shape of the `context.output` object produced by a completed onboarding
- * workflow execution. Used to extract summary counts for the status response.
+ * Raw, flat `context.output` emitted by a completed onboarding workflow
+ * execution (see the `output_result` step in streams_ki/onboarding.yaml).
+ * Mapped into the nested {@link StreamsKIsOnboardingOutput} shape on read.
  */
-export interface StreamsKIsOnboardingOutput {
+interface OnboardingWorkflowOutputContext {
   streamName: string;
   featuresSkipped: boolean;
   featuresConnectorUsed: string;
@@ -61,6 +95,70 @@ export interface StreamsKIsOnboardingOutput {
   persistedQueries: GeneratedSignificantEventQuery[];
   queriesTokensUsed: ChatCompletionTokenCount;
 }
+
+/**
+ * Nested domain representation of a completed onboarding run, grouped by step.
+ * Used to extract summary counts for the status response.
+ */
+export interface StreamsKIsOnboardingOutput {
+  streamName: string;
+  features: StreamsKIsOnboardingFeaturesResult;
+  queries: StreamsKIsOnboardingQueriesResult;
+}
+
+/** Flattens nested onboarding inputs into the workflow engine's scalar payload. */
+const toWorkflowInputPayload = (
+  inputs: StreamsKIsOnboardingInputs
+): OnboardingWorkflowInputPayload => {
+  const { streamName, features, queries } = inputs;
+  return {
+    streamName,
+    skipFeatures: features.skip,
+    skipQueries: queries.skip,
+    featuresStart: features.start,
+    featuresEnd: features.end,
+    ...(features.connectorId !== undefined && { featuresConnectorId: features.connectorId }),
+    ...(queries.connectorId !== undefined && { queriesConnectorId: queries.connectorId }),
+    ...(features.maxIterations !== undefined && { featuresMaxIterations: features.maxIterations }),
+    ...(features.sampleSize !== undefined && { featuresSampleSize: features.sampleSize }),
+    ...(features.ttlDays !== undefined && { featuresTtlDays: features.ttlDays }),
+    ...(features.entityFilteredRatio !== undefined && {
+      featuresEntityFilteredRatio: features.entityFilteredRatio,
+    }),
+    ...(features.diverseRatio !== undefined && { featuresDiverseRatio: features.diverseRatio }),
+    ...(features.maxExcludedInPrompt !== undefined && {
+      featuresMaxExcludedInPrompt: features.maxExcludedInPrompt,
+    }),
+    ...(features.maxEntityFilters !== undefined && {
+      featuresMaxEntityFilters: features.maxEntityFilters,
+    }),
+    ...(features.maxPreviouslyIdentified !== undefined && {
+      featuresMaxPreviouslyIdentified: features.maxPreviouslyIdentified,
+    }),
+    ...(features.recencyThresholdHours !== undefined && {
+      featuresRecencyThresholdHours: features.recencyThresholdHours,
+    }),
+  };
+};
+
+/** Maps the raw flat workflow output into the nested onboarding output shape. */
+const parseWorkflowOutput = (
+  output: Partial<OnboardingWorkflowOutputContext>
+): StreamsKIsOnboardingOutput => ({
+  streamName: output.streamName ?? '',
+  features: {
+    skipped: output.featuresSkipped === true,
+    discovered: Array.isArray(output.discoveredFeatures) ? output.discoveredFeatures : [],
+    connectorUsed: output.featuresConnectorUsed ?? '',
+    tokensUsed: output.featuresTokensUsed ?? EMPTY_TOKEN_COUNT,
+  },
+  queries: {
+    skipped: output.queriesSkipped === true,
+    persisted: Array.isArray(output.persistedQueries) ? output.persistedQueries : [],
+    connectorUsed: output.queriesConnectorUsed ?? '',
+    tokensUsed: output.queriesTokensUsed ?? EMPTY_TOKEN_COUNT,
+  },
+});
 
 const ONBOARDING_EXECUTIONS_SPACE_ID = DEFAULT_SPACE_ID;
 
@@ -130,18 +228,14 @@ const mapExecutionToStatusResult = (
   }
 
   if (onboardingStatus === StreamsKIsOnboardingStatus.Completed) {
-    const ctx = (execution.context ?? {}) as { output?: Partial<StreamsKIsOnboardingOutput> };
-    const output = ctx.output ?? {};
+    const ctx = (execution.context ?? {}) as {
+      output?: Partial<OnboardingWorkflowOutputContext>;
+    };
+    const { features, queries } = parseWorkflowOutput(ctx.output ?? {});
     return {
       status: StreamsKIsOnboardingStatus.Completed,
-      featuresSkipped: output.featuresSkipped === true,
-      discoveredFeatures: Array.isArray(output.discoveredFeatures) ? output.discoveredFeatures : [],
-      featuresConnectorUsed: output.featuresConnectorUsed ?? '',
-      featuresTokensUsed: output.featuresTokensUsed ?? EMPTY_TOKEN_COUNT,
-      queriesSkipped: output.queriesSkipped === true,
-      persistedQueries: Array.isArray(output.persistedQueries) ? output.persistedQueries : [],
-      queriesConnectorUsed: output.queriesConnectorUsed ?? '',
-      queriesTokensUsed: output.queriesTokensUsed ?? EMPTY_TOKEN_COUNT,
+      features,
+      queries,
     };
   }
 
@@ -190,7 +284,7 @@ export class StreamsKIsOnboardingClient {
     await this.managementApi.runWorkflow(
       { ...workflow, definition: workflow.definition },
       ONBOARDING_EXECUTIONS_SPACE_ID,
-      inputs,
+      toWorkflowInputPayload(inputs),
       request
     );
   }

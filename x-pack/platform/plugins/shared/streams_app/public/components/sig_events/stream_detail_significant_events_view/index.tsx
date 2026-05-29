@@ -93,9 +93,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         { status: StreamsKIsOnboardingStatus.Completed }
       >
     ) => {
-      const { featuresSkipped, discoveredFeatures, persistedQueries } = completedState;
+      const { features, queries } = completedState;
 
-      const count = discoveredFeatures.length + persistedQueries.length;
+      const count = features.discovered.length + queries.persisted.length;
 
       toasts.addSuccess({
         title: i18n.translate(
@@ -106,7 +106,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             values: { count },
           }
         ),
-        text: featuresSkipped
+        text: features.skipped
           ? i18n.translate('xpack.streams.significantEventsTable.featuresSkippedToastText', {
               defaultMessage: 'Feature identification was skipped.',
             })

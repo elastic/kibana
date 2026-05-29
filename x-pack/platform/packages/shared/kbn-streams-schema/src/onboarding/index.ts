@@ -9,15 +9,25 @@ import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { BaseFeature } from '../feature';
 import type { GeneratedSignificantEventQuery } from '../api/significant_events';
 
+/** Summary of the features identification step of a completed onboarding run. */
+export interface StreamsKIsOnboardingFeaturesResult {
+  skipped: boolean;
+  discovered: BaseFeature[];
+  connectorUsed: string;
+  tokensUsed: ChatCompletionTokenCount;
+}
+
+/** Summary of the queries generation step of a completed onboarding run. */
+export interface StreamsKIsOnboardingQueriesResult {
+  skipped: boolean;
+  persisted: GeneratedSignificantEventQuery[];
+  connectorUsed: string;
+  tokensUsed: ChatCompletionTokenCount;
+}
+
 export interface StreamsKIsOnboardingResult {
-  featuresSkipped: boolean;
-  discoveredFeatures: BaseFeature[];
-  featuresConnectorUsed: string;
-  featuresTokensUsed: ChatCompletionTokenCount;
-  queriesSkipped: boolean;
-  persistedQueries: GeneratedSignificantEventQuery[];
-  queriesConnectorUsed: string;
-  queriesTokensUsed: ChatCompletionTokenCount;
+  features: StreamsKIsOnboardingFeaturesResult;
+  queries: StreamsKIsOnboardingQueriesResult;
 }
 
 export enum StreamsKIsOnboardingStep {

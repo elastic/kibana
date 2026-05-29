@@ -90,10 +90,8 @@ describe('StreamsKIsOnboardingClient', () => {
       await client.run({
         inputs: {
           streamName: 'logs.nginx',
-          skipFeatures: false,
-          skipQueries: false,
-          featuresStart: 1000,
-          featuresEnd: 2000,
+          features: { skip: false, start: 1000, end: 2000 },
+          queries: { skip: false },
         },
         request,
       });
@@ -120,10 +118,8 @@ describe('StreamsKIsOnboardingClient', () => {
         client.run({
           inputs: {
             streamName: 'logs.nginx',
-            skipFeatures: false,
-            skipQueries: false,
-            featuresStart: 1000,
-            featuresEnd: 2000,
+            features: { skip: false, start: 1000, end: 2000 },
+            queries: { skip: false },
           },
           request,
         })
@@ -140,10 +136,8 @@ describe('StreamsKIsOnboardingClient', () => {
         client.run({
           inputs: {
             streamName: 'logs.nginx',
-            skipFeatures: false,
-            skipQueries: false,
-            featuresStart: 1000,
-            featuresEnd: 2000,
+            features: { skip: false, start: 1000, end: 2000 },
+            queries: { skip: false },
           },
           request,
         })
@@ -201,14 +195,18 @@ describe('StreamsKIsOnboardingClient', () => {
       expect(result).toEqual({
         status: StreamsKIsOnboardingStatus.Completed,
         executionId: 'exec-1',
-        featuresSkipped: false,
-        discoveredFeatures: ['f1', 'f2'],
-        featuresConnectorUsed: 'connector-1',
-        featuresTokensUsed: { prompt: 100, completion: 50 },
-        queriesSkipped: true,
-        persistedQueries: [],
-        queriesConnectorUsed: '',
-        queriesTokensUsed: {},
+        features: {
+          skipped: false,
+          discovered: ['f1', 'f2'],
+          connectorUsed: 'connector-1',
+          tokensUsed: { prompt: 100, completion: 50 },
+        },
+        queries: {
+          skipped: true,
+          persisted: [],
+          connectorUsed: '',
+          tokensUsed: {},
+        },
       });
     });
 
@@ -225,14 +223,18 @@ describe('StreamsKIsOnboardingClient', () => {
       expect(result).toEqual({
         status: StreamsKIsOnboardingStatus.Completed,
         executionId: 'exec-1',
-        featuresSkipped: false,
-        discoveredFeatures: [],
-        featuresConnectorUsed: '',
-        featuresTokensUsed: { prompt: 0, completion: 0, total: 0 },
-        queriesSkipped: false,
-        persistedQueries: [],
-        queriesConnectorUsed: '',
-        queriesTokensUsed: { prompt: 0, completion: 0, total: 0 },
+        features: {
+          skipped: false,
+          discovered: [],
+          connectorUsed: '',
+          tokensUsed: { prompt: 0, completion: 0, total: 0 },
+        },
+        queries: {
+          skipped: false,
+          persisted: [],
+          connectorUsed: '',
+          tokensUsed: { prompt: 0, completion: 0, total: 0 },
+        },
       });
     });
 

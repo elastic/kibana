@@ -103,12 +103,16 @@ export const onboardingExecuteRoute = createServerRoute({
 
       const inputs: StreamsKIsOnboardingInputs = {
         streamName,
-        skipFeatures,
-        skipQueries,
-        featuresStart: body.from,
-        featuresEnd: body.to,
-        ...(body.connectors?.features && { featuresConnectorId: body.connectors.features }),
-        ...(body.connectors?.queries && { queriesConnectorId: body.connectors.queries }),
+        features: {
+          skip: skipFeatures,
+          start: body.from,
+          end: body.to,
+          ...(body.connectors?.features && { connectorId: body.connectors.features }),
+        },
+        queries: {
+          skip: skipQueries,
+          ...(body.connectors?.queries && { connectorId: body.connectors.queries }),
+        },
       };
 
       await streamsKIsOnboardingClient.run({ inputs, request });

@@ -43,12 +43,16 @@ export async function startKiIdentificationToolHandler({
 
   const inputs: StreamsKIsOnboardingInputs = {
     streamName,
-    skipFeatures,
-    skipQueries,
-    featuresStart: now - DEFAULT_LOOKBACK_MS,
-    featuresEnd: now,
-    ...(connectors?.features && { featuresConnectorId: connectors.features }),
-    ...(connectors?.queries && { queriesConnectorId: connectors.queries }),
+    features: {
+      skip: skipFeatures,
+      start: now - DEFAULT_LOOKBACK_MS,
+      end: now,
+      ...(connectors?.features && { connectorId: connectors.features }),
+    },
+    queries: {
+      skip: skipQueries,
+      ...(connectors?.queries && { connectorId: connectors.queries }),
+    },
   };
 
   await streamsKIsOnboardingClient.run({ inputs, request });

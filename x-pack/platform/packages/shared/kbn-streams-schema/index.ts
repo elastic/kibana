@@ -307,6 +307,8 @@ export {
 } from './src/sig_events';
 export type {
   StreamsKIsOnboardingResult,
+  StreamsKIsOnboardingFeaturesResult,
+  StreamsKIsOnboardingQueriesResult,
   StreamsKIsOnboardingStatusResult,
 } from './src/onboarding';
 export {
