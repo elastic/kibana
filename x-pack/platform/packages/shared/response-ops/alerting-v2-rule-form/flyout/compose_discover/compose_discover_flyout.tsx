@@ -40,7 +40,7 @@ import {
 } from './compose_mappers';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { QuerySandboxFlyout } from './query_sandbox_flyout';
-import { RULE_BUILDER_REGISTRY } from './rule_builder';
+import { RULE_BUILDER_REGISTRY, BuilderStateProvider, type BuilderState } from './rule_builder';
 import type { ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
@@ -149,7 +149,7 @@ export interface ComposeDiscoverFlyoutProps<TWorkflow extends object = object> {
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
   builderType?: string;
-  initialBuilderState?: unknown;
+  initialBuilderState?: BuilderState;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -264,7 +264,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(baseServices);
 
-  const [builderState, setBuilderState] = useState<unknown>(() => {
+  const [builderState, setBuilderState] = useState<BuilderState>(() => {
     if (!builderType) return undefined;
     if (initialBuilderState !== undefined) return initialBuilderState;
     const definition = RULE_BUILDER_REGISTRY[builderType];
@@ -353,11 +353,20 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
         setSandboxQuery((q) => {
           if (q.format !== 'composed') return q;
           const current = q.blocks.recover ?? '';
+          if (current.trim()) return q;
+          if (isBuilderMode) {
+            const formQuery = methods.getValues('query');
+            const builderRecover =
+              formQuery.format === 'composed' ? formQuery.blocks.recover ?? '' : '';
+            if (builderRecover.trim()) {
+              return { ...q, blocks: { ...q.blocks, recover: builderRecover } };
+            }
+          }
           return {
             ...q,
             blocks: {
               ...q.blocks,
-              recover: current.trim() ? current : guessRecoveryBlock(q.blocks.breach),
+              recover: guessRecoveryBlock(q.blocks.breach),
             },
           };
         });
@@ -378,6 +387,10 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
             methods.setValue('query', { format: 'standalone', breach: current.breach });
           }
         }
+        if (isBuilderMode && builderState) {
+          const { recovery: _, ...rest } = builderState as Record<string, unknown>;
+          setBuilderState(rest);
+        }
         // (b) Close sandbox in non-YAML mode — prevents a pending Apply from
         // overwriting the recovery type change by writing the stale sandboxQuery back.
         // Skip syncSandbox here: (a) already set the clean state directly, and
@@ -386,15 +399,23 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
           dispatch({ type: 'CLOSE_CHILD' });
         }
       }
-      dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type });
+      dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type, isBuilderMode });
     },
-    [dispatch, methods, uiState.queryCommitted, uiState.childOpen, uiState.yamlMode]
+    [
+      dispatch,
+      methods,
+      isBuilderMode,
+      builderState,
+      uiState.queryCommitted,
+      uiState.childOpen,
+      uiState.yamlMode,
+    ]
   );
 
   const isCreate = mode === 'create' || mode === 'clone';
   const title = getFlyoutTitle(mode);
 
-  const steps = getSteps(isAlert, builderType);
+  const { steps } = getSteps(isAlert, builderType);
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
 
@@ -417,6 +438,15 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
       runYamlParse(yaml);
     },
     [runYamlParse]
+  );
+
+  const handleBlurSync = useCallback(
+    (values: FormValues) => {
+      cancelYamlParse();
+      methods.reset(formValuesFromYamlToCompose(values));
+      syncSandbox();
+    },
+    [cancelYamlParse, methods, syncSandbox]
   );
 
   const handleToggleYamlMode = useCallback(
@@ -480,7 +510,7 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
       methods.reset(formValuesFromYamlToCompose(result.values));
-      // No syncForm() here: draft is temporarily stale after methods.reset(), but
+      // No syncSandbox() here: sandbox is temporarily stale after methods.reset(), but
       // we're about to submit. On success the flyout closes; on failure the user is still
       // in YAML mode and handleToggleYamlMode(false) will resync draft when they switch back.
     }
@@ -535,12 +565,14 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
               responsive={false}
               style={{ marginTop: 8 }}
             >
-              <EuiFlexItem grow>
-                {uiState.yamlMode ? (
+              {uiState.yamlMode ? (
+                <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
                     {YAML_MODE_BADGE_LABEL}
                   </EuiBadge>
-                ) : (
+                </EuiFlexItem>
+              ) : (
+                <EuiFlexItem grow>
                   <HorizontalMinimalStepper
                     steps={steps.map(
                       (s, i): MinimalStep => ({
@@ -549,8 +581,8 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                       })
                     )}
                   />
-                )}
-              </EuiFlexItem>
+                </EuiFlexItem>
+              )}
               {!isBuilderMode && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonGroup
@@ -574,21 +606,22 @@ export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
                   services={baseServices}
                   yamlText={yamlText}
                   setYamlText={handleSetYamlText}
+                  onBlurSync={handleBlurSync}
                   isSubmitting={isSaving}
                 />
               </React.Suspense>
             ) : (
-              <ComposeDiscoverForm
-                state={uiState}
-                dispatch={dispatch}
-                services={baseServices}
-                onRecoveryTypeChange={handleRecoveryTypeChange}
-                onKindChange={handleKindChange}
-                ruleId={ruleId}
-                builderType={builderType}
-                builderState={builderState}
-                onBuilderStateChange={setBuilderState}
-              />
+              <BuilderStateProvider builderState={builderState} setBuilderState={setBuilderState}>
+                <ComposeDiscoverForm
+                  state={uiState}
+                  dispatch={dispatch}
+                  services={baseServices}
+                  onRecoveryTypeChange={handleRecoveryTypeChange}
+                  onKindChange={handleKindChange}
+                  ruleId={ruleId}
+                  builderType={builderType}
+                />
+              </BuilderStateProvider>
             )}
           </EuiFlyoutBody>
 
