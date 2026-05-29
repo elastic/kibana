@@ -29,9 +29,9 @@ node scripts/evals init --skip-discovery
 | ------------------ | ------------------------------------------------------------------ |
 | `--skip-discovery` | Skip EIS model discovery (reuse existing `target/eis_models.json`) |
 
-#### `init config` -- Local config for golden cluster
+#### `init config` -- Configuration profiles for dataset, experiment and trace destinations
 
-Create golden cluster config files interactively.
+Create config files interactively.
 
 ```bash
 node scripts/evals init config
