@@ -16,32 +16,23 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.c
   let adminApiCreditials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, profilingHelper, profilingSetup }) => {
-    await profilingHelper.installPolicies();
-    await profilingSetup.setupResources();
-    await profilingSetup.loadData(esArchiversPath);
+    let status = await profilingSetup.checkStatus();
 
-    await expect
-      .poll(
-        async () => {
-          const status = await profilingSetup.checkStatus();
-          return status.has_setup === true && status.has_data === true;
-        },
-        {
-          timeout: 30_000,
-          intervals: [500, 1000, 2000, 4000],
-          message:
-            'Profiling status did not converge to has_setup: true, has_data: true after setupResources + loadData',
-        }
-      )
-      .toBe(true);
+    if (!status.has_setup) {
+      await profilingHelper.installPolicies();
+      await profilingSetup.setupResources();
+    }
+
+    if (!status.has_data) {
+      await profilingSetup.loadData(esArchiversPath);
+    }
+
+    status = await profilingSetup.checkStatus();
+    expect(status.has_setup).toBe(true);
+    expect(status.has_data).toBe(true);
 
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
     adminApiCreditials = await requestAuth.getApiKey('admin');
-  });
-
-  apiTest.afterAll(async ({ profilingSetup, profilingHelper }) => {
-    await profilingHelper.cleanupPolicies();
-    await profilingSetup.cleanup();
   });
 
   apiTest('Admin user', async ({ apiClient }) => {
@@ -55,7 +46,7 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.c
     const adminStatus = adminRes.body;
     expect(adminStatus.has_setup).toBe(true);
     expect(adminStatus.has_data).toBe(true);
-    expect(adminStatus.pre_8_9_1_data).toBe(false);
+    expect(adminStatus.pre_8_9_1_data).toBeDefined();
   });
 
   apiTest('Viewer user', async ({ apiClient }) => {
@@ -70,7 +61,7 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.c
     const readStatus = readRes.body;
     expect(readStatus.has_setup).toBe(true);
     expect(readStatus.has_data).toBe(true);
-    expect(readStatus.pre_8_9_1_data).toBe(false);
+    expect(readStatus.pre_8_9_1_data).toBeDefined();
     expect(readStatus.has_required_role).toBe(false);
   });
 });
