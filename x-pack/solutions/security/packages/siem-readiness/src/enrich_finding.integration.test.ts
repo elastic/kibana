@@ -92,7 +92,10 @@ describe('enrichFinding integration', () => {
     dimension,
   });
 
-  const createFinding = (resource: string, severity: 'CRITICAL' | 'WARNING' = 'WARNING'): ActionableFinding => ({
+  const createFinding = (
+    resource: string,
+    severity: 'CRITICAL' | 'WARNING' = 'WARNING'
+  ): ActionableFinding => ({
     severity,
     message: `Finding for ${resource}`,
     resource,

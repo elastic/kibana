@@ -263,7 +263,9 @@ describe('enrichFinding', () => {
 
       const caseAction = result.recommendedActions?.find((a) => a.label === 'Open case');
       expect(caseAction).toBeDefined();
-      expect(caseAction?.href).toContain('readiness:retention,warning,logs-endpoint-events-default');
+      expect(caseAction?.href).toContain(
+        'readiness:retention,warning,logs-endpoint-events-default'
+      );
     });
 
     it('should include ILM policies action for retention dimension', () => {
