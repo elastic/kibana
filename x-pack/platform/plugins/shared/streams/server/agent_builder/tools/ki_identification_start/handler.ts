@@ -6,26 +6,23 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { OnboardingStep } from '@kbn/streams-schema';
+import { StreamsKIsOnboardingStep } from '@kbn/streams-schema';
 import { getStreamsLocation } from '../../../../common/get_streams_location/get_streams_location';
-import type { TaskClient } from '../../../lib/tasks/task_client';
-import type { StreamsTaskType } from '../../../lib/tasks/task_definitions';
-import {
-  getOnboardingTaskId,
-  STREAMS_ONBOARDING_TASK_TYPE,
-  type OnboardingTaskParams,
-} from '../../../lib/tasks/task_definitions/onboarding';
+import type {
+  StreamsKIsOnboardingClient,
+  StreamsKIsOnboardingInputs,
+} from '../../../lib/workflows/onboarding_workflow_client';
 
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
 interface StartKiIdentificationHandlerParams {
   streamName: string;
-  steps: OnboardingStep[];
+  steps: StreamsKIsOnboardingStep[];
   connectors?: {
     features?: string;
     queries?: string;
   };
-  taskClient: TaskClient<StreamsTaskType>;
+  streamsKIsOnboardingClient: StreamsKIsOnboardingClient;
   request: KibanaRequest;
 }
 
@@ -37,27 +34,28 @@ export async function startKiIdentificationToolHandler({
   streamName,
   steps,
   connectors,
-  taskClient,
+  streamsKIsOnboardingClient,
   request,
 }: StartKiIdentificationHandlerParams): Promise<StartKiIdentificationHandlerResult> {
-  const taskId = getOnboardingTaskId(streamName);
   const now = Date.now();
+  const skipFeatures = !steps.includes(StreamsKIsOnboardingStep.FeaturesIdentification);
+  const skipQueries = !steps.includes(StreamsKIsOnboardingStep.QueriesGeneration);
 
-  await taskClient.schedule<OnboardingTaskParams>({
-    task: {
-      type: STREAMS_ONBOARDING_TASK_TYPE,
-      id: taskId,
-      space: '*',
+  const inputs: StreamsKIsOnboardingInputs = {
+    streamName,
+    features: {
+      skip: skipFeatures,
+      start: now - DEFAULT_LOOKBACK_MS,
+      end: now,
+      ...(connectors?.features && { connectorId: connectors.features }),
     },
-    params: {
-      streamName,
-      from: now - DEFAULT_LOOKBACK_MS,
-      to: now,
-      steps,
-      connectors,
+    queries: {
+      skip: skipQueries,
+      ...(connectors?.queries && { connectorId: connectors.queries }),
     },
-    request,
-  });
+  };
+
+  await streamsKIsOnboardingClient.run({ inputs, request });
 
   const location = getStreamsLocation({
     name: streamName,

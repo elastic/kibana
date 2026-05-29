@@ -9,13 +9,13 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
   buildCreateRuleData,
   getActionPolicyUrl,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -24,7 +24,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
 
   apiTest.beforeAll(async ({ requestAuth }) => {
     const readerCredentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
-      READ_ROLE
+      ALERTING_V2_ACTION_POLICIES_READ_ROLE
     );
     readerHeaders = { ...readerCredentials.apiKeyHeader };
   });
@@ -159,7 +159,9 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
   apiTest(
     'authorization: 200 with full alerting_v2 privileges',
     async ({ apiClient, apiServices, requestAuth }) => {
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+      const writerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ACTION_POLICIES_ALL_ROLE
+      );
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'writer-can-also-get' })
       );
