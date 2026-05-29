@@ -194,6 +194,14 @@ export class SpacesPlugin
       this.isServerless
     );
 
+    initContextSwitcher(
+      this.spacesManager,
+      core,
+      this.config.allowSolutionVisibility,
+      plugins.cloud,
+      this.isServerless
+    );
+
     return this.spacesApi;
   }
 

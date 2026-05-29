@@ -26,6 +26,10 @@ export function initContextSwitcher(
   cloud?: CloudStart,
   isServerless?: boolean
 ) {
+  if (!core.chrome.next.isEnabled) {
+    return;
+  }
+
   if (core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
     return;
   }

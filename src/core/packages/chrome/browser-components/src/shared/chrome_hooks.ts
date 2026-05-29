@@ -277,7 +277,6 @@ export function useHasAppMenu(): boolean {
  * Returns the current global search configuration, or `undefined` if none is set.
  * Used by `SearchButton` (global header).
  */
-
 export function useGlobalSearch(): GlobalSearchConfig | undefined {
   const chrome = useChromeService();
   const config$ = useMemo(() => chrome.next.globalSearch.get$(), [chrome]);

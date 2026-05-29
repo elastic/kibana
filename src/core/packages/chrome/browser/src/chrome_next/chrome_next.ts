@@ -116,9 +116,7 @@ export interface ChromeNext {
   };
   contextSwitcher: {
     /**
-     * Set the context switcher content for the Chrome-Next global header.
-     * The provided ReactNode is rendered as-is in the header's context switcher slot.
-     * The consumer owns the full UI (context switcher trigger button, popover, menu items).
+     * Set the context switcher content for the Chrome-Next header.
      * Pass `undefined` to remove. Global — persists across app changes.
      */
     set(content?: ReactNode): void;
