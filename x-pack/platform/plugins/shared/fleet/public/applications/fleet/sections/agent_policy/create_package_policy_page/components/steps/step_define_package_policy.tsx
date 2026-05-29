@@ -506,7 +506,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           data-test-subj="packagePolicyNamespaceCustomizationToggle"
                           label={i18n.translate(
                             'xpack.fleet.createPackagePolicy.namespaceCustomization.label',
-                            { defaultMessage: 'Use a dedicated index template for this namespace' }
+                            { defaultMessage: 'Use dedicated index templates for this namespace' }
                           )}
                           checked={namespaceCustomizationEnabled}
                           disabled={isNamespaceCustomizationInputDisabled}
