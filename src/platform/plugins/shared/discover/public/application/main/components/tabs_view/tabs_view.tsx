@@ -84,7 +84,7 @@ export const TabsView = (props: SingleTabViewProps) => {
         text: i18n.translate('discover.tabs.tabLimitReachedWarningText', {
           defaultMessage:
             'The last {droppedCount, plural, one {# tab} other {# tabs}} in the group {droppedCount, plural, one {was} other {were}} not restored because the maximum number of {maxTabs} tabs has been reached.',
-          values: { droppedCount, maxTabs: MAX_TABS_COUNT },
+          values: { droppedCount, maxTabs: MAX_DISCOVER_SESSION_TABS },
         }),
       });
     },
