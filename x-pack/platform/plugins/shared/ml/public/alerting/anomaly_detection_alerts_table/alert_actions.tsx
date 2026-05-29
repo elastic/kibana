@@ -105,7 +105,6 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
             data-test-subj="add-to-existing-case-action"
             key="addToExistingCase"
             onClick={handleAddToExistingCaseClick}
-            size="s"
           >
             {i18n.translate('xpack.ml.alerts.actions.addToCase', {
               defaultMessage: 'Add to existing case',
@@ -115,7 +114,6 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
             data-test-subj="add-to-new-case-action"
             key="addToNewCase"
             onClick={handleAddToNewCaseClick}
-            size="s"
           >
             {i18n.translate('xpack.ml.alerts.actions.addToNewCase', {
               defaultMessage: 'Add to new case',
@@ -162,11 +160,7 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
         isOpen={isPopoverOpen}
         panelPaddingSize="none"
       >
-        <EuiContextMenuPanel
-          size="s"
-          items={actionsMenuItems}
-          data-test-subj="alertsTableActionsMenu"
-        />
+        <EuiContextMenuPanel items={actionsMenuItems} data-test-subj="alertsTableActionsMenu" />
       </EuiPopover>
     </>
   );

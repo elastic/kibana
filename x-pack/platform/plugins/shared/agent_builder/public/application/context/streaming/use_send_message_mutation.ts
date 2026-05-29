@@ -7,6 +7,7 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback, useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom } from 'rxjs';
@@ -19,11 +20,12 @@ import type {
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type {
   Attachment,
-  AttachmentInput,
+  ConversationAttachment,
   ScreenContextAttachmentData,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { flattenAttachments } from '../conversation/flatten_attachments';
 import { queryKeys } from '../../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import type { StartServices } from '../../hooks/use_kibana';
@@ -32,8 +34,17 @@ import { mutationKeys } from '../../mutation_keys';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
+import {
+  insertSidebarConversationListRow,
+  removeSidebarConversationListRow,
+} from '../../utils/conversation_sidebar_list_cache';
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
+
+const optimisticConversationListTitle = i18n.translate(
+  'xpack.agentBuilder.conversationList.optimisticNewConversationTitle',
+  { defaultMessage: 'New conversation' }
+);
 
 export interface SendMessageVars {
   message?: string;
@@ -41,7 +52,7 @@ export interface SendMessageVars {
   conversationId: string;
   agentId: string;
   connectorId?: string;
-  attachments?: AttachmentInput[];
+  attachments?: ConversationAttachment[];
   conversationAttachments?: VersionedAttachment[];
   lastRoundSteps?: ConversationRoundStep[];
   resetAttachments?: () => void;
@@ -167,6 +178,7 @@ export const useSendMessageMutation = ({
       const controller = new AbortController();
       controllersRef.current.set(vars.conversationId, controller);
 
+      let hasInsertedOptimisticListRow = false;
       if (isRegenerate) {
         // Clear the existing response immediately so UI shows empty state.
         streamActions.clearLastRoundResponse();
@@ -175,9 +187,15 @@ export const useSendMessageMutation = ({
           throw new Error('Message is required');
         }
         setPendingMessage(vars.conversationId, vars.message);
+        hasInsertedOptimisticListRow = await insertSidebarConversationListRow({
+          queryClient,
+          agentId: vars.agentId,
+          conversationId: vars.conversationId,
+          title: optimisticConversationListTitle,
+        });
         await streamActions.addOptimisticRound({
           userMessage: vars.message,
-          attachments: vars.attachments ?? [],
+          attachments: flattenAttachments(vars.attachments ?? []),
           agentId: vars.agentId,
         });
       }
@@ -201,7 +219,7 @@ export const useSendMessageMutation = ({
               agentId: vars.agentId,
               connectorId: vars.connectorId,
               attachments: [
-                ...(vars.attachments ?? []),
+                ...flattenAttachments(vars.attachments ?? []),
                 ...(await withScreenContextAttachment({
                   services,
                   conversationAttachments: vars.conversationAttachments,
@@ -245,6 +263,13 @@ export const useSendMessageMutation = ({
           cached?.rounds?.at(-1)?.status === ConversationRoundStatus.awaitingPrompt;
         if (succeeded && !endedInAwaitingPrompt) {
           streamActions.invalidateConversation();
+        }
+        if (!succeeded && hasInsertedOptimisticListRow) {
+          removeSidebarConversationListRow({
+            queryClient,
+            agentId: vars.agentId,
+            conversationId: vars.conversationId,
+          });
         }
         clearActiveStream(vars.conversationId);
         if (controllersRef.current.get(vars.conversationId) === controller) {

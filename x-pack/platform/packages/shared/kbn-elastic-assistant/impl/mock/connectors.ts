@@ -21,6 +21,8 @@ export const mockActionTypes = [
     subFeature: undefined,
     isDeprecated: false,
     allowMultipleSystemActions: undefined,
+    description: undefined,
+    isExperimental: undefined,
   } as ActionType,
   {
     id: '.bedrock',
@@ -34,6 +36,8 @@ export const mockActionTypes = [
     subFeature: undefined,
     isDeprecated: false,
     allowMultipleSystemActions: undefined,
+    description: undefined,
+    isExperimental: undefined,
   } as ActionType,
   {
     id: '.gemini',
@@ -47,6 +51,8 @@ export const mockActionTypes = [
     subFeature: undefined,
     isDeprecated: false,
     allowMultipleSystemActions: undefined,
+    description: undefined,
+    isExperimental: undefined,
   } as ActionType,
 ];
 

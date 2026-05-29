@@ -23,12 +23,18 @@ const ActionIdSchema = schema.object({
 });
 
 const ActionIdOrMessageSchema = schema.oneOf([
-  schema.object({
-    actionId: schema.string(),
-  }),
-  schema.object({
-    message: schema.string(),
-  }),
+  schema.object(
+    {
+      actionId: schema.string(),
+    },
+    { meta: { id: 'action_id_response' } }
+  ),
+  schema.object(
+    {
+      message: schema.string(),
+    },
+    { meta: { id: 'action_message_response' } }
+  ),
 ]);
 
 export const GetAgentsRequestSchema = {
@@ -241,6 +247,7 @@ export const AgentResponseSchema = schema.object({
     )
   ),
   status: schema.maybe(AgentStatusSchema),
+  pipeline_config: schema.maybe(schema.string({ maxLength: 10000 })),
   last_known_status: schema.maybe(AgentStatusSchema),
   packages: schema.arrayOf(schema.string(), { maxSize: 10000 }),
   sort: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 10 })), // ES can return many different types for `sort` array values, including unsafe numbers
@@ -377,6 +384,7 @@ export const AgentResponseSchema = schema.object({
   capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   health: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   effective_config: schema.maybe(schema.any()),
+  signals: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({
@@ -505,6 +513,35 @@ export const PostBulkAgentUnenrollRequestSchema = {
       schema.boolean({
         meta: {
           description: 'When passing agents by KQL query, unenrolls inactive agents too',
+        },
+      })
+    ),
+  }),
+};
+
+export const PostRemoveCollectorRequestSchema = {
+  params: schema.object({
+    agentId: schema.string({ meta: { description: 'The collector agent ID' } }),
+  }),
+};
+
+export const PostBulkRemoveCollectorsRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([
+      schema.arrayOf(
+        schema.string({
+          meta: { description: 'List of collector agent IDs' },
+        }),
+        { maxSize: 10000 }
+      ),
+      schema.string({
+        meta: { description: 'KQL query string. Leave empty to target all collectors' },
+      }),
+    ]),
+    includeInactive: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'When passing collectors by KQL query, also removes inactive collectors',
         },
       })
     ),

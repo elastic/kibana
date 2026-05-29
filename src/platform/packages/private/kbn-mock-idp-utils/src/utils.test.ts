@@ -42,8 +42,7 @@ jest.mock('./cosmos_db_seeder', () => ({
 describe('mock-idp-utils', () => {
   describe('createMockIdpMetadata', () => {
     it('should generate valid XML metadata with correct entity ID', async () => {
-      const kibanaUrl = 'http://localhost:5601';
-      const metadata = await createMockIdpMetadata(kibanaUrl);
+      const metadata = await createMockIdpMetadata();
 
       expect(metadata).toContain('<?xml version="1.0" encoding="UTF-8"?>');
       expect(metadata).toContain(`entityID="${MOCK_IDP_ENTITY_ID}"`);
@@ -52,25 +51,15 @@ describe('mock-idp-utils', () => {
     });
 
     it('should include correct SSO service locations', async () => {
-      const kibanaUrl = 'http://localhost:5601';
-      const metadata = await createMockIdpMetadata(kibanaUrl);
+      const metadata = await createMockIdpMetadata();
 
-      expect(metadata).toContain(`Location="${kibanaUrl}${MOCK_IDP_LOGIN_PATH}"`);
-      expect(metadata).toContain(`Location="${kibanaUrl}${MOCK_IDP_LOGOUT_PATH}"`);
+      expect(metadata).toContain(`Location="http://localhost:5601${MOCK_IDP_LOGIN_PATH}"`);
+      expect(metadata).toContain(`Location="http://localhost:5601${MOCK_IDP_LOGOUT_PATH}"`);
       expect(metadata).toContain('HTTP-Redirect');
     });
 
-    it('should trim trailing slash from kibana URL', async () => {
-      const kibanaUrl = 'http://localhost:5601/';
-      const metadata = await createMockIdpMetadata(kibanaUrl);
-
-      expect(metadata).toContain('http://localhost:5601/mock_idp');
-      expect(metadata).not.toContain('http://localhost:5601//mock_idp');
-    });
-
     it('should include X509 certificate data', async () => {
-      const kibanaUrl = 'http://localhost:5601';
-      const metadata = await createMockIdpMetadata(kibanaUrl);
+      const metadata = await createMockIdpMetadata();
 
       expect(metadata).toContain('ds:X509Certificate');
       expect(metadata).toContain('KeyDescriptor');
@@ -79,7 +68,6 @@ describe('mock-idp-utils', () => {
 
   describe('createSAMLResponse', () => {
     const baseOptions = {
-      kibanaUrl: 'http://localhost:5601/api/security/saml/callback',
       username: 'testuser',
       full_name: 'Test User',
       email: 'test@elastic.co',

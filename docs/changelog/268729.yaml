@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/268729
+issues:
+- https://github.com/elastic/kibana/issues/267482
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+areas:
+- Dashboards and visualizations
+title: Fix legend size for vertical placements
+description: The Lens API now returns correctly an XY chart configured with legend in the top or bottom positions.

@@ -13,7 +13,11 @@ import type {
   PersistableStateAttachmentPayload,
   ExternalReferenceAttachmentPayload,
 } from '../../../common/types/domain';
-import { LEGACY_FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import type { UnifiedReferenceAttachmentPayload } from '../../../common/types/domain/attachment/v2';
+import {
+  LEGACY_FILE_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+} from '../../../common/constants';
 import type { FileAttachmentRequest } from '../types';
 
 export const createUserRequests = (num: number): UserCommentAttachmentPayload[] => {
@@ -110,4 +114,15 @@ export const createAlertRequests = (
   });
 
   return requests;
+};
+
+export const createUnifiedAlertRequests = (
+  numberOfRequests: number,
+  attachmentIds: string | string[]
+): UnifiedReferenceAttachmentPayload[] => {
+  return Array.from({ length: numberOfRequests }, (_, value) => ({
+    type: SECURITY_ALERT_ATTACHMENT_TYPE,
+    attachmentId: attachmentIds,
+    owner: `${value}`,
+  }));
 };

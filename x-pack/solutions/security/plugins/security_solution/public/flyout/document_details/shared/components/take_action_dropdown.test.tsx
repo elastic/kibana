@@ -106,7 +106,6 @@ describe('take action dropdown', () => {
       dataFormattedForFieldBrowser: mockAlertDetailsData as TimelineEventsDetailsItem[],
       dataAsNestedObject: getDetectionAlertMock(),
       handleOnEventClosed: jest.fn(),
-      isHostIsolationPanelOpen: false,
       onAddEventFilterClick: jest.fn(),
       onAddExceptionTypeClick: jest.fn(),
       onAddIsolationStatusClick: jest.fn(),

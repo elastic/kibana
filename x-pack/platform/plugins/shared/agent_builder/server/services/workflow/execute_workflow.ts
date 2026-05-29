@@ -7,26 +7,14 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { safeJsonStringify } from '@kbn/std';
-import { ExecutionStatus as WorkflowExecutionStatus } from '@kbn/workflows/types/v1';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
-import {
-  getExecutionState,
-  type WorkflowExecutionState,
-} from '@kbn/agent-builder-tools-base/workflows';
+import { toWorkflowExecutionState } from '@kbn/agent-builder-tools-base/workflows';
 import type { WorkflowExecutionResult } from './types';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
 
 const DEFAULT_COMPLETION_TIMEOUT_SEC = 120;
-const INITIAL_WAIT_MS = 1_000;
-const CHECK_INTERVAL_MS = 2_500;
-
-const finalStatuses = [
-  WorkflowExecutionStatus.COMPLETED,
-  WorkflowExecutionStatus.FAILED,
-  WorkflowExecutionStatus.WAITING_FOR_INPUT,
-];
 
 export interface ExecuteWorkflowParams {
   workflowId: string;
@@ -49,100 +37,56 @@ export const executeWorkflow = async ({
   completionTimeoutSec = DEFAULT_COMPLETION_TIMEOUT_SEC,
   metadata,
 }: ExecuteWorkflowParams): Promise<WorkflowExecutionResult> => {
-  const workflow = await workflowApi.getWorkflow(workflowId, spaceId);
-
-  if (!workflow) {
-    return { success: false, error: `Workflow '${workflowId}' not found.` };
-  }
-  if (!workflow.enabled) {
-    return {
-      success: false,
-      error: `Workflow '${workflowId}' is disabled and cannot be executed.`,
-    };
-  }
-  if (!workflow.valid) {
-    return {
-      success: false,
-      error: `Workflow '${workflowId}' has validation errors and cannot be executed.`,
-    };
-  }
-  const definition = workflow.definition;
-  if (!definition) {
-    return {
-      success: false,
-      error: `Workflow '${workflowId}' has no definition and cannot be executed.`,
-    };
-  }
-
-  const workflowForExecution = {
-    id: workflow.id,
-    name: workflow.name,
-    enabled: workflow.enabled,
-    definition,
-    yaml: workflow.yaml,
-  };
-
   return withActiveInferenceSpan(
-    `Workflow: ${workflow.name}`,
+    `Workflow: ${workflowId}`,
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
-        'elastic.workflow.id': workflow.id,
-        'elastic.workflow.name': workflow.name,
+        'elastic.workflow.id': workflowId,
         'input.value': safeJsonStringify(workflowParams) ?? '{}',
       },
     },
     async (span) => {
-      const executionId = await workflowApi.runWorkflow(
-        workflowForExecution,
-        spaceId,
-        workflowParams,
-        request,
-        undefined,
-        metadata
-      );
+      try {
+        const executeResult = await workflowApi.executeWorkflow({
+          workflowId,
+          inputs: workflowParams,
+          request,
+          spaceId,
+          waitForCompletion,
+          completionTimeoutSec,
+          metadata,
+        });
 
-      span?.setAttribute('elastic.workflow.execution_id', executionId);
+        span?.setAttribute('elastic.workflow.execution_id', executeResult.workflowExecutionId);
 
-      const waitLimit = Date.now() + completionTimeoutSec * 1000;
-      await waitMs(INITIAL_WAIT_MS);
-
-      let execution: WorkflowExecutionState | null | undefined;
-      do {
-        try {
-          execution = await getExecutionState({ executionId, spaceId, workflowApi });
-
-          const shouldReturn = waitForCompletion
-            ? execution && finalStatuses.includes(execution.status)
-            : execution;
-
-          if (shouldReturn && execution) {
-            const result: WorkflowExecutionResult = { success: true, execution };
-            span?.setAttribute('output.value', safeJsonStringify(result) ?? 'unknown');
-            return result;
-          }
-        } catch (e) {
-          // trap - we just keep waiting until timeout
+        if (executeResult.execution) {
+          span?.setAttribute(
+            'elastic.workflow.name',
+            executeResult.execution.workflowDefinition.name
+          );
+          const result: WorkflowExecutionResult = {
+            success: true,
+            execution: toWorkflowExecutionState(executeResult.execution),
+          };
+          span?.setAttribute('output.value', safeJsonStringify(result) ?? 'unknown');
+          return result;
         }
 
-        await waitMs(CHECK_INTERVAL_MS);
-      } while (Date.now() < waitLimit);
-
-      if (execution) {
-        const result: WorkflowExecutionResult = { success: true, execution };
+        const result: WorkflowExecutionResult = {
+          success: false,
+          error: `Workflow '${workflowId}' executed but execution not found after ${completionTimeoutSec}s.`,
+        };
+        span?.setAttribute('output.value', safeJsonStringify(result) ?? 'unknown');
+        return result;
+      } catch (e) {
+        const result: WorkflowExecutionResult = {
+          success: false,
+          error: e instanceof Error ? e.message : String(e),
+        };
         span?.setAttribute('output.value', safeJsonStringify(result) ?? 'unknown');
         return result;
       }
-
-      const result: WorkflowExecutionResult = {
-        success: false,
-        error: `Workflow '${workflowId}' executed but execution not found after ${completionTimeoutSec}s.`,
-      };
-      span?.setAttribute('output.value', safeJsonStringify(result) ?? 'unknown');
-      return result;
     }
   );
 };
-
-const waitMs = (durationMs: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, durationMs));

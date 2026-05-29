@@ -107,7 +107,7 @@ export const TakeAction = memo(({ indicator }: TakeActionProps) => {
         anchorPosition="downLeft"
         data-test-subj={TAKE_ACTION_BUTTON_TEST_ID}
       >
-        <EuiContextMenuPanel size="s" items={items} />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
 
       {blockListIndicatorValue && (

@@ -7,49 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext, SavedObjectsFindOptionsReference } from '@kbn/core/server';
+import { SEARCH_ROUTE_PATH } from '../../common/constants';
+import { searchLibraryRequestSchema, searchLibraryResponseSchema } from './types';
 
 export function registerSearchRoute(router: IRouter<RequestHandlerContext>) {
   router.post(
     {
-      path: '/internal/embeddable/fetch_saved_objects',
+      path: SEARCH_ROUTE_PATH,
       validate: {
         request: {
-          body: schema.object({
-            type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
-            search: schema.maybe(schema.string()),
-            limit: schema.maybe(schema.number()),
-            tags: schema.maybe(
-              schema.object({
-                included: schema.arrayOf(schema.string()),
-                excluded: schema.arrayOf(schema.string()),
-              })
-            ),
-          }),
+          body: searchLibraryRequestSchema,
         },
         response: {
           200: {
-            body: () =>
-              schema.object({
-                hits: schema.arrayOf(schema.any()),
-                total: schema.number(),
-              }),
+            body: () => searchLibraryResponseSchema,
             description: 'success',
+          },
+          403: {
+            description: 'forbidden',
           },
         },
       },
       security: {
         authz: {
-          requiredPrivileges: ['read'],
+          enabled: false,
+          reason:
+            'This route delegates authorization because the it is just a wrapper around the Saved Object client',
         },
       },
     },
     async (ctx, req, res) => {
-      console.log('MADE IT HERE', { body: JSON.stringify(req.body, null, 2) });
       const { core } = await ctx.resolve(['core']);
       const { type, search, tags, limit } = req.body;
+
+      const tagIdToSavedObjectReference = (tagId: string): SavedObjectsFindOptionsReference => ({
+        type: 'tag',
+        id: tagId,
+      });
 
       try {
         const savedObjectResult = await core.savedObjects.client.find({
@@ -61,7 +57,6 @@ export function registerSearchRoute(router: IRouter<RequestHandlerContext>) {
           hasReference: tags?.included?.map(tagIdToSavedObjectReference),
           hasNoReference: tags?.excluded?.map(tagIdToSavedObjectReference),
         });
-        console.log({ savedObjectResult });
         return res.ok({
           body: { hits: savedObjectResult.saved_objects, total: savedObjectResult.total },
         });
@@ -71,8 +66,3 @@ export function registerSearchRoute(router: IRouter<RequestHandlerContext>) {
     }
   );
 }
-
-const tagIdToSavedObjectReference = (tagId: string): SavedObjectsFindOptionsReference => ({
-  type: 'tag',
-  id: tagId,
-});

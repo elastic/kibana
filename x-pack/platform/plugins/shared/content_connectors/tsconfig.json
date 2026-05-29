@@ -58,6 +58,7 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/home-plugin",
     "@kbn/logging",
-    "@kbn/shared-ux-ai-components"
+    "@kbn/shared-ux-ai-components",
+    "@kbn/deeplinks-management"
   ]
 }

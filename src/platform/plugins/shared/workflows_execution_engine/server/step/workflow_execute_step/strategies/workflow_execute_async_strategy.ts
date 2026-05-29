@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { JsonObject } from '@kbn/utility-types';
 import type { EsWorkflow } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
@@ -59,7 +60,7 @@ export class WorkflowExecuteAsyncStrategy {
       );
 
       // Return step output for the impl to persist
-      const stepOutput: Record<string, unknown> = {
+      const stepOutput: JsonObject = {
         workflowId: workflow.id,
         executionId: workflowExecutionId,
         awaited: false,
