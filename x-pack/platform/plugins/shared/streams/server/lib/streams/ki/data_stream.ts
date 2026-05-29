@@ -21,10 +21,6 @@ export const KNOWLEDGE_INDICATORS_DATA_STREAM = '.significant_events-knowledge_i
  *  - Root-level shared KI fields (`id`, `type`, `title`, `description`, …).
  *  - `feature.*` payload populated when `type === 'feature'`.
  *  - `query.*` payload populated when `type === 'query'`.
- *
- * Heterogeneous fields like `feature.properties`, `feature.meta`, and
- * `feature.filter` are stored as opaque JSON via `dynamic: false`; query.esql
- * is a `match_only_text` to keep the source intact while staying searchable.
  */
 export const knowledgeIndicatorsMappings = {
   dynamic: false,
