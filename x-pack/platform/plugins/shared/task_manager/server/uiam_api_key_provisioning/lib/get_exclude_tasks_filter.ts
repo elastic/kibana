@@ -8,10 +8,11 @@
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import { nodeBuilder } from '@kbn/es-query';
 import {
+  PERMANENT_UIAM_CONVERSION_ERROR_CODES,
   UiamApiKeyProvisioningEntityType,
   UiamApiKeyProvisioningStatus,
 } from '@kbn/uiam-api-keys-provisioning-status';
-import { GET_STATUS_BATCH_SIZE, PERMANENT_UIAM_CONVERSION_ERROR_CODES } from '../constants';
+import { GET_STATUS_BATCH_SIZE } from '../constants';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../uiam_api_keys_provisioning_status_saved_object';
 
 /**

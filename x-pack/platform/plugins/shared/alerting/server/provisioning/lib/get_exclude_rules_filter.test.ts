@@ -6,12 +6,12 @@
  */
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import {
   API_KEY_CREATOR_NOT_ORG_MEMBER_ERROR_CODE,
   NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE,
   PERMANENT_UIAM_CONVERSION_ERROR_CODES,
-} from '../constants';
+} from '@kbn/uiam-api-keys-provisioning-status';
+import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import {
   UiamApiKeyProvisioningStatus,
   UiamApiKeyProvisioningEntityType,
