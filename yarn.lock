@@ -6681,6 +6681,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/discoveries-plugin@link:x-pack/solutions/security/plugins/discoveries":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discoveries-schemas@link:x-pack/solutions/security/packages/kbn-discoveries-schemas":
   version "0.0.0"
   uid ""
