@@ -7,41 +7,85 @@
 
 import { Builder } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLAstItem, ESQLMapEntry } from '@elastic/esql/types';
-import type { UserAgentProcessor } from '../../../../types/processors';
-import { conditionToESQLAst } from '../condition_to_esql';
-import { buildIgnoreMissingFilter, buildWhereCondition } from './common';
+import { isAlwaysCondition } from '../../../../types/conditions';
+import type { UserAgentProcessor, UserAgentProperty } from '../../../../types/processors';
+import {
+  buildCoalescePrefixedFieldsEval,
+  buildConditionalEval,
+  buildDropColumns,
+  buildIgnoreMissingFilter,
+} from './common';
+
+const internalColumnPrefix = '__streamlang_user_agent';
+const internalExpressionColumn = '__streamlang_user_agent_expression';
+
+const DEFAULT_USER_AGENT_PROPERTIES: UserAgentProperty[] = ['name', 'version', 'os', 'device'];
+
+/**
+ * Leaf field paths (relative to the target prefix) that USER_AGENT may populate.
+ * See https://www.elastic.co/docs/reference/query-languages/esql/commands/user-agent
+ */
+function getUserAgentSubfields(
+  properties: UserAgentProperty[] | undefined,
+  extractDeviceType: boolean | undefined
+): string[] {
+  const effectiveProperties = properties ?? DEFAULT_USER_AGENT_PROPERTIES;
+  const fields: string[] = [];
+
+  for (const property of effectiveProperties) {
+    switch (property) {
+      case 'name':
+        fields.push('name');
+        break;
+      case 'version':
+        fields.push('version');
+        break;
+      case 'os':
+        fields.push('os.name', 'os.version', 'os.full');
+        break;
+      case 'device':
+        fields.push('device.name');
+        if (extractDeviceType) {
+          fields.push('device.type');
+        }
+        break;
+      case 'original':
+        break;
+    }
+  }
+
+  return fields;
+}
 
 /**
  * Converts a Streamlang UserAgentProcessor into a list of ES|QL AST commands.
  *
- * The user_agent processor extracts details from browser user agent strings
- * including browser name, version, OS, and device information.
+ *  1. `WHERE NOT(<from> IS NULL)` pre-filter when `ignore_missing: false`.
+ *  2. If `where` is set (and not `{ always: true }`), gate the input through
+ *     `EVAL __streamlang_user_agent_expression = CASE(<where>, <from>, NULL)`.
+ *     The NULL fallback (not the helper's default `""`) makes USER_AGENT(NULL)
+ *     emit all-null sub-fields on rows failing the condition, so the temp
+ *     output stays empty and the COALESCE merge preserves prior `<to>.*` values.
+ *  3. `USER_AGENT __streamlang_user_agent = <input>` — parse into a temp prefix
+ *     so the user's target fields are never written by the command directly.
+ *     USER_AGENT is destructive: it nullifies sub-fields when parsing yields
+ *     no value (failed parse, blank or null input), which would clobber any
+ *     pre-existing `<to>.*` data if we wrote into the target directly.
+ *  4. `EVAL <to>.<f> = COALESCE(__streamlang_user_agent.<f>, <to>.<f>), ...`
+ *     merges the parsed sub-fields into `<to>.*`, preferring the new value
+ *     but preserving the prior value whenever the parse produced null. This
+ *     is the destructive-overwrite fix.
+ *  5. Unless `properties` excludes it, `EVAL <to>.original = COALESCE(<input>,
+ *     <to>.original)` writes the source string into `<to>.original` whenever
+ *     the processor ran (matching the ingest USER_AGENT processor, which always
+ *     stores the input in `<target>.original`). On gated rows the input is
+ *     NULL, so COALESCE preserves the prior value.
+ *  6. `DROP __streamlang_user_agent.<f>, ..., __streamlang_user_agent_expression`
+ *     to clean up the temp columns introduced in steps 2–3.
  *
- * Conditional execution logic:
- *  - Emit `USER_AGENT target = source` when no `where` clause.
- *  - When `where` is provided, use inline CASE so parsing is skipped unless the condition holds:
- *      * USER_AGENT target = CASE(condition, source, "") WITH {...}
- *
- * @example
- *    ```typescript
- *    const processor: UserAgentProcessor = {
- *      action: 'user_agent',
- *      from: 'user_agent.original',
- *      to: 'parsed_agent',
- *      regex_file: 'myregexes.yaml',
- *      extract_device_type: true,
- *    };
- *    ```
- *
- *    Generates:
- *    ```txt
- *    | USER_AGENT parsed_agent = user_agent.original WITH {"regex_file": "myregexes.yaml", "extract_device_type": true}
- *    | EVAL parsed_agent.original = user_agent.original
- *    ```
- *
- * ES|QL does not populate `target.original` (unlike the ingest user_agent processor). When `properties` is omitted
- * or includes `original`, we emit `EVAL target.original = <source>` using the same source expression as the
- * USER_AGENT command. `original` is never passed in WITH `properties` because ES|QL does not accept it there.
+ * Mirrors the pattern used by `registered_domain` and `uri_parts`. The set of
+ * sub-fields to COALESCE-merge depends on `properties` and `extract_device_type`,
+ * so it is computed dynamically (see `getUserAgentSubfields`).
  */
 export function convertUserAgentProcessorToESQL(processor: UserAgentProcessor): ESQLAstCommand[] {
   const {
@@ -54,27 +98,34 @@ export function convertUserAgentProcessorToESQL(processor: UserAgentProcessor): 
     where,
   } = processor;
 
+  const isConditional = Boolean(where && !isAlwaysCondition(where));
+
   const commands: ESQLAstCommand[] = [];
   const missingFieldFilter = buildIgnoreMissingFilter(ignore_missing, from);
   if (missingFieldFilter) {
     commands.push(missingFieldFilter);
   }
 
-  const fromColumn = Builder.expression.column(from);
-  const toColumn = Builder.expression.column(to);
-  let conditionalSource: ESQLAstItem = fromColumn;
-
-  if (where) {
-    const userAgentCondition = buildWhereCondition(from, ignore_missing, where, conditionToESQLAst);
-    conditionalSource = Builder.expression.func.call('CASE', [
-      userAgentCondition,
-      fromColumn,
-      Builder.expression.literal.string(''),
-    ]);
+  let sourceExpression = from;
+  if (isConditional) {
+    // Use NULL (not the helper's default `""`) as the gated-row sentinel: per
+    // ES|QL's USER_AGENT command, a NULL input emits NULL across every output
+    // sub-field, so the COALESCE merge below naturally preserves prior `<to>.*`
+    // values on rows that failed `where`. See the contract on
+    // `buildConditionalEval` and the parallel use in `uri_parts`.
+    commands.push(
+      buildConditionalEval(where!, from, internalExpressionColumn, Builder.expression.literal.nil())
+    );
+    sourceExpression = internalExpressionColumn;
   }
 
-  const args: ESQLAstItem[] = [Builder.expression.func.binary('=', [toColumn, conditionalSource])];
-  const cmd = Builder.command({ name: 'user_agent', args });
+  const userAgentArgs: ESQLAstItem[] = [
+    Builder.expression.func.binary('=', [
+      Builder.expression.column(internalColumnPrefix),
+      Builder.expression.column(sourceExpression),
+    ]),
+  ];
+  const cmd = Builder.command({ name: 'user_agent', args: userAgentArgs });
   const mapEntries: ESQLMapEntry[] = [];
 
   if (regex_file) {
@@ -115,15 +166,35 @@ export function convertUserAgentProcessorToESQL(processor: UserAgentProcessor): 
 
   commands.push(cmd);
 
+  const subfields = getUserAgentSubfields(properties, extract_device_type);
+  if (subfields.length > 0) {
+    commands.push(buildCoalescePrefixedFieldsEval(subfields, internalColumnPrefix, to));
+  }
+
   const includeOriginal = properties?.includes('original') ?? true;
   if (includeOriginal) {
-    const originalTarget = Builder.expression.column(`${to}.original`);
     commands.push(
       Builder.command({
         name: 'eval',
-        args: [Builder.expression.func.binary('=', [originalTarget, conditionalSource])],
+        args: [
+          Builder.expression.func.binary('=', [
+            Builder.expression.column(`${to}.original`),
+            Builder.expression.func.call('COALESCE', [
+              Builder.expression.column(sourceExpression),
+              Builder.expression.column(`${to}.original`),
+            ]),
+          ]),
+        ],
       })
     );
+  }
+
+  const dropColumns = subfields.map((field) => `${internalColumnPrefix}.${field}`);
+  if (isConditional) {
+    dropColumns.push(internalExpressionColumn);
+  }
+  if (dropColumns.length > 0) {
+    commands.push(buildDropColumns(dropColumns));
   }
 
   return commands;

@@ -29,10 +29,13 @@ apiTest.describe(
       const { query } = await transpile(streamlangDSL);
 
       expect(query).toContain('USER_AGENT');
+      expect(query).toContain('__streamlang_user_agent');
+      expect(query).toContain('COALESCE');
       expect(query).toContain('parsed_agent');
       expect(query).toContain('`http.user_agent`');
       expect(query).toContain('EVAL');
       expect(query).toContain('`parsed_agent.original`');
+      expect(query).toContain('DROP');
     });
 
     apiTest('should generate USER_AGENT command with default target field', async () => {
@@ -185,7 +188,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'should use the same CASE expression for USER_AGENT and original EVAL when where is set',
+      'should gate input with NULL sentinel and COALESCE original when where is set',
       async () => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
@@ -202,10 +205,14 @@ apiTest.describe(
         const { query } = await transpile(streamlangDSL);
 
         expect(query).toContain('USER_AGENT');
+        expect(query).toContain('__streamlang_user_agent_expression');
         expect(query).toContain('CASE');
         expect(query).toContain('keep');
-        expect(query).toContain('`parsed_agent.original`');
-        expect(query.match(/CASE\(/g) ?? []).toHaveLength(2);
+        expect(query).toContain('NULL');
+        expect(query).toContain(
+          'COALESCE(__streamlang_user_agent_expression, `parsed_agent.original`)'
+        );
+        expect(query.match(/CASE\(/g) ?? []).toHaveLength(1);
       }
     );
 
@@ -253,11 +260,13 @@ apiTest.describe(
       const { query } = await transpile(streamlangDSL);
 
       expect(query).toContain('USER_AGENT');
+      expect(query).toContain('__streamlang_user_agent_expression');
       expect(query).toContain('CASE');
       expect(query).toContain('should_parse');
-      expect(query).toContain('EVAL');
+      expect(query).toContain('NULL');
+      expect(query).toContain('COALESCE');
       expect(query).toContain('`parsed_agent.original`');
-      expect(query.match(/CASE\(/g) ?? []).toHaveLength(2);
+      expect(query.match(/CASE\(/g) ?? []).toHaveLength(1);
     });
 
     [

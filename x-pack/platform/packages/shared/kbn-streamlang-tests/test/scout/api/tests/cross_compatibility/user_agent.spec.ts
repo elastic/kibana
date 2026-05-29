@@ -149,6 +149,82 @@ apiTest.describe(
       }
     );
 
+    apiTest(
+      'should preserve pre-existing target sub-fields when parsing is skipped or fails (destruction-fix parity)',
+      async ({ testBed, esql }) => {
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'user_agent',
+              from: 'agent_string',
+              to: 'user_agent',
+              where: { field: 'should_parse', eq: true },
+            } as UserAgentProcessor,
+          ],
+        };
+
+        const priorUserAgent = {
+          name: 'prior-browser',
+          version: 'test',
+          original: 'prior-ua-string',
+          os: { name: 'prior-os' },
+        };
+
+        const docs = [
+          {
+            case: 'processed',
+            should_parse: true,
+            agent_string:
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/91.0.4472.124',
+            user_agent: priorUserAgent,
+          },
+          {
+            case: 'skipped',
+            should_parse: false,
+            agent_string: 'not-a-valid-user-agent-for-parsing',
+            user_agent: priorUserAgent,
+          },
+          {
+            case: 'failed-parse',
+            should_parse: true,
+            agent_string: 'test',
+            user_agent: priorUserAgent,
+          },
+        ];
+
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
+
+        await testBed.ingest('ingest-user-agent-preserve', docs, processors);
+        const ingestResult = await testBed.getFlattenedDocsOrdered('ingest-user-agent-preserve');
+
+        await testBed.ingest('esql-user-agent-preserve', docs);
+        const esqlResult = await esql.queryOnIndex('esql-user-agent-preserve', query);
+
+        const byCase = (rows: Array<Record<string, unknown>>) =>
+          Object.fromEntries(rows.map((row) => [row.case, row]));
+
+        const ingestByCase = byCase(ingestResult);
+        const esqlByCase = byCase(esqlResult.documentsWithoutKeywords);
+
+        // Processed row: successful parse overwrites prior values.
+        expect(ingestByCase.processed['user_agent.name']).toBe('Chrome');
+        expect(ingestByCase.processed['user_agent.version']).toBe('91.0.4472.124');
+        expect(esqlByCase.processed['user_agent.name']).toBe('Chrome');
+        expect(esqlByCase.processed['user_agent.version']).toBe('91.0.4472.124');
+
+        // Skipped row (where:false): ingest leaves target untouched; ES|QL must not null sub-fields.
+        expect(ingestByCase.skipped['user_agent.version']).toBe('test');
+        expect(ingestByCase.skipped['user_agent.name']).toBe('prior-browser');
+        expect(esqlByCase.skipped['user_agent.version']).toBe('test');
+        expect(esqlByCase.skipped['user_agent.name']).toBe('prior-browser');
+
+        // Failed parse: ES|QL must preserve prior sub-fields (ingest may omit null outputs).
+        expect(esqlByCase['failed-parse']['user_agent.version']).toBe('test');
+        expect(esqlByCase['failed-parse']['user_agent.name']).toBe('prior-browser');
+      }
+    );
+
     // Template validation tests - both transpilers should consistently REJECT Mustache templates
     [
       {
