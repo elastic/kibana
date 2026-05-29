@@ -3135,7 +3135,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
     this.log.info(`${new Date().toISOString()} Calling API RunScriptAction`);
     return this.kbnClient
       .request<RunScriptActionResponse>({
-        path: '/api/endpoint/action/runscript',
+        path: '/api/endpoint/action/run_script',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
