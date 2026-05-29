@@ -17,6 +17,7 @@
     "optionalPlugins": [
       "cloud",
       "security",
+      "usageCollection",
     ],
     "requiredBundles": []
   }

@@ -13,6 +13,7 @@ import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { LanguageModal } from './language_modal';
 import { useLanguage } from './use_language_hook';
@@ -21,17 +22,23 @@ interface Props {
   security: SecurityPluginStart;
   core: CoreStart;
   closePopover: () => void;
+  usageCollection?: UsageCollectionStart;
 }
 
-export const LanguageSelector = ({ security, core, closePopover }: Props) => {
+export const LanguageSelector = ({ security, core, closePopover, usageCollection }: Props) => {
   return (
     <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-      <LanguageSelectorUI core={core} security={security} closePopover={closePopover} />
+      <LanguageSelectorUI
+        core={core}
+        security={security}
+        closePopover={closePopover}
+        usageCollection={usageCollection}
+      />
     </UserProfilesKibanaProvider>
   );
 };
 
-function LanguageSelectorUI({ security, core, closePopover }: Props) {
+function LanguageSelectorUI({ security, core, closePopover, usageCollection }: Props) {
   const { isVisible } = useLanguage();
   const hasConfiguredLocales = getAvailableLocales().length > 0;
 
@@ -46,7 +53,7 @@ function LanguageSelectorUI({ security, core, closePopover }: Props) {
     modalRef.current = core.overlays.openModal(
       toMountPoint(
         <UserProfilesKibanaProvider core={core} security={security} toMountPoint={toMountPoint}>
-          <LanguageModal closeModal={closeModal} />
+          <LanguageModal closeModal={closeModal} usageCollection={usageCollection} />
         </UserProfilesKibanaProvider>,
         core
       ),

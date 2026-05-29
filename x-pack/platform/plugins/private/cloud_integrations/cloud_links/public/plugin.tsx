@@ -12,6 +12,7 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import * as connectionDetails from '@kbn/cloud/connection_details';
 import type { BuildFlavor } from '@kbn/config';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { maybeAddCloudLinks } from './maybe_add_cloud_links';
 
 interface CloudLinksDepsSetup {
@@ -23,6 +24,7 @@ interface CloudLinksDepsStart {
   cloud?: CloudStart;
   security?: SecurityPluginStart;
   share: SharePluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export class CloudLinksPlugin
@@ -98,7 +100,7 @@ export class CloudLinksPlugin
   }
 
   public start(core: CoreStart, plugins: CloudLinksDepsStart) {
-    const { cloud, security, share } = plugins;
+    const { cloud, security, share, usageCollection } = plugins;
 
     if (cloud?.isCloudEnabled && !core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
       if (security) {
@@ -108,6 +110,7 @@ export class CloudLinksPlugin
           cloud,
           share,
           isServerless: this.offering === 'serverless',
+          usageCollection,
         });
       }
     }

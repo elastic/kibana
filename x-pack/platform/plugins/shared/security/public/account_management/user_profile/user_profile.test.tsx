@@ -9,6 +9,7 @@ import { act, render, renderHook, screen, within } from '@testing-library/react'
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
+import { METRIC_TYPE } from '@kbn/analytics';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 
 import { UserProfile, useUserProfileForm } from './user_profile';
@@ -421,6 +422,84 @@ describe('useUserProfileForm', () => {
         expect.objectContaining({ title: 'Profile updated' }),
         expect.objectContaining({ toastLifeTimeMs: 300000 })
       );
+    });
+  });
+
+  describe('Display Language Form', () => {
+    it('should call reportUiCounter with the new locale when locale is changed on submit', async () => {
+      const reportUiCounter = jest.fn();
+      const usageCollection = { reportUiCounter } as any;
+
+      const wrapperWithUsageCollection: FC<PropsWithChildren<unknown>> = ({ children }) => (
+        <Providers
+          services={coreStart}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+          usageCollection={usageCollection}
+        >
+          {children}
+        </Providers>
+      );
+
+      const data: UserProfileData = {
+        userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'en' },
+      };
+
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), {
+        wrapper: wrapperWithUsageCollection,
+      });
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.locale', 'fr-FR');
+      });
+
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      expect(reportUiCounter).toHaveBeenCalledWith(
+        'display_language',
+        METRIC_TYPE.COUNT,
+        'language_changed_fr-FR'
+      );
+    });
+
+    it('should not call reportUiCounter when locale is unchanged on submit', async () => {
+      const reportUiCounter = jest.fn();
+      const usageCollection = { reportUiCounter } as any;
+
+      const wrapperWithUsageCollection: FC<PropsWithChildren<unknown>> = ({ children }) => (
+        <Providers
+          services={coreStart}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+          usageCollection={usageCollection}
+        >
+          {children}
+        </Providers>
+      );
+
+      const data: UserProfileData = {
+        userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'en' },
+      };
+
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), {
+        wrapper: wrapperWithUsageCollection,
+      });
+
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      expect(reportUiCounter).not.toHaveBeenCalled();
     });
   });
 

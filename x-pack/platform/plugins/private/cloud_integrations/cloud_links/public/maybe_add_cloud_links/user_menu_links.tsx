@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { AppearanceSelector } from './appearance_selector';
 import { LanguageSelector } from './language_selector';
 
@@ -18,11 +19,13 @@ export const createUserMenuLinks = async ({
   cloud,
   security,
   isServerless,
+  usageCollection,
 }: {
   core: CoreStart;
   cloud: CloudStart;
   security: SecurityPluginStart;
   isServerless: boolean;
+  usageCollection?: UsageCollectionStart;
 }): Promise<UserMenuLink[]> => {
   const { profileUrl, organizationUrl } = cloud;
 
@@ -80,7 +83,12 @@ export const createUserMenuLinks = async ({
 
   userMenuLinks.push({
     content: ({ closePopover }) => (
-      <LanguageSelector core={core} security={security} closePopover={closePopover} />
+      <LanguageSelector
+        core={core}
+        security={security}
+        closePopover={closePopover}
+        usageCollection={usageCollection}
+      />
     ),
     order: 500,
     label: '',

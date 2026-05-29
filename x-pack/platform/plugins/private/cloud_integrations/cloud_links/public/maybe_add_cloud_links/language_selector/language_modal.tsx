@@ -23,8 +23,10 @@ import {
 } from '@elastic/eui';
 import type { Theme } from '@emotion/react';
 import { css } from '@emotion/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n, getAvailableLocales } from '@kbn/i18n';
 import type { LocaleValue } from '@kbn/user-profile-components';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { useLanguage } from './use_language_hook';
 
@@ -36,9 +38,10 @@ const betaBadgeStyle = ({ euiTheme }: Theme) => css`
 
 interface Props {
   closeModal: () => void;
+  usageCollection?: UsageCollectionStart;
 }
 
-export const LanguageModal: FC<Props> = ({ closeModal }) => {
+export const LanguageModal: FC<Props> = ({ closeModal, usageCollection }) => {
   const modalTitleId = useGeneratedHtmlId();
   const selectId = useGeneratedHtmlId();
 
@@ -116,6 +119,11 @@ export const LanguageModal: FC<Props> = ({ closeModal }) => {
           onClick={() => {
             if (locale !== initialLocaleValue) {
               onChange(locale, true);
+              usageCollection?.reportUiCounter(
+                'display_language',
+                METRIC_TYPE.COUNT,
+                `language_changed_${locale}`
+              );
             }
             closeModal();
           }}

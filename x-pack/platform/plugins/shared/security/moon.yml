@@ -105,6 +105,7 @@ dependsOn:
   - '@kbn/core-user-activity-server'
   - '@kbn/core-user-activity-server-mocks'
   - '@kbn/management-settings-ids'
+  - '@kbn/analytics'
 tags:
   - plugin
   - prod

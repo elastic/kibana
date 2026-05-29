@@ -30,6 +30,7 @@ import type {
 } from '@kbn/security-plugin-types-public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { accountManagementApp, UserProfileAPIClient } from './account_management';
 import { AnalyticsService } from './analytics';
@@ -62,6 +63,7 @@ export interface PluginStartDependencies {
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
   cloud?: CloudStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export class SecurityPlugin
