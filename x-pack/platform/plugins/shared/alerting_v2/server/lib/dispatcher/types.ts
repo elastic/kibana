@@ -112,9 +112,7 @@ export interface ActionGroup {
   rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
-export interface ActionPolicyWorkflowPayloadRule {
-  name: string;
-}
+export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
 
 export interface ActionPolicyWorkflowPayload {
   id: ActionGroupId;
