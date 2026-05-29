@@ -121,8 +121,6 @@ export const loadVaultConfig = (repoRoot: string, profile?: string): VaultConfig
   return readVaultConfigFromFile(repoRoot, profile);
 };
 
-export const isDevVaultConfigReadable = (): boolean => readVaultConfigFromDevVault() !== undefined;
-
 export const envFromDatasetsProfile = (
   repoRoot: string,
   profile?: string
