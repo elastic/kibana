@@ -157,12 +157,17 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
       render: (item: Cert) => {
         const isExpanded = Boolean(expandedRows[getCertId(item)]);
         return (
-          <EuiButtonIcon
-            data-test-subj="certExpandDetailsButton"
-            onClick={() => toggleDetails(item)}
-            aria-label={isExpanded ? labels.COLLAPSE_CERT_DETAILS : labels.EXPAND_CERT_DETAILS}
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-          />
+          <EuiToolTip
+            content={isExpanded ? labels.COLLAPSE_CERT_DETAILS : labels.EXPAND_CERT_DETAILS}
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="certExpandDetailsButton"
+              onClick={() => toggleDetails(item)}
+              aria-label={isExpanded ? labels.COLLAPSE_CERT_DETAILS : labels.EXPAND_CERT_DETAILS}
+              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            />
+          </EuiToolTip>
         );
       },
     },
