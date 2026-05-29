@@ -12,8 +12,11 @@ import { useKibana } from '../use_kibana';
 import { getLast24HoursTimeRange } from '../../util/time_range';
 
 interface StreamFeaturesApi {
+  /** @deprecated Use GET /internal/streams/{name}/onboarding/_status instead */
   getFeaturesIdentificationStatus: () => Promise<FeaturesIdentificationTaskResult>;
+  /** @deprecated Use POST /internal/streams/{name}/onboarding/_execute instead */
   scheduleFeaturesIdentificationTask: () => Promise<void>;
+  /** @deprecated Use POST /internal/streams/{name}/onboarding/_execute with action: 'cancel' instead */
   cancelFeaturesIdentificationTask: () => Promise<void>;
   deleteFeature: (id: string) => Promise<void>;
   deleteFeaturesInBulk: (ids: string[]) => Promise<void>;

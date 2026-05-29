@@ -304,8 +304,17 @@ export {
   type SigEvent,
   type KnowledgeIndicator,
 } from './src/sig_events';
-export type { OnboardingResult } from './src/onboarding';
-export { OnboardingStep } from './src/onboarding';
+export type {
+  StreamsKIsOnboardingResult,
+  StreamsKIsOnboardingFeaturesResult,
+  StreamsKIsOnboardingQueriesResult,
+  StreamsKIsOnboardingStatusResult,
+} from './src/onboarding';
+export {
+  StreamsKIsOnboardingStep,
+  StreamsKIsOnboardingStatus,
+  STREAMS_KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+} from './src/onboarding';
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
 

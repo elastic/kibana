@@ -8,12 +8,40 @@
 import { esql, type ComposerQuery, type ComposerSortShorthand } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
   type CommonSearchOptions,
   type PaginatedResponse,
   type PaginatedSearchOptions,
 } from './query_utils';
 import { runEsqlQuery } from './run_esql_query';
+import { toEsqlRequest } from '../streams/helpers/esql';
+
+// esClient.esql.query() return type doesn't match ESQLSearchResponse.
+// Known typing gap in the ES client — centralized here to avoid scattered assertions.
+// Uses `toEsqlRequest` so named-parameter holes (`${{ name: value }}`) are bound
+// at the protocol level rather than inlined into the query string.
+export const queryEsql = async ({
+  esClient,
+  query,
+}: {
+  esClient: ElasticsearchClient;
+  query: ComposerQuery;
+}): Promise<ESQLSearchResponse> =>
+  (await esClient.esql.query(toEsqlRequest(query))) as ESQLSearchResponse;
+
+// Converts a columnar ESQLSearchResponse into an array of plain objects keyed by column name.
+export const esqlToObjects = <T extends Record<string, unknown>>(
+  response: ESQLSearchResponse
+): T[] =>
+  response.values.map(
+    (row) =>
+      row.reduce<Record<string, unknown>>((acc, value, i) => {
+        const col = response.columns[i];
+        if (col) acc[col.name] = value;
+        return acc;
+      }, {}) as T
+  );
 
 export const andWhere = (
   current: ESQLAstExpression | undefined,
