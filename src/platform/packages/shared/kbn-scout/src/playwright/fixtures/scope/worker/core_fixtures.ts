@@ -38,7 +38,7 @@ export interface RoleSessionCredentials {
   cookieHeader: CookieHeader;
 }
 
-export interface BaseCoreWorkerFixtures {
+export interface BaseWorkerFixtures {
   log: ScoutLogger;
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;
@@ -69,7 +69,7 @@ export interface BaseCoreWorkerFixtures {
  * Note: `samlAuth` is added by the `samlAuthFixture` in `./saml_auth/index.ts`, which
  * extends this base. The combined fixture (with samlAuth) is what `worker/index.ts` exports.
  */
-export const coreWorkerFixtures = base.extend<{}, BaseCoreWorkerFixtures>({
+export const coreWorkerFixtures = base.extend<{}, BaseWorkerFixtures>({
   // Provides a scoped logger instance for each worker to use in fixtures and tests.
   // For parallel workers logger context is matching worker index+1, e.g. '[scout-worker-1]', '[scout-worker-2]', etc.
   log: [

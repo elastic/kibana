@@ -10,7 +10,7 @@
 import type { SamlSessionManager } from '@kbn/test-saml-auth';
 import { createSamlSessionManager } from '../../../../../common/services';
 import type { ElasticsearchRoleDescriptor, KibanaRole } from '../../../../../common/services';
-import type { RoleSessionCredentials, BaseCoreWorkerFixtures } from '../core_fixtures';
+import type { RoleSessionCredentials, BaseWorkerFixtures } from '../core_fixtures';
 import { coreWorkerFixtures } from '../core_fixtures';
 import { SamlAuthManager } from './saml_auth_manager';
 
@@ -65,7 +65,7 @@ export interface SamlAuth {
    *
    * @param roleName - The name of the role to look up in Elasticsearch.
    */
-  setBuiltinRole(roleName: string): Promise<void>;
+  setBuiltinRole(roleName: string): Promise<ElasticsearchRoleDescriptor>;
   /**
    * Generates a SAML session cookie for an interactive user with the specified role.
    *
@@ -104,7 +104,7 @@ export interface SamlAuth {
  * Full worker fixture set: base fixtures + samlAuth.
  * Use this type when you need to reference the complete worker fixture surface.
  */
-export interface CoreWorkerFixtures extends BaseCoreWorkerFixtures {
+export interface CoreWorkerFixtures extends BaseWorkerFixtures {
   samlAuth: SamlAuth;
 }
 

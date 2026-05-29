@@ -26,11 +26,22 @@ apiTest.describe(
     });
 
     apiTest(
-      `should create a session for a built-in ES role via setBuiltinRole`,
+      `setBuiltinRole should provision the custom role slot and return the descriptor`,
       async ({ samlAuth }) => {
-        await samlAuth.setBuiltinRole('kibana_admin');
+        const descriptor = await samlAuth.setBuiltinRole('kibana_admin');
+        expect(descriptor).toBeDefined();
         const credentials = await samlAuth.asInteractiveUser(samlAuth.customRoleName);
         expect(credentials.cookieValue).toBeDefined();
+      }
+    );
+
+    apiTest(
+      `getApiKeyForBuiltinRole should create an API key scoped to a built-in ES role`,
+      async ({ requestAuth }) => {
+        const { apiKey, apiKeyHeader } = await requestAuth.getApiKeyForBuiltinRole('kibana_admin');
+        expect(apiKey.id).toBeDefined();
+        expect(apiKey.name).toBeDefined();
+        expect(apiKeyHeader.Authorization).toMatch(/^ApiKey /);
       }
     );
   }

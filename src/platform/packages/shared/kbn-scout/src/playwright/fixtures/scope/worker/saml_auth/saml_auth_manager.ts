@@ -67,7 +67,7 @@ export class SamlAuthManager {
    *
    * @param roleName - The name of the role to look up in Elasticsearch.
    */
-  async setBuiltinRole(roleName: string): Promise<void> {
+  async setBuiltinRole(roleName: string): Promise<ElasticsearchRoleDescriptor> {
     const response = await this.esClient.security.getRole({ name: roleName });
     const roleData = response[roleName];
     if (!roleData) {
@@ -76,6 +76,7 @@ export class SamlAuthManager {
     // Strip non-privilege metadata before delegating to the generic custom-role path
     const { metadata: _metadata, transient_metadata: _transient, ...descriptor } = roleData;
     await this.setCustomRole(descriptor as ElasticsearchRoleDescriptor);
+    return descriptor as ElasticsearchRoleDescriptor;
   }
 
   async asInteractiveUser(
