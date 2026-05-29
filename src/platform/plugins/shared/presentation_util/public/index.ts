@@ -13,8 +13,6 @@ export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from '.
 export type { DashboardSavingOption, SaveModalDashboardProps } from './components/types';
 
 export {
-  LazyLabsBeakerButton,
-  LazyLabsFlyout,
   LazyDashboardPicker,
   SavedObjectSaveModalDashboard,
   withSuspense,
