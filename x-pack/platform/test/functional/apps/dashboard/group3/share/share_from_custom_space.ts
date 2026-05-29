@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
 
 export default function sharingFromSpace({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -49,7 +50,7 @@ export default function sharingFromSpace({ getPageObjects, getService }: FtrProv
 
       await spaceSelector.clickSpaceCard(spaceId);
 
-      await common.navigateToApp(dashboard.APP_ID, { basePath: `/s/${spaceId}` });
+      await common.navigateToApp(DASHBOARD_APP_ID, { basePath: `/s/${spaceId}` });
       await dashboard.preserveCrossAppState();
       await dashboard.loadDashboardInEditMode('few panels');
       await dashboard.waitForRenderComplete();
