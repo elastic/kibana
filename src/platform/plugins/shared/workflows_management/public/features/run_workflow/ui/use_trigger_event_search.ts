@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type RefObject, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -15,13 +15,18 @@ import { useQueryTriggerEvents } from '@kbn/workflows-ui';
 import { TIMEPICKER_FALLBACK } from './constants';
 import type { TriggerEventLogGridRow } from './trigger_event_log_grid_cells';
 import { triggerSourceToGridRow } from './trigger_event_log_grid_cells';
-import {
-  useAccumulatedTriggerEventSearchPages,
-  useTriggerEventGridScrollLoadMore,
-} from './workflow_execute_event_form_infinite_list';
+import { useAccumulatedTriggerEventSearchPages } from './workflow_execute_event_form_infinite_list';
 import { buildDefaultTriggerEventSearchQuery } from './workflow_execute_modal_helpers';
 
 export const TRIGGER_EVENT_SEARCH_PAGE_SIZE = 50;
+
+function getTriggerEventSearchIdentity(
+  submittedQuery: Query,
+  timeRange: Pick<TimeRange, 'from' | 'to'>
+): string {
+  const submittedKql = typeof submittedQuery.query === 'string' ? submittedQuery.query.trim() : '';
+  return `${submittedKql}|${timeRange.from}|${timeRange.to}`;
+}
 
 export interface TriggerEventTableRow {
   id: string;
@@ -52,8 +57,6 @@ export interface UseTriggerEventSearchOptions {
   customTriggerIdsKey: string;
   queryEnabled: boolean;
   isEventConfigLoading: boolean;
-  dataViewReady: boolean;
-  surfaceRef: RefObject<HTMLDivElement | null>;
   getTimeDefaults: () => TimeRange;
 }
 
@@ -64,8 +67,6 @@ export function useTriggerEventSearch(options: UseTriggerEventSearchOptions) {
     customTriggerIdsKey,
     queryEnabled,
     isEventConfigLoading,
-    dataViewReady,
-    surfaceRef,
     getTimeDefaults,
   } = options;
 
@@ -113,10 +114,24 @@ export function useTriggerEventSearch(options: UseTriggerEventSearchOptions) {
     isPreviousData
   );
 
+  const previousDefinitionRef = useRef(definition);
+  const previousSearchIdentityRef = useRef<string | null>(null);
+
   useLayoutEffect(() => {
+    const searchIdentity = getTriggerEventSearchIdentity(submittedQuery, timeRange);
+    const definitionChanged = previousDefinitionRef.current !== definition;
+    const searchChanged = previousSearchIdentityRef.current !== searchIdentity;
+
+    previousDefinitionRef.current = definition;
+    previousSearchIdentityRef.current = searchIdentity;
+
+    if (!definitionChanged && !searchChanged) {
+      return;
+    }
+
     setPageIndex(0);
     setAccumulatedHits([]);
-  }, [definition, submittedQuery, timeRange.from, timeRange.to, setAccumulatedHits]);
+  }, [definition, submittedQuery, timeRange, setAccumulatedHits]);
 
   const handleLoadMoreTriggerEventPage = useCallback(() => {
     setPageIndex((p) => p + 1);
@@ -137,16 +152,12 @@ export function useTriggerEventSearch(options: UseTriggerEventSearchOptions) {
   }, [accumulatedHits]);
 
   const hasMoreHits = Boolean(searchResult && accumulatedHits.length < searchResult.total);
+  const totalHits = searchResult?.total ?? 0;
 
-  useTriggerEventGridScrollLoadMore({
-    dataViewReady,
-    queryEnabled,
-    surfaceRef,
-    isFetching,
-    hasMoreHits,
-    reboundKey: `${accumulatedHits.length}-${searchResult?.total ?? 0}`,
-    onNearBottom: handleLoadMoreTriggerEventPage,
-  });
+  const onFetchMoreRecords = useMemo(
+    () => (hasMoreHits && !isFetching ? handleLoadMoreTriggerEventPage : undefined),
+    [hasMoreHits, isFetching, handleLoadMoreTriggerEventPage]
+  );
 
   const tableLoadingState = resolveTriggerEventTableLoadingState(
     isSearchLoading,
@@ -189,7 +200,8 @@ export function useTriggerEventSearch(options: UseTriggerEventSearchOptions) {
     searchError,
     accumulatedHits,
     rows,
-    hasMoreHits,
+    totalHits,
+    onFetchMoreRecords,
     tableLoadingState,
     handleQueryChange,
     handleQuerySubmit,

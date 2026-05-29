@@ -12,7 +12,7 @@ import type {
   euiFontSize,
   EuiThemeComputed,
 } from '@elastic/eui';
-import { EuiCallOut, EuiFlexItem, EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
+import { EuiCallOut, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { memo } from 'react';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -57,9 +57,8 @@ export interface WorkflowExecuteEventFormSearchResultsProps {
   renderCustomToolbar: UnifiedDataTableRenderCustomToolbar;
   renderCellPopover: (popoverProps: EuiDataGridCellPopoverElementProps) => React.JSX.Element;
   externalCustomRenderers: CustomCellRenderer;
-  hasMoreHits: boolean;
-  isFetching: boolean;
-  accumulatedHitsLength: number;
+  totalHits: number;
+  onFetchMoreRecords: (() => void) | undefined;
   onDataGridFullScreenChange: (isFullScreen: boolean) => void;
 }
 
@@ -88,9 +87,8 @@ export const WorkflowExecuteEventFormSearchResults = memo(
     renderCustomToolbar,
     renderCellPopover,
     externalCustomRenderers,
-    hasMoreHits,
-    isFetching,
-    accumulatedHitsLength,
+    totalHits,
+    onFetchMoreRecords,
     onDataGridFullScreenChange,
   }: WorkflowExecuteEventFormSearchResultsProps): React.JSX.Element {
     return (
@@ -238,7 +236,10 @@ export const WorkflowExecuteEventFormSearchResults = memo(
                       sort={sort}
                       onSort={handleSortChange}
                       isSortEnabled={true}
-                      isPaginationEnabled={false}
+                      isPaginationEnabled={true}
+                      paginationMode="infinite"
+                      totalHits={totalHits}
+                      onFetchMoreRecords={onFetchMoreRecords}
                       dataGridDensityState={DataGridDensity.NORMAL}
                       isPlainRecord={true}
                       showFullScreenButton={true}
@@ -253,27 +254,6 @@ export const WorkflowExecuteEventFormSearchResults = memo(
                     />
                   </CellActionsProvider>
                 </div>
-                {hasMoreHits && isFetching && accumulatedHitsLength > 0 ? (
-                  <div
-                    role="status"
-                    aria-label={i18n.translate(
-                      'workflows.workflowExecuteEventTriggerForm.loadingMoreTriggerEventsAria',
-                      {
-                        defaultMessage: 'Loading more trigger events',
-                      }
-                    )}
-                    data-test-subj="workflowTriggerEventsLoadingMore"
-                    css={css({
-                      flexShrink: 0,
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      paddingBlock: euiTheme.size.s,
-                    })}
-                  >
-                    <EuiLoadingSpinner size="m" />
-                  </div>
-                ) : null}
               </>
             ) : null}
           </div>

@@ -94,12 +94,11 @@ export const WorkflowExecuteEventForm = ({
     query,
     timeRange,
     searchResult,
-    isFetching,
     isError,
     searchError,
-    accumulatedHits,
     rows,
-    hasMoreHits,
+    totalHits,
+    onFetchMoreRecords,
     tableLoadingState,
     handleQueryChange,
     handleQuerySubmit,
@@ -109,8 +108,6 @@ export const WorkflowExecuteEventForm = ({
     customTriggerIdsKey,
     queryEnabled,
     isEventConfigLoading,
-    dataViewReady: Boolean(dataView),
-    surfaceRef: triggerEventsSurfaceRef,
     getTimeDefaults,
   });
 
@@ -219,9 +216,8 @@ export const WorkflowExecuteEventForm = ({
         renderCustomToolbar={tableConfig.renderCustomToolbar}
         renderCellPopover={tableConfig.renderCellPopover}
         externalCustomRenderers={tableConfig.externalCustomRenderers}
-        hasMoreHits={hasMoreHits}
-        isFetching={isFetching}
-        accumulatedHitsLength={accumulatedHits.length}
+        totalHits={totalHits}
+        onFetchMoreRecords={onFetchMoreRecords}
         onDataGridFullScreenChange={handleDataGridFullScreenChange}
       />
     </EuiFlexGroup>
