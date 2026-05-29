@@ -81,7 +81,18 @@ export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServices
   ],
 });
 
-export { ALL_ROLE, NO_ACCESS_ROLE, READ_ROLE } from '../../common/roles';
+export {
+  ALL_ROLE,
+  NO_ACCESS_ROLE,
+  READ_ROLE,
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
+  ALERTING_V2_ALERTS_ALL_ROLE,
+  ALERTING_V2_ALERTS_READ_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
+} from '../../common/roles';
 export {
   buildAlertEvent,
   buildCreateRuleData,
@@ -98,6 +109,7 @@ export {
   getActivateAlertActionUrl,
   getDeactivateAlertActionUrl,
   getRuleUrl,
+  getBulkRulesUrl,
   BULK_ALERT_ACTION_URL,
   getBulkActionPoliciesUrl,
   getDisableActionPolicyUrl,
