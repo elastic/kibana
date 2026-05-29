@@ -296,13 +296,12 @@ export const registerLookupIndexRoutes = (
           'http.response.status_code': statusCode,
         });
         const message = error instanceof Error ? error.message : String(error);
-        logger.get().error(
-          `Failed to update mappings for lookup index "${indexName}": ${message}`,
-          {
+        logger
+          .get()
+          .error(`Failed to update mappings for lookup index "${indexName}": ${message}`, {
             tags: ['esql', 'lookup_index', 'update_mappings'],
             error: { stack_trace: error instanceof Error ? error.stack : undefined },
-          }
-        );
+          });
         throw error;
       }
     }
